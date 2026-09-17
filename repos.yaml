@@ -1,0 +1,63 @@
+schema_version: 1
+
+workspace_root: /home/atrott/adamArchives/Adam
+
+repositories:
+
+  PADataset:
+    path: varMax/PADataset
+    remote: git@github.com:adamtrott78/PADataset.git
+    role: managed
+    writable: true
+    canonical_branch: main
+    context_entry: README.md
+    authority: reusable RF/DQNGuard research and PADataset-owned tools
+    worktree_policy: isolated_task_worktrees_preferred
+    recursive_mutation_forbidden: false
+
+  MTH602-AdamTrott:
+    path: classes/MTH602-AdamTrott
+    remote: git@github.com:adamtrott78/MTH602-AdamTrott.git
+    role: managed
+    writable: true
+    canonical_branch: main
+    context_entry: README.md
+    authority: student MTH 602 coursework and course-facing artifacts
+    worktree_policy: inspect_before_mutation
+    recursive_mutation_forbidden: false
+
+  MTH602-Fall2026-SciML:
+    path: classes/MTH602-Fall2026-SciML
+    remote: git@github.com:sfield17/MTH602-Fall2026-SciML.git
+    role: upstream_reference
+    writable: false
+    canonical_branch: main
+    context_entry: null
+    authority: instructor-maintained MTH 602 source material
+    worktree_policy: read_only
+    recursive_mutation_forbidden: true
+
+  varMax:
+    path: varMax
+    remote: https://github.com/bayegaspard/varMax.git
+    role: legacy_upstream
+    writable: false
+    canonical_branch: main
+    context_entry: null
+    authority: historical/upstream varMax repository
+    worktree_policy: read_only
+    recursive_mutation_forbidden: true
+    notes:
+      - PADataset and PADataset worktrees exist beneath this filesystem tree.
+      - Never perform broad recursive staging or cleanup from this repository root.
+
+  Payload-Byte:
+    path: Payload-Byte
+    remote: https://github.com/Yasir-ali-farrukh/Payload-Byte.git
+    role: external_reference
+    writable: false
+    canonical_branch: main
+    context_entry: null
+    authority: externally owned Payload-Byte repository
+    worktree_policy: read_only
+    recursive_mutation_forbidden: true
