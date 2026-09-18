@@ -38,6 +38,48 @@ def require_git(path, *args):
     return out
 
 
+def query_remote_branch(path, branch):
+    rc, out, err = run_git(
+        path,
+        "ls-remote",
+        "--exit-code",
+        "origin",
+        f"refs/heads/{branch}",
+    )
+
+    if rc == 0:
+        fields = out.split()
+        if len(fields) < 2:
+            return {
+                "status": "ERROR",
+                "branch": branch,
+                "sha": None,
+                "error": "unexpected ls-remote output",
+            }
+
+        return {
+            "status": "FOUND",
+            "branch": branch,
+            "sha": fields[0],
+            "error": None,
+        }
+
+    if rc == 2:
+        return {
+            "status": "MISSING",
+            "branch": branch,
+            "sha": None,
+            "error": None,
+        }
+
+    return {
+        "status": "ERROR",
+        "branch": branch,
+        "sha": None,
+        "error": err or f"git ls-remote exited {rc}",
+    }
+
+
 def load_registry():
     control_root = Path(__file__).resolve().parent.parent
     registry_path = control_root / "repos.json"
@@ -360,6 +402,28 @@ def preflight_state(record, intent, allow_dirty):
                 "checkout is dirty; review it or use an isolated worktree"
             )
 
+        if record.get("branch") == record.get("canonical_branch"):
+            remote = record.get("canonical_remote")
+
+            if not remote:
+                reasons.append(
+                    "remote canonical branch state was not checked"
+                )
+            elif remote.get("status") == "ERROR":
+                reasons.append(
+                    "remote canonical branch state could not be verified"
+                )
+            elif remote.get("status") == "MISSING":
+                reasons.append(
+                    "registered canonical branch is missing on the remote"
+                )
+            elif remote.get("sha") != record.get("head"):
+                reasons.append(
+                    "local canonical branch HEAD differs from remote "
+                    "canonical branch; synchronize or use an isolated "
+                    "task worktree"
+                )
+
         if reasons:
             return "REVIEW_REQUIRED", EXIT_REVIEW, reasons
 
@@ -410,6 +474,15 @@ def print_preflight_human(record, intent, allow_dirty, state, reasons):
                 f"{item['recursive_mutation_forbidden']}"
             )
 
+    remote = record.get("canonical_remote")
+    if remote:
+        print(
+            "REMOTE_MAIN:  "
+            f"status={remote.get('status')} "
+            f"branch={remote.get('branch')} "
+            f"sha={remote.get('sha') or '<none>'}"
+        )
+
     print(f"ALLOW_DIRTY: {allow_dirty}")
     print(f"RESULT:      {state}")
 
@@ -442,6 +515,19 @@ def command_preflight(args):
         workspace_root,
         repos,
     )
+
+    if (
+        args.intent == "mutate"
+        and record.get("git")
+        and record.get("identity_matches")
+        and record.get("writable")
+        and not record.get("recursive_mutation_forbidden")
+        and record.get("branch") == record.get("canonical_branch")
+    ):
+        record["canonical_remote"] = query_remote_branch(
+            Path(record["git_root"]),
+            record["canonical_branch"],
+        )
 
     state, code, reasons = preflight_state(
         record,

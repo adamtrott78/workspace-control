@@ -60,6 +60,17 @@
       "authority": "externally owned Payload-Byte repository",
       "worktree_policy": "read_only",
       "recursive_mutation_forbidden": true
+    },
+    "workspace-control": {
+      "path": "workspace-control",
+      "remote": "git@github.com:adamtrott78/workspace-control.git",
+      "role": "managed",
+      "writable": true,
+      "canonical_branch": "main",
+      "context_entry": "README.md",
+      "authority": "cross-project operating policy, portability contracts, and shared control-plane tooling",
+      "worktree_policy": "isolated_task_worktrees_preferred",
+      "recursive_mutation_forbidden": false
     }
   }
 }

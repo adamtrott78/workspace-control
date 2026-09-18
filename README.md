@@ -106,6 +106,10 @@ The corresponding operating contracts live under `procedures/`.
 These tools observe state. They do not fetch, clean, switch, stash, reset, stage,
 commit, push, or otherwise normalize project repositories.
 
+Mutation preflight performs a read-only `git ls-remote` query when mutation is
+proposed directly on a registered canonical branch. This checks the advertised
+remote branch SHA without updating local Git refs.
+
 ## Current maturity
 
 Status: `EXPERIMENTAL`

@@ -40,6 +40,8 @@ The command establishes:
 - HEAD;
 - observed origin;
 - registry/origin agreement;
+- remote canonical-branch SHA when mutation is proposed directly on the
+  registered canonical branch;
 - staged, unstaged, and untracked state;
 - context-entry availability;
 - registered parent-repository overlaps;
@@ -49,12 +51,19 @@ The command establishes:
 
 The preflight itself does not mutate the repository.
 
+For a writable canonical branch, mutation preflight uses `git ls-remote` to
+observe the currently advertised remote branch SHA without fetching or updating
+local remote-tracking refs.
+
 For `--intent mutate`:
 
 - a non-writable repository is blocked;
 - `recursive_mutation_forbidden` blocks mutation from that registered repository;
 - repository/origin identity mismatch is blocked;
-- a dirty checkout requires review by default.
+- a dirty checkout requires review by default;
+- mutation directly on a canonical branch requires review if its local HEAD
+  differs from the currently advertised remote canonical-branch SHA or if that
+  remote state cannot be verified.
 
 A caller may supply `--allow-dirty` only after the dirty state has been
 explicitly reviewed and the intended mutation is known not to overwrite or
