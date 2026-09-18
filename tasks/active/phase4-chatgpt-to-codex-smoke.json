@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "task_id": "phase4-chatgpt-to-codex-smoke",
+  "title": "Codex executor handoff smoke test",
+  "status": "CHECKPOINTED",
+  "goal": "Prove that Codex can recover and execute a bounded workspace-control mutation from durable repository and task state without a prose handoff from the previous executor.",
+  "acceptance_criteria": [
+    "Codex recovers the task from this capsule and canonical workspace-control sources.",
+    "Codex runs canonical mutation preflight against the recorded target checkout before modifying it.",
+    "Codex creates only reports/phase4_codex_handoff.md.",
+    "The report records the task ID, starting checkpoint SHA, executor identity, preflight result, and the recovered purpose of the task.",
+    "git diff --check passes after the mutation.",
+    "The resulting Git change set contains exactly reports/phase4_codex_handoff.md.",
+    "Codex creates one local commit with message Record Codex handoff smoke test.",
+    "Codex does not push the resulting commit."
+  ],
+  "constraints": [
+    "Use durable repository and task state rather than previous conversation state.",
+    "Do not modify this task capsule.",
+    "Do not modify README.md, AGENTS.md, Skills, procedures, policies, schemas, registry files, or deterministic implementation.",
+    "Do not clean, reset, stash, switch branches, delete unrelated files, or broadly stage files.",
+    "Do not use git add .",
+    "Do not push.",
+    "Do not modify any repository other than the recorded workspace-control target checkout.",
+    "The only allowed mutation path is reports/phase4_codex_handoff.md."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "checkout_path": "/home/atrott/adamArchives/Adam/workspace-control-phase4-codex-adapters",
+      "branch": "phase4-codex-adapters",
+      "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
+      "checkpoint_sha": "769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1",
+      "checkpoint_pushed": true,
+      "allowed_mutation_scope": [
+        "reports/phase4_codex_handoff.md"
+      ]
+    }
+  ],
+  "decisions": [
+    "Use a separate coordination worktree so the durable capsule does not dirty the target checkpoint.",
+    "The first Codex mutation test ends at a clean local Git commit and deliberately does not push.",
+    "The Codex prompt will provide only the durable capsule location and no task-specific prose handoff."
+  ],
+  "executed_operations": [
+    {
+      "summary": "Phase-4 Codex adapter layer was implemented, validated in read-only Codex mode, committed, and pushed.",
+      "evidence": [
+        "Adapter checkpoint 769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1 is advertised by remote branch phase4-codex-adapters."
+      ]
+    },
+    {
+      "summary": "ChatGPT independently reread the pushed adapter checkpoint before creating this handoff.",
+      "evidence": [
+        "GitHub comparison showed the adapter checkpoint exactly one commit ahead of base cb8368cd50de2d364c2aade8843276aab0b02420 with the reviewed five-path change set."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "reports/phase4_codex_handoff.md",
+      "state": "not yet created",
+      "evidence": [
+        "Creation is assigned to the receiving Codex executor."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Starting adapter checkpoint is pushed",
+      "result": "PASS",
+      "evidence": [
+        "Remote branch phase4-codex-adapters advertises 769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1."
+      ]
+    },
+    {
+      "check": "Starting target checkout is clean",
+      "result": "PASS",
+      "evidence": [
+        "Target git status was empty immediately before capsule creation."
+      ]
+    },
+    {
+      "check": "Codex mutation execution",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Receiving Codex executor validates this task capsule.",
+    "Receiving Codex executor confirms HANDOFF_SAFE before mutation.",
+    "Receiving Codex executor runs canonical mutation preflight against the target checkout.",
+    "Receiving Codex executor creates and validates the single allowed report artifact.",
+    "Receiving Codex executor creates one local commit and does not push.",
+    "ChatGPT reviews the resulting local checkpoint and execution evidence."
+  ],
+  "next_safe_action": "As the receiving executor, validate this capsule and require HANDOFF_SAFE, run canonical mutation preflight on the recorded target checkout, then create only reports/phase4_codex_handoff.md, validate the exact one-file change, commit it locally with message Record Codex handoff smoke test, and do not push.",
+  "last_executor": "chatgpt",
+  "notes": "The receiving executor must derive the task from this durable capsule and canonical repository sources. No separate task-specific prose handoff is required."
+}
