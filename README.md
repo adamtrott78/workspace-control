@@ -110,6 +110,27 @@ Mutation preflight performs a read-only `git ls-remote` query when mutation is
 proposed directly on a registered canonical branch. This checks the advertised
 remote branch SHA without updating local Git refs.
 
+## Durable task capsules
+
+Long-running or executor-switchable work is represented by machine-readable
+task capsules under `tasks/`.
+
+The structural contract is `schemas/task_capsule.schema.json`, and the operating
+contract is `procedures/task_capsule.md`.
+
+The executor-neutral CLI now also provides:
+
+- `workspace_control.py task-validate`
+- `workspace_control.py handoff-check`
+
+`task-validate` checks capsule structure and registry policy.
+
+`handoff-check` combines the capsule with current Git/filesystem state and
+reports whether the task is actually `HANDOFF_SAFE`.
+
+A task capsule coordinates work; it does not become a source of project-domain
+truth.
+
 ## Current maturity
 
 Status: `EXPERIMENTAL`

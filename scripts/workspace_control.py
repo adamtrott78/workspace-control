@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -558,6 +559,743 @@ def command_preflight(args):
     return code
 
 
+
+TASK_STATUSES = {
+    "PLANNED",
+    "IN_PROGRESS",
+    "VALIDATING",
+    "CHECKPOINTED",
+    "BLOCKED_RUNTIME",
+    "BLOCKED_EVIDENCE",
+    "NEEDS_USER_DECISION",
+    "COMPLETE",
+}
+
+HANDOFF_STATUSES = {
+    "CHECKPOINTED",
+    "BLOCKED_RUNTIME",
+    "BLOCKED_EVIDENCE",
+    "NEEDS_USER_DECISION",
+    "COMPLETE",
+}
+
+TASK_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
+
+def is_nonempty_string(value):
+    return isinstance(value, str) and bool(value.strip())
+
+
+def validate_string_array(value, field, errors, min_items=0):
+    if not isinstance(value, list):
+        errors.append(f"{field}: expected array")
+        return
+
+    if len(value) < min_items:
+        errors.append(
+            f"{field}: expected at least {min_items} item(s)"
+        )
+
+    for index, item in enumerate(value):
+        if not is_nonempty_string(item):
+            errors.append(
+                f"{field}[{index}]: expected nonempty string"
+            )
+
+
+def validate_exact_keys(obj, required, allowed, field, errors):
+    if not isinstance(obj, dict):
+        errors.append(f"{field}: expected object")
+        return False
+
+    missing = sorted(required - set(obj))
+    extra = sorted(set(obj) - allowed)
+
+    if missing:
+        errors.append(
+            f"{field}: missing required keys: {', '.join(missing)}"
+        )
+
+    if extra:
+        errors.append(
+            f"{field}: unexpected keys: {', '.join(extra)}"
+        )
+
+    return not missing and not extra
+
+
+def load_task_capsule(file_path):
+    path = Path(file_path).expanduser().resolve()
+
+    try:
+        text = path.read_text()
+    except OSError as exc:
+        fail(f"could not read task capsule {path}: {exc}")
+
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as exc:
+        fail(f"invalid task-capsule JSON in {path}: {exc}")
+
+    return path, data
+
+
+def validate_task_capsule_data(data, source_path, repos):
+    errors = []
+
+    top_required = {
+        "schema_version",
+        "task_id",
+        "title",
+        "status",
+        "goal",
+        "acceptance_criteria",
+        "constraints",
+        "repositories",
+        "decisions",
+        "executed_operations",
+        "artifacts",
+        "validation",
+        "blockers",
+        "remaining_work",
+        "next_safe_action",
+    }
+
+    top_allowed = top_required | {
+        "last_executor",
+        "notes",
+    }
+
+    if not validate_exact_keys(
+        data,
+        top_required,
+        top_allowed,
+        "task",
+        errors,
+    ):
+        if not isinstance(data, dict):
+            return errors
+
+    if data.get("schema_version") != 1:
+        errors.append("schema_version: expected integer 1")
+
+    task_id = data.get("task_id")
+    if not is_nonempty_string(task_id):
+        errors.append("task_id: expected nonempty string")
+    elif not TASK_ID_RE.fullmatch(task_id):
+        errors.append(
+            "task_id: must match ^[a-z0-9][a-z0-9._-]*$"
+        )
+    elif source_path.stem != task_id:
+        errors.append(
+            "task_id: must match task-capsule filename"
+        )
+
+    for field in ("title", "goal", "next_safe_action"):
+        if not is_nonempty_string(data.get(field)):
+            errors.append(f"{field}: expected nonempty string")
+
+    if "last_executor" in data:
+        if not is_nonempty_string(data.get("last_executor")):
+            errors.append(
+                "last_executor: expected nonempty string when present"
+            )
+
+    if "notes" in data and not isinstance(data.get("notes"), str):
+        errors.append("notes: expected string when present")
+
+    status = data.get("status")
+    if status not in TASK_STATUSES:
+        errors.append(
+            "status: unsupported value "
+            f"{status!r}"
+        )
+
+    validate_string_array(
+        data.get("acceptance_criteria"),
+        "acceptance_criteria",
+        errors,
+        min_items=1,
+    )
+
+    for field in (
+        "constraints",
+        "decisions",
+        "blockers",
+        "remaining_work",
+    ):
+        validate_string_array(
+            data.get(field),
+            field,
+            errors,
+        )
+
+    repositories = data.get("repositories")
+
+    if not isinstance(repositories, list):
+        errors.append("repositories: expected array")
+        repositories = []
+    elif not repositories:
+        errors.append(
+            "repositories: expected at least one repository"
+        )
+
+    repo_required = {
+        "name",
+        "intent",
+        "checkout_path",
+        "branch",
+        "base_sha",
+        "checkpoint_sha",
+        "checkpoint_pushed",
+        "allowed_mutation_scope",
+    }
+
+    seen_repositories = set()
+
+    for index, entry in enumerate(repositories):
+        field = f"repositories[{index}]"
+
+        if not validate_exact_keys(
+            entry,
+            repo_required,
+            repo_required,
+            field,
+            errors,
+        ):
+            if not isinstance(entry, dict):
+                continue
+
+        name = entry.get("name")
+
+        if not is_nonempty_string(name):
+            errors.append(f"{field}.name: expected nonempty string")
+        else:
+            if name in seen_repositories:
+                errors.append(
+                    f"{field}.name: duplicate logical repository {name}"
+                )
+
+            seen_repositories.add(name)
+
+            if name not in repos:
+                errors.append(
+                    f"{field}.name: unknown registered repository {name}"
+                )
+
+        intent = entry.get("intent")
+        if intent not in {"read", "mutate"}:
+            errors.append(
+                f"{field}.intent: expected read or mutate"
+            )
+
+        checkout_path = entry.get("checkout_path")
+        if not is_nonempty_string(checkout_path):
+            errors.append(
+                f"{field}.checkout_path: expected nonempty string"
+            )
+        elif not Path(checkout_path).expanduser().is_absolute():
+            errors.append(
+                f"{field}.checkout_path: expected absolute path"
+            )
+
+        if not is_nonempty_string(entry.get("branch")):
+            errors.append(
+                f"{field}.branch: expected nonempty string"
+            )
+
+        for sha_field in ("base_sha", "checkpoint_sha"):
+            value = entry.get(sha_field)
+
+            if not isinstance(value, str) or not SHA_RE.fullmatch(value):
+                errors.append(
+                    f"{field}.{sha_field}: expected 40 lowercase hex characters"
+                )
+
+        if not isinstance(entry.get("checkpoint_pushed"), bool):
+            errors.append(
+                f"{field}.checkpoint_pushed: expected boolean"
+            )
+
+        validate_string_array(
+            entry.get("allowed_mutation_scope"),
+            f"{field}.allowed_mutation_scope",
+            errors,
+        )
+
+        if (
+            intent == "mutate"
+            and isinstance(
+                entry.get("allowed_mutation_scope"),
+                list,
+            )
+            and not entry["allowed_mutation_scope"]
+        ):
+            errors.append(
+                f"{field}.allowed_mutation_scope: "
+                "mutation intent requires nonempty scope"
+            )
+
+        if name in repos and intent == "mutate":
+            cfg = repos[name]
+
+            if not cfg.get("writable", False):
+                errors.append(
+                    f"{field}: registry marks repository non-writable"
+                )
+
+            if cfg.get("recursive_mutation_forbidden", False):
+                errors.append(
+                    f"{field}: registry forbids mutation from repository scope"
+                )
+
+    operations = data.get("executed_operations")
+
+    if not isinstance(operations, list):
+        errors.append("executed_operations: expected array")
+        operations = []
+
+    operation_required = {"summary", "evidence"}
+
+    for index, entry in enumerate(operations):
+        field = f"executed_operations[{index}]"
+
+        if not validate_exact_keys(
+            entry,
+            operation_required,
+            operation_required,
+            field,
+            errors,
+        ):
+            if not isinstance(entry, dict):
+                continue
+
+        if not is_nonempty_string(entry.get("summary")):
+            errors.append(
+                f"{field}.summary: expected nonempty string"
+            )
+
+        validate_string_array(
+            entry.get("evidence"),
+            f"{field}.evidence",
+            errors,
+            min_items=1,
+        )
+
+    artifacts = data.get("artifacts")
+
+    if not isinstance(artifacts, list):
+        errors.append("artifacts: expected array")
+        artifacts = []
+
+    artifact_required = {
+        "path",
+        "state",
+        "evidence",
+    }
+
+    for index, entry in enumerate(artifacts):
+        field = f"artifacts[{index}]"
+
+        if not validate_exact_keys(
+            entry,
+            artifact_required,
+            artifact_required,
+            field,
+            errors,
+        ):
+            if not isinstance(entry, dict):
+                continue
+
+        if not is_nonempty_string(entry.get("path")):
+            errors.append(
+                f"{field}.path: expected nonempty string"
+            )
+
+        if not is_nonempty_string(entry.get("state")):
+            errors.append(
+                f"{field}.state: expected nonempty string"
+            )
+
+        validate_string_array(
+            entry.get("evidence"),
+            f"{field}.evidence",
+            errors,
+            min_items=1,
+        )
+
+    validations = data.get("validation")
+
+    if not isinstance(validations, list):
+        errors.append("validation: expected array")
+        validations = []
+
+    validation_required = {
+        "check",
+        "result",
+        "evidence",
+    }
+
+    for index, entry in enumerate(validations):
+        field = f"validation[{index}]"
+
+        if not validate_exact_keys(
+            entry,
+            validation_required,
+            validation_required,
+            field,
+            errors,
+        ):
+            if not isinstance(entry, dict):
+                continue
+
+        if not is_nonempty_string(entry.get("check")):
+            errors.append(
+                f"{field}.check: expected nonempty string"
+            )
+
+        if entry.get("result") not in {
+            "PASS",
+            "FAIL",
+            "NOT_RUN",
+        }:
+            errors.append(
+                f"{field}.result: expected PASS, FAIL, or NOT_RUN"
+            )
+
+        validate_string_array(
+            entry.get("evidence"),
+            f"{field}.evidence",
+            errors,
+        )
+
+    if status == "COMPLETE":
+        if isinstance(data.get("remaining_work"), list):
+            if data["remaining_work"]:
+                errors.append(
+                    "remaining_work: COMPLETE task must have no remaining work"
+                )
+
+        if isinstance(data.get("blockers"), list):
+            if data["blockers"]:
+                errors.append(
+                    "blockers: COMPLETE task must have no blockers"
+                )
+
+    if status in {
+        "BLOCKED_RUNTIME",
+        "BLOCKED_EVIDENCE",
+        "NEEDS_USER_DECISION",
+    }:
+        if isinstance(data.get("blockers"), list):
+            if not data["blockers"]:
+                errors.append(
+                    "blockers: blocked/decision state requires at least one blocker"
+                )
+
+    return errors
+
+
+def task_validation_payload(path, data, repos):
+    errors = validate_task_capsule_data(
+        data,
+        path,
+        repos,
+    )
+
+    return {
+        "schema_version": 1,
+        "task_file": str(path),
+        "task_id": (
+            data.get("task_id")
+            if isinstance(data, dict)
+            else None
+        ),
+        "valid": not errors,
+        "errors": errors,
+    }
+
+
+def print_task_validation_human(payload):
+    print("============================================================")
+    print("TASK CAPSULE VALIDATION")
+    print("============================================================")
+    print(f"FILE:    {payload['task_file']}")
+    print(f"TASK_ID: {payload.get('task_id')}")
+    print(f"VALID:   {payload['valid']}")
+
+    if payload["errors"]:
+        print("ERRORS:")
+        for error in payload["errors"]:
+            print(f"  - {error}")
+
+
+def command_task_validate(args):
+    _, _, repos = load_registry()
+    path, data = load_task_capsule(args.file)
+
+    payload = task_validation_payload(
+        path,
+        data,
+        repos,
+    )
+
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print_task_validation_human(payload)
+
+    return EXIT_READY if payload["valid"] else EXIT_STATE
+
+
+def check_commit_exists(path, sha):
+    rc, _, _ = run_git(
+        path,
+        "cat-file",
+        "-e",
+        f"{sha}^{{commit}}",
+    )
+    return rc == 0
+
+
+def check_ancestor(path, base_sha, checkpoint_sha):
+    rc, _, _ = run_git(
+        path,
+        "merge-base",
+        "--is-ancestor",
+        base_sha,
+        checkpoint_sha,
+    )
+    return rc == 0
+
+
+def handoff_assessment(path, data, workspace_root, repos):
+    validation = task_validation_payload(
+        path,
+        data,
+        repos,
+    )
+
+    if not validation["valid"]:
+        return {
+            "schema_version": 1,
+            "task_file": str(path),
+            "task_id": validation.get("task_id"),
+            "result": "INVALID_CAPSULE",
+            "handoff_safe": False,
+            "reasons": validation["errors"],
+            "repositories": [],
+        }, EXIT_STATE
+
+    reasons = []
+    repository_results = []
+
+    if data["status"] not in HANDOFF_STATUSES:
+        reasons.append(
+            "task status is not an explicit handoff-capable state"
+        )
+
+    for entry in data["repositories"]:
+        name = entry["name"]
+        cfg = repos[name]
+        checkout = Path(
+            entry["checkout_path"]
+        ).expanduser().resolve()
+
+        record = inspect_checkout(
+            name,
+            cfg,
+            checkout,
+            workspace_root,
+            repos,
+        )
+
+        repo_reasons = []
+
+        if not record.get("exists"):
+            repo_reasons.append(
+                "recorded checkout/worktree path is missing"
+            )
+        elif not record.get("git"):
+            repo_reasons.append(
+                "recorded path is not a Git checkout"
+            )
+        else:
+            if not record.get("identity_matches"):
+                repo_reasons.append(
+                    "observed origin does not match registered repository"
+                )
+
+            if record.get("branch") != entry["branch"]:
+                repo_reasons.append(
+                    "current branch differs from recorded task branch"
+                )
+
+            if record.get("head") != entry["checkpoint_sha"]:
+                repo_reasons.append(
+                    "current HEAD differs from recorded checkpoint SHA"
+                )
+
+            if not record.get("clean"):
+                repo_reasons.append(
+                    "checkout is dirty; v1 handoff requires a clean checkpoint"
+                )
+
+            if not check_commit_exists(
+                Path(record["git_root"]),
+                entry["checkpoint_sha"],
+            ):
+                repo_reasons.append(
+                    "recorded checkpoint commit is not present locally"
+                )
+
+            if (
+                check_commit_exists(
+                    Path(record["git_root"]),
+                    entry["base_sha"],
+                )
+                and check_commit_exists(
+                    Path(record["git_root"]),
+                    entry["checkpoint_sha"],
+                )
+                and not check_ancestor(
+                    Path(record["git_root"]),
+                    entry["base_sha"],
+                    entry["checkpoint_sha"],
+                )
+            ):
+                repo_reasons.append(
+                    "recorded base SHA is not an ancestor of checkpoint SHA"
+                )
+
+            if not check_commit_exists(
+                Path(record["git_root"]),
+                entry["base_sha"],
+            ):
+                repo_reasons.append(
+                    "recorded base commit is not present locally"
+                )
+
+            if entry["intent"] == "mutate":
+                if not entry["checkpoint_pushed"]:
+                    repo_reasons.append(
+                        "mutation checkpoint is not recorded as pushed"
+                    )
+                else:
+                    remote = query_remote_branch(
+                        Path(record["git_root"]),
+                        entry["branch"],
+                    )
+
+                    if remote["status"] == "ERROR":
+                        repo_reasons.append(
+                            "remote task branch state could not be verified"
+                        )
+                    elif remote["status"] == "MISSING":
+                        repo_reasons.append(
+                            "recorded task branch is missing on remote"
+                        )
+                    elif remote["sha"] != entry["checkpoint_sha"]:
+                        repo_reasons.append(
+                            "remote task branch does not advertise "
+                            "recorded checkpoint SHA"
+                        )
+
+        repository_results.append(
+            {
+                "name": name,
+                "intent": entry["intent"],
+                "checkout_path": str(checkout),
+                "branch": entry["branch"],
+                "checkpoint_sha": entry["checkpoint_sha"],
+                "checkpoint_pushed": entry["checkpoint_pushed"],
+                "ready": not repo_reasons,
+                "reasons": repo_reasons,
+            }
+        )
+
+        for reason in repo_reasons:
+            reasons.append(f"{name}: {reason}")
+
+    result = (
+        "HANDOFF_SAFE"
+        if not reasons
+        else "NOT_HANDOFF_SAFE"
+    )
+
+    return {
+        "schema_version": 1,
+        "task_file": str(path),
+        "task_id": data["task_id"],
+        "status": data["status"],
+        "result": result,
+        "handoff_safe": not reasons,
+        "reasons": reasons,
+        "repositories": repository_results,
+        "next_safe_action": data["next_safe_action"],
+    }, (
+        EXIT_READY
+        if not reasons
+        else EXIT_REVIEW
+    )
+
+
+def print_handoff_human(payload):
+    print("============================================================")
+    print("TASK HANDOFF ASSESSMENT")
+    print("============================================================")
+    print(f"FILE:      {payload['task_file']}")
+    print(f"TASK_ID:   {payload.get('task_id')}")
+    print(f"STATUS:    {payload.get('status')}")
+    print(f"RESULT:    {payload['result']}")
+
+    if "next_safe_action" in payload:
+        print(
+            f"NEXT_SAFE_ACTION: {payload['next_safe_action']}"
+        )
+
+    repositories = payload.get("repositories", [])
+
+    if repositories:
+        print("REPOSITORIES:")
+        for repo in repositories:
+            print(
+                "  - "
+                f"{repo['name']} "
+                f"intent={repo['intent']} "
+                f"branch={repo['branch']} "
+                f"ready={repo['ready']}"
+            )
+
+            for reason in repo["reasons"]:
+                print(f"      reason: {reason}")
+
+    if payload["reasons"]:
+        print("REASONS:")
+        for reason in payload["reasons"]:
+            print(f"  - {reason}")
+
+
+def command_handoff_check(args):
+    _, workspace_root, repos = load_registry()
+    path, data = load_task_capsule(args.file)
+
+    payload, code = handoff_assessment(
+        path,
+        data,
+        workspace_root,
+        repos,
+    )
+
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print_handoff_human(payload)
+
+    return code
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         description="Executor-neutral workspace control CLI"
@@ -605,6 +1343,38 @@ def build_parser():
         help="emit machine-readable JSON",
     )
     preflight.set_defaults(func=command_preflight)
+
+    task_validate = sub.add_parser(
+        "task-validate",
+        help="validate a durable task capsule",
+    )
+    task_validate.add_argument(
+        "--file",
+        required=True,
+        help="path to task-capsule JSON",
+    )
+    task_validate.add_argument(
+        "--json",
+        action="store_true",
+        help="emit machine-readable JSON",
+    )
+    task_validate.set_defaults(func=command_task_validate)
+
+    handoff = sub.add_parser(
+        "handoff-check",
+        help="assess whether a task capsule is handoff-safe",
+    )
+    handoff.add_argument(
+        "--file",
+        required=True,
+        help="path to task-capsule JSON",
+    )
+    handoff.add_argument(
+        "--json",
+        action="store_true",
+        help="emit machine-readable JSON",
+    )
+    handoff.set_defaults(func=command_handoff_check)
 
     return parser
 
