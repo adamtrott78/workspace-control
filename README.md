@@ -30,7 +30,7 @@ For workspace-level work:
 
 1. read this file;
 2. read `policies/PORTABILITY_CONTRACT.md`;
-3. inspect `repos.yaml`;
+3. inspect `repos.json`;
 4. observe current repository/runtime state before mutation.
 
 Do not recursively ingest all project repositories merely because they are
@@ -77,7 +77,7 @@ Essential knowledge must remain usable if the agent-adapter layer disappears.
 
 ## Repository registry
 
-`repos.yaml` records stable repository identity, ownership, and mutation policy.
+`repos.json` records stable repository identity, ownership, and mutation policy.
 
 It intentionally does not record volatile facts such as current branch, HEAD,
 dirty state, running processes, or ahead/behind counts. Those must be observed
@@ -85,6 +85,26 @@ from the actual checkout when needed.
 
 A logical repository may have multiple Git worktrees. Worktree instances are
 runtime state, not separate repository identities.
+
+JSON is used deliberately for the registry so the initial control-plane tooling
+can parse it with the Python standard library and remain independent of
+project-specific Python environments or third-party YAML packages.
+
+## Deterministic control tooling
+
+`scripts/workspace_control.py` is the initial executor-neutral control-plane CLI.
+
+Its first commands are:
+
+```text
+workspace_control.py status
+workspace_control.py preflight
+```
+
+The corresponding operating contracts live under `procedures/`.
+
+These tools observe state. They do not fetch, clean, switch, stash, reset, stage,
+commit, push, or otherwise normalize project repositories.
 
 ## Current maturity
 
