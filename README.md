@@ -131,6 +131,23 @@ reports whether the task is actually `HANDOFF_SAFE`.
 A task capsule coordinates work; it does not become a source of project-domain
 truth.
 
+## Codex adapter
+
+Codex is an executor over the same control plane, not a separate workflow.
+
+Codex-specific routing consists of:
+
+- `AGENTS.md`;
+- `.agents/skills/workspace-control/SKILL.md`;
+- `adapters/codex/global/AGENTS.md`;
+- `procedures/codex_adapter.md`.
+
+These adapters point back to the canonical context, procedures, registry, task
+capsules, and deterministic CLI.
+
+Removing the Codex adapter layer must reduce automation only; it must not make
+the workspace workflow conceptually inoperable.
+
 ## Current maturity
 
 Status: `EXPERIMENTAL`
