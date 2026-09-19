@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "phase4-chatgpt-to-codex-smoke",
   "title": "Codex executor handoff smoke test",
-  "status": "VALIDATING",
+  "status": "COMPLETE",
   "goal": "Prove that Codex can recover and execute a bounded workspace-control mutation from durable repository and task state without a prose handoff from the previous executor.",
   "acceptance_criteria": [
     "Codex recovers the task from this capsule and canonical workspace-control sources.",
@@ -32,7 +32,7 @@
       "branch": "phase4-codex-adapters",
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
       "checkpoint_sha": "9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859",
-      "checkpoint_pushed": false,
+      "checkpoint_pushed": true,
       "allowed_mutation_scope": [
         "reports/phase4_codex_handoff.md"
       ]
@@ -87,16 +87,24 @@
         "All eight original acceptance criteria passed independent review.",
         "The reviewed local checkpoint is 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859; the remote phase4-codex-adapters branch still advertises 769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1."
       ]
+    },
+    {
+      "summary": "The independently reviewed Codex checkpoint was pushed to phase4-codex-adapters and its advertised remote SHA was independently verified.",
+      "evidence": [
+        "Local target HEAD and remote phase4-codex-adapters both equal 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859.",
+        "Post-push local/remote divergence was zero commits in both directions.",
+        "The separate coordination checkpoint remained unchanged during the target push."
+      ]
     }
   ],
   "artifacts": [
     {
       "path": "reports/phase4_codex_handoff.md",
-      "state": "created and committed locally; independently reviewed by ChatGPT; not pushed",
+      "state": "created, committed, independently reviewed by ChatGPT, pushed, and remote-verified",
       "evidence": [
-        "Artifact is committed in local checkpoint 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859.",
+        "Artifact is committed in checkpoint 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859.",
         "The change set from the starting checkpoint contains exactly reports/phase4_codex_handoff.md.",
-        "Remote phase4-codex-adapters still advertises 769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1, so the reviewed Codex checkpoint is not yet pushed."
+        "Remote phase4-codex-adapters advertises 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859."
       ]
     }
   ],
@@ -133,20 +141,16 @@
     },
     {
       "check": "Reviewed Codex checkpoint pushed",
-      "result": "NOT_RUN",
+      "result": "PASS",
       "evidence": [
-        "Local reviewed checkpoint is 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859; remote phase4-codex-adapters still advertises 769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1."
+        "Remote phase4-codex-adapters advertises reviewed checkpoint 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859.",
+        "Independent post-push verification showed zero local/remote divergence."
       ]
     }
   ],
   "blockers": [],
-  "remaining_work": [
-    "Push reviewed Codex checkpoint 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859 to remote branch phase4-codex-adapters.",
-    "Verify the advertised remote SHA for phase4-codex-adapters equals 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859.",
-    "Only after remote verification, update checkpoint_pushed to true and record the pushed-checkpoint validation result.",
-    "Run canonical task-validate and handoff-check against the pushed checkpoint, then complete the task if the durable state is safe."
-  ],
-  "next_safe_action": "From the reviewed target checkout, reverify local HEAD 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859, clean status, and remote phase4-codex-adapters at 769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1; push only 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859 to phase4-codex-adapters, verify the advertised remote SHA equals 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859, then update this capsule to checkpoint_pushed true and rerun canonical task-validate and handoff-check.",
+  "remaining_work": [],
+  "next_safe_action": "Phase-4C is complete. Preserve the validated target and coordination checkpoints as durable evidence; perform no further Phase-4C mutation unless a later integration phase explicitly consumes this completed task.",
   "last_executor": "chatgpt",
-  "notes": "Codex recovered the task from durable state without a task-specific prose handoff. Two earlier executions stopped safely because the Codex sandbox could not verify GitHub DNS. Retry-3B used an execution environment with the required network and Git-metadata access plus an ephemeral push guard. ChatGPT independently reviewed the resulting local checkpoint. The current checkpoint is deliberately recorded as unpushed until remote verification."
+  "notes": "Phase-4C demonstrated both executor boundaries. Codex recovered and executed the bounded mutation from durable capsule and canonical repository state without a task-specific prose handoff; earlier DNS-gated attempts stopped safely without mutation. ChatGPT independently recovered and validated the Codex checkpoint. The reviewed checkpoint was subsequently pushed and remote-verified, and this capsule now records the completed durable state."
 }
