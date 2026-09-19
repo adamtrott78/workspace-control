@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "phase4-chatgpt-to-codex-smoke",
   "title": "Codex executor handoff smoke test",
-  "status": "CHECKPOINTED",
+  "status": "VALIDATING",
   "goal": "Prove that Codex can recover and execute a bounded workspace-control mutation from durable repository and task state without a prose handoff from the previous executor.",
   "acceptance_criteria": [
     "Codex recovers the task from this capsule and canonical workspace-control sources.",
@@ -16,13 +16,13 @@
   ],
   "constraints": [
     "Use durable repository and task state rather than previous conversation state.",
-    "Do not modify this task capsule.",
+    "The receiving Codex executor must not modify this task capsule; after Codex execution, ChatGPT may update durable coordination state following independent review.",
     "Do not modify README.md, AGENTS.md, Skills, procedures, policies, schemas, registry files, or deterministic implementation.",
     "Do not clean, reset, stash, switch branches, delete unrelated files, or broadly stage files.",
     "Do not use git add .",
-    "Do not push.",
-    "Do not modify any repository other than the recorded workspace-control target checkout.",
-    "The only allowed mutation path is reports/phase4_codex_handoff.md."
+    "The receiving Codex executor must not push the resulting target commit; after independent ChatGPT review, the coordination executor may push only the reviewed checkpoint specified by next_safe_action.",
+    "During receiving Codex execution, do not modify any repository other than the recorded workspace-control target checkout; post-execution coordination updates may modify only this task capsule in the separate coordination worktree.",
+    "During receiving Codex execution, the only allowed target-repository mutation path is reports/phase4_codex_handoff.md; post-execution coordination-state mutation is limited to this task capsule."
   ],
   "repositories": [
     {
@@ -31,8 +31,8 @@
       "checkout_path": "/home/atrott/adamArchives/Adam/workspace-control-phase4-codex-adapters",
       "branch": "phase4-codex-adapters",
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
-      "checkpoint_sha": "769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1",
-      "checkpoint_pushed": true,
+      "checkpoint_sha": "9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859",
+      "checkpoint_pushed": false,
       "allowed_mutation_scope": [
         "reports/phase4_codex_handoff.md"
       ]
@@ -41,7 +41,8 @@
   "decisions": [
     "Use a separate coordination worktree so the durable capsule does not dirty the target checkpoint.",
     "The first Codex mutation test ends at a clean local Git commit and deliberately does not push.",
-    "The Codex prompt will provide only the durable capsule location and no task-specific prose handoff."
+    "The Codex prompt will provide only the durable capsule location and no task-specific prose handoff.",
+    "After independent ChatGPT review, record the Codex-created local checkpoint as the current task checkpoint while keeping checkpoint_pushed false until the remote branch is explicitly verified."
   ],
   "executed_operations": [
     {
@@ -55,14 +56,47 @@
       "evidence": [
         "GitHub comparison showed the adapter checkpoint exactly one commit ahead of base cb8368cd50de2d364c2aade8843276aab0b02420 with the reviewed five-path change set."
       ]
+    },
+    {
+      "summary": "The first Codex execution recovered the durable task and stopped before mutation when canonical handoff-check returned NOT_HANDOFF_SAFE because github.com could not resolve.",
+      "evidence": [
+        "Codex stdout SHA-256 12a5bb088dc1b9aef8cb6d887c50e4b5af3fe50269b539f0978ba9772b2df72f records capsule validation passing, preflight READY, handoff-check NOT_HANDOFF_SAFE, and no mutation.",
+        "Codex stderr SHA-256 c743c622d820c8509c51eaaad8158d2e6057f2616864ff3c2c1cd01b2c16320b records the failed GitHub hostname resolution and the executor safety stop."
+      ]
+    },
+    {
+      "summary": "A second Codex attempt again recovered the same durable task and stopped safely before mutation when its execution environment could not resolve github.com.",
+      "evidence": [
+        "Retry-2 stdout SHA-256 62ed6940f6f71e7121c70d2475f20f147c6a808586848ae0df4a5bc5689e843c records no file change, no commit, and no push.",
+        "Retry-2 stderr SHA-256 eb6b5d048985874f359301c74163345a11c285edf46d7c26d546374e378d618e records NOT_HANDOFF_SAFE before mutation."
+      ]
+    },
+    {
+      "summary": "Codex Retry-3B recovered the task from the unchanged durable capsule, obtained HANDOFF_SAFE and READY, created exactly the authorized report, and committed it locally without pushing.",
+      "evidence": [
+        "Local commit 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859 is a direct child of starting checkpoint 769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1 with subject 'Record Codex handoff smoke test'.",
+        "Retry-3B stdout SHA-256 ff79f95798e3b189768b6f3ed2245f4f45367fdf64f23f5876e369687706e70d records successful task completion.",
+        "Retry-3B stderr SHA-256 33b48de163e5a5fbe72960f077adba635033ddf39d80118a6747628937b868fa records task-validate, handoff-check, preflight, exact-path staging, commit, and post-commit checks.",
+        "Retry-3B wrapper summary SHA-256 b6f50d479faa73ae1d4a66effe730124fe5bb706a2d46f82a88c12b0db49cf7e records structural verification and the unchanged remote checkpoint."
+      ]
+    },
+    {
+      "summary": "ChatGPT independently recovered and reviewed the Codex-produced checkpoint from Git and runtime evidence.",
+      "evidence": [
+        "Independent review confirmed execution order: task-validate -> handoff-check -> HANDOFF_SAFE -> preflight -> READY -> stage/check -> commit -> post-commit check.",
+        "All eight original acceptance criteria passed independent review.",
+        "The reviewed local checkpoint is 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859; the remote phase4-codex-adapters branch still advertises 769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1."
+      ]
     }
   ],
   "artifacts": [
     {
       "path": "reports/phase4_codex_handoff.md",
-      "state": "not yet created",
+      "state": "created and committed locally; independently reviewed by ChatGPT; not pushed",
       "evidence": [
-        "Creation is assigned to the receiving Codex executor."
+        "Artifact is committed in local checkpoint 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859.",
+        "The change set from the starting checkpoint contains exactly reports/phase4_codex_handoff.md.",
+        "Remote phase4-codex-adapters still advertises 769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1, so the reviewed Codex checkpoint is not yet pushed."
       ]
     }
   ],
@@ -83,20 +117,36 @@
     },
     {
       "check": "Codex mutation execution",
+      "result": "PASS",
+      "evidence": [
+        "Successful Retry-3B recovered the durable capsule, obtained HANDOFF_SAFE and READY before mutation, created exactly one authorized report, passed git diff --check, created one local commit with the required message, and did not push.",
+        "Reviewed local Codex checkpoint: 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859."
+      ]
+    },
+    {
+      "check": "ChatGPT independent review of Codex checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "ChatGPT independently recovered the local commit, verified its direct parent, exact one-file change set, clean worktree, report semantics, and execution ordering.",
+        "All eight original task acceptance criteria were satisfied."
+      ]
+    },
+    {
+      "check": "Reviewed Codex checkpoint pushed",
       "result": "NOT_RUN",
-      "evidence": []
+      "evidence": [
+        "Local reviewed checkpoint is 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859; remote phase4-codex-adapters still advertises 769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Receiving Codex executor validates this task capsule.",
-    "Receiving Codex executor confirms HANDOFF_SAFE before mutation.",
-    "Receiving Codex executor runs canonical mutation preflight against the target checkout.",
-    "Receiving Codex executor creates and validates the single allowed report artifact.",
-    "Receiving Codex executor creates one local commit and does not push.",
-    "ChatGPT reviews the resulting local checkpoint and execution evidence."
+    "Push reviewed Codex checkpoint 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859 to remote branch phase4-codex-adapters.",
+    "Verify the advertised remote SHA for phase4-codex-adapters equals 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859.",
+    "Only after remote verification, update checkpoint_pushed to true and record the pushed-checkpoint validation result.",
+    "Run canonical task-validate and handoff-check against the pushed checkpoint, then complete the task if the durable state is safe."
   ],
-  "next_safe_action": "As the receiving executor, validate this capsule and require HANDOFF_SAFE, run canonical mutation preflight on the recorded target checkout, then create only reports/phase4_codex_handoff.md, validate the exact one-file change, commit it locally with message Record Codex handoff smoke test, and do not push.",
+  "next_safe_action": "From the reviewed target checkout, reverify local HEAD 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859, clean status, and remote phase4-codex-adapters at 769ef2daccaf5bf08c8b4b26bb9992f79b11c9d1; push only 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859 to phase4-codex-adapters, verify the advertised remote SHA equals 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859, then update this capsule to checkpoint_pushed true and rerun canonical task-validate and handoff-check.",
   "last_executor": "chatgpt",
-  "notes": "The receiving executor must derive the task from this durable capsule and canonical repository sources. No separate task-specific prose handoff is required."
+  "notes": "Codex recovered the task from durable state without a task-specific prose handoff. Two earlier executions stopped safely because the Codex sandbox could not verify GitHub DNS. Retry-3B used an execution environment with the required network and Git-metadata access plus an ephemeral push guard. ChatGPT independently reviewed the resulting local checkpoint. The current checkpoint is deliberately recorded as unpushed until remote verification."
 }
