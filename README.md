@@ -18,11 +18,13 @@ The control plane exists to make workflows portable across executors.
 The primary supported execution modes are:
 
 1. an agentic executor such as Codex;
-2. ChatGPT directing a human-operated terminal through bounded copy/paste
-   operations.
+2. a connected assistant using authorized direct mutation tools;
+3. ChatGPT directing a human-operated terminal through bounded copy/paste
+   operations;
+4. hybrids of those modes when local runtime and remote tooling must cooperate.
 
 Changing executors should change the degree of automation, not the underlying
-workflow architecture.
+workflow architecture, evidence standard, or authority model.
 
 ## Start here
 
@@ -30,8 +32,16 @@ For workspace-level work:
 
 1. read this file;
 2. read `policies/PORTABILITY_CONTRACT.md`;
-3. inspect `repos.json`;
-4. observe current repository/runtime state before mutation.
+3. read `policies/OPERATOR_WORKFLOW.md` when execution, mutation, Git, runtime,
+   artifact validation, or task-transition routing is involved;
+4. read `policies/TUTORING_CONTRACT.md` when building or operating a
+   repository-backed course tutor;
+5. inspect `repos.json`;
+6. observe current repository/runtime state before mutation.
+
+Routing is continuous rather than startup-only. When a conversation materially
+changes task ownership, return to the owning project route and load the new owner
+before acting.
 
 Do not recursively ingest all project repositories merely because they are
 registered here.
@@ -70,10 +80,28 @@ workspace control plane
         ↓
 agent adapters
         ↓
-Codex OR ChatGPT + human terminal
+Codex / connected direct tools / ChatGPT + human terminal
 ```
 
 Essential knowledge must remain usable if the agent-adapter layer disappears.
+
+## Shared policy contracts
+
+The control plane now has two provisional reusable policy contracts in addition
+to the portability contract:
+
+- `policies/OPERATOR_WORKFLOW.md` owns executor-neutral mutation, runtime,
+  validation, Git synchronization, and mid-conversation rerouting semantics;
+- `policies/TUTORING_CONTRACT.md` owns reusable repository-backed tutoring
+  semantics, including learning/completion modes, mastery evidence, pedagogical
+  persistence, report provenance, and deadline recovery.
+
+Project repositories should route to these shared owners and retain only their
+own domain-specific supplements. They should not copy the complete shared
+contracts into each project.
+
+These policies are currently compatibility bridges. PADataset remains unchanged
+until cold-start and cross-executor validation justify a later migration.
 
 ## Repository registry
 
