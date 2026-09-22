@@ -103,6 +103,14 @@ contracts into each project.
 These policies are currently compatibility bridges. PADataset remains unchanged
 until cold-start and cross-executor validation justify a later migration.
 
+For new course-tutor projects:
+
+- start from `templates/COURSE_TUTOR_ADAPTER.md` and fill only the local
+  course-specific mappings and exceptions;
+- validate the result with `procedures/TUTOR_EVALUATION.md`;
+- keep the shared contracts in this repository rather than copying them into each
+  course repository.
+
 ## Repository registry
 
 `repos.json` records stable repository identity, ownership, and mutation policy.
