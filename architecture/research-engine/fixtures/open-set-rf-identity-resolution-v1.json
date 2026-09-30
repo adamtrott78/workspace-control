@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "resolution_run_id": "rf-osr-pilot-identity-v1",
+  "created_at": "2026-09-30",
+  "decisions": [
+    {
+      "canonical_work_id": "work:arxiv:2005.00954",
+      "candidate_refs": [
+        "openalex:W3021303548",
+        "openalex:W4287790782"
+      ],
+      "resolution_state": "SAME_WORK_SAME_VERSION",
+      "evidence": [
+        "Both provider records resolve to arXiv 2005.00954.",
+        "Both records return the same substantive title; one contains only formatting/newline variation.",
+        "Both records return the same three authors.",
+        "arXiv metadata resolves the manifestation as 2005.00954v1, published 2020-05-03."
+      ],
+      "related_work_ids": [
+        "work:arxiv:2002.07777"
+      ],
+      "versions": [
+        {
+          "work_version_id": "work-version:arxiv:2005.00954v1",
+          "title": "Open Set Wireless Transmitter Authorization: Deep Learning Approaches and Dataset Considerations",
+          "external_ids": {
+            "arxiv": "2005.00954v1",
+            "openalex_1": "W3021303548",
+            "openalex_2": "W4287790782"
+          },
+          "published": "2020-05-03T00:26:03Z",
+          "source_locations": [
+            "https://arxiv.org/pdf/2005.00954v1"
+          ]
+        }
+      ]
+    },
+    {
+      "canonical_work_id": "work:arxiv:2002.07777",
+      "candidate_refs": [
+        "openalex:W3006634433"
+      ],
+      "resolution_state": "DISTINCT_WORK",
+      "evidence": [
+        "Provider record resolves to a different arXiv identifier: 2002.07777.",
+        "arXiv metadata reports title 'Deep Learning Approaches for Open Set Wireless Transmitter Authorization'.",
+        "arXiv metadata reports version 2002.07777v2 and original publication date 2020-02-18.",
+        "The title and abstract differ from 2005.00954; no source evidence observed in this pilot establishes that they are merely versions of one work."
+      ],
+      "related_work_ids": [
+        "work:arxiv:2005.00954"
+      ],
+      "versions": [
+        {
+          "work_version_id": "work-version:arxiv:2002.07777v2",
+          "title": "Deep Learning Approaches for Open Set Wireless Transmitter Authorization",
+          "external_ids": {
+            "arxiv": "2002.07777v2",
+            "openalex": "W3006634433"
+          },
+          "published": "2020-02-18T18:12:53Z",
+          "source_locations": [
+            "https://arxiv.org/pdf/2002.07777v2"
+          ]
+        }
+      ]
+    },
+    {
+      "canonical_work_id": "work:arxiv:2108.13099",
+      "candidate_refs": [
+        "openalex:W3197616054"
+      ],
+      "resolution_state": "NEW_WORK",
+      "evidence": [
+        "OpenAlex and arXiv metadata agree on title and authors.",
+        "arXiv metadata resolves the source as 2108.13099v1, published 2021-08-30."
+      ],
+      "related_work_ids": [
+        "work:arxiv:2005.00954",
+        "work:arxiv:2002.07777"
+      ],
+      "versions": [
+        {
+          "work_version_id": "work-version:arxiv:2108.13099v1",
+          "title": "Open Set RF Fingerprinting using Generative Outlier Augmentation",
+          "external_ids": {
+            "arxiv": "2108.13099v1",
+            "openalex": "W3197616054"
+          },
+          "published": "2021-08-30T10:12:46Z",
+          "source_locations": [
+            "https://arxiv.org/pdf/2108.13099v1"
+          ]
+        }
+      ]
+    }
+  ]
+}

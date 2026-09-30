@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/identity-resolution-run.v1.schema.json",
+  "title": "Research Engine IdentityResolutionRun v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "resolution_run_id",
+    "created_at",
+    "decisions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "resolution_run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "canonical_work_id",
+          "candidate_refs",
+          "resolution_state",
+          "evidence",
+          "versions"
+        ],
+        "properties": {
+          "canonical_work_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "candidate_refs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "resolution_state": {
+            "enum": [
+              "NEW_WORK",
+              "SAME_WORK_SAME_VERSION",
+              "SAME_WORK_DIFFERENT_VERSION",
+              "POSSIBLE_DUPLICATE",
+              "DISTINCT_WORK",
+              "NEEDS_REVIEW"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "related_work_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "versions": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "work_version_id",
+                "title",
+                "external_ids",
+                "published",
+                "source_locations"
+              ],
+              "properties": {
+                "work_version_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "external_ids": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "published": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_locations": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

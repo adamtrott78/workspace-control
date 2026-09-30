@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/corpus-decision.v1.schema.json",
+  "title": "Research Engine CorpusDecision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "decision_id",
+    "candidate_or_work_id",
+    "research_scope",
+    "decision",
+    "reason_codes",
+    "rationale",
+    "decider_type",
+    "decider_identity",
+    "decided_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_or_work_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "research_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision": {
+      "enum": [
+        "INCLUDE_DEEP_READ",
+        "INCLUDE_METADATA_ONLY",
+        "DEFER",
+        "EXCLUDE_IRRELEVANT",
+        "EXCLUDE_DUPLICATE",
+        "EXCLUDE_WRONG_VERSION",
+        "EXCLUDE_SCOPE",
+        "EXCLUDE_ACCESS_LIMITATION"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decider_type": {
+      "enum": [
+        "MODEL",
+        "HUMAN",
+        "RULE",
+        "HYBRID"
+      ]
+    },
+    "decider_identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_available": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "decided_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supersedes_decision_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

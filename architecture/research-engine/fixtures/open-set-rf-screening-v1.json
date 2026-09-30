@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "screening_run_id": "rf-osr-pilot-screening-v1",
+  "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+  "created_at": "2026-09-30",
+  "note": "Pilot screening is model-generated from discovery metadata only. It is a triage artifact, not scientific evidence.",
+  "decisions": [
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W3197616054:v1",
+      "candidate_or_work_id": "openalex:W3197616054",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "DIRECT_OPEN_SET_RF"
+      ],
+      "rationale": "Directly addresses open-set RF fingerprinting and is an anchor work for the pilot.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W4214569028:v1",
+      "candidate_or_work_id": "openalex:W4214569028",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "RF_DATASET",
+        "ANCHOR_AUTHORS"
+      ],
+      "rationale": "RF fingerprinting dataset likely supplies experimental/data context for multiple anchor works.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W7164509050:v1",
+      "candidate_or_work_id": "openalex:W7164509050",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "DIRECT_OPEN_SET_RF",
+        "RECENT"
+      ],
+      "rationale": "Direct open-set RF fingerprinting/OOD detector work.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W7161587027:v1",
+      "candidate_or_work_id": "openalex:W7161587027",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "DIRECT_OPEN_SET_RF",
+        "RECENT"
+      ],
+      "rationale": "Direct dynamic/open-set RF fingerprinting work.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W4385480376:v1",
+      "candidate_or_work_id": "openalex:W4385480376",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "RF_FINGERPRINT_SURVEY"
+      ],
+      "rationale": "Survey is useful for terminology, taxonomy, and backward/forward discovery.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W4224991115:v1",
+      "candidate_or_work_id": "openalex:W4224991115",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "OPEN_SET_RF_SIGNALS"
+      ],
+      "rationale": "Open-set recognition applied to interference signals is within the broader RF open-set scope.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W4322504422:v1",
+      "candidate_or_work_id": "openalex:W4322504422",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "OPEN_SET_DEVICE_RECOGNITION"
+      ],
+      "rationale": "Open-set device recognition is directly relevant to physical-layer/open-world identity.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W7166824432:v1",
+      "candidate_or_work_id": "openalex:W7166824432",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "DEFER",
+      "reason_codes": [
+        "ADJACENT_DOMAIN"
+      ],
+      "rationale": "AIS physical-feature vessel identity is adjacent but not clearly central to the pilot from metadata alone.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W4377009965:v1",
+      "candidate_or_work_id": "openalex:W4377009965",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "DIRECT_OPEN_SET_RF"
+      ],
+      "rationale": "Direct open-set RF device-authentication method.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W4392954577:v1",
+      "candidate_or_work_id": "openalex:W4392954577",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "DIRECT_OPEN_SET_RF"
+      ],
+      "rationale": "Direct robust open-set RF fingerprint detection method.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W3021303548:v1",
+      "candidate_or_work_id": "openalex:W3021303548",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "DIRECT_OPEN_SET_RF",
+        "CANONICAL_ANCHOR"
+      ],
+      "rationale": "Canonical open-set wireless transmitter authorization anchor.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W3006634433:v1",
+      "candidate_or_work_id": "openalex:W3006634433",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "DIRECT_OPEN_SET_RF",
+        "RELATED_PRIOR_WORK"
+      ],
+      "rationale": "Earlier distinct open-set transmitter-authorization work by the anchor authors.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W4287790782:v1",
+      "candidate_or_work_id": "openalex:W4287790782",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "EXCLUDE_DUPLICATE",
+      "reason_codes": [
+        "CANONICAL_DUPLICATE"
+      ],
+      "rationale": "Identity-resolution fixture maps this OpenAlex record to the same arXiv work/version as W3021303548.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W3097148708:v1",
+      "candidate_or_work_id": "openalex:W3097148708",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_METADATA_ONLY",
+      "reason_codes": [
+        "RF_SECURITY_ADJACENT"
+      ],
+      "rationale": "RF fingerprint authentication attack paper is useful context but is not primarily an open-set method paper.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W4229371957:v1",
+      "candidate_or_work_id": "openalex:W4229371957",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "OPEN_SET_EMITTER_IDENTIFICATION"
+      ],
+      "rationale": "Direct open-set specific-emitter identification work.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W3093454165:v1",
+      "candidate_or_work_id": "openalex:W3093454165",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_METADATA_ONLY",
+      "reason_codes": [
+        "PHYSICAL_LAYER_AUTH_ADJACENT"
+      ],
+      "rationale": "Physical-layer transmitter authentication context; retain for graph expansion but not first-pass deep reading.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W4317927930:v1",
+      "candidate_or_work_id": "openalex:W4317927930",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_METADATA_ONLY",
+      "reason_codes": [
+        "RF_FINGERPRINT_DOMAIN_ADAPTATION"
+      ],
+      "rationale": "RF fingerprint domain adaptation may qualify generalization claims but is secondary to the first open-set deep-read set.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W4385626897:v1",
+      "candidate_or_work_id": "openalex:W4385626897",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "OPEN_SET_MODULATION"
+      ],
+      "rationale": "Direct automatic modulation open-set recognition work.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    },
+    {
+      "schema_version": 1,
+      "decision_id": "decision:W4390092590:v1",
+      "candidate_or_work_id": "openalex:W4390092590",
+      "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+      "decision": "INCLUDE_DEEP_READ",
+      "reason_codes": [
+        "OPEN_SET_MODULATION"
+      ],
+      "rationale": "Direct automatic modulation open-set recognition method.",
+      "decider_type": "MODEL",
+      "decider_identity": "chatgpt-ingress-pilot-2026-09-30",
+      "evidence_available": "title/authors/source-location metadata; no deep-read evidence used for screening",
+      "decided_at": "2026-09-30",
+      "supersedes_decision_id": null
+    }
+  ]
+}
