@@ -12,7 +12,7 @@
     "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
   },
   "parent_execution_owner": "research-operating-system",
-  "current_stage": "execution_bridge",
+  "current_stage": "vertical_slice_validation",
   "acceptance_criteria": [
     "The architecture explicitly separates source evidence, extracted evidence, normalized knowledge, synthesis, model inference, and human judgment.",
     "Every durable scientific evidence object can be traced to a canonical work/version, immutable source artifact identity, and source locator whenever the available representation permits it.",
@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "a77f39d566492ff56875644256095abb8366359e",
+        "checkpoint_sha": "d2baadf2c20f20a1edd958fef4f041706e34115f",
         "verified": true
       },
       "local": null,
@@ -357,7 +357,7 @@
     },
     {
       "id": "execution_bridge",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -365,18 +365,40 @@
         "proposal_compiler",
         "git:a77f39d566492ff56875644256095abb8366359e"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "git:d2baadf2c20f20a1edd958fef4f041706e34115f",
+        "artifact:architecture/research-engine/execution-bridge-contract-v1.md",
+        "artifact:architecture/research-engine/fixtures/open-set-rf-execution-bridge-dry-run-v1.json",
+        "schema:schemas/research-engine/execution-bridge-plan.v1.schema.json"
+      ],
+      "validation": [
+        {
+          "check": "unapproved program refusal",
+          "result": "PASS",
+          "evidence": [
+            "DRAFT_NOT_APPROVED program produces instantiable=false with explicit novelty/human/repository blockers and causes no project mutation."
+          ]
+        },
+        {
+          "check": "deterministic project bootstrap mapping",
+          "result": "PASS",
+          "evidence": [
+            "Bridge maps durable ResearchProgram concerns into explicit workspace-control stages for prior-work closure, method design, implementation, evaluation, falsification, and evidence update.",
+            "Project repository remains authoritative for scientific execution while workspace-control remains coordination authority."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "vertical_slice_validation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "cross-executor-validation",
       "selected_executor": "codex",
       "selected_surface": "composed",
       "inputs": [
-        "execution_bridge"
+        "execution_bridge",
+        "git:d2baadf2c20f20a1edd958fef4f041706e34115f"
       ],
       "outputs": [],
       "validation": [],
@@ -488,6 +510,16 @@
       "evidence": [
         "ResearchProgram/FundingOpportunity/SolicitationRequirement/ProposalCompilation contracts and gated dry-run fixture committed.",
         "Dry run preserves novelty, human approval, official opportunity, and submission gates."
+      ]
+    },
+    {
+      "id": "research-engine-execution-bridge",
+      "kind": "git_commit",
+      "identity": "d2baadf2c20f20a1edd958fef4f041706e34115f",
+      "required_for_resume": true,
+      "evidence": [
+        "Approval-gated execution bridge contract/schema and dry-run fixture committed.",
+        "Unapproved program refusal and deterministic would-be workspace-control bootstrap mapping both validated."
       ]
     }
   ],
@@ -720,6 +752,30 @@
       "evidence": [
         "Validated proposal-compiler dry run with submission disabled."
       ]
+    },
+    {
+      "path": "architecture/research-engine/execution-bridge-contract-v1.md",
+      "state": "durable",
+      "role": "execution-bridge-contract",
+      "origin": "automated-research-engine-v1@d2baadf2c20f20a1edd958fef4f041706e34115f",
+      "persistence": "git-tracked",
+      "regeneration": "versioned bridge artifact",
+      "review_requirement": "Must preserve explicit approval gate, project authority boundary, and deterministic bootstrap semantics.",
+      "evidence": [
+        "Validated non-instantiation for unapproved ResearchProgram."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/open-set-rf-execution-bridge-dry-run-v1.json",
+      "state": "durable",
+      "role": "execution-bridge-regression-fixture",
+      "origin": "automated-research-engine-v1@d2baadf2c20f20a1edd958fef4f041706e34115f",
+      "persistence": "git-tracked",
+      "regeneration": "versioned bridge artifact",
+      "review_requirement": "Must preserve explicit approval gate, project authority boundary, and deterministic bootstrap semantics.",
+      "evidence": [
+        "Validated non-instantiation for unapproved ResearchProgram."
+      ]
     }
   ],
   "validation": [
@@ -843,18 +899,26 @@
         "Validated at automated-research-engine-v1@a77f39d566492ff56875644256095abb8366359e.",
         "Unapproved narrowed gap cannot become approved research program or submission-ready proposal."
       ]
+    },
+    {
+      "check": "execution bridge gating",
+      "result": "PASS",
+      "evidence": [
+        "Validated at automated-research-engine-v1@d2baadf2c20f20a1edd958fef4f041706e34115f.",
+        "Unapproved research direction cannot mutate/create a project; approved-state mapping is durably representable without chat state."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Define the execution-bridge contract that maps an APPROVED ResearchProgram into a workspace-control task/workflow without reconstructing it from chat.",
-    "Build a non-instantiable dry-run execution-plan fixture from the unapproved pilot program and prove that approval gating prevents project creation/execution.",
-    "Define the exact project-bootstrap payload that would be emitted after human approval.",
-    "During vertical-slice validation, ingest multiple additional papers and require deeper novelty review before any candidate becomes SUPPORTED_AS_OPEN.",
-    "Choose persistence/indexing architecture only after the complete vertical slice demonstrates actual query/load requirements.",
-    "After the end-to-end pipeline is validated, bootstrap the first real RF OSR knowledge corpus from the PDFs already curated/cited in the user's research paper and stored in PADataset's paper area; resolve the exact PADataset route at that time and ingest them through the same provenance-preserving pipeline rather than special-casing them."
+    "Run vertical-slice validation across multiple additional RF OSR papers so cross-paper identity, evidence, contradiction, synthesis, and novelty behavior are tested rather than only single-paper mechanics.",
+    "Use the user's already-curated/cited PDFs in PADataset as the first serious RF OSR corpus once their exact project route is resolved; ingest them through the same acquisition/evidence pipeline without special-casing.",
+    "Measure extraction/source-locator fidelity on a manually checked sample and track unsupported-extraction rate.",
+    "Re-run novelty challenge after the multi-paper corpus is indexed; only then consider whether any candidate can move toward SUPPORTED_AS_OPEN.",
+    "Choose persistence/indexing architecture based on observed graph/query/corpus scale requirements.",
+    "Create the dedicated research-engine implementation repository when a supported repository-creation path is available; move executable provider/parser/storage code there while retaining workspace-control as control plane."
   ],
-  "next_safe_action": "Continue execution_bridge from automated-research-engine-v1@a77f39d566492ff56875644256095abb8366359e. Define the approval-gated mapping from ResearchProgram to workspace-control task/workflow state. Use the current DRAFT_NOT_APPROVED pilot only to prove that the bridge refuses to instantiate a project. Define the exact payload that would become executable after APPROVED state; do not create a research project or infer approval.",
+  "next_safe_action": "Vertical-slice validation is active at automated-research-engine-v1@d2baadf2c20f20a1edd958fef4f041706e34115f. The end-to-end control/data contracts have been proven on one exact full-text paper. Next, ingest a small multi-paper RF OSR corpus through the same pipeline—prefer the user's already-curated cited-paper PDFs in PADataset once their exact route is resolved—then validate cross-paper synthesis, contradiction/novelty behavior, and extraction fidelity before bulk-ingesting the remainder.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
