@@ -35,8 +35,10 @@
       "checkpoint_sha": "84a7e67a8af2b701ab63829468c92e46221a72f9",
       "checkpoint_pushed": true,
       "allowed_mutation_scope": [
+        "schemas/workflow_descriptor.v1.schema.json",
         "scripts/workspace_control.py",
-        "procedures/worktree_prepare.md",
+        "procedures/workflow_descriptor.md",
+        "templates/workflow_descriptor.v1.json",
         "tests/test_workspace_control.py",
         "tests/fixtures/**"
       ]
@@ -563,9 +565,14 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Open Phase 8 workflow descriptor validation from the implementation plan."
+    "Implement Phase 8 workflow descriptor v1 validator support.",
+    "Keep workflow descriptors reusable and free of live task execution state.",
+    "Validate owner repository/context placement and stage dependency semantics.",
+    "Emit exact bindable workflow identity when the descriptor is resolvable in Git.",
+    "Add procedure/template and bounded positive/negative fixtures/tests.",
+    "Inspect the exact changed-path set before runtime testing."
   ],
-  "next_safe_action": "Open Phase 8 workflow descriptor validation only; recover its exact scope from architecture/control-plane-v2-implementation.md before mutating the target branch.",
+  "next_safe_action": "Begin Phase 8 only. Starting from control-plane-v2-refactor@84a7e67a8af2b701ab63829468c92e46221a72f9, implement workflow descriptor v1 procedure/template/validator support within schemas/workflow_descriptor.v1.schema.json, scripts/workspace_control.py, procedures/workflow_descriptor.md, templates/workflow_descriptor.v1.json, tests/test_workspace_control.py, and tests/fixtures/**. Enforce exact bindable version identity, reject live task execution state, preserve project-local ownership, and validate stage/dependency semantics. Do not begin Phase 9 artifact-lifecycle implementation beyond validating descriptor structure.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
