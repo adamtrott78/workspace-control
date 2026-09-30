@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: automated-research-engine-v1
 - Title: Automated research engine v1
-- Status: IN_PROGRESS
+- Status: BLOCKED_RUNTIME
 - Capsule schema: v2
 
 ## Goal
@@ -35,7 +35,7 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Next safe action
 
-Complete the ingress byte-acquisition gate for at least one already-resolved lawful OA source (prefer arXiv 2108.13099v1). Use a noninteractive local runtime to download the exact source bytes, record byte length and SHA-256, and return the receipt. Preserve the prior current-executor acquisition failure as a separate AcquisitionAttempt. Once one artifact hash is proven, record it durably and advance to extraction_pipeline.
+Run the documented noninteractive local acquisition command for arXiv 2108.13099v1 and return its receipt (URL, byte count, SHA-256, and PDF magic). Do not rerun discovery or identity resolution. After receipt, record a successful AcquisitionAttempt, clear BLOCKED_RUNTIME, validate ingress_prototype, and advance to extraction_pipeline.
 
 ## Remaining work
 
@@ -50,7 +50,7 @@ Complete the ingress byte-acquisition gate for at least one already-resolved law
 
 ## Blockers / gates
 
-- None.
+- Current ChatGPT container cannot resolve external hosts for byte acquisition (curl to arxiv.org failed with DNS resolution error). The lawful OA source is resolved and readable through the scholarly/web surface; only byte retrieval/hash evidence is missing.
 
 ## Fresh-chat initialization
 
