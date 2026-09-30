@@ -24,30 +24,43 @@ Evolve the repository-backed course tutoring/application architecture to the tas
 
 - Intent: mutate
 - Remote branch: course-workflows-v2-refactor
-- Remote checkpoint: 06058acf5a074db5a849f7f42f721971e5dda965
-- Remote verified: true
+- Remote checkpoint: 8a6202b020d0733437960415f77833f2001da962
+- Remote verified: True
 
 ### MTH602-AdamTrott
 
 - Intent: read
 - Remote branch: main
 - Remote checkpoint: 62b7a03c7139cb3987b72ad66bdc532e8a61b82a
-- Remote verified: true
+- Remote verified: True
+
+### CIS560-AdamTrott
+
+- Intent: read
+- Remote branch: tutor-framework
+- Remote checkpoint: 1af3ce7022d079b89f0fbca32f313a6853db1c60
+- Remote verified: True
+
+### EAS501-AdamTrott
+
+- Intent: read
+- Remote branch: eas501-tutor-bootstrap
+- Remote checkpoint: aa6195377b856862124643d0fc501969467fad3b
+- Remote verified: True
 
 ### PADataset
 
 - Intent: read
 - Remote branch: resume-framework
 - Remote checkpoint: 078461795be3c1d3e5c3845c81607166fac9fad3
-- Remote verified: true
+- Remote verified: True
 
 ## Next safe action
 
-Start from workspace-control README.md and this capsule. Use the isolated `course-workflows-v2-refactor` branch at 06058acf5a074db5a849f7f42f721971e5dda965 for shared-architecture mutations; task-state JSON/Markdown remain on main. Inspect the smallest evidence needed to establish stable workspace paths and canonical-branch identity for CIS560-AdamTrott and EAS501-AdamTrott, then add only those stable identities to repos.json on the isolated branch. After that operation, verify the branch checkpoint, update this JSON capsule on main, and immediately regenerate its Markdown before any further architecture work; then add CIS560/EAS501 as formal read-only recovery entries and proceed to shared_contract_review.
+Start from workspace-control README.md and this capsule. Continue on the isolated `course-workflows-v2-refactor` branch at 8a6202b020d0733437960415f77833f2001da962. Review the current shared tutoring/operator/adapter/evaluation contracts against only the smallest pinned legacy evidence needed from MTH602, CIS560, EAS501, and PADataset; identify the smallest reusable shared changes required by this task's acceptance criteria without mutating project repositories. Record the review as durable branch changes/evidence only where justified. After any material capsule update, regenerate its Markdown immediately; if the review validates a bounded design direction, advance to `workflow_descriptor_design` rather than stopping at the review boundary.
 
 ## Remaining work
 
-- Register CIS560-AdamTrott and EAS501-AdamTrott with stable identity in repos.json on the isolated course-workflows-v2-refactor branch after verifying their workspace paths/canonical branch evidence; then add them as formal read-only recovery entries in this capsule.
 - Review current shared tutoring/adapter/evaluation/operator contracts against demonstrated legacy repo evidence and identify the smallest reusable changes.
 - Define composite reusable course workflow descriptors/procedures for course bootstrap/migration, content ingestion, assessment preparation, study session, assignment work, cheat-sheet build, communications ingestion, and document-artifact build without changing task-capsule v2 composition semantics.
 - Implement shared contract/template/procedure updates on the isolated architecture branch while preserving project-local truth and explicit workflow-version migration rules.
