@@ -1,0 +1,178 @@
+{
+  "schema_version": 2,
+  "task_id": "mth602-course-workflows-v2-migration",
+  "title": "MTH602 Course Workflows v2 Migration",
+  "status": "PLANNED",
+  "goal": "Explicitly migrate the current MTH602 repository integration to the promoted reusable course-workflow architecture while preserving its proven direct-visual source ingestion, tutoring/mastery state, homework/LaTeX report mechanics, and project-local authority.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/course-bootstrap-migration.v1.json",
+    "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+    "content_sha": "da6076a9b4baf328d6a91526f6dff7aa999733b6"
+  },
+  "parent_execution_owner": "course-workflows-v2-refactor",
+  "current_stage": "baseline_recovery",
+  "acceptance_criteria": [
+    "A fresh executor starts only from the target repository root README at the pinned checkpoint plus this capsule and the exact promoted shared workflow binding.",
+    "Project-local course/source/assignment/mastery/artifact authority remains in the target repository; workspace-control contributes reusable mechanics only.",
+    "Any shared-contract adoption is explicit and pins an exact compatible workspace-control checkpoint; no moving-main dependency is introduced.",
+    "Existing active project work is not silently migrated merely because the shared architecture is newer.",
+    "Legacy conversational builder/tutor dependencies are removed only if the target actually has them and durable repository owners replace them.",
+    "Cold-start routing, tutoring/mastery semantics, mutation boundaries, and relevant artifact/source-ingestion regressions pass before completion.",
+    "The final project checkpoint is pushed/verified and recoverable without prior conversation.",
+    "Classroom/handwritten ingestion continues to preserve original images and permits direct multimodal synthesis without making OCR/Mathpix mandatory.",
+    "Existing MTH602 LaTeX homework source/build/render/visual-QA mechanics map cleanly to the shared document-artifact procedure without changing assignment truth."
+  ],
+  "constraints": [
+    "Do not mutate workspace-control shared architecture from this child; its workflow binding is read-only.",
+    "Do not rewrite authoritative instructor/course content merely to fit the new shared architecture.",
+    "Do not alter unrelated branches, assignments, research repositories, archived capsules, or external submission state.",
+    "Do not silently rebase/reset/overwrite if the target branch moved after the pinned starting checkpoint; refresh durable task state first.",
+    "Follow the operator continuation obligation and use runtime only when project-specific validation actually requires it."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "read",
+      "base_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "MTH602-AdamTrott",
+      "intent": "mutate",
+      "base_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "README.md",
+        "COURSE_TUTOR.md",
+        "workspace-control.lock.json",
+        "classnotes/**",
+        "docs/**",
+        "study/**",
+        "homework/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "baseline_recovery",
+      "status": "PLANNED",
+      "execution_owner": "mth602-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+        "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9:course-bootstrap-migration-v1"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "local_owner_mapping",
+      "status": "PLANNED",
+      "execution_owner": "mth602-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "baseline_recovery"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "shared_checkpoint_integration",
+      "status": "PLANNED",
+      "execution_owner": "mth602-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "local_owner_mapping"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "regression_validation",
+      "status": "PLANNED",
+      "execution_owner": "mth602-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+runtime",
+      "inputs": [
+        "shared_checkpoint_integration"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "completion",
+      "status": "PLANNED",
+      "execution_owner": "mth602-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "regression_validation"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "promoted-shared-workflow",
+      "kind": "git_commit",
+      "identity": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "required_for_resume": true,
+      "evidence": [
+        "workflow workflows/course-bootstrap-migration.v1.json blob da6076a9b4baf328d6a91526f6dff7aa999733b6"
+      ]
+    },
+    {
+      "id": "target-starting-checkpoint",
+      "kind": "git_commit",
+      "identity": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+      "required_for_resume": true,
+      "evidence": [
+        "MTH602-AdamTrott main verified at child creation"
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Child capsule creation baseline",
+      "result": "PASS",
+      "evidence": [
+        "Promoted shared workflow identity pinned at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9/workflows/course-bootstrap-migration.v1.json/da6076a9b4baf328d6a91526f6dff7aa999733b6.",
+        "Target repository branch main verified at exact starting checkpoint 62b7a03c7139cb3987b72ad66bdc532e8a61b82a.",
+        "No child-repository mutation was performed by the parent task."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Recover current MTH602 owners and compatibility state from the root route.",
+    "Map missing shared adapter roles without duplicating shared policy.",
+    "Adopt the promoted checkpoint explicitly if validation supports it.",
+    "Run cold-start/source-ingestion/tutoring/LaTeX artifact regressions.",
+    "Checkpoint and verify the migrated project state."
+  ],
+  "next_safe_action": "Start only from MTH602-AdamTrott README.md at 62b7a03c7139cb3987b72ad66bdc532e8a61b82a on branch main, then follow its documented routes. Read workspace-control course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 only through the exact binding in this capsule. Recover existing source/tutoring/homework/report owners and any current compatibility mechanism before proposing mutations. If the target branch no longer advertises 62b7a03c7139cb3987b72ad66bdc532e8a61b82a, update this capsule deliberately before mutating. Do not execute unrelated homework/course-content work as part of the migration.",
+  "notes": []
+}

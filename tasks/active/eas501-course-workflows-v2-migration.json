@@ -1,0 +1,183 @@
+{
+  "schema_version": 2,
+  "task_id": "eas501-course-workflows-v2-migration",
+  "title": "EAS501 Course Workflows v2 Migration",
+  "status": "PLANNED",
+  "goal": "Explicitly migrate EAS501 from its current pinned workspace-control compatibility contract to the promoted reusable course-workflow architecture while preserving current assessment/course state and project-local authority.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/course-bootstrap-migration.v1.json",
+    "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+    "content_sha": "da6076a9b4baf328d6a91526f6dff7aa999733b6"
+  },
+  "parent_execution_owner": "course-workflows-v2-refactor",
+  "current_stage": "baseline_recovery",
+  "acceptance_criteria": [
+    "A fresh executor starts only from the target repository root README at the pinned checkpoint plus this capsule and the exact promoted shared workflow binding.",
+    "Project-local course/source/assignment/mastery/artifact authority remains in the target repository; workspace-control contributes reusable mechanics only.",
+    "Any shared-contract adoption is explicit and pins an exact compatible workspace-control checkpoint; no moving-main dependency is introduced.",
+    "Existing active project work is not silently migrated merely because the shared architecture is newer.",
+    "Legacy conversational builder/tutor dependencies are removed only if the target actually has them and durable repository owners replace them.",
+    "Cold-start routing, tutoring/mastery semantics, mutation boundaries, and relevant artifact/source-ingestion regressions pass before completion.",
+    "The final project checkpoint is pushed/verified and recoverable without prior conversation.",
+    "The existing workspace-control.lock.json compatibility pin is changed only through an explicit validated transition.",
+    "Assessment preparation keeps factual authority separate from contextual assessment relevance and does not impose a fixed prior-exam ranking.",
+    "Current Exam/course material and durable mastery state remain authoritative and are not rewritten by the architecture migration."
+  ],
+  "constraints": [
+    "Do not mutate workspace-control shared architecture from this child; its workflow binding is read-only.",
+    "Do not rewrite authoritative instructor/course content merely to fit the new shared architecture.",
+    "Do not alter unrelated branches, assignments, research repositories, archived capsules, or external submission state.",
+    "Do not silently rebase/reset/overwrite if the target branch moved after the pinned starting checkpoint; refresh durable task state first.",
+    "Follow the operator continuation obligation and use runtime only when project-specific validation actually requires it.",
+    "Do not treat the child migration as authorization to alter the content of an in-progress assessment-preparation task."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "read",
+      "base_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "EAS501-AdamTrott",
+      "intent": "mutate",
+      "base_sha": "52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5",
+      "remote": {
+        "branch": "eas501-tutor-bootstrap",
+        "checkpoint_sha": "52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "README.md",
+        "COURSE_TUTOR.md",
+        "COURSE.md",
+        "workspace-control.lock.json",
+        "course/**",
+        "sources/**",
+        "study/**",
+        "homework/**",
+        "practice/**",
+        "experiments/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "baseline_recovery",
+      "status": "PLANNED",
+      "execution_owner": "eas501-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5",
+        "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9:course-bootstrap-migration-v1"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "local_owner_mapping",
+      "status": "PLANNED",
+      "execution_owner": "eas501-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "baseline_recovery"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "shared_checkpoint_integration",
+      "status": "PLANNED",
+      "execution_owner": "eas501-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "local_owner_mapping"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "regression_validation",
+      "status": "PLANNED",
+      "execution_owner": "eas501-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "shared_checkpoint_integration"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "completion",
+      "status": "PLANNED",
+      "execution_owner": "eas501-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "regression_validation"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "promoted-shared-workflow",
+      "kind": "git_commit",
+      "identity": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "required_for_resume": true,
+      "evidence": [
+        "workflow workflows/course-bootstrap-migration.v1.json blob da6076a9b4baf328d6a91526f6dff7aa999733b6"
+      ]
+    },
+    {
+      "id": "target-starting-checkpoint",
+      "kind": "git_commit",
+      "identity": "52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5",
+      "required_for_resume": true,
+      "evidence": [
+        "EAS501-AdamTrott eas501-tutor-bootstrap verified at child creation"
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Child capsule creation baseline",
+      "result": "PASS",
+      "evidence": [
+        "Promoted shared workflow identity pinned at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9/workflows/course-bootstrap-migration.v1.json/da6076a9b4baf328d6a91526f6dff7aa999733b6.",
+        "Target repository branch eas501-tutor-bootstrap verified at exact starting checkpoint 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5.",
+        "No child-repository mutation was performed by the parent task."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Recover EAS501 root routes and current workspace-control lock semantics.",
+    "Map current tutor/assessment/source/mastery owners to the promoted adapter roles.",
+    "Perform an explicit compatible_commit transition only after validation.",
+    "Run cold-start/tutoring/assessment-relevance regressions.",
+    "Checkpoint and verify the migrated project state."
+  ],
+  "next_safe_action": "Start only from EAS501-AdamTrott README.md at 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5 on branch eas501-tutor-bootstrap. Read its workspace-control.lock.json and resolve the currently pinned shared contracts before touching any file. Compare those local semantics to the promoted course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; preserve current assessment/mastery content. If the branch moved from 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5, update this capsule first rather than silently rebasing.",
+  "notes": []
+}

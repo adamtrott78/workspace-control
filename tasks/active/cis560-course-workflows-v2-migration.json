@@ -1,0 +1,180 @@
+{
+  "schema_version": 2,
+  "task_id": "cis560-course-workflows-v2-migration",
+  "title": "CIS560 Course Workflows v2 Migration",
+  "status": "PLANNED",
+  "goal": "Explicitly migrate the CIS560 tutor-framework integration to the promoted reusable course-workflow architecture while preserving course authority, durable tutoring state, and the proven communications-ingestion/idempotent parent-return behavior.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/course-bootstrap-migration.v1.json",
+    "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+    "content_sha": "da6076a9b4baf328d6a91526f6dff7aa999733b6"
+  },
+  "parent_execution_owner": "course-workflows-v2-refactor",
+  "current_stage": "baseline_recovery",
+  "acceptance_criteria": [
+    "A fresh executor starts only from the target repository root README at the pinned checkpoint plus this capsule and the exact promoted shared workflow binding.",
+    "Project-local course/source/assignment/mastery/artifact authority remains in the target repository; workspace-control contributes reusable mechanics only.",
+    "Any shared-contract adoption is explicit and pins an exact compatible workspace-control checkpoint; no moving-main dependency is introduced.",
+    "Existing active project work is not silently migrated merely because the shared architecture is newer.",
+    "Legacy conversational builder/tutor dependencies are removed only if the target actually has them and durable repository owners replace them.",
+    "Cold-start routing, tutoring/mastery semantics, mutation boundaries, and relevant artifact/source-ingestion regressions pass before completion.",
+    "The final project checkpoint is pushed/verified and recoverable without prior conversation.",
+    "Forwarded-Gmail communications ingestion remains repository-first and idempotent by exact source identity, with no invented direct Outlook dependency.",
+    "Experiment evidence remains historical evidence; migration does not rewrite successful experiment records merely to fit new terminology."
+  ],
+  "constraints": [
+    "Do not mutate workspace-control shared architecture from this child; its workflow binding is read-only.",
+    "Do not rewrite authoritative instructor/course content merely to fit the new shared architecture.",
+    "Do not alter unrelated branches, assignments, research repositories, archived capsules, or external submission state.",
+    "Do not silently rebase/reset/overwrite if the target branch moved after the pinned starting checkpoint; refresh durable task state first.",
+    "Follow the operator continuation obligation and use runtime only when project-specific validation actually requires it."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "read",
+      "base_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "CIS560-AdamTrott",
+      "intent": "mutate",
+      "base_sha": "1af3ce7022d079b89f0fbca32f313a6853db1c60",
+      "remote": {
+        "branch": "tutor-framework",
+        "checkpoint_sha": "1af3ce7022d079b89f0fbca32f313a6853db1c60",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "README.md",
+        "COURSE_TUTOR.md",
+        "COURSE.md",
+        "workspace-control.lock.json",
+        "sources/**",
+        "course/**",
+        "study/**",
+        "homework/**",
+        "experiments/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "baseline_recovery",
+      "status": "PLANNED",
+      "execution_owner": "cis560-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "1af3ce7022d079b89f0fbca32f313a6853db1c60",
+        "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9:course-bootstrap-migration-v1"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "local_owner_mapping",
+      "status": "PLANNED",
+      "execution_owner": "cis560-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "baseline_recovery"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "shared_checkpoint_integration",
+      "status": "PLANNED",
+      "execution_owner": "cis560-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "local_owner_mapping"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "regression_validation",
+      "status": "PLANNED",
+      "execution_owner": "cis560-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "shared_checkpoint_integration"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "completion",
+      "status": "PLANNED",
+      "execution_owner": "cis560-migration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "regression_validation"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "promoted-shared-workflow",
+      "kind": "git_commit",
+      "identity": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "required_for_resume": true,
+      "evidence": [
+        "workflow workflows/course-bootstrap-migration.v1.json blob da6076a9b4baf328d6a91526f6dff7aa999733b6"
+      ]
+    },
+    {
+      "id": "target-starting-checkpoint",
+      "kind": "git_commit",
+      "identity": "1af3ce7022d079b89f0fbca32f313a6853db1c60",
+      "required_for_resume": true,
+      "evidence": [
+        "CIS560-AdamTrott tutor-framework verified at child creation"
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Child capsule creation baseline",
+      "result": "PASS",
+      "evidence": [
+        "Promoted shared workflow identity pinned at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9/workflows/course-bootstrap-migration.v1.json/da6076a9b4baf328d6a91526f6dff7aa999733b6.",
+        "Target repository branch tutor-framework verified at exact starting checkpoint 1af3ce7022d079b89f0fbca32f313a6853db1c60.",
+        "No child-repository mutation was performed by the parent task."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Recover CIS560 root/tutor/source/experiment owners.",
+    "Map the promoted course adapter and communications-ingestion semantics.",
+    "Adopt the promoted shared checkpoint explicitly if validated.",
+    "Run cold-start/tutoring/communications-idempotency regressions.",
+    "Checkpoint and verify the migrated project state."
+  ],
+  "next_safe_action": "Start only from CIS560-AdamTrott README.md at 1af3ce7022d079b89f0fbca32f313a6853db1c60 on branch tutor-framework. Follow the repository's own durable routes; use experiments B/C only as evidence, not as new task state. Resolve the exact existing shared compatibility mechanism before mutation. If the branch moved from 1af3ce7022d079b89f0fbca32f313a6853db1c60, refresh this capsule first. Preserve course facts and do not reread external mail unless a migration regression genuinely requires it.",
+  "notes": []
+}
