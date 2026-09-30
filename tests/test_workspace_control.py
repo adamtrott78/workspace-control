@@ -755,6 +755,38 @@ class WorktreePrepareTests(unittest.TestCase):
             "",
         )
 
+    def test_explicit_create_may_create_missing_local_branch_at_exact_sha(self):
+        self.git(
+            self.source,
+            "branch",
+            "-D",
+            "phase7-task",
+        )
+
+        payload, code = self.assess(create=True)
+
+        self.assertEqual(code, workspace_control.EXIT_READY)
+        self.assertEqual(payload["result"], "READY")
+        self.assertEqual(
+            payload["creation"]["created_branch"],
+            "phase7-task",
+        )
+        self.assertEqual(
+            self.git(self.target, "rev-parse", "HEAD"),
+            self.expected,
+        )
+
+    def test_occupied_non_repository_target_is_blocked_identity(self):
+        self.target.mkdir()
+        marker = self.target / "preserve.txt"
+        marker.write_text("unrelated\n")
+
+        payload, code = self.assess(create=True)
+
+        self.assertEqual(code, workspace_control.EXIT_STATE)
+        self.assertEqual(payload["result"], "BLOCKED_IDENTITY")
+        self.assertTrue(marker.exists())
+
     def test_dirty_source_blocks_creation_without_normalization(self):
         dirty = self.source / "unrelated.txt"
         dirty.write_text("preserve me\n")
