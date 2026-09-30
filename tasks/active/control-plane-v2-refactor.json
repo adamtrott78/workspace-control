@@ -2,12 +2,12 @@
   "schema_version": 2,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace control-plane v2 refactor",
-  "status": "CHECKPOINTED",
+  "status": "COMPLETE",
   "goal": "Promote the fully validated executor-neutral workspace-control v2 implementation without migrating project-owned operator architecture.",
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control-v2-implementation-plan",
-  "current_stage": "promotion",
+  "current_stage": null,
   "acceptance_criteria": [
     "All required regression evidence is recorded.",
     "The frozen integration diff is reviewed and v1 compatibility is preserved.",
@@ -28,7 +28,7 @@
       "intent": "read",
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
       "remote": {
-        "branch": "control-plane-v2-refactor",
+        "branch": "main",
         "checkpoint_sha": "b8aa52e242a07e6aa2036516e401864991183ad2",
         "verified": true
       },
@@ -161,15 +161,27 @@
     },
     {
       "id": "promotion",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "promotion_decision"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "git:b8aa52e242a07e6aa2036516e401864991183ad2",
+        "branch:main"
+      ],
+      "validation": [
+        {
+          "check": "non-forced fast-forward promotion",
+          "result": "PASS",
+          "evidence": [
+            "main was moved non-forcibly from cb8368cd50de2d364c2aade8843276aab0b02420 to b8aa52e242a07e6aa2036516e401864991183ad2.",
+            "Post-promotion compare main...control-plane-v2-refactor is identical: ahead_by=0, behind_by=0, files=0."
+          ]
+        }
+      ],
       "resume_condition": null
     }
   ],
@@ -263,16 +275,22 @@
       "evidence": [
         "User explicitly authorized PROMOTE in chat."
       ]
+    },
+    {
+      "check": "Phase 11 promotion verification",
+      "result": "PASS",
+      "evidence": [
+        "GitHub non-forced ref update succeeded for main -> b8aa52e242a07e6aa2036516e401864991183ad2.",
+        "Post-promotion main HEAD and control-plane-v2-refactor HEAD both equal b8aa52e242a07e6aa2036516e401864991183ad2.",
+        "Post-promotion compare reports status=identical, ahead_by=0, behind_by=0, total_commits=0, files=0.",
+        "control-plane-v2-coordination remained separate; no force update was used."
+      ]
     }
   ],
   "blockers": [],
-  "remaining_work": [
-    "Fast-forward main non-forcibly from cb8368cd50de2d364c2aade8843276aab0b02420 to the exact validated target b8aa52e242a07e6aa2036516e401864991183ad2.",
-    "Verify main, target, and integration identity after promotion.",
-    "Finalize the v2 task capsule as COMPLETE/HANDOFF_SAFE and archive the completed handoff."
-  ],
-  "next_safe_action": "Promotion is explicitly authorized. Fast-forward main non-forcibly to b8aa52e242a07e6aa2036516e401864991183ad2, verify exact post-promotion Git state, then finalize and archive the v2 task capsule.",
+  "remaining_work": [],
+  "next_safe_action": "No action required. Workspace-control v2 is promoted on main at b8aa52e242a07e6aa2036516e401864991183ad2. Future project adoption/migration should occur only through explicit separate tasks.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Complete pre-v2 coordination history is preserved at tasks/evidence/control-plane-v2-refactor-v1-final.json."
+  "notes": "Workspace-control v2 promoted to main. Complete pre-v2 coordination history remains preserved at tasks/evidence/control-plane-v2-refactor-v1-final.json. Generated task Markdown is a derived convenience view only; repository policies, procedures, README/CONTEXT documents, and project-owned specifications remain authoritative according to their own documented precedence."
 }
