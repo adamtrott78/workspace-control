@@ -12,7 +12,7 @@
     "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
   },
   "parent_execution_owner": "research-operating-system",
-  "current_stage": "evidence_contract",
+  "current_stage": "ingress_prototype",
   "acceptance_criteria": [
     "The architecture explicitly separates source evidence, extracted evidence, normalized knowledge, synthesis, model inference, and human judgment.",
     "Every durable scientific evidence object can be traced to a canonical work/version, immutable source artifact identity, and source locator whenever the available representation permits it.",
@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "b1734cea1498d2206902c115e4224fffc824aa09",
+        "checkpoint_sha": "e531b0641868589b1852fe062b60ea495d1b27d9",
         "verified": true
       },
       "local": null,
@@ -85,20 +85,33 @@
     },
     {
       "id": "evidence_contract",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "architecture_foundation"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "git:e531b0641868589b1852fe062b60ea495d1b27d9",
+        "artifact:architecture/research-engine/evidence-contract-v1.md"
+      ],
+      "validation": [
+        {
+          "check": "storage-agnostic evidence and provenance contract",
+          "result": "PASS",
+          "evidence": [
+            "Defined canonical Work, WorkVersion, SourceArtifact, SourceLocator, DiscoveryRun, CorpusDecision, typed scientific evidence, Inference, EvidenceRelation, VerificationEvent, and SynthesisArtifact records.",
+            "Defined explicit evidence-to-source traceability, numerical integrity, missing-evidence semantics, contradiction handling, correction/retraction propagation, and novelty-challenge representation.",
+            "No database, vector store, parser, or LLM implementation was selected as part of the contract."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "ingress_prototype",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "composed",
@@ -206,6 +219,15 @@
       "evidence": [
         "Research-engine task is governed by the promoted workspace-control v2 operator contract."
       ]
+    },
+    {
+      "id": "research-engine-evidence-contract",
+      "kind": "git_commit",
+      "identity": "e531b0641868589b1852fe062b60ea495d1b27d9",
+      "required_for_resume": true,
+      "evidence": [
+        "architecture/research-engine/evidence-contract-v1.md committed and linked from the parent architecture."
+      ]
     }
   ],
   "artifacts": [
@@ -219,6 +241,18 @@
       "review_requirement": "Major architectural boundary changes require explicit review before implementation.",
       "evidence": [
         "Initial architecture committed and remote checkpoint verified."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/evidence-contract-v1.md",
+      "state": "durable",
+      "role": "evidence-provenance-contract",
+      "origin": "automated-research-engine-v1@e531b0641868589b1852fe062b60ea495d1b27d9",
+      "persistence": "git-tracked",
+      "regeneration": "contract evolves only through explicit research-engine task changes",
+      "review_requirement": "Changes that weaken provenance, source/inference separation, or novelty-challenge semantics require explicit review.",
+      "evidence": [
+        "Evidence contract v1 committed and parent architecture links to it."
       ]
     }
   ],
@@ -243,8 +277,11 @@
     },
     {
       "check": "evidence contract",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "Storage-agnostic evidence/provenance contract defined at architecture/research-engine/evidence-contract-v1.md.",
+        "Validated design checkpoint e531b0641868589b1852fe062b60ea495d1b27d9."
+      ]
     },
     {
       "check": "vertical-slice provenance benchmark",
@@ -264,17 +301,16 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Define the canonical evidence/provenance contract before selecting persistence technology.",
-    "Define the reproducible corpus/search-run record and canonical work/version identity model.",
-    "Prototype multi-provider discovery and lawful full-text acquisition adapters.",
+    "Prototype multi-provider literature discovery with reproducible DiscoveryRun records and canonical work/version identity.",
+    "Prototype lawful full-text resolution/acquisition with explicit access-state and artifact hashing.",
     "Build normalized parsing and typed evidence extraction with source locators and verification state.",
-    "Choose persistence/indexing architecture only after the evidence contract is stable enough to evaluate storage requirements.",
+    "Choose persistence/indexing architecture only after real ingress/extraction objects demonstrate storage/query requirements.",
     "Build provenance-preserving synthesis, contradiction handling, gap generation, and adversarial novelty challenge.",
     "Build the research-program/funding/proposal layer and explicit human gates.",
     "Bridge an approved research program into a workspace-control project execution workflow.",
     "Run the narrow-domain vertical slice and measure evidence fidelity, traceability, novelty false-positive rate, and execution handoff quality."
   ],
-  "next_safe_action": "Continue on automated-research-engine-v1 by defining the evidence contract in architecture/automated-research-engine-v1.md: specify canonical Work, SourceArtifact, SourceLocator, EvidenceObject, Claim, Method, Experiment, Dataset/Population, Metric, Result, Limitation, Inference, and EvidenceRelation records plus their required provenance and verification fields. Do not choose a database yet.",
+  "next_safe_action": "Begin the ingress prototype on automated-research-engine-v1 by defining a reproducible DiscoveryRun/corpus manifest and testing provider adapters on a narrow pilot query in open-set/open-world RF sensing. Use OpenAlex-class discovery first, resolve identifiers/versions, then attempt lawful full-text resolution while recording access state. Do not build the database yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
