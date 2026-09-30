@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "workflow_id": "course-communications-ingestion-v1",
+  "title": "Course Communications Ingestion",
+  "purpose": "Ingest course communications through authorized read adapters into durable project state with idempotent source identity and parent return.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "procedures/course_communications_ingestion.md"
+  },
+  "entry_route": [
+    "procedures/course_communications_ingestion.md",
+    "policies/OPERATOR_WORKFLOW.md",
+    "policies/PORTABILITY_CONTRACT.md"
+  ],
+  "stages": [
+    {
+      "id": "repository-first-lookup",
+      "execution_owner": "course-communications-ingestion",
+      "authority_owners": [
+        "procedures/course_communications_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Exact source identity is checked in durable state before external reread."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "retrieve-source-if-needed",
+      "execution_owner": "course-communications-ingestion",
+      "authority_owners": [
+        "procedures/course_communications_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "repository-first-lookup"
+      ],
+      "required_capabilities": [
+        "message-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Authorized source is read only when durable state is insufficient."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "normalize-domain-facts",
+      "execution_owner": "course-communications-ingestion",
+      "authority_owners": [
+        "procedures/course_communications_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "retrieve-source-if-needed"
+      ],
+      "required_capabilities": [
+        "reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Only domain-relevant facts and minimal provenance are selected."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "persist-project-state",
+      "execution_owner": "course-communications-ingestion",
+      "authority_owners": [
+        "procedures/course_communications_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "normalize-domain-facts"
+      ],
+      "required_capabilities": [
+        "repository-write"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Normalized facts are written through the project owner with bounded scope."
+      ],
+      "gates": [
+        "project-mutation-authority"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "verify-checkpoint",
+      "execution_owner": "course-communications-ingestion",
+      "authority_owners": [
+        "procedures/course_communications_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "persist-project-state"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Durable checkpoint and normalized record are verified."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "return-to-parent",
+      "execution_owner": "course-communications-ingestion",
+      "authority_owners": [
+        "procedures/course_communications_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "verify-checkpoint"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Parent task resumes from durable project state rather than mailbox memory."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": "source-identity"
+}

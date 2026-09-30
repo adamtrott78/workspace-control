@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "workflow_id": "document-artifact-build-v1",
+  "title": "Document Artifact Build and QA",
+  "purpose": "Build and validate a project-owned document through deterministic production, structural checks, rendered QA, bounded revision, and delivery gates.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "procedures/document_artifact_build.md"
+  },
+  "entry_route": [
+    "procedures/document_artifact_build.md",
+    "policies/OPERATOR_WORKFLOW.md",
+    "policies/PORTABILITY_CONTRACT.md"
+  ],
+  "stages": [
+    {
+      "id": "load-domain-contract",
+      "execution_owner": "document-artifact-build",
+      "authority_owners": [
+        "procedures/document_artifact_build.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Project content, production, validation, and delivery requirements are loaded."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "prepare-source",
+      "execution_owner": "document-artifact-build",
+      "authority_owners": [
+        "procedures/document_artifact_build.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "load-domain-contract"
+      ],
+      "required_capabilities": [
+        "repository-write"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Source is prepared without layout pressure changing authoritative facts."
+      ],
+      "gates": [
+        "project-mutation-authority"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "build",
+      "execution_owner": "document-artifact-build",
+      "authority_owners": [
+        "procedures/document_artifact_build.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "prepare-source"
+      ],
+      "required_capabilities": [
+        "artifact-build"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Deterministic build produces the expected artifact candidate."
+      ],
+      "gates": [
+        "runtime-if-required"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "structural-validation",
+      "execution_owner": "document-artifact-build",
+      "authority_owners": [
+        "procedures/document_artifact_build.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "build"
+      ],
+      "required_capabilities": [
+        "artifact-inspection"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Required static, structural, freshness, format, and privacy checks pass."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "render",
+      "execution_owner": "document-artifact-build",
+      "authority_owners": [
+        "procedures/document_artifact_build.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "structural-validation"
+      ],
+      "required_capabilities": [
+        "artifact-render"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Final artifact is rendered into a representation suitable for visual inspection."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "visual-qa",
+      "execution_owner": "document-artifact-build",
+      "authority_owners": [
+        "procedures/document_artifact_build.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "render"
+      ],
+      "required_capabilities": [
+        "artifact-visual-inspection"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Layout/legibility criteria pass; automation suffices unless owner requires human judgment."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "bounded-revision",
+      "execution_owner": "document-artifact-build",
+      "authority_owners": [
+        "procedures/document_artifact_build.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "visual-qa"
+      ],
+      "required_capabilities": [
+        "repository-write",
+        "artifact-build"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Revision changes the correct owning layer and is rebuilt/revalidated."
+      ],
+      "gates": [
+        "project-mutation-authority"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "delivery-gate",
+      "execution_owner": "document-artifact-build",
+      "authority_owners": [
+        "procedures/document_artifact_build.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "bounded-revision"
+      ],
+      "required_capabilities": [
+        "artifact-inspection"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Final artifact identity and validation evidence precede external delivery."
+      ],
+      "gates": [
+        "external-delivery-approval-when-required"
+      ],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": null
+}

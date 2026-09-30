@@ -67,22 +67,55 @@ When the task changes ownership mid-conversation, reroute before acting.
 Fill in paths for this course:
 
 - course/instructor authority:
+- source-evidence owner:
+- source-ingestion / semantic-synthesis context:
 - assignment ingestion context:
 - tutoring protocol adapter:
 - current mastery snapshot:
 - chronological mastery log:
 - skill/dependency map:
+- assessment scope / assessment-relevance owner:
 - notation owner:
 - course/topic index:
 - homework/assignment index:
 - per-assignment learning record:
-- report owner:
+- communications-ingestion owner:
+- report/document-artifact owner:
 - code owner:
 - result/provenance owner:
 - local operator supplement:
 
 If a role does not yet exist, create it deliberately rather than silently using
 chat memory as the owner.
+
+## Source-ingestion mapping
+
+Map this course to
+`workspace-control/procedures/course_content_ingestion.md`.
+
+Define original evidence retention, durable source identity/provenance, when
+direct multimodal interpretation is appropriate, when OCR/Mathpix is useful,
+where reviewed synthesis lives, and which project owner authorizes promotion.
+
+Do not make OCR mandatory for handwriting or classroom photographs merely
+because a PDF workflow uses it.
+
+## Assessment-preparation mapping
+
+Keep separate course/source authority, current assessment scope, contextual
+assessment-relevance evidence, and mastery/skill dependencies.
+
+Do not encode a fixed cross-course ranking among old exams, practice sets,
+lecture examples, review sheets, or homework.
+
+## Communications-ingestion mapping
+
+When communications are ingested, define allowed read sources, durable source
+identity, normalized course-fact destination, minimal provenance, repository-first
+idempotency lookup, and the parent return route.
+
+A forwarded Gmail copy MAY be used when the original school-mail surface is
+unavailable. Read/ingest authority does not authorize sending.
 
 ## Default tutoring mode
 
@@ -196,20 +229,28 @@ For coding assignments, define the minimum durable evidence:
 
 The exact requirements remain course/assignment-specific.
 
-## Report validation contract
+## Document-artifact validation contract
+
+Map production to
+`workspace-control/procedures/document_artifact_build.md`.
 
 Define:
 
+- domain/content owner:
 - source path:
-- build command:
+- deterministic build command:
 - expected final artifact:
 - freshness check:
 - log/static checks:
-- visual review requirements:
+- render command / rendered review artifact:
+- automated visual-QA requirements:
+- any explicit human-judgment gate and why it is authoritative:
+- delivery/submission gate:
 - submission packaging:
 - whether final PDF/source is tracked:
 
-Compilation success alone is not artifact validation.
+Compilation success alone is not artifact validation. Visual QA does not become
+a human gate unless the owning workflow explicitly requires human judgment.
 
 ## Cold-start read route
 

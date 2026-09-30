@@ -120,6 +120,25 @@ For new course-tutor projects:
 - keep the shared contracts in this repository rather than copying them into each
   course repository.
 
+## Reusable course and document workflows
+
+Reusable executor-neutral course/document mechanics live in `workflows/` and
+route to shared owners under `procedures/`.
+
+The initial set covers course bootstrap/migration, content ingestion, assessment
+preparation, study sessions, assignment work, cheat-sheet build, communications
+ingestion, and generic document-artifact build/QA.
+
+These descriptors use workflow-descriptor v1 and are bound by exact Git identity
+when a concrete v2 task depends on them. A v2 task still binds **at most one**
+workflow descriptor; composition happens inside that descriptor through stages
+and procedure routing.
+
+workspace-control owns reusable mechanics only. Course/application repositories
+retain facts, source authority, mastery state, artifact content, deterministic
+project commands, and submission semantics. Existing active tasks and project
+compatibility locks do not migrate automatically.
+
 ## Repository registry
 
 `repos.json` records stable repository identity, ownership, and mutation policy.

@@ -24,6 +24,28 @@
       "worktree_policy": "inspect_before_mutation",
       "recursive_mutation_forbidden": false
     },
+    "CIS560-AdamTrott": {
+      "path": "classes/CIS560-AdamTrott",
+      "remote": "git@github.com:adamtrott78/CIS560-AdamTrott.git",
+      "role": "managed",
+      "writable": true,
+      "canonical_branch": "main",
+      "context_entry": "README.md",
+      "authority": "student CIS 560 coursework, tutoring state, and course-facing artifacts",
+      "worktree_policy": "inspect_before_mutation",
+      "recursive_mutation_forbidden": false
+    },
+    "EAS501-AdamTrott": {
+      "path": "classes/EAS501-AdamTrott",
+      "remote": "git@github.com:adamtrott78/EAS501-AdamTrott.git",
+      "role": "managed",
+      "writable": true,
+      "canonical_branch": "main",
+      "context_entry": "README.md",
+      "authority": "student EAS 501 coursework, tutoring state, and course-facing artifacts",
+      "worktree_policy": "inspect_before_mutation",
+      "recursive_mutation_forbidden": false
+    },
     "MTH602-Fall2026-SciML": {
       "path": "classes/MTH602-Fall2026-SciML",
       "remote": "git@github.com:sfield17/MTH602-Fall2026-SciML.git",

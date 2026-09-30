@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "workflow_id": "course-content-ingestion-v1",
+  "title": "Course Content Ingestion",
+  "purpose": "Preserve source evidence and create provenance-aware semantic representations with modality-appropriate interpretation.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "procedures/course_content_ingestion.md"
+  },
+  "entry_route": [
+    "procedures/course_content_ingestion.md",
+    "policies/OPERATOR_WORKFLOW.md",
+    "policies/PORTABILITY_CONTRACT.md"
+  ],
+  "stages": [
+    {
+      "id": "resolve-source",
+      "execution_owner": "course-content-ingestion",
+      "authority_owners": [
+        "procedures/course_content_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read",
+        "source-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Exact source identity, source kind, project owner, and existing representation are resolved."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "preserve-original",
+      "execution_owner": "course-content-ingestion",
+      "authority_owners": [
+        "procedures/course_content_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "resolve-source"
+      ],
+      "required_capabilities": [
+        "source-read",
+        "repository-write"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Original evidence is preserved as required before derivatives are relied upon."
+      ],
+      "gates": [
+        "project-mutation-authority"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "interpret-modality",
+      "execution_owner": "course-content-ingestion",
+      "authority_owners": [
+        "procedures/course_content_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "preserve-original"
+      ],
+      "required_capabilities": [
+        "source-interpretation"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Interpretation is modality-appropriate and OCR is optional rather than universal."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "synthesize",
+      "execution_owner": "course-content-ingestion",
+      "authority_owners": [
+        "procedures/course_content_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "interpret-modality"
+      ],
+      "required_capabilities": [
+        "reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Synthesis distinguishes source support, interpretation/recollection, and uncertainty."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "validate-provenance",
+      "execution_owner": "course-content-ingestion",
+      "authority_owners": [
+        "procedures/course_content_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "synthesize"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Required source identity/provenance is complete and discrepancies stay explicit."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "promote-project-state",
+      "execution_owner": "course-content-ingestion",
+      "authority_owners": [
+        "procedures/course_content_ingestion.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md"
+      ],
+      "depends_on": [
+        "validate-provenance"
+      ],
+      "required_capabilities": [
+        "repository-write"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Promotion uses only the project-owned destination and does not imply mastery."
+      ],
+      "gates": [
+        "project-mutation-authority"
+      ],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": "source-identity"
+}

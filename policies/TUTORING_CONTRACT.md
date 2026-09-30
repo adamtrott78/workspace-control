@@ -511,6 +511,71 @@ current instructor assignment/instruction
 When sources disagree, record the discrepancy rather than silently rewriting one
 to match another.
 
+## Source evidence and modality-aware ingestion
+
+Course-source ingestion must preserve the distinction between original evidence
+and derived semantic representations.
+
+A reusable ingestion path is:
+
+```text
+original source evidence
+→ modality-appropriate interpretation/transcription
+→ reviewed semantic synthesis
+→ deliberate promotion into project-owned course/study state
+```
+
+The owning course repository defines source authority, provenance fields,
+promotion targets, and any required conversion tooling.
+
+For classroom photographs, whiteboards, handwritten notes, and similar visual
+material:
+
+- original images remain source evidence;
+- direct multimodal interpretation MAY be preferred when images are readable and
+  OCR would add little value or reduce accuracy;
+- OCR/Mathpix MAY be used when it materially improves transcription or retrieval,
+  but it is not a universal prerequisite;
+- derived synthesis MUST preserve source kind, provenance, ordering when
+  relevant, and explicit uncertainty;
+- reconstructed explanation or student recollection MUST NOT be represented as
+  verbatim instructor transcription.
+
+For PDFs, messages, structured files, or other modalities, use the source adapter
+and conversion path appropriate to that modality while preserving original
+evidence whenever the owning project requires it.
+
+Shared mechanics are defined by
+`procedures/course_content_ingestion.md`. Project repositories remain
+authoritative for source meaning and promotion.
+
+## Assessment authority and assessment relevance
+
+Course/source authority and relevance to a particular assessment are separate
+axes.
+
+Authority determines what the instructor assigned or stated, which source/version
+controls notation or requirements, and whether a derivative is faithful.
+
+Assessment relevance asks which authoritative evidence is most useful for the
+current assessment and durable learning state.
+
+Evaluate relevance contextually using evidence such as:
+
+- explicit current instructor assessment guidance;
+- demonstrated correspondence to the announced problem form;
+- current-instructor specificity;
+- recency;
+- source role;
+- coverage gaps;
+- prerequisite and mastery dependencies.
+
+Do not encode a universal ranking such as
+`prior exam > practice set > lecture example`.
+
+Shared assessment mechanics are defined by
+`procedures/course_assessment_preparation.md`.
+
 ## Reports and LaTeX
 
 A report should be a polished solution artifact, not a tutoring transcript.
@@ -528,14 +593,21 @@ Report construction should preserve:
 
 Compilation success alone is not enough.
 
-Use the owning project/report context plus the shared operator workflow for:
+Use the owning project/report context plus
+`procedures/document_artifact_build.md` and the shared operator workflow for:
 
-- fresh build;
+- fresh deterministic build;
 - log/static checks;
 - page rendering;
-- visual QA;
+- structural/artifact checks;
+- rendered visual QA;
+- bounded revision;
 - completion bookkeeping;
-- commit/push.
+- commit/push;
+- delivery/submission gates when applicable.
+
+The project owns document content, formatting requirements, and submission
+semantics. workspace-control owns only reusable artifact mechanics.
 
 ## Coding assignments
 
@@ -605,20 +677,22 @@ It MUST follow `policies/OPERATOR_WORKFLOW.md`.
 The efficiency benefit of direct execution is desirable when evidence and scope
 remain clear.
 
-## Human review
+## Visual QA and human review
 
-The tutor should request human review where human judgment materially matters.
+Rendered visual QA is an artifact-validation operation, not automatically a
+human gate.
 
-Typical examples:
+When an authorized executor can inspect the rendered artifact sufficiently,
+automated visual QA MAY satisfy validation. A human gate is required only when
+the owning course/artifact workflow explicitly makes substantive human judgment
+or approval authoritative.
 
-- final rendered report;
-- images/figures;
-- submission packaging;
-- ambiguous instructor expectations;
-- a strategic choice among uncertain alternatives.
+Examples include unresolved ambiguous instructor expectations, project-defined
+final sign-off, subjective strategic choices, or an external action requiring
+user approval.
 
-Do not add unnecessary manual gates merely because older workflows were
-human-terminal-driven.
+Do not require a human merely because the artifact is a PDF, figure, slide, or
+resume. External delivery/submission remains distinct from visual QA.
 
 ## Cold-start requirement
 
@@ -665,16 +739,20 @@ At minimum, define:
 - root routing entry point;
 - course/instructor authority;
 - assignment ingestion route;
+- source-evidence and semantic-synthesis owners;
 - tutoring protocol entry;
 - mastery snapshot/log paths;
 - skill/dependency path;
+- assessment-scope/relevance owner when applicable;
 - per-assignment learning path;
-- report/code owners;
+- communications-ingestion owner when applicable;
+- report/code/document-artifact owners;
 - notation owner;
 - local runtime/environment;
 - allowed automatic mutation scope;
 - default tutoring mode;
-- artifact validation rules.
+- artifact validation rules, including whether any visual/human gate is truly
+  required.
 
 The local adapter should point to this shared contract rather than copy it
 verbatim.

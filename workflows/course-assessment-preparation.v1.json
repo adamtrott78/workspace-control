@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "workflow_id": "course-assessment-preparation-v1",
+  "title": "Course Assessment Preparation",
+  "purpose": "Prioritize and execute assessment preparation from project-owned scope, contextual relevance evidence, dependencies, and mastery.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "procedures/course_assessment_preparation.md"
+  },
+  "entry_route": [
+    "procedures/course_assessment_preparation.md",
+    "policies/TUTORING_CONTRACT.md",
+    "procedures/course_study_session.md",
+    "procedures/document_artifact_build.md",
+    "policies/OPERATOR_WORKFLOW.md"
+  ],
+  "stages": [
+    {
+      "id": "recover-assessment-scope",
+      "execution_owner": "course-assessment-preparation",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Current assessment scope and uncertainty are recovered."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "collect-relevance-evidence",
+      "execution_owner": "course-assessment-preparation",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "recover-assessment-scope"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Relevance remains contextual and separate from authority; no universal source ranking is applied."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "map-skill-state",
+      "execution_owner": "course-assessment-preparation",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "collect-relevance-evidence"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Scope maps to dependencies, mastery, traps, and stale evidence."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "prioritize-preparation",
+      "execution_owner": "course-assessment-preparation",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "map-skill-state"
+      ],
+      "required_capabilities": [
+        "reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Priority follows relevance, coverage gaps, blocking dependencies, and durable evidence."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "execute-preparation",
+      "execution_owner": "course-assessment-preparation",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "prioritize-preparation"
+      ],
+      "required_capabilities": [
+        "reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Preparation routes to study/artifact procedures without extra task workflow bindings."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "validate-readiness-state",
+      "execution_owner": "course-assessment-preparation",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "execute-preparation"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Coverage, artifact completion, and mastery/readiness remain separate."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": null
+}
