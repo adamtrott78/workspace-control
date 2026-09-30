@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "workflow_id": "replace-me",
+  "title": "Replace Me Workflow",
+  "purpose": "Describe one reusable authority-owned workflow; replace placeholder values before adoption.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "README.md"
+  },
+  "entry_route": [
+    "README.md"
+  ],
+  "stages": [
+    {
+      "id": "inspect",
+      "execution_owner": "replace-with-authority-owner",
+      "authority_owners": [
+        "README.md"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "replace with deterministic validation requirement"
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": null
+}
