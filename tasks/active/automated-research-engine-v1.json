@@ -1,0 +1,281 @@
+{
+  "schema_version": 2,
+  "task_id": "automated-research-engine-v1",
+  "title": "Automated research engine v1",
+  "status": "IN_PROGRESS",
+  "goal": "Design and prove a provenance-preserving automated research engine that turns scholarly literature into structured evidence, durable knowledge, challenged research gaps, fundable research programs, and workspace-control-executable research projects.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "policies/OPERATOR_WORKFLOW.md",
+    "checkpoint_sha": "03a51fdbe2a9153f2b5e45054eec6e927a9dda36",
+    "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
+  },
+  "parent_execution_owner": "research-operating-system",
+  "current_stage": "evidence_contract",
+  "acceptance_criteria": [
+    "The architecture explicitly separates source evidence, extracted evidence, normalized knowledge, synthesis, model inference, and human judgment.",
+    "Every durable scientific evidence object can be traced to a canonical work/version, immutable source artifact identity, and source locator whenever the available representation permits it.",
+    "Literature discovery and lawful acquisition use provider-independent adapters and record exact discovery/acquisition provenance and access state.",
+    "The first vertical slice can discover a broad candidate corpus, triage it, deeply process a bounded high-value subset, and answer benchmark research questions with traceable evidence.",
+    "The knowledge layer preserves contradictory findings and experimental context rather than silently reconciling them.",
+    "Research-gap candidates are generated from evidence patterns and undergo an adversarial novelty-challenge search before being treated as supported open questions.",
+    "At least one surviving gap can be expanded into a structured research program with hypotheses, experiments, risks, assets, evaluation criteria, and falsification conditions.",
+    "The funding layer can match a research program to current official opportunities and compile solicitation-specific proposal inputs without autonomous submission.",
+    "An approved research program can transition into a durable workspace-control project/task workflow without reconstructing the research plan from conversation state.",
+    "A pilot in a narrow domain demonstrates that scaling the corpus increases durable, provenance-backed knowledge rather than merely increasing generated summary text.",
+    "The authoritative task JSON and maintained Markdown cold-start handoff remain synchronized after every material task-state mutation."
+  ],
+  "constraints": [
+    "Do not treat model-generated prose as primary scientific evidence.",
+    "Do not claim research novelty solely from model judgment; challenge candidate novelty with targeted literature searches designed to find prior work.",
+    "Do not bypass paywalls, authentication controls, publisher restrictions, or licensing terms.",
+    "Keep provider-specific APIs behind adapters; no single scholarly index, parser, model, vector store, or RAG service is the architecture.",
+    "Do not silently reconcile contradictory papers; preserve source context and disagreement.",
+    "Do not choose storage technology before defining the evidence/provenance contract it must support.",
+    "Do not embed the full research-engine implementation into workspace-control before the implementation repository boundary is explicitly decided; workspace-control currently owns the architecture/task state and control semantics.",
+    "Use staged corpus triage so deep-reading cost scales with relevance rather than raw discovery volume.",
+    "Require explicit human approval for consequential research-direction selection, proposal submission, and other configured scientific decision gates.",
+    "Use direct tools first where evidence can be established remotely; introduce local runtime only when parsing, computation, scale tests, or environment-bound validation require it.",
+    "Treat the generated Markdown task handoff as the standard pasteable cold-start surface and keep it synchronized with the JSON capsule."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
+      "remote": {
+        "branch": "automated-research-engine-v1",
+        "checkpoint_sha": "b1734cea1498d2206902c115e4224fffc824aa09",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "architecture/automated-research-engine-v1.md",
+        "architecture/research-engine/**",
+        "schemas/research-engine/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "architecture_foundation",
+      "status": "VALIDATED",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "workflow:workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36",
+        "user-research-system-goal"
+      ],
+      "outputs": [
+        "git:b1734cea1498d2206902c115e4224fffc824aa09",
+        "artifact:architecture/automated-research-engine-v1.md"
+      ],
+      "validation": [
+        {
+          "check": "initial architecture captured durably",
+          "result": "PASS",
+          "evidence": [
+            "Architecture document defines the literature-to-evidence-to-gap-to-proposal-to-execution loop, trust boundaries, acquisition strategy, evidence graph, novelty challenge, proposal layer, and first vertical slice."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "evidence_contract",
+      "status": "IN_PROGRESS",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "architecture_foundation"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "ingress_prototype",
+      "status": "PLANNED",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "composed",
+      "inputs": [
+        "evidence_contract"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "extraction_pipeline",
+      "status": "PLANNED",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "composed",
+      "inputs": [
+        "ingress_prototype"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "evidence_graph",
+      "status": "PLANNED",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "composed",
+      "inputs": [
+        "extraction_pipeline"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "synthesis_gap_engine",
+      "status": "PLANNED",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "composed",
+      "inputs": [
+        "evidence_graph"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "proposal_compiler",
+      "status": "PLANNED",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "composed",
+      "inputs": [
+        "synthesis_gap_engine"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "execution_bridge",
+      "status": "PLANNED",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "composed",
+      "inputs": [
+        "proposal_compiler"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "vertical_slice_validation",
+      "status": "PLANNED",
+      "execution_owner": "cross-executor-validation",
+      "selected_executor": "codex",
+      "selected_surface": "composed",
+      "inputs": [
+        "execution_bridge"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "research-engine-architecture-seed",
+      "kind": "git_commit",
+      "identity": "b1734cea1498d2206902c115e4224fffc824aa09",
+      "required_for_resume": true,
+      "evidence": [
+        "Initial automated research engine v1 architecture committed on automated-research-engine-v1."
+      ]
+    },
+    {
+      "id": "workspace-control-v2-contract",
+      "kind": "git_commit",
+      "identity": "03a51fdbe2a9153f2b5e45054eec6e927a9dda36",
+      "required_for_resume": true,
+      "evidence": [
+        "Research-engine task is governed by the promoted workspace-control v2 operator contract."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "architecture/automated-research-engine-v1.md",
+      "state": "durable",
+      "role": "architecture-specification",
+      "origin": "automated-research-engine-v1@b1734cea1498d2206902c115e4224fffc824aa09",
+      "persistence": "git-tracked",
+      "regeneration": "manual architecture evolution through this task",
+      "review_requirement": "Major architectural boundary changes require explicit review before implementation.",
+      "evidence": [
+        "Initial architecture committed and remote checkpoint verified."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "architecture foundation",
+      "result": "PASS",
+      "evidence": [
+        "architecture/automated-research-engine-v1.md exists at b1734cea1498d2206902c115e4224fffc824aa09."
+      ]
+    },
+    {
+      "check": "paper acquisition feasibility",
+      "result": "PASS",
+      "evidence": [
+        "Current official APIs support large-scale bibliographic discovery and lawful-access resolution through multiple independent providers.",
+        "OpenAlex documentation reports cached full text for more than 50 million OA works and TEI XML for roughly 43 million.",
+        "Crossref exposes DOI/funder/license metadata and deposited full-text/TDM links where available.",
+        "Unpaywall supports DOI-level OA resolution; Semantic Scholar exposes graph/recommendation/dataset APIs.",
+        "Grants.gov exposes programmatic funding-opportunity search/detail retrieval for the downstream proposal layer."
+      ]
+    },
+    {
+      "check": "evidence contract",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "vertical-slice provenance benchmark",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "gap novelty challenge",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "proposal-to-execution handoff",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Define the canonical evidence/provenance contract before selecting persistence technology.",
+    "Define the reproducible corpus/search-run record and canonical work/version identity model.",
+    "Prototype multi-provider discovery and lawful full-text acquisition adapters.",
+    "Build normalized parsing and typed evidence extraction with source locators and verification state.",
+    "Choose persistence/indexing architecture only after the evidence contract is stable enough to evaluate storage requirements.",
+    "Build provenance-preserving synthesis, contradiction handling, gap generation, and adversarial novelty challenge.",
+    "Build the research-program/funding/proposal layer and explicit human gates.",
+    "Bridge an approved research program into a workspace-control project execution workflow.",
+    "Run the narrow-domain vertical slice and measure evidence fidelity, traceability, novelty false-positive rate, and execution handoff quality."
+  ],
+  "next_safe_action": "Continue on automated-research-engine-v1 by defining the evidence contract in architecture/automated-research-engine-v1.md: specify canonical Work, SourceArtifact, SourceLocator, EvidenceObject, Claim, Method, Experiment, Dataset/Population, Metric, Result, Limitation, Inference, and EvidenceRelation records plus their required provenance and verification fields. Do not choose a database yet.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
+}
