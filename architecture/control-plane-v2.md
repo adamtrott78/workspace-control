@@ -84,7 +84,9 @@ Each project repository remains authoritative for its own:
 - artifact semantics;
 - workflow-specific validation;
 - project-owned deterministic procedures;
-- project-owned workflow descriptors.
+- workflow descriptors whose semantics belong to that project.
+
+A workflow descriptor belongs with the authority that owns the workflow's semantics. Most domain workflows are project-local. A genuinely cross-project coordination workflow MAY be owned by workspace-control when its semantics are themselves workspace-level rather than project-domain-specific.
 
 workspace-control MUST NOT silently replace these owners.
 
@@ -146,12 +148,12 @@ mutation.
 
 # 2. Core definitions
 
-## 2.1 Owner
+## 2.1 Authority owner
 
-An **owner** is the authoritative source for a specific class of truth or
-decision.
+An **authority owner** is the authoritative source for a specific class of truth
+or decision.
 
-Ownership is typed, not necessarily hierarchical.
+Authority ownership is typed, not necessarily hierarchical.
 
 Examples:
 
@@ -166,7 +168,30 @@ Examples:
 
 A source may outrank another for one fact type without globally outranking it.
 
-## 2.2 Workflow
+## 2.2 Execution owner
+
+An **execution owner** is the routed context, procedure, or workflow component
+currently responsible for deciding the next bounded stage.
+
+Execution ownership may change repeatedly during one task without changing the
+underlying authority owners.
+
+Example:
+
+```text
+tutoring execution owner
+-> report execution owner
+-> runtime/build execution owner
+-> tutoring execution owner
+```
+
+The assignment, report source, runtime evidence, and mastery record retain their
+own authority throughout those transitions.
+
+This distinction prevents the word "owner" from conflating source-of-truth
+authority with current orchestration responsibility.
+
+## 2.3 Workflow
 
 A **workflow** is a reusable project-owned procedure for accomplishing a class of
 task.
@@ -188,34 +213,40 @@ It MAY define:
 
 A workflow descriptor is not a task capsule.
 
-## 2.3 Stage
+## 2.4 Stage
 
 A **stage** is a bounded unit of workflow execution.
 
-A material stage SHOULD establish, as applicable:
+A reusable stage definition SHOULD establish, as applicable:
 
-- owner;
+- execution owner;
+- required authority owners;
 - preconditions;
-- authority;
-- inputs and their identities;
-- selected executor/surface;
+- required authority;
+- input requirements and identity requirements;
+- capability/surface requirements;
 - expected outputs;
 - validation;
-- durable output identity;
+- durable output identity requirements;
 - failure/stop condition;
 - next stage or return route.
+
+A reusable workflow SHOULD NOT pin a specific executor or surface merely because
+that surface is available today. The concrete task execution records the selected
+executor/surface/topology unless the workflow semantics genuinely require a
+specific external tool.
 
 A stage may be read-only, mutating, runtime-executing, validating, or waiting on
 an external gate.
 
-## 2.4 Task execution
+## 2.5 Task execution
 
 A **task execution** is one concrete run of a workflow or one bounded task that
 may span stages, sessions, repositories, executors, surfaces, and human gates.
 
 Its live durable state belongs in a task capsule or successor mechanism.
 
-## 2.5 Reasoning executor
+## 2.6 Reasoning executor
 
 A **reasoning executor** is the actor selecting or reasoning about actions.
 
@@ -228,7 +259,7 @@ Examples:
 Reasoning executor identity is descriptive. It MUST NOT become the task's
 semantic identity.
 
-## 2.6 Operation surface
+## 2.7 Operation surface
 
 An **operation surface** is the mechanism through which a concrete operation is
 performed.
@@ -247,7 +278,7 @@ Examples:
 Operation surfaces have capability boundaries independent of the reasoning
 executor using them.
 
-## 2.7 Execution topology
+## 2.8 Execution topology
 
 An **execution topology** describes where required state lives and which surfaces
 must cooperate.
@@ -262,10 +293,10 @@ Initial topology classes are conceptual, not yet a frozen schema:
 
 Topology determines which state identities must be checked before continuation.
 
-## 2.8 Checkpoint
+## 2.9 Checkpoint
 
-A **checkpoint** is a durable identity from which the next safe action can be
-recovered.
+A **checkpoint** is a durable identity, or a coherent checkpoint bundle of
+multiple durable identities, from which the next safe action can be recovered.
 
 Examples:
 
@@ -273,32 +304,42 @@ Examples:
 - validated remote commit;
 - runtime result manifest;
 - saved artifact hash;
-- persisted workflow stage record.
+- persisted workflow stage record;
+- a bundle such as remote Git SHA + local result manifest + validated artifact
+  hash when all three are required to resume.
 
 A checkpoint is not synonymous with "Git commit" when required runtime state
-exists outside Git.
+exists outside Git. A composed workflow MUST NOT collapse several independently
+required state identities into one misleading scalar checkpoint.
 
-## 2.9 Artifact class
+## 2.10 Artifact lifecycle declaration
 
-An **artifact class** describes the lifecycle and Git expectations of a project
-artifact without moving project-specific artifact semantics into workspace-control.
+An **artifact lifecycle declaration** describes how an artifact participates in
+the workflow and Git/runtime lifecycle without moving project-specific semantics
+into workspace-control.
 
-Candidate common classes:
+The v2 architecture SHOULD NOT force every artifact into one mutually exclusive
+class. The observed categories overlap: for example, a generated artifact may
+also be tracked, evidence-bearing, and a delivery artifact.
 
-- `SOURCE`;
-- `INPUT_EXTERNAL`;
-- `GENERATED_TRACKED`;
-- `GENERATED_LOCAL`;
-- `RUNTIME_STATE`;
-- `DELIVERY_ARTIFACT`;
-- `TRANSIENT`.
+A project MAY therefore declare orthogonal properties such as:
 
-Projects MAY map or extend these concepts.
+- role: source, input, evidence, intermediate, delivery;
+- origin: authored, external, generated;
+- persistence: Git-tracked, local durable, runtime-only, external, transient;
+- regeneration: reproducible, expensive, non-reproducible, unknown;
+- review requirement: none, automated validation, visual/human gate.
+
+Illustrative legacy labels such as `SOURCE`, `INPUT_EXTERNAL`,
+`GENERATED_TRACKED`, `GENERATED_LOCAL`, `RUNTIME_STATE`,
+`DELIVERY_ARTIFACT`, and `TRANSIENT` remain useful shorthand, but v2 should
+not freeze them into a single exclusive enum unless implementation evidence
+shows that is sufficient.
 
 workspace-control should understand lifecycle expectations, not scientific
 meaning.
 
-## 2.10 Validation barrier
+## 2.11 Validation barrier
 
 A **validation barrier** is the evidence boundary that must pass before a
 dependent stage may rely on a result.
@@ -318,7 +359,7 @@ Validation may include:
 
 Process exit alone is not automatically sufficient.
 
-## 2.11 Suspension
+## 2.12 Suspension
 
 A **suspension** is a safe non-failure stop because continuation requires an
 external capability or authority.
@@ -334,7 +375,7 @@ Examples:
 A suspension records the first incomplete stage and the required resume
 condition.
 
-## 2.12 Failure
+## 2.13 Failure
 
 A **failure** means a stage did not establish its required result or validation.
 
@@ -348,7 +389,7 @@ inspect actual durable state
 
 Blind retry is forbidden.
 
-## 2.13 Resumability
+## 2.14 Resumability
 
 A task is **resumable** when another control cycle can recover:
 
@@ -364,7 +405,7 @@ A task is **resumable** when another control cycle can recover:
 Completed validated stages SHOULD NOT be replayed merely because the
 conversation, executor, or user turn changed.
 
-## 2.14 HANDOFF_SAFE
+## 2.15 HANDOFF_SAFE
 
 A task is **HANDOFF_SAFE** when a receiving executor can recover the next safe
 action entirely from durable authority and evidence relevant to the topology
@@ -403,9 +444,25 @@ Topology-specific handoff evidence may include:
 - synchronization boundary;
 - which side is authoritative for each remaining stage.
 
-HANDOFF_SAFE is a property of recoverability, not of a specific executor.
+HANDOFF_SAFE is a property of durable recoverability by a suitable receiving
+executor, not proof that every possible receiver can execute the next stage.
 
-## 2.15 Executor/surface selection
+## 2.16 EXECUTION_READY
+
+**EXECUTION_READY** is a separate runtime assessment for a particular proposed
+executor/surface/topology.
+
+A task may be HANDOFF_SAFE while the current receiver is not EXECUTION_READY
+because it lacks a required connector, credential, local runtime, hardware,
+external artifact, or human decision.
+
+Conversely, an executor having the technical ability to act does not make an
+incomplete task record HANDOFF_SAFE.
+
+Separating these concepts prevents handoff completeness from being coupled to one
+executor's transient capabilities.
+
+## 2.17 Executor/surface selection
 
 Selection SHOULD answer:
 
@@ -414,6 +471,10 @@ Selection SHOULD answer:
 > surface/executor combination?
 
 Selection MUST NOT hard-code current tool limitations as timeless architecture.
+
+Technical capability and access permission do not themselves grant mutation
+authority. The selected executor/surface must satisfy both capability/access
+requirements and the task/project's bounded authority.
 
 A known deterministic project procedure SHOULD be preferred over repeatedly
 reinventing the same shell/tool sequence.
@@ -441,10 +502,10 @@ source edit -> artifact validation
 Return routing is equally important:
 
 ```text
-parent owner
+parent execution owner
 -> subordinate stage/workflow
 -> validation/checkpoint
--> return to parent owner
+-> return to parent execution owner
 ```
 
 An explicit owner stack is not required by this draft. It should be introduced
@@ -531,13 +592,31 @@ A future capsule v2 may record:
 - parent task;
 - completed stage IDs;
 - current/suspended stage;
-- remote checkpoints;
+- remote checkpoints or checkpoint bundles;
 - local/runtime checkpoints;
 - validations;
 - artifact identities;
 - blockers/gates;
 - remaining work;
 - next safe action.
+
+## 5.3 Human-readable handoff view
+
+A task MAY expose a generated Markdown/text handoff view for human convenience.
+
+The task capsule plus verified Git/runtime evidence remain authoritative.
+
+The human-readable view MUST:
+
+- identify the authoritative capsule;
+- identify the exact target checkpoint;
+- state that it is derived;
+- be regenerable deterministically;
+- never become a competing source of task truth.
+
+A v2 implementation SHOULD provide one deterministic render/update operation so
+the human-readable handoff is refreshed whenever durable capsule state materially
+changes.
 
 ---
 
@@ -616,10 +695,11 @@ Possible checks:
 - logical repository identity;
 - expected remote;
 - expected branch/ref;
-- advertised SHA;
+- advertised SHA, including non-canonical task branches when relevant;
 - write policy;
 - allowed mutation scope;
-- expected parent when mutation is ref-dependent.
+- expected parent when mutation is ref-dependent;
+- connector/write capability and authorization needed for the proposed operation.
 
 No local checkout should be manufactured merely to satisfy this mode.
 
@@ -753,6 +833,11 @@ Volatile state SHOULD live in:
 Human-readable status summaries MAY exist, but they must be clearly derived and
 must not become competing authority.
 
+The task capsule SHOULD remain a concise recoverable snapshot. Detailed
+append-only execution evidence MAY live in referenced logs/records when retaining
+the full event history inside the snapshot would make it unwieldy. The capsule
+must still contain or reference enough evidence to justify its current state.
+
 ---
 
 # 15. Initial v2 implementation boundary
@@ -845,3 +930,12 @@ Before broader implementation, review this draft against the evidence and answer
    every task into a formal workflow?
 10. Is the implementation boundary still small enough to avoid building an
     unnecessary workflow engine?
+11. Are authority owner and execution owner now separated clearly enough?
+12. Does HANDOFF_SAFE remain durable-state completeness while EXECUTION_READY
+    captures receiver-specific capability?
+13. Can composed workflows represent checkpoint bundles without pretending one
+    Git SHA describes all required runtime state?
+14. Are artifact lifecycle properties modeled without forcing overlapping roles
+    into a single enum?
+15. Is the generated human-readable handoff explicitly derived rather than a
+    second source of truth?
