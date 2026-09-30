@@ -12,7 +12,7 @@
 
 - ID: `control-plane-v2-refactor`
 - Title: Workspace Control Plane v2
-- Status: `CHECKPOINTED`
+- Status: `BLOCKED_RUNTIME`
 
 ## Goal
 
@@ -23,7 +23,7 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9`
+- Current checkpoint: `01ebfed8d8b79ec1cbf52930c6f02b13eeae4386`
 - Pushed: `true`
 
 ### Allowed mutation scope
@@ -35,26 +35,25 @@ Design, implement, and validate a workspace-control v2 architecture that general
 
 ## Next safe action
 
-Begin Phase 7 only. Starting from control-plane-v2-refactor@f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9, implement deterministic non-destructive worktree preparation within scripts/workspace_control.py, procedures/worktree_prepare.md, tests/test_workspace_control.py, and tests/fixtures/**. The command must be read-only by default, require explicit --create before adding a worktree, and stop safely on dirty/diverged/identity/policy/path conflicts without cleaning, resetting, stashing, fetching, force-checking-out, switching unrelated checkouts, rewriting unrelated refs, or overwriting files. Inspect and validate the exact changed-path set before runtime testing.
+Remain in Phase 7. Validate exact pushed checkpoint 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 in an isolated GitHub-connected runtime. Run the full unit suite and bounded real-Git worktree-prepare scenarios proving read-only CREATE_AVAILABLE, explicit --create -> READY at the exact checkpoint, existing READY behavior, dirty-state preservation/refusal, divergence refusal without branch movement, and non-interference with existing workspace worktrees. Record the runtime evidence, then and only then mark Phase 7 validated/checkpointed and open the next planned phase.
 
 ## Remaining work
 
-- Implement Phase 7 deterministic non-destructive worktree preparation.
-- Keep worktree preparation read-only by default; require explicit --create for creation.
-- Return explicit READY, CREATE_AVAILABLE, NEEDS_REVIEW, BLOCKED_DIRTY, BLOCKED_DIVERGED, BLOCKED_IDENTITY, or BLOCKED_POLICY outcomes as applicable.
-- Allow creation of a missing isolated worktree only when repository identity, branch/ref, expected checkpoint, target path, policy, and local source state make creation safe.
-- Stop safely for dirty, diverged, occupied-path, branch-conflict, identity-mismatch, or policy-invalid states; do not clean/reset/stash/force-checkout/fetch/overwrite.
-- Add the worktree preparation procedure and bounded tests/fixtures.
-- Inspect and validate the exact changed-path set before runtime testing.
+- Run the complete Python unit suite from exact checkpoint 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 in an isolated temporary clone.
+- Run worktree-prepare read-only against an isolated temporary repository and require CREATE_AVAILABLE without creating the target.
+- Run the same request with --create and require READY at the exact branch/checkpoint.
+- Re-run read-only assessment on the created worktree and require READY without mutation.
+- Prove dirty target refusal preserves the dirty file.
+- Prove divergent remote/ref state returns BLOCKED_DIVERGED without moving the local branch or deleting/rewriting the worktree.
+- Verify non-interference with existing workspace worktrees.
+- Only after those checks pass, mark Phase 7 validated/checkpointed and follow the implementation plan's next phase.
 
 ## Latest completed runtime gate
 
 - `PHASE6_RUNTIME_RESULT=PASS`
 - `VALIDATED_COMMIT=f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9`
-- Full Python unit suite: 26 tests, `OK`.
-- v1 and v2 remote/local/composed handoff runtime checks passed.
-- HANDOFF_SAFE remained independent from receiver-specific EXECUTION_READY.
-- Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified.
+- Phase 7 implementation checkpoint: `01ebfed8d8b79ec1cbf52930c6f02b13eeae4386`
+- Phase 7 exact-checkpoint runtime validation is pending.
 
 ## Validation state
 
@@ -143,10 +142,25 @@ Begin Phase 7 only. Starting from control-plane-v2-refactor@f88fb301ea9fd500fcfa
   - Workflow checkpoint binding and composed synchronization boundary assertions passed.
   - HANDOFF_SAFE remained independent from receiver-specific EXECUTION_READY.
   - Validation reported PHASE6_RUNTIME_RESULT=PASS and explicit non-interference with existing workspace worktrees.
+- **Phase 7 exact changed-path set:** `PASS`
+  - Compare f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 reports exactly procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py.
+  - All changed paths are inside the capsule's authorized Phase 7 mutation scope.
+- **Phase 7 source/contract inspection:** `PASS`
+  - worktree-prepare command is registered and requires an absolute target path, branch, and exact checkpoint.
+  - Missing safe worktrees return CREATE_AVAILABLE unless --create is explicitly supplied.
+  - The worktree-preparation implementation contains no fetch, reset, stash, or checkout normalization command.
+  - Only git worktree add is used for the bounded creation mutation.
+  - Post-failure and post-success target state are explicitly re-inspected.
+  - Occupied broken symlink targets are detected instead of being hidden by path resolution.
+  - Real Git tests cover the Phase 7 creation, dirty, divergence, identity, and policy gates.
+- **Phase 7 exact-checkpoint integrated runtime validation:** `NOT_RUN`
+  - Target implementation is pushed at 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386.
+  - Exact-checkpoint unit/CLI runtime validation is pending in an isolated GitHub-connected terminal.
+  - Do not open the next implementation phase until this validation passes and is recorded.
 
 ## Blockers / known limitations
 
-- None recorded.
+- Exact-checkpoint Phase 7 integrated runtime validation is pending for control-plane-v2-refactor@01ebfed8d8b79ec1cbf52930c6f02b13eeae4386.
 
 ## Fresh-chat initialization
 
@@ -177,10 +191,10 @@ Current target branch:
 control-plane-v2-refactor
 
 Current target checkpoint:
-f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9
+01ebfed8d8b79ec1cbf52930c6f02b13eeae4386
 
 Current phase:
-Phase 7 — worktree preparation
+Phase 7 — worktree preparation (runtime validation pending)
 
 Do not broaden mutation scope beyond the capsule.
 ```
