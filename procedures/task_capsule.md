@@ -100,12 +100,52 @@ Run:
     python3 scripts/workspace_control.py handoff-check \
       --file tasks/active/<task_id>.json
 
-v1 handoff semantics remain unchanged in the current phase.
+v1 handoff semantics remain unchanged.
 
-v2 capsules validate structurally, but topology-aware v2 handoff is intentionally
-not implemented until its dedicated phase. Until then, `handoff-check` returns
-`NOT_HANDOFF_SAFE` for a valid v2 capsule with an explicit reason instead of
-applying v1 local-checkout assumptions to remote/composed tasks.
+For v2 capsules, `HANDOFF_SAFE` evaluates durable recoverability according to
+the capsule's execution topology rather than applying v1 local-checkout rules.
+
+Remote-only handoff uses the recorded verified remote checkpoint and does not
+require a local checkout or a live remote query merely to prove durable handoff
+state.
+
+Local handoff rechecks the recorded checkout/worktree identity, branch, HEAD,
+clean state, and base/checkpoint relation.
+
+Composed handoff requires usable remote and local identities plus a provable
+synchronization boundary. The current v2 model accepts either a shared verified
+Git checkpoint across the remote/local sides or an explicit current-stage
+`git:<sha>` input bound to a verified remote checkpoint. If neither is present,
+the task is not handoff-safe rather than inferring a transition.
+
+When a reusable workflow is bound, its exact checkpoint must be bound to a
+verified repository recovery state in the capsule.
+
+### Receiver-specific EXECUTION_READY
+
+`EXECUTION_READY` is intentionally separate from `HANDOFF_SAFE`.
+
+A caller may optionally assess transient receiver facts:
+
+    python3 scripts/workspace_control.py handoff-check \
+      --file tasks/active/<task_id>.json \
+      --receiver codex \
+      --receiver-check github=ready \
+      --receiver-check local-runtime=missing \
+      --json
+
+Receiver-check names are generic and caller supplied. Values are only
+`ready` or `missing`. Use them for transient capability/access facts such as
+connector availability, credentialed connection presence, runtime availability,
+hardware, required external artifacts, or a human gate.
+
+These checks are not persisted by `handoff-check`, do not contain credentials,
+and do not grant authority. If no receiver facts are supplied,
+`execution_readiness.result` is `NOT_ASSESSED`.
+
+A v2 task may return `HANDOFF_SAFE` while the proposed receiver is
+`NOT_EXECUTION_READY`. The handoff command's exit status follows durable
+handoff safety, not receiver readiness.
 
 ## Updating durable task state
 
@@ -151,8 +191,10 @@ capsules or derived handoff views.
 
 ## Current phase boundary
 
-`task-validate` and `task-render` support v2.
+`task-validate`, `task-render`, and topology-aware `handoff-check` support
+v2 while preserving v1 behavior.
 
-`handoff-check` remains v1-only until topology-aware handoff is implemented.
+Topology-aware preflight supports explicit local and remote modes. Composed
+execution remains explicit remote/local checks plus a synchronization boundary.
 
-Preflight behavior is unchanged in this phase.
+Safe worktree preparation remains a later phase and is not implemented here.
