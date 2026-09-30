@@ -29,21 +29,33 @@
 - First-incomplete-stage recovery: `PASS`
 - Exact pinned-workflow recovery after branch advance: `PASS`
 - Generated handoff regeneration after capsule change: `PASS`
-- MILCOM reference workflow lineage: `IN_PROGRESS`
-- Fresh MILCOM rebuild/render + human visual gate + final PPTX verification: `PENDING`
+- MILCOM project-local lineage/source-repair evidence: `PASS`
+- Fresh MILCOM exact-head rebuild/render: `PASS`
+- Human visual QA on fresh MILCOM contact sheet: `PASS`
+- Final MILCOM PPTX assembly + structural verification: `PENDING`
+
+## Approved MILCOM artifacts
+
+- PNG directory:
+  `/home/atrott/adamArchives/Adam/MILCOM2026_PHASE10_REFERENCE.OwCS4r/slides`
+- Approved contact sheet:
+  `/home/atrott/adamArchives/Adam/MILCOM2026_PHASE10_REFERENCE.OwCS4r/contact_sheet.png`
+- PADataset reference checkpoint:
+  `108d7840918751153253671af49c3451d8e6fe96`
+
+Do not rebuild the slides again for this regression.
 
 ## Next safe action
 
-Continue Phase 10 with the workspace-control target frozen. Run the bounded MILCOM reference regression against PADataset milcom-presentation@108d7840918751153253671af49c3451d8e6fe96 in a disposable clone. Rebuild the project-owned SVG sources, require deterministic no-diff regeneration, render twelve fresh 1920x1080 PNGs and a 4x3 contact sheet outside the worktree, stop for explicit human visual approval, then assemble and structurally verify the final PPTX outside the worktree. Do not migrate or modify PADataset operator architecture.
+Continue Phase 10 with the workspace-control target frozen at b8aa52e242a07e6aa2036516e401864991183ad2. Do not rebuild the MILCOM slides again. Reuse the human-approved PNGs in /home/atrott/adamArchives/Adam/MILCOM2026_PHASE10_REFERENCE.OwCS4r/slides, create one disposable exact PADataset checkout at milcom-presentation@108d7840918751153253671af49c3451d8e6fe96, run the project-owned assemble_milcom26_pptx.py to write the final reference PPTX outside the worktree, independently verify 12 slides / 16:9 / one full-slide image per slide / 12 nonempty speaker-note blocks, and verify no repository/ref mutation. Then close Phase 10 and open Phase 11 promotion decision.
 
 ## Remaining work
 
-- Run the MILCOM reference regression at exact PADataset milcom-presentation@108d7840918751153253671af49c3451d8e6fe96 in a disposable clone.
-- Rebuild the twelve template-integrated SVGs using the project-owned build_milcom26_svg_slides.py command and require no source diff after regeneration.
-- Render all twelve rebuilt SVGs to fresh 1920x1080 PNGs outside the worktree and assemble a 4x3 contact sheet.
-- Perform a human visual QA gate on the fresh contact sheet.
-- After approval, assemble a fresh PPTX outside the worktree using the project-owned assembler and verify its built-in structural checks.
-- Record the reference regression PASS, reconcile the full 16-item matrix, and open Phase 11 promotion decision.
+- Run assembly-only MILCOM continuation using the already-approved PNG renders at /home/atrott/adamArchives/Adam/MILCOM2026_PHASE10_REFERENCE.OwCS4r/slides.
+- Use a disposable exact PADataset checkout at milcom-presentation@108d7840918751153253671af49c3451d8e6fe96 only to execute the project-owned assembler.
+- Write the final reference PPTX outside the Git worktree and run independent structural checks: 12 slides, 16:9, one full-slide image per slide, 12 nonempty speaker-note blocks.
+- Verify PADataset remote/reference HEAD and workspace-control frozen target remain unchanged.
+- After assembly PASS, mark MILCOM reference regression PASS, reconcile the full 16-item matrix, and open Phase 11 promotion decision.
 
 ## Validation state
 
@@ -251,7 +263,24 @@ Continue Phase 10 with the workspace-control target frozen. Run the bounded MILC
   - Commit 746e10ec6c1004127d8b4a9e3e730c90b045e9ba corrected the MILCOM presentation route numbering.
   - Commit 162bdb5517829e3187473cccacd56583a7716941 performed bounded post-template visual QA repairs on Slides 5 and 12; its own README note states no scientific values, narrative claims, template branding, or other slide layouts changed.
   - Commit 108d7840918751153253671af49c3451d8e6fe96 added deterministic final PowerPoint assembly while preserving the project-local presentation workflow.
-  - Fresh exact-head local rebuild/render and human visual approval are still pending before the reference regression can be marked PASS.
+  - Fresh exact-head rebuild/render and human visual approval: PASS. Final PPTX assembly/structural verification remains pending.
+- **Phase 10 MILCOM fresh rebuild harness attempt:** `FAIL`
+  - Exact PADataset milcom-presentation checkpoint 108d7840918751153253671af49c3451d8e6fe96 loaded cleanly.
+  - All required tools and Python dependencies were present.
+  - Project-owned build_milcom26_svg_slides.py completed successfully and rebuilt all 12 template-integrated SVGs.
+  - The harness then stopped before the human visual gate because it incorrectly required zero tracked diff after regeneration.
+  - The rebuild changed exactly the 12 generated slide SVGs in the disposable clone.
+  - PADataset presentations/milcom2026/slides/README.md explicitly states that committed SVG files predate the final template pass until the wrapper is executed and generated slides are reviewed/committed.
+  - Commit 162bdb5517829e3187473cccacd56583a7716941 changed the slide builder and slide README for bounded visual repairs but did not commit regenerated slide SVGs; commit 108d7840918751153253671af49c3451d8e6fe96 added final assembly only.
+  - Therefore the zero-diff assertion was a regression-harness defect, not a PADataset workflow defect or workspace-control implementation defect.
+- **Phase 10 MILCOM fresh rebuild and human visual QA:** `PASS`
+  - Exact PADataset milcom-presentation checkpoint 108d7840918751153253671af49c3451d8e6fe96 loaded cleanly in a disposable clone.
+  - Project-owned build_milcom26_svg_slides.py rebuilt all 12 template-integrated SVGs successfully.
+  - Generated-artifact boundary check passed: only the twelve presentations/milcom2026/slides/slide*.svg outputs differed in the disposable clone.
+  - All twelve SVGs rendered to fresh 1920x1080 PNGs.
+  - A fresh 4x3 contact sheet was created at /home/atrott/adamArchives/Adam/MILCOM2026_PHASE10_REFERENCE.OwCS4r/contact_sheet.png.
+  - The user visually reviewed the fresh contact sheet and explicitly approved proceeding.
+  - workspace-control target remained frozen at b8aa52e242a07e6aa2036516e401864991183ad2.
 
 ## Blockers
 
@@ -273,11 +302,14 @@ Treat the JSON capsule and verified Git/runtime evidence as authoritative.
 Current phase:
 Phase 10 — real regression workflows
 
-Frozen target:
+Frozen workspace-control target:
 control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2
 
-MILCOM reference checkpoint:
+Approved MILCOM reference:
 adamtrott78/PADataset milcom-presentation@108d7840918751153253671af49c3451d8e6fe96
 
-Follow next_safe_action. Do not mutate the workspace-control target implementation unless a regression demonstrates a defect. Do not migrate PADataset operator architecture.
+Approved PNGs:
+$HOME/adamArchives/Adam/MILCOM2026_PHASE10_REFERENCE.OwCS4r/slides
+
+Do not rebuild the slides again. Follow next_safe_action: assembly-only continuation, structural verification, then Phase 11 promotion decision.
 ```
