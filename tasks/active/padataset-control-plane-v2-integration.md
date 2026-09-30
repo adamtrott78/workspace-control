@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: padataset-control-plane-v2-integration
 - Title: PADataset workspace-control v2 integration
-- Status: CHECKPOINTED
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -42,12 +42,11 @@ Adopt the promoted workspace-control v2 operating model in PADataset with the sm
 
 ## Next safe action
 
-Evaluate this synchronized capsule against workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36 scripts/workspace_control.py handoff_assessment_v2 semantics. Require a handoff-capable status, durable evidence on required checkpoints, ready remote recovery state for PADataset and workspace-control, and exact workflow checkpoint binding. If there are no reasons, record HANDOFF_SAFE and complete/archive the task.
+Task complete. For future PADataset work, start from PADataset README.md at the intended ref and create or resume a separate workspace-control task capsule when durable coordination is required.
 
 ## Remaining work
 
-- Evaluate the synchronized CHECKPOINTED capsule against the exact pinned workspace-control v2 handoff-check semantics.
-- If HANDOFF_SAFE, mark completion validated, set task COMPLETE with no remaining work, synchronize Markdown, then archive the completed JSON and derived Markdown.
+- None.
 
 ## Blockers / gates
 
