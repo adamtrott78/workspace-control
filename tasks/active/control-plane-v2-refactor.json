@@ -212,8 +212,16 @@
     },
     {
       "check": "Phase 11 v2 HANDOFF_SAFE",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "Exact target and coordination checkpoints were recovered: target b8aa52e242a07e6aa2036516e401864991183ad2 and coordination d3f85f075c68fc4d5ab054aaea17e72297111d9c.",
+        "task-validate returned schema_version=2, task_id=control-plane-v2-refactor, valid=true, errors=[].",
+        "handoff-check returned execution_topology=remote_only, handoff_safe=true, result=HANDOFF_SAFE, status=CHECKPOINTED, reasons=[].",
+        "workspace-control remote checkpoint b8aa52e242a07e6aa2036516e401864991183ad2 was ready and verified.",
+        "execution_readiness remained NOT_ASSESSED, preserving the HANDOFF_SAFE vs EXECUTION_READY distinction.",
+        "PHASE11_V2_HANDOFF_RESULT=PASS.",
+        "The subsequent Codex launch did not execute because interactive stdin was inherited from the enclosing heredoc; Codex reported 'stdin is not a terminal'. This is a harness/TTY issue, not a v2 handoff failure."
+      ]
     },
     {
       "check": "Phase 11 Codex both-direction handoff rerun",
@@ -228,12 +236,12 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Validate this v2 active capsule and prove HANDOFF_SAFE at the exact frozen target checkpoint.",
-    "Rerun ChatGPT -> Codex -> ChatGPT handoff against this Phase 11 v2 state.",
+    "Rerun only the final ChatGPT -> Codex -> ChatGPT handoff using a standalone terminal launch, not a heredoc-inherited stdin path.",
+    "Record the Codex round-trip PASS.",
     "Obtain the user's explicit decision whether to promote.",
     "If approved, transition the capsule to COMPLETE, promote the reviewed target checkpoint, and verify final Git/handoff state."
   ],
-  "next_safe_action": "Validate the active v2 capsule and HANDOFF_SAFE state against control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2, then perform the required both-direction Codex handoff rerun. Do not promote until those gates pass and the user explicitly approves promotion.",
+  "next_safe_action": "Phase 11 v2 capsule validation and HANDOFF_SAFE have passed. Run only the final read-only Codex round-trip from a real terminal stdin (standalone command, outside any heredoc). Do not rerun the completed v2 validation. After Codex returns PASS, record the round-trip and request the user's explicit promotion decision.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Complete pre-v2 coordination history is preserved at tasks/evidence/control-plane-v2-refactor-v1-final.json."
