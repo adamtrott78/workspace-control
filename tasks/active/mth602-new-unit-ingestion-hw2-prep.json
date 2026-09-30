@@ -1,0 +1,225 @@
+{
+  "schema_version": 2,
+  "task_id": "mth602-new-unit-ingestion-hw2-prep",
+  "title": "MTH 602 new-unit ingestion and HW2 preparation",
+  "status": "CHECKPOINTED",
+  "goal": "Bring MTH 602 course-content state current by visually synthesizing new classroom/whiteboard photographs and handwritten notes with the smallest relevant instructor material, persist durable session/topic knowledge without falsely promoting mastery, and bootstrap Homework 2 when authoritative assignment evidence is available.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "policies/OPERATOR_WORKFLOW.md",
+    "checkpoint_sha": "bc3966f10b8b07b9a27d8ec5275f218c209a7609",
+    "content_sha": "f59dfb03fc6739fe9ef4c9e581b0c613aa34cd02"
+  },
+  "parent_execution_owner": "mth602-course-content",
+  "current_stage": "source_intake",
+  "acceptance_criteria": [
+    "Fresh execution starts from MTH602 README.md on unit-ingestion-hw2 and follows existing classroom/source/course/study routing.",
+    "Whiteboard and handwritten images default to direct multimodal visual interpretation; OCR/Mathpix is optional and used only when it materially improves understanding.",
+    "Original images remain source evidence; durable synthesis distinguishes board evidence, projected slides, student notes/reconstruction, student recollection, and explanatory interpretation.",
+    "Illegible or ambiguous material remains uncertain rather than being silently repaired.",
+    "Overlapping photographs are synthesized coherently as sessions/topics rather than transcribed independently.",
+    "Only the smallest relevant current instructor material is used for corroboration and authority.",
+    "Durable course/topic/skill/notation owners are updated only when justified by the source evidence.",
+    "Content ingestion does not promote mastery; mastery changes require independent behavioral evidence.",
+    "If HW2 is authoritatively available, bootstrap its exact assignment contract; otherwise finish at an HW2-ready course-content checkpoint without inventing requirements.",
+    "All tracked project mutations stay on the isolated unit-ingestion-hw2 branch.",
+    "Every material task JSON mutation is immediately followed by task-render Markdown regeneration before further work or handoff.",
+    "Final state is recoverable without the original ingestion conversation."
+  ],
+  "constraints": [
+    "Start from MTH602 README.md at unit-ingestion-hw2@62b7a03c7139cb3987b72ad66bdc532e8a61b82a and read only relevant routed owners.",
+    "Do not perform the broader tutor/control-plane migration in this task.",
+    "Do not silently adopt later shared contracts; this task pins workspace-control@bc3966f10b8b07b9a27d8ec5275f218c209a7609 OPERATOR_WORKFLOW.md blob f59dfb03fc6739fe9ef4c9e581b0c613aa34cd02.",
+    "Treat direct vision as reviewed synthesis, not verbatim transcription; preserve provenance and uncertainty.",
+    "Do not run OCR/Mathpix on classroom images without demonstrated benefit.",
+    "Do not infer mastery from exposure, notes, or tutor-generated synthesis.",
+    "Do not invent HW2 requirements; use the actual instructor/upstream artifact or explicit instructor communication.",
+    "Use direct connected tooling when possible; use the smallest attachment/materialization or human-transfer bridge only when source bytes or runtime evidence genuinely require it.",
+    "Use the configured workspace scratch root rather than /tmp for human-transfer artifacts.",
+    "Continue through safe authorized stages and suspend only at a demonstrated missing-input, capability, authority/safety, or required-human-judgment boundary."
+  ],
+  "repositories": [
+    {
+      "name": "MTH602-AdamTrott",
+      "intent": "mutate",
+      "base_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+      "remote": {
+        "branch": "unit-ingestion-hw2",
+        "checkpoint_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "classnotes/**",
+        "study/**",
+        "homework/**",
+        "docs/course/**",
+        "docs/sources/**"
+      ]
+    },
+    {
+      "name": "workspace-control",
+      "intent": "read",
+      "base_sha": "bc3966f10b8b07b9a27d8ec5275f218c209a7609",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "bc3966f10b8b07b9a27d8ec5275f218c209a7609",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "baseline_recovery",
+      "status": "VALIDATED",
+      "execution_owner": "mth602-course-content",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "MTH602 main@62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+        "workspace-control@bc3966f10b8b07b9a27d8ec5275f218c209a7609"
+      ],
+      "outputs": [
+        "branch:unit-ingestion-hw2@62b7a03c7139cb3987b72ad66bdc532e8a61b82a"
+      ],
+      "validation": [
+        {
+          "check": "Isolated ingestion branch created from exact MTH602 main checkpoint",
+          "result": "PASS",
+          "evidence": [
+            "MTH602 main and unit-ingestion-hw2 were observed at 62b7a03c7139cb3987b72ad66bdc532e8a61b82a."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "source_intake",
+      "status": "PLANNED",
+      "execution_owner": "mth602-course-content",
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation-vision+github",
+      "inputs": [
+        "baseline_recovery"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "session_visual_synthesis",
+      "status": "PLANNED",
+      "execution_owner": "mth602-course-content",
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation-vision+github",
+      "inputs": [
+        "source_intake"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "cumulative_course_promotion",
+      "status": "PLANNED",
+      "execution_owner": "mth602-course-content",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "session_visual_synthesis"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "hw2_bootstrap",
+      "status": "PLANNED",
+      "execution_owner": "mth602-homework",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "cumulative_course_promotion"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "completion",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "hw2_bootstrap"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "mth602-ingestion-base",
+      "kind": "git_commit",
+      "identity": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+      "required_for_resume": true,
+      "evidence": [
+        "Observed MTH602 main and unit-ingestion-hw2 at this exact checkpoint."
+      ]
+    },
+    {
+      "id": "workspace-control-operator-contract",
+      "kind": "git_commit",
+      "identity": "bc3966f10b8b07b9a27d8ec5275f218c209a7609",
+      "required_for_resume": true,
+      "evidence": [
+        "Pinned OPERATOR_WORKFLOW.md blob f59dfb03fc6739fe9ef4c9e581b0c613aa34cd02."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Direct visual source-ingestion path recovered",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Session synthesis preserves provenance and uncertainty",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Cumulative knowledge updated without false mastery promotion",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "HW2 authoritative availability resolved",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Final HANDOFF_SAFE",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Upload the new classroom/whiteboard photographs and handwritten notes in the ingestion chat, grouped by session/date/order when known.",
+    "Visually synthesize the new unit with the repository's direct-visual model and smallest relevant instructor sources.",
+    "Persist session syntheses and justified cumulative topic/dependency/notation updates without inferring mastery.",
+    "Resolve HW2 authoritative availability and either bootstrap it or checkpoint an HW2-ready state.",
+    "Validate/push the task branch, synchronize task JSON/Markdown, establish HANDOFF_SAFE, and archive when complete."
+  ],
+  "next_safe_action": "Start a fresh ingestion chat from this capsule. From MTH602 README.md at unit-ingestion-hw2@62b7a03c7139cb3987b72ad66bdc532e8a61b82a, load the existing classnotes visual-ingestion route and smallest relevant course/source/study owners. Then ask the user to upload the new classroom/whiteboard and handwritten-note images, preferably grouped by session/date/order. Inspect them directly before deciding whether any OCR is useful. Do not mutate course knowledge until the actual image evidence has been visually reviewed.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "This task intentionally precedes the broader shared tutor-architecture migration and uses MTH602's already-demonstrated direct visual synthesis model."
+}
