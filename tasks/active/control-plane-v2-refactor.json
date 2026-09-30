@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "BLOCKED_RUNTIME",
+  "status": "CHECKPOINTED",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -235,6 +235,16 @@
         "query_local_branch now uses git rev-parse --verify --quiet refs/heads/<branch>^{commit}, which returns exit 1 for a missing ref and still resolves the exact commit when present.",
         "Added an explicit regression test asserting a deleted local task branch is reported as MISSING rather than ERROR.",
         "The cumulative Phase 7 range f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...84a7e67a8af2b701ab63829468c92e46221a72f9 still changes only procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py."
+      ]
+    },
+    {
+      "summary": "Completed exact-checkpoint Phase 7 integrated runtime validation.",
+      "evidence": [
+        "Validated repaired checkpoint 84a7e67a8af2b701ab63829468c92e46221a72f9.",
+        "37 unit tests passed.",
+        "CREATE_AVAILABLE, explicit READY creation, existing READY, dirty refusal/preservation, and divergence refusal all passed.",
+        "PHASE7_RUNTIME_RESULT=PASS.",
+        "No existing workspace worktree was modified."
       ]
     }
   ],
@@ -515,11 +525,18 @@
     },
     {
       "check": "Phase 7 exact-checkpoint integrated runtime validation",
-      "result": "NOT_RUN",
+      "result": "PASS",
       "evidence": [
-        "Repaired target implementation is pushed at 84a7e67a8af2b701ab63829468c92e46221a72f9.",
-        "Exact-checkpoint unit/CLI runtime validation has not yet been rerun after the repair.",
-        "Do not open the next implementation phase until the repaired checkpoint passes."
+        "Exact isolated checkout resolved ACTUAL_HEAD=84a7e67a8af2b701ab63829468c92e46221a72f9.",
+        "Full Python unit suite completed 37 tests with OK.",
+        "Read-only worktree preparation returned CREATE_AVAILABLE without creating the target.",
+        "Explicit creation returned READY at the exact requested branch and checkpoint.",
+        "Existing worktree reassessment returned READY.",
+        "Dirty target returned BLOCKED_DIRTY and preserved the dirty marker.",
+        "Divergence regression passed without moving the local branch.",
+        "Target HEAD and remote HEAD both matched 84a7e67a8af2b701ab63829468c92e46221a72f9.",
+        "PHASE7_RUNTIME_RESULT=PASS.",
+        "Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified."
       ]
     },
     {
@@ -544,20 +561,11 @@
       ]
     }
   ],
-  "blockers": [
-    "Exact-checkpoint Phase 7 integrated runtime validation must be rerun for repaired checkpoint control-plane-v2-refactor@84a7e67a8af2b701ab63829468c92e46221a72f9."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Run the complete Python unit suite from repaired exact checkpoint 84a7e67a8af2b701ab63829468c92e46221a72f9 in an isolated temporary clone; the suite now includes the missing-local-branch regression.",
-    "Run worktree-prepare read-only against an isolated temporary repository and require CREATE_AVAILABLE without creating the target.",
-    "Run the same request with --create and require READY at the exact branch/checkpoint.",
-    "Re-run read-only assessment on the created worktree and require READY without mutation.",
-    "Prove dirty target refusal preserves the dirty file.",
-    "Prove divergent remote/ref state returns BLOCKED_DIVERGED without moving the local branch or deleting/rewriting the worktree.",
-    "Verify non-interference with existing workspace worktrees.",
-    "Only after those checks pass, mark Phase 7 validated/checkpointed and follow the implementation plan's next phase."
+    "Open Phase 8 workflow descriptor validation from the implementation plan."
   ],
-  "next_safe_action": "Remain in Phase 7. Validate repaired exact pushed checkpoint 84a7e67a8af2b701ab63829468c92e46221a72f9 in an isolated GitHub-connected runtime. Run the full unit suite and bounded real-Git worktree-prepare scenarios proving missing-local-branch handling, read-only CREATE_AVAILABLE, explicit --create -> READY at the exact checkpoint, existing READY behavior, dirty-state preservation/refusal, divergence refusal without branch movement, and non-interference with existing workspace worktrees. Record the runtime evidence, then and only then mark Phase 7 validated/checkpointed and open the next planned phase.",
+  "next_safe_action": "Open Phase 8 workflow descriptor validation only; recover its exact scope from architecture/control-plane-v2-implementation.md before mutating the target branch.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
