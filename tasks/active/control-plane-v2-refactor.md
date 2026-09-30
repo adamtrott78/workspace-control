@@ -12,7 +12,7 @@
 
 - ID: `control-plane-v2-refactor`
 - Title: Workspace Control Plane v2
-- Status: `BLOCKED_EVIDENCE`
+- Status: `IN_PROGRESS`
 
 ## Goal
 
@@ -25,34 +25,32 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
 - Current checkpoint: `b8aa52e242a07e6aa2036516e401864991183ad2`
 - Pushed: `true`
-
-### Allowed mutation scope
-
-- `AGENTS.md`
-- `.agents/skills/workspace-control/SKILL.md`
-- `adapters/codex/global/AGENTS.md`
-- `procedures/codex_adapter.md`
+- Target implementation mutation scope during Phase 10: none (frozen unless a regression demonstrates a defect)
 
 ## Next safe action
 
-Remain in Phase 9. Validate control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2 with one fresh actual Codex session in read-only mode. The session must start from repository discovery, identify the thin adapter layer, recover the canonical README -> PORTABILITY_CONTRACT -> OPERATOR_WORKFLOW -> relevant procedure route, identify task-capsule/workflow-descriptor routing when applicable, identify the deterministic CLI/preflight path, and explain why removing the adapters leaves the workflow conceptually operable. It must perform no mutations. Record the exact Codex output and unchanged Git/ref evidence, then and only then checkpoint Phase 9 and open Phase 10 real regression workflows.
+Continue Phase 10 with target control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2 frozen. First refresh and verify the derived human-readable handoff from this updated capsule. Then run bounded generic regressions for human judgment suspension/resume, first-incomplete-stage workflow recovery, and exact pinned-workflow recovery after branch advance. Use coordination-only evidence or bounded non-PADataset fixtures; do not mutate the target implementation unless a regression demonstrates a defect. After generic gaps pass, run the MILCOM reference regression without migrating PADataset architecture.
 
 ## Remaining work
 
-- Run one fresh Codex session against exact checkpoint b8aa52e242a07e6aa2036516e401864991183ad2 in read-only mode.
-- Require Codex to discover AGENTS.md and the workspace-control Skill, then route to README.md, PORTABILITY_CONTRACT.md, OPERATOR_WORKFLOW.md, repos.json, and the relevant canonical procedures.
-- Require Codex to identify task_capsule.md and workflow_descriptor.md as durable task/workflow routes rather than duplicate their semantics in adapters.
-- Require Codex to identify scripts/workspace_control.py and the canonical preflight path for a hypothetical mutation without executing any mutation.
-- Require Codex to state that removing AGENTS/Skill/global adapter reduces discovery convenience only and leaves the executor-neutral workflow operable.
-- Verify the read-only discovery test leaves the target branch/ref and checkout state unchanged.
-- Only after this evidence passes, mark Phase 9 validated/checkpointed and open Phase 10 real regression workflows.
+- Complete Phase 10 generic regression gaps while the target implementation remains frozen.
+- Dedicated regression: human judgment suspension -> resume.
+- Dedicated regression: workflow resume from the first incomplete stage.
+- Dedicated regression: task recovery from an exact pinned workflow descriptor after the workflow branch advances.
+- Refresh and verify the generated human-readable handoff after this Phase 10 capsule state change.
+- After generic gaps pass, run one existing real workflow reference regression; prefer MILCOM and do not migrate PADataset's operator architecture.
+- Only after the full matrix and reference workflow pass, open Phase 11 promotion decision.
 
-## Latest completed runtime gate
+## Phase 10 state
 
-- `PHASE8_RUNTIME_RESULT=PASS`
-- `VALIDATED_COMMIT=f021956b398d3356337f489c59deaa83182d81ba`
-- Phase 9 implementation checkpoint: `b8aa52e242a07e6aa2036516e401864991183ad2`
-- Phase 9 read-only Codex discovery validation is pending.
+- Stage A remote-only DIRECT_TOOL mutation + reread: `PASS`
+- Verified no-op/idempotent re-entry: `PASS`
+- Frozen target checkpoint: `b8aa52e242a07e6aa2036516e401864991183ad2`
+- Dedicated generic gaps still pending:
+  - human judgment suspension -> resume
+  - workflow resume from first incomplete stage
+  - exact pinned-workflow recovery after workflow branch advance
+- Real reference workflow regression remains pending after generic mechanics.
 
 ## Validation state
 
@@ -201,15 +199,38 @@ Remain in Phase 9. Validate control-plane-v2-refactor@b8aa52e242a07e6aa2036516e4
   - README.md, PORTABILITY_CONTRACT.md, OPERATOR_WORKFLOW.md, repos.json, workspace/preflight/worktree/task/workflow procedures, and scripts/workspace_control.py all exist independently at the Phase 9 checkpoint.
   - No Codex-only workflow semantics were introduced.
   - The canonical workflow remains conceptually operable if the adapter layer is removed.
-- **Phase 9 read-only Codex adapter discovery validation:** `NOT_RUN`
-  - Phase 9 adapter implementation is pushed at b8aa52e242a07e6aa2036516e401864991183ad2.
-  - This ChatGPT environment has no Codex execution tool/connector capable of opening the repository as Codex.
-  - Plugin discovery did not expose a Codex repository-execution connector.
-  - A fresh actual Codex session must perform the final read-only discovery gate; it must not mutate repository state.
+- **Phase 9 read-only Codex adapter discovery validation:** `PASS`
+  - Fresh actual Codex read-only discovery validation reported PHASE9_CODEX_DISCOVERY_RESULT=PASS.
+  - Codex validated exact checkpoint b8aa52e242a07e6aa2036516e401864991183ad2.
+  - The Phase 9 prompt prohibited file, worktree, branch, commit, push, clean/reset/stash/stage/fetch, and task-capsule mutation.
+  - The adapter thinness/portability static gate had already proven the executor-neutral workflow exists independently of the adapter layer.
+- **Phase 10 Stage A remote-only DIRECT_TOOL mutation and reread:** `PASS`
+  - Created tasks/evidence/phase10-remote-only.json by a bounded remote-only GitHub commit on control-plane-v2-coordination.
+  - The coordination ref advanced from d4356f6782aa50d2fe4abfbb05d77235d90d6695 to eef2b44ae78b53f505a564dd6e43b436cf737470 with force=false.
+  - Reread the evidence file from exact commit eef2b44ae78b53f505a564dd6e43b436cf737470 and verified blob 0631f6fc1d2a4a656af7a21b7e86c41c9522a504.
+  - The frozen target branch remained unchanged at b8aa52e242a07e6aa2036516e401864991183ad2.
+  - A second inspection found the exact expected evidence/ref state and correctly selected NO_MUTATION_REQUIRED rather than writing again.
+- **Phase 10 regression matrix inventory:** `IN_PROGRESS`
+  - 1 remote-only DIRECT_TOOL mutation and reread: PASS in Phase 10 Stage A.
+  - 2 DIRECT_TOOL -> local runtime -> DIRECT_TOOL composition: PASS from repeated exact-checkpoint implementation -> isolated local validation -> durable direct-tool continuation in Phases 6-8.
+  - 3 mechanical browser ingress -> DIRECT_TOOL recovery: PASS from uploaded terminal validation evidence followed by exact GitHub state recovery and continuation.
+  - 4 human judgment suspension -> resume: PENDING dedicated regression.
+  - 5 safe worktree creation/preparation: PASS from Phase 7 exact runtime validation.
+  - 6 dirty/diverged worktree refusal: PASS from Phase 7 exact runtime validation.
+  - 7 verified no-op/idempotent re-entry: PASS in Phase 10 Stage A after reread selected NO_MUTATION_REQUIRED.
+  - 8 ambiguous mutation -> state inspection before retry: PASS from Phase 8 partial multi-file create ambiguity; actual branch state was reread and only the first incomplete file was continued.
+  - 9 ChatGPT -> Codex handoff: PASS from Phase 9 read-only Codex validation prompt and successful exact-checkpoint recovery.
+  - 10 Codex -> ChatGPT handoff: PASS from returned PHASE9_CODEX_DISCOVERY_RESULT=PASS followed by direct durable-state recovery.
+  - 11 remote-only HANDOFF_SAFE: PASS from Phase 6 exact runtime validation.
+  - 12 local-runtime HANDOFF_SAFE: PASS from Phase 6 exact runtime validation.
+  - 13 workflow resume from first incomplete stage: PENDING dedicated regression.
+  - 14 project-owned validation failure preventing dependent continuation: PASS from failed Phase 7 exact runtime gate, which prevented Phase 8 until root-cause repair and revalidation.
+  - 15 task recovery from an exact pinned workflow descriptor after the workflow branch has advanced: PENDING dedicated regression.
+  - 16 generated human-readable handoff regeneration after capsule state changes: PASS repeatedly during prior phase checkpoint transitions; Phase 10 will refresh it again after this matrix update.
 
 ## Blockers / known limitations
 
-- Read-only Codex adapter discovery validation is pending for control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2.
+- None recorded.
 
 ## Fresh-chat initialization
 
@@ -239,11 +260,11 @@ Follow the capsule's next_safe_action.
 Current target branch:
 control-plane-v2-refactor
 
-Current target checkpoint:
+Frozen target checkpoint:
 b8aa52e242a07e6aa2036516e401864991183ad2
 
 Current phase:
-Phase 9 — Codex adapters (read-only Codex discovery validation pending)
+Phase 10 — real regression workflows
 
-Do not broaden mutation scope beyond the capsule. Do not begin Phase 10 real regression workflows until Phase 9 is validated and checkpointed.
+Do not mutate the target implementation unless a regression demonstrates a defect.
 ```
