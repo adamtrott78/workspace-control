@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "automated-research-engine-v1",
   "title": "Automated research engine v1",
-  "status": "IN_PROGRESS",
+  "status": "BLOCKED_RUNTIME",
   "goal": "Design and prove a provenance-preserving automated research engine that turns scholarly literature into structured evidence, durable knowledge, challenged research gaps, fundable research programs, and workspace-control-executable research projects.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -111,7 +111,7 @@
     },
     {
       "id": "ingress_prototype",
-      "status": "IN_PROGRESS",
+      "status": "SUSPENDED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "composed",
@@ -157,9 +157,17 @@
             "19 unique provider records were explicitly screened from metadata only: 14 INCLUDE_DEEP_READ, 3 INCLUDE_METADATA_ONLY, 1 DEFER, 1 EXCLUDE_DUPLICATE.",
             "Screening fixture labels itself model-generated triage, not scientific evidence."
           ]
+        },
+        {
+          "check": "current-executor byte acquisition capability",
+          "result": "FAIL",
+          "evidence": [
+            "Direct container curl to https://arxiv.org/pdf/2108.13099 failed because the container could not resolve host arxiv.org.",
+            "The same paper was successfully resolved/read through the scholarly/web surface, so this is an executor network limitation rather than source unavailability."
+          ]
         }
       ],
-      "resume_condition": null
+      "resume_condition": "Receive a noninteractive local-runtime acquisition receipt for at least one resolved OA source containing source URL, byte length, SHA-256, and PDF signature check."
     },
     {
       "id": "extraction_pipeline",
@@ -427,9 +435,19 @@
       "evidence": [
         "All 19 unique provider records received explicit metadata-only triage decisions with decider identity and rationale."
       ]
+    },
+    {
+      "check": "current-executor full-text byte acquisition",
+      "result": "FAIL",
+      "evidence": [
+        "OA source resolution succeeded, but current container DNS/network access cannot retrieve external PDF bytes.",
+        "Ingress remains blocked only on cryptographic artifact receipt."
+      ]
     }
   ],
-  "blockers": [],
+  "blockers": [
+    "Current ChatGPT container cannot resolve external hosts for byte acquisition (curl to arxiv.org failed with DNS resolution error). The lawful OA source is resolved and readable through the scholarly/web surface; only byte retrieval/hash evidence is missing."
+  ],
   "remaining_work": [
     "Acquire and cryptographically hash at least one lawful OA full-text artifact using a runtime/tool with byte retrieval access; record both the successful acquisition and prior failed executor attempt.",
     "Validate the ingress schemas and pilot fixtures mechanically in the future research-engine implementation repository.",
@@ -440,8 +458,8 @@
     "Bridge an approved research program into a workspace-control project execution workflow.",
     "Run the narrow-domain vertical slice and measure evidence fidelity, traceability, novelty false-positive rate, and execution handoff quality."
   ],
-  "next_safe_action": "Complete the ingress byte-acquisition gate for at least one already-resolved lawful OA source (prefer arXiv 2108.13099v1). Use a noninteractive local runtime to download the exact source bytes, record byte length and SHA-256, and return the receipt. Preserve the prior current-executor acquisition failure as a separate AcquisitionAttempt. Once one artifact hash is proven, record it durably and advance to extraction_pipeline.",
+  "next_safe_action": "Run the documented noninteractive local acquisition command for arXiv 2108.13099v1 and return its receipt (URL, byte count, SHA-256, and PDF magic). Do not rerun discovery or identity resolution. After receipt, record a successful AcquisitionAttempt, clear BLOCKED_RUNTIME, validate ingress_prototype, and advance to extraction_pipeline.",
   "last_executor": "chatgpt",
-  "last_surface": "github",
+  "last_surface": "local-runtime-attempt",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
 }
