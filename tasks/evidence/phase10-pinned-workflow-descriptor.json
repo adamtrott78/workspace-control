@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "workflow_id": "phase10-pinned-workflow",
-  "title": "Phase 10 pinned workflow version A",
-  "purpose": "Regression fixture proving exact workflow recovery after the live branch advances.",
+  "title": "Phase 10 pinned workflow version B",
+  "purpose": "Advanced live-branch version used to prove an older task remains bound to workflow version A.",
   "owner": {
     "repository": "workspace-control",
     "context_path": "README.md"
@@ -27,7 +27,28 @@
       "expected_artifacts": [],
       "artifact_lifecycle": [],
       "validation": [
-        "Exact pinned descriptor identity is recoverable."
+        "Current live workflow version is B."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "report",
+      "execution_owner": "workspace-control",
+      "authority_owners": [
+        "README.md"
+      ],
+      "depends_on": [
+        "inspect"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Version B branch advance is explicit."
       ],
       "gates": [],
       "forbidden_mutations": []
