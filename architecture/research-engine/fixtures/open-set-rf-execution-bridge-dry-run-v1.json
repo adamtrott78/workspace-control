@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "bridge_plan": {
+    "schema_version": 1,
+    "bridge_plan_id": "bridge:rf-osr:efficient-blind-generative:dry-run-v1",
+    "source_research_program_id": "program:rf-osr:efficient-blind-generative:dry-run-v1",
+    "source_program_status": "DRAFT_NOT_APPROVED",
+    "instantiable": false,
+    "blockers": [
+      "Source ResearchProgram is DRAFT_NOT_APPROVED.",
+      "Source GapCandidate is NARROWED and requires deeper prior-work review.",
+      "No explicit human approval selected this research direction.",
+      "Owning implementation/project repository has not been selected or created."
+    ],
+    "project": {
+      "suggested_role": "project-owned research repository",
+      "repository": null,
+      "goal": "If approved after prior-work closure, evaluate an efficient tuning-light blind generative outlier augmentation approach for open-set RF fingerprinting.",
+      "authority": [
+        "scientific method and experiment design",
+        "research code/configuration",
+        "datasets and provenance",
+        "results and analysis",
+        "paper/project context"
+      ]
+    },
+    "workspace_control_task_template": {
+      "schema_version": 2,
+      "status": "PLANNED",
+      "execution_topology": "remote_only",
+      "goal": "Execute the approved ResearchProgram from durable evidence through method implementation, controlled experiments, analysis, falsification, and publication artifacts.",
+      "stages": [
+        {
+          "id": "prior_work_closure",
+          "status": "PLANNED",
+          "gate": "Must validate or further narrow novelty before method implementation."
+        },
+        {
+          "id": "method_design",
+          "status": "PLANNED",
+          "gate": "Requires prior_work_closure PASS and human continuation decision if novelty materially changed."
+        },
+        {
+          "id": "implementation",
+          "status": "PLANNED",
+          "gate": "Project-owned executable implementation."
+        },
+        {
+          "id": "experimental_evaluation",
+          "status": "PLANNED",
+          "gate": "Run baselines and proposed method under frozen evaluation protocol."
+        },
+        {
+          "id": "analysis_and_falsification",
+          "status": "PLANNED",
+          "gate": "Evaluate hypotheses against predeclared falsification criteria."
+        },
+        {
+          "id": "publication_evidence_update",
+          "status": "PLANNED",
+          "gate": "Feed validated results back into research-engine evidence/proposal state."
+        }
+      ],
+      "acceptance_criteria": [
+        "Every experiment/result traces to project-owned configuration/data/code checkpoints.",
+        "Predeclared baselines, metrics, and falsification criteria are executed or explicitly waived by a recorded human decision.",
+        "Negative results are persisted rather than optimized away.",
+        "Final scientific claims trace to durable experimental evidence."
+      ],
+      "next_safe_action": "Not executable until ResearchProgram becomes APPROVED and owning project repository is selected."
+    },
+    "evidence_refs": [
+      "gap:rf-osr:efficient-blind-generative-outliers:v1",
+      "ev:2108:result:ellipsoid",
+      "ev:2108:limitation:ellipsoid",
+      "ev:2108:result:optimization",
+      "ev:2108:limitation:optimization",
+      "challenge:efficient-blind-generative:v1"
+    ],
+    "human_gate": {
+      "required": true,
+      "state": "NOT_APPROVED",
+      "required_decision": "Explicitly approve a research direction after sufficient novelty/evidence review."
+    }
+  },
+  "validation": [
+    {
+      "check": "unapproved instantiation refusal",
+      "result": "PASS",
+      "evidence": "DRAFT_NOT_APPROVED source program produces instantiable=false and no project mutation."
+    },
+    {
+      "check": "deterministic execution mapping",
+      "result": "PASS",
+      "evidence": "ResearchProgram concerns map to explicit prior-work, design, implementation, evaluation, falsification, and evidence-update stages."
+    },
+    {
+      "check": "authority separation",
+      "result": "PASS",
+      "evidence": "Project repository remains owner of scientific execution; workspace-control owns generic coordination/task state."
+    },
+    {
+      "check": "conversation independence",
+      "result": "PASS",
+      "evidence": "Would-be task goal, stages, acceptance criteria, evidence refs, blockers, and next action are represented durably without chat reconstruction."
+    }
+  ]
+}

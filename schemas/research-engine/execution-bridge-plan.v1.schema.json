@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/execution-bridge-plan.v1.schema.json",
+  "title": "Research Engine ProjectBootstrapPlan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "bridge_plan_id",
+    "source_research_program_id",
+    "source_program_status",
+    "instantiable",
+    "blockers",
+    "project",
+    "workspace_control_task_template",
+    "evidence_refs",
+    "human_gate"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "bridge_plan_id": {
+      "type": "string"
+    },
+    "source_research_program_id": {
+      "type": "string"
+    },
+    "source_program_status": {
+      "type": "string"
+    },
+    "instantiable": {
+      "type": "boolean"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "project": {
+      "type": "object"
+    },
+    "workspace_control_task_template": {
+      "type": "object"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_gate": {
+      "type": "object"
+    }
+  }
+}
