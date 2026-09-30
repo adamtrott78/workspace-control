@@ -37,22 +37,21 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: e23da0349160a0a181d356d4f9aee0c0c2ea8b3e
+- Remote checkpoint: 6b33ababe9e58de33941c8ad2d3161c02551ce7e
 - Remote verified: true
 
 ## Next safe action
 
-Merge research-engine PR #1 after its successful PostgreSQL/pgvector CI run, verify research-engine/main, then implement the idempotent curated-corpus PostgreSQL loader and database-backed provenance query regression tests. Continue using PR-triggered CI as the real database runtime.
+Continue directly in adamtrott78/research-engine from main@6b33ababe9e58de33941c8ad2d3161c02551ce7e. Enforce immutable evidence/relation identity with explicit supersession/history, then add deterministic knowledge checkpoints and PostgreSQL regression tests. Use PR-triggered GitHub Actions as the real PostgreSQL/pgvector runtime. Continue until a genuine capability, authority, or required-human-decision boundary is reached.
 
 ## Remaining work
 
-- Merge the validated CI documentation PR into research-engine/main and verify main.
-- Implement an idempotent PostgreSQL corpus loader for the current curated multi-paper fixture and integration tests.
-- Implement database-backed provenance/support/qualifier queries over loaded corpus evidence.
-- Add machine-readable schema/fixture validation for research-engine contract fixtures.
-- Add provider/parser service interfaces while keeping scientific evidence contracts authoritative.
-- Re-run novelty challenge after additional RF-specific papers are loaded; only then consider SUPPORTED_AS_OPEN.
-- After implementation vertical-slice tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
+- Enforce immutable authoritative evidence/relation IDs: identical re-entry is idempotent, but semantic changes under the same ID must be rejected and represented by superseding records/events.
+- Implement deterministic knowledge checkpoints so syntheses bind to a reproducible corpus/evidence state rather than live database contents.
+- Add database regression tests for supersession/history and deterministic checkpoint reproduction.
+- Promote Broggi 2025 to exact-PDF evidence during corpus scaling; this is not a blocker for implementation hardening.
+- Ingest additional RF-specific papers and re-run novelty challenge before any GapCandidate can move toward SUPPORTED_AS_OPEN.
+- After hardening tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
 
 ## Blockers / gates
 
