@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "BLOCKED_RUNTIME",
+  "status": "CHECKPOINTED",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -36,8 +36,7 @@
       "checkpoint_pushed": true,
       "allowed_mutation_scope": [
         "scripts/workspace_control.py",
-        "procedures/task_capsule.md",
-        "tasks/README.md",
+        "procedures/worktree_prepare.md",
         "tests/test_workspace_control.py",
         "tests/fixtures/**"
       ]
@@ -189,6 +188,20 @@
         "v2 composed handoff requires a provable synchronization boundary.",
         "EXECUTION_READY is a separate optional receiver assessment and does not alter HANDOFF_SAFE or its exit status.",
         "No worktree-preparation implementation was introduced."
+      ]
+    },
+    {
+      "summary": "Completed exact-checkpoint Phase 6 integrated runtime validation and cleared the runtime gate.",
+      "evidence": [
+        "Validated exact target checkpoint f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9 in a clean isolated clone.",
+        "Full Python unit suite completed: Ran 26 tests; OK.",
+        "Live remote preflight returned READY and advertised control-plane-v2-refactor at f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9.",
+        "v1 handoff behavior returned HANDOFF_SAFE.",
+        "v2 remote-only, local, and composed handoff cases all returned HANDOFF_SAFE.",
+        "Composed workflow binding and synchronization boundary resolved successfully.",
+        "A HANDOFF_SAFE remote-only task independently returned NOT_EXECUTION_READY when local-runtime was marked missing.",
+        "Validation explicitly reported PHASE6_RUNTIME_RESULT=PASS.",
+        "Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified."
       ]
     }
   ],
@@ -435,28 +448,29 @@
     },
     {
       "check": "Phase 6 exact-checkpoint integrated runtime validation",
-      "result": "NOT_RUN",
+      "result": "PASS",
       "evidence": [
-        "Target implementation is pushed at f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9.",
-        "Exact-checkpoint unit and CLI runtime validation is pending in a GitHub-connected terminal.",
-        "Do not open Phase 7 until this validation passes and is recorded."
+        "Exact isolated checkout resolved ACTUAL_HEAD=f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9.",
+        "tests/test_workspace_control.py completed 26 tests with OK.",
+        "Live remote preflight returned result=READY, reasons=[], advertised status=FOUND, and advertised SHA=f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9.",
+        "v1 compatibility and v2 remote-only/local/composed handoff assertions all passed.",
+        "Workflow checkpoint binding and composed synchronization boundary assertions passed.",
+        "HANDOFF_SAFE remained independent from receiver-specific EXECUTION_READY.",
+        "Validation reported PHASE6_RUNTIME_RESULT=PASS and explicit non-interference with existing workspace worktrees."
       ]
     }
   ],
-  "blockers": [
-    "Exact-checkpoint Phase 6 integrated runtime validation is pending for control-plane-v2-refactor@f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Run the complete Python unit suite from exact checkpoint f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9 in an isolated temporary clone.",
-    "Prove schema_version 1 handoff behavior remains HANDOFF_SAFE on a matching clean local checkpoint.",
-    "Prove v2 remote-only HANDOFF_SAFE without depending on local checkout state.",
-    "Prove v2 local HANDOFF_SAFE on a matching clean local checkpoint.",
-    "Prove v2 composed HANDOFF_SAFE with workflow binding and an explicit synchronization boundary.",
-    "Prove a HANDOFF_SAFE task can independently report NOT_EXECUTION_READY for a proposed receiver with a missing transient capability.",
-    "Verify the target remote branch still advertises the exact Phase 6 checkpoint and that validation does not modify existing workspace worktrees.",
-    "Only after those checks pass, mark Phase 6 validated/checkpointed and open Phase 7 safe worktree-preparation scope."
+    "Implement Phase 7 deterministic non-destructive worktree preparation.",
+    "Keep worktree preparation read-only by default; require explicit --create for creation.",
+    "Return explicit READY, CREATE_AVAILABLE, NEEDS_REVIEW, BLOCKED_DIRTY, BLOCKED_DIVERGED, BLOCKED_IDENTITY, or BLOCKED_POLICY outcomes as applicable.",
+    "Allow creation of a missing isolated worktree only when repository identity, branch/ref, expected checkpoint, target path, policy, and local source state make creation safe.",
+    "Stop safely for dirty, diverged, occupied-path, branch-conflict, identity-mismatch, or policy-invalid states; do not clean/reset/stash/force-checkout/fetch/overwrite.",
+    "Add the worktree preparation procedure and bounded tests/fixtures.",
+    "Inspect and validate the exact changed-path set before runtime testing."
   ],
-  "next_safe_action": "Remain in Phase 6. Validate exact pushed checkpoint f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9 in an isolated GitHub-connected runtime. Run the full unit suite, verify the target remote ref, and execute bounded v1, v2 remote-only, v2 local, and v2 composed handoff checks plus a receiver-specific NOT_EXECUTION_READY case. Require all durable handoff cases to report HANDOFF_SAFE, require receiver readiness to remain independent, and verify no existing workspace worktree is switched, cleaned, reset, stashed, or modified. Record the runtime evidence, then and only then mark Phase 6 validated/checkpointed and open Phase 7.",
+  "next_safe_action": "Begin Phase 7 only. Starting from control-plane-v2-refactor@f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9, implement deterministic non-destructive worktree preparation within scripts/workspace_control.py, procedures/worktree_prepare.md, tests/test_workspace_control.py, and tests/fixtures/**. The command must be read-only by default, require explicit --create before adding a worktree, and stop safely on dirty/diverged/identity/policy/path conflicts without cleaning, resetting, stashing, fetching, force-checking-out, switching unrelated checkouts, rewriting unrelated refs, or overwriting files. Inspect and validate the exact changed-path set before runtime testing.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
