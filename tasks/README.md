@@ -35,14 +35,32 @@ Supported versioned schemas:
 
 `task-validate` dispatches according to the capsule's `schema_version`.
 
-## Human-readable view
+## Human-readable cold-start handoff
 
-`task-render` can produce `tasks/active/<task_id>.md` as a derived convenience
-view.
+For a durable active task, `task-render` produces
+`tasks/active/<task_id>.md` as the standard human-readable cold-start handoff
+surface.
 
-The JSON capsule plus verified Git/runtime evidence remain authoritative.
+Its authority is derived: the JSON capsule plus verified Git/runtime evidence
+remain authoritative. Its operational value is nevertheless first-class. The
+Markdown should contain enough current state and fresh-chat initialization
+context that it can be pasted or read in a new conversation to recover the task
+without relying on prior chat memory.
 
 The Markdown view must never become a competing source of task truth.
+
+### Synchronization requirement
+
+Whenever a maintained active JSON capsule changes materially, its companion
+Markdown MUST be regenerated from the post-mutation JSON before any further task
+operation or executor/conversation handoff.
+
+Prefer updating JSON and Markdown atomically. If the operation surface requires
+two commits, the Markdown refresh must immediately follow the JSON mutation and
+no unrelated task work may occur between them.
+
+A stale or missing maintained Markdown handoff after a material JSON change is a
+synchronization defect. Pause task progression until the handoff is regenerated.
 
 ## v1
 

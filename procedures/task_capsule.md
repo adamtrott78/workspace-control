@@ -79,6 +79,12 @@ Without `--output`, the rendered Markdown is written to stdout.
 
 The JSON capsule plus verified Git/runtime evidence remain authoritative.
 
+The rendered Markdown is the standard human-readable cold-start handoff surface
+for a durable task. Its authority is derived from the JSON capsule, but its
+operational role is first-class: a user or receiving executor should be able to
+paste or read it in a fresh conversation and recover the task without depending
+on prior chat state.
+
 The rendered view:
 
 - carries an explicit derived marker;
@@ -91,7 +97,24 @@ The rendered view:
 The renderer refuses to overwrite an existing output that does not carry the
 derived marker.
 
-Regenerate the human-readable view after material capsule changes.
+### JSON -> Markdown synchronization invariant
+
+For an active durable task that maintains
+`tasks/active/<task_id>.md`, every material mutation to
+`tasks/active/<task_id>.json` MUST be followed by regeneration of the Markdown
+from the **post-mutation JSON state before any further task operation, executor
+handoff, or fresh-chat handoff**.
+
+Treat the JSON mutation plus Markdown regeneration as one control-cycle unit.
+
+- Prefer an atomic multi-file commit when the operation surface supports it.
+- If two commits are required, the Markdown refresh MUST be the immediate next
+  task-state mutation; no unrelated task work may occur between them.
+- A stale or missing companion Markdown after a material JSON change is a
+  synchronization defect. Suspend further task progression until it is
+  regenerated.
+- Do not manually maintain task truth in the Markdown. Regenerate it from the
+  authoritative JSON capsule.
 
 ## Handoff assessment
 
@@ -166,8 +189,10 @@ Do not record an operation as executed until execution evidence exists.
 Do not mark a remote checkpoint verified until the remote identity was actually
 checked.
 
-Where a derived Markdown handoff is maintained, refresh it after the capsule
-update or mark it explicitly stale. The JSON remains authoritative.
+Where a derived Markdown handoff is maintained, the capsule update is not
+operationally complete until the Markdown has been regenerated from the
+post-update JSON state. Do not continue the task or hand it off while the
+companion Markdown is stale. The JSON remains authoritative.
 
 ## Workflow binding
 

@@ -488,6 +488,13 @@ The capsule should record:
 A handoff should not depend on a special prose explanation if the normal
 workspace-control entry route and durable state are sufficient.
 
+When an active capsule maintains a derived
+`tasks/active/<task_id>.md` handoff, a material JSON state change and the
+Markdown regeneration form one control-cycle unit. The executor MUST regenerate
+the Markdown from the post-mutation JSON before performing another task
+operation or handing the task to a new conversation/executor. A stale companion
+Markdown is a synchronization defect, not an acceptable steady state.
+
 See `procedures/task_capsule.md`.
 
 ## Project integration contract
