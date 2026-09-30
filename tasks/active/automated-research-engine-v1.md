@@ -33,23 +33,30 @@ Design and prove a provenance-preserving automated research engine that turns sc
 - Remote checkpoint: 33339103d1a21842ff7479bd72782ab4dc42f9b9
 - Remote verified: true
 
+### research-engine
+
+- Intent: mutate
+- Remote branch: main
+- Remote checkpoint: cc4ae9e185257574757ff5da910237a23f4292a1
+- Remote verified: true
+
 ## Next safe action
 
-Populate the newly created private adamtrott78/research-engine repository with the tested 20-file implementation bootstrap, verify exact file hashes/remote checkpoint, register the repository in workspace-control, then continue remotely executable implementation. Run the prepared PostgreSQL/pgvector integration test when a capable runtime becomes available. Do not stop merely because the runtime test is pending while independent safe implementation work remains.
+On research-engine/main@cc4ae9e185257574757ff5da910237a23f4292a1, add CI that runs the full test suite against a PostgreSQL 18 + pgvector service. Inspect the workflow result and repair any implementation/schema defects without asking for local Docker while GitHub Actions remains a viable runtime surface. Then implement/load the curated corpus and provenance query tests.
 
 ## Remaining work
 
-- Create the dedicated adamtrott78/research-engine implementation repository and initialize it from the validated workspace-control contracts.
-- Implement v1 PostgreSQL/pgvector schema and content-addressed artifact-store interfaces.
-- Implement fixture/schema validation and load the current five-work corpus as the first test dataset.
-- Implement provenance query tests covering Result->Claim support, limitation qualifiers, source locators, and mixed fidelity.
-- Promote Broggi 2025 to exact-PDF evidence during later corpus ingestion, not as a blocker for implementation.
+- Add GitHub Actions CI using PostgreSQL 18 + pgvector and run all unit/integration tests on research-engine/main.
+- Repair any runtime/schema defect found by CI and rerun until the bootstrap passes on a real PostgreSQL/pgvector instance.
+- Implement fixture/schema validation and an idempotent loader for the current curated multi-paper corpus into PostgreSQL.
+- Implement provenance query regression tests over loaded corpus evidence and mixed-fidelity state.
+- Add provider/parser service interfaces while keeping scientific evidence contracts authoritative.
 - Re-run novelty challenge after additional RF-specific papers are loaded; only then consider SUPPORTED_AS_OPEN.
 - After implementation vertical-slice tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
 
 ## Blockers / gates
 
-- PostgreSQL/pgvector integration test remains pending until a capable runtime is confirmed. This does not block remote repository population or further implementation work.
+- The initial PostgreSQL integration test has not yet executed against a real PostgreSQL/pgvector runtime; GitHub Actions CI is the next available authorized runtime surface and should be tried before requesting local Docker.
 
 ## Fresh-chat initialization
 
