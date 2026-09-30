@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "task_id": "control-plane-v2-refactor",
+  "title": "Workspace Control Plane v2",
+  "status": "CHECKPOINTED",
+  "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
+  "acceptance_criteria": [
+    "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
+    "The shared operator/tutor bridge concepts and proven Codex adapter concepts are deliberately integrated rather than blindly merged, while executor-specific adapters remain thin.",
+    "Portability is generalized beyond a two-party Codex versus ChatGPT+human model to distinguish reasoning executor, operation surface, topology/data locality, authority, and consequence.",
+    "Reusable project-owned workflow descriptors are distinguished from live task capsules; workflow descriptors define stable procedure while capsules define one execution's durable progress.",
+    "Coordination supports remote-only, local, and composed/hybrid execution topologies without manufacturing local state solely to legitimize remote DIRECT_TOOL work.",
+    "Task execution is stage-oriented: material stages have preconditions, bounded authority, expected outputs, validation, durable identities when required, stop/failure conditions, and resumable progress.",
+    "Artifact lifecycle/Git policy and safe deterministic worktree preparation are represented without making workspace-control own project-specific artifact semantics.",
+    "Regression validation covers DIRECT_TOOL-only work, DIRECT_TOOL to local runtime transitions, human-gate suspension/resume, ChatGPT to Codex and Codex to ChatGPT handoff, remote-only handoff, local-runtime handoff, and ambiguous-failure recovery before promotion to main."
+  ],
+  "constraints": [
+    "Do not modify PADataset during the v2 architecture/refactor until the new control plane is validated and an explicit later migration consumes it.",
+    "Do not modify MTH602, EAS501, CIS560, or other course repositories merely to implement workspace-control v2.",
+    "Preserve phase4-codex-adapters at 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859 and phase4-chatgpt-to-codex-handoff at 726c31f855d723943cc24b8d31448cf5eaa5532e as evidence; do not redo Phase 4C.",
+    "Preserve shared-operator-tutor-contract at 450eebeef6b76a674913949863082277b6bdb811 as the provisional tutor/operator evidence branch until deliberate integration.",
+    "Project/domain authority remains inside the owning project repository; workspace-control owns reusable coordination, portability, routing, and execution semantics only.",
+    "Do not make LangGraph, Temporal, AutoGen, OpenAI Agents SDK, GitOps tooling, or another framework the canonical control plane; use external systems only as design references unless separately justified.",
+    "Do not create a large permanent executor-capability database before the minimal v2 selection/validation requirements are clear.",
+    "Do not blindly retry failed or ambiguous mutations; inspect actual durable state first.",
+    "For the first implementation phase, mutate only the v2 architecture specification path on the refactor branch; expand mutation scope only after that specification is reviewed."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "checkout_path": "/home/atrott/adamArchives/Adam/workspace-control-v2-refactor",
+      "branch": "control-plane-v2-refactor",
+      "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
+      "checkpoint_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
+      "checkpoint_pushed": true,
+      "allowed_mutation_scope": [
+        "architecture/control-plane-v2.md"
+      ]
+    }
+  ],
+  "decisions": [
+    "Use a separate coordination branch for the task capsule and a separate refactor branch for actual v2 mutations, following the pattern proven in Phase 4C.",
+    "Treat project-local domain authority, shared behavioral contracts, workspace coordination/durable task state, thin executor adapters, and actual executors/surfaces as separate architectural layers.",
+    "Treat DIRECT_TOOL as a first-class autonomous surface for operation classes that have empirical evidence, but keep trust operation-class specific.",
+    "Distinguish reasoning executor from operation surface and from execution topology/data locality; do not encode current GitHub-versus-terminal limitations as permanent executor assignments.",
+    "Treat HUMAN_BROWSER_INGRESS, HUMAN_TERMINAL, specialized external-tool execution, and substantive human judgment as different kinds of boundaries.",
+    "Keep artifact completion separate from student mastery; this remains a tutoring-contract invariant rather than a generic control-plane state.",
+    "Adopt the principle 'more verified stages per autonomous control cycle' rather than optimizing merely for fewer messages.",
+    "Introduce reusable project-owned workflow descriptors as a v2 design target, distinct from live task capsules.",
+    "Introduce stage-level validation and resumability as v2 design targets so completed stages are not replayed after suspension or partial failure.",
+    "Use MILCOM/PADataset evidence to evaluate named deterministic project entrypoints, artifact lifecycle declarations, safe worktree preparation, and project-owned cross-authority consistency validators.",
+    "Use external systems such as Anthropic workflow/agent guidance, Temporal, LangGraph, AutoGen, OpenAI Agents SDK, GitOps, and asset-oriented orchestration only as comparative design references."
+  ],
+  "executed_operations": [
+    {
+      "summary": "Verified preserved workspace-control branch heads before initializing v2.",
+      "evidence": [
+        "main -> cb8368cd50de2d364c2aade8843276aab0b02420",
+        "shared-operator-tutor-contract -> 450eebeef6b76a674913949863082277b6bdb811",
+        "phase4-codex-adapters -> 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859",
+        "phase4-chatgpt-to-codex-handoff -> 726c31f855d723943cc24b8d31448cf5eaa5532e"
+      ]
+    },
+    {
+      "summary": "Created isolated v2 target and coordination branches from the exact main baseline.",
+      "evidence": [
+        "control-plane-v2-refactor created from cb8368cd50de2d364c2aade8843276aab0b02420",
+        "control-plane-v2-coordination created from cb8368cd50de2d364c2aade8843276aab0b02420"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "tasks/active/control-plane-v2-refactor.json",
+      "state": "coordination capsule stored on control-plane-v2-coordination",
+      "evidence": [
+        "The capsule is intentionally stored outside the target refactor branch to avoid self-referential checkpoint state."
+      ]
+    },
+    {
+      "path": "architecture/control-plane-v2.md",
+      "state": "not yet created",
+      "evidence": [
+        "This is the only currently authorized target-branch mutation for the first implementation phase."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Preserved evidence branches verified before v2 initialization",
+      "result": "PASS",
+      "evidence": [
+        "GitHub branch endpoints matched the expected main, shared bridge, Codex target, and Phase-4 coordination SHAs."
+      ]
+    },
+    {
+      "check": "New v2 branches created from exact baseline",
+      "result": "PASS",
+      "evidence": [
+        "Both control-plane-v2-refactor and control-plane-v2-coordination were created from cb8368cd50de2d364c2aade8843276aab0b02420."
+      ]
+    },
+    {
+      "check": "V2 architecture specification reviewed",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Integrated v2 implementation validated",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Cross-executor regression suite completed",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [
+    "The v1 HANDOFF_SAFE checker is local-worktree-centric. This capsule is durable remote coordination state, but formal v1 HANDOFF_SAFE validation requires an isolated local worktree at the recorded checkout path. Do not confuse this known v1 checker limitation with loss of the remote task state."
+  ],
+  "remaining_work": [
+    "Verify the newly created remote v2 branch heads and the coordination capsule commit.",
+    "Create/review architecture/control-plane-v2.md on control-plane-v2-refactor, answering the agreed v2 vocabulary and ownership questions before broader implementation.",
+    "After architecture approval, update this capsule's mutation scope and checkpoint before modifying policies, schemas, procedures, deterministic tooling, or adapters.",
+    "Deliberately integrate the provisional shared operator/tutor bridge and proven Codex adapter concepts.",
+    "Design and implement topology-aware coordination, workflow/stage semantics, remote-aware preflight/handoff, safe worktree preparation, and minimal workflow/artifact contracts.",
+    "Run regression validation across direct-tool, local-runtime, human-gate, failure-recovery, and both Codex/ChatGPT handoff directions.",
+    "Only after validation, decide promotion to main and later PADataset migration."
+  ],
+  "next_safe_action": "From the normal workspace-control entry route, inspect this capsule and the exact preserved evidence branches, verify control-plane-v2-refactor still points to cb8368cd50de2d364c2aade8843276aab0b02420, then draft only architecture/control-plane-v2.md on that refactor branch. Do not broaden mutation scope until the architecture specification is reviewed.",
+  "last_executor": "chatgpt-direct-tool",
+  "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
+}
