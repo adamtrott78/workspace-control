@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "BLOCKED_EVIDENCE",
+  "status": "CHECKPOINTED",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -34,12 +34,7 @@
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
       "checkpoint_sha": "b8aa52e242a07e6aa2036516e401864991183ad2",
       "checkpoint_pushed": true,
-      "allowed_mutation_scope": [
-        "AGENTS.md",
-        ".agents/skills/workspace-control/SKILL.md",
-        "adapters/codex/global/AGENTS.md",
-        "procedures/codex_adapter.md"
-      ]
+      "allowed_mutation_scope": []
     }
   ],
   "decisions": [
@@ -282,6 +277,14 @@
         "The adapter files explicitly identify themselves as discovery/routing aids rather than policy/domain/task authority.",
         "All canonical routes referenced by the adapters exist independently of the adapter layer.",
         "Removing the four adapter files would leave README, portability/operator policy, registry, procedures, task/workflow state, and deterministic CLI intact."
+      ]
+    },
+    {
+      "summary": "Completed Phase 9 read-only Codex adapter discovery validation.",
+      "evidence": [
+        "Actual Codex reported PHASE9_CODEX_DISCOVERY_RESULT=PASS.",
+        "VALIDATED_COMMIT=b8aa52e242a07e6aa2036516e401864991183ad2.",
+        "No target implementation change was required after the adapter integration checkpoint."
       ]
     }
   ],
@@ -651,28 +654,25 @@
     },
     {
       "check": "Phase 9 read-only Codex adapter discovery validation",
-      "result": "NOT_RUN",
+      "result": "PASS",
       "evidence": [
-        "Phase 9 adapter implementation is pushed at b8aa52e242a07e6aa2036516e401864991183ad2.",
-        "This ChatGPT environment has no Codex execution tool/connector capable of opening the repository as Codex.",
-        "Plugin discovery did not expose a Codex repository-execution connector.",
-        "A fresh actual Codex session must perform the final read-only discovery gate; it must not mutate repository state."
+        "Fresh actual Codex read-only discovery validation reported PHASE9_CODEX_DISCOVERY_RESULT=PASS.",
+        "Codex validated exact checkpoint b8aa52e242a07e6aa2036516e401864991183ad2.",
+        "The Phase 9 prompt prohibited file, worktree, branch, commit, push, clean/reset/stash/stage/fetch, and task-capsule mutation.",
+        "The adapter thinness/portability static gate had already proven the executor-neutral workflow exists independently of the adapter layer."
       ]
     }
   ],
-  "blockers": [
-    "Read-only Codex adapter discovery validation is pending for control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Run one fresh Codex session against exact checkpoint b8aa52e242a07e6aa2036516e401864991183ad2 in read-only mode.",
-    "Require Codex to discover AGENTS.md and the workspace-control Skill, then route to README.md, PORTABILITY_CONTRACT.md, OPERATOR_WORKFLOW.md, repos.json, and the relevant canonical procedures.",
-    "Require Codex to identify task_capsule.md and workflow_descriptor.md as durable task/workflow routes rather than duplicate their semantics in adapters.",
-    "Require Codex to identify scripts/workspace_control.py and the canonical preflight path for a hypothetical mutation without executing any mutation.",
-    "Require Codex to state that removing AGENTS/Skill/global adapter reduces discovery convenience only and leaves the executor-neutral workflow operable.",
-    "Verify the read-only discovery test leaves the target branch/ref and checkout state unchanged.",
-    "Only after this evidence passes, mark Phase 9 validated/checkpointed and open Phase 10 real regression workflows."
+    "Run Phase 10 architecture regression matrix as evidence-only work while keeping the target implementation checkpoint fixed unless a demonstrated defect requires repair.",
+    "Stage A: workspace-control remote-only regression.",
+    "Stage B: bounded non-PADataset local/worktree/runtime regression.",
+    "Stage C: one existing real workflow reference regression after generic mechanics pass; MILCOM is the preferred reference because its historical direct-tool -> pushed SHA -> local build/render -> QA/human gate -> source-repair flow is already known.",
+    "Do not migrate PADataset's operator architecture during this regression phase.",
+    "Record exact evidence for each stage before moving to Phase 11 promotion decision."
   ],
-  "next_safe_action": "Remain in Phase 9. Validate control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2 with one fresh actual Codex session in read-only mode. The session must start from repository discovery, identify the thin adapter layer, recover the canonical README -> PORTABILITY_CONTRACT -> OPERATOR_WORKFLOW -> relevant procedure route, identify task-capsule/workflow-descriptor routing when applicable, identify the deterministic CLI/preflight path, and explain why removing the adapters leaves the workflow conceptually operable. It must perform no mutations. Record the exact Codex output and unchanged Git/ref evidence, then and only then checkpoint Phase 9 and open Phase 10 real regression workflows.",
+  "next_safe_action": "Begin Phase 10 regression evidence with the target implementation frozen at control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2. First run a bounded workspace-control remote-only regression against the exact pushed checkpoint. Then run bounded non-PADataset local/worktree/runtime mechanics. Only after both generic regressions pass, run one existing real workflow as a reference regression, preferring MILCOM without migrating PADataset's operator architecture. Record all evidence on the coordination task state. If any regression exposes an implementation defect, stop, inspect actual durable state, and reopen only the demonstrated implementation scope before retrying.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
