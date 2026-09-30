@@ -30,21 +30,21 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: f9e2a519b5bcde1c2c5a76579bed695f454658a8
+- Remote checkpoint: 24e62c9165b155cda23763dcf1d97b14d923b2b9
 - Remote verified: true
 
 ## Next safe action
 
-Continue vertical_slice_validation from automated-research-engine-v1@f9e2a519b5bcde1c2c5a76579bed695f454658a8. Use the demonstrated five-work object/graph/query requirements to choose and document the v1 persistence/index architecture. Preserve immutable evidence/source records as authority and treat graph/vector indexes as rebuildable projections. Then prepare a bounded exact-PDF promotion check for 2-3 PADataset local reference PDFs to measure OCR-vs-PDF extraction fidelity.
+Run the bounded local exact-PDF promotion bundle for the three PADataset files 2013_scheirer_toward_open_set_recognition.pdf, 2020_liu_energy_ood_detection.pdf, and 2024_baye_varmax_milcom.pdf at their manifest-recorded local paths. Emit SHA-256, byte length, PDF magic/page count, and package exact copies into one temporary tar.gz for upload to the extraction executor. Do not modify PADataset.
 
 ## Remaining work
 
-- Select and document the v1 persistence/index architecture based on demonstrated requirements: immutable source/artifact identity, typed relational records, directed evidence relations, recursive provenance queries, JSON-like extensibility, full-text retrieval, and optional semantic retrieval.
-- Mechanically validate representative fixtures against their JSON schemas in the future implementation repository.
-- Promote a small subset of PADataset OCR_DERIVED works to exact-PDF-verified artifacts by hashing/parsing their local PDFs, then compare OCR-derived extraction against exact-PDF extraction to measure locator/fidelity error.
-- Re-run novelty challenge after additional RF-specific papers are ingested; only then consider whether any candidate can move toward SUPPORTED_AS_OPEN.
-- Create the dedicated research-engine implementation repository when a supported repository-creation path is available; move executable provider/parser/storage code there while retaining workspace-control as control plane.
-- After the vertical slice passes exact-PDF fidelity checks, bulk-ingest the remainder of the already-curated PADataset reference PDFs through the same pipeline.
+- Promote three PADataset OCR_DERIVED reference works (Scheirer 2013, Liu 2020, Baye 2024) to exact-PDF-verified artifacts by hashing the local PDFs and making those exact bytes available to the extraction executor.
+- For each promoted paper, parse exact PDF layout and compare selected OCR-derived evidence anchors against exact-PDF extraction to quantify locator/text fidelity.
+- Mechanically validate representative fixtures against their JSON schemas in the dedicated implementation repository.
+- Re-run cross-paper synthesis/novelty challenge using exact-PDF evidence for the promoted subset and additional RF-specific papers.
+- Create the dedicated research-engine implementation repository when a supported repository-creation path is available; implement PostgreSQL/artifact-store/provider/parser services there.
+- After exact-PDF fidelity checks pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs through the same pipeline.
 
 ## Blockers / gates
 
