@@ -4,6 +4,8 @@
 import hashlib
 import importlib.util
 import json
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -605,6 +607,241 @@ class HandoffTopologyTests(unittest.TestCase):
             readiness["result"],
             "NOT_EXECUTION_READY",
         )
+
+
+class WorktreePrepareTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name)
+        self.bare = self.root / "remote.git"
+        self.source = self.root / "source"
+        self.target = self.root / "task-worktree"
+
+        self.run_git_raw(
+            "init",
+            "--bare",
+            str(self.bare),
+        )
+        self.run_git_raw(
+            "init",
+            str(self.source),
+        )
+        self.git(self.source, "config", "user.name", "Phase7 Test")
+        self.git(
+            self.source,
+            "config",
+            "user.email",
+            "phase7@example.invalid",
+        )
+        self.git(self.source, "checkout", "-b", "main")
+        (self.source / "README.md").write_text("fixture\n")
+        self.git(self.source, "add", "README.md")
+        self.git(self.source, "commit", "-m", "base")
+        self.git(
+            self.source,
+            "remote",
+            "add",
+            "origin",
+            str(self.bare),
+        )
+        self.git(self.source, "push", "-u", "origin", "main")
+
+        self.git(self.source, "checkout", "-b", "phase7-task")
+        (self.source / "task.txt").write_text("task\n")
+        self.git(self.source, "add", "task.txt")
+        self.git(self.source, "commit", "-m", "task")
+        self.expected = self.git(
+            self.source,
+            "rev-parse",
+            "HEAD",
+        )
+        self.git(
+            self.source,
+            "push",
+            "-u",
+            "origin",
+            "phase7-task",
+        )
+        self.git(self.source, "checkout", "main")
+
+        self.cfg = {
+            "path": "source",
+            "remote": str(self.bare),
+            "role": "managed",
+            "writable": True,
+            "canonical_branch": "main",
+            "context_entry": "README.md",
+            "authority": "phase7 test repository",
+            "worktree_policy": "isolated_task_worktrees_preferred",
+            "recursive_mutation_forbidden": False,
+        }
+        self.repos = {"fixture": self.cfg}
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def run_git_raw(self, *args):
+        proc = subprocess.run(
+            ["git", *args],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        if proc.returncode != 0:
+            self.fail(
+                "git command failed: git "
+                + " ".join(args)
+                + "\n"
+                + proc.stderr
+            )
+        return proc.stdout.strip()
+
+    def git(self, path, *args):
+        proc = subprocess.run(
+            ["git", "-C", str(path), *args],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        if proc.returncode != 0:
+            self.fail(
+                "git command failed: git -C "
+                + str(path)
+                + " "
+                + " ".join(args)
+                + "\n"
+                + proc.stderr
+            )
+        return proc.stdout.strip()
+
+    def assess(self, create=False, cfg=None, expected=None):
+        cfg = cfg or self.cfg
+        return workspace_control.worktree_prepare_assessment(
+            "fixture",
+            cfg,
+            self.source,
+            self.target,
+            "phase7-task",
+            expected or self.expected,
+            self.root,
+            {"fixture": cfg},
+            create=create,
+        )
+
+    def test_missing_worktree_is_create_available_without_mutation(self):
+        payload, code = self.assess()
+
+        self.assertEqual(code, workspace_control.EXIT_REVIEW)
+        self.assertEqual(payload["result"], "CREATE_AVAILABLE")
+        self.assertFalse(self.target.exists())
+        self.assertFalse(payload["create_requested"])
+
+    def test_explicit_create_produces_exact_clean_worktree(self):
+        payload, code = self.assess(create=True)
+
+        self.assertEqual(code, workspace_control.EXIT_READY)
+        self.assertEqual(payload["result"], "READY")
+        self.assertTrue(self.target.is_dir())
+        self.assertEqual(
+            self.git(self.target, "branch", "--show-current"),
+            "phase7-task",
+        )
+        self.assertEqual(
+            self.git(self.target, "rev-parse", "HEAD"),
+            self.expected,
+        )
+        self.assertEqual(
+            self.git(self.target, "status", "--porcelain"),
+            "",
+        )
+
+    def test_dirty_source_blocks_creation_without_normalization(self):
+        dirty = self.source / "unrelated.txt"
+        dirty.write_text("preserve me\n")
+
+        payload, code = self.assess(create=True)
+
+        self.assertEqual(code, workspace_control.EXIT_REVIEW)
+        self.assertEqual(payload["result"], "BLOCKED_DIRTY")
+        self.assertTrue(dirty.exists())
+        self.assertFalse(self.target.exists())
+        self.assertIn(
+            "?? unrelated.txt",
+            self.git(self.source, "status", "--porcelain"),
+        )
+
+    def test_remote_divergence_blocks_without_moving_local_branch(self):
+        old_local = self.git(
+            self.source,
+            "rev-parse",
+            "refs/heads/phase7-task",
+        )
+        self.git(self.source, "checkout", "phase7-task")
+        (self.source / "task.txt").write_text("changed\n")
+        self.git(self.source, "add", "task.txt")
+        self.git(self.source, "commit", "-m", "remote moves")
+        new_remote = self.git(self.source, "rev-parse", "HEAD")
+        self.git(self.source, "push", "origin", "phase7-task")
+        self.git(self.source, "checkout", "main")
+
+        payload, code = self.assess(
+            create=True,
+            expected=old_local,
+        )
+
+        self.assertEqual(code, workspace_control.EXIT_REVIEW)
+        self.assertEqual(payload["result"], "BLOCKED_DIVERGED")
+        self.assertEqual(
+            self.git(
+                self.source,
+                "rev-parse",
+                "refs/heads/phase7-task",
+            ),
+            new_remote,
+        )
+        self.assertFalse(self.target.exists())
+
+    def test_dirty_existing_worktree_is_blocked_and_preserved(self):
+        created, code = self.assess(create=True)
+        self.assertEqual(code, workspace_control.EXIT_READY)
+        self.assertEqual(created["result"], "READY")
+
+        dirty = self.target / "local-only.txt"
+        dirty.write_text("preserve me\n")
+
+        payload, code = self.assess()
+
+        self.assertEqual(code, workspace_control.EXIT_REVIEW)
+        self.assertEqual(payload["result"], "BLOCKED_DIRTY")
+        self.assertTrue(dirty.exists())
+        self.assertIn(
+            "?? local-only.txt",
+            self.git(self.target, "status", "--porcelain"),
+        )
+
+    def test_non_writable_repository_cannot_create_missing_worktree(self):
+        cfg = dict(self.cfg)
+        cfg["writable"] = False
+
+        payload, code = self.assess(
+            create=True,
+            cfg=cfg,
+        )
+
+        self.assertEqual(code, workspace_control.EXIT_POLICY)
+        self.assertEqual(payload["result"], "BLOCKED_POLICY")
+        self.assertFalse(self.target.exists())
+
+    def test_existing_exact_worktree_is_ready_without_creation(self):
+        created, code = self.assess(create=True)
+        self.assertEqual(code, workspace_control.EXIT_READY)
+        self.assertEqual(created["result"], "READY")
+
+        payload, code = self.assess(create=False)
+
+        self.assertEqual(code, workspace_control.EXIT_READY)
+        self.assertEqual(payload["result"], "READY")
+        self.assertFalse(payload["create_requested"])
 
 
 if __name__ == "__main__":
