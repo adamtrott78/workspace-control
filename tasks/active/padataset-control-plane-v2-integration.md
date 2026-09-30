@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: padataset-control-plane-v2-integration
 - Title: PADataset workspace-control v2 integration
-- Status: PLANNED
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -35,13 +35,11 @@ Adopt the promoted workspace-control v2 operating model in PADataset with the sm
 
 ## Next safe action
 
-In a fresh ChatGPT conversation with GitHub access, open workspace-control/tasks/active/padataset-control-plane-v2-integration.json from main, follow the pinned workspace-control v2 route, then read PADataset README.md at control-plane-v2-integration@232d5fd506ac8bffa55c39591c9cf1198257e51f. Complete baseline_recovery before proposing or making PADataset mutations.
+On PADataset control-plane-v2-integration, update README.md with a concise route to workspace-control for mutation/runtime/Git/handoff coordination and create a thin root AGENTS.md adapter. Change no other PADataset paths. Then verify the remote checkpoint and reread both pushed files before cold-start validation.
 
 ## Remaining work
 
-- Recover the PADataset baseline from README.md and inspect only the existing operator/routing surfaces needed to design the integration.
-- Define the smallest PADataset-local route/adapter changes needed to adopt workspace-control v2 without duplicating generic semantics.
-- Implement the bounded integration on control-plane-v2-integration.
+- Implement the bounded README.md + root AGENTS.md integration on control-plane-v2-integration.
 - Run a fresh-reader ChatGPT/Codex cold-start validation from the PADataset root route.
 - Review the exact integration diff and verify that scientific code/configuration/results/paper semantics did not change.
 - Checkpoint the verified PADataset branch, establish final HANDOFF_SAFE state, and archive the completed task.
