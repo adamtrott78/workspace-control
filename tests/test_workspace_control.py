@@ -728,6 +728,23 @@ class WorktreePrepareTests(unittest.TestCase):
             create=create,
         )
 
+    def test_missing_local_branch_is_reported_as_missing_not_error(self):
+        self.git(
+            self.source,
+            "branch",
+            "-D",
+            "phase7-task",
+        )
+
+        state = workspace_control.query_local_branch(
+            self.source,
+            "phase7-task",
+        )
+
+        self.assertEqual(state["status"], "MISSING")
+        self.assertIsNone(state["sha"])
+        self.assertIsNone(state["error"])
+
     def test_missing_worktree_is_create_available_without_mutation(self):
         payload, code = self.assess()
 
