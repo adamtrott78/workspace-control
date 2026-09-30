@@ -1,0 +1,211 @@
+{
+  "schema_version": 2,
+  "task_id": "padataset-control-plane-v2-integration",
+  "title": "PADataset workspace-control v2 integration",
+  "status": "PLANNED",
+  "goal": "Adopt the promoted workspace-control v2 operating model in PADataset with the smallest project-local integration necessary for durable cold starts, direct-tool-first execution, executor handoff, and task-state recovery while preserving PADataset-owned scientific/domain authority and existing research workflows.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "policies/OPERATOR_WORKFLOW.md",
+    "checkpoint_sha": "03a51fdbe2a9153f2b5e45054eec6e927a9dda36",
+    "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
+  },
+  "parent_execution_owner": "workspace-control-v2-adoption",
+  "current_stage": "baseline_recovery",
+  "acceptance_criteria": [
+    "PADataset exposes a clear root route into the shared workspace-control v2 operator contract while preserving PADataset-owned scientific and workflow authority.",
+    "Any project-local ChatGPT/Codex adapter remains thin and does not duplicate or fork generic workspace-control semantics.",
+    "A fresh ChatGPT or Codex session can start from PADataset README.md on the integration branch, recover the shared control-plane route and relevant project-local context, and identify the next safe action without prior conversation state.",
+    "The integration preserves the existing PADataset task-routing model and does not alter scientific code, experiment behavior, dataset semantics, result provenance, or paper claims.",
+    "Direct GitHub/tool execution remains the default surface; local runtime is introduced only when validation genuinely requires local computation or environment state.",
+    "Any required local validation uses isolated/safe worktree mechanics and does not switch, clean, reset, stash, or otherwise disturb existing user worktrees.",
+    "The final integration diff is explicitly reviewed and contains only justified control-plane/routing/adapter documentation changes.",
+    "The PADataset integration branch ends at a verified durable checkpoint and the v2 task is HANDOFF_SAFE.",
+    "The authoritative JSON capsule and maintained Markdown cold-start handoff remain synchronized after every material task-state mutation."
+  ],
+  "constraints": [
+    "Start from PADataset README.md at control-plane-v2-integration@232d5fd506ac8bffa55c39591c9cf1198257e51f and follow its existing task routes; do not recursively inventory unrelated repository areas.",
+    "Do not mutate research-framework as part of this task; all PADataset project changes belong on control-plane-v2-integration unless the capsule is explicitly revised.",
+    "Preserve PADataset as the authority for RF/DQNGuard research, executable behavior, datasets, experiments, results, papers, and project-specific context.",
+    "Do not copy generic workspace-control policy into PADataset. Route to the shared contract and keep any local adapter project-specific and thin.",
+    "Do not modify scientific source code, experiment configuration, generated data, result artifacts, manuscript claims, or accepted-paper snapshots merely to complete control-plane adoption.",
+    "Do not perform opportunistic cleanup, broad context rewrites, branch switching, stash/reset/clean operations, or unrelated repository maintenance.",
+    "Before expanding mutation scope into executable/configuration paths, update this capsule with the demonstrated need and preserve JSON-to-Markdown synchronization.",
+    "Use direct GitHub tooling for remotely provable operations; use local/runtime execution only for evidence that cannot be established remotely.",
+    "Treat generated task Markdown as the standard pasteable cold-start handoff surface; regenerate it from the post-mutation JSON before any further task operation or handoff."
+  ],
+  "repositories": [
+    {
+      "name": "PADataset",
+      "intent": "mutate",
+      "base_sha": "232d5fd506ac8bffa55c39591c9cf1198257e51f",
+      "remote": {
+        "branch": "control-plane-v2-integration",
+        "checkpoint_sha": "232d5fd506ac8bffa55c39591c9cf1198257e51f",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "README.md",
+        "AGENTS.md",
+        ".agents/**",
+        ".workspace-control/**",
+        "docs/**",
+        "**/CONTEXT.md"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "baseline_recovery",
+      "status": "PLANNED",
+      "execution_owner": "padataset-control-plane-adoption",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "git:232d5fd506ac8bffa55c39591c9cf1198257e51f",
+        "workflow:workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36",
+        "path:README.md"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "integration_design",
+      "status": "PLANNED",
+      "execution_owner": "padataset-control-plane-adoption",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "baseline_recovery"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "implementation",
+      "status": "PLANNED",
+      "execution_owner": "padataset-control-plane-adoption",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "integration_design"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "cold_start_validation",
+      "status": "PLANNED",
+      "execution_owner": "cross-executor-validation",
+      "selected_executor": "codex",
+      "selected_surface": "repository-read",
+      "inputs": [
+        "implementation"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "project_regression",
+      "status": "PLANNED",
+      "execution_owner": "padataset-control-plane-adoption",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "cold_start_validation"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "completion",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "project_regression"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "padataset-integration-base",
+      "kind": "git_commit",
+      "identity": "232d5fd506ac8bffa55c39591c9cf1198257e51f",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset control-plane-v2-integration was created directly from research-framework@232d5fd506ac8bffa55c39591c9cf1198257e51f."
+      ]
+    },
+    {
+      "id": "workspace-control-v2-contract",
+      "kind": "git_commit",
+      "identity": "03a51fdbe2a9153f2b5e45054eec6e927a9dda36",
+      "required_for_resume": true,
+      "evidence": [
+        "Pinned promoted workspace-control v2 operator contract including mandatory JSON-to-Markdown handoff synchronization."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "PADataset integration branch anchored",
+      "result": "PASS",
+      "evidence": [
+        "control-plane-v2-integration exists at 232d5fd506ac8bffa55c39591c9cf1198257e51f, exactly matching the observed research-framework starting checkpoint."
+      ]
+    },
+    {
+      "check": "workspace-control v2 contract pinned",
+      "result": "PASS",
+      "evidence": [
+        "Task workflow is pinned to workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36, policies/OPERATOR_WORKFLOW.md content blob 1e98a3d530fe0cbd09fdf72d255e50d570adec58."
+      ]
+    },
+    {
+      "check": "fresh-chat control-plane recovery",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "bounded integration diff",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "PADataset scientific non-regression",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "final v2 HANDOFF_SAFE",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Recover the PADataset baseline from README.md and inspect only the existing operator/routing surfaces needed to design the integration.",
+    "Define the smallest PADataset-local route/adapter changes needed to adopt workspace-control v2 without duplicating generic semantics.",
+    "Implement the bounded integration on control-plane-v2-integration.",
+    "Run a fresh-reader ChatGPT/Codex cold-start validation from the PADataset root route.",
+    "Review the exact integration diff and verify that scientific code/configuration/results/paper semantics did not change.",
+    "Checkpoint the verified PADataset branch, establish final HANDOFF_SAFE state, and archive the completed task."
+  ],
+  "next_safe_action": "In a fresh ChatGPT conversation with GitHub access, open workspace-control/tasks/active/padataset-control-plane-v2-integration.json from main, follow the pinned workspace-control v2 route, then read PADataset README.md at control-plane-v2-integration@232d5fd506ac8bffa55c39591c9cf1198257e51f. Complete baseline_recovery before proposing or making PADataset mutations.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "This is an adoption task, not a scientific refactor. PADataset already has a mature project-owned hierarchical context system; integrate the shared control plane around that system rather than replacing it."
+}
