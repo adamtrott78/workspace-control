@@ -310,5 +310,302 @@ class PreflightTopologyTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, 2)
 
 
+class HandoffTopologyTests(unittest.TestCase):
+    def virtual_fixture(self, name):
+        data = load_json(FIXTURES / name)
+        return Path(f"{data['task_id']}.json"), data
+
+    def matching_local_record(self, data):
+        entry = data["repositories"][0]
+        local = entry["local"]
+        return {
+            "name": entry["name"],
+            "exists": True,
+            "git": True,
+            "git_root": local["checkout_path"],
+            "identity_matches": True,
+            "branch": local["branch"],
+            "head": local["head_sha"],
+            "clean": True,
+        }
+
+    def test_v1_handoff_behavior_remains_on_v1_dispatch(self):
+        path, data = self.virtual_fixture(
+            "task_capsule_v1_minimal.json"
+        )
+        entry = data["repositories"][0]
+        record = {
+            "exists": True,
+            "git": True,
+            "git_root": entry["checkout_path"],
+            "identity_matches": True,
+            "branch": entry["branch"],
+            "head": entry["checkpoint_sha"],
+            "clean": True,
+        }
+
+        with (
+            patch.object(
+                workspace_control,
+                "inspect_checkout",
+                return_value=record,
+            ),
+            patch.object(
+                workspace_control,
+                "check_commit_exists",
+                return_value=True,
+            ),
+            patch.object(
+                workspace_control,
+                "check_ancestor",
+                return_value=True,
+            ),
+        ):
+            payload, code = workspace_control.handoff_assessment(
+                path,
+                data,
+                ROOT,
+                REPOS,
+            )
+
+        self.assertEqual(code, workspace_control.EXIT_READY)
+        self.assertEqual(payload["schema_version"], 1)
+        self.assertEqual(payload["result"], "HANDOFF_SAFE")
+        self.assertNotIn("execution_readiness", payload)
+
+    def test_remote_only_handoff_safe_without_local_or_live_remote_access(self):
+        path, data = self.virtual_fixture(
+            "task_capsule_v2_remote.json"
+        )
+
+        with (
+            patch.object(
+                workspace_control,
+                "inspect_checkout",
+                side_effect=AssertionError(
+                    "remote-only handoff inspected local state"
+                ),
+            ),
+            patch.object(
+                workspace_control,
+                "query_remote_branch_url",
+                side_effect=AssertionError(
+                    "HANDOFF_SAFE used transient live remote access"
+                ),
+            ),
+        ):
+            payload, code = workspace_control.handoff_assessment(
+                path,
+                data,
+                ROOT,
+                REPOS,
+            )
+
+        self.assertEqual(code, workspace_control.EXIT_READY)
+        self.assertTrue(payload["handoff_safe"])
+        self.assertEqual(payload["result"], "HANDOFF_SAFE")
+        self.assertEqual(
+            payload["execution_topology"],
+            "remote_only",
+        )
+        self.assertIsNone(payload["repositories"][0]["local"])
+
+    def test_local_handoff_safe_uses_recorded_local_checkpoint(self):
+        path, data = self.virtual_fixture(
+            "task_capsule_v2_local.json"
+        )
+
+        with (
+            patch.object(
+                workspace_control,
+                "inspect_checkout",
+                return_value=self.matching_local_record(data),
+            ),
+            patch.object(
+                workspace_control,
+                "check_commit_exists",
+                return_value=True,
+            ),
+            patch.object(
+                workspace_control,
+                "check_ancestor",
+                return_value=True,
+            ),
+        ):
+            payload, code = workspace_control.handoff_assessment(
+                path,
+                data,
+                ROOT,
+                REPOS,
+            )
+
+        self.assertEqual(code, workspace_control.EXIT_READY)
+        self.assertEqual(payload["result"], "HANDOFF_SAFE")
+        self.assertTrue(payload["repositories"][0]["local"]["ready"])
+
+    def test_composed_handoff_safe_proves_synchronization_boundary(self):
+        path, data = self.virtual_fixture(
+            "task_capsule_v2_composed.json"
+        )
+
+        with (
+            patch.object(
+                workspace_control,
+                "inspect_checkout",
+                return_value=self.matching_local_record(data),
+            ),
+            patch.object(
+                workspace_control,
+                "check_commit_exists",
+                return_value=True,
+            ),
+            patch.object(
+                workspace_control,
+                "check_ancestor",
+                return_value=True,
+            ),
+        ):
+            payload, code = workspace_control.handoff_assessment(
+                path,
+                data,
+                ROOT,
+                REPOS,
+            )
+
+        self.assertEqual(code, workspace_control.EXIT_READY)
+        self.assertEqual(payload["result"], "HANDOFF_SAFE")
+        self.assertTrue(payload["workflow_resolution"]["resolved"])
+        self.assertTrue(
+            payload["synchronization_boundary"]["ready"]
+        )
+
+    def test_missing_workflow_checkpoint_binding_blocks_handoff(self):
+        path, data = self.virtual_fixture(
+            "task_capsule_v2_composed.json"
+        )
+        data["workflow"]["checkpoint_sha"] = "1" * 40
+
+        with (
+            patch.object(
+                workspace_control,
+                "inspect_checkout",
+                return_value=self.matching_local_record(data),
+            ),
+            patch.object(
+                workspace_control,
+                "check_commit_exists",
+                return_value=True,
+            ),
+            patch.object(
+                workspace_control,
+                "check_ancestor",
+                return_value=True,
+            ),
+        ):
+            payload, code = workspace_control.handoff_assessment(
+                path,
+                data,
+                ROOT,
+                REPOS,
+            )
+
+        self.assertEqual(code, workspace_control.EXIT_REVIEW)
+        self.assertFalse(payload["handoff_safe"])
+        self.assertTrue(
+            any(
+                "workflow checkpoint" in reason
+                for reason in payload["reasons"]
+            )
+        )
+
+    def test_composed_without_sync_boundary_blocks_handoff(self):
+        path, data = self.virtual_fixture(
+            "task_capsule_v2_composed.json"
+        )
+        data["repositories"][0]["local"]["head_sha"] = "1" * 40
+        data["stages"][1]["inputs"] = []
+
+        with (
+            patch.object(
+                workspace_control,
+                "inspect_checkout",
+                return_value=self.matching_local_record(data),
+            ),
+            patch.object(
+                workspace_control,
+                "check_commit_exists",
+                return_value=True,
+            ),
+            patch.object(
+                workspace_control,
+                "check_ancestor",
+                return_value=True,
+            ),
+        ):
+            payload, code = workspace_control.handoff_assessment(
+                path,
+                data,
+                ROOT,
+                REPOS,
+            )
+
+        self.assertEqual(code, workspace_control.EXIT_REVIEW)
+        self.assertFalse(payload["handoff_safe"])
+        self.assertFalse(
+            payload["synchronization_boundary"]["ready"]
+        )
+
+    def test_handoff_safe_can_be_receiver_not_execution_ready(self):
+        path, data = self.virtual_fixture(
+            "task_capsule_v2_remote.json"
+        )
+
+        payload, code = workspace_control.handoff_assessment(
+            path,
+            data,
+            ROOT,
+            REPOS,
+            receiver="codex",
+            receiver_checks=[
+                {"name": "github", "ready": True},
+                {"name": "local-runtime", "ready": False},
+            ],
+        )
+
+        self.assertEqual(code, workspace_control.EXIT_READY)
+        self.assertEqual(payload["result"], "HANDOFF_SAFE")
+        readiness = payload["execution_readiness"]
+        self.assertTrue(readiness["assessed"])
+        self.assertFalse(readiness["ready"])
+        self.assertEqual(
+            readiness["result"],
+            "NOT_EXECUTION_READY",
+        )
+
+    def test_receiver_checks_are_generic_and_deterministic(self):
+        checks = workspace_control.parse_receiver_checks(
+            [
+                "github=ready",
+                "local-runtime=missing",
+            ]
+        )
+        self.assertEqual(
+            checks,
+            [
+                {"name": "github", "ready": True},
+                {"name": "local-runtime", "ready": False},
+            ],
+        )
+
+        readiness = workspace_control.execution_readiness_assessment(
+            "chatgpt",
+            checks,
+        )
+        self.assertEqual(
+            readiness["result"],
+            "NOT_EXECUTION_READY",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
