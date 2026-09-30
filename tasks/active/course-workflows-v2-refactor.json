@@ -6,7 +6,7 @@
   "goal": "Evolve the repository-backed course tutoring/application architecture to the task-capsule-driven workspace-control v2 model: remove dependence on conversational builder/tutor hierarchy, define reusable course and document-artifact workflow descriptors/procedures, improve assessment alignment and multimodal ingestion, preserve project-local authority and mastery semantics, and create independently executable migration capsules for MTH602, CIS560, EAS501, and the resume/application workflow.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-control-v2-adoption",
-  "current_stage": "shared_contract_review",
+  "current_stage": "workflow_descriptor_design",
   "acceptance_criteria": [
     "The shared architecture treats conversations as replaceable executors while durable semantic owners, reusable workflow/procedure definitions, exact task state, and mutation boundaries remain authoritative.",
     "Task-capsule v2 retains its single optional workflow binding; conceptual composition is represented by one composite workflow descriptor plus stage/procedure routing, not by silently changing v2 schema.",
@@ -49,7 +49,7 @@
       "base_sha": "06058acf5a074db5a849f7f42f721971e5dda965",
       "remote": {
         "branch": "course-workflows-v2-refactor",
-        "checkpoint_sha": "8a6202b020d0733437960415f77833f2001da962",
+        "checkpoint_sha": "0624110cf808951b65f01c4851f90a3178988237",
         "verified": true
       },
       "local": null,
@@ -175,15 +175,28 @@
     },
     {
       "id": "shared_contract_review",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control-architecture",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "registry_bootstrap"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "architecture/course-workflows-v2-review.md",
+        "bounded shared-change set: tutoring extensions + reusable source/assessment/study/assignment/communications/document-artifact procedures + workflow descriptors"
+      ],
+      "validation": [
+        {
+          "check": "Shared contract review reconciled against pinned legacy evidence",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control course-workflows-v2-refactor@0624110cf808951b65f01c4851f90a3178988237",
+            "architecture/course-workflows-v2-review.md records project evidence, reusable gaps, explicit non-changes, and PASS review result.",
+            "Review preserves project-local authority, task-capsule v2 single workflow binding, immutable archives, explicit contract migrations, modality-aware ingestion, contextual assessment relevance, and automated visual QA by default."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
@@ -321,6 +334,16 @@
         "Verified advertised course-workflows-v2-refactor branch after registry mutation.",
         "Registry content blob 29220f9f386cdb4ba90f3df81c1b37c7b55e8212 records the two stable course repository identities."
       ]
+    },
+    {
+      "id": "workspace-control-shared-contract-review",
+      "kind": "git_commit",
+      "identity": "0624110cf808951b65f01c4851f90a3178988237",
+      "required_for_resume": true,
+      "evidence": [
+        "Verified advertised architecture branch after shared-contract review.",
+        "Review document blob 8613b8a56f49b18344c9d061f2c04b562e0c2717 records the bounded implementation direction."
+      ]
     }
   ],
   "artifacts": [],
@@ -364,7 +387,6 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Review current shared tutoring/adapter/evaluation/operator contracts against demonstrated legacy repo evidence and identify the smallest reusable changes.",
     "Define composite reusable course workflow descriptors/procedures for course bootstrap/migration, content ingestion, assessment preparation, study session, assignment work, cheat-sheet build, communications ingestion, and document-artifact build without changing task-capsule v2 composition semantics.",
     "Implement shared contract/template/procedure updates on the isolated architecture branch while preserving project-local truth and explicit workflow-version migration rules.",
     "Validate cold-start routing, assessment relevance behavior, multimodal ingestion, LaTeX artifact QA, continuation behavior, and executor handoff.",
@@ -372,7 +394,7 @@
     "Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration pinned to the promoted shared checkpoint and exact project checkpoints.",
     "Complete HANDOFF_SAFE assessment and archive this task."
   ],
-  "next_safe_action": "Start from workspace-control README.md and this capsule. Continue on the isolated `course-workflows-v2-refactor` branch at 8a6202b020d0733437960415f77833f2001da962. Review the current shared tutoring/operator/adapter/evaluation contracts against only the smallest pinned legacy evidence needed from MTH602, CIS560, EAS501, and PADataset; identify the smallest reusable shared changes required by this task's acceptance criteria without mutating project repositories. Record the review as durable branch changes/evidence only where justified. After any material capsule update, regenerate its Markdown immediately; if the review validates a bounded design direction, advance to `workflow_descriptor_design` rather than stopping at the review boundary.",
+  "next_safe_action": "Continue on workspace-control `course-workflows-v2-refactor` at 0624110cf808951b65f01c4851f90a3178988237. Define the smallest reusable procedure interfaces and single-binding workflow descriptors for course bootstrap/migration, content ingestion, assessment preparation, study session, assignment work, cheat-sheet build, communications ingestion, and document-artifact build. Use the existing workflow-descriptor v1/schema/validator unchanged unless a demonstrated incompatibility exists; represent composition through descriptor stages and procedure routing, not multiple task-capsule workflow bindings. Do not mutate project repositories. Validate the descriptor shapes against the pinned workspace-control implementation, record the design durably on the architecture branch, then checkpoint JSON+Markdown on main and continue into shared_implementation.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is the shared architecture refactor only. Urgent EAS501 Exam 1 cheat-sheet work and MTH602 new-unit ingestion may proceed independently against their existing project lineages. The task intentionally omits workflow binding because it mutates workspace-control, the repository that owns the baseline operator contract; the exact baseline contract is instead preserved as a required checkpoint to avoid a self-referential handoff-binding defect. The architecture worktree/ref is now isolated on workspace-control branch course-workflows-v2-refactor; this prevents the task capsule stored on main from becoming self-referential with the repository checkpoint it coordinates."
