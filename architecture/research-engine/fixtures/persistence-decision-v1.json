@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "decision_id": "persistence:research-engine:v1",
+  "decided_at": "2026-09-30",
+  "authoritative_store": "PostgreSQL 18",
+  "extensions": [
+    "pgvector 0.8.6"
+  ],
+  "artifact_store": "content-addressed filesystem initially; S3-compatible adapter later",
+  "graph_representation": "directed adjacency relation tables in PostgreSQL",
+  "lexical_retrieval": "PostgreSQL full-text search",
+  "semantic_retrieval": "pgvector exact nearest-neighbor initially",
+  "approximate_vector_policy": "No approximate index until benchmark justifies it; prefer HNSW first if required and validate recall against exact search.",
+  "authority_policy": "Relational scientific/source records and content hashes are authoritative; graph convenience views, full-text vectors, embeddings, and vector indexes are rebuildable projections.",
+  "demonstrated_workloads": [
+    "trace synthesis statement to evidence and exact source locator",
+    "retrieve Result -> SUPPORTS -> Claim paths",
+    "retrieve Method qualifiers/limitations",
+    "filter evidence by source fidelity and verification state",
+    "represent cross-paper lineage/support/compare relations",
+    "reproduce discovery/corpus membership",
+    "support exact-term novelty search and semantic candidate retrieval"
+  ],
+  "rejected_v1_choices": [
+    {
+      "choice": "Neo4j or another graph database as co-authority",
+      "reason": "Adds duplicate state/synchronization without a demonstrated workload that PostgreSQL adjacency traversal cannot handle."
+    },
+    {
+      "choice": "vector database as primary knowledge store",
+      "reason": "Similarity search cannot represent authoritative provenance, transactional identity, audit history, and typed relation semantics."
+    },
+    {
+      "choice": "approximate vector index by default",
+      "reason": "Current corpus scale does not justify trading recall for speed before benchmarks."
+    }
+  ]
+}
