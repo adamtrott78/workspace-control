@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "fc79aaaecbb83e1cf63f048449a6a999a0b57530",
+        "checkpoint_sha": "7dc229243e223438bc860946988977aa4f8d54f2",
         "verified": true
       },
       "local": null,
@@ -119,24 +119,43 @@
         "evidence_contract"
       ],
       "outputs": [
-        "git:fc79aaaecbb83e1cf63f048449a6a999a0b57530",
+        "git:7dc229243e223438bc860946988977aa4f8d54f2",
         "artifact:architecture/research-engine/ingress-contract-v1.md",
         "artifact:architecture/research-engine/fixtures/open-set-rf-ingress-pilot-v1.json",
+        "artifact:architecture/research-engine/fixtures/open-set-rf-identity-resolution-v1.json",
+        "artifact:architecture/research-engine/fixtures/open-set-rf-screening-v1.json",
         "schema:schemas/research-engine/discovery-run.v1.schema.json",
         "schema:schemas/research-engine/work-record.v1.schema.json",
         "schema:schemas/research-engine/acquisition-attempt.v1.schema.json",
-        "schema:schemas/research-engine/corpus-manifest.v1.schema.json"
+        "schema:schemas/research-engine/corpus-manifest.v1.schema.json",
+        "schema:schemas/research-engine/identity-resolution-run.v1.schema.json",
+        "schema:schemas/research-engine/corpus-decision.v1.schema.json",
+        "schema:schemas/research-engine/corpus-screening-run.v1.schema.json"
       ],
       "validation": [
         {
           "check": "focused discovery and ingress-contract prototype",
           "result": "PASS",
           "evidence": [
-            "Three reproducible focused searches produced a 22-record raw pilot corpus with 19 unique provider work IDs.",
-            "Repeated provider works across runs are preserved rather than erased.",
-            "W3021303548 and W4287790782 expose a possible same-work/same-arXiv-manifestation duplicate requiring canonical identity resolution.",
-            "OA source resolution succeeded for arXiv, institutional-repository, and OA publisher locations.",
-            "Current-executor network acquisition failure is represented separately from source availability."
+            "Three reproducible focused searches produced 22 raw results and 19 unique OpenAlex work IDs.",
+            "Repeated works across search runs preserve per-run discovery provenance.",
+            "Source resolution and byte acquisition are modeled as distinct states."
+          ]
+        },
+        {
+          "check": "canonical identity resolution pilot",
+          "result": "PASS",
+          "evidence": [
+            "W3021303548 and W4287790782 resolve to the same arXiv manifestation 2005.00954v1 and are represented as SAME_WORK_SAME_VERSION.",
+            "W3006634433 resolves to distinct arXiv 2002.07777v2 and remains a related distinct work because no observed source evidence establishes a mere version relationship."
+          ]
+        },
+        {
+          "check": "metadata triage pilot",
+          "result": "PASS",
+          "evidence": [
+            "19 unique provider records were explicitly screened from metadata only: 14 INCLUDE_DEEP_READ, 3 INCLUDE_METADATA_ONLY, 1 DEFER, 1 EXCLUDE_DUPLICATE.",
+            "Screening fixture labels itself model-generated triage, not scientific evidence."
           ]
         }
       ],
@@ -258,6 +277,16 @@
         "Ingress contract, four machine-readable ingress schemas, and open-set RF pilot fixture committed together.",
         "Pilot fixture preserves 22 raw search results, 19 unique OpenAlex work IDs, repeated-result provenance, duplicate/version ambiguity, OA source resolution, and executor-specific acquisition failure."
       ]
+    },
+    {
+      "id": "research-engine-ingress-identity-screening",
+      "kind": "git_commit",
+      "identity": "7dc229243e223438bc860946988977aa4f8d54f2",
+      "required_for_resume": true,
+      "evidence": [
+        "Identity-resolution and corpus-screening schemas/fixtures committed.",
+        "Known duplicate/version case and model-generated metadata triage are durable regression evidence."
+      ]
     }
   ],
   "artifacts": [
@@ -307,6 +336,30 @@
       "review_requirement": "Fixture changes require explanation because it records observed provider behavior.",
       "evidence": [
         "Three focused OpenAlex-backed DiscoveryRuns; 22 raw candidates; 19 unique provider work IDs."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/open-set-rf-identity-resolution-v1.json",
+      "state": "durable",
+      "role": "identity-resolution-regression-fixture",
+      "origin": "automated-research-engine-v1@7dc229243e223438bc860946988977aa4f8d54f2",
+      "persistence": "git-tracked",
+      "regeneration": "versioned fixture; preserve observed decisions/evidence",
+      "review_requirement": "Changes require explicit evidence because the fixture is regression state.",
+      "evidence": [
+        "Committed at the current ingress checkpoint."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/open-set-rf-screening-v1.json",
+      "state": "durable",
+      "role": "corpus-screening-regression-fixture",
+      "origin": "automated-research-engine-v1@7dc229243e223438bc860946988977aa4f8d54f2",
+      "persistence": "git-tracked",
+      "regeneration": "versioned fixture; preserve observed decisions/evidence",
+      "review_requirement": "Changes require explicit evidence because the fixture is regression state.",
+      "evidence": [
+        "Committed at the current ingress checkpoint."
       ]
     }
   ],
@@ -359,13 +412,27 @@
         "Ingress contract and schemas committed at fc79aaaecbb83e1cf63f048449a6a999a0b57530.",
         "Pilot corpus fixture records 22 raw candidates, 19 unique provider IDs, duplicate/version ambiguity, and acquisition-state separation."
       ]
+    },
+    {
+      "check": "canonical work/version identity pilot",
+      "result": "PASS",
+      "evidence": [
+        "Known OpenAlex duplicate pair mapped to one arXiv WorkVersion without erasing provider-record provenance.",
+        "Related earlier arXiv work retained separately because version equivalence was not established."
+      ]
+    },
+    {
+      "check": "corpus screening pilot",
+      "result": "PASS",
+      "evidence": [
+        "All 19 unique provider records received explicit metadata-only triage decisions with decider identity and rationale."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement canonical Work/WorkVersion identity resolution against the pilot duplicate/version cases.",
-    "Acquire and content-hash at least one lawful full-text source artifact using an executor/tool path that can retrieve bytes; preserve failed attempts separately.",
-    "Define and test explicit CorpusDecision screening records on the RF pilot.",
+    "Acquire and cryptographically hash at least one lawful OA full-text artifact using a runtime/tool with byte retrieval access; record both the successful acquisition and prior failed executor attempt.",
+    "Validate the ingress schemas and pilot fixtures mechanically in the future research-engine implementation repository.",
     "Build normalized parsing and typed evidence extraction with source locators and verification state.",
     "Choose persistence/indexing architecture only after real ingress/extraction objects demonstrate storage/query requirements.",
     "Build provenance-preserving synthesis, contradiction handling, gap generation, and adversarial novelty challenge.",
@@ -373,7 +440,7 @@
     "Bridge an approved research program into a workspace-control project execution workflow.",
     "Run the narrow-domain vertical slice and measure evidence fidelity, traceability, novelty false-positive rate, and execution handoff quality."
   ],
-  "next_safe_action": "Continue ingress_prototype at automated-research-engine-v1@fc79aaaecbb83e1cf63f048449a6a999a0b57530. First implement/validate canonical Work and WorkVersion resolution for the pilot's known duplicate/version cases, then obtain bytes and a cryptographic hash for at least one lawful OA source using a capable executor. Do not collapse source resolution and acquisition into one state, and do not choose the persistence database yet.",
+  "next_safe_action": "Complete the ingress byte-acquisition gate for at least one already-resolved lawful OA source (prefer arXiv 2108.13099v1). Use a noninteractive local runtime to download the exact source bytes, record byte length and SHA-256, and return the receipt. Preserve the prior current-executor acquisition failure as a separate AcquisitionAttempt. Once one artifact hash is proven, record it durably and advance to extraction_pipeline.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."

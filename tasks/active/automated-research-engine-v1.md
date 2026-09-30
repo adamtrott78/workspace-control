@@ -30,18 +30,17 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: fc79aaaecbb83e1cf63f048449a6a999a0b57530
+- Remote checkpoint: 7dc229243e223438bc860946988977aa4f8d54f2
 - Remote verified: true
 
 ## Next safe action
 
-Continue ingress_prototype at automated-research-engine-v1@fc79aaaecbb83e1cf63f048449a6a999a0b57530. First implement/validate canonical Work and WorkVersion resolution for the pilot's known duplicate/version cases, then obtain bytes and a cryptographic hash for at least one lawful OA source using a capable executor. Do not collapse source resolution and acquisition into one state, and do not choose the persistence database yet.
+Complete the ingress byte-acquisition gate for at least one already-resolved lawful OA source (prefer arXiv 2108.13099v1). Use a noninteractive local runtime to download the exact source bytes, record byte length and SHA-256, and return the receipt. Preserve the prior current-executor acquisition failure as a separate AcquisitionAttempt. Once one artifact hash is proven, record it durably and advance to extraction_pipeline.
 
 ## Remaining work
 
-- Implement canonical Work/WorkVersion identity resolution against the pilot duplicate/version cases.
-- Acquire and content-hash at least one lawful full-text source artifact using an executor/tool path that can retrieve bytes; preserve failed attempts separately.
-- Define and test explicit CorpusDecision screening records on the RF pilot.
+- Acquire and cryptographically hash at least one lawful OA full-text artifact using a runtime/tool with byte retrieval access; record both the successful acquisition and prior failed executor attempt.
+- Validate the ingress schemas and pilot fixtures mechanically in the future research-engine implementation repository.
 - Build normalized parsing and typed evidence extraction with source locators and verification state.
 - Choose persistence/indexing architecture only after real ingress/extraction objects demonstrate storage/query requirements.
 - Build provenance-preserving synthesis, contradiction handling, gap generation, and adversarial novelty challenge.
