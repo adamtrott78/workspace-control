@@ -6,7 +6,7 @@
   "goal": "Evolve the repository-backed course tutoring/application architecture to the task-capsule-driven workspace-control v2 model: remove dependence on conversational builder/tutor hierarchy, define reusable course and document-artifact workflow descriptors/procedures, improve assessment alignment and multimodal ingestion, preserve project-local authority and mastery semantics, and create independently executable migration capsules for MTH602, CIS560, EAS501, and the resume/application workflow.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-control-v2-adoption",
-  "current_stage": "shared_implementation",
+  "current_stage": "shared_validation",
   "acceptance_criteria": [
     "The shared architecture treats conversations as replaceable executors while durable semantic owners, reusable workflow/procedure definitions, exact task state, and mutation boundaries remain authoritative.",
     "Task-capsule v2 retains its single optional workflow binding; conceptual composition is represented by one composite workflow descriptor plus stage/procedure routing, not by silently changing v2 schema.",
@@ -49,7 +49,7 @@
       "base_sha": "06058acf5a074db5a849f7f42f721971e5dda965",
       "remote": {
         "branch": "course-workflows-v2-refactor",
-        "checkpoint_sha": "da4ddc9aaca4cb18d6dbe70b089189fd6a1d18be",
+        "checkpoint_sha": "f5d7a1a97a135cc4e238119789cda4aed773ae9b",
         "verified": true
       },
       "local": null,
@@ -228,15 +228,42 @@
     },
     {
       "id": "shared_implementation",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control-architecture",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "workflow_descriptor_design"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "README.md shared workflow route",
+        "policies/TUTORING_CONTRACT.md modality/relevance/visual-QA extensions",
+        "templates/COURSE_TUTOR_ADAPTER.md new local integration mappings",
+        "procedures/TUTOR_EVALUATION.md new regression stages",
+        "seven executor-neutral shared procedures",
+        "eight workflow-descriptor v1 JSON files under workflows/"
+      ],
+      "validation": [
+        {
+          "check": "Bounded shared implementation committed on isolated architecture branch",
+          "result": "PASS",
+          "evidence": [
+            "course-workflows-v2-refactor@f5d7a1a97a135cc4e238119789cda4aed773ae9b is exactly one commit ahead of workflow-design checkpoint da4ddc9aaca4cb18d6dbe70b089189fd6a1d18be.",
+            "Implementation diff contains exactly 19 intended paths: README, tutoring contract, course adapter, tutor evaluation, seven new procedures, and eight new workflow descriptors.",
+            "workflow_descriptor.v1.schema.json remains blob 8bcbe00d83f644d705adbe2a57749a9466ca1260; task-capsule schemas were not changed.",
+            "Archived padataset-control-plane-v2-integration capsule and automated-research-engine-v1 task remained unchanged on the architecture branch."
+          ]
+        },
+        {
+          "check": "All eight workflow descriptors satisfy committed v1 structural/owner-route constraints",
+          "result": "PASS",
+          "evidence": [
+            "All descriptors were fetched from immutable checkpoint f5d7a1a97a135cc4e238119789cda4aed773ae9b; every owner.context_path exists at the same checkpoint.",
+            "All descriptors use schema_version 1, workspace-control owner, unique ordered stage IDs, earlier-only dependencies, nonempty validation arrays, no live task-state fields, and safe repository-relative shared paths.",
+            "Content identities: bootstrap da6076a9b4baf328d6a91526f6dff7aa999733b6; content ingestion 4c9037d7d5fc0937ae2193684566c9875ae6cde7; assessment a576677dc886bd70826789b37dcce2499190c2f1; study 1a28468d3cc35243273a21ca12e10c1f7c404c67; assignment 8a0f596add333737e03c72a81e71a7eb075b53fc; cheat sheet 14a13e820b5b106e55e7bbbcc252e67abcb47351; communications ebb5fe64b36709d8cf6b17059df2ed1916494cf5; document artifact 0d66b919acdd2e51c08d2e8496c41dc22aed47c4."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
@@ -368,6 +395,16 @@
         "Verified advertised architecture branch after workflow/procedure design.",
         "Design document blob 94e9d19a602754d74a552e8600f7d3cad2d1ea68 records the exact reusable procedure and workflow descriptor shapes."
       ]
+    },
+    {
+      "id": "workspace-control-shared-implementation",
+      "kind": "git_commit",
+      "identity": "f5d7a1a97a135cc4e238119789cda4aed773ae9b",
+      "required_for_resume": true,
+      "evidence": [
+        "Verified isolated branch ref and exact implementation diff before validation.",
+        "All eight committed workflow descriptors passed remote structural/owner-route checks at the implementation checkpoint."
+      ]
     }
   ],
   "artifacts": [],
@@ -411,13 +448,12 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement shared contract/template/procedure updates on the isolated architecture branch while preserving project-local truth and explicit workflow-version migration rules.",
     "Validate cold-start routing, assessment relevance behavior, multimodal ingestion, LaTeX artifact QA, continuation behavior, and executor handoff.",
     "Promote the validated shared architecture to workspace-control main through an explicit reviewed integration step and record the exact promoted checkpoint.",
     "Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration pinned to the promoted shared checkpoint and exact project checkpoints.",
     "Complete HANDOFF_SAFE assessment and archive this task."
   ],
-  "next_safe_action": "Continue on workspace-control `course-workflows-v2-refactor` at da4ddc9aaca4cb18d6dbe70b089189fd6a1d18be. Implement the bounded shared changes defined by architecture/course-workflows-v2-review.md and architecture/course-workflows-v2-design.md: extend TUTORING_CONTRACT, COURSE_TUTOR_ADAPTER, and TUTOR_EVALUATION; add the seven shared procedures and eight workflow-descriptor v1 JSON files; route the new shared workflow set from workspace-control documentation. Keep task-capsule v2 and workflow-descriptor v1 schemas unchanged, do not mutate project repositories, and do not alter archived/other active task capsules. Commit a coherent implementation on the isolated branch, verify its changed-path set, then advance directly into shared_validation.",
+  "next_safe_action": "Continue at workspace-control `course-workflows-v2-refactor` checkpoint f5d7a1a97a135cc4e238119789cda4aed773ae9b. Perform shared_validation as a fresh repository-read regression pass over the committed shared routes and pinned project evidence. Validate at minimum: root/descriptor cold-start routing; multimodal source ingestion against MTH602 evidence; contextual assessment relevance against EAS501 evidence; document-artifact structural/rendered visual-QA semantics against the PADataset resume evidence; communications repository-first/idempotent parent-return semantics against CIS560 experiment B/C; continuation/gate behavior against the pinned operator contract; and exact single-workflow durable handoff semantics. Record the validation durably on the architecture branch. If all required shared regressions pass, update JSON+Markdown on main and proceed directly to explicit promotion; do not migrate project repositories during validation.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is the shared architecture refactor only. Urgent EAS501 Exam 1 cheat-sheet work and MTH602 new-unit ingestion may proceed independently against their existing project lineages. The task intentionally omits workflow binding because it mutates workspace-control, the repository that owns the baseline operator contract; the exact baseline contract is instead preserved as a required checkpoint to avoid a self-referential handoff-binding defect. The architecture worktree/ref is now isolated on workspace-control branch course-workflows-v2-refactor; this prevents the task capsule stored on main from becoming self-referential with the repository checkpoint it coordinates."
