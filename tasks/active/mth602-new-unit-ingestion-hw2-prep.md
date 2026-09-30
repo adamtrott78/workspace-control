@@ -31,14 +31,14 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
 - Remote checkpoint: dd664c785585e55c2dfe974f98050268fd343b97
-- Remote verified: true
+- Remote verified: True
 
 ### workspace-control
 
 - Intent: read
 - Remote branch: main
 - Remote checkpoint: bc3966f10b8b07b9a27d8ec5275f218c209a7609
-- Remote verified: true
+- Remote verified: True
 
 ## Next safe action
 
