@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "padataset-control-plane-v2-integration",
   "title": "PADataset workspace-control v2 integration",
-  "status": "PLANNED",
+  "status": "IN_PROGRESS",
   "goal": "Adopt the promoted workspace-control v2 operating model in PADataset with the smallest project-local integration necessary for durable cold starts, direct-tool-first execution, executor handoff, and task-state recovery while preserving PADataset-owned scientific/domain authority and existing research workflows.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -12,7 +12,7 @@
     "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
   },
   "parent_execution_owner": "workspace-control-v2-adoption",
-  "current_stage": "baseline_recovery",
+  "current_stage": "implementation",
   "acceptance_criteria": [
     "PADataset exposes a clear root route into the shared workspace-control v2 operator contract while preserving PADataset-owned scientific and workflow authority.",
     "Any project-local ChatGPT/Codex adapter remains thin and does not duplicate or fork generic workspace-control semantics.",
@@ -59,7 +59,7 @@
   "stages": [
     {
       "id": "baseline_recovery",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "padataset-control-plane-adoption",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -68,21 +68,49 @@
         "workflow:workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36",
         "path:README.md"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "route:PADataset README.md@232d5fd506ac8bffa55c39591c9cf1198257e51f",
+        "evidence:control-plane-v2-integration remote branch verified at 232d5fd506ac8bffa55c39591c9cf1198257e51f",
+        "evidence:no pre-existing root AGENTS.md, .agents/, or .workspace-control/ adapter at the pinned PADataset checkpoint"
+      ],
+      "validation": [
+        {
+          "check": "Pinned baseline recovered without prior conversation state",
+          "result": "PASS",
+          "evidence": [
+            "Fresh ChatGPT session followed workspace-control root -> pinned v2 operator/task-capsule route -> PADataset README.md.",
+            "PADataset control-plane-v2-integration advertised remote SHA exactly matched capsule checkpoint 232d5fd506ac8bffa55c39591c9cf1198257e51f.",
+            "PADataset root README remains the authoritative task router; context-refactor evidence states normal readers enter through README only."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "integration_design",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "padataset-control-plane-adoption",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "baseline_recovery"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "plan:README.md gains a concise cross-project operator/control-plane route while retaining PADataset domain authority",
+        "plan:create root AGENTS.md as a thin executor adapter that starts at README.md and routes shared operator semantics to workspace-control",
+        "scope:documentation/routing only; no scientific context, executable source, configuration, data, results, or paper semantics"
+      ],
+      "validation": [
+        {
+          "check": "Smallest project-local integration defined",
+          "result": "PASS",
+          "evidence": [
+            "Shared operator integration contract requires a root routing entry point and permits only project-specific thin local supplements.",
+            "PADataset already has a mature README + twelve scoped context-owner hierarchy, so duplicating shared control-plane policy locally is unnecessary.",
+            "No existing root AGENTS.md, .agents/, or .workspace-control/ adapter exists at the pinned checkpoint."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
@@ -193,18 +221,30 @@
       "check": "final v2 HANDOFF_SAFE",
       "result": "NOT_RUN",
       "evidence": []
+    },
+    {
+      "check": "baseline recovery",
+      "result": "PASS",
+      "evidence": [
+        "Fresh-session root-route recovery completed against PADataset@232d5fd506ac8bffa55c39591c9cf1198257e51f and workspace-control operator contract@03a51fdbe2a9153f2b5e45054eec6e927a9dda36."
+      ]
+    },
+    {
+      "check": "minimal integration design bounded",
+      "result": "PASS",
+      "evidence": [
+        "Implementation scope is exactly README.md plus new root AGENTS.md; all scientific/executable paths remain out of scope."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Recover the PADataset baseline from README.md and inspect only the existing operator/routing surfaces needed to design the integration.",
-    "Define the smallest PADataset-local route/adapter changes needed to adopt workspace-control v2 without duplicating generic semantics.",
-    "Implement the bounded integration on control-plane-v2-integration.",
+    "Implement the bounded README.md + root AGENTS.md integration on control-plane-v2-integration.",
     "Run a fresh-reader ChatGPT/Codex cold-start validation from the PADataset root route.",
     "Review the exact integration diff and verify that scientific code/configuration/results/paper semantics did not change.",
     "Checkpoint the verified PADataset branch, establish final HANDOFF_SAFE state, and archive the completed task."
   ],
-  "next_safe_action": "In a fresh ChatGPT conversation with GitHub access, open workspace-control/tasks/active/padataset-control-plane-v2-integration.json from main, follow the pinned workspace-control v2 route, then read PADataset README.md at control-plane-v2-integration@232d5fd506ac8bffa55c39591c9cf1198257e51f. Complete baseline_recovery before proposing or making PADataset mutations.",
+  "next_safe_action": "On PADataset control-plane-v2-integration, update README.md with a concise route to workspace-control for mutation/runtime/Git/handoff coordination and create a thin root AGENTS.md adapter. Change no other PADataset paths. Then verify the remote checkpoint and reread both pushed files before cold-start validation.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This is an adoption task, not a scientific refactor. PADataset already has a mature project-owned hierarchical context system; integrate the shared control plane around that system rather than replacing it."
