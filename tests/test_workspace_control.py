@@ -609,6 +609,312 @@ class HandoffTopologyTests(unittest.TestCase):
         )
 
 
+class WorkflowDescriptorTests(unittest.TestCase):
+    def test_valid_workflow_fixture_passes_semantic_validation(self):
+        data = load_json(
+            FIXTURES / "workflow_descriptor_v1.json"
+        )
+        errors = workspace_control.validate_workflow_descriptor_v1_data(
+            data,
+            FIXTURES / "workflow_descriptor_v1.json",
+            REPOS,
+        )
+        self.assertEqual(errors, [])
+
+    def test_template_passes_semantic_validation(self):
+        data = load_json(
+            ROOT / "templates" / "workflow_descriptor.v1.json"
+        )
+        errors = workspace_control.validate_workflow_descriptor_v1_data(
+            data,
+            ROOT / "templates" / "workflow_descriptor.v1.json",
+            REPOS,
+        )
+        self.assertEqual(errors, [])
+
+    def test_live_task_state_fixture_is_rejected_explicitly(self):
+        path = FIXTURES / "workflow_descriptor_v1_live_state.json"
+        data = load_json(path)
+        errors = workspace_control.validate_workflow_descriptor_v1_data(
+            data,
+            path,
+            REPOS,
+        )
+        self.assertTrue(
+            any(
+                "live task state is forbidden" in error
+                for error in errors
+            )
+        )
+        self.assertTrue(
+            any("status" in error for error in errors)
+        )
+
+    def test_forward_dependency_fixture_is_rejected(self):
+        path = (
+            FIXTURES
+            / "workflow_descriptor_v1_invalid_dependency.json"
+        )
+        data = load_json(path)
+        errors = workspace_control.validate_workflow_descriptor_v1_data(
+            data,
+            path,
+            REPOS,
+        )
+        self.assertTrue(
+            any(
+                "must name an earlier declared stage" in error
+                for error in errors
+            )
+        )
+
+    def test_owner_context_must_be_repository_relative(self):
+        data = load_json(
+            FIXTURES / "workflow_descriptor_v1.json"
+        )
+        data["owner"]["context_path"] = "../outside.md"
+        errors = workspace_control.validate_workflow_descriptor_v1_data(
+            data,
+            Path("workflow.json"),
+            REPOS,
+        )
+        self.assertTrue(
+            any(
+                "owner.context_path" in error
+                for error in errors
+            )
+        )
+
+    def test_workflow_validate_command_is_registered(self):
+        args = workspace_control.build_parser().parse_args(
+            [
+                "workflow-validate",
+                "--file",
+                "workflow.json",
+                "--json",
+            ]
+        )
+        self.assertEqual(
+            args.func,
+            workspace_control.command_workflow_validate,
+        )
+
+    def test_exact_binding_and_uncommitted_change_detection(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            bare = root / "owner.git"
+            checkout = root / "owner"
+            descriptor = checkout / "workflow.json"
+
+            def raw(*args):
+                proc = subprocess.run(
+                    ["git", *args],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                self.assertEqual(
+                    proc.returncode,
+                    0,
+                    msg=proc.stderr,
+                )
+                return proc.stdout.strip()
+
+            def git(*args):
+                return raw("-C", str(checkout), *args)
+
+            raw("init", "--bare", str(bare))
+            raw("init", str(checkout))
+            git("config", "user.name", "Workflow Test")
+            git(
+                "config",
+                "user.email",
+                "workflow@example.invalid",
+            )
+            git("checkout", "-b", "main")
+            (checkout / "README.md").write_text(
+                "owner context\n"
+            )
+
+            data = load_json(
+                FIXTURES / "workflow_descriptor_v1.json"
+            )
+            data["owner"]["repository"] = "fixture-owner"
+            descriptor.write_text(
+                json.dumps(data, indent=2) + "\n"
+            )
+
+            git("add", "README.md", "workflow.json")
+            git("commit", "-m", "workflow")
+            git("remote", "add", "origin", str(bare))
+            git("push", "-u", "origin", "main")
+
+            cfg = {
+                "path": "owner",
+                "remote": str(bare),
+                "role": "managed",
+                "writable": True,
+                "canonical_branch": "main",
+                "context_entry": "README.md",
+                "authority": "fixture workflow owner",
+                "worktree_policy": "shared",
+                "recursive_mutation_forbidden": False,
+            }
+            repos = {"fixture-owner": cfg}
+
+            payload = workspace_control.workflow_validation_payload(
+                descriptor,
+                data,
+                repos,
+            )
+            self.assertTrue(payload["valid"])
+            binding = payload["binding"]
+            self.assertTrue(binding["resolved"])
+            self.assertEqual(
+                binding["repository"],
+                "fixture-owner",
+            )
+            self.assertEqual(
+                binding["path"],
+                "workflow.json",
+            )
+            self.assertEqual(
+                binding["checkpoint_sha"],
+                git("rev-parse", "HEAD"),
+            )
+            self.assertEqual(
+                binding["content_sha"],
+                git("rev-parse", "HEAD:workflow.json"),
+            )
+
+            data["title"] = "Changed but uncommitted"
+            descriptor.write_text(
+                json.dumps(data, indent=2) + "\n"
+            )
+            changed = (
+                workspace_control.workflow_validation_payload(
+                    descriptor,
+                    data,
+                    repos,
+                )
+            )
+            self.assertFalse(changed["valid"])
+            self.assertTrue(
+                any(
+                    "differs from durable repository HEAD" in error
+                    for error in changed["errors"]
+                )
+            )
+
+    def test_binding_rejects_wrong_owner_repository_origin(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            checkout = root / "owner"
+            checkout.mkdir()
+
+            subprocess.run(
+                ["git", "-C", str(checkout), "init"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(checkout),
+                    "config",
+                    "user.name",
+                    "Workflow Test",
+                ],
+                check=True,
+            )
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(checkout),
+                    "config",
+                    "user.email",
+                    "workflow@example.invalid",
+                ],
+                check=True,
+            )
+            (checkout / "README.md").write_text("context\n")
+
+            data = load_json(
+                FIXTURES / "workflow_descriptor_v1.json"
+            )
+            data["owner"]["repository"] = "fixture-owner"
+            descriptor = checkout / "workflow.json"
+            descriptor.write_text(
+                json.dumps(data, indent=2) + "\n"
+            )
+
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(checkout),
+                    "add",
+                    "README.md",
+                    "workflow.json",
+                ],
+                check=True,
+            )
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(checkout),
+                    "commit",
+                    "-m",
+                    "workflow",
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(checkout),
+                    "remote",
+                    "add",
+                    "origin",
+                    str(root / "actual.git"),
+                ],
+                check=True,
+            )
+
+            cfg = {
+                "path": "owner",
+                "remote": str(root / "different.git"),
+                "role": "managed",
+                "writable": True,
+                "canonical_branch": "main",
+                "context_entry": "README.md",
+                "authority": "fixture workflow owner",
+                "worktree_policy": "shared",
+                "recursive_mutation_forbidden": False,
+            }
+            payload = workspace_control.workflow_validation_payload(
+                descriptor,
+                data,
+                {"fixture-owner": cfg},
+            )
+            self.assertFalse(payload["valid"])
+            self.assertTrue(
+                any(
+                    "origin does not match owner.repository" in error
+                    for error in payload["errors"]
+                )
+            )
+
+
 class WorktreePrepareTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
