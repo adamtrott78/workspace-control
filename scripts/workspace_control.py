@@ -909,6 +909,8 @@ STAGE_STATUSES_V2 = {
     "SKIPPED",
 }
 
+HANDOFF_STATUSES_V2 = HANDOFF_STATUSES | {"SUSPENDED"}
+
 TASK_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
@@ -2287,7 +2289,7 @@ def check_ancestor(path, base_sha, checkpoint_sha):
     return rc == 0
 
 
-def handoff_assessment(path, data, workspace_root, repos):
+def handoff_assessment_v1(path, data, workspace_root, repos):
     validation = task_validation_payload(
         path,
         data,
@@ -2478,6 +2480,500 @@ def handoff_assessment(path, data, workspace_root, repos):
     )
 
 
+def assess_v2_remote_state(entry, cfg):
+    remote = entry.get("remote")
+    if not isinstance(remote, dict):
+        return None
+
+    reasons = []
+
+    if not remote.get("verified"):
+        reasons.append(
+            "remote checkpoint is not recorded as independently verified"
+        )
+
+    if not cfg.get("remote"):
+        reasons.append(
+            "registered repository has no remote identity"
+        )
+
+    return {
+        "branch": remote.get("branch"),
+        "checkpoint_sha": remote.get("checkpoint_sha"),
+        "verified": remote.get("verified"),
+        "registered_remote": cfg.get("remote"),
+        "ready": not reasons,
+        "reasons": reasons,
+    }
+
+
+def assess_v2_local_state(
+    entry,
+    cfg,
+    workspace_root,
+    repos,
+):
+    local = entry.get("local")
+    if not isinstance(local, dict):
+        return None
+
+    checkout = Path(
+        local["checkout_path"]
+    ).expanduser().resolve()
+
+    record = inspect_checkout(
+        entry["name"],
+        cfg,
+        checkout,
+        workspace_root,
+        repos,
+    )
+
+    reasons = []
+
+    if not record.get("exists"):
+        reasons.append(
+            "recorded checkout/worktree path is missing"
+        )
+    elif not record.get("git"):
+        reasons.append(
+            "recorded path is not a Git checkout"
+        )
+    else:
+        if not record.get("identity_matches"):
+            reasons.append(
+                "observed origin does not match registered repository"
+            )
+
+        if record.get("branch") != local["branch"]:
+            reasons.append(
+                "current branch differs from recorded local branch"
+            )
+
+        if record.get("head") != local["head_sha"]:
+            reasons.append(
+                "current HEAD differs from recorded local HEAD"
+            )
+
+        if local.get("clean") is not True:
+            reasons.append(
+                "recorded local state is not a clean recoverable checkpoint"
+            )
+
+        if not record.get("clean"):
+            reasons.append(
+                "checkout is dirty; local v2 handoff requires a clean checkpoint"
+            )
+
+        git_root = Path(record["git_root"])
+
+        if not check_commit_exists(
+            git_root,
+            local["head_sha"],
+        ):
+            reasons.append(
+                "recorded local HEAD commit is not present locally"
+            )
+
+        base_sha = entry.get("base_sha")
+        if base_sha:
+            if not check_commit_exists(git_root, base_sha):
+                reasons.append(
+                    "recorded base commit is not present locally"
+                )
+            elif not check_ancestor(
+                git_root,
+                base_sha,
+                local["head_sha"],
+            ):
+                reasons.append(
+                    "recorded base SHA is not an ancestor of local HEAD"
+                )
+
+    return {
+        "checkout_path": str(checkout),
+        "branch": local.get("branch"),
+        "head_sha": local.get("head_sha"),
+        "recorded_clean": local.get("clean"),
+        "ready": not reasons,
+        "reasons": reasons,
+    }
+
+
+def assess_v2_repository(
+    entry,
+    cfg,
+    workspace_root,
+    repos,
+):
+    remote = assess_v2_remote_state(entry, cfg)
+    local = assess_v2_local_state(
+        entry,
+        cfg,
+        workspace_root,
+        repos,
+    )
+
+    reasons = []
+
+    if remote is None and local is None:
+        reasons.append(
+            "repository records neither remote nor local recovery state"
+        )
+
+    for label, state in (
+        ("remote", remote),
+        ("local", local),
+    ):
+        if state:
+            for reason in state["reasons"]:
+                reasons.append(f"{label}: {reason}")
+
+    return {
+        "name": entry["name"],
+        "intent": entry["intent"],
+        "remote": remote,
+        "local": local,
+        "ready": not reasons,
+        "reasons": reasons,
+    }
+
+
+def assess_v2_workflow_binding(data, repository_results):
+    workflow = data.get("workflow")
+
+    if not isinstance(workflow, dict):
+        return {
+            "required": False,
+            "resolved": True,
+            "repository": None,
+            "path": None,
+            "checkpoint_sha": None,
+            "bindings": [],
+            "reasons": [],
+        }
+
+    bindings = []
+    workflow_repo = workflow["repository"]
+    workflow_sha = workflow["checkpoint_sha"]
+
+    for result in repository_results:
+        if result["name"] != workflow_repo:
+            continue
+
+        remote = result.get("remote")
+        if (
+            remote
+            and remote.get("ready")
+            and remote.get("checkpoint_sha") == workflow_sha
+        ):
+            bindings.append("remote")
+
+        local = result.get("local")
+        if (
+            local
+            and local.get("ready")
+            and local.get("head_sha") == workflow_sha
+        ):
+            bindings.append("local")
+
+    reasons = []
+
+    if not bindings:
+        reasons.append(
+            "workflow checkpoint is not bound to a verified "
+            "repository recovery state"
+        )
+
+    return {
+        "required": True,
+        "resolved": bool(bindings),
+        "repository": workflow_repo,
+        "path": workflow["path"],
+        "checkpoint_sha": workflow_sha,
+        "bindings": bindings,
+        "reasons": reasons,
+    }
+
+
+def assess_v2_composed_boundary(data, repository_results):
+    if data.get("execution_topology") != "composed":
+        return None
+
+    remote_shas = set()
+    local_shas = set()
+
+    for result in repository_results:
+        remote = result.get("remote")
+        if remote and remote.get("ready"):
+            remote_shas.add(remote["checkpoint_sha"])
+
+        local = result.get("local")
+        if local and local.get("ready"):
+            local_shas.add(local["head_sha"])
+
+    shared = sorted(remote_shas & local_shas)
+
+    current_stage = None
+    current_stage_id = data.get("current_stage")
+    for stage in data.get("stages", []):
+        if stage.get("id") == current_stage_id:
+            current_stage = stage
+            break
+
+    stage_inputs = []
+    if isinstance(current_stage, dict):
+        for item in current_stage.get("inputs", []):
+            if not isinstance(item, str):
+                continue
+            if not item.startswith("git:"):
+                continue
+            sha = item[4:]
+            if sha in remote_shas:
+                stage_inputs.append(item)
+
+    ready = bool(shared or stage_inputs)
+    reasons = []
+
+    if not ready:
+        reasons.append(
+            "composed task does not record a provable remote/local "
+            "synchronization boundary"
+        )
+
+    return {
+        "ready": ready,
+        "shared_checkpoints": shared,
+        "current_stage_remote_inputs": stage_inputs,
+        "reasons": reasons,
+    }
+
+
+def parse_receiver_checks(values):
+    checks = []
+    seen = set()
+
+    for value in values:
+        if "=" not in value:
+            raise ValueError(
+                "receiver check must use NAME=ready or NAME=missing"
+            )
+
+        name, state = value.split("=", 1)
+        name = name.strip()
+        state = state.strip().lower()
+
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:-]*", name):
+            raise ValueError(
+                "receiver check name must use letters, numbers, "
+                "dot, underscore, colon, or dash"
+            )
+
+        if state not in {"ready", "missing"}:
+            raise ValueError(
+                "receiver check state must be ready or missing"
+            )
+
+        if name in seen:
+            raise ValueError(
+                f"duplicate receiver check: {name}"
+            )
+
+        seen.add(name)
+        checks.append({
+            "name": name,
+            "ready": state == "ready",
+        })
+
+    return checks
+
+
+def execution_readiness_assessment(receiver, checks):
+    if receiver is None:
+        return {
+            "assessed": False,
+            "receiver": None,
+            "result": "NOT_ASSESSED",
+            "ready": None,
+            "checks": [],
+            "reasons": [],
+        }
+
+    if not checks:
+        return {
+            "assessed": False,
+            "receiver": receiver,
+            "result": "NOT_ASSESSED",
+            "ready": None,
+            "checks": [],
+            "reasons": [
+                "no transient receiver capability/readiness checks "
+                "were supplied"
+            ],
+        }
+
+    reasons = [
+        f"receiver check is not ready: {item['name']}"
+        for item in checks
+        if not item["ready"]
+    ]
+
+    return {
+        "assessed": True,
+        "receiver": receiver,
+        "result": (
+            "EXECUTION_READY"
+            if not reasons
+            else "NOT_EXECUTION_READY"
+        ),
+        "ready": not reasons,
+        "checks": checks,
+        "reasons": reasons,
+    }
+
+
+def handoff_assessment_v2(
+    path,
+    data,
+    workspace_root,
+    repos,
+    receiver=None,
+    receiver_checks=None,
+):
+    reasons = []
+    repository_results = []
+
+    if data["status"] not in HANDOFF_STATUSES_V2:
+        reasons.append(
+            "task status is not an explicit v2 handoff-capable state"
+        )
+
+    required_checkpoints = [
+        item
+        for item in data.get("checkpoints", [])
+        if item.get("required_for_resume")
+    ]
+
+    if not required_checkpoints:
+        reasons.append(
+            "handoff requires at least one required-for-resume checkpoint"
+        )
+
+    for item in required_checkpoints:
+        if not item.get("evidence"):
+            reasons.append(
+                "required-for-resume checkpoint lacks durable evidence: "
+                f"{item.get('id')}"
+            )
+
+    for entry in data["repositories"]:
+        result = assess_v2_repository(
+            entry,
+            repos[entry["name"]],
+            workspace_root,
+            repos,
+        )
+        repository_results.append(result)
+
+        for reason in result["reasons"]:
+            reasons.append(
+                f"{entry['name']}: {reason}"
+            )
+
+    workflow = assess_v2_workflow_binding(
+        data,
+        repository_results,
+    )
+    for reason in workflow["reasons"]:
+        reasons.append(f"workflow: {reason}")
+
+    synchronization = assess_v2_composed_boundary(
+        data,
+        repository_results,
+    )
+    if synchronization:
+        for reason in synchronization["reasons"]:
+            reasons.append(f"composed: {reason}")
+
+    result = (
+        "HANDOFF_SAFE"
+        if not reasons
+        else "NOT_HANDOFF_SAFE"
+    )
+
+    readiness = execution_readiness_assessment(
+        receiver,
+        receiver_checks or [],
+    )
+
+    return {
+        "schema_version": 2,
+        "task_file": str(path),
+        "task_id": data["task_id"],
+        "status": data["status"],
+        "execution_topology": data["execution_topology"],
+        "result": result,
+        "handoff_safe": not reasons,
+        "reasons": reasons,
+        "repositories": repository_results,
+        "workflow_resolution": workflow,
+        "synchronization_boundary": synchronization,
+        "execution_readiness": readiness,
+        "next_safe_action": data["next_safe_action"],
+    }, (
+        EXIT_READY
+        if not reasons
+        else EXIT_REVIEW
+    )
+
+
+def handoff_assessment(
+    path,
+    data,
+    workspace_root,
+    repos,
+    receiver=None,
+    receiver_checks=None,
+):
+    validation = task_validation_payload(
+        path,
+        data,
+        repos,
+    )
+
+    if not validation["valid"]:
+        return {
+            "schema_version": (
+                data.get("schema_version")
+                if isinstance(data, dict)
+                else None
+            ),
+            "task_file": str(path),
+            "task_id": validation.get("task_id"),
+            "result": "INVALID_CAPSULE",
+            "handoff_safe": False,
+            "reasons": validation["errors"],
+            "repositories": [],
+        }, EXIT_STATE
+
+    if data.get("schema_version") == 1:
+        return handoff_assessment_v1(
+            path,
+            data,
+            workspace_root,
+            repos,
+        )
+
+    return handoff_assessment_v2(
+        path,
+        data,
+        workspace_root,
+        repos,
+        receiver=receiver,
+        receiver_checks=receiver_checks,
+    )
+
+
 def print_handoff_human(payload):
     print("============================================================")
     print("TASK HANDOFF ASSESSMENT")
@@ -2486,6 +2982,11 @@ def print_handoff_human(payload):
     print(f"TASK_ID:   {payload.get('task_id')}")
     print(f"STATUS:    {payload.get('status')}")
     print(f"RESULT:    {payload['result']}")
+
+    if payload.get("execution_topology"):
+        print(
+            f"TOPOLOGY:  {payload['execution_topology']}"
+        )
 
     if "next_safe_action" in payload:
         print(
@@ -2497,16 +2998,63 @@ def print_handoff_human(payload):
     if repositories:
         print("REPOSITORIES:")
         for repo in repositories:
-            print(
-                "  - "
-                f"{repo['name']} "
-                f"intent={repo['intent']} "
-                f"branch={repo['branch']} "
-                f"ready={repo['ready']}"
-            )
+            if payload.get("schema_version") == 1:
+                print(
+                    "  - "
+                    f"{repo['name']} "
+                    f"intent={repo['intent']} "
+                    f"branch={repo['branch']} "
+                    f"ready={repo['ready']}"
+                )
+            else:
+                print(
+                    "  - "
+                    f"{repo['name']} "
+                    f"intent={repo['intent']} "
+                    f"ready={repo['ready']}"
+                )
+
+                remote = repo.get("remote")
+                if remote:
+                    print(
+                        "      remote "
+                        f"branch={remote['branch']} "
+                        f"checkpoint={remote['checkpoint_sha']} "
+                        f"verified={remote['verified']} "
+                        f"ready={remote['ready']}"
+                    )
+
+                local = repo.get("local")
+                if local:
+                    print(
+                        "      local "
+                        f"path={local['checkout_path']} "
+                        f"branch={local['branch']} "
+                        f"HEAD={local['head_sha']} "
+                        f"ready={local['ready']}"
+                    )
 
             for reason in repo["reasons"]:
                 print(f"      reason: {reason}")
+
+    readiness = payload.get("execution_readiness")
+    if readiness:
+        print(
+            "EXECUTION_READINESS: "
+            f"{readiness['result']}"
+        )
+        if readiness.get("receiver"):
+            print(
+                f"RECEIVER:   {readiness['receiver']}"
+            )
+        for check in readiness.get("checks", []):
+            print(
+                "  - "
+                f"{check['name']} "
+                f"ready={check['ready']}"
+            )
+        for reason in readiness.get("reasons", []):
+            print(f"      reason: {reason}")
 
     if payload["reasons"]:
         print("REASONS:")
@@ -2518,11 +3066,36 @@ def command_handoff_check(args):
     _, workspace_root, repos = load_registry()
     path, data = load_task_capsule(args.file)
 
+    if (
+        data.get("schema_version") == 1
+        and (args.receiver or args.receiver_check)
+    ):
+        fail(
+            "receiver readiness assessment is available only "
+            "for schema_version 2 capsules",
+            2,
+        )
+
+    if args.receiver_check and not args.receiver:
+        fail(
+            "--receiver-check requires --receiver",
+            2,
+        )
+
+    try:
+        receiver_checks = parse_receiver_checks(
+            args.receiver_check
+        )
+    except ValueError as exc:
+        fail(str(exc), 2)
+
     payload, code = handoff_assessment(
         path,
         data,
         workspace_root,
         repos,
+        receiver=args.receiver,
+        receiver_checks=receiver_checks,
     )
 
     if args.json:
@@ -2665,6 +3238,23 @@ def build_parser():
         "--file",
         required=True,
         help="path to task-capsule JSON",
+    )
+    handoff.add_argument(
+        "--receiver",
+        help=(
+            "optional proposed receiver identifier for a separate "
+            "transient EXECUTION_READY assessment"
+        ),
+    )
+    handoff.add_argument(
+        "--receiver-check",
+        action="append",
+        default=[],
+        metavar="NAME=ready|missing",
+        help=(
+            "ephemeral receiver capability/readiness fact; repeat as "
+            "needed; does not alter durable HANDOFF_SAFE"
+        ),
     )
     handoff.add_argument(
         "--json",
