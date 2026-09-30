@@ -30,19 +30,18 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: ca1c5a45facbed732aca3f40a3de53e4b6d8f4df
+- Remote checkpoint: a77f39d566492ff56875644256095abb8366359e
 - Remote verified: true
 
 ## Next safe action
 
-Continue proposal_compiler from automated-research-engine-v1@ca1c5a45facbed732aca3f40a3de53e4b6d8f4df. Define ResearchProgram, FundingOpportunity, SolicitationRequirement, and ProposalCompilation contracts. Use only a NOT_FOR_SUBMISSION dry-run fixture because the current surviving RF OSR candidate is NARROWED and requires deeper prior-work review; do not select it as the user's research direction and do not mark it fundable/novel.
+Continue execution_bridge from automated-research-engine-v1@a77f39d566492ff56875644256095abb8366359e. Define the approval-gated mapping from ResearchProgram to workspace-control task/workflow state. Use the current DRAFT_NOT_APPROVED pilot only to prove that the bridge refuses to instantiate a project. Define the exact payload that would become executable after APPROVED state; do not create a research project or infer approval.
 
 ## Remaining work
 
-- Define ResearchProgram and solicitation/proposal compiler contracts without treating a NARROWED/NEEDS_HUMAN_REVIEW gap as an approved research direction.
-- Build a dry-run proposal compilation fixture that demonstrates evidence mapping and required human gates but is explicitly NOT_FOR_SUBMISSION.
-- Add official funding-opportunity adapter contracts and solicitation requirement mapping.
-- Build the execution bridge from an APPROVED research program into a workspace-control project/task workflow.
+- Define the execution-bridge contract that maps an APPROVED ResearchProgram into a workspace-control task/workflow without reconstructing it from chat.
+- Build a non-instantiable dry-run execution-plan fixture from the unapproved pilot program and prove that approval gating prevents project creation/execution.
+- Define the exact project-bootstrap payload that would be emitted after human approval.
 - During vertical-slice validation, ingest multiple additional papers and require deeper novelty review before any candidate becomes SUPPORTED_AS_OPEN.
 - Choose persistence/indexing architecture only after the complete vertical slice demonstrates actual query/load requirements.
 - After the end-to-end pipeline is validated, bootstrap the first real RF OSR knowledge corpus from the PDFs already curated/cited in the user's research paper and stored in PADataset's paper area; resolve the exact PADataset route at that time and ingest them through the same provenance-preserving pipeline rather than special-casing them.
