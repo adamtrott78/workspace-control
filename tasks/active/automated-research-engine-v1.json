@@ -754,9 +754,10 @@
       "required_for_resume": true,
       "evidence": [
         "stage=vertical_slice_validation",
-        "last_validated_boundary=research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7 (PR #3 immutable evidence history + deterministic knowledge checkpoints; PostgreSQL/pgvector CI PASS)",
-        "in_flight=research-engine/acquire-broggi-source@10ce97b9157d745c6e437983fb02e2e9e8ae72c5; GitHub Actions run 36762756822 completed FAILURE at Fetch publisher PDF; no exact-source artifact uploaded",
-        "resume=inspect acquisition failure evidence, try alternate authorized exact-source surfaces, then continue corpus scaling/novelty persistence without asking for local bytes unless all direct surfaces are exhausted"
+        "last_validated_boundary=research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7 (immutable evidence history + deterministic knowledge checkpoints; PostgreSQL/pgvector CI PASS)",
+        "external_runtime_prepared=research-engine/acquire-broggi-source commit 115335b26852df2af840191a713ffe481f759947 prepared from 10ce97b9157d745c6e437983fb02e2e9e8ae72c5; branch ref not yet advanced at restore-point creation",
+        "purpose=resolve HICSS Broggi 2025 exact PDF via ScholarSpace handle 10125/109750 / DSpace APIs after AISel returned HTTP 403",
+        "resume=verify acquire-broggi-source ref; if it points to 115335b26852df2af840191a713ffe481f759947 inspect the newest Acquire Broggi 2025 exact source Actions run and artifact; if ref has not advanced, advance it non-force to that prepared commit"
       ]
     }
   ],
@@ -1316,7 +1317,7 @@
     "Only after broader exact-source corpus validation consider any GapCandidate eligible for SUPPORTED_AS_OPEN.",
     "After the scaling slice passes, bulk-ingest the remainder of the already-curated PADataset reference PDFs."
   ],
-  "next_safe_action": "Resume from restore-point:latest at research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7. Inspect GitHub Actions run 36762756822 / acquire-broggi-source@10ce97b9157d745c6e437983fb02e2e9e8ae72c5 for publisher-fetch failure evidence; try alternate authorized exact-source acquisition surfaces for Broggi 2025. If all direct surfaces fail, record the true local-byte boundary, but continue any independent corpus-scaling/novelty-persistence work first.",
+  "next_safe_action": "Launch the prepared Broggi ScholarSpace acquisition by non-force advancing research-engine/acquire-broggi-source from 10ce97b9157d745c6e437983fb02e2e9e8ae72c5 to 115335b26852df2af840191a713ffe481f759947. Then inspect the resulting GitHub Actions run/artifact. Continue independent novelty-persistence work while external acquisition runs; do not stop solely to poll.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
