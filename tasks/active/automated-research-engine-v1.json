@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "d2baadf2c20f20a1edd958fef4f041706e34115f",
+        "checkpoint_sha": "f9e2a519b5bcde1c2c5a76579bed695f454658a8",
         "verified": true
       },
       "local": null,
@@ -400,8 +400,25 @@
         "execution_bridge",
         "git:d2baadf2c20f20a1edd958fef4f041706e34115f"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "git:f9e2a519b5bcde1c2c5a76579bed695f454658a8",
+        "artifact:architecture/research-engine/fixtures/rf-osr-curated-multipaper-corpus-v1.json",
+        "artifact:architecture/research-engine/fixtures/rf-osr-curated-multipaper-graph-v1.json",
+        "artifact:architecture/research-engine/fixtures/rf-osr-curated-multipaper-synthesis-v1.json"
+      ],
+      "validation": [
+        {
+          "check": "first curated multi-paper corpus",
+          "result": "PASS",
+          "evidence": [
+            "Five-work corpus combines one exact hashed FULLTEXT_PDF_LAYOUT paper with four tracked OCR_DERIVED PADataset reference artifacts.",
+            "Corpus contains 21 evidence nodes and 5 cross-work relations.",
+            "Cross-paper synthesis maps every statement to evidence IDs and preserves source fidelity.",
+            "Source-supported cross-work relations are distinguished from model-inferred taxonomy/lineage relations.",
+            "No field-level novelty conclusion is drawn from the curated subset."
+          ]
+        }
+      ],
       "resume_condition": null
     }
   ],
@@ -520,6 +537,16 @@
       "evidence": [
         "Approval-gated execution bridge contract/schema and dry-run fixture committed.",
         "Unapproved program refusal and deterministic would-be workspace-control bootstrap mapping both validated."
+      ]
+    },
+    {
+      "id": "research-engine-first-multipaper-corpus",
+      "kind": "git_commit",
+      "identity": "f9e2a519b5bcde1c2c5a76579bed695f454658a8",
+      "required_for_resume": true,
+      "evidence": [
+        "First curated PADataset-derived multi-paper corpus, graph, and synthesis fixtures committed.",
+        "Mixed source-fidelity handling and cross-work relation/query behavior validated."
       ]
     }
   ],
@@ -776,6 +803,42 @@
       "evidence": [
         "Validated non-instantiation for unapproved ResearchProgram."
       ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/rf-osr-curated-multipaper-corpus-v1.json",
+      "state": "durable",
+      "role": "multipaper-corpus-regression-fixture",
+      "origin": "automated-research-engine-v1@f9e2a519b5bcde1c2c5a76579bed695f454658a8",
+      "persistence": "git-tracked",
+      "regeneration": "versioned multi-paper fixture; preserve historical evidence/source-fidelity state",
+      "review_requirement": "Must preserve per-work source fidelity and distinguish source-supported from model-inferred cross-work relations.",
+      "evidence": [
+        "First five-work cross-paper vertical-slice fixture."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/rf-osr-curated-multipaper-graph-v1.json",
+      "state": "durable",
+      "role": "multipaper-graph-regression-fixture",
+      "origin": "automated-research-engine-v1@f9e2a519b5bcde1c2c5a76579bed695f454658a8",
+      "persistence": "git-tracked",
+      "regeneration": "versioned multi-paper fixture; preserve historical evidence/source-fidelity state",
+      "review_requirement": "Must preserve per-work source fidelity and distinguish source-supported from model-inferred cross-work relations.",
+      "evidence": [
+        "First five-work cross-paper vertical-slice fixture."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/rf-osr-curated-multipaper-synthesis-v1.json",
+      "state": "durable",
+      "role": "multipaper-synthesis-regression-fixture",
+      "origin": "automated-research-engine-v1@f9e2a519b5bcde1c2c5a76579bed695f454658a8",
+      "persistence": "git-tracked",
+      "regeneration": "versioned multi-paper fixture; preserve historical evidence/source-fidelity state",
+      "review_requirement": "Must preserve per-work source fidelity and distinguish source-supported from model-inferred cross-work relations.",
+      "evidence": [
+        "First five-work cross-paper vertical-slice fixture."
+      ]
     }
   ],
   "validation": [
@@ -907,18 +970,26 @@
         "Validated at automated-research-engine-v1@d2baadf2c20f20a1edd958fef4f041706e34115f.",
         "Unapproved research direction cannot mutate/create a project; approved-state mapping is durably representable without chat state."
       ]
+    },
+    {
+      "check": "multi-paper knowledge substrate",
+      "result": "PASS",
+      "evidence": [
+        "Validated at automated-research-engine-v1@f9e2a519b5bcde1c2c5a76579bed695f454658a8.",
+        "Five works can be synthesized and related without collapsing exact-PDF and OCR-derived evidence or source-supported and inferred relations."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Run vertical-slice validation across multiple additional RF OSR papers so cross-paper identity, evidence, contradiction, synthesis, and novelty behavior are tested rather than only single-paper mechanics.",
-    "Use the user's already-curated/cited PDFs in PADataset as the first serious RF OSR corpus once their exact project route is resolved; ingest them through the same acquisition/evidence pipeline without special-casing.",
-    "Measure extraction/source-locator fidelity on a manually checked sample and track unsupported-extraction rate.",
-    "Re-run novelty challenge after the multi-paper corpus is indexed; only then consider whether any candidate can move toward SUPPORTED_AS_OPEN.",
-    "Choose persistence/indexing architecture based on observed graph/query/corpus scale requirements.",
-    "Create the dedicated research-engine implementation repository when a supported repository-creation path is available; move executable provider/parser/storage code there while retaining workspace-control as control plane."
+    "Select and document the v1 persistence/index architecture based on demonstrated requirements: immutable source/artifact identity, typed relational records, directed evidence relations, recursive provenance queries, JSON-like extensibility, full-text retrieval, and optional semantic retrieval.",
+    "Mechanically validate representative fixtures against their JSON schemas in the future implementation repository.",
+    "Promote a small subset of PADataset OCR_DERIVED works to exact-PDF-verified artifacts by hashing/parsing their local PDFs, then compare OCR-derived extraction against exact-PDF extraction to measure locator/fidelity error.",
+    "Re-run novelty challenge after additional RF-specific papers are ingested; only then consider whether any candidate can move toward SUPPORTED_AS_OPEN.",
+    "Create the dedicated research-engine implementation repository when a supported repository-creation path is available; move executable provider/parser/storage code there while retaining workspace-control as control plane.",
+    "After the vertical slice passes exact-PDF fidelity checks, bulk-ingest the remainder of the already-curated PADataset reference PDFs through the same pipeline."
   ],
-  "next_safe_action": "Vertical-slice validation is active at automated-research-engine-v1@d2baadf2c20f20a1edd958fef4f041706e34115f. The end-to-end control/data contracts have been proven on one exact full-text paper. Next, ingest a small multi-paper RF OSR corpus through the same pipeline—prefer the user's already-curated cited-paper PDFs in PADataset once their exact route is resolved—then validate cross-paper synthesis, contradiction/novelty behavior, and extraction fidelity before bulk-ingesting the remainder.",
+  "next_safe_action": "Continue vertical_slice_validation from automated-research-engine-v1@f9e2a519b5bcde1c2c5a76579bed695f454658a8. Use the demonstrated five-work object/graph/query requirements to choose and document the v1 persistence/index architecture. Preserve immutable evidence/source records as authority and treat graph/vector indexes as rebuildable projections. Then prepare a bounded exact-PDF promotion check for 2-3 PADataset local reference PDFs to measure OCR-vs-PDF extraction fidelity.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
