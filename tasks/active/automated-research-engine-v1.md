@@ -30,17 +30,18 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: e531b0641868589b1852fe062b60ea495d1b27d9
+- Remote checkpoint: fc79aaaecbb83e1cf63f048449a6a999a0b57530
 - Remote verified: true
 
 ## Next safe action
 
-Begin the ingress prototype on automated-research-engine-v1 by defining a reproducible DiscoveryRun/corpus manifest and testing provider adapters on a narrow pilot query in open-set/open-world RF sensing. Use OpenAlex-class discovery first, resolve identifiers/versions, then attempt lawful full-text resolution while recording access state. Do not build the database yet.
+Continue ingress_prototype at automated-research-engine-v1@fc79aaaecbb83e1cf63f048449a6a999a0b57530. First implement/validate canonical Work and WorkVersion resolution for the pilot's known duplicate/version cases, then obtain bytes and a cryptographic hash for at least one lawful OA source using a capable executor. Do not collapse source resolution and acquisition into one state, and do not choose the persistence database yet.
 
 ## Remaining work
 
-- Prototype multi-provider literature discovery with reproducible DiscoveryRun records and canonical work/version identity.
-- Prototype lawful full-text resolution/acquisition with explicit access-state and artifact hashing.
+- Implement canonical Work/WorkVersion identity resolution against the pilot duplicate/version cases.
+- Acquire and content-hash at least one lawful full-text source artifact using an executor/tool path that can retrieve bytes; preserve failed attempts separately.
+- Define and test explicit CorpusDecision screening records on the RF pilot.
 - Build normalized parsing and typed evidence extraction with source locators and verification state.
 - Choose persistence/indexing architecture only after real ingress/extraction objects demonstrate storage/query requirements.
 - Build provenance-preserving synthesis, contradiction handling, gap generation, and adversarial novelty challenge.
