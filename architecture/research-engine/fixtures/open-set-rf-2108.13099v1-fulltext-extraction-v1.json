@@ -887,14 +887,14 @@
     {
       "schema_version": 1,
       "relation_id": "rel:conclusion-support-ellipsoid",
-      "source_id": "ev:2108:claim:conclusion",
-      "target_id": "ev:2108:result:ellipsoid",
+      "source_id": "ev:2108:result:ellipsoid",
+      "target_id": "ev:2108:claim:conclusion",
       "relation_type": "SUPPORTS",
       "basis_evidence_ids": [
         "ev:2108:result:ellipsoid"
       ],
       "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
-      "rationale": "The blind ellipsoidal accuracy gains contribute evidence for the paper's conclusion about replacing physical known-outlier acquisition.",
+      "rationale": "The blind ellipsoidal accuracy gains contribute evidence supporting the paper's conclusion about replacing physical known-outlier acquisition.",
       "confidence": null,
       "verification_state": "MACHINE_CHECKED",
       "created_by": "chatgpt-research-engine-fulltext-pilot",
@@ -903,14 +903,14 @@
     {
       "schema_version": 1,
       "relation_id": "rel:conclusion-support-optimization",
-      "source_id": "ev:2108:claim:conclusion",
-      "target_id": "ev:2108:result:optimization",
+      "source_id": "ev:2108:result:optimization",
+      "target_id": "ev:2108:claim:conclusion",
       "relation_type": "SUPPORTS",
       "basis_evidence_ids": [
         "ev:2108:result:optimization"
       ],
       "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
-      "rationale": "The optimization-method results contribute additional evidence for the paper's conclusion.",
+      "rationale": "The optimization-method results contribute additional evidence supporting the paper's conclusion.",
       "confidence": null,
       "verification_state": "MACHINE_CHECKED",
       "created_by": "chatgpt-research-engine-fulltext-pilot",
