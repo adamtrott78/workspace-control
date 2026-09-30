@@ -30,21 +30,21 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: d2baadf2c20f20a1edd958fef4f041706e34115f
+- Remote checkpoint: f9e2a519b5bcde1c2c5a76579bed695f454658a8
 - Remote verified: true
 
 ## Next safe action
 
-Vertical-slice validation is active at automated-research-engine-v1@d2baadf2c20f20a1edd958fef4f041706e34115f. The end-to-end control/data contracts have been proven on one exact full-text paper. Next, ingest a small multi-paper RF OSR corpus through the same pipeline—prefer the user's already-curated cited-paper PDFs in PADataset once their exact route is resolved—then validate cross-paper synthesis, contradiction/novelty behavior, and extraction fidelity before bulk-ingesting the remainder.
+Continue vertical_slice_validation from automated-research-engine-v1@f9e2a519b5bcde1c2c5a76579bed695f454658a8. Use the demonstrated five-work object/graph/query requirements to choose and document the v1 persistence/index architecture. Preserve immutable evidence/source records as authority and treat graph/vector indexes as rebuildable projections. Then prepare a bounded exact-PDF promotion check for 2-3 PADataset local reference PDFs to measure OCR-vs-PDF extraction fidelity.
 
 ## Remaining work
 
-- Run vertical-slice validation across multiple additional RF OSR papers so cross-paper identity, evidence, contradiction, synthesis, and novelty behavior are tested rather than only single-paper mechanics.
-- Use the user's already-curated/cited PDFs in PADataset as the first serious RF OSR corpus once their exact project route is resolved; ingest them through the same acquisition/evidence pipeline without special-casing.
-- Measure extraction/source-locator fidelity on a manually checked sample and track unsupported-extraction rate.
-- Re-run novelty challenge after the multi-paper corpus is indexed; only then consider whether any candidate can move toward SUPPORTED_AS_OPEN.
-- Choose persistence/indexing architecture based on observed graph/query/corpus scale requirements.
+- Select and document the v1 persistence/index architecture based on demonstrated requirements: immutable source/artifact identity, typed relational records, directed evidence relations, recursive provenance queries, JSON-like extensibility, full-text retrieval, and optional semantic retrieval.
+- Mechanically validate representative fixtures against their JSON schemas in the future implementation repository.
+- Promote a small subset of PADataset OCR_DERIVED works to exact-PDF-verified artifacts by hashing/parsing their local PDFs, then compare OCR-derived extraction against exact-PDF extraction to measure locator/fidelity error.
+- Re-run novelty challenge after additional RF-specific papers are ingested; only then consider whether any candidate can move toward SUPPORTED_AS_OPEN.
 - Create the dedicated research-engine implementation repository when a supported repository-creation path is available; move executable provider/parser/storage code there while retaining workspace-control as control plane.
+- After the vertical slice passes exact-PDF fidelity checks, bulk-ingest the remainder of the already-curated PADataset reference PDFs through the same pipeline.
 
 ## Blockers / gates
 
