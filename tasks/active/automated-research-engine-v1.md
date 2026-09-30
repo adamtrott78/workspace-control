@@ -30,21 +30,21 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: a77f39d566492ff56875644256095abb8366359e
+- Remote checkpoint: d2baadf2c20f20a1edd958fef4f041706e34115f
 - Remote verified: true
 
 ## Next safe action
 
-Continue execution_bridge from automated-research-engine-v1@a77f39d566492ff56875644256095abb8366359e. Define the approval-gated mapping from ResearchProgram to workspace-control task/workflow state. Use the current DRAFT_NOT_APPROVED pilot only to prove that the bridge refuses to instantiate a project. Define the exact payload that would become executable after APPROVED state; do not create a research project or infer approval.
+Vertical-slice validation is active at automated-research-engine-v1@d2baadf2c20f20a1edd958fef4f041706e34115f. The end-to-end control/data contracts have been proven on one exact full-text paper. Next, ingest a small multi-paper RF OSR corpus through the same pipeline—prefer the user's already-curated cited-paper PDFs in PADataset once their exact route is resolved—then validate cross-paper synthesis, contradiction/novelty behavior, and extraction fidelity before bulk-ingesting the remainder.
 
 ## Remaining work
 
-- Define the execution-bridge contract that maps an APPROVED ResearchProgram into a workspace-control task/workflow without reconstructing it from chat.
-- Build a non-instantiable dry-run execution-plan fixture from the unapproved pilot program and prove that approval gating prevents project creation/execution.
-- Define the exact project-bootstrap payload that would be emitted after human approval.
-- During vertical-slice validation, ingest multiple additional papers and require deeper novelty review before any candidate becomes SUPPORTED_AS_OPEN.
-- Choose persistence/indexing architecture only after the complete vertical slice demonstrates actual query/load requirements.
-- After the end-to-end pipeline is validated, bootstrap the first real RF OSR knowledge corpus from the PDFs already curated/cited in the user's research paper and stored in PADataset's paper area; resolve the exact PADataset route at that time and ingest them through the same provenance-preserving pipeline rather than special-casing them.
+- Run vertical-slice validation across multiple additional RF OSR papers so cross-paper identity, evidence, contradiction, synthesis, and novelty behavior are tested rather than only single-paper mechanics.
+- Use the user's already-curated/cited PDFs in PADataset as the first serious RF OSR corpus once their exact project route is resolved; ingest them through the same acquisition/evidence pipeline without special-casing.
+- Measure extraction/source-locator fidelity on a manually checked sample and track unsupported-extraction rate.
+- Re-run novelty challenge after the multi-paper corpus is indexed; only then consider whether any candidate can move toward SUPPORTED_AS_OPEN.
+- Choose persistence/indexing architecture based on observed graph/query/corpus scale requirements.
+- Create the dedicated research-engine implementation repository when a supported repository-creation path is available; move executable provider/parser/storage code there while retaining workspace-control as control plane.
 
 ## Blockers / gates
 
