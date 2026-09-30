@@ -1,0 +1,6 @@
+{
+  "schema_version":1,"task_id":"fixture-v1","title":"Fixture v1","status":"CHECKPOINTED","goal":"Verify v1 compatibility fixture.",
+  "acceptance_criteria":["Fixture parses."],"constraints":[],
+  "repositories":[{"name":"workspace-control","intent":"read","checkout_path":"/home/atrott/adamArchives/Adam/workspace-control","branch":"main","base_sha":"cb8368cd50de2d364c2aade8843276aab0b02420","checkpoint_sha":"cb8368cd50de2d364c2aade8843276aab0b02420","checkpoint_pushed":true,"allowed_mutation_scope":[]}],
+  "decisions":[],"executed_operations":[],"artifacts":[],"validation":[],"blockers":[],"remaining_work":["Fixture only."],"next_safe_action":"No action."
+}

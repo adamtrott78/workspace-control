@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/task_capsule.v2.schema.json",
+  "title": "Workspace Control Task Capsule v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version","task_id","title","status","goal","execution_topology","acceptance_criteria","constraints","repositories","stages","checkpoints","artifacts","validation","blockers","remaining_work","next_safe_action"],
+  "properties": {
+    "schema_version": {"const": 2},
+    "task_id": {"type":"string","pattern":"^[a-z0-9][a-z0-9._-]*$","minLength":1},
+    "title": {"type":"string","minLength":1},
+    "status": {"enum":["PLANNED","IN_PROGRESS","VALIDATING","CHECKPOINTED","SUSPENDED","BLOCKED_RUNTIME","BLOCKED_EVIDENCE","NEEDS_USER_DECISION","COMPLETE"]},
+    "goal": {"type":"string","minLength":1},
+    "execution_topology": {"enum":["remote_only","local","composed"]},
+    "workflow": {"anyOf":[{"type":"null"},{"$ref":"#/$defs/workflow_identity"}]},
+    "parent_execution_owner": {"type":["string","null"]},
+    "current_stage": {"type":["string","null"]},
+    "acceptance_criteria": {"type":"array","minItems":1,"items":{"type":"string","minLength":1}},
+    "constraints": {"type":"array","items":{"type":"string","minLength":1}},
+    "repositories": {"type":"array","minItems":1,"items":{"$ref":"#/$defs/repository"}},
+    "stages": {"type":"array","items":{"$ref":"#/$defs/stage_state"}},
+    "checkpoints": {"type":"array","items":{"$ref":"#/$defs/checkpoint"}},
+    "artifacts": {"type":"array","items":{"$ref":"#/$defs/artifact"}},
+    "validation": {"type":"array","items":{"$ref":"#/$defs/validation"}},
+    "blockers": {"type":"array","items":{"type":"string","minLength":1}},
+    "remaining_work": {"type":"array","items":{"type":"string","minLength":1}},
+    "next_safe_action": {"type":"string","minLength":1},
+    "last_executor": {"type":"string","minLength":1},
+    "last_surface": {"type":"string","minLength":1},
+    "notes": {"type":"string"}
+  },
+  "$defs": {
+    "workflow_identity": {
+      "type":"object","additionalProperties":false,
+      "required":["repository","path","checkpoint_sha"],
+      "properties":{
+        "repository":{"type":"string","minLength":1},
+        "path":{"type":"string","minLength":1},
+        "checkpoint_sha":{"type":"string","pattern":"^[0-9a-f]{40}$"},
+        "content_sha":{"type":"string","minLength":1}
+      }
+    },
+    "repository": {
+      "type":"object","additionalProperties":false,
+      "required":["name","intent","allowed_mutation_scope"],
+      "properties":{
+        "name":{"type":"string","minLength":1},
+        "intent":{"enum":["read","mutate"]},
+        "base_sha":{"type":["string","null"],"pattern":"^[0-9a-f]{40}$"},
+        "remote":{"anyOf":[{"type":"null"},{"type":"object","additionalProperties":false,"required":["branch","checkpoint_sha","verified"],"properties":{"branch":{"type":"string","minLength":1},"checkpoint_sha":{"type":"string","pattern":"^[0-9a-f]{40}$"},"verified":{"type":"boolean"}}}]},
+        "local":{"anyOf":[{"type":"null"},{"type":"object","additionalProperties":false,"required":["checkout_path","branch","head_sha","clean"],"properties":{"checkout_path":{"type":"string","minLength":1},"branch":{"type":"string","minLength":1},"head_sha":{"type":"string","pattern":"^[0-9a-f]{40}$"},"clean":{"type":"boolean"}}}]},
+        "allowed_mutation_scope":{"type":"array","items":{"type":"string","minLength":1}}
+      }
+    },
+    "stage_state": {
+      "type":"object","additionalProperties":false,
+      "required":["id","status","execution_owner","validation"],
+      "properties":{
+        "id":{"type":"string","pattern":"^[a-z0-9][a-z0-9._-]*$","minLength":1},
+        "status":{"enum":["PLANNED","IN_PROGRESS","VALIDATED","SUSPENDED","FAILED","SKIPPED"]},
+        "execution_owner":{"type":"string","minLength":1},
+        "selected_executor":{"type":["string","null"]},
+        "selected_surface":{"type":["string","null"]},
+        "inputs":{"type":"array","items":{"type":"string"}},
+        "outputs":{"type":"array","items":{"type":"string"}},
+        "validation":{"type":"array","items":{"$ref":"#/$defs/validation"}},
+        "resume_condition":{"type":["string","null"]}
+      }
+    },
+    "checkpoint": {
+      "type":"object","additionalProperties":false,
+      "required":["id","kind","identity","required_for_resume"],
+      "properties":{
+        "id":{"type":"string","minLength":1},
+        "kind":{"type":"string","minLength":1},
+        "identity":{"type":"string","minLength":1},
+        "required_for_resume":{"type":"boolean"},
+        "evidence":{"type":"array","items":{"type":"string"}}
+      }
+    },
+    "artifact": {
+      "type":"object","additionalProperties":false,
+      "required":["path","state","evidence"],
+      "properties":{
+        "path":{"type":"string","minLength":1},
+        "state":{"type":"string","minLength":1},
+        "role":{"type":["string","null"]},
+        "origin":{"type":["string","null"]},
+        "persistence":{"type":["string","null"]},
+        "regeneration":{"type":["string","null"]},
+        "review_requirement":{"type":["string","null"]},
+        "evidence":{"type":"array","items":{"type":"string"}}
+      }
+    },
+    "validation": {
+      "type":"object","additionalProperties":false,
+      "required":["check","result","evidence"],
+      "properties":{"check":{"type":"string","minLength":1},"result":{"enum":["PASS","FAIL","NOT_RUN"]},"evidence":{"type":"array","items":{"type":"string"}}}
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "schema_version":2,"task_id":"fixture-v2-remote","title":"Fixture v2 remote","status":"CHECKPOINTED","goal":"Represent remote-only state.","execution_topology":"remote_only","workflow":null,"parent_execution_owner":null,"current_stage":"persist",
+  "acceptance_criteria":["Remote checkpoint verified."],"constraints":[],
+  "repositories":[{"name":"workspace-control","intent":"mutate","base_sha":"cb8368cd50de2d364c2aade8843276aab0b02420","remote":{"branch":"control-plane-v2-refactor","checkpoint_sha":"5000900823150676d356c54642efdefc560878ca","verified":true},"local":null,"allowed_mutation_scope":["tests/fixtures/**"]}],
+  "stages":[{"id":"persist","status":"VALIDATED","execution_owner":"workspace-control","selected_executor":"chatgpt","selected_surface":"github","inputs":[],"outputs":["git:5000900823150676d356c54642efdefc560878ca"],"validation":[{"check":"remote sha","result":"PASS","evidence":["fixture"]}],"resume_condition":null}],
+  "checkpoints":[{"id":"remote","kind":"git_commit","identity":"5000900823150676d356c54642efdefc560878ca","required_for_resume":true,"evidence":["fixture"]}],
+  "artifacts":[],"validation":[],"blockers":[],"remaining_work":["Fixture only."],"next_safe_action":"No action.","last_executor":"chatgpt","last_surface":"github"
+}

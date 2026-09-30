@@ -1,0 +1,8 @@
+{
+  "schema_version":2,"task_id":"fixture-v2-local","title":"Fixture v2 local","status":"CHECKPOINTED","goal":"Represent local state.","execution_topology":"local","workflow":null,"parent_execution_owner":null,"current_stage":"build",
+  "acceptance_criteria":["Local checkpoint verified."],"constraints":[],
+  "repositories":[{"name":"workspace-control","intent":"read","base_sha":"cb8368cd50de2d364c2aade8843276aab0b02420","remote":null,"local":{"checkout_path":"/home/atrott/adamArchives/Adam/workspace-control","branch":"main","head_sha":"cb8368cd50de2d364c2aade8843276aab0b02420","clean":true},"allowed_mutation_scope":[]}],
+  "stages":[{"id":"build","status":"VALIDATED","execution_owner":"local-runtime","selected_executor":"human","selected_surface":"terminal","inputs":[],"outputs":[],"validation":[],"resume_condition":null}],
+  "checkpoints":[{"id":"local","kind":"git_commit","identity":"cb8368cd50de2d364c2aade8843276aab0b02420","required_for_resume":true,"evidence":["fixture"]}],
+  "artifacts":[],"validation":[],"blockers":[],"remaining_work":["Fixture only."],"next_safe_action":"No action."
+}

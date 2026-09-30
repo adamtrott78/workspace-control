@@ -1,0 +1,9 @@
+{
+  "schema_version":2,"task_id":"fixture-v2-composed","title":"Fixture v2 composed","status":"SUSPENDED","goal":"Represent composed state.","execution_topology":"composed",
+  "workflow":{"repository":"workspace-control","path":"tests/fixtures/workflow_descriptor_v1.json","checkpoint_sha":"5000900823150676d356c54642efdefc560878ca"},
+  "parent_execution_owner":"parent-workflow","current_stage":"human_gate","acceptance_criteria":["Resume safely."],"constraints":[],
+  "repositories":[{"name":"workspace-control","intent":"read","base_sha":"cb8368cd50de2d364c2aade8843276aab0b02420","remote":{"branch":"control-plane-v2-refactor","checkpoint_sha":"5000900823150676d356c54642efdefc560878ca","verified":true},"local":{"checkout_path":"/home/atrott/adamArchives/Adam/workspace-control-v2-refactor","branch":"control-plane-v2-refactor","head_sha":"5000900823150676d356c54642efdefc560878ca","clean":true},"allowed_mutation_scope":[]}],
+  "stages":[{"id":"remote_edit","status":"VALIDATED","execution_owner":"remote-source","selected_executor":"chatgpt","selected_surface":"github","inputs":[],"outputs":["git:5000900823150676d356c54642efdefc560878ca"],"validation":[],"resume_condition":null},{"id":"human_gate","status":"SUSPENDED","execution_owner":"human-review","selected_executor":"human","selected_surface":"visual-review","inputs":["git:5000900823150676d356c54642efdefc560878ca"],"outputs":[],"validation":[],"resume_condition":"Human review result is durably recorded."}],
+  "checkpoints":[{"id":"remote","kind":"git_commit","identity":"5000900823150676d356c54642efdefc560878ca","required_for_resume":true,"evidence":["fixture"]},{"id":"local","kind":"git_commit","identity":"5000900823150676d356c54642efdefc560878ca","required_for_resume":true,"evidence":["fixture"]}],
+  "artifacts":[],"validation":[],"blockers":["Awaiting substantive human review."],"remaining_work":["Resume at human_gate."],"next_safe_action":"Record the human review result, then continue."
+}
