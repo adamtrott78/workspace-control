@@ -23,7 +23,7 @@ Evolve the repository-backed course tutoring/application architecture to the tas
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
+- Remote branch: course-workflows-v2-refactor
 - Remote checkpoint: 06058acf5a074db5a849f7f42f721971e5dda965
 - Remote verified: true
 
@@ -43,16 +43,17 @@ Evolve the repository-backed course tutoring/application architecture to the tas
 
 ## Next safe action
 
-Start from workspace-control README.md at the recorded baseline. Inspect the smallest available evidence needed to establish stable workspace paths and canonical-branch identity for CIS560-AdamTrott and EAS501-AdamTrott; then add only those stable identities to repos.json. Do not encode tutor-framework/eas501-tutor-bootstrap HEADs as registry state. After that material mutation, update this JSON capsule and immediately regenerate its Markdown before any further architecture work; then add CIS560/EAS501 as formal read-only repository recovery entries and proceed to shared_contract_review.
+Start from workspace-control README.md and this capsule. Use the isolated `course-workflows-v2-refactor` branch at 06058acf5a074db5a849f7f42f721971e5dda965 for shared-architecture mutations; task-state JSON/Markdown remain on main. Inspect the smallest evidence needed to establish stable workspace paths and canonical-branch identity for CIS560-AdamTrott and EAS501-AdamTrott, then add only those stable identities to repos.json on the isolated branch. After that operation, verify the branch checkpoint, update this JSON capsule on main, and immediately regenerate its Markdown before any further architecture work; then add CIS560/EAS501 as formal read-only recovery entries and proceed to shared_contract_review.
 
 ## Remaining work
 
-- Register CIS560-AdamTrott and EAS501-AdamTrott with stable identity in repos.json after verifying their workspace paths/canonical branch evidence; then add them as formal read-only recovery entries in this capsule.
+- Register CIS560-AdamTrott and EAS501-AdamTrott with stable identity in repos.json on the isolated course-workflows-v2-refactor branch after verifying their workspace paths/canonical branch evidence; then add them as formal read-only recovery entries in this capsule.
 - Review current shared tutoring/adapter/evaluation/operator contracts against demonstrated legacy repo evidence and identify the smallest reusable changes.
 - Define composite reusable course workflow descriptors/procedures for course bootstrap/migration, content ingestion, assessment preparation, study session, assignment work, cheat-sheet build, communications ingestion, and document-artifact build without changing task-capsule v2 composition semantics.
-- Implement shared contract/template/procedure updates while preserving project-local truth and explicit workflow-version migration rules.
+- Implement shared contract/template/procedure updates on the isolated architecture branch while preserving project-local truth and explicit workflow-version migration rules.
 - Validate cold-start routing, assessment relevance behavior, multimodal ingestion, LaTeX artifact QA, continuation behavior, and executor handoff.
-- Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration from exact project checkpoints.
+- Promote the validated shared architecture to workspace-control main through an explicit reviewed integration step and record the exact promoted checkpoint.
+- Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration pinned to the promoted shared checkpoint and exact project checkpoints.
 - Complete HANDOFF_SAFE assessment and archive this task.
 
 ## Blockers / gates

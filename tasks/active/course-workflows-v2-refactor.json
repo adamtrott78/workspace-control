@@ -21,7 +21,8 @@
     "Legacy builder/tutor role dependencies are removed from project integrations only where they exist; shared workspace-control is not rewritten merely to delete a conversational role it already does not require.",
     "Resume/application separation from PADataset is evaluated explicitly rather than performed automatically; any move to a dedicated private domain repository requires its own justified migration decision.",
     "The completed PADataset integration capsule remains unchanged, and the active automated-research-engine task is not silently migrated by this task.",
-    "After shared validation, separate durable migration capsules are created for MTH602, CIS560, EAS501, and resume/application integration, each with exact project checkpoints and a first safe action suitable for a fresh executor."
+    "After shared validation, separate durable migration capsules are created for MTH602, CIS560, EAS501, and resume/application integration, each with exact project checkpoints and a first safe action suitable for a fresh executor.",
+    "Validated shared architecture changes are promoted to workspace-control main through an explicit reviewed integration step before child migration capsules pin the new shared checkpoint."
   ],
   "constraints": [
     "Start from workspace-control README.md and current v2 contracts; do not recursively inventory project repositories.",
@@ -38,7 +39,8 @@
     "Professor-email ingestion should model forwarded Gmail as an available source adapter when school Outlook is inaccessible; do not engineer pseudo-real-time Outlook connectivity.",
     "Shared artifact mechanics may be generalized upward, but candidate/course/application truth must remain with its domain owner.",
     "Use direct GitHub tooling for remotely provable work. Introduce local/runtime execution only when actual build/render/test evidence requires it.",
-    "If mutation scope must expand beyond the recorded workspace-control paths, update the capsule and regenerate its Markdown before performing the expanded mutation."
+    "If mutation scope must expand beyond the recorded workspace-control paths, update the capsule and regenerate its Markdown before performing the expanded mutation.",
+    "Perform shared architecture mutations on the dedicated `course-workflows-v2-refactor` branch created from 06058acf5a074db5a849f7f42f721971e5dda965. Keep task-capsule state on workspace-control main. Do not mutate main with shared-contract changes until the validated promotion stage."
   ],
   "repositories": [
     {
@@ -46,7 +48,7 @@
       "intent": "mutate",
       "base_sha": "06058acf5a074db5a849f7f42f721971e5dda965",
       "remote": {
-        "branch": "main",
+        "branch": "course-workflows-v2-refactor",
         "checkpoint_sha": "06058acf5a074db5a849f7f42f721971e5dda965",
         "verified": true
       },
@@ -186,13 +188,26 @@
       "resume_condition": null
     },
     {
-      "id": "child_migration_capsules",
+      "id": "promotion",
       "status": "PLANNED",
       "execution_owner": "workspace-control-architecture",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "shared_validation"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "child_migration_capsules",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control-architecture",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "promotion"
       ],
       "outputs": [],
       "validation": [],
@@ -297,16 +312,17 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Register CIS560-AdamTrott and EAS501-AdamTrott with stable identity in repos.json after verifying their workspace paths/canonical branch evidence; then add them as formal read-only recovery entries in this capsule.",
+    "Register CIS560-AdamTrott and EAS501-AdamTrott with stable identity in repos.json on the isolated course-workflows-v2-refactor branch after verifying their workspace paths/canonical branch evidence; then add them as formal read-only recovery entries in this capsule.",
     "Review current shared tutoring/adapter/evaluation/operator contracts against demonstrated legacy repo evidence and identify the smallest reusable changes.",
     "Define composite reusable course workflow descriptors/procedures for course bootstrap/migration, content ingestion, assessment preparation, study session, assignment work, cheat-sheet build, communications ingestion, and document-artifact build without changing task-capsule v2 composition semantics.",
-    "Implement shared contract/template/procedure updates while preserving project-local truth and explicit workflow-version migration rules.",
+    "Implement shared contract/template/procedure updates on the isolated architecture branch while preserving project-local truth and explicit workflow-version migration rules.",
     "Validate cold-start routing, assessment relevance behavior, multimodal ingestion, LaTeX artifact QA, continuation behavior, and executor handoff.",
-    "Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration from exact project checkpoints.",
+    "Promote the validated shared architecture to workspace-control main through an explicit reviewed integration step and record the exact promoted checkpoint.",
+    "Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration pinned to the promoted shared checkpoint and exact project checkpoints.",
     "Complete HANDOFF_SAFE assessment and archive this task."
   ],
-  "next_safe_action": "Start from workspace-control README.md at the recorded baseline. Inspect the smallest available evidence needed to establish stable workspace paths and canonical-branch identity for CIS560-AdamTrott and EAS501-AdamTrott; then add only those stable identities to repos.json. Do not encode tutor-framework/eas501-tutor-bootstrap HEADs as registry state. After that material mutation, update this JSON capsule and immediately regenerate its Markdown before any further architecture work; then add CIS560/EAS501 as formal read-only repository recovery entries and proceed to shared_contract_review.",
+  "next_safe_action": "Start from workspace-control README.md and this capsule. Use the isolated `course-workflows-v2-refactor` branch at 06058acf5a074db5a849f7f42f721971e5dda965 for shared-architecture mutations; task-state JSON/Markdown remain on main. Inspect the smallest evidence needed to establish stable workspace paths and canonical-branch identity for CIS560-AdamTrott and EAS501-AdamTrott, then add only those stable identities to repos.json on the isolated branch. After that operation, verify the branch checkpoint, update this JSON capsule on main, and immediately regenerate its Markdown before any further architecture work; then add CIS560/EAS501 as formal read-only recovery entries and proceed to shared_contract_review.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "This task is the shared architecture refactor only. Urgent EAS501 Exam 1 cheat-sheet work and MTH602 new-unit ingestion may proceed independently against their existing project lineages. The task intentionally omits workflow binding because it mutates workspace-control, the repository that owns the baseline operator contract; the exact baseline contract is instead preserved as a required checkpoint to avoid a self-referential handoff-binding defect."
+  "notes": "This task is the shared architecture refactor only. Urgent EAS501 Exam 1 cheat-sheet work and MTH602 new-unit ingestion may proceed independently against their existing project lineages. The task intentionally omits workflow binding because it mutates workspace-control, the repository that owns the baseline operator contract; the exact baseline contract is instead preserved as a required checkpoint to avoid a self-referential handoff-binding defect. The architecture worktree/ref is now isolated on workspace-control branch course-workflows-v2-refactor; this prevents the task capsule stored on main from becoming self-referential with the repository checkpoint it coordinates."
 }
