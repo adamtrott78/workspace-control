@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: automated-research-engine-v1
 - Title: Automated research engine v1
-- Status: BLOCKED_RUNTIME
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -22,7 +22,7 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Repository: workspace-control
 - Path: policies/OPERATOR_WORKFLOW.md
-- Checkpoint: 03a51fdbe2a9153f2b5e45054eec6e927a9dda36
+- Checkpoint: 56ca8f608202b6700129a2a54feb74d1d43c9cbf
 
 ## Repositories
 
@@ -33,24 +33,28 @@ Design and prove a provenance-preserving automated research engine that turns sc
 - Remote checkpoint: 33339103d1a21842ff7479bd72782ab4dc42f9b9
 - Remote verified: true
 
+### research-engine
+
+- Intent: mutate
+- Remote branch: main
+- Remote checkpoint: de1d1a0ca0f649895d461e40a1496071443e32d7
+- Remote verified: true
+
 ## Next safe action
 
-Human local action is now genuinely required. Create an empty private GitHub repository named adamtrott78/research-engine using the local authenticated gh CLI, and report docker/docker compose availability. Do not initialize files in the repo. After the repo exists, ChatGPT should populate the tested 20-file bootstrap directly through GitHub and then run the prepared PostgreSQL integration test on a capable local runtime. Human-transfer scratch root is ~/adamArchives/Adam/.workspace-control/tmp (or WORKSPACE_CONTROL_SCRATCH_ROOT).
+Continue from research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7. First attempt to resolve and acquire an authorized exact source for Broggi 2025 using available scholarly/direct surfaces; do not ask for local bytes while a direct surface may satisfy the requirement. Then expand the RF OSR/OOD corpus and implement reproducible novelty-challenge persistence against knowledge checkpoints. Continue until a genuine capability, authority, or human-decision boundary is reached.
 
 ## Remaining work
 
-- Create the dedicated adamtrott78/research-engine implementation repository and initialize it from the validated workspace-control contracts.
-- Implement v1 PostgreSQL/pgvector schema and content-addressed artifact-store interfaces.
-- Implement fixture/schema validation and load the current five-work corpus as the first test dataset.
-- Implement provenance query tests covering Result->Claim support, limitation qualifiers, source locators, and mixed fidelity.
-- Promote Broggi 2025 to exact-PDF evidence during later corpus ingestion, not as a blocker for implementation.
-- Re-run novelty challenge after additional RF-specific papers are loaded; only then consider SUPPORTED_AS_OPEN.
-- After implementation vertical-slice tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
+- Promote Broggi 2025 from OCR_DERIVED to exact-PDF evidence if an authorized scholarly/direct source can provide exact bytes; otherwise use the existing local PADataset PDF only when a true local-byte boundary is reached.
+- Ingest additional RF-specific open-set/OOD papers into the implementation database and re-run adversarial novelty challenge over a broader corpus.
+- Implement novelty-challenge persistence/query services in research-engine using knowledge checkpoints so prior-work rejection/narrowing is reproducible.
+- Only after broader exact-source corpus validation consider any GapCandidate eligible for SUPPORTED_AS_OPEN.
+- After the scaling slice passes, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
 
 ## Blockers / gates
 
-- Connected GitHub tooling can mutate existing repositories but exposes no repository-creation operation; the required adamtrott78/research-engine repository does not yet exist.
-- The tested implementation includes a real PostgreSQL/pgvector integration test, but the current executor has neither Docker nor a PostgreSQL server/psql runtime.
+- None.
 
 ## Fresh-chat initialization
 

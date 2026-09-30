@@ -332,6 +332,51 @@ other owned procedure rather than a long sequence of ephemeral commands.
 A one-off text edit does not require a permanent script merely because Bash can
 perform it.
 
+## Interactive-shell safety
+
+Commands intended for a user to paste into an **existing interactive shell or SSH
+session MUST NOT change failure-control options in that parent shell**.
+
+In particular, do not emit a block whose first operation is:
+
+```bash
+set -e
+set -euo pipefail
+```
+
+when the block is expected to run directly in the user's current interactive
+shell. A later noncritical command failure can terminate that shell and, over
+SSH, disconnect the session.
+
+For bounded fail-fast execution, run the body in a child shell instead:
+
+```bash
+bash -lc '
+set -euo pipefail
+# bounded commands
+'
+rc=$?
+echo "COMMAND_BLOCK_RC=$rc"
+```
+
+or use an equivalent subshell/function whose shell options do not leak into the
+parent interactive session.
+
+Rules:
+
+- the parent interactive/SSH shell SHOULD survive ordinary command failure;
+- fail-fast behavior belongs inside the bounded child execution context;
+- a diagnostic/reporting command failing after the required mutation succeeded
+  MUST NOT erase evidence of the successful mutation;
+- after any failure, inspect durable state before retrying a mutation;
+- when the child exits nonzero, print/return the exit status and relevant
+  evidence instead of relying on the SSH session disappearing as a failure
+  signal.
+
+Noninteractive scripts executed as their own process MAY use
+`set -euo pipefail` normally because their exit does not terminate the user's
+parent interactive shell.
+
 ## Scratch and human-transfer artifacts
 
 Use `/tmp` only for executor-internal ephemeral scratch that the human does not
@@ -605,7 +650,10 @@ Representative tests should include:
   authority, or irreducible-input boundary;
 - human-transfer scratch regression: user-accessible artifacts are emitted under
   the configured workspace scratch root rather than requiring a manual copy out
-  of `/tmp`.
+  of `/tmp`;
+- interactive-shell safety regression: a failing command inside a user-pasted
+  SSH block returns a visible nonzero child status without terminating the
+  parent interactive shell.
 
 Failures should be classified as routing, content, implementation, evidence, or
 executor-portability defects.

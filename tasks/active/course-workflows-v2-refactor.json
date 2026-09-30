@@ -1,0 +1,491 @@
+{
+  "schema_version": 2,
+  "task_id": "course-workflows-v2-refactor",
+  "title": "Shared course workflows and tutor architecture v2 refactor",
+  "status": "CHECKPOINTED",
+  "goal": "Evolve the repository-backed course tutoring/application architecture to the task-capsule-driven workspace-control v2 model: remove dependence on conversational builder/tutor hierarchy, define reusable course and document-artifact workflow descriptors/procedures, improve assessment alignment and multimodal ingestion, preserve project-local authority and mastery semantics, and create independently executable migration capsules for MTH602, CIS560, EAS501, and the resume/application workflow.",
+  "execution_topology": "remote_only",
+  "parent_execution_owner": "workspace-control-v2-adoption",
+  "current_stage": "promotion",
+  "acceptance_criteria": [
+    "The shared architecture treats conversations as replaceable executors while durable semantic owners, reusable workflow/procedure definitions, exact task state, and mutation boundaries remain authoritative.",
+    "Task-capsule v2 retains its single optional workflow binding; conceptual composition is represented by one composite workflow descriptor plus stage/procedure routing, not by silently changing v2 schema.",
+    "Shared-contract changes do not silently migrate active tasks, and archived capsules remain immutable historical execution evidence. Any active task adopting a newer shared contract uses an explicit validated workflow-version transition.",
+    "Assessment preparation distinguishes course/factual authority from assessment-relevance evidence without imposing a universal hard ranking among old exams, practice sets, lecture examples, or review material.",
+    "Handwritten/whiteboard ingestion defaults to direct multimodal interpretation when effective; original images remain source evidence, synthesis remains derived, and uncertainty stays explicit. OCR/Mathpix is optional and modality-appropriate.",
+    "Reusable document-artifact workflow supports LaTeX homework and cheat-sheet production through source, deterministic build, structural validation, rendered visual QA, bounded revision, and delivery/submission gates. Automated visual QA is sufficient unless the owning workflow explicitly requires human judgment.",
+    "New course workflows inherit the current operator continuation obligation and workspace scratch rules; executors continue while safe authorized work remains and suspend only at a demonstrated capability, irreducible-input, authority/safety, or required-human-judgment boundary.",
+    "Every material JSON task-capsule mutation is immediately followed by deterministic task-render Markdown regeneration before further task operations or handoff.",
+    "CIS560-AdamTrott and EAS501-AdamTrott are added to repos.json using stable repository identity only; volatile task branch/HEAD/runtime facts remain outside the registry.",
+    "MTH602, CIS560, EAS501, PADataset research, and future resume/application domains retain their own project truth; workspace-control owns only generic reusable operating/tutoring/artifact mechanics.",
+    "Legacy builder/tutor role dependencies are removed from project integrations only where they exist; shared workspace-control is not rewritten merely to delete a conversational role it already does not require.",
+    "Resume/application separation from PADataset is evaluated explicitly rather than performed automatically; any move to a dedicated private domain repository requires its own justified migration decision.",
+    "The completed PADataset integration capsule remains unchanged, and the active automated-research-engine task is not silently migrated by this task.",
+    "After shared validation, separate durable migration capsules are created for MTH602, CIS560, EAS501, and resume/application integration, each with exact project checkpoints and a first safe action suitable for a fresh executor.",
+    "Validated shared architecture changes are promoted to workspace-control main through an explicit reviewed integration step before child migration capsules pin the new shared checkpoint."
+  ],
+  "constraints": [
+    "Start from workspace-control README.md and current v2 contracts; do not recursively inventory project repositories.",
+    "The baseline operator contract for this meta-architecture task is workspace-control@06058acf5a074db5a849f7f42f721971e5dda965, policies/OPERATOR_WORKFLOW.md blob 32a0d46c0269fec0f84dadf62427e53adeb95418. It is recorded as a required checkpoint rather than the capsule workflow field because this task mutates workspace-control itself; do not create a self-referential workflow-binding defect.",
+    "Do not change task-capsule v2 to support multiple workflow bindings. Any future structural expansion requires a separately versioned, compatibility-preserving schema task.",
+    "Do not silently migrate existing active or archived task capsules when shared contracts change. Preserve exact workflow bindings. Active tasks may adopt a new shared-contract checkpoint only through an explicit validated workflow-version transition; archived tasks remain immutable.",
+    "Do not modify tasks/archive/padataset-control-plane-v2-integration.json or its derived Markdown.",
+    "Do not modify automated-research-engine-v1 task state as part of this architecture task. When that task resumes, its older OPERATOR_WORKFLOW pin must be migrated explicitly and validated within that task before newer semantics are relied upon.",
+    "Do not mutate MTH602, CIS560, EAS501, or PADataset project content during this shared architecture task. Project migrations belong to separate child capsules after the shared design is validated.",
+    "Before CIS560 or EAS501 can be formal repository entries in this capsule, register their stable identities in repos.json. Do not weaken validation to bypass this bootstrap.",
+    "Assessment relevance must be represented as contextual evidence weighting using factors such as recency, instructor specificity, explicit assessment guidance, demonstrated problem-form correspondence, and source role; do not hardcode prior exam > practice globally.",
+    "Original classroom/handwritten images remain source evidence even when direct multimodal synthesis is preferred; derived synthesis must preserve provenance and uncertainty.",
+    "Visual QA is an artifact-validation operation, not automatically a human gate. Require Adam only when the owning workflow explicitly makes human judgment/approval necessary.",
+    "Professor-email ingestion should model forwarded Gmail as an available source adapter when school Outlook is inaccessible; do not engineer pseudo-real-time Outlook connectivity.",
+    "Shared artifact mechanics may be generalized upward, but candidate/course/application truth must remain with its domain owner.",
+    "Use direct GitHub tooling for remotely provable work. Introduce local/runtime execution only when actual build/render/test evidence requires it.",
+    "If mutation scope must expand beyond the recorded workspace-control paths, update the capsule and regenerate its Markdown before performing the expanded mutation.",
+    "Perform shared architecture mutations on the dedicated `course-workflows-v2-refactor` branch created from 06058acf5a074db5a849f7f42f721971e5dda965. Keep task-capsule state on workspace-control main. Do not mutate main with shared-contract changes until the validated promotion stage."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "06058acf5a074db5a849f7f42f721971e5dda965",
+      "remote": {
+        "branch": "course-workflows-v2-refactor",
+        "checkpoint_sha": "d757a0c5d59e915fa3f78b4c19d936748f7c318d",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "README.md",
+        "repos.json",
+        "architecture/**",
+        "policies/**",
+        "procedures/**",
+        "templates/**",
+        "workflows/**",
+        "tasks/**"
+      ]
+    },
+    {
+      "name": "MTH602-AdamTrott",
+      "intent": "read",
+      "base_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "CIS560-AdamTrott",
+      "intent": "read",
+      "base_sha": "1af3ce7022d079b89f0fbca32f313a6853db1c60",
+      "remote": {
+        "branch": "tutor-framework",
+        "checkpoint_sha": "1af3ce7022d079b89f0fbca32f313a6853db1c60",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "EAS501-AdamTrott",
+      "intent": "read",
+      "base_sha": "aa6195377b856862124643d0fc501969467fad3b",
+      "remote": {
+        "branch": "eas501-tutor-bootstrap",
+        "checkpoint_sha": "aa6195377b856862124643d0fc501969467fad3b",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "PADataset",
+      "intent": "read",
+      "base_sha": "078461795be3c1d3e5c3845c81607166fac9fad3",
+      "remote": {
+        "branch": "resume-framework",
+        "checkpoint_sha": "078461795be3c1d3e5c3845c81607166fac9fad3",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "planning_baseline",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-control-architecture",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "workspace-control@06058acf5a074db5a849f7f42f721971e5dda965",
+        "MTH602-AdamTrott@62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+        "CIS560-AdamTrott:tutor-framework@1af3ce7022d079b89f0fbca32f313a6853db1c60",
+        "EAS501-AdamTrott:eas501-tutor-bootstrap@aa6195377b856862124643d0fc501969467fad3b",
+        "PADataset:resume-framework@078461795be3c1d3e5c3845c81607166fac9fad3",
+        "audit:single-workflow-v2, explicit workflow migrations, immutable archives, evidence-weighted assessment relevance, automated visual QA unless human gate required, image-source authority, JSON-to-Markdown sync, continuation obligation"
+      ],
+      "outputs": [
+        "plan:replace conversational hierarchy with owner + workflow/procedure + task capsule + executor model",
+        "plan:shared architecture first, then independent project migration capsules",
+        "plan:urgent EAS501 cheat-sheet and MTH602 content-ingestion work remain independent of migration program"
+      ],
+      "validation": [
+        {
+          "check": "Architecture proposal reconciled with current v2 audit",
+          "result": "PASS",
+          "evidence": [
+            "Audit approved the central executor/owner/task-state model while requiring explicit corrections for v2 single workflow binding, workflow-version migration, assessment weighting, visual QA gates, source-image authority, task-render synchronization, and registry bootstrap.",
+            "Current OPERATOR_WORKFLOW.md includes continuation obligation and workspace scratch-root rules at blob 32a0d46c0269fec0f84dadf62427e53adeb95418."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "registry_bootstrap",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-control-architecture",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "CIS560-AdamTrott:tutor-framework@1af3ce7022d079b89f0fbca32f313a6853db1c60",
+        "EAS501-AdamTrott:eas501-tutor-bootstrap@aa6195377b856862124643d0fc501969467fad3b"
+      ],
+      "outputs": [
+        "workspace-control repos.json registry bootstrap committed at 8a6202b020d0733437960415f77833f2001da962",
+        "CIS560-AdamTrott registered at classes/CIS560-AdamTrott with canonical branch main and README.md context entry",
+        "EAS501-AdamTrott registered at classes/EAS501-AdamTrott with canonical branch main and README.md context entry"
+      ],
+      "validation": [
+        {
+          "check": "Stable course repository identities registered on isolated architecture branch",
+          "result": "PASS",
+          "evidence": [
+            "course-workflows-v2-refactor advertises 8a6202b020d0733437960415f77833f2001da962, direct child of baseline 06058acf5a074db5a849f7f42f721971e5dda965",
+            "repos.json blob 29220f9f386cdb4ba90f3df81c1b37c7b55e8212 contains CIS560-AdamTrott and EAS501-AdamTrott stable identities only; tutor-framework/eas501-tutor-bootstrap HEADs are not registry fields",
+            "GitHub repository metadata reports default branch main for both repositories; pinned root READMEs confirm README.md is each repository entry route"
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "shared_contract_review",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-control-architecture",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "registry_bootstrap"
+      ],
+      "outputs": [
+        "architecture/course-workflows-v2-review.md",
+        "bounded shared-change set: tutoring extensions + reusable source/assessment/study/assignment/communications/document-artifact procedures + workflow descriptors"
+      ],
+      "validation": [
+        {
+          "check": "Shared contract review reconciled against pinned legacy evidence",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control course-workflows-v2-refactor@0624110cf808951b65f01c4851f90a3178988237",
+            "architecture/course-workflows-v2-review.md records project evidence, reusable gaps, explicit non-changes, and PASS review result.",
+            "Review preserves project-local authority, task-capsule v2 single workflow binding, immutable archives, explicit contract migrations, modality-aware ingestion, contextual assessment relevance, and automated visual QA by default."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "workflow_descriptor_design",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-control-architecture",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "shared_contract_review"
+      ],
+      "outputs": [
+        "architecture/course-workflows-v2-design.md",
+        "seven shared procedure interfaces",
+        "eight workflow-descriptor v1 shapes using one reusable workflow binding per task"
+      ],
+      "validation": [
+        {
+          "check": "Workflow/procedure design fits existing descriptor v1 contract without schema mutation",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control course-workflows-v2-refactor@da4ddc9aaca4cb18d6dbe70b089189fd6a1d18be",
+            "architecture/course-workflows-v2-design.md maps every proposed descriptor field to the existing v1 schema/validator contract and records PASS.",
+            "Design keeps workspace-control path fields workspace-control-relative, uses project-local authority as runtime routed input, keeps expected project artifact paths out of shared descriptor path fields, and preserves task-capsule v2 single workflow binding."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "shared_implementation",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-control-architecture",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "workflow_descriptor_design"
+      ],
+      "outputs": [
+        "README.md shared workflow route",
+        "policies/TUTORING_CONTRACT.md modality/relevance/visual-QA extensions",
+        "templates/COURSE_TUTOR_ADAPTER.md new local integration mappings",
+        "procedures/TUTOR_EVALUATION.md new regression stages",
+        "seven executor-neutral shared procedures",
+        "eight workflow-descriptor v1 JSON files under workflows/"
+      ],
+      "validation": [
+        {
+          "check": "Bounded shared implementation committed on isolated architecture branch",
+          "result": "PASS",
+          "evidence": [
+            "course-workflows-v2-refactor@f5d7a1a97a135cc4e238119789cda4aed773ae9b is exactly one commit ahead of workflow-design checkpoint da4ddc9aaca4cb18d6dbe70b089189fd6a1d18be.",
+            "Implementation diff contains exactly 19 intended paths: README, tutoring contract, course adapter, tutor evaluation, seven new procedures, and eight new workflow descriptors.",
+            "workflow_descriptor.v1.schema.json remains blob 8bcbe00d83f644d705adbe2a57749a9466ca1260; task-capsule schemas were not changed.",
+            "Archived padataset-control-plane-v2-integration capsule and automated-research-engine-v1 task remained unchanged on the architecture branch."
+          ]
+        },
+        {
+          "check": "All eight workflow descriptors satisfy committed v1 structural/owner-route constraints",
+          "result": "PASS",
+          "evidence": [
+            "All descriptors were fetched from immutable checkpoint f5d7a1a97a135cc4e238119789cda4aed773ae9b; every owner.context_path exists at the same checkpoint.",
+            "All descriptors use schema_version 1, workspace-control owner, unique ordered stage IDs, earlier-only dependencies, nonempty validation arrays, no live task-state fields, and safe repository-relative shared paths.",
+            "Content identities: bootstrap da6076a9b4baf328d6a91526f6dff7aa999733b6; content ingestion 4c9037d7d5fc0937ae2193684566c9875ae6cde7; assessment a576677dc886bd70826789b37dcce2499190c2f1; study 1a28468d3cc35243273a21ca12e10c1f7c404c67; assignment 8a0f596add333737e03c72a81e71a7eb075b53fc; cheat sheet 14a13e820b5b106e55e7bbbcc252e67abcb47351; communications ebb5fe64b36709d8cf6b17059df2ed1916494cf5; document artifact 0d66b919acdd2e51c08d2e8496c41dc22aed47c4."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "shared_validation",
+      "status": "VALIDATED",
+      "execution_owner": "cross-executor-validation",
+      "selected_executor": "chatgpt",
+      "selected_surface": "repository-read",
+      "inputs": [
+        "shared_implementation"
+      ],
+      "outputs": [
+        "architecture/course-workflows-v2-validation.md",
+        "repository-read cold-start/route regression",
+        "multimodal ingestion regression against pinned MTH602 evidence",
+        "assessment-relevance regression against pinned EAS501 evidence",
+        "document-artifact/LaTeX/visual-QA regression against MTH602 and PADataset evidence",
+        "communications idempotency/parent-return regression against pinned CIS560 evidence",
+        "continuation/gate and single-workflow durable-handoff regression"
+      ],
+      "validation": [
+        {
+          "check": "Shared architecture cold-start and behavioral regression suite",
+          "result": "PASS",
+          "evidence": [
+            "architecture branch validation checkpoint d757a0c5d59e915fa3f78b4c19d936748f7c318d; validation document blob dcc2d93c90239c6dcb88c933d6d7a61d93cedf4f",
+            "All eight descriptor owner/entry routes exist at the immutable implementation tree; no target-project artifact paths are encoded in shared descriptors.",
+            "MTH602 evidence validates direct visual synthesis/OCR optionality and a real LaTeX report source->compile->rendered visual-review lifecycle.",
+            "EAS501 evidence validates contextual assessment preparation from instructor practice plus current material; shared workflow rejects universal source ranking.",
+            "CIS560 experiments B/C validate forwarded-Gmail ingestion, repository-first exact-identity re-entry, no duplicate mutation, and return to parent from durable Git.",
+            "PADataset resume evidence validates source->render->semantic/visual QA->bounded revision mechanics.",
+            "OPERATOR_WORKFLOW remains baseline blob 32a0d46c0269fec0f84dadf62427e53adeb95418; task-capsule v2 remains single object-or-null workflow binding blob 3c6c424d2a087857a9d59fec2abb6732afe6d132."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "promotion",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control-architecture",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "shared_validation"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "child_migration_capsules",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control-architecture",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "promotion"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "completion",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "child_migration_capsules"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "workspace-control-architecture-baseline",
+      "kind": "git_commit",
+      "identity": "06058acf5a074db5a849f7f42f721971e5dda965",
+      "required_for_resume": true,
+      "evidence": [
+        "Observed workspace-control main at 06058acf5a074db5a849f7f42f721971e5dda965 before capsule creation.",
+        "Baseline OPERATOR_WORKFLOW.md blob is 32a0d46c0269fec0f84dadf62427e53adeb95418 and includes continuation/scratch policy."
+      ]
+    },
+    {
+      "id": "mth602-evidence-snapshot",
+      "kind": "git_commit",
+      "identity": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+      "required_for_resume": false,
+      "evidence": [
+        "Observed MTH602-AdamTrott main before architecture task creation."
+      ]
+    },
+    {
+      "id": "cis560-observed-unregistered-snapshot",
+      "kind": "git_commit",
+      "identity": "1af3ce7022d079b89f0fbca32f313a6853db1c60",
+      "required_for_resume": false,
+      "evidence": [
+        "Observed CIS560-AdamTrott tutor-framework before registry bootstrap; repository is not yet registered in workspace-control."
+      ]
+    },
+    {
+      "id": "eas501-observed-unregistered-snapshot",
+      "kind": "git_commit",
+      "identity": "aa6195377b856862124643d0fc501969467fad3b",
+      "required_for_resume": false,
+      "evidence": [
+        "Observed EAS501-AdamTrott eas501-tutor-bootstrap before registry bootstrap; repository is not yet registered in workspace-control."
+      ]
+    },
+    {
+      "id": "resume-framework-evidence-snapshot",
+      "kind": "git_commit",
+      "identity": "078461795be3c1d3e5c3845c81607166fac9fad3",
+      "required_for_resume": false,
+      "evidence": [
+        "Observed PADataset resume-framework before architecture task creation."
+      ]
+    },
+    {
+      "id": "workspace-control-registry-bootstrap",
+      "kind": "git_commit",
+      "identity": "8a6202b020d0733437960415f77833f2001da962",
+      "required_for_resume": true,
+      "evidence": [
+        "Verified advertised course-workflows-v2-refactor branch after registry mutation.",
+        "Registry content blob 29220f9f386cdb4ba90f3df81c1b37c7b55e8212 records the two stable course repository identities."
+      ]
+    },
+    {
+      "id": "workspace-control-shared-contract-review",
+      "kind": "git_commit",
+      "identity": "0624110cf808951b65f01c4851f90a3178988237",
+      "required_for_resume": true,
+      "evidence": [
+        "Verified advertised architecture branch after shared-contract review.",
+        "Review document blob 8613b8a56f49b18344c9d061f2c04b562e0c2717 records the bounded implementation direction."
+      ]
+    },
+    {
+      "id": "workspace-control-workflow-design",
+      "kind": "git_commit",
+      "identity": "da4ddc9aaca4cb18d6dbe70b089189fd6a1d18be",
+      "required_for_resume": true,
+      "evidence": [
+        "Verified advertised architecture branch after workflow/procedure design.",
+        "Design document blob 94e9d19a602754d74a552e8600f7d3cad2d1ea68 records the exact reusable procedure and workflow descriptor shapes."
+      ]
+    },
+    {
+      "id": "workspace-control-shared-implementation",
+      "kind": "git_commit",
+      "identity": "f5d7a1a97a135cc4e238119789cda4aed773ae9b",
+      "required_for_resume": true,
+      "evidence": [
+        "Verified isolated branch ref and exact implementation diff before validation.",
+        "All eight committed workflow descriptors passed remote structural/owner-route checks at the implementation checkpoint."
+      ]
+    },
+    {
+      "id": "workspace-control-shared-validation",
+      "kind": "git_commit",
+      "identity": "d757a0c5d59e915fa3f78b4c19d936748f7c318d",
+      "required_for_resume": true,
+      "evidence": [
+        "All required shared regressions passed and are recorded in architecture/course-workflows-v2-validation.md.",
+        "Validation remained repository-read only for the declarative shared architecture; project-specific build/runtime tests remain owned by child migrations after explicit adoption."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Current architecture baseline captured",
+      "result": "PASS",
+      "evidence": [
+        "workspace-control, MTH602 main, CIS560 tutor-framework, EAS501 eas501-tutor-bootstrap, and PADataset resume-framework exact remote checkpoints were observed before capsule creation."
+      ]
+    },
+    {
+      "check": "CIS560 and EAS501 stable registry identities",
+      "result": "PASS",
+      "evidence": [
+        "workspace-control course-workflows-v2-refactor@8a6202b020d0733437960415f77833f2001da962 registers both repositories in repos.json.",
+        "GitHub metadata confirms each repository's canonical/default branch is main; root routing entry is README.md at the pinned evidence snapshots.",
+        "Registry entries contain stable path/remote/authority/mutation policy only and exclude volatile tutor task branches, HEADs, and runtime state."
+      ]
+    },
+    {
+      "check": "Shared workflow/procedure design",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Shared architecture cold-start/regression validation",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Child migration capsules created",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Final HANDOFF_SAFE",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Promote the validated shared architecture to workspace-control main through an explicit reviewed integration step and record the exact promoted checkpoint.",
+    "Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration pinned to the promoted shared checkpoint and exact project checkpoints.",
+    "Complete HANDOFF_SAFE assessment and archive this task."
+  ],
+  "next_safe_action": "Promote the validated workspace-control architecture explicitly. Review `course-workflows-v2-refactor@d757a0c5d59e915fa3f78b4c19d936748f7c318d` against the current `main`, preserving concurrent main-only task/control changes. Use a reviewed pull-request/merge integration when clean; do not force-update main. Verify the resulting main commit contains the registry bootstrap, shared review/design/validation records, policy/template/evaluation updates, seven procedures, and eight descriptors while retaining unrelated main work. Immediately checkpoint the promoted main identity in this capsule+Markdown, then create the four required child migration capsules (MTH602, CIS560, EAS501, resume/application integration) on main. Do not execute child repository migrations in this parent chat unless the parent capsule explicitly transitions ownership.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "This task is the shared architecture refactor only. Urgent EAS501 Exam 1 cheat-sheet work and MTH602 new-unit ingestion may proceed independently against their existing project lineages. The task intentionally omits workflow binding because it mutates workspace-control, the repository that owns the baseline operator contract; the exact baseline contract is instead preserved as a required checkpoint to avoid a self-referential handoff-binding defect. The architecture worktree/ref is now isolated on workspace-control branch course-workflows-v2-refactor; this prevents the task capsule stored on main from becoming self-referential with the repository checkpoint it coordinates."
+}
