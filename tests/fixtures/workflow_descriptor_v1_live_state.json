@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "workflow_id": "fixture-live-state",
+  "title": "Invalid live-state workflow",
+  "purpose": "Prove workflow descriptors reject live task execution state.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "README.md"
+  },
+  "entry_route": [
+    "README.md"
+  ],
+  "stages": [
+    {
+      "id": "inspect",
+      "execution_owner": "workspace-control",
+      "authority_owners": [
+        "repos.json"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "repository identity established"
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": null,
+  "status": "CHECKPOINTED"
+}
