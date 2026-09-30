@@ -62,7 +62,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "cc4ae9e185257574757ff5da910237a23f4292a1",
+        "checkpoint_sha": "e23da0349160a0a181d356d4f9aee0c0c2ea8b3e",
         "verified": true
       },
       "local": null,
@@ -500,6 +500,16 @@
             "Remote main checkpoint cc4ae9e185257574757ff5da910237a23f4292a1 contains exactly 20 bootstrap files.",
             "Every remote Git blob identity matches the corresponding file in the previously unit-tested local bootstrap; no missing, extra, or mismatched files.",
             "workspace-control/repos.json now registers research-engine as a managed writable repository without storing volatile HEAD state."
+          ]
+        },
+        {
+          "check": "real PostgreSQL pgvector CI runtime",
+          "result": "PASS",
+          "evidence": [
+            "GitHub Actions run 36760418652 initialized pgvector/pgvector:0.8.6-pg18 and PostgreSQL 18.6.",
+            "The project installed successfully under Python 3.12, compiled successfully, and executed the previously skipped PostgreSQL integration test.",
+            "Full suite result: 7 passed in 0.29s.",
+            "CI validation ran on PR head 87b893d283cfe4a26a789a516356f6062ae10c76; main currently contains the CI workflow at e23da0349160a0a181d356d4f9aee0c0c2ea8b3e."
           ]
         }
       ],
@@ -1206,22 +1216,28 @@
         "User-created private repository was verified remotely after gh CLI creation.",
         "Exact tested bootstrap was imported and verified 20/20 by Git blob identity at cc4ae9e185257574757ff5da910237a23f4292a1."
       ]
+    },
+    {
+      "check": "PostgreSQL integration runtime",
+      "result": "PASS",
+      "evidence": [
+        "GitHub Actions supplied the missing runtime; local Docker is not required for canonical CI validation.",
+        "7/7 tests passed with real PostgreSQL 18.6 + pgvector service."
+      ]
     }
   ],
-  "blockers": [
-    "The initial PostgreSQL integration test has not yet executed against a real PostgreSQL/pgvector runtime; GitHub Actions CI is the next available authorized runtime surface and should be tried before requesting local Docker."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Add GitHub Actions CI using PostgreSQL 18 + pgvector and run all unit/integration tests on research-engine/main.",
-    "Repair any runtime/schema defect found by CI and rerun until the bootstrap passes on a real PostgreSQL/pgvector instance.",
-    "Implement fixture/schema validation and an idempotent loader for the current curated multi-paper corpus into PostgreSQL.",
-    "Implement provenance query regression tests over loaded corpus evidence and mixed-fidelity state.",
+    "Merge the validated CI documentation PR into research-engine/main and verify main.",
+    "Implement an idempotent PostgreSQL corpus loader for the current curated multi-paper fixture and integration tests.",
+    "Implement database-backed provenance/support/qualifier queries over loaded corpus evidence.",
+    "Add machine-readable schema/fixture validation for research-engine contract fixtures.",
     "Add provider/parser service interfaces while keeping scientific evidence contracts authoritative.",
     "Re-run novelty challenge after additional RF-specific papers are loaded; only then consider SUPPORTED_AS_OPEN.",
     "After implementation vertical-slice tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs."
   ],
-  "next_safe_action": "On research-engine/main@cc4ae9e185257574757ff5da910237a23f4292a1, add CI that runs the full test suite against a PostgreSQL 18 + pgvector service. Inspect the workflow result and repair any implementation/schema defects without asking for local Docker while GitHub Actions remains a viable runtime surface. Then implement/load the curated corpus and provenance query tests.",
+  "next_safe_action": "Merge research-engine PR #1 after its successful PostgreSQL/pgvector CI run, verify research-engine/main, then implement the idempotent curated-corpus PostgreSQL loader and database-backed provenance query regression tests. Continue using PR-triggered CI as the real database runtime.",
   "last_executor": "chatgpt",
-  "last_surface": "github",
+  "last_surface": "github-actions",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
 }
