@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "synthesis_id": "synthesis:rf-osr-curated-multipaper:v1",
+  "corpus_id": "corpus:rf-osr-curated-multipaper:v1",
+  "scope_class": "CURATED_SUBSET",
+  "question": "How do the selected sources develop the open-set decision problem and practical evidence mechanisms used for unknown rejection?",
+  "statements": [
+    {
+      "id": "multi:s1",
+      "text": "The selected lineage begins with open-set recognition as a structural problem: unknown classes may appear during testing, and a classifier must support rejection rather than always choosing a known label.",
+      "evidence_ids": [
+        "ev:scheirer2013:claim:unknown-at-test",
+        "ev:scheirer2013:claim:rejection"
+      ],
+      "source_fidelity": "OCR_DERIVED"
+    },
+    {
+      "id": "multi:s2",
+      "text": "Energy-based OOD detection addresses a concrete failure of softmax confidence by using a logit-derived scalar score; in Liu et al.'s reported CIFAR-10/WideResNet setting, energy scoring reduced average FPR at 95% TPR by 18.03 relative to softmax confidence.",
+      "evidence_ids": [
+        "ev:liu2020:claim:softmax-overconfidence",
+        "ev:liu2020:method:energy",
+        "ev:liu2020:result:fpr95"
+      ],
+      "source_fidelity": "OCR_DERIVED"
+    },
+    {
+      "id": "multi:s3",
+      "text": "The varMax lineage adds a staged confidence decision: top-two softmax separation identifies ambiguity, logit variance provides known-versus-unknown evidence, and energy-based OOD evidence is used as an external/companion comparison or validation signal.",
+      "evidence_ids": [
+        "ev:baye2024:method:varmax",
+        "ev:baye2024:claim:energy-validation",
+        "ev:broggi2025:method:varmax",
+        "ev:broggi2025:relation:energy-comparison"
+      ],
+      "source_fidelity": "OCR_DERIVED"
+    },
+    {
+      "id": "multi:s4",
+      "text": "The curated sources expose at least two distinct open-world strategy families: post-hoc/rejection scoring over classifier outputs and generative augmentation that synthesizes outlier-like training samples.",
+      "evidence_ids": [
+        "ev:liu2020:method:energy",
+        "ev:baye2024:method:varmax",
+        "ev:2108:method:ellipsoid",
+        "ev:2108:method:optimization"
+      ],
+      "source_fidelity": "MIXED_EXACT_PDF_AND_OCR_DERIVED"
+    },
+    {
+      "id": "multi:s5",
+      "text": "The later varMax formulation explicitly emphasizes balancing the two error directions—missing unknowns versus over-rejecting known inputs—which is a more operational objective than simply maximizing unknown detection.",
+      "evidence_ids": [
+        "ev:broggi2025:claim:balanced-known-unknown"
+      ],
+      "source_fidelity": "OCR_DERIVED"
+    }
+  ],
+  "limitations": [
+    "This is a curated subset selected to validate cross-paper mechanics, not a systematic review.",
+    "Four of five works are represented through tracked Mathpix OCR artifacts whose local source PDFs have not yet been hashed by the research engine.",
+    "Cross-work taxonomy and lineage edges marked MODEL_INFERRED are not source-stated facts.",
+    "No field-level novelty conclusion is permitted from this subset."
+  ],
+  "validation": [
+    {
+      "check": "mixed fidelity preserved",
+      "result": "PASS",
+      "evidence": "Each work/evidence statement records FULLTEXT_PDF_LAYOUT or OCR_DERIVED source level."
+    },
+    {
+      "check": "source/inference relation separation",
+      "result": "PASS",
+      "evidence": "Cross-work relations distinguish OCR_SOURCE_SUPPORTED from MODEL_INFERRED relations."
+    },
+    {
+      "check": "cross-paper synthesis traceability",
+      "result": "PASS",
+      "evidence": "Every synthesis statement maps to evidence IDs belonging to specific works/source artifacts."
+    },
+    {
+      "check": "no field-wide overclaim",
+      "result": "PASS",
+      "evidence": "Scope is CURATED_SUBSET and explicitly prohibits field-level novelty conclusions."
+    }
+  ]
+}
