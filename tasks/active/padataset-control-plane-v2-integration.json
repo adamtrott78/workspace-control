@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "padataset-control-plane-v2-integration",
   "title": "PADataset workspace-control v2 integration",
-  "status": "IN_PROGRESS",
+  "status": "CHECKPOINTED",
   "goal": "Adopt the promoted workspace-control v2 operating model in PADataset with the smallest project-local integration necessary for durable cold starts, direct-tool-first execution, executor handoff, and task-state recovery while preserving PADataset-owned scientific/domain authority and existing research workflows.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -12,7 +12,7 @@
     "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
   },
   "parent_execution_owner": "workspace-control-v2-adoption",
-  "current_stage": "project_regression",
+  "current_stage": "completion",
   "acceptance_criteria": [
     "PADataset exposes a clear root route into the shared workspace-control v2 operator contract while preserving PADataset-owned scientific and workflow authority.",
     "Any project-local ChatGPT/Codex adapter remains thin and does not duplicate or fork generic workspace-control semantics.",
@@ -181,25 +181,41 @@
     },
     {
       "id": "project_regression",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "padataset-control-plane-adoption",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "cold_start_validation"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "evidence:base-to-head changed path set exactly {README.md, AGENTS.md}",
+        "evidence:removing the exact inserted shared-operator interval from README.md@d6f6a7281f20d250423abd35ee5991841677e27d reconstructs README.md@232d5fd506ac8bffa55c39591c9cf1198257e51f byte-for-byte",
+        "evidence:AGENTS.md passes thin-adapter checks for README-first routing, shared-operator routing, capsule-over-adapter authority, non-authoritative status, and no policy duplication"
+      ],
+      "validation": [
+        {
+          "check": "PADataset routing/scientific regression review",
+          "result": "PASS",
+          "evidence": [
+            "Integration branch still advertises d6f6a7281f20d250423abd35ee5991841677e27d and is exactly one commit ahead of base 232d5fd506ac8bffa55c39591c9cf1198257e51f.",
+            "Changed paths are exactly AGENTS.md and README.md; README has additions only and the exact inserted interval can be removed to recover the original README byte-for-byte.",
+            "AGENTS.md remains a thin executor-discovery adapter and delegates generic cross-project semantics to workspace-control; no PADataset scientific or executable ownership moved."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "completion",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "project_regression"
+        "project_regression",
+        "git:d6f6a7281f20d250423abd35ee5991841677e27d",
+        "workflow:workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36"
       ],
       "outputs": [],
       "validation": [],
@@ -296,11 +312,10 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Perform project_regression by rechecking the exact base-to-head diff, verifying the original PADataset README/task router is preserved apart from the bounded operator-route insertion, and confirming AGENTS.md remains a thin adapter.",
-    "Establish final v2 HANDOFF_SAFE state under the pinned workspace-control checker semantics.",
-    "Archive the completed task after final JSON/Markdown synchronization."
+    "Evaluate the synchronized CHECKPOINTED capsule against the exact pinned workspace-control v2 handoff-check semantics.",
+    "If HANDOFF_SAFE, mark completion validated, set task COMPLETE with no remaining work, synchronize Markdown, then archive the completed JSON and derived Markdown."
   ],
-  "next_safe_action": "Re-review PADataset base 232d5fd506ac8bffa55c39591c9cf1198257e51f against integration head d6f6a7281f20d250423abd35ee5991841677e27d. Verify the changed-path set is exactly README.md and AGENTS.md, removing the inserted README operator section reconstructs the base README byte-for-byte, AGENTS.md contains routing only, and the pinned workspace-control workflow recovery entry satisfies v2 handoff binding. If all pass, complete and archive the task.",
+  "next_safe_action": "Evaluate this synchronized capsule against workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36 scripts/workspace_control.py handoff_assessment_v2 semantics. Require a handoff-capable status, durable evidence on required checkpoints, ready remote recovery state for PADataset and workspace-control, and exact workflow checkpoint binding. If there are no reasons, record HANDOFF_SAFE and complete/archive the task.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Independent cold-start validation passed. The capsule now explicitly records workspace-control as a read-only verified recovery repository at the already-pinned workflow checkpoint so the v2 workflow binding is representable to handoff-check."
