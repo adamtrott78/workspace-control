@@ -15,23 +15,41 @@ application, and artifact-specific truth.
 
 The control plane exists to make workflows portable across executors.
 
-The primary supported execution modes are:
+The control plane supports multiple reasoning executors and operation surfaces,
+including ChatGPT with connected tools, Codex, human-operated terminals, browser
+ingress, project runtimes, and specialized external tools.
 
-1. an agentic executor such as Codex;
-2. ChatGPT directing a human-operated terminal through bounded copy/paste
-   operations.
+v2 distinguishes:
 
-Changing executors should change the degree of automation, not the underlying
-workflow architecture.
+- reasoning executor;
+- operation surface;
+- execution topology/data locality;
+- authority;
+- consequence level.
+
+Changing executors or surfaces may change the degree of automation, but it must
+not change project authority, evidence requirements, validation, or the canonical
+workflow.
 
 ## Start here
 
 For workspace-level work:
 
 1. read this file;
-2. read `policies/PORTABILITY_CONTRACT.md`;
-3. inspect `repos.json`;
-4. observe current repository/runtime state before mutation.
+2. read `architecture/control-plane-v2.md` for v2 architecture work;
+3. read `policies/PORTABILITY_CONTRACT.md`;
+4. read `policies/OPERATOR_WORKFLOW.md` when execution, mutation, Git, runtime,
+   artifact validation, or task-transition routing is involved;
+5. read `policies/TUTORING_CONTRACT.md` when building or operating a
+   repository-backed course tutor;
+6. inspect `repos.json`;
+7. follow only the project/workflow/task route relevant to the work;
+8. observe current state relevant to the actual execution topology before
+   mutation.
+
+Routing is continuous rather than startup-only. When a conversation materially
+changes task ownership, return to the owning project route and load the new owner
+before acting.
 
 Do not recursively ingest all project repositories merely because they are
 registered here.
@@ -62,18 +80,45 @@ Those remain with their owning repositories.
 The intended stack is:
 
 ```text
-project/domain authority
+project-local domain authority
         ↓
-executor-neutral procedures
+shared behavioral / portability contracts
         ↓
-workspace control plane
+workspace coordination + durable task state
         ↓
-agent adapters
+thin executor adapters / routing
         ↓
-Codex OR ChatGPT + human terminal
+reasoning executors + operation surfaces
 ```
 
 Essential knowledge must remain usable if the agent-adapter layer disappears.
+
+## Shared policy contracts
+
+The control plane now has two provisional reusable policy contracts in addition
+to the portability contract:
+
+- `policies/OPERATOR_WORKFLOW.md` owns executor-neutral mutation, runtime,
+  validation, Git synchronization, and mid-conversation rerouting semantics;
+- `policies/TUTORING_CONTRACT.md` owns reusable repository-backed tutoring
+  semantics, including learning/completion modes, mastery evidence, pedagogical
+  persistence, report provenance, and deadline recovery.
+
+Project repositories should route to these shared owners and retain only their
+own domain-specific supplements. They should not copy the complete shared
+contracts into each project.
+
+These contracts are integrated into the v2 candidate architecture. Existing
+projects retain their pinned compatibility checkpoints until an explicit project
+migration is performed.
+
+For new course-tutor projects:
+
+- start from `templates/COURSE_TUTOR_ADAPTER.md` and fill only the local
+  course-specific mappings and exceptions;
+- validate the result with `procedures/TUTOR_EVALUATION.md`;
+- keep the shared contracts in this repository rather than copying them into each
+  course repository.
 
 ## Repository registry
 
@@ -133,7 +178,7 @@ truth.
 
 ## Current maturity
 
-Status: `EXPERIMENTAL`
+Status: `V2 CANDIDATE`
 
-The control-plane architecture and portability contract are being established
-before Codex is installed or agent-specific instructions are added.
+The v2 architecture is being integrated and regression-tested before promotion
+to the canonical branch. Executor-specific adapters remain non-authoritative.

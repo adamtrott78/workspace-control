@@ -1,65 +1,99 @@
 # Executor Portability Contract
 
-Status: **provisional v0.1**
-
-This contract defines the cross-project requirements that allow work to move
-between an agentic executor and ChatGPT-assisted human execution without
-redesigning the workflow.
+Status: **v2 candidate**
 
 Normative terms **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY**
 are intentional.
 
 ## 1. Definition
 
-A workflow has **executor portability** when Codex and ChatGPT-assisted human
-execution can independently recover the next correct and safe action from
-durable repository and runtime evidence without requiring the previous
-executor's private conversation state.
+A workflow has **executor portability** when a suitable receiving executor can
+recover the next correct and safe action from durable project/control-plane
+authority and evidence without requiring the previous executor's private
+conversation state.
 
-Changing executors should change the degree of automation, not the canonical
-workflow.
+Changing executors or operation surfaces may change the degree of automation,
+but it must not redefine project authority, validation standards, or the
+canonical workflow.
 
 ## 2. Durable knowledge
 
-Essential operational, scientific, course, artifact, or provenance knowledge
-MUST NOT exist only in:
+Essential operational, scientific, course, artifact, provenance, workflow, or
+resume knowledge MUST NOT exist only in:
 
 - an agent conversation;
 - a ChatGPT conversation;
 - a Codex Skill;
 - `AGENTS.md`;
-- an MCP result;
+- an MCP/connector result;
 - an automation definition;
 - an executor-private scratchpad.
 
-Durable knowledge MUST live in the owning repository context, authoritative
-source/evidence, tracked procedure, tracked configuration, validated artifact,
-or another explicitly durable authority.
+Durable knowledge MUST live in the owning repository context, tracked workflow or
+procedure, task capsule, authoritative source/evidence, validated artifact,
+runtime record, or another explicitly durable authority.
 
-## 3. Executor-neutral core
+## 3. Authority boundary
 
-Canonical context and reusable procedures MUST remain operable without Codex.
+workspace-control coordinates reusable execution semantics.
 
-Agent-specific instructions MAY improve discovery, automation, or efficiency,
-but removing the entire agent-adapter layer MUST NOT make an established
-workflow conceptually inoperable.
+It MUST NOT silently absorb project-domain truth.
 
-If an essential procedure exists only inside an agent Skill, that is an
-executor-portability defect.
+Project repositories retain authority for their own:
 
-## 4. Agent adapters
+- scientific/course truth;
+- implementation truth;
+- source provenance;
+- artifact semantics;
+- project workflows;
+- project-specific validation.
 
-`AGENTS.md`, Skills, MCP configuration, automation definitions, and similar
-agent-specific mechanisms MUST act as adapters to canonical knowledge and
-procedures.
+Authority is typed. One source may own one fact class without globally outranking
+all other sources.
 
-They MUST NOT silently become competing sources of scientific, course, or
-artifact truth.
+## 4. Reasoning executor, operation surface, and topology
 
-Where practical, an agent adapter SHOULD point to an executor-neutral tracked
-procedure or implementation rather than duplicate it.
+These concepts are distinct.
 
-## 5. Repository identity and checkout state
+A **reasoning executor** selects or reasons about actions, for example ChatGPT,
+Codex, or a human.
+
+An **operation surface** performs a concrete operation, for example GitHub
+connected tools, a terminal, browser ingress, Gmail read, JFLAP, a compiler, or a
+project runtime.
+
+An **execution topology** describes where required state lives and how surfaces
+must cooperate, for example remote-only, local, local-to-remote ingress, or
+composed execution.
+
+Capability on one surface MUST NOT be generalized into universal executor trust.
+
+## 5. Executor-neutral core and thin adapters
+
+Canonical context and reusable procedures MUST remain operable without any one
+executor-specific adapter.
+
+`AGENTS.md`, Skills, connector routing, automations, and similar mechanisms MAY
+improve discovery or automation, but MUST NOT become competing sources of
+project truth, workflow semantics, task execution evidence, or artifact
+completion state.
+
+Removing an adapter may reduce automation. It MUST NOT make an established
+workflow conceptually unrecoverable.
+
+## 6. Workflow and shared-contract version binding
+
+When a task depends on a reusable workflow or shared contract, the dependency
+SHOULD be bound to an exact durable identity such as repository + path + Git
+checkpoint/content identity.
+
+A long-running task MUST NOT silently resume against a materially changed
+workflow definition.
+
+Migration to a newer workflow/contract version is an explicit, validated state
+transition.
+
+## 7. Repository identity and current state
 
 A logical Git repository MUST be distinguished from any individual checkout or
 worktree.
@@ -75,34 +109,57 @@ Stable registry information MAY include:
 - canonical branch;
 - context entry point.
 
-Volatile observations MUST be obtained from the actual checkout when needed and
-SHOULD NOT be stored as timeless registry truth. Examples include:
+Volatile observations MUST be obtained from the relevant current surface when
+needed and SHOULD NOT be stored as timeless registry truth.
 
-- current branch;
-- current HEAD;
-- dirty state;
-- staged state;
+Examples include:
+
+- current branch/ref;
+- HEAD/advertised SHA;
+- dirty/staged state;
 - ahead/behind counts;
 - worktree list;
 - running processes;
-- current GPU/hardware state.
+- hardware/runtime availability.
 
-## 6. Mutation preflight
+## 8. Topology-aware preflight
 
-Before mutation, an executor MUST establish the relevant:
+Before mutation, an executor MUST establish the state relevant to the topology
+actually used.
 
-- repository identity;
-- checkout/worktree path;
+### Remote-only
+
+Establish, as applicable:
+
+- logical repository identity;
+- expected remote;
+- branch/ref;
+- advertised SHA;
+- expected parent;
+- mutation policy/scope;
+- required connector/write capability.
+
+Do not manufacture a local checkout merely to satisfy preflight.
+
+### Local
+
+Establish, as applicable:
+
+- checkout/worktree identity;
 - branch;
 - HEAD;
-- dirty/staged state;
-- intended mutation scope;
-- required runtime or external state.
+- dirty/staged/untracked state;
+- origin/remote relation;
+- required runtime/environment.
 
-An executor MUST NOT infer checkout identity from an already-open GUI,
-notebook browser, remembered path, or prior conversation.
+### Composed
 
-## 7. Dirty-work protection
+Establish both sides needed for the transition and the exact synchronization
+boundary.
+
+Remote mutation MUST NOT be assumed to have moved a local checkout.
+
+## 9. Dirty-work protection
 
 Executors MUST NOT automatically:
 
@@ -110,171 +167,174 @@ Executors MUST NOT automatically:
 - reset;
 - stash;
 - switch branches;
+- force checkout;
 - overwrite;
 - delete;
 - broadly stage unrelated work
 
-merely to make a checkout match an expected branch or documentation state.
+merely to normalize a checkout.
 
-Isolated worktrees SHOULD be preferred for bounded task branches when the
-primary checkout contains unrelated work.
+Isolated worktrees SHOULD be preferred for bounded task branches when unrelated
+work exists.
 
-`git add .` or equivalent broad staging SHOULD NOT be used in a dirty research
-or coursework checkout.
+## 10. Execution evidence
 
-## 8. Execution evidence
-
-A proposed, inspected, generated, or explained command MUST NOT be represented
+A proposed, inspected, generated, or explained operation MUST NOT be represented
 as having executed.
 
-Runtime claims MUST be grounded in returned execution evidence such as:
+Claims about execution SHOULD use the strongest available evidence, including:
 
 - stdout/stderr;
+- exit status;
+- Git refs/SHAs;
+- changed-path sets;
+- hashes;
 - logs;
-- process state;
+- runtime state;
 - generated files;
-- metadata;
-- checkpoints;
-- result summaries;
-- validated external state.
+- result records;
+- artifact identities.
 
-Executor recollection is not runtime evidence.
+An executor's recollection is not execution evidence.
 
-## 9. Artifact completion
+## 11. Artifact completion and validation barriers
 
 Process exit status alone MUST NOT establish successful completion.
 
-Each reusable workflow SHOULD define an artifact or state contract identifying:
+Each material stage SHOULD define the evidence required before a dependent stage
+may consume its result.
 
-- expected outputs;
-- required metadata/provenance;
-- semantic correctness conditions;
+Validation may include:
+
 - structural/static checks;
-- runtime/scientific checks where applicable;
-- failure indicators.
+- exact changed-path checks;
+- commit/ref equality;
+- hashes;
+- semantic invariants;
+- unit/numerical tests;
+- artifact freshness;
+- visual inspection;
+- human judgment required by the owning workflow.
 
-Completion MUST be judged against that contract.
+Project repositories own semantic correctness.
 
-## 10. Git and synchronization
+## 12. Checkpoints and resumability
 
-For tracked source, Git/GitHub is the synchronization mechanism between
-executors.
+A checkpoint may be one durable identity or a coherent bundle of identities.
 
-Tracked changes SHOULD follow:
+A resumable task allows another control cycle to recover:
+
+- parent task/execution owner;
+- workflow identity/version when applicable;
+- completed validated stages;
+- last required checkpoint/bundle;
+- unresolved gate/failure;
+- first safe incomplete stage;
+- next/return route.
+
+Completed validated stages SHOULD NOT be replayed merely because the user turn,
+conversation, executor, or surface changed.
+
+## 13. HANDOFF_SAFE and EXECUTION_READY
+
+A task is **HANDOFF_SAFE** when durable authority/evidence is sufficient for a
+suitable receiver to recover the next safe action for the topology actually
+used.
+
+A task may be HANDOFF_SAFE even when a particular proposed receiver is not
+**EXECUTION_READY** because it lacks a connector, credentialed connection,
+runtime, hardware resource, required artifact, or human decision.
+
+Conversely, technical ability to act does not make incomplete task state
+HANDOFF_SAFE.
+
+Remote-only tasks MUST NOT require local checkout state solely because an older
+checker did.
+
+## 14. Human/external-tool gates
+
+Human involvement MUST distinguish at least:
+
+- mechanical capability bridge;
+- specialized external-tool execution;
+- substantive human judgment.
+
+A required human gate for one stage does not revoke standing authority for other
+bounded reversible stages.
+
+## 15. Capability, access, authority, and consequence
+
+Technical capability and access permission do not themselves authorize an
+operation.
+
+Selection must consider:
+
+- operation class;
+- capability evidence;
+- data locality/topology;
+- bounded task/project authority;
+- consequence level.
+
+Externally consequential or destructive actions MAY require stronger authority
+or explicit human judgment even when technically easy.
+
+Secrets, credentials, tokens, private keys, and equivalent authentication
+material MUST NOT be persisted in ordinary Git workflow/task state.
+
+## 16. Failure, ambiguity, and idempotency
+
+After a failed or ambiguous mutation:
 
 ```text
-inspect
-→ bounded change
-→ execute when needed
-→ validate artifact/result
-→ targeted diff
-→ narrow staging
-→ commit
-→ push
-→ reread pushed state
+inspect actual durable state
+-> determine what completed
+-> continue from first safe incomplete stage
 ```
 
-An executor SHOULD prefer pushed validated checkpoints before another executor
-takes over.
+Blind retry is forbidden.
 
-## 11. Handoff-safe state
+A verified no-op is a valid successful workflow result when state is already
+correct.
 
-A task is **HANDOFF-SAFE** when another executor can determine, from durable
-evidence:
+## 17. Long-running tasks
 
-- repository identity;
-- checkout/worktree and branch;
-- relevant HEAD or last pushed checkpoint;
-- task goal;
-- acceptance criteria;
-- constraints;
-- important decisions already made;
-- operations actually executed;
-- artifacts produced;
-- validation completed;
-- unresolved failures/blockers;
-- remaining work;
-- next safe action.
+Work spanning sessions, executors, substantial runtime, multiple repositories,
+or real human/tool gates SHOULD maintain durable task state.
 
-A clean commit is useful but does not by itself guarantee a handoff-safe state.
-Unrecorded runtime work may still make a task nonportable.
+That state coordinates work. It does not become project-domain authority.
 
-## 12. Long-running tasks
+Detailed event history MAY live in referenced logs/records while the task
+capsule remains a concise recoverable snapshot.
 
-A task expected to span sessions, executors, significant runtime, or substantial
-agent quota SHOULD maintain a durable task/execution record.
+## 18. Runtime-only state
 
-That record MAY contain:
+Ignored/local datasets, caches, checkpoints, hardware state, and environment
+state MAY remain outside Git.
 
-- task ID;
-- repository/repositories;
-- base SHA;
-- task branch/worktree;
-- status;
-- acceptance criteria;
-- allowed mutation scope;
-- decisions;
-- executed operations;
-- artifacts;
-- validation;
-- blockers;
-- next safe action.
+When required to continue, their identity must be recoverable through explicit
+paths, manifests, hashes, logs, task records, or targeted inspection.
 
-The executor named in such a record is descriptive only and MUST NOT become part
-of the task's semantic identity.
-
-## 13. Agent quota or availability failure
-
-Loss of Codex availability, exhaustion of agent quota, or intentional choice not
-to use an agent MUST reduce automation only.
-
-It MUST NOT require:
-
-- rewriting canonical context;
-- converting the task into another workflow format;
-- recreating hidden agent knowledge manually;
-- abandoning an established procedure.
-
-ChatGPT-assisted human execution SHOULD be able to continue from the same
-durable state.
-
-## 14. Runtime-only state
-
-Ignored/local datasets, caches, checkpoints, hardware state, environment state,
-and other runtime-only resources MAY remain outside Git.
-
-When required to continue a task, their identity MUST be recoverable through
-explicit paths, manifests, metadata, hashes, logs, task records, or targeted
-inspection.
-
-Absence from Git MUST NOT be interpreted automatically as absence from the
+Absence from Git MUST NOT automatically be interpreted as absence from the
 prepared machine.
 
-## 15. Cross-repository work
+## 19. Cross-repository work
 
 Cross-repository tasks MUST preserve each repository's independent authority and
 Git history.
 
-A coordinator MAY reference exact repository SHAs and roles, but MUST NOT
-silently move scientific/course authority into the control plane.
+The control plane coordinates. It does not become a super-repository.
 
-Each writable repository SHOULD use its own branch/worktree for its own
-mutations.
+Each writable repository SHOULD use its own safe mutation boundary.
 
-The workspace control plane coordinates; it does not become a super-repository.
+## 20. Availability or quota failure
 
-## 16. Read-only and externally owned repositories
+Loss of Codex availability, connector availability, agent quota, or intentional
+choice not to use an executor SHOULD reduce automation only.
 
-A repository marked non-writable in the workspace registry MUST be treated as
-read-only unless the user explicitly changes that policy.
+It MUST NOT require redesigning the canonical workflow or recreating hidden
+executor knowledge manually.
 
-Dirty external/upstream repositories MUST NOT be cleaned or normalized merely
-for agent convenience.
-
-Broad recursive operations are forbidden when a registered repository contains
-or overlaps another project checkout.
-
-## 17. Completion authority
+## 21. Completion authority
 
 When claims conflict, prefer:
 
@@ -283,42 +343,32 @@ owning authoritative context/evidence
         +
 validated artifact/runtime evidence
         +
-actual Git state
+actual durable state
 ```
 
-over either executor's conversational recollection.
+over conversational recollection.
 
-A generated status index or agent summary is an observation aid, not authority.
+Generated status or handoff views are convenience projections, not authority.
 
-## 18. Portability test
+## 22. Portability tests
 
-An important workflow SHOULD eventually pass both directions:
+Important workflows SHOULD eventually demonstrate relevant directions such as:
 
-```text
-Codex → ChatGPT-assisted human execution
-ChatGPT-assisted human execution → Codex
-```
+- ChatGPT DIRECT_TOOL -> Codex;
+- Codex -> ChatGPT DIRECT_TOOL;
+- ChatGPT/direct tools -> human terminal/runtime -> ChatGPT;
+- human/external-tool suspension -> resume;
+- remote-only handoff;
+- local-runtime handoff.
 
-The receiving executor should be given only the normal repository/control-plane
-entry route and durable task state.
+The receiving executor should need the normal entry route, durable task state,
+and referenced owning context/evidence rather than a special prose reconstruction.
 
-If a special explanatory handoff must be invented because essential state existed
-only in the prior conversation, the workflow has failed executor portability.
+## 23. Boundary
 
-## 19. Current boundary
+This contract defines portable semantics, not a mandatory orchestration
+framework.
 
-This v0.1 defines architecture only.
-
-It does not yet establish:
-
-- Codex installation;
-- Codex sandbox configuration;
-- global or repository `AGENTS.md`;
-- Skills;
-- MCP integrations;
-- automations;
-- an execution-plan schema;
-- runtime reproduction of any project workflow.
-
-Those should be added only after this executor-neutral contract is reviewed and
-committed.
+workspace-control should remain understandable and operable with ordinary Git,
+repository context, deterministic scripts, ChatGPT/direct tools, human-operated
+surfaces, and Codex.
