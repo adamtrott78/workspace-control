@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: automated-research-engine-v1
 - Title: Automated research engine v1
-- Status: BLOCKED_RUNTIME
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -30,25 +30,26 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: 56533236666d17e742c96528807ced11dbc3b92d
+- Remote checkpoint: 7f09a557240722b4d104cbb7d7a2d99779974755
 - Remote verified: true
 
 ## Next safe action
 
-Run architecture/research-engine/exact-pdf-promotion-protocol-v1.md's noninteractive local command against the manifest-recorded PADataset checkout. Return the printed receipt and upload /tmp/research-engine-pdf-promotion.tar.gz. Do not modify PADataset. After receipt/upload, verify the bundle and resume vertical_slice_validation with exact-PDF parsing and OCR-fidelity comparison.
+Create the dedicated research-engine implementation repository from the validated contracts at automated-research-engine-v1@7f09a557240722b4d104cbb7d7a2d99779974755. Initialize PostgreSQL/pgvector schema, content-addressed artifact-store interface, contract/fixture validator, and first five-work corpus load/query tests. Continue through remotely executable implementation work; suspend only at a demonstrated runtime/human-decision/authority boundary per policies/OPERATOR_WORKFLOW.md.
 
 ## Remaining work
 
-- Promote three PADataset OCR_DERIVED reference works (Scheirer 2013, Liu 2020, Baye 2024) to exact-PDF-verified artifacts by hashing the local PDFs and making those exact bytes available to the extraction executor.
-- For each promoted paper, parse exact PDF layout and compare selected OCR-derived evidence anchors against exact-PDF extraction to quantify locator/text fidelity.
-- Mechanically validate representative fixtures against their JSON schemas in the dedicated implementation repository.
-- Re-run cross-paper synthesis/novelty challenge using exact-PDF evidence for the promoted subset and additional RF-specific papers.
-- Create the dedicated research-engine implementation repository when a supported repository-creation path is available; implement PostgreSQL/artifact-store/provider/parser services there.
-- After exact-PDF fidelity checks pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs through the same pipeline.
+- Create the dedicated adamtrott78/research-engine implementation repository and initialize it from the validated workspace-control contracts.
+- Implement v1 PostgreSQL/pgvector schema and content-addressed artifact-store interfaces.
+- Implement fixture/schema validation and load the current five-work corpus as the first test dataset.
+- Implement provenance query tests covering Result->Claim support, limitation qualifiers, source locators, and mixed fidelity.
+- Promote Broggi 2025 to exact-PDF evidence during later corpus ingestion, not as a blocker for implementation.
+- Re-run novelty challenge after additional RF-specific papers are loaded; only then consider SUPPORTED_AS_OPEN.
+- After implementation vertical-slice tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
 
 ## Blockers / gates
 
-- Exact source PDFs for the next fidelity test are local-only in the PADataset checkout and are not available to this executor. A bounded read-only local bundle is required for Scheirer 2013, Liu 2020, and Baye 2024.
+- None.
 
 ## Fresh-chat initialization
 
