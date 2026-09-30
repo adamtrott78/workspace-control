@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "padataset-control-plane-v2-integration",
   "title": "PADataset workspace-control v2 integration",
-  "status": "IN_PROGRESS",
+  "status": "SUSPENDED",
   "goal": "Adopt the promoted workspace-control v2 operating model in PADataset with the smallest project-local integration necessary for durable cold starts, direct-tool-first execution, executor handoff, and task-state recovery while preserving PADataset-owned scientific/domain authority and existing research workflows.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -12,7 +12,7 @@
     "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
   },
   "parent_execution_owner": "workspace-control-v2-adoption",
-  "current_stage": "implementation",
+  "current_stage": "cold_start_validation",
   "acceptance_criteria": [
     "PADataset exposes a clear root route into the shared workspace-control v2 operator contract while preserving PADataset-owned scientific and workflow authority.",
     "Any project-local ChatGPT/Codex adapter remains thin and does not duplicate or fork generic workspace-control semantics.",
@@ -42,7 +42,7 @@
       "base_sha": "232d5fd506ac8bffa55c39591c9cf1198257e51f",
       "remote": {
         "branch": "control-plane-v2-integration",
-        "checkpoint_sha": "232d5fd506ac8bffa55c39591c9cf1198257e51f",
+        "checkpoint_sha": "d6f6a7281f20d250423abd35ee5991841677e27d",
         "verified": true
       },
       "local": null,
@@ -115,20 +115,34 @@
     },
     {
       "id": "implementation",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "padataset-control-plane-adoption",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "integration_design"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "git:d6f6a7281f20d250423abd35ee5991841677e27d",
+        "path:README.md",
+        "path:AGENTS.md"
+      ],
+      "validation": [
+        {
+          "check": "Bounded two-file control-plane integration pushed and reread",
+          "result": "PASS",
+          "evidence": [
+            "PADataset control-plane-v2-integration advertises d6f6a7281f20d250423abd35ee5991841677e27d.",
+            "Compare against base 232d5fd506ac8bffa55c39591c9cf1198257e51f shows exactly AGENTS.md added (21 lines) and README.md modified (19 added lines), with no other paths and no deletions.",
+            "Pushed README.md and AGENTS.md were reread at the exact commit; README exposes the shared workspace-control/operator route and AGENTS.md remains a thin README-first adapter."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "cold_start_validation",
-      "status": "PLANNED",
+      "status": "SUSPENDED",
       "execution_owner": "cross-executor-validation",
       "selected_executor": "codex",
       "selected_surface": "repository-read",
@@ -137,7 +151,7 @@
       ],
       "outputs": [],
       "validation": [],
-      "resume_condition": null
+      "resume_condition": "An independent fresh ChatGPT or Codex session, without this implementation conversation, starts only from PADataset README.md at d6f6a7281f20d250423abd35ee5991841677e27d, follows the discovered workspace-control route, and returns a read-only validation showing it can recover authority boundaries, shared operator routing, task-capsule version binding, and the next safe action."
     },
     {
       "id": "project_regression",
@@ -184,6 +198,17 @@
       "evidence": [
         "Pinned promoted workspace-control v2 operator contract including mandatory JSON-to-Markdown handoff synchronization."
       ]
+    },
+    {
+      "id": "padataset-v2-integration-implementation",
+      "kind": "git_commit",
+      "identity": "d6f6a7281f20d250423abd35ee5991841677e27d",
+      "required_for_resume": true,
+      "evidence": [
+        "Atomic PADataset documentation-only integration commit on control-plane-v2-integration.",
+        "Remote branch SHA verified after push and both changed files reread from the exact commit.",
+        "Base-to-head compare contains only README.md and AGENTS.md."
+      ]
     }
   ],
   "artifacts": [],
@@ -209,13 +234,17 @@
     },
     {
       "check": "bounded integration diff",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "Base 232d5fd506ac8bffa55c39591c9cf1198257e51f -> head d6f6a7281f20d250423abd35ee5991841677e27d is one commit, changing only README.md and AGENTS.md."
+      ]
     },
     {
       "check": "PADataset scientific non-regression",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "Integration diff adds routing/adapter documentation only: README.md has additions only, AGENTS.md is new, and no scientific source, configuration, dataset, result, experiment, or paper path changed."
+      ]
     },
     {
       "check": "final v2 HANDOFF_SAFE",
@@ -237,14 +266,15 @@
       ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Implement the bounded README.md + root AGENTS.md integration on control-plane-v2-integration.",
-    "Run a fresh-reader ChatGPT/Codex cold-start validation from the PADataset root route.",
-    "Review the exact integration diff and verify that scientific code/configuration/results/paper semantics did not change.",
-    "Checkpoint the verified PADataset branch, establish final HANDOFF_SAFE state, and archive the completed task."
+  "blockers": [
+    "Independent fresh-reader validation is required before project_regression; the implementation session must not self-certify that gate."
   ],
-  "next_safe_action": "On PADataset control-plane-v2-integration, update README.md with a concise route to workspace-control for mutation/runtime/Git/handoff coordination and create a thin root AGENTS.md adapter. Change no other PADataset paths. Then verify the remote checkpoint and reread both pushed files before cold-start validation.",
+  "remaining_work": [
+    "Run the independent README-first ChatGPT/Codex cold-start validation against PADataset@d6f6a7281f20d250423abd35ee5991841677e27d.",
+    "After that passes, perform project_regression by reviewing the exact integration diff and confirming the shared route preserves PADataset authority/task routing.",
+    "Checkpoint final HANDOFF_SAFE state and archive the completed task."
+  ],
+  "next_safe_action": "Use a separate fresh ChatGPT or Codex session for a read-only validation. Give it only repository adamtrott78/PADataset, branch lineage control-plane-v2-integration, pinned commit d6f6a7281f20d250423abd35ee5991841677e27d, and instruct it to start only from README.md with no prior handoff. Ask it to recover (1) the shared workspace-control/operator route, (2) PADataset versus workspace-control authority boundaries, (3) how an exact task-capsule workflow/checkpoint must be honored, and (4) what it would read next for a mutation/runtime task. It must not modify anything. Return that exact validation result to this task before project_regression.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This is an adoption task, not a scientific refactor. PADataset already has a mature project-owned hierarchical context system; integrate the shared control plane around that system rather than replacing it."
