@@ -30,7 +30,7 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: e86ce6a687bde7b906c7c26c4d0fd274c3284762
+- Remote checkpoint: 6b1cefa7c6d36e0c33e7aaaa926bd07f07b46e1a
 - Remote verified: True
 
 ### workspace-control
@@ -42,14 +42,14 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Accept the next lecture ZIP from the user. Treat it as the next provisional session label, inspect the actual images directly, recover date/order/overlap from image evidence and mathematical continuity, distinguish notebook images as student-derived supplemental evidence, and do not use OCR/Mathpix unless direct vision proves insufficient. Persist the next session only after visual review. Do not begin HW2 bootstrap until the user has finished supplying the new-unit lecture batches or authoritative assignment evidence makes an earlier bootstrap independently safe.
+Accept the next lecture ZIP from the user if additional new-unit sessions remain. Inspect the actual images directly, recover date/order/overlap from image evidence and mathematical continuity, distinguish any notebook images as student-derived supplemental evidence, and do not use OCR/Mathpix unless direct vision proves insufficient. If the user indicates the lecture-image intake is complete, route next to authoritative HW2 availability resolution before bootstrapping any assignment requirements.
 
 ## Remaining work
 
-- Upload the remaining lecture ZIP batches; for each batch, visually establish date/order/overlap and synthesize the session without default OCR.
+- Upload any remaining lecture ZIP batches; for each batch, visually establish date/order/overlap and synthesize the session without default OCR.
 - When a batch contains notebook images, preserve them as student-derived supplemental evidence rather than direct professor-board evidence.
 - Complete exact-byte transfer of classroom originals into each session source tree and verify them against recorded SHA-256 manifests when a suitable binary transfer surface is available.
-- Resolve exact current instructor-slide provenance/page slices where accessible and update only claims that stronger source evidence supports.
+- Resolve exact current instructor-slide/projected-source provenance where accessible and update only claims that stronger source evidence supports.
 - After all new-unit sessions are represented, finish cumulative topic/dependency/notation promotion without inferring mastery.
 - Resolve HW2 authoritative availability and either bootstrap its exact contract or checkpoint an HW2-ready state.
 - Validate the final task branch, synchronize task JSON/Markdown, establish HANDOFF_SAFE, and archive when complete.
