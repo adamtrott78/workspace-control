@@ -23,38 +23,38 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `84a7e67a8af2b701ab63829468c92e46221a72f9`
+- Current checkpoint: `f021956b398d3356337f489c59deaa83182d81ba`
 - Pushed: `true`
 
 ### Allowed mutation scope
 
+- `schemas/workflow_descriptor.v1.schema.json`
 - `scripts/workspace_control.py`
-- `procedures/worktree_prepare.md`
+- `procedures/workflow_descriptor.md`
+- `templates/workflow_descriptor.v1.json`
 - `tests/test_workspace_control.py`
 - `tests/fixtures/**`
 
 ## Next safe action
 
-Remain in Phase 7. Validate repaired exact pushed checkpoint 84a7e67a8af2b701ab63829468c92e46221a72f9 in an isolated GitHub-connected runtime. Run the full unit suite and bounded real-Git worktree-prepare scenarios proving missing-local-branch handling, read-only CREATE_AVAILABLE, explicit --create -> READY at the exact checkpoint, existing READY behavior, dirty-state preservation/refusal, divergence refusal without branch movement, and non-interference with existing workspace worktrees. Record the runtime evidence, then and only then mark Phase 7 validated/checkpointed and open the next planned phase.
+Remain in Phase 8. Validate exact pushed checkpoint f021956b398d3356337f489c59deaa83182d81ba in an isolated GitHub-connected runtime. Run the full unit suite and workflow-validate CLI against the positive fixture, template, live-state negative fixture, and invalid-dependency fixture. Require positive bindings to resolve to checkpoint f021956b398d3356337f489c59deaa83182d81ba with exact content/blob identities, require the negative cases to fail for the intended reasons, and verify no checkout/worktree mutation. Record runtime evidence, then and only then mark Phase 8 validated/checkpointed and open Phase 9 artifact lifecycle.
 
 ## Remaining work
 
-- Run the complete Python unit suite from repaired exact checkpoint 84a7e67a8af2b701ab63829468c92e46221a72f9 in an isolated temporary clone; the suite now includes the missing-local-branch regression.
-- Run worktree-prepare read-only against an isolated temporary repository and require CREATE_AVAILABLE without creating the target.
-- Run the same request with --create and require READY at the exact branch/checkpoint.
-- Re-run read-only assessment on the created worktree and require READY without mutation.
-- Prove dirty target refusal preserves the dirty file.
-- Prove divergent remote/ref state returns BLOCKED_DIVERGED without moving the local branch or deleting/rewriting the worktree.
-- Verify non-interference with existing workspace worktrees.
-- Only after those checks pass, mark Phase 7 validated/checkpointed and follow the implementation plan's next phase.
+- Run the full Python unit suite from exact checkpoint f021956b398d3356337f489c59deaa83182d81ba.
+- Run workflow-validate on the committed positive workflow fixture and require VALID with a binding to the exact Phase 8 checkpoint and exact blob SHA.
+- Run workflow-validate on the committed workflow template and require VALID with an exact binding.
+- Run workflow-validate on the live-task-state negative fixture and require invalid status with explicit live-state rejection.
+- Run workflow-validate on the invalid-dependency fixture and require invalid status with earlier-stage dependency rejection.
+- Verify the validator itself does not alter the checkout and existing workspace worktrees remain untouched.
+- Only after those checks pass, mark Phase 8 validated/checkpointed and open Phase 9 artifact lifecycle.
 
-## Latest runtime evidence
+## Latest completed runtime gate
 
-- Failed Phase 7 checkpoint: `01ebfed8d8b79ec1cbf52930c6f02b13eeae4386`
-- Failure: missing local branch was misclassified as an error by the Git ref probe.
-- Repaired Phase 7 checkpoint: `84a7e67a8af2b701ab63829468c92e46221a72f9`
-- Repair: use `git rev-parse --verify --quiet` so an absent local branch is represented as `MISSING`.
-- Repaired exact-checkpoint runtime validation is pending.
+- `PHASE7_RUNTIME_RESULT=PASS`
+- `VALIDATED_COMMIT=84a7e67a8af2b701ab63829468c92e46221a72f9`
+- Phase 8 implementation checkpoint: `f021956b398d3356337f489c59deaa83182d81ba`
+- Phase 8 exact-checkpoint runtime validation is pending.
 
 ## Validation state
 
@@ -154,10 +154,17 @@ Remain in Phase 7. Validate repaired exact pushed checkpoint 84a7e67a8af2b701ab6
   - Post-failure and post-success target state are explicitly re-inspected.
   - Occupied broken symlink targets are detected instead of being hidden by path resolution.
   - Real Git tests cover the Phase 7 creation, dirty, divergence, identity, and policy gates.
-- **Phase 7 exact-checkpoint integrated runtime validation:** `NOT_RUN`
-  - Repaired target implementation is pushed at 84a7e67a8af2b701ab63829468c92e46221a72f9.
-  - Exact-checkpoint unit/CLI runtime validation has not yet been rerun after the repair.
-  - Do not open the next implementation phase until the repaired checkpoint passes.
+- **Phase 7 exact-checkpoint integrated runtime validation:** `PASS`
+  - Exact isolated checkout resolved ACTUAL_HEAD=84a7e67a8af2b701ab63829468c92e46221a72f9.
+  - Full Python unit suite completed 37 tests with OK.
+  - Read-only worktree preparation returned CREATE_AVAILABLE without creating the target.
+  - Explicit creation returned READY at the exact requested branch and checkpoint.
+  - Existing worktree reassessment returned READY.
+  - Dirty target returned BLOCKED_DIRTY and preserved the dirty marker.
+  - Divergence regression passed without moving the local branch.
+  - Target HEAD and remote HEAD both matched 84a7e67a8af2b701ab63829468c92e46221a72f9.
+  - PHASE7_RUNTIME_RESULT=PASS.
+  - Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified.
 - **Phase 7 runtime validation at 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386:** `FAIL`
   - Exact checkpoint and isolated clone preconditions passed.
   - Full unit suite result: Ran 36 tests; FAILED (failures=1).
@@ -169,10 +176,24 @@ Remain in Phase 7. Validate repaired exact pushed checkpoint 84a7e67a8af2b701ab6
   - A raw isolated Git worktree add -b <branch> <target> <expected-sha> succeeds when the local branch is absent, the remote branch exists, and the commit is locally available.
   - Repaired source maps exit 1 to MISSING and preserves other nonzero states as ERROR.
   - Regression test explicitly covers MISSING rather than ERROR for the absent local branch.
+- **Phase 8 exact changed-path set:** `PASS`
+  - Compare 84a7e67a8af2b701ab63829468c92e46221a72f9...f021956b398d3356337f489c59deaa83182d81ba reports exactly procedures/workflow_descriptor.md, schemas/workflow_descriptor.v1.schema.json, scripts/workspace_control.py, templates/workflow_descriptor.v1.json, tests/fixtures/workflow_descriptor_v1_invalid_dependency.json, tests/fixtures/workflow_descriptor_v1_live_state.json, and tests/test_workspace_control.py.
+  - All changed paths are inside the capsule's authorized Phase 8 mutation scope.
+- **Phase 8 source/contract inspection:** `PASS`
+  - workflow-validate parser/command and semantic validator are present.
+  - Live execution-state fields are explicitly rejected.
+  - Stage dependency order is enforced.
+  - Binding resolution checks registered owner origin, tracked descriptor path, exact repository HEAD, durable descriptor blob, current-content equality, and durable owner/entry routes.
+  - Tests cover positive semantics, template semantics, live-state rejection, dependency rejection, unsafe owner context path, CLI registration, exact Git binding, uncommitted descriptor rejection, missing durable owner context, and owner-origin mismatch.
+  - No Phase 9 artifact-lifecycle command/behavior was introduced.
+- **Phase 8 exact-checkpoint integrated runtime validation:** `NOT_RUN`
+  - Target implementation is pushed at f021956b398d3356337f489c59deaa83182d81ba.
+  - Exact-checkpoint unit and CLI workflow-validation runtime checks are pending in an isolated GitHub-connected runtime.
+  - Do not begin Phase 9 until this validation passes and is recorded.
 
 ## Blockers / known limitations
 
-- Exact-checkpoint Phase 7 integrated runtime validation must be rerun for repaired checkpoint control-plane-v2-refactor@84a7e67a8af2b701ab63829468c92e46221a72f9.
+- Exact-checkpoint Phase 8 integrated runtime validation is pending for control-plane-v2-refactor@f021956b398d3356337f489c59deaa83182d81ba.
 
 ## Fresh-chat initialization
 
@@ -203,10 +224,10 @@ Current target branch:
 control-plane-v2-refactor
 
 Current target checkpoint:
-84a7e67a8af2b701ab63829468c92e46221a72f9
+f021956b398d3356337f489c59deaa83182d81ba
 
 Current phase:
-Phase 7 — worktree preparation (repaired checkpoint runtime validation pending)
+Phase 8 — workflow descriptor validation (runtime validation pending)
 
-Do not broaden mutation scope beyond the capsule.
+Do not broaden mutation scope beyond the capsule. Do not begin Phase 9 artifact lifecycle until Phase 8 is validated and checkpointed.
 ```
