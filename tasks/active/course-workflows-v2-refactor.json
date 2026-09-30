@@ -6,7 +6,7 @@
   "goal": "Evolve the repository-backed course tutoring/application architecture to the task-capsule-driven workspace-control v2 model: remove dependence on conversational builder/tutor hierarchy, define reusable course and document-artifact workflow descriptors/procedures, improve assessment alignment and multimodal ingestion, preserve project-local authority and mastery semantics, and create independently executable migration capsules for MTH602, CIS560, EAS501, and the resume/application workflow.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-control-v2-adoption",
-  "current_stage": "child_migration_capsules",
+  "current_stage": "completion",
   "acceptance_criteria": [
     "The shared architecture treats conversations as replaceable executors while durable semantic owners, reusable workflow/procedure definitions, exact task state, and mutation boundaries remain authoritative.",
     "Task-capsule v2 retains its single optional workflow binding; conceptual composition is represented by one composite workflow descriptor plus stage/procedure routing, not by silently changing v2 schema.",
@@ -333,15 +333,35 @@
     },
     {
       "id": "child_migration_capsules",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control-architecture",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "promotion"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "tasks/active/mth602-course-workflows-v2-migration.json + .md",
+        "tasks/active/cis560-course-workflows-v2-migration.json + .md",
+        "tasks/active/eas501-course-workflows-v2-migration.json + .md",
+        "tasks/active/resume-application-workflows-v2-integration.json + .md"
+      ],
+      "validation": [
+        {
+          "check": "Four separate durable child migration capsules created and verified",
+          "result": "PASS",
+          "evidence": [
+            "Final child-capsule correction/verification checkpoint ee577330309d19f095f5a73842b384f654b9e620.",
+            "MTH602 child JSON blob c53bc96a2b757de80a5a234c53b96cd682858b8a; target main@62b7a03c7139cb3987b72ad66bdc532e8a61b82a.",
+            "CIS560 child JSON blob 69566018cb490468fba60c509d2dabeb809ca189; target tutor-framework@1af3ce7022d079b89f0fbca32f313a6853db1c60.",
+            "EAS501 child JSON blob abd16fec83ad3389beabfbcd8bd70e3dad144015; target eas501-tutor-bootstrap@52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5.",
+            "Resume/application child JSON blob 6e1aafd5c9833880e0d3b97d5441f942f2823045; target PADataset resume-framework@078461795be3c1d3e5c3845c81607166fac9fad3.",
+            "Course children bind course-bootstrap-migration.v1 at promoted main 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9/content da6076a9b4baf328d6a91526f6dff7aa999733b6; resume child binds document-artifact-build.v1/content 0d66b919acdd2e51c08d2e8496c41dc22aed47c4.",
+            "All four committed capsules satisfy task-capsule v2 key/type/topology/mutation-scope checks and each companion Markdown contains the exact JSON next_safe_action.",
+            "No target repository was mutated while creating or validating the child tasks."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
@@ -464,6 +484,15 @@
         "GitHub PR #1 merged the validated course-workflows-v2-refactor architecture into main.",
         "Post-merge main verification preserved concurrent main-only task/control state and registry additions."
       ]
+    },
+    {
+      "id": "child-migration-capsules-created",
+      "kind": "git_commit",
+      "identity": "ee577330309d19f095f5a73842b384f654b9e620",
+      "required_for_resume": true,
+      "evidence": [
+        "Four child JSON/Markdown handoffs exist and pass committed v2 validation checks."
+      ]
     }
   ],
   "artifacts": [],
@@ -507,10 +536,9 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration pinned to the promoted shared checkpoint and exact project checkpoints.",
     "Complete HANDOFF_SAFE assessment and archive this task."
   ],
-  "next_safe_action": "Create four separate task-capsule v2 migration tasks on workspace-control main for MTH602, CIS560, EAS501, and PADataset resume/application integration. Each child must pin the promoted shared checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 (or the exact descendant only if its capsule creation requires a newer main control-only commit), bind the appropriate reusable workflow descriptor by exact path/checkpoint/content identity, pin the exact target-project starting checkpoint, preserve project-local authority, and explicitly prohibit unrelated project migration. Generate each child Markdown immediately with its JSON in the same main commit. Do not execute the child repository migrations in this parent chat. After creation, verify all eight child files and advance the parent to completion/HANDOFF_SAFE assessment.",
+  "next_safe_action": "Perform the parent task's final HANDOFF_SAFE/completion assessment only. Verify the promoted main checkpoint, the stable architecture-branch checkpoint, all parent stages/checkpoints, zero blockers, and the four child capsule handoffs. Do not execute any child migration. If the parent is fully recoverable and all acceptance criteria are satisfied, mark completion VALIDATED, set status COMPLETE with no remaining work, regenerate the Markdown, and archive the parent JSON/Markdown as immutable historical evidence.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is the shared architecture refactor only. Urgent EAS501 Exam 1 cheat-sheet work and MTH602 new-unit ingestion may proceed independently against their existing project lineages. The task intentionally omits workflow binding because it mutates workspace-control, the repository that owns the baseline operator contract; the exact baseline contract is instead preserved as a required checkpoint to avoid a self-referential handoff-binding defect. The architecture worktree/ref is now isolated on workspace-control branch course-workflows-v2-refactor; this prevents the task capsule stored on main from becoming self-referential with the repository checkpoint it coordinates."

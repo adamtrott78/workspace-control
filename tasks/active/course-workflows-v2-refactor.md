@@ -57,11 +57,10 @@ Evolve the repository-backed course tutoring/application architecture to the tas
 
 ## Next safe action
 
-Create four separate task-capsule v2 migration tasks on workspace-control main for MTH602, CIS560, EAS501, and PADataset resume/application integration. Each child must pin the promoted shared checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 (or the exact descendant only if its capsule creation requires a newer main control-only commit), bind the appropriate reusable workflow descriptor by exact path/checkpoint/content identity, pin the exact target-project starting checkpoint, preserve project-local authority, and explicitly prohibit unrelated project migration. Generate each child Markdown immediately with its JSON in the same main commit. Do not execute the child repository migrations in this parent chat. After creation, verify all eight child files and advance the parent to completion/HANDOFF_SAFE assessment.
+Perform the parent task's final HANDOFF_SAFE/completion assessment only. Verify the promoted main checkpoint, the stable architecture-branch checkpoint, all parent stages/checkpoints, zero blockers, and the four child capsule handoffs. Do not execute any child migration. If the parent is fully recoverable and all acceptance criteria are satisfied, mark completion VALIDATED, set status COMPLETE with no remaining work, regenerate the Markdown, and archive the parent JSON/Markdown as immutable historical evidence.
 
 ## Remaining work
 
-- Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration pinned to the promoted shared checkpoint and exact project checkpoints.
 - Complete HANDOFF_SAFE assessment and archive this task.
 
 ## Blockers / gates
