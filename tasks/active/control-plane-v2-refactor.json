@@ -1,835 +1,240 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "task_id": "control-plane-v2-refactor",
-  "title": "Workspace Control Plane v2",
+  "title": "Workspace control-plane v2 refactor",
   "status": "CHECKPOINTED",
-  "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
+  "goal": "Promote the fully validated executor-neutral workspace-control v2 implementation without migrating project-owned operator architecture.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-control-v2-implementation-plan",
+  "current_stage": "phase11_codex_rerun",
   "acceptance_criteria": [
-    "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
-    "The shared operator/tutor bridge concepts and proven Codex adapter concepts are deliberately integrated rather than blindly merged, while executor-specific adapters remain thin.",
-    "Portability is generalized beyond a two-party Codex versus ChatGPT+human model to distinguish reasoning executor, operation surface, topology/data locality, authority, and consequence.",
-    "Reusable project-owned workflow descriptors are distinguished from live task capsules; workflow descriptors define stable procedure while capsules define one execution's durable progress.",
-    "Coordination supports remote-only, local, and composed/hybrid execution topologies without manufacturing local state solely to legitimize remote DIRECT_TOOL work.",
-    "Task execution is stage-oriented: material stages have preconditions, bounded authority, expected outputs, validation, durable identities when required, stop/failure conditions, and resumable progress.",
-    "Artifact lifecycle/Git policy and safe deterministic worktree preparation are represented without making workspace-control own project-specific artifact semantics.",
-    "Regression validation covers DIRECT_TOOL-only work, DIRECT_TOOL to local runtime transitions, human-gate suspension/resume, ChatGPT to Codex and Codex to ChatGPT handoff, remote-only handoff, local-runtime handoff, and ambiguous-failure recovery before promotion to main."
+    "All required regression evidence is recorded.",
+    "The frozen integration diff is reviewed and v1 compatibility is preserved.",
+    "The active v2 capsule is HANDOFF_SAFE.",
+    "Both-direction Codex handoff rerun passes at the exact frozen checkpoint.",
+    "The user explicitly decides whether to promote.",
+    "Any approved promotion is verified exactly and remains reversible."
   ],
   "constraints": [
-    "Do not modify PADataset during the v2 architecture/refactor until the new control plane is validated and an explicit later migration consumes it.",
-    "Do not modify MTH602, EAS501, CIS560, or other course repositories merely to implement workspace-control v2.",
-    "Preserve phase4-codex-adapters at 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859 and phase4-chatgpt-to-codex-handoff at 726c31f855d723943cc24b8d31448cf5eaa5532e as evidence; do not redo Phase 4C.",
-    "Preserve shared-operator-tutor-contract at 450eebeef6b76a674913949863082277b6bdb811 as the provisional tutor/operator evidence branch until deliberate integration.",
-    "Project/domain authority remains inside the owning project repository; workspace-control owns reusable coordination, portability, routing, and execution semantics only.",
-    "Do not make LangGraph, Temporal, AutoGen, OpenAI Agents SDK, GitOps tooling, or another framework the canonical control plane; use external systems only as design references unless separately justified.",
-    "Do not create a large permanent executor-capability database before the minimal v2 selection/validation requirements are clear.",
-    "Do not blindly retry failed or ambiguous mutations; inspect actual durable state first.",
-    "For the first implementation phase, mutate only the v2 architecture specification path on the refactor branch; expand mutation scope only after that specification is reviewed."
+    "Do not modify PADataset or course-project operator architecture as part of core promotion.",
+    "Do not change the frozen target implementation unless a demonstrated promotion-gate defect requires repair.",
+    "Do not promote before every Phase 11 gate passes.",
+    "Preserve the complete v1 coordination history as immutable evidence."
   ],
   "repositories": [
     {
       "name": "workspace-control",
-      "intent": "mutate",
-      "checkout_path": "/home/atrott/adamArchives/Adam/workspace-control-v2-refactor",
-      "branch": "control-plane-v2-refactor",
+      "intent": "read",
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
-      "checkpoint_sha": "b8aa52e242a07e6aa2036516e401864991183ad2",
-      "checkpoint_pushed": true,
+      "remote": {
+        "branch": "control-plane-v2-refactor",
+        "checkpoint_sha": "b8aa52e242a07e6aa2036516e401864991183ad2",
+        "verified": true
+      },
+      "local": null,
       "allowed_mutation_scope": []
     }
   ],
-  "decisions": [
-    "Use a separate coordination branch for the task capsule and a separate refactor branch for actual v2 mutations, following the pattern proven in Phase 4C.",
-    "Treat project-local domain authority, shared behavioral contracts, workspace coordination/durable task state, thin executor adapters, and actual executors/surfaces as separate architectural layers.",
-    "Treat DIRECT_TOOL as a first-class autonomous surface for operation classes that have empirical evidence, but keep trust operation-class specific.",
-    "Distinguish reasoning executor from operation surface and from execution topology/data locality; do not encode current GitHub-versus-terminal limitations as permanent executor assignments.",
-    "Treat HUMAN_BROWSER_INGRESS, HUMAN_TERMINAL, specialized external-tool execution, and substantive human judgment as different kinds of boundaries.",
-    "Keep artifact completion separate from student mastery; this remains a tutoring-contract invariant rather than a generic control-plane state.",
-    "Adopt the principle 'more verified stages per autonomous control cycle' rather than optimizing merely for fewer messages.",
-    "Introduce reusable project-owned workflow descriptors as a v2 design target, distinct from live task capsules.",
-    "Introduce stage-level validation and resumability as v2 design targets so completed stages are not replayed after suspension or partial failure.",
-    "Use MILCOM/PADataset evidence to evaluate named deterministic project entrypoints, artifact lifecycle declarations, safe worktree preparation, and project-owned cross-authority consistency validators.",
-    "Use external systems such as Anthropic workflow/agent guidance, Temporal, LangGraph, AutoGen, OpenAI Agents SDK, GitOps, and asset-oriented orchestration only as comparative design references."
+  "stages": [
+    {
+      "id": "implementation",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "git:cb8368cd50de2d364c2aade8843276aab0b02420"
+      ],
+      "outputs": [
+        "git:b8aa52e242a07e6aa2036516e401864991183ad2"
+      ],
+      "validation": [
+        {
+          "check": "phased implementation validation",
+          "result": "PASS",
+          "evidence": [
+            "Phases 2-9 passed exact scope/source gates and their required runtime or adapter validation."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "regression_suite",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "composed",
+      "inputs": [
+        "git:b8aa52e242a07e6aa2036516e401864991183ad2"
+      ],
+      "outputs": [
+        "evidence:tasks/evidence/control-plane-v2-refactor-v1-final.json",
+        "artifact:phase10-milcom-reference"
+      ],
+      "validation": [
+        {
+          "check": "architecture regression matrix",
+          "result": "PASS",
+          "evidence": [
+            "All 16 required regression items are recorded PASS in the preserved v1 coordination history.",
+            "The MILCOM reference regression ended PHASE10_MILCOM_RESULT=PASS."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "integration_review",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "git:b8aa52e242a07e6aa2036516e401864991183ad2"
+      ],
+      "outputs": [
+        "review:exact-integration-diff",
+        "review:v1-compatibility"
+      ],
+      "validation": [
+        {
+          "check": "exact integration diff and v1 compatibility",
+          "result": "PASS",
+          "evidence": [
+            "Baseline-to-target compare is ahead by 36 commits, behind by 0, across 31 previously phase-gated files.",
+            "Final task_capsule.v1 schema blob exactly matches the original pre-v2 schema blob 40fa76125f61c0ad8e11a10a45347dbb36c63a84."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "phase11_codex_rerun",
+      "status": "PLANNED",
+      "execution_owner": "cross-executor-validation",
+      "selected_executor": "codex",
+      "selected_surface": "repository-read",
+      "inputs": [
+        "git:b8aa52e242a07e6aa2036516e401864991183ad2",
+        "task:tasks/active/control-plane-v2-refactor.json"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "promotion_decision",
+      "status": "PLANNED",
+      "execution_owner": "human",
+      "selected_executor": "human",
+      "selected_surface": "chat",
+      "inputs": [
+        "phase11_codex_rerun"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "promotion",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "promotion_decision"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    }
   ],
-  "executed_operations": [
+  "checkpoints": [
     {
-      "summary": "Verified preserved workspace-control branch heads before initializing v2.",
+      "id": "frozen-target",
+      "kind": "git_commit",
+      "identity": "b8aa52e242a07e6aa2036516e401864991183ad2",
+      "required_for_resume": true,
       "evidence": [
-        "main -> cb8368cd50de2d364c2aade8843276aab0b02420",
-        "shared-operator-tutor-contract -> 450eebeef6b76a674913949863082277b6bdb811",
-        "phase4-codex-adapters -> 9d2c088e1929a6a1cdc2aaca6ec1393c3e1e6859",
-        "phase4-chatgpt-to-codex-handoff -> 726c31f855d723943cc24b8d31448cf5eaa5532e"
+        "Remote control-plane-v2-refactor checkpoint verified throughout Phase 10."
       ]
     },
     {
-      "summary": "Created isolated v2 target and coordination branches from the exact main baseline.",
+      "id": "v1-history",
+      "kind": "git_commit",
+      "identity": "64908850a72101843ec5c7445989b894e2aa2f25",
+      "required_for_resume": false,
       "evidence": [
-        "control-plane-v2-refactor created from cb8368cd50de2d364c2aade8843276aab0b02420",
-        "control-plane-v2-coordination created from cb8368cd50de2d364c2aade8843276aab0b02420"
-      ]
-    },
-    {
-      "summary": "Created and pushed the initial Workspace Control Plane v2 architecture specification within the capsule's authorized mutation scope.",
-      "evidence": [
-        "control-plane-v2-refactor -> 93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e",
-        "Added only architecture/control-plane-v2.md",
-        "Commit subject: Draft control plane v2 architecture"
-      ]
-    },
-    {
-      "summary": "Completed the first v2 architecture review and refined the architecture candidate without broadening into implementation.",
-      "evidence": [
-        "control-plane-v2-refactor -> 07075963f2d56f1bf76d562de3f6a6dc0d16c43d",
-        "Only architecture/control-plane-v2.md differs from the original main baseline."
-      ]
-    },
-    {
-      "summary": "Created the concrete v2 implementation plan after the reviewed architecture baseline.",
-      "evidence": [
-        "control-plane-v2-refactor -> 5a7a4fa331a25568490ead42156dea1f2a5c52b6",
-        "Added architecture/control-plane-v2-implementation.md",
-        "Implementation plan preserves v1 compatibility, stages v2 schema/tool changes behind gates, and keeps PADataset/project repositories untouched."
-      ]
-    },
-    {
-      "summary": "Completed implementation-plan review and opened only Phase 2 compatibility-scaffolding mutation scope.",
-      "evidence": [
-        "control-plane-v2-refactor -> 5000900823150676d356c54642efdefc560878ca",
-        "scripts/workspace_control.py remains out of scope for Phase 2."
-      ]
-    },
-    {
-      "summary": "Attempted an atomic Phase 2 Git-object transaction; the tool connection failed ambiguously before result reporting.",
-      "evidence": [
-        "The first low-level transaction returned RemoteProtocolError with no trustworthy completion result.",
-        "No retry was issued until actual branch state was inspected."
-      ]
-    },
-    {
-      "summary": "Inspected durable target state after the ambiguous Phase 2 failure and proved the target ref was unchanged.",
-      "evidence": [
-        "control-plane-v2-refactor remained exactly at 5000900823150676d356c54642efdefc560878ca",
-        "Compare from expected parent showed zero commits and zero changed paths."
-      ]
-    },
-    {
-      "summary": "Retried Phase 2 from the first incomplete safe stage using a smaller atomic tree/commit/ref transaction and published one coherent compatibility-scaffolding commit.",
-      "evidence": [
-        "control-plane-v2-refactor -> bb4292d65e858ec2fd527c8984a769e4bb87f955",
-        "Parent -> 5000900823150676d356c54642efdefc560878ca",
-        "One commit added exactly nine authorized Phase 2 paths."
-      ]
-    },
-    {
-      "summary": "Integrated the six shared Phase 3 contracts/root-routing files as one atomic v2-adapted commit.",
-      "evidence": [
-        "control-plane-v2-refactor -> 610c71902425adaf054fc9ba13deb21bba7cc7ce",
-        "Parent -> bb4292d65e858ec2fd527c8984a769e4bb87f955",
-        "Changed exactly README.md, three policy files, COURSE_TUTOR_ADAPTER.md, and TUTOR_EVALUATION.md."
-      ]
-    },
-    {
-      "summary": "Implemented Phase 4 v2 task-validation dispatch, deterministic task-render support, schema dispatch entrypoint, tests, and task-capsule documentation without changing preflight semantics.",
-      "evidence": [
-        "control-plane-v2-refactor -> 77c7355bbafeb674dd35b55bcfdb542d50c6079c",
-        "Phase 4 changed exactly scripts/workspace_control.py, schemas/task_capsule.schema.json, tests/test_workspace_control.py, procedures/task_capsule.md, and tasks/README.md."
-      ]
-    },
-    {
-      "summary": "Completed bounded Phase 4 runtime validation on Lambda against the exact pushed refactor checkpoint.",
-      "evidence": [
-        "PHASE4_RUNTIME_RESULT=PASS",
-        "VALIDATED_COMMIT=77c7355bbafeb674dd35b55bcfdb542d50c6079c",
-        "PASS: v2 capsule is explicitly refused by v1 handoff semantics.",
-        "Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified by this validation."
-      ]
-    },
-    {
-      "summary": "Implemented Phase 5 topology-aware preflight within the authorized target scope and inspected the exact changed-path set before runtime validation.",
-      "evidence": [
-        "control-plane-v2-refactor -> dc6980284abc17f4c0f96d90b01391e2c952879f",
-        "Phase 5 range 77c7355bbafeb674dd35b55bcfdb542d50c6079c...dc6980284abc17f4c0f96d90b01391e2c952879f changes exactly procedures/repo_preflight.md, scripts/workspace_control.py, and tests/test_workspace_control.py.",
-        "Existing preflight invocation defaults to local behavior; remote mode queries the registered remote directly; composed work is explicitly not modeled as one opaque preflight mode.",
-        "Tests cover local default compatibility, remote no-checkout inspection shape, expected-parent match/mismatch, mutation-scope refusal, missing write capability, non-writable repository refusal, and rejection of opaque composed topology."
-      ]
-    },
-    {
-      "summary": "Completed a bounded Phase 5 logic/runtime harness without modifying existing workspace worktrees.",
-      "evidence": [
-        "PHASE5_LOGIC_HARNESS=PASS",
-        "An isolated temporary bare Git remote exercised git ls-remote without checkout inspection.",
-        "Expected-parent mismatch required review; out-of-scope mutation and non-writable policy were blocked; write-capability/high-consequence conditions required review.",
-        "Current ChatGPT container could not resolve github.com, so exact pushed CLI execution against the real GitHub remote was not possible in this executor."
-      ]
-    },
-    {
-      "summary": "Completed exact-checkpoint Phase 5 integrated runtime validation and cleared the runtime gate.",
-      "evidence": [
-        "Validated exact target checkpoint dc6980284abc17f4c0f96d90b01391e2c952879f in an isolated temporary clone.",
-        "Python unit suite completed: Ran 18 tests; OK.",
-        "Remote topology preflight returned READY with no reasons and advertised control-plane-v2-refactor at dc6980284abc17f4c0f96d90b01391e2c952879f.",
-        "Remote preflight used the registered workspace-control remote, reported topology=remote and writable=true, and did not require an existing workspace checkout.",
-        "Validation explicitly reported PHASE5_RUNTIME_RESULT=PASS.",
-        "Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified."
-      ]
-    },
-    {
-      "summary": "Implemented Phase 6 topology-aware v2 handoff and receiver-specific EXECUTION_READY assessment within the authorized target scope.",
-      "evidence": [
-        "control-plane-v2-refactor -> f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9",
-        "Phase 6 range dc6980284abc17f4c0f96d90b01391e2c952879f...f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9 changes exactly procedures/task_capsule.md, scripts/workspace_control.py, tasks/README.md, and tests/test_workspace_control.py.",
-        "v1 handoff implementation is preserved behind schema-version dispatch.",
-        "v2 remote-only handoff uses durable verified remote state without requiring a local checkout or live remote query.",
-        "v2 local handoff rechecks checkout identity, branch, HEAD, clean state, and base ancestry.",
-        "v2 composed handoff requires a provable synchronization boundary.",
-        "EXECUTION_READY is a separate optional receiver assessment and does not alter HANDOFF_SAFE or its exit status.",
-        "No worktree-preparation implementation was introduced."
-      ]
-    },
-    {
-      "summary": "Completed exact-checkpoint Phase 6 integrated runtime validation and cleared the runtime gate.",
-      "evidence": [
-        "Validated exact target checkpoint f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9 in a clean isolated clone.",
-        "Full Python unit suite completed: Ran 26 tests; OK.",
-        "Live remote preflight returned READY and advertised control-plane-v2-refactor at f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9.",
-        "v1 handoff behavior returned HANDOFF_SAFE.",
-        "v2 remote-only, local, and composed handoff cases all returned HANDOFF_SAFE.",
-        "Composed workflow binding and synchronization boundary resolved successfully.",
-        "A HANDOFF_SAFE remote-only task independently returned NOT_EXECUTION_READY when local-runtime was marked missing.",
-        "Validation explicitly reported PHASE6_RUNTIME_RESULT=PASS.",
-        "Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified."
-      ]
-    },
-    {
-      "summary": "Implemented Phase 7 deterministic non-destructive worktree preparation within the authorized target scope.",
-      "evidence": [
-        "control-plane-v2-refactor -> 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386",
-        "Phase 7 range f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 changes exactly procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py.",
-        "worktree-prepare is read-only by default and returns CREATE_AVAILABLE for a safely creatable missing worktree until --create is explicitly supplied.",
-        "Creation uses only bounded git worktree add after verifying registry policy, source/target identity, clean state, branch/ref, remote advertised checkpoint, local commit availability, and branch-holder conflicts.",
-        "The implementation does not fetch, reset, stash, force-checkout, switch unrelated checkouts, create parent directories, or overwrite occupied targets.",
-        "Dirty, diverged, identity-mismatched, non-writable, occupied non-repository, and broken-symlink target cases stop explicitly.",
-        "After any git worktree add attempt, actual target state is re-inspected; failed/ambiguous creation is returned as NEEDS_REVIEW without cleanup or blind retry.",
-        "Real temporary-Git tests cover read-only proposal, explicit creation, missing local branch creation, dirty source/target preservation, divergence refusal, policy refusal, occupied path/symlink refusal, and existing READY state."
-      ]
-    },
-    {
-      "summary": "Phase 7 runtime validation failed at 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386; inspected the failure before retrying or further implementation.",
-      "evidence": [
-        "Exact isolated checkout matched 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 and was clean.",
-        "The unit suite ran 36 tests and failed exactly one test: WorktreePrepareTests.test_explicit_create_may_create_missing_local_branch_at_exact_sha.",
-        "The failing assertion was EXIT_REVIEW (10) instead of EXIT_READY (0).",
-        "Validation stopped at the unit-suite gate before the explicit Phase 7 CLI creation scenarios.",
-        "No existing workspace worktree was modified by the failed validation."
-      ]
-    },
-    {
-      "summary": "Repaired Phase 7 missing-local-branch detection within the existing authorized scope.",
-      "evidence": [
-        "control-plane-v2-refactor -> 84a7e67a8af2b701ab63829468c92e46221a72f9",
-        "Root cause: git show-ref --verify --hash returns exit 128 for an absent local branch, so the implementation misclassified a safe MISSING branch as ERROR.",
-        "query_local_branch now uses git rev-parse --verify --quiet refs/heads/<branch>^{commit}, which returns exit 1 for a missing ref and still resolves the exact commit when present.",
-        "Added an explicit regression test asserting a deleted local task branch is reported as MISSING rather than ERROR.",
-        "The cumulative Phase 7 range f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...84a7e67a8af2b701ab63829468c92e46221a72f9 still changes only procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py."
-      ]
-    },
-    {
-      "summary": "Completed exact-checkpoint Phase 7 integrated runtime validation.",
-      "evidence": [
-        "Validated repaired checkpoint 84a7e67a8af2b701ab63829468c92e46221a72f9.",
-        "37 unit tests passed.",
-        "CREATE_AVAILABLE, explicit READY creation, existing READY, dirty refusal/preservation, and divergence refusal all passed.",
-        "PHASE7_RUNTIME_RESULT=PASS.",
-        "No existing workspace worktree was modified."
-      ]
-    },
-    {
-      "summary": "Implemented Phase 8 workflow descriptor v1 validation within the authorized target scope.",
-      "evidence": [
-        "control-plane-v2-refactor -> f021956b398d3356337f489c59deaa83182d81ba",
-        "Phase 8 range 84a7e67a8af2b701ab63829468c92e46221a72f9...f021956b398d3356337f489c59deaa83182d81ba changes exactly seven authorized files: workflow schema, workflow validator/CLI, workflow procedure, workflow template, two negative fixtures, and tests.",
-        "workflow-validate performs semantic validation and exact Git binding resolution.",
-        "Live task state is explicitly rejected from reusable workflow descriptors.",
-        "Stage dependencies must reference an earlier declared stage, preventing self/forward/unknown dependencies in the ordered descriptor.",
-        "Project-local ownership is enforced by matching the descriptor checkout origin to owner.repository.",
-        "Exact binding requires a tracked descriptor unchanged from HEAD and returns repository, repository-relative path, checkpoint SHA, and content/blob SHA.",
-        "Owner context and entry-route paths must exist at the same durable repository HEAD.",
-        "Detailed artifact-lifecycle semantics remain deferred to Phase 9."
-      ]
-    },
-    {
-      "summary": "Completed exact-checkpoint Phase 8 integrated runtime validation.",
-      "evidence": [
-        "Validated checkpoint f021956b398d3356337f489c59deaa83182d81ba.",
-        "46 unit tests passed.",
-        "Positive fixture and template resolved exact durable Git bindings.",
-        "Live task state and invalid forward dependencies were rejected for the intended reasons.",
-        "PHASE8_RUNTIME_RESULT=PASS.",
-        "No existing workspace worktree was modified."
-      ]
-    },
-    {
-      "summary": "Integrated the proven Codex adapter layer as thin v2 discovery/routing files.",
-      "evidence": [
-        "control-plane-v2-refactor -> b8aa52e242a07e6aa2036516e401864991183ad2",
-        "Phase 9 range f021956b398d3356337f489c59deaa83182d81ba...b8aa52e242a07e6aa2036516e401864991183ad2 changes exactly AGENTS.md, .agents/skills/workspace-control/SKILL.md, adapters/codex/global/AGENTS.md, and procedures/codex_adapter.md.",
-        "Adapters route through README -> PORTABILITY_CONTRACT -> OPERATOR_WORKFLOW -> relevant procedure, plus task capsules/workflow descriptors when applicable.",
-        "No CLI, schema, registry, task-capsule, workflow-descriptor, or project repository file changed.",
-        "The adapter files explicitly identify themselves as discovery/routing aids rather than policy/domain/task authority.",
-        "All canonical routes referenced by the adapters exist independently of the adapter layer.",
-        "Removing the four adapter files would leave README, portability/operator policy, registry, procedures, task/workflow state, and deterministic CLI intact."
-      ]
-    },
-    {
-      "summary": "Completed Phase 9 read-only Codex adapter discovery validation.",
-      "evidence": [
-        "Actual Codex reported PHASE9_CODEX_DISCOVERY_RESULT=PASS.",
-        "VALIDATED_COMMIT=b8aa52e242a07e6aa2036516e401864991183ad2.",
-        "No target implementation change was required after the adapter integration checkpoint."
+        "tasks/evidence/control-plane-v2-refactor-v1-final.json preserves the complete v1 coordination history."
       ]
     }
   ],
   "artifacts": [
     {
-      "path": "tasks/active/control-plane-v2-refactor.json",
-      "state": "coordination capsule stored on control-plane-v2-coordination",
+      "path": "tasks/evidence/control-plane-v2-refactor-v1-final.json",
+      "state": "durable",
+      "role": "coordination-history",
+      "origin": "control-plane-v2-coordination@64908850a72101843ec5c7445989b894e2aa2f25",
+      "persistence": "git-tracked",
+      "regeneration": "none",
+      "review_requirement": null,
       "evidence": [
-        "The capsule is intentionally stored outside the target refactor branch to avoid self-referential checkpoint state."
-      ]
-    },
-    {
-      "path": "architecture/control-plane-v2.md",
-      "state": "draft created and pushed; awaiting architecture review before broader implementation",
-      "evidence": [
-        "control-plane-v2-refactor commit 93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e",
-        "The draft defines the v2 layers, 15 core terms, routing/return-routing, human gates, workflow-descriptor/task-capsule separation, deterministic project entrypoints, worktree preparation, remote-aware preflight, artifact lifecycle, consistency validation, capability evidence, ordering, failure/idempotency, regression evidence, and non-goals."
-      ]
-    },
-    {
-      "path": "tasks/active/control-plane-v2-refactor.md",
-      "state": "derived human-readable handoff view on coordination branch",
-      "evidence": [
-        "Created as a convenience view only; JSON capsule plus verified Git/runtime evidence remain authoritative.",
-        "v2 architecture now requires deterministic regeneration of this handoff view after material capsule changes."
-      ]
-    },
-    {
-      "path": "architecture/control-plane-v2-implementation.md",
-      "state": "draft implementation plan created and pushed; awaiting plan review before Phase 2 compatibility scaffolding",
-      "evidence": [
-        "control-plane-v2-refactor commit 5a7a4fa331a25568490ead42156dea1f2a5c52b6"
+        "Exact final v1 active-capsule content was copied before v2 transition."
       ]
     }
   ],
   "validation": [
     {
-      "check": "Preserved evidence branches verified before v2 initialization",
+      "check": "Phase 10 regression suite",
       "result": "PASS",
       "evidence": [
-        "GitHub branch endpoints matched the expected main, shared bridge, Codex target, and Phase-4 coordination SHAs."
+        "All 16 architecture regression items recorded PASS.",
+        "MILCOM real-workflow reference regression ended PHASE10_MILCOM_RESULT=PASS."
       ]
     },
     {
-      "check": "New v2 branches created from exact baseline",
+      "check": "Phase 11 exact integration diff",
       "result": "PASS",
       "evidence": [
-        "Both control-plane-v2-refactor and control-plane-v2-coordination were created from cb8368cd50de2d364c2aade8843276aab0b02420."
+        "36 commits, 31 files, behind by 0 from the original v2 baseline.",
+        "All changed paths map to previously reviewed phase scopes."
       ]
     },
     {
-      "check": "V2 architecture specification reviewed",
+      "check": "Phase 11 v1 compatibility",
       "result": "PASS",
       "evidence": [
-        "architecture/control-plane-v2.md reviewed and refined through control-plane-v2-refactor@07075963f2d56f1bf76d562de3f6a6dc0d16c43d",
-        "Review resolved authority-owner vs execution-owner ambiguity, workflow version binding, checkpoint bundles, HANDOFF_SAFE vs EXECUTION_READY, artifact lifecycle overlap, generated handoff authority, secret handling, consequence classes, and coordination-state placement."
+        "Preserved v1 schema is byte-identical to the original pre-v2 schema.",
+        "v1 dispatch and handoff compatibility were exercised in prior exact-checkpoint runtime validation."
       ]
     },
     {
-      "check": "Integrated v2 implementation validated",
-      "result": "PASS",
-      "evidence": [
-        "Frozen final implementation checkpoint is b8aa52e242a07e6aa2036516e401864991183ad2.",
-        "Phases 2-9 each passed their exact changed-path/source gates and required runtime or adapter validation.",
-        "Phase 10 generic and real-workflow regressions passed without requiring any repair to the final target checkpoint."
-      ]
+      "check": "Phase 11 v2 HANDOFF_SAFE",
+      "result": "NOT_RUN",
+      "evidence": []
     },
     {
-      "check": "Cross-executor regression suite completed",
-      "result": "PASS",
-      "evidence": [
-        "Architecture regression matrix items 1-16 are all recorded PASS.",
-        "ChatGPT -> Codex and Codex -> ChatGPT handoff evidence exists.",
-        "Local runtime, direct GitHub tool, human judgment, worktree, pinned workflow, and real MILCOM project workflow paths were exercised."
-      ]
+      "check": "Phase 11 Codex both-direction handoff rerun",
+      "result": "NOT_RUN",
+      "evidence": []
     },
     {
-      "check": "Initial v2 architecture draft created within authorized target scope",
-      "result": "PASS",
-      "evidence": [
-        "Target branch changed only by architecture/control-plane-v2.md at 93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e."
-      ]
-    },
-    {
-      "check": "Architecture branch remained within authorized review scope",
-      "result": "PASS",
-      "evidence": [
-        "Compare cb8368cd50de2d364c2aade8843276aab0b02420...07075963f2d56f1bf76d562de3f6a6dc0d16c43d shows only architecture/control-plane-v2.md changed."
-      ]
-    },
-    {
-      "check": "Implementation plan created within authorized planning scope",
-      "result": "PASS",
-      "evidence": [
-        "Only architecture/control-plane-v2.md and architecture/control-plane-v2-implementation.md are authorized target paths at this stage."
-      ]
-    },
-    {
-      "check": "V2 implementation plan reviewed",
-      "result": "PASS",
-      "evidence": [
-        "architecture/control-plane-v2-implementation.md reviewed through control-plane-v2-refactor@5000900823150676d356c54642efdefc560878ca",
-        "Review preserved exact shared-contract pins, optional workflow descriptors, deferred project adoption, and derived handoff synchronization."
-      ]
-    },
-    {
-      "check": "Phase 2 exact changed-path set",
-      "result": "PASS",
-      "evidence": [
-        "Compare 5000900823150676d356c54642efdefc560878ca...bb4292d65e858ec2fd527c8984a769e4bb87f955 reports exactly the three schema paths, one test file, and five fixture files authorized for Phase 2."
-      ]
-    },
-    {
-      "check": "V1 schema compatibility copy",
-      "result": "PASS",
-      "evidence": [
-        "schemas/task_capsule.schema.json and schemas/task_capsule.v1.schema.json both resolve to Git blob 40fa76125f61c0ad8e11a10a45347dbb36c63a84 at bb4292d65e858ec2fd527c8984a769e4bb87f955."
-      ]
-    },
-    {
-      "check": "Phase 2 JSON schema/fixture parse",
-      "result": "PASS",
-      "evidence": [
-        "All three schema files and all five JSON fixtures were independently reread from bb4292d65e858ec2fd527c8984a769e4bb87f955 and parsed successfully."
-      ]
-    },
-    {
-      "check": "Python Phase 2 unittest execution",
-      "result": "PASS",
-      "evidence": [
-        "The Phase 4 bounded runtime validation executed tests/test_workspace_control.py successfully as part of PHASE4_RUNTIME_RESULT=PASS at 77c7355bbafeb674dd35b55bcfdb542d50c6079c."
-      ]
-    },
-    {
-      "check": "Phase 3 exact changed-path set",
-      "result": "PASS",
-      "evidence": [
-        "Compare bb4292d65e858ec2fd527c8984a769e4bb87f955...610c71902425adaf054fc9ba13deb21bba7cc7ce reports exactly six authorized contract/routing files."
-      ]
-    },
-    {
-      "check": "Phase 3 stale executor/bridge language scan",
-      "result": "PASS",
-      "evidence": [
-        "All six Phase 3 files were reread from 610c71902425adaf054fc9ba13deb21bba7cc7ce.",
-        "No stale 'Codex vs ChatGPT-assisted human' framing, bridge-v0.1 heading, or old 'Execution modes' heading remained."
-      ]
-    },
-    {
-      "check": "Phase 3 project-domain authority boundary",
-      "result": "PASS",
-      "evidence": [
-        "README and operator contract explicitly preserve project-local truth.",
-        "Tutoring contract explicitly states course repositories retain authority for syllabus, assignments, instructor material, notation, deliverables, grading rules, and topic structure."
-      ]
-    },
-    {
-      "check": "Phase 4 exact changed-path set",
-      "result": "PASS",
-      "evidence": [
-        "Compare 610c71902425adaf054fc9ba13deb21bba7cc7ce...77c7355bbafeb674dd35b55bcfdb542d50c6079c reports exactly five intended Phase 4 files."
-      ]
-    },
-    {
-      "check": "Phase 4 source structure inspection",
-      "result": "PASS",
-      "evidence": [
-        "Pushed script contains explicit v1 validator, v2 validator, schema-version dispatcher, task-render implementation/parser wiring, and an explicit guard preventing v2 capsules from being assessed with v1 handoff semantics."
-      ]
-    },
-    {
-      "check": "Phase 4 Python syntax/unit/runtime validation",
-      "result": "PASS",
-      "evidence": [
-        "Lambda runtime validation completed with PHASE4_RUNTIME_RESULT=PASS.",
-        "Validated exact commit 77c7355bbafeb674dd35b55bcfdb542d50c6079c.",
-        "v2 capsule was explicitly refused by v1 handoff semantics, proving the compatibility guard executes correctly.",
-        "Validation did not switch, clean, reset, stash, or modify existing workspace worktrees."
-      ]
-    },
-    {
-      "check": "Phase 4 v1/v2 handoff compatibility guard",
-      "result": "PASS",
-      "evidence": [
-        "Runtime result explicitly reported: PASS: v2 capsule is explicitly refused by v1 handoff semantics.",
-        "This confirms v2 task state is not silently interpreted under v1 local-only handoff rules."
-      ]
-    },
-    {
-      "check": "Phase 4 runtime non-interference with existing worktrees",
-      "result": "PASS",
-      "evidence": [
-        "Lambda reported that existing workspace worktrees were not switched, cleaned, reset, stashed, or modified."
-      ]
-    },
-    {
-      "check": "Phase 5 exact changed-path set",
-      "result": "PASS",
-      "evidence": [
-        "Compare 77c7355bbafeb674dd35b55bcfdb542d50c6079c...dc6980284abc17f4c0f96d90b01391e2c952879f reports exactly procedures/repo_preflight.md, scripts/workspace_control.py, and tests/test_workspace_control.py.",
-        "All changed paths are inside the capsule's authorized Phase 5 mutation scope."
-      ]
-    },
-    {
-      "check": "Phase 5 topology/source contract inspection",
-      "result": "PASS",
-      "evidence": [
-        "Default preflight topology is local and the existing local state/payload path remains in place.",
-        "Remote inspection calls git ls-remote against the registered remote URL and does not inspect a checkout/worktree.",
-        "Parser permits only local or remote topology; composed execution is documented as separate remote/local preflights plus a synchronization boundary."
-      ]
-    },
-    {
-      "check": "Phase 5 bounded logic harness",
-      "result": "PASS",
-      "evidence": [
-        "PHASE5_LOGIC_HARNESS=PASS against an isolated temporary bare remote.",
-        "Policy-edge harness also passed non-writable refusal and rejection of opaque composed preflight.",
-        "No existing workspace worktree was switched, cleaned, reset, stashed, or modified by these harnesses."
-      ]
-    },
-    {
-      "check": "Phase 5 exact-checkpoint integrated runtime validation",
-      "result": "PASS",
-      "evidence": [
-        "Exact isolated validation checkout resolved ACTUAL_HEAD=dc6980284abc17f4c0f96d90b01391e2c952879f.",
-        "tests/test_workspace_control.py completed 18 tests with OK.",
-        "Documented remote preflight returned result=READY, reasons=[], advertised status=FOUND, and advertised SHA=dc6980284abc17f4c0f96d90b01391e2c952879f.",
-        "Remote preflight confirmed surface_write_ready=true, consequence=reversible, and the exact Phase 5 allowed/proposed path set.",
-        "Validation reported PHASE5_RUNTIME_RESULT=PASS and explicitly confirmed non-interference with existing workspace worktrees."
-      ]
-    },
-    {
-      "check": "Phase 6 exact changed-path set",
-      "result": "PASS",
-      "evidence": [
-        "Compare dc6980284abc17f4c0f96d90b01391e2c952879f...f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9 reports exactly procedures/task_capsule.md, scripts/workspace_control.py, tasks/README.md, and tests/test_workspace_control.py.",
-        "All changed paths are inside the capsule's authorized Phase 6 mutation scope."
-      ]
-    },
-    {
-      "check": "Phase 6 source/contract inspection",
-      "result": "PASS",
-      "evidence": [
-        "v1 handoff function remains intact and schema_version 1 dispatches to it.",
-        "Remote-only v2 handoff does not call local checkout inspection or transient live-remote query.",
-        "Local and composed v2 handoff paths are topology-specific.",
-        "Receiver readiness is represented separately as execution_readiness with NOT_ASSESSED, EXECUTION_READY, or NOT_EXECUTION_READY.",
-        "Regression tests cover v1 compatibility, remote-only no-local behavior, local handoff, composed synchronization, workflow binding failure, missing synchronization boundary, and HANDOFF_SAFE with NOT_EXECUTION_READY.",
-        "No worktree-prepare command or Phase 7 implementation was added."
-      ]
-    },
-    {
-      "check": "Phase 6 exact-checkpoint integrated runtime validation",
-      "result": "PASS",
-      "evidence": [
-        "Exact isolated checkout resolved ACTUAL_HEAD=f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9.",
-        "tests/test_workspace_control.py completed 26 tests with OK.",
-        "Live remote preflight returned result=READY, reasons=[], advertised status=FOUND, and advertised SHA=f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9.",
-        "v1 compatibility and v2 remote-only/local/composed handoff assertions all passed.",
-        "Workflow checkpoint binding and composed synchronization boundary assertions passed.",
-        "HANDOFF_SAFE remained independent from receiver-specific EXECUTION_READY.",
-        "Validation reported PHASE6_RUNTIME_RESULT=PASS and explicit non-interference with existing workspace worktrees."
-      ]
-    },
-    {
-      "check": "Phase 7 exact changed-path set",
-      "result": "PASS",
-      "evidence": [
-        "Compare f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...84a7e67a8af2b701ab63829468c92e46221a72f9 reports exactly procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py.",
-        "All changed paths remain inside the capsule's authorized Phase 7 mutation scope."
-      ]
-    },
-    {
-      "check": "Phase 7 source/contract inspection",
-      "result": "PASS",
-      "evidence": [
-        "worktree-prepare command is registered and requires an absolute target path, branch, and exact checkpoint.",
-        "Missing safe worktrees return CREATE_AVAILABLE unless --create is explicitly supplied.",
-        "The worktree-preparation implementation contains no fetch, reset, stash, or checkout normalization command.",
-        "Only git worktree add is used for the bounded creation mutation.",
-        "Post-failure and post-success target state are explicitly re-inspected.",
-        "Occupied broken symlink targets are detected instead of being hidden by path resolution.",
-        "Real Git tests cover the Phase 7 creation, dirty, divergence, identity, and policy gates."
-      ]
-    },
-    {
-      "check": "Phase 7 exact-checkpoint integrated runtime validation",
-      "result": "PASS",
-      "evidence": [
-        "Exact isolated checkout resolved ACTUAL_HEAD=84a7e67a8af2b701ab63829468c92e46221a72f9.",
-        "Full Python unit suite completed 37 tests with OK.",
-        "Read-only worktree preparation returned CREATE_AVAILABLE without creating the target.",
-        "Explicit creation returned READY at the exact requested branch and checkpoint.",
-        "Existing worktree reassessment returned READY.",
-        "Dirty target returned BLOCKED_DIRTY and preserved the dirty marker.",
-        "Divergence regression passed without moving the local branch.",
-        "Target HEAD and remote HEAD both matched 84a7e67a8af2b701ab63829468c92e46221a72f9.",
-        "PHASE7_RUNTIME_RESULT=PASS.",
-        "Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified."
-      ]
-    },
-    {
-      "check": "Phase 7 runtime validation at 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386",
-      "result": "FAIL",
-      "evidence": [
-        "Exact checkpoint and isolated clone preconditions passed.",
-        "Full unit suite result: Ran 36 tests; FAILED (failures=1).",
-        "Failure: test_explicit_create_may_create_missing_local_branch_at_exact_sha expected EXIT_READY=0 but observed 10.",
-        "No explicit worktree-prepare CLI creation scenario ran after the unit-suite failure."
-      ]
-    },
-    {
-      "check": "Phase 7 root-cause and repair inspection",
-      "result": "PASS",
-      "evidence": [
-        "Independent Git behavior reproduction confirmed show-ref --verify --hash returns exit 128 for an absent local branch.",
-        "Independent Git behavior reproduction confirmed rev-parse --verify --quiet returns exit 1 for an absent local branch.",
-        "A raw isolated Git worktree add -b <branch> <target> <expected-sha> succeeds when the local branch is absent, the remote branch exists, and the commit is locally available.",
-        "Repaired source maps exit 1 to MISSING and preserves other nonzero states as ERROR.",
-        "Regression test explicitly covers MISSING rather than ERROR for the absent local branch."
-      ]
-    },
-    {
-      "check": "Phase 8 exact changed-path set",
-      "result": "PASS",
-      "evidence": [
-        "Compare 84a7e67a8af2b701ab63829468c92e46221a72f9...f021956b398d3356337f489c59deaa83182d81ba reports exactly procedures/workflow_descriptor.md, schemas/workflow_descriptor.v1.schema.json, scripts/workspace_control.py, templates/workflow_descriptor.v1.json, tests/fixtures/workflow_descriptor_v1_invalid_dependency.json, tests/fixtures/workflow_descriptor_v1_live_state.json, and tests/test_workspace_control.py.",
-        "All changed paths are inside the capsule's authorized Phase 8 mutation scope."
-      ]
-    },
-    {
-      "check": "Phase 8 source/contract inspection",
-      "result": "PASS",
-      "evidence": [
-        "workflow-validate parser/command and semantic validator are present.",
-        "Live execution-state fields are explicitly rejected.",
-        "Stage dependency order is enforced.",
-        "Binding resolution checks registered owner origin, tracked descriptor path, exact repository HEAD, durable descriptor blob, current-content equality, and durable owner/entry routes.",
-        "Tests cover positive semantics, template semantics, live-state rejection, dependency rejection, unsafe owner context path, CLI registration, exact Git binding, uncommitted descriptor rejection, missing durable owner context, and owner-origin mismatch.",
-        "No Phase 9 artifact-lifecycle command/behavior was introduced."
-      ]
-    },
-    {
-      "check": "Phase 8 exact-checkpoint integrated runtime validation",
-      "result": "PASS",
-      "evidence": [
-        "Exact isolated checkout and advertised remote both resolved f021956b398d3356337f489c59deaa83182d81ba.",
-        "Full Python unit suite completed 46 tests with OK.",
-        "Positive workflow fixture validated with exact checkpoint and content/blob binding.",
-        "Workflow template validated with exact checkpoint and content/blob binding.",
-        "Live task state fixture failed explicitly with live task state forbidden: status.",
-        "Invalid dependency fixture failed explicitly because the dependency did not name an earlier declared stage.",
-        "Validation was read-only and did not modify existing workspace worktrees.",
-        "PHASE8_RUNTIME_RESULT=PASS."
-      ]
-    },
-    {
-      "check": "Phase 9 exact changed-path set",
-      "result": "PASS",
-      "evidence": [
-        "Compare f021956b398d3356337f489c59deaa83182d81ba...b8aa52e242a07e6aa2036516e401864991183ad2 reports exactly the four authorized Codex adapter paths.",
-        "No executor-neutral implementation or authority file changed."
-      ]
-    },
-    {
-      "check": "Phase 9 adapter thinness/portability inspection",
-      "result": "PASS",
-      "evidence": [
-        "Repository AGENTS, Skill, global adapter, and adapter procedure all route to canonical tracked sources.",
-        "README.md, PORTABILITY_CONTRACT.md, OPERATOR_WORKFLOW.md, repos.json, workspace/preflight/worktree/task/workflow procedures, and scripts/workspace_control.py all exist independently at the Phase 9 checkpoint.",
-        "No Codex-only workflow semantics were introduced.",
-        "The canonical workflow remains conceptually operable if the adapter layer is removed."
-      ]
-    },
-    {
-      "check": "Phase 9 read-only Codex adapter discovery validation",
-      "result": "PASS",
-      "evidence": [
-        "Fresh actual Codex read-only discovery validation reported PHASE9_CODEX_DISCOVERY_RESULT=PASS.",
-        "Codex validated exact checkpoint b8aa52e242a07e6aa2036516e401864991183ad2.",
-        "The Phase 9 prompt prohibited file, worktree, branch, commit, push, clean/reset/stash/stage/fetch, and task-capsule mutation.",
-        "The adapter thinness/portability static gate had already proven the executor-neutral workflow exists independently of the adapter layer."
-      ]
-    },
-    {
-      "check": "Phase 10 Stage A remote-only DIRECT_TOOL mutation and reread",
-      "result": "PASS",
-      "evidence": [
-        "Created tasks/evidence/phase10-remote-only.json by a bounded remote-only GitHub commit on control-plane-v2-coordination.",
-        "The coordination ref advanced from d4356f6782aa50d2fe4abfbb05d77235d90d6695 to eef2b44ae78b53f505a564dd6e43b436cf737470 with force=false.",
-        "Reread the evidence file from exact commit eef2b44ae78b53f505a564dd6e43b436cf737470 and verified blob 0631f6fc1d2a4a656af7a21b7e86c41c9522a504.",
-        "The frozen target branch remained unchanged at b8aa52e242a07e6aa2036516e401864991183ad2.",
-        "A second inspection found the exact expected evidence/ref state and correctly selected NO_MUTATION_REQUIRED rather than writing again."
-      ]
-    },
-    {
-      "check": "Phase 10 regression matrix inventory",
-      "result": "PASS",
-      "evidence": [
-        "1 remote-only DIRECT_TOOL mutation and reread: PASS in Phase 10 Stage A.",
-        "2 DIRECT_TOOL -> local runtime -> DIRECT_TOOL composition: PASS from repeated exact-checkpoint implementation -> isolated local validation -> durable direct-tool continuation in Phases 6-8.",
-        "3 mechanical browser ingress -> DIRECT_TOOL recovery: PASS from uploaded terminal validation evidence followed by exact GitHub state recovery and continuation.",
-        "4 human judgment suspension -> resume: PASS from Phase 10 Stage B explicit APPROVE gate and resume.",
-        "5 safe worktree creation/preparation: PASS from Phase 7 exact runtime validation.",
-        "6 dirty/diverged worktree refusal: PASS from Phase 7 exact runtime validation.",
-        "7 verified no-op/idempotent re-entry: PASS in Phase 10 Stage A after reread selected NO_MUTATION_REQUIRED.",
-        "8 ambiguous mutation -> state inspection before retry: PASS from Phase 8 partial multi-file create ambiguity; actual branch state was reread and only the first incomplete file was continued.",
-        "9 ChatGPT -> Codex handoff: PASS from Phase 9 read-only Codex validation prompt and successful exact-checkpoint recovery.",
-        "10 Codex -> ChatGPT handoff: PASS from returned PHASE9_CODEX_DISCOVERY_RESULT=PASS followed by direct durable-state recovery.",
-        "11 remote-only HANDOFF_SAFE: PASS from Phase 6 exact runtime validation.",
-        "12 local-runtime HANDOFF_SAFE: PASS from Phase 6 exact runtime validation.",
-        "13 workflow resume from first incomplete stage: PASS from Phase 10 Stage B deterministic recovery of local_runtime after the human gate.",
-        "14 project-owned validation failure preventing dependent continuation: PASS from failed Phase 7 exact runtime gate, which prevented Phase 8 until root-cause repair and revalidation.",
-        "15 task recovery from an exact pinned workflow descriptor after the workflow branch has advanced: PASS from the dedicated Phase 10 branch-advance recovery regression.",
-        "16 generated human-readable handoff regeneration after capsule state changes: PASS from the dedicated Phase 10 regeneration after the matrix capsule update.",
-        "All 16 required architecture regression items are now supported by recorded Phase 4-10 evidence; no matrix item remains pending."
-      ]
-    },
-    {
-      "check": "Phase 10 exact pinned-workflow recovery after branch advance",
-      "result": "PASS",
-      "evidence": [
-        "Created workflow version A at coordination commit 61b23bebab77e98feb997d16916e2310f5c8acea with blob 125f2f237c20bba366ccb6114f92603fff1f992a.",
-        "Created a task-binding evidence record pinning repository, path, commit A, and blob A.",
-        "Advanced the live coordination branch workflow file to version B at da16f0726b7e3a9d026c16fef58e447d41bc6ea0 with a different blob aee1ee2e8f67f987fdd8f621c374bd035f1587cb.",
-        "Reread the task record from the advanced branch, fetched the descriptor from its pinned old commit, and verified the recovered blob exactly matched the pinned content_sha.",
-        "Current branch content differed from the pinned descriptor, proving recovery used the exact historical version rather than silently migrating to the live branch.",
-        "The target implementation remained frozen at b8aa52e242a07e6aa2036516e401864991183ad2."
-      ]
-    },
-    {
-      "check": "Phase 10 generated human-readable handoff regeneration",
-      "result": "PASS",
-      "evidence": [
-        "After the Phase 10 regression-matrix capsule update, regenerated tasks/active/control-plane-v2-refactor.md.",
-        "The derived handoff reflected IN_PROGRESS Phase 10 state, frozen target checkpoint, Stage A PASS, and the then-pending generic regression gaps.",
-        "The generated handoff remained explicitly subordinate to the authoritative JSON capsule and verified Git/runtime evidence."
-      ]
-    },
-    {
-      "check": "Phase 10 Stage B local/worktree/runtime regression",
-      "result": "PASS",
-      "evidence": [
-        "Exact frozen target checkpoint b8aa52e242a07e6aa2036516e401864991183ad2 loaded in an isolated source clone.",
-        "Read-only worktree preparation returned CREATE_AVAILABLE and did not create the target.",
-        "Explicit worktree creation returned READY at the exact frozen checkpoint with a clean isolated worktree.",
-        "Local topology capsule validated and returned HANDOFF_SAFE.",
-        "Composed topology capsule validated in SUSPENDED state and returned HANDOFF_SAFE with a ready synchronization boundary.",
-        "Human judgment gate required and received explicit APPROVE.",
-        "After approval, human_gate transitioned to VALIDATED and deterministic recovery selected local_runtime as the first incomplete stage.",
-        "The bounded local runtime observation executed at the exact frozen checkpoint with a clean worktree.",
-        "Final composed state validated as CHECKPOINTED and HANDOFF_SAFE with no remaining work or blockers.",
-        "All operations occurred under a temporary validation root; no existing workspace worktree was switched, cleaned, reset, stashed, staged, or modified.",
-        "PHASE10_STAGEB_RESULT=PASS."
-      ]
-    },
-    {
-      "check": "Phase 10 MILCOM reference workflow lineage",
-      "result": "PASS",
-      "evidence": [
-        "PADataset project-local route was recovered from README.md and presentations/milcom2026/README.md on milcom-presentation.",
-        "Current reference head is adamtrott78/PADataset milcom-presentation@108d7840918751153253671af49c3451d8e6fe96.",
-        "Canonical production route is MILCOM_TEMPLATE_INTEGRATION.md -> SVG_PRODUCTION_SPEC.md -> PRESENTATION_PLAN.md -> SCRIPT.md, with project-local authority preserved.",
-        "Commit 427086605dfefc9e2ad2e672a3a5e7e08a20fe5c integrated the official MILCOM 2026 template.",
-        "Commit 746e10ec6c1004127d8b4a9e3e730c90b045e9ba corrected the MILCOM presentation route numbering.",
-        "Commit 162bdb5517829e3187473cccacd56583a7716941 performed bounded post-template visual QA repairs on Slides 5 and 12; its own README note states no scientific values, narrative claims, template branding, or other slide layouts changed.",
-        "Commit 108d7840918751153253671af49c3451d8e6fe96 added deterministic final PowerPoint assembly while preserving the project-local presentation workflow.",
-        "Fresh exact-head rebuild/render, human visual approval, and final PPTX assembly/structural verification: PASS."
-      ]
-    },
-    {
-      "check": "Phase 10 MILCOM fresh rebuild harness attempt",
-      "result": "FAIL",
-      "evidence": [
-        "Exact PADataset milcom-presentation checkpoint 108d7840918751153253671af49c3451d8e6fe96 loaded cleanly.",
-        "All required tools and Python dependencies were present.",
-        "Project-owned build_milcom26_svg_slides.py completed successfully and rebuilt all 12 template-integrated SVGs.",
-        "The harness then stopped before the human visual gate because it incorrectly required zero tracked diff after regeneration.",
-        "The rebuild changed exactly the 12 generated slide SVGs in the disposable clone.",
-        "PADataset presentations/milcom2026/slides/README.md explicitly states that committed SVG files predate the final template pass until the wrapper is executed and generated slides are reviewed/committed.",
-        "Commit 162bdb5517829e3187473cccacd56583a7716941 changed the slide builder and slide README for bounded visual repairs but did not commit regenerated slide SVGs; commit 108d7840918751153253671af49c3451d8e6fe96 added final assembly only.",
-        "Therefore the zero-diff assertion was a regression-harness defect, not a PADataset workflow defect or workspace-control implementation defect."
-      ]
-    },
-    {
-      "check": "Phase 10 MILCOM fresh rebuild and human visual QA",
-      "result": "PASS",
-      "evidence": [
-        "Exact PADataset milcom-presentation checkpoint 108d7840918751153253671af49c3451d8e6fe96 loaded cleanly in a disposable clone.",
-        "Project-owned build_milcom26_svg_slides.py rebuilt all 12 template-integrated SVGs successfully.",
-        "Generated-artifact boundary check passed: only the twelve presentations/milcom2026/slides/slide*.svg outputs differed in the disposable clone.",
-        "All twelve SVGs rendered to fresh 1920x1080 PNGs.",
-        "A fresh 4x3 contact sheet was created at /home/atrott/adamArchives/Adam/MILCOM2026_PHASE10_REFERENCE.OwCS4r/contact_sheet.png.",
-        "The user visually reviewed the fresh contact sheet and explicitly approved proceeding.",
-        "workspace-control target remained frozen at b8aa52e242a07e6aa2036516e401864991183ad2."
-      ]
-    },
-    {
-      "check": "Phase 10 MILCOM final PPTX assembly and structural verification",
-      "result": "PASS",
-      "evidence": [
-        "Approved PNG set contained exactly 12 1920x1080 renders from PADataset 108d7840918751153253671af49c3451d8e6fe96.",
-        "Disposable assembler checkout resolved local and remote milcom-presentation to 108d7840918751153253671af49c3451d8e6fe96.",
-        "Project-owned assemble_milcom26_pptx.py reported PASS: 12 slides, 16:9, one exact full-slide render per slide, canonical speaker notes on Slides 1-12.",
-        "Independent structural check separately confirmed 12 slides, 16:9, one exact full-slide picture per slide, and nonempty notes on all 12 slides.",
-        "Disposable PADataset checkout remained clean, the remote branch remained unchanged, and the PPTX was written only outside the Git worktree.",
-        "Final PPTX SHA-256: f7806202661086b18f8ec4f0e991dd84d71e744515bdb1e66f8d3d15188895f7.",
-        "PHASE10_MILCOM_RESULT=PASS."
-      ]
-    },
-    {
-      "check": "Phase 11 exact integration diff review",
-      "result": "PASS",
-      "evidence": [
-        "Compare cb8368cd50de2d364c2aade8843276aab0b02420...b8aa52e242a07e6aa2036516e401864991183ad2 is ahead by 36 commits, behind by 0.",
-        "The cumulative integration diff contains 31 files.",
-        "Every changed path maps to an already recorded Phase 1-9 exact-scope gate: architecture/plan; compatibility schemas/fixtures/tests; executor-neutral contracts/routes; v2 task/handoff implementation; remote preflight; worktree preparation; workflow descriptor validation; and four thin Codex adapter files.",
-        "No PADataset/course-project file is part of the workspace-control target diff.",
-        "Phase 10 required no repair to the frozen target checkpoint."
-      ]
-    },
-    {
-      "check": "Phase 11 v1 compatibility review",
-      "result": "PASS",
-      "evidence": [
-        "Original baseline schemas/task_capsule.schema.json blob at cb8368cd50de2d364c2aade8843276aab0b02420 is 40fa76125f61c0ad8e11a10a45347dbb36c63a84.",
-        "Final schemas/task_capsule.v1.schema.json blob at b8aa52e242a07e6aa2036516e401864991183ad2 is exactly 40fa76125f61c0ad8e11a10a45347dbb36c63a84.",
-        "The final generic schemas/task_capsule.schema.json is intentionally a oneOf dispatcher to task_capsule.v1.schema.json and task_capsule.v2.schema.json.",
-        "v1 validator dispatch remains present in scripts/workspace_control.py.",
-        "Prior exact-checkpoint runtime evidence proved v1 handoff compatibility and the v2/v1 semantic guard.",
-        "No executable workspace-control changes occurred after the 46-test Phase 8 runtime suite; Phase 9 added only the four thin adapter files."
-      ]
+      "check": "Phase 11 explicit promotion decision",
+      "result": "NOT_RUN",
+      "evidence": []
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Preserve this completed v1 coordination history as immutable evidence.",
-    "Transition the active coordination capsule to v2 CHECKPOINTED state without changing the frozen target implementation.",
-    "Validate the v2 active capsule and HANDOFF_SAFE state.",
-    "Rerun both-direction Codex handoff against the exact v2 Phase 11 checkpoint.",
-    "Obtain explicit user decision to promote.",
-    "After every gate passes, perform and verify the reviewed promotion."
+    "Validate this v2 active capsule and prove HANDOFF_SAFE at the exact frozen target checkpoint.",
+    "Rerun ChatGPT -> Codex -> ChatGPT handoff against this Phase 11 v2 state.",
+    "Obtain the user's explicit decision whether to promote.",
+    "If approved, transition the capsule to COMPLETE, promote the reviewed target checkpoint, and verify final Git/handoff state."
   ],
-  "next_safe_action": "Preserve the completed v1 coordination capsule as evidence, then replace the active capsule with a v2 CHECKPOINTED coordination capsule that points to the same frozen target and summarized durable evidence. Validate v2 HANDOFF_SAFE, rerun Codex both-direction handoff, obtain explicit user promotion decision, then promote only if all gates pass.",
-  "last_executor": "chatgpt-direct-tool",
-  "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
+  "next_safe_action": "Validate the active v2 capsule and HANDOFF_SAFE state against control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2, then perform the required both-direction Codex handoff rerun. Do not promote until those gates pass and the user explicitly approves promotion.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Complete pre-v2 coordination history is preserved at tasks/evidence/control-plane-v2-refactor-v1-final.json."
 }
