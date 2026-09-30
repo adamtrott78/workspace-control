@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "IN_PROGRESS",
+  "status": "CHECKPOINTED",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -32,7 +32,7 @@
       "checkout_path": "/home/atrott/adamArchives/Adam/workspace-control-v2-refactor",
       "branch": "control-plane-v2-refactor",
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
-      "checkpoint_sha": "5000900823150676d356c54642efdefc560878ca",
+      "checkpoint_sha": "bb4292d65e858ec2fd527c8984a769e4bb87f955",
       "checkpoint_pushed": true,
       "allowed_mutation_scope": [
         "architecture/control-plane-v2.md",
@@ -41,7 +41,13 @@
         "schemas/task_capsule.v2.schema.json",
         "schemas/workflow_descriptor.v1.schema.json",
         "tests/test_workspace_control.py",
-        "tests/fixtures/**"
+        "tests/fixtures/**",
+        "README.md",
+        "policies/PORTABILITY_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/TUTORING_CONTRACT.md",
+        "templates/COURSE_TUTOR_ADAPTER.md",
+        "procedures/TUTOR_EVALUATION.md"
       ]
     }
   ],
@@ -103,6 +109,28 @@
       "evidence": [
         "control-plane-v2-refactor -> 5000900823150676d356c54642efdefc560878ca",
         "scripts/workspace_control.py remains out of scope for Phase 2."
+      ]
+    },
+    {
+      "summary": "Attempted an atomic Phase 2 Git-object transaction; the tool connection failed ambiguously before result reporting.",
+      "evidence": [
+        "The first low-level transaction returned RemoteProtocolError with no trustworthy completion result.",
+        "No retry was issued until actual branch state was inspected."
+      ]
+    },
+    {
+      "summary": "Inspected durable target state after the ambiguous Phase 2 failure and proved the target ref was unchanged.",
+      "evidence": [
+        "control-plane-v2-refactor remained exactly at 5000900823150676d356c54642efdefc560878ca",
+        "Compare from expected parent showed zero commits and zero changed paths."
+      ]
+    },
+    {
+      "summary": "Retried Phase 2 from the first incomplete safe stage using a smaller atomic tree/commit/ref transaction and published one coherent compatibility-scaffolding commit.",
+      "evidence": [
+        "control-plane-v2-refactor -> bb4292d65e858ec2fd527c8984a769e4bb87f955",
+        "Parent -> 5000900823150676d356c54642efdefc560878ca",
+        "One commit added exactly nine authorized Phase 2 paths."
       ]
     }
   ],
@@ -199,19 +227,46 @@
         "architecture/control-plane-v2-implementation.md reviewed through control-plane-v2-refactor@5000900823150676d356c54642efdefc560878ca",
         "Review preserved exact shared-contract pins, optional workflow descriptors, deferred project adoption, and derived handoff synchronization."
       ]
+    },
+    {
+      "check": "Phase 2 exact changed-path set",
+      "result": "PASS",
+      "evidence": [
+        "Compare 5000900823150676d356c54642efdefc560878ca...bb4292d65e858ec2fd527c8984a769e4bb87f955 reports exactly the three schema paths, one test file, and five fixture files authorized for Phase 2."
+      ]
+    },
+    {
+      "check": "V1 schema compatibility copy",
+      "result": "PASS",
+      "evidence": [
+        "schemas/task_capsule.schema.json and schemas/task_capsule.v1.schema.json both resolve to Git blob 40fa76125f61c0ad8e11a10a45347dbb36c63a84 at bb4292d65e858ec2fd527c8984a769e4bb87f955."
+      ]
+    },
+    {
+      "check": "Phase 2 JSON schema/fixture parse",
+      "result": "PASS",
+      "evidence": [
+        "All three schema files and all five JSON fixtures were independently reread from bb4292d65e858ec2fd527c8984a769e4bb87f955 and parsed successfully."
+      ]
+    },
+    {
+      "check": "Python Phase 2 unittest execution",
+      "result": "NOT_RUN",
+      "evidence": [
+        "No local/runtime executor has executed tests/test_workspace_control.py yet; source/fixture validation is recorded separately and does not imply test-run success."
+      ]
     }
   ],
   "blockers": [
     "The v1 HANDOFF_SAFE checker is local-worktree-centric. This capsule is durable remote coordination state, but formal v1 HANDOFF_SAFE validation requires an isolated local worktree at the recorded checkout path. Do not confuse this known v1 checker limitation with loss of the remote task state."
   ],
   "remaining_work": [
-    "Implement Phase 2 compatibility scaffolding in one coherent commit if the low-level Git surface supports exact-parent tree construction safely.",
-    "Prove the v1 schema copy is byte-equivalent to the current schema before any executable behavior changes.",
-    "Add a v2 capsule schema skeleton, workflow descriptor schema skeleton, standard-library test harness, and fixtures without modifying scripts/workspace_control.py.",
-    "Review and validate the exact Phase 2 diff.",
-    "Only after Phase 2 passes, open the next bounded scope for shared-contract integration."
+    "Integrate Phase 3 shared contracts/root routing from the preserved shared-operator-tutor-contract evidence, adapting terminology to the reviewed v2 architecture rather than blindly merging.",
+    "Review the exact Phase 3 diff for authority leakage, stale two-executor language, and project-specific semantics.",
+    "Keep scripts/workspace_control.py unchanged until the later validator/task-render phase.",
+    "After shared-contract integration passes, open the next bounded scope for schema-version dispatch and deterministic task-render behavior."
   ],
-  "next_safe_action": "On control-plane-v2-refactor@5000900823150676d356c54642efdefc560878ca, verify the branch/ref still points to that exact parent, then create only the Phase 2 schema/test scaffolding paths in one coherent commit if possible. Do not modify scripts/workspace_control.py or shared contracts yet. Validate exact changed paths and v1 schema equivalence afterward.",
+  "next_safe_action": "On control-plane-v2-refactor@bb4292d65e858ec2fd527c8984a769e4bb87f955, integrate only README.md, policies/PORTABILITY_CONTRACT.md, policies/OPERATOR_WORKFLOW.md, policies/TUTORING_CONTRACT.md, templates/COURSE_TUTOR_ADAPTER.md, and procedures/TUTOR_EVALUATION.md. Use shared-operator-tutor-contract@450eebeef6b76a674913949863082277b6bdb811 as evidence, but adapt its terminology to v2 and preserve project-local authority. Do not modify scripts, task procedures, Codex adapters, or PADataset.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
