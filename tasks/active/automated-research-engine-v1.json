@@ -12,7 +12,7 @@
     "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
   },
   "parent_execution_owner": "research-operating-system",
-  "current_stage": "proposal_compiler",
+  "current_stage": "execution_bridge",
   "acceptance_criteria": [
     "The architecture explicitly separates source evidence, extracted evidence, normalized knowledge, synthesis, model inference, and human judgment.",
     "Every durable scientific evidence object can be traced to a canonical work/version, immutable source artifact identity, and source locator whenever the available representation permits it.",
@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "ca1c5a45facbed732aca3f40a3de53e4b6d8f4df",
+        "checkpoint_sha": "a77f39d566492ff56875644256095abb8366359e",
         "verified": true
       },
       "local": null,
@@ -317,7 +317,7 @@
     },
     {
       "id": "proposal_compiler",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -325,18 +325,45 @@
         "synthesis_gap_engine",
         "git:ca1c5a45facbed732aca3f40a3de53e4b6d8f4df"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "git:a77f39d566492ff56875644256095abb8366359e",
+        "artifact:architecture/research-engine/proposal-compiler-contract-v1.md",
+        "artifact:architecture/research-engine/fixtures/open-set-rf-proposal-dry-run-v1.json",
+        "schema:schemas/research-engine/research-program.v1.schema.json",
+        "schema:schemas/research-engine/funding-opportunity.v1.schema.json",
+        "schema:schemas/research-engine/solicitation-requirement.v1.schema.json",
+        "schema:schemas/research-engine/proposal-compilation.v1.schema.json"
+      ],
+      "validation": [
+        {
+          "check": "gated research-program dry run",
+          "result": "PASS",
+          "evidence": [
+            "NARROWED gap produces DRAFT_NOT_APPROVED program only.",
+            "No user research-direction approval was inferred.",
+            "Evidence-backed problem statements map to durable evidence IDs."
+          ]
+        },
+        {
+          "check": "proposal submission safety",
+          "result": "PASS",
+          "evidence": [
+            "Dry-run compilation is NOT_FOR_SUBMISSION and submission_gate.allowed=false.",
+            "No NSF/sponsor compliance is claimed without a selected official current opportunity and mapped solicitation requirements."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "execution_bridge",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
-      "selected_surface": "composed",
+      "selected_surface": "github",
       "inputs": [
-        "proposal_compiler"
+        "proposal_compiler",
+        "git:a77f39d566492ff56875644256095abb8366359e"
       ],
       "outputs": [],
       "validation": [],
@@ -451,6 +478,16 @@
       "evidence": [
         "Scoped synthesis and novelty-challenge contracts/fixtures committed.",
         "Pilot demonstrates both prior-work rejection and candidate narrowing; no false novelty accepted."
+      ]
+    },
+    {
+      "id": "research-engine-proposal-compiler-contract",
+      "kind": "git_commit",
+      "identity": "a77f39d566492ff56875644256095abb8366359e",
+      "required_for_resume": true,
+      "evidence": [
+        "ResearchProgram/FundingOpportunity/SolicitationRequirement/ProposalCompilation contracts and gated dry-run fixture committed.",
+        "Dry run preserves novelty, human approval, official opportunity, and submission gates."
       ]
     }
   ],
@@ -659,6 +696,30 @@
       "evidence": [
         "First synthesis/gap pilot includes one rejected and one narrowed candidate."
       ]
+    },
+    {
+      "path": "architecture/research-engine/proposal-compiler-contract-v1.md",
+      "state": "durable",
+      "role": "proposal-compiler-contract",
+      "origin": "automated-research-engine-v1@a77f39d566492ff56875644256095abb8366359e",
+      "persistence": "git-tracked",
+      "regeneration": "versioned dry-run/contract artifact",
+      "review_requirement": "Must preserve novelty, human-decision, official-opportunity, and submission gates.",
+      "evidence": [
+        "Validated proposal-compiler dry run with submission disabled."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/open-set-rf-proposal-dry-run-v1.json",
+      "state": "durable",
+      "role": "proposal-compiler-regression-fixture",
+      "origin": "automated-research-engine-v1@a77f39d566492ff56875644256095abb8366359e",
+      "persistence": "git-tracked",
+      "regeneration": "versioned dry-run/contract artifact",
+      "review_requirement": "Must preserve novelty, human-decision, official-opportunity, and submission gates.",
+      "evidence": [
+        "Validated proposal-compiler dry run with submission disabled."
+      ]
     }
   ],
   "validation": [
@@ -774,19 +835,26 @@
         "Validated at automated-research-engine-v1@ca1c5a45facbed732aca3f40a3de53e4b6d8f4df.",
         "One-paper synthesis remained scoped; broad candidate rejected; partial-overlap candidate narrowed; zero unsupported novelty claims."
       ]
+    },
+    {
+      "check": "proposal compiler gating",
+      "result": "PASS",
+      "evidence": [
+        "Validated at automated-research-engine-v1@a77f39d566492ff56875644256095abb8366359e.",
+        "Unapproved narrowed gap cannot become approved research program or submission-ready proposal."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Define ResearchProgram and solicitation/proposal compiler contracts without treating a NARROWED/NEEDS_HUMAN_REVIEW gap as an approved research direction.",
-    "Build a dry-run proposal compilation fixture that demonstrates evidence mapping and required human gates but is explicitly NOT_FOR_SUBMISSION.",
-    "Add official funding-opportunity adapter contracts and solicitation requirement mapping.",
-    "Build the execution bridge from an APPROVED research program into a workspace-control project/task workflow.",
+    "Define the execution-bridge contract that maps an APPROVED ResearchProgram into a workspace-control task/workflow without reconstructing it from chat.",
+    "Build a non-instantiable dry-run execution-plan fixture from the unapproved pilot program and prove that approval gating prevents project creation/execution.",
+    "Define the exact project-bootstrap payload that would be emitted after human approval.",
     "During vertical-slice validation, ingest multiple additional papers and require deeper novelty review before any candidate becomes SUPPORTED_AS_OPEN.",
     "Choose persistence/indexing architecture only after the complete vertical slice demonstrates actual query/load requirements.",
     "After the end-to-end pipeline is validated, bootstrap the first real RF OSR knowledge corpus from the PDFs already curated/cited in the user's research paper and stored in PADataset's paper area; resolve the exact PADataset route at that time and ingest them through the same provenance-preserving pipeline rather than special-casing them."
   ],
-  "next_safe_action": "Continue proposal_compiler from automated-research-engine-v1@ca1c5a45facbed732aca3f40a3de53e4b6d8f4df. Define ResearchProgram, FundingOpportunity, SolicitationRequirement, and ProposalCompilation contracts. Use only a NOT_FOR_SUBMISSION dry-run fixture because the current surviving RF OSR candidate is NARROWED and requires deeper prior-work review; do not select it as the user's research direction and do not mark it fundable/novel.",
+  "next_safe_action": "Continue execution_bridge from automated-research-engine-v1@a77f39d566492ff56875644256095abb8366359e. Define the approval-gated mapping from ResearchProgram to workspace-control task/workflow state. Use the current DRAFT_NOT_APPROVED pilot only to prove that the bridge refuses to instantiate a project. Define the exact payload that would become executable after APPROVED state; do not create a research project or infer approval.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
