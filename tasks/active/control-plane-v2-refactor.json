@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "CHECKPOINTED",
+  "status": "BLOCKED_RUNTIME",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -32,7 +32,7 @@
       "checkout_path": "/home/atrott/adamArchives/Adam/workspace-control-v2-refactor",
       "branch": "control-plane-v2-refactor",
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
-      "checkpoint_sha": "610c71902425adaf054fc9ba13deb21bba7cc7ce",
+      "checkpoint_sha": "77c7355bbafeb674dd35b55bcfdb542d50c6079c",
       "checkpoint_pushed": true,
       "allowed_mutation_scope": [
         "architecture/control-plane-v2.md",
@@ -143,6 +143,13 @@
         "control-plane-v2-refactor -> 610c71902425adaf054fc9ba13deb21bba7cc7ce",
         "Parent -> bb4292d65e858ec2fd527c8984a769e4bb87f955",
         "Changed exactly README.md, three policy files, COURSE_TUTOR_ADAPTER.md, and TUTOR_EVALUATION.md."
+      ]
+    },
+    {
+      "summary": "Implemented Phase 4 v2 task-validation dispatch, deterministic task-render support, schema dispatch entrypoint, tests, and task-capsule documentation without changing preflight semantics.",
+      "evidence": [
+        "control-plane-v2-refactor -> 77c7355bbafeb674dd35b55bcfdb542d50c6079c",
+        "Phase 4 changed exactly scripts/workspace_control.py, schemas/task_capsule.schema.json, tests/test_workspace_control.py, procedures/task_capsule.md, and tasks/README.md."
       ]
     }
   ],
@@ -290,17 +297,38 @@
         "README and operator contract explicitly preserve project-local truth.",
         "Tutoring contract explicitly states course repositories retain authority for syllabus, assignments, instructor material, notation, deliverables, grading rules, and topic structure."
       ]
+    },
+    {
+      "check": "Phase 4 exact changed-path set",
+      "result": "PASS",
+      "evidence": [
+        "Compare 610c71902425adaf054fc9ba13deb21bba7cc7ce...77c7355bbafeb674dd35b55bcfdb542d50c6079c reports exactly five intended Phase 4 files."
+      ]
+    },
+    {
+      "check": "Phase 4 source structure inspection",
+      "result": "PASS",
+      "evidence": [
+        "Pushed script contains explicit v1 validator, v2 validator, schema-version dispatcher, task-render implementation/parser wiring, and an explicit guard preventing v2 capsules from being assessed with v1 handoff semantics."
+      ]
+    },
+    {
+      "check": "Phase 4 Python syntax/unit/runtime validation",
+      "result": "NOT_RUN",
+      "evidence": [
+        "A real Python runtime is required; direct GitHub tooling cannot establish execution success."
+      ]
     }
   ],
   "blockers": [
-    "The v1 HANDOFF_SAFE checker is local-worktree-centric. This capsule is durable remote coordination state, but formal v1 HANDOFF_SAFE validation requires an isolated local worktree at the recorded checkout path. Do not confuse this known v1 checker limitation with loss of the remote task state."
+    "Phase 4 source is pushed and structurally reviewed, but Python syntax/unit/runtime tests must execute in a real runtime before Phase 4 can be accepted."
   ],
   "remaining_work": [
-    "Implement Phase 4 schema-version dispatch, v2 task structural/semantic validation, deterministic task-render, and supporting task-capsule documentation/tests without changing preflight/handoff behavior yet.",
-    "Run v1 compatibility tests plus v2 validation/render fixtures in a real runtime before declaring Phase 4 complete.",
-    "Only after Phase 4 passes, open topology-aware preflight scope."
+    "Run the bounded Phase 4 runtime validation against exact commit 77c7355bbafeb674dd35b55bcfdb542d50c6079c without mutating an existing worktree.",
+    "If tests fail, inspect the exact failure and patch only the demonstrated defect; do not continue to topology-aware preflight.",
+    "If tests pass, checkpoint Phase 4 complete and open the next bounded scope for topology-aware preflight."
   ],
-  "next_safe_action": "On control-plane-v2-refactor@610c71902425adaf054fc9ba13deb21bba7cc7ce, modify only scripts/workspace_control.py, schemas/task_capsule.schema.json, procedures/task_capsule.md, tasks/README.md, and existing tests/fixtures as needed to add schema-version dispatch, v2 task validation, and deterministic task-render. Preserve all existing v1 command behavior. Do not change preflight or handoff semantics in this phase.",
+  "next_safe_action": "In a real Python runtime, validate exactly control-plane-v2-refactor@77c7355bbafeb674dd35b55bcfdb542d50c6079c: verify remote identity, extract that commit into a temporary directory without switching/cleaning any checkout, run py_compile and tests/test_workspace_control.py, exercise task-validate/task-render on copied correctly named v1/v2 fixtures, and confirm v2 handoff-check safely returns NOT_HANDOFF_SAFE rather than applying v1 semantics. Return exact output before any further mutation.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
