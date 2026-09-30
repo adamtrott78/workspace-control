@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/evidence-query-proof.v1.schema.json",
+  "title": "Research Engine EvidenceQueryProof v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "query_id",
+    "snapshot_id",
+    "question",
+    "start_node",
+    "answer_trace",
+    "paths",
+    "verification"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "query_id": {
+      "type": "string"
+    },
+    "snapshot_id": {
+      "type": "string"
+    },
+    "question": {
+      "type": "string"
+    },
+    "start_node": {
+      "type": "string"
+    },
+    "answer_trace": {
+      "type": "object"
+    },
+    "paths": {
+      "type": "array"
+    },
+    "verification": {
+      "type": "array"
+    }
+  }
+}

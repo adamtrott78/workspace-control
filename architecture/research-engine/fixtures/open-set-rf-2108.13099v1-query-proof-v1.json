@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "query_id": "query:2108:conclusion-support:v1",
+  "snapshot_id": "graph:rf-osr-pilot:2108.13099v1:v1",
+  "question": "What evidence supports the paper's conclusion that generative outlier augmentation can reduce or replace physical known-outlier transmitter acquisition?",
+  "start_node": "ev:2108:claim:conclusion",
+  "answer_trace": {
+    "claim": {
+      "evidence_id": "ev:2108:claim:conclusion",
+      "type": "CLAIM",
+      "normalized_form": "The authors conclude that generative outlier augmentation can reduce or replace the need to acquire physical transmitters solely as known outliers for RF authentication training.",
+      "locator": {
+        "page": 6,
+        "bbox": [
+          311.98,
+          67.17,
+          563.04,
+          328.19
+        ],
+        "section_path": [
+          "VI. CONCLUSION"
+        ],
+        "quality": "EXACT"
+      }
+    },
+    "supporting_results": [
+      {
+        "evidence_id": "ev:2108:result:ellipsoid",
+        "type": "RESULT",
+        "normalized_form": "For small authorized sets, ellipsoidal augmentation yields testing-accuracy gains greater than 15 percentage points relative to the non-augmented comparison shown by the paper.",
+        "locator": {
+          "page": 5,
+          "bbox": [
+            48.96,
+            352.25,
+            300.03,
+            613.27
+          ],
+          "section_path": [
+            "V. BLIND OUTLIER GENERATION",
+            "A. Ellipsoisal method"
+          ],
+          "quality": "EXACT"
+        }
+      },
+      {
+        "evidence_id": "ev:2108:result:optimization",
+        "type": "RESULT",
+        "normalized_form": "Optimization-based blind generation achieves results similar to the ellipsoidal method and additionally shows an improvement at |A|=15 in the reported experiment.",
+        "locator": {
+          "page": 6,
+          "bbox": [
+            48.96,
+            446.75,
+            300.03,
+            719.57
+          ],
+          "section_path": [
+            "V. BLIND OUTLIER GENERATION",
+            "B. Optimization method"
+          ],
+          "quality": "EXACT"
+        }
+      }
+    ],
+    "qualifying_limitations": [
+      {
+        "evidence_id": "ev:2108:limitation:ellipsoid",
+        "type": "LIMITATION",
+        "normalized_form": "The ellipsoidal blind-generation method requires empirical tuning of shell-thickness parameter δ.",
+        "locator": {
+          "page": 5,
+          "bbox": [
+            48.96,
+            637.9,
+            300.03,
+            719.57
+          ],
+          "section_path": [
+            "V. BLIND OUTLIER GENERATION",
+            "B. Optimization method"
+          ],
+          "quality": "EXACT"
+        }
+      },
+      {
+        "evidence_id": "ev:2108:limitation:optimization",
+        "type": "LIMITATION",
+        "normalized_form": "Generating 1,000 outlier samples with the optimization method took about 30 times as long as with the ellipsoidal method.",
+        "locator": {
+          "page": 6,
+          "bbox": [
+            48.96,
+            446.75,
+            300.03,
+            719.57
+          ],
+          "section_path": [
+            "V. BLIND OUTLIER GENERATION",
+            "B. Optimization method"
+          ],
+          "quality": "EXACT"
+        }
+      }
+    ],
+    "method_context": [
+      {
+        "evidence_id": "ev:2108:method:ellipsoid",
+        "type": "METHOD",
+        "normalized_form": "Blind ellipsoidal generation maps authorized samples into latent space, encloses them with a minimum-volume ellipsoid, samples a surrounding shell, and decodes those points as synthetic outliers.",
+        "locator": {
+          "page": 5,
+          "bbox": [
+            48.96,
+            51.66,
+            300.03,
+            193.68
+          ],
+          "section_path": [
+            "V. BLIND OUTLIER GENERATION",
+            "A. Ellipsoisal method"
+          ],
+          "quality": "EXACT"
+        }
+      },
+      {
+        "evidence_id": "ev:2108:method:optimization",
+        "type": "METHOD",
+        "normalized_form": "Optimization-based blind generation minimizes latent distance while using an |A|+1 classifier loss to drive decoded samples toward the unauthorized class, with iterative judge retraining.",
+        "locator": {
+          "page": 5,
+          "bbox": [
+            311.98,
+            406.99,
+            563.04,
+            584.67
+          ],
+          "section_path": [
+            "V. BLIND OUTLIER GENERATION",
+            "B. Optimization method"
+          ],
+          "quality": "EXACT"
+        }
+      }
+    ]
+  },
+  "paths": [
+    [
+      "ev:2108:result:ellipsoid",
+      "SUPPORTS",
+      "ev:2108:claim:conclusion"
+    ],
+    [
+      "ev:2108:experiment:ellipsoid",
+      "USES",
+      "ev:2108:method:ellipsoid"
+    ],
+    [
+      "ev:2108:result:ellipsoid",
+      "DERIVED_FROM",
+      "ev:2108:experiment:ellipsoid"
+    ],
+    [
+      "ev:2108:limitation:ellipsoid",
+      "QUALIFIES",
+      "ev:2108:method:ellipsoid"
+    ],
+    [
+      "ev:2108:result:optimization",
+      "SUPPORTS",
+      "ev:2108:claim:conclusion"
+    ],
+    [
+      "ev:2108:result:optimization",
+      "DERIVED_FROM",
+      "ev:2108:method:optimization"
+    ],
+    [
+      "ev:2108:limitation:optimization",
+      "QUALIFIES",
+      "ev:2108:method:optimization"
+    ]
+  ],
+  "verification": [
+    {
+      "check": "support direction",
+      "result": "PASS",
+      "evidence": "Both SUPPORTS edges originate at Result nodes and target the conclusion Claim."
+    },
+    {
+      "check": "source traceability",
+      "result": "PASS",
+      "evidence": "Claim, results, methods, and limitations each resolve to exact page/bbox SourceLocator nodes."
+    },
+    {
+      "check": "qualifier retrieval",
+      "result": "PASS",
+      "evidence": "Query returns delta-tuning and 30x-compute limitations alongside supporting evidence."
+    },
+    {
+      "check": "artifact trace",
+      "result": "PASS",
+      "evidence": "All evidence nodes connect through WorkVersion to the exact SHA-256 SourceArtifact."
+    }
+  ]
+}
