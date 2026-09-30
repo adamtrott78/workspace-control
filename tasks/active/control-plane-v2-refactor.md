@@ -2,77 +2,52 @@
 
 > **Derived human-readable view.**
 >
-> Authoritative task state: `tasks/active/control-plane-v2-refactor.json` on `control-plane-v2-coordination`.
+> Authoritative state: `tasks/active/control-plane-v2-refactor.json` on `control-plane-v2-coordination`.
 >
-> If this file disagrees with the v2 JSON capsule or verified Git/runtime state, trust the JSON capsule plus verified evidence.
+> Trust the v2 JSON capsule plus verified Git/runtime evidence over this derived view.
 
-## Task
+## Phase 11 status
 
-- ID: `control-plane-v2-refactor`
+- Task: `control-plane-v2-refactor`
 - Schema: `v2`
-- Status: `CHECKPOINTED`
-- Current stage: `phase11_codex_rerun`
-- Execution topology: `remote_only`
+- Status: `SUSPENDED`
+- Current stage: `promotion_decision`
+- Frozen target: `control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2`
 
-## Frozen implementation
+## Promotion gates
 
-- Branch: `control-plane-v2-refactor`
-- Checkpoint: `b8aa52e242a07e6aa2036516e401864991183ad2`
-- Remote verified: `true`
-
-## Phase 11 completed gates
-
+- Full Phase 10 regression matrix: `PASS`
+- MILCOM reference workflow regression: `PASS`
 - Exact integration diff review: `PASS`
 - v1 compatibility review: `PASS`
-- Active v2 capsule validation: `PASS`
+- v2 capsule validation: `PASS`
 - v2 `HANDOFF_SAFE`: `PASS`
+- Final ChatGPT -> Codex -> ChatGPT round trip: `PASS`
+- Explicit human promotion decision: `PENDING`
+
+## Main branch
+
+Promotion has **not** occurred yet.
+
+The validated implementation checkpoint is:
+
+`b8aa52e242a07e6aa2036516e401864991183ad2`
 
 ## Preserved history
 
-Complete final v1 coordination history:
+Complete pre-v2 coordination history:
 
 `tasks/evidence/control-plane-v2-refactor-v1-final.json`
 
-## Pending gates
-
-- standalone ChatGPT -> Codex -> ChatGPT read-only round-trip;
-- explicit user promotion decision;
-- if approved, promotion + final verification.
-
-## TTY harness note
-
-Do not launch interactive Codex or human `read` prompts from a shell whose stdin is an enclosing heredoc.
-
-The failed Phase 11 Codex launch occurred only because Codex inherited heredoc stdin and reported:
-
-`stdin is not a terminal`
-
-The v2 capsule validation and HANDOFF_SAFE gate had already passed.
-
 ## Next safe action
 
-Phase 11 v2 capsule validation and HANDOFF_SAFE have passed. Run only the final read-only Codex round-trip from a real terminal stdin (standalone command, outside any heredoc). Do not rerun the completed v2 validation. After Codex returns PASS, record the round-trip and request the user's explicit promotion decision.
+Await the user's explicit Phase 11 promotion decision. Accept only an unambiguous PROMOTE or DO NOT PROMOTE decision. Do not update main before explicit approval.
 
-## Exact coordination checkpoint
+## Required human decision
 
-`71563dc20be3794e5a1f09bc3178e05a4327f2dc`
+Choose exactly one:
 
-## Fresh-chat initialization
+- `PROMOTE`
+- `DO NOT PROMOTE`
 
-```text
-@GitHub
-
-Continue the workspace-control v2 promotion task from:
-
-repository: adamtrott78/workspace-control
-coordination branch: control-plane-v2-coordination
-coordination checkpoint: 71563dc20be3794e5a1f09bc3178e05a4327f2dc
-authoritative capsule: tasks/active/control-plane-v2-refactor.json
-frozen target: control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2
-
-Phase 11 v2 capsule validation and HANDOFF_SAFE already passed.
-
-Do not rerun those gates.
-Run only the final standalone read-only Codex round-trip using real terminal stdin.
-Then request explicit user promotion approval.
-```
+No main-branch update is authorized until that explicit decision is recorded.
