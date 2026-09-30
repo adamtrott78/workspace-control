@@ -2,12 +2,12 @@
 
 ## Purpose
 
-Represent a multi-step task in an executor-neutral durable form so another
-executor can determine the next correct and safe action without needing the
-previous executor's private conversation state.
+Represent one concrete task execution in executor-neutral durable form so another
+control cycle can recover the next correct and safe action without the previous
+executor's private conversation state.
 
-The task capsule coordinates execution. It does not replace repository-owned
-scientific, course, implementation, or artifact truth.
+A task capsule coordinates execution. It does not replace project-owned
+scientific, course, implementation, workflow, or artifact truth.
 
 ## Storage
 
@@ -21,11 +21,24 @@ Completed capsules normally live at:
 
 The filename must match `task_id`.
 
-The structural contract is:
+## Versioned structural contracts
+
+The schema entry point is:
 
 `schemas/task_capsule.schema.json`
 
-## Structural and semantic validation
+Versioned schemas are:
+
+- `schemas/task_capsule.v1.schema.json`
+- `schemas/task_capsule.v2.schema.json`
+
+The deterministic validator dispatches on `schema_version`.
+Unknown versions fail explicitly.
+
+v1 remains supported so preserved Phase-3/Phase-4 evidence does not change
+meaning merely because v2 exists.
+
+## Validation
 
 Run:
 
@@ -38,22 +51,47 @@ Machine-readable output:
       --file tasks/active/<task_id>.json \
       --json
 
-Validation checks include:
+v1 validation preserves the existing checkout-centered task contract.
 
-- required fields and value types;
-- task ID syntax and filename agreement;
-- supported task status;
-- repository-entry structure;
-- SHA syntax;
-- evidence-entry structure;
-- repository names against `repos.json`;
-- mutation policy against `repos.json`;
-- nonempty mutation scope for repositories that may be changed;
-- status-specific consistency such as COMPLETE having no remaining work.
+v2 validation adds structural/semantic checks for:
 
-The validator uses only the Python standard library. It implements the v1 task
-capsule contract directly rather than requiring a third-party JSON Schema
-library.
+- execution topology;
+- optional exact workflow identity/version;
+- remote and/or local repository state;
+- stage IDs and states;
+- checkpoint/checkpoint-bundle entries;
+- suspension/resume structure;
+- artifact lifecycle metadata;
+- registry mutation policy;
+- COMPLETE and blocked/suspended status consistency.
+
+The validator uses only the Python standard library.
+
+## Human-readable handoff rendering
+
+Render a derived Markdown view:
+
+    python3 scripts/workspace_control.py task-render \
+      --file tasks/active/<task_id>.json \
+      --output tasks/active/<task_id>.md
+
+Without `--output`, the rendered Markdown is written to stdout.
+
+The JSON capsule plus verified Git/runtime evidence remain authoritative.
+
+The rendered view:
+
+- carries an explicit derived marker;
+- identifies the authoritative capsule;
+- includes current task/checkpoint information;
+- includes blockers and next safe action;
+- includes fresh-chat initialization text;
+- is deterministic for a given capsule/control-root context.
+
+The renderer refuses to overwrite an existing output that does not carry the
+derived marker.
+
+Regenerate the human-readable view after material capsule changes.
 
 ## Handoff assessment
 
@@ -62,85 +100,59 @@ Run:
     python3 scripts/workspace_control.py handoff-check \
       --file tasks/active/<task_id>.json
 
-Machine-readable output:
+v1 handoff semantics remain unchanged in the current phase.
 
-    python3 scripts/workspace_control.py handoff-check \
-      --file tasks/active/<task_id>.json \
-      --json
+v2 capsules validate structurally, but topology-aware v2 handoff is intentionally
+not implemented until its dedicated phase. Until then, `handoff-check` returns
+`NOT_HANDOFF_SAFE` for a valid v2 capsule with an explicit reason instead of
+applying v1 local-checkout assumptions to remote/composed tasks.
 
-The handoff checker first validates the capsule and then compares it with actual
-Git/filesystem state.
+## Updating durable task state
 
-The initial v1 checker requires:
-
-- an explicit handoff-capable task status;
-- correct logical repository identity;
-- matching checkout/worktree path;
-- matching branch;
-- current HEAD equal to recorded checkpoint SHA;
-- checkpoint commit present locally;
-- base SHA ancestral to checkpoint SHA;
-- clean checkout;
-- for mutation repositories, a pushed checkpoint whose remote branch currently
-  advertises the exact checkpoint SHA.
-
-A successful result is:
-
-`HANDOFF_SAFE`
-
-A structurally valid capsule that is not currently safe to transfer returns:
-
-`NOT_HANDOFF_SAFE`
-
-An invalid capsule returns:
-
-`INVALID_CAPSULE`
-
-## Exit codes
-
-For `task-validate`:
-
-- `0` — capsule is structurally and semantically valid;
-- `30` — capsule is invalid or cannot be read safely;
-- `2` — command-line usage error.
-
-For `handoff-check`:
-
-- `0` — `HANDOFF_SAFE`;
-- `10` — `NOT_HANDOFF_SAFE`;
-- `30` — `INVALID_CAPSULE` or state could not be established safely;
-- `2` — command-line usage error.
-
-## Updating a capsule
-
-An executor should update the capsule when durable task state materially changes,
-especially after:
+Update the capsule when task state materially changes, especially after:
 
 - an important decision;
-- an executed operation;
-- creation of an artifact;
+- an operation that actually executed;
+- artifact creation;
 - validation;
-- discovery of a blocker;
-- a Git checkpoint;
-- a push;
-- a change in remaining work;
-- a change in the next safe action.
+- discovery/resolution of a blocker or gate;
+- a checkpoint;
+- a push/remote verification;
+- a stage transition;
+- a change in remaining work or next safe action.
 
-Do not record a command as executed until execution evidence exists.
+Do not record an operation as executed until execution evidence exists.
 
-Do not set `checkpoint_pushed: true` until the remote branch has actually been
-verified at that checkpoint.
+Do not mark a remote checkpoint verified until the remote identity was actually
+checked.
 
-## Executor switching
+Where a derived Markdown handoff is maintained, refresh it after the capsule
+update or mark it explicitly stale. The JSON remains authoritative.
 
-The receiving executor should need only:
+## Workflow binding
 
-1. the normal workspace-control entry route;
-2. the task capsule;
-3. the owning repository contexts and evidence referenced by that capsule.
+When a v2 task uses a reusable workflow, record an exact durable workflow
+identity such as repository + path + Git checkpoint/content identity.
 
-A special prose explanation from the previous executor should not be necessary.
+Do not silently resume a long-running task against a materially changed workflow.
 
-If the receiving executor cannot recover the next safe action from those durable
-sources, the task is not handoff-safe even if a conversation contains the
-missing information.
+## Evidence discipline
+
+Capsules distinguish:
+
+- intended work from executed work;
+- capability from authority;
+- process completion from artifact validation;
+- handoff-safe state from receiver-specific execution readiness;
+- durable evidence from executor recollection.
+
+Secrets, credentials, access tokens, and private keys do not belong in task
+capsules or derived handoff views.
+
+## Current phase boundary
+
+`task-validate` and `task-render` support v2.
+
+`handoff-check` remains v1-only until topology-aware handoff is implemented.
+
+Preflight behavior is unchanged in this phase.
