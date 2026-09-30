@@ -12,7 +12,7 @@
 
 - ID: `control-plane-v2-refactor`
 - Title: Workspace Control Plane v2
-- Status: `CHECKPOINTED`
+- Status: `BLOCKED_RUNTIME`
 
 ## Goal
 
@@ -23,7 +23,7 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `dc6980284abc17f4c0f96d90b01391e2c952879f`
+- Current checkpoint: `f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9`
 - Pushed: `true`
 
 ### Allowed mutation scope
@@ -36,26 +36,25 @@ Design, implement, and validate a workspace-control v2 architecture that general
 
 ## Next safe action
 
-Begin Phase 6 only. Starting from control-plane-v2-refactor@dc6980284abc17f4c0f96d90b01391e2c952879f, implement topology-aware v2 handoff semantics and receiver-specific EXECUTION_READY assessment within scripts/workspace_control.py, procedures/task_capsule.md, tasks/README.md, tests/test_workspace_control.py, and tests/fixtures/**. Preserve schema_version 1 handoff behavior exactly. For schema_version 2, establish HANDOFF_SAFE according to remote_only, local, and composed topology; require exact workflow version resolution when a workflow is bound; and keep EXECUTION_READY separate from durable handoff safety. Inspect and validate the exact changed-path set before runtime testing. Do not begin Phase 7 worktree-preparation implementation.
+Remain in Phase 6. Validate exact pushed checkpoint f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9 in an isolated GitHub-connected runtime. Run the full unit suite, verify the target remote ref, and execute bounded v1, v2 remote-only, v2 local, and v2 composed handoff checks plus a receiver-specific NOT_EXECUTION_READY case. Require all durable handoff cases to report HANDOFF_SAFE, require receiver readiness to remain independent, and verify no existing workspace worktree is switched, cleaned, reset, stashed, or modified. Record the runtime evidence, then and only then mark Phase 6 validated/checkpointed and open Phase 7.
 
 ## Remaining work
 
-- Implement Phase 6 topology-aware v2 handoff assessment while preserving v1 handoff behavior exactly.
-- Prove remote-only HANDOFF_SAFE without requiring local checkout state.
-- Prove local HANDOFF_SAFE against the relevant local checkpoint/state.
-- Prove composed HANDOFF_SAFE using all identities required by the first incomplete stage and an explicit synchronization boundary.
-- Distinguish durable HANDOFF_SAFE from receiver-specific EXECUTION_READY capability/readiness.
-- Update task-capsule documentation and bounded fixtures/tests; validate the exact changed-path set before runtime testing.
-- Do not begin Phase 7 worktree-preparation implementation until Phase 6 is validated and checkpointed.
+- Run the complete Python unit suite from exact checkpoint f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9 in an isolated temporary clone.
+- Prove schema_version 1 handoff behavior remains HANDOFF_SAFE on a matching clean local checkpoint.
+- Prove v2 remote-only HANDOFF_SAFE without depending on local checkout state.
+- Prove v2 local HANDOFF_SAFE on a matching clean local checkpoint.
+- Prove v2 composed HANDOFF_SAFE with workflow binding and an explicit synchronization boundary.
+- Prove a HANDOFF_SAFE task can independently report NOT_EXECUTION_READY for a proposed receiver with a missing transient capability.
+- Verify the target remote branch still advertises the exact Phase 6 checkpoint and that validation does not modify existing workspace worktrees.
+- Only after those checks pass, mark Phase 6 validated/checkpointed and open Phase 7 safe worktree-preparation scope.
 
 ## Latest completed runtime gate
 
 - `PHASE5_RUNTIME_RESULT=PASS`
 - `VALIDATED_COMMIT=dc6980284abc17f4c0f96d90b01391e2c952879f`
-- Exact isolated checkout matched the Phase 5 checkpoint.
-- Python unit suite: 18 tests, `OK`.
-- Remote topology preflight: `READY`, no reasons, advertised SHA exactly matched the checkpoint.
-- Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified.
+- Phase 6 implementation checkpoint: `f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9`
+- Phase 6 exact-checkpoint runtime validation is pending.
 
 ## Validation state
 
@@ -67,7 +66,9 @@ Begin Phase 6 only. Starting from control-plane-v2-refactor@dc6980284abc17f4c0f9
   - architecture/control-plane-v2.md reviewed and refined through control-plane-v2-refactor@07075963f2d56f1bf76d562de3f6a6dc0d16c43d
   - Review resolved authority-owner vs execution-owner ambiguity, workflow version binding, checkpoint bundles, HANDOFF_SAFE vs EXECUTION_READY, artifact lifecycle overlap, generated handoff authority, secret handling, consequence classes, and coordination-state placement.
 - **Integrated v2 implementation validated:** `NOT_RUN`
+
 - **Cross-executor regression suite completed:** `NOT_RUN`
+
 - **Initial v2 architecture draft created within authorized target scope:** `PASS`
   - Target branch changed only by architecture/control-plane-v2.md at 93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e.
 - **Architecture branch remained within authorized review scope:** `PASS`
@@ -124,10 +125,24 @@ Begin Phase 6 only. Starting from control-plane-v2-refactor@dc6980284abc17f4c0f9
   - Documented remote preflight returned result=READY, reasons=[], advertised status=FOUND, and advertised SHA=dc6980284abc17f4c0f96d90b01391e2c952879f.
   - Remote preflight confirmed surface_write_ready=true, consequence=reversible, and the exact Phase 5 allowed/proposed path set.
   - Validation reported PHASE5_RUNTIME_RESULT=PASS and explicitly confirmed non-interference with existing workspace worktrees.
+- **Phase 6 exact changed-path set:** `PASS`
+  - Compare dc6980284abc17f4c0f96d90b01391e2c952879f...f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9 reports exactly procedures/task_capsule.md, scripts/workspace_control.py, tasks/README.md, and tests/test_workspace_control.py.
+  - All changed paths are inside the capsule's authorized Phase 6 mutation scope.
+- **Phase 6 source/contract inspection:** `PASS`
+  - v1 handoff function remains intact and schema_version 1 dispatches to it.
+  - Remote-only v2 handoff does not call local checkout inspection or transient live-remote query.
+  - Local and composed v2 handoff paths are topology-specific.
+  - Receiver readiness is represented separately as execution_readiness with NOT_ASSESSED, EXECUTION_READY, or NOT_EXECUTION_READY.
+  - Regression tests cover v1 compatibility, remote-only no-local behavior, local handoff, composed synchronization, workflow binding failure, missing synchronization boundary, and HANDOFF_SAFE with NOT_EXECUTION_READY.
+  - No worktree-prepare command or Phase 7 implementation was added.
+- **Phase 6 exact-checkpoint integrated runtime validation:** `NOT_RUN`
+  - Target implementation is pushed at f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9.
+  - Exact-checkpoint unit and CLI runtime validation is pending in a GitHub-connected terminal.
+  - Do not open Phase 7 until this validation passes and is recorded.
 
 ## Blockers / known limitations
 
-- None recorded.
+- Exact-checkpoint Phase 6 integrated runtime validation is pending for control-plane-v2-refactor@f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9.
 
 ## Fresh-chat initialization
 
@@ -158,10 +173,10 @@ Current target branch:
 control-plane-v2-refactor
 
 Current target checkpoint:
-dc6980284abc17f4c0f96d90b01391e2c952879f
+f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9
 
 Current phase:
-Phase 6 — topology-aware handoff + EXECUTION_READY
+Phase 6 — topology-aware handoff + EXECUTION_READY (runtime validation pending)
 
-Do not broaden mutation scope beyond the capsule. Preserve v1 handoff semantics. Do not begin Phase 7 worktree-preparation implementation until Phase 6 is validated and checkpointed.
+Do not broaden mutation scope beyond the capsule. Do not begin Phase 7 worktree-preparation implementation until Phase 6 is validated and checkpointed.
 ```
