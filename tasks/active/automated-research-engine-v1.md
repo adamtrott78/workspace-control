@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: automated-research-engine-v1
 - Title: Automated research engine v1
-- Status: IN_PROGRESS
+- Status: BLOCKED_RUNTIME
 - Capsule schema: v2
 
 ## Goal
@@ -30,12 +30,12 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: 7f09a557240722b4d104cbb7d7a2d99779974755
+- Remote checkpoint: 33339103d1a21842ff7479bd72782ab4dc42f9b9
 - Remote verified: true
 
 ## Next safe action
 
-Create the dedicated research-engine implementation repository from the validated contracts at automated-research-engine-v1@7f09a557240722b4d104cbb7d7a2d99779974755. Initialize PostgreSQL/pgvector schema, content-addressed artifact-store interface, contract/fixture validator, and first five-work corpus load/query tests. Continue through remotely executable implementation work; suspend only at a demonstrated runtime/human-decision/authority boundary per policies/OPERATOR_WORKFLOW.md.
+Human local action is now genuinely required. Create an empty private GitHub repository named adamtrott78/research-engine using the local authenticated gh CLI, and report docker/docker compose availability. Do not initialize files in the repo. After the repo exists, ChatGPT should populate the tested 20-file bootstrap directly through GitHub and then run the prepared PostgreSQL integration test on a capable local runtime. Human-transfer scratch root is ~/adamArchives/Adam/.workspace-control/tmp (or WORKSPACE_CONTROL_SCRATCH_ROOT).
 
 ## Remaining work
 
@@ -49,7 +49,8 @@ Create the dedicated research-engine implementation repository from the validate
 
 ## Blockers / gates
 
-- None.
+- Connected GitHub tooling can mutate existing repositories but exposes no repository-creation operation; the required adamtrott78/research-engine repository does not yet exist.
+- The tested implementation includes a real PostgreSQL/pgvector integration test, but the current executor has neither Docker nor a PostgreSQL server/psql runtime.
 
 ## Fresh-chat initialization
 
