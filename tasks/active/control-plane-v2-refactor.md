@@ -12,7 +12,7 @@
 
 - ID: `control-plane-v2-refactor`
 - Title: Workspace Control Plane v2
-- Status: `CHECKPOINTED`
+- Status: `BLOCKED_RUNTIME`
 
 ## Goal
 
@@ -23,7 +23,7 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `77c7355bbafeb674dd35b55bcfdb542d50c6079c`
+- Current checkpoint: `dc6980284abc17f4c0f96d90b01391e2c952879f`
 - Pushed: `true`
 
 ### Allowed mutation scope
@@ -35,22 +35,24 @@ Design, implement, and validate a workspace-control v2 architecture that general
 
 ## Next safe action
 
-Begin Phase 5 only. Starting from control-plane-v2-refactor@77c7355bbafeb674dd35b55bcfdb542d50c6079c, implement topology-aware preflight within scripts/workspace_control.py, procedures/repo_preflight.md, tests/test_workspace_control.py, and tests/fixtures/**. Preserve the existing preflight invocation as backward-compatible local behavior; add explicit remote topology support without creating a local checkout; model composed work as explicit remote/local checks plus a synchronization boundary rather than one opaque hybrid preflight. Inspect and validate the exact changed-path set before runtime testing. Do not begin topology-aware handoff or worktree-preparation implementation yet.
+Remain in Phase 5. Validate the exact pushed checkpoint dc6980284abc17f4c0f96d90b01391e2c952879f in a runtime with GitHub access: execute the repository unit tests and the documented --topology remote preflight against control-plane-v2-refactor using expected parent dc6980284abc17f4c0f96d90b01391e2c952879f, reversible consequence, confirmed write capability/access, the capsule's allowed mutation scope, and the three Phase 5 changed paths. Require the remote preflight to report READY with advertised SHA dc6980284abc17f4c0f96d90b01391e2c952879f and verify it does not manufacture or require a local checkout. Record durable runtime evidence, then and only then mark Phase 5 validated/checkpointed and open Phase 6. Do not begin topology-aware handoff or worktree-preparation implementation yet.
 
 ## Remaining work
 
-- Implement Phase 5 topology-aware preflight while preserving the existing local preflight invocation and semantics.
-- Add explicit remote topology preflight that validates registry identity, expected remote/ref/SHA, writable policy, mutation scope, expected parent when supplied, and operation capability/authorization without manufacturing a local checkout.
-- Add composed-transition checks sufficient to prove remote and local identities and their synchronization boundary without assuming remote mutation updated local state.
-- Update procedures/repo_preflight.md and add bounded tests/fixtures for local backward compatibility, remote expected-SHA match/mismatch, non-writable repositories, isolated task branches, and composed synchronization assumptions.
-- Run source/diff validation first, then bounded real-runtime validation before opening Phase 6 topology-aware handoff scope.
+- Run exact-checkpoint Phase 5 integrated runtime validation for control-plane-v2-refactor@dc6980284abc17f4c0f96d90b01391e2c952879f in a runtime with GitHub access, without switching/cleaning/resetting/stashing existing workspace worktrees.
+- Run tests/test_workspace_control.py from the exact Phase 5 source and require the full suite to pass.
+- Run the documented remote preflight against workspace-control branch control-plane-v2-refactor with expected parent dc6980284abc17f4c0f96d90b01391e2c952879f, reversible consequence, confirmed write-capable surface, the capsule's allowed scope, and the three actual Phase 5 mutation paths; require READY and advertised SHA dc6980284abc17f4c0f96d90b01391e2c952879f.
+- Confirm the remote preflight itself did not create or require a local checkout and that composed execution remains an explicit remote/local synchronization boundary.
+- Only after those runtime checks pass, mark Phase 5 validated/checkpointed and open Phase 6 topology-aware handoff scope.
 
 ## Latest completed runtime gate
 
-- `PHASE4_RUNTIME_RESULT=PASS`
-- `VALIDATED_COMMIT=77c7355bbafeb674dd35b55bcfdb542d50c6079c`
-- v2 capsule is explicitly refused by v1 handoff semantics.
-- Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified.
+- `PHASE5_LOGIC_HARNESS=PASS`
+- Target implementation checkpoint: `dc6980284abc17f4c0f96d90b01391e2c952879f`
+- GitHub connector independently verified the target branch head at that checkpoint.
+- An isolated bare-remote harness exercised the new remote-preflight state machine and `git ls-remote` path without checkout inspection.
+- Exact-checkpoint CLI-to-GitHub runtime validation remains pending because this executor cannot resolve `github.com`.
+- Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified by the bounded harness.
 
 ## Validation state
 
@@ -102,10 +104,25 @@ Begin Phase 5 only. Starting from control-plane-v2-refactor@77c7355bbafeb674dd35
   - This confirms v2 task state is not silently interpreted under v1 local-only handoff rules.
 - **Phase 4 runtime non-interference with existing worktrees:** `PASS`
   - Lambda reported that existing workspace worktrees were not switched, cleaned, reset, stashed, or modified.
+- **Phase 5 exact changed-path set:** `PASS`
+  - Compare 77c7355bbafeb674dd35b55bcfdb542d50c6079c...dc6980284abc17f4c0f96d90b01391e2c952879f reports exactly procedures/repo_preflight.md, scripts/workspace_control.py, and tests/test_workspace_control.py.
+  - All changed paths are inside the capsule's authorized Phase 5 mutation scope.
+- **Phase 5 topology/source contract inspection:** `PASS`
+  - Default preflight topology is local and the existing local state/payload path remains in place.
+  - Remote inspection calls git ls-remote against the registered remote URL and does not inspect a checkout/worktree.
+  - Parser permits only local or remote topology; composed execution is documented as separate remote/local preflights plus a synchronization boundary.
+- **Phase 5 bounded logic harness:** `PASS`
+  - PHASE5_LOGIC_HARNESS=PASS against an isolated temporary bare remote.
+  - Policy-edge harness also passed non-writable refusal and rejection of opaque composed preflight.
+  - No existing workspace worktree was switched, cleaned, reset, stashed, or modified by these harnesses.
+- **Phase 5 exact-checkpoint integrated runtime validation:** `NOT_RUN`
+  - GitHub connector verified control-plane-v2-refactor currently advertises dc6980284abc17f4c0f96d90b01391e2c952879f.
+  - The current ChatGPT container cannot resolve github.com, so the exact pushed workspace_control.py could not complete a real git ls-remote to GitHub here.
+  - Do not treat the bounded harness as a substitute for exact-checkpoint end-to-end runtime validation.
 
 ## Blockers / known limitations
 
-- None recorded.
+- Exact-checkpoint Phase 5 integrated runtime validation is pending: the current ChatGPT container has no outbound GitHub DNS/network. The target implementation is pushed at dc6980284abc17f4c0f96d90b01391e2c952879f, exact changed-path/source checks pass, and the bounded bare-remote logic harness passes, but the exact pushed CLI has not yet been executed end-to-end against the real GitHub remote.
 
 ## Fresh-chat initialization
 
@@ -136,10 +153,10 @@ Current target branch:
 control-plane-v2-refactor
 
 Current target checkpoint:
-77c7355bbafeb674dd35b55bcfdb542d50c6079c
+dc6980284abc17f4c0f96d90b01391e2c952879f
 
 Current phase:
-Phase 5 — topology-aware preflight
+Phase 5 — topology-aware preflight (exact-checkpoint runtime validation pending)
 
 Do not broaden mutation scope beyond the capsule. Do not begin topology-aware handoff or worktree-preparation implementation until Phase 5 is validated and checkpointed.
 ```
