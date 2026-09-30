@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: automated-research-engine-v1
 - Title: Automated research engine v1
-- Status: IN_PROGRESS
+- Status: BLOCKED_RUNTIME
 - Capsule schema: v2
 
 ## Goal
@@ -30,12 +30,12 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: 24e62c9165b155cda23763dcf1d97b14d923b2b9
+- Remote checkpoint: 56533236666d17e742c96528807ced11dbc3b92d
 - Remote verified: true
 
 ## Next safe action
 
-Run the bounded local exact-PDF promotion bundle for the three PADataset files 2013_scheirer_toward_open_set_recognition.pdf, 2020_liu_energy_ood_detection.pdf, and 2024_baye_varmax_milcom.pdf at their manifest-recorded local paths. Emit SHA-256, byte length, PDF magic/page count, and package exact copies into one temporary tar.gz for upload to the extraction executor. Do not modify PADataset.
+Run architecture/research-engine/exact-pdf-promotion-protocol-v1.md's noninteractive local command against the manifest-recorded PADataset checkout. Return the printed receipt and upload /tmp/research-engine-pdf-promotion.tar.gz. Do not modify PADataset. After receipt/upload, verify the bundle and resume vertical_slice_validation with exact-PDF parsing and OCR-fidelity comparison.
 
 ## Remaining work
 
@@ -48,7 +48,7 @@ Run the bounded local exact-PDF promotion bundle for the three PADataset files 2
 
 ## Blockers / gates
 
-- None.
+- Exact source PDFs for the next fidelity test are local-only in the PADataset checkout and are not available to this executor. A bounded read-only local bundle is required for Scheirer 2013, Liu 2020, and Baye 2024.
 
 ## Fresh-chat initialization
 
