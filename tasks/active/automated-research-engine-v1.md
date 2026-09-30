@@ -30,21 +30,20 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: d0e5f8e652081f531b51b1518795f9b1628b2696
+- Remote checkpoint: 9984c3d68e01bbaea6dafe6dc941df82d1184ced
 - Remote verified: true
 
 ## Next safe action
 
-Continue evidence_graph from automated-research-engine-v1@d0e5f8e652081f531b51b1518795f9b1628b2696. Define the storage-agnostic graph projection and query contract using the first full-text fixture. Prove that a query can traverse from the paper's conclusion claim to supporting/qualifying result/method evidence and back to exact PDF page/bbox locators. Do not select the database yet.
+Continue synthesis_gap_engine from automated-research-engine-v1@9984c3d68e01bbaea6dafe6dc941df82d1184ced. Define SynthesisArtifact and GapCandidate contracts. Build a one-paper synthesis only as a scoped machinery test, clearly labeling its evidence boundary. Then generate one or more candidate gap hypotheses and adversarially search current literature for prior work that could invalidate them; do not mark any RF OSR gap SUPPORTED_AS_OPEN until additional papers are ingested.
 
 ## Remaining work
 
-- Define the durable evidence-graph projection from Work/WorkVersion, evidence objects, locators, and EvidenceRelation records without losing source-specific context.
-- Build graph queries that can answer which source results support/qualify/contradict a claim and return exact source locators.
-- Test graph projection and retrieval against the first full-text paper fixture.
-- Extend extraction to several additional deep-read pilot papers during vertical-slice validation to test schema generality and cross-paper relations.
-- Choose persistence/indexing architecture only after graph/query requirements are demonstrated against real evidence objects.
-- Build provenance-preserving synthesis, contradiction handling, gap generation, and adversarial novelty challenge.
+- Define reproducible SynthesisArtifact and GapCandidate projection/query contracts over evidence-graph snapshots.
+- Generate a first synthesis from the one-paper graph while explicitly declaring that its evidence scope is one work and is insufficient for field-level conclusions.
+- Generate candidate gap signals only as hypotheses/inferences, then run adversarial novelty searches intended to disprove them.
+- Ingest additional pilot papers before accepting any field-level RF OSR gap as SUPPORTED_AS_OPEN.
+- Choose persistence/indexing architecture only after graph/synthesis/query requirements are demonstrated against real evidence objects.
 - Build the research-program/funding/proposal layer and explicit human gates.
 - Bridge an approved research program into a workspace-control project execution workflow.
 - After the end-to-end pipeline is validated, bootstrap the first real RF OSR knowledge corpus from the PDFs already curated/cited in the user's research paper and stored in PADataset's paper area; resolve the exact PADataset route at that time and ingest them through the same provenance-preserving pipeline rather than special-casing them.
