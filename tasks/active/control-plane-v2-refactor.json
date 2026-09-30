@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "BLOCKED_RUNTIME",
+  "status": "CHECKPOINTED",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -35,12 +35,10 @@
       "checkpoint_sha": "f021956b398d3356337f489c59deaa83182d81ba",
       "checkpoint_pushed": true,
       "allowed_mutation_scope": [
-        "schemas/workflow_descriptor.v1.schema.json",
-        "scripts/workspace_control.py",
-        "procedures/workflow_descriptor.md",
-        "templates/workflow_descriptor.v1.json",
-        "tests/test_workspace_control.py",
-        "tests/fixtures/**"
+        "AGENTS.md",
+        ".agents/skills/workspace-control/SKILL.md",
+        "adapters/codex/global/AGENTS.md",
+        "procedures/codex_adapter.md"
       ]
     }
   ],
@@ -261,6 +259,17 @@
         "Exact binding requires a tracked descriptor unchanged from HEAD and returns repository, repository-relative path, checkpoint SHA, and content/blob SHA.",
         "Owner context and entry-route paths must exist at the same durable repository HEAD.",
         "Detailed artifact-lifecycle semantics remain deferred to Phase 9."
+      ]
+    },
+    {
+      "summary": "Completed exact-checkpoint Phase 8 integrated runtime validation.",
+      "evidence": [
+        "Validated checkpoint f021956b398d3356337f489c59deaa83182d81ba.",
+        "46 unit tests passed.",
+        "Positive fixture and template resolved exact durable Git bindings.",
+        "Live task state and invalid forward dependencies were rejected for the intended reasons.",
+        "PHASE8_RUNTIME_RESULT=PASS.",
+        "No existing workspace worktree was modified."
       ]
     }
   ],
@@ -598,27 +607,29 @@
     },
     {
       "check": "Phase 8 exact-checkpoint integrated runtime validation",
-      "result": "NOT_RUN",
+      "result": "PASS",
       "evidence": [
-        "Target implementation is pushed at f021956b398d3356337f489c59deaa83182d81ba.",
-        "Exact-checkpoint unit and CLI workflow-validation runtime checks are pending in an isolated GitHub-connected runtime.",
-        "Do not begin Phase 9 until this validation passes and is recorded."
+        "Exact isolated checkout and advertised remote both resolved f021956b398d3356337f489c59deaa83182d81ba.",
+        "Full Python unit suite completed 46 tests with OK.",
+        "Positive workflow fixture validated with exact checkpoint and content/blob binding.",
+        "Workflow template validated with exact checkpoint and content/blob binding.",
+        "Live task state fixture failed explicitly with live task state forbidden: status.",
+        "Invalid dependency fixture failed explicitly because the dependency did not name an earlier declared stage.",
+        "Validation was read-only and did not modify existing workspace worktrees.",
+        "PHASE8_RUNTIME_RESULT=PASS."
       ]
     }
   ],
-  "blockers": [
-    "Exact-checkpoint Phase 8 integrated runtime validation is pending for control-plane-v2-refactor@f021956b398d3356337f489c59deaa83182d81ba."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Run the full Python unit suite from exact checkpoint f021956b398d3356337f489c59deaa83182d81ba.",
-    "Run workflow-validate on the committed positive workflow fixture and require VALID with a binding to the exact Phase 8 checkpoint and exact blob SHA.",
-    "Run workflow-validate on the committed workflow template and require VALID with an exact binding.",
-    "Run workflow-validate on the live-task-state negative fixture and require invalid status with explicit live-state rejection.",
-    "Run workflow-validate on the invalid-dependency fixture and require invalid status with earlier-stage dependency rejection.",
-    "Verify the validator itself does not alter the checkout and existing workspace worktrees remain untouched.",
-    "Only after those checks pass, mark Phase 8 validated/checkpointed and open Phase 9 artifact lifecycle."
+    "Integrate the preserved thin Codex adapter layer into the v2 candidate.",
+    "Route adapter discovery through README -> PORTABILITY_CONTRACT -> OPERATOR_WORKFLOW -> relevant procedure.",
+    "Route to task capsules and workflow descriptors when durable task/workflow state is relevant.",
+    "Do not introduce Codex-only workflow semantics or duplicate authoritative policy.",
+    "Rerun read-only adapter discovery validation.",
+    "Prove the workflow remains conceptually operable if the adapter layer is removed."
   ],
-  "next_safe_action": "Remain in Phase 8. Validate exact pushed checkpoint f021956b398d3356337f489c59deaa83182d81ba in an isolated GitHub-connected runtime. Run the full unit suite and workflow-validate CLI against the positive fixture, template, live-state negative fixture, and invalid-dependency fixture. Require positive bindings to resolve to checkpoint f021956b398d3356337f489c59deaa83182d81ba with exact content/blob identities, require the negative cases to fail for the intended reasons, and verify no checkout/worktree mutation. Record runtime evidence, then and only then mark Phase 8 validated/checkpointed and open Phase 9 artifact lifecycle.",
+  "next_safe_action": "Begin Phase 9 only. Starting from control-plane-v2-refactor@f021956b398d3356337f489c59deaa83182d81ba, integrate AGENTS.md, .agents/skills/workspace-control/SKILL.md, adapters/codex/global/AGENTS.md, and procedures/codex_adapter.md from the preserved Phase-4 adapter evidence, updating them only as necessary to route through the current v2 README, PORTABILITY_CONTRACT, OPERATOR_WORKFLOW, relevant procedures, task capsules, and workflow descriptors. Keep all four files thin and non-authoritative. Do not change CLI/schema behavior. Inspect the exact changed-path set and perform read-only adapter discovery validation before opening any later phase.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
