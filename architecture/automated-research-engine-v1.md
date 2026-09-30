@@ -877,3 +877,28 @@ say:
 
 Once that object is trustworthy, search, graph storage, synthesis, gap inference,
 and proposal generation can all be built around it.
+
+
+## 18. Evidence contract
+
+The detailed v1 evidence/provenance contract is maintained at:
+
+- [research-engine/evidence-contract-v1.md](research-engine/evidence-contract-v1.md)
+
+That contract defines the minimum durable objects and traceability path required
+before persistence technology is selected.
+
+The core support path is:
+
+```text
+scientific statement
+  -> evidence object / relation
+  -> result or source claim
+  -> experiment/method/context
+  -> work version
+  -> immutable source artifact
+  -> exact/qualified source locator
+```
+
+Generated synthesis and inference must point into that graph rather than replacing
+it.
