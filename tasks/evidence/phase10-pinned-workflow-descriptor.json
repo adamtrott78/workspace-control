@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "workflow_id": "phase10-pinned-workflow",
+  "title": "Phase 10 pinned workflow version A",
+  "purpose": "Regression fixture proving exact workflow recovery after the live branch advances.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "README.md"
+  },
+  "entry_route": [
+    "README.md",
+    "policies/PORTABILITY_CONTRACT.md",
+    "policies/OPERATOR_WORKFLOW.md"
+  ],
+  "stages": [
+    {
+      "id": "inspect",
+      "execution_owner": "workspace-control",
+      "authority_owners": [
+        "README.md"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Exact pinned descriptor identity is recoverable."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": "phase10-pinned-workflow"
+}
