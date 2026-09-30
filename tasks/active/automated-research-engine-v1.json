@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "1c32bde9e57772e81bb6eb6898d6cbd817ddbf87",
+        "checkpoint_sha": "7f40545ac0ccf891d8a108a6b83180eb9f5b5428",
         "verified": true
       },
       "local": null,
@@ -191,8 +191,26 @@
         "ingress_prototype",
         "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "git:7f40545ac0ccf891d8a108a6b83180eb9f5b5428",
+        "artifact:architecture/research-engine/extraction-contract-v1.md",
+        "artifact:architecture/research-engine/fixtures/open-set-rf-2108.13099v1-abstract-extraction-v1.json",
+        "schema:schemas/research-engine/source-locator.v1.schema.json",
+        "schema:schemas/research-engine/evidence-object.v1.schema.json",
+        "schema:schemas/research-engine/extraction-run.v1.schema.json"
+      ],
+      "validation": [
+        {
+          "check": "abstract-only extraction boundary",
+          "result": "PASS",
+          "evidence": [
+            "Extraction contract defines explicit source levels from METADATA_ONLY through FULLTEXT_PDF_LAYOUT/OCR_DERIVED.",
+            "First fixture is explicitly ABSTRACT_ONLY and contains 8 typed evidence objects with one STRUCTURAL abstract locator.",
+            "Fixture does not assert PDF page numbers, table/figure values, sample counts, architecture details, or numeric improvements unavailable from the abstract.",
+            "Source-derived evidence and model normalization remain structurally distinct."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
@@ -318,6 +336,15 @@
         "First lawful full-text SourceArtifact recorded for arXiv 2108.13099v1.",
         "SHA-256 7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab; byte length 816786; PDF magic verified."
       ]
+    },
+    {
+      "id": "research-engine-extraction-contract",
+      "kind": "git_commit",
+      "identity": "7f40545ac0ccf891d8a108a6b83180eb9f5b5428",
+      "required_for_resume": true,
+      "evidence": [
+        "Extraction contract, SourceLocator/EvidenceObject/ExtractionRun schemas, and conservative abstract-only extraction fixture committed."
+      ]
     }
   ],
   "artifacts": [
@@ -405,6 +432,30 @@
         "Contains one NETWORK_UNAVAILABLE attempt and one successful ACQUIRED attempt for the same resolved OA source.",
         "Successful attempt produced SourceArtifact sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab."
       ]
+    },
+    {
+      "path": "architecture/research-engine/extraction-contract-v1.md",
+      "state": "durable",
+      "role": "extraction-contract",
+      "origin": "automated-research-engine-v1@7f40545ac0ccf891d8a108a6b83180eb9f5b5428",
+      "persistence": "git-tracked",
+      "regeneration": "explicit contract evolution",
+      "review_requirement": "Must preserve source-level, locator-quality, raw/normalized, and inference boundaries.",
+      "evidence": [
+        "Committed with the initial extraction schemas."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/open-set-rf-2108.13099v1-abstract-extraction-v1.json",
+      "state": "durable",
+      "role": "abstract-extraction-regression-fixture",
+      "origin": "automated-research-engine-v1@7f40545ac0ccf891d8a108a6b83180eb9f5b5428",
+      "persistence": "git-tracked",
+      "regeneration": "preserve as ABSTRACT_ONLY baseline; full-text extraction should create a new superseding fixture",
+      "review_requirement": "Must never be relabeled as full-text evidence.",
+      "evidence": [
+        "Contains 8 typed evidence objects from authoritative arXiv abstract metadata only."
+      ]
     }
   ],
   "validation": [
@@ -488,21 +539,29 @@
         "Three reproducible searches, canonical identity resolution, metadata screening, lawful OA source resolution, failed-attempt preservation, and successful content-hashed acquisition are all durably represented.",
         "Validated ingress checkpoint 1c32bde9e57772e81bb6eb6898d6cbd817ddbf87."
       ]
+    },
+    {
+      "check": "extraction contract and abstract baseline",
+      "result": "PASS",
+      "evidence": [
+        "Extraction contract checkpoint 7f40545ac0ccf891d8a108a6b83180eb9f5b5428.",
+        "ABSTRACT_ONLY fixture proves conservative typed extraction and locator semantics before full-text access."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Parse the first acquired source into a normalized document representation with stable source locators.",
-    "Extract and validate typed scientific evidence from arXiv 2108.13099v1: research question, method, experiment, dataset/population, metric, result, claim, and limitation where present.",
-    "Create a manually checked benchmark annotation for the first paper and compare automated extraction against it.",
+    "Make the exact acquired PDF artifact for arXiv 2108.13099v1 accessible to the extraction executor and verify its SHA-256 against 7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab.",
+    "Parse that exact PDF into a normalized document representation with page/section/block locators.",
+    "Create a full-text typed evidence fixture covering research question, methods, experiments, dataset, metrics, quantitative results, and limitations/assumptions where present.",
+    "Manually verify a benchmark subset of source locators and numerical values.",
     "Extend extraction to several additional deep-read pilot papers to test schema generality.",
     "Choose persistence/indexing architecture only after real ingress/extraction objects demonstrate storage/query requirements.",
     "Build provenance-preserving synthesis, contradiction handling, gap generation, and adversarial novelty challenge.",
     "Build the research-program/funding/proposal layer and explicit human gates.",
-    "Bridge an approved research program into a workspace-control project execution workflow.",
-    "Run the narrow-domain vertical slice and measure evidence fidelity, traceability, novelty false-positive rate, and execution handoff quality."
+    "Bridge an approved research program into a workspace-control project execution workflow."
   ],
-  "next_safe_action": "Continue extraction_pipeline using the exact SourceArtifact for arXiv 2108.13099v1 (SHA-256 7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab). Build a normalized document/source-locator representation and a first typed evidence fixture for the paper. Preserve exact source locations and distinguish source-derived statements from inference. Do not choose the persistence database yet.",
+  "next_safe_action": "Provide the exact locally acquired /tmp/research-engine-2108.13099v1.pdf to the current extraction executor (prefer direct file upload). Verify its SHA-256 is 7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab before extraction. Then parse the full PDF with stable page/section/block locators and create a new FULLTEXT_PDF_* extraction fixture that supersedes, but does not overwrite, the ABSTRACT_ONLY baseline.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
