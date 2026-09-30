@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: automated-research-engine-v1
 - Title: Automated research engine v1
-- Status: BLOCKED_RUNTIME
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -22,7 +22,7 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Repository: workspace-control
 - Path: policies/OPERATOR_WORKFLOW.md
-- Checkpoint: 03a51fdbe2a9153f2b5e45054eec6e927a9dda36
+- Checkpoint: 56ca8f608202b6700129a2a54feb74d1d43c9cbf
 
 ## Repositories
 
@@ -35,7 +35,7 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Next safe action
 
-Human local action is now genuinely required. Create an empty private GitHub repository named adamtrott78/research-engine using the local authenticated gh CLI, and report docker/docker compose availability. Do not initialize files in the repo. After the repo exists, ChatGPT should populate the tested 20-file bootstrap directly through GitHub and then run the prepared PostgreSQL integration test on a capable local runtime. Human-transfer scratch root is ~/adamArchives/Adam/.workspace-control/tmp (or WORKSPACE_CONTROL_SCRATCH_ROOT).
+Populate the newly created private adamtrott78/research-engine repository with the tested 20-file implementation bootstrap, verify exact file hashes/remote checkpoint, register the repository in workspace-control, then continue remotely executable implementation. Run the prepared PostgreSQL/pgvector integration test when a capable runtime becomes available. Do not stop merely because the runtime test is pending while independent safe implementation work remains.
 
 ## Remaining work
 
@@ -49,8 +49,7 @@ Human local action is now genuinely required. Create an empty private GitHub rep
 
 ## Blockers / gates
 
-- Connected GitHub tooling can mutate existing repositories but exposes no repository-creation operation; the required adamtrott78/research-engine repository does not yet exist.
-- The tested implementation includes a real PostgreSQL/pgvector integration test, but the current executor has neither Docker nor a PostgreSQL server/psql runtime.
+- PostgreSQL/pgvector integration test remains pending until a capable runtime is confirmed. This does not block remote repository population or further implementation work.
 
 ## Fresh-chat initialization
 
