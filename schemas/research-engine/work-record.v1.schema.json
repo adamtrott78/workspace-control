@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/work-record.v1.schema.json",
+  "title": "Research Engine Work/Version Resolution v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "work_id",
+    "title",
+    "candidate_refs",
+    "versions",
+    "resolution_state"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "work_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "external_ids": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "resolution_state": {
+      "enum": [
+        "NEW_WORK",
+        "SAME_WORK_SAME_VERSION",
+        "SAME_WORK_DIFFERENT_VERSION",
+        "POSSIBLE_DUPLICATE",
+        "DISTINCT_WORK",
+        "NEEDS_REVIEW"
+      ]
+    },
+    "resolution_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "versions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "work_version_id",
+          "version_type",
+          "external_ids",
+          "source_locations"
+        ],
+        "properties": {
+          "work_version_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "version_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "external_ids": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "is_version_of_record": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "source_locations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_location_id",
+                "provider",
+                "uri",
+                "source_class",
+                "access_class",
+                "resolved_at"
+              ],
+              "properties": {
+                "source_location_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "provider": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uri": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_class": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "access_class": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "license": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "format": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "resolved_at": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

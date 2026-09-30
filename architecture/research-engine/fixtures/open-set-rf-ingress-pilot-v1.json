@@ -1,0 +1,304 @@
+{
+  "schema_version": 1,
+  "manifest_id": "open-set-rf-ingress-pilot-v1",
+  "research_scope": "Open-set/open-world RF fingerprinting, transmitter authorization, emitter identification, and automatic modulation recognition",
+  "created_at": "2026-09-30",
+  "discovery_runs": [
+    {
+      "schema_version": 1,
+      "discovery_run_id": "rf-osr-pilot-q1",
+      "provider": "openalex",
+      "adapter": {
+        "name": "sider-scholar/search_open_access_works",
+        "version": "2026-09-30"
+      },
+      "query": "\"Open Set RF Fingerprinting\" generative outlier",
+      "parameters": {
+        "per_page": 10,
+        "page": 1
+      },
+      "provider_run_id": "6fa20d79-ad4d-49ad-bff5-a452a845b2c8",
+      "started_at": "2026-09-30",
+      "completed_at": "2026-09-30",
+      "parent_discovery_run_id": null,
+      "expansion_type": "QUERY",
+      "results": [
+        {
+          "rank": 1,
+          "provider_work_id": "https://openalex.org/W3197616054",
+          "title": "Open Set RF Fingerprinting using Generative Outlier Augmentation",
+          "authors_text": "Samurdhi Karunaratne, Samer Hanna, Danijela Branislav Čabrić",
+          "doi": null,
+          "source_url": "https://arxiv.org/pdf/2108.13099"
+        },
+        {
+          "rank": 2,
+          "provider_work_id": "https://openalex.org/W4214569028",
+          "title": "WiSig: A Large-Scale WiFi Signal Dataset for Receiver and Channel Agnostic RF Fingerprinting",
+          "authors_text": "Samer Hanna, Samurdhi Karunaratne, Danijela Branislav Čabrić",
+          "doi": null,
+          "source_url": "https://ieeexplore.ieee.org/ielx7/6287639/9668973/09721895.pdf"
+        },
+        {
+          "rank": 3,
+          "provider_work_id": "https://openalex.org/W7164509050",
+          "title": "Out-of-Distribution (OOD) Detectors for Open-Set RF Fingerprinting",
+          "authors_text": "Sudeepta Mondal, Ganesh Sundaramoorthi",
+          "doi": null,
+          "source_url": "https://arxiv.org/pdf/2606.12718"
+        },
+        {
+          "rank": 4,
+          "provider_work_id": "https://openalex.org/W7161587027",
+          "title": "Dynamic and Open-Set RF Fingerprinting and Localization in Crowded Indoor Environments through Contrastive Channel State Information Learning",
+          "authors_text": "Fawaz Abdul Razak, Yasin Yilmaz",
+          "doi": null,
+          "source_url": "https://arxiv.org/pdf/2605.15593"
+        },
+        {
+          "rank": 5,
+          "provider_work_id": "https://openalex.org/W4385480376",
+          "title": "Radio frequency fingerprint identification for Internet of Things: A survey",
+          "authors_text": "Lingnan Xie, Linning Peng, Junqing Zhang, Aiqun Hu",
+          "doi": null,
+          "source_url": "https://sands.edpsciences.org/articles/sands/pdf/forth/sands20230017.pdf"
+        },
+        {
+          "rank": 6,
+          "provider_work_id": "https://openalex.org/W4224991115",
+          "title": "Efficient Open-Set Recognition for Interference Signals Based on Convolutional Prototype Learning",
+          "authors_text": "Xiangwei Chen, Zhijin Zhao, Xueyi Ye, Shilian Zheng, Caiyi Lou, Xiaoniu Yang",
+          "doi": null,
+          "source_url": "https://www.mdpi.com/2076-3417/12/9/4380/pdf?version=1651136782"
+        },
+        {
+          "rank": 7,
+          "provider_work_id": "https://openalex.org/W4322504422",
+          "title": "A Knowledge Inference and Sharing-Based Open-Set Device Recognition Approach for Satellite-Terrestrial-Integrated IoT",
+          "authors_text": "Ying Li Yang, Lidong Zhu",
+          "doi": null,
+          "source_url": "https://www.mdpi.com/2079-9292/12/5/1143/pdf?version=1677484015"
+        },
+        {
+          "rank": 8,
+          "provider_work_id": "https://openalex.org/W7166824432",
+          "title": "Reliable vessel identity verification for maritime traffic systems using AIS physical features",
+          "authors_text": "Liang Chen, Lele Li, Yang Sun",
+          "doi": null,
+          "source_url": "https://www.frontiersin.org/journals/marine-science/articles/10.3389/fmars.2026.1858626/pdf"
+        },
+        {
+          "rank": 9,
+          "provider_work_id": "https://openalex.org/W4377009965",
+          "title": "HiNoVa: A Novel Open-Set Detection Method for Automating RF Device Authentication",
+          "authors_text": "Luke Puppo, Wong, Weng-Keen, Bechir Hamdaoui, Abdurrahman Elmaghbub",
+          "doi": null,
+          "source_url": "https://arxiv.org/pdf/2305.09594"
+        },
+        {
+          "rank": 10,
+          "provider_work_id": "https://openalex.org/W4392954577",
+          "title": "On the extraction of RF fingerprints from LSTM hidden-state values for robust open-set detection",
+          "authors_text": "Luke Puppo, Weng-Keen Wong, Bechir Hamdaoui, Abdurrahman Elmaghbub, Lucy Q. Lin",
+          "doi": null,
+          "source_url": "https://www.itu.int/dms_pub/itu-s/opb/jnl/S-JNL-VOL5.ISSUE1-2024-A10-PDF-E.pdf"
+        }
+      ]
+    },
+    {
+      "schema_version": 1,
+      "discovery_run_id": "rf-osr-pilot-q2",
+      "provider": "openalex",
+      "adapter": {
+        "name": "sider-scholar/search_open_access_works",
+        "version": "2026-09-30"
+      },
+      "query": "\"Open Set Wireless Transmitter Authorization\"",
+      "parameters": {
+        "per_page": 10,
+        "page": 1
+      },
+      "provider_run_id": "48d9fa77-3f94-49c9-8db3-234e814d0657",
+      "started_at": "2026-09-30",
+      "completed_at": "2026-09-30",
+      "parent_discovery_run_id": null,
+      "expansion_type": "QUERY",
+      "results": [
+        {
+          "rank": 1,
+          "provider_work_id": "https://openalex.org/W3021303548",
+          "title": "Open Set Wireless Transmitter Authorization: Deep Learning Approaches and Dataset Considerations",
+          "authors_text": "Samer Hanna, Samurdhi Karunaratne, Danijela Branislav Čabrić",
+          "doi": null,
+          "source_url": "https://arxiv.org/pdf/2005.00954"
+        },
+        {
+          "rank": 2,
+          "provider_work_id": "https://openalex.org/W3006634433",
+          "title": "Deep Learning Approaches for Open Set Wireless Transmitter Authorization",
+          "authors_text": "Samer Hanna, Samurdhi Karunaratne, Danijela Branislav Čabrić",
+          "doi": null,
+          "source_url": "https://arxiv.org/pdf/2002.07777"
+        },
+        {
+          "rank": 3,
+          "provider_work_id": "https://openalex.org/W4287790782",
+          "title": "Open Set Wireless Transmitter Authorization: Deep Learning Approaches\\n and Dataset Considerations",
+          "authors_text": "Samer Hanna, Samurdhi Karunaratne, Danijela Čabrić",
+          "doi": null,
+          "source_url": "https://arxiv.org/pdf/2005.00954"
+        },
+        {
+          "rank": 4,
+          "provider_work_id": "https://openalex.org/W4214569028",
+          "title": "WiSig: A Large-Scale WiFi Signal Dataset for Receiver and Channel Agnostic RF Fingerprinting",
+          "authors_text": "Samer Hanna, Samurdhi Karunaratne, Danijela Branislav Čabrić",
+          "doi": null,
+          "source_url": "https://ieeexplore.ieee.org/ielx7/6287639/9668973/09721895.pdf"
+        },
+        {
+          "rank": 5,
+          "provider_work_id": "https://openalex.org/W4385480376",
+          "title": "Radio frequency fingerprint identification for Internet of Things: A survey",
+          "authors_text": "Lingnan Xie, Linning Peng, Junqing Zhang, Aiqun Hu",
+          "doi": null,
+          "source_url": "https://sands.edpsciences.org/articles/sands/pdf/forth/sands20230017.pdf"
+        },
+        {
+          "rank": 6,
+          "provider_work_id": "https://openalex.org/W3097148708",
+          "title": "Penetrating RF Fingerprinting-based Authentication with a Generative Adversarial Attack",
+          "authors_text": "Samurdhi Karunaratne, Enes Krijestorac, Danijela Branislav Čabrić",
+          "doi": null,
+          "source_url": "https://arxiv.org/pdf/2011.01538"
+        },
+        {
+          "rank": 7,
+          "provider_work_id": "https://openalex.org/W3197616054",
+          "title": "Open Set RF Fingerprinting using Generative Outlier Augmentation",
+          "authors_text": "Samurdhi Karunaratne, Samer Hanna, Danijela Branislav Čabrić",
+          "doi": null,
+          "source_url": "https://arxiv.org/pdf/2108.13099"
+        },
+        {
+          "rank": 8,
+          "provider_work_id": "https://openalex.org/W4229371957",
+          "title": "Multi-Classifier Fusion for Open-Set Specific Emitter Identification",
+          "authors_text": "Yurui Zhao, Xiang Wang, Ziyu Lin, Zhitao Huang",
+          "doi": null,
+          "source_url": "https://www.mdpi.com/2072-4292/14/9/2226/pdf?version=1651916244"
+        },
+        {
+          "rank": 9,
+          "provider_work_id": "https://openalex.org/W3093454165",
+          "title": "PAST-AI: Physical-Layer Authentication of Satellite Transmitters via Deep Learning",
+          "authors_text": "Gabriele Oligeri, Savio Sciancalepore, Simone Raponi, Roberto Di Pietro",
+          "doi": null,
+          "source_url": "https://ieeexplore.ieee.org/ielx7/10206/9970396/09936663.pdf"
+        },
+        {
+          "rank": 10,
+          "provider_work_id": "https://openalex.org/W4317927930",
+          "title": "Cross-Domain Adaptation for RF Fingerprinting Using Prototypical Networks",
+          "authors_text": "Steven Mackey, Tianya Zhao, Xuyu Wang, Shiwen Mao",
+          "doi": null,
+          "source_url": "https://dl.acm.org/doi/pdf/10.1145/3560905.3568100"
+        }
+      ]
+    },
+    {
+      "schema_version": 1,
+      "discovery_run_id": "rf-osr-pilot-q3",
+      "provider": "openalex",
+      "adapter": {
+        "name": "sider-scholar/search_open_access_works",
+        "version": "2026-09-30"
+      },
+      "query": "\"Automatic Modulation Open Set Recognition\"",
+      "parameters": {
+        "per_page": 10,
+        "page": 1
+      },
+      "provider_run_id": "8fe5bef4-b8c0-4c4a-8f5e-0df38e8f3358",
+      "started_at": "2026-09-30",
+      "completed_at": "2026-09-30",
+      "parent_discovery_run_id": null,
+      "expansion_type": "QUERY",
+      "results": [
+        {
+          "rank": 1,
+          "provider_work_id": "https://openalex.org/W4385626897",
+          "title": "The Importance of Expert Knowledge for Automatic Modulation Open Set Recognition",
+          "authors_text": "Taotao Li, Zhenyu Wen, Yang Long, Zhen Hong, Shilian Zheng, Li Juan Yu, Bo Chen, Xiaoniu Yang, Ling Shao",
+          "doi": null,
+          "source_url": "https://durham-repository.worktribe.com/preview/1898073/1815190AAM.pdf"
+        },
+        {
+          "rank": 2,
+          "provider_work_id": "https://openalex.org/W4390092590",
+          "title": "Class Information Guided Reconstruction for Automatic Modulation Open-Set Recognition",
+          "authors_text": "Ziwei Zhang, Mengtao Zhu, Liu, Jiabin, Yunjie Li, Shafei Wang",
+          "doi": null,
+          "source_url": "https://arxiv.org/pdf/2312.13023"
+        }
+      ]
+    }
+  ],
+  "candidate_count_raw": 22,
+  "unique_provider_work_count": 19,
+  "identity_observations": [
+    {
+      "type": "REPEATED_PROVIDER_WORK_ACROSS_RUNS",
+      "records": [
+        "W3197616054",
+        "W4214569028",
+        "W4385480376"
+      ],
+      "note": "These OpenAlex IDs recur in multiple focused DiscoveryRuns and must deduplicate without losing per-run provenance/rank."
+    },
+    {
+      "type": "POSSIBLE_SAME_WORK_SAME_VERSION",
+      "records": [
+        "W3021303548",
+        "W4287790782"
+      ],
+      "note": "Two OpenAlex IDs return effectively the same title/authors and the same arXiv PDF 2005.00954; identity resolution must not assume OpenAlex ID uniqueness equals intellectual-work uniqueness."
+    },
+    {
+      "type": "RELATED_DISTINCT_WORK_OR_EARLIER_VERSION",
+      "records": [
+        "W3006634433",
+        "W3021303548",
+        "W4287790782"
+      ],
+      "note": "The 2002.07777 and 2005.00954 arXiv records are closely related but must remain distinct until version/relationship evidence is resolved."
+    }
+  ],
+  "acquisition_observations": [
+    {
+      "source": "https://arxiv.org/pdf/2108.13099",
+      "state": "SOURCE_RESOLVED_OA",
+      "note": "Scholarly provider resolved a lawful arXiv PDF location for W3197616054."
+    },
+    {
+      "source": "https://arxiv.org/pdf/2005.00954",
+      "state": "SOURCE_RESOLVED_OA",
+      "note": "Scholarly provider resolved a lawful arXiv PDF location for both W3021303548 and W4287790782."
+    },
+    {
+      "source": "https://durham-repository.worktribe.com/preview/1898073/1815190AAM.pdf",
+      "state": "SOURCE_RESOLVED_OA",
+      "note": "Scholarly provider resolved an institutional-repository manuscript for W4385626897."
+    },
+    {
+      "source": "https://www.mdpi.com/2076-3417/12/9/4380/pdf?version=1651136782",
+      "state": "SOURCE_RESOLVED_OA",
+      "note": "Scholarly provider resolved an OA publisher PDF for W4224991115."
+    },
+    {
+      "source": "https://arxiv.org/pdf/2108.13099",
+      "state": "ACQUISITION_FAILED_CURRENT_EXECUTOR",
+      "note": "A direct container-network byte fetch failed in the current execution environment. This is recorded separately from OA/source availability and does not downgrade the source to unavailable."
+    }
+  ]
+}

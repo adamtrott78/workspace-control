@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/acquisition-attempt.v1.schema.json",
+  "title": "Research Engine AcquisitionAttempt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "acquisition_attempt_id",
+    "source_location_id",
+    "executor",
+    "started_at",
+    "result"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "acquisition_attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_location_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "executor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "started_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "completed_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "result": {
+      "enum": [
+        "ACQUIRED",
+        "NOT_ATTEMPTED",
+        "ACCESS_REQUIRED",
+        "NETWORK_UNAVAILABLE",
+        "PROVIDER_REJECTED",
+        "NOT_FOUND",
+        "LICENSE_RESTRICTION",
+        "PARSER_UNSUPPORTED",
+        "OTHER_FAILURE"
+      ]
+    },
+    "failure_detail": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "byte_length": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "hash_algorithm": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "content_hash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "artifact_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
