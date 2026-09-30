@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "padataset-control-plane-v2-integration",
   "title": "PADataset workspace-control v2 integration",
-  "status": "CHECKPOINTED",
+  "status": "COMPLETE",
   "goal": "Adopt the promoted workspace-control v2 operating model in PADataset with the smallest project-local integration necessary for durable cold starts, direct-tool-first execution, executor handoff, and task-state recovery while preserving PADataset-owned scientific/domain authority and existing research workflows.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -208,7 +208,7 @@
     },
     {
       "id": "completion",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -217,8 +217,22 @@
         "git:d6f6a7281f20d250423abd35ee5991841677e27d",
         "workflow:workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "result:HANDOFF_SAFE",
+        "checkpoint:PADataset@d6f6a7281f20d250423abd35ee5991841677e27d",
+        "workflow:workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36"
+      ],
+      "validation": [
+        {
+          "check": "Pinned v2 handoff assessment",
+          "result": "PASS",
+          "evidence": [
+            "Evaluated the synchronized CHECKPOINTED capsule against workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36 handoff_assessment_v2 semantics.",
+            "PADataset remote recovery state is verified at d6f6a7281f20d250423abd35ee5991841677e27d; workspace-control remote recovery state is verified at the exact bound workflow checkpoint 03a51fdbe2a9153f2b5e45054eec6e927a9dda36.",
+            "All three required-for-resume checkpoints carry durable evidence; workflow binding resolves through the workspace-control remote entry; the reasons list is empty, yielding HANDOFF_SAFE."
+          ]
+        }
+      ],
       "resume_condition": null
     }
   ],
@@ -292,8 +306,11 @@
     },
     {
       "check": "final v2 HANDOFF_SAFE",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "Exact pinned handoff_assessment_v2 conditions evaluated on the synchronized CHECKPOINTED capsule produced an empty reasons list and result HANDOFF_SAFE.",
+        "PADataset and workspace-control each have verified remote recovery state, and the bound workspace-control workflow checkpoint resolves through the workspace-control repository entry."
+      ]
     },
     {
       "check": "baseline recovery",
@@ -311,12 +328,9 @@
     }
   ],
   "blockers": [],
-  "remaining_work": [
-    "Evaluate the synchronized CHECKPOINTED capsule against the exact pinned workspace-control v2 handoff-check semantics.",
-    "If HANDOFF_SAFE, mark completion validated, set task COMPLETE with no remaining work, synchronize Markdown, then archive the completed JSON and derived Markdown."
-  ],
-  "next_safe_action": "Evaluate this synchronized capsule against workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36 scripts/workspace_control.py handoff_assessment_v2 semantics. Require a handoff-capable status, durable evidence on required checkpoints, ready remote recovery state for PADataset and workspace-control, and exact workflow checkpoint binding. If there are no reasons, record HANDOFF_SAFE and complete/archive the task.",
+  "remaining_work": [],
+  "next_safe_action": "Task complete. For future PADataset work, start from PADataset README.md at the intended ref and create or resume a separate workspace-control task capsule when durable coordination is required.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Independent cold-start validation passed. The capsule now explicitly records workspace-control as a read-only verified recovery repository at the already-pinned workflow checkpoint so the v2 workflow binding is representable to handoff-check."
+  "notes": "PADataset workspace-control v2 adoption completed. Independent README-first cold start passed; project regression passed; pinned v2 handoff assessment returned HANDOFF_SAFE. Final PADataset checkpoint is d6f6a7281f20d250423abd35ee5991841677e27d."
 }
