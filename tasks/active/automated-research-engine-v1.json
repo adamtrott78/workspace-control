@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "f9e2a519b5bcde1c2c5a76579bed695f454658a8",
+        "checkpoint_sha": "24e62c9165b155cda23763dcf1d97b14d923b2b9",
         "verified": true
       },
       "local": null,
@@ -404,7 +404,10 @@
         "git:f9e2a519b5bcde1c2c5a76579bed695f454658a8",
         "artifact:architecture/research-engine/fixtures/rf-osr-curated-multipaper-corpus-v1.json",
         "artifact:architecture/research-engine/fixtures/rf-osr-curated-multipaper-graph-v1.json",
-        "artifact:architecture/research-engine/fixtures/rf-osr-curated-multipaper-synthesis-v1.json"
+        "artifact:architecture/research-engine/fixtures/rf-osr-curated-multipaper-synthesis-v1.json",
+        "git:24e62c9165b155cda23763dcf1d97b14d923b2b9",
+        "artifact:architecture/research-engine/persistence-architecture-v1.md",
+        "artifact:architecture/research-engine/fixtures/persistence-decision-v1.json"
       ],
       "validation": [
         {
@@ -416,6 +419,16 @@
             "Cross-paper synthesis maps every statement to evidence IDs and preserves source fidelity.",
             "Source-supported cross-work relations are distinguished from model-inferred taxonomy/lineage relations.",
             "No field-level novelty conclusion is drawn from the curated subset."
+          ]
+        },
+        {
+          "check": "persistence architecture selection",
+          "result": "PASS",
+          "evidence": [
+            "Selected PostgreSQL 18 as the single authoritative structured store based on demonstrated identity/provenance/graph/query/concurrency requirements.",
+            "Selected content-addressed artifact storage for retained source bytes.",
+            "Selected pgvector 0.8.6 as an optional semantic-retrieval projection, using exact nearest-neighbor search initially.",
+            "Graph relations remain directed adjacency records in PostgreSQL; no separate graph database is introduced without a measured need."
           ]
         }
       ],
@@ -547,6 +560,16 @@
       "evidence": [
         "First curated PADataset-derived multi-paper corpus, graph, and synthesis fixtures committed.",
         "Mixed source-fidelity handling and cross-work relation/query behavior validated."
+      ]
+    },
+    {
+      "id": "research-engine-persistence-architecture",
+      "kind": "git_commit",
+      "identity": "24e62c9165b155cda23763dcf1d97b14d923b2b9",
+      "required_for_resume": true,
+      "evidence": [
+        "Persistence architecture decision and workload rationale committed.",
+        "Authoritative versus rebuildable projection boundaries are explicit."
       ]
     }
   ],
@@ -839,6 +862,30 @@
       "evidence": [
         "First five-work cross-paper vertical-slice fixture."
       ]
+    },
+    {
+      "path": "architecture/research-engine/persistence-architecture-v1.md",
+      "state": "durable",
+      "role": "persistence-architecture-decision",
+      "origin": "automated-research-engine-v1@24e62c9165b155cda23763dcf1d97b14d923b2b9",
+      "persistence": "git-tracked",
+      "regeneration": "explicit architecture revision only after measured revisit trigger",
+      "review_requirement": "Changes require workload evidence because this is the selected v1 persistence boundary.",
+      "evidence": [
+        "Decision based on demonstrated five-work graph/query workload, not hypothetical scale."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/persistence-decision-v1.json",
+      "state": "durable",
+      "role": "persistence-decision-regression-fixture",
+      "origin": "automated-research-engine-v1@24e62c9165b155cda23763dcf1d97b14d923b2b9",
+      "persistence": "git-tracked",
+      "regeneration": "explicit architecture revision only after measured revisit trigger",
+      "review_requirement": "Changes require workload evidence because this is the selected v1 persistence boundary.",
+      "evidence": [
+        "Decision based on demonstrated five-work graph/query workload, not hypothetical scale."
+      ]
     }
   ],
   "validation": [
@@ -978,18 +1025,26 @@
         "Validated at automated-research-engine-v1@f9e2a519b5bcde1c2c5a76579bed695f454658a8.",
         "Five works can be synthesized and related without collapsing exact-PDF and OCR-derived evidence or source-supported and inferred relations."
       ]
+    },
+    {
+      "check": "v1 persistence decision",
+      "result": "PASS",
+      "evidence": [
+        "Validated at automated-research-engine-v1@24e62c9165b155cda23763dcf1d97b14d923b2b9.",
+        "PostgreSQL + content-addressed artifact store + rebuildable pgvector/text/graph projections selected."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Select and document the v1 persistence/index architecture based on demonstrated requirements: immutable source/artifact identity, typed relational records, directed evidence relations, recursive provenance queries, JSON-like extensibility, full-text retrieval, and optional semantic retrieval.",
-    "Mechanically validate representative fixtures against their JSON schemas in the future implementation repository.",
-    "Promote a small subset of PADataset OCR_DERIVED works to exact-PDF-verified artifacts by hashing/parsing their local PDFs, then compare OCR-derived extraction against exact-PDF extraction to measure locator/fidelity error.",
-    "Re-run novelty challenge after additional RF-specific papers are ingested; only then consider whether any candidate can move toward SUPPORTED_AS_OPEN.",
-    "Create the dedicated research-engine implementation repository when a supported repository-creation path is available; move executable provider/parser/storage code there while retaining workspace-control as control plane.",
-    "After the vertical slice passes exact-PDF fidelity checks, bulk-ingest the remainder of the already-curated PADataset reference PDFs through the same pipeline."
+    "Promote three PADataset OCR_DERIVED reference works (Scheirer 2013, Liu 2020, Baye 2024) to exact-PDF-verified artifacts by hashing the local PDFs and making those exact bytes available to the extraction executor.",
+    "For each promoted paper, parse exact PDF layout and compare selected OCR-derived evidence anchors against exact-PDF extraction to quantify locator/text fidelity.",
+    "Mechanically validate representative fixtures against their JSON schemas in the dedicated implementation repository.",
+    "Re-run cross-paper synthesis/novelty challenge using exact-PDF evidence for the promoted subset and additional RF-specific papers.",
+    "Create the dedicated research-engine implementation repository when a supported repository-creation path is available; implement PostgreSQL/artifact-store/provider/parser services there.",
+    "After exact-PDF fidelity checks pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs through the same pipeline."
   ],
-  "next_safe_action": "Continue vertical_slice_validation from automated-research-engine-v1@f9e2a519b5bcde1c2c5a76579bed695f454658a8. Use the demonstrated five-work object/graph/query requirements to choose and document the v1 persistence/index architecture. Preserve immutable evidence/source records as authority and treat graph/vector indexes as rebuildable projections. Then prepare a bounded exact-PDF promotion check for 2-3 PADataset local reference PDFs to measure OCR-vs-PDF extraction fidelity.",
+  "next_safe_action": "Run the bounded local exact-PDF promotion bundle for the three PADataset files 2013_scheirer_toward_open_set_recognition.pdf, 2020_liu_energy_ood_detection.pdf, and 2024_baye_varmax_milcom.pdf at their manifest-recorded local paths. Emit SHA-256, byte length, PDF magic/page count, and package exact copies into one temporary tar.gz for upload to the extraction executor. Do not modify PADataset.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
