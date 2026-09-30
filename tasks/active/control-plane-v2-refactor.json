@@ -795,18 +795,41 @@
         "Final PPTX SHA-256: f7806202661086b18f8ec4f0e991dd84d71e744515bdb1e66f8d3d15188895f7.",
         "PHASE10_MILCOM_RESULT=PASS."
       ]
+    },
+    {
+      "check": "Phase 11 exact integration diff review",
+      "result": "PASS",
+      "evidence": [
+        "Compare cb8368cd50de2d364c2aade8843276aab0b02420...b8aa52e242a07e6aa2036516e401864991183ad2 is ahead by 36 commits, behind by 0.",
+        "The cumulative integration diff contains 31 files.",
+        "Every changed path maps to an already recorded Phase 1-9 exact-scope gate: architecture/plan; compatibility schemas/fixtures/tests; executor-neutral contracts/routes; v2 task/handoff implementation; remote preflight; worktree preparation; workflow descriptor validation; and four thin Codex adapter files.",
+        "No PADataset/course-project file is part of the workspace-control target diff.",
+        "Phase 10 required no repair to the frozen target checkpoint."
+      ]
+    },
+    {
+      "check": "Phase 11 v1 compatibility review",
+      "result": "PASS",
+      "evidence": [
+        "Original baseline schemas/task_capsule.schema.json blob at cb8368cd50de2d364c2aade8843276aab0b02420 is 40fa76125f61c0ad8e11a10a45347dbb36c63a84.",
+        "Final schemas/task_capsule.v1.schema.json blob at b8aa52e242a07e6aa2036516e401864991183ad2 is exactly 40fa76125f61c0ad8e11a10a45347dbb36c63a84.",
+        "The final generic schemas/task_capsule.schema.json is intentionally a oneOf dispatcher to task_capsule.v1.schema.json and task_capsule.v2.schema.json.",
+        "v1 validator dispatch remains present in scripts/workspace_control.py.",
+        "Prior exact-checkpoint runtime evidence proved v1 handoff compatibility and the v2/v1 semantic guard.",
+        "No executable workspace-control changes occurred after the 46-test Phase 8 runtime suite; Phase 9 added only the four thin adapter files."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Phase 11 only: review exact integration diff from baseline to frozen target.",
-    "Phase 11 only: confirm no unexplained v1 regression at the final target checkpoint.",
-    "Phase 11 only: transition active coordination state to a v2 checkpoint while preserving this complete v1 history as evidence.",
-    "Phase 11 only: rerun Codex both-direction handoff against the v2 checkpoint.",
-    "Phase 11 only: obtain explicit user decision to promote.",
-    "If all promotion gates pass, promote the reviewed exact target checkpoint and verify final state."
+    "Preserve this completed v1 coordination history as immutable evidence.",
+    "Transition the active coordination capsule to v2 CHECKPOINTED state without changing the frozen target implementation.",
+    "Validate the v2 active capsule and HANDOFF_SAFE state.",
+    "Rerun both-direction Codex handoff against the exact v2 Phase 11 checkpoint.",
+    "Obtain explicit user decision to promote.",
+    "After every gate passes, perform and verify the reviewed promotion."
   ],
-  "next_safe_action": "Phase 10 is complete. Begin Phase 11 promotion decision with target b8aa52e242a07e6aa2036516e401864991183ad2 frozen. Review the exact integration diff, preserve the completed v1 coordination history as immutable evidence, transition the active coordination capsule to v2 CHECKPOINTED state, validate HANDOFF_SAFE, rerun both-direction Codex handoff, confirm no unexplained v1 regression, then request the user's explicit promotion decision. Do not promote before every Phase 11 gate passes.",
+  "next_safe_action": "Preserve the completed v1 coordination capsule as evidence, then replace the active capsule with a v2 CHECKPOINTED coordination capsule that points to the same frozen target and summarized durable evidence. Validate v2 HANDOFF_SAFE, rerun Codex both-direction handoff, obtain explicit user promotion decision, then promote only if all gates pass.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
