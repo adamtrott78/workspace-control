@@ -12,7 +12,7 @@
 
 - ID: `control-plane-v2-refactor`
 - Title: Workspace Control Plane v2
-- Status: `IN_PROGRESS`
+- Status: `CHECKPOINTED`
 
 ## Goal
 
@@ -23,7 +23,7 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `5000900823150676d356c54642efdefc560878ca`
+- Current checkpoint: `bb4292d65e858ec2fd527c8984a769e4bb87f955`
 - Pushed: `true`
 
 ### Allowed mutation scope
@@ -35,18 +35,23 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - `schemas/workflow_descriptor.v1.schema.json`
 - `tests/test_workspace_control.py`
 - `tests/fixtures/**`
+- `README.md`
+- `policies/PORTABILITY_CONTRACT.md`
+- `policies/OPERATOR_WORKFLOW.md`
+- `policies/TUTORING_CONTRACT.md`
+- `templates/COURSE_TUTOR_ADAPTER.md`
+- `procedures/TUTOR_EVALUATION.md`
 
 ## Next safe action
 
-On control-plane-v2-refactor@5000900823150676d356c54642efdefc560878ca, verify the branch/ref still points to that exact parent, then create only the Phase 2 schema/test scaffolding paths in one coherent commit if possible. Do not modify scripts/workspace_control.py or shared contracts yet. Validate exact changed paths and v1 schema equivalence afterward.
+On control-plane-v2-refactor@bb4292d65e858ec2fd527c8984a769e4bb87f955, integrate only README.md, policies/PORTABILITY_CONTRACT.md, policies/OPERATOR_WORKFLOW.md, policies/TUTORING_CONTRACT.md, templates/COURSE_TUTOR_ADAPTER.md, and procedures/TUTOR_EVALUATION.md. Use shared-operator-tutor-contract@450eebeef6b76a674913949863082277b6bdb811 as evidence, but adapt its terminology to v2 and preserve project-local authority. Do not modify scripts, task procedures, Codex adapters, or PADataset.
 
 ## Remaining work
 
-- Implement Phase 2 compatibility scaffolding in one coherent commit if the low-level Git surface supports exact-parent tree construction safely.
-- Prove the v1 schema copy is byte-equivalent to the current schema before any executable behavior changes.
-- Add a v2 capsule schema skeleton, workflow descriptor schema skeleton, standard-library test harness, and fixtures without modifying scripts/workspace_control.py.
-- Review and validate the exact Phase 2 diff.
-- Only after Phase 2 passes, open the next bounded scope for shared-contract integration.
+- Integrate Phase 3 shared contracts/root routing from the preserved shared-operator-tutor-contract evidence, adapting terminology to the reviewed v2 architecture rather than blindly merging.
+- Review the exact Phase 3 diff for authority leakage, stale two-executor language, and project-specific semantics.
+- Keep scripts/workspace_control.py unchanged until the later validator/task-render phase.
+- After shared-contract integration passes, open the next bounded scope for schema-version dispatch and deterministic task-render behavior.
 
 ## Validation state
 
@@ -68,6 +73,14 @@ On control-plane-v2-refactor@5000900823150676d356c54642efdefc560878ca, verify th
 - **V2 implementation plan reviewed:** `PASS`
   - architecture/control-plane-v2-implementation.md reviewed through control-plane-v2-refactor@5000900823150676d356c54642efdefc560878ca
   - Review preserved exact shared-contract pins, optional workflow descriptors, deferred project adoption, and derived handoff synchronization.
+- **Phase 2 exact changed-path set:** `PASS`
+  - Compare 5000900823150676d356c54642efdefc560878ca...bb4292d65e858ec2fd527c8984a769e4bb87f955 reports exactly the three schema paths, one test file, and five fixture files authorized for Phase 2.
+- **V1 schema compatibility copy:** `PASS`
+  - schemas/task_capsule.schema.json and schemas/task_capsule.v1.schema.json both resolve to Git blob 40fa76125f61c0ad8e11a10a45347dbb36c63a84 at bb4292d65e858ec2fd527c8984a769e4bb87f955.
+- **Phase 2 JSON schema/fixture parse:** `PASS`
+  - All three schema files and all five JSON fixtures were independently reread from bb4292d65e858ec2fd527c8984a769e4bb87f955 and parsed successfully.
+- **Python Phase 2 unittest execution:** `NOT_RUN`
+  - No local/runtime executor has executed tests/test_workspace_control.py yet; source/fixture validation is recorded separately and does not imply test-run success.
 
 ## Blockers / known limitations
 
@@ -89,7 +102,7 @@ control-plane-v2-coordination
 Task capsule:
 tasks/active/control-plane-v2-refactor.json
 
-Treat the task capsule, the normal workspace-control root route, exact Git state, and the durable evidence referenced by the capsule as the handoff.
+Treat the task capsule, the normal workspace-control root route, exact Git state, and durable evidence referenced by the capsule as the handoff.
 
 Do not rely on previous conversation state.
 
@@ -99,7 +112,7 @@ Current target branch:
 control-plane-v2-refactor
 
 Current target checkpoint:
-5000900823150676d356c54642efdefc560878ca
+bb4292d65e858ec2fd527c8984a769e4bb87f955
 
 Do not broaden mutation scope beyond the capsule.
 ```
