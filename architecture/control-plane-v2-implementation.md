@@ -1,6 +1,6 @@
 # Workspace Control Plane v2 — Implementation Plan
 
-Status: **draft for review**
+Status: **reviewed implementation candidate v0.1**
 
 Architecture baseline:
 
@@ -205,7 +205,10 @@ The first schema should support only what has repeated empirical evidence:
 
 A workflow descriptor must not contain live task state.
 
-A task capsule referencing it must pin:
+Workflow descriptors are optional. Ad-hoc bounded tasks do not need to be forced
+into a reusable descriptor merely so workspace-control can operate them.
+
+A task capsule referencing a reusable workflow must pin:
 
 ```text
 repository
@@ -377,6 +380,12 @@ Requirements:
 The operating procedure should require regeneration after material capsule
 changes.
 
+Where a local CLI is available, `task-render` provides deterministic generation.
+A DIRECT_TOOL executor that updates coordination state remotely must either
+regenerate the same derived view as part of the same logical coordination
+checkpoint or leave the view explicitly marked stale. The JSON capsule remains
+authoritative in either case.
+
 A later atomic task-update helper may combine validation + render, but v2 should
 not require one initially.
 
@@ -432,6 +441,11 @@ Bring in:
 - `procedures/TUTOR_EVALUATION.md`;
 
 and update only the references/terminology required by v2.
+
+Preserve the proven compatibility-lock pattern: a project adapter that consumes
+shared workspace-control contracts should be able to record the exact compatible
+workspace-control checkpoint/version. Project migration to a newer shared
+contract is explicit rather than silently following a moving branch.
 
 ## 13. Codex adapter integration
 
@@ -665,7 +679,24 @@ Before merging/promoting:
 - reviewed exact integration diff;
 - explicit user decision to promote.
 
-## 17. Initial mutation scope after this plan is approved
+## 17. Project adoption is separate from core implementation
+
+Core v2 implementation must not opportunistically register or migrate every
+known project.
+
+Updates such as:
+
+- adding EAS501/CIS560 or future projects to `repos.json`;
+- replacing PADataset's preserved local operator context;
+- changing course adapter pins;
+- converting existing project workflows into machine-readable descriptors
+
+belong to explicit later adoption/migration tasks after the generic mechanics are
+validated.
+
+This keeps control-plane correctness separable from project migration.
+
+## 18. Initial mutation scope after this plan is approved
 
 Do not authorize every file at once.
 
@@ -688,7 +719,7 @@ step.
 This preserves a clean boundary between defining compatibility fixtures and
 changing executable behavior.
 
-## 18. Review questions
+## 19. Review questions
 
 Before Phase 2 begins:
 
@@ -704,3 +735,9 @@ Before Phase 2 begins:
 8. Are implementation phases narrow enough to diagnose regressions?
 9. Is PADataset still untouched until generic v2 mechanics are proven?
 10. Is the first code-changing phase small enough to review independently?
+11. Are exact shared-contract compatibility pins preserved for project adapters?
+12. Can ad-hoc tasks remain capsule-only without requiring a workflow descriptor?
+13. Is project registration/migration clearly deferred until after generic v2
+    validation?
+14. Can remote DIRECT_TOOL coordination keep the derived handoff synchronized
+    without making the Markdown view authoritative?
