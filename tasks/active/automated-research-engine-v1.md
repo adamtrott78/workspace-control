@@ -37,21 +37,20 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 6b33ababe9e58de33941c8ad2d3161c02551ce7e
+- Remote checkpoint: de1d1a0ca0f649895d461e40a1496071443e32d7
 - Remote verified: true
 
 ## Next safe action
 
-Continue directly in adamtrott78/research-engine from main@6b33ababe9e58de33941c8ad2d3161c02551ce7e. Enforce immutable evidence/relation identity with explicit supersession/history, then add deterministic knowledge checkpoints and PostgreSQL regression tests. Use PR-triggered GitHub Actions as the real PostgreSQL/pgvector runtime. Continue until a genuine capability, authority, or required-human-decision boundary is reached.
+Continue from research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7. First attempt to resolve and acquire an authorized exact source for Broggi 2025 using available scholarly/direct surfaces; do not ask for local bytes while a direct surface may satisfy the requirement. Then expand the RF OSR/OOD corpus and implement reproducible novelty-challenge persistence against knowledge checkpoints. Continue until a genuine capability, authority, or human-decision boundary is reached.
 
 ## Remaining work
 
-- Enforce immutable authoritative evidence/relation IDs: identical re-entry is idempotent, but semantic changes under the same ID must be rejected and represented by superseding records/events.
-- Implement deterministic knowledge checkpoints so syntheses bind to a reproducible corpus/evidence state rather than live database contents.
-- Add database regression tests for supersession/history and deterministic checkpoint reproduction.
-- Promote Broggi 2025 to exact-PDF evidence during corpus scaling; this is not a blocker for implementation hardening.
-- Ingest additional RF-specific papers and re-run novelty challenge before any GapCandidate can move toward SUPPORTED_AS_OPEN.
-- After hardening tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
+- Promote Broggi 2025 from OCR_DERIVED to exact-PDF evidence if an authorized scholarly/direct source can provide exact bytes; otherwise use the existing local PADataset PDF only when a true local-byte boundary is reached.
+- Ingest additional RF-specific open-set/OOD papers into the implementation database and re-run adversarial novelty challenge over a broader corpus.
+- Implement novelty-challenge persistence/query services in research-engine using knowledge checkpoints so prior-work rejection/narrowing is reproducible.
+- Only after broader exact-source corpus validation consider any GapCandidate eligible for SUPPORTED_AS_OPEN.
+- After the scaling slice passes, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
 
 ## Blockers / gates
 

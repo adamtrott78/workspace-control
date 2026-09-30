@@ -62,7 +62,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "6b33ababe9e58de33941c8ad2d3161c02551ce7e",
+        "checkpoint_sha": "de1d1a0ca0f649895d461e40a1496071443e32d7",
         "verified": true
       },
       "local": null,
@@ -440,7 +440,9 @@
         "artifact:architecture/research-engine/implementation-bootstrap-v1.md",
         "artifact:architecture/research-engine/fixtures/implementation-bootstrap-v1.json",
         "git:research-engine@6b33ababe9e58de33941c8ad2d3161c02551ce7e",
-        "runtime:github-actions:PR2:36761375588"
+        "runtime:github-actions:PR2:36761375588",
+        "git:research-engine@de1d1a0ca0f649895d461e40a1496071443e32d7",
+        "runtime:github-actions:PR3:36762254566"
       ],
       "validation": [
         {
@@ -522,6 +524,17 @@
             "Validated fixture contains 5 works, 21 evidence objects, and 11 evidence relations.",
             "Loader is idempotent under repeated import.",
             "Database queries recover mixed source-fidelity counts, Result->SUPPORTS->Claim provenance with exact PDF SHA/page trace, method qualifiers, recursive provenance, and cross-work relation verification state."
+          ]
+        },
+        {
+          "check": "immutable evidence history and checkpoints",
+          "result": "PASS",
+          "evidence": [
+            "PR #3 merged after GitHub Actions run 36762254566 completed successfully.",
+            "Same evidence/relation ID with changed authoritative content is rejected.",
+            "Explicit superseding evidence preserves the old record and links with supersedes_id.",
+            "Verification-event replay is idempotent and preserves event history.",
+            "Knowledge checkpoints are deterministic for identical scientific state and change when supersession changes the authoritative state."
           ]
         }
       ],
@@ -722,6 +735,16 @@
       "evidence": [
         "Five-work normalized corpus loader merged after real PostgreSQL/pgvector CI.",
         "5 works / 21 evidence objects / 11 relations load idempotently and remain provenance-queryable."
+      ]
+    },
+    {
+      "id": "research-engine-immutable-history-checkpoints",
+      "kind": "git_commit",
+      "identity": "de1d1a0ca0f649895d461e40a1496071443e32d7",
+      "required_for_resume": true,
+      "evidence": [
+        "Authoritative evidence/relation IDs are immutable; explicit supersession/history is enforced.",
+        "Deterministic knowledge checkpoints are persisted and regression-tested in PostgreSQL."
       ]
     }
   ],
@@ -1254,18 +1277,25 @@
         "research-engine PR #2 merged at 6b33ababe9e58de33941c8ad2d3161c02551ce7e.",
         "GitHub Actions PostgreSQL/pgvector run 36761375588 passed the full suite including idempotent five-work corpus load/query regression."
       ]
+    },
+    {
+      "check": "immutable scientific history",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #3 merged at de1d1a0ca0f649895d461e40a1496071443e32d7.",
+        "Real PostgreSQL/pgvector CI validates immutable IDs, supersession, verification history, and deterministic knowledge checkpoints."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Enforce immutable authoritative evidence/relation IDs: identical re-entry is idempotent, but semantic changes under the same ID must be rejected and represented by superseding records/events.",
-    "Implement deterministic knowledge checkpoints so syntheses bind to a reproducible corpus/evidence state rather than live database contents.",
-    "Add database regression tests for supersession/history and deterministic checkpoint reproduction.",
-    "Promote Broggi 2025 to exact-PDF evidence during corpus scaling; this is not a blocker for implementation hardening.",
-    "Ingest additional RF-specific papers and re-run novelty challenge before any GapCandidate can move toward SUPPORTED_AS_OPEN.",
-    "After hardening tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs."
+    "Promote Broggi 2025 from OCR_DERIVED to exact-PDF evidence if an authorized scholarly/direct source can provide exact bytes; otherwise use the existing local PADataset PDF only when a true local-byte boundary is reached.",
+    "Ingest additional RF-specific open-set/OOD papers into the implementation database and re-run adversarial novelty challenge over a broader corpus.",
+    "Implement novelty-challenge persistence/query services in research-engine using knowledge checkpoints so prior-work rejection/narrowing is reproducible.",
+    "Only after broader exact-source corpus validation consider any GapCandidate eligible for SUPPORTED_AS_OPEN.",
+    "After the scaling slice passes, bulk-ingest the remainder of the already-curated PADataset reference PDFs."
   ],
-  "next_safe_action": "Continue directly in adamtrott78/research-engine from main@6b33ababe9e58de33941c8ad2d3161c02551ce7e. Enforce immutable evidence/relation identity with explicit supersession/history, then add deterministic knowledge checkpoints and PostgreSQL regression tests. Use PR-triggered GitHub Actions as the real PostgreSQL/pgvector runtime. Continue until a genuine capability, authority, or required-human-decision boundary is reached.",
+  "next_safe_action": "Continue from research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7. First attempt to resolve and acquire an authorized exact source for Broggi 2025 using available scholarly/direct surfaces; do not ask for local bytes while a direct surface may satisfy the requirement. Then expand the RF OSR/OOD corpus and implement reproducible novelty-challenge persistence against knowledge checkpoints. Continue until a genuine capability, authority, or human-decision boundary is reached.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
