@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "work_version_id": "work-version:arxiv:2108.13099v1",
+  "source_location": {
+    "source_location_id": "source-location:arxiv:2108.13099v1:pdf",
+    "provider": "arxiv",
+    "uri": "https://arxiv.org/pdf/2108.13099v1",
+    "source_class": "ARXIV",
+    "access_class": "OPEN_ACCESS",
+    "format": "application/pdf"
+  },
+  "attempts": [
+    {
+      "schema_version": 1,
+      "acquisition_attempt_id": "acq:2108.13099v1:chatgpt-container:2026-09-30",
+      "source_location_id": "source-location:arxiv:2108.13099v1:pdf",
+      "executor": "chatgpt-container",
+      "tool": "curl",
+      "started_at": "2026-09-30T12:00:00-04:00",
+      "completed_at": "2026-09-30T12:00:00-04:00",
+      "result": "NETWORK_UNAVAILABLE",
+      "failure_detail": "Container could not resolve host arxiv.org. Source remained independently resolved through scholarly/web surfaces.",
+      "byte_length": null,
+      "hash_algorithm": null,
+      "content_hash": null,
+      "artifact_ref": null
+    },
+    {
+      "schema_version": 1,
+      "acquisition_attempt_id": "acq:2108.13099v1:user-local:2026-09-30",
+      "source_location_id": "source-location:arxiv:2108.13099v1:pdf",
+      "executor": "user-local-runtime",
+      "tool": "curl",
+      "started_at": "2026-09-30T12:30:00-04:00",
+      "completed_at": "2026-09-30T12:30:00-04:00",
+      "result": "ACQUIRED",
+      "failure_detail": null,
+      "byte_length": 816786,
+      "hash_algorithm": "sha256",
+      "content_hash": "7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "artifact_ref": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab"
+    }
+  ],
+  "source_artifact": {
+    "schema_version": 1,
+    "artifact_id": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+    "work_version_id": "work-version:arxiv:2108.13099v1",
+    "content_hash": "7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+    "hash_algorithm": "sha256",
+    "media_type": "application/pdf",
+    "format": "pdf",
+    "byte_size": 816786,
+    "acquisition_method": "noninteractive local curl",
+    "provider": "arxiv",
+    "source_uri_or_identifier": "https://arxiv.org/pdf/2108.13099v1",
+    "access_class": "OPEN_ACCESS",
+    "license_if_known": null,
+    "retrieved_at": "2026-09-30T12:30:00-04:00",
+    "parser_state": "UNPARSED",
+    "magic": "%PDF-",
+    "local_receipt_path": "/tmp/research-engine-2108.13099v1.pdf"
+  },
+  "receipt_evidence": [
+    "RESEARCH_ENGINE_ACQUISITION_RESULT=PASS",
+    "BYTES=816786",
+    "SHA256=7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+    "PDF_MAGIC=%PDF-"
+  ]
+}

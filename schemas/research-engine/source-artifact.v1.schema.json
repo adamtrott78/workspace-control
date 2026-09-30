@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/source-artifact.v1.schema.json",
+  "title": "Research Engine SourceArtifact v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_id",
+    "work_version_id",
+    "content_hash",
+    "hash_algorithm",
+    "media_type",
+    "format",
+    "byte_size",
+    "acquisition_method",
+    "provider",
+    "source_uri_or_identifier",
+    "access_class",
+    "retrieved_at",
+    "parser_state"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "work_version_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "hash_algorithm": {
+      "const": "sha256"
+    },
+    "media_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "format": {
+      "type": "string",
+      "minLength": 1
+    },
+    "byte_size": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "acquisition_method": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_uri_or_identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "access_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "license_if_known": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "retrieved_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parser_state": {
+      "type": "string",
+      "minLength": 1
+    },
+    "magic": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "local_receipt_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
