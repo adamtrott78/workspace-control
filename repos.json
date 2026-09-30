@@ -93,6 +93,17 @@
       "authority": "cross-project operating policy, portability contracts, and shared control-plane tooling",
       "worktree_policy": "isolated_task_worktrees_preferred",
       "recursive_mutation_forbidden": false
+    },
+    "research-engine": {
+      "path": "research-engine",
+      "remote": "git@github.com:adamtrott78/research-engine.git",
+      "role": "managed",
+      "writable": true,
+      "canonical_branch": "main",
+      "context_entry": "README.md",
+      "authority": "executable automated research-engine implementation, persistence, provider/parser/query services, tests, and project-owned runtime behavior",
+      "worktree_policy": "isolated_task_worktrees_preferred",
+      "recursive_mutation_forbidden": false
     }
   }
 }
