@@ -40,6 +40,46 @@ route to authority
 A proposed, generated, inspected, or explained operation is not evidence that it
 executed.
 
+## Continuation obligation
+
+An authorized executor MUST continue advancing a task while a safe, in-scope
+operation surface remains available.
+
+A chat turn, commit boundary, successful substage, convenient stopping point, or
+desire to summarize is **not** a suspension boundary.
+
+The executor may stop/suspend only when at least one of these is true:
+
+1. **Unavailable execution capability** — the next required operation genuinely
+   cannot be performed through any currently authorized direct tool, connected
+   executor, repository surface, or available runtime.
+2. **Required human judgment or approval** — the owning workflow explicitly
+   requires a user decision, visual/subjective judgment, approval, credential
+   action, physical-world action, or other human-owned input before continuation.
+3. **Authority/safety boundary** — continuation would exceed mutation authority,
+   risk unrelated work, require a destructive/externally consequential action
+   without approval, or violate an owning contract.
+4. **Missing irreducible input** — required source bytes/data/hardware are not
+   available to any current executor and cannot be retrieved through an
+   authorized surface.
+
+Before declaring a runtime/local boundary, the executor MUST check whether the
+operation can instead continue through another authorized surface. For example,
+a container network failure is not a task boundary when a connected scholarly
+tool can still complete the next scientific step; conversely, exact byte hashing
+is a genuine boundary when only the user's local filesystem contains the bytes.
+
+When suspension is necessary, durable task state MUST record:
+
+- the exact unavailable capability or required human decision;
+- why currently available surfaces cannot satisfy it;
+- the smallest resume condition;
+- the first safe operation after resume.
+
+If another authorized operation can still make meaningful progress without
+invalidating the blocked step, perform that work before suspending.
+
+
 ## Authority boundary
 
 This policy owns shared rules for:
@@ -292,6 +332,30 @@ other owned procedure rather than a long sequence of ephemeral commands.
 A one-off text edit does not require a permanent script merely because Bash can
 perform it.
 
+## Scratch and human-transfer artifacts
+
+Use `/tmp` only for executor-internal ephemeral scratch that the human does not
+need to locate, upload, inspect, or carry across executor boundaries.
+
+When an operation will produce a file the user must access, prefer the shared
+workspace scratch root:
+
+`~/adamArchives/Adam/.workspace-control/tmp`
+
+Executors SHOULD honor `WORKSPACE_CONTROL_SCRATCH_ROOT` when set; otherwise the
+workspace path above is the default for this environment.
+
+Create task-specific subdirectories beneath that root rather than dropping files
+directly into `~/adamArchives/Adam`.
+
+A command that produces a human-transfer artifact SHOULD print its final absolute
+path and hash/identity. Do not force the user to copy an artifact out of
+`/tmp` merely because the executor chose an inaccessible scratch location.
+
+Project-owned durable outputs still belong in their owning repository/artifact
+location; the shared scratch root is a transfer/staging area, not a new source of
+truth.
+
 ## Human-terminal command integrity
 
 Copy/paste integrity is part of the workflow.
@@ -535,7 +599,13 @@ Representative tests should include:
 - narrow staging/commit/push;
 - post-push reread;
 - Codex → ChatGPT+human handoff;
-- ChatGPT+human → Codex handoff.
+- ChatGPT+human → Codex handoff;
+- premature-suspension regression: executor continues across available direct/
+  composed surfaces and suspends only at a demonstrated capability, approval,
+  authority, or irreducible-input boundary;
+- human-transfer scratch regression: user-accessible artifacts are emitted under
+  the configured workspace scratch root rather than requiring a manual copy out
+  of `/tmp`.
 
 Failures should be classified as routing, content, implementation, evidence, or
 executor-portability defects.
