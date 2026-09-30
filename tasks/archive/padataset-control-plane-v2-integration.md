@@ -3,7 +3,7 @@
 
 Derived human-readable view.
 
-Authoritative capsule: tasks/active/padataset-control-plane-v2-integration.json
+Authoritative capsule: tasks/archive/padataset-control-plane-v2-integration.json
 
 If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
 
@@ -57,7 +57,7 @@ Task complete. For future PADataset work, start from PADataset README.md at the 
 @GitHub
 
 Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/padataset-control-plane-v2-integration.json
+Task capsule: tasks/archive/padataset-control-plane-v2-integration.json
 
 Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
