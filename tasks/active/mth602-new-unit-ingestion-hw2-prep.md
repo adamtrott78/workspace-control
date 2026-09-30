@@ -30,7 +30,7 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: 6b1cefa7c6d36e0c33e7aaaa926bd07f07b46e1a
+- Remote checkpoint: 20dc641dcb9b505efe53daa52932521d0927ef3a
 - Remote verified: True
 
 ### workspace-control
@@ -42,20 +42,21 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Bridge the exact current instructor lab and HW2 artifacts from local origin/main@5c037ac5e16249f6d6fa107f50f73ceac848f60d into a user-uploadable bundle without changing the instructor checkout. Read and execute the lab first because it is due 2026-09-30; then ingest/bootstrap HW2 from Homeworks/hw2/ for its 2026-10-05 deadline.
+Begin HW2 Floating-point Problem 1 using homework/hw02/CONTEXT.md, the 2026-09-21 floating-point lecture synthesis, and study/TUTORING.md. Diagnose the student's understanding before counting mathematical mastery. The completed Lab1 artifact should be submitted separately as soon as practical.
 
 ## Remaining work
 
-- Bridge exact authoritative lab and HW2 source bytes from instructor origin/main@5c037ac5e16249f6d6fa107f50f73ceac848f60d without modifying the instructor checkout.
-- Prioritize and complete Lab1-ProbabilyCoin.ipynb, due 2026-09-30, preserving its exact instructions and required deliverable.
-- Ensure the final project-topic action item due 2026-09-30 is not missed.
-- Ingest HW2 exact source package from Homeworks/hw2/ and bootstrap homework/hw02; HW2 is due 2026-10-05.
+- Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.
+- Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.
+- Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.
+- Work HW2 one bounded problem at a time under the tutoring/mastery protocol, starting with Floating-point Problem 1.
+- Build and visually validate the final reproducible HW2 report and separately verify actual submission.
 - Complete exact-byte transfer of previously ingested classroom originals when a suitable binary transfer surface is available.
-- Validate final MTH602 branch state, synchronize task JSON/Markdown, establish HANDOFF_SAFE, and archive when complete.
+- Synchronize final task JSON/Markdown, establish HANDOFF_SAFE, and archive when the task's preparation/assignment boundary is complete.
 
 ## Blockers / gates
 
-- The current GitHub connector still cannot directly read sfield17/MTH602-Fall2026-SciML. Exact lab/HW2 contents must be bridged from the user's local instructor checkout at origin/main@5c037ac5e16249f6d6fa107f50f73ceac848f60d before their requirements can be interpreted or student work created.
+- Final cold-start completeness still requires exact binary transfer of hw2.pdf, hw2.csv, and the two instructor PNG reference assets into homework/hw02; current conversation can continue because those exact bytes are mounted and verified.
 
 ## Fresh-chat initialization
 
