@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: mth602-new-unit-ingestion-hw2-prep
 - Title: MTH 602 new-unit ingestion and HW2 preparation
-- Status: CHECKPOINTED
+- Status: BLOCKED_EVIDENCE
 - Capsule schema: v2
 
 ## Goal
@@ -42,21 +42,19 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Accept the next lecture ZIP from the user if additional new-unit sessions remain. Inspect the actual images directly, recover date/order/overlap from image evidence and mathematical continuity, distinguish any notebook images as student-derived supplemental evidence, and do not use OCR/Mathpix unless direct vision proves insufficient. If the user indicates the lecture-image intake is complete, route next to authoritative HW2 availability resolution before bootstrapping any assignment requirements.
+Obtain a current read-only snapshot of the local instructor checkout at ~/adamArchives/Adam/classes/MTH602-Fall2026-SciML: fetch origin/main without changing the worktree, report the exact origin/main SHA and recent commits, print README lines relevant to lab/HW2/deadlines, and list candidate assignment/lab paths. Then immediately identify the lab due 2026-09-30 and bootstrap that urgent artifact before continuing HW2.
 
 ## Remaining work
 
-- Upload any remaining lecture ZIP batches; for each batch, visually establish date/order/overlap and synthesize the session without default OCR.
-- When a batch contains notebook images, preserve them as student-derived supplemental evidence rather than direct professor-board evidence.
-- Complete exact-byte transfer of classroom originals into each session source tree and verify them against recorded SHA-256 manifests when a suitable binary transfer surface is available.
-- Resolve exact current instructor-slide/projected-source provenance where accessible and update only claims that stronger source evidence supports.
-- After all new-unit sessions are represented, finish cumulative topic/dependency/notation promotion without inferring mastery.
-- Resolve HW2 authoritative availability and either bootstrap its exact contract or checkpoint an HW2-ready state.
-- Validate the final task branch, synchronize task JSON/Markdown, establish HANDOFF_SAFE, and archive when complete.
+- Recover the current instructor origin/main SHA, README deadlines/tasks, and assignment/lab file paths from the user's local instructor checkout without modifying its working tree.
+- Prioritize the lab reported due tonight (2026-09-30): identify its exact source path, instructions, required artifacts, and deadline before beginning lower-urgency work.
+- Identify and ingest the authoritative HW2 artifact at its exact upstream commit and bootstrap homework/hw02 through the existing homework/source workflow.
+- Complete exact-byte transfer of previously ingested classroom originals when a suitable binary transfer surface is available.
+- Validate final MTH602 branch state, synchronize task JSON/Markdown, establish HANDOFF_SAFE, and archive when complete.
 
 ## Blockers / gates
 
-- None.
+- Authoritative current instructor-repository evidence is inaccessible from this chat's GitHub connection. A current read-only snapshot from the user's local checkout ~/adamArchives/Adam/classes/MTH602-Fall2026-SciML is required to identify HW2 and the lab due 2026-09-30 without guessing.
 
 ## Fresh-chat initialization
 
