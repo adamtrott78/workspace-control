@@ -746,18 +746,32 @@
         "Commit 108d7840918751153253671af49c3451d8e6fe96 added deterministic final PowerPoint assembly while preserving the project-local presentation workflow.",
         "Fresh exact-head local rebuild/render and human visual approval are still pending before the reference regression can be marked PASS."
       ]
+    },
+    {
+      "check": "Phase 10 MILCOM fresh rebuild harness attempt",
+      "result": "FAIL",
+      "evidence": [
+        "Exact PADataset milcom-presentation checkpoint 108d7840918751153253671af49c3451d8e6fe96 loaded cleanly.",
+        "All required tools and Python dependencies were present.",
+        "Project-owned build_milcom26_svg_slides.py completed successfully and rebuilt all 12 template-integrated SVGs.",
+        "The harness then stopped before the human visual gate because it incorrectly required zero tracked diff after regeneration.",
+        "The rebuild changed exactly the 12 generated slide SVGs in the disposable clone.",
+        "PADataset presentations/milcom2026/slides/README.md explicitly states that committed SVG files predate the final template pass until the wrapper is executed and generated slides are reviewed/committed.",
+        "Commit 162bdb5517829e3187473cccacd56583a7716941 changed the slide builder and slide README for bounded visual repairs but did not commit regenerated slide SVGs; commit 108d7840918751153253671af49c3451d8e6fe96 added final assembly only.",
+        "Therefore the zero-diff assertion was a regression-harness defect, not a PADataset workflow defect or workspace-control implementation defect."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Run the MILCOM reference regression at exact PADataset milcom-presentation@108d7840918751153253671af49c3451d8e6fe96 in a disposable clone.",
-    "Rebuild the twelve template-integrated SVGs using the project-owned build_milcom26_svg_slides.py command and require no source diff after regeneration.",
-    "Render all twelve rebuilt SVGs to fresh 1920x1080 PNGs outside the worktree and assemble a 4x3 contact sheet.",
-    "Perform a human visual QA gate on the fresh contact sheet.",
-    "After approval, assemble a fresh PPTX outside the worktree using the project-owned assembler and verify its built-in structural checks.",
+    "Rerun the MILCOM reference regression at exact PADataset milcom-presentation@108d7840918751153253671af49c3451d8e6fe96 in a disposable clone.",
+    "Allow regeneration drift only for the twelve presentations/milcom2026/slides/slide*.svg outputs; require no other tracked or untracked repository changes.",
+    "Render the regenerated SVGs to twelve fresh 1920x1080 PNGs outside the worktree and assemble a 4x3 contact sheet.",
+    "Perform an explicit human visual QA gate on the fresh contact sheet.",
+    "After approval, assemble a fresh PPTX outside the worktree using the project-owned assembler and verify its built-in and independent structural checks.",
     "Record the reference regression PASS, reconcile the full 16-item matrix, and open Phase 11 promotion decision."
   ],
-  "next_safe_action": "Continue Phase 10 with the workspace-control target frozen. Run the bounded MILCOM reference regression against PADataset milcom-presentation@108d7840918751153253671af49c3451d8e6fe96 in a disposable clone. Rebuild the project-owned SVG sources, require deterministic no-diff regeneration, render twelve fresh 1920x1080 PNGs and a 4x3 contact sheet outside the worktree, stop for explicit human visual approval, then assemble and structurally verify the final PPTX outside the worktree. Do not migrate or modify PADataset operator architecture.",
+  "next_safe_action": "Remain in Phase 10. Rerun the MILCOM reference regression with the corrected generated-artifact gate: exact PADataset checkpoint 108d7840918751153253671af49c3451d8e6fe96, project-owned SVG rebuild, allow only the twelve regenerated slide SVG outputs to differ in the disposable clone, forbid any other repository changes, render fresh PNGs/contact sheet outside the worktree, stop for explicit human visual approval, then assemble and structurally verify the PPTX. Do not modify PADataset or the frozen workspace-control target.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
