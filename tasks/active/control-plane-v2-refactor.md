@@ -23,7 +23,7 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `01ebfed8d8b79ec1cbf52930c6f02b13eeae4386`
+- Current checkpoint: `84a7e67a8af2b701ab63829468c92e46221a72f9`
 - Pushed: `true`
 
 ### Allowed mutation scope
@@ -35,11 +35,11 @@ Design, implement, and validate a workspace-control v2 architecture that general
 
 ## Next safe action
 
-Remain in Phase 7. Validate exact pushed checkpoint 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 in an isolated GitHub-connected runtime. Run the full unit suite and bounded real-Git worktree-prepare scenarios proving read-only CREATE_AVAILABLE, explicit --create -> READY at the exact checkpoint, existing READY behavior, dirty-state preservation/refusal, divergence refusal without branch movement, and non-interference with existing workspace worktrees. Record the runtime evidence, then and only then mark Phase 7 validated/checkpointed and open the next planned phase.
+Remain in Phase 7. Validate repaired exact pushed checkpoint 84a7e67a8af2b701ab63829468c92e46221a72f9 in an isolated GitHub-connected runtime. Run the full unit suite and bounded real-Git worktree-prepare scenarios proving missing-local-branch handling, read-only CREATE_AVAILABLE, explicit --create -> READY at the exact checkpoint, existing READY behavior, dirty-state preservation/refusal, divergence refusal without branch movement, and non-interference with existing workspace worktrees. Record the runtime evidence, then and only then mark Phase 7 validated/checkpointed and open the next planned phase.
 
 ## Remaining work
 
-- Run the complete Python unit suite from exact checkpoint 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 in an isolated temporary clone.
+- Run the complete Python unit suite from repaired exact checkpoint 84a7e67a8af2b701ab63829468c92e46221a72f9 in an isolated temporary clone; the suite now includes the missing-local-branch regression.
 - Run worktree-prepare read-only against an isolated temporary repository and require CREATE_AVAILABLE without creating the target.
 - Run the same request with --create and require READY at the exact branch/checkpoint.
 - Re-run read-only assessment on the created worktree and require READY without mutation.
@@ -48,12 +48,13 @@ Remain in Phase 7. Validate exact pushed checkpoint 01ebfed8d8b79ec1cbf52930c6f0
 - Verify non-interference with existing workspace worktrees.
 - Only after those checks pass, mark Phase 7 validated/checkpointed and follow the implementation plan's next phase.
 
-## Latest completed runtime gate
+## Latest runtime evidence
 
-- `PHASE6_RUNTIME_RESULT=PASS`
-- `VALIDATED_COMMIT=f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9`
-- Phase 7 implementation checkpoint: `01ebfed8d8b79ec1cbf52930c6f02b13eeae4386`
-- Phase 7 exact-checkpoint runtime validation is pending.
+- Failed Phase 7 checkpoint: `01ebfed8d8b79ec1cbf52930c6f02b13eeae4386`
+- Failure: missing local branch was misclassified as an error by the Git ref probe.
+- Repaired Phase 7 checkpoint: `84a7e67a8af2b701ab63829468c92e46221a72f9`
+- Repair: use `git rev-parse --verify --quiet` so an absent local branch is represented as `MISSING`.
+- Repaired exact-checkpoint runtime validation is pending.
 
 ## Validation state
 
@@ -143,8 +144,8 @@ Remain in Phase 7. Validate exact pushed checkpoint 01ebfed8d8b79ec1cbf52930c6f0
   - HANDOFF_SAFE remained independent from receiver-specific EXECUTION_READY.
   - Validation reported PHASE6_RUNTIME_RESULT=PASS and explicit non-interference with existing workspace worktrees.
 - **Phase 7 exact changed-path set:** `PASS`
-  - Compare f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 reports exactly procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py.
-  - All changed paths are inside the capsule's authorized Phase 7 mutation scope.
+  - Compare f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...84a7e67a8af2b701ab63829468c92e46221a72f9 reports exactly procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py.
+  - All changed paths remain inside the capsule's authorized Phase 7 mutation scope.
 - **Phase 7 source/contract inspection:** `PASS`
   - worktree-prepare command is registered and requires an absolute target path, branch, and exact checkpoint.
   - Missing safe worktrees return CREATE_AVAILABLE unless --create is explicitly supplied.
@@ -154,13 +155,24 @@ Remain in Phase 7. Validate exact pushed checkpoint 01ebfed8d8b79ec1cbf52930c6f0
   - Occupied broken symlink targets are detected instead of being hidden by path resolution.
   - Real Git tests cover the Phase 7 creation, dirty, divergence, identity, and policy gates.
 - **Phase 7 exact-checkpoint integrated runtime validation:** `NOT_RUN`
-  - Target implementation is pushed at 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386.
-  - Exact-checkpoint unit/CLI runtime validation is pending in an isolated GitHub-connected terminal.
-  - Do not open the next implementation phase until this validation passes and is recorded.
+  - Repaired target implementation is pushed at 84a7e67a8af2b701ab63829468c92e46221a72f9.
+  - Exact-checkpoint unit/CLI runtime validation has not yet been rerun after the repair.
+  - Do not open the next implementation phase until the repaired checkpoint passes.
+- **Phase 7 runtime validation at 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386:** `FAIL`
+  - Exact checkpoint and isolated clone preconditions passed.
+  - Full unit suite result: Ran 36 tests; FAILED (failures=1).
+  - Failure: test_explicit_create_may_create_missing_local_branch_at_exact_sha expected EXIT_READY=0 but observed 10.
+  - No explicit worktree-prepare CLI creation scenario ran after the unit-suite failure.
+- **Phase 7 root-cause and repair inspection:** `PASS`
+  - Independent Git behavior reproduction confirmed show-ref --verify --hash returns exit 128 for an absent local branch.
+  - Independent Git behavior reproduction confirmed rev-parse --verify --quiet returns exit 1 for an absent local branch.
+  - A raw isolated Git worktree add -b <branch> <target> <expected-sha> succeeds when the local branch is absent, the remote branch exists, and the commit is locally available.
+  - Repaired source maps exit 1 to MISSING and preserves other nonzero states as ERROR.
+  - Regression test explicitly covers MISSING rather than ERROR for the absent local branch.
 
 ## Blockers / known limitations
 
-- Exact-checkpoint Phase 7 integrated runtime validation is pending for control-plane-v2-refactor@01ebfed8d8b79ec1cbf52930c6f02b13eeae4386.
+- Exact-checkpoint Phase 7 integrated runtime validation must be rerun for repaired checkpoint control-plane-v2-refactor@84a7e67a8af2b701ab63829468c92e46221a72f9.
 
 ## Fresh-chat initialization
 
@@ -191,10 +203,10 @@ Current target branch:
 control-plane-v2-refactor
 
 Current target checkpoint:
-01ebfed8d8b79ec1cbf52930c6f02b13eeae4386
+84a7e67a8af2b701ab63829468c92e46221a72f9
 
 Current phase:
-Phase 7 — worktree preparation (runtime validation pending)
+Phase 7 — worktree preparation (repaired checkpoint runtime validation pending)
 
 Do not broaden mutation scope beyond the capsule.
 ```
