@@ -12,7 +12,7 @@
     "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
   },
   "parent_execution_owner": "research-operating-system",
-  "current_stage": "extraction_pipeline",
+  "current_stage": "evidence_graph",
   "acceptance_criteria": [
     "The architecture explicitly separates source evidence, extracted evidence, normalized knowledge, synthesis, model inference, and human judgment.",
     "Every durable scientific evidence object can be traced to a canonical work/version, immutable source artifact identity, and source locator whenever the available representation permits it.",
@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "7f40545ac0ccf891d8a108a6b83180eb9f5b5428",
+        "checkpoint_sha": "d0e5f8e652081f531b51b1518795f9b1628b2696",
         "verified": true
       },
       "local": null,
@@ -183,7 +183,7 @@
     },
     {
       "id": "extraction_pipeline",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "composed",
@@ -197,7 +197,13 @@
         "artifact:architecture/research-engine/fixtures/open-set-rf-2108.13099v1-abstract-extraction-v1.json",
         "schema:schemas/research-engine/source-locator.v1.schema.json",
         "schema:schemas/research-engine/evidence-object.v1.schema.json",
-        "schema:schemas/research-engine/extraction-run.v1.schema.json"
+        "schema:schemas/research-engine/extraction-run.v1.schema.json",
+        "git:d0e5f8e652081f531b51b1518795f9b1628b2696",
+        "artifact:architecture/research-engine/fixtures/open-set-rf-2108.13099v1-normalized-document-v1.json",
+        "artifact:architecture/research-engine/fixtures/open-set-rf-2108.13099v1-fulltext-extraction-v1.json",
+        "artifact:architecture/research-engine/fixtures/open-set-rf-2108.13099v1-fulltext-verification-v1.json",
+        "schema:schemas/research-engine/normalized-document.v1.schema.json",
+        "schema:schemas/research-engine/evidence-relation.v1.schema.json"
       ],
       "validation": [
         {
@@ -209,18 +215,31 @@
             "Fixture does not assert PDF page numbers, table/figure values, sample counts, architecture details, or numeric improvements unavailable from the abstract.",
             "Source-derived evidence and model normalization remain structurally distinct."
           ]
+        },
+        {
+          "check": "first exact full-text deep-read extraction",
+          "result": "PASS",
+          "evidence": [
+            "Uploaded PDF exactly matched the previously acquired artifact: 816786 bytes, SHA-256 7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab.",
+            "PyMuPDF 1.26.7 parsed all 6 pages and produced exact page/bounding-box source locators for evidence-source blocks.",
+            "Full-text fixture contains 17 typed evidence objects spanning research question, dataset/population, metric, experiments, methods, results, assumption, limitations, and claim.",
+            "10 evidence relations connect methods, experiments, results, limitations, and the conclusion claim.",
+            "No figure curves were digitized; quantitative evidence was included only when explicitly stated in source text.",
+            "FULLTEXT_PDF_LAYOUT extraction supersedes rather than overwrites the prior ABSTRACT_ONLY baseline."
+          ]
         }
       ],
       "resume_condition": null
     },
     {
       "id": "evidence_graph",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
-      "selected_surface": "composed",
+      "selected_surface": "github",
       "inputs": [
-        "extraction_pipeline"
+        "extraction_pipeline",
+        "git:d0e5f8e652081f531b51b1518795f9b1628b2696"
       ],
       "outputs": [],
       "validation": [],
@@ -345,6 +364,16 @@
       "evidence": [
         "Extraction contract, SourceLocator/EvidenceObject/ExtractionRun schemas, and conservative abstract-only extraction fixture committed."
       ]
+    },
+    {
+      "id": "research-engine-first-fulltext-extraction",
+      "kind": "git_commit",
+      "identity": "d0e5f8e652081f531b51b1518795f9b1628b2696",
+      "required_for_resume": true,
+      "evidence": [
+        "First exact PDF deep-read fixture committed with normalized-document map, typed evidence objects, evidence relations, and verification receipt.",
+        "Artifact identity verified against acquisition SHA-256 before extraction."
+      ]
     }
   ],
   "artifacts": [
@@ -456,6 +485,42 @@
       "evidence": [
         "Contains 8 typed evidence objects from authoritative arXiv abstract metadata only."
       ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/open-set-rf-2108.13099v1-normalized-document-v1.json",
+      "state": "durable",
+      "role": "normalized-document-regression-fixture",
+      "origin": "automated-research-engine-v1@d0e5f8e652081f531b51b1518795f9b1628b2696",
+      "persistence": "git-tracked",
+      "regeneration": "create a new version when extraction logic changes; preserve historical fixture",
+      "review_requirement": "Changes must preserve source-artifact identity, locator fidelity, and source/inference boundaries.",
+      "evidence": [
+        "First exact full-text deep-read pipeline fixture."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/open-set-rf-2108.13099v1-fulltext-extraction-v1.json",
+      "state": "durable",
+      "role": "fulltext-evidence-regression-fixture",
+      "origin": "automated-research-engine-v1@d0e5f8e652081f531b51b1518795f9b1628b2696",
+      "persistence": "git-tracked",
+      "regeneration": "create a new version when extraction logic changes; preserve historical fixture",
+      "review_requirement": "Changes must preserve source-artifact identity, locator fidelity, and source/inference boundaries.",
+      "evidence": [
+        "First exact full-text deep-read pipeline fixture."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/open-set-rf-2108.13099v1-fulltext-verification-v1.json",
+      "state": "durable",
+      "role": "fulltext-verification-receipt",
+      "origin": "automated-research-engine-v1@d0e5f8e652081f531b51b1518795f9b1628b2696",
+      "persistence": "git-tracked",
+      "regeneration": "create a new version when extraction logic changes; preserve historical fixture",
+      "review_requirement": "Changes must preserve source-artifact identity, locator fidelity, and source/inference boundaries.",
+      "evidence": [
+        "First exact full-text deep-read pipeline fixture."
+      ]
     }
   ],
   "validation": [
@@ -547,21 +612,29 @@
         "Extraction contract checkpoint 7f40545ac0ccf891d8a108a6b83180eb9f5b5428.",
         "ABSTRACT_ONLY fixture proves conservative typed extraction and locator semantics before full-text access."
       ]
+    },
+    {
+      "check": "first full-text extraction pipeline",
+      "result": "PASS",
+      "evidence": [
+        "Validated at automated-research-engine-v1@d0e5f8e652081f531b51b1518795f9b1628b2696.",
+        "17 typed evidence objects, 15 exact PDF-layout locators, 10 evidence relations, and exact artifact verification."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Make the exact acquired PDF artifact for arXiv 2108.13099v1 accessible to the extraction executor and verify its SHA-256 against 7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab.",
-    "Parse that exact PDF into a normalized document representation with page/section/block locators.",
-    "Create a full-text typed evidence fixture covering research question, methods, experiments, dataset, metrics, quantitative results, and limitations/assumptions where present.",
-    "Manually verify a benchmark subset of source locators and numerical values.",
-    "Extend extraction to several additional deep-read pilot papers to test schema generality.",
-    "Choose persistence/indexing architecture only after real ingress/extraction objects demonstrate storage/query requirements.",
+    "Define the durable evidence-graph projection from Work/WorkVersion, evidence objects, locators, and EvidenceRelation records without losing source-specific context.",
+    "Build graph queries that can answer which source results support/qualify/contradict a claim and return exact source locators.",
+    "Test graph projection and retrieval against the first full-text paper fixture.",
+    "Extend extraction to several additional deep-read pilot papers during vertical-slice validation to test schema generality and cross-paper relations.",
+    "Choose persistence/indexing architecture only after graph/query requirements are demonstrated against real evidence objects.",
     "Build provenance-preserving synthesis, contradiction handling, gap generation, and adversarial novelty challenge.",
     "Build the research-program/funding/proposal layer and explicit human gates.",
-    "Bridge an approved research program into a workspace-control project execution workflow."
+    "Bridge an approved research program into a workspace-control project execution workflow.",
+    "After the end-to-end pipeline is validated, bootstrap the first real RF OSR knowledge corpus from the PDFs already curated/cited in the user's research paper and stored in PADataset's paper area; resolve the exact PADataset route at that time and ingest them through the same provenance-preserving pipeline rather than special-casing them."
   ],
-  "next_safe_action": "Provide the exact locally acquired /tmp/research-engine-2108.13099v1.pdf to the current extraction executor (prefer direct file upload). Verify its SHA-256 is 7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab before extraction. Then parse the full PDF with stable page/section/block locators and create a new FULLTEXT_PDF_* extraction fixture that supersedes, but does not overwrite, the ABSTRACT_ONLY baseline.",
+  "next_safe_action": "Continue evidence_graph from automated-research-engine-v1@d0e5f8e652081f531b51b1518795f9b1628b2696. Define the storage-agnostic graph projection and query contract using the first full-text fixture. Prove that a query can traverse from the paper's conclusion claim to supporting/qualifying result/method evidence and back to exact PDF page/bbox locators. Do not select the database yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
