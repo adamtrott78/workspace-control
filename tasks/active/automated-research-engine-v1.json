@@ -55,6 +55,26 @@
         "architecture/research-engine/**",
         "schemas/research-engine/**"
       ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "mutate",
+      "base_sha": null,
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "cc4ae9e185257574757ff5da910237a23f4292a1",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "README.md",
+        "pyproject.toml",
+        "docker-compose.yml",
+        ".github/**",
+        "sql/**",
+        "src/**",
+        "tests/**"
+      ]
     }
   ],
   "stages": [
@@ -471,6 +491,16 @@
             "A seventh PostgreSQL integration test is present but skipped because the current executor lacks a PostgreSQL/Docker runtime.",
             "Bootstrap bundle contains 20 source/test/config files; SHA-256 8284f62ba73e95d7227ada42c4107c357c23992951333d4341bff4c00305161e."
           ]
+        },
+        {
+          "check": "research-engine repository bootstrap parity",
+          "result": "PASS",
+          "evidence": [
+            "Private repository adamtrott78/research-engine exists and is writable.",
+            "Remote main checkpoint cc4ae9e185257574757ff5da910237a23f4292a1 contains exactly 20 bootstrap files.",
+            "Every remote Git blob identity matches the corresponding file in the previously unit-tested local bootstrap; no missing, extra, or mismatched files.",
+            "workspace-control/repos.json now registers research-engine as a managed writable repository without storing volatile HEAD state."
+          ]
         }
       ],
       "resume_condition": "Create the empty adamtrott78/research-engine repository and report local docker/docker compose availability. Then ChatGPT can directly populate the repository and the local runtime can execute the prepared PostgreSQL integration test."
@@ -650,6 +680,16 @@
       "evidence": [
         "Active task explicitly adopted the newer operator workflow checkpoint after validating compatibility.",
         "Migration preserves task-capsule semantics; only shared operator execution policy changed."
+      ]
+    },
+    {
+      "id": "research-engine-implementation-repository-bootstrap",
+      "kind": "git_commit",
+      "identity": "cc4ae9e185257574757ff5da910237a23f4292a1",
+      "required_for_resume": true,
+      "evidence": [
+        "Exact 20-file tested implementation bootstrap is remotely recoverable on research-engine/main.",
+        "Remote tree parity validated against the local tested scaffold."
       ]
     }
   ],
@@ -1158,21 +1198,29 @@
         "New pinned contract includes continuation obligation, shared human-transfer scratch root, and interactive SSH child-shell safety.",
         "Archived completed tasks are not modified by this active-task workflow migration."
       ]
+    },
+    {
+      "check": "research-engine repository creation and bootstrap",
+      "result": "PASS",
+      "evidence": [
+        "User-created private repository was verified remotely after gh CLI creation.",
+        "Exact tested bootstrap was imported and verified 20/20 by Git blob identity at cc4ae9e185257574757ff5da910237a23f4292a1."
+      ]
     }
   ],
   "blockers": [
-    "PostgreSQL/pgvector integration test remains pending until a capable runtime is confirmed. This does not block remote repository population or further implementation work."
+    "The initial PostgreSQL integration test has not yet executed against a real PostgreSQL/pgvector runtime; GitHub Actions CI is the next available authorized runtime surface and should be tried before requesting local Docker."
   ],
   "remaining_work": [
-    "Create the dedicated adamtrott78/research-engine implementation repository and initialize it from the validated workspace-control contracts.",
-    "Implement v1 PostgreSQL/pgvector schema and content-addressed artifact-store interfaces.",
-    "Implement fixture/schema validation and load the current five-work corpus as the first test dataset.",
-    "Implement provenance query tests covering Result->Claim support, limitation qualifiers, source locators, and mixed fidelity.",
-    "Promote Broggi 2025 to exact-PDF evidence during later corpus ingestion, not as a blocker for implementation.",
+    "Add GitHub Actions CI using PostgreSQL 18 + pgvector and run all unit/integration tests on research-engine/main.",
+    "Repair any runtime/schema defect found by CI and rerun until the bootstrap passes on a real PostgreSQL/pgvector instance.",
+    "Implement fixture/schema validation and an idempotent loader for the current curated multi-paper corpus into PostgreSQL.",
+    "Implement provenance query regression tests over loaded corpus evidence and mixed-fidelity state.",
+    "Add provider/parser service interfaces while keeping scientific evidence contracts authoritative.",
     "Re-run novelty challenge after additional RF-specific papers are loaded; only then consider SUPPORTED_AS_OPEN.",
     "After implementation vertical-slice tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs."
   ],
-  "next_safe_action": "Populate the newly created private adamtrott78/research-engine repository with the tested 20-file implementation bootstrap, verify exact file hashes/remote checkpoint, register the repository in workspace-control, then continue remotely executable implementation. Run the prepared PostgreSQL/pgvector integration test when a capable runtime becomes available. Do not stop merely because the runtime test is pending while independent safe implementation work remains.",
+  "next_safe_action": "On research-engine/main@cc4ae9e185257574757ff5da910237a23f4292a1, add CI that runs the full test suite against a PostgreSQL 18 + pgvector service. Inspect the workflow result and repair any implementation/schema defects without asking for local Docker while GitHub Actions remains a viable runtime surface. Then implement/load the curated corpus and provenance query tests.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
