@@ -2,12 +2,12 @@
   "schema_version": 2,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace control-plane v2 refactor",
-  "status": "SUSPENDED",
+  "status": "CHECKPOINTED",
   "goal": "Promote the fully validated executor-neutral workspace-control v2 implementation without migrating project-owned operator architecture.",
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control-v2-implementation-plan",
-  "current_stage": "promotion_decision",
+  "current_stage": "promotion",
   "acceptance_criteria": [
     "All required regression evidence is recorded.",
     "The frozen integration diff is reviewed and v1 compatibility is preserved.",
@@ -138,20 +138,30 @@
     },
     {
       "id": "promotion_decision",
-      "status": "SUSPENDED",
+      "status": "VALIDATED",
       "execution_owner": "human",
       "selected_executor": "human",
       "selected_surface": "chat",
       "inputs": [
         "phase11_codex_rerun"
       ],
-      "outputs": [],
-      "validation": [],
-      "resume_condition": "User must explicitly choose PROMOTE or DO NOT PROMOTE."
+      "outputs": [
+        "decision:PROMOTE"
+      ],
+      "validation": [
+        {
+          "check": "explicit human promotion decision",
+          "result": "PASS",
+          "evidence": [
+            "User explicitly replied PROMOTE after reviewing the promotion rationale and capabilities."
+          ]
+        }
+      ],
+      "resume_condition": null
     },
     {
       "id": "promotion",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -249,19 +259,19 @@
     },
     {
       "check": "Phase 11 explicit promotion decision",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "User explicitly authorized PROMOTE in chat."
+      ]
     }
   ],
-  "blockers": [
-    "Awaiting explicit user promotion decision."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Obtain explicit user decision: PROMOTE or DO NOT PROMOTE.",
-    "If PROMOTE, transition the capsule to COMPLETE, promote the reviewed target checkpoint b8aa52e242a07e6aa2036516e401864991183ad2 to main, and verify final Git/handoff state.",
-    "If DO NOT PROMOTE, preserve the validated target and coordination evidence without changing main."
+    "Fast-forward main non-forcibly from cb8368cd50de2d364c2aade8843276aab0b02420 to the exact validated target b8aa52e242a07e6aa2036516e401864991183ad2.",
+    "Verify main, target, and integration identity after promotion.",
+    "Finalize the v2 task capsule as COMPLETE/HANDOFF_SAFE and archive the completed handoff."
   ],
-  "next_safe_action": "Await the user's explicit Phase 11 promotion decision. Accept only an unambiguous PROMOTE or DO NOT PROMOTE decision. Do not update main before explicit approval.",
+  "next_safe_action": "Promotion is explicitly authorized. Fast-forward main non-forcibly to b8aa52e242a07e6aa2036516e401864991183ad2, verify exact post-promotion Git state, then finalize and archive the v2 task capsule.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Complete pre-v2 coordination history is preserved at tasks/evidence/control-plane-v2-refactor-v1-final.json."
