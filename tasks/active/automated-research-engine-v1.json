@@ -2,14 +2,14 @@
   "schema_version": 2,
   "task_id": "automated-research-engine-v1",
   "title": "Automated research engine v1",
-  "status": "BLOCKED_RUNTIME",
+  "status": "IN_PROGRESS",
   "goal": "Design and prove a provenance-preserving automated research engine that turns scholarly literature into structured evidence, durable knowledge, challenged research gaps, fundable research programs, and workspace-control-executable research projects.",
   "execution_topology": "remote_only",
   "workflow": {
     "repository": "workspace-control",
     "path": "policies/OPERATOR_WORKFLOW.md",
-    "checkpoint_sha": "03a51fdbe2a9153f2b5e45054eec6e927a9dda36",
-    "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
+    "checkpoint_sha": "56ca8f608202b6700129a2a54feb74d1d43c9cbf",
+    "content_sha": "f59dfb03fc6739fe9ef4c9e581b0c613aa34cd02"
   },
   "parent_execution_owner": "research-operating-system",
   "current_stage": "vertical_slice_validation",
@@ -641,6 +641,16 @@
         "Executable bootstrap manifest and implementation plan committed.",
         "6 unit tests PASS; real PostgreSQL integration test prepared and awaiting capable runtime."
       ]
+    },
+    {
+      "id": "research-engine-operator-workflow-migration",
+      "kind": "git_commit",
+      "identity": "56ca8f608202b6700129a2a54feb74d1d43c9cbf",
+      "required_for_resume": true,
+      "evidence": [
+        "Active task explicitly adopted the newer operator workflow checkpoint after validating compatibility.",
+        "Migration preserves task-capsule semantics; only shared operator execution policy changed."
+      ]
     }
   ],
   "artifacts": [
@@ -1139,11 +1149,19 @@
         "Validated at automated-research-engine-v1@24e62c9165b155cda23763dcf1d97b14d923b2b9.",
         "PostgreSQL + content-addressed artifact store + rebuildable pgvector/text/graph projections selected."
       ]
+    },
+    {
+      "check": "operator workflow migration",
+      "result": "PASS",
+      "evidence": [
+        "Explicitly migrated from 03a51fdbe2a9153f2b5e45054eec6e927a9dda36/1e98a3d530fe0cbd09fdf72d255e50d570adec58 to workspace-control OPERATOR_WORKFLOW.md@56ca8f608202b6700129a2a54feb74d1d43c9cbf blob f59dfb03fc6739fe9ef4c9e581b0c613aa34cd02.",
+        "New pinned contract includes continuation obligation, shared human-transfer scratch root, and interactive SSH child-shell safety.",
+        "Archived completed tasks are not modified by this active-task workflow migration."
+      ]
     }
   ],
   "blockers": [
-    "Connected GitHub tooling can mutate existing repositories but exposes no repository-creation operation; the required adamtrott78/research-engine repository does not yet exist.",
-    "The tested implementation includes a real PostgreSQL/pgvector integration test, but the current executor has neither Docker nor a PostgreSQL server/psql runtime."
+    "PostgreSQL/pgvector integration test remains pending until a capable runtime is confirmed. This does not block remote repository population or further implementation work."
   ],
   "remaining_work": [
     "Create the dedicated adamtrott78/research-engine implementation repository and initialize it from the validated workspace-control contracts.",
@@ -1154,7 +1172,7 @@
     "Re-run novelty challenge after additional RF-specific papers are loaded; only then consider SUPPORTED_AS_OPEN.",
     "After implementation vertical-slice tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs."
   ],
-  "next_safe_action": "Human local action is now genuinely required. Create an empty private GitHub repository named adamtrott78/research-engine using the local authenticated gh CLI, and report docker/docker compose availability. Do not initialize files in the repo. After the repo exists, ChatGPT should populate the tested 20-file bootstrap directly through GitHub and then run the prepared PostgreSQL integration test on a capable local runtime. Human-transfer scratch root is ~/adamArchives/Adam/.workspace-control/tmp (or WORKSPACE_CONTROL_SCRATCH_ROOT).",
+  "next_safe_action": "Populate the newly created private adamtrott78/research-engine repository with the tested 20-file implementation bootstrap, verify exact file hashes/remote checkpoint, register the repository in workspace-control, then continue remotely executable implementation. Run the prepared PostgreSQL/pgvector integration test when a capable runtime becomes available. Do not stop merely because the runtime test is pending while independent safe implementation work remains.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
