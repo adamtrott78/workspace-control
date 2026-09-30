@@ -24,7 +24,7 @@ Evolve the repository-backed course tutoring/application architecture to the tas
 
 - Intent: mutate
 - Remote branch: course-workflows-v2-refactor
-- Remote checkpoint: d757a0c5d59e915fa3f78b4c19d936748f7c318d
+- Remote checkpoint: 32412c28440681bcfc6136ad36be71b3c1151f9e
 - Remote verified: True
 
 ### MTH602-AdamTrott
@@ -57,11 +57,10 @@ Evolve the repository-backed course tutoring/application architecture to the tas
 
 ## Next safe action
 
-Promote the validated workspace-control architecture explicitly. Review `course-workflows-v2-refactor@d757a0c5d59e915fa3f78b4c19d936748f7c318d` against the current `main`, preserving concurrent main-only task/control changes. Use a reviewed pull-request/merge integration when clean; do not force-update main. Verify the resulting main commit contains the registry bootstrap, shared review/design/validation records, policy/template/evaluation updates, seven procedures, and eight descriptors while retaining unrelated main work. Immediately checkpoint the promoted main identity in this capsule+Markdown, then create the four required child migration capsules (MTH602, CIS560, EAS501, resume/application integration) on main. Do not execute child repository migrations in this parent chat unless the parent capsule explicitly transitions ownership.
+Create four separate task-capsule v2 migration tasks on workspace-control main for MTH602, CIS560, EAS501, and PADataset resume/application integration. Each child must pin the promoted shared checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 (or the exact descendant only if its capsule creation requires a newer main control-only commit), bind the appropriate reusable workflow descriptor by exact path/checkpoint/content identity, pin the exact target-project starting checkpoint, preserve project-local authority, and explicitly prohibit unrelated project migration. Generate each child Markdown immediately with its JSON in the same main commit. Do not execute the child repository migrations in this parent chat. After creation, verify all eight child files and advance the parent to completion/HANDOFF_SAFE assessment.
 
 ## Remaining work
 
-- Promote the validated shared architecture to workspace-control main through an explicit reviewed integration step and record the exact promoted checkpoint.
 - Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration pinned to the promoted shared checkpoint and exact project checkpoints.
 - Complete HANDOFF_SAFE assessment and archive this task.
 
