@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "VALIDATING",
+  "status": "IN_PROGRESS",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -32,11 +32,16 @@
       "checkout_path": "/home/atrott/adamArchives/Adam/workspace-control-v2-refactor",
       "branch": "control-plane-v2-refactor",
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
-      "checkpoint_sha": "5a7a4fa331a25568490ead42156dea1f2a5c52b6",
+      "checkpoint_sha": "5000900823150676d356c54642efdefc560878ca",
       "checkpoint_pushed": true,
       "allowed_mutation_scope": [
         "architecture/control-plane-v2.md",
-        "architecture/control-plane-v2-implementation.md"
+        "architecture/control-plane-v2-implementation.md",
+        "schemas/task_capsule.v1.schema.json",
+        "schemas/task_capsule.v2.schema.json",
+        "schemas/workflow_descriptor.v1.schema.json",
+        "tests/test_workspace_control.py",
+        "tests/fixtures/**"
       ]
     }
   ],
@@ -91,6 +96,13 @@
         "control-plane-v2-refactor -> 5a7a4fa331a25568490ead42156dea1f2a5c52b6",
         "Added architecture/control-plane-v2-implementation.md",
         "Implementation plan preserves v1 compatibility, stages v2 schema/tool changes behind gates, and keeps PADataset/project repositories untouched."
+      ]
+    },
+    {
+      "summary": "Completed implementation-plan review and opened only Phase 2 compatibility-scaffolding mutation scope.",
+      "evidence": [
+        "control-plane-v2-refactor -> 5000900823150676d356c54642efdefc560878ca",
+        "scripts/workspace_control.py remains out of scope for Phase 2."
       ]
     }
   ],
@@ -179,20 +191,27 @@
       "evidence": [
         "Only architecture/control-plane-v2.md and architecture/control-plane-v2-implementation.md are authorized target paths at this stage."
       ]
+    },
+    {
+      "check": "V2 implementation plan reviewed",
+      "result": "PASS",
+      "evidence": [
+        "architecture/control-plane-v2-implementation.md reviewed through control-plane-v2-refactor@5000900823150676d356c54642efdefc560878ca",
+        "Review preserved exact shared-contract pins, optional workflow descriptors, deferred project adoption, and derived handoff synchronization."
+      ]
     }
   ],
   "blockers": [
     "The v1 HANDOFF_SAFE checker is local-worktree-centric. This capsule is durable remote coordination state, but formal v1 HANDOFF_SAFE validation requires an isolated local worktree at the recorded checkout path. Do not confuse this known v1 checker limitation with loss of the remote task state."
   ],
   "remaining_work": [
-    "Review architecture/control-plane-v2-implementation.md against its ten review questions and the reviewed architecture baseline.",
-    "After implementation-plan approval, expand target mutation scope only to Phase 2 compatibility scaffolding: v1/v2 capsule schemas, workflow descriptor schema skeleton, tests, and fixtures.",
-    "Establish v1 schema equivalence and fixture coverage before changing scripts/workspace_control.py.",
-    "Then integrate shared contracts, add schema-version dispatch/task-render, topology-aware preflight/handoff, safe worktree preparation, workflow descriptor validation, and thin Codex adapters in gated phases.",
-    "Run the full regression matrix, including remote-only, local, composed, human-gate, idempotent, failure-recovery, and both Codex/ChatGPT handoff directions.",
-    "Only after validation, decide promotion to main and later PADataset migration."
+    "Implement Phase 2 compatibility scaffolding in one coherent commit if the low-level Git surface supports exact-parent tree construction safely.",
+    "Prove the v1 schema copy is byte-equivalent to the current schema before any executable behavior changes.",
+    "Add a v2 capsule schema skeleton, workflow descriptor schema skeleton, standard-library test harness, and fixtures without modifying scripts/workspace_control.py.",
+    "Review and validate the exact Phase 2 diff.",
+    "Only after Phase 2 passes, open the next bounded scope for shared-contract integration."
   ],
-  "next_safe_action": "Review architecture/control-plane-v2-implementation.md at control-plane-v2-refactor@5a7a4fa331a25568490ead42156dea1f2a5c52b6. Do not authorize Phase 2 schema/test mutations until the plan's compatibility strategy, file map, phase ordering, and regression gates are accepted.",
+  "next_safe_action": "On control-plane-v2-refactor@5000900823150676d356c54642efdefc560878ca, verify the branch/ref still points to that exact parent, then create only the Phase 2 schema/test scaffolding paths in one coherent commit if possible. Do not modify scripts/workspace_control.py or shared contracts yet. Validate exact changed paths and v1 schema equivalence afterward.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
