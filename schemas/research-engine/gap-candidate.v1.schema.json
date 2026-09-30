@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/gap-candidate.v1.schema.json",
+  "title": "Research Engine GapCandidate v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "gap_candidate_id",
+    "statement",
+    "gap_type",
+    "motivating_evidence_ids",
+    "contradicting_or_counterevidence",
+    "novelty_status",
+    "novelty_search_run_ids",
+    "rationale",
+    "human_review_state"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "gap_candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gap_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "motivating_evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "contradicting_or_counterevidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "work_id",
+          "source_level",
+          "title",
+          "reason"
+        ],
+        "properties": {
+          "work_id": {
+            "type": "string"
+          },
+          "source_level": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "source_uri": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "novelty_status": {
+      "enum": [
+        "PROPOSED",
+        "UNDER_CHALLENGE",
+        "NARROWED",
+        "REJECTED_PRIOR_WORK_FOUND",
+        "NEEDS_HUMAN_REVIEW",
+        "SUPPORTED_AS_OPEN"
+      ]
+    },
+    "novelty_search_run_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "human_review_state": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

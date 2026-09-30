@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/synthesis-artifact.v1.schema.json",
+  "title": "Research Engine SynthesisArtifact v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "synthesis_id",
+    "graph_snapshot_id",
+    "question",
+    "scope_class",
+    "input_evidence_ids",
+    "input_inference_ids",
+    "generator",
+    "generated_at",
+    "statements",
+    "scope_limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "synthesis_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "graph_snapshot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "question": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope_class": {
+      "enum": [
+        "SINGLE_WORK",
+        "CURATED_SUBSET",
+        "CORPUS",
+        "SYSTEMATIC_SEARCH",
+        "META_ANALYTIC"
+      ]
+    },
+    "input_evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "input_inference_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "identity",
+        "version"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "identity": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "statements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "statement_id",
+          "text",
+          "evidence_ids",
+          "qualifier_ids"
+        ],
+        "properties": {
+          "statement_id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "qualifier_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "scope_limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,254 @@
+{
+  "schema_version": 1,
+  "synthesis": {
+    "schema_version": 1,
+    "synthesis_id": "synthesis:2108.13099v1:single-work:v1",
+    "graph_snapshot_id": "graph:rf-osr-pilot:2108.13099v1:v1",
+    "question": "What does the 2108.13099v1 paper establish about generative outlier augmentation for open-set RF fingerprinting?",
+    "scope_class": "SINGLE_WORK",
+    "input_evidence_ids": [
+      "ev:2108:rq:1",
+      "ev:2108:dataset:1",
+      "ev:2108:metric:1",
+      "ev:2108:experiment:vae",
+      "ev:2108:method:vae",
+      "ev:2108:method:cvae",
+      "ev:2108:result:cvae",
+      "ev:2108:method:ellipsoid",
+      "ev:2108:assumption:ellipsoid",
+      "ev:2108:experiment:ellipsoid",
+      "ev:2108:result:ellipsoid",
+      "ev:2108:limitation:ellipsoid",
+      "ev:2108:method:optimization",
+      "ev:2108:result:optimization",
+      "ev:2108:limitation:optimization",
+      "ev:2108:claim:conclusion"
+    ],
+    "input_inference_ids": [],
+    "generator": {
+      "type": "MODEL",
+      "identity": "chatgpt-research-engine-synthesis-pilot",
+      "version": "2026-09-30"
+    },
+    "generated_at": "2026-09-30T12:30:00-04:00",
+    "statements": [
+      {
+        "statement_id": "syn:1",
+        "text": "The paper studies open-set RF authorization, where authorized transmitters must be recognized while unseen unauthorized transmitters are rejected.",
+        "evidence_ids": [
+          "ev:2108:rq:1"
+        ],
+        "qualifier_ids": []
+      },
+      {
+        "statement_id": "syn:2",
+        "text": "Its supervised augmentation methods use VAE/CVAE generation from known unauthorized transmitters, while its blind methods attempt outlier generation using only authorized samples.",
+        "evidence_ids": [
+          "ev:2108:method:vae",
+          "ev:2108:method:cvae",
+          "ev:2108:method:ellipsoid",
+          "ev:2108:method:optimization"
+        ],
+        "qualifier_ids": []
+      },
+      {
+        "statement_id": "syn:3",
+        "text": "The evaluation uses an ORBIT WiFi testbed with 71 transmitters and measures OvA test-set prediction accuracy.",
+        "evidence_ids": [
+          "ev:2108:dataset:1",
+          "ev:2108:metric:1"
+        ],
+        "qualifier_ids": []
+      },
+      {
+        "statement_id": "syn:4",
+        "text": "The ellipsoidal blind method reports testing-accuracy gains greater than 15 percentage points for small authorized sets, but requires empirical tuning of shell thickness delta.",
+        "evidence_ids": [
+          "ev:2108:result:ellipsoid"
+        ],
+        "qualifier_ids": [
+          "ev:2108:limitation:ellipsoid"
+        ]
+      },
+      {
+        "statement_id": "syn:5",
+        "text": "The optimization-based blind method removes delta tuning and reports similar results, but generating 1,000 outliers took about 30 times as long as the ellipsoidal method.",
+        "evidence_ids": [
+          "ev:2108:result:optimization"
+        ],
+        "qualifier_ids": [
+          "ev:2108:limitation:optimization"
+        ]
+      },
+      {
+        "statement_id": "syn:6",
+        "text": "Within this paper's experiments, the authors conclude that generative outlier augmentation can reduce or replace the need to acquire physical known-outlier transmitters for RF authentication training.",
+        "evidence_ids": [
+          "ev:2108:claim:conclusion",
+          "ev:2108:result:ellipsoid",
+          "ev:2108:result:optimization"
+        ],
+        "qualifier_ids": [
+          "ev:2108:limitation:ellipsoid",
+          "ev:2108:limitation:optimization"
+        ]
+      }
+    ],
+    "scope_limitations": [
+      "This synthesis is based on one paper only and must not be interpreted as a field-wide state-of-the-art conclusion.",
+      "The pilot has not yet deep-read later RF OSR papers.",
+      "The paper's core evaluation uses a specific ORBIT WiFi testbed; broader generalization is a candidate question, not a source-stated field gap."
+    ]
+  },
+  "gap_candidates": [
+    {
+      "schema_version": 1,
+      "gap_candidate_id": "gap:rf-osr:dynamic-environment-generalization:v1",
+      "statement": "Open-set RF fingerprinting lacks validation under dynamic real-world channel/environment variation such as human motion, multipath, device orientation, and distance changes.",
+      "gap_type": "MISSING_EXTERNAL_DYNAMIC_VALIDATION",
+      "motivating_evidence_ids": [
+        "ev:2108:dataset:1"
+      ],
+      "contradicting_or_counterevidence": [
+        {
+          "work_id": "arxiv:2605.15593v1",
+          "source_level": "ABSTRACT_ONLY",
+          "title": "Dynamic and Open-Set RF Fingerprinting and Localization in Crowded Indoor Environments through Contrastive Channel State Information Learning",
+          "reason": "The abstract explicitly reports open-set authentication experiments in dynamic crowded indoor conditions with human motion, multipath fading, varying device orientations, and distances.",
+          "source_uri": "https://arxiv.org/pdf/2605.15593v1"
+        }
+      ],
+      "novelty_status": "REJECTED_PRIOR_WORK_FOUND",
+      "novelty_search_run_ids": [
+        "74f7eaf0-9a3a-482f-9cb3-e7a13df34309",
+        "fdb63f7b-5a27-4c4b-90dc-6af9ba01c2d9"
+      ],
+      "rationale": "The broad candidate is directly contradicted by later prior work whose abstract explicitly evaluates the proposed dynamic/open-set setting. Any surviving research direction must be narrower than dynamic real-world open-set RF fingerprinting in general.",
+      "human_review_state": "NOT_REQUIRED_FOR_BROAD_REJECTION"
+    },
+    {
+      "schema_version": 1,
+      "gap_candidate_id": "gap:rf-osr:efficient-blind-generative-outliers:v1",
+      "statement": "Can blind generative outlier augmentation for open-set RF fingerprinting avoid both manually tuned generation hyperparameters and the large computational cost observed in optimization-based generation while retaining comparable open-set accuracy?",
+      "gap_type": "COMPUTE_TUNING_TRADEOFF",
+      "motivating_evidence_ids": [
+        "ev:2108:limitation:ellipsoid",
+        "ev:2108:limitation:optimization",
+        "ev:2108:result:ellipsoid",
+        "ev:2108:result:optimization"
+      ],
+      "contradicting_or_counterevidence": [
+        {
+          "work_id": "arxiv:2606.12718v1",
+          "source_level": "ABSTRACT_ONLY",
+          "title": "Out-of-Distribution (OOD) Detectors for Open-Set RF Fingerprinting",
+          "reason": "The abstract reports OOD detectors for open-set RFF that can be tuned without given OOD tuning data, showing that later work attacks the no-known-OOD-data problem without generative outlier augmentation.",
+          "source_uri": "https://arxiv.org/pdf/2606.12718v1"
+        }
+      ],
+      "novelty_status": "NARROWED",
+      "novelty_search_run_ids": [
+        "a5d15558-9b27-4e32-b67e-16f95036d2c6",
+        "f7413ff0-20d9-4b94-9414-7794fb3ecebe",
+        "b0db4520-be19-45e1-8c72-f0b882e2446b",
+        "a0f6a070-4fa3-4e37-aa02-ff4f6d3c3c11",
+        "487ff5ef-996d-471b-8cc6-2f3614e6d21d",
+        "ad7b49a4-0ea2-4f8f-9cf4-4f221a3dc7f0"
+      ],
+      "rationale": "The one-paper evidence motivates a real tuning/compute tradeoff, but later OOD work may bypass the need for synthetic outlier generation entirely. The defensible candidate must therefore be narrowed to efficient blind generative augmentation specifically, and deeper review is required before claiming novelty.",
+      "human_review_state": "NEEDS_DEEP_PRIOR_WORK_REVIEW"
+    }
+  ],
+  "novelty_challenges": [
+    {
+      "schema_version": 1,
+      "challenge_id": "challenge:dynamic-generalization:v1",
+      "gap_candidate_id": "gap:rf-osr:dynamic-environment-generalization:v1",
+      "search_runs": [
+        {
+          "provider_run_id": "74f7eaf0-9a3a-482f-9cb3-e7a13df34309",
+          "query": "dynamic open set RF fingerprinting channel receiver domain shift"
+        },
+        {
+          "provider_run_id": "fdb63f7b-5a27-4c4b-90dc-6af9ba01c2d9",
+          "query": "\"Dynamic and Open-Set RF Fingerprinting\""
+        }
+      ],
+      "counterevidence": [
+        {
+          "work_id": "arxiv:2605.15593v1",
+          "title": "Dynamic and Open-Set RF Fingerprinting and Localization in Crowded Indoor Environments through Contrastive Channel State Information Learning",
+          "source_level": "ABSTRACT_ONLY",
+          "source_uri": "https://arxiv.org/pdf/2605.15593v1",
+          "observed_coverage": "Abstract explicitly evaluates open-set RF authentication in dynamic crowded indoor conditions including human motion, multipath, orientation, and distance variation."
+        }
+      ],
+      "result": "REJECTED_PRIOR_WORK_FOUND",
+      "reasoning": "The broad gap proposition is directly covered by later prior work and cannot be claimed as open."
+    },
+    {
+      "schema_version": 1,
+      "challenge_id": "challenge:efficient-blind-generative:v1",
+      "gap_candidate_id": "gap:rf-osr:efficient-blind-generative-outliers:v1",
+      "search_runs": [
+        {
+          "provider_run_id": "a5d15558-9b27-4e32-b67e-16f95036d2c6",
+          "query": "blind outlier generation RF fingerprinting open set"
+        },
+        {
+          "provider_run_id": "f7413ff0-20d9-4b94-9414-7794fb3ecebe",
+          "query": "synthetic outlier open set RF fingerprinting"
+        },
+        {
+          "provider_run_id": "b0db4520-be19-45e1-8c72-f0b882e2446b",
+          "query": "efficient open set RF fingerprinting OOD detector"
+        },
+        {
+          "provider_run_id": "a0f6a070-4fa3-4e37-aa02-ff4f6d3c3c11",
+          "query": "open set RF fingerprinting generative augmentation"
+        },
+        {
+          "provider_run_id": "487ff5ef-996d-471b-8cc6-2f3614e6d21d",
+          "query": "blind RF fingerprinting outlier generation hyperparameter tuning computational cost"
+        },
+        {
+          "provider_run_id": "ad7b49a4-0ea2-4f8f-9cf4-4f221a3dc7f0",
+          "query": "\"Out-of-Distribution (OOD) Detectors for Open-Set RF Fingerprinting\""
+        }
+      ],
+      "counterevidence": [
+        {
+          "work_id": "arxiv:2606.12718v1",
+          "title": "Out-of-Distribution (OOD) Detectors for Open-Set RF Fingerprinting",
+          "source_level": "ABSTRACT_ONLY",
+          "source_uri": "https://arxiv.org/pdf/2606.12718v1",
+          "observed_coverage": "Abstract demonstrates open-set RFF OOD detectors tuned without given OOD tuning data, providing a non-generative route around the known-OOD-data requirement."
+        }
+      ],
+      "result": "NARROWED",
+      "reasoning": "Later OOD work weakens any broad claim that no-known-outlier open-set RF remains unsolved. The potentially open question must be narrowed to the specific accuracy/compute/tuning tradeoff of blind generative augmentation and requires deeper prior-work review."
+    }
+  ],
+  "validation": [
+    {
+      "check": "single-work scope honesty",
+      "result": "PASS",
+      "evidence": "Synthesis explicitly declares SINGLE_WORK scope and does not claim field-wide coverage."
+    },
+    {
+      "check": "broad gap rejection",
+      "result": "PASS",
+      "evidence": "Dynamic-environment open-set candidate was rejected after exact-title search and abstract review found direct 2026 prior work."
+    },
+    {
+      "check": "partial-overlap narrowing",
+      "result": "PASS",
+      "evidence": "Efficient blind-generation candidate was narrowed after later OOD work attacked the same operational constraint via a different method family."
+    },
+    {
+      "check": "no false novelty",
+      "result": "PASS",
+      "evidence": "No pilot candidate is marked SUPPORTED_AS_OPEN."
+    }
+  ]
+}

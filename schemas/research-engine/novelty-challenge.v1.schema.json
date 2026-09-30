@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/novelty-challenge.v1.schema.json",
+  "title": "Research Engine NoveltyChallenge v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "challenge_id",
+    "gap_candidate_id",
+    "search_runs",
+    "counterevidence",
+    "result",
+    "reasoning"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "challenge_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gap_candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "search_runs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "provider_run_id",
+          "query"
+        ],
+        "properties": {
+          "provider_run_id": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "counterevidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "work_id",
+          "title",
+          "source_level",
+          "source_uri",
+          "observed_coverage"
+        ],
+        "properties": {
+          "work_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "source_level": {
+            "type": "string"
+          },
+          "source_uri": {
+            "type": "string"
+          },
+          "observed_coverage": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "result": {
+      "enum": [
+        "NARROWED",
+        "REJECTED_PRIOR_WORK_FOUND",
+        "NEEDS_HUMAN_REVIEW",
+        "SUPPORTED_AS_OPEN"
+      ]
+    },
+    "reasoning": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
