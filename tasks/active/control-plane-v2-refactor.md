@@ -12,7 +12,7 @@
 
 - ID: `control-plane-v2-refactor`
 - Title: Workspace Control Plane v2
-- Status: `CHECKPOINTED`
+- Status: `BLOCKED_RUNTIME`
 
 ## Goal
 
@@ -23,7 +23,7 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `610c71902425adaf054fc9ba13deb21bba7cc7ce`
+- Current checkpoint: `77c7355bbafeb674dd35b55bcfdb542d50c6079c`
 - Pushed: `true`
 
 ### Allowed mutation scope
@@ -48,13 +48,13 @@ Design, implement, and validate a workspace-control v2 architecture that general
 
 ## Next safe action
 
-On control-plane-v2-refactor@610c71902425adaf054fc9ba13deb21bba7cc7ce, modify only scripts/workspace_control.py, schemas/task_capsule.schema.json, procedures/task_capsule.md, tasks/README.md, and existing tests/fixtures as needed to add schema-version dispatch, v2 task validation, and deterministic task-render. Preserve all existing v1 command behavior. Do not change preflight or handoff semantics in this phase.
+In a real Python runtime, validate exactly control-plane-v2-refactor@77c7355bbafeb674dd35b55bcfdb542d50c6079c: verify remote identity, extract that commit into a temporary directory without switching/cleaning any checkout, run py_compile and tests/test_workspace_control.py, exercise task-validate/task-render on copied correctly named v1/v2 fixtures, and confirm v2 handoff-check safely returns NOT_HANDOFF_SAFE rather than applying v1 semantics. Return exact output before any further mutation.
 
 ## Remaining work
 
-- Implement Phase 4 schema-version dispatch, v2 task structural/semantic validation, deterministic task-render, and supporting task-capsule documentation/tests without changing preflight/handoff behavior yet.
-- Run v1 compatibility tests plus v2 validation/render fixtures in a real runtime before declaring Phase 4 complete.
-- Only after Phase 4 passes, open topology-aware preflight scope.
+- Run the bounded Phase 4 runtime validation against exact commit 77c7355bbafeb674dd35b55bcfdb542d50c6079c without mutating an existing worktree.
+- If tests fail, inspect the exact failure and patch only the demonstrated defect; do not continue to topology-aware preflight.
+- If tests pass, checkpoint Phase 4 complete and open the next bounded scope for topology-aware preflight.
 
 ## Validation state
 
@@ -92,10 +92,16 @@ On control-plane-v2-refactor@610c71902425adaf054fc9ba13deb21bba7cc7ce, modify on
 - **Phase 3 project-domain authority boundary:** `PASS`
   - README and operator contract explicitly preserve project-local truth.
   - Tutoring contract explicitly states course repositories retain authority for syllabus, assignments, instructor material, notation, deliverables, grading rules, and topic structure.
+- **Phase 4 exact changed-path set:** `PASS`
+  - Compare 610c71902425adaf054fc9ba13deb21bba7cc7ce...77c7355bbafeb674dd35b55bcfdb542d50c6079c reports exactly five intended Phase 4 files.
+- **Phase 4 source structure inspection:** `PASS`
+  - Pushed script contains explicit v1 validator, v2 validator, schema-version dispatcher, task-render implementation/parser wiring, and an explicit guard preventing v2 capsules from being assessed with v1 handoff semantics.
+- **Phase 4 Python syntax/unit/runtime validation:** `NOT_RUN`
+  - A real Python runtime is required; direct GitHub tooling cannot establish execution success.
 
 ## Blockers / known limitations
 
-- The v1 HANDOFF_SAFE checker is local-worktree-centric. This capsule is durable remote coordination state, but formal v1 HANDOFF_SAFE validation requires an isolated local worktree at the recorded checkout path. Do not confuse this known v1 checker limitation with loss of the remote task state.
+- Phase 4 source is pushed and structurally reviewed, but Python syntax/unit/runtime tests must execute in a real runtime before Phase 4 can be accepted.
 
 ## Fresh-chat initialization
 
@@ -123,7 +129,7 @@ Current target branch:
 control-plane-v2-refactor
 
 Current target checkpoint:
-610c71902425adaf054fc9ba13deb21bba7cc7ce
+77c7355bbafeb674dd35b55bcfdb542d50c6079c
 
 Do not broaden mutation scope beyond the capsule.
 ```
