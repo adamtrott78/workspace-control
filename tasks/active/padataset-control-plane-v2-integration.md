@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: padataset-control-plane-v2-integration
 - Title: PADataset workspace-control v2 integration
-- Status: IN_PROGRESS
+- Status: CHECKPOINTED
 - Capsule schema: v2
 
 ## Goal
@@ -42,13 +42,12 @@ Adopt the promoted workspace-control v2 operating model in PADataset with the sm
 
 ## Next safe action
 
-Re-review PADataset base 232d5fd506ac8bffa55c39591c9cf1198257e51f against integration head d6f6a7281f20d250423abd35ee5991841677e27d. Verify the changed-path set is exactly README.md and AGENTS.md, removing the inserted README operator section reconstructs the base README byte-for-byte, AGENTS.md contains routing only, and the pinned workspace-control workflow recovery entry satisfies v2 handoff binding. If all pass, complete and archive the task.
+Evaluate this synchronized capsule against workspace-control@03a51fdbe2a9153f2b5e45054eec6e927a9dda36 scripts/workspace_control.py handoff_assessment_v2 semantics. Require a handoff-capable status, durable evidence on required checkpoints, ready remote recovery state for PADataset and workspace-control, and exact workflow checkpoint binding. If there are no reasons, record HANDOFF_SAFE and complete/archive the task.
 
 ## Remaining work
 
-- Perform project_regression by rechecking the exact base-to-head diff, verifying the original PADataset README/task router is preserved apart from the bounded operator-route insertion, and confirming AGENTS.md remains a thin adapter.
-- Establish final v2 HANDOFF_SAFE state under the pinned workspace-control checker semantics.
-- Archive the completed task after final JSON/Markdown synchronization.
+- Evaluate the synchronized CHECKPOINTED capsule against the exact pinned workspace-control v2 handoff-check semantics.
+- If HANDOFF_SAFE, mark completion validated, set task COMPLETE with no remaining work, synchronize Markdown, then archive the completed JSON and derived Markdown.
 
 ## Blockers / gates
 
