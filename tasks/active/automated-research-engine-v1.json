@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "automated-research-engine-v1",
   "title": "Automated research engine v1",
-  "status": "IN_PROGRESS",
+  "status": "BLOCKED_RUNTIME",
   "goal": "Design and prove a provenance-preserving automated research engine that turns scholarly literature into structured evidence, durable knowledge, challenged research gaps, fundable research programs, and workspace-control-executable research projects.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "24e62c9165b155cda23763dcf1d97b14d923b2b9",
+        "checkpoint_sha": "56533236666d17e742c96528807ced11dbc3b92d",
         "verified": true
       },
       "local": null,
@@ -392,7 +392,7 @@
     },
     {
       "id": "vertical_slice_validation",
-      "status": "IN_PROGRESS",
+      "status": "SUSPENDED",
       "execution_owner": "cross-executor-validation",
       "selected_executor": "codex",
       "selected_surface": "composed",
@@ -407,7 +407,9 @@
         "artifact:architecture/research-engine/fixtures/rf-osr-curated-multipaper-synthesis-v1.json",
         "git:24e62c9165b155cda23763dcf1d97b14d923b2b9",
         "artifact:architecture/research-engine/persistence-architecture-v1.md",
-        "artifact:architecture/research-engine/fixtures/persistence-decision-v1.json"
+        "artifact:architecture/research-engine/fixtures/persistence-decision-v1.json",
+        "git:56533236666d17e742c96528807ced11dbc3b92d",
+        "artifact:architecture/research-engine/exact-pdf-promotion-protocol-v1.md"
       ],
       "validation": [
         {
@@ -430,9 +432,18 @@
             "Selected pgvector 0.8.6 as an optional semantic-retrieval projection, using exact nearest-neighbor search initially.",
             "Graph relations remain directed adjacency records in PostgreSQL; no separate graph database is introduced without a measured need."
           ]
+        },
+        {
+          "check": "exact-PDF promotion protocol prepared",
+          "result": "PASS",
+          "evidence": [
+            "Read-only local procedure selects exactly three manifest-recorded PADataset PDFs.",
+            "Procedure records SHA-256, byte length, PDF magic, and page count and packages exact copies without mutating PADataset.",
+            "Expected manifest page counts are Scheirer=16, Liu=16, Baye=6."
+          ]
         }
       ],
-      "resume_condition": null
+      "resume_condition": "Receive the exact-PDF promotion tar.gz (or the three exact PDFs) plus local receipt for Scheirer 2013, Liu 2020, and Baye 2024. Then verify SHA-256/page counts and run OCR-vs-exact-PDF fidelity comparison."
     }
   ],
   "checkpoints": [
@@ -570,6 +581,15 @@
       "evidence": [
         "Persistence architecture decision and workload rationale committed.",
         "Authoritative versus rebuildable projection boundaries are explicit."
+      ]
+    },
+    {
+      "id": "research-engine-exact-pdf-promotion-protocol",
+      "kind": "git_commit",
+      "identity": "56533236666d17e742c96528807ced11dbc3b92d",
+      "required_for_resume": true,
+      "evidence": [
+        "Exact-PDF promotion procedure committed with fixed file set, receipt schema, safety constraints, and acceptance criteria."
       ]
     }
   ],
@@ -886,6 +906,18 @@
       "evidence": [
         "Decision based on demonstrated five-work graph/query workload, not hypothetical scale."
       ]
+    },
+    {
+      "path": "architecture/research-engine/exact-pdf-promotion-protocol-v1.md",
+      "state": "durable",
+      "role": "exact-pdf-promotion-procedure",
+      "origin": "automated-research-engine-v1@56533236666d17e742c96528807ced11dbc3b92d",
+      "persistence": "git-tracked",
+      "regeneration": "explicit procedure revision only",
+      "review_requirement": "Must remain read-only with respect to PADataset and preserve exact byte/hash/page receipt semantics.",
+      "evidence": [
+        "Prepared for three-paper OCR-to-exact-PDF fidelity validation."
+      ]
     }
   ],
   "validation": [
@@ -1035,7 +1067,9 @@
       ]
     }
   ],
-  "blockers": [],
+  "blockers": [
+    "Exact source PDFs for the next fidelity test are local-only in the PADataset checkout and are not available to this executor. A bounded read-only local bundle is required for Scheirer 2013, Liu 2020, and Baye 2024."
+  ],
   "remaining_work": [
     "Promote three PADataset OCR_DERIVED reference works (Scheirer 2013, Liu 2020, Baye 2024) to exact-PDF-verified artifacts by hashing the local PDFs and making those exact bytes available to the extraction executor.",
     "For each promoted paper, parse exact PDF layout and compare selected OCR-derived evidence anchors against exact-PDF extraction to quantify locator/text fidelity.",
@@ -1044,7 +1078,7 @@
     "Create the dedicated research-engine implementation repository when a supported repository-creation path is available; implement PostgreSQL/artifact-store/provider/parser services there.",
     "After exact-PDF fidelity checks pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs through the same pipeline."
   ],
-  "next_safe_action": "Run the bounded local exact-PDF promotion bundle for the three PADataset files 2013_scheirer_toward_open_set_recognition.pdf, 2020_liu_energy_ood_detection.pdf, and 2024_baye_varmax_milcom.pdf at their manifest-recorded local paths. Emit SHA-256, byte length, PDF magic/page count, and package exact copies into one temporary tar.gz for upload to the extraction executor. Do not modify PADataset.",
+  "next_safe_action": "Run architecture/research-engine/exact-pdf-promotion-protocol-v1.md's noninteractive local command against the manifest-recorded PADataset checkout. Return the printed receipt and upload /tmp/research-engine-pdf-promotion.tar.gz. Do not modify PADataset. After receipt/upload, verify the bundle and resume vertical_slice_validation with exact-PDF parsing and OCR-fidelity comparison.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
