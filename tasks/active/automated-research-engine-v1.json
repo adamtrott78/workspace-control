@@ -8,8 +8,8 @@
   "workflow": {
     "repository": "workspace-control",
     "path": "policies/OPERATOR_WORKFLOW.md",
-    "checkpoint_sha": "56ca8f608202b6700129a2a54feb74d1d43c9cbf",
-    "content_sha": "f59dfb03fc6739fe9ef4c9e581b0c613aa34cd02"
+    "checkpoint_sha": "2ee1f6584178df68d1f01a219fb526d4745707bf",
+    "content_sha": "cbf405d066f84b87f64c03671a4ed1941ca71ffb"
   },
   "parent_execution_owner": "research-operating-system",
   "current_stage": "vertical_slice_validation",
@@ -746,6 +746,18 @@
         "Authoritative evidence/relation IDs are immutable; explicit supersession/history is enforced.",
         "Deterministic knowledge checkpoints are persisted and regression-tested in PostgreSQL."
       ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "de1d1a0ca0f649895d461e40a1496071443e32d7",
+      "required_for_resume": true,
+      "evidence": [
+        "stage=vertical_slice_validation",
+        "last_validated_boundary=research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7 (PR #3 immutable evidence history + deterministic knowledge checkpoints; PostgreSQL/pgvector CI PASS)",
+        "in_flight=research-engine/acquire-broggi-source@10ce97b9157d745c6e437983fb02e2e9e8ae72c5; GitHub Actions run 36762756822 completed FAILURE at Fetch publisher PDF; no exact-source artifact uploaded",
+        "resume=inspect acquisition failure evidence, try alternate authorized exact-source surfaces, then continue corpus scaling/novelty persistence without asking for local bytes unless all direct surfaces are exhausted"
+      ]
     }
   ],
   "artifacts": [
@@ -1285,6 +1297,15 @@
         "research-engine PR #3 merged at de1d1a0ca0f649895d461e40a1496071443e32d7.",
         "Real PostgreSQL/pgvector CI validates immutable IDs, supersession, verification history, and deterministic knowledge checkpoints."
       ]
+    },
+    {
+      "check": "smart recovery restore-point adoption",
+      "result": "PASS",
+      "evidence": [
+        "Active task explicitly migrated to OPERATOR_WORKFLOW.md@2ee1f6584178df68d1f01a219fb526d4745707bf rather than silently following main.",
+        "First rolling restore-point:latest captures the validated research-engine baseline plus the failed Broggi acquisition run and immediate resume operation.",
+        "Restore point reuses existing v2 checkpoint structure; no task-capsule schema change or parallel authority layer was introduced."
+      ]
     }
   ],
   "blockers": [],
@@ -1295,7 +1316,7 @@
     "Only after broader exact-source corpus validation consider any GapCandidate eligible for SUPPORTED_AS_OPEN.",
     "After the scaling slice passes, bulk-ingest the remainder of the already-curated PADataset reference PDFs."
   ],
-  "next_safe_action": "Continue from research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7. First attempt to resolve and acquire an authorized exact source for Broggi 2025 using available scholarly/direct surfaces; do not ask for local bytes while a direct surface may satisfy the requirement. Then expand the RF OSR/OOD corpus and implement reproducible novelty-challenge persistence against knowledge checkpoints. Continue until a genuine capability, authority, or human-decision boundary is reached.",
+  "next_safe_action": "Resume from restore-point:latest at research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7. Inspect GitHub Actions run 36762756822 / acquire-broggi-source@10ce97b9157d745c6e437983fb02e2e9e8ae72c5 for publisher-fetch failure evidence; try alternate authorized exact-source acquisition surfaces for Broggi 2025. If all direct surfaces fail, record the true local-byte boundary, but continue any independent corpus-scaling/novelty-persistence work first.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."

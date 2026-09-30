@@ -22,7 +22,7 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Repository: workspace-control
 - Path: policies/OPERATOR_WORKFLOW.md
-- Checkpoint: 56ca8f608202b6700129a2a54feb74d1d43c9cbf
+- Checkpoint: 2ee1f6584178df68d1f01a219fb526d4745707bf
 
 ## Repositories
 
@@ -40,9 +40,17 @@ Design and prove a provenance-preserving automated research engine that turns sc
 - Remote checkpoint: de1d1a0ca0f649895d461e40a1496071443e32d7
 - Remote verified: true
 
+## Recovery restore point
+
+- Identity: de1d1a0ca0f649895d461e40a1496071443e32d7
+- stage=vertical_slice_validation
+- last_validated_boundary=research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7 (PR #3 immutable evidence history + deterministic knowledge checkpoints; PostgreSQL/pgvector CI PASS)
+- in_flight=research-engine/acquire-broggi-source@10ce97b9157d745c6e437983fb02e2e9e8ae72c5; GitHub Actions run 36762756822 completed FAILURE at Fetch publisher PDF; no exact-source artifact uploaded
+- resume=inspect acquisition failure evidence, try alternate authorized exact-source surfaces, then continue corpus scaling/novelty persistence without asking for local bytes unless all direct surfaces are exhausted
+
 ## Next safe action
 
-Continue from research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7. First attempt to resolve and acquire an authorized exact source for Broggi 2025 using available scholarly/direct surfaces; do not ask for local bytes while a direct surface may satisfy the requirement. Then expand the RF OSR/OOD corpus and implement reproducible novelty-challenge persistence against knowledge checkpoints. Continue until a genuine capability, authority, or human-decision boundary is reached.
+Resume from restore-point:latest at research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7. Inspect GitHub Actions run 36762756822 / acquire-broggi-source@10ce97b9157d745c6e437983fb02e2e9e8ae72c5 for publisher-fetch failure evidence; try alternate authorized exact-source acquisition surfaces for Broggi 2025. If all direct surfaces fail, record the true local-byte boundary, but continue any independent corpus-scaling/novelty-persistence work first.
 
 ## Remaining work
 
