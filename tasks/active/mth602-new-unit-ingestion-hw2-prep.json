@@ -46,7 +46,7 @@
       "base_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
       "remote": {
         "branch": "unit-ingestion-hw2",
-        "checkpoint_sha": "6b1cefa7c6d36e0c33e7aaaa926bd07f07b46e1a",
+        "checkpoint_sha": "20dc641dcb9b505efe53daa52932521d0927ef3a",
         "verified": true
       },
       "local": null,
@@ -222,17 +222,37 @@
         "cumulative_course_promotion",
         "instructor origin/main@5c037ac5e16249f6d6fa107f50f73ceac848f60d"
       ],
-      "outputs": [],
+      "outputs": [
+        "homework/hw02/CONTEXT.md",
+        "homework/hw02/LEARNING.md",
+        "homework/hw02/assignment/manifest.json",
+        "homework/hw02/assignment/UPSTREAM_COMMIT.txt"
+      ],
       "validation": [
         {
           "check": "Authoritative current HW2/lab source availability resolved",
           "result": "PASS",
           "evidence": [
-            "Current instructor origin/main is 5c037ac5e16249f6d6fa107f50f73ceac848f60d.",
-            "README identifies Lab1-ProbabilityCoin.ipynb due Wednesday 2026-09-30.",
-            "Repository tree contains ComputationalLabs/Lab1-ProbabilyCoin.ipynb.",
-            "README identifies Homework 2 due Monday 2026-10-05.",
-            "Repository tree contains Homeworks/hw2/hw2.pdf, Homeworks/hw2/hw2.csv, Homework2-ExampleDataset.png, and Hw2-Example-RhoHistogram.png."
+            "Instructor origin/main resolved to 5c037ac5e16249f6d6fa107f50f73ceac848f60d.",
+            "Lab1-ProbabilyCoin.ipynb is due 2026-09-30 and was bridged exactly.",
+            "Current README says Homework 2 is due 2026-10-05; stale hw2.pdf still prints 2026-09-30."
+          ]
+        },
+        {
+          "check": "HW2 exact assignment contract established without inventing requirements",
+          "result": "PASS",
+          "evidence": [
+            "All four PDF pages were visually reviewed from exact upstream bytes.",
+            "Required work is 100 points plus optional questions and +10 class-competition bonus.",
+            "homework/hw02/CONTEXT.md records every required problem, report/submission requirement, source hashes, input interpretation, and the explicit due-date clarification."
+          ]
+        },
+        {
+          "check": "HW2 source-byte package durably transferred into Git",
+          "result": "PENDING",
+          "evidence": [
+            "Exact PDF/CSV/PNG bytes were reviewed and SHA-256 verified in the current executor.",
+            "Current connected GitHub surface cannot directly transfer mounted binary bytes; manifest records the pending transfer boundary."
           ]
         }
       ],
@@ -299,6 +319,16 @@
       "evidence": [
         "MTH602 unit-ingestion-hw2 advanced five commits from e86ce6a687bde7b906c7c26c4d0fd274c3284762.",
         "Compare reports ahead_by=5, behind_by=0 with exactly five changed paths: the 2026-09-28 synthesis, its lecture-room provenance manifest, COURSE_INDEX.md, SKILL_MAP.md, and MASTERY.md."
+      ]
+    },
+    {
+      "id": "mth602-hw2-contract-bootstrap",
+      "kind": "git_commit",
+      "identity": "20dc641dcb9b505efe53daa52932521d0927ef3a",
+      "required_for_resume": true,
+      "evidence": [
+        "MTH602 unit-ingestion-hw2 advanced four commits from 6b1cefa7c6d36e0c33e7aaaa926bd07f07b46e1a.",
+        "Compare reports ahead_by=4, behind_by=0 with exactly four new paths under homework/hw02: CONTEXT.md, LEARNING.md, assignment/manifest.json, and assignment/UPSTREAM_COMMIT.txt."
       ]
     }
   ],
@@ -434,6 +464,30 @@
       "evidence": [
         "Current GitHub text/file surface cannot directly ingest mounted binary attachment bytes."
       ]
+    },
+    {
+      "path": "homework/hw02/CONTEXT.md",
+      "state": "validated",
+      "role": "authoritative local HW2 assignment contract and routing owner",
+      "origin": "exact current instructor hw2.pdf plus later README deadline clarification",
+      "persistence": "tracked on unit-ingestion-hw2",
+      "regeneration": "re-read exact upstream source package at pinned instructor commit",
+      "review_requirement": "preserve October 5 operative due-date clarification and stale PDF date provenance",
+      "evidence": [
+        "Created at MTH602 commit 7b63c97a8764b9c6ae334f207e70c00fbf0eebe2."
+      ]
+    },
+    {
+      "path": "homework/hw02/assignment/manifest.json",
+      "state": "tracked; binary source files pending transfer",
+      "role": "source identity/provenance and transfer-verification record",
+      "origin": "exact bridged upstream PDF/CSV/PNG bytes",
+      "persistence": "tracked on unit-ingestion-hw2",
+      "regeneration": "recompute only from exact current instructor bytes",
+      "review_requirement": "later binary transfer must match all recorded SHA-256 values",
+      "evidence": [
+        "Created at MTH602 commit 893ac9f03dfa6d18c3cded43417c6c6dbbbdcc6a."
+      ]
     }
   ],
   "validation": [
@@ -473,18 +527,19 @@
     }
   ],
   "blockers": [
-    "The current GitHub connector still cannot directly read sfield17/MTH602-Fall2026-SciML. Exact lab/HW2 contents must be bridged from the user's local instructor checkout at origin/main@5c037ac5e16249f6d6fa107f50f73ceac848f60d before their requirements can be interpreted or student work created."
+    "Final cold-start completeness still requires exact binary transfer of hw2.pdf, hw2.csv, and the two instructor PNG reference assets into homework/hw02; current conversation can continue because those exact bytes are mounted and verified."
   ],
   "remaining_work": [
-    "Bridge exact authoritative lab and HW2 source bytes from instructor origin/main@5c037ac5e16249f6d6fa107f50f73ceac848f60d without modifying the instructor checkout.",
-    "Prioritize and complete Lab1-ProbabilyCoin.ipynb, due 2026-09-30, preserving its exact instructions and required deliverable.",
-    "Ensure the final project-topic action item due 2026-09-30 is not missed.",
-    "Ingest HW2 exact source package from Homeworks/hw2/ and bootstrap homework/hw02; HW2 is due 2026-10-05.",
+    "Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.",
+    "Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.",
+    "Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.",
+    "Work HW2 one bounded problem at a time under the tutoring/mastery protocol, starting with Floating-point Problem 1.",
+    "Build and visually validate the final reproducible HW2 report and separately verify actual submission.",
     "Complete exact-byte transfer of previously ingested classroom originals when a suitable binary transfer surface is available.",
-    "Validate final MTH602 branch state, synchronize task JSON/Markdown, establish HANDOFF_SAFE, and archive when complete."
+    "Synchronize final task JSON/Markdown, establish HANDOFF_SAFE, and archive when the task's preparation/assignment boundary is complete."
   ],
-  "next_safe_action": "Bridge the exact current instructor lab and HW2 artifacts from local origin/main@5c037ac5e16249f6d6fa107f50f73ceac848f60d into a user-uploadable bundle without changing the instructor checkout. Read and execute the lab first because it is due 2026-09-30; then ingest/bootstrap HW2 from Homeworks/hw2/ for its 2026-10-05 deadline.",
+  "next_safe_action": "Begin HW2 Floating-point Problem 1 using homework/hw02/CONTEXT.md, the 2026-09-21 floating-point lecture synthesis, and study/TUTORING.md. Diagnose the student's understanding before counting mathematical mastery. The completed Lab1 artifact should be submitted separately as soon as practical.",
   "last_executor": "chatgpt",
   "last_surface": "conversation+github+local-instructor-snapshot",
-  "notes": "Lecture ingestion is complete through 2026-09-28. Current instructor state is now resolved at origin/main 5c037ac5e16249f6d6fa107f50f73ceac848f60d. Urgent graded Lab1-ProbabilyCoin.ipynb is due 2026-09-30; HW2 is due 2026-10-05. Final project topic is also listed due 2026-09-30."
+  "notes": "Lecture ingestion is complete through 2026-09-28. Lab1 was bridged, completed, executed, and rendered to a clean PDF in the current conversation; actual submission remains a user action. HW2 contract is durably bootstrapped at MTH602 checkpoint 20dc641dcb9b505efe53daa52932521d0927ef3a. Operative HW2 deadline is 2026-10-05 via later instructor README clarification; hw2.pdf still prints 2026-09-30."
 }
