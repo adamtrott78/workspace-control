@@ -1,6 +1,6 @@
 # Workspace Control Plane v2 Architecture
 
-Status: **draft for review**
+Status: **reviewed architecture candidate v0.1**
 
 Branch: `control-plane-v2-refactor`
 
@@ -193,7 +193,7 @@ authority with current orchestration responsibility.
 
 ## 2.3 Workflow
 
-A **workflow** is a reusable project-owned procedure for accomplishing a class of
+A **workflow** is a reusable authority-owned procedure for accomplishing a class of
 task.
 
 A workflow describes stable procedure, not current progress.
@@ -212,6 +212,12 @@ It MAY define:
 - forbidden mutation areas.
 
 A workflow descriptor is not a task capsule.
+
+A task execution that depends on a reusable workflow SHOULD bind to an exact
+durable workflow identity, such as repository + path + Git checkpoint/content
+identity. A long-running task MUST NOT silently resume against a materially
+changed workflow definition. Workflow migration, when desired, is an explicit
+task-state transition with its own validation.
 
 ## 2.4 Stage
 
@@ -393,7 +399,7 @@ Blind retry is forbidden.
 
 A task is **resumable** when another control cycle can recover:
 
-- parent task/owner;
+- parent task/execution owner;
 - workflow identity when applicable;
 - completed stages;
 - validation already established;
@@ -413,6 +419,10 @@ actually used.
 
 v2 MUST NOT require local checkout state for a remote-only task solely because
 the v1 checker did.
+
+When a task depends on a reusable workflow or shared contract, handoff evidence
+must also identify the exact durable workflow/contract version required for
+recovery.
 
 Topology-specific handoff evidence may include:
 
@@ -462,7 +472,23 @@ incomplete task record HANDOFF_SAFE.
 Separating these concepts prevents handoff completeness from being coupled to one
 executor's transient capabilities.
 
-## 2.17 Executor/surface selection
+## 2.17 Consequence class
+
+A **consequence class** describes the external or destructive impact of an
+operation independently of whether the operation is technically easy.
+
+At minimum, workflows should distinguish among concepts such as:
+
+- read-only observation;
+- reversible tracked/local mutation;
+- destructive or history-rewriting mutation;
+- externally consequential action such as submission, sending, publication,
+  purchase, or other side effect outside the controlled repository/runtime.
+
+Higher-consequence classes MAY require stronger authority or a substantive human
+gate even when the selected surface is technically capable.
+
+## 2.18 Executor/surface selection
 
 Selection SHOULD answer:
 
@@ -473,8 +499,15 @@ Selection SHOULD answer:
 Selection MUST NOT hard-code current tool limitations as timeless architecture.
 
 Technical capability and access permission do not themselves grant mutation
-authority. The selected executor/surface must satisfy both capability/access
-requirements and the task/project's bounded authority.
+authority. The selected executor/surface must satisfy capability/access
+requirements, consequence-class requirements, and the task/project's bounded
+authority.
+
+Secrets, credentials, access tokens, private keys, and equivalent authentication
+material MUST NOT be persisted in workflow descriptors, task capsules,
+human-readable handoff views, or ordinary Git evidence. Durable state may record
+that a named capability/connection is required or was observed available, but
+not the secret material itself.
 
 A known deterministic project procedure SHOULD be preferred over repeatedly
 reinventing the same shell/tool sequence.
@@ -568,7 +601,7 @@ These are deliberately separate.
 
 ## 5.1 Workflow descriptor
 
-Stable project-owned procedure:
+Stable authority-owned procedure:
 
 ```text
 how this kind of task works
@@ -588,7 +621,7 @@ It SHOULD refer to project-owned workflow/context rather than duplicate it.
 
 A future capsule v2 may record:
 
-- workflow identity;
+- exact workflow identity/version when a reusable workflow is used;
 - parent task;
 - completed stage IDs;
 - current/suspended stage;
@@ -600,7 +633,19 @@ A future capsule v2 may record:
 - remaining work;
 - next safe action.
 
-## 5.3 Human-readable handoff view
+## 5.3 Coordination-state placement
+
+Coordination state MAY live separately from the repositories being mutated.
+
+This is useful when storing the task capsule in the same target branch would
+create self-referential checkpoint semantics, as demonstrated by the Phase-4 and
+v2 coordination-branch pattern.
+
+The capsule must identify target repositories/checkpoints precisely, while its
+own storage commit is coordination evidence rather than a target-project
+checkpoint.
+
+## 5.4 Human-readable handoff view
 
 A task MAY expose a generated Markdown/text handoff view for human convenience.
 
@@ -745,8 +790,12 @@ This enables more reliable:
 - `git status` interpretation;
 - changed-path validation;
 - artifact freshness checks;
-- cleanup decisions;
+- cleanup planning;
 - handoff state.
+
+Artifact lifecycle metadata alone MUST NOT authorize deletion or cleanup.
+Destructive cleanup still requires the owning workflow's explicit policy and
+authority.
 
 workspace-control SHOULD NOT decide whether a scientific artifact is correct.
 
@@ -854,8 +903,9 @@ needed to integrate:
 - topology-aware handoff;
 - task capsule v2 stage/resume semantics;
 - safe worktree preparation;
-- minimal workflow descriptor contract;
+- minimal workflow descriptor contract and exact workflow-version binding;
 - artifact lifecycle declarations;
+- generated human-readable task handoff views;
 - validation integration.
 
 PADataset, MTH602, EAS501, CIS560, and the preserved Phase-4 evidence branches
@@ -882,7 +932,10 @@ At minimum, validate:
 11. remote-only HANDOFF_SAFE;
 12. local-runtime HANDOFF_SAFE;
 13. workflow resume from first incomplete stage;
-14. project-owned validation failure preventing dependent continuation.
+14. project-owned validation failure preventing dependent continuation;
+15. task recovery from an exact pinned workflow descriptor after the workflow's
+    branch has advanced;
+16. generated human-readable handoff regeneration after capsule state changes.
 
 A real project workflow should be used for at least one regression after the
 control-plane mechanics pass. PADataset migration remains a later explicit
@@ -939,3 +992,9 @@ Before broader implementation, review this draft against the evidence and answer
     into a single enum?
 15. Is the generated human-readable handoff explicitly derived rather than a
     second source of truth?
+16. Can a long-running task pin and later recover the exact workflow version it
+    began under?
+17. Are access capability, task authority, and consequence class distinct?
+18. Are secrets excluded from durable Git/task state by construction?
+19. Can coordination state live outside target repositories without confusing
+    coordination commits with target checkpoints?
