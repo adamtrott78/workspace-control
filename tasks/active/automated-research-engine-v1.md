@@ -30,22 +30,21 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: 9984c3d68e01bbaea6dafe6dc941df82d1184ced
+- Remote checkpoint: ca1c5a45facbed732aca3f40a3de53e4b6d8f4df
 - Remote verified: true
 
 ## Next safe action
 
-Continue synthesis_gap_engine from automated-research-engine-v1@9984c3d68e01bbaea6dafe6dc941df82d1184ced. Define SynthesisArtifact and GapCandidate contracts. Build a one-paper synthesis only as a scoped machinery test, clearly labeling its evidence boundary. Then generate one or more candidate gap hypotheses and adversarially search current literature for prior work that could invalidate them; do not mark any RF OSR gap SUPPORTED_AS_OPEN until additional papers are ingested.
+Continue proposal_compiler from automated-research-engine-v1@ca1c5a45facbed732aca3f40a3de53e4b6d8f4df. Define ResearchProgram, FundingOpportunity, SolicitationRequirement, and ProposalCompilation contracts. Use only a NOT_FOR_SUBMISSION dry-run fixture because the current surviving RF OSR candidate is NARROWED and requires deeper prior-work review; do not select it as the user's research direction and do not mark it fundable/novel.
 
 ## Remaining work
 
-- Define reproducible SynthesisArtifact and GapCandidate projection/query contracts over evidence-graph snapshots.
-- Generate a first synthesis from the one-paper graph while explicitly declaring that its evidence scope is one work and is insufficient for field-level conclusions.
-- Generate candidate gap signals only as hypotheses/inferences, then run adversarial novelty searches intended to disprove them.
-- Ingest additional pilot papers before accepting any field-level RF OSR gap as SUPPORTED_AS_OPEN.
-- Choose persistence/indexing architecture only after graph/synthesis/query requirements are demonstrated against real evidence objects.
-- Build the research-program/funding/proposal layer and explicit human gates.
-- Bridge an approved research program into a workspace-control project execution workflow.
+- Define ResearchProgram and solicitation/proposal compiler contracts without treating a NARROWED/NEEDS_HUMAN_REVIEW gap as an approved research direction.
+- Build a dry-run proposal compilation fixture that demonstrates evidence mapping and required human gates but is explicitly NOT_FOR_SUBMISSION.
+- Add official funding-opportunity adapter contracts and solicitation requirement mapping.
+- Build the execution bridge from an APPROVED research program into a workspace-control project/task workflow.
+- During vertical-slice validation, ingest multiple additional papers and require deeper novelty review before any candidate becomes SUPPORTED_AS_OPEN.
+- Choose persistence/indexing architecture only after the complete vertical slice demonstrates actual query/load requirements.
 - After the end-to-end pipeline is validated, bootstrap the first real RF OSR knowledge corpus from the PDFs already curated/cited in the user's research paper and stored in PADataset's paper area; resolve the exact PADataset route at that time and ingest them through the same provenance-preserving pipeline rather than special-casing them.
 
 ## Blockers / gates
