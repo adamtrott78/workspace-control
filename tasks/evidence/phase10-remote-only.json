@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "regression_id": "phase10-remote-only-direct-tool",
+  "phase": 10,
+  "topology": "remote_only",
+  "operation_surface": "DIRECT_TOOL",
+  "repository": "workspace-control",
+  "coordination_branch": "control-plane-v2-coordination",
+  "parent_checkpoint": "d4356f6782aa50d2fe4abfbb05d77235d90d6695",
+  "frozen_target": {
+    "branch": "control-plane-v2-refactor",
+    "checkpoint_sha": "b8aa52e242a07e6aa2036516e401864991183ad2"
+  },
+  "objective": "Prove a bounded remote-only DIRECT_TOOL mutation can be committed, reread from the exact pushed checkpoint, and leave the frozen target implementation unchanged.",
+  "mutation_scope": [
+    "tasks/evidence/phase10-remote-only.json"
+  ],
+  "expected_validation": [
+    "coordination ref advances from parent_checkpoint by one bounded commit",
+    "evidence file rereads byte-for-byte from the pushed commit",
+    "frozen target branch remains at the recorded checkpoint"
+  ]
+}
