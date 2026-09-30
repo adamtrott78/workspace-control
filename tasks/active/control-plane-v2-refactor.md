@@ -23,7 +23,7 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `bb4292d65e858ec2fd527c8984a769e4bb87f955`
+- Current checkpoint: `610c71902425adaf054fc9ba13deb21bba7cc7ce`
 - Pushed: `true`
 
 ### Allowed mutation scope
@@ -41,17 +41,20 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - `policies/TUTORING_CONTRACT.md`
 - `templates/COURSE_TUTOR_ADAPTER.md`
 - `procedures/TUTOR_EVALUATION.md`
+- `schemas/task_capsule.schema.json`
+- `scripts/workspace_control.py`
+- `procedures/task_capsule.md`
+- `tasks/README.md`
 
 ## Next safe action
 
-On control-plane-v2-refactor@bb4292d65e858ec2fd527c8984a769e4bb87f955, integrate only README.md, policies/PORTABILITY_CONTRACT.md, policies/OPERATOR_WORKFLOW.md, policies/TUTORING_CONTRACT.md, templates/COURSE_TUTOR_ADAPTER.md, and procedures/TUTOR_EVALUATION.md. Use shared-operator-tutor-contract@450eebeef6b76a674913949863082277b6bdb811 as evidence, but adapt its terminology to v2 and preserve project-local authority. Do not modify scripts, task procedures, Codex adapters, or PADataset.
+On control-plane-v2-refactor@610c71902425adaf054fc9ba13deb21bba7cc7ce, modify only scripts/workspace_control.py, schemas/task_capsule.schema.json, procedures/task_capsule.md, tasks/README.md, and existing tests/fixtures as needed to add schema-version dispatch, v2 task validation, and deterministic task-render. Preserve all existing v1 command behavior. Do not change preflight or handoff semantics in this phase.
 
 ## Remaining work
 
-- Integrate Phase 3 shared contracts/root routing from the preserved shared-operator-tutor-contract evidence, adapting terminology to the reviewed v2 architecture rather than blindly merging.
-- Review the exact Phase 3 diff for authority leakage, stale two-executor language, and project-specific semantics.
-- Keep scripts/workspace_control.py unchanged until the later validator/task-render phase.
-- After shared-contract integration passes, open the next bounded scope for schema-version dispatch and deterministic task-render behavior.
+- Implement Phase 4 schema-version dispatch, v2 task structural/semantic validation, deterministic task-render, and supporting task-capsule documentation/tests without changing preflight/handoff behavior yet.
+- Run v1 compatibility tests plus v2 validation/render fixtures in a real runtime before declaring Phase 4 complete.
+- Only after Phase 4 passes, open topology-aware preflight scope.
 
 ## Validation state
 
@@ -81,6 +84,14 @@ On control-plane-v2-refactor@bb4292d65e858ec2fd527c8984a769e4bb87f955, integrate
   - All three schema files and all five JSON fixtures were independently reread from bb4292d65e858ec2fd527c8984a769e4bb87f955 and parsed successfully.
 - **Python Phase 2 unittest execution:** `NOT_RUN`
   - No local/runtime executor has executed tests/test_workspace_control.py yet; source/fixture validation is recorded separately and does not imply test-run success.
+- **Phase 3 exact changed-path set:** `PASS`
+  - Compare bb4292d65e858ec2fd527c8984a769e4bb87f955...610c71902425adaf054fc9ba13deb21bba7cc7ce reports exactly six authorized contract/routing files.
+- **Phase 3 stale executor/bridge language scan:** `PASS`
+  - All six Phase 3 files were reread from 610c71902425adaf054fc9ba13deb21bba7cc7ce.
+  - No stale 'Codex vs ChatGPT-assisted human' framing, bridge-v0.1 heading, or old 'Execution modes' heading remained.
+- **Phase 3 project-domain authority boundary:** `PASS`
+  - README and operator contract explicitly preserve project-local truth.
+  - Tutoring contract explicitly states course repositories retain authority for syllabus, assignments, instructor material, notation, deliverables, grading rules, and topic structure.
 
 ## Blockers / known limitations
 
@@ -102,7 +113,7 @@ control-plane-v2-coordination
 Task capsule:
 tasks/active/control-plane-v2-refactor.json
 
-Treat the task capsule, the normal workspace-control root route, exact Git state, and durable evidence referenced by the capsule as the handoff.
+Treat the task capsule, normal workspace-control root route, exact Git state, and durable evidence referenced by the capsule as the handoff.
 
 Do not rely on previous conversation state.
 
@@ -112,7 +123,7 @@ Current target branch:
 control-plane-v2-refactor
 
 Current target checkpoint:
-bb4292d65e858ec2fd527c8984a769e4bb87f955
+610c71902425adaf054fc9ba13deb21bba7cc7ce
 
 Do not broaden mutation scope beyond the capsule.
 ```
