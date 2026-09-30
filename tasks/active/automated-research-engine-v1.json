@@ -12,7 +12,7 @@
     "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
   },
   "parent_execution_owner": "research-operating-system",
-  "current_stage": "evidence_graph",
+  "current_stage": "synthesis_gap_engine",
   "acceptance_criteria": [
     "The architecture explicitly separates source evidence, extracted evidence, normalized knowledge, synthesis, model inference, and human judgment.",
     "Every durable scientific evidence object can be traced to a canonical work/version, immutable source artifact identity, and source locator whenever the available representation permits it.",
@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "d0e5f8e652081f531b51b1518795f9b1628b2696",
+        "checkpoint_sha": "9984c3d68e01bbaea6dafe6dc941df82d1184ced",
         "verified": true
       },
       "local": null,
@@ -227,13 +227,21 @@
             "No figure curves were digitized; quantitative evidence was included only when explicitly stated in source text.",
             "FULLTEXT_PDF_LAYOUT extraction supersedes rather than overwrites the prior ABSTRACT_ONLY baseline."
           ]
+        },
+        {
+          "check": "support relation direction repair",
+          "result": "PASS",
+          "evidence": [
+            "Graph projection exposed two reversed SUPPORTS edges in the first full-text fixture.",
+            "Fixture was repaired so supporting Result nodes point to the conclusion Claim, matching the directed relation contract."
+          ]
         }
       ],
       "resume_condition": null
     },
     {
       "id": "evidence_graph",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -241,18 +249,43 @@
         "extraction_pipeline",
         "git:d0e5f8e652081f531b51b1518795f9b1628b2696"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "git:9984c3d68e01bbaea6dafe6dc941df82d1184ced",
+        "artifact:architecture/research-engine/evidence-graph-contract-v1.md",
+        "artifact:architecture/research-engine/fixtures/open-set-rf-2108.13099v1-graph-v1.json",
+        "artifact:architecture/research-engine/fixtures/open-set-rf-2108.13099v1-query-proof-v1.json",
+        "schema:schemas/research-engine/evidence-graph-snapshot.v1.schema.json",
+        "schema:schemas/research-engine/evidence-query-proof.v1.schema.json"
+      ],
+      "validation": [
+        {
+          "check": "storage-agnostic graph projection",
+          "result": "PASS",
+          "evidence": [
+            "First graph snapshot projects 35 nodes and 46 edges from durable Work/WorkVersion/SourceArtifact/SourceLocator/EvidenceObject/EvidenceRelation records.",
+            "Graph records are projections; source records remain authoritative."
+          ]
+        },
+        {
+          "check": "source-trace query",
+          "result": "PASS",
+          "evidence": [
+            "Query from the conclusion Claim retrieves both supporting Results, method/experiment context, qualifying limitations, exact page/bbox locators, WorkVersion, and SourceArtifact identity.",
+            "Both SUPPORTS edges are directionally valid: Result -> Claim."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "synthesis_gap_engine",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "composed",
       "inputs": [
-        "evidence_graph"
+        "evidence_graph",
+        "git:9984c3d68e01bbaea6dafe6dc941df82d1184ced"
       ],
       "outputs": [],
       "validation": [],
@@ -373,6 +406,16 @@
       "evidence": [
         "First exact PDF deep-read fixture committed with normalized-document map, typed evidence objects, evidence relations, and verification receipt.",
         "Artifact identity verified against acquisition SHA-256 before extraction."
+      ]
+    },
+    {
+      "id": "research-engine-first-evidence-graph",
+      "kind": "git_commit",
+      "identity": "9984c3d68e01bbaea6dafe6dc941df82d1184ced",
+      "required_for_resume": true,
+      "evidence": [
+        "Evidence graph contract, 35-node/46-edge first snapshot, and conclusion-support query proof committed.",
+        "Graph query returns exact source locators and qualifying limitations rather than only generated prose."
       ]
     }
   ],
@@ -521,6 +564,42 @@
       "evidence": [
         "First exact full-text deep-read pipeline fixture."
       ]
+    },
+    {
+      "path": "architecture/research-engine/evidence-graph-contract-v1.md",
+      "state": "durable",
+      "role": "evidence-graph-contract",
+      "origin": "automated-research-engine-v1@9984c3d68e01bbaea6dafe6dc941df82d1184ced",
+      "persistence": "git-tracked",
+      "regeneration": "versioned graph/query fixture; authoritative evidence records remain upstream",
+      "review_requirement": "Graph/query changes must preserve directed relation semantics and source traceability.",
+      "evidence": [
+        "Validated first-paper graph projection and source-trace retrieval."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/open-set-rf-2108.13099v1-graph-v1.json",
+      "state": "durable",
+      "role": "evidence-graph-regression-fixture",
+      "origin": "automated-research-engine-v1@9984c3d68e01bbaea6dafe6dc941df82d1184ced",
+      "persistence": "git-tracked",
+      "regeneration": "versioned graph/query fixture; authoritative evidence records remain upstream",
+      "review_requirement": "Graph/query changes must preserve directed relation semantics and source traceability.",
+      "evidence": [
+        "Validated first-paper graph projection and source-trace retrieval."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/open-set-rf-2108.13099v1-query-proof-v1.json",
+      "state": "durable",
+      "role": "evidence-query-proof",
+      "origin": "automated-research-engine-v1@9984c3d68e01bbaea6dafe6dc941df82d1184ced",
+      "persistence": "git-tracked",
+      "regeneration": "versioned graph/query fixture; authoritative evidence records remain upstream",
+      "review_requirement": "Graph/query changes must preserve directed relation semantics and source traceability.",
+      "evidence": [
+        "Validated first-paper graph projection and source-trace retrieval."
+      ]
     }
   ],
   "validation": [
@@ -620,21 +699,28 @@
         "Validated at automated-research-engine-v1@d0e5f8e652081f531b51b1518795f9b1628b2696.",
         "17 typed evidence objects, 15 exact PDF-layout locators, 10 evidence relations, and exact artifact verification."
       ]
+    },
+    {
+      "check": "first evidence graph query",
+      "result": "PASS",
+      "evidence": [
+        "Validated at automated-research-engine-v1@9984c3d68e01bbaea6dafe6dc941df82d1184ced.",
+        "Conclusion-support query returns evidence, qualifiers, exact locators, and artifact identity."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Define the durable evidence-graph projection from Work/WorkVersion, evidence objects, locators, and EvidenceRelation records without losing source-specific context.",
-    "Build graph queries that can answer which source results support/qualify/contradict a claim and return exact source locators.",
-    "Test graph projection and retrieval against the first full-text paper fixture.",
-    "Extend extraction to several additional deep-read pilot papers during vertical-slice validation to test schema generality and cross-paper relations.",
-    "Choose persistence/indexing architecture only after graph/query requirements are demonstrated against real evidence objects.",
-    "Build provenance-preserving synthesis, contradiction handling, gap generation, and adversarial novelty challenge.",
+    "Define reproducible SynthesisArtifact and GapCandidate projection/query contracts over evidence-graph snapshots.",
+    "Generate a first synthesis from the one-paper graph while explicitly declaring that its evidence scope is one work and is insufficient for field-level conclusions.",
+    "Generate candidate gap signals only as hypotheses/inferences, then run adversarial novelty searches intended to disprove them.",
+    "Ingest additional pilot papers before accepting any field-level RF OSR gap as SUPPORTED_AS_OPEN.",
+    "Choose persistence/indexing architecture only after graph/synthesis/query requirements are demonstrated against real evidence objects.",
     "Build the research-program/funding/proposal layer and explicit human gates.",
     "Bridge an approved research program into a workspace-control project execution workflow.",
     "After the end-to-end pipeline is validated, bootstrap the first real RF OSR knowledge corpus from the PDFs already curated/cited in the user's research paper and stored in PADataset's paper area; resolve the exact PADataset route at that time and ingest them through the same provenance-preserving pipeline rather than special-casing them."
   ],
-  "next_safe_action": "Continue evidence_graph from automated-research-engine-v1@d0e5f8e652081f531b51b1518795f9b1628b2696. Define the storage-agnostic graph projection and query contract using the first full-text fixture. Prove that a query can traverse from the paper's conclusion claim to supporting/qualifying result/method evidence and back to exact PDF page/bbox locators. Do not select the database yet.",
+  "next_safe_action": "Continue synthesis_gap_engine from automated-research-engine-v1@9984c3d68e01bbaea6dafe6dc941df82d1184ced. Define SynthesisArtifact and GapCandidate contracts. Build a one-paper synthesis only as a scoped machinery test, clearly labeling its evidence boundary. Then generate one or more candidate gap hypotheses and adversarially search current literature for prior work that could invalidate them; do not mark any RF OSR gap SUPPORTED_AS_OPEN until additional papers are ingested.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
