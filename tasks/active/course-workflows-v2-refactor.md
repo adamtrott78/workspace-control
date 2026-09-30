@@ -24,7 +24,7 @@ Evolve the repository-backed course tutoring/application architecture to the tas
 
 - Intent: mutate
 - Remote branch: course-workflows-v2-refactor
-- Remote checkpoint: f5d7a1a97a135cc4e238119789cda4aed773ae9b
+- Remote checkpoint: d757a0c5d59e915fa3f78b4c19d936748f7c318d
 - Remote verified: True
 
 ### MTH602-AdamTrott
@@ -57,11 +57,10 @@ Evolve the repository-backed course tutoring/application architecture to the tas
 
 ## Next safe action
 
-Continue at workspace-control `course-workflows-v2-refactor` checkpoint f5d7a1a97a135cc4e238119789cda4aed773ae9b. Perform shared_validation as a fresh repository-read regression pass over the committed shared routes and pinned project evidence. Validate at minimum: root/descriptor cold-start routing; multimodal source ingestion against MTH602 evidence; contextual assessment relevance against EAS501 evidence; document-artifact structural/rendered visual-QA semantics against the PADataset resume evidence; communications repository-first/idempotent parent-return semantics against CIS560 experiment B/C; continuation/gate behavior against the pinned operator contract; and exact single-workflow durable handoff semantics. Record the validation durably on the architecture branch. If all required shared regressions pass, update JSON+Markdown on main and proceed directly to explicit promotion; do not migrate project repositories during validation.
+Promote the validated workspace-control architecture explicitly. Review `course-workflows-v2-refactor@d757a0c5d59e915fa3f78b4c19d936748f7c318d` against the current `main`, preserving concurrent main-only task/control changes. Use a reviewed pull-request/merge integration when clean; do not force-update main. Verify the resulting main commit contains the registry bootstrap, shared review/design/validation records, policy/template/evaluation updates, seven procedures, and eight descriptors while retaining unrelated main work. Immediately checkpoint the promoted main identity in this capsule+Markdown, then create the four required child migration capsules (MTH602, CIS560, EAS501, resume/application integration) on main. Do not execute child repository migrations in this parent chat unless the parent capsule explicitly transitions ownership.
 
 ## Remaining work
 
-- Validate cold-start routing, assessment relevance behavior, multimodal ingestion, LaTeX artifact QA, continuation behavior, and executor handoff.
 - Promote the validated shared architecture to workspace-control main through an explicit reviewed integration step and record the exact promoted checkpoint.
 - Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration pinned to the promoted shared checkpoint and exact project checkpoints.
 - Complete HANDOFF_SAFE assessment and archive this task.

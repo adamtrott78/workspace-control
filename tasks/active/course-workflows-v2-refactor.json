@@ -6,7 +6,7 @@
   "goal": "Evolve the repository-backed course tutoring/application architecture to the task-capsule-driven workspace-control v2 model: remove dependence on conversational builder/tutor hierarchy, define reusable course and document-artifact workflow descriptors/procedures, improve assessment alignment and multimodal ingestion, preserve project-local authority and mastery semantics, and create independently executable migration capsules for MTH602, CIS560, EAS501, and the resume/application workflow.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-control-v2-adoption",
-  "current_stage": "shared_validation",
+  "current_stage": "promotion",
   "acceptance_criteria": [
     "The shared architecture treats conversations as replaceable executors while durable semantic owners, reusable workflow/procedure definitions, exact task state, and mutation boundaries remain authoritative.",
     "Task-capsule v2 retains its single optional workflow binding; conceptual composition is represented by one composite workflow descriptor plus stage/procedure routing, not by silently changing v2 schema.",
@@ -49,7 +49,7 @@
       "base_sha": "06058acf5a074db5a849f7f42f721971e5dda965",
       "remote": {
         "branch": "course-workflows-v2-refactor",
-        "checkpoint_sha": "f5d7a1a97a135cc4e238119789cda4aed773ae9b",
+        "checkpoint_sha": "d757a0c5d59e915fa3f78b4c19d936748f7c318d",
         "verified": true
       },
       "local": null,
@@ -268,15 +268,37 @@
     },
     {
       "id": "shared_validation",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "cross-executor-validation",
       "selected_executor": "chatgpt",
       "selected_surface": "repository-read",
       "inputs": [
         "shared_implementation"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "architecture/course-workflows-v2-validation.md",
+        "repository-read cold-start/route regression",
+        "multimodal ingestion regression against pinned MTH602 evidence",
+        "assessment-relevance regression against pinned EAS501 evidence",
+        "document-artifact/LaTeX/visual-QA regression against MTH602 and PADataset evidence",
+        "communications idempotency/parent-return regression against pinned CIS560 evidence",
+        "continuation/gate and single-workflow durable-handoff regression"
+      ],
+      "validation": [
+        {
+          "check": "Shared architecture cold-start and behavioral regression suite",
+          "result": "PASS",
+          "evidence": [
+            "architecture branch validation checkpoint d757a0c5d59e915fa3f78b4c19d936748f7c318d; validation document blob dcc2d93c90239c6dcb88c933d6d7a61d93cedf4f",
+            "All eight descriptor owner/entry routes exist at the immutable implementation tree; no target-project artifact paths are encoded in shared descriptors.",
+            "MTH602 evidence validates direct visual synthesis/OCR optionality and a real LaTeX report source->compile->rendered visual-review lifecycle.",
+            "EAS501 evidence validates contextual assessment preparation from instructor practice plus current material; shared workflow rejects universal source ranking.",
+            "CIS560 experiments B/C validate forwarded-Gmail ingestion, repository-first exact-identity re-entry, no duplicate mutation, and return to parent from durable Git.",
+            "PADataset resume evidence validates source->render->semantic/visual QA->bounded revision mechanics.",
+            "OPERATOR_WORKFLOW remains baseline blob 32a0d46c0269fec0f84dadf62427e53adeb95418; task-capsule v2 remains single object-or-null workflow binding blob 3c6c424d2a087857a9d59fec2abb6732afe6d132."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
@@ -405,6 +427,16 @@
         "Verified isolated branch ref and exact implementation diff before validation.",
         "All eight committed workflow descriptors passed remote structural/owner-route checks at the implementation checkpoint."
       ]
+    },
+    {
+      "id": "workspace-control-shared-validation",
+      "kind": "git_commit",
+      "identity": "d757a0c5d59e915fa3f78b4c19d936748f7c318d",
+      "required_for_resume": true,
+      "evidence": [
+        "All required shared regressions passed and are recorded in architecture/course-workflows-v2-validation.md.",
+        "Validation remained repository-read only for the declarative shared architecture; project-specific build/runtime tests remain owned by child migrations after explicit adoption."
+      ]
     }
   ],
   "artifacts": [],
@@ -448,12 +480,11 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Validate cold-start routing, assessment relevance behavior, multimodal ingestion, LaTeX artifact QA, continuation behavior, and executor handoff.",
     "Promote the validated shared architecture to workspace-control main through an explicit reviewed integration step and record the exact promoted checkpoint.",
     "Create separate durable migration capsules for MTH602, CIS560, EAS501, and resume/application integration pinned to the promoted shared checkpoint and exact project checkpoints.",
     "Complete HANDOFF_SAFE assessment and archive this task."
   ],
-  "next_safe_action": "Continue at workspace-control `course-workflows-v2-refactor` checkpoint f5d7a1a97a135cc4e238119789cda4aed773ae9b. Perform shared_validation as a fresh repository-read regression pass over the committed shared routes and pinned project evidence. Validate at minimum: root/descriptor cold-start routing; multimodal source ingestion against MTH602 evidence; contextual assessment relevance against EAS501 evidence; document-artifact structural/rendered visual-QA semantics against the PADataset resume evidence; communications repository-first/idempotent parent-return semantics against CIS560 experiment B/C; continuation/gate behavior against the pinned operator contract; and exact single-workflow durable handoff semantics. Record the validation durably on the architecture branch. If all required shared regressions pass, update JSON+Markdown on main and proceed directly to explicit promotion; do not migrate project repositories during validation.",
+  "next_safe_action": "Promote the validated workspace-control architecture explicitly. Review `course-workflows-v2-refactor@d757a0c5d59e915fa3f78b4c19d936748f7c318d` against the current `main`, preserving concurrent main-only task/control changes. Use a reviewed pull-request/merge integration when clean; do not force-update main. Verify the resulting main commit contains the registry bootstrap, shared review/design/validation records, policy/template/evaluation updates, seven procedures, and eight descriptors while retaining unrelated main work. Immediately checkpoint the promoted main identity in this capsule+Markdown, then create the four required child migration capsules (MTH602, CIS560, EAS501, resume/application integration) on main. Do not execute child repository migrations in this parent chat unless the parent capsule explicitly transitions ownership.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is the shared architecture refactor only. Urgent EAS501 Exam 1 cheat-sheet work and MTH602 new-unit ingestion may proceed independently against their existing project lineages. The task intentionally omits workflow binding because it mutates workspace-control, the repository that owns the baseline operator contract; the exact baseline contract is instead preserved as a required checkpoint to avoid a self-referential handoff-binding defect. The architecture worktree/ref is now isolated on workspace-control branch course-workflows-v2-refactor; this prevents the task capsule stored on main from becoming self-referential with the repository checkpoint it coordinates."
