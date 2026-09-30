@@ -178,6 +178,5 @@
     "Run cold-start/tutoring/assessment-relevance regressions.",
     "Checkpoint and verify the migrated project state."
   ],
-  "next_safe_action": "Start only from EAS501-AdamTrott README.md at 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5 on branch eas501-tutor-bootstrap. Read its workspace-control.lock.json and resolve the currently pinned shared contracts before touching any file. Compare those local semantics to the promoted course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; preserve current assessment/mastery content. If the branch moved from 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5, update this capsule first rather than silently rebasing.",
-  "notes": []
+  "next_safe_action": "Start only from EAS501-AdamTrott README.md at 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5 on branch eas501-tutor-bootstrap. Read its workspace-control.lock.json and resolve the currently pinned shared contracts before touching any file. Compare those local semantics to the promoted course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; preserve current assessment/mastery content. If the branch moved from 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5, update this capsule first rather than silently rebasing."
 }

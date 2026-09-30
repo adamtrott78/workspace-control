@@ -173,6 +173,5 @@
     "Run cold-start/source-ingestion/tutoring/LaTeX artifact regressions.",
     "Checkpoint and verify the migrated project state."
   ],
-  "next_safe_action": "Start only from MTH602-AdamTrott README.md at 62b7a03c7139cb3987b72ad66bdc532e8a61b82a on branch main, then follow its documented routes. Read workspace-control course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 only through the exact binding in this capsule. Recover existing source/tutoring/homework/report owners and any current compatibility mechanism before proposing mutations. If the target branch no longer advertises 62b7a03c7139cb3987b72ad66bdc532e8a61b82a, update this capsule deliberately before mutating. Do not execute unrelated homework/course-content work as part of the migration.",
-  "notes": []
+  "next_safe_action": "Start only from MTH602-AdamTrott README.md at 62b7a03c7139cb3987b72ad66bdc532e8a61b82a on branch main, then follow its documented routes. Read workspace-control course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 only through the exact binding in this capsule. Recover existing source/tutoring/homework/report owners and any current compatibility mechanism before proposing mutations. If the target branch no longer advertises 62b7a03c7139cb3987b72ad66bdc532e8a61b82a, update this capsule deliberately before mutating. Do not execute unrelated homework/course-content work as part of the migration."
 }

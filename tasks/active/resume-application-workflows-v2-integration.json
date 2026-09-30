@@ -170,7 +170,5 @@
     "Checkpoint and verify the resulting integration state."
   ],
   "next_safe_action": "Start only from PADataset README.md at 078461795be3c1d3e5c3845c81607166fac9fad3 on branch resume-framework, then follow the documented resume/application route to the smallest required owning contexts. Compare the existing resume production lifecycle to workspace-control document-artifact-build at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9. First decide, from repository evidence, whether the domain should remain in PADataset or warrants a separate private repository; do not move or create a repository automatically. If the target branch moved from 078461795be3c1d3e5c3845c81607166fac9fad3, refresh this capsule before mutation.",
-  "notes": [
-    "This child owns resume/application integration only. It does not own PADataset research migration."
-  ]
+  "notes": "This child owns resume/application integration only. It does not own PADataset research migration."
 }

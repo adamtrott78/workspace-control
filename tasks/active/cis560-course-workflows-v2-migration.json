@@ -175,6 +175,5 @@
     "Run cold-start/tutoring/communications-idempotency regressions.",
     "Checkpoint and verify the migrated project state."
   ],
-  "next_safe_action": "Start only from CIS560-AdamTrott README.md at 1af3ce7022d079b89f0fbca32f313a6853db1c60 on branch tutor-framework. Follow the repository's own durable routes; use experiments B/C only as evidence, not as new task state. Resolve the exact existing shared compatibility mechanism before mutation. If the branch moved from 1af3ce7022d079b89f0fbca32f313a6853db1c60, refresh this capsule first. Preserve course facts and do not reread external mail unless a migration regression genuinely requires it.",
-  "notes": []
+  "next_safe_action": "Start only from CIS560-AdamTrott README.md at 1af3ce7022d079b89f0fbca32f313a6853db1c60 on branch tutor-framework. Follow the repository's own durable routes; use experiments B/C only as evidence, not as new task state. Resolve the exact existing shared compatibility mechanism before mutation. If the branch moved from 1af3ce7022d079b89f0fbca32f313a6853db1c60, refresh this capsule first. Preserve course facts and do not reread external mail unless a migration regression genuinely requires it."
 }
