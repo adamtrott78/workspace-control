@@ -20,7 +20,7 @@
 
 **Title:** Workspace Control Plane v2
 
-**Status:** `VALIDATING`
+**Status:** `CHECKPOINTED`
 
 ## Goal
 
@@ -31,28 +31,23 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e`
+- Current checkpoint: `07075963f2d56f1bf76d562de3f6a6dc0d16c43d`
 - Pushed: `true`
 - Current allowed mutation scope:
   - `architecture/control-plane-v2.md`
-
-## Current architecture artifact
-
-- `architecture/control-plane-v2.md`
-- State: draft created and pushed; awaiting architecture review before broader implementation
+  - `architecture/control-plane-v2-implementation.md`
 
 ## Next safe action
 
-Review architecture/control-plane-v2.md at control-plane-v2-refactor@93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e. Do not broaden mutation scope or begin implementation until the architecture draft is reviewed against its ten review questions and the preserved experimental evidence.
+Draft only architecture/control-plane-v2-implementation.md on control-plane-v2-refactor from the reviewed architecture at 07075963f2d56f1bf76d562de3f6a6dc0d16c43d. The plan must preserve v1 evidence, specify backward-compatibility/migration strategy, map v2 concepts to concrete repository files and CLI behavior, and define gated implementation phases before any policy/schema/tool mutation.
 
 ## Remaining work
 
-- Review architecture/control-plane-v2.md against its explicit review questions and the preserved MTH602, EAS501, CIS560, MILCOM/PADataset, and Phase-4 Codex evidence.
-- Revise the architecture specification only if review finds a demonstrated ownership, vocabulary, portability, or scope defect.
-- After architecture approval, update this capsule's allowed mutation scope before modifying policies, schemas, procedures, deterministic tooling, or adapters.
-- Deliberately integrate the provisional shared operator/tutor bridge and proven Codex adapter concepts.
-- Design and implement topology-aware coordination, workflow/stage semantics, remote-aware preflight/handoff, safe worktree preparation, and minimal workflow/artifact contracts.
-- Run regression validation across direct-tool, local-runtime, human-gate, failure-recovery, and both Codex/ChatGPT handoff directions.
+- Draft and review architecture/control-plane-v2-implementation.md as the implementation map from the reviewed architecture candidate to concrete files, compatibility strategy, phases, and regression gates.
+- After implementation-plan approval, broaden this capsule's mutation scope deliberately before modifying policies, schemas, procedures, deterministic tooling, tests, or adapters.
+- Deliberately integrate the provisional shared operator/tutor bridge and proven Codex adapter concepts rather than blindly merging their branches.
+- Implement topology-aware coordination, workflow/stage semantics, remote-aware preflight/handoff, safe worktree preparation, workflow-version binding, generated handoff rendering, and minimal workflow/artifact contracts.
+- Run regression validation across direct-tool, local-runtime, human-gate, idempotency, failure-recovery, and both Codex/ChatGPT handoff directions.
 - Only after validation, decide promotion to main and later PADataset migration.
 
 ## Constraints that matter most
@@ -87,19 +82,21 @@ Review architecture/control-plane-v2.md at control-plane-v2-refactor@93c7cbbd82e
   - GitHub branch endpoints matched the expected main, shared bridge, Codex target, and Phase-4 coordination SHAs.
 - **New v2 branches created from exact baseline:** `PASS`
   - Both control-plane-v2-refactor and control-plane-v2-coordination were created from cb8368cd50de2d364c2aade8843276aab0b02420.
-- **V2 architecture specification reviewed:** `NOT_RUN`
+- **V2 architecture specification reviewed:** `PASS`
+  - architecture/control-plane-v2.md reviewed and refined through control-plane-v2-refactor@07075963f2d56f1bf76d562de3f6a6dc0d16c43d
+  - Review resolved authority-owner vs execution-owner ambiguity, workflow version binding, checkpoint bundles, HANDOFF_SAFE vs EXECUTION_READY, artifact lifecycle overlap, generated handoff authority, secret handling, consequence classes, and coordination-state placement.
 - **Integrated v2 implementation validated:** `NOT_RUN`
 - **Cross-executor regression suite completed:** `NOT_RUN`
 - **Initial v2 architecture draft created within authorized target scope:** `PASS`
   - Target branch changed only by architecture/control-plane-v2.md at 93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e.
+- **Architecture branch remained within authorized review scope:** `PASS`
+  - Compare cb8368cd50de2d364c2aade8843276aab0b02420...07075963f2d56f1bf76d562de3f6a6dc0d16c43d shows only architecture/control-plane-v2.md changed.
 
 ## Blockers / known limitations
 
 - The v1 HANDOFF_SAFE checker is local-worktree-centric. This capsule is durable remote coordination state, but formal v1 HANDOFF_SAFE validation requires an isolated local worktree at the recorded checkout path. Do not confuse this known v1 checker limitation with loss of the remote task state.
 
 ## Fresh-chat initialization
-
-Use the following as the first message in a new chat:
 
 ```text
 @GitHub
@@ -125,7 +122,7 @@ Current target branch:
 control-plane-v2-refactor
 
 Current target checkpoint:
-93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e
+07075963f2d56f1bf76d562de3f6a6dc0d16c43d
 
 Do not broaden mutation scope beyond the capsule.
 ```
