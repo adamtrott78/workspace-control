@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "automated-research-engine-v1",
   "title": "Automated research engine v1",
-  "status": "BLOCKED_RUNTIME",
+  "status": "IN_PROGRESS",
   "goal": "Design and prove a provenance-preserving automated research engine that turns scholarly literature into structured evidence, durable knowledge, challenged research gaps, fundable research programs, and workspace-control-executable research projects.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "56533236666d17e742c96528807ced11dbc3b92d",
+        "checkpoint_sha": "7f09a557240722b4d104cbb7d7a2d99779974755",
         "verified": true
       },
       "local": null,
@@ -392,7 +392,7 @@
     },
     {
       "id": "vertical_slice_validation",
-      "status": "SUSPENDED",
+      "status": "IN_PROGRESS",
       "execution_owner": "cross-executor-validation",
       "selected_executor": "codex",
       "selected_surface": "composed",
@@ -409,7 +409,13 @@
         "artifact:architecture/research-engine/persistence-architecture-v1.md",
         "artifact:architecture/research-engine/fixtures/persistence-decision-v1.json",
         "git:56533236666d17e742c96528807ced11dbc3b92d",
-        "artifact:architecture/research-engine/exact-pdf-promotion-protocol-v1.md"
+        "artifact:architecture/research-engine/exact-pdf-promotion-protocol-v1.md",
+        "git:7f09a557240722b4d104cbb7d7a2d99779974755",
+        "artifact:architecture/research-engine/fixtures/rf-osr-exact-pdf-promotion-v1.json",
+        "artifact:architecture/research-engine/fixtures/rf-osr-ocr-pdf-fidelity-v1.json",
+        "artifact:architecture/research-engine/fixtures/rf-osr-curated-multipaper-corpus-v2.json",
+        "artifact:architecture/research-engine/fixtures/rf-osr-curated-multipaper-graph-v2.json",
+        "artifact:architecture/research-engine/fixtures/rf-osr-curated-multipaper-synthesis-v2.json"
       ],
       "validation": [
         {
@@ -441,9 +447,20 @@
             "Procedure records SHA-256, byte length, PDF magic, and page count and packages exact copies without mutating PADataset.",
             "Expected manifest page counts are Scheirer=16, Liu=16, Baye=6."
           ]
+        },
+        {
+          "check": "exact-PDF promotion fidelity",
+          "result": "PASS",
+          "evidence": [
+            "Three local PADataset PDFs were bundled read-only and verified against SHA256SUMS, byte length, PDF magic, and manifest page count.",
+            "Scheirer 2013, Liu 2020, and Baye 2024 are now represented by exact SourceArtifact SHA-256 identities.",
+            "11 selected OCR-derived evidence anchors were compared against exact-PDF text/layout: 7 EXACT_MATCH, 4 NORMALIZATION_ONLY, 0 OCR_MINOR_ERROR, 0 OCR_SEMANTIC_ERROR, 0 LOCATOR_UNRESOLVED.",
+            "The four normalization-only cases are Liu 2020 PDF ligature/hyphenation normalization, not semantic differences.",
+            "The five-work corpus now has four exact-PDF-verified works and one OCR-derived work."
+          ]
         }
       ],
-      "resume_condition": "Receive the exact-PDF promotion tar.gz (or the three exact PDFs) plus local receipt for Scheirer 2013, Liu 2020, and Baye 2024. Then verify SHA-256/page counts and run OCR-vs-exact-PDF fidelity comparison."
+      "resume_condition": null
     }
   ],
   "checkpoints": [
@@ -590,6 +607,16 @@
       "required_for_resume": true,
       "evidence": [
         "Exact-PDF promotion procedure committed with fixed file set, receipt schema, safety constraints, and acceptance criteria."
+      ]
+    },
+    {
+      "id": "research-engine-exact-pdf-fidelity",
+      "kind": "git_commit",
+      "identity": "7f09a557240722b4d104cbb7d7a2d99779974755",
+      "required_for_resume": true,
+      "evidence": [
+        "Exact-PDF promotion/fidelity fixtures and corpus v2 committed.",
+        "Selected-anchor semantic preservation rate = 1.0."
       ]
     }
   ],
@@ -1067,18 +1094,17 @@
       ]
     }
   ],
-  "blockers": [
-    "Exact source PDFs for the next fidelity test are local-only in the PADataset checkout and are not available to this executor. A bounded read-only local bundle is required for Scheirer 2013, Liu 2020, and Baye 2024."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Promote three PADataset OCR_DERIVED reference works (Scheirer 2013, Liu 2020, Baye 2024) to exact-PDF-verified artifacts by hashing the local PDFs and making those exact bytes available to the extraction executor.",
-    "For each promoted paper, parse exact PDF layout and compare selected OCR-derived evidence anchors against exact-PDF extraction to quantify locator/text fidelity.",
-    "Mechanically validate representative fixtures against their JSON schemas in the dedicated implementation repository.",
-    "Re-run cross-paper synthesis/novelty challenge using exact-PDF evidence for the promoted subset and additional RF-specific papers.",
-    "Create the dedicated research-engine implementation repository when a supported repository-creation path is available; implement PostgreSQL/artifact-store/provider/parser services there.",
-    "After exact-PDF fidelity checks pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs through the same pipeline."
+    "Create the dedicated adamtrott78/research-engine implementation repository and initialize it from the validated workspace-control contracts.",
+    "Implement v1 PostgreSQL/pgvector schema and content-addressed artifact-store interfaces.",
+    "Implement fixture/schema validation and load the current five-work corpus as the first test dataset.",
+    "Implement provenance query tests covering Result->Claim support, limitation qualifiers, source locators, and mixed fidelity.",
+    "Promote Broggi 2025 to exact-PDF evidence during later corpus ingestion, not as a blocker for implementation.",
+    "Re-run novelty challenge after additional RF-specific papers are loaded; only then consider SUPPORTED_AS_OPEN.",
+    "After implementation vertical-slice tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs."
   ],
-  "next_safe_action": "Run architecture/research-engine/exact-pdf-promotion-protocol-v1.md's noninteractive local command against the manifest-recorded PADataset checkout. Return the printed receipt and upload /tmp/research-engine-pdf-promotion.tar.gz. Do not modify PADataset. After receipt/upload, verify the bundle and resume vertical_slice_validation with exact-PDF parsing and OCR-fidelity comparison.",
+  "next_safe_action": "Create the dedicated research-engine implementation repository from the validated contracts at automated-research-engine-v1@7f09a557240722b4d104cbb7d7a2d99779974755. Initialize PostgreSQL/pgvector schema, content-addressed artifact-store interface, contract/fixture validator, and first five-work corpus load/query tests. Continue through remotely executable implementation work; suspend only at a demonstrated runtime/human-decision/authority boundary per policies/OPERATOR_WORKFLOW.md.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
