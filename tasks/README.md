@@ -61,8 +61,13 @@ v2 adds representation for:
 - artifact lifecycle metadata;
 - remote/local identities needed for recovery.
 
-Topology-aware v2 HANDOFF_SAFE checking is implemented in a later dedicated
-phase. Valid v2 capsules are not evaluated with v1 local-checkout assumptions.
+Topology-aware v2 `HANDOFF_SAFE` checking evaluates durable recovery state
+for remote-only, local, and composed topologies without applying v1
+local-checkout assumptions to remote-only tasks.
+
+Receiver-specific `EXECUTION_READY` is reported separately from durable handoff
+safety. Optional receiver checks describe transient capability/access facts and
+do not grant authority or become durable task truth.
 
 ## Evidence discipline
 
