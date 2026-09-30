@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "extraction_run_id": "extract:2108.13099v1:abstract:v1",
+  "work_version_id": "work-version:arxiv:2108.13099v1",
+  "source_identity": "metadata:arxiv:2108.13099v1:abstract",
+  "source_level": "ABSTRACT_ONLY",
+  "extractor": {
+    "type": "MODEL",
+    "identity": "chatgpt-research-engine-pilot",
+    "version": "2026-09-30"
+  },
+  "started_at": "2026-09-30T12:30:00-04:00",
+  "completed_at": "2026-09-30T12:30:00-04:00",
+  "locators": [
+    {
+      "schema_version": 1,
+      "locator_id": "locator:arxiv:2108.13099v1:abstract",
+      "source_identity": "metadata:arxiv:2108.13099v1:abstract",
+      "locator_quality": "STRUCTURAL",
+      "source_level": "ABSTRACT_ONLY",
+      "section_path": [
+        "Abstract"
+      ],
+      "page_number": null,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": null,
+      "raw_anchor": "arXiv abstract metadata field"
+    }
+  ],
+  "evidence": [
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "metadata:arxiv:2108.13099v1:abstract",
+      "locator_id": "locator:arxiv:2108.13099v1:abstract",
+      "extraction_run_id": "extract:2108.13099v1:abstract:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "UNVERIFIED",
+      "evidence_id": "ev:2108.13099v1:rq:1",
+      "evidence_type": "RESEARCH_QUESTION",
+      "raw_source_form": "the classifier needs to reject unauthorized transmitters while recognizing authorized transmitters",
+      "normalized_form": "How can RF fingerprinting perform open-set classification by recognizing authorized transmitters while rejecting unauthorized transmitters?",
+      "attributes": {
+        "scope": "open-set RF fingerprinting"
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "metadata:arxiv:2108.13099v1:abstract",
+      "locator_id": "locator:arxiv:2108.13099v1:abstract",
+      "extraction_run_id": "extract:2108.13099v1:abstract:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "UNVERIFIED",
+      "evidence_id": "ev:2108.13099v1:claim:1",
+      "evidence_type": "CLAIM",
+      "raw_source_form": "acquiring new transmitters to use as known transmitters is highly expensive",
+      "normalized_form": "Collecting real unauthorized transmitters for open-set training is costly.",
+      "attributes": {
+        "claim_kind": "MOTIVATION",
+        "modality": "asserted",
+        "author_asserted": true
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "metadata:arxiv:2108.13099v1:abstract",
+      "locator_id": "locator:arxiv:2108.13099v1:abstract",
+      "extraction_run_id": "extract:2108.13099v1:abstract:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "UNVERIFIED",
+      "evidence_id": "ev:2108.13099v1:method:1",
+      "evidence_type": "METHOD",
+      "raw_source_form": "we propose to use generative deep learning methods to emulate unauthorized signal samples for the augmentation of training datasets",
+      "normalized_form": "Generative outlier augmentation creates synthetic unauthorized RF signal samples for training-data augmentation.",
+      "attributes": {
+        "method_family": "generative data augmentation"
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "metadata:arxiv:2108.13099v1:abstract",
+      "locator_id": "locator:arxiv:2108.13099v1:abstract",
+      "extraction_run_id": "extract:2108.13099v1:abstract:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "UNVERIFIED",
+      "evidence_id": "ev:2108.13099v1:method:2",
+      "evidence_type": "METHOD",
+      "raw_source_form": "two different data augmentation techniques, one that exploits a limited number of known unauthorized transmitters and the other that does not require any unauthorized transmitters",
+      "normalized_form": "The paper evaluates two augmentation variants: one using a limited known-unauthorized set and one requiring no unauthorized transmitters.",
+      "attributes": {
+        "variant_count": 2
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "metadata:arxiv:2108.13099v1:abstract",
+      "locator_id": "locator:arxiv:2108.13099v1:abstract",
+      "extraction_run_id": "extract:2108.13099v1:abstract:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "UNVERIFIED",
+      "evidence_id": "ev:2108.13099v1:dataset:1",
+      "evidence_type": "DATASET_OR_POPULATION",
+      "raw_source_form": "a dataset captured from a WiFi testbed",
+      "normalized_form": "A WiFi-testbed RF dataset is used for evaluation.",
+      "attributes": {
+        "domain": "WiFi RF fingerprinting",
+        "sample_count": null
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "metadata:arxiv:2108.13099v1:abstract",
+      "locator_id": "locator:arxiv:2108.13099v1:abstract",
+      "extraction_run_id": "extract:2108.13099v1:abstract:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "UNVERIFIED",
+      "evidence_id": "ev:2108.13099v1:metric:1",
+      "evidence_type": "METRIC",
+      "raw_source_form": "open set classification accuracy",
+      "normalized_form": "Open-set classification accuracy.",
+      "attributes": {
+        "units": null,
+        "definition": null
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "metadata:arxiv:2108.13099v1:abstract",
+      "locator_id": "locator:arxiv:2108.13099v1:abstract",
+      "extraction_run_id": "extract:2108.13099v1:abstract:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "UNVERIFIED",
+      "evidence_id": "ev:2108.13099v1:result:1",
+      "evidence_type": "RESULT",
+      "raw_source_form": "data augmentation allows for significant increases in open set classification accuracy, especially when the authorized set is small",
+      "normalized_form": "Data augmentation improves open-set classification accuracy, with larger benefits reported for smaller authorized sets.",
+      "attributes": {
+        "raw_value": null,
+        "normalized_value": null,
+        "qualitative": true,
+        "condition": "especially when authorized set is small"
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "metadata:arxiv:2108.13099v1:abstract",
+      "locator_id": "locator:arxiv:2108.13099v1:abstract",
+      "extraction_run_id": "extract:2108.13099v1:abstract:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "UNVERIFIED",
+      "evidence_id": "ev:2108.13099v1:limitation:1",
+      "evidence_type": "LIMITATION",
+      "raw_source_form": "So far, efforts at open set classification have largely relied on the utilization of signal samples captured from a known set of unauthorized transmitters",
+      "normalized_form": "Prior open-set RF approaches commonly depend on known unauthorized transmitter samples.",
+      "attributes": {
+        "category": "DATA_REQUIREMENT",
+        "author_asserted": true,
+        "scope": "prior work"
+      }
+    }
+  ],
+  "warnings": [
+    "This fixture is derived only from authoritative arXiv abstract metadata, not the acquired PDF bytes.",
+    "No PDF page numbers, table values, figure values, architecture details, sample counts, or numerical improvements are asserted.",
+    "Full-text extraction must supersede or qualify this fixture once the exact hashed PDF is available to the extraction executor."
+  ]
+}

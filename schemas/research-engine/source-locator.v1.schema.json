@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/source-locator.v1.schema.json",
+  "title": "Research Engine SourceLocator v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "locator_id",
+    "source_identity",
+    "locator_quality",
+    "source_level"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "locator_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "locator_quality": {
+      "enum": [
+        "EXACT",
+        "STRUCTURAL",
+        "APPROXIMATE",
+        "UNAVAILABLE"
+      ]
+    },
+    "source_level": {
+      "enum": [
+        "METADATA_ONLY",
+        "ABSTRACT_ONLY",
+        "FULLTEXT_STRUCTURED",
+        "FULLTEXT_PDF_TEXT",
+        "FULLTEXT_PDF_LAYOUT",
+        "OCR_DERIVED"
+      ]
+    },
+    "section_path": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "page_number": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "paragraph_index": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "normalized_text_start": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "normalized_text_end": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "xml_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pdf_bbox": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "raw_anchor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/evidence-object.v1.schema.json",
+  "title": "Research Engine EvidenceObject v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "evidence_type",
+    "work_id",
+    "work_version_id",
+    "source_identity",
+    "locator_id",
+    "raw_source_form",
+    "normalized_form",
+    "extraction_run_id",
+    "extractor_type",
+    "extractor_identity",
+    "extracted_at",
+    "verification_state"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_type": {
+      "enum": [
+        "RESEARCH_QUESTION",
+        "CLAIM",
+        "METHOD",
+        "EXPERIMENT",
+        "DATASET_OR_POPULATION",
+        "METRIC",
+        "RESULT",
+        "LIMITATION",
+        "ASSUMPTION",
+        "THREAT_TO_VALIDITY"
+      ]
+    },
+    "work_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "work_version_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "locator_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "raw_source_form": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "normalized_form": {
+      "type": "string",
+      "minLength": 1
+    },
+    "extraction_run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "extractor_type": {
+      "enum": [
+        "MODEL",
+        "RULE",
+        "PARSER",
+        "HUMAN",
+        "HYBRID"
+      ]
+    },
+    "extractor_identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "extracted_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "verification_state": {
+      "enum": [
+        "UNVERIFIED",
+        "MACHINE_CHECKED",
+        "HUMAN_VERIFIED",
+        "REJECTED",
+        "SUPERSEDED"
+      ]
+    },
+    "attributes": {
+      "type": "object"
+    }
+  }
+}
