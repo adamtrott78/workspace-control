@@ -680,7 +680,7 @@
         "1 remote-only DIRECT_TOOL mutation and reread: PASS in Phase 10 Stage A.",
         "2 DIRECT_TOOL -> local runtime -> DIRECT_TOOL composition: PASS from repeated exact-checkpoint implementation -> isolated local validation -> durable direct-tool continuation in Phases 6-8.",
         "3 mechanical browser ingress -> DIRECT_TOOL recovery: PASS from uploaded terminal validation evidence followed by exact GitHub state recovery and continuation.",
-        "4 human judgment suspension -> resume: PENDING dedicated regression.",
+        "4 human judgment suspension -> resume: PASS from Phase 10 Stage B explicit APPROVE gate and resume.",
         "5 safe worktree creation/preparation: PASS from Phase 7 exact runtime validation.",
         "6 dirty/diverged worktree refusal: PASS from Phase 7 exact runtime validation.",
         "7 verified no-op/idempotent re-entry: PASS in Phase 10 Stage A after reread selected NO_MUTATION_REQUIRED.",
@@ -689,7 +689,7 @@
         "10 Codex -> ChatGPT handoff: PASS from returned PHASE9_CODEX_DISCOVERY_RESULT=PASS followed by direct durable-state recovery.",
         "11 remote-only HANDOFF_SAFE: PASS from Phase 6 exact runtime validation.",
         "12 local-runtime HANDOFF_SAFE: PASS from Phase 6 exact runtime validation.",
-        "13 workflow resume from first incomplete stage: PENDING dedicated regression.",
+        "13 workflow resume from first incomplete stage: PASS from Phase 10 Stage B deterministic recovery of local_runtime after the human gate.",
         "14 project-owned validation failure preventing dependent continuation: PASS from failed Phase 7 exact runtime gate, which prevented Phase 8 until root-cause repair and revalidation.",
         "15 task recovery from an exact pinned workflow descriptor after the workflow branch has advanced: PASS from the dedicated Phase 10 branch-advance recovery regression.",
         "16 generated human-readable handoff regeneration after capsule state changes: PASS from the dedicated Phase 10 regeneration after the matrix capsule update."
@@ -715,18 +715,34 @@
         "The derived handoff reflected IN_PROGRESS Phase 10 state, frozen target checkpoint, Stage A PASS, and the then-pending generic regression gaps.",
         "The generated handoff remained explicitly subordinate to the authoritative JSON capsule and verified Git/runtime evidence."
       ]
+    },
+    {
+      "check": "Phase 10 Stage B local/worktree/runtime regression",
+      "result": "PASS",
+      "evidence": [
+        "Exact frozen target checkpoint b8aa52e242a07e6aa2036516e401864991183ad2 loaded in an isolated source clone.",
+        "Read-only worktree preparation returned CREATE_AVAILABLE and did not create the target.",
+        "Explicit worktree creation returned READY at the exact frozen checkpoint with a clean isolated worktree.",
+        "Local topology capsule validated and returned HANDOFF_SAFE.",
+        "Composed topology capsule validated in SUSPENDED state and returned HANDOFF_SAFE with a ready synchronization boundary.",
+        "Human judgment gate required and received explicit APPROVE.",
+        "After approval, human_gate transitioned to VALIDATED and deterministic recovery selected local_runtime as the first incomplete stage.",
+        "The bounded local runtime observation executed at the exact frozen checkpoint with a clean worktree.",
+        "Final composed state validated as CHECKPOINTED and HANDOFF_SAFE with no remaining work or blockers.",
+        "All operations occurred under a temporary validation root; no existing workspace worktree was switched, cleaned, reset, stashed, staged, or modified.",
+        "PHASE10_STAGEB_RESULT=PASS."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Run Phase 10 Stage B bounded non-PADataset local/worktree/runtime regression at the frozen target checkpoint.",
-    "Stage B must prove isolated worktree preparation, local HANDOFF_SAFE, composed SUSPENDED HANDOFF_SAFE, human-gate resume, and first-incomplete-stage recovery.",
-    "Return exact Stage B runtime evidence for direct-tool persistence on the coordination branch.",
-    "After Stage B passes, run one existing real workflow reference regression; prefer MILCOM without migrating PADataset's operator architecture.",
-    "Use the MILCOM reference regression to close the remaining human-judgment suspension/resume evidence if Stage B does not already satisfy it substantively.",
-    "Only after the full matrix and reference workflow pass, open Phase 11 promotion decision."
+    "Run one existing real workflow reference regression after generic mechanics passed.",
+    "Use MILCOM as the reference workflow and preserve PADataset project-local authority.",
+    "Exercise the historical DIRECT_TOOL -> pushed SHA -> local build/render -> QA/human gate -> source-repair pattern without migrating PADataset's operator architecture.",
+    "Record exact evidence for the reference workflow and verify the workspace-control target implementation remains frozen.",
+    "After the reference regression passes, reconcile the full 16-item matrix and open Phase 11 promotion decision."
   ],
-  "next_safe_action": "Continue Phase 10 with target control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2 frozen. Run one bounded isolated local/runtime regression outside existing workspace worktrees. It must prove safe worktree creation, local HANDOFF_SAFE, composed SUSPENDED HANDOFF_SAFE, a human-gate state transition to VALIDATED, deterministic recovery of the first incomplete stage, final CHECKPOINTED/HANDOFF_SAFE state, and non-interference. Return exact output, then persist Stage B evidence with DIRECT_TOOL and proceed to the MILCOM reference regression.",
+  "next_safe_action": "Continue Phase 10 with control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2 frozen. Generic remote-only and local/runtime mechanics have passed. Run one bounded MILCOM reference regression in adamtrott78/PADataset using its existing project-local authority and presentation workflow. Do not migrate PADataset's operator architecture. Exercise or verify the historical DIRECT_TOOL -> pushed SHA -> local build/render -> QA/human gate -> source-repair flow with exact evidence, then persist the result on the coordination branch and reconcile the full 16-item promotion matrix.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
