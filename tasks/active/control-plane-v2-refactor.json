@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "VALIDATING",
+  "status": "CHECKPOINTED",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -32,10 +32,11 @@
       "checkout_path": "/home/atrott/adamArchives/Adam/workspace-control-v2-refactor",
       "branch": "control-plane-v2-refactor",
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
-      "checkpoint_sha": "93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e",
+      "checkpoint_sha": "07075963f2d56f1bf76d562de3f6a6dc0d16c43d",
       "checkpoint_pushed": true,
       "allowed_mutation_scope": [
-        "architecture/control-plane-v2.md"
+        "architecture/control-plane-v2.md",
+        "architecture/control-plane-v2-implementation.md"
       ]
     }
   ],
@@ -76,6 +77,13 @@
         "Added only architecture/control-plane-v2.md",
         "Commit subject: Draft control plane v2 architecture"
       ]
+    },
+    {
+      "summary": "Completed the first v2 architecture review and refined the architecture candidate without broadening into implementation.",
+      "evidence": [
+        "control-plane-v2-refactor -> 07075963f2d56f1bf76d562de3f6a6dc0d16c43d",
+        "Only architecture/control-plane-v2.md differs from the original main baseline."
+      ]
     }
   ],
   "artifacts": [
@@ -92,6 +100,14 @@
       "evidence": [
         "control-plane-v2-refactor commit 93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e",
         "The draft defines the v2 layers, 15 core terms, routing/return-routing, human gates, workflow-descriptor/task-capsule separation, deterministic project entrypoints, worktree preparation, remote-aware preflight, artifact lifecycle, consistency validation, capability evidence, ordering, failure/idempotency, regression evidence, and non-goals."
+      ]
+    },
+    {
+      "path": "tasks/active/control-plane-v2-refactor.md",
+      "state": "derived human-readable handoff view on coordination branch",
+      "evidence": [
+        "Created as a convenience view only; JSON capsule plus verified Git/runtime evidence remain authoritative.",
+        "v2 architecture now requires deterministic regeneration of this handoff view after material capsule changes."
       ]
     }
   ],
@@ -112,8 +128,11 @@
     },
     {
       "check": "V2 architecture specification reviewed",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "architecture/control-plane-v2.md reviewed and refined through control-plane-v2-refactor@07075963f2d56f1bf76d562de3f6a6dc0d16c43d",
+        "Review resolved authority-owner vs execution-owner ambiguity, workflow version binding, checkpoint bundles, HANDOFF_SAFE vs EXECUTION_READY, artifact lifecycle overlap, generated handoff authority, secret handling, consequence classes, and coordination-state placement."
+      ]
     },
     {
       "check": "Integrated v2 implementation validated",
@@ -131,21 +150,27 @@
       "evidence": [
         "Target branch changed only by architecture/control-plane-v2.md at 93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e."
       ]
+    },
+    {
+      "check": "Architecture branch remained within authorized review scope",
+      "result": "PASS",
+      "evidence": [
+        "Compare cb8368cd50de2d364c2aade8843276aab0b02420...07075963f2d56f1bf76d562de3f6a6dc0d16c43d shows only architecture/control-plane-v2.md changed."
+      ]
     }
   ],
   "blockers": [
     "The v1 HANDOFF_SAFE checker is local-worktree-centric. This capsule is durable remote coordination state, but formal v1 HANDOFF_SAFE validation requires an isolated local worktree at the recorded checkout path. Do not confuse this known v1 checker limitation with loss of the remote task state."
   ],
   "remaining_work": [
-    "Review architecture/control-plane-v2.md against its explicit review questions and the preserved MTH602, EAS501, CIS560, MILCOM/PADataset, and Phase-4 Codex evidence.",
-    "Revise the architecture specification only if review finds a demonstrated ownership, vocabulary, portability, or scope defect.",
-    "After architecture approval, update this capsule's allowed mutation scope before modifying policies, schemas, procedures, deterministic tooling, or adapters.",
-    "Deliberately integrate the provisional shared operator/tutor bridge and proven Codex adapter concepts.",
-    "Design and implement topology-aware coordination, workflow/stage semantics, remote-aware preflight/handoff, safe worktree preparation, and minimal workflow/artifact contracts.",
-    "Run regression validation across direct-tool, local-runtime, human-gate, failure-recovery, and both Codex/ChatGPT handoff directions.",
+    "Draft and review architecture/control-plane-v2-implementation.md as the implementation map from the reviewed architecture candidate to concrete files, compatibility strategy, phases, and regression gates.",
+    "After implementation-plan approval, broaden this capsule's mutation scope deliberately before modifying policies, schemas, procedures, deterministic tooling, tests, or adapters.",
+    "Deliberately integrate the provisional shared operator/tutor bridge and proven Codex adapter concepts rather than blindly merging their branches.",
+    "Implement topology-aware coordination, workflow/stage semantics, remote-aware preflight/handoff, safe worktree preparation, workflow-version binding, generated handoff rendering, and minimal workflow/artifact contracts.",
+    "Run regression validation across direct-tool, local-runtime, human-gate, idempotency, failure-recovery, and both Codex/ChatGPT handoff directions.",
     "Only after validation, decide promotion to main and later PADataset migration."
   ],
-  "next_safe_action": "Review architecture/control-plane-v2.md at control-plane-v2-refactor@93c7cbbd82ed9d46e43c2ad38a57ba81165e8f3e. Do not broaden mutation scope or begin implementation until the architecture draft is reviewed against its ten review questions and the preserved experimental evidence.",
+  "next_safe_action": "Draft only architecture/control-plane-v2-implementation.md on control-plane-v2-refactor from the reviewed architecture at 07075963f2d56f1bf76d562de3f6a6dc0d16c43d. The plan must preserve v1 evidence, specify backward-compatibility/migration strategy, map v2 concepts to concrete repository files and CLI behavior, and define gated implementation phases before any policy/schema/tool mutation.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
