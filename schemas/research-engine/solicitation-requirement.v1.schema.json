@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/solicitation-requirement.v1.schema.json",
+  "title": "Research Engine SolicitationRequirement v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "requirement_id",
+    "funding_opportunity_id",
+    "source_locator",
+    "category",
+    "normalized_rule",
+    "validation_method",
+    "satisfaction_state"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "requirement_id": {
+      "type": "string"
+    },
+    "funding_opportunity_id": {
+      "type": "string"
+    },
+    "source_locator": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "normalized_rule": {
+      "type": "string"
+    },
+    "validation_method": {
+      "type": "string"
+    },
+    "satisfaction_state": {
+      "enum": [
+        "UNMAPPED",
+        "MAPPED",
+        "SATISFIED",
+        "UNSATISFIED",
+        "NEEDS_HUMAN_INPUT"
+      ]
+    }
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "research_program": {
+    "schema_version": 1,
+    "research_program_id": "program:rf-osr:efficient-blind-generative:dry-run-v1",
+    "source_gap_candidate_id": "gap:rf-osr:efficient-blind-generative-outliers:v1",
+    "source_gap_status": "NARROWED",
+    "status": "DRAFT_NOT_APPROVED",
+    "problem_statement": "The pilot evidence exposes a tradeoff in blind generative outlier augmentation: ellipsoidal generation requires tuning of shell thickness, while optimization-based generation removes that tuning but incurs substantial generation cost.",
+    "research_question": "Can a blind generative outlier augmentation method reduce tuning and computational overhead while preserving open-set RF fingerprinting accuracy?",
+    "hypotheses": [
+      {
+        "id": "H1",
+        "statement": "A more efficient blind generator can match or exceed the open-set accuracy of the 2021 blind-generation baselines with materially lower generation cost.",
+        "state": "PROPOSED"
+      },
+      {
+        "id": "H2",
+        "statement": "The generator can avoid a manually tuned shell-thickness hyperparameter without requiring real unauthorized-transmitter training data.",
+        "state": "PROPOSED"
+      }
+    ],
+    "proposed_contribution": "A computationally efficient, tuning-light blind generative augmentation method for open-set RF fingerprinting, if deeper novelty review confirms this contribution remains open.",
+    "work_packages": [
+      {
+        "id": "WP1",
+        "name": "Prior-work closure",
+        "goal": "Deep-read later OOD/open-set/generative RF literature and either validate, narrow, or reject the contribution before implementation."
+      },
+      {
+        "id": "WP2",
+        "name": "Method design",
+        "goal": "Design candidate generator only if WP1 preserves a meaningful open contribution."
+      },
+      {
+        "id": "WP3",
+        "name": "Evaluation",
+        "goal": "Compare accuracy, generation runtime, tuning burden, and robustness against 2021 blind-generation and later relevant baselines."
+      }
+    ],
+    "data_requirements": [
+      "At least one reproducible open-set RF fingerprinting dataset; additional environments/receivers if the surviving contribution includes generalization."
+    ],
+    "infrastructure_requirements": [
+      "GPU-capable training environment",
+      "reproducible RF dataset pipeline",
+      "runtime/profiling instrumentation"
+    ],
+    "baselines": [
+      "2021 ellipsoidal blind outlier generation",
+      "2021 optimization-based blind outlier generation",
+      "relevant later OOD/open-set RF methods identified by WP1"
+    ],
+    "evaluation_metrics": [
+      "open-set/test accuracy or compatible open-set metrics",
+      "outlier-generation runtime",
+      "tuning/search cost",
+      "performance across authorized-set sizes"
+    ],
+    "falsification_criteria": [
+      "Reject H1 if the proposed method does not materially reduce computational cost at comparable open-set performance.",
+      "Reject H2 if avoiding manual tuning requires equivalent hidden tuning or real unauthorized-transmitter data.",
+      "Terminate the research direction before method development if deeper prior-work review finds the proposed contribution already demonstrated."
+    ],
+    "risks": [
+      {
+        "risk": "Prior work already solves the narrowed contribution.",
+        "mitigation": "Make prior-work closure WP1 and terminate/narrow before implementation."
+      },
+      {
+        "risk": "Accuracy/runtime gains do not survive broader datasets.",
+        "mitigation": "Use multiple datasets/environments during later validation if the direction survives novelty review."
+      }
+    ],
+    "evidence_ids": [
+      "ev:2108:result:ellipsoid",
+      "ev:2108:limitation:ellipsoid",
+      "ev:2108:result:optimization",
+      "ev:2108:limitation:optimization"
+    ],
+    "human_gate": {
+      "required": true,
+      "state": "NOT_APPROVED",
+      "conditions": [
+        "Gap novelty remains NARROWED and requires deeper prior-work review.",
+        "User has not selected this candidate as a research direction."
+      ]
+    }
+  },
+  "proposal_compilation": {
+    "schema_version": 1,
+    "compilation_id": "proposal:dry-run:efficient-blind-generative:v1",
+    "research_program_id": "program:rf-osr:efficient-blind-generative:dry-run-v1",
+    "funding_opportunity_id": null,
+    "status": "NOT_FOR_SUBMISSION",
+    "component_map": [
+      {
+        "component": "problem_and_motivation",
+        "source": [
+          "program.problem_statement",
+          "ev:2108:limitation:ellipsoid",
+          "ev:2108:limitation:optimization"
+        ],
+        "state": "MAPPED"
+      },
+      {
+        "component": "research_question_and_hypotheses",
+        "source": [
+          "program.research_question",
+          "program.hypotheses"
+        ],
+        "state": "MAPPED"
+      },
+      {
+        "component": "prior_evidence",
+        "source": [
+          "ev:2108:result:ellipsoid",
+          "ev:2108:result:optimization"
+        ],
+        "state": "MAPPED"
+      },
+      {
+        "component": "research_plan",
+        "source": [
+          "program.work_packages"
+        ],
+        "state": "MAPPED"
+      },
+      {
+        "component": "evaluation_and_falsification",
+        "source": [
+          "program.evaluation_metrics",
+          "program.falsification_criteria"
+        ],
+        "state": "MAPPED"
+      },
+      {
+        "component": "funding-opportunity-specific requirements",
+        "source": [],
+        "state": "UNMAPPED"
+      }
+    ],
+    "evidence_map": [
+      {
+        "proposal_claim": "The 2021 ellipsoidal method shows strong gains for small authorized sets but requires delta tuning.",
+        "evidence_ids": [
+          "ev:2108:result:ellipsoid",
+          "ev:2108:limitation:ellipsoid"
+        ]
+      },
+      {
+        "proposal_claim": "The 2021 optimization method avoids delta tuning but carries a substantial generation-time cost.",
+        "evidence_ids": [
+          "ev:2108:result:optimization",
+          "ev:2108:limitation:optimization"
+        ]
+      }
+    ],
+    "unresolved_inputs": [
+      "Deeper novelty review of the narrowed candidate.",
+      "Human approval of the research direction.",
+      "Selection of an official current funding opportunity.",
+      "Opportunity-specific requirements, review criteria, formatting, deadline, eligibility, and budget constraints.",
+      "Any project-specific preliminary data beyond the current literature evidence."
+    ],
+    "compliance_state": "NO_OFFICIAL_OPPORTUNITY_SELECTED",
+    "submission_gate": {
+      "allowed": false,
+      "reasons": [
+        "ResearchProgram is DRAFT_NOT_APPROVED.",
+        "Source GapCandidate is NARROWED, not SUPPORTED_AS_OPEN.",
+        "No human research-direction approval.",
+        "No official funding opportunity selected.",
+        "No solicitation requirement matrix exists."
+      ]
+    }
+  },
+  "validation": [
+    {
+      "check": "novelty gate",
+      "result": "PASS",
+      "evidence": "NARROWED gap remains DRAFT_NOT_APPROVED and cannot become an approved program automatically."
+    },
+    {
+      "check": "human decision gate",
+      "result": "PASS",
+      "evidence": "No user research-direction approval is inferred from interest in building the pipeline."
+    },
+    {
+      "check": "submission gate",
+      "result": "PASS",
+      "evidence": "Dry-run proposal is NOT_FOR_SUBMISSION with submission_gate.allowed=false."
+    },
+    {
+      "check": "evidence map",
+      "result": "PASS",
+      "evidence": "Problem motivation and prior-evidence statements point to exact evidence IDs rather than unsourced prose."
+    },
+    {
+      "check": "solicitation honesty",
+      "result": "PASS",
+      "evidence": "No NSF or other sponsor compliance is claimed because no official current opportunity has been selected."
+    }
+  ]
+}

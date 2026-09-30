@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/funding-opportunity.v1.schema.json",
+  "title": "Research Engine FundingOpportunity v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "funding_opportunity_id",
+    "agency",
+    "official_identifier",
+    "title",
+    "authoritative_source_uri",
+    "retrieved_at",
+    "requirements"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "funding_opportunity_id": {
+      "type": "string"
+    },
+    "agency": {
+      "type": "string"
+    },
+    "official_identifier": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "authoritative_source_uri": {
+      "type": "string"
+    },
+    "retrieved_at": {
+      "type": "string"
+    },
+    "published_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "updated_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "deadlines": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "eligibility": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

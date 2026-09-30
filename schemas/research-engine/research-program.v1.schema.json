@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/research-program.v1.schema.json",
+  "title": "Research Engine ResearchProgram v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "research_program_id",
+    "source_gap_candidate_id",
+    "source_gap_status",
+    "status",
+    "problem_statement",
+    "research_question",
+    "hypotheses",
+    "proposed_contribution",
+    "work_packages",
+    "data_requirements",
+    "infrastructure_requirements",
+    "baselines",
+    "evaluation_metrics",
+    "falsification_criteria",
+    "risks",
+    "evidence_ids",
+    "human_gate"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "research_program_id": {
+      "type": "string"
+    },
+    "source_gap_candidate_id": {
+      "type": "string"
+    },
+    "source_gap_status": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "DRAFT_NOT_APPROVED",
+        "APPROVED",
+        "REJECTED",
+        "COMPLETED"
+      ]
+    },
+    "problem_statement": {
+      "type": "string"
+    },
+    "research_question": {
+      "type": "string"
+    },
+    "hypotheses": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "proposed_contribution": {
+      "type": "string"
+    },
+    "work_packages": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "data_requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "infrastructure_requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "baselines": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evaluation_metrics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "falsification_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_gate": {
+      "type": "object"
+    }
+  }
+}

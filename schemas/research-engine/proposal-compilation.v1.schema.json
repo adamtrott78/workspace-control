@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/proposal-compilation.v1.schema.json",
+  "title": "Research Engine ProposalCompilation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "compilation_id",
+    "research_program_id",
+    "funding_opportunity_id",
+    "status",
+    "component_map",
+    "evidence_map",
+    "unresolved_inputs",
+    "compliance_state",
+    "submission_gate"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "compilation_id": {
+      "type": "string"
+    },
+    "research_program_id": {
+      "type": "string"
+    },
+    "funding_opportunity_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "NOT_FOR_SUBMISSION",
+        "DRAFT",
+        "READY_FOR_REVIEW",
+        "READY_FOR_SUBMISSION",
+        "SUBMITTED"
+      ]
+    },
+    "component_map": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "evidence_map": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "unresolved_inputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "compliance_state": {
+      "type": "string"
+    },
+    "submission_gate": {
+      "type": "object"
+    }
+  }
+}
