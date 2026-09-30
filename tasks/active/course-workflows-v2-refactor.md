@@ -24,7 +24,7 @@ Evolve the repository-backed course tutoring/application architecture to the tas
 
 - Intent: mutate
 - Remote branch: course-workflows-v2-refactor
-- Remote checkpoint: 0624110cf808951b65f01c4851f90a3178988237
+- Remote checkpoint: da4ddc9aaca4cb18d6dbe70b089189fd6a1d18be
 - Remote verified: True
 
 ### MTH602-AdamTrott
@@ -57,11 +57,10 @@ Evolve the repository-backed course tutoring/application architecture to the tas
 
 ## Next safe action
 
-Continue on workspace-control `course-workflows-v2-refactor` at 0624110cf808951b65f01c4851f90a3178988237. Define the smallest reusable procedure interfaces and single-binding workflow descriptors for course bootstrap/migration, content ingestion, assessment preparation, study session, assignment work, cheat-sheet build, communications ingestion, and document-artifact build. Use the existing workflow-descriptor v1/schema/validator unchanged unless a demonstrated incompatibility exists; represent composition through descriptor stages and procedure routing, not multiple task-capsule workflow bindings. Do not mutate project repositories. Validate the descriptor shapes against the pinned workspace-control implementation, record the design durably on the architecture branch, then checkpoint JSON+Markdown on main and continue into shared_implementation.
+Continue on workspace-control `course-workflows-v2-refactor` at da4ddc9aaca4cb18d6dbe70b089189fd6a1d18be. Implement the bounded shared changes defined by architecture/course-workflows-v2-review.md and architecture/course-workflows-v2-design.md: extend TUTORING_CONTRACT, COURSE_TUTOR_ADAPTER, and TUTOR_EVALUATION; add the seven shared procedures and eight workflow-descriptor v1 JSON files; route the new shared workflow set from workspace-control documentation. Keep task-capsule v2 and workflow-descriptor v1 schemas unchanged, do not mutate project repositories, and do not alter archived/other active task capsules. Commit a coherent implementation on the isolated branch, verify its changed-path set, then advance directly into shared_validation.
 
 ## Remaining work
 
-- Define composite reusable course workflow descriptors/procedures for course bootstrap/migration, content ingestion, assessment preparation, study session, assignment work, cheat-sheet build, communications ingestion, and document-artifact build without changing task-capsule v2 composition semantics.
 - Implement shared contract/template/procedure updates on the isolated architecture branch while preserving project-local truth and explicit workflow-version migration rules.
 - Validate cold-start routing, assessment relevance behavior, multimodal ingestion, LaTeX artifact QA, continuation behavior, and executor handoff.
 - Promote the validated shared architecture to workspace-control main through an explicit reviewed integration step and record the exact promoted checkpoint.
