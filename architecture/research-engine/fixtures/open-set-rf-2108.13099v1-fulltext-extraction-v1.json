@@ -1,0 +1,927 @@
+{
+  "schema_version": 1,
+  "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+  "work_version_id": "work-version:arxiv:2108.13099v1",
+  "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+  "source_level": "FULLTEXT_PDF_LAYOUT",
+  "extractor": {
+    "type": "HYBRID",
+    "identity": "PyMuPDF-1.26.7 + ChatGPT research-engine extraction",
+    "version": "2026-09-30"
+  },
+  "started_at": "2026-09-30T12:30:00-04:00",
+  "completed_at": "2026-09-30T12:30:00-04:00",
+  "normalized_document_id": "normalized:2108.13099v1:pymupdf-1.26.7:v1",
+  "locators": [
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p2:b12",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "II. SYSTEM MODEL AND PROBLEM FORMULATION"
+      ],
+      "page_number": 2,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        527.15,
+        300.03,
+        656.66
+      ],
+      "raw_anchor": "receiver R receives a signal y ... should determine whether transmitter T belongs to the authorized set or not"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p2:b23",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "III. DATASET AND EVALUATION METHOD",
+        "A. Dataset"
+      ],
+      "page_number": 2,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        437.27,
+        563.04,
+        602.58
+      ],
+      "raw_anchor": "The dataset was captured on the Orbit testbed ... 71 transmitters ... USRP N210"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p3:b0",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "III. DATASET AND EVALUATION METHOD",
+        "B. Outlier detector architecture and evaluation"
+      ],
+      "page_number": 3,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        51.84,
+        300.03,
+        217.58
+      ],
+      "raw_anchor": "The evaluation metric is the prediction accuracy of the OvA classifier on this test set."
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p3:b2",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "IV. SUPERVISED OUTLIER GENERATION"
+      ],
+      "page_number": 3,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        243.17,
+        300.03,
+        719.57
+      ],
+      "raw_anchor": "We chose Variational autoencoders (VAEs) ... fixed |Y-hat| = 7500 ... compared against non-augmented OvA performance."
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p3:b5",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "IV. SUPERVISED OUTLIER GENERATION"
+      ],
+      "page_number": 3,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        361.85,
+        563.04,
+        719.57
+      ],
+      "raw_anchor": "conditional VAE ... 7500/|K| samples were generated from each known outlier ... roughly the same level of accuracy increase"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p4:b21",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION"
+      ],
+      "page_number": 4,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        519.04,
+        300.02,
+        600.73
+      ],
+      "raw_anchor": "use just the information available in X to emulate signal samples from O: blind outlier generation"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p4:b23",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "A. Ellipsoisal method"
+      ],
+      "page_number": 4,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        625.93,
+        300.03,
+        719.57
+      ],
+      "raw_anchor": "use an autoencoder to map the authorized signal samples to a latent space"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p4:b50",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "A. Ellipsoisal method"
+      ],
+      "page_number": 4,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        503.3,
+        563.04,
+        719.57
+      ],
+      "raw_anchor": "outliers are still wireless signals so they should be close ... clearly separated from ... authorized signals"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p5:b0",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "A. Ellipsoisal method"
+      ],
+      "page_number": 5,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        51.66,
+        300.03,
+        193.68
+      ],
+      "raw_anchor": "take some shell of uniform thickness delta around E ... points within this region should correspond to outlier signals"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p5:b6",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "A. Ellipsoisal method"
+      ],
+      "page_number": 5,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        352.25,
+        300.03,
+        613.27
+      ],
+      "raw_anchor": "30 transmitters ... set of outliers ... |A| in {5,10,15,20,25} ... 7500 outlier samples ... significant gains (>15%)"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p5:b8",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "B. Optimization method"
+      ],
+      "page_number": 5,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        637.9,
+        300.03,
+        719.57
+      ],
+      "raw_anchor": "ellipsoidal method ... required empirical tuning of parameter delta ... formulate constraints differently"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p5:b25",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "B. Optimization method"
+      ],
+      "page_number": 5,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        406.99,
+        563.04,
+        584.67
+      ],
+      "raw_anchor": "use a closed set classifier C_A+1 with |A|+1 outputs as the judge of whether D(z) is an outlier"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p5:b27",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "B. Optimization method"
+      ],
+      "page_number": 5,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        611.79,
+        563.04,
+        719.57
+      ],
+      "raw_anchor": "re-train the initial judge ... using those outliers ... generate even better outliers"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p6:b20",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "B. Optimization method"
+      ],
+      "page_number": 6,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        446.75,
+        300.03,
+        719.57
+      ],
+      "raw_anchor": "results in Fig. 7 are almost identical ... no tuning ... generating 10^3 outlier samples ... took 30x the time"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p6:b22",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "VI. CONCLUSION"
+      ],
+      "page_number": 6,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        67.17,
+        563.04,
+        328.19
+      ],
+      "raw_anchor": "generative outlier augmentation can replace the need to acquire transmitters as known outliers"
+    }
+  ],
+  "evidence": [
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:rq:1",
+      "evidence_type": "RESEARCH_QUESTION",
+      "locator_id": "loc:p2:b12",
+      "raw_source_form": "determine whether the transmitter T belongs to the authorized set or not",
+      "normalized_form": "Determine whether a received RF signal comes from an authorized transmitter and, when authorized, identify which transmitter sent it.",
+      "attributes": {
+        "scope": "open-set RF authorization"
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:dataset:1",
+      "evidence_type": "DATASET_OR_POPULATION",
+      "locator_id": "loc:p2:b23",
+      "raw_source_form": "71 transmitters ... WiFi modules ... receiver was ... USRP N210",
+      "normalized_form": "ORBIT WiFi testbed dataset using 71 transmitters and a USRP N210 receiver.",
+      "attributes": {
+        "transmitters": 71,
+        "hardware": [
+          "Atheros 5212",
+          "Atheros 9220",
+          "Atheros 9280",
+          "USRP N210"
+        ],
+        "center_frequency_mhz": 2462,
+        "bandwidth_mhz": 20,
+        "sample_rate_msps": 25,
+        "capture_seconds": 1,
+        "packets_per_transmitter_range": [
+          200,
+          1500
+        ],
+        "packets_per_transmitter_mean": 800,
+        "iq_samples_per_example": 256
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:metric:1",
+      "evidence_type": "METRIC",
+      "locator_id": "loc:p3:b0",
+      "raw_source_form": "evaluation metric is the prediction accuracy of the OvA classifier on this test set",
+      "normalized_form": "Prediction accuracy of the OvA classifier on the held-out test set.",
+      "attributes": {
+        "name": "testing accuracy",
+        "units": "percent",
+        "direction": "higher_is_better"
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:experiment:split",
+      "evidence_type": "EXPERIMENT",
+      "locator_id": "loc:p3:b0",
+      "raw_source_form": "70% ... A ... all ... K ... 80% training and 20% validation ... remaining 30% of A",
+      "normalized_form": "Evaluation split uses 70% of authorized samples plus all known-outlier samples for train/validation, split 80/20; test contains all unknown-outlier samples plus remaining 30% of authorized samples.",
+      "attributes": {
+        "authorized_pool_trainval_fraction": 0.7,
+        "train_fraction_of_trainval": 0.8,
+        "validation_fraction_of_trainval": 0.2,
+        "authorized_test_fraction": 0.3
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:method:vae",
+      "evidence_type": "METHOD",
+      "locator_id": "loc:p3:b2",
+      "raw_source_form": "Variational autoencoders (VAEs) ... preferred generative model",
+      "normalized_form": "Supervised outlier generation trains a VAE on known unauthorized samples and uses its decoder to synthesize additional outliers.",
+      "attributes": {
+        "family": "VAE",
+        "mode": "supervised_outlier_generation"
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:experiment:vae",
+      "evidence_type": "EXPERIMENT",
+      "locator_id": "loc:p3:b2",
+      "raw_source_form": "fixed set of 10 authorized transmitters ... |K| in {5, 10, 15, 20, 25} ... fixed |Y-hat| = 7500",
+      "normalized_form": "VAE experiment fixes 10 authorized transmitters, varies known unauthorized transmitters over 5/10/15/20/25, and augments training with 7,500 generated outlier samples.",
+      "attributes": {
+        "authorized_count": 10,
+        "known_outlier_counts": [
+          5,
+          10,
+          15,
+          20,
+          25
+        ],
+        "generated_outliers": 7500
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:method:cvae",
+      "evidence_type": "METHOD",
+      "locator_id": "loc:p3:b5",
+      "raw_source_form": "conditional VAE or CVAE ... categorical input to the decoder",
+      "normalized_form": "CVAE conditions the decoder on transmitter class so generated known-outlier samples can be allocated proportionally across classes.",
+      "attributes": {
+        "family": "CVAE",
+        "mode": "supervised_outlier_generation"
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:result:cvae",
+      "evidence_type": "RESULT",
+      "locator_id": "loc:p3:b5",
+      "raw_source_form": "roughly the same level of accuracy increase is seen for all |K|",
+      "normalized_form": "CVAE augmentation produces a roughly uniform accuracy improvement across the evaluated known-outlier counts.",
+      "attributes": {
+        "qualitative": true,
+        "metric_id": "ev:2108:metric:1"
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:method:ellipsoid",
+      "evidence_type": "METHOD",
+      "locator_id": "loc:p5:b0",
+      "raw_source_form": "shell of uniform thickness δ around E",
+      "normalized_form": "Blind ellipsoidal generation maps authorized samples into latent space, encloses them with a minimum-volume ellipsoid, samples a surrounding shell, and decodes those points as synthetic outliers.",
+      "attributes": {
+        "family": "ellipsoidal_latent_generation",
+        "requires_known_outliers": false,
+        "hyperparameter": "delta"
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:assumption:ellipsoid",
+      "evidence_type": "ASSUMPTION",
+      "locator_id": "loc:p4:b50",
+      "raw_source_form": "outliers ... should be close ... clearly separated ... authorized signals",
+      "normalized_form": "In latent space, valid unauthorized RF signals are assumed to be near authorized-signal representations while remaining separated from the authorized region.",
+      "attributes": {
+        "scope": "ellipsoidal blind generation"
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:experiment:ellipsoid",
+      "evidence_type": "EXPERIMENT",
+      "locator_id": "loc:p5:b6",
+      "raw_source_form": "30 transmitters ... set of outliers ... |A| ∈ {5, 10, 15, 20, 25} ... 5 separate occasions ... 7500",
+      "normalized_form": "Ellipsoidal experiment uses 30 held-out outlier transmitters, authorized-set sizes 5/10/15/20/25, five random selections per size, and 7,500 generated outliers.",
+      "attributes": {
+        "outlier_count": 30,
+        "authorized_counts": [
+          5,
+          10,
+          15,
+          20,
+          25
+        ],
+        "repetitions_per_authorized_count": 5,
+        "generated_outliers": 7500
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:result:ellipsoid",
+      "evidence_type": "RESULT",
+      "locator_id": "loc:p5:b6",
+      "raw_source_form": "significant gains (>15%) in testing accuracy",
+      "normalized_form": "For small authorized sets, ellipsoidal augmentation yields testing-accuracy gains greater than 15 percentage points relative to the non-augmented comparison shown by the paper.",
+      "attributes": {
+        "metric_id": "ev:2108:metric:1",
+        "reported_gain_lower_bound_percentage_points": 15,
+        "condition": "especially low |A|"
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:limitation:ellipsoid",
+      "evidence_type": "LIMITATION",
+      "locator_id": "loc:p5:b8",
+      "raw_source_form": "required the empirical tuning of a parameter δ",
+      "normalized_form": "The ellipsoidal blind-generation method requires empirical tuning of shell-thickness parameter δ.",
+      "attributes": {
+        "category": "HYPERPARAMETER_TUNING",
+        "author_asserted": true
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:method:optimization",
+      "evidence_type": "METHOD",
+      "locator_id": "loc:p5:b25",
+      "raw_source_form": "closed set classifier C_A+1 with |A| + 1 outputs as the judge",
+      "normalized_form": "Optimization-based blind generation minimizes latent distance while using an |A|+1 classifier loss to drive decoded samples toward the unauthorized class, with iterative judge retraining.",
+      "attributes": {
+        "family": "optimization_blind_generation",
+        "requires_known_outliers": false
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:result:optimization",
+      "evidence_type": "RESULT",
+      "locator_id": "loc:p6:b20",
+      "raw_source_form": "results in Fig. 7 are almost identical ... improvement ... at |A| = 15",
+      "normalized_form": "Optimization-based blind generation achieves results similar to the ellipsoidal method and additionally shows an improvement at |A|=15 in the reported experiment.",
+      "attributes": {
+        "metric_id": "ev:2108:metric:1",
+        "authorized_count_with_additional_observed_improvement": 15
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:limitation:optimization",
+      "evidence_type": "LIMITATION",
+      "locator_id": "loc:p6:b20",
+      "raw_source_form": "generating 10^3 outlier samples ... took 30× the time",
+      "normalized_form": "Generating 1,000 outlier samples with the optimization method took about 30 times as long as with the ellipsoidal method.",
+      "attributes": {
+        "category": "COMPUTE",
+        "generated_outliers": 1000,
+        "relative_runtime_multiplier": 30,
+        "author_asserted": true
+      }
+    },
+    {
+      "schema_version": 1,
+      "work_id": "work:arxiv:2108.13099",
+      "work_version_id": "work-version:arxiv:2108.13099v1",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "extraction_run_id": "extract:2108.13099v1:fulltext-layout:v1",
+      "extractor_type": "MODEL",
+      "extractor_identity": "chatgpt-research-engine-fulltext-pilot",
+      "extracted_at": "2026-09-30T12:30:00-04:00",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "evidence_id": "ev:2108:claim:conclusion",
+      "evidence_type": "CLAIM",
+      "locator_id": "loc:p6:b22",
+      "raw_source_form": "generative outlier augmentation can replace the need to acquire transmitters as known outliers",
+      "normalized_form": "The authors conclude that generative outlier augmentation can reduce or replace the need to acquire physical transmitters solely as known outliers for RF authentication training.",
+      "attributes": {
+        "claim_kind": "CONCLUSION",
+        "modality": "can",
+        "author_asserted": true
+      }
+    }
+  ],
+  "relations": [
+    {
+      "schema_version": 1,
+      "relation_id": "rel:exp-split-metric",
+      "source_id": "ev:2108:experiment:split",
+      "target_id": "ev:2108:metric:1",
+      "relation_type": "MEASURES",
+      "basis_evidence_ids": [
+        "ev:2108:experiment:split",
+        "ev:2108:metric:1"
+      ],
+      "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
+      "rationale": "The split defines the held-out test set on which OvA prediction accuracy is measured.",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "created_by": "chatgpt-research-engine-fulltext-pilot",
+      "created_at": "2026-09-30T12:30:00-04:00"
+    },
+    {
+      "schema_version": 1,
+      "relation_id": "rel:vae-exp-method",
+      "source_id": "ev:2108:experiment:vae",
+      "target_id": "ev:2108:method:vae",
+      "relation_type": "USES",
+      "basis_evidence_ids": [
+        "ev:2108:experiment:vae",
+        "ev:2108:method:vae"
+      ],
+      "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
+      "rationale": "The supervised augmentation experiment trains and samples the VAE method.",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "created_by": "chatgpt-research-engine-fulltext-pilot",
+      "created_at": "2026-09-30T12:30:00-04:00"
+    },
+    {
+      "schema_version": 1,
+      "relation_id": "rel:cvae-result-method",
+      "source_id": "ev:2108:result:cvae",
+      "target_id": "ev:2108:method:cvae",
+      "relation_type": "DERIVED_FROM",
+      "basis_evidence_ids": [
+        "ev:2108:result:cvae",
+        "ev:2108:method:cvae"
+      ],
+      "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
+      "rationale": "The reported roughly uniform accuracy improvement is attributed to class-conditioned CVAE generation.",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "created_by": "chatgpt-research-engine-fulltext-pilot",
+      "created_at": "2026-09-30T12:30:00-04:00"
+    },
+    {
+      "schema_version": 1,
+      "relation_id": "rel:ellipsoid-exp-method",
+      "source_id": "ev:2108:experiment:ellipsoid",
+      "target_id": "ev:2108:method:ellipsoid",
+      "relation_type": "USES",
+      "basis_evidence_ids": [
+        "ev:2108:experiment:ellipsoid",
+        "ev:2108:method:ellipsoid"
+      ],
+      "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
+      "rationale": "The blind-generation experiment evaluates the ellipsoidal method.",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "created_by": "chatgpt-research-engine-fulltext-pilot",
+      "created_at": "2026-09-30T12:30:00-04:00"
+    },
+    {
+      "schema_version": 1,
+      "relation_id": "rel:ellipsoid-result-exp",
+      "source_id": "ev:2108:result:ellipsoid",
+      "target_id": "ev:2108:experiment:ellipsoid",
+      "relation_type": "DERIVED_FROM",
+      "basis_evidence_ids": [
+        "ev:2108:result:ellipsoid",
+        "ev:2108:experiment:ellipsoid"
+      ],
+      "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
+      "rationale": "The greater-than-15-point accuracy-gain statement is reported from the ellipsoidal experiment.",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "created_by": "chatgpt-research-engine-fulltext-pilot",
+      "created_at": "2026-09-30T12:30:00-04:00"
+    },
+    {
+      "schema_version": 1,
+      "relation_id": "rel:ellipsoid-limitation-method",
+      "source_id": "ev:2108:limitation:ellipsoid",
+      "target_id": "ev:2108:method:ellipsoid",
+      "relation_type": "QUALIFIES",
+      "basis_evidence_ids": [
+        "ev:2108:limitation:ellipsoid"
+      ],
+      "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
+      "rationale": "Empirical delta tuning is a stated limitation of the ellipsoidal method.",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "created_by": "chatgpt-research-engine-fulltext-pilot",
+      "created_at": "2026-09-30T12:30:00-04:00"
+    },
+    {
+      "schema_version": 1,
+      "relation_id": "rel:optimization-result-method",
+      "source_id": "ev:2108:result:optimization",
+      "target_id": "ev:2108:method:optimization",
+      "relation_type": "DERIVED_FROM",
+      "basis_evidence_ids": [
+        "ev:2108:result:optimization",
+        "ev:2108:method:optimization"
+      ],
+      "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
+      "rationale": "The Fig. 7 result is the evaluation outcome for the optimization-based blind generator.",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "created_by": "chatgpt-research-engine-fulltext-pilot",
+      "created_at": "2026-09-30T12:30:00-04:00"
+    },
+    {
+      "schema_version": 1,
+      "relation_id": "rel:optimization-limit-method",
+      "source_id": "ev:2108:limitation:optimization",
+      "target_id": "ev:2108:method:optimization",
+      "relation_type": "QUALIFIES",
+      "basis_evidence_ids": [
+        "ev:2108:limitation:optimization"
+      ],
+      "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
+      "rationale": "The 30x generation-time cost qualifies the optimization method's computational tradeoff.",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "created_by": "chatgpt-research-engine-fulltext-pilot",
+      "created_at": "2026-09-30T12:30:00-04:00"
+    },
+    {
+      "schema_version": 1,
+      "relation_id": "rel:conclusion-support-ellipsoid",
+      "source_id": "ev:2108:claim:conclusion",
+      "target_id": "ev:2108:result:ellipsoid",
+      "relation_type": "SUPPORTS",
+      "basis_evidence_ids": [
+        "ev:2108:result:ellipsoid"
+      ],
+      "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
+      "rationale": "The blind ellipsoidal accuracy gains contribute evidence for the paper's conclusion about replacing physical known-outlier acquisition.",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "created_by": "chatgpt-research-engine-fulltext-pilot",
+      "created_at": "2026-09-30T12:30:00-04:00"
+    },
+    {
+      "schema_version": 1,
+      "relation_id": "rel:conclusion-support-optimization",
+      "source_id": "ev:2108:claim:conclusion",
+      "target_id": "ev:2108:result:optimization",
+      "relation_type": "SUPPORTS",
+      "basis_evidence_ids": [
+        "ev:2108:result:optimization"
+      ],
+      "context_compatibility": "COMPATIBLE_WITHIN_PAPER",
+      "rationale": "The optimization-method results contribute additional evidence for the paper's conclusion.",
+      "confidence": null,
+      "verification_state": "MACHINE_CHECKED",
+      "created_by": "chatgpt-research-engine-fulltext-pilot",
+      "created_at": "2026-09-30T12:30:00-04:00"
+    }
+  ],
+  "warnings": [
+    "Evidence locators were grounded to the exact uploaded artifact whose SHA-256 matches the acquisition receipt.",
+    "Figure curves were not digitized in v1; numerical claims are included only where the paper text states them explicitly.",
+    "No full paper text is duplicated into the fixture; short source anchors plus exact page/bbox locators support verification.",
+    "A non-fatal PyMuPDF color-space syntax warning occurred on page extraction but did not prevent six-page text/layout parsing."
+  ],
+  "supersedes_extraction_run_id": "extract:2108.13099v1:abstract:v1"
+}

@@ -1,0 +1,397 @@
+{
+  "schema_version": 1,
+  "document_id": "normalized:2108.13099v1:pymupdf-1.26.7:v1",
+  "source_artifact_id": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+  "source_sha256": "7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+  "source_byte_length": 816786,
+  "parser": {
+    "name": "PyMuPDF",
+    "version": "1.26.7"
+  },
+  "source_level": "FULLTEXT_PDF_LAYOUT",
+  "page_count": 6,
+  "page_size_points": {
+    "width": 612,
+    "height": 792
+  },
+  "text_extraction_page_char_counts": [
+    5408,
+    4479,
+    5248,
+    2749,
+    4851,
+    6011
+  ],
+  "coverage": "FULL_DOCUMENT_PARSED; durable locator map retains evidence-source blocks rather than redistributing full paper text",
+  "sections": [
+    {
+      "title": "I. INTRODUCTION",
+      "start_page": 1
+    },
+    {
+      "title": "II. SYSTEM MODEL AND PROBLEM FORMULATION",
+      "start_page": 2
+    },
+    {
+      "title": "III. DATASET AND EVALUATION METHOD",
+      "start_page": 2
+    },
+    {
+      "title": "IV. SUPERVISED OUTLIER GENERATION",
+      "start_page": 3
+    },
+    {
+      "title": "V. BLIND OUTLIER GENERATION",
+      "start_page": 4
+    },
+    {
+      "title": "VI. CONCLUSION",
+      "start_page": 6
+    }
+  ],
+  "locators": [
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p2:b12",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "II. SYSTEM MODEL AND PROBLEM FORMULATION"
+      ],
+      "page_number": 2,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        527.15,
+        300.03,
+        656.66
+      ],
+      "raw_anchor": "receiver R receives a signal y ... should determine whether transmitter T belongs to the authorized set or not"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p2:b23",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "III. DATASET AND EVALUATION METHOD",
+        "A. Dataset"
+      ],
+      "page_number": 2,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        437.27,
+        563.04,
+        602.58
+      ],
+      "raw_anchor": "The dataset was captured on the Orbit testbed ... 71 transmitters ... USRP N210"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p3:b0",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "III. DATASET AND EVALUATION METHOD",
+        "B. Outlier detector architecture and evaluation"
+      ],
+      "page_number": 3,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        51.84,
+        300.03,
+        217.58
+      ],
+      "raw_anchor": "The evaluation metric is the prediction accuracy of the OvA classifier on this test set."
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p3:b2",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "IV. SUPERVISED OUTLIER GENERATION"
+      ],
+      "page_number": 3,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        243.17,
+        300.03,
+        719.57
+      ],
+      "raw_anchor": "We chose Variational autoencoders (VAEs) ... fixed |Y-hat| = 7500 ... compared against non-augmented OvA performance."
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p3:b5",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "IV. SUPERVISED OUTLIER GENERATION"
+      ],
+      "page_number": 3,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        361.85,
+        563.04,
+        719.57
+      ],
+      "raw_anchor": "conditional VAE ... 7500/|K| samples were generated from each known outlier ... roughly the same level of accuracy increase"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p4:b21",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION"
+      ],
+      "page_number": 4,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        519.04,
+        300.02,
+        600.73
+      ],
+      "raw_anchor": "use just the information available in X to emulate signal samples from O: blind outlier generation"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p4:b23",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "A. Ellipsoisal method"
+      ],
+      "page_number": 4,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        625.93,
+        300.03,
+        719.57
+      ],
+      "raw_anchor": "use an autoencoder to map the authorized signal samples to a latent space"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p4:b50",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "A. Ellipsoisal method"
+      ],
+      "page_number": 4,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        503.3,
+        563.04,
+        719.57
+      ],
+      "raw_anchor": "outliers are still wireless signals so they should be close ... clearly separated from ... authorized signals"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p5:b0",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "A. Ellipsoisal method"
+      ],
+      "page_number": 5,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        51.66,
+        300.03,
+        193.68
+      ],
+      "raw_anchor": "take some shell of uniform thickness delta around E ... points within this region should correspond to outlier signals"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p5:b6",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "A. Ellipsoisal method"
+      ],
+      "page_number": 5,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        352.25,
+        300.03,
+        613.27
+      ],
+      "raw_anchor": "30 transmitters ... set of outliers ... |A| in {5,10,15,20,25} ... 7500 outlier samples ... significant gains (>15%)"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p5:b8",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "B. Optimization method"
+      ],
+      "page_number": 5,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        637.9,
+        300.03,
+        719.57
+      ],
+      "raw_anchor": "ellipsoidal method ... required empirical tuning of parameter delta ... formulate constraints differently"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p5:b25",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "B. Optimization method"
+      ],
+      "page_number": 5,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        406.99,
+        563.04,
+        584.67
+      ],
+      "raw_anchor": "use a closed set classifier C_A+1 with |A|+1 outputs as the judge of whether D(z) is an outlier"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p5:b27",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "B. Optimization method"
+      ],
+      "page_number": 5,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        611.79,
+        563.04,
+        719.57
+      ],
+      "raw_anchor": "re-train the initial judge ... using those outliers ... generate even better outliers"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p6:b20",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "V. BLIND OUTLIER GENERATION",
+        "B. Optimization method"
+      ],
+      "page_number": 6,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        48.96,
+        446.75,
+        300.03,
+        719.57
+      ],
+      "raw_anchor": "results in Fig. 7 are almost identical ... no tuning ... generating 10^3 outlier samples ... took 30x the time"
+    },
+    {
+      "schema_version": 1,
+      "locator_id": "loc:p6:b22",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "locator_quality": "EXACT",
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "section_path": [
+        "VI. CONCLUSION"
+      ],
+      "page_number": 6,
+      "paragraph_index": null,
+      "normalized_text_start": null,
+      "normalized_text_end": null,
+      "xml_path": null,
+      "pdf_bbox": [
+        311.98,
+        67.17,
+        563.04,
+        328.19
+      ],
+      "raw_anchor": "generative outlier augmentation can replace the need to acquire transmitters as known outliers"
+    }
+  ],
+  "parser_warnings": [
+    "PyMuPDF reported a non-fatal color-space syntax warning while extracting some pages; text/layout extraction completed for all 6 pages."
+  ]
+}

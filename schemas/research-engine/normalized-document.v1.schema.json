@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-engine.local/schemas/normalized-document.v1.schema.json",
+  "title": "Research Engine NormalizedDocument v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "document_id",
+    "source_artifact_id",
+    "source_sha256",
+    "parser",
+    "source_level",
+    "page_count",
+    "page_size_points",
+    "text_extraction_page_char_counts",
+    "coverage",
+    "sections",
+    "locators",
+    "parser_warnings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "document_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_byte_length": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "parser": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "source_level": {
+      "const": "FULLTEXT_PDF_LAYOUT"
+    },
+    "page_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "page_size_points": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        }
+      }
+    },
+    "text_extraction_page_char_counts": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "coverage": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "start_page"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "start_page": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "locators": {
+      "type": "array",
+      "items": {
+        "$ref": "source-locator.v1.schema.json"
+      }
+    },
+    "parser_warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

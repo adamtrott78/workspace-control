@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "verification_id": "verify:2108.13099v1:fulltext:v1",
+  "source_artifact": {
+    "path": "/mnt/data/research-engine-2108.13099v1.pdf",
+    "byte_length": 816786,
+    "sha256": "7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+    "pdf_magic": "%PDF-",
+    "expected_sha256": "7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+    "identity_match": true
+  },
+  "parser": {
+    "name": "PyMuPDF",
+    "version": "1.26.7",
+    "page_count": 6,
+    "page_char_counts": [
+      5408,
+      4479,
+      5248,
+      2749,
+      4851,
+      6011
+    ]
+  },
+  "evidence_counts": {
+    "RESEARCH_QUESTION": 1,
+    "DATASET_OR_POPULATION": 1,
+    "METRIC": 1,
+    "EXPERIMENT": 3,
+    "METHOD": 4,
+    "RESULT": 3,
+    "ASSUMPTION": 1,
+    "LIMITATION": 2,
+    "CLAIM": 1
+  },
+  "relation_count": 10,
+  "checks": [
+    {
+      "check": "artifact identity",
+      "result": "PASS",
+      "evidence": "Uploaded bytes exactly match acquisition receipt SHA-256 and byte length."
+    },
+    {
+      "check": "page parse",
+      "result": "PASS",
+      "evidence": "All six PDF pages yielded text; evidence-source blocks have exact page/bbox locators."
+    },
+    {
+      "check": "source-level boundary",
+      "result": "PASS",
+      "evidence": "Fixture is FULLTEXT_PDF_LAYOUT and supersedes rather than overwrites ABSTRACT_ONLY baseline."
+    },
+    {
+      "check": "numeric restraint",
+      "result": "PASS",
+      "evidence": "No figure curve was digitized; numeric evidence is limited to values explicitly present in source text."
+    },
+    {
+      "check": "source/inference separation",
+      "result": "PASS",
+      "evidence": "Evidence objects retain short raw source anchors and normalized forms; no cross-paper inference is represented as source fact."
+    }
+  ]
+}
