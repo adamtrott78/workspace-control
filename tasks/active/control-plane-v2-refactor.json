@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "CHECKPOINTED",
+  "status": "BLOCKED_RUNTIME",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -32,7 +32,7 @@
       "checkout_path": "/home/atrott/adamArchives/Adam/workspace-control-v2-refactor",
       "branch": "control-plane-v2-refactor",
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
-      "checkpoint_sha": "f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9",
+      "checkpoint_sha": "01ebfed8d8b79ec1cbf52930c6f02b13eeae4386",
       "checkpoint_pushed": true,
       "allowed_mutation_scope": [
         "scripts/workspace_control.py",
@@ -202,6 +202,19 @@
         "A HANDOFF_SAFE remote-only task independently returned NOT_EXECUTION_READY when local-runtime was marked missing.",
         "Validation explicitly reported PHASE6_RUNTIME_RESULT=PASS.",
         "Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified."
+      ]
+    },
+    {
+      "summary": "Implemented Phase 7 deterministic non-destructive worktree preparation within the authorized target scope.",
+      "evidence": [
+        "control-plane-v2-refactor -> 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386",
+        "Phase 7 range f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 changes exactly procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py.",
+        "worktree-prepare is read-only by default and returns CREATE_AVAILABLE for a safely creatable missing worktree until --create is explicitly supplied.",
+        "Creation uses only bounded git worktree add after verifying registry policy, source/target identity, clean state, branch/ref, remote advertised checkpoint, local commit availability, and branch-holder conflicts.",
+        "The implementation does not fetch, reset, stash, force-checkout, switch unrelated checkouts, create parent directories, or overwrite occupied targets.",
+        "Dirty, diverged, identity-mismatched, non-writable, occupied non-repository, and broken-symlink target cases stop explicitly.",
+        "After any git worktree add attempt, actual target state is re-inspected; failed/ambiguous creation is returned as NEEDS_REVIEW without cleanup or blind retry.",
+        "Real temporary-Git tests cover read-only proposal, explicit creation, missing local branch creation, dirty source/target preservation, divergence refusal, policy refusal, occupied path/symlink refusal, and existing READY state."
       ]
     }
   ],
@@ -458,19 +471,52 @@
         "HANDOFF_SAFE remained independent from receiver-specific EXECUTION_READY.",
         "Validation reported PHASE6_RUNTIME_RESULT=PASS and explicit non-interference with existing workspace worktrees."
       ]
+    },
+    {
+      "check": "Phase 7 exact changed-path set",
+      "result": "PASS",
+      "evidence": [
+        "Compare f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 reports exactly procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py.",
+        "All changed paths are inside the capsule's authorized Phase 7 mutation scope."
+      ]
+    },
+    {
+      "check": "Phase 7 source/contract inspection",
+      "result": "PASS",
+      "evidence": [
+        "worktree-prepare command is registered and requires an absolute target path, branch, and exact checkpoint.",
+        "Missing safe worktrees return CREATE_AVAILABLE unless --create is explicitly supplied.",
+        "The worktree-preparation implementation contains no fetch, reset, stash, or checkout normalization command.",
+        "Only git worktree add is used for the bounded creation mutation.",
+        "Post-failure and post-success target state are explicitly re-inspected.",
+        "Occupied broken symlink targets are detected instead of being hidden by path resolution.",
+        "Real Git tests cover the Phase 7 creation, dirty, divergence, identity, and policy gates."
+      ]
+    },
+    {
+      "check": "Phase 7 exact-checkpoint integrated runtime validation",
+      "result": "NOT_RUN",
+      "evidence": [
+        "Target implementation is pushed at 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386.",
+        "Exact-checkpoint unit/CLI runtime validation is pending in an isolated GitHub-connected terminal.",
+        "Do not open the next implementation phase until this validation passes and is recorded."
+      ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Implement Phase 7 deterministic non-destructive worktree preparation.",
-    "Keep worktree preparation read-only by default; require explicit --create for creation.",
-    "Return explicit READY, CREATE_AVAILABLE, NEEDS_REVIEW, BLOCKED_DIRTY, BLOCKED_DIVERGED, BLOCKED_IDENTITY, or BLOCKED_POLICY outcomes as applicable.",
-    "Allow creation of a missing isolated worktree only when repository identity, branch/ref, expected checkpoint, target path, policy, and local source state make creation safe.",
-    "Stop safely for dirty, diverged, occupied-path, branch-conflict, identity-mismatch, or policy-invalid states; do not clean/reset/stash/force-checkout/fetch/overwrite.",
-    "Add the worktree preparation procedure and bounded tests/fixtures.",
-    "Inspect and validate the exact changed-path set before runtime testing."
+  "blockers": [
+    "Exact-checkpoint Phase 7 integrated runtime validation is pending for control-plane-v2-refactor@01ebfed8d8b79ec1cbf52930c6f02b13eeae4386."
   ],
-  "next_safe_action": "Begin Phase 7 only. Starting from control-plane-v2-refactor@f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9, implement deterministic non-destructive worktree preparation within scripts/workspace_control.py, procedures/worktree_prepare.md, tests/test_workspace_control.py, and tests/fixtures/**. The command must be read-only by default, require explicit --create before adding a worktree, and stop safely on dirty/diverged/identity/policy/path conflicts without cleaning, resetting, stashing, fetching, force-checking-out, switching unrelated checkouts, rewriting unrelated refs, or overwriting files. Inspect and validate the exact changed-path set before runtime testing.",
+  "remaining_work": [
+    "Run the complete Python unit suite from exact checkpoint 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 in an isolated temporary clone.",
+    "Run worktree-prepare read-only against an isolated temporary repository and require CREATE_AVAILABLE without creating the target.",
+    "Run the same request with --create and require READY at the exact branch/checkpoint.",
+    "Re-run read-only assessment on the created worktree and require READY without mutation.",
+    "Prove dirty target refusal preserves the dirty file.",
+    "Prove divergent remote/ref state returns BLOCKED_DIVERGED without moving the local branch or deleting/rewriting the worktree.",
+    "Verify non-interference with existing workspace worktrees.",
+    "Only after those checks pass, mark Phase 7 validated/checkpointed and follow the implementation plan's next phase."
+  ],
+  "next_safe_action": "Remain in Phase 7. Validate exact pushed checkpoint 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 in an isolated GitHub-connected runtime. Run the full unit suite and bounded real-Git worktree-prepare scenarios proving read-only CREATE_AVAILABLE, explicit --create -> READY at the exact checkpoint, existing READY behavior, dirty-state preservation/refusal, divergence refusal without branch movement, and non-interference with existing workspace worktrees. Record the runtime evidence, then and only then mark Phase 7 validated/checkpointed and open the next planned phase.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
