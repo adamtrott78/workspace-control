@@ -12,7 +12,7 @@
 
 - ID: `control-plane-v2-refactor`
 - Title: Workspace Control Plane v2
-- Status: `BLOCKED_RUNTIME`
+- Status: `BLOCKED_EVIDENCE`
 
 ## Goal
 
@@ -23,38 +23,36 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `f021956b398d3356337f489c59deaa83182d81ba`
+- Current checkpoint: `b8aa52e242a07e6aa2036516e401864991183ad2`
 - Pushed: `true`
 
 ### Allowed mutation scope
 
-- `schemas/workflow_descriptor.v1.schema.json`
-- `scripts/workspace_control.py`
-- `procedures/workflow_descriptor.md`
-- `templates/workflow_descriptor.v1.json`
-- `tests/test_workspace_control.py`
-- `tests/fixtures/**`
+- `AGENTS.md`
+- `.agents/skills/workspace-control/SKILL.md`
+- `adapters/codex/global/AGENTS.md`
+- `procedures/codex_adapter.md`
 
 ## Next safe action
 
-Remain in Phase 8. Validate exact pushed checkpoint f021956b398d3356337f489c59deaa83182d81ba in an isolated GitHub-connected runtime. Run the full unit suite and workflow-validate CLI against the positive fixture, template, live-state negative fixture, and invalid-dependency fixture. Require positive bindings to resolve to checkpoint f021956b398d3356337f489c59deaa83182d81ba with exact content/blob identities, require the negative cases to fail for the intended reasons, and verify no checkout/worktree mutation. Record runtime evidence, then and only then mark Phase 8 validated/checkpointed and open Phase 9 artifact lifecycle.
+Remain in Phase 9. Validate control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2 with one fresh actual Codex session in read-only mode. The session must start from repository discovery, identify the thin adapter layer, recover the canonical README -> PORTABILITY_CONTRACT -> OPERATOR_WORKFLOW -> relevant procedure route, identify task-capsule/workflow-descriptor routing when applicable, identify the deterministic CLI/preflight path, and explain why removing the adapters leaves the workflow conceptually operable. It must perform no mutations. Record the exact Codex output and unchanged Git/ref evidence, then and only then checkpoint Phase 9 and open Phase 10 real regression workflows.
 
 ## Remaining work
 
-- Run the full Python unit suite from exact checkpoint f021956b398d3356337f489c59deaa83182d81ba.
-- Run workflow-validate on the committed positive workflow fixture and require VALID with a binding to the exact Phase 8 checkpoint and exact blob SHA.
-- Run workflow-validate on the committed workflow template and require VALID with an exact binding.
-- Run workflow-validate on the live-task-state negative fixture and require invalid status with explicit live-state rejection.
-- Run workflow-validate on the invalid-dependency fixture and require invalid status with earlier-stage dependency rejection.
-- Verify the validator itself does not alter the checkout and existing workspace worktrees remain untouched.
-- Only after those checks pass, mark Phase 8 validated/checkpointed and open Phase 9 artifact lifecycle.
+- Run one fresh Codex session against exact checkpoint b8aa52e242a07e6aa2036516e401864991183ad2 in read-only mode.
+- Require Codex to discover AGENTS.md and the workspace-control Skill, then route to README.md, PORTABILITY_CONTRACT.md, OPERATOR_WORKFLOW.md, repos.json, and the relevant canonical procedures.
+- Require Codex to identify task_capsule.md and workflow_descriptor.md as durable task/workflow routes rather than duplicate their semantics in adapters.
+- Require Codex to identify scripts/workspace_control.py and the canonical preflight path for a hypothetical mutation without executing any mutation.
+- Require Codex to state that removing AGENTS/Skill/global adapter reduces discovery convenience only and leaves the executor-neutral workflow operable.
+- Verify the read-only discovery test leaves the target branch/ref and checkout state unchanged.
+- Only after this evidence passes, mark Phase 9 validated/checkpointed and open Phase 10 real regression workflows.
 
 ## Latest completed runtime gate
 
-- `PHASE7_RUNTIME_RESULT=PASS`
-- `VALIDATED_COMMIT=84a7e67a8af2b701ab63829468c92e46221a72f9`
-- Phase 8 implementation checkpoint: `f021956b398d3356337f489c59deaa83182d81ba`
-- Phase 8 exact-checkpoint runtime validation is pending.
+- `PHASE8_RUNTIME_RESULT=PASS`
+- `VALIDATED_COMMIT=f021956b398d3356337f489c59deaa83182d81ba`
+- Phase 9 implementation checkpoint: `b8aa52e242a07e6aa2036516e401864991183ad2`
+- Phase 9 read-only Codex discovery validation is pending.
 
 ## Validation state
 
@@ -186,14 +184,32 @@ Remain in Phase 8. Validate exact pushed checkpoint f021956b398d3356337f489c59de
   - Binding resolution checks registered owner origin, tracked descriptor path, exact repository HEAD, durable descriptor blob, current-content equality, and durable owner/entry routes.
   - Tests cover positive semantics, template semantics, live-state rejection, dependency rejection, unsafe owner context path, CLI registration, exact Git binding, uncommitted descriptor rejection, missing durable owner context, and owner-origin mismatch.
   - No Phase 9 artifact-lifecycle command/behavior was introduced.
-- **Phase 8 exact-checkpoint integrated runtime validation:** `NOT_RUN`
-  - Target implementation is pushed at f021956b398d3356337f489c59deaa83182d81ba.
-  - Exact-checkpoint unit and CLI workflow-validation runtime checks are pending in an isolated GitHub-connected runtime.
-  - Do not begin Phase 9 until this validation passes and is recorded.
+- **Phase 8 exact-checkpoint integrated runtime validation:** `PASS`
+  - Exact isolated checkout and advertised remote both resolved f021956b398d3356337f489c59deaa83182d81ba.
+  - Full Python unit suite completed 46 tests with OK.
+  - Positive workflow fixture validated with exact checkpoint and content/blob binding.
+  - Workflow template validated with exact checkpoint and content/blob binding.
+  - Live task state fixture failed explicitly with live task state forbidden: status.
+  - Invalid dependency fixture failed explicitly because the dependency did not name an earlier declared stage.
+  - Validation was read-only and did not modify existing workspace worktrees.
+  - PHASE8_RUNTIME_RESULT=PASS.
+- **Phase 9 exact changed-path set:** `PASS`
+  - Compare f021956b398d3356337f489c59deaa83182d81ba...b8aa52e242a07e6aa2036516e401864991183ad2 reports exactly the four authorized Codex adapter paths.
+  - No executor-neutral implementation or authority file changed.
+- **Phase 9 adapter thinness/portability inspection:** `PASS`
+  - Repository AGENTS, Skill, global adapter, and adapter procedure all route to canonical tracked sources.
+  - README.md, PORTABILITY_CONTRACT.md, OPERATOR_WORKFLOW.md, repos.json, workspace/preflight/worktree/task/workflow procedures, and scripts/workspace_control.py all exist independently at the Phase 9 checkpoint.
+  - No Codex-only workflow semantics were introduced.
+  - The canonical workflow remains conceptually operable if the adapter layer is removed.
+- **Phase 9 read-only Codex adapter discovery validation:** `NOT_RUN`
+  - Phase 9 adapter implementation is pushed at b8aa52e242a07e6aa2036516e401864991183ad2.
+  - This ChatGPT environment has no Codex execution tool/connector capable of opening the repository as Codex.
+  - Plugin discovery did not expose a Codex repository-execution connector.
+  - A fresh actual Codex session must perform the final read-only discovery gate; it must not mutate repository state.
 
 ## Blockers / known limitations
 
-- Exact-checkpoint Phase 8 integrated runtime validation is pending for control-plane-v2-refactor@f021956b398d3356337f489c59deaa83182d81ba.
+- Read-only Codex adapter discovery validation is pending for control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2.
 
 ## Fresh-chat initialization
 
@@ -224,10 +240,10 @@ Current target branch:
 control-plane-v2-refactor
 
 Current target checkpoint:
-f021956b398d3356337f489c59deaa83182d81ba
+b8aa52e242a07e6aa2036516e401864991183ad2
 
 Current phase:
-Phase 8 — workflow descriptor validation (runtime validation pending)
+Phase 9 — Codex adapters (read-only Codex discovery validation pending)
 
-Do not broaden mutation scope beyond the capsule. Do not begin Phase 9 artifact lifecycle until Phase 8 is validated and checkpointed.
+Do not broaden mutation scope beyond the capsule. Do not begin Phase 10 real regression workflows until Phase 9 is validated and checkpointed.
 ```
