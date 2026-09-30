@@ -46,7 +46,7 @@
       "base_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
       "remote": {
         "branch": "unit-ingestion-hw2",
-        "checkpoint_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+        "checkpoint_sha": "dd664c785585e55c2dfe974f98050268fd343b97",
         "verified": true
       },
       "local": null,
@@ -98,41 +98,80 @@
     },
     {
       "id": "source_intake",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "mth602-course-content",
       "selected_executor": "chatgpt",
       "selected_surface": "conversation-vision+github",
       "inputs": [
         "baseline_recovery"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "classnotes/2026-09-21/sources/lecture_room/SOURCE_MANIFEST.json",
+        "14 visually reviewed direct lecture-room images identified by SHA-256; exact-byte Git transfer pending"
+      ],
+      "validation": [
+        {
+          "check": "2026-09-21 source batch visually reviewed, ordered, and provenance-recorded without OCR",
+          "result": "PASS",
+          "evidence": [
+            "14 distinct lecture-room JPEGs reviewed directly in capture order from 11:11:02 through 12:07:49 on 2026-09-21.",
+            "SOURCE_MANIFEST.json records basenames, sizes, dimensions, timestamps, orientations, and SHA-256 hashes.",
+            "No notebook image was present in this batch."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "session_visual_synthesis",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "mth602-course-content",
       "selected_executor": "chatgpt",
       "selected_surface": "conversation-vision+github",
       "inputs": [
         "source_intake"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "classnotes/2026-09-21/SESSION_SYNTHESIS.md"
+      ],
+      "validation": [
+        {
+          "check": "2026-09-21 session synthesis preserves source distinctions and uncertainty",
+          "result": "PASS",
+          "evidence": [
+            "Direct visual synthesis created without OCR/Mathpix.",
+            "Unresolved exact instructor-slide provenance is explicitly recorded rather than invented.",
+            "Projected radioactive-nucleus slide is treated only as partially visible classroom context."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "cumulative_course_promotion",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "mth602-course-content",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "session_visual_synthesis"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "study/COURSE_INDEX.md",
+        "study/SKILL_MAP.md",
+        "study/MASTERY.md"
+      ],
+      "validation": [
+        {
+          "check": "2026-09-21 topics promoted cumulatively without false mastery",
+          "result": "PASS",
+          "evidence": [
+            "Course index now routes floating-point and probability topics to the 2026-09-21 synthesis.",
+            "Skill map adds finite-precision and probability dependencies.",
+            "All newly registered mastery rows are unassessed; no mastery promotion occurred."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
@@ -180,24 +219,77 @@
       "evidence": [
         "Pinned OPERATOR_WORKFLOW.md blob f59dfb03fc6739fe9ef4c9e581b0c613aa34cd02."
       ]
+    },
+    {
+      "id": "mth602-2026-09-21-ingestion",
+      "kind": "git_commit",
+      "identity": "dd664c785585e55c2dfe974f98050268fd343b97",
+      "required_for_resume": true,
+      "evidence": [
+        "MTH602 unit-ingestion-hw2 is five commits ahead of the pinned base with exactly five changed paths: the 2026-09-21 synthesis, its source manifest, COURSE_INDEX.md, SKILL_MAP.md, and MASTERY.md.",
+        "Compare against 62b7a03c7139cb3987b72ad66bdc532e8a61b82a reports ahead_by=5, behind_by=0."
+      ]
     }
   ],
-  "artifacts": [],
+  "artifacts": [
+    {
+      "path": "classnotes/2026-09-21/SESSION_SYNTHESIS.md",
+      "state": "validated",
+      "role": "session semantic retrieval layer",
+      "origin": "direct visual interpretation of 14 lecture-room photographs",
+      "persistence": "tracked on unit-ingestion-hw2",
+      "regeneration": "re-review original images plus exact instructor source when available",
+      "review_requirement": "preserve current uncertainty unless stronger source evidence resolves it",
+      "evidence": [
+        "Created at MTH602 commit 97a9ca1602c9dd8d0e658cf1178bb3a8cf496b61."
+      ]
+    },
+    {
+      "path": "classnotes/2026-09-21/sources/lecture_room/SOURCE_MANIFEST.json",
+      "state": "tracked; exact source bytes pending transfer",
+      "role": "source identity and transfer-verification record",
+      "origin": "metadata and SHA-256 from the uploaded Lecture N+1 archive",
+      "persistence": "tracked on unit-ingestion-hw2",
+      "regeneration": "recompute only from the exact original JPEG bytes",
+      "review_requirement": "later exact-byte transfer must match every recorded SHA-256",
+      "evidence": [
+        "Created at MTH602 commit 311b10ba1092f46e3e22b35440261764111857cc."
+      ]
+    },
+    {
+      "path": "classnotes/2026-09-21/sources/lecture_room/originals/",
+      "state": "pending exact-byte transfer",
+      "role": "primary visual/source evidence",
+      "origin": "user-uploaded Lecture N+1 archive",
+      "persistence": "not yet present in Git on the current operation surface",
+      "regeneration": "not regenerable; preserve original bytes",
+      "review_requirement": "verify transferred files against SOURCE_MANIFEST.json",
+      "evidence": [
+        "Current GitHub text/file surface cannot directly ingest mounted binary attachment bytes."
+      ]
+    }
+  ],
   "validation": [
     {
       "check": "Direct visual source-ingestion path recovered",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "2026-09-21 batch completed by direct visual interpretation with no OCR/Mathpix."
+      ]
     },
     {
       "check": "Session synthesis preserves provenance and uncertainty",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "2026-09-21 synthesis separates direct board evidence from partially visible projected material and records unresolved upstream slide provenance."
+      ]
     },
     {
       "check": "Cumulative knowledge updated without false mastery promotion",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "COURSE_INDEX and SKILL_MAP updated; seven newly registered mastery rows remain unassessed."
+      ]
     },
     {
       "check": "HW2 authoritative availability resolved",
@@ -212,14 +304,16 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Upload the new classroom/whiteboard photographs and handwritten notes in the ingestion chat, grouped by session/date/order when known.",
-    "Visually synthesize the new unit with the repository's direct-visual model and smallest relevant instructor sources.",
-    "Persist session syntheses and justified cumulative topic/dependency/notation updates without inferring mastery.",
-    "Resolve HW2 authoritative availability and either bootstrap it or checkpoint an HW2-ready state.",
-    "Validate/push the task branch, synchronize task JSON/Markdown, establish HANDOFF_SAFE, and archive when complete."
+    "Upload the remaining lecture ZIP batches; for each batch, visually establish date/order/overlap and synthesize the session without default OCR.",
+    "When a batch contains notebook images, preserve them as student-derived supplemental evidence rather than direct professor-board evidence.",
+    "Complete exact-byte transfer of classroom originals into each session source tree and verify them against the recorded SHA-256 manifests when a suitable binary transfer surface is available.",
+    "Resolve exact current instructor-slide provenance/page slices where accessible and update only claims that stronger source evidence supports.",
+    "After all new-unit sessions are represented, finish cumulative topic/dependency/notation promotion without inferring mastery.",
+    "Resolve HW2 authoritative availability and either bootstrap its exact contract or checkpoint an HW2-ready state.",
+    "Validate the final task branch, synchronize task JSON/Markdown, establish HANDOFF_SAFE, and archive when complete."
   ],
-  "next_safe_action": "Start a fresh ingestion chat from this capsule. From MTH602 README.md at unit-ingestion-hw2@62b7a03c7139cb3987b72ad66bdc532e8a61b82a, load the existing classnotes visual-ingestion route and smallest relevant course/source/study owners. Then ask the user to upload the new classroom/whiteboard and handwritten-note images, preferably grouped by session/date/order. Inspect them directly before deciding whether any OCR is useful. Do not mutate course knowledge until the actual image evidence has been visually reviewed.",
+  "next_safe_action": "Accept the next lecture ZIP from the user. Treat it as the next provisional session label, inspect the actual images directly, recover date/order/overlap from image evidence and mathematical continuity, distinguish any notebook images as student-derived supplemental evidence, and do not use OCR/Mathpix unless direct vision proves insufficient. Persist the next session only after visual review. Do not begin HW2 bootstrap until the user has finished supplying the new-unit lecture batches or authoritative assignment evidence makes an earlier bootstrap independently safe.",
   "last_executor": "chatgpt",
-  "last_surface": "github",
-  "notes": "This task intentionally precedes the broader shared tutor-architecture migration and uses MTH602's already-demonstrated direct visual synthesis model."
+  "last_surface": "conversation-vision+github",
+  "notes": "First new-unit batch is durably synthesized as 2026-09-21 (user label Lecture N+1). Exact source JPEG bytes remain a recorded transfer boundary; their identities are preserved by SHA-256. The instructor repository was not accessible through the current connected GitHub surface, so no newer slide commit/page slice was invented."
 }
