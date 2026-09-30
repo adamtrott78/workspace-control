@@ -12,7 +12,7 @@
 
 - ID: `control-plane-v2-refactor`
 - Title: Workspace Control Plane v2
-- Status: `VALIDATING`
+- Status: `IN_PROGRESS`
 
 ## Goal
 
@@ -23,26 +23,30 @@ Design, implement, and validate a workspace-control v2 architecture that general
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
 - Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `5a7a4fa331a25568490ead42156dea1f2a5c52b6`
+- Current checkpoint: `5000900823150676d356c54642efdefc560878ca`
 - Pushed: `true`
 
 ### Allowed mutation scope
 
 - `architecture/control-plane-v2.md`
 - `architecture/control-plane-v2-implementation.md`
+- `schemas/task_capsule.v1.schema.json`
+- `schemas/task_capsule.v2.schema.json`
+- `schemas/workflow_descriptor.v1.schema.json`
+- `tests/test_workspace_control.py`
+- `tests/fixtures/**`
 
 ## Next safe action
 
-Review architecture/control-plane-v2-implementation.md at control-plane-v2-refactor@5a7a4fa331a25568490ead42156dea1f2a5c52b6. Do not authorize Phase 2 schema/test mutations until the plan's compatibility strategy, file map, phase ordering, and regression gates are accepted.
+On control-plane-v2-refactor@5000900823150676d356c54642efdefc560878ca, verify the branch/ref still points to that exact parent, then create only the Phase 2 schema/test scaffolding paths in one coherent commit if possible. Do not modify scripts/workspace_control.py or shared contracts yet. Validate exact changed paths and v1 schema equivalence afterward.
 
 ## Remaining work
 
-- Review architecture/control-plane-v2-implementation.md against its ten review questions and the reviewed architecture baseline.
-- After implementation-plan approval, expand target mutation scope only to Phase 2 compatibility scaffolding: v1/v2 capsule schemas, workflow descriptor schema skeleton, tests, and fixtures.
-- Establish v1 schema equivalence and fixture coverage before changing scripts/workspace_control.py.
-- Then integrate shared contracts, add schema-version dispatch/task-render, topology-aware preflight/handoff, safe worktree preparation, workflow descriptor validation, and thin Codex adapters in gated phases.
-- Run the full regression matrix, including remote-only, local, composed, human-gate, idempotent, failure-recovery, and both Codex/ChatGPT handoff directions.
-- Only after validation, decide promotion to main and later PADataset migration.
+- Implement Phase 2 compatibility scaffolding in one coherent commit if the low-level Git surface supports exact-parent tree construction safely.
+- Prove the v1 schema copy is byte-equivalent to the current schema before any executable behavior changes.
+- Add a v2 capsule schema skeleton, workflow descriptor schema skeleton, standard-library test harness, and fixtures without modifying scripts/workspace_control.py.
+- Review and validate the exact Phase 2 diff.
+- Only after Phase 2 passes, open the next bounded scope for shared-contract integration.
 
 ## Validation state
 
@@ -61,6 +65,9 @@ Review architecture/control-plane-v2-implementation.md at control-plane-v2-refac
   - Compare cb8368cd50de2d364c2aade8843276aab0b02420...07075963f2d56f1bf76d562de3f6a6dc0d16c43d shows only architecture/control-plane-v2.md changed.
 - **Implementation plan created within authorized planning scope:** `PASS`
   - Only architecture/control-plane-v2.md and architecture/control-plane-v2-implementation.md are authorized target paths at this stage.
+- **V2 implementation plan reviewed:** `PASS`
+  - architecture/control-plane-v2-implementation.md reviewed through control-plane-v2-refactor@5000900823150676d356c54642efdefc560878ca
+  - Review preserved exact shared-contract pins, optional workflow descriptors, deferred project adoption, and derived handoff synchronization.
 
 ## Blockers / known limitations
 
@@ -92,7 +99,7 @@ Current target branch:
 control-plane-v2-refactor
 
 Current target checkpoint:
-5a7a4fa331a25568490ead42156dea1f2a5c52b6
+5000900823150676d356c54642efdefc560878ca
 
 Do not broaden mutation scope beyond the capsule.
 ```
