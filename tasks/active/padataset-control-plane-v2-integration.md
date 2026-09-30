@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: padataset-control-plane-v2-integration
 - Title: PADataset workspace-control v2 integration
-- Status: IN_PROGRESS
+- Status: SUSPENDED
 - Capsule schema: v2
 
 ## Goal
@@ -30,23 +30,22 @@ Adopt the promoted workspace-control v2 operating model in PADataset with the sm
 
 - Intent: mutate
 - Remote branch: control-plane-v2-integration
-- Remote checkpoint: 232d5fd506ac8bffa55c39591c9cf1198257e51f
+- Remote checkpoint: d6f6a7281f20d250423abd35ee5991841677e27d
 - Remote verified: true
 
 ## Next safe action
 
-On PADataset control-plane-v2-integration, update README.md with a concise route to workspace-control for mutation/runtime/Git/handoff coordination and create a thin root AGENTS.md adapter. Change no other PADataset paths. Then verify the remote checkpoint and reread both pushed files before cold-start validation.
+Use a separate fresh ChatGPT or Codex session for a read-only validation. Give it only repository adamtrott78/PADataset, branch lineage control-plane-v2-integration, pinned commit d6f6a7281f20d250423abd35ee5991841677e27d, and instruct it to start only from README.md with no prior handoff. Ask it to recover (1) the shared workspace-control/operator route, (2) PADataset versus workspace-control authority boundaries, (3) how an exact task-capsule workflow/checkpoint must be honored, and (4) what it would read next for a mutation/runtime task. It must not modify anything. Return that exact validation result to this task before project_regression.
 
 ## Remaining work
 
-- Implement the bounded README.md + root AGENTS.md integration on control-plane-v2-integration.
-- Run a fresh-reader ChatGPT/Codex cold-start validation from the PADataset root route.
-- Review the exact integration diff and verify that scientific code/configuration/results/paper semantics did not change.
-- Checkpoint the verified PADataset branch, establish final HANDOFF_SAFE state, and archive the completed task.
+- Run the independent README-first ChatGPT/Codex cold-start validation against PADataset@d6f6a7281f20d250423abd35ee5991841677e27d.
+- After that passes, perform project_regression by reviewing the exact integration diff and confirming the shared route preserves PADataset authority/task routing.
+- Checkpoint final HANDOFF_SAFE state and archive the completed task.
 
 ## Blockers / gates
 
-- None.
+- Independent fresh-reader validation is required before project_regression; the implementation session must not self-certify that gate.
 
 ## Fresh-chat initialization
 
