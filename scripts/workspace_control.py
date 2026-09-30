@@ -1419,11 +1419,27 @@ def resolve_workflow_binding(
         )
         return result
 
-    context_path = owner.get("context_path")
-    if is_repo_relative_spec(context_path):
-        if not (git_root / context_path).exists():
+    durable_routes = [
+        ("owner.context_path", owner.get("context_path")),
+    ]
+    for index, route in enumerate(data.get("entry_route", [])):
+        durable_routes.append(
+            (f"entry_route[{index}]", route)
+        )
+
+    for label, route in durable_routes:
+        if not is_repo_relative_spec(route):
+            continue
+
+        rc, _, _ = run_git(
+            git_root,
+            "cat-file",
+            "-e",
+            f"HEAD:{route}",
+        )
+        if rc != 0:
             result["reasons"].append(
-                "owner.context_path does not exist in the owning checkout"
+                f"{label} is not present at owning repository HEAD"
             )
             return result
 
