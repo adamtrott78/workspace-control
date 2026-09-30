@@ -279,6 +279,36 @@ class PreflightTopologyTests(unittest.TestCase):
             any("write capability" in reason for reason in reasons)
         )
 
+    def test_remote_non_writable_repository_is_policy_block(self):
+        record = self.remote_record()
+        record["writable"] = False
+        state, code, reasons = workspace_control.remote_preflight_state(
+            record,
+            "mutate",
+            self.REMOTE_SHA,
+            True,
+            "reversible",
+            ["scripts/workspace_control.py"],
+            ["scripts/workspace_control.py"],
+        )
+        self.assertEqual(state, "BLOCKED_POLICY")
+        self.assertEqual(code, workspace_control.EXIT_POLICY)
+        self.assertIn("non-writable", reasons[0])
+
+    def test_composed_is_not_an_opaque_preflight_mode(self):
+        parser = workspace_control.build_parser()
+        with self.assertRaises(SystemExit) as raised:
+            parser.parse_args(
+                [
+                    "preflight",
+                    "--repo",
+                    "workspace-control",
+                    "--topology",
+                    "composed",
+                ]
+            )
+        self.assertEqual(raised.exception.code, 2)
+
 
 if __name__ == "__main__":
     unittest.main()
