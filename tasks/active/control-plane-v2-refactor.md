@@ -5,8 +5,6 @@
 > Authoritative task state: `tasks/active/control-plane-v2-refactor.json` on `control-plane-v2-coordination`.
 >
 > If this file disagrees with the JSON capsule or verified Git/runtime state, trust the JSON capsule plus verified evidence.
->
-> Regenerate this view whenever the capsule materially changes.
 
 ## Task
 
@@ -14,43 +12,35 @@
 - Title: Workspace Control Plane v2
 - Status: `IN_PROGRESS`
 
-## Goal
-
-Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.
-
 ## Current target
 
 - Repository: `workspace-control`
 - Branch: `control-plane-v2-refactor`
-- Base: `cb8368cd50de2d364c2aade8843276aab0b02420`
-- Current checkpoint: `b8aa52e242a07e6aa2036516e401864991183ad2`
+- Frozen checkpoint: `b8aa52e242a07e6aa2036516e401864991183ad2`
 - Pushed: `true`
-- Target implementation mutation scope during Phase 10: none (frozen unless a regression demonstrates a defect)
+- Target mutation scope during Phase 10: none unless a regression demonstrates a defect.
+
+## Phase 10 progress
+
+- Remote-only DIRECT_TOOL mutation + reread: `PASS`
+- Verified no-op/idempotent re-entry: `PASS`
+- Exact pinned-workflow recovery after branch advance: `PASS`
+- Generated handoff regeneration after capsule change: `PASS`
+- Stage B local/worktree/runtime regression: `PENDING`
+- Real MILCOM reference regression: `PENDING`
 
 ## Next safe action
 
-Continue Phase 10 with target control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2 frozen. First refresh and verify the derived human-readable handoff from this updated capsule. Then run bounded generic regressions for human judgment suspension/resume, first-incomplete-stage workflow recovery, and exact pinned-workflow recovery after branch advance. Use coordination-only evidence or bounded non-PADataset fixtures; do not mutate the target implementation unless a regression demonstrates a defect. After generic gaps pass, run the MILCOM reference regression without migrating PADataset architecture.
+Continue Phase 10 with target control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2 frozen. Run one bounded isolated local/runtime regression outside existing workspace worktrees. It must prove safe worktree creation, local HANDOFF_SAFE, composed SUSPENDED HANDOFF_SAFE, a human-gate state transition to VALIDATED, deterministic recovery of the first incomplete stage, final CHECKPOINTED/HANDOFF_SAFE state, and non-interference. Return exact output, then persist Stage B evidence with DIRECT_TOOL and proceed to the MILCOM reference regression.
 
 ## Remaining work
 
-- Complete Phase 10 generic regression gaps while the target implementation remains frozen.
-- Dedicated regression: human judgment suspension -> resume.
-- Dedicated regression: workflow resume from the first incomplete stage.
-- Dedicated regression: task recovery from an exact pinned workflow descriptor after the workflow branch advances.
-- Refresh and verify the generated human-readable handoff after this Phase 10 capsule state change.
-- After generic gaps pass, run one existing real workflow reference regression; prefer MILCOM and do not migrate PADataset's operator architecture.
+- Run Phase 10 Stage B bounded non-PADataset local/worktree/runtime regression at the frozen target checkpoint.
+- Stage B must prove isolated worktree preparation, local HANDOFF_SAFE, composed SUSPENDED HANDOFF_SAFE, human-gate resume, and first-incomplete-stage recovery.
+- Return exact Stage B runtime evidence for direct-tool persistence on the coordination branch.
+- After Stage B passes, run one existing real workflow reference regression; prefer MILCOM without migrating PADataset's operator architecture.
+- Use the MILCOM reference regression to close the remaining human-judgment suspension/resume evidence if Stage B does not already satisfy it substantively.
 - Only after the full matrix and reference workflow pass, open Phase 11 promotion decision.
-
-## Phase 10 state
-
-- Stage A remote-only DIRECT_TOOL mutation + reread: `PASS`
-- Verified no-op/idempotent re-entry: `PASS`
-- Frozen target checkpoint: `b8aa52e242a07e6aa2036516e401864991183ad2`
-- Dedicated generic gaps still pending:
-  - human judgment suspension -> resume
-  - workflow resume from first incomplete stage
-  - exact pinned-workflow recovery after workflow branch advance
-- Real reference workflow regression remains pending after generic mechanics.
 
 ## Validation state
 
@@ -225,10 +215,21 @@ Continue Phase 10 with target control-plane-v2-refactor@b8aa52e242a07e6aa2036516
   - 12 local-runtime HANDOFF_SAFE: PASS from Phase 6 exact runtime validation.
   - 13 workflow resume from first incomplete stage: PENDING dedicated regression.
   - 14 project-owned validation failure preventing dependent continuation: PASS from failed Phase 7 exact runtime gate, which prevented Phase 8 until root-cause repair and revalidation.
-  - 15 task recovery from an exact pinned workflow descriptor after the workflow branch has advanced: PENDING dedicated regression.
-  - 16 generated human-readable handoff regeneration after capsule state changes: PASS repeatedly during prior phase checkpoint transitions; Phase 10 will refresh it again after this matrix update.
+  - 15 task recovery from an exact pinned workflow descriptor after the workflow branch has advanced: PASS from the dedicated Phase 10 branch-advance recovery regression.
+  - 16 generated human-readable handoff regeneration after capsule state changes: PASS from the dedicated Phase 10 regeneration after the matrix capsule update.
+- **Phase 10 exact pinned-workflow recovery after branch advance:** `PASS`
+  - Created workflow version A at coordination commit 61b23bebab77e98feb997d16916e2310f5c8acea with blob 125f2f237c20bba366ccb6114f92603fff1f992a.
+  - Created a task-binding evidence record pinning repository, path, commit A, and blob A.
+  - Advanced the live coordination branch workflow file to version B at da16f0726b7e3a9d026c16fef58e447d41bc6ea0 with a different blob aee1ee2e8f67f987fdd8f621c374bd035f1587cb.
+  - Reread the task record from the advanced branch, fetched the descriptor from its pinned old commit, and verified the recovered blob exactly matched the pinned content_sha.
+  - Current branch content differed from the pinned descriptor, proving recovery used the exact historical version rather than silently migrating to the live branch.
+  - The target implementation remained frozen at b8aa52e242a07e6aa2036516e401864991183ad2.
+- **Phase 10 generated human-readable handoff regeneration:** `PASS`
+  - After the Phase 10 regression-matrix capsule update, regenerated tasks/active/control-plane-v2-refactor.md.
+  - The derived handoff reflected IN_PROGRESS Phase 10 state, frozen target checkpoint, Stage A PASS, and the then-pending generic regression gaps.
+  - The generated handoff remained explicitly subordinate to the authoritative JSON capsule and verified Git/runtime evidence.
 
-## Blockers / known limitations
+## Blockers
 
 - None recorded.
 
@@ -238,33 +239,18 @@ Continue Phase 10 with target control-plane-v2-refactor@b8aa52e242a07e6aa2036516
 @GitHub
 
 Continue the durable workspace-control task defined by:
+- repository: adamtrott78/workspace-control
+- coordination branch: control-plane-v2-coordination
+- capsule: tasks/active/control-plane-v2-refactor.json
+- derived handoff: tasks/active/control-plane-v2-refactor.md
 
-Repository:
-adamtrott78/workspace-control
-
-Coordination branch:
-control-plane-v2-coordination
-
-Task capsule:
-tasks/active/control-plane-v2-refactor.json
-
-Human-readable handoff:
-tasks/active/control-plane-v2-refactor.md
-
-Treat the JSON capsule, normal workspace-control root route, exact Git state, and durable evidence referenced by the capsule as authoritative. The Markdown handoff is a derived convenience view.
-
-Do not rely on previous conversation state.
-
-Follow the capsule's next_safe_action.
-
-Current target branch:
-control-plane-v2-refactor
-
-Frozen target checkpoint:
-b8aa52e242a07e6aa2036516e401864991183ad2
+Treat the JSON capsule and verified Git/runtime evidence as authoritative.
 
 Current phase:
 Phase 10 — real regression workflows
 
-Do not mutate the target implementation unless a regression demonstrates a defect.
+Frozen target:
+control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2
+
+Follow next_safe_action. Do not mutate the target implementation unless a regression demonstrates a defect.
 ```
