@@ -3336,9 +3336,9 @@ def worktree_prepare_assessment(
     create=False,
 ):
     source_path = Path(source_path).expanduser().resolve()
-    target_path = Path(target_path).expanduser().resolve()
+    target_path = Path(target_path).expanduser().absolute()
 
-    if target_path.exists():
+    if target_path.exists() or target_path.is_symlink():
         return assess_existing_worktree(
             name,
             cfg,
