@@ -3106,6 +3106,767 @@ def command_handoff_check(args):
     return code
 
 
+def query_local_branch(path, branch):
+    rc, out, err = run_git(
+        path,
+        "show-ref",
+        "--verify",
+        "--hash",
+        f"refs/heads/{branch}",
+    )
+
+    if rc == 0:
+        return {
+            "status": "FOUND",
+            "branch": branch,
+            "sha": out.splitlines()[0] if out else None,
+            "error": None,
+        }
+
+    if rc == 1:
+        return {
+            "status": "MISSING",
+            "branch": branch,
+            "sha": None,
+            "error": None,
+        }
+
+    return {
+        "status": "ERROR",
+        "branch": branch,
+        "sha": None,
+        "error": err or f"git show-ref exited {rc}",
+    }
+
+
+def worktree_prepare_result(
+    state,
+    code,
+    reasons,
+    *,
+    name,
+    branch,
+    expected_checkpoint,
+    source_path,
+    target_path,
+    create,
+    source=None,
+    target=None,
+    remote=None,
+    local_branch=None,
+    creation=None,
+):
+    return {
+        "schema_version": 1,
+        "repository": name,
+        "branch": branch,
+        "expected_checkpoint": expected_checkpoint,
+        "source_path": str(source_path),
+        "target_path": str(target_path),
+        "create_requested": create,
+        "result": state,
+        "reasons": reasons,
+        "source": source,
+        "target": target,
+        "remote": remote,
+        "local_branch": local_branch,
+        "creation": creation,
+    }, code
+
+
+def concise_checkout_state(record):
+    if record is None:
+        return None
+
+    return {
+        "exists": record.get("exists"),
+        "git": record.get("git"),
+        "git_root": record.get("git_root"),
+        "branch": record.get("branch"),
+        "head": record.get("head"),
+        "clean": record.get("clean"),
+        "observed_origin": record.get("observed_origin"),
+        "identity_matches": record.get("identity_matches"),
+    }
+
+
+def assess_existing_worktree(
+    name,
+    cfg,
+    target_path,
+    branch,
+    expected_checkpoint,
+    workspace_root,
+    repos,
+    create,
+):
+    record = inspect_checkout(
+        name,
+        cfg,
+        target_path,
+        workspace_root,
+        repos,
+    )
+    target = concise_checkout_state(record)
+
+    if not record.get("git") or not record.get("identity_matches"):
+        return worktree_prepare_result(
+            "BLOCKED_IDENTITY",
+            EXIT_STATE,
+            [
+                "target path exists but is not the registered "
+                "repository identity"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=target_path,
+            target_path=target_path,
+            create=create,
+            target=target,
+        )
+
+    if not record.get("clean"):
+        return worktree_prepare_result(
+            "BLOCKED_DIRTY",
+            EXIT_REVIEW,
+            [
+                "target worktree is dirty; no normalization was attempted"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=record["git_root"],
+            target_path=target_path,
+            create=create,
+            target=target,
+        )
+
+    divergence = []
+
+    if record.get("branch") != branch:
+        divergence.append(
+            "target worktree branch differs from requested branch"
+        )
+
+    if record.get("head") != expected_checkpoint:
+        divergence.append(
+            "target worktree HEAD differs from expected checkpoint"
+        )
+
+    remote = query_remote_branch(
+        Path(record["git_root"]),
+        branch,
+    )
+
+    if remote["status"] == "ERROR":
+        return worktree_prepare_result(
+            "NEEDS_REVIEW",
+            EXIT_REVIEW,
+            ["remote branch state could not be verified"],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=record["git_root"],
+            target_path=target_path,
+            create=create,
+            target=target,
+            remote=remote,
+        )
+
+    if remote["status"] == "MISSING":
+        return worktree_prepare_result(
+            "NEEDS_REVIEW",
+            EXIT_REVIEW,
+            ["requested branch is missing on the remote"],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=record["git_root"],
+            target_path=target_path,
+            create=create,
+            target=target,
+            remote=remote,
+        )
+
+    if remote.get("sha") != expected_checkpoint:
+        divergence.append(
+            "advertised remote branch differs from expected checkpoint"
+        )
+
+    if divergence:
+        return worktree_prepare_result(
+            "BLOCKED_DIVERGED",
+            EXIT_REVIEW,
+            divergence,
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=record["git_root"],
+            target_path=target_path,
+            create=create,
+            target=target,
+            remote=remote,
+        )
+
+    return worktree_prepare_result(
+        "READY",
+        EXIT_READY,
+        [],
+        name=name,
+        branch=branch,
+        expected_checkpoint=expected_checkpoint,
+        source_path=record["git_root"],
+        target_path=target_path,
+        create=create,
+        target=target,
+        remote=remote,
+    )
+
+
+def worktree_prepare_assessment(
+    name,
+    cfg,
+    source_path,
+    target_path,
+    branch,
+    expected_checkpoint,
+    workspace_root,
+    repos,
+    create=False,
+):
+    source_path = Path(source_path).expanduser().resolve()
+    target_path = Path(target_path).expanduser().resolve()
+
+    if target_path.exists():
+        return assess_existing_worktree(
+            name,
+            cfg,
+            target_path,
+            branch,
+            expected_checkpoint,
+            workspace_root,
+            repos,
+            create,
+        )
+
+    if not cfg.get("writable", False):
+        return worktree_prepare_result(
+            "BLOCKED_POLICY",
+            EXIT_POLICY,
+            ["registry marks this logical repository non-writable"],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=source_path,
+            target_path=target_path,
+            create=create,
+        )
+
+    if cfg.get("recursive_mutation_forbidden", False):
+        return worktree_prepare_result(
+            "BLOCKED_POLICY",
+            EXIT_POLICY,
+            ["registry forbids mutation from this repository scope"],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=source_path,
+            target_path=target_path,
+            create=create,
+        )
+
+    if not target_path.parent.exists():
+        return worktree_prepare_result(
+            "NEEDS_REVIEW",
+            EXIT_REVIEW,
+            [
+                "target parent directory does not exist; "
+                "worktree-prepare will not create parent directories"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=source_path,
+            target_path=target_path,
+            create=create,
+        )
+
+    source_record = inspect_checkout(
+        name,
+        cfg,
+        source_path,
+        workspace_root,
+        repos,
+    )
+    source = concise_checkout_state(source_record)
+
+    if (
+        not source_record.get("exists")
+        or not source_record.get("git")
+        or not source_record.get("identity_matches")
+    ):
+        return worktree_prepare_result(
+            "BLOCKED_IDENTITY",
+            EXIT_STATE,
+            [
+                "source path is not a checkout of the registered "
+                "repository identity"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=source_path,
+            target_path=target_path,
+            create=create,
+            source=source,
+        )
+
+    git_root = Path(source_record["git_root"]).resolve()
+
+    if target_path == git_root or is_parent(git_root, target_path):
+        return worktree_prepare_result(
+            "BLOCKED_POLICY",
+            EXIT_POLICY,
+            [
+                "target path must be isolated from the source "
+                "checkout/worktree"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+        )
+
+    if not source_record.get("clean"):
+        return worktree_prepare_result(
+            "BLOCKED_DIRTY",
+            EXIT_REVIEW,
+            [
+                "source checkout is dirty; worktree creation stopped "
+                "without normalization"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+        )
+
+    rc, _, branch_err = run_git(
+        git_root,
+        "check-ref-format",
+        "--branch",
+        branch,
+    )
+    if rc != 0:
+        return worktree_prepare_result(
+            "NEEDS_REVIEW",
+            EXIT_REVIEW,
+            [
+                "requested branch name is not a valid Git branch"
+                + (f": {branch_err}" if branch_err else "")
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+        )
+
+    remote = query_remote_branch(git_root, branch)
+
+    if remote["status"] == "ERROR":
+        return worktree_prepare_result(
+            "NEEDS_REVIEW",
+            EXIT_REVIEW,
+            ["remote branch state could not be verified"],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+            remote=remote,
+        )
+
+    if remote["status"] == "MISSING":
+        return worktree_prepare_result(
+            "NEEDS_REVIEW",
+            EXIT_REVIEW,
+            ["requested branch is missing on the remote"],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+            remote=remote,
+        )
+
+    if remote.get("sha") != expected_checkpoint:
+        return worktree_prepare_result(
+            "BLOCKED_DIVERGED",
+            EXIT_REVIEW,
+            [
+                "advertised remote branch differs from expected checkpoint"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+            remote=remote,
+        )
+
+    if not check_commit_exists(git_root, expected_checkpoint):
+        return worktree_prepare_result(
+            "NEEDS_REVIEW",
+            EXIT_REVIEW,
+            [
+                "expected checkpoint is not present in the local "
+                "repository object database; worktree-prepare will not fetch"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+            remote=remote,
+        )
+
+    local_branch = query_local_branch(git_root, branch)
+
+    if local_branch["status"] == "ERROR":
+        return worktree_prepare_result(
+            "NEEDS_REVIEW",
+            EXIT_REVIEW,
+            ["local branch state could not be established"],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+            remote=remote,
+            local_branch=local_branch,
+        )
+
+    if (
+        local_branch["status"] == "FOUND"
+        and local_branch.get("sha") != expected_checkpoint
+    ):
+        return worktree_prepare_result(
+            "BLOCKED_DIVERGED",
+            EXIT_REVIEW,
+            [
+                "existing local branch differs from expected checkpoint; "
+                "worktree-prepare will not move or rewrite it"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+            remote=remote,
+            local_branch=local_branch,
+        )
+
+    holders = []
+    for item in get_worktrees(git_root):
+        if item.get("branch") == branch:
+            holders.append(item.get("worktree"))
+
+    if holders:
+        return worktree_prepare_result(
+            "NEEDS_REVIEW",
+            EXIT_REVIEW,
+            [
+                "requested branch is already checked out in another "
+                "worktree"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+            remote=remote,
+            local_branch=local_branch,
+            creation={
+                "branch_holders": holders,
+            },
+        )
+
+    if not create:
+        return worktree_prepare_result(
+            "CREATE_AVAILABLE",
+            EXIT_REVIEW,
+            [
+                "missing isolated worktree can be created safely only "
+                "with explicit --create authority"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+            remote=remote,
+            local_branch=local_branch,
+        )
+
+    command = [
+        "git",
+        "-C",
+        str(git_root),
+        "worktree",
+        "add",
+    ]
+
+    if local_branch["status"] == "MISSING":
+        command.extend([
+            "-b",
+            branch,
+            str(target_path),
+            expected_checkpoint,
+        ])
+    else:
+        command.extend([
+            str(target_path),
+            branch,
+        ])
+
+    proc = subprocess.run(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+    creation = {
+        "attempted": True,
+        "returncode": proc.returncode,
+        "stdout": proc.stdout.strip(),
+        "stderr": proc.stderr.strip(),
+        "created_branch": (
+            branch
+            if local_branch["status"] == "MISSING"
+            else None
+        ),
+    }
+
+    if proc.returncode != 0:
+        post = None
+        if target_path.exists():
+            post = concise_checkout_state(
+                inspect_checkout(
+                    name,
+                    cfg,
+                    target_path,
+                    workspace_root,
+                    repos,
+                )
+            )
+        creation["post_state"] = post
+
+        return worktree_prepare_result(
+            "NEEDS_REVIEW",
+            EXIT_REVIEW,
+            [
+                "git worktree add did not complete successfully; "
+                "inspect the reported post-state before any retry"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+            remote=remote,
+            local_branch=local_branch,
+            creation=creation,
+        )
+
+    post_record = inspect_checkout(
+        name,
+        cfg,
+        target_path,
+        workspace_root,
+        repos,
+    )
+    post = concise_checkout_state(post_record)
+    creation["post_state"] = post
+
+    post_reasons = []
+
+    if (
+        not post_record.get("git")
+        or not post_record.get("identity_matches")
+    ):
+        post_reasons.append(
+            "created worktree does not match registered repository identity"
+        )
+
+    if post_record.get("branch") != branch:
+        post_reasons.append(
+            "created worktree branch differs from requested branch"
+        )
+
+    if post_record.get("head") != expected_checkpoint:
+        post_reasons.append(
+            "created worktree HEAD differs from expected checkpoint"
+        )
+
+    if not post_record.get("clean"):
+        post_reasons.append(
+            "created worktree is unexpectedly dirty"
+        )
+
+    if post_reasons:
+        return worktree_prepare_result(
+            "NEEDS_REVIEW",
+            EXIT_REVIEW,
+            post_reasons + [
+                "worktree was created; no automatic cleanup or rollback "
+                "was attempted"
+            ],
+            name=name,
+            branch=branch,
+            expected_checkpoint=expected_checkpoint,
+            source_path=git_root,
+            target_path=target_path,
+            create=create,
+            source=source,
+            target=post,
+            remote=remote,
+            local_branch=local_branch,
+            creation=creation,
+        )
+
+    return worktree_prepare_result(
+        "READY",
+        EXIT_READY,
+        [],
+        name=name,
+        branch=branch,
+        expected_checkpoint=expected_checkpoint,
+        source_path=git_root,
+        target_path=target_path,
+        create=create,
+        source=source,
+        target=post,
+        remote=remote,
+        local_branch=local_branch,
+        creation=creation,
+    )
+
+
+def print_worktree_prepare_human(payload):
+    print("============================================================")
+    print("WORKTREE PREPARATION")
+    print("============================================================")
+    print(f"REPOSITORY:  {payload['repository']}")
+    print(f"BRANCH:      {payload['branch']}")
+    print(f"EXPECTED:    {payload['expected_checkpoint']}")
+    print(f"SOURCE:      {payload['source_path']}")
+    print(f"TARGET:      {payload['target_path']}")
+    print(f"CREATE:      {payload['create_requested']}")
+    print(f"RESULT:      {payload['result']}")
+
+    remote = payload.get("remote")
+    if remote:
+        print(
+            "REMOTE:      "
+            f"status={remote.get('status')} "
+            f"sha={remote.get('sha') or '<none>'}"
+        )
+
+    local_branch = payload.get("local_branch")
+    if local_branch:
+        print(
+            "LOCAL_BRANCH:"
+            f" status={local_branch.get('status')} "
+            f"sha={local_branch.get('sha') or '<none>'}"
+        )
+
+    creation = payload.get("creation")
+    if creation and creation.get("attempted"):
+        print(
+            "CREATION:    "
+            f"returncode={creation.get('returncode')}"
+        )
+
+    if payload["reasons"]:
+        print("REASONS:")
+        for reason in payload["reasons"]:
+            print(f"  - {reason}")
+
+
+def command_worktree_prepare(args):
+    _, workspace_root, repos = load_registry()
+
+    if args.repo not in repos:
+        fail(
+            f"unknown registered repository: {args.repo}",
+            EXIT_STATE,
+        )
+
+    if not re.fullmatch(r"[0-9a-f]{40}", args.expected_checkpoint):
+        fail(
+            "--expected-checkpoint must be a 40-character Git SHA",
+            2,
+        )
+
+    target_raw = Path(args.path).expanduser()
+    if not target_raw.is_absolute():
+        fail("--path must be an absolute durable target path", 2)
+
+    source_raw = (
+        Path(args.source).expanduser()
+        if args.source
+        else workspace_root / repos[args.repo]["path"]
+    )
+
+    payload, code = worktree_prepare_assessment(
+        args.repo,
+        repos[args.repo],
+        source_raw,
+        target_raw,
+        args.branch,
+        args.expected_checkpoint,
+        workspace_root,
+        repos,
+        create=args.create,
+    )
+
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print_worktree_prepare_human(payload)
+
+    return code
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         description="Executor-neutral workspace control CLI"
@@ -3262,6 +4023,55 @@ def build_parser():
         help="emit machine-readable JSON",
     )
     handoff.set_defaults(func=command_handoff_check)
+
+    worktree_prepare = sub.add_parser(
+        "worktree-prepare",
+        help=(
+            "inspect or explicitly create one isolated task worktree "
+            "without normalization"
+        ),
+    )
+    worktree_prepare.add_argument(
+        "--repo",
+        required=True,
+        help="logical repository name from repos.json",
+    )
+    worktree_prepare.add_argument(
+        "--branch",
+        required=True,
+        help="task branch/ref to prepare",
+    )
+    worktree_prepare.add_argument(
+        "--path",
+        required=True,
+        help="absolute durable target worktree path",
+    )
+    worktree_prepare.add_argument(
+        "--expected-checkpoint",
+        required=True,
+        help="exact expected advertised Git checkpoint",
+    )
+    worktree_prepare.add_argument(
+        "--source",
+        help=(
+            "existing source checkout/worktree; defaults to registered "
+            "repository path"
+        ),
+    )
+    worktree_prepare.add_argument(
+        "--create",
+        action="store_true",
+        help=(
+            "explicitly authorize creation when the read-only assessment "
+            "returns CREATE_AVAILABLE"
+        ),
+    )
+    worktree_prepare.add_argument(
+        "--json",
+        action="store_true",
+        help="emit machine-readable JSON",
+    )
+    worktree_prepare.set_defaults(func=command_worktree_prepare)
 
     return parser
 
