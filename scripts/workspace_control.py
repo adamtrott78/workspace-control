@@ -3109,10 +3109,10 @@ def command_handoff_check(args):
 def query_local_branch(path, branch):
     rc, out, err = run_git(
         path,
-        "show-ref",
+        "rev-parse",
         "--verify",
-        "--hash",
-        f"refs/heads/{branch}",
+        "--quiet",
+        f"refs/heads/{branch}^{{commit}}",
     )
 
     if rc == 0:
@@ -3135,7 +3135,7 @@ def query_local_branch(path, branch):
         "status": "ERROR",
         "branch": branch,
         "sha": None,
-        "error": err or f"git show-ref exited {rc}",
+        "error": err or f"git rev-parse exited {rc}",
     }
 
 
