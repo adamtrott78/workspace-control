@@ -30,24 +30,24 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: automated-research-engine-v1
-- Remote checkpoint: 7f40545ac0ccf891d8a108a6b83180eb9f5b5428
+- Remote checkpoint: d0e5f8e652081f531b51b1518795f9b1628b2696
 - Remote verified: true
 
 ## Next safe action
 
-Provide the exact locally acquired /tmp/research-engine-2108.13099v1.pdf to the current extraction executor (prefer direct file upload). Verify its SHA-256 is 7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab before extraction. Then parse the full PDF with stable page/section/block locators and create a new FULLTEXT_PDF_* extraction fixture that supersedes, but does not overwrite, the ABSTRACT_ONLY baseline.
+Continue evidence_graph from automated-research-engine-v1@d0e5f8e652081f531b51b1518795f9b1628b2696. Define the storage-agnostic graph projection and query contract using the first full-text fixture. Prove that a query can traverse from the paper's conclusion claim to supporting/qualifying result/method evidence and back to exact PDF page/bbox locators. Do not select the database yet.
 
 ## Remaining work
 
-- Make the exact acquired PDF artifact for arXiv 2108.13099v1 accessible to the extraction executor and verify its SHA-256 against 7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab.
-- Parse that exact PDF into a normalized document representation with page/section/block locators.
-- Create a full-text typed evidence fixture covering research question, methods, experiments, dataset, metrics, quantitative results, and limitations/assumptions where present.
-- Manually verify a benchmark subset of source locators and numerical values.
-- Extend extraction to several additional deep-read pilot papers to test schema generality.
-- Choose persistence/indexing architecture only after real ingress/extraction objects demonstrate storage/query requirements.
+- Define the durable evidence-graph projection from Work/WorkVersion, evidence objects, locators, and EvidenceRelation records without losing source-specific context.
+- Build graph queries that can answer which source results support/qualify/contradict a claim and return exact source locators.
+- Test graph projection and retrieval against the first full-text paper fixture.
+- Extend extraction to several additional deep-read pilot papers during vertical-slice validation to test schema generality and cross-paper relations.
+- Choose persistence/indexing architecture only after graph/query requirements are demonstrated against real evidence objects.
 - Build provenance-preserving synthesis, contradiction handling, gap generation, and adversarial novelty challenge.
 - Build the research-program/funding/proposal layer and explicit human gates.
 - Bridge an approved research program into a workspace-control project execution workflow.
+- After the end-to-end pipeline is validated, bootstrap the first real RF OSR knowledge corpus from the PDFs already curated/cited in the user's research paper and stored in PADataset's paper area; resolve the exact PADataset route at that time and ingest them through the same provenance-preserving pipeline rather than special-casing them.
 
 ## Blockers / gates
 
