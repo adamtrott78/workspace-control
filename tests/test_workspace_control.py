@@ -806,6 +806,94 @@ class WorkflowDescriptorTests(unittest.TestCase):
                 )
             )
 
+    def test_binding_rejects_owner_context_not_present_at_head(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            bare = root / "owner.git"
+            checkout = root / "owner"
+            descriptor = checkout / "workflow.json"
+
+            subprocess.run(
+                ["git", "init", "--bare", str(bare)],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            subprocess.run(
+                ["git", "init", str(checkout)],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "config", "user.name", "Workflow Test"],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "config", "user.email", "workflow@example.invalid"],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "checkout", "-b", "main"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+
+            data = load_json(
+                FIXTURES / "workflow_descriptor_v1.json"
+            )
+            data["owner"]["repository"] = "fixture-owner"
+            descriptor.write_text(
+                json.dumps(data, indent=2) + "\n"
+            )
+            (checkout / "README.md").write_text(
+                "untracked owner context\n"
+            )
+
+            subprocess.run(
+                ["git", "-C", str(checkout), "add", "workflow.json"],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "commit", "-m", "workflow"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "remote", "add", "origin", str(bare)],
+                check=True,
+            )
+
+            cfg = {
+                "path": "owner",
+                "remote": str(bare),
+                "role": "managed",
+                "writable": True,
+                "canonical_branch": "main",
+                "context_entry": "README.md",
+                "authority": "fixture workflow owner",
+                "worktree_policy": "shared",
+                "recursive_mutation_forbidden": False,
+            }
+            payload = workspace_control.workflow_validation_payload(
+                descriptor,
+                data,
+                {"fixture-owner": cfg},
+            )
+            self.assertFalse(payload["valid"])
+            self.assertTrue(
+                any(
+                    "owner.context_path is not present" in error
+                    for error in payload["errors"]
+                )
+            )
+
     def test_binding_rejects_wrong_owner_repository_origin(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
