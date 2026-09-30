@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "workflow_id": "course-study-session-v1",
+  "title": "Course Study Session",
+  "purpose": "Execute evidence-grounded repository-backed study and persist durable mastery state.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "procedures/course_study_session.md"
+  },
+  "entry_route": [
+    "procedures/course_study_session.md",
+    "policies/TUTORING_CONTRACT.md",
+    "policies/OPERATOR_WORKFLOW.md"
+  ],
+  "stages": [
+    {
+      "id": "recover-learning-state",
+      "execution_owner": "course-study-session",
+      "authority_owners": [
+        "procedures/course_study_session.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Learning scope, dependencies, mastery, notation, and evidence are recovered without chat assumptions."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "diagnose",
+      "execution_owner": "course-study-session",
+      "authority_owners": [
+        "procedures/course_study_session.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "recover-learning-state"
+      ],
+      "required_capabilities": [
+        "interactive-reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Smallest useful diagnostic localizes the earliest blocking/unassessed dependency."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "remediate",
+      "execution_owner": "course-study-session",
+      "authority_owners": [
+        "procedures/course_study_session.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "diagnose"
+      ],
+      "required_capabilities": [
+        "interactive-reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Smallest missing unit is taught before control returns to the student."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "transfer-check",
+      "execution_owner": "course-study-session",
+      "authority_owners": [
+        "procedures/course_study_session.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "remediate"
+      ],
+      "required_capabilities": [
+        "interactive-reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Behavioral evidence supports the claimed mastery level and excludes tutor-generated work."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "persist-evidence",
+      "execution_owner": "course-study-session",
+      "authority_owners": [
+        "procedures/course_study_session.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "transfer-check"
+      ],
+      "required_capabilities": [
+        "repository-write"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Learning/mastery records persist only supported changes with completion separate."
+      ],
+      "gates": [
+        "project-mutation-authority"
+      ],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": null
+}

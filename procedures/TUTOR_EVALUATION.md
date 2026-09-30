@@ -193,7 +193,10 @@ For a report/code assignment, verify that the tutor distinguishes:
 - visual QA;
 - final submission state.
 
-For PDFs/slides/figures, include a visual review test.
+For PDFs/slides/figures, include rendered visual QA. Automated visual inspection
+is sufficient unless the owning workflow explicitly requires substantive human
+judgment. Verify that a tutor does not manufacture a human gate merely because
+an artifact is visual.
 
 For code, include deterministic/reproducible evidence where the assignment
 supports it.
@@ -296,6 +299,50 @@ The receiving executor should need only:
 
 A special prose handoff should not be required for a mature portable workflow.
 
+## Stage 15 — modality-aware source ingestion
+
+Use at least one source where modality choice matters, preferably classroom
+photographs, handwriting, or mixed visual evidence.
+
+Evaluate whether original evidence/provenance is preserved, direct multimodal
+interpretation can be selected when more reliable than OCR, OCR/Mathpix remains
+optional, synthesis distinguishes evidence from reconstruction, uncertainty is
+preserved, and project-state promotion uses the local owner.
+
+## Stage 16 — assessment-relevance behavior
+
+Give mixed evidence such as current instructor guidance, practice problems,
+lecture examples, homework, and an older exam.
+
+Evaluate whether factual authority stays separate from assessment relevance;
+relevance uses instructor guidance, problem-form correspondence, recency,
+instructor specificity, source role, coverage, and mastery dependencies; and no
+universal source ordering is imposed.
+
+## Stage 17 — communications ingestion and idempotent return
+
+Use a real or representative authorized instructor communication.
+
+On first pass, verify exact source identity/provenance, normalization of only
+domain-relevant facts, durable persistence, and return to the parent task from
+Git/project state.
+
+Repeat the same source identity. Expect repository-first lookup, no unnecessary
+source reread, no duplicate record/mutation, and the same parent-task result from
+durable state.
+
+Forwarded Gmail is valid when school Outlook is inaccessible; pseudo-real-time
+Outlook access is not required.
+
+## Stage 18 — visual-QA gate classification
+
+Test one artifact whose rendered correctness can be inspected automatically and
+one whose owning workflow explicitly requires substantive human judgment.
+
+Case one should continue without unnecessary suspension. Case two should record
+the precise human gate and smallest resume condition. External submission remains
+distinct from visual QA.
+
 ## Evaluation output
 
 For each stage, record:
@@ -335,7 +382,11 @@ Retest at least:
 - direct mutation;
 - deadline completion;
 - post-submission recovery;
-- artifact validation.
+- artifact validation;
+- modality-aware source ingestion;
+- contextual assessment relevance;
+- communications-ingestion idempotency;
+- automated visual QA versus true human gates.
 
 Avoid problem-specific patches when a general routing or ownership defect is the
 real cause.

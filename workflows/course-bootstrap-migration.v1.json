@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "workflow_id": "course-bootstrap-migration-v1",
+  "title": "Course Bootstrap and Migration",
+  "purpose": "Integrate a course repository with pinned shared mechanics while preserving project-local authority and explicit compatibility transitions.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "procedures/course_bootstrap_migration.md"
+  },
+  "entry_route": [
+    "procedures/course_bootstrap_migration.md",
+    "templates/COURSE_TUTOR_ADAPTER.md",
+    "policies/TUTORING_CONTRACT.md",
+    "policies/OPERATOR_WORKFLOW.md",
+    "policies/PORTABILITY_CONTRACT.md",
+    "procedures/TUTOR_EVALUATION.md"
+  ],
+  "stages": [
+    {
+      "id": "inspect-target",
+      "execution_owner": "course-bootstrap-migration",
+      "authority_owners": [
+        "procedures/course_bootstrap_migration.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md",
+        "templates/COURSE_TUTOR_ADAPTER.md"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Exact target repository/checkpoint and current compatibility binding are established."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "recover-local-owners",
+      "execution_owner": "course-bootstrap-migration",
+      "authority_owners": [
+        "procedures/course_bootstrap_migration.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md",
+        "templates/COURSE_TUTOR_ADAPTER.md"
+      ],
+      "depends_on": [
+        "inspect-target"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Existing valid project-local owners are recovered before design changes."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "map-shared-contract",
+      "execution_owner": "course-bootstrap-migration",
+      "authority_owners": [
+        "procedures/course_bootstrap_migration.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md",
+        "templates/COURSE_TUTOR_ADAPTER.md"
+      ],
+      "depends_on": [
+        "recover-local-owners"
+      ],
+      "required_capabilities": [
+        "repository-read",
+        "repository-write"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Only missing adapter roles are mapped and shared checkpoint transitions are explicit."
+      ],
+      "gates": [
+        "project-mutation-authority"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "validate-cold-start",
+      "execution_owner": "course-bootstrap-migration",
+      "authority_owners": [
+        "procedures/course_bootstrap_migration.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md",
+        "templates/COURSE_TUTOR_ADAPTER.md"
+      ],
+      "depends_on": [
+        "map-shared-contract"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Fresh executor recovers representative course owners from the root without prior chat."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "checkpoint-migration",
+      "execution_owner": "course-bootstrap-migration",
+      "authority_owners": [
+        "procedures/course_bootstrap_migration.md",
+        "policies/OPERATOR_WORKFLOW.md",
+        "policies/PORTABILITY_CONTRACT.md",
+        "templates/COURSE_TUTOR_ADAPTER.md"
+      ],
+      "depends_on": [
+        "validate-cold-start"
+      ],
+      "required_capabilities": [
+        "repository-write"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Bounded changes are checkpointed, remote identity verified, and pushed state reread."
+      ],
+      "gates": [
+        "project-mutation-authority"
+      ],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": null
+}

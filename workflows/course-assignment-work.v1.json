@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "workflow_id": "course-assignment-work-v1",
+  "title": "Course Assignment Work",
+  "purpose": "Coordinate assignment learning, completion, artifacts, and persistence while preserving completion/mastery separation.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "procedures/course_assignment_work.md"
+  },
+  "entry_route": [
+    "procedures/course_assignment_work.md",
+    "policies/TUTORING_CONTRACT.md",
+    "procedures/course_study_session.md",
+    "procedures/document_artifact_build.md",
+    "policies/OPERATOR_WORKFLOW.md"
+  ],
+  "stages": [
+    {
+      "id": "load-assignment-owner",
+      "execution_owner": "course-assignment-work",
+      "authority_owners": [
+        "procedures/course_assignment_work.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Exact assignment requirements/source and local owners are loaded."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "recover-learning-completion-state",
+      "execution_owner": "course-assignment-work",
+      "authority_owners": [
+        "procedures/course_assignment_work.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "load-assignment-owner"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Completion and mastery are recovered as separate axes."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "execute-assignment-work",
+      "execution_owner": "course-assignment-work",
+      "authority_owners": [
+        "procedures/course_assignment_work.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "recover-learning-completion-state"
+      ],
+      "required_capabilities": [
+        "interactive-reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Work follows authorized tutoring/completion mode without falsifying mastery."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "build-required-artifacts",
+      "execution_owner": "course-assignment-work",
+      "authority_owners": [
+        "procedures/course_assignment_work.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "execute-assignment-work"
+      ],
+      "required_capabilities": [
+        "artifact-build"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Required artifacts are built/validated through project-owned contracts."
+      ],
+      "gates": [
+        "runtime-if-required"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "persist-learning-state",
+      "execution_owner": "course-assignment-work",
+      "authority_owners": [
+        "procedures/course_assignment_work.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "build-required-artifacts"
+      ],
+      "required_capabilities": [
+        "repository-write"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Independent, guided, and executor-generated work are persisted distinctly."
+      ],
+      "gates": [
+        "project-mutation-authority"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "validate-assignment-state",
+      "execution_owner": "course-assignment-work",
+      "authority_owners": [
+        "procedures/course_assignment_work.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "persist-learning-state"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Requirements, artifact state, and learning state are validated separately."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": null
+}

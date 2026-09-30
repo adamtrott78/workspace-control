@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "workflow_id": "course-cheat-sheet-build-v1",
+  "title": "Course Cheat-Sheet Build",
+  "purpose": "Build an assessment-aligned cheat sheet through contextual relevance selection, deterministic production, and rendered QA.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "procedures/course_assessment_preparation.md"
+  },
+  "entry_route": [
+    "procedures/course_assessment_preparation.md",
+    "procedures/document_artifact_build.md",
+    "policies/TUTORING_CONTRACT.md",
+    "policies/OPERATOR_WORKFLOW.md"
+  ],
+  "stages": [
+    {
+      "id": "recover-assessment-scope",
+      "execution_owner": "course-cheat-sheet-build",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "procedures/document_artifact_build.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Assessment scope, artifact requirements, and learning state are recovered."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "select-high-value-content",
+      "execution_owner": "course-cheat-sheet-build",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "procedures/document_artifact_build.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "recover-assessment-scope"
+      ],
+      "required_capabilities": [
+        "reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Selection uses contextual relevance, coverage gaps, and mastery dependencies rather than fixed ranking."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "compose-source",
+      "execution_owner": "course-cheat-sheet-build",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "procedures/document_artifact_build.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "select-high-value-content"
+      ],
+      "required_capabilities": [
+        "repository-write"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Project-owned source contains supported content within artifact constraints."
+      ],
+      "gates": [
+        "project-mutation-authority"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "build-render",
+      "execution_owner": "course-cheat-sheet-build",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "procedures/document_artifact_build.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "compose-source"
+      ],
+      "required_capabilities": [
+        "artifact-build",
+        "artifact-render"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Deterministic build/render produces the representation required for QA."
+      ],
+      "gates": [
+        "runtime-if-required"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "structural-validation",
+      "execution_owner": "course-cheat-sheet-build",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "procedures/document_artifact_build.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "build-render"
+      ],
+      "required_capabilities": [
+        "artifact-inspection"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Project structural/static/freshness constraints pass."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "visual-qa",
+      "execution_owner": "course-cheat-sheet-build",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "procedures/document_artifact_build.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "structural-validation"
+      ],
+      "required_capabilities": [
+        "artifact-visual-inspection"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Rendered QA checks legibility/layout without assuming a human gate."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "bounded-revision",
+      "execution_owner": "course-cheat-sheet-build",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "procedures/document_artifact_build.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "visual-qa"
+      ],
+      "required_capabilities": [
+        "repository-write",
+        "artifact-build"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Revision changes the owning layer that is actually wrong and is rebuilt/revalidated."
+      ],
+      "gates": [
+        "project-mutation-authority"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "delivery-gate",
+      "execution_owner": "course-cheat-sheet-build",
+      "authority_owners": [
+        "procedures/course_assessment_preparation.md",
+        "procedures/document_artifact_build.md",
+        "policies/TUTORING_CONTRACT.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "bounded-revision"
+      ],
+      "required_capabilities": [
+        "artifact-inspection"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Final artifact identity and required QA precede external delivery."
+      ],
+      "gates": [
+        "external-delivery-approval-when-required"
+      ],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": null
+}
