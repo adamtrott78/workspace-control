@@ -32,7 +32,7 @@
       "checkout_path": "/home/atrott/adamArchives/Adam/workspace-control-v2-refactor",
       "branch": "control-plane-v2-refactor",
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
-      "checkpoint_sha": "01ebfed8d8b79ec1cbf52930c6f02b13eeae4386",
+      "checkpoint_sha": "84a7e67a8af2b701ab63829468c92e46221a72f9",
       "checkpoint_pushed": true,
       "allowed_mutation_scope": [
         "scripts/workspace_control.py",
@@ -215,6 +215,26 @@
         "Dirty, diverged, identity-mismatched, non-writable, occupied non-repository, and broken-symlink target cases stop explicitly.",
         "After any git worktree add attempt, actual target state is re-inspected; failed/ambiguous creation is returned as NEEDS_REVIEW without cleanup or blind retry.",
         "Real temporary-Git tests cover read-only proposal, explicit creation, missing local branch creation, dirty source/target preservation, divergence refusal, policy refusal, occupied path/symlink refusal, and existing READY state."
+      ]
+    },
+    {
+      "summary": "Phase 7 runtime validation failed at 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386; inspected the failure before retrying or further implementation.",
+      "evidence": [
+        "Exact isolated checkout matched 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 and was clean.",
+        "The unit suite ran 36 tests and failed exactly one test: WorktreePrepareTests.test_explicit_create_may_create_missing_local_branch_at_exact_sha.",
+        "The failing assertion was EXIT_REVIEW (10) instead of EXIT_READY (0).",
+        "Validation stopped at the unit-suite gate before the explicit Phase 7 CLI creation scenarios.",
+        "No existing workspace worktree was modified by the failed validation."
+      ]
+    },
+    {
+      "summary": "Repaired Phase 7 missing-local-branch detection within the existing authorized scope.",
+      "evidence": [
+        "control-plane-v2-refactor -> 84a7e67a8af2b701ab63829468c92e46221a72f9",
+        "Root cause: git show-ref --verify --hash returns exit 128 for an absent local branch, so the implementation misclassified a safe MISSING branch as ERROR.",
+        "query_local_branch now uses git rev-parse --verify --quiet refs/heads/<branch>^{commit}, which returns exit 1 for a missing ref and still resolves the exact commit when present.",
+        "Added an explicit regression test asserting a deleted local task branch is reported as MISSING rather than ERROR.",
+        "The cumulative Phase 7 range f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...84a7e67a8af2b701ab63829468c92e46221a72f9 still changes only procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py."
       ]
     }
   ],
@@ -476,8 +496,8 @@
       "check": "Phase 7 exact changed-path set",
       "result": "PASS",
       "evidence": [
-        "Compare f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 reports exactly procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py.",
-        "All changed paths are inside the capsule's authorized Phase 7 mutation scope."
+        "Compare f88fb301ea9fd500fcfa5ee8614ce33bd64f55c9...84a7e67a8af2b701ab63829468c92e46221a72f9 reports exactly procedures/worktree_prepare.md, scripts/workspace_control.py, and tests/test_workspace_control.py.",
+        "All changed paths remain inside the capsule's authorized Phase 7 mutation scope."
       ]
     },
     {
@@ -497,17 +517,38 @@
       "check": "Phase 7 exact-checkpoint integrated runtime validation",
       "result": "NOT_RUN",
       "evidence": [
-        "Target implementation is pushed at 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386.",
-        "Exact-checkpoint unit/CLI runtime validation is pending in an isolated GitHub-connected terminal.",
-        "Do not open the next implementation phase until this validation passes and is recorded."
+        "Repaired target implementation is pushed at 84a7e67a8af2b701ab63829468c92e46221a72f9.",
+        "Exact-checkpoint unit/CLI runtime validation has not yet been rerun after the repair.",
+        "Do not open the next implementation phase until the repaired checkpoint passes."
+      ]
+    },
+    {
+      "check": "Phase 7 runtime validation at 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386",
+      "result": "FAIL",
+      "evidence": [
+        "Exact checkpoint and isolated clone preconditions passed.",
+        "Full unit suite result: Ran 36 tests; FAILED (failures=1).",
+        "Failure: test_explicit_create_may_create_missing_local_branch_at_exact_sha expected EXIT_READY=0 but observed 10.",
+        "No explicit worktree-prepare CLI creation scenario ran after the unit-suite failure."
+      ]
+    },
+    {
+      "check": "Phase 7 root-cause and repair inspection",
+      "result": "PASS",
+      "evidence": [
+        "Independent Git behavior reproduction confirmed show-ref --verify --hash returns exit 128 for an absent local branch.",
+        "Independent Git behavior reproduction confirmed rev-parse --verify --quiet returns exit 1 for an absent local branch.",
+        "A raw isolated Git worktree add -b <branch> <target> <expected-sha> succeeds when the local branch is absent, the remote branch exists, and the commit is locally available.",
+        "Repaired source maps exit 1 to MISSING and preserves other nonzero states as ERROR.",
+        "Regression test explicitly covers MISSING rather than ERROR for the absent local branch."
       ]
     }
   ],
   "blockers": [
-    "Exact-checkpoint Phase 7 integrated runtime validation is pending for control-plane-v2-refactor@01ebfed8d8b79ec1cbf52930c6f02b13eeae4386."
+    "Exact-checkpoint Phase 7 integrated runtime validation must be rerun for repaired checkpoint control-plane-v2-refactor@84a7e67a8af2b701ab63829468c92e46221a72f9."
   ],
   "remaining_work": [
-    "Run the complete Python unit suite from exact checkpoint 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 in an isolated temporary clone.",
+    "Run the complete Python unit suite from repaired exact checkpoint 84a7e67a8af2b701ab63829468c92e46221a72f9 in an isolated temporary clone; the suite now includes the missing-local-branch regression.",
     "Run worktree-prepare read-only against an isolated temporary repository and require CREATE_AVAILABLE without creating the target.",
     "Run the same request with --create and require READY at the exact branch/checkpoint.",
     "Re-run read-only assessment on the created worktree and require READY without mutation.",
@@ -516,7 +557,7 @@
     "Verify non-interference with existing workspace worktrees.",
     "Only after those checks pass, mark Phase 7 validated/checkpointed and follow the implementation plan's next phase."
   ],
-  "next_safe_action": "Remain in Phase 7. Validate exact pushed checkpoint 01ebfed8d8b79ec1cbf52930c6f02b13eeae4386 in an isolated GitHub-connected runtime. Run the full unit suite and bounded real-Git worktree-prepare scenarios proving read-only CREATE_AVAILABLE, explicit --create -> READY at the exact checkpoint, existing READY behavior, dirty-state preservation/refusal, divergence refusal without branch movement, and non-interference with existing workspace worktrees. Record the runtime evidence, then and only then mark Phase 7 validated/checkpointed and open the next planned phase.",
+  "next_safe_action": "Remain in Phase 7. Validate repaired exact pushed checkpoint 84a7e67a8af2b701ab63829468c92e46221a72f9 in an isolated GitHub-connected runtime. Run the full unit suite and bounded real-Git worktree-prepare scenarios proving missing-local-branch handling, read-only CREATE_AVAILABLE, explicit --create -> READY at the exact checkpoint, existing READY behavior, dirty-state preservation/refusal, divergence refusal without branch movement, and non-interference with existing workspace worktrees. Record the runtime evidence, then and only then mark Phase 7 validated/checkpointed and open the next planned phase.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
