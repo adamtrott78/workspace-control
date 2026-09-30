@@ -37,26 +37,26 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: cc4ae9e185257574757ff5da910237a23f4292a1
+- Remote checkpoint: e23da0349160a0a181d356d4f9aee0c0c2ea8b3e
 - Remote verified: true
 
 ## Next safe action
 
-On research-engine/main@cc4ae9e185257574757ff5da910237a23f4292a1, add CI that runs the full test suite against a PostgreSQL 18 + pgvector service. Inspect the workflow result and repair any implementation/schema defects without asking for local Docker while GitHub Actions remains a viable runtime surface. Then implement/load the curated corpus and provenance query tests.
+Merge research-engine PR #1 after its successful PostgreSQL/pgvector CI run, verify research-engine/main, then implement the idempotent curated-corpus PostgreSQL loader and database-backed provenance query regression tests. Continue using PR-triggered CI as the real database runtime.
 
 ## Remaining work
 
-- Add GitHub Actions CI using PostgreSQL 18 + pgvector and run all unit/integration tests on research-engine/main.
-- Repair any runtime/schema defect found by CI and rerun until the bootstrap passes on a real PostgreSQL/pgvector instance.
-- Implement fixture/schema validation and an idempotent loader for the current curated multi-paper corpus into PostgreSQL.
-- Implement provenance query regression tests over loaded corpus evidence and mixed-fidelity state.
+- Merge the validated CI documentation PR into research-engine/main and verify main.
+- Implement an idempotent PostgreSQL corpus loader for the current curated multi-paper fixture and integration tests.
+- Implement database-backed provenance/support/qualifier queries over loaded corpus evidence.
+- Add machine-readable schema/fixture validation for research-engine contract fixtures.
 - Add provider/parser service interfaces while keeping scientific evidence contracts authoritative.
 - Re-run novelty challenge after additional RF-specific papers are loaded; only then consider SUPPORTED_AS_OPEN.
 - After implementation vertical-slice tests pass, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
 
 ## Blockers / gates
 
-- The initial PostgreSQL integration test has not yet executed against a real PostgreSQL/pgvector runtime; GitHub Actions CI is the next available authorized runtime surface and should be tried before requesting local Docker.
+- None.
 
 ## Fresh-chat initialization
 
