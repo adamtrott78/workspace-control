@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "regression_id": "phase10-pinned-workflow-recovery",
+  "task_semantics": "Recover the exact reusable workflow version pinned when this task record was created, even after the live branch advances.",
+  "workflow_binding": {
+    "repository": "workspace-control",
+    "path": "tasks/evidence/phase10-pinned-workflow-descriptor.json",
+    "checkpoint_sha": "61b23bebab77e98feb997d16916e2310f5c8acea",
+    "content_sha": "125f2f237c20bba366ccb6114f92603fff1f992a"
+  },
+  "required_recovery": [
+    "ignore newer branch content when recovering this task's workflow semantics",
+    "read the descriptor from checkpoint_sha at path",
+    "require the recovered blob/content identity to equal content_sha"
+  ]
+}
