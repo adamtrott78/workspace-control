@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "BLOCKED_RUNTIME",
+  "status": "CHECKPOINTED",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -35,23 +35,10 @@
       "checkpoint_sha": "77c7355bbafeb674dd35b55bcfdb542d50c6079c",
       "checkpoint_pushed": true,
       "allowed_mutation_scope": [
-        "architecture/control-plane-v2.md",
-        "architecture/control-plane-v2-implementation.md",
-        "schemas/task_capsule.v1.schema.json",
-        "schemas/task_capsule.v2.schema.json",
-        "schemas/workflow_descriptor.v1.schema.json",
-        "tests/test_workspace_control.py",
-        "tests/fixtures/**",
-        "README.md",
-        "policies/PORTABILITY_CONTRACT.md",
-        "policies/OPERATOR_WORKFLOW.md",
-        "policies/TUTORING_CONTRACT.md",
-        "templates/COURSE_TUTOR_ADAPTER.md",
-        "procedures/TUTOR_EVALUATION.md",
-        "schemas/task_capsule.schema.json",
         "scripts/workspace_control.py",
-        "procedures/task_capsule.md",
-        "tasks/README.md"
+        "procedures/repo_preflight.md",
+        "tests/test_workspace_control.py",
+        "tests/fixtures/**"
       ]
     }
   ],
@@ -150,6 +137,15 @@
       "evidence": [
         "control-plane-v2-refactor -> 77c7355bbafeb674dd35b55bcfdb542d50c6079c",
         "Phase 4 changed exactly scripts/workspace_control.py, schemas/task_capsule.schema.json, tests/test_workspace_control.py, procedures/task_capsule.md, and tasks/README.md."
+      ]
+    },
+    {
+      "summary": "Completed bounded Phase 4 runtime validation on Lambda against the exact pushed refactor checkpoint.",
+      "evidence": [
+        "PHASE4_RUNTIME_RESULT=PASS",
+        "VALIDATED_COMMIT=77c7355bbafeb674dd35b55bcfdb542d50c6079c",
+        "PASS: v2 capsule is explicitly refused by v1 handoff semantics.",
+        "Existing workspace worktrees were not switched, cleaned, reset, stashed, or modified by this validation."
       ]
     }
   ],
@@ -270,9 +266,9 @@
     },
     {
       "check": "Python Phase 2 unittest execution",
-      "result": "NOT_RUN",
+      "result": "PASS",
       "evidence": [
-        "No local/runtime executor has executed tests/test_workspace_control.py yet; source/fixture validation is recorded separately and does not imply test-run success."
+        "The Phase 4 bounded runtime validation executed tests/test_workspace_control.py successfully as part of PHASE4_RUNTIME_RESULT=PASS at 77c7355bbafeb674dd35b55bcfdb542d50c6079c."
       ]
     },
     {
@@ -314,21 +310,39 @@
     },
     {
       "check": "Phase 4 Python syntax/unit/runtime validation",
-      "result": "NOT_RUN",
+      "result": "PASS",
       "evidence": [
-        "A real Python runtime is required; direct GitHub tooling cannot establish execution success."
+        "Lambda runtime validation completed with PHASE4_RUNTIME_RESULT=PASS.",
+        "Validated exact commit 77c7355bbafeb674dd35b55bcfdb542d50c6079c.",
+        "v2 capsule was explicitly refused by v1 handoff semantics, proving the compatibility guard executes correctly.",
+        "Validation did not switch, clean, reset, stash, or modify existing workspace worktrees."
+      ]
+    },
+    {
+      "check": "Phase 4 v1/v2 handoff compatibility guard",
+      "result": "PASS",
+      "evidence": [
+        "Runtime result explicitly reported: PASS: v2 capsule is explicitly refused by v1 handoff semantics.",
+        "This confirms v2 task state is not silently interpreted under v1 local-only handoff rules."
+      ]
+    },
+    {
+      "check": "Phase 4 runtime non-interference with existing worktrees",
+      "result": "PASS",
+      "evidence": [
+        "Lambda reported that existing workspace worktrees were not switched, cleaned, reset, stashed, or modified."
       ]
     }
   ],
-  "blockers": [
-    "Phase 4 source is pushed and structurally reviewed, but Python syntax/unit/runtime tests must execute in a real runtime before Phase 4 can be accepted."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Run the bounded Phase 4 runtime validation against exact commit 77c7355bbafeb674dd35b55bcfdb542d50c6079c without mutating an existing worktree.",
-    "If tests fail, inspect the exact failure and patch only the demonstrated defect; do not continue to topology-aware preflight.",
-    "If tests pass, checkpoint Phase 4 complete and open the next bounded scope for topology-aware preflight."
+    "Implement Phase 5 topology-aware preflight while preserving the existing local preflight invocation and semantics.",
+    "Add explicit remote topology preflight that validates registry identity, expected remote/ref/SHA, writable policy, mutation scope, expected parent when supplied, and operation capability/authorization without manufacturing a local checkout.",
+    "Add composed-transition checks sufficient to prove remote and local identities and their synchronization boundary without assuming remote mutation updated local state.",
+    "Update procedures/repo_preflight.md and add bounded tests/fixtures for local backward compatibility, remote expected-SHA match/mismatch, non-writable repositories, isolated task branches, and composed synchronization assumptions.",
+    "Run source/diff validation first, then bounded real-runtime validation before opening Phase 6 topology-aware handoff scope."
   ],
-  "next_safe_action": "In a real Python runtime, validate exactly control-plane-v2-refactor@77c7355bbafeb674dd35b55bcfdb542d50c6079c: verify remote identity, extract that commit into a temporary directory without switching/cleaning any checkout, run py_compile and tests/test_workspace_control.py, exercise task-validate/task-render on copied correctly named v1/v2 fixtures, and confirm v2 handoff-check safely returns NOT_HANDOFF_SAFE rather than applying v1 semantics. Return exact output before any further mutation.",
+  "next_safe_action": "Begin Phase 5 only. Starting from control-plane-v2-refactor@77c7355bbafeb674dd35b55bcfdb542d50c6079c, implement topology-aware preflight within scripts/workspace_control.py, procedures/repo_preflight.md, tests/test_workspace_control.py, and tests/fixtures/**. Preserve the existing preflight invocation as backward-compatible local behavior; add explicit remote topology support without creating a local checkout; model composed work as explicit remote/local checks plus a synchronization boundary rather than one opaque hybrid preflight. Inspect and validate the exact changed-path set before runtime testing. Do not begin topology-aware handoff or worktree-preparation implementation yet.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
