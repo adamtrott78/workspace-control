@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: padataset-control-plane-v2-integration
 - Title: PADataset workspace-control v2 integration
-- Status: SUSPENDED
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -33,19 +33,26 @@ Adopt the promoted workspace-control v2 operating model in PADataset with the sm
 - Remote checkpoint: d6f6a7281f20d250423abd35ee5991841677e27d
 - Remote verified: true
 
+### workspace-control
+
+- Intent: read
+- Remote branch: main
+- Remote checkpoint: 03a51fdbe2a9153f2b5e45054eec6e927a9dda36
+- Remote verified: true
+
 ## Next safe action
 
-Use a separate fresh ChatGPT or Codex session for a read-only validation. Give it only repository adamtrott78/PADataset, branch lineage control-plane-v2-integration, pinned commit d6f6a7281f20d250423abd35ee5991841677e27d, and instruct it to start only from README.md with no prior handoff. Ask it to recover (1) the shared workspace-control/operator route, (2) PADataset versus workspace-control authority boundaries, (3) how an exact task-capsule workflow/checkpoint must be honored, and (4) what it would read next for a mutation/runtime task. It must not modify anything. Return that exact validation result to this task before project_regression.
+Re-review PADataset base 232d5fd506ac8bffa55c39591c9cf1198257e51f against integration head d6f6a7281f20d250423abd35ee5991841677e27d. Verify the changed-path set is exactly README.md and AGENTS.md, removing the inserted README operator section reconstructs the base README byte-for-byte, AGENTS.md contains routing only, and the pinned workspace-control workflow recovery entry satisfies v2 handoff binding. If all pass, complete and archive the task.
 
 ## Remaining work
 
-- Run the independent README-first ChatGPT/Codex cold-start validation against PADataset@d6f6a7281f20d250423abd35ee5991841677e27d.
-- After that passes, perform project_regression by reviewing the exact integration diff and confirming the shared route preserves PADataset authority/task routing.
-- Checkpoint final HANDOFF_SAFE state and archive the completed task.
+- Perform project_regression by rechecking the exact base-to-head diff, verifying the original PADataset README/task router is preserved apart from the bounded operator-route insertion, and confirming AGENTS.md remains a thin adapter.
+- Establish final v2 HANDOFF_SAFE state under the pinned workspace-control checker semantics.
+- Archive the completed task after final JSON/Markdown synchronization.
 
 ## Blockers / gates
 
-- Independent fresh-reader validation is required before project_regression; the implementation session must not self-certify that gate.
+- None.
 
 ## Fresh-chat initialization
 
