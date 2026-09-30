@@ -12,7 +12,7 @@
     "content_sha": "1e98a3d530fe0cbd09fdf72d255e50d570adec58"
   },
   "parent_execution_owner": "research-operating-system",
-  "current_stage": "synthesis_gap_engine",
+  "current_stage": "proposal_compiler",
   "acceptance_criteria": [
     "The architecture explicitly separates source evidence, extracted evidence, normalized knowledge, synthesis, model inference, and human judgment.",
     "Every durable scientific evidence object can be traced to a canonical work/version, immutable source artifact identity, and source locator whenever the available representation permits it.",
@@ -46,7 +46,7 @@
       "base_sha": "fad0375da10a6a153de75ee68d939d174d2042bf",
       "remote": {
         "branch": "automated-research-engine-v1",
-        "checkpoint_sha": "9984c3d68e01bbaea6dafe6dc941df82d1184ced",
+        "checkpoint_sha": "ca1c5a45facbed732aca3f40a3de53e4b6d8f4df",
         "verified": true
       },
       "local": null,
@@ -279,7 +279,7 @@
     },
     {
       "id": "synthesis_gap_engine",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "composed",
@@ -287,18 +287,43 @@
         "evidence_graph",
         "git:9984c3d68e01bbaea6dafe6dc941df82d1184ced"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "git:ca1c5a45facbed732aca3f40a3de53e4b6d8f4df",
+        "artifact:architecture/research-engine/synthesis-gap-contract-v1.md",
+        "artifact:architecture/research-engine/fixtures/open-set-rf-2108.13099v1-synthesis-gap-v1.json",
+        "schema:schemas/research-engine/synthesis-artifact.v1.schema.json",
+        "schema:schemas/research-engine/gap-candidate.v1.schema.json",
+        "schema:schemas/research-engine/novelty-challenge.v1.schema.json"
+      ],
+      "validation": [
+        {
+          "check": "scoped evidence synthesis",
+          "result": "PASS",
+          "evidence": [
+            "First SynthesisArtifact explicitly declares SINGLE_WORK scope and maps each statement to durable evidence IDs and qualifiers."
+          ]
+        },
+        {
+          "check": "adversarial novelty challenge",
+          "result": "PASS",
+          "evidence": [
+            "Broad dynamic-environment RF OSR gap was REJECTED_PRIOR_WORK_FOUND after exact-title search and abstract review found 2026 direct prior work.",
+            "Efficient blind-generative gap was NARROWED after 2026 OOD-detector work showed a non-generative route around the auxiliary-OOD-data constraint.",
+            "No candidate was marked SUPPORTED_AS_OPEN."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "proposal_compiler",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
-      "selected_surface": "composed",
+      "selected_surface": "github",
       "inputs": [
-        "synthesis_gap_engine"
+        "synthesis_gap_engine",
+        "git:ca1c5a45facbed732aca3f40a3de53e4b6d8f4df"
       ],
       "outputs": [],
       "validation": [],
@@ -416,6 +441,16 @@
       "evidence": [
         "Evidence graph contract, 35-node/46-edge first snapshot, and conclusion-support query proof committed.",
         "Graph query returns exact source locators and qualifying limitations rather than only generated prose."
+      ]
+    },
+    {
+      "id": "research-engine-first-synthesis-gap-challenge",
+      "kind": "git_commit",
+      "identity": "ca1c5a45facbed732aca3f40a3de53e4b6d8f4df",
+      "required_for_resume": true,
+      "evidence": [
+        "Scoped synthesis and novelty-challenge contracts/fixtures committed.",
+        "Pilot demonstrates both prior-work rejection and candidate narrowing; no false novelty accepted."
       ]
     }
   ],
@@ -600,6 +635,30 @@
       "evidence": [
         "Validated first-paper graph projection and source-trace retrieval."
       ]
+    },
+    {
+      "path": "architecture/research-engine/synthesis-gap-contract-v1.md",
+      "state": "durable",
+      "role": "synthesis-gap-contract",
+      "origin": "automated-research-engine-v1@ca1c5a45facbed732aca3f40a3de53e4b6d8f4df",
+      "persistence": "git-tracked",
+      "regeneration": "versioned synthesis/gap fixture; underlying evidence remains authoritative",
+      "review_requirement": "Must preserve evidence-scope labeling and adversarial novelty-challenge history.",
+      "evidence": [
+        "First synthesis/gap pilot includes one rejected and one narrowed candidate."
+      ]
+    },
+    {
+      "path": "architecture/research-engine/fixtures/open-set-rf-2108.13099v1-synthesis-gap-v1.json",
+      "state": "durable",
+      "role": "synthesis-gap-regression-fixture",
+      "origin": "automated-research-engine-v1@ca1c5a45facbed732aca3f40a3de53e4b6d8f4df",
+      "persistence": "git-tracked",
+      "regeneration": "versioned synthesis/gap fixture; underlying evidence remains authoritative",
+      "review_requirement": "Must preserve evidence-scope labeling and adversarial novelty-challenge history.",
+      "evidence": [
+        "First synthesis/gap pilot includes one rejected and one narrowed candidate."
+      ]
     }
   ],
   "validation": [
@@ -707,20 +766,27 @@
         "Validated at automated-research-engine-v1@9984c3d68e01bbaea6dafe6dc941df82d1184ced.",
         "Conclusion-support query returns evidence, qualifiers, exact locators, and artifact identity."
       ]
+    },
+    {
+      "check": "first synthesis and novelty challenge",
+      "result": "PASS",
+      "evidence": [
+        "Validated at automated-research-engine-v1@ca1c5a45facbed732aca3f40a3de53e4b6d8f4df.",
+        "One-paper synthesis remained scoped; broad candidate rejected; partial-overlap candidate narrowed; zero unsupported novelty claims."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Define reproducible SynthesisArtifact and GapCandidate projection/query contracts over evidence-graph snapshots.",
-    "Generate a first synthesis from the one-paper graph while explicitly declaring that its evidence scope is one work and is insufficient for field-level conclusions.",
-    "Generate candidate gap signals only as hypotheses/inferences, then run adversarial novelty searches intended to disprove them.",
-    "Ingest additional pilot papers before accepting any field-level RF OSR gap as SUPPORTED_AS_OPEN.",
-    "Choose persistence/indexing architecture only after graph/synthesis/query requirements are demonstrated against real evidence objects.",
-    "Build the research-program/funding/proposal layer and explicit human gates.",
-    "Bridge an approved research program into a workspace-control project execution workflow.",
+    "Define ResearchProgram and solicitation/proposal compiler contracts without treating a NARROWED/NEEDS_HUMAN_REVIEW gap as an approved research direction.",
+    "Build a dry-run proposal compilation fixture that demonstrates evidence mapping and required human gates but is explicitly NOT_FOR_SUBMISSION.",
+    "Add official funding-opportunity adapter contracts and solicitation requirement mapping.",
+    "Build the execution bridge from an APPROVED research program into a workspace-control project/task workflow.",
+    "During vertical-slice validation, ingest multiple additional papers and require deeper novelty review before any candidate becomes SUPPORTED_AS_OPEN.",
+    "Choose persistence/indexing architecture only after the complete vertical slice demonstrates actual query/load requirements.",
     "After the end-to-end pipeline is validated, bootstrap the first real RF OSR knowledge corpus from the PDFs already curated/cited in the user's research paper and stored in PADataset's paper area; resolve the exact PADataset route at that time and ingest them through the same provenance-preserving pipeline rather than special-casing them."
   ],
-  "next_safe_action": "Continue synthesis_gap_engine from automated-research-engine-v1@9984c3d68e01bbaea6dafe6dc941df82d1184ced. Define SynthesisArtifact and GapCandidate contracts. Build a one-paper synthesis only as a scoped machinery test, clearly labeling its evidence boundary. Then generate one or more candidate gap hypotheses and adversarially search current literature for prior work that could invalidate them; do not mark any RF OSR gap SUPPORTED_AS_OPEN until additional papers are ingested.",
+  "next_safe_action": "Continue proposal_compiler from automated-research-engine-v1@ca1c5a45facbed732aca3f40a3de53e4b6d8f4df. Define ResearchProgram, FundingOpportunity, SolicitationRequirement, and ProposalCompilation contracts. Use only a NOT_FOR_SUBMISSION dry-run fixture because the current surviving RF OSR candidate is NARROWED and requires deeper prior-work review; do not select it as the user's research direction and do not mark it fundable/novel.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
