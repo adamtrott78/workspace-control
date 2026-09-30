@@ -787,6 +787,15 @@ class WorktreePrepareTests(unittest.TestCase):
         self.assertEqual(payload["result"], "BLOCKED_IDENTITY")
         self.assertTrue(marker.exists())
 
+    def test_broken_symlink_target_is_treated_as_occupied(self):
+        self.target.symlink_to(self.root / "missing-target")
+
+        payload, code = self.assess(create=True)
+
+        self.assertEqual(code, workspace_control.EXIT_STATE)
+        self.assertEqual(payload["result"], "BLOCKED_IDENTITY")
+        self.assertTrue(self.target.is_symlink())
+
     def test_dirty_source_blocks_creation_without_normalization(self):
         dirty = self.source / "unrelated.txt"
         dirty.write_text("preserve me\n")
