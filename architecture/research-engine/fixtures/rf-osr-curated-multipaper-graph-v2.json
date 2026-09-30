@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "snapshot_id": "graph:rf-osr-curated-multipaper:v2",
+  "corpus_id": "corpus:rf-osr-curated-multipaper:v2",
+  "created_at": "2026-09-30T13:33:00-04:00",
+  "work_count": 5,
+  "evidence_node_count": 21,
+  "cross_work_relation_count": 5,
+  "work_nodes": [
+    {
+      "id": "work:arxiv:2108.13099",
+      "title": "Open Set RF Fingerprinting using Generative Outlier Augmentation",
+      "year": 2021,
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab"
+    },
+    {
+      "id": "work:scheirer:2013:osr",
+      "title": "Toward Open Set Recognition",
+      "year": 2013,
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "source_identity": "source-artifact:sha256:b121b72c904d6f70d08e2cfba2ffcca77f9fb05654311781691d07f119c0eed9"
+    },
+    {
+      "id": "work:liu:2020:energy-ood",
+      "title": "Energy-based Out-of-distribution Detection",
+      "year": 2020,
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "source_identity": "source-artifact:sha256:202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7"
+    },
+    {
+      "id": "work:baye:2024:varmax",
+      "title": "varMax: Towards Confidence-Based Zero-Day Attack Recognition",
+      "year": 2024,
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "source_identity": "source-artifact:sha256:68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714"
+    },
+    {
+      "id": "work:broggi:2025:varmax",
+      "title": "varMax: Uncertainty and Novelty Management in Deep Neural Networks",
+      "year": 2025,
+      "source_level": "OCR_DERIVED",
+      "source_identity": "gitblob:95f146b0c3ab0c5244a568f4ac2529591a04a191"
+    }
+  ],
+  "cross_work_relations": [
+    {
+      "relation_id": "rel:scheirer-rejection-motivates-liu",
+      "source_id": "ev:scheirer2013:claim:rejection",
+      "target_id": "ev:liu2020:method:energy",
+      "relation_type": "MOTIVATES",
+      "verification_state": "MODEL_INFERRED",
+      "rationale": "Scheirer's rejection requirement defines the open-world decision need that later OOD scoring methods address; Liu does not claim direct derivation from this exact sentence."
+    },
+    {
+      "relation_id": "rel:liu-energy-used-by-baye",
+      "source_id": "ev:baye2024:claim:energy-validation",
+      "target_id": "ev:liu2020:method:energy",
+      "relation_type": "USES",
+      "verification_state": "OCR_SOURCE_SUPPORTED",
+      "rationale": "Baye's OCR artifact explicitly states that energy-based OOD is used to validate the unknown-classification hypothesis, and its reference text attributes the energy method to Liu et al."
+    },
+    {
+      "relation_id": "rel:baye-broggi-varmax",
+      "source_id": "ev:broggi2025:method:varmax",
+      "target_id": "ev:baye2024:method:varmax",
+      "relation_type": "SAME_METHOD_LINEAGE",
+      "verification_state": "MODEL_INFERRED_HIGH_CONFIDENCE",
+      "rationale": "Both sources describe the named varMax method using top-two softmax separation and logit variance, with overlapping authorship; exact version/extension semantics require PDF/bibliographic verification."
+    },
+    {
+      "relation_id": "rel:broggi-compares-liu-energy",
+      "source_id": "ev:broggi2025:relation:energy-comparison",
+      "target_id": "ev:liu2020:method:energy",
+      "relation_type": "COMPARES_AGAINST",
+      "verification_state": "OCR_SOURCE_SUPPORTED",
+      "rationale": "Broggi's OCR text explicitly states Liu et al. 2020 energy is used for comparison."
+    },
+    {
+      "relation_id": "rel:rf-generative-distinct-strategy",
+      "source_id": "ev:2108:method:ellipsoid",
+      "target_id": "ev:liu2020:method:energy",
+      "relation_type": "ALTERNATIVE_OPEN_WORLD_STRATEGY",
+      "verification_state": "MODEL_INFERRED",
+      "rationale": "The RF paper creates synthetic outliers to improve open-set training, whereas Liu's energy method scores classifier outputs for OOD detection; this is a cross-paper taxonomy inference, not a source-stated relation."
+    }
+  ],
+  "query_proof": {
+    "question": "Which selected methods operationalize unknown rejection, and what evidence lineage connects them?",
+    "result_paths": [
+      [
+        "ev:scheirer2013:claim:rejection",
+        "MOTIVATES",
+        "ev:liu2020:method:energy"
+      ],
+      [
+        "ev:baye2024:claim:energy-validation",
+        "USES",
+        "ev:liu2020:method:energy"
+      ],
+      [
+        "ev:broggi2025:relation:energy-comparison",
+        "COMPARES_AGAINST",
+        "ev:liu2020:method:energy"
+      ],
+      [
+        "ev:broggi2025:method:varmax",
+        "SAME_METHOD_LINEAGE",
+        "ev:baye2024:method:varmax"
+      ],
+      [
+        "ev:2108:method:ellipsoid",
+        "ALTERNATIVE_OPEN_WORLD_STRATEGY",
+        "ev:liu2020:method:energy"
+      ]
+    ],
+    "validation": "PASS"
+  },
+  "supersedes_snapshot_id": "graph:rf-osr-curated-multipaper:v1",
+  "verification_upgrade": {
+    "promoted_works": [
+      "work:scheirer:2013:osr",
+      "work:liu:2020:energy-ood",
+      "work:baye:2024:varmax"
+    ],
+    "exact_pdf_verified_work_count": 4,
+    "ocr_derived_work_count": 1,
+    "fidelity_run_id": "fidelity:padataset-ocr-vs-pdf:2026-09-30:v1"
+  }
+}

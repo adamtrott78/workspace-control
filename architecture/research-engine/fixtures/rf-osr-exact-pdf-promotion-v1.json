@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "promotion_run_id": "promotion:padataset-rf-osr:2026-09-30:v1",
+  "received_bundle": {
+    "sha256": "4a145f2bf9b9b2809244acbecadfa84056af39944a1beb863c2d9883a63470c3",
+    "uploaded_name": "research-engine-pdf-promotion.tar.gz",
+    "verification": [
+      "archive opened successfully",
+      "SHA256SUMS verified for all three PDFs",
+      "receipt values matched recomputed byte/hash/page/magic values"
+    ]
+  },
+  "source_artifacts": [
+    {
+      "slug": "2013_scheirer_toward_open_set_recognition",
+      "title": "Toward Open Set Recognition",
+      "work_id": "work:scheirer:2013:osr",
+      "version_id": "work-version:scheirer:2013:osr:pdf",
+      "sha256": "b121b72c904d6f70d08e2cfba2ffcca77f9fb05654311781691d07f119c0eed9",
+      "bytes": 1777783,
+      "pages": 16,
+      "source_path": "/home/atrott/adamArchives/Adam/varMax/PADataset/papers/milcom2026/reference_notes/papers/2013_scheirer_toward_open_set_recognition/2013_scheirer_toward_open_set_recognition.pdf",
+      "artifact_id": "source-artifact:sha256:b121b72c904d6f70d08e2cfba2ffcca77f9fb05654311781691d07f119c0eed9",
+      "media_type": "application/pdf",
+      "format": "pdf",
+      "pdf_magic": "%PDF-",
+      "acquisition_method": "user-local exact-PDF promotion bundle",
+      "bundle_sha256": "4a145f2bf9b9b2809244acbecadfa84056af39944a1beb863c2d9883a63470c3",
+      "exact_pdf_verified": true
+    },
+    {
+      "slug": "2020_liu_energy_ood_detection",
+      "title": "Energy-based Out-of-distribution Detection",
+      "work_id": "work:liu:2020:energy-ood",
+      "version_id": "work-version:liu:2020:energy-ood:pdf",
+      "sha256": "202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+      "bytes": 673885,
+      "pages": 16,
+      "source_path": "/home/atrott/adamArchives/Adam/varMax/PADataset/papers/milcom2026/reference_notes/papers/2020_liu_energy_ood_detection/2020_liu_energy_ood_detection.pdf",
+      "artifact_id": "source-artifact:sha256:202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+      "media_type": "application/pdf",
+      "format": "pdf",
+      "pdf_magic": "%PDF-",
+      "acquisition_method": "user-local exact-PDF promotion bundle",
+      "bundle_sha256": "4a145f2bf9b9b2809244acbecadfa84056af39944a1beb863c2d9883a63470c3",
+      "exact_pdf_verified": true
+    },
+    {
+      "slug": "2024_baye_varmax_milcom",
+      "title": "varMax: Towards Confidence-Based Zero-Day Attack Recognition",
+      "work_id": "work:baye:2024:varmax",
+      "version_id": "work-version:baye:2024:varmax:pdf",
+      "sha256": "68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714",
+      "bytes": 1026611,
+      "pages": 6,
+      "source_path": "/home/atrott/adamArchives/Adam/varMax/PADataset/papers/milcom2026/reference_notes/papers/2024_baye_varmax_milcom/2024_baye_varmax_milcom.pdf",
+      "artifact_id": "source-artifact:sha256:68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714",
+      "media_type": "application/pdf",
+      "format": "pdf",
+      "pdf_magic": "%PDF-",
+      "acquisition_method": "user-local exact-PDF promotion bundle",
+      "bundle_sha256": "4a145f2bf9b9b2809244acbecadfa84056af39944a1beb863c2d9883a63470c3",
+      "exact_pdf_verified": true
+    }
+  ],
+  "parser": {
+    "name": "PyMuPDF",
+    "version": "1.26.7"
+  },
+  "result": "PASS"
+}

@@ -1,0 +1,448 @@
+{
+  "schema_version": 1,
+  "corpus_id": "corpus:rf-osr-curated-multipaper:v2",
+  "created_at": "2026-09-30T13:33:00-04:00",
+  "source_project": {
+    "repository": "adamtrott78/PADataset",
+    "branch": "research-framework",
+    "root": "papers/milcom2026/reference_notes/papers"
+  },
+  "works": [
+    {
+      "work_id": "work:arxiv:2108.13099",
+      "title": "Open Set RF Fingerprinting using Generative Outlier Augmentation",
+      "year": 2021,
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "source_identity": "source-artifact:sha256:7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+      "provenance": {
+        "artifact_sha256": "7fcfc9929fd80a94095657ebf644be3301000d0a4342b74de1adc2af529ff7ab",
+        "exact_pdf_verified": true,
+        "padataset_slug": null
+      },
+      "evidence_ids": [
+        "ev:2108:rq:1",
+        "ev:2108:method:ellipsoid",
+        "ev:2108:method:optimization",
+        "ev:2108:result:ellipsoid",
+        "ev:2108:result:optimization",
+        "ev:2108:limitation:ellipsoid",
+        "ev:2108:limitation:optimization",
+        "ev:2108:claim:conclusion"
+      ]
+    },
+    {
+      "work_id": "work:scheirer:2013:osr",
+      "title": "Toward Open Set Recognition",
+      "year": 2013,
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "source_identity": "source-artifact:sha256:b121b72c904d6f70d08e2cfba2ffcca77f9fb05654311781691d07f119c0eed9",
+      "provenance": {
+        "padataset_slug": "2013_scheirer_toward_open_set_recognition",
+        "mmd_blob_sha": "bcc80f11063f61a8692e8af3367fad230ec00c1b",
+        "local_pdf_path": "/home/atrott/adamArchives/Adam/varMax/PADataset/papers/milcom2026/reference_notes/papers/2013_scheirer_toward_open_set_recognition/2013_scheirer_toward_open_set_recognition.pdf",
+        "manifest_pages": 16,
+        "exact_pdf_verified": true,
+        "artifact_sha256": "b121b72c904d6f70d08e2cfba2ffcca77f9fb05654311781691d07f119c0eed9",
+        "artifact_bytes": 1777783,
+        "promotion_run_id": "promotion:padataset-rf-osr:2026-09-30:v1"
+      },
+      "evidence": [
+        {
+          "evidence_id": "ev:scheirer2013:claim:unknown-at-test",
+          "type": "CLAIM",
+          "raw_anchor": "open set recognition ... incomplete knowledge ... unknown classes can be submitted ... during testing",
+          "normalized_form": "Open-set recognition assumes incomplete training-time class knowledge and permits previously unseen classes at test time.",
+          "locator": {
+            "artifact": "gitblob:bcc80f11063f61a8692e8af3367fad230ec00c1b",
+            "line_start": 9,
+            "line_end": 11,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          },
+          "source_level": "FULLTEXT_PDF_LAYOUT",
+          "exact_pdf_locator": {
+            "source_artifact_id": "source-artifact:sha256:b121b72c904d6f70d08e2cfba2ffcca77f9fb05654311781691d07f119c0eed9",
+            "page": 1,
+            "pdf_bbox": [
+              50.12,
+              135.46,
+              516.46,
+              248.11
+            ],
+            "quality": "EXACT",
+            "promotion_classification": "EXACT_MATCH"
+          }
+        },
+        {
+          "evidence_id": "ev:scheirer2013:claim:rejection",
+          "type": "CLAIM",
+          "raw_anchor": "It is not sufficient to just return the most likely class: The classifier must also support rejection.",
+          "normalized_form": "A general open-set classifier must support an unknown/rejection output rather than always returning a known class.",
+          "locator": {
+            "artifact": "gitblob:bcc80f11063f61a8692e8af3367fad230ec00c1b",
+            "line_start": 67,
+            "line_end": 69,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          },
+          "source_level": "FULLTEXT_PDF_LAYOUT",
+          "exact_pdf_locator": {
+            "source_artifact_id": "source-artifact:sha256:b121b72c904d6f70d08e2cfba2ffcca77f9fb05654311781691d07f119c0eed9",
+            "page": 2,
+            "pdf_bbox": [
+              289.25,
+              190.16,
+              540.31,
+              746.84
+            ],
+            "quality": "EXACT",
+            "promotion_classification": "EXACT_MATCH"
+          }
+        },
+        {
+          "evidence_id": "ev:scheirer2013:concept:open-space-risk",
+          "type": "METHOD",
+          "raw_anchor": "minimize an error function combining empirical risk over training data with the risk model for the open space",
+          "normalized_form": "Open-set recognition can explicitly balance empirical risk on known training data against open-space risk.",
+          "locator": {
+            "artifact": "gitblob:bcc80f11063f61a8692e8af3367fad230ec00c1b",
+            "line_start": 79,
+            "line_end": 81,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          },
+          "source_level": "FULLTEXT_PDF_LAYOUT",
+          "exact_pdf_locator": {
+            "source_artifact_id": "source-artifact:sha256:b121b72c904d6f70d08e2cfba2ffcca77f9fb05654311781691d07f119c0eed9",
+            "page": 3,
+            "pdf_bbox": [
+              26.19,
+              331.05,
+              277.3,
+              746.85
+            ],
+            "quality": "EXACT",
+            "promotion_classification": "EXACT_MATCH"
+          }
+        }
+      ]
+    },
+    {
+      "work_id": "work:liu:2020:energy-ood",
+      "title": "Energy-based Out-of-distribution Detection",
+      "year": 2020,
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "source_identity": "source-artifact:sha256:202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+      "provenance": {
+        "padataset_slug": "2020_liu_energy_ood_detection",
+        "mmd_blob_sha": "a92e04ff5377a78635d90b40ce470460acb63bef",
+        "local_pdf_path": "/home/atrott/adamArchives/Adam/varMax/PADataset/papers/milcom2026/reference_notes/papers/2020_liu_energy_ood_detection/2020_liu_energy_ood_detection.pdf",
+        "manifest_pages": 16,
+        "exact_pdf_verified": true,
+        "artifact_sha256": "202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+        "artifact_bytes": 673885,
+        "promotion_run_id": "promotion:padataset-rf-osr:2026-09-30:v1"
+      },
+      "evidence": [
+        {
+          "evidence_id": "ev:liu2020:claim:softmax-overconfidence",
+          "type": "CLAIM",
+          "raw_anchor": "previous methods relying on the softmax confidence score suffer from overconfident posterior distributions for OOD data",
+          "normalized_form": "Softmax confidence can be overconfident on out-of-distribution inputs.",
+          "locator": {
+            "artifact": "gitblob:a92e04ff5377a78635d90b40ce470460acb63bef",
+            "line_start": 21,
+            "line_end": 23,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          },
+          "source_level": "FULLTEXT_PDF_LAYOUT",
+          "exact_pdf_locator": {
+            "source_artifact_id": "source-artifact:sha256:202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+            "page": 1,
+            "pdf_bbox": [
+              143.87,
+              341.64,
+              469.79,
+              493.4
+            ],
+            "quality": "EXACT",
+            "promotion_classification": "NORMALIZATION_ONLY"
+          }
+        },
+        {
+          "evidence_id": "ev:liu2020:method:energy",
+          "type": "METHOD",
+          "raw_anchor": "a unified framework for OOD detection that uses an energy score",
+          "normalized_form": "Energy-based OOD detection derives a scalar score from classifier logits to separate in- and out-of-distribution inputs.",
+          "locator": {
+            "artifact": "gitblob:a92e04ff5377a78635d90b40ce470460acb63bef",
+            "line_start": 21,
+            "line_end": 23,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          },
+          "source_level": "FULLTEXT_PDF_LAYOUT",
+          "exact_pdf_locator": {
+            "source_artifact_id": "source-artifact:sha256:202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+            "page": 1,
+            "pdf_bbox": [
+              143.87,
+              341.64,
+              469.79,
+              493.4
+            ],
+            "quality": "EXACT",
+            "promotion_classification": "NORMALIZATION_ONLY"
+          }
+        },
+        {
+          "evidence_id": "ev:liu2020:result:fpr95",
+          "type": "RESULT",
+          "raw_anchor": "using the energy score reduces the average FPR (at TPR 95%) by 18.03% compared to the softmax confidence score",
+          "normalized_form": "On the paper's CIFAR-10 WideResNet setting, energy scoring reduces average FPR at 95% TPR by 18.03 percentage points relative to softmax confidence.",
+          "locator": {
+            "artifact": "gitblob:a92e04ff5377a78635d90b40ce470460acb63bef",
+            "line_start": 21,
+            "line_end": 23,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          },
+          "attributes": {
+            "benchmark_context": "CIFAR-10 pre-trained WideResNet",
+            "metric": "FPR@TPR95",
+            "reported_reduction": 18.03
+          },
+          "source_level": "FULLTEXT_PDF_LAYOUT",
+          "exact_pdf_locator": {
+            "source_artifact_id": "source-artifact:sha256:202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+            "page": 1,
+            "pdf_bbox": [
+              143.87,
+              341.64,
+              469.79,
+              493.4
+            ],
+            "quality": "EXACT",
+            "promotion_classification": "NORMALIZATION_ONLY"
+          }
+        },
+        {
+          "evidence_id": "ev:liu2020:claim:discriminative-no-density-estimator",
+          "type": "CLAIM",
+          "raw_anchor": "energy score can be derived from a purely discriminative classification model without relying on a density estimator explicitly",
+          "normalized_form": "Energy scoring can be used with a discriminative classifier without explicit density estimation.",
+          "locator": {
+            "artifact": "gitblob:a92e04ff5377a78635d90b40ce470460acb63bef",
+            "line_start": 33,
+            "line_end": 35,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          },
+          "source_level": "FULLTEXT_PDF_LAYOUT",
+          "exact_pdf_locator": {
+            "source_artifact_id": "source-artifact:sha256:202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+            "page": 2,
+            "pdf_bbox": [
+              107.81,
+              123.42,
+              504.35,
+              220.76
+            ],
+            "quality": "EXACT",
+            "promotion_classification": "NORMALIZATION_ONLY"
+          }
+        }
+      ]
+    },
+    {
+      "work_id": "work:baye:2024:varmax",
+      "title": "varMax: Towards Confidence-Based Zero-Day Attack Recognition",
+      "year": 2024,
+      "source_level": "FULLTEXT_PDF_LAYOUT",
+      "source_identity": "source-artifact:sha256:68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714",
+      "provenance": {
+        "padataset_slug": "2024_baye_varmax_milcom",
+        "mmd_blob_sha": "8e5f7a325c9b01564b0d479cc3b7db8fede22d9e",
+        "local_pdf_path": "/home/atrott/adamArchives/Adam/varMax/PADataset/papers/milcom2026/reference_notes/papers/2024_baye_varmax_milcom/2024_baye_varmax_milcom.pdf",
+        "manifest_pages": 6,
+        "exact_pdf_verified": true,
+        "artifact_sha256": "68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714",
+        "artifact_bytes": 1026611,
+        "promotion_run_id": "promotion:padataset-rf-osr:2026-09-30:v1"
+      },
+      "evidence": [
+        {
+          "evidence_id": "ev:baye2024:method:varmax",
+          "type": "METHOD",
+          "raw_anchor": "varMax, a bias-neutral OSR technique using DNN logit variance to distinguish known from unknown inputs",
+          "normalized_form": "varMax combines a top-two softmax-difference gate, logit-variance confidence for ambiguous samples, and energy-based OOD evidence.",
+          "locator": {
+            "artifact": "gitblob:8e5f7a325c9b01564b0d479cc3b7db8fede22d9e",
+            "line_start": 29,
+            "line_end": 31,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          },
+          "source_level": "FULLTEXT_PDF_LAYOUT",
+          "exact_pdf_locator": {
+            "source_artifact_id": "source-artifact:sha256:68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714",
+            "page": 1,
+            "pdf_bbox": [
+              48.96,
+              291.13,
+              300.02,
+              509.81
+            ],
+            "quality": "EXACT",
+            "promotion_classification": "EXACT_MATCH"
+          }
+        },
+        {
+          "evidence_id": "ev:baye2024:claim:variance-known-unknown",
+          "type": "CLAIM",
+          "raw_anchor": "high variance indicates a high confidence that the data point is from a known class ... low variance means the data point is novel",
+          "normalized_form": "In varMax, higher final-logit variance is treated as evidence of known-class membership and lower variance as evidence of novelty.",
+          "locator": {
+            "artifact": "gitblob:8e5f7a325c9b01564b0d479cc3b7db8fede22d9e",
+            "line_start": 77,
+            "line_end": 79,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          },
+          "source_level": "FULLTEXT_PDF_LAYOUT",
+          "exact_pdf_locator": {
+            "source_artifact_id": "source-artifact:sha256:68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714",
+            "page": 2,
+            "pdf_bbox": [
+              311.98,
+              420.73,
+              563.04,
+              718.85
+            ],
+            "quality": "EXACT",
+            "promotion_classification": "EXACT_MATCH"
+          }
+        },
+        {
+          "evidence_id": "ev:baye2024:claim:energy-validation",
+          "type": "CLAIM",
+          "raw_anchor": "To verify the unknown classification confidence, we use an energy-based OOD method to validate our hypothesis.",
+          "normalized_form": "The varMax pipeline uses energy-based OOD evidence to validate ambiguous/unknown classification confidence.",
+          "locator": {
+            "artifact": "gitblob:8e5f7a325c9b01564b0d479cc3b7db8fede22d9e",
+            "line_start": 77,
+            "line_end": 79,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          },
+          "source_level": "FULLTEXT_PDF_LAYOUT",
+          "exact_pdf_locator": {
+            "source_artifact_id": "source-artifact:sha256:68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714",
+            "page": 2,
+            "pdf_bbox": [
+              311.98,
+              420.73,
+              563.04,
+              718.85
+            ],
+            "quality": "EXACT",
+            "promotion_classification": "EXACT_MATCH"
+          }
+        }
+      ]
+    },
+    {
+      "work_id": "work:broggi:2025:varmax",
+      "title": "varMax: Uncertainty and Novelty Management in Deep Neural Networks",
+      "year": 2025,
+      "source_level": "OCR_DERIVED",
+      "source_identity": "gitblob:95f146b0c3ab0c5244a568f4ac2529591a04a191",
+      "provenance": {
+        "padataset_slug": "2025_broggi_varmax_uncertainty_novelty",
+        "mmd_blob_sha": "95f146b0c3ab0c5244a568f4ac2529591a04a191",
+        "local_pdf_path": "/home/atrott/adamArchives/Adam/varMax/PADataset/papers/milcom2026/reference_notes/papers/2025_broggi_varmax_uncertainty_novelty/2025_broggi_varmax_uncertainty_novelty.pdf",
+        "manifest_pages": 10,
+        "exact_pdf_verified": false
+      },
+      "evidence": [
+        {
+          "evidence_id": "ev:broggi2025:method:varmax",
+          "type": "METHOD",
+          "raw_anchor": "calculate the softmax probabilities ... top-ranked ... second-ranked ... introduce VarMax ... evaluates the variance ... in the DNN's logits",
+          "normalized_form": "The longer varMax formulation first uses top-two softmax separation for ambiguity, then uses logit variance to discriminate known from unknown inputs.",
+          "locator": {
+            "artifact": "gitblob:95f146b0c3ab0c5244a568f4ac2529591a04a191",
+            "line_start": 36,
+            "line_end": 38,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          }
+        },
+        {
+          "evidence_id": "ev:broggi2025:claim:balanced-known-unknown",
+          "type": "CLAIM",
+          "raw_anchor": "ensure that previously unknown samples are neither overlooked ... nor known samples excessively flagged as unknowns",
+          "normalized_form": "The paper frames balanced OSR as avoiding both missed unknowns and excessive rejection of known inputs.",
+          "locator": {
+            "artifact": "gitblob:95f146b0c3ab0c5244a568f4ac2529591a04a191",
+            "line_start": 32,
+            "line_end": 34,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          }
+        },
+        {
+          "evidence_id": "ev:broggi2025:relation:energy-comparison",
+          "type": "CLAIM",
+          "raw_anchor": "we use the energy-based function by Liu et al., 2020 ... for comparison",
+          "normalized_form": "The 2025 varMax work explicitly compares against Liu et al.'s energy-based OOD function.",
+          "locator": {
+            "artifact": "gitblob:95f146b0c3ab0c5244a568f4ac2529591a04a191",
+            "line_start": 76,
+            "line_end": 78,
+            "quality": "EXACT_TEXT_RANGE_OCR"
+          }
+        }
+      ]
+    }
+  ],
+  "cross_work_relations": [
+    {
+      "relation_id": "rel:scheirer-rejection-motivates-liu",
+      "source_id": "ev:scheirer2013:claim:rejection",
+      "target_id": "ev:liu2020:method:energy",
+      "relation_type": "MOTIVATES",
+      "verification_state": "MODEL_INFERRED",
+      "rationale": "Scheirer's rejection requirement defines the open-world decision need that later OOD scoring methods address; Liu does not claim direct derivation from this exact sentence."
+    },
+    {
+      "relation_id": "rel:liu-energy-used-by-baye",
+      "source_id": "ev:baye2024:claim:energy-validation",
+      "target_id": "ev:liu2020:method:energy",
+      "relation_type": "USES",
+      "verification_state": "OCR_SOURCE_SUPPORTED",
+      "rationale": "Baye's OCR artifact explicitly states that energy-based OOD is used to validate the unknown-classification hypothesis, and its reference text attributes the energy method to Liu et al."
+    },
+    {
+      "relation_id": "rel:baye-broggi-varmax",
+      "source_id": "ev:broggi2025:method:varmax",
+      "target_id": "ev:baye2024:method:varmax",
+      "relation_type": "SAME_METHOD_LINEAGE",
+      "verification_state": "MODEL_INFERRED_HIGH_CONFIDENCE",
+      "rationale": "Both sources describe the named varMax method using top-two softmax separation and logit variance, with overlapping authorship; exact version/extension semantics require PDF/bibliographic verification."
+    },
+    {
+      "relation_id": "rel:broggi-compares-liu-energy",
+      "source_id": "ev:broggi2025:relation:energy-comparison",
+      "target_id": "ev:liu2020:method:energy",
+      "relation_type": "COMPARES_AGAINST",
+      "verification_state": "OCR_SOURCE_SUPPORTED",
+      "rationale": "Broggi's OCR text explicitly states Liu et al. 2020 energy is used for comparison."
+    },
+    {
+      "relation_id": "rel:rf-generative-distinct-strategy",
+      "source_id": "ev:2108:method:ellipsoid",
+      "target_id": "ev:liu2020:method:energy",
+      "relation_type": "ALTERNATIVE_OPEN_WORLD_STRATEGY",
+      "verification_state": "MODEL_INFERRED",
+      "rationale": "The RF paper creates synthetic outliers to improve open-set training, whereas Liu's energy method scores classifier outputs for OOD detection; this is a cross-paper taxonomy inference, not a source-stated relation."
+    }
+  ],
+  "fidelity_policy": {
+    "exact_pdf_verified_work_count": 4,
+    "ocr_derived_work_count": 1,
+    "rule": "Exact-PDF-backed evidence is preferred when promoted. OCR-derived history remains preserved. Broggi 2025 remains OCR_DERIVED until separately promoted.",
+    "fidelity_run_id": "fidelity:padataset-ocr-vs-pdf:2026-09-30:v1",
+    "checked_anchor_semantic_preservation_rate": 1
+  },
+  "supersedes_corpus_id": "corpus:rf-osr-curated-multipaper:v1"
+}

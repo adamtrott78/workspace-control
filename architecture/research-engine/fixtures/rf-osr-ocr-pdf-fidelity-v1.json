@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "fidelity_run_id": "fidelity:padataset-ocr-vs-pdf:2026-09-30:v1",
+  "promotion_run_id": "promotion:padataset-rf-osr:2026-09-30:v1",
+  "comparisons": [
+    {
+      "evidence_id": "ev:scheirer2013:claim:unknown-at-test",
+      "slug": "2013_scheirer_toward_open_set_recognition",
+      "classification": "EXACT_MATCH",
+      "page": 1,
+      "pdf_bbox": [
+        50.12,
+        135.46,
+        516.46,
+        248.11
+      ],
+      "exact_pdf_artifact_id": "source-artifact:sha256:b121b72c904d6f70d08e2cfba2ffcca77f9fb05654311781691d07f119c0eed9",
+      "comparison_basis": "previous tracked Mathpix MMD anchor versus text/layout parsed from exact PDF bytes using PyMuPDF 1.26.7"
+    },
+    {
+      "evidence_id": "ev:scheirer2013:claim:rejection",
+      "slug": "2013_scheirer_toward_open_set_recognition",
+      "classification": "EXACT_MATCH",
+      "page": 2,
+      "pdf_bbox": [
+        289.25,
+        190.16,
+        540.31,
+        746.84
+      ],
+      "exact_pdf_artifact_id": "source-artifact:sha256:b121b72c904d6f70d08e2cfba2ffcca77f9fb05654311781691d07f119c0eed9",
+      "comparison_basis": "previous tracked Mathpix MMD anchor versus text/layout parsed from exact PDF bytes using PyMuPDF 1.26.7"
+    },
+    {
+      "evidence_id": "ev:scheirer2013:concept:open-space-risk",
+      "slug": "2013_scheirer_toward_open_set_recognition",
+      "classification": "EXACT_MATCH",
+      "page": 3,
+      "pdf_bbox": [
+        26.19,
+        331.05,
+        277.3,
+        746.85
+      ],
+      "exact_pdf_artifact_id": "source-artifact:sha256:b121b72c904d6f70d08e2cfba2ffcca77f9fb05654311781691d07f119c0eed9",
+      "comparison_basis": "previous tracked Mathpix MMD anchor versus text/layout parsed from exact PDF bytes using PyMuPDF 1.26.7"
+    },
+    {
+      "evidence_id": "ev:liu2020:claim:softmax-overconfidence",
+      "slug": "2020_liu_energy_ood_detection",
+      "classification": "NORMALIZATION_ONLY",
+      "page": 1,
+      "pdf_bbox": [
+        143.87,
+        341.64,
+        469.79,
+        493.4
+      ],
+      "exact_pdf_artifact_id": "source-artifact:sha256:202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+      "comparison_basis": "previous tracked Mathpix MMD anchor versus text/layout parsed from exact PDF bytes using PyMuPDF 1.26.7"
+    },
+    {
+      "evidence_id": "ev:liu2020:method:energy",
+      "slug": "2020_liu_energy_ood_detection",
+      "classification": "NORMALIZATION_ONLY",
+      "page": 1,
+      "pdf_bbox": [
+        143.87,
+        341.64,
+        469.79,
+        493.4
+      ],
+      "exact_pdf_artifact_id": "source-artifact:sha256:202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+      "comparison_basis": "previous tracked Mathpix MMD anchor versus text/layout parsed from exact PDF bytes using PyMuPDF 1.26.7"
+    },
+    {
+      "evidence_id": "ev:liu2020:result:fpr95",
+      "slug": "2020_liu_energy_ood_detection",
+      "classification": "NORMALIZATION_ONLY",
+      "page": 1,
+      "pdf_bbox": [
+        143.87,
+        341.64,
+        469.79,
+        493.4
+      ],
+      "exact_pdf_artifact_id": "source-artifact:sha256:202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+      "comparison_basis": "previous tracked Mathpix MMD anchor versus text/layout parsed from exact PDF bytes using PyMuPDF 1.26.7"
+    },
+    {
+      "evidence_id": "ev:liu2020:claim:discriminative-no-density-estimator",
+      "slug": "2020_liu_energy_ood_detection",
+      "classification": "NORMALIZATION_ONLY",
+      "page": 2,
+      "pdf_bbox": [
+        107.81,
+        123.42,
+        504.35,
+        220.76
+      ],
+      "exact_pdf_artifact_id": "source-artifact:sha256:202c4d502f682bd31c5979be6fe930e505553a47a0acf39a15d24bff3e9bc4f7",
+      "comparison_basis": "previous tracked Mathpix MMD anchor versus text/layout parsed from exact PDF bytes using PyMuPDF 1.26.7"
+    },
+    {
+      "evidence_id": "ev:baye2024:method:varmax",
+      "slug": "2024_baye_varmax_milcom",
+      "classification": "EXACT_MATCH",
+      "page": 1,
+      "pdf_bbox": [
+        48.96,
+        291.13,
+        300.02,
+        509.81
+      ],
+      "exact_pdf_artifact_id": "source-artifact:sha256:68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714",
+      "comparison_basis": "previous tracked Mathpix MMD anchor versus text/layout parsed from exact PDF bytes using PyMuPDF 1.26.7"
+    },
+    {
+      "evidence_id": "ev:baye2024:claim:variance-known-unknown",
+      "slug": "2024_baye_varmax_milcom",
+      "classification": "EXACT_MATCH",
+      "page": 2,
+      "pdf_bbox": [
+        311.98,
+        420.73,
+        563.04,
+        718.85
+      ],
+      "exact_pdf_artifact_id": "source-artifact:sha256:68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714",
+      "comparison_basis": "previous tracked Mathpix MMD anchor versus text/layout parsed from exact PDF bytes using PyMuPDF 1.26.7"
+    },
+    {
+      "evidence_id": "ev:baye2024:claim:variance-known-unknown-low",
+      "slug": "2024_baye_varmax_milcom",
+      "classification": "EXACT_MATCH",
+      "page": 2,
+      "pdf_bbox": [
+        311.98,
+        420.73,
+        563.04,
+        718.85
+      ],
+      "exact_pdf_artifact_id": "source-artifact:sha256:68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714",
+      "comparison_basis": "previous tracked Mathpix MMD anchor versus text/layout parsed from exact PDF bytes using PyMuPDF 1.26.7"
+    },
+    {
+      "evidence_id": "ev:baye2024:claim:energy-validation",
+      "slug": "2024_baye_varmax_milcom",
+      "classification": "EXACT_MATCH",
+      "page": 2,
+      "pdf_bbox": [
+        311.98,
+        420.73,
+        563.04,
+        718.85
+      ],
+      "exact_pdf_artifact_id": "source-artifact:sha256:68d0e07fba96977ce202715d1d36493f4c05933c57df6a32e5c58430855c0714",
+      "comparison_basis": "previous tracked Mathpix MMD anchor versus text/layout parsed from exact PDF bytes using PyMuPDF 1.26.7"
+    }
+  ],
+  "summary": {
+    "checked_anchors": 11,
+    "exact_match": 7,
+    "normalization_only": 4,
+    "ocr_minor_error": 0,
+    "ocr_semantic_error": 0,
+    "locator_unresolved": 0,
+    "semantic_preservation_rate": 1
+  },
+  "normalization_notes": [
+    "The four NORMALIZATION_ONLY cases are all from Liu 2020 and are explained by exact-PDF text extraction artifacts such as ligatures (e.g. ﬁ) and line-end hyphenation.",
+    "No checked Mathpix anchor changed the scientific meaning relative to exact PDF text.",
+    "This benchmark validates selected anchors, not every character/equation/table in the OCR packages."
+  ],
+  "result": "PASS"
+}

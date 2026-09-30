@@ -62,8 +62,10 @@ Run:
 set -euo pipefail
 
 ROOT="/home/atrott/adamArchives/Adam/varMax/PADataset/papers/milcom2026/reference_notes/papers"
-OUT="$(mktemp -d /tmp/research-engine-pdf-promotion.XXXXXX)"
-BUNDLE="/tmp/research-engine-pdf-promotion.tar.gz"
+SCRATCH_ROOT="${WORKSPACE_CONTROL_SCRATCH_ROOT:-$HOME/adamArchives/Adam/.workspace-control/tmp}"
+mkdir -p "$SCRATCH_ROOT"
+OUT="$(mktemp -d "$SCRATCH_ROOT/research-engine-pdf-promotion.XXXXXX")"
+BUNDLE="$SCRATCH_ROOT/research-engine-pdf-promotion.tar.gz"
 
 declare -a RELS=(
   "2013_scheirer_toward_open_set_recognition/2013_scheirer_toward_open_set_recognition.pdf"
