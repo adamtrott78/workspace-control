@@ -957,6 +957,583 @@ def validate_exact_keys(obj, required, allowed, field, errors):
     return not missing and not extra
 
 
+LIVE_WORKFLOW_STATE_FIELDS = {
+    "status",
+    "current_stage",
+    "checkpoints",
+    "blockers",
+    "remaining_work",
+    "next_safe_action",
+    "last_executor",
+    "last_surface",
+    "executed_operations",
+    "decisions",
+}
+
+
+def is_repo_relative_spec(value):
+    if not is_nonempty_string(value):
+        return False
+
+    if value.startswith(("/", "\\")):
+        return False
+
+    if re.match(r"^[A-Za-z]:[\\/]", value):
+        return False
+
+    parts = re.split(r"[\\/]+", value)
+    return ".." not in parts
+
+
+def validate_unique_string_array(
+    value,
+    field,
+    errors,
+    min_items=0,
+):
+    validate_string_array(
+        value,
+        field,
+        errors,
+        min_items=min_items,
+    )
+
+    if not isinstance(value, list):
+        return
+
+    seen = set()
+    for index, item in enumerate(value):
+        if not isinstance(item, str):
+            continue
+        if item in seen:
+            errors.append(
+                f"{field}[{index}]: duplicate value {item!r}"
+            )
+        seen.add(item)
+
+
+def load_workflow_descriptor(file_path):
+    path = Path(file_path).expanduser().resolve()
+
+    try:
+        text = path.read_text()
+    except OSError as exc:
+        fail(f"could not read workflow descriptor {path}: {exc}")
+
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as exc:
+        fail(f"invalid workflow-descriptor JSON in {path}: {exc}")
+
+    return path, data
+
+
+def validate_workflow_descriptor_v1_data(
+    data,
+    source_path,
+    repos,
+):
+    errors = []
+
+    if not isinstance(data, dict):
+        return ["workflow: expected object"]
+
+    live_fields = sorted(
+        LIVE_WORKFLOW_STATE_FIELDS & set(data)
+    )
+    if live_fields:
+        errors.append(
+            "workflow: live task state is forbidden: "
+            + ", ".join(live_fields)
+        )
+
+    required = {
+        "schema_version",
+        "workflow_id",
+        "title",
+        "purpose",
+        "owner",
+        "entry_route",
+        "stages",
+        "forbidden_mutations",
+        "idempotency_identity",
+    }
+    allowed = set(required)
+
+    validate_exact_keys(
+        data,
+        required,
+        allowed,
+        "workflow",
+        errors,
+    )
+
+    if data.get("schema_version") != 1:
+        errors.append("schema_version: expected integer 1")
+
+    workflow_id = data.get("workflow_id")
+    if not is_nonempty_string(workflow_id):
+        errors.append("workflow_id: expected nonempty string")
+    elif not TASK_ID_RE.fullmatch(workflow_id):
+        errors.append(
+            "workflow_id: must match ^[a-z0-9][a-z0-9._-]*$"
+        )
+
+    for field in ("title", "purpose"):
+        if not is_nonempty_string(data.get(field)):
+            errors.append(f"{field}: expected nonempty string")
+
+    owner = data.get("owner")
+    owner_required = {"repository", "context_path"}
+
+    if validate_exact_keys(
+        owner,
+        owner_required,
+        owner_required,
+        "owner",
+        errors,
+    ):
+        repository = owner.get("repository")
+        context_path = owner.get("context_path")
+
+        if not is_nonempty_string(repository):
+            errors.append(
+                "owner.repository: expected nonempty string"
+            )
+        elif repository not in repos:
+            errors.append(
+                "owner.repository: unknown registered repository "
+                f"{repository}"
+            )
+
+        if not is_repo_relative_spec(context_path):
+            errors.append(
+                "owner.context_path: expected safe repository-relative path"
+            )
+
+    entry_route = data.get("entry_route")
+    validate_unique_string_array(
+        entry_route,
+        "entry_route",
+        errors,
+        min_items=1,
+    )
+    if isinstance(entry_route, list):
+        for index, item in enumerate(entry_route):
+            if (
+                isinstance(item, str)
+                and not is_repo_relative_spec(item)
+            ):
+                errors.append(
+                    f"entry_route[{index}]: expected safe "
+                    "repository-relative path"
+                )
+
+    forbidden = data.get("forbidden_mutations")
+    validate_unique_string_array(
+        forbidden,
+        "forbidden_mutations",
+        errors,
+    )
+    if isinstance(forbidden, list):
+        for index, item in enumerate(forbidden):
+            if (
+                isinstance(item, str)
+                and not is_repo_relative_spec(item)
+            ):
+                errors.append(
+                    f"forbidden_mutations[{index}]: expected safe "
+                    "repository-relative path/pattern"
+                )
+
+    identity = data.get("idempotency_identity")
+    if identity is not None and not is_nonempty_string(identity):
+        errors.append(
+            "idempotency_identity: expected nonempty string or null"
+        )
+
+    stages = data.get("stages")
+    if not isinstance(stages, list):
+        errors.append("stages: expected array")
+        stages = []
+    elif not stages:
+        errors.append("stages: expected at least one stage")
+
+    stage_required = {
+        "id",
+        "execution_owner",
+        "authority_owners",
+        "depends_on",
+        "required_capabilities",
+        "deterministic_entrypoint",
+        "expected_artifacts",
+        "artifact_lifecycle",
+        "validation",
+        "gates",
+        "forbidden_mutations",
+    }
+
+    declared = set()
+
+    for index, stage in enumerate(stages):
+        field = f"stages[{index}]"
+
+        if not validate_exact_keys(
+            stage,
+            stage_required,
+            stage_required,
+            field,
+            errors,
+        ):
+            if not isinstance(stage, dict):
+                continue
+
+        stage_id = stage.get("id")
+        if not is_nonempty_string(stage_id):
+            errors.append(
+                f"{field}.id: expected nonempty string"
+            )
+        elif not TASK_ID_RE.fullmatch(stage_id):
+            errors.append(
+                f"{field}.id: must match "
+                "^[a-z0-9][a-z0-9._-]*$"
+            )
+        elif stage_id in declared:
+            errors.append(
+                f"{field}.id: duplicate stage id {stage_id}"
+            )
+
+        if not is_nonempty_string(
+            stage.get("execution_owner")
+        ):
+            errors.append(
+                f"{field}.execution_owner: expected nonempty string"
+            )
+
+        for list_field in (
+            "authority_owners",
+            "depends_on",
+            "required_capabilities",
+            "expected_artifacts",
+            "gates",
+            "forbidden_mutations",
+        ):
+            validate_unique_string_array(
+                stage.get(list_field),
+                f"{field}.{list_field}",
+                errors,
+            )
+
+        validate_unique_string_array(
+            stage.get("validation"),
+            f"{field}.validation",
+            errors,
+            min_items=1,
+        )
+
+        for path_field in (
+            "authority_owners",
+            "expected_artifacts",
+            "forbidden_mutations",
+        ):
+            values = stage.get(path_field)
+            if isinstance(values, list):
+                for item_index, item in enumerate(values):
+                    if (
+                        isinstance(item, str)
+                        and not is_repo_relative_spec(item)
+                    ):
+                        errors.append(
+                            f"{field}.{path_field}[{item_index}]: "
+                            "expected safe repository-relative "
+                            "path/pattern"
+                        )
+
+        depends_on = stage.get("depends_on")
+        if isinstance(depends_on, list):
+            for dep_index, dependency in enumerate(depends_on):
+                if not isinstance(dependency, str):
+                    continue
+                if dependency == stage_id:
+                    errors.append(
+                        f"{field}.depends_on[{dep_index}]: "
+                        "stage cannot depend on itself"
+                    )
+                elif dependency not in declared:
+                    errors.append(
+                        f"{field}.depends_on[{dep_index}]: "
+                        f"dependency {dependency!r} must name an "
+                        "earlier declared stage"
+                    )
+
+        entrypoint = stage.get("deterministic_entrypoint")
+        if (
+            entrypoint is not None
+            and not is_nonempty_string(entrypoint)
+        ):
+            errors.append(
+                f"{field}.deterministic_entrypoint: "
+                "expected nonempty string or null"
+            )
+
+        lifecycle = stage.get("artifact_lifecycle")
+        if not isinstance(lifecycle, list):
+            errors.append(
+                f"{field}.artifact_lifecycle: expected array"
+            )
+        else:
+            for item_index, item in enumerate(lifecycle):
+                if not isinstance(item, dict):
+                    errors.append(
+                        f"{field}.artifact_lifecycle[{item_index}]: "
+                        "expected object"
+                    )
+
+        if (
+            is_nonempty_string(stage_id)
+            and TASK_ID_RE.fullmatch(stage_id)
+        ):
+            declared.add(stage_id)
+
+    return errors
+
+
+def resolve_workflow_binding(
+    source_path,
+    data,
+    repos,
+):
+    owner = data.get("owner")
+    repository = (
+        owner.get("repository")
+        if isinstance(owner, dict)
+        else None
+    )
+
+    result = {
+        "resolved": False,
+        "repository": repository,
+        "path": None,
+        "checkpoint_sha": None,
+        "content_sha": None,
+        "reasons": [],
+    }
+
+    if repository not in repos:
+        result["reasons"].append(
+            "owner repository is not registered"
+        )
+        return result
+
+    cfg = repos[repository]
+    source_path = Path(source_path).expanduser().resolve()
+
+    rc, top, err = run_git(
+        source_path.parent,
+        "rev-parse",
+        "--show-toplevel",
+    )
+    if rc != 0:
+        result["reasons"].append(
+            "descriptor is not inside a Git checkout"
+            + (f": {err}" if err else "")
+        )
+        return result
+
+    git_root = Path(top).resolve()
+
+    rc, origin, _ = run_git(
+        git_root,
+        "remote",
+        "get-url",
+        "origin",
+    )
+    if rc != 0 or origin != cfg.get("remote"):
+        result["reasons"].append(
+            "descriptor Git origin does not match owner.repository"
+        )
+        return result
+
+    try:
+        relative = source_path.relative_to(git_root)
+    except ValueError:
+        result["reasons"].append(
+            "descriptor is outside the owning Git checkout"
+        )
+        return result
+
+    relative_text = relative.as_posix()
+    result["path"] = relative_text
+
+    rc, _, _ = run_git(
+        git_root,
+        "ls-files",
+        "--error-unmatch",
+        "--",
+        relative_text,
+    )
+    if rc != 0:
+        result["reasons"].append(
+            "descriptor is not tracked at the owning repository checkpoint"
+        )
+        return result
+
+    rc, checkpoint, err = run_git(
+        git_root,
+        "rev-parse",
+        "HEAD",
+    )
+    if rc != 0 or not SHA_RE.fullmatch(checkpoint or ""):
+        result["reasons"].append(
+            "owning repository HEAD could not be resolved"
+            + (f": {err}" if err else "")
+        )
+        return result
+
+    rc, durable_blob, _ = run_git(
+        git_root,
+        "rev-parse",
+        f"HEAD:{relative_text}",
+    )
+    if rc != 0 or not durable_blob:
+        result["reasons"].append(
+            "descriptor blob is not present at repository HEAD"
+        )
+        return result
+
+    rc, current_blob, _ = run_git(
+        git_root,
+        "hash-object",
+        "--no-filters",
+        str(source_path),
+    )
+    if rc != 0 or not current_blob:
+        result["reasons"].append(
+            "current descriptor content identity could not be computed"
+        )
+        return result
+
+    if current_blob != durable_blob:
+        result["reasons"].append(
+            "descriptor content differs from durable repository HEAD"
+        )
+        return result
+
+    context_path = owner.get("context_path")
+    if is_repo_relative_spec(context_path):
+        if not (git_root / context_path).exists():
+            result["reasons"].append(
+                "owner.context_path does not exist in the owning checkout"
+            )
+            return result
+
+    result.update(
+        {
+            "resolved": True,
+            "checkpoint_sha": checkpoint,
+            "content_sha": durable_blob,
+        }
+    )
+    return result
+
+
+def workflow_validation_payload(
+    path,
+    data,
+    repos,
+):
+    errors = validate_workflow_descriptor_v1_data(
+        data,
+        path,
+        repos,
+    )
+
+    binding = {
+        "resolved": False,
+        "repository": None,
+        "path": None,
+        "checkpoint_sha": None,
+        "content_sha": None,
+        "reasons": [],
+    }
+
+    if not errors:
+        binding = resolve_workflow_binding(
+            path,
+            data,
+            repos,
+        )
+        for reason in binding["reasons"]:
+            errors.append(f"binding: {reason}")
+
+    return {
+        "schema_version": (
+            data.get("schema_version")
+            if isinstance(data, dict)
+            else None
+        ),
+        "workflow_file": str(path),
+        "workflow_id": (
+            data.get("workflow_id")
+            if isinstance(data, dict)
+            else None
+        ),
+        "valid": not errors,
+        "errors": errors,
+        "binding": binding,
+    }
+
+
+def print_workflow_validation_human(payload):
+    print("============================================================")
+    print("WORKFLOW DESCRIPTOR VALIDATION")
+    print("============================================================")
+    print(f"FILE:       {payload['workflow_file']}")
+    print(f"WORKFLOW:   {payload.get('workflow_id')}")
+    print(f"VALID:      {payload['valid']}")
+
+    binding = payload.get("binding", {})
+    print(
+        "BINDING:    "
+        + (
+            "RESOLVED"
+            if binding.get("resolved")
+            else "UNRESOLVED"
+        )
+    )
+
+    if binding.get("resolved"):
+        print(
+            "  "
+            f"{binding['repository']}:"
+            f"{binding['path']}@{binding['checkpoint_sha']} "
+            f"content={binding['content_sha']}"
+        )
+
+    if payload["errors"]:
+        print("ERRORS:")
+        for error in payload["errors"]:
+            print(f"  - {error}")
+
+
+def command_workflow_validate(args):
+    _, _, repos = load_registry()
+    path, data = load_workflow_descriptor(args.file)
+
+    payload = workflow_validation_payload(
+        path,
+        data,
+        repos,
+    )
+
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print_workflow_validation_human(payload)
+
+    return EXIT_READY if payload["valid"] else EXIT_STATE
+
+
 def load_task_capsule(file_path):
     path = Path(file_path).expanduser().resolve()
 
@@ -3959,6 +4536,27 @@ def build_parser():
         help="emit machine-readable JSON",
     )
     preflight.set_defaults(func=command_preflight)
+
+    workflow_validate = sub.add_parser(
+        "workflow-validate",
+        help=(
+            "validate a reusable workflow descriptor and resolve its "
+            "exact durable Git binding"
+        ),
+    )
+    workflow_validate.add_argument(
+        "--file",
+        required=True,
+        help="path to workflow-descriptor JSON",
+    )
+    workflow_validate.add_argument(
+        "--json",
+        action="store_true",
+        help="emit machine-readable JSON",
+    )
+    workflow_validate.set_defaults(
+        func=command_workflow_validate
+    )
 
     task_validate = sub.add_parser(
         "task-validate",
