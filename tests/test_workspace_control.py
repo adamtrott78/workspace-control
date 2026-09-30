@@ -6,6 +6,7 @@ import importlib.util
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS = ROOT / "schemas"
@@ -150,6 +151,132 @@ class TaskRenderTests(unittest.TestCase):
         self.assertIn(
             "tests/fixtures/task_capsule_v2_remote.json",
             first,
+        )
+
+
+class PreflightTopologyTests(unittest.TestCase):
+    REMOTE_SHA = "77c7355bbafeb674dd35b55bcfdb542d50c6079c"
+
+    def remote_record(self):
+        with patch.object(
+            workspace_control,
+            "query_remote_branch_url",
+            return_value={
+                "status": "FOUND",
+                "branch": "control-plane-v2-refactor",
+                "sha": self.REMOTE_SHA,
+                "error": None,
+            },
+        ):
+            return workspace_control.inspect_remote(
+                "workspace-control",
+                REPOS["workspace-control"],
+                "control-plane-v2-refactor",
+            )
+
+    def test_existing_preflight_invocation_defaults_to_local(self):
+        args = workspace_control.build_parser().parse_args(
+            [
+                "preflight",
+                "--repo",
+                "workspace-control",
+                "--intent",
+                "mutate",
+            ]
+        )
+        self.assertEqual(args.topology, "local")
+        self.assertIsNone(args.branch)
+        self.assertIsNone(args.expected_parent)
+
+    def test_remote_inspection_uses_registered_remote_without_checkout(self):
+        with patch.object(
+            workspace_control,
+            "query_remote_branch_url",
+            return_value={
+                "status": "FOUND",
+                "branch": "control-plane-v2-refactor",
+                "sha": self.REMOTE_SHA,
+                "error": None,
+            },
+        ) as query:
+            record = workspace_control.inspect_remote(
+                "workspace-control",
+                REPOS["workspace-control"],
+                "control-plane-v2-refactor",
+            )
+
+        query.assert_called_once_with(
+            REPOS["workspace-control"]["remote"],
+            "control-plane-v2-refactor",
+        )
+        self.assertEqual(record["topology"], "remote")
+        self.assertNotIn("requested_path", record)
+        self.assertNotIn("git_root", record)
+        self.assertNotIn("worktrees", record)
+
+    def test_remote_mutation_ready_at_expected_parent(self):
+        state, code, reasons = workspace_control.remote_preflight_state(
+            self.remote_record(),
+            "mutate",
+            self.REMOTE_SHA,
+            True,
+            "reversible",
+            [
+                "scripts/workspace_control.py",
+                "procedures/repo_preflight.md",
+                "tests/test_workspace_control.py",
+                "tests/fixtures/**",
+            ],
+            [
+                "scripts/workspace_control.py",
+                "procedures/repo_preflight.md",
+                "tests/test_workspace_control.py",
+            ],
+        )
+        self.assertEqual((state, code, reasons), ("READY", 0, []))
+
+    def test_remote_parent_mismatch_requires_review(self):
+        state, code, reasons = workspace_control.remote_preflight_state(
+            self.remote_record(),
+            "mutate",
+            "0" * 40,
+            True,
+            "reversible",
+            ["scripts/workspace_control.py"],
+            ["scripts/workspace_control.py"],
+        )
+        self.assertEqual(state, "REVIEW_REQUIRED")
+        self.assertEqual(code, workspace_control.EXIT_REVIEW)
+        self.assertIn("expected parent", reasons[0])
+
+    def test_remote_scope_violation_is_policy_block(self):
+        state, code, reasons = workspace_control.remote_preflight_state(
+            self.remote_record(),
+            "mutate",
+            self.REMOTE_SHA,
+            True,
+            "reversible",
+            ["scripts/workspace_control.py"],
+            ["README.md"],
+        )
+        self.assertEqual(state, "BLOCKED_POLICY")
+        self.assertEqual(code, workspace_control.EXIT_POLICY)
+        self.assertIn("README.md", reasons[0])
+
+    def test_remote_mutation_requires_surface_capability(self):
+        state, code, reasons = workspace_control.remote_preflight_state(
+            self.remote_record(),
+            "mutate",
+            self.REMOTE_SHA,
+            False,
+            "reversible",
+            ["scripts/workspace_control.py"],
+            ["scripts/workspace_control.py"],
+        )
+        self.assertEqual(state, "REVIEW_REQUIRED")
+        self.assertEqual(code, workspace_control.EXIT_REVIEW)
+        self.assertTrue(
+            any("write capability" in reason for reason in reasons)
         )
 
 

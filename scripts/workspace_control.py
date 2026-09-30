@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import fnmatch
 import json
 import re
 import subprocess
@@ -78,6 +79,55 @@ def query_remote_branch(path, branch):
         "branch": branch,
         "sha": None,
         "error": err or f"git ls-remote exited {rc}",
+    }
+
+
+def query_remote_branch_url(remote, branch):
+    proc = subprocess.run(
+        [
+            "git",
+            "ls-remote",
+            "--exit-code",
+            remote,
+            f"refs/heads/{branch}",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    out = proc.stdout.strip()
+    err = proc.stderr.strip()
+
+    if proc.returncode == 0:
+        fields = out.split()
+        if len(fields) < 2:
+            return {
+                "status": "ERROR",
+                "branch": branch,
+                "sha": None,
+                "error": "unexpected ls-remote output",
+            }
+
+        return {
+            "status": "FOUND",
+            "branch": branch,
+            "sha": fields[0],
+            "error": None,
+        }
+
+    if proc.returncode == 2:
+        return {
+            "status": "MISSING",
+            "branch": branch,
+            "sha": None,
+            "error": None,
+        }
+
+    return {
+        "status": "ERROR",
+        "branch": branch,
+        "sha": None,
+        "error": err or f"git ls-remote exited {proc.returncode}",
     }
 
 
@@ -371,6 +421,181 @@ def command_status(args):
     return EXIT_READY
 
 
+def inspect_remote(name, cfg, branch):
+    remote = cfg.get("remote")
+    result = {
+        "name": name,
+        "topology": "remote",
+        "role": cfg.get("role"),
+        "writable": bool(cfg.get("writable", False)),
+        "canonical_branch": cfg.get("canonical_branch"),
+        "branch": branch,
+        "registered_remote": remote,
+        "authority": cfg.get("authority"),
+        "recursive_mutation_forbidden": bool(
+            cfg.get("recursive_mutation_forbidden", False)
+        ),
+    }
+
+    if not remote:
+        result["advertised"] = {
+            "status": "ERROR",
+            "branch": branch,
+            "sha": None,
+            "error": "registered remote is missing",
+        }
+    else:
+        result["advertised"] = query_remote_branch_url(remote, branch)
+
+    return result
+
+
+def mutation_path_allowed(path, allowed_scope):
+    return any(
+        fnmatch.fnmatchcase(path, pattern)
+        for pattern in allowed_scope
+    )
+
+
+def remote_preflight_state(
+    record,
+    intent,
+    expected_parent,
+    surface_write_ready,
+    consequence,
+    allowed_scope,
+    mutation_paths,
+):
+    advertised = record.get("advertised") or {}
+
+    if advertised.get("status") == "ERROR":
+        return "BLOCKED_STATE", EXIT_STATE, [
+            "remote branch state could not be established"
+        ]
+
+    if advertised.get("status") == "MISSING":
+        return "BLOCKED_STATE", EXIT_STATE, [
+            "requested remote branch is missing"
+        ]
+
+    reasons = []
+
+    if expected_parent and advertised.get("sha") != expected_parent:
+        reasons.append(
+            "advertised remote branch SHA differs from the expected parent"
+        )
+
+    if intent == "mutate":
+        if not record.get("writable"):
+            return "BLOCKED_POLICY", EXIT_POLICY, [
+                "registry marks this logical repository non-writable"
+            ]
+
+        if record.get("recursive_mutation_forbidden"):
+            return "BLOCKED_POLICY", EXIT_POLICY, [
+                "registry forbids mutation from this repository scope"
+            ]
+
+        if not expected_parent:
+            reasons.append(
+                "remote mutation requires an explicit expected parent"
+            )
+
+        if not surface_write_ready:
+            reasons.append(
+                "remote mutation requires explicit confirmation that the "
+                "selected operation surface has write capability and access"
+            )
+
+        if consequence is None:
+            reasons.append(
+                "remote mutation requires an explicit consequence class"
+            )
+        elif consequence == "read_only":
+            reasons.append(
+                "read_only consequence is incompatible with mutate intent"
+            )
+        elif consequence in {"destructive", "external"}:
+            reasons.append(
+                "higher-consequence remote mutation requires additional "
+                "authority or human-gate validation outside preflight"
+            )
+
+        if mutation_paths:
+            if not allowed_scope:
+                reasons.append(
+                    "mutation paths were supplied without an allowed "
+                    "mutation scope"
+                )
+            else:
+                outside = [
+                    path
+                    for path in mutation_paths
+                    if not mutation_path_allowed(path, allowed_scope)
+                ]
+                if outside:
+                    return "BLOCKED_POLICY", EXIT_POLICY, [
+                        "proposed mutation path is outside the allowed scope: "
+                        + path
+                        for path in outside
+                    ]
+
+    if reasons:
+        return "REVIEW_REQUIRED", EXIT_REVIEW, reasons
+
+    return "READY", EXIT_READY, []
+
+
+def print_remote_preflight_human(
+    record,
+    intent,
+    expected_parent,
+    surface_write_ready,
+    consequence,
+    allowed_scope,
+    mutation_paths,
+    state,
+    reasons,
+):
+    print("============================================================")
+    print("REMOTE REPOSITORY PREFLIGHT")
+    print("============================================================")
+    print(f"REPOSITORY:   {record['name']}")
+    print("TOPOLOGY:     remote")
+    print(f"INTENT:       {intent}")
+    print(f"ROLE:         {record.get('role')}")
+    print(f"WRITABLE:     {record.get('writable')}")
+    print(f"REMOTE:       {record.get('registered_remote') or '<none>'}")
+    print(f"BRANCH:       {record.get('branch')}")
+
+    advertised = record.get("advertised") or {}
+    print(
+        "ADVERTISED:   "
+        f"status={advertised.get('status')} "
+        f"sha={advertised.get('sha') or '<none>'}"
+    )
+    print(f"EXPECTED:     {expected_parent or '<none>'}")
+    print(f"WRITE_READY:  {surface_write_ready}")
+    print(f"CONSEQUENCE:  {consequence or '<none>'}")
+
+    if allowed_scope:
+        print("ALLOWED_SCOPE:")
+        for pattern in allowed_scope:
+            print(f"  - {pattern}")
+
+    if mutation_paths:
+        print("MUTATION_PATHS:")
+        for path in mutation_paths:
+            print(f"  - {path}")
+
+    print(f"RESULT:       {state}")
+
+    if reasons:
+        print("REASONS:")
+        for reason in reasons:
+            print(f"  - {reason}")
+
+
 def preflight_state(record, intent, allow_dirty):
     if not record.get("exists") or not record.get("git"):
         return "BLOCKED_STATE", EXIT_STATE, [
@@ -503,6 +728,100 @@ def command_preflight(args):
         )
 
     cfg = repos[args.repo]
+
+    if args.topology == "remote":
+        if args.path:
+            fail("--path is only valid for local preflight", 2)
+        if args.allow_dirty:
+            fail("--allow-dirty is only valid for local preflight", 2)
+
+        branch = args.branch or cfg.get("canonical_branch")
+        if not branch:
+            fail(
+                "remote preflight requires --branch when no canonical "
+                "branch is registered",
+                2,
+            )
+
+        if args.expected_parent and not re.fullmatch(
+            r"[0-9a-f]{40}",
+            args.expected_parent,
+        ):
+            fail("--expected-parent must be a 40-character Git SHA", 2)
+
+        for value in args.allowed_path + args.mutation_path:
+            path = Path(value)
+            if (
+                not value
+                or path.is_absolute()
+                or ".." in path.parts
+            ):
+                fail(
+                    "remote mutation scope/path values must be "
+                    "repository-relative",
+                    2,
+                )
+
+        consequence = args.consequence
+        if args.intent == "read" and consequence is None:
+            consequence = "read_only"
+
+        record = inspect_remote(args.repo, cfg, branch)
+        state, code, reasons = remote_preflight_state(
+            record,
+            args.intent,
+            args.expected_parent,
+            args.surface_write_ready,
+            consequence,
+            args.allowed_path,
+            args.mutation_path,
+        )
+
+        payload = {
+            "schema_version": 2,
+            "topology": "remote",
+            "intent": args.intent,
+            "expected_parent": args.expected_parent,
+            "surface_write_ready": args.surface_write_ready,
+            "consequence": consequence,
+            "allowed_scope": args.allowed_path,
+            "mutation_paths": args.mutation_path,
+            "result": state,
+            "reasons": reasons,
+            "repository": record,
+        }
+
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print_remote_preflight_human(
+                record,
+                args.intent,
+                args.expected_parent,
+                args.surface_write_ready,
+                consequence,
+                args.allowed_path,
+                args.mutation_path,
+                state,
+                reasons,
+            )
+
+        return code
+
+    remote_only_values = (
+        args.branch,
+        args.expected_parent,
+        args.surface_write_ready,
+        args.consequence,
+        args.allowed_path,
+        args.mutation_path,
+    )
+    if any(remote_only_values):
+        fail(
+            "remote-only preflight options require --topology remote",
+            2,
+        )
+
     path = (
         Path(args.path).expanduser()
         if args.path
@@ -2234,7 +2553,7 @@ def build_parser():
 
     preflight = sub.add_parser(
         "preflight",
-        help="establish checkout state before a read or mutation",
+        help="establish repository state before a read or mutation",
     )
     preflight.add_argument(
         "--repo",
@@ -2242,8 +2561,53 @@ def build_parser():
         help="logical repository name from repos.json",
     )
     preflight.add_argument(
+        "--topology",
+        choices=("local", "remote"),
+        default="local",
+        help="state surface to inspect; existing calls default to local",
+    )
+    preflight.add_argument(
         "--path",
-        help="specific checkout/worktree path; defaults to registered path",
+        help="specific checkout/worktree path; local topology only",
+    )
+    preflight.add_argument(
+        "--branch",
+        help="remote branch to inspect; defaults to registered canonical branch",
+    )
+    preflight.add_argument(
+        "--expected-parent",
+        help="expected advertised SHA before a ref-dependent remote mutation",
+    )
+    preflight.add_argument(
+        "--surface-write-ready",
+        action="store_true",
+        help=(
+            "confirm the selected remote operation surface has write "
+            "capability/access; this does not itself grant mutation authority"
+        ),
+    )
+    preflight.add_argument(
+        "--consequence",
+        choices=("read_only", "reversible", "destructive", "external"),
+        help="declared consequence class for remote preflight",
+    )
+    preflight.add_argument(
+        "--allowed-path",
+        action="append",
+        default=[],
+        help=(
+            "authoritative allowed mutation path/pattern for remote "
+            "preflight; repeat as needed"
+        ),
+    )
+    preflight.add_argument(
+        "--mutation-path",
+        action="append",
+        default=[],
+        help=(
+            "proposed repository-relative mutation path for remote "
+            "scope checking; repeat as needed"
+        ),
     )
     preflight.add_argument(
         "--intent",
@@ -2253,7 +2617,7 @@ def build_parser():
     preflight.add_argument(
         "--allow-dirty",
         action="store_true",
-        help="acknowledge reviewed dirty state for mutation",
+        help="acknowledge reviewed dirty state for local mutation",
     )
     preflight.add_argument(
         "--json",
