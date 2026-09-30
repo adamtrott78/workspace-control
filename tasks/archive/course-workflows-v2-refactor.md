@@ -3,7 +3,7 @@
 
 Derived human-readable view.
 
-Authoritative capsule: tasks/active/course-workflows-v2-refactor.json
+Authoritative capsule: tasks/archive/course-workflows-v2-refactor.json
 
 If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
 
@@ -71,10 +71,8 @@ Parent task complete. Begin any follow-on work from the appropriate child capsul
 
 @GitHub
 
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/course-workflows-v2-refactor.json
+This task is complete and archived.
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Archived task capsule: tasks/archive/course-workflows-v2-refactor.json
+
+Do not resume or mutate this parent task. Start follow-on work from the appropriate active child capsule instead.
