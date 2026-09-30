@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "workflow_id": "fixture-invalid-dependency",
+  "title": "Invalid dependency workflow",
+  "purpose": "Prove stage order and dependencies are validated.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "README.md"
+  },
+  "entry_route": [
+    "README.md"
+  ],
+  "stages": [
+    {
+      "id": "build",
+      "execution_owner": "workspace-control",
+      "authority_owners": [
+        "repos.json"
+      ],
+      "depends_on": [
+        "validate"
+      ],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "build inspected"
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "validate",
+      "execution_owner": "workspace-control",
+      "authority_owners": [
+        "repos.json"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "repository-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "validation complete"
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": null
+}
