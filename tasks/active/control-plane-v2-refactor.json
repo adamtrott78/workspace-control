@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "CHECKPOINTED",
+  "status": "BLOCKED_EVIDENCE",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -32,7 +32,7 @@
       "checkout_path": "/home/atrott/adamArchives/Adam/workspace-control-v2-refactor",
       "branch": "control-plane-v2-refactor",
       "base_sha": "cb8368cd50de2d364c2aade8843276aab0b02420",
-      "checkpoint_sha": "f021956b398d3356337f489c59deaa83182d81ba",
+      "checkpoint_sha": "b8aa52e242a07e6aa2036516e401864991183ad2",
       "checkpoint_pushed": true,
       "allowed_mutation_scope": [
         "AGENTS.md",
@@ -270,6 +270,18 @@
         "Live task state and invalid forward dependencies were rejected for the intended reasons.",
         "PHASE8_RUNTIME_RESULT=PASS.",
         "No existing workspace worktree was modified."
+      ]
+    },
+    {
+      "summary": "Integrated the proven Codex adapter layer as thin v2 discovery/routing files.",
+      "evidence": [
+        "control-plane-v2-refactor -> b8aa52e242a07e6aa2036516e401864991183ad2",
+        "Phase 9 range f021956b398d3356337f489c59deaa83182d81ba...b8aa52e242a07e6aa2036516e401864991183ad2 changes exactly AGENTS.md, .agents/skills/workspace-control/SKILL.md, adapters/codex/global/AGENTS.md, and procedures/codex_adapter.md.",
+        "Adapters route through README -> PORTABILITY_CONTRACT -> OPERATOR_WORKFLOW -> relevant procedure, plus task capsules/workflow descriptors when applicable.",
+        "No CLI, schema, registry, task-capsule, workflow-descriptor, or project repository file changed.",
+        "The adapter files explicitly identify themselves as discovery/routing aids rather than policy/domain/task authority.",
+        "All canonical routes referenced by the adapters exist independently of the adapter layer.",
+        "Removing the four adapter files would leave README, portability/operator policy, registry, procedures, task/workflow state, and deterministic CLI intact."
       ]
     }
   ],
@@ -618,18 +630,49 @@
         "Validation was read-only and did not modify existing workspace worktrees.",
         "PHASE8_RUNTIME_RESULT=PASS."
       ]
+    },
+    {
+      "check": "Phase 9 exact changed-path set",
+      "result": "PASS",
+      "evidence": [
+        "Compare f021956b398d3356337f489c59deaa83182d81ba...b8aa52e242a07e6aa2036516e401864991183ad2 reports exactly the four authorized Codex adapter paths.",
+        "No executor-neutral implementation or authority file changed."
+      ]
+    },
+    {
+      "check": "Phase 9 adapter thinness/portability inspection",
+      "result": "PASS",
+      "evidence": [
+        "Repository AGENTS, Skill, global adapter, and adapter procedure all route to canonical tracked sources.",
+        "README.md, PORTABILITY_CONTRACT.md, OPERATOR_WORKFLOW.md, repos.json, workspace/preflight/worktree/task/workflow procedures, and scripts/workspace_control.py all exist independently at the Phase 9 checkpoint.",
+        "No Codex-only workflow semantics were introduced.",
+        "The canonical workflow remains conceptually operable if the adapter layer is removed."
+      ]
+    },
+    {
+      "check": "Phase 9 read-only Codex adapter discovery validation",
+      "result": "NOT_RUN",
+      "evidence": [
+        "Phase 9 adapter implementation is pushed at b8aa52e242a07e6aa2036516e401864991183ad2.",
+        "This ChatGPT environment has no Codex execution tool/connector capable of opening the repository as Codex.",
+        "Plugin discovery did not expose a Codex repository-execution connector.",
+        "A fresh actual Codex session must perform the final read-only discovery gate; it must not mutate repository state."
+      ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Integrate the preserved thin Codex adapter layer into the v2 candidate.",
-    "Route adapter discovery through README -> PORTABILITY_CONTRACT -> OPERATOR_WORKFLOW -> relevant procedure.",
-    "Route to task capsules and workflow descriptors when durable task/workflow state is relevant.",
-    "Do not introduce Codex-only workflow semantics or duplicate authoritative policy.",
-    "Rerun read-only adapter discovery validation.",
-    "Prove the workflow remains conceptually operable if the adapter layer is removed."
+  "blockers": [
+    "Read-only Codex adapter discovery validation is pending for control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2."
   ],
-  "next_safe_action": "Begin Phase 9 only. Starting from control-plane-v2-refactor@f021956b398d3356337f489c59deaa83182d81ba, integrate AGENTS.md, .agents/skills/workspace-control/SKILL.md, adapters/codex/global/AGENTS.md, and procedures/codex_adapter.md from the preserved Phase-4 adapter evidence, updating them only as necessary to route through the current v2 README, PORTABILITY_CONTRACT, OPERATOR_WORKFLOW, relevant procedures, task capsules, and workflow descriptors. Keep all four files thin and non-authoritative. Do not change CLI/schema behavior. Inspect the exact changed-path set and perform read-only adapter discovery validation before opening any later phase.",
+  "remaining_work": [
+    "Run one fresh Codex session against exact checkpoint b8aa52e242a07e6aa2036516e401864991183ad2 in read-only mode.",
+    "Require Codex to discover AGENTS.md and the workspace-control Skill, then route to README.md, PORTABILITY_CONTRACT.md, OPERATOR_WORKFLOW.md, repos.json, and the relevant canonical procedures.",
+    "Require Codex to identify task_capsule.md and workflow_descriptor.md as durable task/workflow routes rather than duplicate their semantics in adapters.",
+    "Require Codex to identify scripts/workspace_control.py and the canonical preflight path for a hypothetical mutation without executing any mutation.",
+    "Require Codex to state that removing AGENTS/Skill/global adapter reduces discovery convenience only and leaves the executor-neutral workflow operable.",
+    "Verify the read-only discovery test leaves the target branch/ref and checkout state unchanged.",
+    "Only after this evidence passes, mark Phase 9 validated/checkpointed and open Phase 10 real regression workflows."
+  ],
+  "next_safe_action": "Remain in Phase 9. Validate control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2 with one fresh actual Codex session in read-only mode. The session must start from repository discovery, identify the thin adapter layer, recover the canonical README -> PORTABILITY_CONTRACT -> OPERATOR_WORKFLOW -> relevant procedure route, identify task-capsule/workflow-descriptor routing when applicable, identify the deterministic CLI/preflight path, and explain why removing the adapters leaves the workflow conceptually operable. It must perform no mutations. Record the exact Codex output and unchanged Git/ref evidence, then and only then checkpoint Phase 9 and open Phase 10 real regression workflows.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
