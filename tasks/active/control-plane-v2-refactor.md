@@ -24,23 +24,26 @@
 
 - Remote-only DIRECT_TOOL mutation + reread: `PASS`
 - Verified no-op/idempotent re-entry: `PASS`
+- Stage B local/worktree/runtime regression: `PASS`
+- Human judgment suspension -> resume: `PASS`
+- First-incomplete-stage recovery: `PASS`
 - Exact pinned-workflow recovery after branch advance: `PASS`
 - Generated handoff regeneration after capsule change: `PASS`
-- Stage B local/worktree/runtime regression: `PENDING`
-- Real MILCOM reference regression: `PENDING`
+- MILCOM reference workflow lineage: `IN_PROGRESS`
+- Fresh MILCOM rebuild/render + human visual gate + final PPTX verification: `PENDING`
 
 ## Next safe action
 
-Continue Phase 10 with target control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2 frozen. Run one bounded isolated local/runtime regression outside existing workspace worktrees. It must prove safe worktree creation, local HANDOFF_SAFE, composed SUSPENDED HANDOFF_SAFE, a human-gate state transition to VALIDATED, deterministic recovery of the first incomplete stage, final CHECKPOINTED/HANDOFF_SAFE state, and non-interference. Return exact output, then persist Stage B evidence with DIRECT_TOOL and proceed to the MILCOM reference regression.
+Continue Phase 10 with the workspace-control target frozen. Run the bounded MILCOM reference regression against PADataset milcom-presentation@108d7840918751153253671af49c3451d8e6fe96 in a disposable clone. Rebuild the project-owned SVG sources, require deterministic no-diff regeneration, render twelve fresh 1920x1080 PNGs and a 4x3 contact sheet outside the worktree, stop for explicit human visual approval, then assemble and structurally verify the final PPTX outside the worktree. Do not migrate or modify PADataset operator architecture.
 
 ## Remaining work
 
-- Run Phase 10 Stage B bounded non-PADataset local/worktree/runtime regression at the frozen target checkpoint.
-- Stage B must prove isolated worktree preparation, local HANDOFF_SAFE, composed SUSPENDED HANDOFF_SAFE, human-gate resume, and first-incomplete-stage recovery.
-- Return exact Stage B runtime evidence for direct-tool persistence on the coordination branch.
-- After Stage B passes, run one existing real workflow reference regression; prefer MILCOM without migrating PADataset's operator architecture.
-- Use the MILCOM reference regression to close the remaining human-judgment suspension/resume evidence if Stage B does not already satisfy it substantively.
-- Only after the full matrix and reference workflow pass, open Phase 11 promotion decision.
+- Run the MILCOM reference regression at exact PADataset milcom-presentation@108d7840918751153253671af49c3451d8e6fe96 in a disposable clone.
+- Rebuild the twelve template-integrated SVGs using the project-owned build_milcom26_svg_slides.py command and require no source diff after regeneration.
+- Render all twelve rebuilt SVGs to fresh 1920x1080 PNGs outside the worktree and assemble a 4x3 contact sheet.
+- Perform a human visual QA gate on the fresh contact sheet.
+- After approval, assemble a fresh PPTX outside the worktree using the project-owned assembler and verify its built-in structural checks.
+- Record the reference regression PASS, reconcile the full 16-item matrix, and open Phase 11 promotion decision.
 
 ## Validation state
 
@@ -204,7 +207,7 @@ Continue Phase 10 with target control-plane-v2-refactor@b8aa52e242a07e6aa2036516
   - 1 remote-only DIRECT_TOOL mutation and reread: PASS in Phase 10 Stage A.
   - 2 DIRECT_TOOL -> local runtime -> DIRECT_TOOL composition: PASS from repeated exact-checkpoint implementation -> isolated local validation -> durable direct-tool continuation in Phases 6-8.
   - 3 mechanical browser ingress -> DIRECT_TOOL recovery: PASS from uploaded terminal validation evidence followed by exact GitHub state recovery and continuation.
-  - 4 human judgment suspension -> resume: PENDING dedicated regression.
+  - 4 human judgment suspension -> resume: PASS from Phase 10 Stage B explicit APPROVE gate and resume.
   - 5 safe worktree creation/preparation: PASS from Phase 7 exact runtime validation.
   - 6 dirty/diverged worktree refusal: PASS from Phase 7 exact runtime validation.
   - 7 verified no-op/idempotent re-entry: PASS in Phase 10 Stage A after reread selected NO_MUTATION_REQUIRED.
@@ -213,7 +216,7 @@ Continue Phase 10 with target control-plane-v2-refactor@b8aa52e242a07e6aa2036516
   - 10 Codex -> ChatGPT handoff: PASS from returned PHASE9_CODEX_DISCOVERY_RESULT=PASS followed by direct durable-state recovery.
   - 11 remote-only HANDOFF_SAFE: PASS from Phase 6 exact runtime validation.
   - 12 local-runtime HANDOFF_SAFE: PASS from Phase 6 exact runtime validation.
-  - 13 workflow resume from first incomplete stage: PENDING dedicated regression.
+  - 13 workflow resume from first incomplete stage: PASS from Phase 10 Stage B deterministic recovery of local_runtime after the human gate.
   - 14 project-owned validation failure preventing dependent continuation: PASS from failed Phase 7 exact runtime gate, which prevented Phase 8 until root-cause repair and revalidation.
   - 15 task recovery from an exact pinned workflow descriptor after the workflow branch has advanced: PASS from the dedicated Phase 10 branch-advance recovery regression.
   - 16 generated human-readable handoff regeneration after capsule state changes: PASS from the dedicated Phase 10 regeneration after the matrix capsule update.
@@ -228,6 +231,27 @@ Continue Phase 10 with target control-plane-v2-refactor@b8aa52e242a07e6aa2036516
   - After the Phase 10 regression-matrix capsule update, regenerated tasks/active/control-plane-v2-refactor.md.
   - The derived handoff reflected IN_PROGRESS Phase 10 state, frozen target checkpoint, Stage A PASS, and the then-pending generic regression gaps.
   - The generated handoff remained explicitly subordinate to the authoritative JSON capsule and verified Git/runtime evidence.
+- **Phase 10 Stage B local/worktree/runtime regression:** `PASS`
+  - Exact frozen target checkpoint b8aa52e242a07e6aa2036516e401864991183ad2 loaded in an isolated source clone.
+  - Read-only worktree preparation returned CREATE_AVAILABLE and did not create the target.
+  - Explicit worktree creation returned READY at the exact frozen checkpoint with a clean isolated worktree.
+  - Local topology capsule validated and returned HANDOFF_SAFE.
+  - Composed topology capsule validated in SUSPENDED state and returned HANDOFF_SAFE with a ready synchronization boundary.
+  - Human judgment gate required and received explicit APPROVE.
+  - After approval, human_gate transitioned to VALIDATED and deterministic recovery selected local_runtime as the first incomplete stage.
+  - The bounded local runtime observation executed at the exact frozen checkpoint with a clean worktree.
+  - Final composed state validated as CHECKPOINTED and HANDOFF_SAFE with no remaining work or blockers.
+  - All operations occurred under a temporary validation root; no existing workspace worktree was switched, cleaned, reset, stashed, staged, or modified.
+  - PHASE10_STAGEB_RESULT=PASS.
+- **Phase 10 MILCOM reference workflow lineage:** `IN_PROGRESS`
+  - PADataset project-local route was recovered from README.md and presentations/milcom2026/README.md on milcom-presentation.
+  - Current reference head is adamtrott78/PADataset milcom-presentation@108d7840918751153253671af49c3451d8e6fe96.
+  - Canonical production route is MILCOM_TEMPLATE_INTEGRATION.md -> SVG_PRODUCTION_SPEC.md -> PRESENTATION_PLAN.md -> SCRIPT.md, with project-local authority preserved.
+  - Commit 427086605dfefc9e2ad2e672a3a5e7e08a20fe5c integrated the official MILCOM 2026 template.
+  - Commit 746e10ec6c1004127d8b4a9e3e730c90b045e9ba corrected the MILCOM presentation route numbering.
+  - Commit 162bdb5517829e3187473cccacd56583a7716941 performed bounded post-template visual QA repairs on Slides 5 and 12; its own README note states no scientific values, narrative claims, template branding, or other slide layouts changed.
+  - Commit 108d7840918751153253671af49c3451d8e6fe96 added deterministic final PowerPoint assembly while preserving the project-local presentation workflow.
+  - Fresh exact-head local rebuild/render and human visual approval are still pending before the reference regression can be marked PASS.
 
 ## Blockers
 
@@ -252,5 +276,8 @@ Phase 10 — real regression workflows
 Frozen target:
 control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2
 
-Follow next_safe_action. Do not mutate the target implementation unless a regression demonstrates a defect.
+MILCOM reference checkpoint:
+adamtrott78/PADataset milcom-presentation@108d7840918751153253671af49c3451d8e6fe96
+
+Follow next_safe_action. Do not mutate the workspace-control target implementation unless a regression demonstrates a defect. Do not migrate PADataset operator architecture.
 ```
