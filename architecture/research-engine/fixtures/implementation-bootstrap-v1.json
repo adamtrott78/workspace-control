@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "bootstrap_id": "research-engine-implementation-bootstrap-v1",
+  "created_at": "2026-09-30T13:33:00-04:00",
+  "intended_repository": "adamtrott78/research-engine",
+  "intended_visibility": "private-until-user-changes-it",
+  "architecture_checkpoint": "automated-research-engine-v1@7f09a557240722b4d104cbb7d7a2d99779974755",
+  "persistence_checkpoint": "automated-research-engine-v1@24e62c9165b155cda23763dcf1d97b14d923b2b9",
+  "local_bundle": {
+    "filename": "research-engine-bootstrap-v1.tar.gz",
+    "sha256": "8284f62ba73e95d7227ada42c4107c357c23992951333d4341bff4c00305161e",
+    "bytes": 9756,
+    "file_count": 20
+  },
+  "implementation": {
+    "python_requires": ">=3.11",
+    "postgres": "18",
+    "pgvector": "0.8.6",
+    "docker_image": "pgvector/pgvector:0.8.6-pg18",
+    "modules": [
+      "content-addressed SHA-256 artifact store with atomic writes/dedup",
+      "typed evidence/relation domain models",
+      "relation-direction validation",
+      "in-memory evidence graph reference implementation",
+      "PostgreSQL authoritative schema",
+      "recursive provenance and claim-support SQL queries",
+      "PostgreSQL store boundary",
+      "mixed-fidelity fixture projection",
+      "OCR/PDF fidelity validation",
+      "CLI for artifact ingestion and fidelity checks"
+    ]
+  },
+  "tests": {
+    "unit": {
+      "passed": 6,
+      "failed": 0
+    },
+    "postgres_integration": {
+      "status": "SKIPPED_RUNTIME_UNAVAILABLE",
+      "reason": "Current executor has neither Docker nor a PostgreSQL server/psql; integration test exists and requires RESEARCH_ENGINE_DATABASE_URL."
+    },
+    "compileall": "PASS"
+  },
+  "file_sha256": {
+    "README.md": "c27afe83c1cb6fb2907528a24eea7bde66961e35a0387066fb52bdcd6b7bba99",
+    "docker-compose.yml": "a3e60cc3f00ab91ff3969099af97d3c969e30da466c5be80d19a29ce5598960e",
+    "pyproject.toml": "0bfaa3eefb214374378bf6517337c18e6211d675d02539755ba31031f59c7a2c",
+    "sql/schema.sql": "6b50ba52ff99bb02be08c8121261d5a01d8885b731731655c08b6cdb49cc03a2",
+    "src/research_engine/artifact_store.py": "a83958775cdb355f4955c273f376a9db43d67ec74d1487222328816ba1b9fc29",
+    "src/research_engine/cli.py": "006277c6edb1e11391674600d261c389059b3d7fe759b09907a613a45e9e8671",
+    "src/research_engine/domain.py": "b8eb7e109230c34039ad24aa0cecf332f13d6029601f1f4daebf1929741c79e0",
+    "src/research_engine/fixture_projection.py": "806ed6c8da82e7e26981ea8598998e42b59d98b70ef265d9bff5fffc2be0b240",
+    "src/research_engine/graph.py": "16d5bba25cec51009e708dd684f36fabc0ec37b604bbb135b568f56ebb65182a",
+    "src/research_engine/postgres.py": "fb525fdcae5228398d931bef94d2e058897da0d4665abc61ba84f37e7b1d2828",
+    "src/research_engine/sql_queries.py": "266a2ff6394f031e31728d3fec88b3f7c3092176e8501662e8c61a21d7718418",
+    "src/research_engine/validation.py": "c0196da2b41a2d0061d982cf047d714631c49145df9c2b3035644f2d3b5ae4c3",
+    "tests/data/mini_corpus.json": "3695f8d539ac0866c4170a704714df7210809f3a1bf8c0ee359a04cd0c865a88",
+    "tests/test_artifact_store.py": "4bc068d5022776e7fe508750d72b896133197af3c201c80c22e83f5b3070af2d",
+    "tests/test_fidelity.py": "4af7ac105bda3fd6d95017f76066b4d3318004e027183ae28be7fcf19c088bab",
+    "tests/test_graph.py": "f55da6a20b4614e435bfccf5781d65fbdf43b28c9394955995a1c1b2387c6861",
+    "tests/test_postgres_integration.py": "5d0ba27f4ffd48ba190f062b7afba4188d1dbc1a5d61144ddd7d68f10fa9c64b",
+    "tests/test_projection.py": "d6bb48ae7a142cb9a5be63d8604fd0c57d55c98156255d7176e215288eb02f3b",
+    "tests/test_sql_contract.py": "962623931b992ae2b34fa96480c0f4b57f41fff906581811fe84b3c135ef96e4"
+  },
+  "next_boundary": {
+    "kind": "HUMAN_LOCAL_ACTION",
+    "reason": "Connected GitHub tooling can write existing repositories but exposes no repository-creation action. Current executor also lacks Docker/PostgreSQL runtime for the prepared integration test.",
+    "minimum_resume": "Create empty adamtrott78/research-engine repository; report whether docker + docker compose are available on the local research machine. After repository creation ChatGPT can populate the repo directly."
+  }
+}
