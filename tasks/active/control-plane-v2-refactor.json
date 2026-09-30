@@ -2,12 +2,12 @@
   "schema_version": 2,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace control-plane v2 refactor",
-  "status": "CHECKPOINTED",
+  "status": "SUSPENDED",
   "goal": "Promote the fully validated executor-neutral workspace-control v2 implementation without migrating project-owned operator architecture.",
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control-v2-implementation-plan",
-  "current_stage": "phase11_codex_rerun",
+  "current_stage": "promotion_decision",
   "acceptance_criteria": [
     "All required regression evidence is recorded.",
     "The frozen integration diff is reviewed and v1 compatibility is preserved.",
@@ -112,7 +112,7 @@
     },
     {
       "id": "phase11_codex_rerun",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "cross-executor-validation",
       "selected_executor": "codex",
       "selected_surface": "repository-read",
@@ -120,13 +120,25 @@
         "git:b8aa52e242a07e6aa2036516e401864991183ad2",
         "task:tasks/active/control-plane-v2-refactor.json"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "handoff:PHASE11_CODEX_ROUNDTRIP_RESULT=PASS",
+        "git:b8aa52e242a07e6aa2036516e401864991183ad2",
+        "coordination:db6f26e930acb23753c5d6e308484175c0480c5c"
+      ],
+      "validation": [
+        {
+          "check": "final cross-executor round-trip",
+          "result": "PASS",
+          "evidence": [
+            "Standalone read-only codex exec returned the exact required PASS marker and checkpoint identities."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "promotion_decision",
-      "status": "PLANNED",
+      "status": "SUSPENDED",
       "execution_owner": "human",
       "selected_executor": "human",
       "selected_surface": "chat",
@@ -135,7 +147,7 @@
       ],
       "outputs": [],
       "validation": [],
-      "resume_condition": null
+      "resume_condition": "User must explicitly choose PROMOTE or DO NOT PROMOTE."
     },
     {
       "id": "promotion",
@@ -225,8 +237,15 @@
     },
     {
       "check": "Phase 11 Codex both-direction handoff rerun",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "Standalone non-interactive Codex execution returned PHASE11_CODEX_ROUNDTRIP_RESULT=PASS.",
+        "Codex validated implementation checkpoint b8aa52e242a07e6aa2036516e401864991183ad2.",
+        "Codex validated coordination checkpoint db6f26e930acb23753c5d6e308484175c0480c5c.",
+        "The wrapper independently asserted the PASS marker, implementation checkpoint, and coordination checkpoint.",
+        "The final Codex run used read-only non-interactive execution, avoiding heredoc/TTY inheritance.",
+        "This completes the required ChatGPT -> Codex -> ChatGPT round-trip at the exact Phase 11 v2 state."
+      ]
     },
     {
       "check": "Phase 11 explicit promotion decision",
@@ -234,14 +253,15 @@
       "evidence": []
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Rerun only the final ChatGPT -> Codex -> ChatGPT handoff using a standalone terminal launch, not a heredoc-inherited stdin path.",
-    "Record the Codex round-trip PASS.",
-    "Obtain the user's explicit decision whether to promote.",
-    "If approved, transition the capsule to COMPLETE, promote the reviewed target checkpoint, and verify final Git/handoff state."
+  "blockers": [
+    "Awaiting explicit user promotion decision."
   ],
-  "next_safe_action": "Phase 11 v2 capsule validation and HANDOFF_SAFE have passed. Run only the final read-only Codex round-trip from a real terminal stdin (standalone command, outside any heredoc). Do not rerun the completed v2 validation. After Codex returns PASS, record the round-trip and request the user's explicit promotion decision.",
+  "remaining_work": [
+    "Obtain explicit user decision: PROMOTE or DO NOT PROMOTE.",
+    "If PROMOTE, transition the capsule to COMPLETE, promote the reviewed target checkpoint b8aa52e242a07e6aa2036516e401864991183ad2 to main, and verify final Git/handoff state.",
+    "If DO NOT PROMOTE, preserve the validated target and coordination evidence without changing main."
+  ],
+  "next_safe_action": "Await the user's explicit Phase 11 promotion decision. Accept only an unambiguous PROMOTE or DO NOT PROMOTE decision. Do not update main before explicit approval.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Complete pre-v2 coordination history is preserved at tasks/evidence/control-plane-v2-refactor-v1-final.json."
