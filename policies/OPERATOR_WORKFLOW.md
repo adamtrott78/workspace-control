@@ -557,6 +557,64 @@ This catches:
 The next mutation should be based on durable pushed state rather than private
 conversation recollection.
 
+## Smart recovery restore points
+
+Long-running durable tasks SHOULD maintain a lightweight rolling recovery point
+inside the existing task capsule.
+
+The purpose is fast recovery after stream loss, executor throttling, chat limits,
+or an interrupted tool cycle. A restore point is an **index into authoritative
+durable state**, not another source of truth.
+
+Use one stable checkpoint entry such as:
+
+```text
+id: restore-point:latest
+kind: recovery_restore_point
+required_for_resume: true
+```
+
+Refresh that entry only at high-value semantic boundaries:
+
+- after a validated stage, merge, or scientific/implementation slice changes
+  the correct resume basis;
+- immediately before launching a long external runtime, CI job, experiment, or
+  other operation likely to outlive the current response cycle;
+- before an executor/surface handoff or required human/local boundary;
+- after resolving an ambiguous failure or concurrent-state conflict, once a new
+  known-good state has been verified;
+- after a substantial batch of work when the next operation begins a materially
+  different slice.
+
+Do **not** refresh it:
+
+- after every tool call;
+- after ordinary read-only inspection;
+- for every poll of the same external run;
+- after an intermediate commit that has not yet been validated;
+- merely because a chat turn is ending.
+
+A useful restore point records, compactly:
+
+- the exact primary resume commit/ref;
+- current stage;
+- any in-flight branch / PR / external run identity that matters;
+- the last completed validation boundary;
+- the first safe next operation.
+
+The active task capsule's normal repository, stage, blocker, remaining-work, and
+`next_safe_action` fields remain authoritative. The restore point MUST NOT
+duplicate large histories or embed transient logs.
+
+For tasks with a derived Markdown handoff, refreshing the restore point is a
+material capsule mutation and therefore follows the normal atomic JSON ->
+Markdown synchronization invariant.
+
+Prefer replacing the single rolling restore-point entry over appending one
+checkpoint per operation. Historical scientific/implementation checkpoints
+remain separate immutable evidence; the rolling restore point exists only to
+accelerate recovery.
+
 ## Failure handling
 
 On a failed guard or validator:

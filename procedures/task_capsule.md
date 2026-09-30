@@ -194,6 +194,40 @@ operationally complete until the Markdown has been regenerated from the
 post-update JSON state. Do not continue the task or hand it off while the
 companion Markdown is stale. The JSON remains authoritative.
 
+## Rolling recovery restore point
+
+For long-running or interruption-prone v2 tasks, the capsule MAY maintain one
+rolling checkpoint entry with:
+
+- `id: restore-point:latest`
+- `kind: recovery_restore_point`
+- `required_for_resume: true`
+
+This is a recovery accelerator, not a second authority layer.
+
+Refresh it only when the correct resume basis materially changes, especially:
+
+1. after a validated merge/stage/slice;
+2. before a long external runtime or experiment;
+3. before executor/human/local handoff;
+4. after ambiguous-state recovery once actual durable state is verified;
+5. before beginning a materially different work batch after substantial
+   progress.
+
+Do not update it for routine reads, polling, or every commit/tool operation.
+
+Its `identity` should be the exact dominant durable resume anchor (normally a
+Git commit SHA). Keep `evidence` short and sufficient to name any in-flight
+branch/PR/run, the completed validation boundary, and the immediate resume
+operation.
+
+Update the existing `restore-point:latest` entry in place. Do not accumulate a
+restore-point entry for every control cycle. Historical task/scientific
+checkpoints remain normal immutable checkpoint records.
+
+Because the entry lives inside the capsule, any refresh is subject to the
+JSON -> Markdown synchronization invariant.
+
 ## Workflow binding
 
 When a v2 task uses a reusable workflow, record an exact durable workflow
