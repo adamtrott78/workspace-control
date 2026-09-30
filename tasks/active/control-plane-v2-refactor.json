@@ -2,7 +2,7 @@
   "schema_version": 1,
   "task_id": "control-plane-v2-refactor",
   "title": "Workspace Control Plane v2",
-  "status": "CHECKPOINTED",
+  "status": "IN_PROGRESS",
   "goal": "Design, implement, and validate a workspace-control v2 architecture that generalizes the proven tutor, Codex, DIRECT_TOOL, human-gate, and PADataset/MILCOM workflow evidence into an executor-neutral, resumable multi-stage control plane without moving project-domain authority out of project repositories.",
   "acceptance_criteria": [
     "A reviewed v2 architecture specification defines owner, workflow, stage, task execution, reasoning executor, operation surface, execution topology, checkpoint, artifact class, validation barrier, resumability, HANDOFF_SAFE semantics, executor/surface selection, workspace-control ownership, and project-local ownership.",
@@ -661,18 +661,52 @@
         "The Phase 9 prompt prohibited file, worktree, branch, commit, push, clean/reset/stash/stage/fetch, and task-capsule mutation.",
         "The adapter thinness/portability static gate had already proven the executor-neutral workflow exists independently of the adapter layer."
       ]
+    },
+    {
+      "check": "Phase 10 Stage A remote-only DIRECT_TOOL mutation and reread",
+      "result": "PASS",
+      "evidence": [
+        "Created tasks/evidence/phase10-remote-only.json by a bounded remote-only GitHub commit on control-plane-v2-coordination.",
+        "The coordination ref advanced from d4356f6782aa50d2fe4abfbb05d77235d90d6695 to eef2b44ae78b53f505a564dd6e43b436cf737470 with force=false.",
+        "Reread the evidence file from exact commit eef2b44ae78b53f505a564dd6e43b436cf737470 and verified blob 0631f6fc1d2a4a656af7a21b7e86c41c9522a504.",
+        "The frozen target branch remained unchanged at b8aa52e242a07e6aa2036516e401864991183ad2.",
+        "A second inspection found the exact expected evidence/ref state and correctly selected NO_MUTATION_REQUIRED rather than writing again."
+      ]
+    },
+    {
+      "check": "Phase 10 regression matrix inventory",
+      "result": "IN_PROGRESS",
+      "evidence": [
+        "1 remote-only DIRECT_TOOL mutation and reread: PASS in Phase 10 Stage A.",
+        "2 DIRECT_TOOL -> local runtime -> DIRECT_TOOL composition: PASS from repeated exact-checkpoint implementation -> isolated local validation -> durable direct-tool continuation in Phases 6-8.",
+        "3 mechanical browser ingress -> DIRECT_TOOL recovery: PASS from uploaded terminal validation evidence followed by exact GitHub state recovery and continuation.",
+        "4 human judgment suspension -> resume: PENDING dedicated regression.",
+        "5 safe worktree creation/preparation: PASS from Phase 7 exact runtime validation.",
+        "6 dirty/diverged worktree refusal: PASS from Phase 7 exact runtime validation.",
+        "7 verified no-op/idempotent re-entry: PASS in Phase 10 Stage A after reread selected NO_MUTATION_REQUIRED.",
+        "8 ambiguous mutation -> state inspection before retry: PASS from Phase 8 partial multi-file create ambiguity; actual branch state was reread and only the first incomplete file was continued.",
+        "9 ChatGPT -> Codex handoff: PASS from Phase 9 read-only Codex validation prompt and successful exact-checkpoint recovery.",
+        "10 Codex -> ChatGPT handoff: PASS from returned PHASE9_CODEX_DISCOVERY_RESULT=PASS followed by direct durable-state recovery.",
+        "11 remote-only HANDOFF_SAFE: PASS from Phase 6 exact runtime validation.",
+        "12 local-runtime HANDOFF_SAFE: PASS from Phase 6 exact runtime validation.",
+        "13 workflow resume from first incomplete stage: PENDING dedicated regression.",
+        "14 project-owned validation failure preventing dependent continuation: PASS from failed Phase 7 exact runtime gate, which prevented Phase 8 until root-cause repair and revalidation.",
+        "15 task recovery from an exact pinned workflow descriptor after the workflow branch has advanced: PENDING dedicated regression.",
+        "16 generated human-readable handoff regeneration after capsule state changes: PASS repeatedly during prior phase checkpoint transitions; Phase 10 will refresh it again after this matrix update."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Run Phase 10 architecture regression matrix as evidence-only work while keeping the target implementation checkpoint fixed unless a demonstrated defect requires repair.",
-    "Stage A: workspace-control remote-only regression.",
-    "Stage B: bounded non-PADataset local/worktree/runtime regression.",
-    "Stage C: one existing real workflow reference regression after generic mechanics pass; MILCOM is the preferred reference because its historical direct-tool -> pushed SHA -> local build/render -> QA/human gate -> source-repair flow is already known.",
-    "Do not migrate PADataset's operator architecture during this regression phase.",
-    "Record exact evidence for each stage before moving to Phase 11 promotion decision."
+    "Complete Phase 10 generic regression gaps while the target implementation remains frozen.",
+    "Dedicated regression: human judgment suspension -> resume.",
+    "Dedicated regression: workflow resume from the first incomplete stage.",
+    "Dedicated regression: task recovery from an exact pinned workflow descriptor after the workflow branch advances.",
+    "Refresh and verify the generated human-readable handoff after this Phase 10 capsule state change.",
+    "After generic gaps pass, run one existing real workflow reference regression; prefer MILCOM and do not migrate PADataset's operator architecture.",
+    "Only after the full matrix and reference workflow pass, open Phase 11 promotion decision."
   ],
-  "next_safe_action": "Begin Phase 10 regression evidence with the target implementation frozen at control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2. First run a bounded workspace-control remote-only regression against the exact pushed checkpoint. Then run bounded non-PADataset local/worktree/runtime mechanics. Only after both generic regressions pass, run one existing real workflow as a reference regression, preferring MILCOM without migrating PADataset's operator architecture. Record all evidence on the coordination task state. If any regression exposes an implementation defect, stop, inspect actual durable state, and reopen only the demonstrated implementation scope before retrying.",
+  "next_safe_action": "Continue Phase 10 with target control-plane-v2-refactor@b8aa52e242a07e6aa2036516e401864991183ad2 frozen. First refresh and verify the derived human-readable handoff from this updated capsule. Then run bounded generic regressions for human judgment suspension/resume, first-incomplete-stage workflow recovery, and exact pinned-workflow recovery after branch advance. Use coordination-only evidence or bounded non-PADataset fixtures; do not mutate the target implementation unless a regression demonstrates a defect. After generic gaps pass, run the MILCOM reference regression without migrating PADataset architecture.",
   "last_executor": "chatgpt-direct-tool",
   "notes": "Empirical evidence feeding v2 includes: MTH602 tutoring/persistence/completion-vs-mastery; EAS501 empty-repo DIRECT_TOOL bootstrap, browser-ingress boundary, cold-start tutoring and inline persistence/return routing; CIS560 typed-authority and composed-workflow experimental design; MILCOM/PADataset remote Git -> local runtime -> artifact QA workflow; and Phase-4 Codex durable task handoff/recovery. External architectural references include workflow-vs-agent guidance, durable execution, graph orchestration, guardrails/tracing, GitOps-style versioned authority, and asset-oriented orchestration. These are design references, not canonical dependencies."
 }
