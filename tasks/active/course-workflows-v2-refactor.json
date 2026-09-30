@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "course-workflows-v2-refactor",
   "title": "Shared course workflows and tutor architecture v2 refactor",
-  "status": "CHECKPOINTED",
+  "status": "COMPLETE",
   "goal": "Evolve the repository-backed course tutoring/application architecture to the task-capsule-driven workspace-control v2 model: remove dependence on conversational builder/tutor hierarchy, define reusable course and document-artifact workflow descriptors/procedures, improve assessment alignment and multimodal ingestion, preserve project-local authority and mastery semantics, and create independently executable migration capsules for MTH602, CIS560, EAS501, and the resume/application workflow.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-control-v2-adoption",
@@ -366,15 +366,30 @@
     },
     {
       "id": "completion",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "child_migration_capsules"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "Parent architecture task complete",
+        "Promoted reusable shared architecture on workspace-control main",
+        "Four independently recoverable child migration tasks"
+      ],
+      "validation": [
+        {
+          "check": "Parent acceptance/completion assessment",
+          "result": "PASS",
+          "evidence": [
+            "All preceding parent stages are VALIDATED and blockers are empty.",
+            "All 15 acceptance criteria are satisfied by the durable review/design/implementation/validation/promotion/child-handoff evidence.",
+            "Formal v2 HANDOFF_SAFE assessment has no failure reasons.",
+            "No child repository migration was executed in the parent task."
+          ]
+        }
+      ],
       "resume_condition": null
     }
   ],
@@ -515,30 +530,42 @@
     },
     {
       "check": "Shared workflow/procedure design",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "Architecture review/design documents are durable on the promoted main lineage.",
+        "Seven shared procedures and eight workflow-descriptor v1 files were implemented without changing workflow-descriptor or task-capsule schemas."
+      ]
     },
     {
       "check": "Shared architecture cold-start/regression validation",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "architecture/course-workflows-v2-validation.md recorded PASS at validation checkpoint d757a0c5d59e915fa3f78b4c19d936748f7c318d.",
+        "Promotion PR #1 merged the reviewed architecture to main at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 while preserving concurrent main-only work."
+      ]
     },
     {
       "check": "Child migration capsules created",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "Four separate child JSON/Markdown handoffs are durable and v2-valid at ee577330309d19f095f5a73842b384f654b9e620.",
+        "Live target branch checks at final assessment still match every child starting checkpoint; no child repository migration was executed by this parent."
+      ]
     },
     {
       "check": "Final HANDOFF_SAFE",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "Formal v2 handoff semantics evaluated on parent CHECKPOINTED state at main 8333fd803695bf05a31ebc08411ba938487b6e7c: no reasons for NOT_HANDOFF_SAFE.",
+        "All required-for-resume checkpoints contain durable evidence.",
+        "All parent repository recovery states are remote-only, registered, and recorded verified; the architecture branch still advertises 32412c28440681bcfc6136ad36be71b3c1151f9e.",
+        "Four child handoffs remain independently recoverable at their recorded target branch checkpoints."
+      ]
     }
   ],
   "blockers": [],
-  "remaining_work": [
-    "Complete HANDOFF_SAFE assessment and archive this task."
-  ],
-  "next_safe_action": "Perform the parent task's final HANDOFF_SAFE/completion assessment only. Verify the promoted main checkpoint, the stable architecture-branch checkpoint, all parent stages/checkpoints, zero blockers, and the four child capsule handoffs. Do not execute any child migration. If the parent is fully recoverable and all acceptance criteria are satisfied, mark completion VALIDATED, set status COMPLETE with no remaining work, regenerate the Markdown, and archive the parent JSON/Markdown as immutable historical evidence.",
+  "remaining_work": [],
+  "next_safe_action": "Parent task complete. Begin any follow-on work from the appropriate child capsule under tasks/active; do not resume or mutate this parent task.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is the shared architecture refactor only. Urgent EAS501 Exam 1 cheat-sheet work and MTH602 new-unit ingestion may proceed independently against their existing project lineages. The task intentionally omits workflow binding because it mutates workspace-control, the repository that owns the baseline operator contract; the exact baseline contract is instead preserved as a required checkpoint to avoid a self-referential handoff-binding defect. The architecture worktree/ref is now isolated on workspace-control branch course-workflows-v2-refactor; this prevents the task capsule stored on main from becoming self-referential with the repository checkpoint it coordinates."

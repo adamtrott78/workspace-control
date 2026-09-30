@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: course-workflows-v2-refactor
 - Title: Shared course workflows and tutor architecture v2 refactor
-- Status: CHECKPOINTED
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -57,11 +57,11 @@ Evolve the repository-backed course tutoring/application architecture to the tas
 
 ## Next safe action
 
-Perform the parent task's final HANDOFF_SAFE/completion assessment only. Verify the promoted main checkpoint, the stable architecture-branch checkpoint, all parent stages/checkpoints, zero blockers, and the four child capsule handoffs. Do not execute any child migration. If the parent is fully recoverable and all acceptance criteria are satisfied, mark completion VALIDATED, set status COMPLETE with no remaining work, regenerate the Markdown, and archive the parent JSON/Markdown as immutable historical evidence.
+Parent task complete. Begin any follow-on work from the appropriate child capsule under tasks/active; do not resume or mutate this parent task.
 
 ## Remaining work
 
-- Complete HANDOFF_SAFE assessment and archive this task.
+- None.
 
 ## Blockers / gates
 
