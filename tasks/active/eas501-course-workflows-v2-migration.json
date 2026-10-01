@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "eas501-course-workflows-v2-migration",
   "title": "EAS501 Course Workflows v2 Migration",
-  "status": "IN_PROGRESS",
+  "status": "VALIDATING",
   "goal": "Explicitly migrate EAS501 from its current pinned workspace-control compatibility contract to the promoted reusable course-workflow architecture while preserving current assessment/course state and project-local authority.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -12,7 +12,7 @@
     "content_sha": "da6076a9b4baf328d6a91526f6dff7aa999733b6"
   },
   "parent_execution_owner": "course-workflows-v2-refactor",
-  "current_stage": "shared_checkpoint_integration",
+  "current_stage": "regression_validation",
   "acceptance_criteria": [
     "A fresh executor starts only from the target repository root README at the pinned checkpoint plus this capsule and the exact promoted shared workflow binding.",
     "Project-local course/source/assignment/mastery/artifact authority remains in the target repository; workspace-control contributes reusable mechanics only.",
@@ -52,7 +52,7 @@
       "base_sha": "bccb636f35bbb0f530c8fa15b1a7b3d573193e07",
       "remote": {
         "branch": "eas501-tutor-bootstrap",
-        "checkpoint_sha": "bccb636f35bbb0f530c8fa15b1a7b3d573193e07",
+        "checkpoint_sha": "0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d",
         "verified": true
       },
       "local": null,
@@ -131,7 +131,7 @@
     },
     {
       "id": "shared_checkpoint_integration",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "eas501-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -140,18 +140,36 @@
         "existing workspace-control.lock.json compatible_commit 450eebeef6b76a674913949863082277b6bdb811",
         "promoted workspace-control checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "EAS501 migration commit 0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d.",
+        "workspace-control.lock.json explicitly advanced from 450eebeef6b76a674913949863082277b6bdb811 to 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9.",
+        "README.md and COURSE_TUTOR.md map the promoted content-ingestion, assessment-preparation, study-session, assignment/take-home-project, cheat-sheet, communications-ingestion, and document-artifact mechanics to project-local owners.",
+        "No course/source/practice/study evidence file was mutated by the migration commit."
+      ],
+      "validation": [
+        {
+          "check": "Explicit promoted-checkpoint integration",
+          "result": "PASS",
+          "evidence": [
+            "Commit 0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d has direct parent bccb636f35bbb0f530c8fa15b1a7b3d573193e07.",
+            "Git compare reports exactly one commit ahead and exactly three changed paths: README.md, COURSE_TUTOR.md, workspace-control.lock.json.",
+            "The live eas501-tutor-bootstrap branch independently advertises 0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d.",
+            "The migrated lock resolves shared semantics at exact workspace-control checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; no moving-main dependency was introduced.",
+            "Pre-mutation compatibility review confirmed the old and promoted contracts preserve EAS501's root-routing, completion/mastery, unassessed, DIRECT_TOOL, mutation-authority, exam-readiness, and executor-portability semantics while adding reusable workflow roles."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "regression_validation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "eas501-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "shared_checkpoint_integration"
+        "shared_checkpoint_integration",
+        "git:0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d"
       ],
       "outputs": [],
       "validation": [],
@@ -185,10 +203,20 @@
       "id": "target-starting-checkpoint",
       "kind": "git_commit",
       "identity": "bccb636f35bbb0f530c8fa15b1a7b3d573193e07",
-      "required_for_resume": true,
+      "required_for_resume": false,
       "evidence": [
         "EAS501-AdamTrott eas501-tutor-bootstrap verified at child creation",
         "Baseline deliberately refreshed after Exam 1 completion: eas501-tutor-bootstrap advanced by three course-content/assessment commits to bccb636f35bbb0f530c8fa15b1a7b3d573193e07; workspace-control.lock.json remained on compatible_commit 450eebeef6b76a674913949863082277b6bdb811, so no workflow migration had already occurred."
+      ]
+    },
+    {
+      "id": "migrated-project-checkpoint",
+      "kind": "git_commit",
+      "identity": "0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d",
+      "required_for_resume": true,
+      "evidence": [
+        "EAS501-AdamTrott eas501-tutor-bootstrap advertised and reread at 0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d.",
+        "Direct parent is bccb636f35bbb0f530c8fa15b1a7b3d573193e07; changed scope is exactly README.md, COURSE_TUTOR.md, and workspace-control.lock.json."
       ]
     }
   ],
@@ -199,7 +227,7 @@
       "result": "PASS",
       "evidence": [
         "Promoted shared workflow identity pinned at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9/workflows/course-bootstrap-migration.v1.json/da6076a9b4baf328d6a91526f6dff7aa999733b6.",
-        "Target repository branch eas501-tutor-bootstrap verified at exact starting checkpoint 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5.",
+        "Target repository baseline was deliberately refreshed and verified at bccb636f35bbb0f530c8fa15b1a7b3d573193e07 before migration; the older 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5 checkpoint is historical only.",
         "No child-repository mutation was performed by the parent task."
       ]
     },
@@ -211,15 +239,23 @@
         "Existing compatibility semantics and all course/source/mastery/assessment owners were recovered before mutation.",
         "Promoted course-assessment semantics were compared against the existing Exam 2 owner; factual authority and contextual assessment relevance are already distinct."
       ]
+    },
+    {
+      "check": "Promoted shared-checkpoint integration",
+      "result": "PASS",
+      "evidence": [
+        "Exact compatibility pin advanced from workspace-control@450eebeef6b76a674913949863082277b6bdb811 to workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 only after explicit semantic compatibility validation.",
+        "Published EAS501 checkpoint 0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d is a one-commit fast-forward from bccb636f35bbb0f530c8fa15b1a7b3d573193e07 and changes only the three adapter/compatibility files.",
+        "Existing Exam 1/Exam 2/course/source/mastery content was intentionally excluded from mutation scope for this commit."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Advance the existing workspace-control.lock.json compatibility pin explicitly to 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and map promoted reusable course workflow roles through the existing EAS501 adapters.",
-    "Run cold-start, tutoring/mastery, assessment-relevance, source-routing, artifact/workflow, and executor-portability regressions while verifying authoritative evidence blobs remain unchanged.",
-    "Checkpoint and independently verify the migrated EAS501 project state, establish final HANDOFF_SAFE state, and archive the migration task."
+    "Run cold-start, tutoring/mastery, assessment-relevance, source-routing, artifact/workflow, and executor-portability regressions against the migrated checkpoint while confirming all authoritative evidence blobs remain unchanged.",
+    "Reverify the final EAS501 branch and exact shared workflow identity, establish final HANDOFF_SAFE state, and archive the migration task."
   ],
-  "next_safe_action": "On EAS501-AdamTrott:eas501-tutor-bootstrap, mutate only the existing adapter/routing layer from parent bccb636f35bbb0f530c8fa15b1a7b3d573193e07: advance workspace-control.lock.json compatible_commit from 450eebeef6b76a674913949863082277b6bdb811 to 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; update COURSE_TUTOR.md and README.md to route the promoted content-ingestion, assessment-preparation, study-session, assignment/take-home-project, cheat-sheet, communications-ingestion, and document-artifact workflows to existing or deliberately future-created local owners. Preserve all practice/exam01, practice/exam02, course/source, mastery, skill-map, notation, and learning-record blobs unchanged. Then verify the exact changed-path set and remote checkpoint before regression validation.",
+  "next_safe_action": "From EAS501-AdamTrott:eas501-tutor-bootstrap@0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d, run read-only migration regressions: prove root cold-start routing through the exact lock and local adapter; verify tutoring/mastery semantics; verify Exam 2 contextual assessment relevance remains separate from current-course authority; verify source routing and Exam 1 artifact strategy remain intact; confirm all baseline course/practice/study evidence blobs are unchanged; and verify every mapped shared workflow exists at workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9. Do not perform live Exam 2 tutoring.",
   "notes": " The EAS501 target baseline was deliberately refreshed from 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5 to bccb636f35bbb0f530c8fa15b1a7b3d573193e07 after the Exam 1 task completed and Exam 2 planning was initialized. Compare evidence showed three forward-only course/assessment commits and no workspace-control.lock.json migration.",
   "last_executor": "chatgpt",
   "last_surface": "github"
