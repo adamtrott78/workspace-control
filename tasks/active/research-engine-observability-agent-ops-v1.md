@@ -35,7 +35,7 @@ Build a low-overhead, provenance-preserving operations layer for the autonomous 
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: 051a3b0c9828de411812b0a519a070a2aa87683b
+- Local HEAD: 774b2cb5d8a99b9edd5238c6ca83383a6be30add
 - Local clean: true
 
 ## Current stage
@@ -44,26 +44,30 @@ codex_allowance_telemetry_and_forecasting
 
 ## Next safe action
 
-On the Lambda, keep research-engine-daemon.service inactive/dead, clean fast-forward research-engine main from 051a3b0c9828de411812b0a519a070a2aa87683b to exact validated 774b2cb5d8a99b9edd5238c6ca83383a6be30add, then execute `bash deploy/run-verify-calibration.sh`. At its pre/post prompts enter the current ChatGPT UI percent LEFT and relative reset values. The runner applies only the additive calibration schema, performs exactly one non-materializing STANDARD/Terra VERIFY replay against the median historical VERIFY job, persists operational calibration telemetry, renders the updated HUD, and must finish with the daemon inactive/dead. Do not START sustained research yet.
+Start a fresh ChatGPT task executor from https://github.com/adamtrott78/workspace-control and this capsule. Keep research-engine-daemon.service inactive/dead. First implement and CI-validate two GitHub-side improvements on research-engine main@774b2cb5d8a99b9edd5238c6ca83383a6be30add: (1) allowance forecast reset-window grouping that tolerates precision/jitter in relative reset observations without pretending whole-percent readings are exact, and (2) a non-materializing low/high VERIFY replay batch that complements the already-completed median radius-0 replay with only two additional STANDARD/Terra calls. Also add a deterministic zero-model-call extraction provenance audit for the 9 existing papers if it can be implemented without delaying the calibration. Only after canonical CI should the Lambda fast-forward while stopped and run the bounded two-call calibration with one pre/post allowance reading pair. Do not START sustained research.
 
 ## Remaining work
 
-- Fast-forward the stopped Lambda to research-engine main@774b2cb5d8a99b9edd5238c6ca83383a6be30add.
-- Run deploy/run-verify-calibration.sh. Record fresh pre/post percent-left/reset readings from the ChatGPT usage UI around the single Terra replay.
-- Review historical versus replay VERIFY input/cached/uncached tokens, page count, verified_equal, accepted_evidence_ids_equal, and the new HUD CALIBRATION panel.
-- If agreement is preserved, keep page radius 0 and quantify projected sustained-run savings. If agreement differs, set RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=1 and rerun calibration while research remains stopped.
-- Use the measured allowance delta and stage telemetry to choose the next optimization target and bounded end-to-end calibration before any sustained START.
+- While the daemon remains stopped, fix allowance reset-window identity so relative-reset observations within the same real reset window tolerate UI precision/jitter; preserve raw observations and do not invent exact plan usage.
+- Extend the non-materializing VERIFY calibration harness to select/replay the lowest-cost and highest-cost historical VERIFY jobs. The already-completed median replay is sample 1, so only two additional Terra calls are needed for a low/median/high radius-0 sample.
+- Take one fresh 5-hour/weekly allowance reading immediately before the two-call replay batch and one immediately after. Store/display the integer UI movement as quantized/censored plan evidence rather than exact per-call percentage cost.
+- For each low/median/high replay compare historical vs replay input/cached/output/reasoning tokens, context pages/chars, verified_equal, and accepted_evidence_ids_equal. If all three agree, retain radius 0 for the next bounded production calibration. If a job disagrees, rerun only that job at radius 1 before changing the global policy.
+- Before spending more semantic allowance on EXTRACT optimization, perform a deterministic zero-model-call audit of the 9 existing papers: PDF page counts, evidence-bearing page counts, evidence density, evidence-page clustering, and extraction context size. Use that audit to choose whether page/section-selective EXTRACT is technically justified.
+- After representative VERIFY validation and the EXTRACT provenance audit, choose the next bounded optimization experiment; do not resume sustained corpus expansion yet.
 - After monitoring/tuning is validated, continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge.
 
 ## Blockers / gates
 
-- Lambda local research-engine main@051a3b0c9828de411812b0a519a070a2aa87683b is behind validated remote main@774b2cb5d8a99b9edd5238c6ca83383a6be30add; daemon remains intentionally stopped.
-- A second trustworthy 5-hour/weekly observation interval is still required to estimate allowance burn; the one-call VERIFY replay runner is designed to create that interval safely.
-- Sustained START remains gated on calibration outcome: VERIFY result agreement must be reviewed and allowance/token reduction measured.
+- Radius-0 VERIFY context has only one live replay sample. Semantic agreement is exact on the median historical job, but low/high historical VERIFY jobs must be replayed before treating the result as representative.
+- The ChatGPT/Codex usage UI reports whole percentages. The observed 86->85 five-hour and 96->95 weekly transitions are quantized bucket changes, not proof that one Terra call consumed exactly 1 percentage point.
+- Allowance forecast reset-window grouping currently treats small derived reset_at differences as different windows. Relative UI reset readings have finite precision, so this must be fixed before burn-rate/ETA confidence can advance beyond CALIBRATING.
+- Sustained START remains gated on representative VERIFY calibration and a bounded tuning decision.
 
 ## Fresh-chat initialization
 
 @GitHub
+
+https://github.com/adamtrott78/workspace-control
 
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/research-engine-observability-agent-ops-v1.json
@@ -72,3 +76,4 @@ Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
+Invariant: every fresh-chat initialization or handoff prompt for this task must include the full workspace-control repository URL shown above.
