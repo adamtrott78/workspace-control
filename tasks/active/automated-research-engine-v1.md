@@ -37,23 +37,24 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 03babb404e9e6a254deec38fea6ea5ab3b8b05ad
+- Remote checkpoint: aafde498d728e6e04a65902095f269d3ef9a7901
 - Remote verified: true
 
 ## Next safe action
 
-Observe persisted state for acceptance-codex-rf-v1 without manually orchestrating jobs. If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload. If PAUSED_BUDGET again, inspect exact exhausted reason and apply only a bounded increase if justified.
+On the user's Lambda, read acceptance-codex-rf-v1 durable run/budget/job state first. If the run is still RUNNING, do not change the checkout or restart the daemon; return the status so the bounded existing budget can gate it. If it is PAUSED_BUDGET or WAITING_HUMAN, fast-forward the clean research-engine checkout from 03babb404e9e6a254deec38fea6ea5ab3b8b05ad to exact main@aafde498d728e6e04a65902095f269d3ef9a7901, restart the user systemd daemon to load the bounded-fanout planner, and return post-restart non-secret run/job/health state. Do not configure OPENAI_API_KEY.
 
 ## Remaining work
 
-- Observe acceptance-codex-rf-v1 until WAITING_HUMAN, another PAUSED_BUDGET, FAILED, or other gated/terminal state.
-- If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload and validate model_backed_acceptance_v1.
-- If PAUSED_BUDGET again, inspect durable usage and raise only the specific exhausted guardrail needed to complete acceptance.
-- After acceptance passes, resume RF corpus expansion through the daemon and operate continuously while pacing or pausing to stay within the included Codex allowance.
+- Inspect the current durable state of acceptance-codex-rf-v1 and deploy research-engine main@aafde498d728e6e04a65902095f269d3ef9a7901 only at a safe paused/human gate boundary.
+- Use the bounded-fanout planner to salvage/cancel surplus queued novelty work in the same acceptance run, then apply only the budget changes justified by the remaining bounded graph.
+- Reach WAITING_HUMAN and verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload.
+- After acceptance passes, implement/validate plan-limit-aware pacing/backoff so 24/7 operation pauses cleanly when the included weekly Codex allowance is unavailable rather than exhausting job retries.
+- Then resume RF corpus expansion through the daemon and tune concurrency/model tiers against observed allowance consumption and quality.
 
 ## Blockers / gates
 
-- acceptance-codex-rf-v1 is RUNNING again after bounded budget review; final model-backed acceptance awaits its next durable gated or terminal state.
+- The bounded novelty-fanout fix is validated but not yet deployed to the user's Lambda. The current acceptance run's latest status must be read before restarting the daemon so no active semantic job is raced.
 
 ## Fresh-chat initialization
 
