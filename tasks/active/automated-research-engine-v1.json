@@ -62,7 +62,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2",
+        "checkpoint_sha": "588fd692efffaa4392f1472919f2fbca94c9b8f5",
         "verified": true
       },
       "local": null,
@@ -576,7 +576,9 @@
       ],
       "outputs": [
         "git:research-engine@80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2",
-        "runtime:github-actions:PR7:36809660246"
+        "runtime:github-actions:PR7:36809660246",
+        "git:research-engine@588fd692efffaa4392f1472919f2fbca94c9b8f5",
+        "runtime:github-actions:PR8:36810168483"
       ],
       "validation": [
         {
@@ -589,6 +591,17 @@
             "Executor tiers distinguish DETERMINISTIC, CHEAP, STANDARD, STRONG, and HUMAN work.",
             "End-to-end integration reached durable WAITING_HUMAN after discovery, screening, acquisition fan-out, extraction, verification, checkpoint, synthesis, gap generation, novelty-search fan-out, and novelty arbitration.",
             "Regression deliberately exercised worker crash recovery and transient retry."
+          ]
+        },
+        {
+          "check": "tiered semantic worker adapter",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #8 merged at 588fd692efffaa4392f1472919f2fbca94c9b8f5 after CI run 36810168483 PASS.",
+            "CHEAP/STANDARD/STRONG semantic jobs are served through a provider adapter using strict structured outputs and configurable model profiles.",
+            "Refusals are non-retryable; incomplete/API failures remain retryable; response/model/usage metadata is preserved in job results.",
+            "DETERMINISTIC and HUMAN tiers cannot be claimed by the model executor.",
+            "Novelty arbitration schema cannot emit SUPPORTED_AS_OPEN."
           ]
         }
       ],
@@ -804,14 +817,12 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2",
+      "identity": "588fd692efffaa4392f1472919f2fbca94c9b8f5",
       "required_for_resume": true,
       "evidence": [
         "stage=agentic_orchestration_v1",
-        "last_validated_boundary=research-engine/main@80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2; autonomous PostgreSQL orchestration cycle PASS",
-        "in_flight=research-engine PR #8 head openai-responses-executor@f57296b2767bf2e0fd0f49edb2c2f59264682e93",
-        "purpose=validate tiered production semantic worker adapter using Responses API structured outputs; CHEAP/STANDARD/STRONG only; deterministic and HUMAN excluded",
-        "resume=inspect PR #8 CI for f57296b2767bf2e0fd0f49edb2c2f59264682e93; repair remotely if red, merge if green; then implement deterministic worker executors and a full credential-free agentic acceptance cycle that mixes real deterministic workers with mocked semantic workers"
+        "last_validated_boundary=research-engine/main@588fd692efffaa4392f1472919f2fbca94c9b8f5; PR #8 tiered semantic worker PASS",
+        "resume=implement production deterministic ACQUIRE and CHECKPOINT executors behind JobExecutor, expose deterministic-worker CLI, and validate a mixed-worker full autonomous cycle using production deterministic executors plus scripted semantic executors"
       ]
     },
     {
@@ -842,6 +853,16 @@
       "evidence": [
         "Provider-neutral autonomous research orchestrator merged after real PostgreSQL CI.",
         "Crash recovery, retry, heterogeneous tiers, fan-out/fan-in, and human gate all validated."
+      ]
+    },
+    {
+      "id": "research-engine-openai-semantic-worker",
+      "kind": "git_commit",
+      "identity": "588fd692efffaa4392f1472919f2fbca94c9b8f5",
+      "required_for_resume": true,
+      "evidence": [
+        "Tiered Responses semantic worker adapter merged after CI.",
+        "Headless semantic-worker CLI is available for Lambda/container use."
       ]
     }
   ],
@@ -1426,7 +1447,7 @@
     "Add a production executor adapter suitable for headless Lambda/Codex workers after the provider-neutral orchestration core passes.",
     "Then use the autonomous cycle to resume the deferred RF corpus expansion instead of manually shepherding individual papers."
   ],
-  "next_safe_action": "Inspect research-engine PR #8 for head f57296b2767bf2e0fd0f49edb2c2f59264682e93. Repair remotely if CI fails and merge when green. Then implement production deterministic workers for ACQUIRE and CHECKPOINT plus a mixed-worker end-to-end acceptance cycle before requiring live model credentials.",
+  "next_safe_action": "Branch from research-engine/main@588fd692efffaa4392f1472919f2fbca94c9b8f5. Implement production deterministic ACQUIRE and CHECKPOINT executors plus a headless deterministic-worker runtime. Validate a complete mixed autonomous PostgreSQL cycle using these production deterministic executors and scripted semantic workers, then merge if green.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
