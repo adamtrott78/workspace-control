@@ -63,7 +63,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "03babb404e9e6a254deec38fea6ea5ab3b8b05ad",
+        "checkpoint_sha": "aafde498d728e6e04a65902095f269d3ef9a7901",
         "verified": true
       },
       "local": null,
@@ -947,17 +947,30 @@
       ]
     },
     {
+      "id": "research-engine-bounded-novelty-fanout",
+      "kind": "git_commit",
+      "identity": "aafde498d728e6e04a65902095f269d3ef9a7901",
+      "required_for_resume": true,
+      "evidence": [
+        "First real autonomous run exposed unbounded model-generated novelty-search queue fanout (28 total searches observed after gap generation).",
+        "Planner now enforces validated fanout defaults of 2 gap candidates x 2 novelty queries per gap, authoritative materialization is bounded, and surplus queued legacy novelty jobs are deterministically cancelled/ignored.",
+        "PR #17 validation CI 36827652090 PASS and canonical main CI 36827778339 PASS."
+      ]
+    },
+    {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "03babb404e9e6a254deec38fea6ea5ab3b8b05ad",
+      "identity": "aafde498d728e6e04a65902095f269d3ef9a7901",
       "required_for_resume": true,
       "evidence": [
         "stage=model_backed_acceptance_v1",
-        "last_validated_boundary=research-engine/main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad; native ChatGPT-plan Codex runtime and persistent daemon validated",
-        "acceptance_run=acceptance-codex-rf-v1 resumed in place and RUNNING after bounded budget review",
-        "current_budgets=input=360000 output=40000 semantic_jobs=12 tier_caps CHEAP=5 STANDARD=5 STRONG=3; usage_at_resume=input=161973 output=2985 semantic_jobs=6",
+        "last_validated_boundary=research-engine/main@aafde498d728e6e04a65902095f269d3ef9a7901; bounded novelty fanout fix merged; canonical main CI 36827778339 PASS",
+        "live_acceptance_evidence=acceptance-codex-rf-v1 autonomously completed checkpoint, synthesis, gap generation and live novelty search under ChatGPT-plan Codex; durable knowledge checkpoint exists",
+        "production_issue_found=old planner allowed unbounded model-generated gap/query queue fanout; observed 28 novelty-search jobs; token/tier budgets still bounded actual execution",
+        "production_fix=fanout defaults 2 gaps x 2 queries, authoritative materialization bounded, legacy surplus queued novelty jobs cancelable during reconciliation",
+        "lambda_boundary=host still expected on 03babb404e9e6a254deec38fea6ea5ab3b8b05ad until current run is confirmed paused/gated; do not race a live semantic job",
         "cost_boundary=included ChatGPT/Codex plan allowance only; no OPENAI_API_KEY and no paid API fallback",
-        "resume=observe persisted run state only until WAITING_HUMAN, PAUSED_BUDGET, FAILED, or other terminal/gated state"
+        "resume=inspect acceptance-codex-rf-v1 current durable status; when safely PAUSED_BUDGET/WAITING_HUMAN, fast-forward Lambda to aafde498d728e6e04a65902095f269d3ef9a7901, restart user daemon, then reconcile/salvage the same run as appropriate"
       ]
     },
     {
@@ -1716,18 +1729,30 @@
         "Usage remained unchanged at resume boundary: input=161973, output=2985, semantic_jobs=6, CHEAP=2, STANDARD=4.",
         "Budget status reported exhausted=false with no reasons; persistent daemon remained active."
       ]
+    },
+    {
+      "check": "Bounded autonomous novelty fanout",
+      "result": "PASS",
+      "evidence": [
+        "research-engine main advanced to aafde498d728e6e04a65902095f269d3ef9a7901.",
+        "Fanout policy defaults: max_gap_candidates=2 and max_novelty_queries_per_gap=2; policy values are validated as positive integers.",
+        "Planner caps execution fanout and cancels surplus queued novelty jobs from oversubscribed legacy runs; authoritative gap materialization also applies the cap.",
+        "Regression coverage includes 3 gaps x 3 queries collapsing to the bounded 2 x 2 graph and PostgreSQL salvage of a pre-existing surplus novelty queue.",
+        "Canonical main CI 36827778339 passed tests, Compose validation, and Docker image build."
+      ]
     }
   ],
   "blockers": [
-    "acceptance-codex-rf-v1 is RUNNING again after bounded budget review; final model-backed acceptance awaits its next durable gated or terminal state."
+    "The bounded novelty-fanout fix is validated but not yet deployed to the user's Lambda. The current acceptance run's latest status must be read before restarting the daemon so no active semantic job is raced."
   ],
   "remaining_work": [
-    "Observe acceptance-codex-rf-v1 until WAITING_HUMAN, another PAUSED_BUDGET, FAILED, or other gated/terminal state.",
-    "If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload and validate model_backed_acceptance_v1.",
-    "If PAUSED_BUDGET again, inspect durable usage and raise only the specific exhausted guardrail needed to complete acceptance.",
-    "After acceptance passes, resume RF corpus expansion through the daemon and operate continuously while pacing or pausing to stay within the included Codex allowance."
+    "Inspect the current durable state of acceptance-codex-rf-v1 and deploy research-engine main@aafde498d728e6e04a65902095f269d3ef9a7901 only at a safe paused/human gate boundary.",
+    "Use the bounded-fanout planner to salvage/cancel surplus queued novelty work in the same acceptance run, then apply only the budget changes justified by the remaining bounded graph.",
+    "Reach WAITING_HUMAN and verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload.",
+    "After acceptance passes, implement/validate plan-limit-aware pacing/backoff so 24/7 operation pauses cleanly when the included weekly Codex allowance is unavailable rather than exhausting job retries.",
+    "Then resume RF corpus expansion through the daemon and tune concurrency/model tiers against observed allowance consumption and quality."
   ],
-  "next_safe_action": "Observe persisted state for acceptance-codex-rf-v1 without manually orchestrating jobs. If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload. If PAUSED_BUDGET again, inspect exact exhausted reason and apply only a bounded increase if justified.",
+  "next_safe_action": "On the user's Lambda, read acceptance-codex-rf-v1 durable run/budget/job state first. If the run is still RUNNING, do not change the checkout or restart the daemon; return the status so the bounded existing budget can gate it. If it is PAUSED_BUDGET or WAITING_HUMAN, fast-forward the clean research-engine checkout from 03babb404e9e6a254deec38fea6ea5ab3b8b05ad to exact main@aafde498d728e6e04a65902095f269d3ef9a7901, restart the user systemd daemon to load the bounded-fanout planner, and return post-restart non-secret run/job/health state. Do not configure OPENAI_API_KEY.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general. Production semantic execution is constrained to the user's included ChatGPT/Codex plan allowance; continuous operation must pace or pause rather than fall back to paid API usage."
