@@ -30,7 +30,7 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: a05f6881dc55aef1cae11e755449df050c975708
+- Remote checkpoint: c4303853391fd00618cb664fcb55dc67a9affbdd
 - Remote verified: true
 
 ### workspace-control
@@ -42,11 +42,11 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Continue HW2 Floating-point Problem 1(b) in LEARNING mode from MTH602 unit-ingestion-hw2@a05f6881dc55aef1cae11e755449df050c975708. Ask the student to restate the three phases of the observed error curve with the refined distinction: huge early relative error from enormous truncated partial sums versus the tiny target, rapid reduction as later terms cancel and truncation error shrinks, then a catastrophic-cancellation/roundoff floor near order-one relative error. Once correct, treat 1(b) as complete and move to 1(c) without revealing the stable reformulation before diagnosing whether the student can find it.
+Enter HW2 Floating-point Problem 1(c) in LEARNING mode from MTH602 unit-ingestion-hw2@c4303853391fd00618cb664fcb55dc67a9affbdd. Part 1(a) and 1(b) are complete. Ask the smallest diagnostic that tests whether the student can find a stable algebraic reformulation that avoids evaluating the Taylor series directly at a large negative argument while leaving taylor_exp unchanged. Do not reveal the reformulation unless the student is blocked.
 
 ## Remaining work
 
-- Finish Floating-point Problem 1(b) by verifying the refined three-phase interpretation of the executed convergence curve, then begin 1(c) in LEARNING mode and diagnose the stable reformulation without changing taylor_exp.
+- Begin Floating-point Problem 1(c) in LEARNING mode: diagnose a numerically stable reformulation for e^-20 that does not modify taylor_exp, then demonstrate it with a second convergence plot and interpret why it works.
 - Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.
 - Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.
 - Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.
