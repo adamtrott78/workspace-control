@@ -1,0 +1,261 @@
+{
+  "schema_version": 2,
+  "task_id": "research-engine-observability-agent-ops-v1",
+  "title": "Research Engine Observability, Agent Operations & Chat Bridge v1",
+  "status": "PLANNED",
+  "goal": "Build a low-overhead, provenance-preserving operations layer for the autonomous research engine that provides a live terminal HUD, durable per-agent telemetry and throughput metrics, empirical Codex 5-hour/weekly allowance forecasting, ChatGPT-visible status mirroring, and a safe asynchronous bridge for agents to request high-level reasoning from ChatGPT without paid API fallback or direct scientific-state mutation.",
+  "execution_topology": "composed",
+  "workflow": null,
+  "parent_execution_owner": "automated-research-engine-v1",
+  "current_stage": "observability_contract",
+  "acceptance_criteria": [
+    "A terminal HUD refreshes live operational state without mutating research state and shows daemon health, active run/phase, current agents/jobs, queue depth/age, source funnel, evidence/gap funnel, throughput, failures/backoffs, and Codex allowance telemetry.",
+    "Every logical agent role and ephemeral worker instance is durably identifiable, including code checkpoint, host/process generation, supported tier/model, current job, heartbeat, cumulative jobs, elapsed time, failures/retries/backoffs, and model-usage attribution.",
+    "High-frequency telemetry remains authoritative in PostgreSQL; derived rollups are reproducible from append-only or immutable event records rather than being authoritative counters only.",
+    "Per-agent, per-tier, per-model, per-job-type, and per-run usage can be queried for input, output, cached-input, reasoning-output, semantic-call count, wall time, queue time, and percentage share of total usage.",
+    "Research throughput can be reported over rolling and lifetime windows, including discovered, retained, acquired, extracted, verified, checkpointed, synthesized, gap-generated, novelty-searched, novelty-arbitrated, and human-reviewed counts plus stage latency and queue age.",
+    "The system records explicit ChatGPT/Codex plan-usage observations for both the 5-hour and weekly windows, correlates allowance deltas with durable usage events, and produces exhaustion/reset forecasts with a stated confidence level and no unsupported claim of exact token-to-plan conversion.",
+    "The initial user-observed calibration point of approximately 16% of the 5-hour allowance used during the 2026-10-01 acceptance/launch work is ingestible as a manual observation without rewriting research usage history.",
+    "A ChatGPT-readable live-ops mirror is published through GitHub without high-frequency commits to canonical code branches; ChatGPT can answer questions such as 'how is automated research going?' from that mirror plus durable rollups.",
+    "Permanent daily or run-level operational summaries preserve historical per-agent usage, throughput, backoffs, failures, and forecast observations while raw high-frequency telemetry remains in PostgreSQL.",
+    "Agents can enqueue structured Chat reasoning requests containing only bounded context/references; ChatGPT can read and respond through a durable GitHub bridge, and local agents can ingest the response without requiring an OPENAI_API_KEY.",
+    "Chat-bridge responses are advisory inputs only and cannot directly become verified scientific evidence, approve human gates, or mutate authoritative research records without the existing local validation/materialization path.",
+    "The bridge design clearly distinguishes user-triggered Chat processing from any later scheduled ChatGPT automation; no claim of autonomous real-time ChatGPT invocation is made until that path is actually validated.",
+    "Production continues to forbid paid OpenAI API fallback and secrets are never persisted in telemetry, GitHub issues, task capsules, or exported snapshots.",
+    "The observability path adds negligible research disruption: telemetry failure cannot corrupt scientific state, and publisher/HUD failure does not stop the research daemon unless an explicit safety invariant is violated.",
+    "All new schema, CLI/HUD behavior, publisher behavior, usage forecasting, agent attribution, and chat-bridge state transitions have unit/PostgreSQL integration coverage and are validated against the live sustained RF run."
+  ],
+  "constraints": [
+    "Do not stop or recreate rf-open-world-corpus-expansion-v1 merely to build observability; instrumentation must be additive/migration-safe.",
+    "Do not introduce OPENAI_API_KEY, paid OpenAI API billing, or automatic paid fallback.",
+    "Do not infer ChatGPT plan allowance from tokens alone; forecasts must be empirically calibrated against explicit observed plan-usage percentages/reset information and carry confidence/uncertainty.",
+    "Do not expose prompts, source text, secrets, credentials, or sensitive environment values in public or broad telemetry surfaces; Chat-visible payloads must be bounded operational summaries and durable record references.",
+    "Do not use workspace-control main as a high-frequency telemetry sink.",
+    "Do not create high-frequency Git commits for live telemetry; prefer a machine-maintained GitHub issue for current state and low-frequency durable rollups for history.",
+    "Do not let monitoring write to evidence_objects, verification_events, knowledge_checkpoints, synthesis_artifacts, gap_candidates, novelty_challenges, or human-review decisions except through the existing authoritative research workflows.",
+    "Do not collapse logical agent identity into PID alone; distinguish stable role identity from ephemeral process/session identity.",
+    "Do not auto-approve future scientific human-review gates.",
+    "Keep raw high-frequency operational truth local to PostgreSQL; GitHub mirrors are derived observability surfaces, not the authoritative database.",
+    "Chat reasoning requests must be idempotent, bounded, traceable to a run/job/checkpoint where applicable, and safe to ignore or retry.",
+    "Any scheduled ChatGPT bridge is limited by the product automation cadence and must be separately validated before being described as continuous agent-to-Chat communication."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "6ba5cbb8623eadbcd8ee6d2c68a3821dcd63e121",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "6ba5cbb8623eadbcd8ee6d2c68a3821dcd63e121",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/research-engine-observability-agent-ops-v1.json",
+        "tasks/active/research-engine-observability-agent-ops-v1.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "mutate",
+      "base_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
+        "verified": true
+      },
+      "local": {
+        "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
+        "branch": "main",
+        "head_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
+        "clean": true
+      },
+      "allowed_mutation_scope": [
+        "sql/schema.sql",
+        "src/research_engine/**",
+        "tests/**",
+        "deploy/**",
+        "README.md",
+        ".github/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "observability_contract",
+      "status": "PLANNED",
+      "execution_owner": "research-engine-observability",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "workspace-control@6ba5cbb8623eadbcd8ee6d2c68a3821dcd63e121",
+        "research-engine@6a423e0fd38283687cae2eb060405a2a82643450",
+        "runtime:rf-open-world-corpus-expansion-v1"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "telemetry_schema_and_agent_identity",
+      "status": "PLANNED",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+runtime",
+      "inputs": [
+        "observability_contract"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "hud_and_ops_cli",
+      "status": "PLANNED",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+runtime",
+      "inputs": [
+        "telemetry_schema_and_agent_identity"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "codex_allowance_telemetry_and_forecasting",
+      "status": "PLANNED",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+runtime",
+      "inputs": [
+        "telemetry_schema_and_agent_identity",
+        "hud_and_ops_cli",
+        "user-observation:5h-used≈16%@2026-10-01"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "chat_visible_ops_mirror",
+      "status": "PLANNED",
+      "execution_owner": "research-engine-observability",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+runtime",
+      "inputs": [
+        "hud_and_ops_cli",
+        "codex_allowance_telemetry_and_forecasting"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "chat_reasoning_bridge",
+      "status": "PLANNED",
+      "execution_owner": "research-engine-observability",
+      "selected_executor": "chatgpt",
+      "selected_surface": "composed",
+      "inputs": [
+        "chat_visible_ops_mirror"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "live_runtime_validation",
+      "status": "PLANNED",
+      "execution_owner": "cross-executor-validation",
+      "selected_executor": "chatgpt",
+      "selected_surface": "composed",
+      "inputs": [
+        "telemetry_schema_and_agent_identity",
+        "hud_and_ops_cli",
+        "codex_allowance_telemetry_and_forecasting",
+        "chat_visible_ops_mirror",
+        "chat_reasoning_bridge",
+        "runtime:rf-open-world-corpus-expansion-v1"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "completion",
+      "status": "PLANNED",
+      "execution_owner": "research-engine-observability",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "live_runtime_validation"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "research-engine-launch-baseline",
+      "kind": "git_commit",
+      "identity": "6a423e0fd38283687cae2eb060405a2a82643450",
+      "required_for_resume": true,
+      "evidence": [
+        "research-engine main is the validated sustained-run launch build.",
+        "rf-open-world-corpus-expansion-v1 was launched successfully with daemon active/running and zero restart/failure count at launch receipt."
+      ]
+    },
+    {
+      "id": "workspace-control-task-baseline",
+      "kind": "git_commit",
+      "identity": "6ba5cbb8623eadbcd8ee6d2c68a3821dcd63e121",
+      "required_for_resume": true,
+      "evidence": [
+        "workspace-control contains the post-launch restore point for automated-research-engine-v1."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "6a423e0fd38283687cae2eb060405a2a82643450",
+      "required_for_resume": true,
+      "evidence": [
+        "stage=observability_contract",
+        "research-engine/main@6a423e0fd38283687cae2eb060405a2a82643450",
+        "workspace-control/main@6ba5cbb8623eadbcd8ee6d2c68a3821dcd63e121",
+        "live target=rf-open-world-corpus-expansion-v1",
+        "initial plan-usage observation supplied by user: approximately 16% of current 5-hour Codex window used during 2026-10-01 testing/launch"
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Observability task creation baseline",
+      "result": "PASS",
+      "evidence": [
+        "research-engine remote main verified at 6a423e0fd38283687cae2eb060405a2a82643450.",
+        "workspace-control remote main verified at 6ba5cbb8623eadbcd8ee6d2c68a3821dcd63e121.",
+        "Existing research-engine runtime already persists research_workers, research_jobs, research_job_attempts, research_usage_events, provider backoff state, and run/stage state; the new task extends rather than replaces those authorities.",
+        "User requested live terminal monitoring, permanent per-agent usage/throughput history, Codex 5-hour/weekly exhaustion forecasting, Chat-visible status, and an agent-to-Chat reasoning bridge."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Specify the metric taxonomy, stable logical-agent identity, event/rollup schema, retention policy, and the exact separation between authoritative PostgreSQL telemetry and derived Chat-visible summaries.",
+    "Extend usage/event capture to include cached input tokens, reasoning output tokens, wall/queue duration, agent/session attribution, error/backoff outcomes, and stage/source/evidence/gap throughput.",
+    "Implement read-only ops snapshot/report commands and a terminal HUD with rolling throughput, queue/latency, source/evidence/gap funnel, current-agent, failure/backoff, and allowance panels.",
+    "Implement explicit 5-hour/weekly Codex usage observations plus empirical forecast calibration/ETA with uncertainty and per-agent/model attribution.",
+    "Implement a low-frequency GitHub live-ops issue publisher and permanent daily/run summaries that ChatGPT can read without high-frequency code commits.",
+    "Implement structured Chat reasoning request/response records and a GitHub issue-based bridge; validate user-triggered Chat processing first, then separately evaluate an hourly ChatGPT automation if useful.",
+    "Validate the complete observability stack against rf-open-world-corpus-expansion-v1 without interrupting or corrupting the running scientific workflow.",
+    "Document operator commands and cold-start routes, then checkpoint and verify the implementation."
+  ],
+  "next_safe_action": "Start from research-engine main at the verified launch checkpoint and inspect the existing research_workers, research_jobs, research_job_attempts, research_usage_events, daemon health/report code, Codex execution metadata, and current sustained-run runtime. Write the observability contract first: define stable logical agent roles versus ephemeral sessions, append-only telemetry fields, derived metric formulas/windows, allowance-observation/forecast semantics, GitHub live-ops issue format, daily/run rollup format, and chat-reasoning request/response safety boundary. Do not add telemetry schema or runtime mutation until that contract is explicit and regression-safe for the already-running rf-open-world-corpus-expansion-v1.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Preferred UX: a terminal HUD launched from Bash/CLI, backed by read-only PostgreSQL queries rather than Bash scraping. Proposed Chat-visible mirror: one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups; raw high-frequency telemetry remains PostgreSQL-authoritative. Proposed Chat bridge: agents create bounded structured reasoning requests that are mirrored to GitHub issues; ChatGPT can read/update them when invoked. This is not equivalent to a direct autonomous ChatGPT conversation API and must not be described as such until separately validated."
+}
