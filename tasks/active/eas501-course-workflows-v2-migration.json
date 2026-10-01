@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "eas501-course-workflows-v2-migration",
   "title": "EAS501 Course Workflows v2 Migration",
-  "status": "PLANNED",
+  "status": "IN_PROGRESS",
   "goal": "Explicitly migrate EAS501 from its current pinned workspace-control compatibility contract to the promoted reusable course-workflow architecture while preserving current assessment/course state and project-local authority.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -12,7 +12,7 @@
     "content_sha": "da6076a9b4baf328d6a91526f6dff7aa999733b6"
   },
   "parent_execution_owner": "course-workflows-v2-refactor",
-  "current_stage": "baseline_recovery",
+  "current_stage": "shared_checkpoint_integration",
   "acceptance_criteria": [
     "A fresh executor starts only from the target repository root README at the pinned checkpoint plus this capsule and the exact promoted shared workflow binding.",
     "Project-local course/source/assignment/mastery/artifact authority remains in the target repository; workspace-control contributes reusable mechanics only.",
@@ -73,7 +73,7 @@
   "stages": [
     {
       "id": "baseline_recovery",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "eas501-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -81,31 +81,64 @@
         "bccb636f35bbb0f530c8fa15b1a7b3d573193e07",
         "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9:course-bootstrap-migration-v1"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "EAS501-AdamTrott eas501-tutor-bootstrap independently verified at exact baseline bccb636f35bbb0f530c8fa15b1a7b3d573193e07.",
+        "Existing workspace-control.lock.json resolved at compatible_commit 450eebeef6b76a674913949863082277b6bdb811 with portability/operator/tutoring/template/evaluation owners.",
+        "Promoted migration workflow independently resolved at workspace-control 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 with blob da6076a9b4baf328d6a91526f6dff7aa999733b6."
+      ],
+      "validation": [
+        {
+          "check": "Exact target and current compatibility baseline recovery",
+          "result": "PASS",
+          "evidence": [
+            "Live eas501-tutor-bootstrap still advertises bccb636f35bbb0f530c8fa15b1a7b3d573193e07; no reset/rebase is required or authorized.",
+            "workspace-control.lock.json still pins 450eebeef6b76a674913949863082277b6bdb811, proving the promoted v2 course-workflow checkpoint has not already been adopted.",
+            "Root README routes through the lock before local course/practice owners, satisfying the existing cold-start boundary."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "local_owner_mapping",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "eas501-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "baseline_recovery"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "Course/source authority: course/CONTEXT.md + course/SOURCES.json + smallest relevant tracked source.",
+        "Tutoring/mastery owners: COURSE_TUTOR.md, study/SKILL_MAP.md, study/MASTERY.md, study/MASTERY_LOG.md, study/NOTATION.md, study/COURSE_INDEX.md.",
+        "Exam 1 historical/readiness evidence: practice/exam01/CONTEXT.md, LEARNING.md, EXAM_READINESS.md, POST_EXAM.md.",
+        "Exam 2 assessment scope/relevance owners: practice/exam02/CONTEXT.md + ASSESSMENT_MAP.md + LEARNING.md.",
+        "Local operator supplement: operator/LOCAL.md; no mandatory course runtime is established."
+      ],
+      "validation": [
+        {
+          "check": "Existing local semantic owners recovered before design changes",
+          "result": "PASS",
+          "evidence": [
+            "Current course/source truth remains separate from historical assessment evidence; course/CONTEXT.md explicitly preserves that distinction.",
+            "Exam 1 post-exam evidence is student-reported and remains non-authoritative for mathematical/course truth.",
+            "Exam 2 already uses contextual assessment weighting and current-source override semantics; no historical assessment evidence needs rewriting.",
+            "No live conversational builder/tutor hierarchy was found that owns course truth or mutation authority; the durable repository routes already carry those semantics."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "shared_checkpoint_integration",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "eas501-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "local_owner_mapping"
+        "local_owner_mapping",
+        "existing workspace-control.lock.json compatible_commit 450eebeef6b76a674913949863082277b6bdb811",
+        "promoted workspace-control checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9"
       ],
       "outputs": [],
       "validation": [],
@@ -169,16 +202,25 @@
         "Target repository branch eas501-tutor-bootstrap verified at exact starting checkpoint 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5.",
         "No child-repository mutation was performed by the parent task."
       ]
+    },
+    {
+      "check": "Baseline recovery and local-owner mapping",
+      "result": "PASS",
+      "evidence": [
+        "Target branch remained at the refreshed bccb636f35bbb0f530c8fa15b1a7b3d573193e07 baseline during recovery.",
+        "Existing compatibility semantics and all course/source/mastery/assessment owners were recovered before mutation.",
+        "Promoted course-assessment semantics were compared against the existing Exam 2 owner; factual authority and contextual assessment relevance are already distinct."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Recover EAS501 root routes and current workspace-control lock semantics.",
-    "Map current tutor/assessment/source/mastery owners to the promoted adapter roles.",
-    "Perform an explicit compatible_commit transition only after validation.",
-    "Run cold-start/tutoring/assessment-relevance regressions.",
-    "Checkpoint and verify the migrated project state."
+    "Advance the existing workspace-control.lock.json compatibility pin explicitly to 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and map promoted reusable course workflow roles through the existing EAS501 adapters.",
+    "Run cold-start, tutoring/mastery, assessment-relevance, source-routing, artifact/workflow, and executor-portability regressions while verifying authoritative evidence blobs remain unchanged.",
+    "Checkpoint and independently verify the migrated EAS501 project state, establish final HANDOFF_SAFE state, and archive the migration task."
   ],
-  "next_safe_action": "Start only from EAS501-AdamTrott README.md at bccb636f35bbb0f530c8fa15b1a7b3d573193e07 on branch eas501-tutor-bootstrap. Read its workspace-control.lock.json and resolve the currently pinned shared contracts before touching any file. Compare those local semantics to the promoted course-bootstrap workflow pinned by this capsule; preserve the completed Exam 1 post-exam evidence, current Exam 2 planning/source material, and all existing mastery/assessment content. The branch baseline has already been deliberately refreshed after Exam 1, so do not reset or rebase it to the older 52eb8e44 checkpoint.",
-  "notes": " The EAS501 target baseline was deliberately refreshed from 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5 to bccb636f35bbb0f530c8fa15b1a7b3d573193e07 after the Exam 1 task completed and Exam 2 planning was initialized. Compare evidence showed three forward-only course/assessment commits and no workspace-control.lock.json migration."
+  "next_safe_action": "On EAS501-AdamTrott:eas501-tutor-bootstrap, mutate only the existing adapter/routing layer from parent bccb636f35bbb0f530c8fa15b1a7b3d573193e07: advance workspace-control.lock.json compatible_commit from 450eebeef6b76a674913949863082277b6bdb811 to 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; update COURSE_TUTOR.md and README.md to route the promoted content-ingestion, assessment-preparation, study-session, assignment/take-home-project, cheat-sheet, communications-ingestion, and document-artifact workflows to existing or deliberately future-created local owners. Preserve all practice/exam01, practice/exam02, course/source, mastery, skill-map, notation, and learning-record blobs unchanged. Then verify the exact changed-path set and remote checkpoint before regression validation.",
+  "notes": " The EAS501 target baseline was deliberately refreshed from 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5 to bccb636f35bbb0f530c8fa15b1a7b3d573193e07 after the Exam 1 task completed and Exam 2 planning was initialized. Compare evidence showed three forward-only course/assessment commits and no workspace-control.lock.json migration.",
+  "last_executor": "chatgpt",
+  "last_surface": "github"
 }

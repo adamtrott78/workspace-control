@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: eas501-course-workflows-v2-migration
 - Title: EAS501 Course Workflows v2 Migration
-- Status: PLANNED
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -42,15 +42,13 @@ Explicitly migrate EAS501 from its current pinned workspace-control compatibilit
 
 ## Next safe action
 
-Start only from EAS501-AdamTrott README.md at bccb636f35bbb0f530c8fa15b1a7b3d573193e07 on branch eas501-tutor-bootstrap. Read its workspace-control.lock.json and resolve the currently pinned shared contracts before touching any file. Compare those local semantics to the promoted course-bootstrap workflow pinned by this capsule; preserve the completed Exam 1 post-exam evidence, current Exam 2 planning/source material, and all existing mastery/assessment content. The branch baseline has already been deliberately refreshed after Exam 1, so do not reset or rebase it to the older 52eb8e44 checkpoint.
+On EAS501-AdamTrott:eas501-tutor-bootstrap, mutate only the existing adapter/routing layer from parent bccb636f35bbb0f530c8fa15b1a7b3d573193e07: advance workspace-control.lock.json compatible_commit from 450eebeef6b76a674913949863082277b6bdb811 to 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; update COURSE_TUTOR.md and README.md to route the promoted content-ingestion, assessment-preparation, study-session, assignment/take-home-project, cheat-sheet, communications-ingestion, and document-artifact workflows to existing or deliberately future-created local owners. Preserve all practice/exam01, practice/exam02, course/source, mastery, skill-map, notation, and learning-record blobs unchanged. Then verify the exact changed-path set and remote checkpoint before regression validation.
 
 ## Remaining work
 
-- Recover EAS501 root routes and current workspace-control lock semantics.
-- Map current tutor/assessment/source/mastery owners to the promoted adapter roles.
-- Perform an explicit compatible_commit transition only after validation.
-- Run cold-start/tutoring/assessment-relevance regressions.
-- Checkpoint and verify the migrated project state.
+- Advance the existing workspace-control.lock.json compatibility pin explicitly to 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and map promoted reusable course workflow roles through the existing EAS501 adapters.
+- Run cold-start, tutoring/mastery, assessment-relevance, source-routing, artifact/workflow, and executor-portability regressions while verifying authoritative evidence blobs remain unchanged.
+- Checkpoint and independently verify the migrated EAS501 project state, establish final HANDOFF_SAFE state, and archive the migration task.
 
 ## Blockers / gates
 
