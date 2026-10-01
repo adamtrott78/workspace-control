@@ -233,9 +233,10 @@
         "workspace-control/main@08b95dabc03808820e6c7f13ccb04796fdb2e6a5",
         "research-engine/main@6a423e0fd38283687cae2eb060405a2a82643450",
         "policy change=user wants monitoring and tuning before further sustained semantic processing",
-        "next runtime action=stop research-engine-daemon.service while preserving rf-open-world-corpus-expansion-v1",
         "bridge direction=prefer private MCP/plugin direct tooling; evaluate Slack separately as event/wake-up bus; GitHub remains durable audit",
-        "allowance calibration seed=user observed approximately 16% of current 5-hour Codex window consumed by acceptance/testing work"
+        "allowance calibration seed=user observed approximately 16% of current 5-hour Codex window consumed by acceptance/testing work",
+        "runtime_pause=research-engine-daemon.service inactive/dead MainPID=0 Result=success NRestarts=0",
+        "next runtime action=do not restart semantic processing until read-only HUD and initial allowance telemetry are implemented and validated"
       ]
     }
   ],
@@ -260,10 +261,18 @@
         "Slack is available as an optional ChatGPT plugin for this account but is not connected; it is a candidate event/wake-up channel, not yet a dependency.",
         "GitHub remains suitable for durable requests/audit history but is not the preferred high-frequency wake-up transport."
       ]
+    },
+    {
+      "check": "Research engine semantic pause before instrumentation",
+      "result": "PASS",
+      "evidence": [
+        "User stopped research-engine-daemon.service on the Lambda before observability implementation.",
+        "Observed systemd state: ActiveState=inactive, SubState=dead, MainPID=0, Result=success, NRestarts=0.",
+        "rf-open-world-corpus-expansion-v1 remains durable in PostgreSQL and no additional semantic allowance should be consumed while the daemon is stopped."
+      ]
     }
   ],
   "blockers": [
-    "The sustained RF run should be operationally paused on the Lambda before additional semantic allowance is consumed; this requires a local systemd action by the user.",
     "Direct MCP/plugin write capability and any Slack-triggered automation must be validated on the user's actual ChatGPT plan/workspace before the bridge can depend on them."
   ],
   "remaining_work": [
@@ -277,7 +286,7 @@
     "Optionally connect Slack and evaluate it as an event-driven reasoning-request wake-up bus; retain GitHub/PostgreSQL as durable truth.",
     "Implement and validate structured Chat reasoning request/response state transitions without allowing Chat responses to bypass scientific verification or human gates."
   ],
-  "next_safe_action": "First pause research-engine-daemon.service on the user's Lambda so rf-open-world-corpus-expansion-v1 remains durable but consumes no additional semantic allowance. After pause evidence is returned, inspect the persisted run/job/usage/worker tables without mutation and write the observability contract. Implement the read-only ops snapshot and terminal HUD before any sustained semantic processing resumes; the first monitored restart should be a tightly bounded calibration run used to measure allowance burn and tune concurrency/model tiers.",
+  "next_safe_action": "With research-engine-daemon.service confirmed inactive/dead and rf-open-world-corpus-expansion-v1 preserved, inspect the existing research_workers, research_jobs, research_job_attempts, research_usage_events, daemon health/report code, Codex execution metadata, and deployment/runtime identifiers. Write and validate the observability contract first: stable logical agent roles versus ephemeral sessions, append-only telemetry fields, derived metric formulas/windows, retention policy, allowance-observation/forecast semantics, HUD panel contract, Chat-visible summary contract, and MCP/Slack request-response safety boundary. Then implement the read-only ops snapshot and terminal HUD without resuming semantic processing.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Preferred UX: a terminal HUD launched from Bash/CLI, backed by read-only PostgreSQL queries rather than Bash scraping. Proposed Chat-visible mirror: one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups; raw high-frequency telemetry remains PostgreSQL-authoritative. Proposed Chat bridge: agents create bounded structured reasoning requests that are mirrored to GitHub issues; ChatGPT can read/update them when invoked. This is not equivalent to a direct autonomous ChatGPT conversation API and must not be described as such until separately validated."
