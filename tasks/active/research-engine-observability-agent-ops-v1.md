@@ -31,11 +31,11 @@ Build a low-overhead, provenance-preserving operations layer for the autonomous 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0
+- Remote checkpoint: 051a3b0c9828de411812b0a519a070a2aa87683b
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: 28e8a0904831f70e5689fbc8de75fc1fbc071f32
+- Local HEAD: 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0
 - Local clean: true
 
 ## Current stage
@@ -44,19 +44,18 @@ hud_and_ops_cli
 
 ## Next safe action
 
-On the paused Lambda, clean fast-forward research-engine main from 28e8a0904831f70e5689fbc8de75fc1fbc071f32 to exact validated 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 and rerun deploy/deploy-hud-paused.sh. At the prompts, enter the ChatGPT usage UI values directly as percent LEFT and relative reset duration (for the current screenshot: 86 then '3h 20m', 96 then '5d 8h'). The deployer is additive/idempotent and must finish with the daemon still stopped.
+On the Lambda while research-engine-daemon.service remains inactive/dead, clean fast-forward research-engine main from 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 to exact validated 051a3b0c9828de411812b0a519a070a2aa87683b. Do not rerun schema migration and do not START. Because the venv is an editable install, immediately run `HUD --once --no-color` and return the PIPELINE, AGENTS, USAGE / EFFICIENCY, USAGE BY STAGE, QUEUE / ALERTS, and allowance sections for tuning review.
 
 ## Remaining work
 
-- Fast-forward the paused Lambda to 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 and rerun the repository-owned paused HUD deployer.
-- Inspect the real one-shot HUD and historical usage attribution while research remains stopped.
-- Collect a second allowance reading around a tightly bounded calibration workload and tune model/tier/concurrency budgets before sustained research resumes.
-- Then continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge.
+- Fast-forward the paused Lambda to research-engine main@051a3b0c9828de411812b0a519a070a2aa87683b and capture HUD --once --no-color; confirm run-scoped evidence and historical Luna/Terra/Sol labels plus the new usage-by-stage panel.
+- Analyze stage-level historical usage for the completed 9-paper sustained batch (28 semantic calls, 959229 input tokens, 22030 output tokens) and design a tightly bounded calibration workload.
+- Take a second 5-hour/weekly allowance reading immediately around that bounded calibration workload and use the measured allowance delta to tune model/tier/concurrency/context/fanout before any sustained START.
+- After monitoring/tuning is validated, continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge.
 
 ## Blockers / gates
 
-- Lambda local research-engine is at 28e8a0904831f70e5689fbc8de75fc1fbc071f32 after the interrupted paused-HUD deploy; daemon remains stopped.
-- Lambda must fast-forward to validated main@263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 and rerun deploy/deploy-hud-paused.sh to finish allowance observation, snapshot/HUD validation, and shortcut installation.
+- Lambda is one code-only fast-forward behind canonical research-engine main: local 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 versus validated remote 051a3b0c9828de411812b0a519a070a2aa87683b. No schema migration is required for this HUD accuracy patch.
 - At least two trustworthy timestamped observations in the same Codex allowance window are required before exhaustion ETA can move beyond CALIBRATING.
 
 ## Fresh-chat initialization
