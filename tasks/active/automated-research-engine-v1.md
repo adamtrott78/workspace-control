@@ -42,18 +42,18 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Next safe action
 
-Resume acceptance-codex-rf-v1 in place with only the final bounded allowance needed for two remaining CHEAP novelty searches and two STRONG novelty arbitrations: max_semantic_jobs=15, CHEAP=7, STANDARD=5, STRONG=4, with a bounded input-token ceiling increase sufficient for four remaining model calls. Then observe persisted state only until WAITING_HUMAN or another budget/failure gate.
+Observe acceptance-codex-rf-v1 persisted state only. Expected bounded completion is two CHEAP novelty searches followed by two STRONG novelty arbitrations and deterministic transition to WAITING_HUMAN. If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload before validating model_backed_acceptance_v1. If PAUSED_BUDGET or FAILED, inspect the exact persisted reason before any mutation.
 
 ## Remaining work
 
-- Perform the final bounded in-place budget resume for the two remaining CHEAP novelty searches and two STRONG novelty arbitrations.
-- Observe acceptance-codex-rf-v1 to WAITING_HUMAN and verify evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload.
-- Validate model_backed_acceptance_v1 after WAITING_HUMAN evidence passes.
-- Implement/validate plan-limit-aware pacing/backoff for continuous operation under the included weekly Codex allowance, then resume RF corpus expansion.
+- Observe acceptance-codex-rf-v1 through the final bounded novelty graph to WAITING_HUMAN or another gated/terminal state.
+- At WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload and validate model_backed_acceptance_v1.
+- Implement/validate plan-limit-aware pacing/backoff for continuous operation under the included weekly Codex allowance.
+- Then resume RF corpus expansion and tune concurrency/model tiers against observed allowance consumption and research quality.
 
 ## Blockers / gates
 
-- acceptance-codex-rf-v1 is safely PAUSED_BUDGET with only the bounded final graph remaining: two CHEAP novelty searches and two STRONG novelty arbitrations.
+- acceptance-codex-rf-v1 is RUNNING on its final bounded graph; model-backed acceptance awaits its next durable gated or terminal state.
 
 ## Fresh-chat initialization
 
