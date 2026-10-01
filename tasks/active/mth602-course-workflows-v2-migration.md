@@ -31,18 +31,18 @@ Explicitly migrate the current MTH602 repository integration to the promoted reu
 - Intent: read
 - Remote branch: main
 - Remote checkpoint: 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9
-- Remote verified: True
+- Remote verified: true
 
 ### MTH602-AdamTrott
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 62b7a03c7139cb3987b72ad66bdc532e8a61b82a
-- Remote verified: True
+- Remote branch: unit-ingestion-hw2
+- Remote checkpoint: 20dc641dcb9b505efe53daa52932521d0927ef3a
+- Remote verified: true
 
 ## Next safe action
 
-Start only from MTH602-AdamTrott README.md at 62b7a03c7139cb3987b72ad66bdc532e8a61b82a on branch main, then follow its documented routes. Read workspace-control course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 only through the exact binding in this capsule. Recover existing source/tutoring/homework/report owners and any current compatibility mechanism before proposing mutations. If the target branch no longer advertises 62b7a03c7139cb3987b72ad66bdc532e8a61b82a, update this capsule deliberately before mutating. Do not execute unrelated homework/course-content work as part of the migration.
+Start only from MTH602-AdamTrott README.md at 20dc641dcb9b505efe53daa52932521d0927ef3a on branch unit-ingestion-hw2, then follow its documented routes. Read workspace-control course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 only through the exact binding in this capsule. Recover the existing source/tutoring/homework/report owners and current compatibility mechanism before mutation. Preserve the newly ingested lecture state and initialized HW2 contract/learning/provenance state exactly. Do not perform any HW2 problem-solving or mastery work as part of the migration.
 
 ## Remaining work
 

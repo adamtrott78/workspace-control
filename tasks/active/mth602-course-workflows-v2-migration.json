@@ -22,14 +22,16 @@
     "Cold-start routing, tutoring/mastery semantics, mutation boundaries, and relevant artifact/source-ingestion regressions pass before completion.",
     "The final project checkpoint is pushed/verified and recoverable without prior conversation.",
     "Classroom/handwritten ingestion continues to preserve original images and permits direct multimodal synthesis without making OCR/Mathpix mandatory.",
-    "Existing MTH602 LaTeX homework source/build/render/visual-QA mechanics map cleanly to the shared document-artifact procedure without changing assignment truth."
+    "Existing MTH602 LaTeX homework source/build/render/visual-QA mechanics map cleanly to the shared document-artifact procedure without changing assignment truth.",
+    "The refreshed baseline's newly ingested lecture/course state and initialized HW2 bootstrap state are preserved exactly; the migration must not solve, rewrite, or advance HW2 coursework."
   ],
   "constraints": [
     "Do not mutate workspace-control shared architecture from this child; its workflow binding is read-only.",
     "Do not rewrite authoritative instructor/course content merely to fit the new shared architecture.",
     "Do not alter unrelated branches, assignments, research repositories, archived capsules, or external submission state.",
     "Do not silently rebase/reset/overwrite if the target branch moved after the pinned starting checkpoint; refresh durable task state first.",
-    "Follow the operator continuation obligation and use runtime only when project-specific validation actually requires it."
+    "Follow the operator continuation obligation and use runtime only when project-specific validation actually requires it.",
+    "Do not begin or solve HW2 during this migration. The homework task is deliberately suspended at its pre-solution bootstrap boundary and resumes only after migration."
   ],
   "repositories": [
     {
@@ -47,10 +49,10 @@
     {
       "name": "MTH602-AdamTrott",
       "intent": "mutate",
-      "base_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+      "base_sha": "20dc641dcb9b505efe53daa52932521d0927ef3a",
       "remote": {
-        "branch": "main",
-        "checkpoint_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+        "branch": "unit-ingestion-hw2",
+        "checkpoint_sha": "20dc641dcb9b505efe53daa52932521d0927ef3a",
         "verified": true
       },
       "local": null,
@@ -73,7 +75,7 @@
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+        "20dc641dcb9b505efe53daa52932521d0927ef3a",
         "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9:course-bootstrap-migration-v1"
       ],
       "outputs": [],
@@ -146,10 +148,11 @@
     {
       "id": "target-starting-checkpoint",
       "kind": "git_commit",
-      "identity": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
+      "identity": "20dc641dcb9b505efe53daa52932521d0927ef3a",
       "required_for_resume": true,
       "evidence": [
-        "MTH602-AdamTrott main verified at child creation"
+        "MTH602-AdamTrott unit-ingestion-hw2 verified at 20dc641dcb9b505efe53daa52932521d0927ef3a before migration.",
+        "This refreshed baseline includes three newly ingested lecture sessions, cumulative skill/index updates, and HW2 assignment/bootstrap/provenance state, but no HW2 problem solution work."
       ]
     }
   ],
@@ -159,9 +162,10 @@
       "check": "Child capsule creation baseline",
       "result": "PASS",
       "evidence": [
-        "Promoted shared workflow identity pinned at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9/workflows/course-bootstrap-migration.v1.json/da6076a9b4baf328d6a91526f6dff7aa999733b6.",
-        "Target repository branch main verified at exact starting checkpoint 62b7a03c7139cb3987b72ad66bdc532e8a61b82a.",
-        "No child-repository mutation was performed by the parent task."
+        "Promoted shared workflow identity remains pinned at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9/workflows/course-bootstrap-migration.v1.json/da6076a9b4baf328d6a91526f6dff7aa999733b6.",
+        "Target repository baseline deliberately refreshed to unit-ingestion-hw2@20dc641dcb9b505efe53daa52932521d0927ef3a after course-content ingestion and HW2 bootstrap.",
+        "The refreshed branch contains no HW2 solution work; the active HW2 task was suspended at the pre-solution boundary before migration.",
+        "No shared-workflow substitution was performed."
       ]
     }
   ],
@@ -173,5 +177,6 @@
     "Run cold-start/source-ingestion/tutoring/LaTeX artifact regressions.",
     "Checkpoint and verify the migrated project state."
   ],
-  "next_safe_action": "Start only from MTH602-AdamTrott README.md at 62b7a03c7139cb3987b72ad66bdc532e8a61b82a on branch main, then follow its documented routes. Read workspace-control course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 only through the exact binding in this capsule. Recover existing source/tutoring/homework/report owners and any current compatibility mechanism before proposing mutations. If the target branch no longer advertises 62b7a03c7139cb3987b72ad66bdc532e8a61b82a, update this capsule deliberately before mutating. Do not execute unrelated homework/course-content work as part of the migration."
+  "next_safe_action": "Start only from MTH602-AdamTrott README.md at 20dc641dcb9b505efe53daa52932521d0927ef3a on branch unit-ingestion-hw2, then follow its documented routes. Read workspace-control course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 only through the exact binding in this capsule. Recover the existing source/tutoring/homework/report owners and current compatibility mechanism before mutation. Preserve the newly ingested lecture state and initialized HW2 contract/learning/provenance state exactly. Do not perform any HW2 problem-solving or mastery work as part of the migration.",
+  "notes": " Baseline deliberately refreshed on 2026-10-01 from main@62b7a03c7139cb3987b72ad66bdc532e8a61b82a to unit-ingestion-hw2@20dc641dcb9b505efe53daa52932521d0927ef3a because content ingestion and HW2 initialization completed before any HW2 solution work began. Migration is intentionally interposed at this clean pre-solution boundary."
 }
