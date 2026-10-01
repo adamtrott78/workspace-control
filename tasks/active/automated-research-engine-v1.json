@@ -954,10 +954,10 @@
       "evidence": [
         "stage=model_backed_acceptance_v1",
         "last_validated_boundary=research-engine/main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad; Codex native-host production deployment validated; canonical main CI 36824221019 PASS",
-        "lambda_runtime=clean exact checkpoint; Codex CLI 0.155.1 logged in using ChatGPT; PostgreSQL/pgvector healthy; schema initialized; native venv and research-engine CLI smoke test PASS",
-        "production_env=~/adamArchives/Adam/.research-engine/research-engine.env mode 600; no OPENAI_API_KEY present",
-        "cost_boundary=production uses included ChatGPT/Codex plan allowance only; no paid API fallback",
-        "resume=install and start checked-in user systemd daemon, verify service/worker health and persistence boundary without submitting research; then run a tiny Codex-plan execution smoke test before first autonomous topic"
+        "lambda_runtime=clean exact checkpoint; Codex CLI 0.155.1 logged in using ChatGPT; PostgreSQL/pgvector healthy; schema initialized; native venv installed",
+        "daemon=systemd user service enabled+active with Restart=always; lingering=yes; deterministic/CHEAP/STANDARD/STRONG workers ACTIVE; admission allowed",
+        "production_env=mode 600 Codex-only env; no OPENAI_API_KEY; production cost boundary remains included ChatGPT/Codex allowance only",
+        "resume=run one tiny direct Codex-plan structured-output smoke test using the production CHEAP model route; if successful, submit one conservative autonomous RF topic and verify durable WAITING_HUMAN acceptance"
       ]
     },
     {
@@ -1666,19 +1666,28 @@
         "Dedicated native research-engine venv installed successfully and overnight-report returned a healthy empty runtime.",
         "Production Codex env file exists at ~/adamArchives/Adam/.research-engine/research-engine.env with mode 600 and no OPENAI_API_KEY."
       ]
+    },
+    {
+      "check": "Lambda persistent daemon deployment",
+      "result": "PASS",
+      "evidence": [
+        "User-local systemd user service research-engine-daemon.service is enabled and active with Restart=always.",
+        "User lingering was already enabled, so the service remains eligible to run across logout.",
+        "Daemon health reported ACTIVE deterministic, CHEAP, STANDARD, and STRONG workers with zero expired leases and admission allowed.",
+        "Persistent PostgreSQL/pgvector container remained healthy."
+      ]
     }
   ],
   "blockers": [
-    "The remaining acceptance test requires enabling the validated user systemd daemon and exercising one real Codex-backed autonomous research cycle on the user's Lambda."
+    "The remaining acceptance test requires a first real ChatGPT-plan Codex execution and then one conservative autonomous research cycle to WAITING_HUMAN on the user's Lambda."
   ],
   "remaining_work": [
-    "Install/enable the user systemd research daemon as the signed-in ChatGPT/Codex user and verify restart/health behavior.",
-    "Run a tiny direct Codex-plan structured-output smoke test using the configured production model route before submitting autonomous work.",
-    "Run one real Codex-backed autonomous research cycle with a conservative per-run budget and verify it reaches durable WAITING_HUMAN with source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload.",
+    "Run a tiny direct Codex-plan structured-output smoke test using the configured production CHEAP model route.",
+    "Submit one real Codex-backed autonomous RF research cycle with a conservative per-run budget and verify it reaches durable WAITING_HUMAN with source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload.",
     "After acceptance passes, resume RF corpus expansion through the daemon and operate continuously while pacing or pausing to stay within the included Codex allowance.",
     "Tune worker concurrency/model-tier budgets and allowance-aware pacing from observed Codex consumption, latency, and quality after the first real run."
   ],
-  "next_safe_action": "On the user's Lambda, install the checked-in research-engine user systemd unit, enable/start it as the signed-in ChatGPT/Codex user, verify service/worker health and user lingering state, and do not submit a research topic yet. Do not configure OPENAI_API_KEY or use the openai-api-development Compose profile. Return only non-secret status/log/report output.",
+  "next_safe_action": "On the user's Lambda with the persistent daemon healthy, run one tiny direct Codex-plan structured-output smoke test using the production CHEAP model route and no API key. Do not submit an autonomous research topic until the smoke test confirms the configured Codex model, structured-output path, and usage event shape. Return only non-secret output.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general. Production semantic execution is constrained to the user's included ChatGPT/Codex plan allowance; continuous operation must pace or pause rather than fall back to paid API usage."
