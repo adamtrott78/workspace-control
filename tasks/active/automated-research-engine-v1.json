@@ -12,7 +12,7 @@
     "content_sha": "cbf405d066f84b87f64c03671a4ed1941ca71ffb"
   },
   "parent_execution_owner": "research-operating-system",
-  "current_stage": "agentic_orchestration_v1",
+  "current_stage": "model_backed_acceptance_v1",
   "acceptance_criteria": [
     "The architecture explicitly separates source evidence, extracted evidence, normalized knowledge, synthesis, model inference, and human judgment.",
     "Every durable scientific evidence object can be traced to a canonical work/version, immutable source artifact identity, and source locator whenever the available representation permits it.",
@@ -62,7 +62,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "9698089965e7ed015e468e7e5f27453a791e760e",
+        "checkpoint_sha": "738e3beadf8dabadc2496d53cb2e823779bdc453",
         "verified": true
       },
       "local": null,
@@ -566,7 +566,7 @@
     },
     {
       "id": "agentic_orchestration_v1",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "composed",
@@ -582,7 +582,9 @@
         "git:research-engine@f5f007960cb2a67d880874135e904aa209559238",
         "runtime:github-actions:PR9:36810702633",
         "git:research-engine@9698089965e7ed015e468e7e5f27453a791e760e",
-        "runtime:github-actions:PR10:36813028672"
+        "runtime:github-actions:PR10:36813028672",
+        "git:research-engine@738e3beadf8dabadc2496d53cb2e823779bdc453",
+        "runtime:github-actions:PR11:36818681858"
       ],
       "validation": [
         {
@@ -626,8 +628,33 @@
             "Semantic jobs hydrate exact PDF/checkpoint context and persist extraction, verification, synthesis, gap, and novelty state.",
             "Structured semantic results are cached before materialization so lease/crash replay cannot silently regenerate different scientific evidence."
           ]
+        },
+        {
+          "check": "production controller and live search provenance",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #11 merged at 738e3beadf8dabadc2496d53cb2e823779bdc453 after GitHub Actions run 36818681858 PASS.",
+            "Responses web_search is enabled only for DISCOVERY and NOVELTY_SEARCH; non-search semantic stages remain closed-book over hydrated authoritative context.",
+            "Web-search call actions/queries and cited URL sources are captured in semantic execution metadata and therefore persist through semantic materialization.",
+            "autonomous-run starts or resumes a durable run, validates topic identity, recovers expired leases, drives DETERMINISTIC/CHEAP/STANDARD/STRONG workers, and exits only at WAITING_HUMAN/FAILED/COMPLETED/CANCELLED.",
+            "The authoritative semantic PostgreSQL acceptance test now runs through the controller rather than manual worker pumping."
+          ]
         }
       ],
+      "resume_condition": null
+    },
+    {
+      "id": "model_backed_acceptance_v1",
+      "status": "IN_PROGRESS",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "composed",
+      "inputs": [
+        "agentic_orchestration_v1",
+        "git:research-engine@738e3beadf8dabadc2496d53cb2e823779bdc453"
+      ],
+      "outputs": [],
+      "validation": [],
       "resume_condition": null
     }
   ],
@@ -840,14 +867,12 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "9698089965e7ed015e468e7e5f27453a791e760e",
+      "identity": "738e3beadf8dabadc2496d53cb2e823779bdc453",
       "required_for_resume": true,
       "evidence": [
-        "stage=agentic_orchestration_v1",
-        "last_validated_boundary=research-engine/main@9698089965e7ed015e468e7e5f27453a791e760e; PR #10 authoritative semantic pipeline PASS",
-        "in_flight=research-engine PR #11 head agentic-v1-controller-search@751723e9849ceee3d639bc929483e1b914a11e6c",
-        "slice=live Responses web_search provenance restricted to DISCOVERY/NOVELTY_SEARCH + restart-safe autonomous-run controller driving mixed workers to terminal/human gate",
-        "resume=inspect PR #11 CI for head 751723e9849ceee3d639bc929483e1b914a11e6c; repair remotely if failing; merge if green; then classify agentic research v1 implementation complete pending first real model-authenticated autonomous run"
+        "stage=model_backed_acceptance_v1",
+        "last_validated_boundary=research-engine/main@738e3beadf8dabadc2496d53cb2e823779bdc453; agentic research v1 implementation complete; PR #11 CI PASS",
+        "resume=probe an authorized runtime for OPENAI_API_KEY/model authentication without exposing credentials; if available run research-engine autonomous-run on a bounded real topic to WAITING_HUMAN and inspect the payload; if unavailable record the genuine credential boundary and continue non-model 24/7 daemon hardening"
       ]
     },
     {
@@ -908,6 +933,16 @@
       "evidence": [
         "Exact source/checkpoint hydration and authoritative semantic result materialization merged.",
         "Crash-safe semantic result replay validated in real PostgreSQL CI."
+      ]
+    },
+    {
+      "id": "research-engine-agentic-v1-complete",
+      "kind": "git_commit",
+      "identity": "738e3beadf8dabadc2496d53cb2e823779bdc453",
+      "required_for_resume": true,
+      "evidence": [
+        "Agentic research v1 implementation complete: durable scheduler, mixed worker tiers, live search provenance, authoritative semantic materialization, controller, crash recovery, and human gate all CI-validated.",
+        "PR #11 CI run 36818681858 PASS."
       ]
     }
   ],
@@ -1485,13 +1520,11 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Enable live scholarly/web discovery for DISCOVERY and NOVELTY_SEARCH only; persist search query/source provenance in semantic execution metadata.",
-    "Add a production-shaped autonomous controller command that starts a run, drives heterogeneous workers, recovers expired leases, and stops at WAITING_HUMAN/FAILED/COMPLETED.",
-    "Validate the controller against real PostgreSQL with scripted semantic delegates and production deterministic materialization.",
-    "Run one real model-backed autonomous research cycle on a model-authenticated runtime and inspect the human-review payload.",
-    "Then harden 24/7 Lambda deployment: daemon supervision, concurrency/budgets/backpressure, and overnight reporting."
+    "Run one real model-backed autonomous research cycle on a model-authenticated runtime and inspect the durable human-review payload.",
+    "Harden 24/7 Lambda deployment: daemon supervision, worker concurrency/budgets/backpressure, health/heartbeat monitoring, and overnight reporting.",
+    "After the production runtime passes, use the autonomous cycle to resume deferred RF corpus expansion instead of manually shepherding papers."
   ],
-  "next_safe_action": "Inspect research-engine PR #11 for agentic-v1-controller-search@751723e9849ceee3d639bc929483e1b914a11e6c. Repair any CI failures remotely. If CI passes, merge PR #11, checkpoint agentic research v1 implementation complete, and proceed to the first real model-authenticated autonomous research run when a suitable runtime/API credential surface is available.",
+  "next_safe_action": "Probe an authorized execution surface for model authentication without exposing secrets. Prefer a GitHub Actions presence/runtime probe if available. If OPENAI_API_KEY/model authentication is available, run a bounded real autonomous research cycle from research-engine/main@738e3beadf8dabadc2496d53cb2e823779bdc453 to WAITING_HUMAN and inspect the persisted review payload. If credentials are unavailable, record the credential boundary and continue independent 24/7 daemon hardening.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."

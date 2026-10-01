@@ -26,24 +26,20 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Recovery restore point
 
-- Identity: 9698089965e7ed015e468e7e5f27453a791e760e
-- stage=agentic_orchestration_v1
-- last_validated_boundary=research-engine/main@9698089965e7ed015e468e7e5f27453a791e760e; PR #10 authoritative semantic pipeline PASS
-- in_flight=research-engine PR #11 head agentic-v1-controller-search@751723e9849ceee3d639bc929483e1b914a11e6c
-- slice=live Responses web_search provenance restricted to DISCOVERY/NOVELTY_SEARCH + restart-safe autonomous-run controller driving mixed workers to terminal/human gate
-- resume=inspect PR #11 CI for head 751723e9849ceee3d639bc929483e1b914a11e6c; repair remotely if failing; merge if green; then classify agentic research v1 implementation complete pending first real model-authenticated autonomous run
+- Identity: 738e3beadf8dabadc2496d53cb2e823779bdc453
+- stage=model_backed_acceptance_v1
+- last_validated_boundary=research-engine/main@738e3beadf8dabadc2496d53cb2e823779bdc453; agentic research v1 implementation complete; PR #11 CI PASS
+- resume=probe an authorized runtime for OPENAI_API_KEY/model authentication without exposing credentials; if available run research-engine autonomous-run on a bounded real topic to WAITING_HUMAN and inspect the payload; if unavailable record the genuine credential boundary and continue non-model 24/7 daemon hardening
 
 ## Next safe action
 
-Inspect research-engine PR #11 for agentic-v1-controller-search@751723e9849ceee3d639bc929483e1b914a11e6c. Repair any CI failures remotely. If CI passes, merge PR #11, checkpoint agentic research v1 implementation complete, and proceed to the first real model-authenticated autonomous research run when a suitable runtime/API credential surface is available.
+Probe an authorized execution surface for model authentication without exposing secrets. Prefer a GitHub Actions presence/runtime probe if available. If OPENAI_API_KEY/model authentication is available, run a bounded real autonomous research cycle from research-engine/main@738e3beadf8dabadc2496d53cb2e823779bdc453 to WAITING_HUMAN and inspect the persisted review payload. If credentials are unavailable, record the credential boundary and continue independent 24/7 daemon hardening.
 
 ## Remaining work
 
-- Enable live scholarly/web discovery for DISCOVERY and NOVELTY_SEARCH only; persist search query/source provenance in semantic execution metadata.
-- Add a production-shaped autonomous controller command that starts a run, drives heterogeneous workers, recovers expired leases, and stops at WAITING_HUMAN/FAILED/COMPLETED.
-- Validate the controller against real PostgreSQL with scripted semantic delegates and production deterministic materialization.
-- Run one real model-backed autonomous research cycle on a model-authenticated runtime and inspect the human-review payload.
-- Then harden 24/7 Lambda deployment: daemon supervision, concurrency/budgets/backpressure, and overnight reporting.
+- Run one real model-backed autonomous research cycle on a model-authenticated runtime and inspect the durable human-review payload.
+- Harden 24/7 Lambda deployment: daemon supervision, worker concurrency/budgets/backpressure, health/heartbeat monitoring, and overnight reporting.
+- After the production runtime passes, use the autonomous cycle to resume deferred RF corpus expansion instead of manually shepherding papers.
 
 ## Blockers / gates
 
