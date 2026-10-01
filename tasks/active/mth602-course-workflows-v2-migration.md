@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: mth602-course-workflows-v2-migration
 - Title: MTH602 Course Workflows v2 Migration
-- Status: BLOCKED_RUNTIME
+- Status: CHECKPOINTED
 - Capsule schema: v2
 
 ## Goal
@@ -42,17 +42,15 @@ Explicitly migrate the current MTH602 repository integration to the promoted reu
 
 ## Next safe action
 
-Obtain the exact small HW1 report runtime inputs without using the GitHub connector for large-file transfer (minimum: homework/hw01/report/main.tex and homework/hw01/input/hw1.csv, or a small archive containing them). From those exact inputs, run a clean LaTeX build, verify successful output, render the newly built PDF to page images, and visually inspect every page. If that regression passes, mark regression_validation VALIDATED, complete HANDOFF_SAFE, archive this migration task, and do not resume or mutate the separately suspended HW2 task.
+Run the final topology-aware HANDOFF_SAFE assessment for this synchronized checkpointed capsule. If it is HANDOFF_SAFE, mark completion VALIDATED, set the task COMPLETE with no remaining work/blockers, regenerate the derived Markdown immediately, archive the completed capsule/handoff, and leave the separately suspended mth602-new-unit-ingestion-hw2-prep task untouched.
 
 ## Remaining work
 
-- Run a clean HW1 LaTeX compile from exact repository inputs in the available runtime.
-- Render the newly built PDF to page images and visually inspect every page.
-- Record the artifact regression result, establish final HANDOFF_SAFE, archive mth602-course-workflows-v2-migration, and leave mth602-new-unit-ingestion-hw2-prep suspended for coordinator refresh.
+- Run the final topology-aware HANDOFF_SAFE assessment against this synchronized checkpointed capsule, then archive this migration task while leaving mth602-new-unit-ingestion-hw2-prep suspended for coordinator refresh.
 
 ## Blockers / gates
 
-- Fresh LaTeX build/render/visual-QA regression cannot run in the current runtime because no MTH602 checkout/artifact is mounted and the container cannot resolve github.com. Supply/materialize the exact small HW1 report inputs (at minimum homework/hw01/report/main.tex and homework/hw01/input/hw1.csv, or a small HW1 report/input zip) rather than transferring large binaries through the GitHub connector.
+- None.
 
 ## Fresh-chat initialization
 
