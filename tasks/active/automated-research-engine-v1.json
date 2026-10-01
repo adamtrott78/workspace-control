@@ -62,7 +62,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "f5f007960cb2a67d880874135e904aa209559238",
+        "checkpoint_sha": "9698089965e7ed015e468e7e5f27453a791e760e",
         "verified": true
       },
       "local": null,
@@ -580,7 +580,9 @@
         "git:research-engine@588fd692efffaa4392f1472919f2fbca94c9b8f5",
         "runtime:github-actions:PR8:36810168483",
         "git:research-engine@f5f007960cb2a67d880874135e904aa209559238",
-        "runtime:github-actions:PR9:36810702633"
+        "runtime:github-actions:PR9:36810702633",
+        "git:research-engine@9698089965e7ed015e468e7e5f27453a791e760e",
+        "runtime:github-actions:PR10:36813028672"
       ],
       "validation": [
         {
@@ -614,6 +616,15 @@
             "Production deterministic acquisition persists Work, WorkVersion, external arXiv identity, and content-addressed SourceArtifact.",
             "Production deterministic checkpoint worker derives the verified work scope from durable orchestration jobs and creates a real knowledge checkpoint.",
             "Mixed autonomous cycle with production deterministic workers and scripted semantic workers reaches WAITING_HUMAN."
+          ]
+        },
+        {
+          "check": "authoritative semantic materialization",
+          "result": "PASS",
+          "evidence": [
+            "PR #10 merged at research-engine@9698089965e7ed015e468e7e5f27453a791e760e after PostgreSQL/pgvector CI 36813028672 PASS.",
+            "Semantic jobs hydrate exact PDF/checkpoint context and persist extraction, verification, synthesis, gap, and novelty state.",
+            "Structured semantic results are cached before materialization so lease/crash replay cannot silently regenerate different scientific evidence."
           ]
         }
       ],
@@ -829,14 +840,12 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "f5f007960cb2a67d880874135e904aa209559238",
+      "identity": "9698089965e7ed015e468e7e5f27453a791e760e",
       "required_for_resume": true,
       "evidence": [
         "stage=agentic_orchestration_v1",
-        "last_validated_boundary=research-engine/main@f5f007960cb2a67d880874135e904aa209559238; PR #9 mixed deterministic/semantic worker cycle PASS",
-        "external_runtime_prepared=research-engine/semantic-context-materialization@d0888c4c3ee84be78ae6f6b3bf6535b443b95c2e",
-        "validation_target=hydrate EXTRACT/VERIFY from exact artifact text; hydrate SYNTHESIZE/GAP/NOVELTY from knowledge checkpoints; materialize extraction, verification, synthesis, gaps, and novelty challenges with crash-safe semantic result caching",
-        "resume=inspect/create PR for d0888c4c3ee84be78ae6f6b3bf6535b443b95c2e; run GitHub Actions PostgreSQL CI; repair failures remotely; merge only after authoritative end-to-end agent materialization test passes"
+        "last_validated_boundary=research-engine/main@9698089965e7ed015e468e7e5f27453a791e760e; PR #10 authoritative semantic pipeline PASS",
+        "resume=add live web_search only to DISCOVERY/NOVELTY_SEARCH with captured search provenance, add autonomous controller CLI that drives mixed workers to WAITING_HUMAN, then validate final production-shaped v1 through PostgreSQL CI"
       ]
     },
     {
@@ -887,6 +896,16 @@
       "evidence": [
         "Production deterministic ACQUIRE/CHECKPOINT workers merged.",
         "Heterogeneous mixed-worker autonomous cycle validated against PostgreSQL."
+      ]
+    },
+    {
+      "id": "research-engine-authoritative-semantic-pipeline",
+      "kind": "git_commit",
+      "identity": "9698089965e7ed015e468e7e5f27453a791e760e",
+      "required_for_resume": true,
+      "evidence": [
+        "Exact source/checkpoint hydration and authoritative semantic result materialization merged.",
+        "Crash-safe semantic result replay validated in real PostgreSQL CI."
       ]
     }
   ],
@@ -1464,14 +1483,13 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement PostgreSQL-backed research runs and durable job queues with transactional worker leasing, heartbeat/lease expiry recovery, bounded retry, priorities, dependency/barrier semantics, and idempotent downstream planning.",
-    "Implement executor-tier routing for DETERMINISTIC, CHEAP, STANDARD, STRONG, and HUMAN work without hard-coding a single model/provider into orchestration state.",
-    "Implement the autonomous research-cycle stage graph: discovery -> screening -> acquisition fan-out -> extraction -> verification -> knowledge checkpoint -> synthesis -> gap generation -> novelty search fan-out -> novelty arbitration -> human review gate.",
-    "Prove one complete autonomous dry-run cycle through the real PostgreSQL runtime, including worker crash/lease recovery, retry, fan-out/fan-in, heterogeneous executor routing, and a durable WAITING_HUMAN terminal state.",
-    "Add a production executor adapter suitable for headless Lambda/Codex workers after the provider-neutral orchestration core passes.",
-    "Then use the autonomous cycle to resume the deferred RF corpus expansion instead of manually shepherding individual papers."
+    "Enable live scholarly/web discovery for DISCOVERY and NOVELTY_SEARCH only; persist search query/source provenance in semantic execution metadata.",
+    "Add a production-shaped autonomous controller command that starts a run, drives heterogeneous workers, recovers expired leases, and stops at WAITING_HUMAN/FAILED/COMPLETED.",
+    "Validate the controller against real PostgreSQL with scripted semantic delegates and production deterministic materialization.",
+    "Run one real model-backed autonomous research cycle on a model-authenticated runtime and inspect the human-review payload.",
+    "Then harden 24/7 Lambda deployment: daemon supervision, concurrency/budgets/backpressure, and overnight reporting."
   ],
-  "next_safe_action": "Open a pull request from semantic-context-materialization@d0888c4c3ee84be78ae6f6b3bf6535b443b95c2e to research-engine/main. Use GitHub Actions PostgreSQL/pgvector CI to validate exact source/checkpoint hydration, crash-safe semantic result caching, and authoritative EXTRACT/VERIFY/SYNTHESIZE/GAP/NOVELTY materialization. Repair remotely and merge only when green.",
+  "next_safe_action": "From research-engine/main@9698089965e7ed015e468e7e5f27453a791e760e, add live Responses web_search only for DISCOVERY and NOVELTY_SEARCH with durable execution/source provenance, plus an autonomous controller CLI that starts/drives mixed deterministic+semantic workers to WAITING_HUMAN. Validate with PostgreSQL CI; then perform the first production-shaped autonomous research run when a model-authenticated runtime is available.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
