@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "automated-research-engine-v1",
   "title": "Automated research engine v1",
-  "status": "BLOCKED_RUNTIME",
+  "status": "IN_PROGRESS",
   "goal": "Design and prove a provenance-preserving automated research engine that turns scholarly literature into structured evidence, durable knowledge, challenged research gaps, fundable research programs, and workspace-control-executable research projects.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -986,12 +986,15 @@
       "identity": "6a423e0fd38283687cae2eb060405a2a82643450",
       "required_for_resume": true,
       "evidence": [
-        "stage=launch_ready_after_model_backed_acceptance",
-        "research-engine canonical main=6a423e0fd38283687cae2eb060405a2a82643450; PR #20/#21 merged; canonical CI 36836573854 PASS",
-        "acceptance-codex-rf-v1 remains WAITING_HUMAN/PENDING on Lambda pending deterministic cleanup and explicit approval",
-        "acceptance scientific audit passed checkpoint fingerprint, artifact integrity, machine-checked source-located evidence, synthesis binding, two novelty challenges, provenance, and no failed jobs",
-        "known legacy cleanup=remove five pre-fix unchallenged PROPOSED/NOT_REVIEWED gap rows only after reference checks; re-materialize bounded GAP_GENERATE and NOVELTY_ARBITRATE canonical results while preserving raw semantic_result",
-        "launch target=first sustained bounded open-set/open-world RF corpus expansion; one active run; production Codex/ChatGPT plan only; no paid API fallback"
+        "stage=sustained_rf_corpus_expansion_live",
+        "research-engine deployed main=6a423e0fd38283687cae2eb060405a2a82643450; canonical CI 36836573854 PASS",
+        "acceptance-codex-rf-v1=COMPLETED/HUMAN_REVIEW/APPROVED at checkpoint knowledge-checkpoint:sha256:8248c844910c2b0863ecebefb2e2ddd8a66435d3f3d4af45440b7b520acc6232",
+        "acceptance_cleanup=5 inert pre-fix surplus gaps deleted; raw semantic_result hashes preserved; 17 evidence objects; 2 works; 2 novelty challenges; structural audit PASS",
+        "sustained_run=rf-open-world-corpus-expansion-v1 RUNNING phase=DISCOVERY; one DISCOVERY job RUNNING at launch receipt; failed_jobs=0",
+        "daemon=active/running Result=success NRestarts=0 MainPID=3000738",
+        "provider_backoffs=none at launch receipt; durable Codex plan-limit backoff available if allowance is later exhausted",
+        "admission=max_active_runs=1 correctly reports no additional run admission while sustained run is active",
+        "cost_boundary=ChatGPT/Codex included allowance only; no paid API fallback"
       ]
     },
     {
@@ -1863,17 +1866,27 @@
         "Unsupported retained sources are durably cancelled rather than failing a run, and no-relevant/no-new corpus paths terminate at a human gate.",
         "Canonical main CI 36836573854 passed tests, PostgreSQL integration, Compose validation, and image build."
       ]
+    },
+    {
+      "check": "Lambda sustained corpus launch",
+      "result": "PASS",
+      "evidence": [
+        "Lambda fast-forwarded clean research-engine main from 219ef546381a471e5daac91ba524d9b685b8c26b to exact validated 6a423e0fd38283687cae2eb060405a2a82643450.",
+        "Production env remained Codex/ChatGPT-authenticated with no OPENAI_API_KEY; additive schema initialization passed.",
+        "Acceptance cleanup removed only five inert legacy PROPOSED/NOT_REVIEWED surplus gaps, preserved raw semantic results, verified checkpoint fingerprint, and passed structural audit.",
+        "acceptance-codex-rf-v1 human review was explicitly APPROVED and run transitioned to COMPLETED.",
+        "rf-open-world-corpus-expansion-v1 was submitted RUNNING with one DISCOVERY job, zero failures, zero provider backoffs, and daemon stable active/running with NRestarts=0.",
+        "Launch script ended RESEARCH_ENGINE_SET_LOOSE=PASS and RC=0."
+      ]
     }
   ],
-  "blockers": [
-    "Launch-ready code is validated on canonical main; Lambda still needs exact deployment, schema migration, provenance-preserving acceptance cleanup/audit, explicit acceptance approval, and sustained-run submission."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Execute the single fail-closed Lambda deployment/cleanup/approval/launch script against research-engine main@6a423e0fd38283687cae2eb060405a2a82643450.",
-    "Record the resulting sustained-run ID, daemon health, provider-backoff state if any, and acceptance approval as the post-launch restore point.",
-    "Observe the sustained RF corpus expansion through Codex allowance backoffs and its next human-review gate; do not silently auto-approve scientific decisions."
+    "Observe rf-open-world-corpus-expansion-v1 through discovery, screening, acquisition, extraction, verification, checkpoint, synthesis, bounded gap generation, novelty challenge, and its next human-review gate.",
+    "At the next human-review gate, audit the new corpus checkpoint/evidence and decide explicitly whether to approve or continue expansion.",
+    "Use observed throughput and Codex allowance consumption to tune sustained batch size and tier budgets without enabling paid API fallback."
   ],
-  "next_safe_action": "Run the single fail-closed Lambda launch script prepared from canonical research-engine main@6a423e0fd38283687cae2eb060405a2a82643450. It must stop the daemon, require a clean fast-forward to that exact commit, initialize the additive schema, normalize conservative production env/backoff settings without any OPENAI_API_KEY, clean only the known unreferenced legacy acceptance gap materializations while preserving raw semantic results, recompute acceptance invariants/checkpoint fingerprint, approve the pending acceptance human review, submit the first sustained bounded RF corpus expansion, restart the daemon, and verify stable unattended operation.",
+  "next_safe_action": "Observe rf-open-world-corpus-expansion-v1 under the hardened daemon. Allow automatic Codex plan-limit backoff/resume and tier-aware budget routing to operate without intervention. Inspect only if the run reaches WAITING_HUMAN, PAUSED_BUDGET, FAILED, or a provider backoff persists unexpectedly beyond its recorded blocked_until. Do not auto-approve future scientific human-review decisions.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general. Production semantic execution is constrained to the user's included ChatGPT/Codex plan allowance; continuous operation must pace or pause rather than fall back to paid API usage."
