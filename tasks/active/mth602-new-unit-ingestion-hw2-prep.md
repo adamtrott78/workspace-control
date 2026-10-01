@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: mth602-new-unit-ingestion-hw2-prep
 - Title: MTH 602 new-unit ingestion and HW2 preparation
-- Status: SUSPENDED
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -21,8 +21,8 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 ## Workflow
 
 - Repository: workspace-control
-- Path: policies/OPERATOR_WORKFLOW.md
-- Checkpoint: bc3966f10b8b07b9a27d8ec5275f218c209a7609
+- Path: workflows/course-assignment-work.v1.json
+- Checkpoint: 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9
 
 ## Repositories
 
@@ -30,23 +30,23 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: 20dc641dcb9b505efe53daa52932521d0927ef3a
+- Remote checkpoint: 0ed5957af97e2de887ef181f26a9966413daf857
 - Remote verified: true
 
 ### workspace-control
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: bc3966f10b8b07b9a27d8ec5275f218c209a7609
+- Remote checkpoint: 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9
 - Remote verified: true
 
 ## Next safe action
 
-Do not begin HW2 Problem 1 while the course-workflows v2 migration is running. Preserve unit-ingestion-hw2 at the recorded pre-solution checkpoint until the migration executor takes ownership. After mth602-course-workflows-v2-migration completes on this same branch, deliberately refresh this capsule to the migrated checkpoint, restore hw2_bootstrap to active work, and then begin Floating-point Problem 1 using homework/hw02/CONTEXT.md, the 2026-09-21 floating-point lecture synthesis, and study/TUTORING.md.
+Enter HW2 Floating-point Problem 1 in LEARNING mode. Use homework/hw02/CONTEXT.md, classnotes/2026-09-21/SESSION_SYNTHESIS.md, study/TUTORING.md, study/MASTERY.md, and homework/hw02/LEARNING.md. Start with the smallest diagnostic that tests why evaluating the Taylor series for e^-20 can be numerically dangerous; do not dump the completed solution before diagnosing the student's understanding.
 
 ## Remaining work
 
-- Resume HW2 after the course-workflows v2 migration completes and this capsule is refreshed to the migrated branch checkpoint.
+- Begin Floating-point Problem 1 in LEARNING mode: diagnose floating-point representation, machine epsilon/relative rounding error, and roundoff/catastrophic-cancellation understanding before substantive solution work.
 - Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.
 - Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.
 - Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.
@@ -57,7 +57,7 @@ Do not begin HW2 Problem 1 while the course-workflows v2 migration is running. P
 
 ## Blockers / gates
 
-- Final cold-start completeness still requires exact binary transfer of hw2.pdf, hw2.csv, and the two instructor PNG reference assets into homework/hw02; current conversation can continue because those exact bytes are mounted and verified.
+- None.
 
 ## Fresh-chat initialization
 
