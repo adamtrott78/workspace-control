@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "research-engine-observability-agent-ops-v1",
   "title": "Research Engine Observability, Agent Operations & Chat Bridge v1",
-  "status": "PLANNED",
+  "status": "IN_PROGRESS",
   "goal": "Build a low-overhead, provenance-preserving operations layer for the autonomous research engine that provides a live terminal HUD, durable per-agent telemetry and throughput metrics, empirical Codex 5-hour/weekly allowance forecasting, ChatGPT-visible status mirroring, and a safe asynchronous bridge for agents to request high-level reasoning from ChatGPT without paid API fallback or direct scientific-state mutation.",
   "execution_topology": "composed",
   "workflow": null,
@@ -23,7 +23,10 @@
     "The bridge design clearly distinguishes user-triggered Chat processing from any later scheduled ChatGPT automation; no claim of autonomous real-time ChatGPT invocation is made until that path is actually validated.",
     "Production continues to forbid paid OpenAI API fallback and secrets are never persisted in telemetry, GitHub issues, task capsules, or exported snapshots.",
     "The observability path adds negligible research disruption: telemetry failure cannot corrupt scientific state, and publisher/HUD failure does not stop the research daemon unless an explicit safety invariant is violated.",
-    "All new schema, CLI/HUD behavior, publisher behavior, usage forecasting, agent attribution, and chat-bridge state transitions have unit/PostgreSQL integration coverage and are validated against the live sustained RF run."
+    "All new schema, CLI/HUD behavior, publisher behavior, usage forecasting, agent attribution, and chat-bridge state transitions have unit/PostgreSQL integration coverage and are validated against the live sustained RF run.",
+    "Before sustained semantic work resumes, the operator can see live per-agent usage/throughput and at least a first empirical 5-hour allowance burn estimate from the HUD.",
+    "A private research-engine MCP/plugin path is evaluated as the preferred direct ChatGPT tool surface for reading ops state and submitting bounded advisory responses; plan/workspace permission limits are validated rather than assumed.",
+    "An event-driven wake-up transport is evaluated separately from the direct tool surface; Slack is the first candidate so an agent message can potentially trigger ChatGPT processing while GitHub remains the durable audit trail."
   ],
   "constraints": [
     "Do not stop or recreate rf-open-world-corpus-expansion-v1 merely to build observability; instrumentation must be additive/migration-safe.",
@@ -37,7 +40,11 @@
     "Do not auto-approve future scientific human-review gates.",
     "Keep raw high-frequency operational truth local to PostgreSQL; GitHub mirrors are derived observability surfaces, not the authoritative database.",
     "Chat reasoning requests must be idempotent, bounded, traceable to a run/job/checkpoint where applicable, and safe to ignore or retry.",
-    "Any scheduled ChatGPT bridge is limited by the product automation cadence and must be separately validated before being described as continuous agent-to-Chat communication."
+    "Any scheduled ChatGPT bridge is limited by the product automation cadence and must be separately validated before being described as continuous agent-to-Chat communication.",
+    "Do not resume sustained semantic processing merely because the daemon architecture is proven; resume only after the HUD exposes live usage/throughput and an initial empirical allowance forecast.",
+    "Treat the current sustained RF run as durable paused work while observability is built; stopping the user systemd daemon is an operational pause, not cancellation of the run.",
+    "Do not assume a custom MCP/plugin can perform write actions on the user's current ChatGPT plan; validate the actual installed capability and permission surface before relying on it.",
+    "Do not make Slack or another message bus authoritative for research state; it may wake ChatGPT or carry bounded requests, while PostgreSQL/GitHub retain durable truth."
   ],
   "repositories": [
     {
@@ -223,10 +230,12 @@
       "required_for_resume": true,
       "evidence": [
         "stage=observability_contract",
+        "workspace-control/main@08b95dabc03808820e6c7f13ccb04796fdb2e6a5",
         "research-engine/main@6a423e0fd38283687cae2eb060405a2a82643450",
-        "workspace-control/main@6ba5cbb8623eadbcd8ee6d2c68a3821dcd63e121",
-        "live target=rf-open-world-corpus-expansion-v1",
-        "initial plan-usage observation supplied by user: approximately 16% of current 5-hour Codex window used during 2026-10-01 testing/launch"
+        "policy change=user wants monitoring and tuning before further sustained semantic processing",
+        "next runtime action=stop research-engine-daemon.service while preserving rf-open-world-corpus-expansion-v1",
+        "bridge direction=prefer private MCP/plugin direct tooling; evaluate Slack separately as event/wake-up bus; GitHub remains durable audit",
+        "allowance calibration seed=user observed approximately 16% of current 5-hour Codex window consumed by acceptance/testing work"
       ]
     }
   ],
@@ -241,20 +250,34 @@
         "Existing research-engine runtime already persists research_workers, research_jobs, research_job_attempts, research_usage_events, provider backoff state, and run/stage state; the new task extends rather than replaces those authorities.",
         "User requested live terminal monitoring, permanent per-agent usage/throughput history, Codex 5-hour/weekly exhaustion forecasting, Chat-visible status, and an agent-to-Chat reasoning bridge."
       ]
+    },
+    {
+      "check": "Chat bridge candidate discovery",
+      "result": "PASS",
+      "evidence": [
+        "Current OpenAI plugin documentation supports MCP-backed plugins as a direct ChatGPT/Codex tool surface and documents connecting deployed MCP servers to ChatGPT Work.",
+        "Official documentation also describes Secure MCP Tunnel for reaching private/on-premises MCP servers without exposing them publicly, subject to account/workspace capability.",
+        "Slack is available as an optional ChatGPT plugin for this account but is not connected; it is a candidate event/wake-up channel, not yet a dependency.",
+        "GitHub remains suitable for durable requests/audit history but is not the preferred high-frequency wake-up transport."
+      ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Specify the metric taxonomy, stable logical-agent identity, event/rollup schema, retention policy, and the exact separation between authoritative PostgreSQL telemetry and derived Chat-visible summaries.",
-    "Extend usage/event capture to include cached input tokens, reasoning output tokens, wall/queue duration, agent/session attribution, error/backoff outcomes, and stage/source/evidence/gap throughput.",
-    "Implement read-only ops snapshot/report commands and a terminal HUD with rolling throughput, queue/latency, source/evidence/gap funnel, current-agent, failure/backoff, and allowance panels.",
-    "Implement explicit 5-hour/weekly Codex usage observations plus empirical forecast calibration/ETA with uncertainty and per-agent/model attribution.",
-    "Implement a low-frequency GitHub live-ops issue publisher and permanent daily/run summaries that ChatGPT can read without high-frequency code commits.",
-    "Implement structured Chat reasoning request/response records and a GitHub issue-based bridge; validate user-triggered Chat processing first, then separately evaluate an hourly ChatGPT automation if useful.",
-    "Validate the complete observability stack against rf-open-world-corpus-expansion-v1 without interrupting or corrupting the running scientific workflow.",
-    "Document operator commands and cold-start routes, then checkpoint and verify the implementation."
+  "blockers": [
+    "The sustained RF run should be operationally paused on the Lambda before additional semantic allowance is consumed; this requires a local systemd action by the user.",
+    "Direct MCP/plugin write capability and any Slack-triggered automation must be validated on the user's actual ChatGPT plan/workspace before the bridge can depend on them."
   ],
-  "next_safe_action": "Start from research-engine main at the verified launch checkpoint and inspect the existing research_workers, research_jobs, research_job_attempts, research_usage_events, daemon health/report code, Codex execution metadata, and current sustained-run runtime. Write the observability contract first: define stable logical agent roles versus ephemeral sessions, append-only telemetry fields, derived metric formulas/windows, allowance-observation/forecast semantics, GitHub live-ops issue format, daily/run rollup format, and chat-reasoning request/response safety boundary. Do not add telemetry schema or runtime mutation until that contract is explicit and regression-safe for the already-running rf-open-world-corpus-expansion-v1.",
+  "remaining_work": [
+    "Pause the research-engine user daemon on the Lambda, preserving rf-open-world-corpus-expansion-v1 durable state and preventing further semantic allowance burn during instrumentation.",
+    "Specify the metric taxonomy, stable logical-agent identity, event/rollup schema, retention policy, and exact separation between authoritative PostgreSQL telemetry and derived views.",
+    "Implement read-only ops snapshot/report commands and a terminal HUD first, including live per-agent usage, source/evidence/gap throughput, queue/latency, failures/backoffs, and 5-hour/weekly allowance panels.",
+    "Implement explicit 5-hour/weekly Codex usage observations plus empirical forecast calibration/ETA with uncertainty and per-agent/model attribution; ingest the current ~16% 5-hour observation as the first calibration point.",
+    "Run a tightly bounded monitored calibration workload and tune model/tier/concurrency budgets before resuming sustained corpus expansion.",
+    "Implement a low-frequency Chat-visible operations mirror.",
+    "Prototype a private research-engine MCP/plugin as the preferred direct ChatGPT read/advisory-response surface; validate current-plan permissions and Secure MCP Tunnel or another private transport.",
+    "Optionally connect Slack and evaluate it as an event-driven reasoning-request wake-up bus; retain GitHub/PostgreSQL as durable truth.",
+    "Implement and validate structured Chat reasoning request/response state transitions without allowing Chat responses to bypass scientific verification or human gates."
+  ],
+  "next_safe_action": "First pause research-engine-daemon.service on the user's Lambda so rf-open-world-corpus-expansion-v1 remains durable but consumes no additional semantic allowance. After pause evidence is returned, inspect the persisted run/job/usage/worker tables without mutation and write the observability contract. Implement the read-only ops snapshot and terminal HUD before any sustained semantic processing resumes; the first monitored restart should be a tightly bounded calibration run used to measure allowance burn and tune concurrency/model tiers.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Preferred UX: a terminal HUD launched from Bash/CLI, backed by read-only PostgreSQL queries rather than Bash scraping. Proposed Chat-visible mirror: one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups; raw high-frequency telemetry remains PostgreSQL-authoritative. Proposed Chat bridge: agents create bounded structured reasoning requests that are mirrored to GitHub issues; ChatGPT can read/update them when invoked. This is not equivalent to a direct autonomous ChatGPT conversation API and must not be described as such until separately validated."
