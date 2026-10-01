@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: cis560-course-workflows-v2-migration
 - Title: CIS560 Course Workflows v2 Migration
-- Status: IN_PROGRESS
+- Status: VALIDATING
 - Capsule schema: v2
 
 ## Goal
@@ -37,19 +37,17 @@ Explicitly migrate the CIS560 tutor-framework integration to the promoted reusab
 
 - Intent: mutate
 - Remote branch: tutor-framework
-- Remote checkpoint: 1af3ce7022d079b89f0fbca32f313a6853db1c60
+- Remote checkpoint: 9c5e492354449186898b5f038e227e5a92d15005
 - Remote verified: True
 
 ## Next safe action
 
-On CIS560-AdamTrott tutor-framework at exact parent 1af3ce7022d079b89f0fbca32f313a6853db1c60, update only README.md, COURSE.md, and study/TUTORING.md to bind the promoted workspace-control checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9, map the shared course/communications workflow roles, and replace the live conversational tutor-builder/tutor authority split with role-neutral semantic mutation boundaries. Preserve all course facts, mastery state, homework state, source records, experiment B/C evidence, and historical boundary-correction evidence. Then verify the exact changed scope before regression validation.
+Reverify workspace-control workflow checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and CIS560-AdamTrott tutor-framework checkpoint 9c5e492354449186898b5f038e227e5a92d15005. Evaluate the v2 remote_only HANDOFF_SAFE conditions from the task schema/procedure. If they pass, mark completion VALIDATED and the task COMPLETE with no blockers or remaining work, regenerate the derived Markdown immediately, then archive the completed JSON and derived handoff.
 
 ## Remaining work
 
-- Update the existing CIS560 compatibility pins to workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and map promoted shared workflow roles without copying shared policy.
-- Replace remaining live tutor-builder/tutor authority hierarchy with durable semantic-owner and mutation-boundary language while preserving the historical correction record.
-- Run cold-start, tutoring/mastery, communications-ingestion/idempotency, artifact, and portability regressions.
-- Checkpoint and independently verify the migrated CIS560 tutor-framework state.
+- Perform final remote-only acceptance and HANDOFF_SAFE assessment against the exact workflow binding and verified target checkpoint.
+- Mark completion VALIDATED/status COMPLETE, regenerate the derived handoff, then archive the completed capsule/handoff.
 
 ## Blockers / gates
 

@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "cis560-course-workflows-v2-migration",
   "title": "CIS560 Course Workflows v2 Migration",
-  "status": "IN_PROGRESS",
+  "status": "VALIDATING",
   "goal": "Explicitly migrate the CIS560 tutor-framework integration to the promoted reusable course-workflow architecture while preserving course authority, durable tutoring state, and the proven communications-ingestion/idempotent parent-return behavior.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -12,7 +12,7 @@
     "content_sha": "da6076a9b4baf328d6a91526f6dff7aa999733b6"
   },
   "parent_execution_owner": "course-workflows-v2-refactor",
-  "current_stage": "shared_checkpoint_integration",
+  "current_stage": "completion",
   "acceptance_criteria": [
     "A fresh executor starts only from the target repository root README at the pinned checkpoint plus this capsule and the exact promoted shared workflow binding.",
     "Project-local course/source/assignment/mastery/artifact authority remains in the target repository; workspace-control contributes reusable mechanics only.",
@@ -50,7 +50,7 @@
       "base_sha": "1af3ce7022d079b89f0fbca32f313a6853db1c60",
       "remote": {
         "branch": "tutor-framework",
-        "checkpoint_sha": "1af3ce7022d079b89f0fbca32f313a6853db1c60",
+        "checkpoint_sha": "9c5e492354449186898b5f038e227e5a92d15005",
         "verified": true
       },
       "local": null,
@@ -127,7 +127,7 @@
     },
     {
       "id": "shared_checkpoint_integration",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "cis560-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -136,31 +136,91 @@
         "workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
         "existing compatibility pin workspace-control@450eebeef6b76a674913949863082277b6bdb811"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "CIS560 tutor-framework migration commit 9c5e492354449186898b5f038e227e5a92d15005.",
+        "README.md, COURSE.md, and study/TUTORING.md now pin workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9.",
+        "COURSE.md maps promoted shared course/content/study/assignment/communications/document mechanics to existing local semantic owners.",
+        "Live mutation authority is role-neutral and keyed to durable execution owner, semantic owner, and bounded scope; historical tutor-builder correction evidence remains unchanged."
+      ],
+      "validation": [
+        {
+          "check": "Bounded promoted-checkpoint integration",
+          "result": "PASS",
+          "evidence": [
+            "Commit 9c5e492354449186898b5f038e227e5a92d15005 has parent 1af3ce7022d079b89f0fbca32f313a6853db1c60.",
+            "Compare reports exactly one commit ahead and only COURSE.md, README.md, and study/TUTORING.md changed.",
+            "tutor-framework advertises 9c5e492354449186898b5f038e227e5a92d15005 after publication.",
+            "No workspace-control.lock.json was introduced; the pre-existing exact-textual-pin compatibility mechanism was preserved."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "regression_validation",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "cis560-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "shared_checkpoint_integration"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "Cold-start root routing regression PASS.",
+        "Tutoring/mastery and textbook/solution-manual guardrail regression PASS.",
+        "Forwarded-Gmail repository-first communications/idempotency regression PASS without Gmail reread.",
+        "Homework/artifact/source preservation regression PASS.",
+        "Executor-portability and shared-workflow mapping regression PASS."
+      ],
+      "validation": [
+        {
+          "check": "Cold-start routing",
+          "result": "PASS",
+          "evidence": [
+            "Root README at 9c5e492354449186898b5f038e227e5a92d15005 routes course/source authority, tutoring, mastery, homework, notation, and experiment evidence from the root.",
+            "Root and tutoring adapter expose the exact promoted workspace-control checkpoint rather than moving main."
+          ]
+        },
+        {
+          "check": "Tutoring/mastery and source guardrails",
+          "result": "PASS",
+          "evidence": [
+            "study/TUTORING.md still separates artifact completion from behavioral mastery, requires fresh transfer for independent, and preserves completion/mastery recovery semantics.",
+            "Solution-manual policy still requires meaningful student attempt before exposure and semantic prompt matching rather than number-only matching.",
+            "study/MASTERY.md, study/MASTERY_LOG.md, study/SKILL_MAP.md, sources/TEXTBOOK.md, and sources/SOLUTION_MANUAL.md retained their baseline blob identities."
+          ]
+        },
+        {
+          "check": "Communications ingestion and idempotent parent return",
+          "result": "PASS",
+          "evidence": [
+            "course/LECTURES.md and course/lectures/L06.md retain exact source identity gmail:1a0d08b2196e8a4a and unchanged baseline blobs.",
+            "The normalized lecture record explicitly identifies a forwarded Gmail copy and states it is not the original Outlook message.",
+            "course/lectures contains one durable Lecture 6 record; no duplicate was created.",
+            "Experiments B/C remain byte-identical historical evidence, including repository-first re-entry, no Gmail full-body reread on repeat, no source-state mutation, and durable parent return."
+          ]
+        },
+        {
+          "check": "Artifact/source preservation and portability",
+          "result": "PASS",
+          "evidence": [
+            "Homework index, HW1 context/learning record, Java validation, historical boundary correction, source routers, mastery owners, and experiment log all retained their baseline blob identities.",
+            "Mapped shared workflow descriptors course-study-session, course-assignment-work, course-content-ingestion, course-communications-ingestion, and document-artifact-build all exist at exact workspace-control checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9.",
+            "COURSE.md removes the live conversational builder/tutor authority dependency while preserving historical boundary-correction evidence and semantic mutation restrictions."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "completion",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "cis560-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "regression_validation"
+        "regression_validation",
+        "git:9c5e492354449186898b5f038e227e5a92d15005"
       ],
       "outputs": [],
       "validation": [],
@@ -181,9 +241,19 @@
       "id": "target-starting-checkpoint",
       "kind": "git_commit",
       "identity": "1af3ce7022d079b89f0fbca32f313a6853db1c60",
-      "required_for_resume": true,
+      "required_for_resume": false,
       "evidence": [
         "CIS560-AdamTrott tutor-framework verified at child creation"
+      ]
+    },
+    {
+      "id": "migrated-project-checkpoint",
+      "kind": "git_commit",
+      "identity": "9c5e492354449186898b5f038e227e5a92d15005",
+      "required_for_resume": true,
+      "evidence": [
+        "CIS560-AdamTrott tutor-framework advertised and reread at 9c5e492354449186898b5f038e227e5a92d15005.",
+        "Baseline 1af3ce7022d079b89f0fbca32f313a6853db1c60 is the direct parent; changed scope is exactly README.md, COURSE.md, study/TUTORING.md."
       ]
     }
   ],
@@ -206,16 +276,33 @@
         "The existing compatibility mechanism is textual exact-SHA pinning in README.md, COURSE.md, and study/TUTORING.md; no new lock-file mechanism is required.",
         "Local course/source/homework/mastery/artifact owners and experiment evidence were recovered from repository routes before mutation."
       ]
+    },
+    {
+      "check": "Promoted shared-checkpoint integration",
+      "result": "PASS",
+      "evidence": [
+        "Exact project compatibility pin advanced from workspace-control@450eebeef6b76a674913949863082277b6bdb811 to workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9.",
+        "Migration used the existing textual-pin compatibility mechanism and did not copy generic shared policy into CIS560.",
+        "Published CIS560 commit 9c5e492354449186898b5f038e227e5a92d15005 is verified on tutor-framework."
+      ]
+    },
+    {
+      "check": "Required migration regressions",
+      "result": "PASS",
+      "evidence": [
+        "Cold-start routing passed from the root README without prior conversation.",
+        "Tutoring/mastery semantics and textbook/solution-manual guardrails passed.",
+        "Forwarded-Gmail communications/idempotency passed from durable Git without external mail reread.",
+        "Artifact/source preservation and portability regressions passed; all non-adapter authority blobs checked remained unchanged."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Update the existing CIS560 compatibility pins to workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and map promoted shared workflow roles without copying shared policy.",
-    "Replace remaining live tutor-builder/tutor authority hierarchy with durable semantic-owner and mutation-boundary language while preserving the historical correction record.",
-    "Run cold-start, tutoring/mastery, communications-ingestion/idempotency, artifact, and portability regressions.",
-    "Checkpoint and independently verify the migrated CIS560 tutor-framework state."
+    "Perform final remote-only acceptance and HANDOFF_SAFE assessment against the exact workflow binding and verified target checkpoint.",
+    "Mark completion VALIDATED/status COMPLETE, regenerate the derived handoff, then archive the completed capsule/handoff."
   ],
-  "next_safe_action": "On CIS560-AdamTrott tutor-framework at exact parent 1af3ce7022d079b89f0fbca32f313a6853db1c60, update only README.md, COURSE.md, and study/TUTORING.md to bind the promoted workspace-control checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9, map the shared course/communications workflow roles, and replace the live conversational tutor-builder/tutor authority split with role-neutral semantic mutation boundaries. Preserve all course facts, mastery state, homework state, source records, experiment B/C evidence, and historical boundary-correction evidence. Then verify the exact changed scope before regression validation.",
+  "next_safe_action": "Reverify workspace-control workflow checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and CIS560-AdamTrott tutor-framework checkpoint 9c5e492354449186898b5f038e227e5a92d15005. Evaluate the v2 remote_only HANDOFF_SAFE conditions from the task schema/procedure. If they pass, mark completion VALIDATED and the task COMPLETE with no blockers or remaining work, regenerate the derived Markdown immediately, then archive the completed JSON and derived handoff.",
   "last_executor": "chatgpt",
   "last_surface": "github"
 }
