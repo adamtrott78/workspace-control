@@ -12,7 +12,7 @@
     "content_sha": "da6076a9b4baf328d6a91526f6dff7aa999733b6"
   },
   "parent_execution_owner": "course-workflows-v2-refactor",
-  "current_stage": "regression_validation",
+  "current_stage": "completion",
   "acceptance_criteria": [
     "A fresh executor starts only from the target repository root README at the pinned checkpoint plus this capsule and the exact promoted shared workflow binding.",
     "Project-local course/source/assignment/mastery/artifact authority remains in the target repository; workspace-control contributes reusable mechanics only.",
@@ -163,7 +163,7 @@
     },
     {
       "id": "regression_validation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "eas501-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -171,18 +171,76 @@
         "shared_checkpoint_integration",
         "git:0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "Cold-start root routing regression PASS.",
+        "Tutoring/mastery and mutation-boundary regression PASS.",
+        "Assessment-relevance/factual-authority regression PASS.",
+        "Source-routing/content-ingestion regression PASS.",
+        "Exam 1 artifact-strategy and artifact-workflow regression PASS.",
+        "Executor-portability and exact shared-workflow identity regression PASS.",
+        "All protected course/source/study/Exam 1/Exam 2/operator evidence blobs checked remained byte-identical to the pre-migration baseline."
+      ],
+      "validation": [
+        {
+          "check": "Cold-start routing and tutoring/mastery semantics",
+          "result": "PASS",
+          "evidence": [
+            "README.md at 0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d routes a fresh executor through the exact lock, COURSE_TUTOR.md, course/CONTEXT.md, and the smallest Exam 1/Exam 2 owner without prior conversation.",
+            "COURSE_TUTOR.md preserves LEARNING/COMPLETION/MASTERY_RECOVERY/EXAM_READINESS, the completion/mastery firewall, unassessed semantics, and behavioral-evidence requirements.",
+            "Mutation authority is now explicitly attached to durable execution owner + semantic owner + bounded scope, not a chat identity."
+          ]
+        },
+        {
+          "check": "Assessment relevance versus factual authority",
+          "result": "PASS",
+          "evidence": [
+            "COURSE_TUTOR.md explicitly separates course/source authority from contextual assessment relevance and rejects a global source-class ranking.",
+            "practice/exam02/CONTEXT.md remains byte-identical and retains its Exam-2-local strong historical weighting while stating that current 2026 material wins on conflict.",
+            "practice/exam02/ASSESSMENT_MAP.md remains byte-identical and keeps historical scope as a signal rather than a current rule.",
+            "practice/exam01/POST_EXAM.md remains byte-identical, student-reported, not independently verified, and non-authoritative for current course truth."
+          ]
+        },
+        {
+          "check": "Source routing and ingestion boundary",
+          "result": "PASS",
+          "evidence": [
+            "course/SOURCES.json remains at baseline blob 56ffc221733f5512363b6f46b9ca76f93fb6e790 and still routes the canonical Exam 2 transcription and current 2026 lecture evidence.",
+            "course/sources/exam2/exam2.md resolves durably at blob 1ad1c9a3b6c9d1471a4af71e94733466346c108c.",
+            "The adapter routes source ingestion through course/CONTEXT.md + course/SOURCES.json + the destination source owner and preserves native-evidence verification when OCR/Mathpix is suspect."
+          ]
+        },
+        {
+          "check": "Artifact/workflow preservation",
+          "result": "PASS",
+          "evidence": [
+            "practice/exam01/POST_EXAM.md preserves the successful detailed micro-step, dense formula/procedure-bank, and printer-safe artifact strategy.",
+            "practice/exam01/EXAM_READINESS.md remains at baseline blob e887d4f2e27139e36a6775bbd2b64d4c0957e79b.",
+            "COURSE_TUTOR.md maps cheat-sheet work to course-cheat-sheet-build.v1.json and document work to document-artifact-build.v1.json, with final artifact validation requiring more than compilation/file existence.",
+            "No active artifact source/build contract required execution during this architecture-only migration."
+          ]
+        },
+        {
+          "check": "Evidence preservation and executor portability",
+          "result": "PASS",
+          "evidence": [
+            "All checked course/CONTEXT, course/SOURCES, study index/mastery/mastery-log/notation/skill-map, operator/LOCAL, Exam 1 context/readiness/learning/post-exam, and Exam 2 context/map/learning blobs exactly match the bccb636f35bbb0f530c8fa15b1a7b3d573193e07 baseline.",
+            "All eight mapped reusable workflow descriptors resolve at exact workspace-control checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 with their expected content blobs.",
+            "The root route pins the exact compatibility checkpoint, forbids silently following newer main, and does not assume an unverified local checkout/runtime.",
+            "Shared PORTABILITY_CONTRACT.md resolves at exact promoted blob 61f420050f1a0bacd62f2ff2520e99bea16f52a7."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "completion",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "eas501-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "regression_validation"
+        "regression_validation",
+        "git:0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d"
       ],
       "outputs": [],
       "validation": [],
@@ -248,14 +306,22 @@
         "Published EAS501 checkpoint 0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d is a one-commit fast-forward from bccb636f35bbb0f530c8fa15b1a7b3d573193e07 and changes only the three adapter/compatibility files.",
         "Existing Exam 1/Exam 2/course/source/mastery content was intentionally excluded from mutation scope for this commit."
       ]
+    },
+    {
+      "check": "Required migration regressions",
+      "result": "PASS",
+      "evidence": [
+        "Cold-start, tutoring/mastery, assessment-relevance, source-routing, artifact/workflow, and executor-portability regressions all passed at the migrated EAS501 checkpoint.",
+        "Protected course/source/practice/study/operator evidence remained byte-identical to the pre-migration bccb636f35bbb0f530c8fa15b1a7b3d573193e07 baseline.",
+        "All mapped reusable workflow identities were independently resolved at workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Run cold-start, tutoring/mastery, assessment-relevance, source-routing, artifact/workflow, and executor-portability regressions against the migrated checkpoint while confirming all authoritative evidence blobs remain unchanged.",
-    "Reverify the final EAS501 branch and exact shared workflow identity, establish final HANDOFF_SAFE state, and archive the migration task."
+    "Independently reverify the EAS501 migrated branch checkpoint and the exact pinned shared migration workflow, evaluate remote-only HANDOFF_SAFE conditions, then archive the COMPLETE task with synchronized Markdown."
   ],
-  "next_safe_action": "From EAS501-AdamTrott:eas501-tutor-bootstrap@0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d, run read-only migration regressions: prove root cold-start routing through the exact lock and local adapter; verify tutoring/mastery semantics; verify Exam 2 contextual assessment relevance remains separate from current-course authority; verify source routing and Exam 1 artifact strategy remain intact; confirm all baseline course/practice/study evidence blobs are unchanged; and verify every mapped shared workflow exists at workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9. Do not perform live Exam 2 tutoring.",
+  "next_safe_action": "Independently reread EAS501-AdamTrott:eas501-tutor-bootstrap@0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d and workspace-control:workflows/course-bootstrap-migration.v1.json@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; confirm the remote-only capsule has verified durable recovery checkpoints, all stages except completion VALIDATED, no blockers, and no remaining project mutation. If HANDOFF_SAFE conditions pass, mark completion VALIDATED, set task COMPLETE with empty blockers/remaining_work, and atomically move synchronized JSON/Markdown from tasks/active to tasks/archive.",
   "notes": " The EAS501 target baseline was deliberately refreshed from 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5 to bccb636f35bbb0f530c8fa15b1a7b3d573193e07 after the Exam 1 task completed and Exam 2 planning was initialized. Compare evidence showed three forward-only course/assessment commits and no workspace-control.lock.json migration.",
   "last_executor": "chatgpt",
   "last_surface": "github"

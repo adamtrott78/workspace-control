@@ -42,12 +42,11 @@ Explicitly migrate EAS501 from its current pinned workspace-control compatibilit
 
 ## Next safe action
 
-From EAS501-AdamTrott:eas501-tutor-bootstrap@0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d, run read-only migration regressions: prove root cold-start routing through the exact lock and local adapter; verify tutoring/mastery semantics; verify Exam 2 contextual assessment relevance remains separate from current-course authority; verify source routing and Exam 1 artifact strategy remain intact; confirm all baseline course/practice/study evidence blobs are unchanged; and verify every mapped shared workflow exists at workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9. Do not perform live Exam 2 tutoring.
+Independently reread EAS501-AdamTrott:eas501-tutor-bootstrap@0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d and workspace-control:workflows/course-bootstrap-migration.v1.json@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; confirm the remote-only capsule has verified durable recovery checkpoints, all stages except completion VALIDATED, no blockers, and no remaining project mutation. If HANDOFF_SAFE conditions pass, mark completion VALIDATED, set task COMPLETE with empty blockers/remaining_work, and atomically move synchronized JSON/Markdown from tasks/active to tasks/archive.
 
 ## Remaining work
 
-- Run cold-start, tutoring/mastery, assessment-relevance, source-routing, artifact/workflow, and executor-portability regressions against the migrated checkpoint while confirming all authoritative evidence blobs remain unchanged.
-- Reverify the final EAS501 branch and exact shared workflow identity, establish final HANDOFF_SAFE state, and archive the migration task.
+- Independently reverify the EAS501 migrated branch checkpoint and the exact pinned shared migration workflow, evaluate remote-only HANDOFF_SAFE conditions, then archive the COMPLETE task with synchronized Markdown.
 
 ## Blockers / gates
 
