@@ -37,24 +37,24 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: aafde498d728e6e04a65902095f269d3ef9a7901
+- Remote checkpoint: ec8baf481679aa86ee45b8b1b7dd47ed44846d6b
 - Remote verified: true
 
 ## Next safe action
 
-On the user's Lambda, read acceptance-codex-rf-v1 durable run/budget/job state first. If the run is still RUNNING, do not change the checkout or restart the daemon; return the status so the bounded existing budget can gate it. If it is PAUSED_BUDGET or WAITING_HUMAN, fast-forward the clean research-engine checkout from 03babb404e9e6a254deec38fea6ea5ab3b8b05ad to exact main@aafde498d728e6e04a65902095f269d3ef9a7901, restart the user systemd daemon to load the bounded-fanout planner, and return post-restart non-secret run/job/health state. Do not configure OPENAI_API_KEY.
+On the user's Lambda while acceptance-codex-rf-v1 remains PAUSED_BUDGET, verify the only untracked path is src/research_engine/__pycache__/, delete only that generated directory, require a clean checkout, fetch and fast-forward main from 03babb404e9e6a254deec38fea6ea5ab3b8b05ad to exact ec8baf481679aa86ee45b8b1b7dd47ed44846d6b, restart the user daemon, and return post-deploy run/job/budget state. Do not resume the budget yet; first reconcile/cancel the surplus novelty queue under the bounded planner.
 
 ## Remaining work
 
-- Inspect the current durable state of acceptance-codex-rf-v1 and deploy research-engine main@aafde498d728e6e04a65902095f269d3ef9a7901 only at a safe paused/human gate boundary.
-- Use the bounded-fanout planner to salvage/cancel surplus queued novelty work in the same acceptance run, then apply only the budget changes justified by the remaining bounded graph.
-- Reach WAITING_HUMAN and verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload.
-- After acceptance passes, implement/validate plan-limit-aware pacing/backoff so 24/7 operation pauses cleanly when the included weekly Codex allowance is unavailable rather than exhausting job retries.
-- Then resume RF corpus expansion through the daemon and tune concurrency/model tiers against observed allowance consumption and quality.
+- Deploy research-engine main@ec8baf481679aa86ee45b8b1b7dd47ed44846d6b to the safely paused Lambda and restart the native user daemon.
+- Reconcile acceptance-codex-rf-v1 under the bounded planner so surplus queued novelty jobs are cancelled/ignored deterministically; then inspect the remaining bounded graph.
+- Apply only the bounded budget changes needed for the remaining novelty arbitration/human-review path and reach WAITING_HUMAN.
+- Verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload; validate model_backed_acceptance_v1.
+- Implement/validate plan-limit-aware pacing/backoff for 24/7 operation under included weekly Codex allowance, then resume RF corpus expansion.
 
 ## Blockers / gates
 
-- The bounded novelty-fanout fix is validated but not yet deployed to the user's Lambda. The current acceptance run's latest status must be read before restarting the daemon so no active semantic job is raced.
+- The validated bounded-fanout/cache-hygiene build has not yet been deployed to the Lambda. The acceptance run is safely PAUSED_BUDGET, so deployment may proceed after removing only the verified generated __pycache__ directory.
 
 ## Fresh-chat initialization
 
