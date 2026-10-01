@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: mth602-course-workflows-v2-migration
 - Title: MTH602 Course Workflows v2 Migration
-- Status: CHECKPOINTED
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -42,11 +42,11 @@ Explicitly migrate the current MTH602 repository integration to the promoted reu
 
 ## Next safe action
 
-Run the final topology-aware HANDOFF_SAFE assessment for this synchronized checkpointed capsule. If it is HANDOFF_SAFE, mark completion VALIDATED, set the task COMPLETE with no remaining work/blockers, regenerate the derived Markdown immediately, archive the completed capsule/handoff, and leave the separately suspended mth602-new-unit-ingestion-hw2-prep task untouched.
+Archive this completed migration capsule and its synchronized derived handoff under tasks/archive. Do not resume or mutate mth602-new-unit-ingestion-hw2-prep; its coordinator must deliberately refresh that suspended task to the migrated MTH602 checkpoint before HW2 work resumes.
 
 ## Remaining work
 
-- Run the final topology-aware HANDOFF_SAFE assessment against this synchronized checkpointed capsule, then archive this migration task while leaving mth602-new-unit-ingestion-hw2-prep suspended for coordinator refresh.
+- None.
 
 ## Blockers / gates
 
