@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "mth602-course-workflows-v2-migration",
   "title": "MTH602 Course Workflows v2 Migration",
-  "status": "PLANNED",
+  "status": "BLOCKED_RUNTIME",
   "goal": "Explicitly migrate the current MTH602 repository integration to the promoted reusable course-workflow architecture while preserving its proven direct-visual source ingestion, tutoring/mastery state, homework/LaTeX report mechanics, and project-local authority.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -12,7 +12,7 @@
     "content_sha": "da6076a9b4baf328d6a91526f6dff7aa999733b6"
   },
   "parent_execution_owner": "course-workflows-v2-refactor",
-  "current_stage": "baseline_recovery",
+  "current_stage": "regression_validation",
   "acceptance_criteria": [
     "A fresh executor starts only from the target repository root README at the pinned checkpoint plus this capsule and the exact promoted shared workflow binding.",
     "Project-local course/source/assignment/mastery/artifact authority remains in the target repository; workspace-control contributes reusable mechanics only.",
@@ -52,7 +52,7 @@
       "base_sha": "20dc641dcb9b505efe53daa52932521d0927ef3a",
       "remote": {
         "branch": "unit-ingestion-hw2",
-        "checkpoint_sha": "20dc641dcb9b505efe53daa52932521d0927ef3a",
+        "checkpoint_sha": "0ed5957af97e2de887ef181f26a9966413daf857",
         "verified": true
       },
       "local": null,
@@ -70,7 +70,7 @@
   "stages": [
     {
       "id": "baseline_recovery",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "mth602-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -78,48 +78,161 @@
         "20dc641dcb9b505efe53daa52932521d0927ef3a",
         "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9:course-bootstrap-migration-v1"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "MTH602-AdamTrott unit-ingestion-hw2 independently verified at exact refreshed pre-solution baseline 20dc641dcb9b505efe53daa52932521d0927ef3a before migration mutation.",
+        "No COURSE_TUTOR.md or workspace-control.lock.json existed at the baseline; the root already routed durable project-local source, tutoring, homework, report, and operator owners.",
+        "Promoted migration workflow independently resolved at workspace-control 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 with blob da6076a9b4baf328d6a91526f6dff7aa999733b6."
+      ],
+      "validation": [
+        {
+          "check": "Exact target/workflow baseline and pre-solution boundary recovery",
+          "result": "PASS",
+          "evidence": [
+            "unit-ingestion-hw2 advertised 20dc641dcb9b505efe53daa52932521d0927ef3a before mutation; no reset/rebase was required or authorized.",
+            "The refreshed baseline deliberately contains the 2026-09-21, 2026-09-23, and 2026-09-28 ingestions plus HW2 contract/learning/provenance bootstrap.",
+            "homework/hw02/LEARNING.md at the baseline records no HW2 solution work, and the separate mth602-new-unit-ingestion-hw2-prep task is SUSPENDED pending this migration."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "local_owner_mapping",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "mth602-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
         "baseline_recovery"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "Course/source authority: docs/course/CONTEXT.md + exact instructor source; source-ingestion mechanics: docs/sources/CONTEXT.md.",
+        "Classroom visual ingestion: classnotes/CONTEXT.md + session SOURCE_MANIFEST.json + SESSION_SYNTHESIS.md, preserving original images, provenance, uncertainty, and optional OCR/Mathpix.",
+        "Tutoring/mastery: study/TUTORING.md, study/MASTERY.md, study/MASTERY_LOG.md, study/SKILL_MAP.md, study/NOTATION.md, study/COURSE_INDEX.md, study/HOMEWORK_INDEX.md.",
+        "Homework/report: homework/CONTEXT.md -> homework/hwNN/CONTEXT.md, with assignment-local input/src/records/report/LEARNING owners and LaTeX final-PDF validation.",
+        "Operator/runtime supplement: docs/operator/CONTEXT.md."
+      ],
+      "validation": [
+        {
+          "check": "Existing semantic owners recovered before integration",
+          "result": "PASS",
+          "evidence": [
+            "MTH602 already keeps course/source/assignment/mastery/artifact truth in durable project-local owners.",
+            "Direct classroom visual synthesis is explicitly distinct from the homework-PDF Mathpix ingestion path; OCR/Mathpix is not a mandatory classroom-image dependency.",
+            "homework/hw01/CONTEXT.md records report/main.tex as source authority and HW1_AdamTrott.pdf as a compiled and visually reviewed final report.",
+            "No live conversational builder/tutor identity was found owning project truth or mutation authority."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "shared_checkpoint_integration",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "mth602-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "local_owner_mapping"
+        "local_owner_mapping",
+        "workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "MTH602 migration commit 0ed5957af97e2de887ef181f26a9966413daf857.",
+        "README.md now routes fresh executors through the exact workspace-control lock and COURSE_TUTOR.md before the smallest project-local owner.",
+        "COURSE_TUTOR.md maps promoted content-ingestion, study, assignment, assessment, communications, cheat-sheet, and document-artifact mechanics to existing MTH602 owners.",
+        "workspace-control.lock.json explicitly pins shared semantics to 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9."
+      ],
+      "validation": [
+        {
+          "check": "Bounded promoted-checkpoint integration",
+          "result": "PASS",
+          "evidence": [
+            "Commit 0ed5957af97e2de887ef181f26a9966413daf857 has direct parent 20dc641dcb9b505efe53daa52932521d0927ef3a.",
+            "Git compare reports exactly one commit ahead and exactly three changed paths: README.md, COURSE_TUTOR.md, and workspace-control.lock.json.",
+            "unit-ingestion-hw2 independently advertises 0ed5957af97e2de887ef181f26a9966413daf857.",
+            "The lock forbids silently following newer workspace-control main.",
+            "No classnotes, docs/source/course/operator, study/mastery, homework/HW2, HW1 report source, or HW1 final-PDF blob changed in the migration commit."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "regression_validation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "mth602-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github+runtime",
       "inputs": [
-        "shared_checkpoint_integration"
+        "shared_checkpoint_integration",
+        "git:0ed5957af97e2de887ef181f26a9966413daf857"
       ],
-      "outputs": [],
-      "validation": [],
-      "resume_condition": null
+      "outputs": [
+        "Cold-start root-routing regression PASS.",
+        "Direct-visual/source-ingestion regression PASS.",
+        "Tutoring/mastery-firewall regression PASS.",
+        "HW2 pre-solution preservation regression PASS.",
+        "Executor/remote-recovery regression PASS.",
+        "LaTeX artifact owner/build/render/visual-QA preservation regression PASS from durable known-good evidence; fresh runtime rebuild/render/visual inspection remains PENDING."
+      ],
+      "validation": [
+        {
+          "check": "Cold-start routing",
+          "result": "PASS",
+          "evidence": [
+            "README.md at 0ed5957af97e2de887ef181f26a9966413daf857 requires the exact lock and COURSE_TUTOR.md, then routes by task to the smallest local owner without prior conversation.",
+            "COURSE_TUTOR.md exposes the exact promoted compatibility checkpoint and durable local owner map."
+          ]
+        },
+        {
+          "check": "Source-ingestion regression",
+          "result": "PASS",
+          "evidence": [
+            "COURSE_TUTOR.md preserves separate classroom-photograph/handwriting and homework/course-PDF ingestion paths.",
+            "For classroom evidence, original image bytes/provenance remain authoritative and direct multimodal synthesis remains preferred when sufficient; OCR/Mathpix remains optional.",
+            "The 2026-09-21, 2026-09-23, and 2026-09-28 SESSION_SYNTHESIS.md and SOURCE_MANIFEST.json blobs checked are byte-identical to the 20dc641dcb9b505efe53daa52932521d0927ef3a baseline."
+          ]
+        },
+        {
+          "check": "Tutoring/mastery and HW2 firewall regression",
+          "result": "PASS",
+          "evidence": [
+            "COURSE_TUTOR.md preserves LEARNING/COMPLETION/MASTERY_RECOVERY/EXAM_READINESS and explicitly states that source ingestion, homework initialization, tutor-generated solutions/code/report text, and artifact completion do not promote mastery.",
+            "study/TUTORING.md, MASTERY.md, MASTERY_LOG.md, SKILL_MAP.md, COURSE_INDEX.md, HOMEWORK_INDEX.md, and NOTATION.md checked blobs are byte-identical to baseline.",
+            "homework/hw02/CONTEXT.md, LEARNING.md, assignment/UPSTREAM_COMMIT.txt, and assignment/manifest.json checked blobs are byte-identical to baseline.",
+            "The separate HW2 durable task remains SUSPENDED at hw2_bootstrap and was not mutated by this migration."
+          ]
+        },
+        {
+          "check": "LaTeX artifact mechanics preservation",
+          "result": "PASS",
+          "evidence": [
+            "homework/hw01/CONTEXT.md records report/main.tex as the report source with a clean-LaTeX-compile check and report/HW1_AdamTrott.pdf as the final compiled and visually reviewed PDF.",
+            "homework/CONTEXT.md preserves the LaTeX report lifecycle: build from source, validate reproducibility/artifacts, visually review the final graded PDF, and keep submission separate from production.",
+            "COURSE_TUTOR.md maps these assignment-local owners to workflows/document-artifact-build.v1.json without moving assignment truth into workspace-control.",
+            "HW1 report/main.tex and HW1_AdamTrott.pdf are byte-identical to the known-good baseline."
+          ]
+        },
+        {
+          "check": "Fresh LaTeX build/render/visual-QA runtime regression",
+          "result": "PENDING",
+          "evidence": [
+            "The available runtime has latexmk, pdflatex, and pdftoppm installed.",
+            "The runtime contains no MTH602 checkout/artifact and has no network route to github.com, so exact repository inputs cannot be obtained there without a user-supplied/materialized file bridge.",
+            "No fresh compile/render/visual inspection is claimed yet."
+          ]
+        },
+        {
+          "check": "Executor portability and remote recovery",
+          "result": "PASS",
+          "evidence": [
+            "The migrated root/adapter attach mutation authority to durable execution owner + semantic owner + bounded scope rather than a conversational identity.",
+            "The exact shared workflow and compatibility checkpoint are pinned; no moving-main dependency is introduced.",
+            "unit-ingestion-hw2 remote recovery state is verified at 0ed5957af97e2de887ef181f26a9966413daf857 and workspace-control workflow identity remains exact at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9."
+          ]
+        }
+      ],
+      "resume_condition": "Resume when exact HW1 report runtime inputs are available without routing large binaries through the GitHub connector; run a clean compile, render the resulting PDF to page images, visually inspect every page, then finish completion/HANDOFF_SAFE/archive."
     },
     {
       "id": "completion",
@@ -154,6 +267,16 @@
         "MTH602-AdamTrott unit-ingestion-hw2 verified at 20dc641dcb9b505efe53daa52932521d0927ef3a before migration.",
         "This refreshed baseline includes three newly ingested lecture sessions, cumulative skill/index updates, and HW2 assignment/bootstrap/provenance state, but no HW2 problem solution work."
       ]
+    },
+    {
+      "id": "migrated-project-checkpoint",
+      "kind": "git_commit",
+      "identity": "0ed5957af97e2de887ef181f26a9966413daf857",
+      "required_for_resume": true,
+      "evidence": [
+        "MTH602-AdamTrott unit-ingestion-hw2 advertised and reread at 0ed5957af97e2de887ef181f26a9966413daf857.",
+        "Direct parent is 20dc641dcb9b505efe53daa52932521d0927ef3a; changed scope is exactly README.md, COURSE_TUTOR.md, and workspace-control.lock.json."
+      ]
     }
   ],
   "artifacts": [],
@@ -167,16 +290,44 @@
         "The refreshed branch contains no HW2 solution work; the active HW2 task was suspended at the pre-solution boundary before migration.",
         "No shared-workflow substitution was performed."
       ]
+    },
+    {
+      "check": "Baseline recovery and local-owner mapping",
+      "result": "PASS",
+      "evidence": [
+        "Exact refreshed baseline and promoted workflow identities were recovered before mutation.",
+        "Project-local source/tutoring/mastery/homework/report/operator owners were mapped before integration.",
+        "No HW2 problem solving occurred."
+      ]
+    },
+    {
+      "check": "Promoted shared-checkpoint integration",
+      "result": "PASS",
+      "evidence": [
+        "Published MTH602 checkpoint 0ed5957af97e2de887ef181f26a9966413daf857 is a one-commit fast-forward from 20dc641dcb9b505efe53daa52932521d0927ef3a.",
+        "Only README.md, COURSE_TUTOR.md, and workspace-control.lock.json changed.",
+        "Protected lecture/course/study/HW2/HW1 artifact evidence checked remained byte-identical."
+      ]
+    },
+    {
+      "check": "Required regressions except fresh artifact runtime rerun",
+      "result": "PENDING",
+      "evidence": [
+        "Cold-start, source-ingestion, tutoring/mastery, HW2-preservation, artifact-owner preservation, and executor/remote-recovery regressions pass.",
+        "Fresh LaTeX compile/render/visual inspection is the sole remaining runtime regression."
+      ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Recover current MTH602 owners and compatibility state from the root route.",
-    "Map missing shared adapter roles without duplicating shared policy.",
-    "Adopt the promoted checkpoint explicitly if validation supports it.",
-    "Run cold-start/source-ingestion/tutoring/LaTeX artifact regressions.",
-    "Checkpoint and verify the migrated project state."
+  "blockers": [
+    "Fresh LaTeX build/render/visual-QA regression cannot run in the current runtime because no MTH602 checkout/artifact is mounted and the container cannot resolve github.com. Supply/materialize the exact small HW1 report inputs (at minimum homework/hw01/report/main.tex and homework/hw01/input/hw1.csv, or a small HW1 report/input zip) rather than transferring large binaries through the GitHub connector."
   ],
-  "next_safe_action": "Start only from MTH602-AdamTrott README.md at 20dc641dcb9b505efe53daa52932521d0927ef3a on branch unit-ingestion-hw2, then follow its documented routes. Read workspace-control course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 only through the exact binding in this capsule. Recover the existing source/tutoring/homework/report owners and current compatibility mechanism before mutation. Preserve the newly ingested lecture state and initialized HW2 contract/learning/provenance state exactly. Do not perform any HW2 problem-solving or mastery work as part of the migration.",
-  "notes": " Baseline deliberately refreshed on 2026-10-01 from main@62b7a03c7139cb3987b72ad66bdc532e8a61b82a to unit-ingestion-hw2@20dc641dcb9b505efe53daa52932521d0927ef3a because content ingestion and HW2 initialization completed before any HW2 solution work began. Migration is intentionally interposed at this clean pre-solution boundary."
+  "remaining_work": [
+    "Run a clean HW1 LaTeX compile from exact repository inputs in the available runtime.",
+    "Render the newly built PDF to page images and visually inspect every page.",
+    "Record the artifact regression result, establish final HANDOFF_SAFE, archive mth602-course-workflows-v2-migration, and leave mth602-new-unit-ingestion-hw2-prep suspended for coordinator refresh."
+  ],
+  "next_safe_action": "Obtain the exact small HW1 report runtime inputs without using the GitHub connector for large-file transfer (minimum: homework/hw01/report/main.tex and homework/hw01/input/hw1.csv, or a small archive containing them). From those exact inputs, run a clean LaTeX build, verify successful output, render the newly built PDF to page images, and visually inspect every page. If that regression passes, mark regression_validation VALIDATED, complete HANDOFF_SAFE, archive this migration task, and do not resume or mutate the separately suspended HW2 task.",
+  "notes": " Baseline deliberately refreshed on 2026-10-01 from main@62b7a03c7139cb3987b72ad66bdc532e8a61b82a to unit-ingestion-hw2@20dc641dcb9b505efe53daa52932521d0927ef3a because content ingestion and HW2 initialization completed before any HW2 solution work began. Migration is intentionally interposed at this clean pre-solution boundary.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+runtime"
 }
