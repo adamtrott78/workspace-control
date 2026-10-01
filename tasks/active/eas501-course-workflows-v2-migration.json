@@ -49,10 +49,10 @@
     {
       "name": "EAS501-AdamTrott",
       "intent": "mutate",
-      "base_sha": "52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5",
+      "base_sha": "bccb636f35bbb0f530c8fa15b1a7b3d573193e07",
       "remote": {
         "branch": "eas501-tutor-bootstrap",
-        "checkpoint_sha": "52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5",
+        "checkpoint_sha": "bccb636f35bbb0f530c8fa15b1a7b3d573193e07",
         "verified": true
       },
       "local": null,
@@ -78,7 +78,7 @@
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5",
+        "bccb636f35bbb0f530c8fa15b1a7b3d573193e07",
         "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9:course-bootstrap-migration-v1"
       ],
       "outputs": [],
@@ -151,10 +151,11 @@
     {
       "id": "target-starting-checkpoint",
       "kind": "git_commit",
-      "identity": "52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5",
+      "identity": "bccb636f35bbb0f530c8fa15b1a7b3d573193e07",
       "required_for_resume": true,
       "evidence": [
-        "EAS501-AdamTrott eas501-tutor-bootstrap verified at child creation"
+        "EAS501-AdamTrott eas501-tutor-bootstrap verified at child creation",
+        "Baseline deliberately refreshed after Exam 1 completion: eas501-tutor-bootstrap advanced by three course-content/assessment commits to bccb636f35bbb0f530c8fa15b1a7b3d573193e07; workspace-control.lock.json remained on compatible_commit 450eebeef6b76a674913949863082277b6bdb811, so no workflow migration had already occurred."
       ]
     }
   ],
@@ -178,5 +179,6 @@
     "Run cold-start/tutoring/assessment-relevance regressions.",
     "Checkpoint and verify the migrated project state."
   ],
-  "next_safe_action": "Start only from EAS501-AdamTrott README.md at 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5 on branch eas501-tutor-bootstrap. Read its workspace-control.lock.json and resolve the currently pinned shared contracts before touching any file. Compare those local semantics to the promoted course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; preserve current assessment/mastery content. If the branch moved from 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5, update this capsule first rather than silently rebasing."
+  "next_safe_action": "Start only from EAS501-AdamTrott README.md at bccb636f35bbb0f530c8fa15b1a7b3d573193e07 on branch eas501-tutor-bootstrap. Read its workspace-control.lock.json and resolve the currently pinned shared contracts before touching any file. Compare those local semantics to the promoted course-bootstrap workflow pinned by this capsule; preserve the completed Exam 1 post-exam evidence, current Exam 2 planning/source material, and all existing mastery/assessment content. The branch baseline has already been deliberately refreshed after Exam 1, so do not reset or rebase it to the older 52eb8e44 checkpoint.",
+  "notes": " The EAS501 target baseline was deliberately refreshed from 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5 to bccb636f35bbb0f530c8fa15b1a7b3d573193e07 after the Exam 1 task completed and Exam 2 planning was initialized. Compare evidence showed three forward-only course/assessment commits and no workspace-control.lock.json migration."
 }

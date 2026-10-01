@@ -31,18 +31,18 @@ Explicitly migrate EAS501 from its current pinned workspace-control compatibilit
 - Intent: read
 - Remote branch: main
 - Remote checkpoint: 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9
-- Remote verified: True
+- Remote verified: true
 
 ### EAS501-AdamTrott
 
 - Intent: mutate
 - Remote branch: eas501-tutor-bootstrap
-- Remote checkpoint: 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5
-- Remote verified: True
+- Remote checkpoint: bccb636f35bbb0f530c8fa15b1a7b3d573193e07
+- Remote verified: true
 
 ## Next safe action
 
-Start only from EAS501-AdamTrott README.md at 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5 on branch eas501-tutor-bootstrap. Read its workspace-control.lock.json and resolve the currently pinned shared contracts before touching any file. Compare those local semantics to the promoted course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; preserve current assessment/mastery content. If the branch moved from 52eb8e440bcb21bcfcad2e5eb4ac98426e0eacc5, update this capsule first rather than silently rebasing.
+Start only from EAS501-AdamTrott README.md at bccb636f35bbb0f530c8fa15b1a7b3d573193e07 on branch eas501-tutor-bootstrap. Read its workspace-control.lock.json and resolve the currently pinned shared contracts before touching any file. Compare those local semantics to the promoted course-bootstrap workflow pinned by this capsule; preserve the completed Exam 1 post-exam evidence, current Exam 2 planning/source material, and all existing mastery/assessment content. The branch baseline has already been deliberately refreshed after Exam 1, so do not reset or rebase it to the older 52eb8e44 checkpoint.
 
 ## Remaining work
 
