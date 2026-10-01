@@ -68,13 +68,13 @@
       "base_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "02453b856fbb6d5cac8e611949579a61822560f4",
+        "checkpoint_sha": "28e8a0904831f70e5689fbc8de75fc1fbc071f32",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
+        "head_sha": "02453b856fbb6d5cac8e611949579a61822560f4",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -248,15 +248,17 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "02453b856fbb6d5cac8e611949579a61822560f4",
+      "identity": "28e8a0904831f70e5689fbc8de75fc1fbc071f32",
       "required_for_resume": true,
       "evidence": [
         "stage=hud_and_ops_cli",
-        "workspace-control/main@7948382a4ecb6c24fff6da5a16447a80ed4e4539",
-        "research-engine remote main@02453b856fbb6d5cac8e611949579a61822560f4 canonical CI 36918008262 PASS",
-        "Lambda local research-engine remains main@6a423e0fd38283687cae2eb060405a2a82643450 clean pending paused deployment",
-        "runtime_pause=research-engine-daemon.service inactive/dead MainPID=0 Result=success NRestarts=0",
-        "next runtime action=deploy observability only; initialize schema and validate HUD; keep semantic daemon stopped"
+        "workspace-control/main@c2e153662dd7bd926c2eda711bdc8ba9269529c5",
+        "research-engine remote main@28e8a0904831f70e5689fbc8de75fc1fbc071f32 canonical CI 36919903624 PASS",
+        "Lambda local research-engine main@02453b856fbb6d5cac8e611949579a61822560f4 after failed HUD attempt; failure occurred before schema migration",
+        "failure_root_cause=unnecessary pip editable reinstall used --no-build-isolation while Hatchling absent; no scientific state mutation",
+        "runtime_pause=research-engine-daemon.service inactive/dead MainPID=0",
+        "operator_controls=START STOP HUD STATUS repository-owned and validated",
+        "next runtime action=fast-forward to 28e8a090... and run deploy/deploy-hud-paused.sh; keep daemon stopped"
       ]
     }
   ],
@@ -300,21 +302,32 @@
         "Implementation includes the observability contract, stable logical-agent identities, richer immutable usage attribution/backfill, allowance observations/forecasting, read-only ops-snapshot, ANSI terminal HUD, and operator documentation.",
         "The Lambda daemon remained intentionally stopped throughout implementation, so no additional sustained semantic allowance was consumed."
       ]
+    },
+    {
+      "check": "Operator shortcut and repaired HUD deploy path",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #23 merged as 28e8a0904831f70e5689fbc8de75fc1fbc071f32.",
+        "Canonical main CI run 36919903624 passed compile, full PostgreSQL/legacy tests, shell shortcut/deployer syntax tests, Compose validation, and image build.",
+        "Repository now owns START, STOP, HUD, and STATUS commands plus deploy/install-operator-shortcuts.sh.",
+        "STOP returns success only after systemd reports inactive/dead with PID 0.",
+        "deploy/deploy-hud-paused.sh verifies the existing editable source first and avoids the failed --no-build-isolation Hatchling path; fallback editable installation uses normal build isolation."
+      ]
     }
   ],
   "blockers": [
-    "Lambda is intentionally still deployed at research-engine main@6a423e0fd38283687cae2eb060405a2a82643450 with research-engine-daemon.service inactive/dead; observability main@02453b856fbb6d5cac8e611949579a61822560f4 must be fast-forward deployed and the additive schema initialized before the live HUD can be validated.",
+    "Lambda checkout was fast-forwarded by the failed first HUD attempt to 02453b856fbb6d5cac8e611949579a61822560f4, but the additive observability schema was not applied because that attempt failed earlier at an unnecessary pip reinstall.",
+    "Lambda must fast-forward once more to canonical research-engine main@28e8a0904831f70e5689fbc8de75fc1fbc071f32 and run the repository-owned paused HUD deployer; daemon must remain inactive/dead.",
     "At least two trustworthy timestamped observations in the same Codex allowance window are required before exhaustion ETA can move beyond CALIBRATING."
   ],
   "remaining_work": [
-    "Fast-forward the paused Lambda checkout to research-engine main@02453b856fbb6d5cac8e611949579a61822560f4 without restarting research.",
-    "Initialize the additive observability schema and audit historical worker/usage backfill against the existing acceptance and sustained-run records.",
-    "Record current timestamped 5-hour and weekly Codex allowance readings from the ChatGPT UI; do not treat the earlier approximate 16% reading as a precisely timed forecast sample.",
-    "Validate ops-snapshot and the one-shot/live terminal HUD against rf-open-world-corpus-expansion-v1 while the daemon remains stopped.",
-    "After the HUD is trusted, collect a second allowance reading around a tightly bounded calibration workload and tune model/tier/concurrency budgets before sustained research resumes.",
+    "Fast-forward the paused Lambda from 02453b856fbb6d5cac8e611949579a61822560f4 to 28e8a0904831f70e5689fbc8de75fc1fbc071f32.",
+    "Run deploy/deploy-hud-paused.sh; verify existing editable import or build-isolated fallback, initialize additive observability schema, audit protected research state, record current allowance observations, install START/STOP/HUD/STATUS, and render the real one-shot HUD.",
+    "Keep research stopped after deployment; inspect the real historical usage attribution and HUD output before any START.",
+    "Collect a second allowance reading around a tightly bounded calibration workload and tune model/tier/concurrency budgets before sustained research resumes.",
     "Then continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge."
   ],
-  "next_safe_action": "Run the fail-closed paused-Lambda HUD deployment script against exact research-engine main@02453b856fbb6d5cac8e611949579a61822560f4. It must require research-engine-daemon.service to remain inactive/dead, require a clean fast-forward main checkout, initialize the additive schema, verify observability tables/columns and preserved scientific run state, optionally record current timestamped 5-hour/weekly allowance observations supplied interactively by the user, generate an ops-snapshot and one-shot HUD for rf-open-world-corpus-expansion-v1, install a convenient research-hud wrapper, and finish with the daemon still stopped. Do not resume semantic processing yet.",
+  "next_safe_action": "On the paused Lambda, require research-engine-daemon.service inactive/dead, clean fast-forward main from 02453b856fbb6d5cac8e611949579a61822560f4 to exact validated 28e8a0904831f70e5689fbc8de75fc1fbc071f32, then execute deploy/deploy-hud-paused.sh. Enter current 5-hour/weekly Codex usage readings if available. The deployer must preserve the research run/scientific state, install START/STOP/HUD/STATUS, render a one-shot HUD, and finish with the daemon still stopped. Do not use START until the historical usage/HUD output has been reviewed and a bounded calibration plan is chosen.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Preferred UX: a terminal HUD launched from Bash/CLI, backed by read-only PostgreSQL queries rather than Bash scraping. Proposed Chat-visible mirror: one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups; raw high-frequency telemetry remains PostgreSQL-authoritative. Proposed Chat bridge: agents create bounded structured reasoning requests that are mirrored to GitHub issues; ChatGPT can read/update them when invoked. This is not equivalent to a direct autonomous ChatGPT conversation API and must not be described as such until separately validated."
