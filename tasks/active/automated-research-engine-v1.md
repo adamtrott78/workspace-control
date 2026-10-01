@@ -29,11 +29,14 @@ Design and prove a provenance-preserving automated research engine that turns sc
 - Identity: 738e3beadf8dabadc2496d53cb2e823779bdc453
 - stage=model_backed_acceptance_v1
 - last_validated_boundary=research-engine/main@738e3beadf8dabadc2496d53cb2e823779bdc453; agentic research v1 implementation complete; PR #11 CI PASS
-- resume=probe an authorized runtime for OPENAI_API_KEY/model authentication without exposing credentials; if available run research-engine autonomous-run on a bounded real topic to WAITING_HUMAN and inspect the payload; if unavailable record the genuine credential boundary and continue non-model 24/7 daemon hardening
+- credential_probe=not completed because this executor cannot inspect/read GitHub secrets and an attempted secret-presence workflow mutation was blocked before GitHub state changed
+- independent_in_flight=research-engine PR #12 head daemon-supervisor-v1@43b48010ec7bade34db68f2215eb84c543b88a4b
+- slice=24/7 supervisor with tier-configurable concurrency, admission backpressure, stale-worker/lease health, daemon CLI, and overnight reporting
+- resume=inspect PR #12 CI; repair remotely if failing and merge if green. Model-backed acceptance remains gated on a model-authenticated runtime, but independent runtime hardening should continue before asking the user for credentials.
 
 ## Next safe action
 
-Probe an authorized execution surface for model authentication without exposing secrets. Prefer a GitHub Actions presence/runtime probe if available. If OPENAI_API_KEY/model authentication is available, run a bounded real autonomous research cycle from research-engine/main@738e3beadf8dabadc2496d53cb2e823779bdc453 to WAITING_HUMAN and inspect the persisted review payload. If credentials are unavailable, record the credential boundary and continue independent 24/7 daemon hardening.
+Inspect research-engine PR #12 for daemon-supervisor-v1@43b48010ec7bade34db68f2215eb84c543b88a4b. Repair CI failures remotely or merge if green. Then continue non-model runtime hardening (budget controls, service supervision/deployment packaging) while the first real model-backed acceptance run remains gated on an authorized model credential surface.
 
 ## Remaining work
 
