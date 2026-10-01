@@ -42,18 +42,18 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Next safe action
 
-Resume acceptance-codex-rf-v1 in place with a bounded budget increase: raise max_jobs_by_tier.STANDARD from 4 to 5 only to clear the consumed cap, and raise max_input_tokens from 220000 to 360000 for the remaining checkpoint/synthesis/gap/novelty stages. Keep max_output_tokens=40000, max_semantic_jobs=12, CHEAP=5, STRONG=3. Then observe persisted state only; do not manually orchestrate stages.
+Observe persisted state for acceptance-codex-rf-v1 without manually orchestrating jobs. If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload. If PAUSED_BUDGET again, inspect exact exhausted reason and apply only a bounded increase if justified.
 
 ## Remaining work
 
-- Perform one bounded in-place budget resume for acceptance-codex-rf-v1; preserve all other guardrails.
-- Observe the same run until WAITING_HUMAN, another PAUSED_BUDGET, FAILED, or other gated/terminal state.
+- Observe acceptance-codex-rf-v1 until WAITING_HUMAN, another PAUSED_BUDGET, FAILED, or other gated/terminal state.
 - If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload and validate model_backed_acceptance_v1.
+- If PAUSED_BUDGET again, inspect durable usage and raise only the specific exhausted guardrail needed to complete acceptance.
 - After acceptance passes, resume RF corpus expansion through the daemon and operate continuously while pacing or pausing to stay within the included Codex allowance.
 
 ## Blockers / gates
 
-- acceptance-codex-rf-v1 is safely PAUSED_BUDGET after exhausting only the STANDARD-tier job cap; bounded budget review/resume is required to continue the same run.
+- acceptance-codex-rf-v1 is RUNNING again after bounded budget review; final model-backed acceptance awaits its next durable gated or terminal state.
 
 ## Fresh-chat initialization
 
