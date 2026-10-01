@@ -35,32 +35,31 @@ Build a low-overhead, provenance-preserving operations layer for the autonomous 
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: bd62520387daa03d9c1b0cc4ab2365ccda85631c
+- Local HEAD: f2349313e069f4f121eb07713169a2edc77bf54d
 - Local clean: true
 
 ## Current stage
 
-codex_allowance_telemetry_and_forecasting
+chat_visible_ops_mirror
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead. On the Lambda, verify the clean checkout is main@bd62520387daa03d9c1b0cc4ab2365ccda85631c, fetch and fast-forward only to canonical research-engine main@f2349313e069f4f121eb07713169a2edc77bf54d, then run bash deploy/run-verify-ab-batch.sh job:7b6ca4026f026bedaec4859e 3. Provide one complete pasted 5-hour+weekly usage block before radius 0, one between the radius-0 and radius-1 phases, and one after radius 1. Preserve the complete output. The batch is six STANDARD/Terra calls total, non-materializing, and must finish with the daemon inactive/dead. Do not START sustained research.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. With research-engine canonical and Lambda both at main@f2349313e069f4f121eb07713169a2edc77bf54d, implement and CI-validate the Chat-visible ops mirror GitHub-side first: a bounded derived snapshot/Markdown publisher suitable for one machine-maintained GitHub issue plus low-frequency durable rollups, with no prompts/source text/secrets and no scientific-state mutation. Do not assume Lambda GitHub credentials; after repository-side CI passes, validate the publication mechanism on Lambda separately. Continue afterward toward the private MCP direct-tool surface and Slack wake-up/advisory bridge.
 
 ## Remaining work
 
-- Keep research-engine-daemon.service inactive/dead. Fast-forward the clean Lambda main checkout from bd62520387daa03d9c1b0cc4ab2365ccda85631c to canonical f2349313e069f4f121eb07713169a2edc77bf54d.
-- Run bash deploy/run-verify-ab-batch.sh job:7b6ca4026f026bedaec4859e 3. Paste one fresh complete usage-limit block before the radius-0 phase, one after radius 0 / before radius 1, and one after radius 1. This performs six STANDARD/Terra calls total and must end daemon inactive/dead.
-- Compare radius-0 vs radius-1 agreement rates across the three repeated calls per radius and exact replay input/cached/output/reasoning distributions. Use the phase-level censored UI deltas only for average plan-allowance mapping, not exact per-call percentages.
-- If radius 0 repeatedly preserves accepted IDs, treat the original mismatch as likely stochastic and retain radius 0 for the next bounded production calibration. If radius 0 repeatedly disagrees while radius 1 is stable, prefer a safer context policy or investigate a narrower targeted-context alternative before sustained production.
-- Do not implement global page-selective EXTRACT from current evidence and do not resume sustained corpus expansion yet.
-- After tuning is validated, continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge.
+- Implement the Chat-visible ops mirror as a derived, bounded operational surface. Raw high-frequency truth remains PostgreSQL-authoritative; do not use workspace-control main or canonical research-engine commits as a high-frequency telemetry sink.
+- Prefer one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups. The mirror must expose daemon/run/phase, agents/jobs, queue/evidence/gap funnels, throughput, failures/backoffs, usage by tier/model/job type, and censored allowance status without prompts/source text/secrets.
+- Validate the Lambda-side publication mechanism and credentials separately; do not assume GitHub CLI/token availability. Publisher failure must not stop scientific processing.
+- Evaluate/implement the private research-engine MCP/plugin direct-tool surface for reading bounded ops state and submitting advisory responses, validating actual plan/workspace permissions rather than assuming writes.
+- Then implement/evaluate the Chat reasoning bridge with GitHub durable audit and Slack as the first candidate wake-up transport; advisory responses must not directly mutate scientific state.
+- Keep sustained corpus expansion paused until chat-visible mirror/bridge work reaches live-runtime validation. Retain VERIFY radius 0 for the next bounded production calibration.
 
 ## Blockers / gates
 
-- A single radius-0 high-cost replay failed accepted-evidence-ID equality while a single radius-1 replay passed. One sample at each radius cannot distinguish a stable context-window effect from stochastic verifier variation.
-- The whole-percent plan UI is too coarse for precise per-call allowance attribution. Repeated phase-level calls are required to narrow batch-average plan-consumption bounds.
-- EXTRACT evidence spans 43/65 pages across the preserved corpus, so a global page-selective EXTRACT policy remains unjustified.
-- Sustained START remains gated on the repeated VERIFY A/B stability/allowance experiment and the resulting smallest-safe context policy.
+- Sustained START remains gated. The tuning decision is complete, but the Chat-visible ops mirror and advisory reasoning bridge still need implementation/validation before live runtime validation.
+- The whole-percent plan UI supports only censored batch-level allowance calibration; exact token-to-plan conversion remains intentionally unidentified.
+- EXTRACT evidence spans 43/65 pages across the preserved corpus, so global page-selective EXTRACT remains unjustified.
 
 ## Fresh-chat initialization
 
