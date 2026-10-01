@@ -42,7 +42,7 @@ Explicitly migrate the current MTH602 repository integration to the promoted reu
 
 ## Next safe action
 
-Archive this completed migration capsule and its synchronized derived handoff under tasks/archive. Do not resume or mutate mth602-new-unit-ingestion-hw2-prep; its coordinator must deliberately refresh that suspended task to the migrated MTH602 checkpoint before HW2 work resumes.
+No further work belongs to this completed migration. Keep mth602-new-unit-ingestion-hw2-prep suspended until its coordinator deliberately refreshes that capsule to MTH602 unit-ingestion-hw2@0ed5957af97e2de887ef181f26a9966413daf857; only then may HW2 work resume.
 
 ## Remaining work
 
