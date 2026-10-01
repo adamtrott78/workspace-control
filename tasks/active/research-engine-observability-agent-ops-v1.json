@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "chat_visible_ops_mirror",
+  "current_stage": "chat_reasoning_bridge",
   "acceptance_criteria": [
     "A terminal HUD refreshes live operational state without mutating research state and shows daemon health, active run/phase, current agents/jobs, queue depth/age, source funnel, evidence/gap funnel, throughput, failures/backoffs, and Codex allowance telemetry.",
     "Every logical agent role and ephemeral worker instance is durably identifiable, including code checkpoint, host/process generation, supported tier/model, current job, heartbeat, cumulative jobs, elapsed time, failures/retries/backoffs, and model-usage attribution.",
@@ -199,7 +199,7 @@
     },
     {
       "id": "chat_visible_ops_mirror",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "research-engine-observability",
       "selected_executor": "chatgpt",
       "selected_surface": "github+runtime",
@@ -216,7 +216,10 @@
         "research-engine PR #31 merged as 73697608e3ab179b7ed617b1833796cc47f679c2. PR CI run 36936440265 PASS after correcting one false-positive test assertion; canonical-main CI run 36936589258 PASS across compile, full pytest/PostgreSQL integration, Compose validation, image build, and cleanup.",
         "Mirror construction is field-whitelisted and bounded. It exposes daemon/run/gate/checkpoint, censored allowance, stable agent/model/job-type usage, pipeline/queue/throughput, efficiency, recent calibration summaries, and bounded alerts/backoffs while excluding run topic/policy, prompts/source text, credentials/environment values, host/process/worker/current-job identifiers, provider error detail, and raw calibration result summaries.",
         "Unit tests inject sentinel source/provider/worker secrets and require they be absent from both sanitized JSON and Markdown; raw sensitive field keys are absent from sanitized JSON. List caps and 50k Markdown hard bound are tested.",
-        "deploy/publish-ops-mirror.sh publishes through GitHub issues only: current mode creates/edits one [ops] research-engine live state issue; rollup mode appends a low-frequency issue comment. The publisher uses no Git commits and no daemon start/stop path, and fails closed unless gh CLI authentication is already ready."
+        "deploy/publish-ops-mirror.sh publishes through GitHub issues only: current mode creates/edits one [ops] research-engine live state issue; rollup mode appends a low-frequency issue comment. The publisher uses no Git commits and no daemon start/stop path, and fails closed unless gh CLI authentication is already ready.",
+        "Lambda fast-forwarded clean research-engine main to 73697608e3ab179b7ed617b1833796cc47f679c2 and rendered the sanitized Markdown mirror locally while research-engine-daemon.service remained inactive/dead PID 0.",
+        "Lambda had gh CLI at /usr/bin/gh authenticated to github.com as adamtrott78 and deploy/publish-ops-mirror.sh current created GitHub issue #32 [ops] research-engine live state.",
+        "Direct GitHub verification of issue #32 confirms the remote body is the bounded sanitized mirror: daemon/run/gate, censored allowance, pipeline/queue, agents, usage by stage/model, throughput, calibration and alerts; no prompts/source text/credentials/host-process identifiers/raw provider detail are present."
       ],
       "resume_condition": null
     },
@@ -230,7 +233,9 @@
         "chat_visible_ops_mirror"
       ],
       "outputs": [],
-      "validation": [],
+      "validation": [
+        "Priority reassessed after measured workload: STANDARD EXTRACT+VERIFY consumed 485094 of 959229 semantic input tokens (~50.6%), while STRONG high-level reasoning was only 4 calls / 23.1% of input. Slack/Chat reasoning offload remains architecturally useful for exceptional ambiguity/human-review wakeups but is deferred behind research-engine-local-document-pipeline-v1 because document/local-compute optimization targets the dominant throughput cost."
+      ],
       "resume_condition": null
     },
     {
@@ -291,13 +296,13 @@
       "identity": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "required_for_resume": true,
       "evidence": [
-        "stage=chat_visible_ops_mirror",
-        "research-engine remote main@73697608e3ab179b7ed617b1833796cc47f679c2 canonical; PR #31 CI 36936440265 PASS; canonical-main CI 36936589258 PASS",
-        "Lambda/local research-engine remains main@f2349313e069f4f121eb07713169a2edc77bf54d clean; daemon remains inactive/dead PID 0 until runtime fast-forward",
-        "VERIFY radius0 retained from repeated calibration: highest-cost 3/3 provenance agreement, mean input 32639 vs historical 40439 (-19.29%); no further tuning spend planned",
-        "ops mirror=bounded field whitelist, Markdown/JSON, no prompts/source text/secrets/host-process IDs/raw provider error detail",
-        "publisher=GitHub issue current/edit plus low-frequency rollup comment; no git telemetry commits, no daemon control, fails closed without gh auth",
-        "next=Lambda fast-forward to 73697608e3ab179b7ed617b1833796cc47f679c2 while stopped; validate local mirror render and gh CLI/auth; if auth ready publish current issue and verify remotely; do not START"
+        "stage=chat_reasoning_bridge",
+        "research-engine remote and Lambda/local main@73697608e3ab179b7ed617b1833796cc47f679c2",
+        "daemon inactive/dead PID 0",
+        "Chat-visible ops mirror validated end-to-end; GitHub issue #32 is live and directly verified",
+        "measured workload: EXTRACT+VERIFY=485094/959229 semantic input (~50.6%); STRONG tier=221660 input across 4 calls",
+        "Slack/Chat bridge retained conceptually for exception/human-review reasoning but deferred behind sibling research-engine-local-document-pipeline-v1",
+        "next=wait for local-document/localization benchmark evidence before selecting bridge scope; do not START"
       ]
     }
   ],
@@ -522,24 +527,42 @@
         "deploy/publish-ops-mirror.sh is an external publisher for one machine-maintained GitHub issue or low-frequency rollup comments; it does not use Git commits, control systemd, or mutate scientific state.",
         "Lambda publication credentials/authentication remain intentionally unverified and are the next runtime boundary."
       ]
+    },
+    {
+      "check": "Live Chat-visible ops mirror publication",
+      "result": "PASS",
+      "evidence": [
+        "Lambda terminal receipt: research-engine main@73697608e3ab179b7ed617b1833796cc47f679c2; daemon inactive/dead PID 0 before and after.",
+        "Local sanitized mirror rendered successfully at 4191 bytes / 95 lines.",
+        "gh CLI authenticated successfully as adamtrott78.",
+        "deploy/publish-ops-mirror.sh current created https://github.com/adamtrott78/research-engine/issues/32.",
+        "Direct GitHub read confirms issue #32 matches the sanitized operational contract."
+      ]
+    },
+    {
+      "check": "Chat reasoning bridge priority reassessment",
+      "result": "PASS",
+      "evidence": [
+        "Live usage: VERIFY 261832 input and EXTRACT 223262 input, combined 485094 / 959229 total semantic input (~50.6%).",
+        "STRONG tier used 221660 input across only 4 calls (NOVELTY_ARBITRATE x2, GAP_GENERATE x1, SYNTHESIZE x1).",
+        "A new sibling task research-engine-local-document-pipeline-v1 now owns local document compilation and broader localization benchmarking.",
+        "Decision: do not delete the Slack/Chat bridge concept; defer implementation until local-pipeline benchmarks clarify how much exceptional high-level reasoning remains worth offloading."
+      ]
     }
   ],
   "blockers": [
-    "Sustained START remains gated. The Chat-visible mirror is canonical but has not yet been rendered/published from the Lambda runtime or verified through the actual GitHub issue surface.",
-    "Lambda GitHub CLI availability/authentication is intentionally unknown. Do not assume credentials or install a publication timer until gh auth is validated.",
-    "The whole-percent plan UI remains censored; exact token-to-plan conversion is intentionally unidentified.",
-    "Global page-selective EXTRACT remains unjustified by the 43/65 evidence-bearing-page audit."
+    "The Chat-visible ops mirror stage is validated end-to-end; no mirror blocker remains.",
+    "Slack/Chat reasoning bridge implementation is intentionally deferred behind research-engine-local-document-pipeline-v1 because measured throughput is dominated by EXTRACT/VERIFY document processing.",
+    "Sustained START remains gated by the broader automated-research-engine control plane and pending human review; this task does not authorize restart."
   ],
   "remaining_work": [
-    "Keep research-engine-daemon.service inactive/dead. Fast-forward the clean Lambda research-engine main checkout from f2349313e069f4f121eb07713169a2edc77bf54d to canonical 73697608e3ab179b7ed617b1833796cc47f679c2.",
-    "Render research-engine ops-mirror --run-id rf-open-world-corpus-expansion-v1 --format markdown locally and preserve/inspect the bounded output. This step requires no GitHub credentials and must not mutate scientific state.",
-    "Check command -v gh and gh auth status --hostname github.com. If gh is missing or unauthenticated, stop at that boundary and obtain only the required operator install/auth action; do not invent or persist credentials.",
-    "If gh auth is ready, run bash deploy/publish-ops-mirror.sh current, then verify the created/updated [ops] research-engine live state issue through direct GitHub tooling and confirm the remote body matches the sanitized mirror contract.",
-    "After current-state issue publication is validated, choose a low-frequency rollup cadence and validate one rollup comment; do not use canonical Git commits as a telemetry sink.",
-    "Then continue to the private research-engine MCP/direct-tool surface and the Slack wake-up/advisory reasoning bridge, keeping PostgreSQL/GitHub as durable authorities and responses advisory-only.",
-    "Do not resume sustained corpus expansion until the mirror/bridge path reaches live-runtime validation."
+    "Keep the Chat-visible issue publisher available as the current read-only operational surface; choose/update cadence only when sustained research resumes.",
+    "Defer substantial Slack/Chat reasoning bridge implementation until research-engine-local-document-pipeline-v1 benchmarks document/local offload and re-estimates the residual need for remote high-level reasoning.",
+    "When bridge work resumes, use Slack only as a wake-up/request transport and GitHub/PostgreSQL as durable audit/authority; advisory Chat responses must not directly mutate scientific state.",
+    "Evaluate/implement the private research-engine MCP/direct-tool surface for bounded ops reads and advisory request/response submission after the local-compute architecture stabilizes.",
+    "Perform live runtime validation of the combined ops mirror + deferred/selected bridge path before completing this task."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify the research-engine checkout is clean on main@f2349313e069f4f121eb07713169a2edc77bf54d, fetch and fast-forward only to canonical main@73697608e3ab179b7ed617b1833796cc47f679c2, render the sanitized Markdown mirror locally with research-engine ops-mirror --run-id rf-open-world-corpus-expansion-v1 --format markdown, then check command -v gh and gh auth status --hostname github.com. If gh auth is ready, run bash deploy/publish-ops-mirror.sh current and preserve the output so ChatGPT can verify the GitHub issue directly. If gh is missing or unauthenticated, stop there and report that exact boundary. Keep the daemon inactive/dead throughout.",
+  "next_safe_action": "Do not START sustained research from this task. The Chat-visible ops mirror is validated through GitHub issue #32. Pause substantive Slack/Chat reasoning-bridge implementation while the sibling task tasks/active/research-engine-local-document-pipeline-v1.json benchmarks local document intelligence and whole-pipeline offload. When that task produces measured residual remote-reasoning demand, return here to decide the smallest useful bridge surface (likely exception/human-review wakeups rather than routine research throughput).",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Preferred UX: a terminal HUD launched from Bash/CLI, backed by read-only PostgreSQL queries rather than Bash scraping. Proposed Chat-visible mirror: one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups; raw high-frequency telemetry remains PostgreSQL-authoritative. Proposed Chat bridge: agents create bounded structured reasoning requests that are mirrored to GitHub issues; ChatGPT can read/update them when invoked. This is not equivalent to a direct autonomous ChatGPT conversation API and must not be described as such until separately validated. Fresh-chat invariant: every initialization/handoff prompt must include https://github.com/adamtrott78/workspace-control explicitly."
