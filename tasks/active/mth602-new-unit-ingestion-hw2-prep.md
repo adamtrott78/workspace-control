@@ -30,7 +30,7 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: f37356af62c8ac4dc271e7664595462ada5cbb61
+- Remote checkpoint: c4de4115eb430b78b4a568f116859d9e36266d77
 - Remote verified: true
 
 ### workspace-control
@@ -42,11 +42,11 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Continue HW2 Floating-point Problem 1(a) in LEARNING mode from MTH602 unit-ingestion-hw2@f37356af62c8ac4dc271e7664595462ada5cbb61. The student has correctly identified `E_N = abs(approx - exact) / abs(exact)`. Ask for the smallest next coding step needed to build the sequence over N, then proceed to the semilog-y plot and minimum-error interpretation. Do not dump the entire finished solution unless the student becomes genuinely blocked.
+Continue HW2 Floating-point Problem 1(b) in LEARNING mode from MTH602 unit-ingestion-hw2@c4de4115eb430b78b4a568f116859d9e36266d77. Part 1(a) is executed and recorded: N_max=100, minimum relative error 0.5665545568629835 at N=69. Ask the student to interpret why the error first becomes enormous, then decreases, but bottoms out at order-one error instead of approaching machine epsilon. Use that explanation to complete 1(b) without dumping 1(c).
 
 ## Remaining work
 
-- Continue Floating-point Problem 1(a) in LEARNING mode: construct the N-loop, compute the relative-error sequence, produce the required semilog-y convergence plot, and identify the smallest achieved relative error without skipping the student's meaningful reasoning.
+- Continue Floating-point Problem 1 in LEARNING mode: interpret the completed part 1(a) convergence plot and minimum error, then answer part 1(b) by explaining catastrophic cancellation in the observed computation before moving to the stable reformulation in part 1(c).
 - Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.
 - Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.
 - Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.
