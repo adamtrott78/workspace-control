@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: cis560-course-workflows-v2-migration
 - Title: CIS560 Course Workflows v2 Migration
-- Status: PLANNED
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -42,15 +42,14 @@ Explicitly migrate the CIS560 tutor-framework integration to the promoted reusab
 
 ## Next safe action
 
-Start only from CIS560-AdamTrott README.md at 1af3ce7022d079b89f0fbca32f313a6853db1c60 on branch tutor-framework. Follow the repository's own durable routes; use experiments B/C only as evidence, not as new task state. Resolve the exact existing shared compatibility mechanism before mutation. If the branch moved from 1af3ce7022d079b89f0fbca32f313a6853db1c60, refresh this capsule first. Preserve course facts and do not reread external mail unless a migration regression genuinely requires it.
+On CIS560-AdamTrott tutor-framework at exact parent 1af3ce7022d079b89f0fbca32f313a6853db1c60, update only README.md, COURSE.md, and study/TUTORING.md to bind the promoted workspace-control checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9, map the shared course/communications workflow roles, and replace the live conversational tutor-builder/tutor authority split with role-neutral semantic mutation boundaries. Preserve all course facts, mastery state, homework state, source records, experiment B/C evidence, and historical boundary-correction evidence. Then verify the exact changed scope before regression validation.
 
 ## Remaining work
 
-- Recover CIS560 root/tutor/source/experiment owners.
-- Map the promoted course adapter and communications-ingestion semantics.
-- Adopt the promoted shared checkpoint explicitly if validated.
-- Run cold-start/tutoring/communications-idempotency regressions.
-- Checkpoint and verify the migrated project state.
+- Update the existing CIS560 compatibility pins to workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and map promoted shared workflow roles without copying shared policy.
+- Replace remaining live tutor-builder/tutor authority hierarchy with durable semantic-owner and mutation-boundary language while preserving the historical correction record.
+- Run cold-start, tutoring/mastery, communications-ingestion/idempotency, artifact, and portability regressions.
+- Checkpoint and independently verify the migrated CIS560 tutor-framework state.
 
 ## Blockers / gates
 
