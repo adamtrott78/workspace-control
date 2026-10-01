@@ -42,18 +42,18 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Next safe action
 
-Observe acceptance-codex-rf-v1 persisted state only. Expected completion is two STRONG NOVELTY_ARBITRATE jobs followed by deterministic transition to WAITING_HUMAN. If WAITING_HUMAN, perform the final acceptance audit of evidence, usage, checkpoint, novelty decisions, and human-review payload before validating model_backed_acceptance_v1.
+Audit acceptance-codex-rf-v1 persisted scientific state before resolving the pending human review: recompute the knowledge-checkpoint manifest/fingerprint from current authoritative records; inspect checkpoint-scoped works/artifacts/evidence/locators/verification, synthesis, two bounded gap candidates, novelty challenge provenance/counterevidence/reasoning, model usage ledger, and exact human-review payload. Do not approve the gate until those checks pass.
 
 ## Remaining work
 
-- Observe the two final novelty arbitrations and transition to WAITING_HUMAN or another durable gate.
-- At WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload and validate model_backed_acceptance_v1.
-- Fix global budget-exhaustion semantics and implement/validate plan-limit-aware pacing/backoff for continuous included-allowance operation.
-- Then resume RF corpus expansion and tune concurrency/model tiers against observed allowance consumption and research quality.
+- Perform the final scientific/provenance audit of the WAITING_HUMAN acceptance run.
+- If the audit passes, resolve the human review as APPROVED and validate model_backed_acceptance_v1.
+- Fix global budget-exhaustion semantics and implement/validate Codex plan-limit-aware pacing/backoff for continuous included-allowance operation.
+- Then launch the first sustained RF literature expansion under hardened 24/7 controls.
 
 ## Blockers / gates
 
-- acceptance-codex-rf-v1 is RUNNING with only two STRONG novelty arbitrations remaining before human review.
+- model-backed acceptance has reached WAITING_HUMAN; final scientific-state/provenance audit and explicit human decision remain before acceptance can be marked complete.
 
 ## Fresh-chat initialization
 

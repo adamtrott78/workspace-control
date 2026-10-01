@@ -987,13 +987,13 @@
       "required_for_resume": true,
       "evidence": [
         "stage=model_backed_acceptance_v1",
-        "last_validated_boundary=research-engine/main@219ef546381a471e5daac91ba524d9b685b8c26b deployed and stable on Lambda; migration-safe bounded reconciliation active",
-        "acceptance_run=acceptance-codex-rf-v1 RUNNING after final arbitration-only resume",
-        "current_budgets=input=520000 output=40000 semantic_jobs=16 tier_caps CHEAP=8 STANDARD=5 STRONG=5",
-        "usage_at_resume=input=364436 output=10114 semantic_jobs=13; CHEAP=7 STANDARD=4 STRONG=2",
-        "remaining_expected_graph=2 STRONG novelty arbitrations, then deterministic human-review gate",
+        "last_validated_boundary=research-engine/main@219ef546381a471e5daac91ba524d9b685b8c26b deployed and stable on Lambda",
+        "acceptance_run=acceptance-codex-rf-v1 WAITING_HUMAN; current_phase=HUMAN_REVIEW; human_gate_state=PENDING",
+        "job_graph=both NOVELTY_ARBITRATE completed; one HUMAN_REVIEW WAITING_HUMAN; bounded novelty search fanout completed with surplus legacy jobs cancelled",
+        "usage=input=467863 output=11682 semantic_jobs=15; CHEAP=7 STANDARD=4 STRONG=4; final budgets input=520000 output=40000 semantic_jobs=16 CHEAP=8 STANDARD=5 STRONG=5; exhausted=false",
+        "daemon=active/running Result=success NRestarts=135",
         "cost_boundary=included ChatGPT/Codex plan allowance only; no OPENAI_API_KEY and no paid API fallback",
-        "resume=observe persisted acceptance-codex-rf-v1 only until WAITING_HUMAN, PAUSED_BUDGET, FAILED, or other terminal/gated state"
+        "resume=perform final persisted scientific acceptance audit before resolving the human review gate"
       ]
     },
     {
@@ -1833,18 +1833,28 @@
         "Usage at resume boundary remained input=364436, output=10114, semantic_jobs=13, CHEAP=7, STANDARD=4, STRONG=2.",
         "Budget status reported exhausted=false with no reasons and the persistent daemon remained active."
       ]
+    },
+    {
+      "check": "Acceptance reached human review gate",
+      "result": "PASS",
+      "evidence": [
+        "acceptance-codex-rf-v1 reached WAITING_HUMAN with current_phase=HUMAN_REVIEW and human_gate_state=PENDING.",
+        "Both bounded NOVELTY_ARBITRATE jobs completed and one HUMAN_REVIEW job is WAITING_HUMAN.",
+        "Final usage: input_tokens=467863, output_tokens=11682, semantic_jobs=15; CHEAP=7, STANDARD=4, STRONG=4.",
+        "Final budget status exhausted=false; daemon remained active/running with restart count stable at 135."
+      ]
     }
   ],
   "blockers": [
-    "acceptance-codex-rf-v1 is RUNNING with only two STRONG novelty arbitrations remaining before human review."
+    "model-backed acceptance has reached WAITING_HUMAN; final scientific-state/provenance audit and explicit human decision remain before acceptance can be marked complete."
   ],
   "remaining_work": [
-    "Observe the two final novelty arbitrations and transition to WAITING_HUMAN or another durable gate.",
-    "At WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload and validate model_backed_acceptance_v1.",
-    "Fix global budget-exhaustion semantics and implement/validate plan-limit-aware pacing/backoff for continuous included-allowance operation.",
-    "Then resume RF corpus expansion and tune concurrency/model tiers against observed allowance consumption and research quality."
+    "Perform the final scientific/provenance audit of the WAITING_HUMAN acceptance run.",
+    "If the audit passes, resolve the human review as APPROVED and validate model_backed_acceptance_v1.",
+    "Fix global budget-exhaustion semantics and implement/validate Codex plan-limit-aware pacing/backoff for continuous included-allowance operation.",
+    "Then launch the first sustained RF literature expansion under hardened 24/7 controls."
   ],
-  "next_safe_action": "Observe acceptance-codex-rf-v1 persisted state only. Expected completion is two STRONG NOVELTY_ARBITRATE jobs followed by deterministic transition to WAITING_HUMAN. If WAITING_HUMAN, perform the final acceptance audit of evidence, usage, checkpoint, novelty decisions, and human-review payload before validating model_backed_acceptance_v1.",
+  "next_safe_action": "Audit acceptance-codex-rf-v1 persisted scientific state before resolving the pending human review: recompute the knowledge-checkpoint manifest/fingerprint from current authoritative records; inspect checkpoint-scoped works/artifacts/evidence/locators/verification, synthesis, two bounded gap candidates, novelty challenge provenance/counterevidence/reasoning, model usage ledger, and exact human-review payload. Do not approve the gate until those checks pass.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general. Production semantic execution is constrained to the user's included ChatGPT/Codex plan allowance; continuous operation must pace or pause rather than fall back to paid API usage."
