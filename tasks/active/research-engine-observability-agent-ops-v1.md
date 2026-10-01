@@ -44,7 +44,7 @@ observability_contract
 
 ## Next safe action
 
-First pause research-engine-daemon.service on the user's Lambda so rf-open-world-corpus-expansion-v1 remains durable but consumes no additional semantic allowance. After pause evidence is returned, inspect the persisted run/job/usage/worker tables without mutation and write the observability contract. Implement the read-only ops snapshot and terminal HUD before any sustained semantic processing resumes; the first monitored restart should be a tightly bounded calibration run used to measure allowance burn and tune concurrency/model tiers.
+With research-engine-daemon.service confirmed inactive/dead and rf-open-world-corpus-expansion-v1 preserved, inspect the existing research_workers, research_jobs, research_job_attempts, research_usage_events, daemon health/report code, Codex execution metadata, and deployment/runtime identifiers. Write and validate the observability contract first: stable logical agent roles versus ephemeral sessions, append-only telemetry fields, derived metric formulas/windows, retention policy, allowance-observation/forecast semantics, HUD panel contract, Chat-visible summary contract, and MCP/Slack request-response safety boundary. Then implement the read-only ops snapshot and terminal HUD without resuming semantic processing.
 
 ## Remaining work
 
@@ -60,7 +60,6 @@ First pause research-engine-daemon.service on the user's Lambda so rf-open-world
 
 ## Blockers / gates
 
-- The sustained RF run should be operationally paused on the Lambda before additional semantic allowance is consumed; this requires a local systemd action by the user.
 - Direct MCP/plugin write capability and any Slack-triggered automation must be validated on the user's actual ChatGPT plan/workspace before the bridge can depend on them.
 
 ## Fresh-chat initialization
