@@ -30,7 +30,7 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: c4de4115eb430b78b4a568f116859d9e36266d77
+- Remote checkpoint: a05f6881dc55aef1cae11e755449df050c975708
 - Remote verified: true
 
 ### workspace-control
@@ -42,11 +42,11 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Continue HW2 Floating-point Problem 1(b) in LEARNING mode from MTH602 unit-ingestion-hw2@c4de4115eb430b78b4a568f116859d9e36266d77. Part 1(a) is executed and recorded: N_max=100, minimum relative error 0.5665545568629835 at N=69. Ask the student to interpret why the error first becomes enormous, then decreases, but bottoms out at order-one error instead of approaching machine epsilon. Use that explanation to complete 1(b) without dumping 1(c).
+Continue HW2 Floating-point Problem 1(b) in LEARNING mode from MTH602 unit-ingestion-hw2@a05f6881dc55aef1cae11e755449df050c975708. Ask the student to restate the three phases of the observed error curve with the refined distinction: huge early relative error from enormous truncated partial sums versus the tiny target, rapid reduction as later terms cancel and truncation error shrinks, then a catastrophic-cancellation/roundoff floor near order-one relative error. Once correct, treat 1(b) as complete and move to 1(c) without revealing the stable reformulation before diagnosing whether the student can find it.
 
 ## Remaining work
 
-- Continue Floating-point Problem 1 in LEARNING mode: interpret the completed part 1(a) convergence plot and minimum error, then answer part 1(b) by explaining catastrophic cancellation in the observed computation before moving to the stable reformulation in part 1(c).
+- Finish Floating-point Problem 1(b) by verifying the refined three-phase interpretation of the executed convergence curve, then begin 1(c) in LEARNING mode and diagnose the stable reformulation without changing taylor_exp.
 - Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.
 - Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.
 - Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.
