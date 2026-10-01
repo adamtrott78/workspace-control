@@ -42,19 +42,18 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Next safe action
 
-On the user's Lambda while acceptance-codex-rf-v1 remains PAUSED_BUDGET, verify the only untracked path is src/research_engine/__pycache__/, delete only that generated directory, require a clean checkout, fetch and fast-forward main from 03babb404e9e6a254deec38fea6ea5ab3b8b05ad to exact ec8baf481679aa86ee45b8b1b7dd47ed44846d6b, restart the user daemon, and return post-deploy run/job/budget state. Do not resume the budget yet; first reconcile/cancel the surplus novelty queue under the bounded planner.
+Resume acceptance-codex-rf-v1 in place with only the final bounded allowance needed for two remaining CHEAP novelty searches and two STRONG novelty arbitrations: max_semantic_jobs=15, CHEAP=7, STANDARD=5, STRONG=4, with a bounded input-token ceiling increase sufficient for four remaining model calls. Then observe persisted state only until WAITING_HUMAN or another budget/failure gate.
 
 ## Remaining work
 
-- Deploy research-engine main@ec8baf481679aa86ee45b8b1b7dd47ed44846d6b to the safely paused Lambda and restart the native user daemon.
-- Reconcile acceptance-codex-rf-v1 under the bounded planner so surplus queued novelty jobs are cancelled/ignored deterministically; then inspect the remaining bounded graph.
-- Apply only the bounded budget changes needed for the remaining novelty arbitration/human-review path and reach WAITING_HUMAN.
-- Verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload; validate model_backed_acceptance_v1.
-- Implement/validate plan-limit-aware pacing/backoff for 24/7 operation under included weekly Codex allowance, then resume RF corpus expansion.
+- Perform the final bounded in-place budget resume for the two remaining CHEAP novelty searches and two STRONG novelty arbitrations.
+- Observe acceptance-codex-rf-v1 to WAITING_HUMAN and verify evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload.
+- Validate model_backed_acceptance_v1 after WAITING_HUMAN evidence passes.
+- Implement/validate plan-limit-aware pacing/backoff for continuous operation under the included weekly Codex allowance, then resume RF corpus expansion.
 
 ## Blockers / gates
 
-- The validated bounded-fanout/cache-hygiene build has not yet been deployed to the Lambda. The acceptance run is safely PAUSED_BUDGET, so deployment may proceed after removing only the verified generated __pycache__ directory.
+- acceptance-codex-rf-v1 is safely PAUSED_BUDGET with only the bounded final graph remaining: two CHEAP novelty searches and two STRONG novelty arbitrations.
 
 ## Fresh-chat initialization
 
