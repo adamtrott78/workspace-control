@@ -3,7 +3,7 @@
 
 Derived human-readable view.
 
-Authoritative capsule: tasks/active/resume-application-workflows-v2-integration.json
+Authoritative capsule: tasks/archive/resume-application-workflows-v2-integration.json
 
 If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
 
@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: resume-application-workflows-v2-integration
 - Title: Resume/Application Workflows v2 Integration
-- Status: PLANNED
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -37,20 +37,16 @@ Evaluate and explicitly integrate the promoted reusable document-artifact mechan
 
 - Intent: mutate
 - Remote branch: resume-framework
-- Remote checkpoint: 078461795be3c1d3e5c3845c81607166fac9fad3
+- Remote checkpoint: 405e99b67df34caadc690722b210b49b233fc45c
 - Remote verified: True
 
 ## Next safe action
 
-Start only from PADataset README.md at 078461795be3c1d3e5c3845c81607166fac9fad3 on branch resume-framework, then follow the documented resume/application route to the smallest required owning contexts. Compare the existing resume production lifecycle to workspace-control document-artifact-build at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9. First decide, from repository evidence, whether the domain should remain in PADataset or warrants a separate private repository; do not move or create a repository automatically. If the target branch moved from 078461795be3c1d3e5c3845c81607166fac9fad3, refresh this capsule before mutation.
+Task complete. Use tasks/archive/resume-application-workflows-v2-integration.json only for audit or as evidence for a separately authorized future career/application repository migration; no further action is required by this task.
 
 ## Remaining work
 
-- Recover the PADataset resume/application route and existing builder/QA owners.
-- Evaluate whether domain separation from PADataset is justified and record the decision.
-- Integrate the promoted document-artifact mechanics without changing candidate truth.
-- Run cold-start/build/render/semantic+visual-QA/bounded-revision regressions.
-- Checkpoint and verify the resulting integration state.
+- None.
 
 ## Blockers / gates
 
@@ -61,7 +57,7 @@ Start only from PADataset README.md at 078461795be3c1d3e5c3845c81607166fac9fad3 
 @GitHub
 
 Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/resume-application-workflows-v2-integration.json
+Task capsule: tasks/archive/resume-application-workflows-v2-integration.json
 
 Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.

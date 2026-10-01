@@ -1,0 +1,324 @@
+{
+  "schema_version": 2,
+  "task_id": "resume-application-workflows-v2-integration",
+  "title": "Resume/Application Workflows v2 Integration",
+  "status": "COMPLETE",
+  "goal": "Evaluate and explicitly integrate the promoted reusable document-artifact mechanics with the existing PADataset resume/application domain, including a justified decision on whether that private domain should remain in PADataset or migrate to a dedicated repository; do not move it automatically.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/document-artifact-build.v1.json",
+    "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+    "content_sha": "0d66b919acdd2e51c08d2e8496c41dc22aed47c4"
+  },
+  "parent_execution_owner": "course-workflows-v2-refactor",
+  "current_stage": "completion",
+  "acceptance_criteria": [
+    "A fresh executor starts from PADataset README.md at the pinned resume-framework checkpoint and routes only into the resume/application domain.",
+    "Candidate/application truth, private values, target-specific evidence, production specs, and submission semantics remain domain-owned rather than copied into workspace-control.",
+    "The shared document-artifact lifecycle maps cleanly to source -> deterministic build/render -> structural/static validation -> visual QA -> bounded revision -> delivery gate.",
+    "Automated visual QA is accepted when sufficient; a human gate is retained only where the resume/application owner explicitly requires substantive judgment.",
+    "The task explicitly evaluates PADataset-vs-dedicated-private-domain ownership before any repository move; no move is automatic.",
+    "PADataset research/framework content outside resumes/** is not mutated by this integration.",
+    "Any eventual repository move, if justified, is separately authorized and leaves a durable provenance/redirect plan.",
+    "The final integration checkpoint is pushed/verified and recoverable without prior conversation."
+  ],
+  "constraints": [
+    "Do not mutate workspace-control shared architecture from this child.",
+    "Do not mutate PADataset research, RF dataset, paper, slide, or unrelated application domains outside the authorized resume paths.",
+    "Do not create a new repository or move private data merely because separation is conceptually cleaner; require a justified migration decision and explicit authority.",
+    "Do not expose private candidate/application values into workspace-control or public artifacts.",
+    "Do not submit applications, send messages, or perform external irreversible actions as part of architecture integration.",
+    "If resume-framework moves from the pinned checkpoint, refresh this capsule before mutation."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "read",
+      "base_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "PADataset",
+      "intent": "mutate",
+      "base_sha": "078461795be3c1d3e5c3845c81607166fac9fad3",
+      "remote": {
+        "branch": "resume-framework",
+        "checkpoint_sha": "405e99b67df34caadc690722b210b49b233fc45c",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "README.md",
+        "workspace-control.lock.json",
+        "resumes/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "baseline_recovery",
+      "status": "VALIDATED",
+      "execution_owner": "resume-application-integration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "078461795be3c1d3e5c3845c81607166fac9fad3",
+        "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9:document-artifact-build-v1"
+      ],
+      "outputs": [
+        "PADataset README.md cold-start route recovered at 078461795be3c1d3e5c3845c81607166fac9fad3",
+        "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9:workflows/document-artifact-build.v1.json"
+      ],
+      "validation": [
+        {
+          "check": "Pinned baseline and route recovery",
+          "result": "PASS",
+          "evidence": [
+            "resume-framework was independently verified at 078461795be3c1d3e5c3845c81607166fac9fad3 before mutation.",
+            "PADataset README.md routed resume work to resumes/CONTEXT.md without requiring unrelated RF/scientific contexts.",
+            "Pinned workflow content identity was verified as 0d66b919acdd2e51c08d2e8496c41dc22aed47c4."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "domain_separation_evaluation",
+      "status": "VALIDATED",
+      "execution_owner": "resume-application-integration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "baseline_recovery"
+      ],
+      "outputs": [
+        "PADataset@405e99b67df34caadc690722b210b49b233fc45c:resumes/WORKFLOW_INTEGRATION.md repository-separation decision"
+      ],
+      "validation": [
+        {
+          "check": "Repository ownership decision",
+          "result": "PASS",
+          "evidence": [
+            "Current resume/application authority remains in PADataset for this integration; no repository was created and no files were moved.",
+            "Repository evidence justifies a future dedicated private career/application repository only as a separately authorized migration.",
+            "Future migration requirements preserve provenance, the existing route, scientific authority, private/public boundaries, and cold-start validation."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "artifact_workflow_integration",
+      "status": "VALIDATED",
+      "execution_owner": "resume-application-integration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "domain_separation_evaluation"
+      ],
+      "outputs": [
+        "git:405e99b67df34caadc690722b210b49b233fc45c",
+        "PADataset@405e99b67df34caadc690722b210b49b233fc45c:workspace-control.lock.json",
+        "PADataset@405e99b67df34caadc690722b210b49b233fc45c:resumes/WORKFLOW_INTEGRATION.md"
+      ],
+      "validation": [
+        {
+          "check": "Pinned document-artifact workflow integration",
+          "result": "PASS",
+          "evidence": [
+            "PADataset commit 405e99b67df34caadc690722b210b49b233fc45c pins workspace-control 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and workflow blob 0d66b919acdd2e51c08d2e8496c41dc22aed47c4.",
+            "Shared mechanics map to domain contract -> source -> deterministic build -> structural/semantic validation -> render -> visual QA -> bounded revision -> delivery gate.",
+            "Candidate evidence, target evidence, locked content, production specification, privacy rules, builder commands, and submission semantics remain PADataset-owned.",
+            "Visual inspection remains mandatory but is capability-based; no artificial human gate is manufactured."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "regression_validation",
+      "status": "VALIDATED",
+      "execution_owner": "resume-application-integration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+runtime",
+      "inputs": [
+        "artifact_workflow_integration"
+      ],
+      "outputs": [
+        "cold-start regression: PASS",
+        "public build/render/semantic regression: PASS",
+        "executor visual QA: PASS",
+        "bounded-revision failure/recovery regression: PASS"
+      ],
+      "validation": [
+        {
+          "check": "Cold-start, build, render, semantic, visual, privacy-boundary, and bounded-revision regressions",
+          "result": "PASS",
+          "evidence": [
+            "Fresh recovery from PADataset 405e99b67df34caadc690722b210b49b233fc45c confirmed README -> resumes/CONTEXT.md -> WORKFLOW_INTEGRATION.md/NREIP runbook routing and exact shared-workflow lock.",
+            "Public artifact runtime regression returned PUBLIC_BUILD_OK; final y=720.2 pt, bottom reserve=41.8 pt, PDF approximately 33.2 KB, and Ghostscript secondary render PASS.",
+            "PDF regression established exactly one 612 x 792 pt Letter page, no encryption, selectable/extractable text, and required semantic content; the builder also validates every renderer-owned locked content string.",
+            "200-DPI rendered page was visually inspected by the executor and showed no clipping, overlap, broken glyphs, stranded headings, margin violations, or unprofessional compression.",
+            "A production-only bottom-reserve perturbation correctly failed with page overflow (y=720.2, limit=712.0); restoring the production layer returned the unchanged locked content to PASS.",
+            "Tracked public artifacts retain placeholders and resumes/.gitignore protects application private inputs/outputs. Full private-overlay parity was intentionally not fabricated because the ignored private overlay is absent from public Git."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "completion",
+      "status": "VALIDATED",
+      "execution_owner": "resume-application-integration",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "regression_validation"
+      ],
+      "outputs": [
+        "git:405e99b67df34caadc690722b210b49b233fc45c",
+        "archive:tasks/archive/resume-application-workflows-v2-integration.json",
+        "archive:tasks/archive/resume-application-workflows-v2-integration.md"
+      ],
+      "validation": [
+        {
+          "check": "Final integration checkpoint and completion prerequisites",
+          "result": "PASS",
+          "evidence": [
+            "PADataset resume-framework independently advertises 405e99b67df34caadc690722b210b49b233fc45c.",
+            "Compare 078461795be3c1d3e5c3845c81607166fac9fad3..405e99b67df34caadc690722b210b49b233fc45c shows exactly one integration commit and only authorized paths: resumes/CONTEXT.md, resumes/WORKFLOW_INTEGRATION.md, resumes/applications/nreip2027/SVG_PRODUCTION_SPEC.md, resumes/applications/nreip2027/resume/README.md, workspace-control.lock.json.",
+            "All acceptance criteria are satisfied without external submission, messaging, repository creation, or mutation of PADataset scientific authority."
+          ]
+        }
+      ],
+      "resume_condition": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "promoted-shared-workflow",
+      "kind": "git_commit",
+      "identity": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "required_for_resume": true,
+      "evidence": [
+        "workflow workflows/document-artifact-build.v1.json blob 0d66b919acdd2e51c08d2e8496c41dc22aed47c4"
+      ]
+    },
+    {
+      "id": "target-starting-checkpoint",
+      "kind": "git_commit",
+      "identity": "078461795be3c1d3e5c3845c81607166fac9fad3",
+      "required_for_resume": false,
+      "evidence": [
+        "PADataset resume-framework verified at child creation"
+      ]
+    },
+    {
+      "id": "resume-integration-checkpoint",
+      "kind": "git_commit",
+      "identity": "405e99b67df34caadc690722b210b49b233fc45c",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset resume-framework independently verified at 405e99b67df34caadc690722b210b49b233fc45c.",
+        "Parent 078461795be3c1d3e5c3845c81607166fac9fad3; one scoped integration commit; authorized path set verified."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "PADataset/workspace-control.lock.json",
+      "state": "tracked at 405e99b67df34caadc690722b210b49b233fc45c",
+      "role": "exact shared-workflow binding",
+      "origin": "resume/application integration",
+      "persistence": "Git",
+      "regeneration": null,
+      "review_requirement": "Exact checkpoint/content identity must remain pinned unless explicitly migrated.",
+      "evidence": [
+        "workspace-control=0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+        "workflow blob=0d66b919acdd2e51c08d2e8496c41dc22aed47c4"
+      ]
+    },
+    {
+      "path": "PADataset/resumes/WORKFLOW_INTEGRATION.md",
+      "state": "tracked at 405e99b67df34caadc690722b210b49b233fc45c",
+      "role": "resume-domain integration and repository-separation decision",
+      "origin": "repository evidence plus pinned shared workflow",
+      "persistence": "Git",
+      "regeneration": null,
+      "review_requirement": "Domain authority and migration boundary are normative for this integration.",
+      "evidence": [
+        "Current domain remains in PADataset.",
+        "Future private-repository migration requires separate authorization."
+      ]
+    },
+    {
+      "path": "PADataset/resumes/applications/nreip2027/resume/public/nreip2027_resume_public.pdf",
+      "state": "tracked public-safe reference artifact; runtime regeneration regression PASS",
+      "role": "representative final document artifact",
+      "origin": "NREIP locked content and production spec",
+      "persistence": "Git for public review artifact",
+      "regeneration": "python3 resumes/applications/nreip2027/resume/build_resume.py --mode public",
+      "review_requirement": "Structural, semantic, rendered visual QA; private submission artifact additionally requires ignored overlay.",
+      "evidence": [
+        "One Letter page, unencrypted, selectable text, strict-size check PASS.",
+        "Public regression build/render/visual inspection PASS."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Child capsule creation baseline",
+      "result": "PASS",
+      "evidence": [
+        "Promoted shared workflow identity pinned at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9/workflows/document-artifact-build.v1.json/0d66b919acdd2e51c08d2e8496c41dc22aed47c4.",
+        "Target repository branch resume-framework verified at exact starting checkpoint 078461795be3c1d3e5c3845c81607166fac9fad3.",
+        "No child-repository mutation was performed by the parent task."
+      ]
+    },
+    {
+      "check": "PADataset scoped integration checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "078461795be3c1d3e5c3845c81607166fac9fad3..405e99b67df34caadc690722b210b49b233fc45c is ahead by exactly one commit with no unrelated research/scientific changes.",
+        "resume-framework remote checkpoint verified at 405e99b67df34caadc690722b210b49b233fc45c."
+      ]
+    },
+    {
+      "check": "Shared-workflow identity and authority boundary",
+      "result": "PASS",
+      "evidence": [
+        "Exact reusable workflow remains 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9/workflows/document-artifact-build.v1.json/0d66b919acdd2e51c08d2e8496c41dc22aed47c4.",
+        "No candidate/application truth was moved into workspace-control."
+      ]
+    },
+    {
+      "check": "Artifact regressions",
+      "result": "PASS",
+      "evidence": [
+        "Cold-start routing, public build, structural/semantic validation, dual rendering, executor visual QA, privacy-boundary checks, and bounded revision failure/recovery all passed.",
+        "Private overlay was not reconstructed from public or conversational sources."
+      ]
+    },
+    {
+      "check": "Completion and external-consequence boundary",
+      "result": "PASS",
+      "evidence": [
+        "No application was submitted, no message was sent, and no external irreversible action was taken.",
+        "No remaining work or blockers remain within this integration task."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [],
+  "next_safe_action": "Task complete. Use tasks/archive/resume-application-workflows-v2-integration.json only for audit or as evidence for a separately authorized future career/application repository migration; no further action is required by this task.",
+  "notes": "Integration complete. The resume/application domain remains in PADataset for now; a future dedicated private career/application repository is justified as a design direction but was not created or authorized by this task. Private candidate/application values were not copied into workspace-control or public artifacts.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+artifact-runtime"
+}
