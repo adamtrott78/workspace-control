@@ -63,7 +63,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "aafde498d728e6e04a65902095f269d3ef9a7901",
+        "checkpoint_sha": "ec8baf481679aa86ee45b8b1b7dd47ed44846d6b",
         "verified": true
       },
       "local": null,
@@ -958,19 +958,29 @@
       ]
     },
     {
+      "id": "research-engine-native-cache-hygiene",
+      "kind": "git_commit",
+      "identity": "ec8baf481679aa86ee45b8b1b7dd47ed44846d6b",
+      "required_for_resume": true,
+      "evidence": [
+        "Native editable-install daemon generated src/research_engine/__pycache__, causing the strict clean-checkout deployment guard to stop safely.",
+        "Repository now ignores __pycache__/, *.py[cod], and .pytest_cache/ so normal native Python runtime/test caches do not appear as source mutations.",
+        "PR #18 CI 36828663498 PASS and canonical main CI 36828836315 PASS."
+      ]
+    },
+    {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "aafde498d728e6e04a65902095f269d3ef9a7901",
+      "identity": "ec8baf481679aa86ee45b8b1b7dd47ed44846d6b",
       "required_for_resume": true,
       "evidence": [
         "stage=model_backed_acceptance_v1",
-        "last_validated_boundary=research-engine/main@aafde498d728e6e04a65902095f269d3ef9a7901; bounded novelty fanout fix merged; canonical main CI 36827778339 PASS",
-        "live_acceptance_evidence=acceptance-codex-rf-v1 autonomously completed checkpoint, synthesis, gap generation and live novelty search under ChatGPT-plan Codex; durable knowledge checkpoint exists",
-        "production_issue_found=old planner allowed unbounded model-generated gap/query queue fanout; observed 28 novelty-search jobs; token/tier budgets still bounded actual execution",
-        "production_fix=fanout defaults 2 gaps x 2 queries, authoritative materialization bounded, legacy surplus queued novelty jobs cancelable during reconciliation",
-        "lambda_boundary=host still expected on 03babb404e9e6a254deec38fea6ea5ab3b8b05ad until current run is confirmed paused/gated; do not race a live semantic job",
+        "last_validated_boundary=research-engine/main@ec8baf481679aa86ee45b8b1b7dd47ed44846d6b; bounded novelty fanout + native cache hygiene merged; canonical main CI 36828836315 PASS",
+        "acceptance_run=acceptance-codex-rf-v1 PAUSED_BUDGET at BUDGET_REVIEW with durable checkpoint, synthesis, gap generation and three completed novelty searches; 25 surplus novelty searches remain queued from pre-fix planner",
+        "production_fix=planner/materializer cap 2 gaps x 2 queries and can cancel surplus queued legacy novelty work during reconciliation",
+        "deployment_guard=previous deploy stopped safely because only src/research_engine/__pycache__/ was untracked; new .gitignore prevents recurrence",
         "cost_boundary=included ChatGPT/Codex plan allowance only; no OPENAI_API_KEY and no paid API fallback",
-        "resume=inspect acceptance-codex-rf-v1 current durable status; when safely PAUSED_BUDGET/WAITING_HUMAN, fast-forward Lambda to aafde498d728e6e04a65902095f269d3ef9a7901, restart user daemon, then reconcile/salvage the same run as appropriate"
+        "resume=remove only the verified generated __pycache__ from the paused Lambda checkout, fast-forward exact main@ec8baf481679aa86ee45b8b1b7dd47ed44846d6b, restart native daemon, then reconcile same paused run under bounded planner before any budget resume"
       ]
     },
     {
@@ -1740,19 +1750,28 @@
         "Regression coverage includes 3 gaps x 3 queries collapsing to the bounded 2 x 2 graph and PostgreSQL salvage of a pre-existing surplus novelty queue.",
         "Canonical main CI 36827778339 passed tests, Compose validation, and Docker image build."
       ]
+    },
+    {
+      "check": "Native Python cache deployment hygiene",
+      "result": "PASS",
+      "evidence": [
+        "research-engine main advanced to ec8baf481679aa86ee45b8b1b7dd47ed44846d6b.",
+        "Minimal .gitignore covers __pycache__/, *.py[cod], and .pytest_cache/.",
+        "Canonical main CI 36828836315 passed tests, Compose validation, and Docker image build."
+      ]
     }
   ],
   "blockers": [
-    "The bounded novelty-fanout fix is validated but not yet deployed to the user's Lambda. The current acceptance run's latest status must be read before restarting the daemon so no active semantic job is raced."
+    "The validated bounded-fanout/cache-hygiene build has not yet been deployed to the Lambda. The acceptance run is safely PAUSED_BUDGET, so deployment may proceed after removing only the verified generated __pycache__ directory."
   ],
   "remaining_work": [
-    "Inspect the current durable state of acceptance-codex-rf-v1 and deploy research-engine main@aafde498d728e6e04a65902095f269d3ef9a7901 only at a safe paused/human gate boundary.",
-    "Use the bounded-fanout planner to salvage/cancel surplus queued novelty work in the same acceptance run, then apply only the budget changes justified by the remaining bounded graph.",
-    "Reach WAITING_HUMAN and verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload.",
-    "After acceptance passes, implement/validate plan-limit-aware pacing/backoff so 24/7 operation pauses cleanly when the included weekly Codex allowance is unavailable rather than exhausting job retries.",
-    "Then resume RF corpus expansion through the daemon and tune concurrency/model tiers against observed allowance consumption and quality."
+    "Deploy research-engine main@ec8baf481679aa86ee45b8b1b7dd47ed44846d6b to the safely paused Lambda and restart the native user daemon.",
+    "Reconcile acceptance-codex-rf-v1 under the bounded planner so surplus queued novelty jobs are cancelled/ignored deterministically; then inspect the remaining bounded graph.",
+    "Apply only the bounded budget changes needed for the remaining novelty arbitration/human-review path and reach WAITING_HUMAN.",
+    "Verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload; validate model_backed_acceptance_v1.",
+    "Implement/validate plan-limit-aware pacing/backoff for 24/7 operation under included weekly Codex allowance, then resume RF corpus expansion."
   ],
-  "next_safe_action": "On the user's Lambda, read acceptance-codex-rf-v1 durable run/budget/job state first. If the run is still RUNNING, do not change the checkout or restart the daemon; return the status so the bounded existing budget can gate it. If it is PAUSED_BUDGET or WAITING_HUMAN, fast-forward the clean research-engine checkout from 03babb404e9e6a254deec38fea6ea5ab3b8b05ad to exact main@aafde498d728e6e04a65902095f269d3ef9a7901, restart the user systemd daemon to load the bounded-fanout planner, and return post-restart non-secret run/job/health state. Do not configure OPENAI_API_KEY.",
+  "next_safe_action": "On the user's Lambda while acceptance-codex-rf-v1 remains PAUSED_BUDGET, verify the only untracked path is src/research_engine/__pycache__/, delete only that generated directory, require a clean checkout, fetch and fast-forward main from 03babb404e9e6a254deec38fea6ea5ab3b8b05ad to exact ec8baf481679aa86ee45b8b1b7dd47ed44846d6b, restart the user daemon, and return post-deploy run/job/budget state. Do not resume the budget yet; first reconcile/cancel the surplus novelty queue under the bounded planner.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general. Production semantic execution is constrained to the user's included ChatGPT/Codex plan allowance; continuous operation must pace or pause rather than fall back to paid API usage."
