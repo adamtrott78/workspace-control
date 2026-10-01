@@ -3,7 +3,7 @@
 
 Derived human-readable view.
 
-Authoritative capsule: tasks/active/cis560-course-workflows-v2-migration.json
+Authoritative capsule: tasks/archive/cis560-course-workflows-v2-migration.json
 
 If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
 
@@ -57,7 +57,7 @@ Migration is complete and archived-ready. Future CIS560 work should start from C
 @GitHub
 
 Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/cis560-course-workflows-v2-migration.json
+Task capsule: tasks/archive/cis560-course-workflows-v2-migration.json
 
 Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
