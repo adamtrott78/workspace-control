@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "mth602-course-workflows-v2-migration",
   "title": "MTH602 Course Workflows v2 Migration",
-  "status": "CHECKPOINTED",
+  "status": "COMPLETE",
   "goal": "Explicitly migrate the current MTH602 repository integration to the promoted reusable course-workflow architecture while preserving its proven direct-visual source ingestion, tutoring/mastery state, homework/LaTeX report mechanics, and project-local authority.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -238,7 +238,7 @@
     },
     {
       "id": "completion",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "mth602-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -247,7 +247,9 @@
         "git:0ed5957af97e2de887ef181f26a9966413daf857"
       ],
       "outputs": [
-        "All required migration regressions now pass, including the fresh exact-source HW1 LaTeX build/render/visual-QA regression."
+        "All required migration regressions pass, including the fresh exact-source HW1 LaTeX build/render/visual-QA regression.",
+        "Topology-aware v2 handoff assessment returned HANDOFF_SAFE for the synchronized checkpointed capsule.",
+        "Migration completion preserves MTH602 project-local authority and leaves the separate HW2 bootstrap task suspended for deliberate coordinator refresh."
       ],
       "validation": [
         {
@@ -257,6 +259,15 @@
             "Cold-start, source-ingestion, tutoring/mastery-firewall, HW2 pre-solution preservation, LaTeX artifact, and executor/remote-recovery regressions all pass.",
             "MTH602 migrated branch remains recorded and verified at 0ed5957af97e2de887ef181f26a9966413daf857.",
             "The separately suspended mth602-new-unit-ingestion-hw2-prep task has not been resumed or mutated by this migration."
+          ]
+        },
+        {
+          "check": "Final durable handoff",
+          "result": "PASS",
+          "evidence": [
+            "The checkpointed capsule satisfied v2 HANDOFF_SAFE with no reasons for rejection.",
+            "Both recorded remote repository states are verified; the exact pinned shared workflow checkpoint resolves to the recorded workspace-control recovery state.",
+            "Execution topology is remote_only, so no local checkout or composed synchronization boundary is required."
           ]
         }
       ],
@@ -334,10 +345,8 @@
     }
   ],
   "blockers": [],
-  "remaining_work": [
-    "Run the final topology-aware HANDOFF_SAFE assessment against this synchronized checkpointed capsule, then archive this migration task while leaving mth602-new-unit-ingestion-hw2-prep suspended for coordinator refresh."
-  ],
-  "next_safe_action": "Run the final topology-aware HANDOFF_SAFE assessment for this synchronized checkpointed capsule. If it is HANDOFF_SAFE, mark completion VALIDATED, set the task COMPLETE with no remaining work/blockers, regenerate the derived Markdown immediately, archive the completed capsule/handoff, and leave the separately suspended mth602-new-unit-ingestion-hw2-prep task untouched.",
+  "remaining_work": [],
+  "next_safe_action": "Archive this completed migration capsule and its synchronized derived handoff under tasks/archive. Do not resume or mutate mth602-new-unit-ingestion-hw2-prep; its coordinator must deliberately refresh that suspended task to the migrated MTH602 checkpoint before HW2 work resumes.",
   "notes": " Baseline deliberately refreshed on 2026-10-01 from main@62b7a03c7139cb3987b72ad66bdc532e8a61b82a to unit-ingestion-hw2@20dc641dcb9b505efe53daa52932521d0927ef3a because content ingestion and HW2 initialization completed before any HW2 solution work began. Migration is intentionally interposed at this clean pre-solution boundary.",
   "last_executor": "chatgpt",
   "last_surface": "github+runtime"
