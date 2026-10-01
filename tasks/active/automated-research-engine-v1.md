@@ -26,23 +26,22 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Recovery restore point
 
-- Identity: 738e3beadf8dabadc2496d53cb2e823779bdc453
-- stage=model_backed_acceptance_v1
-- last_validated_boundary=research-engine/main@738e3beadf8dabadc2496d53cb2e823779bdc453; agentic research v1 implementation complete; PR #11 CI PASS
-- credential_probe=not completed because this executor cannot inspect/read GitHub secrets and an attempted secret-presence workflow mutation was blocked before GitHub state changed
-- independent_in_flight=research-engine PR #12 head daemon-supervisor-v1@43b48010ec7bade34db68f2215eb84c543b88a4b
-- slice=24/7 supervisor with tier-configurable concurrency, admission backpressure, stale-worker/lease health, daemon CLI, and overnight reporting
-- resume=inspect PR #12 CI; repair remotely if failing and merge if green. Model-backed acceptance remains gated on a model-authenticated runtime, but independent runtime hardening should continue before asking the user for credentials.
+- Identity: 078cef22ccb68e0538e52654bc9f25ce64aaac5b
+- stage=production_daemon_v1
+- last_validated_boundary=research-engine/main@078cef22ccb68e0538e52654bc9f25ce64aaac5b; PR #12 24/7 daemon supervisor PASS
+- model_backed_acceptance=model credential availability remains unverified from this executor; secret APIs are unavailable and direct secret-probe mutation was blocked before GitHub state changed
+- resume=package daemon for persistent Lambda deployment (container/systemd/env templates, restart semantics, artifact volume, database dependency), validate packaging in CI, then continue budget guardrails that do not require model credentials
 
 ## Next safe action
 
-Inspect research-engine PR #12 for daemon-supervisor-v1@43b48010ec7bade34db68f2215eb84c543b88a4b. Repair CI failures remotely or merge if green. Then continue non-model runtime hardening (budget controls, service supervision/deployment packaging) while the first real model-backed acceptance run remains gated on an authorized model credential surface.
+From research-engine/main@078cef22ccb68e0538e52654bc9f25ce64aaac5b, add deployment packaging for the 24/7 daemon: container/service definition, persistent artifact volume, PostgreSQL health dependency, restart behavior, and non-secret environment template. Validate in CI, then add budget guardrails. Model-backed acceptance remains a separate credential-gated stage.
 
 ## Remaining work
 
+- Package the validated daemon for persistent Lambda deployment with restart-safe service/container configuration, persistent artifact storage, and explicit environment templates.
+- Add production budget guardrails around tier concurrency/token usage after the deployment surface is validated.
 - Run one real model-backed autonomous research cycle on a model-authenticated runtime and inspect the durable human-review payload.
-- Harden 24/7 Lambda deployment: daemon supervision, worker concurrency/budgets/backpressure, health/heartbeat monitoring, and overnight reporting.
-- After the production runtime passes, use the autonomous cycle to resume deferred RF corpus expansion instead of manually shepherding papers.
+- After production runtime acceptance, use the autonomous cycle to resume deferred RF corpus expansion instead of manually shepherding papers.
 
 ## Blockers / gates
 
