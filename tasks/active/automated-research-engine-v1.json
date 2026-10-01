@@ -953,11 +953,11 @@
       "required_for_resume": true,
       "evidence": [
         "stage=model_backed_acceptance_v1",
-        "last_validated_boundary=research-engine/main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad; Codex native-host production deployment validated; canonical main CI 36824221019 PASS",
-        "lambda_runtime=clean exact checkpoint; Codex CLI 0.155.1 logged in using ChatGPT; PostgreSQL/pgvector healthy; schema initialized; native venv installed",
-        "daemon=systemd user service enabled+active with Restart=always; lingering=yes; deterministic/CHEAP/STANDARD/STRONG workers ACTIVE; admission allowed",
-        "production_env=mode 600 Codex-only env; no OPENAI_API_KEY; production cost boundary remains included ChatGPT/Codex allowance only",
-        "resume=run one tiny direct Codex-plan structured-output smoke test using the production CHEAP model route; if successful, submit one conservative autonomous RF topic and verify durable WAITING_HUMAN acceptance"
+        "last_validated_boundary=research-engine/main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad; persistent native Codex deployment validated",
+        "lambda_runtime=PostgreSQL healthy; native venv; systemd daemon enabled+active; all worker tiers ACTIVE",
+        "codex_smoke=ChatGPT-authenticated Luna structured execution PASS; usage event input=11500 output=19",
+        "cost_boundary=included ChatGPT/Codex plan allowance only; no OPENAI_API_KEY and no paid API fallback",
+        "resume=submit one conservative autonomous RF topic through the persistent daemon and verify durable WAITING_HUMAN acceptance"
       ]
     },
     {
@@ -1676,18 +1676,28 @@
         "Daemon health reported ACTIVE deterministic, CHEAP, STANDARD, and STRONG workers with zero expired leases and admission allowed.",
         "Persistent PostgreSQL/pgvector container remained healthy."
       ]
+    },
+    {
+      "check": "ChatGPT-plan Codex structured smoke",
+      "result": "PASS",
+      "evidence": [
+        "User-local Codex CLI 0.155.1 reported Logged in using ChatGPT.",
+        "Model catalog exposed gpt-5.6-luna, gpt-5.6-terra, and gpt-5.6-sol.",
+        "Exact daemon-style Luna structured invocation returned exit code 0 and schema-conformant JSON.",
+        "turn.completed usage telemetry reported 11500 input tokens and 19 output tokens."
+      ]
     }
   ],
   "blockers": [
-    "The remaining acceptance test requires a first real ChatGPT-plan Codex execution and then one conservative autonomous research cycle to WAITING_HUMAN on the user's Lambda."
+    "The only remaining model-backed acceptance boundary is one real conservative autonomous RF research cycle through the persistent Codex-backed daemon to durable WAITING_HUMAN."
   ],
   "remaining_work": [
-    "Run a tiny direct Codex-plan structured-output smoke test using the configured production CHEAP model route.",
-    "Submit one real Codex-backed autonomous RF research cycle with a conservative per-run budget and verify it reaches durable WAITING_HUMAN with source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload.",
+    "Submit one real Codex-backed autonomous RF research cycle with a conservative per-run budget and let the persistent daemon orchestrate it.",
+    "Verify durable WAITING_HUMAN with source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload; bounded budget resume is allowed if necessary.",
     "After acceptance passes, resume RF corpus expansion through the daemon and operate continuously while pacing or pausing to stay within the included Codex allowance.",
-    "Tune worker concurrency/model-tier budgets and allowance-aware pacing from observed Codex consumption, latency, and quality after the first real run."
+    "Tune worker concurrency/model-tier budgets and allowance-aware pacing from observed first-run consumption, latency, and quality."
   ],
-  "next_safe_action": "On the user's Lambda with the persistent daemon healthy, run one tiny direct Codex-plan structured-output smoke test using the production CHEAP model route and no API key. Do not submit an autonomous research topic until the smoke test confirms the configured Codex model, structured-output path, and usage event shape. Return only non-secret output.",
+  "next_safe_action": "Submit one conservative autonomous RF research topic through the already-running Lambda daemon using a fixed run ID and explicit durable semantic-job/token budgets. Monitor persisted run state. If PAUSED_BUDGET, inspect budget usage and resume only with a bounded increase; if WAITING_HUMAN, verify evidence, usage ledger, checkpoint, novelty state, and human-review payload.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general. Production semantic execution is constrained to the user's included ChatGPT/Codex plan allowance; continuous operation must pace or pause rather than fall back to paid API usage."
