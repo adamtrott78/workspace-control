@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: research-engine-observability-agent-ops-v1
 - Title: Research Engine Observability, Agent Operations & Chat Bridge v1
-- Status: PLANNED
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -44,22 +44,24 @@ observability_contract
 
 ## Next safe action
 
-Start from research-engine main at the verified launch checkpoint and inspect the existing research_workers, research_jobs, research_job_attempts, research_usage_events, daemon health/report code, Codex execution metadata, and current sustained-run runtime. Write the observability contract first: define stable logical agent roles versus ephemeral sessions, append-only telemetry fields, derived metric formulas/windows, allowance-observation/forecast semantics, GitHub live-ops issue format, daily/run rollup format, and chat-reasoning request/response safety boundary. Do not add telemetry schema or runtime mutation until that contract is explicit and regression-safe for the already-running rf-open-world-corpus-expansion-v1.
+First pause research-engine-daemon.service on the user's Lambda so rf-open-world-corpus-expansion-v1 remains durable but consumes no additional semantic allowance. After pause evidence is returned, inspect the persisted run/job/usage/worker tables without mutation and write the observability contract. Implement the read-only ops snapshot and terminal HUD before any sustained semantic processing resumes; the first monitored restart should be a tightly bounded calibration run used to measure allowance burn and tune concurrency/model tiers.
 
 ## Remaining work
 
-- Specify the metric taxonomy, stable logical-agent identity, event/rollup schema, retention policy, and the exact separation between authoritative PostgreSQL telemetry and derived Chat-visible summaries.
-- Extend usage/event capture to include cached input tokens, reasoning output tokens, wall/queue duration, agent/session attribution, error/backoff outcomes, and stage/source/evidence/gap throughput.
-- Implement read-only ops snapshot/report commands and a terminal HUD with rolling throughput, queue/latency, source/evidence/gap funnel, current-agent, failure/backoff, and allowance panels.
-- Implement explicit 5-hour/weekly Codex usage observations plus empirical forecast calibration/ETA with uncertainty and per-agent/model attribution.
-- Implement a low-frequency GitHub live-ops issue publisher and permanent daily/run summaries that ChatGPT can read without high-frequency code commits.
-- Implement structured Chat reasoning request/response records and a GitHub issue-based bridge; validate user-triggered Chat processing first, then separately evaluate an hourly ChatGPT automation if useful.
-- Validate the complete observability stack against rf-open-world-corpus-expansion-v1 without interrupting or corrupting the running scientific workflow.
-- Document operator commands and cold-start routes, then checkpoint and verify the implementation.
+- Pause the research-engine user daemon on the Lambda, preserving rf-open-world-corpus-expansion-v1 durable state and preventing further semantic allowance burn during instrumentation.
+- Specify the metric taxonomy, stable logical-agent identity, event/rollup schema, retention policy, and exact separation between authoritative PostgreSQL telemetry and derived views.
+- Implement read-only ops snapshot/report commands and a terminal HUD first, including live per-agent usage, source/evidence/gap throughput, queue/latency, failures/backoffs, and 5-hour/weekly allowance panels.
+- Implement explicit 5-hour/weekly Codex usage observations plus empirical forecast calibration/ETA with uncertainty and per-agent/model attribution; ingest the current ~16% 5-hour observation as the first calibration point.
+- Run a tightly bounded monitored calibration workload and tune model/tier/concurrency budgets before resuming sustained corpus expansion.
+- Implement a low-frequency Chat-visible operations mirror.
+- Prototype a private research-engine MCP/plugin as the preferred direct ChatGPT read/advisory-response surface; validate current-plan permissions and Secure MCP Tunnel or another private transport.
+- Optionally connect Slack and evaluate it as an event-driven reasoning-request wake-up bus; retain GitHub/PostgreSQL as durable truth.
+- Implement and validate structured Chat reasoning request/response state transitions without allowing Chat responses to bypass scientific verification or human gates.
 
 ## Blockers / gates
 
-- None.
+- The sustained RF run should be operationally paused on the Lambda before additional semantic allowance is consumed; this requires a local systemd action by the user.
+- Direct MCP/plugin write capability and any Slack-triggered automation must be validated on the user's actual ChatGPT plan/workspace before the bridge can depend on them.
 
 ## Fresh-chat initialization
 
