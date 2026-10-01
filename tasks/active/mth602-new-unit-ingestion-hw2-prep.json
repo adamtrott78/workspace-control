@@ -46,7 +46,7 @@
       "base_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
       "remote": {
         "branch": "unit-ingestion-hw2",
-        "checkpoint_sha": "a05f6881dc55aef1cae11e755449df050c975708",
+        "checkpoint_sha": "c4303853391fd00618cb664fcb55dc67a9affbdd",
         "verified": true
       },
       "local": null,
@@ -366,12 +366,12 @@
     {
       "id": "mth602-hw2-p1-learning-progress",
       "kind": "git_commit",
-      "identity": "a05f6881dc55aef1cae11e755449df050c975708",
+      "identity": "c4303853391fd00618cb664fcb55dc67a9affbdd",
       "required_for_resume": true,
       "evidence": [
-        "HW2 Floating-point Problem 1(a) executed and recorded with minimum relative error 0.5665545568629835 at N=69.",
-        "The student identified cancellation/roundoff as the reason convergence stalls; the durable learning record preserves the refinement that the early ~10^16 peak is dominated by the enormous truncated partial sums relative to the tiny target rather than by the final roundoff floor itself.",
-        "No stable reformulation for part 1(c) has yet been completed."
+        "HW2 Floating-point Problem 1(a) executed in JupyterLab with minimum relative error 0.5665545568629835 at N=69.",
+        "Part 1(b) is complete: the student independently explained the observed rise/fall/plateau as enormous truncated partial sums relative to the tiny target, subsequent cancellation/truncation-error reduction, and a catastrophic-cancellation/roundoff floor that later tiny terms cannot repair.",
+        "Part 1(c) stable reformulation has not yet been demonstrated."
       ]
     }
   ],
@@ -583,7 +583,7 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Finish Floating-point Problem 1(b) by verifying the refined three-phase interpretation of the executed convergence curve, then begin 1(c) in LEARNING mode and diagnose the stable reformulation without changing taylor_exp.",
+    "Begin Floating-point Problem 1(c) in LEARNING mode: diagnose a numerically stable reformulation for e^-20 that does not modify taylor_exp, then demonstrate it with a second convergence plot and interpret why it works.",
     "Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.",
     "Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.",
     "Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.",
@@ -592,8 +592,8 @@
     "Complete exact-byte transfer of previously ingested classroom originals when a suitable binary transfer surface is available.",
     "Synchronize final task JSON/Markdown, establish HANDOFF_SAFE, and archive when the task's preparation/assignment boundary is complete."
   ],
-  "next_safe_action": "Continue HW2 Floating-point Problem 1(b) in LEARNING mode from MTH602 unit-ingestion-hw2@a05f6881dc55aef1cae11e755449df050c975708. Ask the student to restate the three phases of the observed error curve with the refined distinction: huge early relative error from enormous truncated partial sums versus the tiny target, rapid reduction as later terms cancel and truncation error shrinks, then a catastrophic-cancellation/roundoff floor near order-one relative error. Once correct, treat 1(b) as complete and move to 1(c) without revealing the stable reformulation before diagnosing whether the student can find it.",
+  "next_safe_action": "Enter HW2 Floating-point Problem 1(c) in LEARNING mode from MTH602 unit-ingestion-hw2@c4303853391fd00618cb664fcb55dc67a9affbdd. Part 1(a) and 1(b) are complete. Ask the smallest diagnostic that tests whether the student can find a stable algebraic reformulation that avoids evaluating the Taylor series directly at a large negative argument while leaving taylor_exp unchanged. Do not reveal the reformulation unless the student is blocked.",
   "last_executor": "chatgpt",
   "last_surface": "github+chat",
-  "notes": "Lecture ingestion is complete through 2026-09-28. Lab1 was bridged, completed, executed, and rendered to a clean PDF in the current conversation; actual submission remains a user action. HW2 contract is durably bootstrapped at MTH602 checkpoint 20dc641dcb9b505efe53daa52932521d0927ef3a. Operative HW2 deadline is 2026-10-05 via later instructor README clarification; hw2.pdf still prints 2026-09-30. On 2026-10-01 the task was intentionally suspended at the pre-solution HW2 bootstrap boundary so the course-workflows v2 migration can run on the same isolated branch. No HW2 problem solution work had begun at suspension. On 2026-10-01, after the course-workflows v2 migration completed, the coordinator deliberately refreshed this task to MTH602 0ed5957af97e2de887ef181f26a9966413daf857 and workspace-control course-assignment-work-v1 at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9. HW2 resumed with no prior solution work. On 2026-10-01, HW2 Floating-point Problem 1 entered LEARNING mode. The student independently identified the growth-then-factorial-decay structure of the Taylor terms, understood the catastrophic-cancellation mechanism after targeted corrections, and correctly wrote the part 1(a) relative-error expression. Durable MTH602 learning state is now at f37356af62c8ac4dc271e7664595462ada5cbb61; no final P1 numerical result or plot has yet been produced. Part 1(a) was executed in JupyterLab: e^-20=2.061153622438558e-09, minimum relative error 0.5665545568629835 at N=69 with N_max=100. The error curve rises to about 10^16 near the large intermediate partial sums, then falls and plateaus at order-one error. Mastery evidence now supports independent floating-point representation and machine-epsilon/relative-rounding reasoning; roundoff accumulation remains separately unassessed. The student's first 1(b) curve interpretation correctly identified catastrophic cancellation and the inability of later tiny terms to recover lost digits; the durable record now also preserves that the early ~10^16 relative-error peak is primarily truncation/intermediate-sum error relative to the tiny target, while cancellation/roundoff explains the later floor."
+  "notes": "Lecture ingestion is complete through 2026-09-28. Lab1 was bridged, completed, executed, and rendered to a clean PDF in the current conversation; actual submission remains a user action. HW2 contract is durably bootstrapped at MTH602 checkpoint 20dc641dcb9b505efe53daa52932521d0927ef3a. Operative HW2 deadline is 2026-10-05 via later instructor README clarification; hw2.pdf still prints 2026-09-30. On 2026-10-01 the task was intentionally suspended at the pre-solution HW2 bootstrap boundary so the course-workflows v2 migration can run on the same isolated branch. No HW2 problem solution work had begun at suspension. On 2026-10-01, after the course-workflows v2 migration completed, the coordinator deliberately refreshed this task to MTH602 0ed5957af97e2de887ef181f26a9966413daf857 and workspace-control course-assignment-work-v1 at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9. HW2 resumed with no prior solution work. On 2026-10-01, HW2 Floating-point Problem 1 entered LEARNING mode. The student independently identified the growth-then-factorial-decay structure of the Taylor terms, understood the catastrophic-cancellation mechanism after targeted corrections, and correctly wrote the part 1(a) relative-error expression. Durable MTH602 learning state is now at f37356af62c8ac4dc271e7664595462ada5cbb61; no final P1 numerical result or plot has yet been produced. Part 1(a) was executed in JupyterLab: e^-20=2.061153622438558e-09, minimum relative error 0.5665545568629835 at N=69 with N_max=100. The error curve rises to about 10^16 near the large intermediate partial sums, then falls and plateaus at order-one error. Mastery evidence now supports independent floating-point representation and machine-epsilon/relative-rounding reasoning; roundoff accumulation remains separately unassessed. The student's first 1(b) curve interpretation correctly identified catastrophic cancellation and the inability of later tiny terms to recover lost digits; the durable record now also preserves that the early ~10^16 relative-error peak is primarily truncation/intermediate-sum error relative to the tiny target, while cancellation/roundoff explains the later floor. Part 1(b) is now complete: the student independently restated the refined rise/fall/plateau explanation and correctly attributed the final floor to catastrophic cancellation/roundoff after the large alternating terms have cancelled."
 }
