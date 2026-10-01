@@ -12,7 +12,7 @@
     "content_sha": "cbf405d066f84b87f64c03671a4ed1941ca71ffb"
   },
   "parent_execution_owner": "research-operating-system",
-  "current_stage": "vertical_slice_validation",
+  "current_stage": "agentic_orchestration_v1",
   "acceptance_criteria": [
     "The architecture explicitly separates source evidence, extracted evidence, normalized knowledge, synthesis, model inference, and human judgment.",
     "Every durable scientific evidence object can be traced to a canonical work/version, immutable source artifact identity, and source locator whenever the available representation permits it.",
@@ -62,7 +62,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "ac04cf29c0a1174b7b570d501c534d6798815d47",
+        "checkpoint_sha": "cfd5e354239cd1438bbb1da95d5435892427a67e",
         "verified": true
       },
       "local": null,
@@ -412,7 +412,7 @@
     },
     {
       "id": "vertical_slice_validation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "cross-executor-validation",
       "selected_executor": "codex",
       "selected_surface": "composed",
@@ -444,7 +444,9 @@
         "git:research-engine@de1d1a0ca0f649895d461e40a1496071443e32d7",
         "runtime:github-actions:PR3:36762254566",
         "git:research-engine@ac04cf29c0a1174b7b570d501c534d6798815d47",
-        "runtime:github-actions:PR4:36803449193"
+        "runtime:github-actions:PR4:36803449193",
+        "git:research-engine@cfd5e354239cd1438bbb1da95d5435892427a67e",
+        "runtime:github-actions:36807507382"
       ],
       "validation": [
         {
@@ -549,8 +551,31 @@
             "Direct prior work can reject/narrow a candidate; empty automated search escalates to NEEDS_HUMAN_REVIEW.",
             "SUPPORTED_AS_OPEN requires explicit human approval; the regression pilot leaves zero candidates automatically supported as open."
           ]
+        },
+        {
+          "check": "vertical slice closure",
+          "result": "PASS",
+          "evidence": [
+            "Core system now covers exact-source acquisition, structured evidence, source locators, cross-paper graph/synthesis, adversarial novelty challenge, proposal/execution bridge, PostgreSQL/pgvector persistence, immutable history, deterministic knowledge checkpoints, and explicit human novelty gates.",
+            "research-engine/main@cfd5e354239cd1438bbb1da95d5435892427a67e adds a reusable arXiv acquisition provider and passed GitHub Actions run 36807507382.",
+            "Further manual corpus expansion is intentionally deferred to the agentic orchestration system rather than treated as a prerequisite for orchestration."
+          ]
         }
       ],
+      "resume_condition": null
+    },
+    {
+      "id": "agentic_orchestration_v1",
+      "status": "IN_PROGRESS",
+      "execution_owner": "research-engine",
+      "selected_executor": "chatgpt",
+      "selected_surface": "composed",
+      "inputs": [
+        "vertical_slice_validation",
+        "git:research-engine@cfd5e354239cd1438bbb1da95d5435892427a67e"
+      ],
+      "outputs": [],
+      "validation": [],
       "resume_condition": null
     }
   ],
@@ -763,14 +788,13 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "ac04cf29c0a1174b7b570d501c534d6798815d47",
+      "identity": "cfd5e354239cd1438bbb1da95d5435892427a67e",
       "required_for_resume": true,
       "evidence": [
-        "stage=vertical_slice_validation",
-        "last_validated_boundary=research-engine/main@ac04cf29c0a1174b7b570d501c534d6798815d47 (PR #4 checkpointed novelty persistence; PostgreSQL/pgvector CI PASS)",
-        "external_runtime_prepared=research-engine/acquire-rf-counterevidence commit 1009e230a22878ad9ab54ff2a37ae1c8353b7043 prepared from ac04cf29c0a1174b7b570d501c534d6798815d47; branch ref not yet advanced at restore-point creation",
-        "purpose=acquire exact arXiv v1 PDFs for 2605.15593 and 2606.12718, verify SHA-256/PDF magic/page count, and upload exact-source bundle",
-        "resume=verify acquire-rf-counterevidence ref; if it points to 1009e230a22878ad9ab54ff2a37ae1c8353b7043 inspect newest Acquire RF novelty counterevidence run/artifact; if not, advance it non-force to prepared commit"
+        "stage=agentic_orchestration_v1",
+        "last_validated_boundary=research-engine/main@cfd5e354239cd1438bbb1da95d5435892427a67e; full non-agentic research vertical slice VALIDATED and GitHub Actions 36807507382 PASS",
+        "manual_corpus_expansion=deferred intentionally; temporary acquisition branches are not the active path",
+        "resume=branch from cfd5e354239cd1438bbb1da95d5435892427a67e and implement provider-neutral durable orchestration: research runs, job queue, worker leases/retry/recovery, executor tiers, stage fan-out/fan-in, human gate; prove autonomous PostgreSQL cycle before production model adapter"
       ]
     },
     {
@@ -781,6 +805,16 @@
       "evidence": [
         "Checkpoint-bound GapCandidate/NoveltyChallenge persistence merged after real PostgreSQL CI.",
         "Automated no-counterevidence searches cannot produce SUPPORTED_AS_OPEN."
+      ]
+    },
+    {
+      "id": "research-engine-agentic-baseline",
+      "kind": "git_commit",
+      "identity": "cfd5e354239cd1438bbb1da95d5435892427a67e",
+      "required_for_resume": true,
+      "evidence": [
+        "Validated research-engine baseline for agentic orchestration.",
+        "Reusable arXiv provider present; CI 36807507382 PASS."
       ]
     }
   ],
@@ -1338,17 +1372,26 @@
         "PR #4 / CI 36803449193 validated the manually proven RF OSR novelty-challenge behavior in PostgreSQL.",
         "Novelty status can no longer float free of the corpus/search checkpoint that produced it."
       ]
+    },
+    {
+      "check": "vertical research engine slice complete",
+      "result": "PASS",
+      "evidence": [
+        "The non-agentic research pipeline is sufficiently validated to become the substrate for autonomous orchestration.",
+        "Manual literature scaling is now an acceptance workload for the future orchestrator rather than ongoing hand-driven implementation work."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Acquire exact arXiv source artifacts for the 2026 dynamic/open-set RF paper and the 2026 RF OOD-detector paper that challenged the pilot gaps.",
-    "Extract and ingest those papers as first-class corpus/evidence members, then create a new knowledge checkpoint and re-run novelty challenges against corpus-backed evidence instead of abstract-only external metadata.",
-    "Promote Broggi 2025 to exact-PDF evidence from the user's local PADataset copy only when that non-blocking local-byte boundary becomes the next necessary step.",
-    "Continue expanding RF-specific open-set/OOD literature until novelty challenge results are stable enough for human research-direction review.",
-    "After exact-source scaling passes, bulk-ingest the remainder of the already-curated PADataset reference PDFs."
+    "Implement PostgreSQL-backed research runs and durable job queues with transactional worker leasing, heartbeat/lease expiry recovery, bounded retry, priorities, dependency/barrier semantics, and idempotent downstream planning.",
+    "Implement executor-tier routing for DETERMINISTIC, CHEAP, STANDARD, STRONG, and HUMAN work without hard-coding a single model/provider into orchestration state.",
+    "Implement the autonomous research-cycle stage graph: discovery -> screening -> acquisition fan-out -> extraction -> verification -> knowledge checkpoint -> synthesis -> gap generation -> novelty search fan-out -> novelty arbitration -> human review gate.",
+    "Prove one complete autonomous dry-run cycle through the real PostgreSQL runtime, including worker crash/lease recovery, retry, fan-out/fan-in, heterogeneous executor routing, and a durable WAITING_HUMAN terminal state.",
+    "Add a production executor adapter suitable for headless Lambda/Codex workers after the provider-neutral orchestration core passes.",
+    "Then use the autonomous cycle to resume the deferred RF corpus expansion instead of manually shepherding individual papers."
   ],
-  "next_safe_action": "Launch prepared exact arXiv acquisition by non-force advancing research-engine/acquire-rf-counterevidence to 1009e230a22878ad9ab54ff2a37ae1c8353b7043. Then inspect/download the resulting GitHub Actions artifact, verify exact bytes, parse the two PDFs, ingest them into the corpus/evidence model, create a new knowledge checkpoint, and re-run persisted novelty challenges.",
+  "next_safe_action": "Build agentic orchestration in adamtrott78/research-engine from main@cfd5e354239cd1438bbb1da95d5435892427a67e. First implement the provider-neutral PostgreSQL job/run state machine, transactional leases/retry/recovery, executor-tier routing, stage fan-out/fan-in, and explicit human-review gate. Validate one fully autonomous scripted cycle in GitHub Actions/PostgreSQL before adding a production Codex/model executor adapter.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."

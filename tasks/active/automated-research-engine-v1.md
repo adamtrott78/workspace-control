@@ -18,6 +18,10 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Design and prove a provenance-preserving automated research engine that turns scholarly literature into structured evidence, durable knowledge, challenged research gaps, fundable research programs, and workspace-control-executable research projects.
 
+## Current stage
+
+agentic_orchestration_v1
+
 ## Workflow
 
 - Repository: workspace-control
@@ -26,24 +30,24 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Recovery restore point
 
-- Identity: ac04cf29c0a1174b7b570d501c534d6798815d47
-- stage=vertical_slice_validation
-- last_validated_boundary=research-engine/main@ac04cf29c0a1174b7b570d501c534d6798815d47 (PR #4 checkpointed novelty persistence; PostgreSQL/pgvector CI PASS)
-- external_runtime_prepared=research-engine/acquire-rf-counterevidence commit 1009e230a22878ad9ab54ff2a37ae1c8353b7043 prepared from ac04cf29c0a1174b7b570d501c534d6798815d47; branch ref not yet advanced at restore-point creation
-- purpose=acquire exact arXiv v1 PDFs for 2605.15593 and 2606.12718, verify SHA-256/PDF magic/page count, and upload exact-source bundle
-- resume=verify acquire-rf-counterevidence ref; if it points to 1009e230a22878ad9ab54ff2a37ae1c8353b7043 inspect newest Acquire RF novelty counterevidence run/artifact; if not, advance it non-force to prepared commit
+- Identity: cfd5e354239cd1438bbb1da95d5435892427a67e
+- stage=agentic_orchestration_v1
+- last_validated_boundary=research-engine/main@cfd5e354239cd1438bbb1da95d5435892427a67e; full non-agentic research vertical slice VALIDATED and GitHub Actions 36807507382 PASS
+- manual_corpus_expansion=deferred intentionally; temporary acquisition branches are not the active path
+- resume=branch from cfd5e354239cd1438bbb1da95d5435892427a67e and implement provider-neutral durable orchestration: research runs, job queue, worker leases/retry/recovery, executor tiers, stage fan-out/fan-in, human gate; prove autonomous PostgreSQL cycle before production model adapter
 
 ## Next safe action
 
-Launch prepared exact arXiv acquisition by non-force advancing research-engine/acquire-rf-counterevidence to 1009e230a22878ad9ab54ff2a37ae1c8353b7043. Then inspect/download the resulting GitHub Actions artifact, verify exact bytes, parse the two PDFs, ingest them into the corpus/evidence model, create a new knowledge checkpoint, and re-run persisted novelty challenges.
+Build agentic orchestration in adamtrott78/research-engine from main@cfd5e354239cd1438bbb1da95d5435892427a67e. First implement the provider-neutral PostgreSQL job/run state machine, transactional leases/retry/recovery, executor-tier routing, stage fan-out/fan-in, and explicit human-review gate. Validate one fully autonomous scripted cycle in GitHub Actions/PostgreSQL before adding a production Codex/model executor adapter.
 
 ## Remaining work
 
-- Acquire exact arXiv source artifacts for the 2026 dynamic/open-set RF paper and the 2026 RF OOD-detector paper that challenged the pilot gaps.
-- Extract and ingest those papers as first-class corpus/evidence members, then create a new knowledge checkpoint and re-run novelty challenges against corpus-backed evidence instead of abstract-only external metadata.
-- Promote Broggi 2025 to exact-PDF evidence from the user's local PADataset copy only when that non-blocking local-byte boundary becomes the next necessary step.
-- Continue expanding RF-specific open-set/OOD literature until novelty challenge results are stable enough for human research-direction review.
-- After exact-source scaling passes, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
+- Implement PostgreSQL-backed research runs and durable job queues with transactional worker leasing, heartbeat/lease expiry recovery, bounded retry, priorities, dependency/barrier semantics, and idempotent downstream planning.
+- Implement executor-tier routing for DETERMINISTIC, CHEAP, STANDARD, STRONG, and HUMAN work without hard-coding a single model/provider into orchestration state.
+- Implement the autonomous research-cycle stage graph: discovery -> screening -> acquisition fan-out -> extraction -> verification -> knowledge checkpoint -> synthesis -> gap generation -> novelty search fan-out -> novelty arbitration -> human review gate.
+- Prove one complete autonomous dry-run cycle through the real PostgreSQL runtime, including worker crash/lease recovery, retry, fan-out/fan-in, heterogeneous executor routing, and a durable WAITING_HUMAN terminal state.
+- Add a production executor adapter suitable for headless Lambda/Codex workers after the provider-neutral orchestration core passes.
+- Then use the autonomous cycle to resume the deferred RF corpus expansion instead of manually shepherding individual papers.
 
 ## Blockers / gates
 
