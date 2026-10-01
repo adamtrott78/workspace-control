@@ -37,32 +37,24 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ee702eb61740456306c9768dc6aca2c854571617
+- Remote checkpoint: 64295c4f0d102fb02552f25881f01970d39cb304
 - Remote verified: true
-
-## Recovery restore point
-
-- Identity: ee702eb61740456306c9768dc6aca2c854571617
-- stage=model_backed_acceptance_v1
-- last_validated_boundary=research-engine/main@ee702eb61740456306c9768dc6aca2c854571617; production_daemon_v1 fully validated; canonical main CI 36820703111 PASS
-- agentic_research_v1=complete and CI-validated through durable scheduler, deterministic/semantic workers, source hydration/materialization, live search provenance, knowledge checkpoints, novelty arbitration, crash recovery, budgets, and human gate
-- boundary=requires user's Lambda host and host-only OPENAI_API_KEY; connected ChatGPT tooling has no authorized SSH/runtime credential surface
-- resume=deploy exact main checkpoint on Lambda, initialize/start PostgreSQL+daemon, run one real model-backed autonomous research topic with conservative budget, verify durable usage/evidence/checkpoint/novelty state reaches WAITING_HUMAN, then mark model_backed_acceptance_v1 VALIDATED
 
 ## Next safe action
 
-Genuine runtime/human-secret boundary. On the user's Lambda, deploy exact research-engine/main@ee702eb61740456306c9768dc6aca2c854571617, store OPENAI_API_KEY only in ~/adamArchives/Adam/.research-engine/research-engine.env, start the Docker Compose daemon stack, and run one conservative-budget autonomous research topic to WAITING_HUMAN. Return only non-secret command output/health/report data. Do not paste the API key into chat.
+Genuine runtime/human-auth boundary. On the user's Lambda, update the existing research-engine checkout to exact main@64295c4f0d102fb02552f25881f01970d39cb304, verify or install a current Codex CLI, and authenticate Codex with the user's ChatGPT account. Do not configure OPENAI_API_KEY and do not use paid API fallback. Return only non-secret version/auth/status output. Then initialize persistent PostgreSQL plus the native user daemon and run one conservative-budget autonomous research topic to WAITING_HUMAN.
 
 ## Remaining work
 
-- Deploy research-engine/main@ee702eb61740456306c9768dc6aca2c854571617 on the Lambda with persistent PostgreSQL/artifact storage and host-only OpenAI credentials.
-- Run one real model-backed autonomous research cycle with a conservative per-run budget and verify it reaches durable WAITING_HUMAN with source-grounded evidence, model usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload.
-- After model-backed acceptance passes, use the daemon—not manual chat orchestration—to resume deferred RF corpus expansion and begin 24/7 research operation.
-- Tune worker concurrency/model-tier budgets from observed cost/latency/quality after the first real run rather than before.
+- Update the Lambda research-engine checkout to exact main@64295c4f0d102fb02552f25881f01970d39cb304; verify/install a current Codex CLI and authenticate it with the user's ChatGPT account. Do not configure OPENAI_API_KEY.
+- Run PostgreSQL persistently and the research daemon natively as the signed-in user so Codex can reuse host ChatGPT authentication without copying credentials into a container.
+- Run one real Codex-backed autonomous research cycle with a conservative per-run budget and verify it reaches durable WAITING_HUMAN with source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload.
+- After acceptance passes, use the daemon—not manual chat orchestration—to resume RF corpus expansion and operate continuously while pacing work to stay within the included Codex allowance.
+- Tune worker concurrency/model-tier budgets from observed Codex allowance consumption, latency, and quality after the first real run.
 
 ## Blockers / gates
 
-- The remaining acceptance test requires the user's Lambda runtime plus a valid OPENAI_API_KEY stored only on that host. Current connected tooling cannot SSH to the Lambda or obtain/use the user's private API credential.
+- The remaining acceptance test requires the user's Lambda runtime with Codex CLI authenticated to the user's ChatGPT plan. Current connected tooling cannot operate that host or complete the interactive ChatGPT login flow.
 
 ## Fresh-chat initialization
 
