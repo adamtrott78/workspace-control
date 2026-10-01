@@ -31,11 +31,11 @@ Build a low-overhead, provenance-preserving operations layer for the autonomous 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: bd62520387daa03d9c1b0cc4ab2365ccda85631c
+- Remote checkpoint: f2349313e069f4f121eb07713169a2edc77bf54d
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: e10fa79b939571fc2db8e1d6ac5afade2ceea7b2
+- Local HEAD: bd62520387daa03d9c1b0cc4ab2365ccda85631c
 - Local clean: true
 
 ## Current stage
@@ -44,23 +44,23 @@ codex_allowance_telemetry_and_forecasting
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead. On the Lambda, verify the research-engine checkout is clean on main@e10fa79b939571fc2db8e1d6ac5afade2ceea7b2, fetch and fast-forward only to canonical main@bd62520387daa03d9c1b0cc4ab2365ccda85631c, refresh the existing editable venv dependencies so fontTools is installed, then collect one pre-call usage reading through allowance-observe-paste, replay only source VERIFY job job:7b6ca4026f026bedaec4859e with RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=1, collect one post-call usage reading through allowance-observe-paste, and finish with the daemon inactive/dead. Do not START sustained research.
+Keep research-engine-daemon.service inactive/dead. On the Lambda, verify the clean checkout is main@bd62520387daa03d9c1b0cc4ab2365ccda85631c, fetch and fast-forward only to canonical research-engine main@f2349313e069f4f121eb07713169a2edc77bf54d, then run bash deploy/run-verify-ab-batch.sh job:7b6ca4026f026bedaec4859e 3. Provide one complete pasted 5-hour+weekly usage block before radius 0, one between the radius-0 and radius-1 phases, and one after radius 1. Preserve the complete output. The batch is six STANDARD/Terra calls total, non-materializing, and must finish with the daemon inactive/dead. Do not START sustained research.
 
 ## Remaining work
 
-- Keep research-engine-daemon.service inactive/dead. Fast-forward the clean Lambda research-engine main checkout from e10fa79b939571fc2db8e1d6ac5afade2ceea7b2 to canonical bd62520387daa03d9c1b0cc4ab2365ccda85631c and refresh editable dependencies so fontTools is installed.
-- Collect one fresh single-paste 5-hour/weekly allowance reading, rerun only source VERIFY job job:7b6ca4026f026bedaec4859e at RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=1, then collect one fresh single-paste post reading. Keep the replay non-materializing and the daemon stopped.
-- Compare the highest-cost radius-1 replay with its historical source: input/cached/output/reasoning tokens, context pages/chars, verified_equal, and accepted_evidence_ids_equal. If both agreement gates pass, use that result with the passing low/median radius-0 samples to decide the smallest safe global VERIFY radius. If radius 1 also disagrees, stop and inspect the source-specific verification context before any further allowance spend.
-- Do not implement a global page-selective EXTRACT policy from the current audit; evidence spans 43/65 pages. Further EXTRACT work, if pursued, should begin with additional deterministic section-structure analysis rather than a semantic replay.
-- Do not resume sustained corpus expansion yet.
+- Keep research-engine-daemon.service inactive/dead. Fast-forward the clean Lambda main checkout from bd62520387daa03d9c1b0cc4ab2365ccda85631c to canonical f2349313e069f4f121eb07713169a2edc77bf54d.
+- Run bash deploy/run-verify-ab-batch.sh job:7b6ca4026f026bedaec4859e 3. Paste one fresh complete usage-limit block before the radius-0 phase, one after radius 0 / before radius 1, and one after radius 1. This performs six STANDARD/Terra calls total and must end daemon inactive/dead.
+- Compare radius-0 vs radius-1 agreement rates across the three repeated calls per radius and exact replay input/cached/output/reasoning distributions. Use the phase-level censored UI deltas only for average plan-allowance mapping, not exact per-call percentages.
+- If radius 0 repeatedly preserves accepted IDs, treat the original mismatch as likely stochastic and retain radius 0 for the next bounded production calibration. If radius 0 repeatedly disagrees while radius 1 is stable, prefer a safer context policy or investigate a narrower targeted-context alternative before sustained production.
+- Do not implement global page-selective EXTRACT from current evidence and do not resume sustained corpus expansion yet.
 - After tuning is validated, continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge.
 
 ## Blockers / gates
 
-- Radius-0 VERIFY is not globally validated: the lowest and median samples preserve accepted evidence IDs, but the highest-cost sample job:7b6ca4026f026bedaec4859e does not. Per the calibration gate, only that source may be rerun at radius 1 before changing global policy.
-- The Lambda is still at research-engine main@e10fa79b939571fc2db8e1d6ac5afade2ceea7b2 and needs a stopped-daemon fast-forward to canonical bd62520387daa03d9c1b0cc4ab2365ccda85631c plus dependency refresh before the radius-1 retry.
-- EXTRACT evidence spans 66.15% of PDF pages across the current 9-paper corpus; a global page-selective EXTRACT policy is not justified by the current deterministic audit.
-- Sustained START remains gated on the targeted highest-cost radius-1 VERIFY result and the resulting global VERIFY policy decision.
+- A single radius-0 high-cost replay failed accepted-evidence-ID equality while a single radius-1 replay passed. One sample at each radius cannot distinguish a stable context-window effect from stochastic verifier variation.
+- The whole-percent plan UI is too coarse for precise per-call allowance attribution. Repeated phase-level calls are required to narrow batch-average plan-consumption bounds.
+- EXTRACT evidence spans 43/65 pages across the preserved corpus, so a global page-selective EXTRACT policy remains unjustified.
+- Sustained START remains gated on the repeated VERIFY A/B stability/allowance experiment and the resulting smallest-safe context policy.
 
 ## Fresh-chat initialization
 
