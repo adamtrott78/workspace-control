@@ -37,23 +37,23 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ec8baf481679aa86ee45b8b1b7dd47ed44846d6b
+- Remote checkpoint: 219ef546381a471e5daac91ba524d9b685b8c26b
 - Remote verified: true
 
 ## Next safe action
 
-Observe acceptance-codex-rf-v1 persisted state only. Expected bounded completion is two CHEAP novelty searches followed by two STRONG novelty arbitrations and deterministic transition to WAITING_HUMAN. If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload before validating model_backed_acceptance_v1. If PAUSED_BUDGET or FAILED, inspect the exact persisted reason before any mutation.
+On the user's Lambda, stop research-engine-daemon.service if it is still restarting, require a clean main checkout at ec8baf481679aa86ee45b8b1b7dd47ed44846d6b, fetch and fast-forward exactly to 219ef546381a471e5daac91ba524d9b685b8c26b, confirm acceptance-codex-rf-v1 and its final bounded budget remain persisted, start the user daemon, and verify it remains active without idempotency restart-loop errors. Then observe the same run to WAITING_HUMAN or another durable gate.
 
 ## Remaining work
 
-- Observe acceptance-codex-rf-v1 through the final bounded novelty graph to WAITING_HUMAN or another gated/terminal state.
-- At WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload and validate model_backed_acceptance_v1.
-- Implement/validate plan-limit-aware pacing/backoff for continuous operation under the included weekly Codex allowance.
-- Then resume RF corpus expansion and tune concurrency/model tiers against observed allowance consumption and research quality.
+- Deploy research-engine main@219ef546381a471e5daac91ba524d9b685b8c26b to the Lambda and verify stable daemon startup with the same persisted acceptance run.
+- Observe the remaining two bounded novelty searches and two novelty arbitrations to WAITING_HUMAN.
+- At WAITING_HUMAN, verify evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload and validate model_backed_acceptance_v1.
+- Implement/validate plan-limit-aware pacing/backoff for continuous operation under included weekly Codex allowance, then resume RF corpus expansion.
 
 ## Blockers / gates
 
-- acceptance-codex-rf-v1 is RUNNING on its final bounded graph; model-backed acceptance awaits its next durable gated or terminal state.
+- The migration-safe reconciliation fix is validated on canonical main but must be deployed to the Lambda before the final bounded acceptance run can continue.
 
 ## Fresh-chat initialization
 
