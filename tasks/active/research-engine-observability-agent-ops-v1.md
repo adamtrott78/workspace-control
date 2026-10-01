@@ -33,6 +33,10 @@ Build a low-overhead, provenance-preserving operations layer for the autonomous 
 - Remote branch: main
 - Remote checkpoint: 6a423e0fd38283687cae2eb060405a2a82643450
 - Remote verified: true
+- Local path: /home/atrott/adamArchives/Adam/research-engine
+- Local branch: main
+- Local HEAD: 6a423e0fd38283687cae2eb060405a2a82643450
+- Local clean: true
 
 ## Current stage
 
