@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "codex_allowance_telemetry_and_forecasting",
+  "current_stage": "chat_visible_ops_mirror",
   "acceptance_criteria": [
     "A terminal HUD refreshes live operational state without mutating research state and shows daemon health, active run/phase, current agents/jobs, queue depth/age, source funnel, evidence/gap funnel, throughput, failures/backoffs, and Codex allowance telemetry.",
     "Every logical agent role and ephemeral worker instance is durably identifiable, including code checkpoint, host/process generation, supported tier/model, current job, heartbeat, cumulative jobs, elapsed time, failures/retries/backoffs, and model-usage attribution.",
@@ -75,7 +75,7 @@
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "bd62520387daa03d9c1b0cc4ab2365ccda85631c",
+        "head_sha": "f2349313e069f4f121eb07713169a2edc77bf54d",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -155,7 +155,7 @@
     },
     {
       "id": "codex_allowance_telemetry_and_forecasting",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "github+runtime",
@@ -169,7 +169,10 @@
         "5-hour/weekly forecast model",
         "research_calibration_events",
         "non-materializing calibrate-verify",
-        "deploy/run-verify-calibration.sh"
+        "deploy/run-verify-calibration.sh",
+        "deploy/run-verify-ab-batch.sh",
+        "validated VERIFY page-radius decision: retain radius 0",
+        "deterministic EXTRACT provenance audit"
       ],
       "validation": [
         "Initial live FIVE_HOUR observation: 14% used / 86% left.",
@@ -185,13 +188,18 @@
         "research-engine PR #29 merged as bd62520387daa03d9c1b0cc4ab2365ccda85631c. PR CI 36932158850 PASS and canonical-main CI 36932323828 PASS. The CLI now parses a single pasted 5-hour+weekly usage-limit block and the calibration runner uses one paste per reading. fonttools>=4,<5 is now a project dependency for CFF Type1 PDF font parsing.",
         "Targeted highest-cost VERIFY radius-1 replay completed non-materializing on Lambda main@bd62520387daa03d9c1b0cc4ab2365ccda85631c with daemon inactive/dead. Source job job:7b6ca4026f026bedaec4859e expanded to all 12 pages / 60831 context chars; historical input/cached 40439/12032; replay 40907/0; total-input change -1.16% savings (i.e. +1.16% input), uncached input +44.0%; verified_equal=true and accepted_evidence_ids_equal=true.",
         "Radius-1 allowance UI observation: pre 84% left 5-hour / 95% weekly, post 83% left 5-hour / 95% weekly. This remains censored whole-percent evidence and is not an exact one-percentage-point call cost.",
-        "research-engine PR #30 merged as f2349313e069f4f121eb07713169a2edc77bf54d. PR CI run 36933522954 PASS; canonical-main CI run 36933686181 PASS. New deploy/run-verify-ab-batch.sh performs repeated non-materializing radius-0 and radius-1 replays of one explicit source, defaults to 3 calls per radius, caps at 12, collects one whole usage-limit paste before radius 0, between phases, and after radius 1, and summarizes agreement rates plus exact token/wall-time statistics."
+        "research-engine PR #30 merged as f2349313e069f4f121eb07713169a2edc77bf54d. PR CI run 36933522954 PASS; canonical-main CI run 36933686181 PASS. New deploy/run-verify-ab-batch.sh performs repeated non-materializing radius-0 and radius-1 replays of one explicit source, defaults to 3 calls per radius, caps at 12, collects one whole usage-limit paste before radius 0, between phases, and after radius 1, and summarizes agreement rates plus exact token/wall-time statistics.",
+        "Repeated highest-cost VERIFY A/B batch on Lambda main@f2349313e069f4f121eb07713169a2edc77bf54d: radius 0 completed 3/3 verified_equal=true and 3/3 accepted_evidence_ids_equal=true with 7 cited pages / 35485 context chars and replay input mean 32639 (97917 total); radius 1 completed 3/3 on both agreement gates with all 12 pages / 60831 chars and replay input mean 40517 (121551 total).",
+        "Radius-0 mean replay input 32639 is 19.29% below the historical 40439 input tokens for the highest-cost source; radius-1 mean 40517 is 0.19% above historical. The earlier single radius-0 accepted-ID mismatch was not reproduced in three consecutive radius-0 replays and is treated as stochastic rather than a stable missing-context defect.",
+        "Quantized plan UI across repeated phases: 5-hour left 83% -> 82% across three radius-0 calls, then 82% -> 80% across three radius-1 calls; weekly remained 95%. These are censored bucket observations, not exact per-call percentages. Directionally, the higher displayed radius-1 burn is consistent with its larger total input.",
+        "Decision: retain production VERIFY page radius 0 for the next bounded production calibration. Production worker construction already defaults RESEARCH_ENGINE_VERIFY_PAGE_RADIUS to 0. Do not spend additional semantic allowance on this tuning loop.",
+        "EXTRACT deterministic audit remains: 9 papers, 65 PDF pages, 71 evidence objects, 43 evidence-bearing pages (66.15%), 322102 extraction-context chars. A global page-selective EXTRACT policy is not justified by the current corpus evidence distribution."
       ],
       "resume_condition": null
     },
     {
       "id": "chat_visible_ops_mirror",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "research-engine-observability",
       "selected_executor": "chatgpt",
       "selected_surface": "github+runtime",
@@ -274,16 +282,13 @@
       "identity": "f2349313e069f4f121eb07713169a2edc77bf54d",
       "required_for_resume": true,
       "evidence": [
-        "stage=codex_allowance_telemetry_and_forecasting",
-        "research-engine remote main@f2349313e069f4f121eb07713169a2edc77bf54d; PR #30 CI 36933522954 PASS; canonical-main CI 36933686181 PASS",
-        "Lambda/local research-engine main@bd62520387daa03d9c1b0cc4ab2365ccda85631c clean; fontTools 4.66.1 installed; daemon inactive/dead PID 0",
-        "median radius0=job:0a37daf44813a7c4b252f23b; 27115->23321 input (-13.99%); verified_equal=true; accepted_ids_equal=true",
-        "lowest radius0=job:91d3fcbf9d2b1f69481ffdef; 23442->20916 input (-10.78%); verified_equal=true; accepted_ids_equal=true",
-        "highest radius0=job:7b6ca4026f026bedaec4859e; 40439->32509 input (-19.61% total); verified_equal=true; accepted_ids_equal=false",
-        "highest radius1 same source=12 pages/60831 chars; 40439->40907 input (+1.16%); replay cached=0 vs historical cached=12032; verified_equal=true; accepted_ids_equal=true",
-        "allowance UI around radius1=84->83 left 5h; weekly 95->95; whole-percent readings are censored and exact call cost is unidentified",
-        "repeated A/B harness canonical: 3 radius0 + 3 radius1 by default, three single-paste usage observations, exact per-call token telemetry and agreement-rate summary, max 12 repeats/radius",
-        "next=while stopped, fast-forward Lambda to f2349313e069f4f121eb07713169a2edc77bf54d and run repeated A/B harness on job:7b6ca4026f026bedaec4859e with 3 repeats/radius; do not START"
+        "stage=chat_visible_ops_mirror",
+        "research-engine remote/main and Lambda/local both at f2349313e069f4f121eb07713169a2edc77bf54d clean; daemon inactive/dead PID 0",
+        "VERIFY radius0 retained: highest-cost repeated 3/3 provenance agreement, mean input 32639 vs historical 40439 (-19.29%); low and median representative radius0 samples also passed",
+        "radius1 repeated 3/3 provenance agreement but mean input 40517, effectively no saving vs historical and 24.25% more total replay input than radius0 phase",
+        "quantized allowance phases=83->82 left 5h for three radius0 calls; 82->80 for three radius1 calls; weekly 95 throughout; exact per-call plan cost unknown",
+        "EXTRACT audit=9 papers / 65 pages / 71 evidence / 43 evidence-bearing pages / 322102 extraction chars; no global page-selective policy",
+        "next=GitHub-side Chat-visible ops mirror implementation/CI while daemon remains stopped; then Lambda publication-auth validation, private MCP surface, Slack/advisory bridge; do not START"
       ]
     }
   ],
@@ -484,23 +489,34 @@
         "The harness defaults to three radius-0 then three radius-1 non-materializing replays for one explicit source, with daemon-stop and no-API-key guards.",
         "It collects three whole usage-limit pastes total and summarizes exact token statistics plus per-radius verified/evidence-ID agreement counts."
       ]
+    },
+    {
+      "check": "Repeated highest-cost VERIFY radius A/B and context-policy decision",
+      "result": "PASS",
+      "evidence": [
+        "Lambda fast-forwarded clean research-engine main to f2349313e069f4f121eb07713169a2edc77bf54d and completed deploy/run-verify-ab-batch.sh with daemon inactive/dead PID 0.",
+        "Radius 0: 3/3 verified_equal and 3/3 accepted_evidence_ids_equal; context 7 cited pages / 35485 chars; replay input 32899, 32509, 32509; mean 32639; total 97917.",
+        "Radius 1: 3/3 verified_equal and 3/3 accepted_evidence_ids_equal; context all 12 pages / 60831 chars; replay input 40517 for all three; mean 40517; total 121551.",
+        "Against historical 40439 input, radius-0 mean saves 19.29% while radius-1 mean is 0.19% higher. Radius 0 is retained for the next bounded production calibration.",
+        "5-hour UI moved 83->82 left across the three radius-0 calls and 82->80 across the three radius-1 calls; weekly remained 95. Whole-percent readings remain censored and are not treated as exact call costs.",
+        "Runner finished VERIFY_AB_BATCH=PASS and daemon inactive/dead PID 0."
+      ]
     }
   ],
   "blockers": [
-    "A single radius-0 high-cost replay failed accepted-evidence-ID equality while a single radius-1 replay passed. One sample at each radius cannot distinguish a stable context-window effect from stochastic verifier variation.",
-    "The whole-percent plan UI is too coarse for precise per-call allowance attribution. Repeated phase-level calls are required to narrow batch-average plan-consumption bounds.",
-    "EXTRACT evidence spans 43/65 pages across the preserved corpus, so a global page-selective EXTRACT policy remains unjustified.",
-    "Sustained START remains gated on the repeated VERIFY A/B stability/allowance experiment and the resulting smallest-safe context policy."
+    "Sustained START remains gated. The tuning decision is complete, but the Chat-visible ops mirror and advisory reasoning bridge still need implementation/validation before live runtime validation.",
+    "The whole-percent plan UI supports only censored batch-level allowance calibration; exact token-to-plan conversion remains intentionally unidentified.",
+    "EXTRACT evidence spans 43/65 pages across the preserved corpus, so global page-selective EXTRACT remains unjustified."
   ],
   "remaining_work": [
-    "Keep research-engine-daemon.service inactive/dead. Fast-forward the clean Lambda main checkout from bd62520387daa03d9c1b0cc4ab2365ccda85631c to canonical f2349313e069f4f121eb07713169a2edc77bf54d.",
-    "Run bash deploy/run-verify-ab-batch.sh job:7b6ca4026f026bedaec4859e 3. Paste one fresh complete usage-limit block before the radius-0 phase, one after radius 0 / before radius 1, and one after radius 1. This performs six STANDARD/Terra calls total and must end daemon inactive/dead.",
-    "Compare radius-0 vs radius-1 agreement rates across the three repeated calls per radius and exact replay input/cached/output/reasoning distributions. Use the phase-level censored UI deltas only for average plan-allowance mapping, not exact per-call percentages.",
-    "If radius 0 repeatedly preserves accepted IDs, treat the original mismatch as likely stochastic and retain radius 0 for the next bounded production calibration. If radius 0 repeatedly disagrees while radius 1 is stable, prefer a safer context policy or investigate a narrower targeted-context alternative before sustained production.",
-    "Do not implement global page-selective EXTRACT from current evidence and do not resume sustained corpus expansion yet.",
-    "After tuning is validated, continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge."
+    "Implement the Chat-visible ops mirror as a derived, bounded operational surface. Raw high-frequency truth remains PostgreSQL-authoritative; do not use workspace-control main or canonical research-engine commits as a high-frequency telemetry sink.",
+    "Prefer one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups. The mirror must expose daemon/run/phase, agents/jobs, queue/evidence/gap funnels, throughput, failures/backoffs, usage by tier/model/job type, and censored allowance status without prompts/source text/secrets.",
+    "Validate the Lambda-side publication mechanism and credentials separately; do not assume GitHub CLI/token availability. Publisher failure must not stop scientific processing.",
+    "Evaluate/implement the private research-engine MCP/plugin direct-tool surface for reading bounded ops state and submitting advisory responses, validating actual plan/workspace permissions rather than assuming writes.",
+    "Then implement/evaluate the Chat reasoning bridge with GitHub durable audit and Slack as the first candidate wake-up transport; advisory responses must not directly mutate scientific state.",
+    "Keep sustained corpus expansion paused until chat-visible mirror/bridge work reaches live-runtime validation. Retain VERIFY radius 0 for the next bounded production calibration."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead. On the Lambda, verify the clean checkout is main@bd62520387daa03d9c1b0cc4ab2365ccda85631c, fetch and fast-forward only to canonical research-engine main@f2349313e069f4f121eb07713169a2edc77bf54d, then run bash deploy/run-verify-ab-batch.sh job:7b6ca4026f026bedaec4859e 3. Provide one complete pasted 5-hour+weekly usage block before radius 0, one between the radius-0 and radius-1 phases, and one after radius 1. Preserve the complete output. The batch is six STANDARD/Terra calls total, non-materializing, and must finish with the daemon inactive/dead. Do not START sustained research.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. With research-engine canonical and Lambda both at main@f2349313e069f4f121eb07713169a2edc77bf54d, implement and CI-validate the Chat-visible ops mirror GitHub-side first: a bounded derived snapshot/Markdown publisher suitable for one machine-maintained GitHub issue plus low-frequency durable rollups, with no prompts/source text/secrets and no scientific-state mutation. Do not assume Lambda GitHub credentials; after repository-side CI passes, validate the publication mechanism on Lambda separately. Continue afterward toward the private MCP direct-tool surface and Slack wake-up/advisory bridge.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Preferred UX: a terminal HUD launched from Bash/CLI, backed by read-only PostgreSQL queries rather than Bash scraping. Proposed Chat-visible mirror: one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups; raw high-frequency telemetry remains PostgreSQL-authoritative. Proposed Chat bridge: agents create bounded structured reasoning requests that are mirrored to GitHub issues; ChatGPT can read/update them when invoked. This is not equivalent to a direct autonomous ChatGPT conversation API and must not be described as such until separately validated. Fresh-chat invariant: every initialization/handoff prompt must include https://github.com/adamtrott78/workspace-control explicitly."
