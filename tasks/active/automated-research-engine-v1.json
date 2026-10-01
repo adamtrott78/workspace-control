@@ -62,7 +62,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "588fd692efffaa4392f1472919f2fbca94c9b8f5",
+        "checkpoint_sha": "f5f007960cb2a67d880874135e904aa209559238",
         "verified": true
       },
       "local": null,
@@ -578,7 +578,9 @@
         "git:research-engine@80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2",
         "runtime:github-actions:PR7:36809660246",
         "git:research-engine@588fd692efffaa4392f1472919f2fbca94c9b8f5",
-        "runtime:github-actions:PR8:36810168483"
+        "runtime:github-actions:PR8:36810168483",
+        "git:research-engine@f5f007960cb2a67d880874135e904aa209559238",
+        "runtime:github-actions:PR9:36810702633"
       ],
       "validation": [
         {
@@ -602,6 +604,16 @@
             "Refusals are non-retryable; incomplete/API failures remain retryable; response/model/usage metadata is preserved in job results.",
             "DETERMINISTIC and HUMAN tiers cannot be claimed by the model executor.",
             "Novelty arbitration schema cannot emit SUPPORTED_AS_OPEN."
+          ]
+        },
+        {
+          "check": "mixed deterministic and semantic worker pool",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #9 merged at f5f007960cb2a67d880874135e904aa209559238 after GitHub Actions run 36810702633 PASS.",
+            "Production deterministic acquisition persists Work, WorkVersion, external arXiv identity, and content-addressed SourceArtifact.",
+            "Production deterministic checkpoint worker derives the verified work scope from durable orchestration jobs and creates a real knowledge checkpoint.",
+            "Mixed autonomous cycle with production deterministic workers and scripted semantic workers reaches WAITING_HUMAN."
           ]
         }
       ],
@@ -817,14 +829,12 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "588fd692efffaa4392f1472919f2fbca94c9b8f5",
+      "identity": "f5f007960cb2a67d880874135e904aa209559238",
       "required_for_resume": true,
       "evidence": [
         "stage=agentic_orchestration_v1",
-        "last_validated_boundary=research-engine/main@588fd692efffaa4392f1472919f2fbca94c9b8f5; PR #8 tiered semantic worker PASS",
-        "in_flight=research-engine PR #9 head deterministic-workers-v1@80940c99d6a95a5ef515b2ea2b8e4f7958ce2f17; rerun after fixing missing test import",
-        "purpose=validate production deterministic ACQUIRE/CHECKPOINT workers plus mixed autonomous cycle to WAITING_HUMAN",
-        "resume=inspect newest PR #9 CI for head 80940c99d6a95a5ef515b2ea2b8e4f7958ce2f17; repair remotely if red, merge if green; then implement authoritative semantic-result materialization/context hydration"
+        "last_validated_boundary=research-engine/main@f5f007960cb2a67d880874135e904aa209559238; PR #9 mixed deterministic/semantic worker cycle PASS",
+        "resume=implement deterministic ResearchContextHydrator and SemanticResultMaterializer: hydrate EXTRACT/VERIFY from exact artifact text and SYNTHESIZE from checkpoint evidence; materialize EXTRACT/VERIFY/SYNTHESIZE/GAP_GENERATE/NOVELTY_ARBITRATE outputs into authoritative research tables with immutable/idempotent semantics"
       ]
     },
     {
@@ -865,6 +875,16 @@
       "evidence": [
         "Tiered Responses semantic worker adapter merged after CI.",
         "Headless semantic-worker CLI is available for Lambda/container use."
+      ]
+    },
+    {
+      "id": "research-engine-mixed-worker-pool",
+      "kind": "git_commit",
+      "identity": "f5f007960cb2a67d880874135e904aa209559238",
+      "required_for_resume": true,
+      "evidence": [
+        "Production deterministic ACQUIRE/CHECKPOINT workers merged.",
+        "Heterogeneous mixed-worker autonomous cycle validated against PostgreSQL."
       ]
     }
   ],
@@ -1449,7 +1469,7 @@
     "Add a production executor adapter suitable for headless Lambda/Codex workers after the provider-neutral orchestration core passes.",
     "Then use the autonomous cycle to resume the deferred RF corpus expansion instead of manually shepherding individual papers."
   ],
-  "next_safe_action": "Inspect research-engine PR #9 CI for deterministic-workers-v1@80940c99d6a95a5ef515b2ea2b8e4f7958ce2f17. Repair remotely if red and merge when green. Then implement authoritative semantic-result materialization and context hydration.",
+  "next_safe_action": "Branch from research-engine/main@f5f007960cb2a67d880874135e904aa209559238. Implement deterministic source/checkpoint context hydration and authoritative semantic-result materialization. Validate that model extraction becomes evidence/source-locator/extraction-run records, verification becomes verification events, synthesis/gaps/novelty arbitration persist against knowledge checkpoints, and replays remain idempotent.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."

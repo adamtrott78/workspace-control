@@ -8,13 +8,11 @@ Authoritative capsule: tasks/active/automated-research-engine-v1.json
 
 ## Recovery restore point
 
-- Identity: 588fd692efffaa4392f1472919f2fbca94c9b8f5
+- Identity: f5f007960cb2a67d880874135e904aa209559238
 - stage=agentic_orchestration_v1
-- last_validated_boundary=research-engine/main@588fd692efffaa4392f1472919f2fbca94c9b8f5; PR #8 tiered semantic worker PASS
-- in_flight=research-engine PR #9 head deterministic-workers-v1@80940c99d6a95a5ef515b2ea2b8e4f7958ce2f17; rerun after fixing missing test import
-- purpose=validate production deterministic ACQUIRE/CHECKPOINT workers plus mixed autonomous cycle to WAITING_HUMAN
-- resume=inspect newest PR #9 CI for head 80940c99d6a95a5ef515b2ea2b8e4f7958ce2f17; repair remotely if red, merge if green; then implement authoritative semantic-result materialization/context hydration
+- last_validated_boundary=research-engine/main@f5f007960cb2a67d880874135e904aa209559238; PR #9 mixed deterministic/semantic worker cycle PASS
+- resume=implement deterministic ResearchContextHydrator and SemanticResultMaterializer: hydrate EXTRACT/VERIFY from exact artifact text and SYNTHESIZE from checkpoint evidence; materialize EXTRACT/VERIFY/SYNTHESIZE/GAP_GENERATE/NOVELTY_ARBITRATE outputs into authoritative research tables with immutable/idempotent semantics
 
 ## Next safe action
 
-Inspect research-engine PR #9 CI for deterministic-workers-v1@80940c99d6a95a5ef515b2ea2b8e4f7958ce2f17. Repair remotely if red and merge when green. Then implement authoritative semantic-result materialization and context hydration.
+Branch from research-engine/main@f5f007960cb2a67d880874135e904aa209559238. Implement deterministic source/checkpoint context hydration and authoritative semantic-result materialization. Validate that model extraction becomes evidence/source-locator/extraction-run records, verification becomes verification events, synthesis/gaps/novelty arbitration persist against knowledge checkpoints, and replays remain idempotent.
