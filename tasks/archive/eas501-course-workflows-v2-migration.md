@@ -3,7 +3,7 @@
 
 Derived human-readable view.
 
-Authoritative capsule: tasks/active/eas501-course-workflows-v2-migration.json
+Authoritative capsule: tasks/archive/eas501-course-workflows-v2-migration.json
 
 If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
 
@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: eas501-course-workflows-v2-migration
 - Title: EAS501 Course Workflows v2 Migration
-- Status: VALIDATING
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -42,11 +42,11 @@ Explicitly migrate EAS501 from its current pinned workspace-control compatibilit
 
 ## Next safe action
 
-Independently reread EAS501-AdamTrott:eas501-tutor-bootstrap@0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d and workspace-control:workflows/course-bootstrap-migration.v1.json@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; confirm the remote-only capsule has verified durable recovery checkpoints, all stages except completion VALIDATED, no blockers, and no remaining project mutation. If HANDOFF_SAFE conditions pass, mark completion VALIDATED, set task COMPLETE with empty blockers/remaining_work, and atomically move synchronized JSON/Markdown from tasks/active to tasks/archive.
+Migration is complete and archived. Future EAS 501 work should start from EAS501-AdamTrott:eas501-tutor-bootstrap@0e5ac0d14bf5a68e7cb0f48f7e9b82b79e58a43d with the exact workspace-control compatibility/workflow checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; create a new durable task capsule for any further course mutation or assessment/study/artifact work.
 
 ## Remaining work
 
-- Independently reverify the EAS501 migrated branch checkpoint and the exact pinned shared migration workflow, evaluate remote-only HANDOFF_SAFE conditions, then archive the COMPLETE task with synchronized Markdown.
+- None.
 
 ## Blockers / gates
 
@@ -57,7 +57,7 @@ Independently reread EAS501-AdamTrott:eas501-tutor-bootstrap@0e5ac0d14bf5a68e7cb
 @GitHub
 
 Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/eas501-course-workflows-v2-migration.json
+Task capsule: tasks/archive/eas501-course-workflows-v2-migration.json
 
 Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
