@@ -30,7 +30,7 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: 0ed5957af97e2de887ef181f26a9966413daf857
+- Remote checkpoint: f37356af62c8ac4dc271e7664595462ada5cbb61
 - Remote verified: true
 
 ### workspace-control
@@ -42,11 +42,11 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Enter HW2 Floating-point Problem 1 in LEARNING mode. Use homework/hw02/CONTEXT.md, classnotes/2026-09-21/SESSION_SYNTHESIS.md, study/TUTORING.md, study/MASTERY.md, and homework/hw02/LEARNING.md. Start with the smallest diagnostic that tests why evaluating the Taylor series for e^-20 can be numerically dangerous; do not dump the completed solution before diagnosing the student's understanding.
+Continue HW2 Floating-point Problem 1(a) in LEARNING mode from MTH602 unit-ingestion-hw2@f37356af62c8ac4dc271e7664595462ada5cbb61. The student has correctly identified `E_N = abs(approx - exact) / abs(exact)`. Ask for the smallest next coding step needed to build the sequence over N, then proceed to the semilog-y plot and minimum-error interpretation. Do not dump the entire finished solution unless the student becomes genuinely blocked.
 
 ## Remaining work
 
-- Begin Floating-point Problem 1 in LEARNING mode: diagnose floating-point representation, machine epsilon/relative rounding error, and roundoff/catastrophic-cancellation understanding before substantive solution work.
+- Continue Floating-point Problem 1(a) in LEARNING mode: construct the N-loop, compute the relative-error sequence, produce the required semilog-y convergence plot, and identify the smallest achieved relative error without skipping the student's meaningful reasoning.
 - Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.
 - Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.
 - Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.
