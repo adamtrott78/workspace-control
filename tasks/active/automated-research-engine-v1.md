@@ -42,18 +42,18 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Next safe action
 
-Resume the same run with a minimal bookkeeping increase that clears the global exhausted predicate and leaves headroom after two remaining STRONG arbitrations: CHEAP=8 (no additional CHEAP work expected), STRONG=5, max_semantic_jobs=16, STANDARD=5, with a bounded input-token ceiling sufficient for two final STRONG calls. Then observe to WAITING_HUMAN.
+Observe acceptance-codex-rf-v1 persisted state only. Expected completion is two STRONG NOVELTY_ARBITRATE jobs followed by deterministic transition to WAITING_HUMAN. If WAITING_HUMAN, perform the final acceptance audit of evidence, usage, checkpoint, novelty decisions, and human-review payload before validating model_backed_acceptance_v1.
 
 ## Remaining work
 
-- Perform the final arbitration-only budget resume for the two queued STRONG NOVELTY_ARBITRATE jobs.
-- Observe acceptance-codex-rf-v1 to WAITING_HUMAN and perform the final evidence/usage/checkpoint/novelty/human-review audit.
-- Fix the global budget-exhaustion semantics so a saturated unused tier does not pause unrelated queued tiers, and validate plan-limit-aware pacing/backoff for continuous included-allowance operation.
+- Observe the two final novelty arbitrations and transition to WAITING_HUMAN or another durable gate.
+- At WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload and validate model_backed_acceptance_v1.
+- Fix global budget-exhaustion semantics and implement/validate plan-limit-aware pacing/backoff for continuous included-allowance operation.
 - Then resume RF corpus expansion and tune concurrency/model tiers against observed allowance consumption and research quality.
 
 ## Blockers / gates
 
-- acceptance-codex-rf-v1 is safely PAUSED_BUDGET with only two STRONG NOVELTY_ARBITRATE jobs remaining; pause reason is exact CHEAP cap exhaustion despite no remaining CHEAP work.
+- acceptance-codex-rf-v1 is RUNNING with only two STRONG novelty arbitrations remaining before human review.
 
 ## Fresh-chat initialization
 

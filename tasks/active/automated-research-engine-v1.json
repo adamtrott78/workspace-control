@@ -988,12 +988,12 @@
       "evidence": [
         "stage=model_backed_acceptance_v1",
         "last_validated_boundary=research-engine/main@219ef546381a471e5daac91ba524d9b685b8c26b deployed and stable on Lambda; migration-safe bounded reconciliation active",
-        "acceptance_run=acceptance-codex-rf-v1 PAUSED_BUDGET after completing all four allowed bounded novelty searches; two NOVELTY_ARBITRATE jobs queued",
-        "search_state=5 completed novelty searches total (4 bounded allowed + 1 pre-fix surplus ignored), 23 surplus cancelled, 0 allowed novelty searches remaining",
-        "usage=input=364436 output=10114 semantic_jobs=13; CHEAP=7 STANDARD=4 STRONG=2; pause reason=MAX_CHEAP_JOBS",
-        "remaining_graph=2 STRONG novelty arbitrations, then deterministic human-review gate",
-        "budget_semantics_issue=global exhausted predicate pauses the run when any tier reaches its cap even when that tier has no remaining queued work; acceptance can continue by clearing the exhausted equality without scheduling more CHEAP work",
-        "cost_boundary=included ChatGPT/Codex plan allowance only; no OPENAI_API_KEY and no paid API fallback"
+        "acceptance_run=acceptance-codex-rf-v1 RUNNING after final arbitration-only resume",
+        "current_budgets=input=520000 output=40000 semantic_jobs=16 tier_caps CHEAP=8 STANDARD=5 STRONG=5",
+        "usage_at_resume=input=364436 output=10114 semantic_jobs=13; CHEAP=7 STANDARD=4 STRONG=2",
+        "remaining_expected_graph=2 STRONG novelty arbitrations, then deterministic human-review gate",
+        "cost_boundary=included ChatGPT/Codex plan allowance only; no OPENAI_API_KEY and no paid API fallback",
+        "resume=observe persisted acceptance-codex-rf-v1 only until WAITING_HUMAN, PAUSED_BUDGET, FAILED, or other terminal/gated state"
       ]
     },
     {
@@ -1823,18 +1823,28 @@
         "Run paused only because CHEAP usage reached the exact cap 7/7; current usage input=364436, output=10114, semantic_jobs=13, STANDARD=4, STRONG=2.",
         "Daemon remained stable active/running with restart count unchanged at 135."
       ]
+    },
+    {
+      "check": "Final arbitration-only resume",
+      "result": "PASS",
+      "evidence": [
+        "acceptance-codex-rf-v1 resumed in place from PAUSED_BUDGET to RUNNING with only two STRONG NOVELTY_ARBITRATE jobs remaining.",
+        "Final arbitration budgets: max_input_tokens=520000, max_output_tokens=40000, max_semantic_jobs=16, CHEAP=8, STANDARD=5, STRONG=5.",
+        "Usage at resume boundary remained input=364436, output=10114, semantic_jobs=13, CHEAP=7, STANDARD=4, STRONG=2.",
+        "Budget status reported exhausted=false with no reasons and the persistent daemon remained active."
+      ]
     }
   ],
   "blockers": [
-    "acceptance-codex-rf-v1 is safely PAUSED_BUDGET with only two STRONG NOVELTY_ARBITRATE jobs remaining; pause reason is exact CHEAP cap exhaustion despite no remaining CHEAP work."
+    "acceptance-codex-rf-v1 is RUNNING with only two STRONG novelty arbitrations remaining before human review."
   ],
   "remaining_work": [
-    "Perform the final arbitration-only budget resume for the two queued STRONG NOVELTY_ARBITRATE jobs.",
-    "Observe acceptance-codex-rf-v1 to WAITING_HUMAN and perform the final evidence/usage/checkpoint/novelty/human-review audit.",
-    "Fix the global budget-exhaustion semantics so a saturated unused tier does not pause unrelated queued tiers, and validate plan-limit-aware pacing/backoff for continuous included-allowance operation.",
+    "Observe the two final novelty arbitrations and transition to WAITING_HUMAN or another durable gate.",
+    "At WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload and validate model_backed_acceptance_v1.",
+    "Fix global budget-exhaustion semantics and implement/validate plan-limit-aware pacing/backoff for continuous included-allowance operation.",
     "Then resume RF corpus expansion and tune concurrency/model tiers against observed allowance consumption and research quality."
   ],
-  "next_safe_action": "Resume the same run with a minimal bookkeeping increase that clears the global exhausted predicate and leaves headroom after two remaining STRONG arbitrations: CHEAP=8 (no additional CHEAP work expected), STRONG=5, max_semantic_jobs=16, STANDARD=5, with a bounded input-token ceiling sufficient for two final STRONG calls. Then observe to WAITING_HUMAN.",
+  "next_safe_action": "Observe acceptance-codex-rf-v1 persisted state only. Expected completion is two STRONG NOVELTY_ARBITRATE jobs followed by deterministic transition to WAITING_HUMAN. If WAITING_HUMAN, perform the final acceptance audit of evidence, usage, checkpoint, novelty decisions, and human-review payload before validating model_backed_acceptance_v1.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general. Production semantic execution is constrained to the user's included ChatGPT/Codex plan allowance; continuous operation must pace or pause rather than fall back to paid API usage."
