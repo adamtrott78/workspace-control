@@ -42,18 +42,18 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Next safe action
 
-Observe acceptance-codex-rf-v1 persisted state only. The daemon is stable on migration-safe reconciliation. Expected remaining bounded progress is completion of the two allowed novelty searches, completion of two novelty arbitrations, then deterministic transition to WAITING_HUMAN. If WAITING_HUMAN, perform the final evidence/usage/checkpoint/novelty/human-review audit.
+Resume the same run with a minimal bookkeeping increase that clears the global exhausted predicate and leaves headroom after two remaining STRONG arbitrations: CHEAP=8 (no additional CHEAP work expected), STRONG=5, max_semantic_jobs=16, STANDARD=5, with a bounded input-token ceiling sufficient for two final STRONG calls. Then observe to WAITING_HUMAN.
 
 ## Remaining work
 
-- Observe the stable final bounded acceptance run to WAITING_HUMAN or another durable gate.
-- At WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload and validate model_backed_acceptance_v1.
-- Implement/validate plan-limit-aware pacing/backoff for continuous operation under the included weekly Codex allowance.
+- Perform the final arbitration-only budget resume for the two queued STRONG NOVELTY_ARBITRATE jobs.
+- Observe acceptance-codex-rf-v1 to WAITING_HUMAN and perform the final evidence/usage/checkpoint/novelty/human-review audit.
+- Fix the global budget-exhaustion semantics so a saturated unused tier does not pause unrelated queued tiers, and validate plan-limit-aware pacing/backoff for continuous included-allowance operation.
 - Then resume RF corpus expansion and tune concurrency/model tiers against observed allowance consumption and research quality.
 
 ## Blockers / gates
 
-- acceptance-codex-rf-v1 is RUNNING stably on the final bounded novelty graph; model-backed acceptance awaits WAITING_HUMAN or another durable gate.
+- acceptance-codex-rf-v1 is safely PAUSED_BUDGET with only two STRONG NOVELTY_ARBITRATE jobs remaining; pause reason is exact CHEAP cap exhaustion despite no remaining CHEAP work.
 
 ## Fresh-chat initialization
 
