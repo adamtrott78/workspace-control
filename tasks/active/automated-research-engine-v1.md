@@ -42,19 +42,18 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Next safe action
 
-On the user's Lambda, install the checked-in research-engine user systemd unit, enable/start it as the signed-in ChatGPT/Codex user, verify service/worker health and user lingering state, and do not submit a research topic yet. Do not configure OPENAI_API_KEY or use the openai-api-development Compose profile. Return only non-secret status/log/report output.
+On the user's Lambda with the persistent daemon healthy, run one tiny direct Codex-plan structured-output smoke test using the production CHEAP model route and no API key. Do not submit an autonomous research topic until the smoke test confirms the configured Codex model, structured-output path, and usage event shape. Return only non-secret output.
 
 ## Remaining work
 
-- Install/enable the user systemd research daemon as the signed-in ChatGPT/Codex user and verify restart/health behavior.
-- Run a tiny direct Codex-plan structured-output smoke test using the configured production model route before submitting autonomous work.
-- Run one real Codex-backed autonomous research cycle with a conservative per-run budget and verify it reaches durable WAITING_HUMAN with source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload.
+- Run a tiny direct Codex-plan structured-output smoke test using the configured production CHEAP model route.
+- Submit one real Codex-backed autonomous RF research cycle with a conservative per-run budget and verify it reaches durable WAITING_HUMAN with source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload.
 - After acceptance passes, resume RF corpus expansion through the daemon and operate continuously while pacing or pausing to stay within the included Codex allowance.
 - Tune worker concurrency/model-tier budgets and allowance-aware pacing from observed Codex consumption, latency, and quality after the first real run.
 
 ## Blockers / gates
 
-- The remaining acceptance test requires enabling the validated user systemd daemon and exercising one real Codex-backed autonomous research cycle on the user's Lambda.
+- The remaining acceptance test requires a first real ChatGPT-plan Codex execution and then one conservative autonomous research cycle to WAITING_HUMAN on the user's Lambda.
 
 ## Fresh-chat initialization
 
