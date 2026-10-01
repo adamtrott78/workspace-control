@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "hud_and_ops_cli",
+  "current_stage": "codex_allowance_telemetry_and_forecasting",
   "acceptance_criteria": [
     "A terminal HUD refreshes live operational state without mutating research state and shows daemon health, active run/phase, current agents/jobs, queue depth/age, source funnel, evidence/gap funnel, throughput, failures/backoffs, and Codex allowance telemetry.",
     "Every logical agent role and ephemeral worker instance is durably identifiable, including code checkpoint, host/process generation, supported tier/model, current job, heartbeat, cumulative jobs, elapsed time, failures/retries/backoffs, and model-usage attribution.",
@@ -68,13 +68,13 @@
       "base_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "051a3b0c9828de411812b0a519a070a2aa87683b",
+        "checkpoint_sha": "774b2cb5d8a99b9edd5238c6ca83383a6be30add",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "263a9dfb2d22b31922647e129ae32f0d6aa1f7e0",
+        "head_sha": "051a3b0c9828de411812b0a519a070a2aa87683b",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -128,7 +128,7 @@
     },
     {
       "id": "hud_and_ops_cli",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "github+runtime",
@@ -138,12 +138,17 @@
       "outputs": [
         "research-engine ops-snapshot",
         "research-engine hud",
-        "research-engine allowance-observe"
+        "allowance-observe",
+        "START/STOP/HUD/STATUS operator shortcuts",
+        "run-scoped evidence lineage",
+        "usage-by-agent/model/stage telemetry"
       ],
       "validation": [
-        "Live paused deployment succeeded and operator shortcuts are installed.",
-        "Initial HUD rendered correctly except for evidence lineage/model-label defects now fixed and CI-validated on canonical main@051a3b0c9828de411812b0a519a070a2aa87683b.",
-        "One final paused Lambda fast-forward and HUD snapshot remains."
+        "Live Lambda HUD rendered with daemon inactive/dead and sustained run preserved.",
+        "Run-scoped sustained batch reports 9 discovered/retained/acquired/extracted/verified and 71 evidence objects.",
+        "Stage telemetry attributes all 28 semantic calls and 959229 input tokens across DISCOVERY, SCREEN, EXTRACT, VERIFY, SYNTHESIZE, GAP_GENERATE, NOVELTY_SEARCH, and NOVELTY_ARBITRATE.",
+        "Historical worker sessions resolve Luna/Terra/Sol labels correctly.",
+        "STOP/START/HUD/STATUS are installed and STOP verified inactive/dead PID 0."
       ],
       "resume_condition": null
     },
@@ -159,13 +164,17 @@
         "user-observation:5h-used≈16%@2026-10-01"
       ],
       "outputs": [
-        "manual allowance observation ledger",
-        "5-hour/weekly burn-rate and ETA forecast with confidence states"
+        "manual percent-left/reset observation ledger",
+        "5-hour/weekly forecast model",
+        "research_calibration_events",
+        "non-materializing calibrate-verify",
+        "deploy/run-verify-calibration.sh"
       ],
       "validation": [
-        "Live FIVE_HOUR observation recorded at 14% used with reset_at 2026-10-01T23:46:06.216817Z.",
-        "Live WEEKLY observation recorded at 4% used with reset_at 2026-10-07T04:36:29.198413Z.",
-        "One observation per window correctly remains CALIBRATING; a second same-window observation around a bounded workload is required for burn/ETA."
+        "Initial live FIVE_HOUR observation: 14% used / 86% left.",
+        "Initial live WEEKLY observation: 4% used / 96% left.",
+        "One observation per window correctly remains CALIBRATING.",
+        "VERIFY page-window optimization and one-call A/B calibration harness are canonical-main CI validated."
       ],
       "resume_condition": null
     },
@@ -251,17 +260,18 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "051a3b0c9828de411812b0a519a070a2aa87683b",
+      "identity": "774b2cb5d8a99b9edd5238c6ca83383a6be30add",
       "required_for_resume": true,
       "evidence": [
-        "stage=hud_and_ops_cli",
-        "workspace-control/main@d7625e78f414c82c1b164c1956784a6c5b4aad09",
-        "research-engine remote main@051a3b0c9828de411812b0a519a070a2aa87683b canonical CI 36923900304 PASS",
-        "Lambda local main@263a9dfb2d22b31922647e129ae32f0d6aa1f7e0; editable source healthy; observability schema deployed",
-        "runtime=daemon inactive/dead PID 0; START/STOP/HUD/STATUS installed",
-        "sustained run=WAITING_HUMAN/HUMAN_REVIEW/PENDING; 9 acquired, 9 extracted, 9 verified; checkpoint knowledge-checkpoint:sha256:41d4d8634a40bd2987ca61ec4dd68bb8fcff60ca01ef83eb5e956a57c34d4b1d",
-        "usage=28 semantic calls, 959229 input, 22030 output; live initial allowance observation 14% 5h used and 4% weekly used",
-        "next runtime action=code-only fast-forward to 051a3b0c... and HUD --once; do not START"
+        "stage=codex_allowance_telemetry_and_forecasting",
+        "workspace-control/main@e97cd1096ddecb3d0cd303c28c765d5a6d5d92e6",
+        "research-engine remote main@774b2cb5d8a99b9edd5238c6ca83383a6be30add canonical CI 36926507259 PASS",
+        "Lambda local main@051a3b0c9828de411812b0a519a070a2aa87683b; daemon inactive/dead; shortcuts installed",
+        "live baseline=9 verified papers; 71 run-scoped evidence; 28 semantic calls; 959229 input; 240300 cached; 22030 output",
+        "stage hotspot=VERIFY 261800 input + EXTRACT 223300 input = ~50.6% total",
+        "optimization=VERIFY cited-page context default radius0 canonical at 6725a910...",
+        "calibration=non-materializing one-call Terra replay canonical at 774b2cb5...",
+        "next runtime action=fast-forward and run deploy/run-verify-calibration.sh; do not START"
       ]
     }
   ],
@@ -349,19 +359,55 @@
         "The same patch falls back to immutable usage events for historical model/provider/reasoning labels and adds permanent usage-by-job-type/stage telemetry.",
         "Exact canonical main CI run 36923900304 passed compile, full PostgreSQL/legacy tests, Compose validation, image build, and cleanup."
       ]
+    },
+    {
+      "check": "Live stage-level tuning baseline",
+      "result": "PASS",
+      "evidence": [
+        "Sustained 9-paper run: 28 semantic calls, 959229 input tokens, 240300 cached input tokens, 22030 output tokens, ~3500 reasoning-output tokens.",
+        "VERIFY: 9 calls, 261800 input, 36100 cached, 2800 output; largest stage at ~27.3% of run input.",
+        "EXTRACT: 9 calls, 223300 input, 34000 cached, 7500 output; ~23.3% of run input.",
+        "EXTRACT+VERIFY together consume ~50.6% of run input and ~53.9k input tokens per verified paper.",
+        "NOVELTY_SEARCH: 4 calls / 156400 input; NOVELTY_ARBITRATE: 2 calls / 137300 input; DISCOVERY: 1 call / 83600 input.",
+        "The live HUD therefore identified repeated STANDARD/Terra source-context processing as the first optimization target."
+      ]
+    },
+    {
+      "check": "VERIFY cited-page context optimization",
+      "result": "PASS",
+      "evidence": [
+        "research-engine main@6725a910ddbbb14ed659ff267fe46d1986ba84bb stops resending full PDF text to VERIFY.",
+        "VERIFY now receives authoritative evidence plus only cited source pages; default RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=0.",
+        "Missing evidence locators or cited pages fail closed rather than broadening context.",
+        "Exact canonical CI run 36925435411 passed full PostgreSQL/legacy/Compose/image validation."
+      ]
+    },
+    {
+      "check": "Non-materializing VERIFY replay calibration harness",
+      "result": "PASS",
+      "evidence": [
+        "research-engine main@774b2cb5d8a99b9edd5238c6ca83383a6be30add adds research_calibration_events, calibrate-verify, HUD CALIBRATION panel, and deploy/run-verify-calibration.sh.",
+        "Calibration selects a representative completed historical VERIFY job, rehydrates it under the current page-window policy, invokes exactly one STANDARD/Terra replay, and bypasses SemanticResultMaterializer.",
+        "PostgreSQL integration proves source job/result, evidence_objects, verification_events, and knowledge_checkpoints remain unchanged while the operational calibration record is persisted.",
+        "Runner requires daemon inactive/dead and never executes systemctl start.",
+        "Exact canonical CI run 36926507259 passed compile, full PostgreSQL/legacy tests, Compose validation, image build, and cleanup."
+      ]
     }
   ],
   "blockers": [
-    "Lambda is one code-only fast-forward behind canonical research-engine main: local 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 versus validated remote 051a3b0c9828de411812b0a519a070a2aa87683b. No schema migration is required for this HUD accuracy patch.",
-    "At least two trustworthy timestamped observations in the same Codex allowance window are required before exhaustion ETA can move beyond CALIBRATING."
+    "Lambda local research-engine main@051a3b0c9828de411812b0a519a070a2aa87683b is behind validated remote main@774b2cb5d8a99b9edd5238c6ca83383a6be30add; daemon remains intentionally stopped.",
+    "A second trustworthy 5-hour/weekly observation interval is still required to estimate allowance burn; the one-call VERIFY replay runner is designed to create that interval safely.",
+    "Sustained START remains gated on calibration outcome: VERIFY result agreement must be reviewed and allowance/token reduction measured."
   ],
   "remaining_work": [
-    "Fast-forward the paused Lambda to research-engine main@051a3b0c9828de411812b0a519a070a2aa87683b and capture HUD --once --no-color; confirm run-scoped evidence and historical Luna/Terra/Sol labels plus the new usage-by-stage panel.",
-    "Analyze stage-level historical usage for the completed 9-paper sustained batch (28 semantic calls, 959229 input tokens, 22030 output tokens) and design a tightly bounded calibration workload.",
-    "Take a second 5-hour/weekly allowance reading immediately around that bounded calibration workload and use the measured allowance delta to tune model/tier/concurrency/context/fanout before any sustained START.",
+    "Fast-forward the stopped Lambda to research-engine main@774b2cb5d8a99b9edd5238c6ca83383a6be30add.",
+    "Run deploy/run-verify-calibration.sh. Record fresh pre/post percent-left/reset readings from the ChatGPT usage UI around the single Terra replay.",
+    "Review historical versus replay VERIFY input/cached/uncached tokens, page count, verified_equal, accepted_evidence_ids_equal, and the new HUD CALIBRATION panel.",
+    "If agreement is preserved, keep page radius 0 and quantify projected sustained-run savings. If agreement differs, set RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=1 and rerun calibration while research remains stopped.",
+    "Use the measured allowance delta and stage telemetry to choose the next optimization target and bounded end-to-end calibration before any sustained START.",
     "After monitoring/tuning is validated, continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge."
   ],
-  "next_safe_action": "On the Lambda while research-engine-daemon.service remains inactive/dead, clean fast-forward research-engine main from 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 to exact validated 051a3b0c9828de411812b0a519a070a2aa87683b. Do not rerun schema migration and do not START. Because the venv is an editable install, immediately run `HUD --once --no-color` and return the PIPELINE, AGENTS, USAGE / EFFICIENCY, USAGE BY STAGE, QUEUE / ALERTS, and allowance sections for tuning review.",
+  "next_safe_action": "On the Lambda, keep research-engine-daemon.service inactive/dead, clean fast-forward research-engine main from 051a3b0c9828de411812b0a519a070a2aa87683b to exact validated 774b2cb5d8a99b9edd5238c6ca83383a6be30add, then execute `bash deploy/run-verify-calibration.sh`. At its pre/post prompts enter the current ChatGPT UI percent LEFT and relative reset values. The runner applies only the additive calibration schema, performs exactly one non-materializing STANDARD/Terra VERIFY replay against the median historical VERIFY job, persists operational calibration telemetry, renders the updated HUD, and must finish with the daemon inactive/dead. Do not START sustained research yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Preferred UX: a terminal HUD launched from Bash/CLI, backed by read-only PostgreSQL queries rather than Bash scraping. Proposed Chat-visible mirror: one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups; raw high-frequency telemetry remains PostgreSQL-authoritative. Proposed Chat bridge: agents create bounded structured reasoning requests that are mirrored to GitHub issues; ChatGPT can read/update them when invoked. This is not equivalent to a direct autonomous ChatGPT conversation API and must not be described as such until separately validated."
