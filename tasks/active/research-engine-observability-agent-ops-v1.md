@@ -31,32 +31,35 @@ Build a low-overhead, provenance-preserving operations layer for the autonomous 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 051a3b0c9828de411812b0a519a070a2aa87683b
+- Remote checkpoint: 774b2cb5d8a99b9edd5238c6ca83383a6be30add
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0
+- Local HEAD: 051a3b0c9828de411812b0a519a070a2aa87683b
 - Local clean: true
 
 ## Current stage
 
-hud_and_ops_cli
+codex_allowance_telemetry_and_forecasting
 
 ## Next safe action
 
-On the Lambda while research-engine-daemon.service remains inactive/dead, clean fast-forward research-engine main from 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 to exact validated 051a3b0c9828de411812b0a519a070a2aa87683b. Do not rerun schema migration and do not START. Because the venv is an editable install, immediately run `HUD --once --no-color` and return the PIPELINE, AGENTS, USAGE / EFFICIENCY, USAGE BY STAGE, QUEUE / ALERTS, and allowance sections for tuning review.
+On the Lambda, keep research-engine-daemon.service inactive/dead, clean fast-forward research-engine main from 051a3b0c9828de411812b0a519a070a2aa87683b to exact validated 774b2cb5d8a99b9edd5238c6ca83383a6be30add, then execute `bash deploy/run-verify-calibration.sh`. At its pre/post prompts enter the current ChatGPT UI percent LEFT and relative reset values. The runner applies only the additive calibration schema, performs exactly one non-materializing STANDARD/Terra VERIFY replay against the median historical VERIFY job, persists operational calibration telemetry, renders the updated HUD, and must finish with the daemon inactive/dead. Do not START sustained research yet.
 
 ## Remaining work
 
-- Fast-forward the paused Lambda to research-engine main@051a3b0c9828de411812b0a519a070a2aa87683b and capture HUD --once --no-color; confirm run-scoped evidence and historical Luna/Terra/Sol labels plus the new usage-by-stage panel.
-- Analyze stage-level historical usage for the completed 9-paper sustained batch (28 semantic calls, 959229 input tokens, 22030 output tokens) and design a tightly bounded calibration workload.
-- Take a second 5-hour/weekly allowance reading immediately around that bounded calibration workload and use the measured allowance delta to tune model/tier/concurrency/context/fanout before any sustained START.
+- Fast-forward the stopped Lambda to research-engine main@774b2cb5d8a99b9edd5238c6ca83383a6be30add.
+- Run deploy/run-verify-calibration.sh. Record fresh pre/post percent-left/reset readings from the ChatGPT usage UI around the single Terra replay.
+- Review historical versus replay VERIFY input/cached/uncached tokens, page count, verified_equal, accepted_evidence_ids_equal, and the new HUD CALIBRATION panel.
+- If agreement is preserved, keep page radius 0 and quantify projected sustained-run savings. If agreement differs, set RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=1 and rerun calibration while research remains stopped.
+- Use the measured allowance delta and stage telemetry to choose the next optimization target and bounded end-to-end calibration before any sustained START.
 - After monitoring/tuning is validated, continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge.
 
 ## Blockers / gates
 
-- Lambda is one code-only fast-forward behind canonical research-engine main: local 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 versus validated remote 051a3b0c9828de411812b0a519a070a2aa87683b. No schema migration is required for this HUD accuracy patch.
-- At least two trustworthy timestamped observations in the same Codex allowance window are required before exhaustion ETA can move beyond CALIBRATING.
+- Lambda local research-engine main@051a3b0c9828de411812b0a519a070a2aa87683b is behind validated remote main@774b2cb5d8a99b9edd5238c6ca83383a6be30add; daemon remains intentionally stopped.
+- A second trustworthy 5-hour/weekly observation interval is still required to estimate allowance burn; the one-call VERIFY replay runner is designed to create that interval safely.
+- Sustained START remains gated on calibration outcome: VERIFY result agreement must be reviewed and allowance/token reduction measured.
 
 ## Fresh-chat initialization
 
