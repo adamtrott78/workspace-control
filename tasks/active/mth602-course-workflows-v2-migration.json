@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "mth602-course-workflows-v2-migration",
   "title": "MTH602 Course Workflows v2 Migration",
-  "status": "BLOCKED_RUNTIME",
+  "status": "CHECKPOINTED",
   "goal": "Explicitly migrate the current MTH602 repository integration to the promoted reusable course-workflow architecture while preserving its proven direct-visual source ingestion, tutoring/mastery state, homework/LaTeX report mechanics, and project-local authority.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -12,7 +12,7 @@
     "content_sha": "da6076a9b4baf328d6a91526f6dff7aa999733b6"
   },
   "parent_execution_owner": "course-workflows-v2-refactor",
-  "current_stage": "regression_validation",
+  "current_stage": "completion",
   "acceptance_criteria": [
     "A fresh executor starts only from the target repository root README at the pinned checkpoint plus this capsule and the exact promoted shared workflow binding.",
     "Project-local course/source/assignment/mastery/artifact authority remains in the target repository; workspace-control contributes reusable mechanics only.",
@@ -159,7 +159,7 @@
     },
     {
       "id": "regression_validation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "mth602-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github+runtime",
@@ -173,7 +173,7 @@
         "Tutoring/mastery-firewall regression PASS.",
         "HW2 pre-solution preservation regression PASS.",
         "Executor/remote-recovery regression PASS.",
-        "LaTeX artifact owner/build/render/visual-QA preservation regression PASS from durable known-good evidence; fresh runtime rebuild/render/visual inspection remains PENDING."
+        "Fresh exact-source HW1 LaTeX build/render/visual-QA runtime regression PASS: repository-identical inputs compiled to an 11-page PDF and every rendered page passed visual inspection."
       ],
       "validation": [
         {
@@ -215,12 +215,13 @@
         },
         {
           "check": "Fresh LaTeX build/render/visual-QA runtime regression",
-          "result": "PENDING",
+          "result": "PASS",
           "evidence": [
-            "The available runtime has latexmk, pdflatex, and pdftoppm installed.",
-            "The runtime contains no MTH602 checkout/artifact and has no network route to github.com, so exact repository inputs cannot be obtained there without a user-supplied/materialized file bridge.",
-            "No fresh compile/render/visual inspection is claimed yet.",
-            "Independent runtime smoke test passed: latexmk compiled a clean one-page LaTeX document, pdftoppm rendered it successfully, and pdfinfo reported one page. The remaining blocker is exact MTH602 report input availability, not missing runtime tooling."
+            "User-supplied main.tex matched the expected repository Git blob 187598caea904fe79535a5f98d7b463c90a27935 and SHA-256 bbad87d1ee4ce17f4941eda6408da338ac4e83830d4be1197cddca0dcc20ab3d.",
+            "User-supplied hw1.csv matched the expected repository Git blob 3f83d2b2ee1351a8159fe6368cad7725e3612341 and recorded SHA-256 aa6768c5c3515d3dd9555955b2769d39264257cd5cc970885ffd1a404569a1af.",
+            "From a clean report directory, latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex completed successfully with no LaTeX/package/overfull/underfull warnings detected and produced an 11-page letter-size PDF (242555 bytes).",
+            "The newly built PDF SHA-256 is c1ea2902163a8d30329873ecab5a179421b94fa6ef9e4c058ce54dacf2e739ad.",
+            "The PDF was rendered at 200 DPI into page-01.png through page-11.png, and every page was visually inspected. No clipping, overlap, missing figures, broken glyphs, or illegible tables/plots were observed; the sparse final page is the source's reproduction-command continuation."
           ]
         },
         {
@@ -233,19 +234,32 @@
           ]
         }
       ],
-      "resume_condition": "Resume when exact HW1 report runtime inputs are available without routing large binaries through the GitHub connector; run a clean compile, render the resulting PDF to page images, visually inspect every page, then finish completion/HANDOFF_SAFE/archive."
+      "resume_condition": null
     },
     {
       "id": "completion",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "mth602-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "regression_validation"
+        "regression_validation",
+        "git:0ed5957af97e2de887ef181f26a9966413daf857"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "All required migration regressions now pass, including the fresh exact-source HW1 LaTeX build/render/visual-QA regression."
+      ],
+      "validation": [
+        {
+          "check": "Acceptance regression package complete",
+          "result": "PASS",
+          "evidence": [
+            "Cold-start, source-ingestion, tutoring/mastery-firewall, HW2 pre-solution preservation, LaTeX artifact, and executor/remote-recovery regressions all pass.",
+            "MTH602 migrated branch remains recorded and verified at 0ed5957af97e2de887ef181f26a9966413daf857.",
+            "The separately suspended mth602-new-unit-ingestion-hw2-prep task has not been resumed or mutated by this migration."
+          ]
+        }
+      ],
       "resume_condition": null
     }
   ],
@@ -311,23 +325,19 @@
       ]
     },
     {
-      "check": "Required regressions except fresh artifact runtime rerun",
-      "result": "PENDING",
+      "check": "Required migration regressions",
+      "result": "PASS",
       "evidence": [
-        "Cold-start, source-ingestion, tutoring/mastery, HW2-preservation, artifact-owner preservation, and executor/remote-recovery regressions pass.",
-        "Fresh LaTeX compile/render/visual inspection is the sole remaining runtime regression."
+        "Cold-start, source-ingestion, tutoring/mastery, HW2-preservation, artifact-owner preservation, fresh exact-source LaTeX build/render/visual-QA, and executor/remote-recovery regressions all pass.",
+        "The runtime blocker is resolved using exact repository-identical small inputs supplied outside the GitHub connector."
       ]
     }
   ],
-  "blockers": [
-    "Fresh LaTeX build/render/visual-QA regression cannot run in the current runtime because no MTH602 checkout/artifact is mounted and the container cannot resolve github.com. Supply/materialize the exact small HW1 report inputs (at minimum homework/hw01/report/main.tex and homework/hw01/input/hw1.csv, or a small HW1 report/input zip) rather than transferring large binaries through the GitHub connector."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Run a clean HW1 LaTeX compile from exact repository inputs in the available runtime.",
-    "Render the newly built PDF to page images and visually inspect every page.",
-    "Record the artifact regression result, establish final HANDOFF_SAFE, archive mth602-course-workflows-v2-migration, and leave mth602-new-unit-ingestion-hw2-prep suspended for coordinator refresh."
+    "Run the final topology-aware HANDOFF_SAFE assessment against this synchronized checkpointed capsule, then archive this migration task while leaving mth602-new-unit-ingestion-hw2-prep suspended for coordinator refresh."
   ],
-  "next_safe_action": "Obtain the exact small HW1 report runtime inputs without using the GitHub connector for large-file transfer (minimum: homework/hw01/report/main.tex and homework/hw01/input/hw1.csv, or a small archive containing them). From those exact inputs, run a clean LaTeX build, verify successful output, render the newly built PDF to page images, and visually inspect every page. If that regression passes, mark regression_validation VALIDATED, complete HANDOFF_SAFE, archive this migration task, and do not resume or mutate the separately suspended HW2 task.",
+  "next_safe_action": "Run the final topology-aware HANDOFF_SAFE assessment for this synchronized checkpointed capsule. If it is HANDOFF_SAFE, mark completion VALIDATED, set the task COMPLETE with no remaining work/blockers, regenerate the derived Markdown immediately, archive the completed capsule/handoff, and leave the separately suspended mth602-new-unit-ingestion-hw2-prep task untouched.",
   "notes": " Baseline deliberately refreshed on 2026-10-01 from main@62b7a03c7139cb3987b72ad66bdc532e8a61b82a to unit-ingestion-hw2@20dc641dcb9b505efe53daa52932521d0927ef3a because content ingestion and HW2 initialization completed before any HW2 solution work began. Migration is intentionally interposed at this clean pre-solution boundary.",
   "last_executor": "chatgpt",
   "last_surface": "github+runtime"
