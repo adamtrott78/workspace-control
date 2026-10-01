@@ -68,13 +68,13 @@
       "base_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "263a9dfb2d22b31922647e129ae32f0d6aa1f7e0",
+        "checkpoint_sha": "051a3b0c9828de411812b0a519a070a2aa87683b",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "28e8a0904831f70e5689fbc8de75fc1fbc071f32",
+        "head_sha": "263a9dfb2d22b31922647e129ae32f0d6aa1f7e0",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -141,8 +141,9 @@
         "research-engine allowance-observe"
       ],
       "validation": [
-        "Pure forecast/render tests and PostgreSQL ops-attribution tests passed in CI.",
-        "Live Lambda deployment and paused-runtime snapshot remain."
+        "Live paused deployment succeeded and operator shortcuts are installed.",
+        "Initial HUD rendered correctly except for evidence lineage/model-label defects now fixed and CI-validated on canonical main@051a3b0c9828de411812b0a519a070a2aa87683b.",
+        "One final paused Lambda fast-forward and HUD snapshot remains."
       ],
       "resume_condition": null
     },
@@ -162,7 +163,9 @@
         "5-hour/weekly burn-rate and ETA forecast with confidence states"
       ],
       "validation": [
-        "Forecast tests passed; live timestamped allowance observations remain to be collected."
+        "Live FIVE_HOUR observation recorded at 14% used with reset_at 2026-10-01T23:46:06.216817Z.",
+        "Live WEEKLY observation recorded at 4% used with reset_at 2026-10-07T04:36:29.198413Z.",
+        "One observation per window correctly remains CALIBRATING; a second same-window observation around a bounded workload is required for burn/ETA."
       ],
       "resume_condition": null
     },
@@ -248,16 +251,17 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "263a9dfb2d22b31922647e129ae32f0d6aa1f7e0",
+      "identity": "051a3b0c9828de411812b0a519a070a2aa87683b",
       "required_for_resume": true,
       "evidence": [
         "stage=hud_and_ops_cli",
-        "workspace-control/main@05d25d95d13a29b5cfa9c1fa03b88fa04a573376",
-        "research-engine remote main@263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 canonical CI 36922371656 PASS",
-        "Lambda local research-engine main@28e8a0904831f70e5689fbc8de75fc1fbc071f32 after user interrupted old-format reset prompt",
-        "runtime_pause=research-engine-daemon.service inactive/dead",
-        "allowance_input=percent LEFT plus relative reset duration matching ChatGPT UI",
-        "next runtime action=fast-forward and rerun deploy/deploy-hud-paused.sh; keep daemon stopped"
+        "workspace-control/main@d7625e78f414c82c1b164c1956784a6c5b4aad09",
+        "research-engine remote main@051a3b0c9828de411812b0a519a070a2aa87683b canonical CI 36923900304 PASS",
+        "Lambda local main@263a9dfb2d22b31922647e129ae32f0d6aa1f7e0; editable source healthy; observability schema deployed",
+        "runtime=daemon inactive/dead PID 0; START/STOP/HUD/STATUS installed",
+        "sustained run=WAITING_HUMAN/HUMAN_REVIEW/PENDING; 9 acquired, 9 extracted, 9 verified; checkpoint knowledge-checkpoint:sha256:41d4d8634a40bd2987ca61ec4dd68bb8fcff60ca01ef83eb5e956a57c34d4b1d",
+        "usage=28 semantic calls, 959229 input, 22030 output; live initial allowance observation 14% 5h used and 4% weekly used",
+        "next runtime action=code-only fast-forward to 051a3b0c... and HUD --once; do not START"
       ]
     }
   ],
@@ -322,20 +326,42 @@
         "allowance-observe now accepts --left-percent and --resets-in using human-readable durations such as '3h 20m' and '5d 8h'.",
         "Paused HUD deploy prompts now match the product UI exactly: LEFT percent and relative reset duration."
       ]
+    },
+    {
+      "check": "Live paused HUD deployment",
+      "result": "PASS",
+      "evidence": [
+        "Lambda deployed research-engine main@263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 with the existing editable venv confirmed healthy.",
+        "Additive observability schema initialization passed and protected sustained-run/scientific state was byte/logically preserved by the deployment audit.",
+        "Historical attribution backfill produced 43 attributed usage rows and 556 attributed worker-session rows.",
+        "START, STOP, HUD, and STATUS were installed under ~/.local/bin.",
+        "Initial live plan observations: FIVE_HOUR 14% used / 86% left, reset derived from 3h10m at 2026-10-01T20:36:06Z; WEEKLY 4% used / 96% left, reset derived from 5d8h at 2026-10-01T20:36:29Z.",
+        "Daemon finished inactive/dead PID 0; semantic processing was not resumed."
+      ]
+    },
+    {
+      "check": "Live HUD lineage and stage attribution correction",
+      "result": "PASS",
+      "evidence": [
+        "Live HUD exposed a display/accounting defect: pipeline evidence showed 0 while the database held 88 evidence objects globally.",
+        "Root cause: evidence_objects preserve semantic_job_id lineage, not attributes.research_run_id; the HUD had queried a nonexistent run attribute.",
+        "research-engine PR #25 merged as 051a3b0c9828de411812b0a519a070a2aa87683b and scopes evidence through the selected run's EXTRACT job IDs.",
+        "The same patch falls back to immutable usage events for historical model/provider/reasoning labels and adds permanent usage-by-job-type/stage telemetry.",
+        "Exact canonical main CI run 36923900304 passed compile, full PostgreSQL/legacy tests, Compose validation, image build, and cleanup."
+      ]
     }
   ],
   "blockers": [
-    "Lambda local research-engine is at 28e8a0904831f70e5689fbc8de75fc1fbc071f32 after the interrupted paused-HUD deploy; daemon remains stopped.",
-    "Lambda must fast-forward to validated main@263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 and rerun deploy/deploy-hud-paused.sh to finish allowance observation, snapshot/HUD validation, and shortcut installation.",
+    "Lambda is one code-only fast-forward behind canonical research-engine main: local 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 versus validated remote 051a3b0c9828de411812b0a519a070a2aa87683b. No schema migration is required for this HUD accuracy patch.",
     "At least two trustworthy timestamped observations in the same Codex allowance window are required before exhaustion ETA can move beyond CALIBRATING."
   ],
   "remaining_work": [
-    "Fast-forward the paused Lambda to 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 and rerun the repository-owned paused HUD deployer.",
-    "Inspect the real one-shot HUD and historical usage attribution while research remains stopped.",
-    "Collect a second allowance reading around a tightly bounded calibration workload and tune model/tier/concurrency budgets before sustained research resumes.",
-    "Then continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge."
+    "Fast-forward the paused Lambda to research-engine main@051a3b0c9828de411812b0a519a070a2aa87683b and capture HUD --once --no-color; confirm run-scoped evidence and historical Luna/Terra/Sol labels plus the new usage-by-stage panel.",
+    "Analyze stage-level historical usage for the completed 9-paper sustained batch (28 semantic calls, 959229 input tokens, 22030 output tokens) and design a tightly bounded calibration workload.",
+    "Take a second 5-hour/weekly allowance reading immediately around that bounded calibration workload and use the measured allowance delta to tune model/tier/concurrency/context/fanout before any sustained START.",
+    "After monitoring/tuning is validated, continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge."
   ],
-  "next_safe_action": "On the paused Lambda, clean fast-forward research-engine main from 28e8a0904831f70e5689fbc8de75fc1fbc071f32 to exact validated 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 and rerun deploy/deploy-hud-paused.sh. At the prompts, enter the ChatGPT usage UI values directly as percent LEFT and relative reset duration (for the current screenshot: 86 then '3h 20m', 96 then '5d 8h'). The deployer is additive/idempotent and must finish with the daemon still stopped.",
+  "next_safe_action": "On the Lambda while research-engine-daemon.service remains inactive/dead, clean fast-forward research-engine main from 263a9dfb2d22b31922647e129ae32f0d6aa1f7e0 to exact validated 051a3b0c9828de411812b0a519a070a2aa87683b. Do not rerun schema migration and do not START. Because the venv is an editable install, immediately run `HUD --once --no-color` and return the PIPELINE, AGENTS, USAGE / EFFICIENCY, USAGE BY STAGE, QUEUE / ALERTS, and allowance sections for tuning review.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Preferred UX: a terminal HUD launched from Bash/CLI, backed by read-only PostgreSQL queries rather than Bash scraping. Proposed Chat-visible mirror: one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups; raw high-frequency telemetry remains PostgreSQL-authoritative. Proposed Chat bridge: agents create bounded structured reasoning requests that are mirrored to GitHub issues; ChatGPT can read/update them when invoked. This is not equivalent to a direct autonomous ChatGPT conversation API and must not be described as such until separately validated."
