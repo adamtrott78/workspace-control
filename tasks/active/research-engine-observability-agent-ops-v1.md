@@ -31,7 +31,7 @@ Build a low-overhead, provenance-preserving operations layer for the autonomous 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 6a423e0fd38283687cae2eb060405a2a82643450
+- Remote checkpoint: 02453b856fbb6d5cac8e611949579a61822560f4
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
@@ -40,27 +40,25 @@ Build a low-overhead, provenance-preserving operations layer for the autonomous 
 
 ## Current stage
 
-observability_contract
+hud_and_ops_cli
 
 ## Next safe action
 
-With research-engine-daemon.service confirmed inactive/dead and rf-open-world-corpus-expansion-v1 preserved, inspect the existing research_workers, research_jobs, research_job_attempts, research_usage_events, daemon health/report code, Codex execution metadata, and deployment/runtime identifiers. Write and validate the observability contract first: stable logical agent roles versus ephemeral sessions, append-only telemetry fields, derived metric formulas/windows, retention policy, allowance-observation/forecast semantics, HUD panel contract, Chat-visible summary contract, and MCP/Slack request-response safety boundary. Then implement the read-only ops snapshot and terminal HUD without resuming semantic processing.
+Run the fail-closed paused-Lambda HUD deployment script against exact research-engine main@02453b856fbb6d5cac8e611949579a61822560f4. It must require research-engine-daemon.service to remain inactive/dead, require a clean fast-forward main checkout, initialize the additive schema, verify observability tables/columns and preserved scientific run state, optionally record current timestamped 5-hour/weekly allowance observations supplied interactively by the user, generate an ops-snapshot and one-shot HUD for rf-open-world-corpus-expansion-v1, install a convenient research-hud wrapper, and finish with the daemon still stopped. Do not resume semantic processing yet.
 
 ## Remaining work
 
-- Pause the research-engine user daemon on the Lambda, preserving rf-open-world-corpus-expansion-v1 durable state and preventing further semantic allowance burn during instrumentation.
-- Specify the metric taxonomy, stable logical-agent identity, event/rollup schema, retention policy, and exact separation between authoritative PostgreSQL telemetry and derived views.
-- Implement read-only ops snapshot/report commands and a terminal HUD first, including live per-agent usage, source/evidence/gap throughput, queue/latency, failures/backoffs, and 5-hour/weekly allowance panels.
-- Implement explicit 5-hour/weekly Codex usage observations plus empirical forecast calibration/ETA with uncertainty and per-agent/model attribution; ingest the current ~16% 5-hour observation as the first calibration point.
-- Run a tightly bounded monitored calibration workload and tune model/tier/concurrency budgets before resuming sustained corpus expansion.
-- Implement a low-frequency Chat-visible operations mirror.
-- Prototype a private research-engine MCP/plugin as the preferred direct ChatGPT read/advisory-response surface; validate current-plan permissions and Secure MCP Tunnel or another private transport.
-- Optionally connect Slack and evaluate it as an event-driven reasoning-request wake-up bus; retain GitHub/PostgreSQL as durable truth.
-- Implement and validate structured Chat reasoning request/response state transitions without allowing Chat responses to bypass scientific verification or human gates.
+- Fast-forward the paused Lambda checkout to research-engine main@02453b856fbb6d5cac8e611949579a61822560f4 without restarting research.
+- Initialize the additive observability schema and audit historical worker/usage backfill against the existing acceptance and sustained-run records.
+- Record current timestamped 5-hour and weekly Codex allowance readings from the ChatGPT UI; do not treat the earlier approximate 16% reading as a precisely timed forecast sample.
+- Validate ops-snapshot and the one-shot/live terminal HUD against rf-open-world-corpus-expansion-v1 while the daemon remains stopped.
+- After the HUD is trusted, collect a second allowance reading around a tightly bounded calibration workload and tune model/tier/concurrency budgets before sustained research resumes.
+- Then continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge.
 
 ## Blockers / gates
 
-- Direct MCP/plugin write capability and any Slack-triggered automation must be validated on the user's actual ChatGPT plan/workspace before the bridge can depend on them.
+- Lambda is intentionally still deployed at research-engine main@6a423e0fd38283687cae2eb060405a2a82643450 with research-engine-daemon.service inactive/dead; observability main@02453b856fbb6d5cac8e611949579a61822560f4 must be fast-forward deployed and the additive schema initialized before the live HUD can be validated.
+- At least two trustworthy timestamped observations in the same Codex allowance window are required before exhaustion ETA can move beyond CALIBRATING.
 
 ## Fresh-chat initialization
 
