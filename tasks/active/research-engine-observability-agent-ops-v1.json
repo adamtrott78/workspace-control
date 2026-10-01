@@ -69,7 +69,7 @@
       "base_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "774b2cb5d8a99b9edd5238c6ca83383a6be30add",
+        "checkpoint_sha": "e10fa79b939571fc2db8e1d6ac5afade2ceea7b2",
         "verified": true
       },
       "local": {
@@ -177,7 +177,8 @@
         "Median historical VERIFY replay at page radius 0: 27115 -> 23321 input tokens (13.99% reduction), 6 evidence objects across pages 2/4/6, verified_equal=true, accepted_evidence_ids_equal=true.",
         "Replay output tokens fell 339 -> 242 and reasoning-output tokens 112 -> 66; replay wall time was 9915 ms.",
         "Displayed 5-hour percent-left changed 86 -> 85 and weekly 96 -> 95 across the replay interval, but these whole-percent UI transitions are quantized and MUST NOT be interpreted as an exact 1 percentage-point cost for one call.",
-        "Allowance forecast remains CALIBRATING because reset timestamps derived from relative UI values jitter within the same real reset window; reset-window grouping must tolerate display precision/jitter before burn/ETA is trusted."
+        "Allowance forecast remains CALIBRATING because reset timestamps derived from relative UI values jitter within the same real reset window; reset-window grouping must tolerate display precision/jitter before burn/ETA is trusted.",
+        "research-engine PR #28 merged as e10fa79b939571fc2db8e1d6ac5afade2ceea7b2; canonical main CI run 36930327266 PASS. Reset-window grouping is precision-aware, whole-percent UI observations are represented as censored/quantized measurements, VERIFY supports low/median/high historical selection, the stopped-daemon runner performs exactly two additional low/high STANDARD/Terra replays with one pre/post allowance reading pair, and a deterministic zero-model-call EXTRACT provenance audit is included."
       ],
       "resume_condition": null
     },
@@ -263,20 +264,19 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "774b2cb5d8a99b9edd5238c6ca83383a6be30add",
+      "identity": "e10fa79b939571fc2db8e1d6ac5afade2ceea7b2",
       "required_for_resume": true,
       "evidence": [
         "stage=codex_allowance_telemetry_and_forecasting",
-        "workspace-control/main@e2eb07c9b93c71d23f98bb37b0d474d77ff3275e",
-        "research-engine remote+Lambda main@774b2cb5d8a99b9edd5238c6ca83383a6be30add; canonical CI 36926507259 PASS",
-        "runtime=daemon inactive/dead; START/STOP/HUD/STATUS installed",
+        "research-engine remote main@e10fa79b939571fc2db8e1d6ac5afade2ceea7b2 via PR #28; PR CI 36930158077 PASS; canonical-main CI 36930327266 PASS",
+        "Lambda/local research-engine remains at last observed main@774b2cb5d8a99b9edd5238c6ca83383a6be30add and must fast-forward while research-engine-daemon.service stays inactive/dead",
+        "runtime gate=do not START; bounded runner must finish inactive/dead PID 0; production remains Codex plan auth with no OPENAI_API_KEY",
         "baseline=9 verified papers; 71 run-scoped evidence; 28 semantic calls; 959229 input; 240300 cached; 22030 output",
         "stage hotspot=VERIFY 261.8k input / 9 calls; EXTRACT 223.3k / 9 calls; combined ~50.6% of total input",
-        "calibration event 1=median historical VERIFY job job:0a37daf44813a7c4b252f23b; radius0; cited pages 2,4,6; 6 evidence; context_chars 18493",
-        "median replay tokens=historical 27115 input -> replay 23321 input; reduction 13.99%; verified_equal=true; accepted_evidence_ids_equal=true",
-        "plan UI=5h 86->85 left and weekly 96->95 left across one-call interval; exact allowance delta unknown because whole-percent display is quantized",
-        "forecast issue=derived reset_at jitter keeps observations CALIBRATING despite same reset window",
-        "next=fix reset-window grouping + add low/high radius0 replays (2 calls total) + deterministic extraction provenance audit; do not START"
+        "median calibration=job:0a37daf44813a7c4b252f23b; radius0; pages 2,4,6; 6 evidence; context_chars 18493; historical input 27115 -> replay 23321; reduction 13.99%; verified_equal=true; accepted_evidence_ids_equal=true",
+        "plan UI evidence=86->85 left 5h and 96->95 left weekly for prior median replay; whole-percent display is quantized and exact allowance delta is unknown",
+        "implemented next calibration=precision-aware reset grouping + censored allowance bounds + low/high VERIFY selectors + two-call stopped-daemon batch + zero-model EXTRACT provenance audit",
+        "next=Lambda fast-forward to e10fa79b939571fc2db8e1d6ac5afade2ceea7b2 while stopped, run deploy/run-verify-calibration.sh, preserve audit + low/high replay + pre/post UI output; do not START"
       ]
     }
   ],
@@ -420,24 +420,36 @@
         "Applying the observed 13.99% median VERIFY reduction uniformly would save about 36.6k input tokens, roughly 3.8% of the 959.2k-token full run. This is a projection from one sample, not a validated aggregate saving.",
         "The radius-0 optimization is therefore promising but not sufficient by itself to solve the allowance problem; representative replay validation and subsequent EXTRACT analysis remain necessary."
       ]
+    },
+    {
+      "check": "Allowance reset grouping and bounded low/high calibration implementation",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #28 merged to canonical main as e10fa79b939571fc2db8e1d6ac5afade2ceea7b2.",
+        "PR CI run 36930158077 passed compile, full pytest/PostgreSQL integration, Compose validation, image build, and cleanup.",
+        "Canonical-main CI run 36930327266 passed the same validation stack.",
+        "Allowance observations now preserve percent_quantum and reset_precision_seconds; forecasts group reset timestamps using display-precision-aware tolerance and expose censored burn/ETA bounds instead of treating whole-percent bucket movement as exact.",
+        "VERIFY calibration can select lowest, median, or highest historical VERIFY jobs by input tokens without materializing scientific state.",
+        "deploy/run-verify-calibration.sh retains stopped-daemon and no-API-key guards, runs a zero-model EXTRACT provenance audit, captures one pre-batch 5-hour/weekly reading pair, performs exactly the lowest and highest STANDARD/Terra replays, captures one post-batch reading pair, and rechecks the stopped daemon.",
+        "The EXTRACT audit deterministically reports per-paper total PDF pages, extraction-context page/character counts, evidence-bearing pages, evidence density, and contiguous evidence-page clusters without invoking a semantic executor."
+      ]
     }
   ],
   "blockers": [
-    "Radius-0 VERIFY context has only one live replay sample. Semantic agreement is exact on the median historical job, but low/high historical VERIFY jobs must be replayed before treating the result as representative.",
-    "The ChatGPT/Codex usage UI reports whole percentages. The observed 86->85 five-hour and 96->95 weekly transitions are quantized bucket changes, not proof that one Terra call consumed exactly 1 percentage point.",
-    "Allowance forecast reset-window grouping currently treats small derived reset_at differences as different windows. Relative UI reset readings have finite precision, so this must be fixed before burn-rate/ETA confidence can advance beyond CALIBRATING.",
+    "Radius-0 VERIFY context has only one live replay sample. The low/high replay machinery is canonical and CI-validated, but the two bounded Lambda STANDARD/Terra calls have not yet been executed.",
+    "The ChatGPT/Codex usage UI reports whole percentages. The ledger/forecaster now preserves these as censored/quantized measurements, but the next empirical evidence still requires one fresh pre-batch and one fresh post-batch reading pair around the two calls.",
+    "The deterministic EXTRACT provenance audit is implemented and CI-validated but still needs to run against the 9 preserved Lambda papers before an EXTRACT optimization is selected.",
     "Sustained START remains gated on representative VERIFY calibration and a bounded tuning decision."
   ],
   "remaining_work": [
-    "While the daemon remains stopped, fix allowance reset-window identity so relative-reset observations within the same real reset window tolerate UI precision/jitter; preserve raw observations and do not invent exact plan usage.",
-    "Extend the non-materializing VERIFY calibration harness to select/replay the lowest-cost and highest-cost historical VERIFY jobs. The already-completed median replay is sample 1, so only two additional Terra calls are needed for a low/median/high radius-0 sample.",
-    "Take one fresh 5-hour/weekly allowance reading immediately before the two-call replay batch and one immediately after. Store/display the integer UI movement as quantized/censored plan evidence rather than exact per-call percentage cost.",
-    "For each low/median/high replay compare historical vs replay input/cached/output/reasoning tokens, context pages/chars, verified_equal, and accepted_evidence_ids_equal. If all three agree, retain radius 0 for the next bounded production calibration. If a job disagrees, rerun only that job at radius 1 before changing the global policy.",
-    "Before spending more semantic allowance on EXTRACT optimization, perform a deterministic zero-model-call audit of the 9 existing papers: PDF page counts, evidence-bearing page counts, evidence density, evidence-page clustering, and extraction context size. Use that audit to choose whether page/section-selective EXTRACT is technically justified.",
+    "On the Lambda, while research-engine-daemon.service remains inactive/dead, verify the checkout is clean on main and fast-forward research-engine from 774b2cb5d8a99b9edd5238c6ca83383a6be30add to canonical e10fa79b939571fc2db8e1d6ac5afade2ceea7b2.",
+    "Run bash deploy/run-verify-calibration.sh. Preserve the deterministic EXTRACT provenance audit, one fresh 5-hour/weekly pre-batch usage reading pair, the lowest-cost and highest-cost radius-0 VERIFY replay outputs, one post-batch reading pair, the updated HUD, and the final inactive/dead daemon check.",
+    "Compare low/median/high historical vs replay input/cached/output/reasoning tokens, context pages/chars, verified_equal, and accepted_evidence_ids_equal. If all three agree, retain radius 0 for the next bounded production calibration. If a sample disagrees, rerun only that failing source at radius 1 before changing the global policy.",
+    "Use the zero-model EXTRACT audit across the 9 existing papers to decide whether page/section-selective EXTRACT is technically justified before spending any EXTRACT semantic allowance.",
     "After representative VERIFY validation and the EXTRACT provenance audit, choose the next bounded optimization experiment; do not resume sustained corpus expansion yet.",
     "After monitoring/tuning is validated, continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge."
   ],
-  "next_safe_action": "Start a fresh ChatGPT task executor from https://github.com/adamtrott78/workspace-control and this capsule. Keep research-engine-daemon.service inactive/dead. First implement and CI-validate two GitHub-side improvements on research-engine main@774b2cb5d8a99b9edd5238c6ca83383a6be30add: (1) allowance forecast reset-window grouping that tolerates precision/jitter in relative reset observations without pretending whole-percent readings are exact, and (2) a non-materializing low/high VERIFY replay batch that complements the already-completed median radius-0 replay with only two additional STANDARD/Terra calls. Also add a deterministic zero-model-call extraction provenance audit for the 9 existing papers if it can be implemented without delaying the calibration. Only after canonical CI should the Lambda fast-forward while stopped and run the bounded two-call calibration with one pre/post allowance reading pair. Do not START sustained research.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead. On the Lambda, verify the research-engine checkout is clean on main at 774b2cb5d8a99b9edd5238c6ca83383a6be30add, fetch and fast-forward only to canonical research-engine main@e10fa79b939571fc2db8e1d6ac5afade2ceea7b2, then run bash deploy/run-verify-calibration.sh. The runner must perform the deterministic zero-model EXTRACT provenance audit, collect one fresh 5-hour/weekly usage reading pair immediately before the bounded batch, replay only the lowest-cost and highest-cost historical VERIFY jobs at radius 0 (two STANDARD/Terra calls total), collect one fresh post-batch reading pair, and finish with the daemon inactive/dead. Preserve the complete output for comparison with the already-completed median replay. Do not START sustained research.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Preferred UX: a terminal HUD launched from Bash/CLI, backed by read-only PostgreSQL queries rather than Bash scraping. Proposed Chat-visible mirror: one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups; raw high-frequency telemetry remains PostgreSQL-authoritative. Proposed Chat bridge: agents create bounded structured reasoning requests that are mirrored to GitHub issues; ChatGPT can read/update them when invoked. This is not equivalent to a direct autonomous ChatGPT conversation API and must not be described as such until separately validated. Fresh-chat invariant: every initialization/handoff prompt must include https://github.com/adamtrott78/workspace-control explicitly."
