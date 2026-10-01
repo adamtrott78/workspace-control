@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "localization_inventory_and_benchmark_contract",
+  "current_stage": "benchmark_corpus_and_mathpix_oracle",
   "acceptance_criteria": [
     "A versioned paper-package.v1 contract exists and preserves the original PDF SHA-256 as scientific authority while representing normalized reading-order Markdown, page/block provenance, extracted figures, tables, equations, references/citations, diagnostics, confidence, and parser/model lineage.",
     "The pipeline uses a cascaded cost model: deterministic/native PDF extraction first, specialized local OCR/layout/table/formula/document models only where needed, and a general local VLM/agent only for low-confidence or structurally difficult regions.",
@@ -67,7 +67,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
+        "checkpoint_sha": "ac49579badbef02694a6f8b08061c50570704aee",
         "verified": true
       },
       "local": {
@@ -90,7 +90,7 @@
   "stages": [
     {
       "id": "localization_inventory_and_benchmark_contract",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -101,21 +101,23 @@
         "current candidate local document stacks and deterministic PDF libraries"
       ],
       "outputs": [
-        "full research-pipeline localization matrix",
-        "benchmark dimensions and acceptance thresholds",
-        "candidate component inventory with licensing/resource notes",
-        "benchmark fixture/result layout"
+        "benchmarks/document_intelligence/localization-matrix.v1.json",
+        "benchmarks/document_intelligence/candidate-adapters.v1.json",
+        "benchmarks/document_intelligence/README.md",
+        "whole-pipeline localization decisions for 27 components"
       ],
       "validation": [
         "Baseline live mirror shows EXTRACT 223262 and VERIFY 261832 input tokens out of 959229 total, making document-context processing the dominant immediate optimization target.",
         "Research daemon is inactive/dead and Lambda research-engine checkout reached canonical main@73697608e3ab179b7ed617b1833796cc47f679c2 before this task was created.",
-        "User can manually generate Mathpix Markdown without paid API usage under a large desktop annual page allowance and can provide/push those outputs for comparison."
+        "User can manually generate Mathpix Markdown without paid API usage under a large desktop annual page allowance and can provide/push those outputs for comparison.",
+        "research-engine PR #33 introduced a 27-component localization matrix spanning discovery/acquisition, PDF parsing, OCR/layout/tables/formulas/figures, caching/chunking, embeddings/retrieval, SCREEN/EXTRACT/VERIFY, synthesis/gap/novelty/human-review, and ops telemetry.",
+        "The matrix explicitly separates deterministic-local, specialized-local-model, on-demand general local VLM, external-web, remote-reasoning, and human responsibilities so later implementation does not repeatedly redesign boundaries."
       ],
       "resume_condition": "Localization matrix, benchmark contract, and candidate inventory are explicit enough to build paper-package.v1 without prematurely selecting one converter."
     },
     {
       "id": "paper_package_v1_contract",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -125,18 +127,25 @@
         "representative PDF and Mathpix output shapes"
       ],
       "outputs": [
-        "paper-package.v1 manifest and directory/schema contract",
-        "block/page/bbox provenance mapping",
-        "tables/figures/equations/reference representations",
-        "diagnostics/confidence/routing lineage",
-        "content-addressed cache identity rules"
+        "src/research_engine/document_package.py",
+        "tests/test_document_package.py",
+        "paper-package:v1 deterministic source+compiler+config identity",
+        "page/bbox/section provenance and derivation lineage",
+        "table/figure/equation asset contracts",
+        "benchmark quality/resource metric contracts",
+        "DocumentCompilerAdapter protocol"
       ],
-      "validation": [],
+      "validation": [
+        "paper-package.v1 executable Pydantic contract requires original PDF SHA-256/source artifact identity, deterministic compiler-config hash, page/bbox/section source regions, derivation steps, confidence/warnings, and stable relative package paths.",
+        "Package identity changes when source PDF, compiler identity/version, or canonical compiler configuration changes, enabling content-addressed reuse without conflating parser versions.",
+        "Contract tests validate deterministic identity, provenance/derivation requirements, bbox/path safety, manifest counts, asset links, and semantic-figure description invariants.",
+        "research-engine PR #33 CI run 36940736267 PASS and canonical-main CI run 36940888183 PASS across compile, full pytest/PostgreSQL integration, Compose validation, image build, and cleanup."
+      ],
       "resume_condition": "Contract round-trips source locators to authoritative PDF pages/regions and is independent of any one OCR vendor."
     },
     {
       "id": "benchmark_corpus_and_mathpix_oracle",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "hybrid",
       "selected_executor": "chatgpt+human",
       "selected_surface": "github+files",
@@ -362,17 +371,16 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "73697608e3ab179b7ed617b1833796cc47f679c2",
+      "identity": "ac49579badbef02694a6f8b08061c50570704aee",
       "required_for_resume": true,
       "evidence": [
-        "stage=localization_inventory_and_benchmark_contract",
-        "research-engine remote and Lambda/local main@73697608e3ab179b7ed617b1833796cc47f679c2",
-        "daemon inactive/dead PID 0",
-        "current preserved corpus=9 discovered/retained/acquired/extracted/verified papers, 71 evidence objects",
-        "semantic baseline=959229 input tokens across 28 calls; EXTRACT=223262 and VERIFY=261832 input",
-        "VERIFY radius0 already retained from prior repeated calibration",
-        "Mathpix manual desktop conversion is available as a high-quality oracle without production API cost",
-        "next=complete localization matrix and paper-package.v1 benchmark contract before implementing a converter"
+        "stage=benchmark_corpus_and_mathpix_oracle",
+        "research-engine remote main@ac49579badbef02694a6f8b08061c50570704aee canonical; PR #33 CI 36940736267 PASS; canonical-main CI 36940888183 PASS",
+        "Lambda/local research-engine remains clean main@73697608e3ab179b7ed617b1833796cc47f679c2; daemon inactive/dead PID 0",
+        "localization matrix=27 pipeline components with deterministic/specialized-local/VLM/external/remote/human decisions",
+        "paper-package.v1 contract canonical with deterministic cache identity and page/bbox derivation provenance",
+        "benchmark tree accepts small Markdown/JSON parser and manual Mathpix oracle outputs while excluding large PDFs/model weights",
+        "next=assemble representative benchmark cases and Mathpix oracle outputs, then implement adapters beginning with native PDF baseline and candidate local parser runners; do not install heavy models on Lambda yet"
       ]
     }
   ],
@@ -398,25 +406,35 @@
         "Marker documents native text/table handling with local VLM fallback for difficult OCR, tables, and math, plus local batching/serving controls.",
         "These candidates justify a component bakeoff rather than implementing OCR/layout science from scratch."
       ]
+    },
+    {
+      "check": "paper-package.v1 and localization matrix canonicalization",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #33 merged as ac49579badbef02694a6f8b08061c50570704aee.",
+        "PR CI 36940736267 PASS; canonical-main CI 36940888183 PASS.",
+        "The first implementation adds no heavyweight OCR/VLM dependency and makes no production EXTRACT/VERIFY mutation.",
+        "Mathpix remains manual benchmark/reference only; production has no paid per-page Mathpix API dependency."
+      ]
     }
   ],
   "blockers": [
-    "No benchmark corpus/Mathpix oracle bundle has yet been assembled for this task.",
-    "paper-package.v1 and objective acceptance thresholds are not yet finalized.",
-    "Candidate model licensing, Lambda VRAM/RAM requirements, and sustained multi-document throughput are not yet validated.",
+    "Representative benchmark cases and manual Mathpix oracle bundles have not yet been assembled.",
+    "Candidate parser/model licensing and Lambda VRAM/RAM/throughput remain unvalidated.",
+    "No heavyweight local document model has been selected or installed; this is intentional until benchmark cases exist.",
+    "Research-engine Lambda checkout remains at 73697608e3ab179b7ed617b1833796cc47f679c2 and does not need to fast-forward for corpus/oracle assembly.",
     "The research daemon must remain stopped during early benchmark/integration work."
   ],
   "remaining_work": [
-    "Complete the full localization matrix for research-engine stages and subcomponents, explicitly separating deterministic/local-model/external-web/remote-strong-reasoning responsibilities.",
-    "Define paper-package.v1 and benchmark metrics before selecting a converter.",
-    "Create a benchmark result layout in research-engine that can receive local parser outputs and user-generated Mathpix Markdown without committing large source PDFs or model weights.",
-    "Assemble representative test papers/pages, including preserved research-engine papers and difficult scientific layouts; accept Mathpix outputs from the user as reference artifacts.",
-    "Build adapters and benchmark native extraction, Docling, MinerU, PaddleOCR/PP-StructureV3, Marker/Surya, and justified component variants.",
-    "Select/build the adaptive page/region router and shared inference architecture based on measurements.",
-    "Integrate structured tables/equations/figures with provenance and on-demand visual semantic escalation.",
-    "Run downstream EXTRACT/VERIFY A/B and Lambda concurrency/resource acceptance before any production replacement."
+    "Assemble a compact representative benchmark corpus: preserved research-engine papers plus deliberately difficult pages for two-column order, malformed text, scans, equations, tables, charts/figures, mixed layouts, and references.",
+    "User may manually generate Mathpix Markdown/image bundles for chosen cases using the desktop annual allowance and provide them in chat or push small outputs under benchmarks/document_intelligence/oracles/<case-id>/.",
+    "Add case/oracle manifests and a benchmark runner that validates source hashes and scores adapter outputs without mutating scientific state.",
+    "Implement native PDF adapter first as deterministic baseline, then add isolated adapters for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker/Surya without forcing all dependencies into the core production install.",
+    "Measure document fidelity, provenance, token density, pages/sec, memory/VRAM, model-load cost, and concurrent throughput before selecting component winners.",
+    "Only after desktop/CI bakeoff should selected local models be installed and benchmarked on the Lambda.",
+    "Then continue adaptive routing, structured scientific element handling, whole-pipeline localization decisions, and downstream EXTRACT/VERIFY A/B."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead. On a new isolated research-engine branch from canonical main@73697608e3ab179b7ed617b1833796cc47f679c2, implement only the benchmark scaffolding and paper-package.v1 contract first: define the package manifest/provenance/diagnostics schemas, benchmark manifest/result schema, and adapter interface for native/Docling/MinerU/PaddleOCR/Marker candidates. Do not install heavyweight models on the Lambda yet and do not replace EXTRACT/VERIFY. In parallel, the user may generate Mathpix Markdown/image bundles manually and provide or push them as benchmark oracle outputs.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead. Do not install heavyweight OCR/VLM models on the Lambda yet. Build the benchmark corpus/oracle layer next against canonical research-engine main@ac49579badbef02694a6f8b08061c50570704aee: add benchmark case/oracle manifests plus a non-materializing runner, implement the deterministic native-PDF adapter as the baseline, and prepare adapter wrappers that keep Docling/MinerU/PaddleOCR/Marker optional and isolated. The user can meanwhile generate Mathpix Markdown/image bundles manually and provide or push them under the documented benchmark convention. Begin candidate model installation only after representative cases exist.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
