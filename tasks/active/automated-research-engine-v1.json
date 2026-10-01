@@ -845,7 +845,9 @@
       "evidence": [
         "stage=agentic_orchestration_v1",
         "last_validated_boundary=research-engine/main@9698089965e7ed015e468e7e5f27453a791e760e; PR #10 authoritative semantic pipeline PASS",
-        "resume=add live web_search only to DISCOVERY/NOVELTY_SEARCH with captured search provenance, add autonomous controller CLI that drives mixed workers to WAITING_HUMAN, then validate final production-shaped v1 through PostgreSQL CI"
+        "in_flight=research-engine PR #11 head agentic-v1-controller-search@751723e9849ceee3d639bc929483e1b914a11e6c",
+        "slice=live Responses web_search provenance restricted to DISCOVERY/NOVELTY_SEARCH + restart-safe autonomous-run controller driving mixed workers to terminal/human gate",
+        "resume=inspect PR #11 CI for head 751723e9849ceee3d639bc929483e1b914a11e6c; repair remotely if failing; merge if green; then classify agentic research v1 implementation complete pending first real model-authenticated autonomous run"
       ]
     },
     {
@@ -1489,7 +1491,7 @@
     "Run one real model-backed autonomous research cycle on a model-authenticated runtime and inspect the human-review payload.",
     "Then harden 24/7 Lambda deployment: daemon supervision, concurrency/budgets/backpressure, and overnight reporting."
   ],
-  "next_safe_action": "From research-engine/main@9698089965e7ed015e468e7e5f27453a791e760e, add live Responses web_search only for DISCOVERY and NOVELTY_SEARCH with durable execution/source provenance, plus an autonomous controller CLI that starts/drives mixed deterministic+semantic workers to WAITING_HUMAN. Validate with PostgreSQL CI; then perform the first production-shaped autonomous research run when a model-authenticated runtime is available.",
+  "next_safe_action": "Inspect research-engine PR #11 for agentic-v1-controller-search@751723e9849ceee3d639bc929483e1b914a11e6c. Repair any CI failures remotely. If CI passes, merge PR #11, checkpoint agentic research v1 implementation complete, and proceed to the first real model-authenticated autonomous research run when a suitable runtime/API credential surface is available.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
