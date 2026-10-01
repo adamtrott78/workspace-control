@@ -64,7 +64,12 @@
         "checkpoint_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
         "verified": true
       },
-      "local": null,
+      "local": {
+        "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
+        "branch": "main",
+        "head_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
+        "clean": true
+      },
       "allowed_mutation_scope": [
         "sql/schema.sql",
         "src/research_engine/**",
