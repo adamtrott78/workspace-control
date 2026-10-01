@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "cis560-course-workflows-v2-migration",
   "title": "CIS560 Course Workflows v2 Migration",
-  "status": "VALIDATING",
+  "status": "COMPLETE",
   "goal": "Explicitly migrate the CIS560 tutor-framework integration to the promoted reusable course-workflow architecture while preserving course authority, durable tutoring state, and the proven communications-ingestion/idempotent parent-return behavior.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -214,7 +214,7 @@
     },
     {
       "id": "completion",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "cis560-migration",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -222,8 +222,25 @@
         "regression_validation",
         "git:9c5e492354449186898b5f038e227e5a92d15005"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "Final CIS560 project recovery checkpoint: tutor-framework@9c5e492354449186898b5f038e227e5a92d15005.",
+        "Exact reusable migration workflow binding: workspace-control:workflows/course-bootstrap-migration.v1.json@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9, blob da6076a9b4baf328d6a91526f6dff7aa999733b6.",
+        "Remote-only durable recovery assessment: HANDOFF_SAFE."
+      ],
+      "validation": [
+        {
+          "check": "Final remote-only recovery and handoff assessment",
+          "result": "PASS",
+          "evidence": [
+            "CIS560-AdamTrott tutor-framework independently reverified at 9c5e492354449186898b5f038e227e5a92d15005.",
+            "Pinned course-bootstrap migration workflow independently reverified at workspace-control 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 with exact blob da6076a9b4baf328d6a91526f6dff7aa999733b6.",
+            "repos.json at the pinned workspace-control checkpoint provides registered remotes for workspace-control and CIS560-AdamTrott.",
+            "Execution topology is remote_only; both recorded remote recovery states are verified; no local checkout is required.",
+            "The exact workflow checkpoint is bound to the verified workspace-control remote recovery state.",
+            "Required resume checkpoints include the promoted shared workflow and migrated CIS560 project checkpoint; blockers and remaining work are empty."
+          ]
+        }
+      ],
       "resume_condition": null
     }
   ],
@@ -295,14 +312,21 @@
         "Forwarded-Gmail communications/idempotency passed from durable Git without external mail reread.",
         "Artifact/source preservation and portability regressions passed; all non-adapter authority blobs checked remained unchanged."
       ]
+    },
+    {
+      "check": "Final HANDOFF_SAFE assessment",
+      "result": "PASS",
+      "evidence": [
+        "Task schema v2 uses remote_only topology with verified remote recovery state for workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and CIS560-AdamTrott:tutor-framework@9c5e492354449186898b5f038e227e5a92d15005.",
+        "Workflow binding resolves exactly to workflows/course-bootstrap-migration.v1.json at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 with content blob da6076a9b4baf328d6a91526f6dff7aa999733b6.",
+        "All declared migration stages are VALIDATED, required regressions are PASS, blockers are empty, remaining work is empty, and durable required_for_resume checkpoints are present.",
+        "Deterministic v2 handoff conditions therefore evaluate to HANDOFF_SAFE."
+      ]
     }
   ],
   "blockers": [],
-  "remaining_work": [
-    "Perform final remote-only acceptance and HANDOFF_SAFE assessment against the exact workflow binding and verified target checkpoint.",
-    "Mark completion VALIDATED/status COMPLETE, regenerate the derived handoff, then archive the completed capsule/handoff."
-  ],
-  "next_safe_action": "Reverify workspace-control workflow checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and CIS560-AdamTrott tutor-framework checkpoint 9c5e492354449186898b5f038e227e5a92d15005. Evaluate the v2 remote_only HANDOFF_SAFE conditions from the task schema/procedure. If they pass, mark completion VALIDATED and the task COMPLETE with no blockers or remaining work, regenerate the derived Markdown immediately, then archive the completed JSON and derived handoff.",
+  "remaining_work": [],
+  "next_safe_action": "Migration is complete and archived-ready. Future CIS560 work should start from CIS560-AdamTrott tutor-framework@9c5e492354449186898b5f038e227e5a92d15005 with the exact workspace-control compatibility/workflow checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; create a new durable task for any further mutation.",
   "last_executor": "chatgpt",
   "last_surface": "github"
 }

@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: cis560-course-workflows-v2-migration
 - Title: CIS560 Course Workflows v2 Migration
-- Status: VALIDATING
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -42,12 +42,11 @@ Explicitly migrate the CIS560 tutor-framework integration to the promoted reusab
 
 ## Next safe action
 
-Reverify workspace-control workflow checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 and CIS560-AdamTrott tutor-framework checkpoint 9c5e492354449186898b5f038e227e5a92d15005. Evaluate the v2 remote_only HANDOFF_SAFE conditions from the task schema/procedure. If they pass, mark completion VALIDATED and the task COMPLETE with no blockers or remaining work, regenerate the derived Markdown immediately, then archive the completed JSON and derived handoff.
+Migration is complete and archived-ready. Future CIS560 work should start from CIS560-AdamTrott tutor-framework@9c5e492354449186898b5f038e227e5a92d15005 with the exact workspace-control compatibility/workflow checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; create a new durable task for any further mutation.
 
 ## Remaining work
 
-- Perform final remote-only acceptance and HANDOFF_SAFE assessment against the exact workflow binding and verified target checkpoint.
-- Mark completion VALIDATED/status COMPLETE, regenerate the derived handoff, then archive the completed capsule/handoff.
+- None.
 
 ## Blockers / gates
 
