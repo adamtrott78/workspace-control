@@ -987,13 +987,12 @@
       "required_for_resume": true,
       "evidence": [
         "stage=model_backed_acceptance_v1",
-        "last_validated_boundary=research-engine/main@219ef546381a471e5daac91ba524d9b685b8c26b; migration-safe bounded reconciliation validated; canonical main CI 36831237236 PASS",
-        "runtime_failure=deployed ec8baf4 daemon entered systemd auto-restart before leasing semantic work because planner reconcile raised immutable idempotency conflict on existing allowed novelty-search legacy payload",
-        "observed_systemd=ActiveState=activating SubState=auto-restart MainPID=0 Result=exit-code NRestarts=119 ExecMainStatus=1",
-        "durability=acceptance-codex-rf-v1 remained persisted; failure occurred in planner.reconcile before worker semantic execution",
-        "fix=reuse existing allowed NOVELTY_SEARCH/NOVELTY_ARBITRATE jobs by idempotency key, enqueue only missing bounded jobs, retain strict content mismatch detection for true conflicting enqueue attempts",
-        "cost_boundary=no additional Codex model work was launched by the restart loop; no OPENAI_API_KEY and no paid API fallback",
-        "resume=stop user daemon if still restarting, fast-forward clean Lambda main from ec8baf481679aa86ee45b8b1b7dd47ed44846d6b to exact 219ef546381a471e5daac91ba524d9b685b8c26b, verify durable run/budget state, start daemon, and confirm stable ACTIVE plus bounded job progress"
+        "last_validated_boundary=research-engine/main@219ef546381a471e5daac91ba524d9b685b8c26b deployed on Lambda; migration-safe bounded reconciliation active; canonical main CI 36831237236 PASS",
+        "daemon_recovery=stable active/running after prior auto-restart loop; restart count held at 135 across five samples; ExecMainStatus=0; Result=success; idempotency conflict recurrence=0",
+        "acceptance_run=acceptance-codex-rf-v1 RUNNING with final bounded budget input=450000 output=40000 semantic_jobs=15 tier_caps CHEAP=7 STANDARD=5 STRONG=4",
+        "live_progress=after daemon recovery one allowed NOVELTY_SEARCH RUNNING, one allowed NOVELTY_SEARCH QUEUED, and one NOVELTY_ARBITRATE already QUEUED; checkpoint/synthesis/gap generation remain durable",
+        "cost_boundary=included ChatGPT/Codex plan allowance only; no OPENAI_API_KEY and no paid API fallback",
+        "resume=observe persisted acceptance-codex-rf-v1 only until WAITING_HUMAN, PAUSED_BUDGET, FAILED, or other terminal/gated state"
       ]
     },
     {
@@ -1802,18 +1801,29 @@
         "Exact legacy full-gap payload conflict is covered by PostgreSQL regression testing.",
         "Canonical main CI 36831237236 passed tests, Compose validation, and image build."
       ]
+    },
+    {
+      "check": "Lambda migration-safe reconciliation recovery",
+      "result": "PASS",
+      "evidence": [
+        "Lambda fast-forwarded clean research-engine main to exact 219ef546381a471e5daac91ba524d9b685b8c26b.",
+        "User daemon was stopped from the prior restart loop, then started successfully on the migration-safe reconciliation build.",
+        "Five consecutive stability samples reported active/running with restart count fixed at 135; ExecMainStatus=0 and Result=success.",
+        "The previous immutable-idempotency error did not recur.",
+        "acceptance-codex-rf-v1 remained RUNNING with its final bounded budget intact and immediately resumed bounded novelty progress."
+      ]
     }
   ],
   "blockers": [
-    "The migration-safe reconciliation fix is validated on canonical main but must be deployed to the Lambda before the final bounded acceptance run can continue."
+    "acceptance-codex-rf-v1 is RUNNING stably on the final bounded novelty graph; model-backed acceptance awaits WAITING_HUMAN or another durable gate."
   ],
   "remaining_work": [
-    "Deploy research-engine main@219ef546381a471e5daac91ba524d9b685b8c26b to the Lambda and verify stable daemon startup with the same persisted acceptance run.",
-    "Observe the remaining two bounded novelty searches and two novelty arbitrations to WAITING_HUMAN.",
-    "At WAITING_HUMAN, verify evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload and validate model_backed_acceptance_v1.",
-    "Implement/validate plan-limit-aware pacing/backoff for continuous operation under included weekly Codex allowance, then resume RF corpus expansion."
+    "Observe the stable final bounded acceptance run to WAITING_HUMAN or another durable gate.",
+    "At WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, bounded novelty challenges, and human-review payload and validate model_backed_acceptance_v1.",
+    "Implement/validate plan-limit-aware pacing/backoff for continuous operation under the included weekly Codex allowance.",
+    "Then resume RF corpus expansion and tune concurrency/model tiers against observed allowance consumption and research quality."
   ],
-  "next_safe_action": "On the user's Lambda, stop research-engine-daemon.service if it is still restarting, require a clean main checkout at ec8baf481679aa86ee45b8b1b7dd47ed44846d6b, fetch and fast-forward exactly to 219ef546381a471e5daac91ba524d9b685b8c26b, confirm acceptance-codex-rf-v1 and its final bounded budget remain persisted, start the user daemon, and verify it remains active without idempotency restart-loop errors. Then observe the same run to WAITING_HUMAN or another durable gate.",
+  "next_safe_action": "Observe acceptance-codex-rf-v1 persisted state only. The daemon is stable on migration-safe reconciliation. Expected remaining bounded progress is completion of the two allowed novelty searches, completion of two novelty arbitrations, then deterministic transition to WAITING_HUMAN. If WAITING_HUMAN, perform the final evidence/usage/checkpoint/novelty/human-review audit.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general. Production semantic execution is constrained to the user's included ChatGPT/Codex plan allowance; continuous operation must pace or pause rather than fall back to paid API usage."
