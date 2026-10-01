@@ -37,24 +37,23 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 64295c4f0d102fb02552f25881f01970d39cb304
+- Remote checkpoint: 03babb404e9e6a254deec38fea6ea5ab3b8b05ad
 - Remote verified: true
 
 ## Next safe action
 
-Genuine runtime/human-auth boundary. On the user's Lambda, update the existing research-engine checkout to exact main@64295c4f0d102fb02552f25881f01970d39cb304, verify or install a current Codex CLI, and authenticate Codex with the user's ChatGPT account. Do not configure OPENAI_API_KEY and do not use paid API fallback. Return only non-secret version/auth/status output. Then initialize persistent PostgreSQL plus the native user daemon and run one conservative-budget autonomous research topic to WAITING_HUMAN.
+Genuine Lambda runtime boundary. On the user's Lambda, fast-forward the clean research-engine checkout from 64295c4f0d102fb02552f25881f01970d39cb304 to exact main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad. Then start PostgreSQL only with the base Docker Compose file, create the dedicated native research-engine venv and non-secret Codex environment from the checked-in template, and validate the host prerequisites before enabling the user systemd daemon. Do not configure OPENAI_API_KEY or use the openai-api-development Compose profile. Return only non-secret command/status output.
 
 ## Remaining work
 
-- Update the Lambda research-engine checkout to exact main@64295c4f0d102fb02552f25881f01970d39cb304; verify/install a current Codex CLI and authenticate it with the user's ChatGPT account. Do not configure OPENAI_API_KEY.
-- Run PostgreSQL persistently and the research daemon natively as the signed-in user so Codex can reuse host ChatGPT authentication without copying credentials into a container.
+- Fast-forward the Lambda research-engine checkout to exact main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad; start persistent PostgreSQL via the base Compose file and deploy the native Codex-authenticated daemon using the checked-in venv/env/systemd procedure.
 - Run one real Codex-backed autonomous research cycle with a conservative per-run budget and verify it reaches durable WAITING_HUMAN with source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload.
-- After acceptance passes, use the daemon—not manual chat orchestration—to resume RF corpus expansion and operate continuously while pacing work to stay within the included Codex allowance.
-- Tune worker concurrency/model-tier budgets from observed Codex allowance consumption, latency, and quality after the first real run.
+- After acceptance passes, use the daemon—not manual chat orchestration—to resume RF corpus expansion and operate continuously while pacing or pausing to stay within the included Codex allowance.
+- Tune worker concurrency/model-tier budgets and allowance-aware pacing from observed Codex consumption, latency, and quality after the first real run.
 
 ## Blockers / gates
 
-- The remaining acceptance test requires the user's Lambda runtime with Codex CLI authenticated to the user's ChatGPT plan. Current connected tooling cannot operate that host or complete the interactive ChatGPT login flow.
+- The remaining acceptance test requires execution on the user's Lambda. Codex CLI is already present and authenticated with ChatGPT; the next host operation must deploy the validated native topology and run the first real autonomous acceptance topic.
 
 ## Fresh-chat initialization
 
