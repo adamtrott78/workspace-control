@@ -45,13 +45,14 @@ Design and prove a provenance-preserving automated research engine that turns sc
 - Identity: de1d1a0ca0f649895d461e40a1496071443e32d7
 - stage=vertical_slice_validation
 - last_validated_boundary=research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7 (immutable evidence history + deterministic knowledge checkpoints; PostgreSQL/pgvector CI PASS)
-- external_runtime_prepared=research-engine/acquire-broggi-source commit 115335b26852df2af840191a713ffe481f759947 prepared from 10ce97b9157d745c6e437983fb02e2e9e8ae72c5; branch ref not yet advanced at restore-point creation
-- purpose=resolve HICSS Broggi 2025 exact PDF via ScholarSpace handle 10125/109750 / DSpace APIs after AISel returned HTTP 403
-- resume=verify acquire-broggi-source ref; if it points to 115335b26852df2af840191a713ffe481f759947 inspect the newest Acquire Broggi 2025 exact source Actions run and artifact; if ref has not advanced, advance it non-force to that prepared commit
+- in_flight=research-engine PR #4 head novelty-challenge-persistence@45942f236b1acc383a06cd0085c798e9661c345d; purpose=persist checkpoint-bound adversarial novelty challenges with explicit human gate for SUPPORTED_AS_OPEN
+- broggi_exact_source=direct acquisition exhausted for now: AISel returned HTTP 403 in container and GitHub Actions; ScholarSpace/hdl.handle.net and DSpace PID endpoints timed out from Actions; public web search confirmed publication/handle but found no alternate downloadable exact mirror
+- broggi_local_boundary=exact PDF remains available in the user's local PADataset paper package and may be requested only after independent remote work is exhausted
+- resume=inspect PR #4 GitHub Actions for head 45942f236b1acc383a06cd0085c798e9661c345d; repair/merge if green; then continue corpus scaling and novelty revalidation before asking for Broggi local bytes unless exact-source promotion becomes the only remaining safe next step
 
 ## Next safe action
 
-Launch the prepared Broggi ScholarSpace acquisition by non-force advancing research-engine/acquire-broggi-source from 10ce97b9157d745c6e437983fb02e2e9e8ae72c5 to 115335b26852df2af840191a713ffe481f759947. Then inspect the resulting GitHub Actions run/artifact. Continue independent novelty-persistence work while external acquisition runs; do not stop solely to poll.
+Inspect research-engine PR #4 for novelty-challenge-persistence@45942f236b1acc383a06cd0085c798e9661c345d. If CI fails, repair it remotely; if it passes, merge and checkpoint the validated novelty-persistence slice. Continue remote corpus scaling/novelty revalidation before requesting the local Broggi PDF, because that exact-source promotion is now a genuine but non-blocking local-byte boundary.
 
 ## Remaining work
 
