@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: automated-research-engine-v1
 - Title: Automated research engine v1
-- Status: BLOCKED_RUNTIME
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -42,17 +42,17 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Next safe action
 
-Run the single fail-closed Lambda launch script prepared from canonical research-engine main@6a423e0fd38283687cae2eb060405a2a82643450. It must stop the daemon, require a clean fast-forward to that exact commit, initialize the additive schema, normalize conservative production env/backoff settings without any OPENAI_API_KEY, clean only the known unreferenced legacy acceptance gap materializations while preserving raw semantic results, recompute acceptance invariants/checkpoint fingerprint, approve the pending acceptance human review, submit the first sustained bounded RF corpus expansion, restart the daemon, and verify stable unattended operation.
+Observe rf-open-world-corpus-expansion-v1 under the hardened daemon. Allow automatic Codex plan-limit backoff/resume and tier-aware budget routing to operate without intervention. Inspect only if the run reaches WAITING_HUMAN, PAUSED_BUDGET, FAILED, or a provider backoff persists unexpectedly beyond its recorded blocked_until. Do not auto-approve future scientific human-review decisions.
 
 ## Remaining work
 
-- Execute the single fail-closed Lambda deployment/cleanup/approval/launch script against research-engine main@6a423e0fd38283687cae2eb060405a2a82643450.
-- Record the resulting sustained-run ID, daemon health, provider-backoff state if any, and acceptance approval as the post-launch restore point.
-- Observe the sustained RF corpus expansion through Codex allowance backoffs and its next human-review gate; do not silently auto-approve scientific decisions.
+- Observe rf-open-world-corpus-expansion-v1 through discovery, screening, acquisition, extraction, verification, checkpoint, synthesis, bounded gap generation, novelty challenge, and its next human-review gate.
+- At the next human-review gate, audit the new corpus checkpoint/evidence and decide explicitly whether to approve or continue expansion.
+- Use observed throughput and Codex allowance consumption to tune sustained batch size and tier budgets without enabling paid API fallback.
 
 ## Blockers / gates
 
-- Launch-ready code is validated on canonical main; Lambda still needs exact deployment, schema migration, provenance-preserving acceptance cleanup/audit, explicit acceptance approval, and sustained-run submission.
+- None.
 
 ## Fresh-chat initialization
 
