@@ -62,7 +62,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "078cef22ccb68e0538e52654bc9f25ce64aaac5b",
+        "checkpoint_sha": "c29e41d812f2e5a3b492649b2d4538662cd8012d",
         "verified": true
       },
       "local": null,
@@ -669,7 +669,9 @@
       ],
       "outputs": [
         "git:research-engine@078cef22ccb68e0538e52654bc9f25ce64aaac5b",
-        "runtime:github-actions:PR12:36819318032"
+        "runtime:github-actions:PR12:36819318032",
+        "git:research-engine@c29e41d812f2e5a3b492649b2d4538662cd8012d",
+        "runtime:github-actions:PR13:36819746369"
       ],
       "validation": [
         {
@@ -682,6 +684,15 @@
             "Admission backpressure limits simultaneous active runs and pending human-review accumulation.",
             "Stale-worker detection respects valid unexpired leases; lease recovery remains authoritative.",
             "Overnight report summarizes run state, job failures, model token usage, human-review queue, and health."
+          ]
+        },
+        {
+          "check": "persistent deployment packaging",
+          "result": "PASS",
+          "evidence": [
+            "PR #13 merged at c29e41d812f2e5a3b492649b2d4538662cd8012d after CI run 36819746369 PASS.",
+            "CI validated the merged Compose configuration and built the actual daemon image.",
+            "Deployment provides PostgreSQL health dependency, persistent artifact volume, restart policy, non-secret environment template, and systemd fallback."
           ]
         }
       ],
@@ -897,14 +908,12 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "078cef22ccb68e0538e52654bc9f25ce64aaac5b",
+      "identity": "c29e41d812f2e5a3b492649b2d4538662cd8012d",
       "required_for_resume": true,
       "evidence": [
         "stage=production_daemon_v1",
-        "last_validated_boundary=research-engine/main@078cef22ccb68e0538e52654bc9f25ce64aaac5b; PR #12 supervisor core PASS",
-        "in_flight=research-engine PR #13 head daemon-deployment-v1@fea82bf51148f8278e0a3243b46174f3504ed3ff",
-        "slice=daemon deployment packaging: Docker image, Compose PostgreSQL dependency + persistent artifact volume + restart policy, user systemd template, env template, CI compose validation/image build",
-        "resume=inspect PR #13 CI; repair packaging remotely if failing; merge if green; then continue budget guardrails"
+        "last_validated_boundary=research-engine/main@c29e41d812f2e5a3b492649b2d4538662cd8012d; PR #13 deployment packaging PASS",
+        "resume=add durable model-usage ledger and per-run budget enforcement/pause-resume semantics; validate in PostgreSQL CI; model-backed acceptance remains credential-gated"
       ]
     },
     {
@@ -984,6 +993,15 @@
       "required_for_resume": true,
       "evidence": [
         "24/7 daemon supervision, tier concurrency, backpressure, health, and overnight reporting merged after real PostgreSQL CI."
+      ]
+    },
+    {
+      "id": "research-engine-daemon-deployment",
+      "kind": "git_commit",
+      "identity": "c29e41d812f2e5a3b492649b2d4538662cd8012d",
+      "required_for_resume": true,
+      "evidence": [
+        "Persistent daemon deployment packaging validated and merged."
       ]
     }
   ],
@@ -1566,7 +1584,7 @@
     "Run one real model-backed autonomous research cycle on a model-authenticated runtime and inspect the durable human-review payload.",
     "After production runtime acceptance, use the autonomous cycle to resume deferred RF corpus expansion instead of manually shepherding papers."
   ],
-  "next_safe_action": "Inspect research-engine PR #13 for daemon-deployment-v1@fea82bf51148f8278e0a3243b46174f3504ed3ff. Repair CI remotely if failing; merge if green. Then continue production budget guardrails while model-backed acceptance remains credential-gated.",
+  "next_safe_action": "From research-engine/main@c29e41d812f2e5a3b492649b2d4538662cd8012d, add durable semantic usage accounting and per-run budget guardrails. Prevent PAUSED_BUDGET runs from leasing new jobs, expose budget state in health/overnight reports, and require explicit resume after policy change. Validate in PostgreSQL CI.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
