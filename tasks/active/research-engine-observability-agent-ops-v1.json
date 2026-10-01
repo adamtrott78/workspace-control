@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "observability_contract",
+  "current_stage": "hud_and_ops_cli",
   "acceptance_criteria": [
     "A terminal HUD refreshes live operational state without mutating research state and shows daemon health, active run/phase, current agents/jobs, queue depth/age, source funnel, evidence/gap funnel, throughput, failures/backoffs, and Codex allowance telemetry.",
     "Every logical agent role and ephemeral worker instance is durably identifiable, including code checkpoint, host/process generation, supported tier/model, current job, heartbeat, cumulative jobs, elapsed time, failures/retries/backoffs, and model-usage attribution.",
@@ -68,7 +68,7 @@
       "base_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "6a423e0fd38283687cae2eb060405a2a82643450",
+        "checkpoint_sha": "02453b856fbb6d5cac8e611949579a61822560f4",
         "verified": true
       },
       "local": {
@@ -90,7 +90,7 @@
   "stages": [
     {
       "id": "observability_contract",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "research-engine-observability",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -99,39 +99,56 @@
         "research-engine@6a423e0fd38283687cae2eb060405a2a82643450",
         "runtime:rf-open-world-corpus-expansion-v1"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "research-engine/docs/observability-contract-v1.md"
+      ],
+      "validation": [
+        "Contract merged through research-engine PR #22 and canonical-main CI."
+      ],
       "resume_condition": null
     },
     {
       "id": "telemetry_schema_and_agent_identity",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "github+runtime",
       "inputs": [
         "observability_contract"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "additive research_workers logical/session metadata",
+        "rich research_usage_events attribution/backfill",
+        "research_allowance_observations"
+      ],
+      "validation": [
+        "PostgreSQL integration and legacy regression suite passed on canonical main."
+      ],
       "resume_condition": null
     },
     {
       "id": "hud_and_ops_cli",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "github+runtime",
       "inputs": [
         "telemetry_schema_and_agent_identity"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "research-engine ops-snapshot",
+        "research-engine hud",
+        "research-engine allowance-observe"
+      ],
+      "validation": [
+        "Pure forecast/render tests and PostgreSQL ops-attribution tests passed in CI.",
+        "Live Lambda deployment and paused-runtime snapshot remain."
+      ],
       "resume_condition": null
     },
     {
       "id": "codex_allowance_telemetry_and_forecasting",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "github+runtime",
@@ -140,8 +157,13 @@
         "hud_and_ops_cli",
         "user-observation:5h-used≈16%@2026-10-01"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "manual allowance observation ledger",
+        "5-hour/weekly burn-rate and ETA forecast with confidence states"
+      ],
+      "validation": [
+        "Forecast tests passed; live timestamped allowance observations remain to be collected."
+      ],
       "resume_condition": null
     },
     {
@@ -226,17 +248,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "6a423e0fd38283687cae2eb060405a2a82643450",
+      "identity": "02453b856fbb6d5cac8e611949579a61822560f4",
       "required_for_resume": true,
       "evidence": [
-        "stage=observability_contract",
-        "workspace-control/main@08b95dabc03808820e6c7f13ccb04796fdb2e6a5",
-        "research-engine/main@6a423e0fd38283687cae2eb060405a2a82643450",
-        "policy change=user wants monitoring and tuning before further sustained semantic processing",
-        "bridge direction=prefer private MCP/plugin direct tooling; evaluate Slack separately as event/wake-up bus; GitHub remains durable audit",
-        "allowance calibration seed=user observed approximately 16% of current 5-hour Codex window consumed by acceptance/testing work",
+        "stage=hud_and_ops_cli",
+        "workspace-control/main@7948382a4ecb6c24fff6da5a16447a80ed4e4539",
+        "research-engine remote main@02453b856fbb6d5cac8e611949579a61822560f4 canonical CI 36918008262 PASS",
+        "Lambda local research-engine remains main@6a423e0fd38283687cae2eb060405a2a82643450 clean pending paused deployment",
         "runtime_pause=research-engine-daemon.service inactive/dead MainPID=0 Result=success NRestarts=0",
-        "next runtime action=do not restart semantic processing until read-only HUD and initial allowance telemetry are implemented and validated"
+        "next runtime action=deploy observability only; initialize schema and validate HUD; keep semantic daemon stopped"
       ]
     }
   ],
@@ -270,23 +290,31 @@
         "Observed systemd state: ActiveState=inactive, SubState=dead, MainPID=0, Result=success, NRestarts=0.",
         "rf-open-world-corpus-expansion-v1 remains durable in PostgreSQL and no additional semantic allowance should be consumed while the daemon is stopped."
       ]
+    },
+    {
+      "check": "Observability HUD v1 canonical implementation",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #22 merged as 02453b856fbb6d5cac8e611949579a61822560f4.",
+        "Exact canonical main CI run 36918008262 passed compile, full pytest/PostgreSQL integration, daemon Compose validation, image build, and cleanup.",
+        "Implementation includes the observability contract, stable logical-agent identities, richer immutable usage attribution/backfill, allowance observations/forecasting, read-only ops-snapshot, ANSI terminal HUD, and operator documentation.",
+        "The Lambda daemon remained intentionally stopped throughout implementation, so no additional sustained semantic allowance was consumed."
+      ]
     }
   ],
   "blockers": [
-    "Direct MCP/plugin write capability and any Slack-triggered automation must be validated on the user's actual ChatGPT plan/workspace before the bridge can depend on them."
+    "Lambda is intentionally still deployed at research-engine main@6a423e0fd38283687cae2eb060405a2a82643450 with research-engine-daemon.service inactive/dead; observability main@02453b856fbb6d5cac8e611949579a61822560f4 must be fast-forward deployed and the additive schema initialized before the live HUD can be validated.",
+    "At least two trustworthy timestamped observations in the same Codex allowance window are required before exhaustion ETA can move beyond CALIBRATING."
   ],
   "remaining_work": [
-    "Pause the research-engine user daemon on the Lambda, preserving rf-open-world-corpus-expansion-v1 durable state and preventing further semantic allowance burn during instrumentation.",
-    "Specify the metric taxonomy, stable logical-agent identity, event/rollup schema, retention policy, and exact separation between authoritative PostgreSQL telemetry and derived views.",
-    "Implement read-only ops snapshot/report commands and a terminal HUD first, including live per-agent usage, source/evidence/gap throughput, queue/latency, failures/backoffs, and 5-hour/weekly allowance panels.",
-    "Implement explicit 5-hour/weekly Codex usage observations plus empirical forecast calibration/ETA with uncertainty and per-agent/model attribution; ingest the current ~16% 5-hour observation as the first calibration point.",
-    "Run a tightly bounded monitored calibration workload and tune model/tier/concurrency budgets before resuming sustained corpus expansion.",
-    "Implement a low-frequency Chat-visible operations mirror.",
-    "Prototype a private research-engine MCP/plugin as the preferred direct ChatGPT read/advisory-response surface; validate current-plan permissions and Secure MCP Tunnel or another private transport.",
-    "Optionally connect Slack and evaluate it as an event-driven reasoning-request wake-up bus; retain GitHub/PostgreSQL as durable truth.",
-    "Implement and validate structured Chat reasoning request/response state transitions without allowing Chat responses to bypass scientific verification or human gates."
+    "Fast-forward the paused Lambda checkout to research-engine main@02453b856fbb6d5cac8e611949579a61822560f4 without restarting research.",
+    "Initialize the additive observability schema and audit historical worker/usage backfill against the existing acceptance and sustained-run records.",
+    "Record current timestamped 5-hour and weekly Codex allowance readings from the ChatGPT UI; do not treat the earlier approximate 16% reading as a precisely timed forecast sample.",
+    "Validate ops-snapshot and the one-shot/live terminal HUD against rf-open-world-corpus-expansion-v1 while the daemon remains stopped.",
+    "After the HUD is trusted, collect a second allowance reading around a tightly bounded calibration workload and tune model/tier/concurrency budgets before sustained research resumes.",
+    "Then continue the Chat-visible ops mirror, private MCP direct-tool surface, and Slack wake-up/reasoning bridge."
   ],
-  "next_safe_action": "With research-engine-daemon.service confirmed inactive/dead and rf-open-world-corpus-expansion-v1 preserved, inspect the existing research_workers, research_jobs, research_job_attempts, research_usage_events, daemon health/report code, Codex execution metadata, and deployment/runtime identifiers. Write and validate the observability contract first: stable logical agent roles versus ephemeral sessions, append-only telemetry fields, derived metric formulas/windows, retention policy, allowance-observation/forecast semantics, HUD panel contract, Chat-visible summary contract, and MCP/Slack request-response safety boundary. Then implement the read-only ops snapshot and terminal HUD without resuming semantic processing.",
+  "next_safe_action": "Run the fail-closed paused-Lambda HUD deployment script against exact research-engine main@02453b856fbb6d5cac8e611949579a61822560f4. It must require research-engine-daemon.service to remain inactive/dead, require a clean fast-forward main checkout, initialize the additive schema, verify observability tables/columns and preserved scientific run state, optionally record current timestamped 5-hour/weekly allowance observations supplied interactively by the user, generate an ops-snapshot and one-shot HUD for rf-open-world-corpus-expansion-v1, install a convenient research-hud wrapper, and finish with the daemon still stopped. Do not resume semantic processing yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Preferred UX: a terminal HUD launched from Bash/CLI, backed by read-only PostgreSQL queries rather than Bash scraping. Proposed Chat-visible mirror: one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups; raw high-frequency telemetry remains PostgreSQL-authoritative. Proposed Chat bridge: agents create bounded structured reasoning requests that are mirrored to GitHub issues; ChatGPT can read/update them when invoked. This is not equivalent to a direct autonomous ChatGPT conversation API and must not be described as such until separately validated."
