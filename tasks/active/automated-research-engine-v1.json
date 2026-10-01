@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "automated-research-engine-v1",
   "title": "Automated research engine v1",
-  "status": "IN_PROGRESS",
+  "status": "BLOCKED_RUNTIME",
   "goal": "Design and prove a provenance-preserving automated research engine that turns scholarly literature into structured evidence, durable knowledge, challenged research gaps, fundable research programs, and workspace-control-executable research projects.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -12,7 +12,7 @@
     "content_sha": "cbf405d066f84b87f64c03671a4ed1941ca71ffb"
   },
   "parent_execution_owner": "research-operating-system",
-  "current_stage": "production_daemon_v1",
+  "current_stage": "model_backed_acceptance_v1",
   "acceptance_criteria": [
     "The architecture explicitly separates source evidence, extracted evidence, normalized knowledge, synthesis, model inference, and human judgment.",
     "Every durable scientific evidence object can be traced to a canonical work/version, immutable source artifact identity, and source locator whenever the available representation permits it.",
@@ -62,7 +62,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "c29e41d812f2e5a3b492649b2d4538662cd8012d",
+        "checkpoint_sha": "ee702eb61740456306c9768dc6aca2c854571617",
         "verified": true
       },
       "local": null,
@@ -645,7 +645,7 @@
     },
     {
       "id": "model_backed_acceptance_v1",
-      "status": "IN_PROGRESS",
+      "status": "SUSPENDED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "composed",
@@ -655,11 +655,11 @@
       ],
       "outputs": [],
       "validation": [],
-      "resume_condition": null
+      "resume_condition": "Deploy research-engine/main@ee702eb61740456306c9768dc6aca2c854571617 on the Lambda with persistent PostgreSQL/artifact storage and a host-only OPENAI_API_KEY, then run one real autonomous topic through the model-backed controller/daemon to WAITING_HUMAN and inspect durable evidence/search/human-review state."
     },
     {
       "id": "production_daemon_v1",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "research-engine",
       "selected_executor": "chatgpt",
       "selected_surface": "composed",
@@ -671,7 +671,10 @@
         "git:research-engine@078cef22ccb68e0538e52654bc9f25ce64aaac5b",
         "runtime:github-actions:PR12:36819318032",
         "git:research-engine@c29e41d812f2e5a3b492649b2d4538662cd8012d",
-        "runtime:github-actions:PR13:36819746369"
+        "runtime:github-actions:PR13:36819746369",
+        "git:research-engine@ee702eb61740456306c9768dc6aca2c854571617",
+        "runtime:github-actions:PR14:36820538648",
+        "runtime:github-actions:main:36820703111"
       ],
       "validation": [
         {
@@ -693,6 +696,18 @@
             "PR #13 merged at c29e41d812f2e5a3b492649b2d4538662cd8012d after CI run 36819746369 PASS.",
             "CI validated the merged Compose configuration and built the actual daemon image.",
             "Deployment provides PostgreSQL health dependency, persistent artifact volume, restart policy, non-secret environment template, and systemd fallback."
+          ]
+        },
+        {
+          "check": "durable model budget guardrails",
+          "result": "PASS",
+          "evidence": [
+            "PR #14 merged at research-engine/main@ee702eb61740456306c9768dc6aca2c854571617 after repaired CI 36820538648 PASS.",
+            "Canonical post-merge main CI run 36820703111 PASS: tests, PostgreSQL/pgvector, Compose validation, and daemon image build.",
+            "Successful semantic jobs write durable provider/model/token usage events.",
+            "Per-run input-token, output-token, semantic-job, and per-tier job ceilings can pause a run as PAUSED_BUDGET.",
+            "PAUSED_BUDGET runs are excluded from leasing until an explicit budget resume changes policy.",
+            "Overnight reports summarize durable model usage by tier/model."
           ]
         }
       ],
@@ -908,14 +923,14 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "c29e41d812f2e5a3b492649b2d4538662cd8012d",
+      "identity": "ee702eb61740456306c9768dc6aca2c854571617",
       "required_for_resume": true,
       "evidence": [
-        "stage=production_daemon_v1",
-        "last_validated_boundary=research-engine/main@c29e41d812f2e5a3b492649b2d4538662cd8012d; PR #13 deployment packaging PASS",
-        "in_flight=research-engine PR #14 head budget-guardrails-v1@007604e0c774696d9a4275df1e8dd020ae5cb944",
-        "slice=durable model usage ledger + per-run token/semantic-job/tier budgets + PAUSED_BUDGET lease exclusion + explicit resume",
-        "resume=inspect PR #14 CI; repair remotely if failing; merge if green; then production_daemon_v1 is functionally complete pending real host/model credential acceptance"
+        "stage=model_backed_acceptance_v1",
+        "last_validated_boundary=research-engine/main@ee702eb61740456306c9768dc6aca2c854571617; production_daemon_v1 fully validated; canonical main CI 36820703111 PASS",
+        "agentic_research_v1=complete and CI-validated through durable scheduler, deterministic/semantic workers, source hydration/materialization, live search provenance, knowledge checkpoints, novelty arbitration, crash recovery, budgets, and human gate",
+        "boundary=requires user's Lambda host and host-only OPENAI_API_KEY; connected ChatGPT tooling has no authorized SSH/runtime credential surface",
+        "resume=deploy exact main checkpoint on Lambda, initialize/start PostgreSQL+daemon, run one real model-backed autonomous research topic with conservative budget, verify durable usage/evidence/checkpoint/novelty state reaches WAITING_HUMAN, then mark model_backed_acceptance_v1 VALIDATED"
       ]
     },
     {
@@ -1004,6 +1019,16 @@
       "required_for_resume": true,
       "evidence": [
         "Persistent daemon deployment packaging validated and merged."
+      ]
+    },
+    {
+      "id": "research-engine-production-daemon-v1-complete",
+      "kind": "git_commit",
+      "identity": "ee702eb61740456306c9768dc6aca2c854571617",
+      "required_for_resume": true,
+      "evidence": [
+        "24/7 daemon, persistent deployment packaging, backpressure/health/reporting, heterogeneous workers, and durable model budget guardrails are merged and canonical-main CI validated.",
+        "GitHub Actions main run 36820703111 PASS."
       ]
     }
   ],
@@ -1579,14 +1604,16 @@
       ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Package the validated daemon for persistent Lambda deployment with restart-safe service/container configuration, persistent artifact storage, and explicit environment templates.",
-    "Add production budget guardrails around tier concurrency/token usage after the deployment surface is validated.",
-    "Run one real model-backed autonomous research cycle on a model-authenticated runtime and inspect the durable human-review payload.",
-    "After production runtime acceptance, use the autonomous cycle to resume deferred RF corpus expansion instead of manually shepherding papers."
+  "blockers": [
+    "The remaining acceptance test requires the user's Lambda runtime plus a valid OPENAI_API_KEY stored only on that host. Current connected tooling cannot SSH to the Lambda or obtain/use the user's private API credential."
   ],
-  "next_safe_action": "Inspect research-engine PR #14 for budget-guardrails-v1@007604e0c774696d9a4275df1e8dd020ae5cb944. Repair CI remotely if failing; merge if green. Then close production_daemon_v1 as validated and return to the genuine model-authenticated runtime acceptance boundary.",
+  "remaining_work": [
+    "Deploy research-engine/main@ee702eb61740456306c9768dc6aca2c854571617 on the Lambda with persistent PostgreSQL/artifact storage and host-only OpenAI credentials.",
+    "Run one real model-backed autonomous research cycle with a conservative per-run budget and verify it reaches durable WAITING_HUMAN with source-grounded evidence, model usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload.",
+    "After model-backed acceptance passes, use the daemon—not manual chat orchestration—to resume deferred RF corpus expansion and begin 24/7 research operation.",
+    "Tune worker concurrency/model-tier budgets from observed cost/latency/quality after the first real run rather than before."
+  ],
+  "next_safe_action": "Genuine runtime/human-secret boundary. On the user's Lambda, deploy exact research-engine/main@ee702eb61740456306c9768dc6aca2c854571617, store OPENAI_API_KEY only in ~/adamArchives/Adam/.research-engine/research-engine.env, start the Docker Compose daemon stack, and run one conservative-budget autonomous research topic to WAITING_HUMAN. Return only non-secret command output/health/report data. Do not paste the API key into chat.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
