@@ -37,23 +37,22 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 219ef546381a471e5daac91ba524d9b685b8c26b
+- Remote checkpoint: 6a423e0fd38283687cae2eb060405a2a82643450
 - Remote verified: true
 
 ## Next safe action
 
-Audit acceptance-codex-rf-v1 persisted scientific state before resolving the pending human review: recompute the knowledge-checkpoint manifest/fingerprint from current authoritative records; inspect checkpoint-scoped works/artifacts/evidence/locators/verification, synthesis, two bounded gap candidates, novelty challenge provenance/counterevidence/reasoning, model usage ledger, and exact human-review payload. Do not approve the gate until those checks pass.
+Run the single fail-closed Lambda launch script prepared from canonical research-engine main@6a423e0fd38283687cae2eb060405a2a82643450. It must stop the daemon, require a clean fast-forward to that exact commit, initialize the additive schema, normalize conservative production env/backoff settings without any OPENAI_API_KEY, clean only the known unreferenced legacy acceptance gap materializations while preserving raw semantic results, recompute acceptance invariants/checkpoint fingerprint, approve the pending acceptance human review, submit the first sustained bounded RF corpus expansion, restart the daemon, and verify stable unattended operation.
 
 ## Remaining work
 
-- Perform the final scientific/provenance audit of the WAITING_HUMAN acceptance run.
-- If the audit passes, resolve the human review as APPROVED and validate model_backed_acceptance_v1.
-- Fix global budget-exhaustion semantics and implement/validate Codex plan-limit-aware pacing/backoff for continuous included-allowance operation.
-- Then launch the first sustained RF literature expansion under hardened 24/7 controls.
+- Execute the single fail-closed Lambda deployment/cleanup/approval/launch script against research-engine main@6a423e0fd38283687cae2eb060405a2a82643450.
+- Record the resulting sustained-run ID, daemon health, provider-backoff state if any, and acceptance approval as the post-launch restore point.
+- Observe the sustained RF corpus expansion through Codex allowance backoffs and its next human-review gate; do not silently auto-approve scientific decisions.
 
 ## Blockers / gates
 
-- model-backed acceptance has reached WAITING_HUMAN; final scientific-state/provenance audit and explicit human decision remain before acceptance can be marked complete.
+- Launch-ready code is validated on canonical main; Lambda still needs exact deployment, schema migration, provenance-preserving acceptance cleanup/audit, explicit acceptance approval, and sustained-run submission.
 
 ## Fresh-chat initialization
 
