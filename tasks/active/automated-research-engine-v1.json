@@ -901,9 +901,10 @@
       "required_for_resume": true,
       "evidence": [
         "stage=production_daemon_v1",
-        "last_validated_boundary=research-engine/main@078cef22ccb68e0538e52654bc9f25ce64aaac5b; PR #12 24/7 daemon supervisor PASS",
-        "model_backed_acceptance=model credential availability remains unverified from this executor; secret APIs are unavailable and direct secret-probe mutation was blocked before GitHub state changed",
-        "resume=package daemon for persistent Lambda deployment (container/systemd/env templates, restart semantics, artifact volume, database dependency), validate packaging in CI, then continue budget guardrails that do not require model credentials"
+        "last_validated_boundary=research-engine/main@078cef22ccb68e0538e52654bc9f25ce64aaac5b; PR #12 supervisor core PASS",
+        "in_flight=research-engine PR #13 head daemon-deployment-v1@fea82bf51148f8278e0a3243b46174f3504ed3ff",
+        "slice=daemon deployment packaging: Docker image, Compose PostgreSQL dependency + persistent artifact volume + restart policy, user systemd template, env template, CI compose validation/image build",
+        "resume=inspect PR #13 CI; repair packaging remotely if failing; merge if green; then continue budget guardrails"
       ]
     },
     {
@@ -1565,7 +1566,7 @@
     "Run one real model-backed autonomous research cycle on a model-authenticated runtime and inspect the durable human-review payload.",
     "After production runtime acceptance, use the autonomous cycle to resume deferred RF corpus expansion instead of manually shepherding papers."
   ],
-  "next_safe_action": "From research-engine/main@078cef22ccb68e0538e52654bc9f25ce64aaac5b, add deployment packaging for the 24/7 daemon: container/service definition, persistent artifact volume, PostgreSQL health dependency, restart behavior, and non-secret environment template. Validate in CI, then add budget guardrails. Model-backed acceptance remains a separate credential-gated stage.",
+  "next_safe_action": "Inspect research-engine PR #13 for daemon-deployment-v1@fea82bf51148f8278e0a3243b46174f3504ed3ff. Repair CI remotely if failing; merge if green. Then continue production budget guardrails while model-backed acceptance remains credential-gated.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
