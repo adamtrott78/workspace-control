@@ -37,30 +37,28 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: de1d1a0ca0f649895d461e40a1496071443e32d7
+- Remote checkpoint: ac04cf29c0a1174b7b570d501c534d6798815d47
 - Remote verified: true
 
 ## Recovery restore point
 
-- Identity: de1d1a0ca0f649895d461e40a1496071443e32d7
+- Identity: ac04cf29c0a1174b7b570d501c534d6798815d47
 - stage=vertical_slice_validation
-- last_validated_boundary=research-engine/main@de1d1a0ca0f649895d461e40a1496071443e32d7 (immutable evidence history + deterministic knowledge checkpoints; PostgreSQL/pgvector CI PASS)
-- in_flight=research-engine PR #4 head novelty-challenge-persistence@45942f236b1acc383a06cd0085c798e9661c345d; purpose=persist checkpoint-bound adversarial novelty challenges with explicit human gate for SUPPORTED_AS_OPEN
-- broggi_exact_source=direct acquisition exhausted for now: AISel returned HTTP 403 in container and GitHub Actions; ScholarSpace/hdl.handle.net and DSpace PID endpoints timed out from Actions; public web search confirmed publication/handle but found no alternate downloadable exact mirror
-- broggi_local_boundary=exact PDF remains available in the user's local PADataset paper package and may be requested only after independent remote work is exhausted
-- resume=inspect PR #4 GitHub Actions for head 45942f236b1acc383a06cd0085c798e9661c345d; repair/merge if green; then continue corpus scaling and novelty revalidation before asking for Broggi local bytes unless exact-source promotion becomes the only remaining safe next step
+- last_validated_boundary=research-engine/main@ac04cf29c0a1174b7b570d501c534d6798815d47 (PR #4 checkpointed novelty persistence; PostgreSQL/pgvector CI 36803449193 PASS)
+- broggi_exact_source=non-blocking local-byte boundary remains: remote AISel/ScholarSpace/handle acquisition failed; local PADataset PDF is available when exact promotion becomes necessary
+- resume=expand corpus with the two 2026 RF papers already used as novelty counterevidence, acquiring exact arXiv bytes through authorized remote runtime where possible; ingest them as first-class evidence, create a new knowledge checkpoint, and re-run persisted novelty challenges
 
 ## Next safe action
 
-Inspect research-engine PR #4 for novelty-challenge-persistence@45942f236b1acc383a06cd0085c798e9661c345d. If CI fails, repair it remotely; if it passes, merge and checkpoint the validated novelty-persistence slice. Continue remote corpus scaling/novelty revalidation before requesting the local Broggi PDF, because that exact-source promotion is now a genuine but non-blocking local-byte boundary.
+Continue from research-engine/main@ac04cf29c0a1174b7b570d501c534d6798815d47. Resolve/acquire exact arXiv sources for 2605.15593 and 2606.12718 using authorized remote surfaces, ingest them into the research-engine corpus/evidence model, create a new deterministic knowledge checkpoint, and re-run the persisted RF OSR novelty challenges using corpus-backed counterevidence. Do not request Broggi local bytes while this independent remote scaling work remains.
 
 ## Remaining work
 
-- Promote Broggi 2025 from OCR_DERIVED to exact-PDF evidence if an authorized scholarly/direct source can provide exact bytes; otherwise use the existing local PADataset PDF only when a true local-byte boundary is reached.
-- Ingest additional RF-specific open-set/OOD papers into the implementation database and re-run adversarial novelty challenge over a broader corpus.
-- Implement novelty-challenge persistence/query services in research-engine using knowledge checkpoints so prior-work rejection/narrowing is reproducible.
-- Only after broader exact-source corpus validation consider any GapCandidate eligible for SUPPORTED_AS_OPEN.
-- After the scaling slice passes, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
+- Acquire exact arXiv source artifacts for the 2026 dynamic/open-set RF paper and the 2026 RF OOD-detector paper that challenged the pilot gaps.
+- Extract and ingest those papers as first-class corpus/evidence members, then create a new knowledge checkpoint and re-run novelty challenges against corpus-backed evidence instead of abstract-only external metadata.
+- Promote Broggi 2025 to exact-PDF evidence from the user's local PADataset copy only when that non-blocking local-byte boundary becomes the next necessary step.
+- Continue expanding RF-specific open-set/OOD literature until novelty challenge results are stable enough for human research-direction review.
+- After exact-source scaling passes, bulk-ingest the remainder of the already-curated PADataset reference PDFs.
 
 ## Blockers / gates
 
