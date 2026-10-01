@@ -63,7 +63,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "64295c4f0d102fb02552f25881f01970d39cb304",
+        "checkpoint_sha": "03babb404e9e6a254deec38fea6ea5ab3b8b05ad",
         "verified": true
       },
       "local": null,
@@ -655,11 +655,12 @@
       "inputs": [
         "agentic_orchestration_v1",
         "git:research-engine@738e3beadf8dabadc2496d53cb2e823779bdc453",
-        "git:research-engine@64295c4f0d102fb02552f25881f01970d39cb304"
+        "git:research-engine@64295c4f0d102fb02552f25881f01970d39cb304",
+        "git:research-engine@03babb404e9e6a254deec38fea6ea5ab3b8b05ad"
       ],
       "outputs": [],
       "validation": [],
-      "resume_condition": "On the user's Lambda, update the existing research-engine checkout to exact main@64295c4f0d102fb02552f25881f01970d39cb304, verify/install Codex CLI, authenticate Codex with the user's ChatGPT plan (no OPENAI_API_KEY), start persistent PostgreSQL plus the native user daemon, then run one conservative autonomous topic through the Codex-backed workers to WAITING_HUMAN and inspect durable evidence/search/usage/checkpoint/novelty/human-review state."
+      "resume_condition": "On the user's Lambda, fast-forward the clean research-engine checkout from 64295c4f0d102fb02552f25881f01970d39cb304 to exact main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad, start persistent PostgreSQL only through the base Compose file, create the dedicated native venv/non-secret Codex environment, install the validated user systemd unit, then run one conservative Codex-backed autonomous topic to WAITING_HUMAN and inspect durable evidence/search/usage/checkpoint/novelty/human-review state."
     },
     {
       "id": "production_daemon_v1",
@@ -935,17 +936,28 @@
       ]
     },
     {
+      "id": "research-engine-codex-native-deployment",
+      "kind": "git_commit",
+      "identity": "03babb404e9e6a254deec38fea6ea5ab3b8b05ad",
+      "required_for_resume": true,
+      "evidence": [
+        "Production deployment now runs PostgreSQL through base Docker Compose and the research daemon natively as the signed-in user so host ChatGPT-authenticated Codex credentials remain on the host.",
+        "Production env template contains no OPENAI_API_KEY; the old API container daemon is isolated behind an explicit openai-api-development profile.",
+        "PR #16 CI 36824117416 PASS and canonical main CI 36824221019 PASS."
+      ]
+    },
+    {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "64295c4f0d102fb02552f25881f01970d39cb304",
+      "identity": "03babb404e9e6a254deec38fea6ea5ab3b8b05ad",
       "required_for_resume": true,
       "evidence": [
         "stage=model_backed_acceptance_v1",
-        "last_validated_boundary=research-engine/main@64295c4f0d102fb02552f25881f01970d39cb304; ChatGPT-plan Codex semantic backend merged; canonical main CI 36823090063 PASS",
-        "agentic_research_v1 and production_daemon_v1 remain intact; semantic jobs now default to Codex CLI while preserving structured result schemas, authoritative hydration/materialization, usage ledger, budgets, novelty arbitration, and human gate",
-        "cost_boundary=production must use included ChatGPT/Codex plan allowance only; no OPENAI_API_KEY and no paid API fallback",
-        "boundary=requires user's Lambda host to update the existing clone, verify/install Codex CLI, and complete ChatGPT-plan authentication; connected ChatGPT tooling has no authorized SSH/runtime surface",
-        "resume=on Lambda update exact main@64295c4f0d102fb02552f25881f01970d39cb304, verify Codex version/auth state without exposing credentials, then initialize persistent PostgreSQL + native user daemon and run one conservative topic to WAITING_HUMAN"
+        "last_validated_boundary=research-engine/main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad; Codex native-host production deployment validated; canonical main CI 36824221019 PASS",
+        "production_topology=PostgreSQL persistent in base Docker Compose; research daemon native user systemd; ChatGPT-authenticated Codex remains host-local; conservative initial semantic concurrency",
+        "cost_boundary=production uses included ChatGPT/Codex plan allowance only; no OPENAI_API_KEY and no paid API fallback",
+        "lambda_observed=research-engine checkout previously clean at 64295c4f0d102fb02552f25881f01970d39cb304; Codex CLI 0.155.1 present and 'Logged in using ChatGPT'; OPENAI_API_KEY absent from environment and host env file",
+        "resume=fast-forward Lambda checkout to exact main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad; then initialize PostgreSQL + native venv/env/systemd and validate one conservative autonomous run to WAITING_HUMAN"
       ]
     },
     {
@@ -1626,19 +1638,27 @@
         "PR CI 36822920211 and canonical main CI 36823090063 passed install, compile, full test suite, Compose configuration validation, and image build.",
         "Production semantic worker selection now defaults to Codex CLI using ChatGPT plan authentication; the paid Responses API path is no longer the production default."
       ]
+    },
+    {
+      "check": "Codex native-host production deployment",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #16 merged at 03babb404e9e6a254deec38fea6ea5ab3b8b05ad.",
+        "PR CI 36824117416 and canonical main CI 36824221019 passed full tests, Compose configuration validation, and image build.",
+        "Production docs, env contract, and user systemd unit now enforce PostgreSQL-in-Docker plus native ChatGPT-authenticated Codex daemon topology; API container execution is explicitly development-only."
+      ]
     }
   ],
   "blockers": [
-    "The remaining acceptance test requires the user's Lambda runtime with Codex CLI authenticated to the user's ChatGPT plan. Current connected tooling cannot operate that host or complete the interactive ChatGPT login flow."
+    "The remaining acceptance test requires execution on the user's Lambda. Codex CLI is already present and authenticated with ChatGPT; the next host operation must deploy the validated native topology and run the first real autonomous acceptance topic."
   ],
   "remaining_work": [
-    "Update the Lambda research-engine checkout to exact main@64295c4f0d102fb02552f25881f01970d39cb304; verify/install a current Codex CLI and authenticate it with the user's ChatGPT account. Do not configure OPENAI_API_KEY.",
-    "Run PostgreSQL persistently and the research daemon natively as the signed-in user so Codex can reuse host ChatGPT authentication without copying credentials into a container.",
+    "Fast-forward the Lambda research-engine checkout to exact main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad; start persistent PostgreSQL via the base Compose file and deploy the native Codex-authenticated daemon using the checked-in venv/env/systemd procedure.",
     "Run one real Codex-backed autonomous research cycle with a conservative per-run budget and verify it reaches durable WAITING_HUMAN with source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload.",
-    "After acceptance passes, use the daemon—not manual chat orchestration—to resume RF corpus expansion and operate continuously while pacing work to stay within the included Codex allowance.",
-    "Tune worker concurrency/model-tier budgets from observed Codex allowance consumption, latency, and quality after the first real run."
+    "After acceptance passes, use the daemon—not manual chat orchestration—to resume RF corpus expansion and operate continuously while pacing or pausing to stay within the included Codex allowance.",
+    "Tune worker concurrency/model-tier budgets and allowance-aware pacing from observed Codex consumption, latency, and quality after the first real run."
   ],
-  "next_safe_action": "Genuine runtime/human-auth boundary. On the user's Lambda, update the existing research-engine checkout to exact main@64295c4f0d102fb02552f25881f01970d39cb304, verify or install a current Codex CLI, and authenticate Codex with the user's ChatGPT account. Do not configure OPENAI_API_KEY and do not use paid API fallback. Return only non-secret version/auth/status output. Then initialize persistent PostgreSQL plus the native user daemon and run one conservative-budget autonomous research topic to WAITING_HUMAN.",
+  "next_safe_action": "Genuine Lambda runtime boundary. On the user's Lambda, fast-forward the clean research-engine checkout from 64295c4f0d102fb02552f25881f01970d39cb304 to exact main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad. Then start PostgreSQL only with the base Docker Compose file, create the dedicated native research-engine venv and non-secret Codex environment from the checked-in template, and validate the host prerequisites before enabling the user systemd daemon. Do not configure OPENAI_API_KEY or use the openai-api-development Compose profile. Return only non-secret command/status output.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general. Production semantic execution is constrained to the user's included ChatGPT/Codex plan allowance; continuous operation must pace or pause rather than fall back to paid API usage."
