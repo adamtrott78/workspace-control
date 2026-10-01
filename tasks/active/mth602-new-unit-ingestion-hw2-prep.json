@@ -2,19 +2,19 @@
   "schema_version": 2,
   "task_id": "mth602-new-unit-ingestion-hw2-prep",
   "title": "MTH 602 new-unit ingestion and HW2 preparation",
-  "status": "SUSPENDED",
+  "status": "IN_PROGRESS",
   "goal": "Bring MTH 602 course-content state current by visually synthesizing new classroom/whiteboard photographs and handwritten notes with the smallest relevant instructor material, persist durable session/topic knowledge without falsely promoting mastery, and bootstrap Homework 2 when authoritative assignment evidence is available.",
   "execution_topology": "remote_only",
   "workflow": {
     "repository": "workspace-control",
-    "path": "policies/OPERATOR_WORKFLOW.md",
-    "checkpoint_sha": "bc3966f10b8b07b9a27d8ec5275f218c209a7609",
-    "content_sha": "f59dfb03fc6739fe9ef4c9e581b0c613aa34cd02"
+    "path": "workflows/course-assignment-work.v1.json",
+    "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+    "content_sha": "8a0f596add333737e03c72a81e71a7eb075b53fc"
   },
   "parent_execution_owner": "mth602-course-content",
   "current_stage": "hw2_bootstrap",
   "acceptance_criteria": [
-    "Fresh execution starts from MTH602 README.md on unit-ingestion-hw2 and follows existing classroom/source/course/study routing.",
+    "Fresh execution starts from MTH602 README.md on unit-ingestion-hw2 at the deliberately refreshed migrated checkpoint 0ed5957af97e2de887ef181f26a9966413daf857 and follows the promoted COURSE_TUTOR.md route plus existing classroom/source/course/study owners.",
     "Whiteboard and handwritten images default to direct multimodal visual interpretation; OCR/Mathpix is optional and used only when it materially improves understanding.",
     "Original images remain source evidence; durable synthesis distinguishes board evidence, projected slides, student notes/reconstruction, student recollection, and explanatory interpretation.",
     "Illegible or ambiguous material remains uncertain rather than being silently repaired.",
@@ -28,9 +28,9 @@
     "Final state is recoverable without the original ingestion conversation."
   ],
   "constraints": [
-    "Start from MTH602 README.md at unit-ingestion-hw2@62b7a03c7139cb3987b72ad66bdc532e8a61b82a and read only relevant routed owners.",
-    "Do not perform the broader tutor/control-plane migration in this task.",
-    "Do not silently adopt later shared contracts; this task pins workspace-control@bc3966f10b8b07b9a27d8ec5275f218c209a7609 OPERATOR_WORKFLOW.md blob f59dfb03fc6739fe9ef4c9e581b0c613aa34cd02.",
+    "Start from MTH602 README.md at unit-ingestion-hw2@0ed5957af97e2de887ef181f26a9966413daf857, resolve workspace-control.lock.json and COURSE_TUTOR.md, then read only the smallest relevant routed owners.",
+    "The course-workflows v2 migration is complete; consume its promoted adapter/lock without rewriting shared architecture from this assignment task.",
+    "Use the deliberately refreshed assignment-work binding at workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; do not silently follow newer shared contracts.",
     "Treat direct vision as reviewed synthesis, not verbatim transcription; preserve provenance and uncertainty.",
     "Do not run OCR/Mathpix on classroom images without demonstrated benefit.",
     "Do not infer mastery from exposure, notes, or tutor-generated synthesis.",
@@ -46,7 +46,7 @@
       "base_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
       "remote": {
         "branch": "unit-ingestion-hw2",
-        "checkpoint_sha": "20dc641dcb9b505efe53daa52932521d0927ef3a",
+        "checkpoint_sha": "0ed5957af97e2de887ef181f26a9966413daf857",
         "verified": true
       },
       "local": null,
@@ -61,10 +61,10 @@
     {
       "name": "workspace-control",
       "intent": "read",
-      "base_sha": "bc3966f10b8b07b9a27d8ec5275f218c209a7609",
+      "base_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "bc3966f10b8b07b9a27d8ec5275f218c209a7609",
+        "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
         "verified": true
       },
       "local": null,
@@ -214,19 +214,22 @@
     },
     {
       "id": "hw2_bootstrap",
-      "status": "SUSPENDED",
+      "status": "IN_PROGRESS",
       "execution_owner": "mth602-homework",
       "selected_executor": "chatgpt",
-      "selected_surface": "github",
+      "selected_surface": "github+chat",
       "inputs": [
         "cumulative_course_promotion",
-        "instructor origin/main@5c037ac5e16249f6d6fa107f50f73ceac848f60d"
+        "instructor origin/main@5c037ac5e16249f6d6fa107f50f73ceac848f60d",
+        "migration-complete:0ed5957af97e2de887ef181f26a9966413daf857",
+        "workflow:course-assignment-work-v1@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9"
       ],
       "outputs": [
         "homework/hw02/CONTEXT.md",
         "homework/hw02/LEARNING.md",
         "homework/hw02/assignment/manifest.json",
-        "homework/hw02/assignment/UPSTREAM_COMMIT.txt"
+        "homework/hw02/assignment/UPSTREAM_COMMIT.txt",
+        "Coordinator refresh completed onto migrated MTH602 checkpoint 0ed5957af97e2de887ef181f26a9966413daf857; no HW2 solution work existed at resume."
       ],
       "validation": [
         {
@@ -249,14 +252,23 @@
         },
         {
           "check": "HW2 source-byte package durably transferred into Git",
-          "result": "PENDING",
+          "result": "NOT_RUN",
           "evidence": [
-            "Exact PDF/CSV/PNG bytes were reviewed and SHA-256 verified in the current executor.",
-            "Current connected GitHub surface cannot directly transfer mounted binary bytes; manifest records the pending transfer boundary."
+            "Binary transfer remains deferred because it is not required to begin Floating-point Problem 1 and large-file transfer through the GitHub connector is intentionally avoided.",
+            "Exact reviewed source identities remain recorded in homework/hw02/CONTEXT.md and assignment/manifest.json."
+          ]
+        },
+        {
+          "check": "Post-migration assignment resume boundary",
+          "result": "PASS",
+          "evidence": [
+            "MTH602 unit-ingestion-hw2 is deliberately refreshed to 0ed5957af97e2de887ef181f26a9966413daf857, the completed migration checkpoint.",
+            "The active task now binds exactly to workflows/course-assignment-work.v1.json at workspace-control 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 (blob 8a0f596add333737e03c72a81e71a7eb075b53fc).",
+            "homework/hw02/CONTEXT.md and LEARNING.md remain at the pre-solution state; no HW2 problem was solved during migration."
           ]
         }
       ],
-      "resume_condition": "Resume after mth602-course-workflows-v2-migration completes on unit-ingestion-hw2 and this capsule is deliberately refreshed to the migrated branch checkpoint."
+      "resume_condition": null
     },
     {
       "id": "completion",
@@ -277,7 +289,7 @@
       "id": "mth602-ingestion-base",
       "kind": "git_commit",
       "identity": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
-      "required_for_resume": true,
+      "required_for_resume": false,
       "evidence": [
         "Observed MTH602 main and unit-ingestion-hw2 at this exact checkpoint."
       ]
@@ -286,7 +298,7 @@
       "id": "workspace-control-operator-contract",
       "kind": "git_commit",
       "identity": "bc3966f10b8b07b9a27d8ec5275f218c209a7609",
-      "required_for_resume": true,
+      "required_for_resume": false,
       "evidence": [
         "Pinned OPERATOR_WORKFLOW.md blob f59dfb03fc6739fe9ef4c9e581b0c613aa34cd02."
       ]
@@ -295,7 +307,7 @@
       "id": "mth602-2026-09-21-ingestion",
       "kind": "git_commit",
       "identity": "dd664c785585e55c2dfe974f98050268fd343b97",
-      "required_for_resume": true,
+      "required_for_resume": false,
       "evidence": [
         "MTH602 unit-ingestion-hw2 is five commits ahead of the pinned base with exactly five changed paths: the 2026-09-21 synthesis, its source manifest, COURSE_INDEX.md, SKILL_MAP.md, and MASTERY.md.",
         "Compare against 62b7a03c7139cb3987b72ad66bdc532e8a61b82a reports ahead_by=5, behind_by=0."
@@ -305,7 +317,7 @@
       "id": "mth602-2026-09-23-ingestion",
       "kind": "git_commit",
       "identity": "e86ce6a687bde7b906c7c26c4d0fd274c3284762",
-      "required_for_resume": true,
+      "required_for_resume": false,
       "evidence": [
         "MTH602 unit-ingestion-hw2 advanced six commits from dd664c785585e55c2dfe974f98050268fd343b97.",
         "Compare reports ahead_by=6, behind_by=0 with exactly six changed paths: the 2026-09-23 synthesis, two provenance manifests, COURSE_INDEX.md, SKILL_MAP.md, and MASTERY.md."
@@ -315,7 +327,7 @@
       "id": "mth602-2026-09-28-ingestion",
       "kind": "git_commit",
       "identity": "6b1cefa7c6d36e0c33e7aaaa926bd07f07b46e1a",
-      "required_for_resume": true,
+      "required_for_resume": false,
       "evidence": [
         "MTH602 unit-ingestion-hw2 advanced five commits from e86ce6a687bde7b906c7c26c4d0fd274c3284762.",
         "Compare reports ahead_by=5, behind_by=0 with exactly five changed paths: the 2026-09-28 synthesis, its lecture-room provenance manifest, COURSE_INDEX.md, SKILL_MAP.md, and MASTERY.md."
@@ -325,10 +337,30 @@
       "id": "mth602-hw2-contract-bootstrap",
       "kind": "git_commit",
       "identity": "20dc641dcb9b505efe53daa52932521d0927ef3a",
-      "required_for_resume": true,
+      "required_for_resume": false,
       "evidence": [
         "MTH602 unit-ingestion-hw2 advanced four commits from 6b1cefa7c6d36e0c33e7aaaa926bd07f07b46e1a.",
         "Compare reports ahead_by=4, behind_by=0 with exactly four new paths under homework/hw02: CONTEXT.md, LEARNING.md, assignment/manifest.json, and assignment/UPSTREAM_COMMIT.txt."
+      ]
+    },
+    {
+      "id": "mth602-post-migration-resume",
+      "kind": "git_commit",
+      "identity": "0ed5957af97e2de887ef181f26a9966413daf857",
+      "required_for_resume": true,
+      "evidence": [
+        "MTH602 unit-ingestion-hw2 verified at the migrated checkpoint 0ed5957af97e2de887ef181f26a9966413daf857.",
+        "The migration changed only README.md, COURSE_TUTOR.md, and workspace-control.lock.json relative to the pre-solution HW2 bootstrap checkpoint."
+      ]
+    },
+    {
+      "id": "workspace-control-assignment-work-binding",
+      "kind": "git_commit",
+      "identity": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "required_for_resume": true,
+      "evidence": [
+        "workflows/course-assignment-work.v1.json blob 8a0f596add333737e03c72a81e71a7eb075b53fc",
+        "MTH602 workspace-control.lock.json pins this exact compatibility checkpoint."
       ]
     }
   ],
@@ -517,20 +549,30 @@
     },
     {
       "check": "HW2 authoritative availability resolved",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "The authoritative HW2 contract remains established in homework/hw02/CONTEXT.md from instructor commit 5c037ac5e16249f6d6fa107f50f73ceac848f60d.",
+        "The operative due date remains October 5, 2026 by the later explicit instructor README clarification."
+      ]
     },
     {
       "check": "Final HANDOFF_SAFE",
       "result": "NOT_RUN",
       "evidence": []
+    },
+    {
+      "check": "Coordinator refresh after course-workflows v2 migration",
+      "result": "PASS",
+      "evidence": [
+        "The suspended task was deliberately resumed only after mth602-course-workflows-v2-migration completed and archived.",
+        "Remote MTH602 recovery state now points to 0ed5957af97e2de887ef181f26a9966413daf857.",
+        "Reusable mechanics now bind to course-assignment-work-v1 at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; project-local assignment/mastery authority remains unchanged."
+      ]
     }
   ],
-  "blockers": [
-    "Final cold-start completeness still requires exact binary transfer of hw2.pdf, hw2.csv, and the two instructor PNG reference assets into homework/hw02; current conversation can continue because those exact bytes are mounted and verified."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Resume HW2 after the course-workflows v2 migration completes and this capsule is refreshed to the migrated branch checkpoint.",
+    "Begin Floating-point Problem 1 in LEARNING mode: diagnose floating-point representation, machine epsilon/relative rounding error, and roundoff/catastrophic-cancellation understanding before substantive solution work.",
     "Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.",
     "Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.",
     "Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.",
@@ -539,8 +581,8 @@
     "Complete exact-byte transfer of previously ingested classroom originals when a suitable binary transfer surface is available.",
     "Synchronize final task JSON/Markdown, establish HANDOFF_SAFE, and archive when the task's preparation/assignment boundary is complete."
   ],
-  "next_safe_action": "Do not begin HW2 Problem 1 while the course-workflows v2 migration is running. Preserve unit-ingestion-hw2 at the recorded pre-solution checkpoint until the migration executor takes ownership. After mth602-course-workflows-v2-migration completes on this same branch, deliberately refresh this capsule to the migrated checkpoint, restore hw2_bootstrap to active work, and then begin Floating-point Problem 1 using homework/hw02/CONTEXT.md, the 2026-09-21 floating-point lecture synthesis, and study/TUTORING.md.",
+  "next_safe_action": "Enter HW2 Floating-point Problem 1 in LEARNING mode. Use homework/hw02/CONTEXT.md, classnotes/2026-09-21/SESSION_SYNTHESIS.md, study/TUTORING.md, study/MASTERY.md, and homework/hw02/LEARNING.md. Start with the smallest diagnostic that tests why evaluating the Taylor series for e^-20 can be numerically dangerous; do not dump the completed solution before diagnosing the student's understanding.",
   "last_executor": "chatgpt",
-  "last_surface": "conversation+github+local-instructor-snapshot",
-  "notes": "Lecture ingestion is complete through 2026-09-28. Lab1 was bridged, completed, executed, and rendered to a clean PDF in the current conversation; actual submission remains a user action. HW2 contract is durably bootstrapped at MTH602 checkpoint 20dc641dcb9b505efe53daa52932521d0927ef3a. Operative HW2 deadline is 2026-10-05 via later instructor README clarification; hw2.pdf still prints 2026-09-30. On 2026-10-01 the task was intentionally suspended at the pre-solution HW2 bootstrap boundary so the course-workflows v2 migration can run on the same isolated branch. No HW2 problem solution work had begun at suspension."
+  "last_surface": "github+chat",
+  "notes": "Lecture ingestion is complete through 2026-09-28. Lab1 was bridged, completed, executed, and rendered to a clean PDF in the current conversation; actual submission remains a user action. HW2 contract is durably bootstrapped at MTH602 checkpoint 20dc641dcb9b505efe53daa52932521d0927ef3a. Operative HW2 deadline is 2026-10-05 via later instructor README clarification; hw2.pdf still prints 2026-09-30. On 2026-10-01 the task was intentionally suspended at the pre-solution HW2 bootstrap boundary so the course-workflows v2 migration can run on the same isolated branch. No HW2 problem solution work had begun at suspension. On 2026-10-01, after the course-workflows v2 migration completed, the coordinator deliberately refreshed this task to MTH602 0ed5957af97e2de887ef181f26a9966413daf857 and workspace-control course-assignment-work-v1 at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9. HW2 resumed with no prior solution work."
 }
