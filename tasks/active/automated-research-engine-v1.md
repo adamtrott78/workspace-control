@@ -14,31 +14,22 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - Status: IN_PROGRESS
 - Capsule schema: v2
 
-## Goal
-
-Design and prove a provenance-preserving automated research engine that turns scholarly literature into structured evidence, durable knowledge, challenged research gaps, fundable research programs, and workspace-control-executable research projects.
-
 ## Current stage
 
 agentic_orchestration_v1
-
-## Workflow
-
-- Repository: workspace-control
-- Path: policies/OPERATOR_WORKFLOW.md
-- Checkpoint: 2ee1f6584178df68d1f01a219fb526d4745707bf
 
 ## Recovery restore point
 
 - Identity: cfd5e354239cd1438bbb1da95d5435892427a67e
 - stage=agentic_orchestration_v1
-- last_validated_boundary=research-engine/main@cfd5e354239cd1438bbb1da95d5435892427a67e; full non-agentic research vertical slice VALIDATED and GitHub Actions 36807507382 PASS
-- manual_corpus_expansion=deferred intentionally; temporary acquisition branches are not the active path
-- resume=branch from cfd5e354239cd1438bbb1da95d5435892427a67e and implement provider-neutral durable orchestration: research runs, job queue, worker leases/retry/recovery, executor tiers, stage fan-out/fan-in, human gate; prove autonomous PostgreSQL cycle before production model adapter
+- last_validated_boundary=research-engine/main@cfd5e354239cd1438bbb1da95d5435892427a67e; non-agentic research vertical slice VALIDATED
+- in_flight=research-engine PR #7 head agentic-orchestrator-v1@a5a5286a08a4120ca69b118443a3010b7333642f
+- purpose=validate PostgreSQL autonomous cycle with transactional leases, crash recovery, retry, executor-tier routing, fan-out/fan-in, reconcilable planning, and durable HUMAN review gate
+- resume=inspect PR #7 GitHub Actions for head a5a5286a08a4120ca69b118443a3010b7333642f; repair remotely if red, merge if green; then implement production headless executor adapter
 
 ## Next safe action
 
-Build agentic orchestration in adamtrott78/research-engine from main@cfd5e354239cd1438bbb1da95d5435892427a67e. First implement the provider-neutral PostgreSQL job/run state machine, transactional leases/retry/recovery, executor-tier routing, stage fan-out/fan-in, and explicit human-review gate. Validate one fully autonomous scripted cycle in GitHub Actions/PostgreSQL before adding a production Codex/model executor adapter.
+Inspect research-engine PR #7 / agentic-orchestrator-v1@a5a5286a08a4120ca69b118443a3010b7333642f. Repair any PostgreSQL orchestration failures remotely; merge when green. Then implement a production headless executor adapter while keeping orchestration provider-neutral.
 
 ## Remaining work
 
@@ -52,15 +43,3 @@ Build agentic orchestration in adamtrott78/research-engine from main@cfd5e354239
 ## Blockers / gates
 
 - None.
-
-## Fresh-chat initialization
-
-@GitHub
-
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/automated-research-engine-v1.json
-
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
