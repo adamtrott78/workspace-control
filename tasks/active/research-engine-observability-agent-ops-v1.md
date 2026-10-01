@@ -31,7 +31,7 @@ Build a low-overhead, provenance-preserving operations layer for the autonomous 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: f2349313e069f4f121eb07713169a2edc77bf54d
+- Remote checkpoint: 73697608e3ab179b7ed617b1833796cc47f679c2
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
@@ -44,22 +44,24 @@ chat_visible_ops_mirror
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. With research-engine canonical and Lambda both at main@f2349313e069f4f121eb07713169a2edc77bf54d, implement and CI-validate the Chat-visible ops mirror GitHub-side first: a bounded derived snapshot/Markdown publisher suitable for one machine-maintained GitHub issue plus low-frequency durable rollups, with no prompts/source text/secrets and no scientific-state mutation. Do not assume Lambda GitHub credentials; after repository-side CI passes, validate the publication mechanism on Lambda separately. Continue afterward toward the private MCP direct-tool surface and Slack wake-up/advisory bridge.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify the research-engine checkout is clean on main@f2349313e069f4f121eb07713169a2edc77bf54d, fetch and fast-forward only to canonical main@73697608e3ab179b7ed617b1833796cc47f679c2, render the sanitized Markdown mirror locally with research-engine ops-mirror --run-id rf-open-world-corpus-expansion-v1 --format markdown, then check command -v gh and gh auth status --hostname github.com. If gh auth is ready, run bash deploy/publish-ops-mirror.sh current and preserve the output so ChatGPT can verify the GitHub issue directly. If gh is missing or unauthenticated, stop there and report that exact boundary. Keep the daemon inactive/dead throughout.
 
 ## Remaining work
 
-- Implement the Chat-visible ops mirror as a derived, bounded operational surface. Raw high-frequency truth remains PostgreSQL-authoritative; do not use workspace-control main or canonical research-engine commits as a high-frequency telemetry sink.
-- Prefer one machine-maintained GitHub issue for current state plus low-frequency permanent daily/run rollups. The mirror must expose daemon/run/phase, agents/jobs, queue/evidence/gap funnels, throughput, failures/backoffs, usage by tier/model/job type, and censored allowance status without prompts/source text/secrets.
-- Validate the Lambda-side publication mechanism and credentials separately; do not assume GitHub CLI/token availability. Publisher failure must not stop scientific processing.
-- Evaluate/implement the private research-engine MCP/plugin direct-tool surface for reading bounded ops state and submitting advisory responses, validating actual plan/workspace permissions rather than assuming writes.
-- Then implement/evaluate the Chat reasoning bridge with GitHub durable audit and Slack as the first candidate wake-up transport; advisory responses must not directly mutate scientific state.
-- Keep sustained corpus expansion paused until chat-visible mirror/bridge work reaches live-runtime validation. Retain VERIFY radius 0 for the next bounded production calibration.
+- Keep research-engine-daemon.service inactive/dead. Fast-forward the clean Lambda research-engine main checkout from f2349313e069f4f121eb07713169a2edc77bf54d to canonical 73697608e3ab179b7ed617b1833796cc47f679c2.
+- Render research-engine ops-mirror --run-id rf-open-world-corpus-expansion-v1 --format markdown locally and preserve/inspect the bounded output. This step requires no GitHub credentials and must not mutate scientific state.
+- Check command -v gh and gh auth status --hostname github.com. If gh is missing or unauthenticated, stop at that boundary and obtain only the required operator install/auth action; do not invent or persist credentials.
+- If gh auth is ready, run bash deploy/publish-ops-mirror.sh current, then verify the created/updated [ops] research-engine live state issue through direct GitHub tooling and confirm the remote body matches the sanitized mirror contract.
+- After current-state issue publication is validated, choose a low-frequency rollup cadence and validate one rollup comment; do not use canonical Git commits as a telemetry sink.
+- Then continue to the private research-engine MCP/direct-tool surface and the Slack wake-up/advisory reasoning bridge, keeping PostgreSQL/GitHub as durable authorities and responses advisory-only.
+- Do not resume sustained corpus expansion until the mirror/bridge path reaches live-runtime validation.
 
 ## Blockers / gates
 
-- Sustained START remains gated. The tuning decision is complete, but the Chat-visible ops mirror and advisory reasoning bridge still need implementation/validation before live runtime validation.
-- The whole-percent plan UI supports only censored batch-level allowance calibration; exact token-to-plan conversion remains intentionally unidentified.
-- EXTRACT evidence spans 43/65 pages across the preserved corpus, so global page-selective EXTRACT remains unjustified.
+- Sustained START remains gated. The Chat-visible mirror is canonical but has not yet been rendered/published from the Lambda runtime or verified through the actual GitHub issue surface.
+- Lambda GitHub CLI availability/authentication is intentionally unknown. Do not assume credentials or install a publication timer until gh auth is validated.
+- The whole-percent plan UI remains censored; exact token-to-plan conversion is intentionally unidentified.
+- Global page-selective EXTRACT remains unjustified by the 43/65 evidence-bearing-page audit.
 
 ## Fresh-chat initialization
 
