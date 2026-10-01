@@ -219,7 +219,8 @@
           "evidence": [
             "The available runtime has latexmk, pdflatex, and pdftoppm installed.",
             "The runtime contains no MTH602 checkout/artifact and has no network route to github.com, so exact repository inputs cannot be obtained there without a user-supplied/materialized file bridge.",
-            "No fresh compile/render/visual inspection is claimed yet."
+            "No fresh compile/render/visual inspection is claimed yet.",
+            "Independent runtime smoke test passed: latexmk compiled a clean one-page LaTeX document, pdftoppm rendered it successfully, and pdfinfo reported one page. The remaining blocker is exact MTH602 report input availability, not missing runtime tooling."
           ]
         },
         {
