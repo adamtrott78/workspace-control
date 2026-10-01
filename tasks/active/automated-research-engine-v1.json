@@ -767,9 +767,10 @@
       "required_for_resume": true,
       "evidence": [
         "stage=vertical_slice_validation",
-        "last_validated_boundary=research-engine/main@ac04cf29c0a1174b7b570d501c534d6798815d47 (PR #4 checkpointed novelty persistence; PostgreSQL/pgvector CI 36803449193 PASS)",
-        "broggi_exact_source=non-blocking local-byte boundary remains: remote AISel/ScholarSpace/handle acquisition failed; local PADataset PDF is available when exact promotion becomes necessary",
-        "resume=expand corpus with the two 2026 RF papers already used as novelty counterevidence, acquiring exact arXiv bytes through authorized remote runtime where possible; ingest them as first-class evidence, create a new knowledge checkpoint, and re-run persisted novelty challenges"
+        "last_validated_boundary=research-engine/main@ac04cf29c0a1174b7b570d501c534d6798815d47 (PR #4 checkpointed novelty persistence; PostgreSQL/pgvector CI PASS)",
+        "external_runtime_prepared=research-engine/acquire-rf-counterevidence commit 1009e230a22878ad9ab54ff2a37ae1c8353b7043 prepared from ac04cf29c0a1174b7b570d501c534d6798815d47; branch ref not yet advanced at restore-point creation",
+        "purpose=acquire exact arXiv v1 PDFs for 2605.15593 and 2606.12718, verify SHA-256/PDF magic/page count, and upload exact-source bundle",
+        "resume=verify acquire-rf-counterevidence ref; if it points to 1009e230a22878ad9ab54ff2a37ae1c8353b7043 inspect newest Acquire RF novelty counterevidence run/artifact; if not, advance it non-force to prepared commit"
       ]
     },
     {
@@ -1347,7 +1348,7 @@
     "Continue expanding RF-specific open-set/OOD literature until novelty challenge results are stable enough for human research-direction review.",
     "After exact-source scaling passes, bulk-ingest the remainder of the already-curated PADataset reference PDFs."
   ],
-  "next_safe_action": "Continue from research-engine/main@ac04cf29c0a1174b7b570d501c534d6798815d47. Resolve/acquire exact arXiv sources for 2605.15593 and 2606.12718 using authorized remote surfaces, ingest them into the research-engine corpus/evidence model, create a new deterministic knowledge checkpoint, and re-run the persisted RF OSR novelty challenges using corpus-backed counterevidence. Do not request Broggi local bytes while this independent remote scaling work remains.",
+  "next_safe_action": "Launch prepared exact arXiv acquisition by non-force advancing research-engine/acquire-rf-counterevidence to 1009e230a22878ad9ab54ff2a37ae1c8353b7043. Then inspect/download the resulting GitHub Actions artifact, verify exact bytes, parse the two PDFs, ingest them into the corpus/evidence model, create a new knowledge checkpoint, and re-run persisted novelty challenges.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."
