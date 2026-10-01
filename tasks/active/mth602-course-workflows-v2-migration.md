@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: mth602-course-workflows-v2-migration
 - Title: MTH602 Course Workflows v2 Migration
-- Status: PLANNED
+- Status: BLOCKED_RUNTIME
 - Capsule schema: v2
 
 ## Goal
@@ -37,24 +37,22 @@ Explicitly migrate the current MTH602 repository integration to the promoted reu
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: 20dc641dcb9b505efe53daa52932521d0927ef3a
+- Remote checkpoint: 0ed5957af97e2de887ef181f26a9966413daf857
 - Remote verified: true
 
 ## Next safe action
 
-Start only from MTH602-AdamTrott README.md at 20dc641dcb9b505efe53daa52932521d0927ef3a on branch unit-ingestion-hw2, then follow its documented routes. Read workspace-control course-bootstrap workflow at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 only through the exact binding in this capsule. Recover the existing source/tutoring/homework/report owners and current compatibility mechanism before mutation. Preserve the newly ingested lecture state and initialized HW2 contract/learning/provenance state exactly. Do not perform any HW2 problem-solving or mastery work as part of the migration.
+Obtain the exact small HW1 report runtime inputs without using the GitHub connector for large-file transfer (minimum: homework/hw01/report/main.tex and homework/hw01/input/hw1.csv, or a small archive containing them). From those exact inputs, run a clean LaTeX build, verify successful output, render the newly built PDF to page images, and visually inspect every page. If that regression passes, mark regression_validation VALIDATED, complete HANDOFF_SAFE, archive this migration task, and do not resume or mutate the separately suspended HW2 task.
 
 ## Remaining work
 
-- Recover current MTH602 owners and compatibility state from the root route.
-- Map missing shared adapter roles without duplicating shared policy.
-- Adopt the promoted checkpoint explicitly if validation supports it.
-- Run cold-start/source-ingestion/tutoring/LaTeX artifact regressions.
-- Checkpoint and verify the migrated project state.
+- Run a clean HW1 LaTeX compile from exact repository inputs in the available runtime.
+- Render the newly built PDF to page images and visually inspect every page.
+- Record the artifact regression result, establish final HANDOFF_SAFE, archive mth602-course-workflows-v2-migration, and leave mth602-new-unit-ingestion-hw2-prep suspended for coordinator refresh.
 
 ## Blockers / gates
 
-- None.
+- Fresh LaTeX build/render/visual-QA regression cannot run in the current runtime because no MTH602 checkout/artifact is mounted and the container cannot resolve github.com. Supply/materialize the exact small HW1 report inputs (at minimum homework/hw01/report/main.tex and homework/hw01/input/hw1.csv, or a small HW1 report/input zip) rather than transferring large binaries through the GitHub connector.
 
 ## Fresh-chat initialization
 
