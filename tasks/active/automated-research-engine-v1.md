@@ -42,19 +42,18 @@ Design and prove a provenance-preserving automated research engine that turns sc
 
 ## Next safe action
 
-Inspect persisted state for acceptance-codex-rf-v1 without manually orchestrating jobs. If status becomes PAUSED_BUDGET, inspect durable budget usage and resume only with a bounded increase. If status becomes WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload before validating model_backed_acceptance_v1.
+Resume acceptance-codex-rf-v1 in place with a bounded budget increase: raise max_jobs_by_tier.STANDARD from 4 to 5 only to clear the consumed cap, and raise max_input_tokens from 220000 to 360000 for the remaining checkpoint/synthesis/gap/novelty stages. Keep max_output_tokens=40000, max_semantic_jobs=12, CHEAP=5, STRONG=3. Then observe persisted state only; do not manually orchestrate stages.
 
 ## Remaining work
 
-- Observe acceptance-codex-rf-v1 through persisted daemon/run state until it reaches WAITING_HUMAN, PAUSED_BUDGET, FAILED, or another terminal/gated state.
-- If PAUSED_BUDGET, inspect durable usage and perform at most a bounded budget increase sufficient to complete acceptance; do not remove budget guardrails.
-- If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload and then validate model_backed_acceptance_v1.
+- Perform one bounded in-place budget resume for acceptance-codex-rf-v1; preserve all other guardrails.
+- Observe the same run until WAITING_HUMAN, another PAUSED_BUDGET, FAILED, or other gated/terminal state.
+- If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload and validate model_backed_acceptance_v1.
 - After acceptance passes, resume RF corpus expansion through the daemon and operate continuously while pacing or pausing to stay within the included Codex allowance.
-- Tune worker concurrency/model-tier budgets and allowance-aware pacing from observed first-run consumption, latency, and quality.
 
 ## Blockers / gates
 
-- The first real Codex-backed autonomous acceptance run acceptance-codex-rf-v1 is now RUNNING on the user's Lambda; final acceptance awaits its durable terminal state.
+- acceptance-codex-rf-v1 is safely PAUSED_BUDGET after exhausting only the STANDARD-tier job cap; bounded budget review/resume is required to continue the same run.
 
 ## Fresh-chat initialization
 

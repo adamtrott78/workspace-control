@@ -953,11 +953,11 @@
       "required_for_resume": true,
       "evidence": [
         "stage=model_backed_acceptance_v1",
-        "last_validated_boundary=research-engine/main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad; native Codex deployment and real structured smoke validated",
-        "lambda_runtime=PostgreSQL healthy; native venv; systemd daemon enabled+active; all worker tiers ACTIVE; ChatGPT-authenticated Codex only",
-        "active_acceptance_run=acceptance-codex-rf-v1 status=RUNNING; budgets input=220000 output=40000 semantic_jobs=12 tier_caps CHEAP=5 STANDARD=4 STRONG=3",
-        "initial_usage=input=0 output=0 semantic_jobs=0; cost boundary remains included ChatGPT/Codex plan allowance only with no paid API fallback",
-        "resume=inspect durable acceptance-codex-rf-v1 state only; if PAUSED_BUDGET inspect usage and bounded-resume, if WAITING_HUMAN validate evidence/checkpoint/novelty/review payload and complete model_backed_acceptance_v1"
+        "last_validated_boundary=research-engine/main@03babb404e9e6a254deec38fea6ea5ab3b8b05ad; native ChatGPT-plan Codex runtime and persistent daemon validated",
+        "acceptance_run=acceptance-codex-rf-v1 PAUSED_BUDGET at BUDGET_REVIEW after DISCOVERY/SCREEN + 2x ACQUIRE/EXTRACT/VERIFY; CHECKPOINT queued; zero failures",
+        "usage_at_pause=input=161973 output=2985 semantic_jobs=6; CHEAP=2 STANDARD=4; pause_reason=MAX_STANDARD_JOBS",
+        "cost_boundary=included ChatGPT/Codex plan allowance only; no OPENAI_API_KEY and no paid API fallback",
+        "resume=bounded budget increase on same run only; raise STANDARD cap minimally and input ceiling enough for remaining checkpoint/synthesis/gap/novelty path, then observe durable terminal/gate state"
       ]
     },
     {
@@ -1695,19 +1695,29 @@
         "Run entered RUNNING with durable budgets max_input_tokens=220000, max_output_tokens=40000, max_semantic_jobs=12, and tier caps CHEAP=5, STANDARD=4, STRONG=3.",
         "Initial durable usage was zero and the persistent systemd research daemon remained active."
       ]
+    },
+    {
+      "check": "First autonomous Codex acceptance budget pause",
+      "result": "PASS",
+      "evidence": [
+        "acceptance-codex-rf-v1 reached PAUSED_BUDGET with human_gate_state=BUDGET_REVIEW and no execution failures.",
+        "Completed: DISCOVERY=1, SCREEN=1, ACQUIRE=2, EXTRACT=2, VERIFY=2; CHECKPOINT=1 remained queued.",
+        "Durable usage at pause: 161973 input tokens, 2985 output tokens, 6 semantic jobs.",
+        "Tier usage: CHEAP=2 (39779 input / 761 output) and STANDARD=4 (122194 input / 2224 output).",
+        "Pause reason was solely MAX_STANDARD_JOBS at the configured STANDARD cap of 4."
+      ]
     }
   ],
   "blockers": [
-    "The first real Codex-backed autonomous acceptance run acceptance-codex-rf-v1 is now RUNNING on the user's Lambda; final acceptance awaits its durable terminal state."
+    "acceptance-codex-rf-v1 is safely PAUSED_BUDGET after exhausting only the STANDARD-tier job cap; bounded budget review/resume is required to continue the same run."
   ],
   "remaining_work": [
-    "Observe acceptance-codex-rf-v1 through persisted daemon/run state until it reaches WAITING_HUMAN, PAUSED_BUDGET, FAILED, or another terminal/gated state.",
-    "If PAUSED_BUDGET, inspect durable usage and perform at most a bounded budget increase sufficient to complete acceptance; do not remove budget guardrails.",
-    "If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload and then validate model_backed_acceptance_v1.",
-    "After acceptance passes, resume RF corpus expansion through the daemon and operate continuously while pacing or pausing to stay within the included Codex allowance.",
-    "Tune worker concurrency/model-tier budgets and allowance-aware pacing from observed first-run consumption, latency, and quality."
+    "Perform one bounded in-place budget resume for acceptance-codex-rf-v1; preserve all other guardrails.",
+    "Observe the same run until WAITING_HUMAN, another PAUSED_BUDGET, FAILED, or other gated/terminal state.",
+    "If WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload and validate model_backed_acceptance_v1.",
+    "After acceptance passes, resume RF corpus expansion through the daemon and operate continuously while pacing or pausing to stay within the included Codex allowance."
   ],
-  "next_safe_action": "Inspect persisted state for acceptance-codex-rf-v1 without manually orchestrating jobs. If status becomes PAUSED_BUDGET, inspect durable budget usage and resume only with a bounded increase. If status becomes WAITING_HUMAN, verify source-grounded evidence, Codex usage ledger, knowledge checkpoint, novelty challenge state, and human-review payload before validating model_backed_acceptance_v1.",
+  "next_safe_action": "Resume acceptance-codex-rf-v1 in place with a bounded budget increase: raise max_jobs_by_tier.STANDARD from 4 to 5 only to clear the consumed cap, and raise max_input_tokens from 220000 to 360000 for the remaining checkpoint/synthesis/gap/novelty stages. Keep max_output_tokens=40000, max_semantic_jobs=12, CHEAP=5, STRONG=3. Then observe persisted state only; do not manually orchestrate stages.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general. Production semantic execution is constrained to the user's included ChatGPT/Codex plan allowance; continuous operation must pace or pause rather than fall back to paid API usage."
