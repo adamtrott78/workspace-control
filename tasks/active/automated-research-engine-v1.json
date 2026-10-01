@@ -62,7 +62,7 @@
       "base_sha": null,
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "cfd5e354239cd1438bbb1da95d5435892427a67e",
+        "checkpoint_sha": "80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2",
         "verified": true
       },
       "local": null,
@@ -574,8 +574,24 @@
         "vertical_slice_validation",
         "git:research-engine@cfd5e354239cd1438bbb1da95d5435892427a67e"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "git:research-engine@80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2",
+        "runtime:github-actions:PR7:36809660246"
+      ],
+      "validation": [
+        {
+          "check": "provider-neutral autonomous cycle",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #7 merged at 80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2 after GitHub Actions run 36809660246 PASS.",
+            "PostgreSQL queue uses transactional FOR UPDATE SKIP LOCKED leases, bounded retry, heartbeats, and lease-expiry recovery.",
+            "Planner is reconcilable/idempotent so worker death after completion cannot permanently orphan downstream work.",
+            "Executor tiers distinguish DETERMINISTIC, CHEAP, STANDARD, STRONG, and HUMAN work.",
+            "End-to-end integration reached durable WAITING_HUMAN after discovery, screening, acquisition fan-out, extraction, verification, checkpoint, synthesis, gap generation, novelty-search fan-out, and novelty arbitration.",
+            "Regression deliberately exercised worker crash recovery and transient retry."
+          ]
+        }
+      ],
       "resume_condition": null
     }
   ],
@@ -788,14 +804,12 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "cfd5e354239cd1438bbb1da95d5435892427a67e",
+      "identity": "80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2",
       "required_for_resume": true,
       "evidence": [
         "stage=agentic_orchestration_v1",
-        "last_validated_boundary=research-engine/main@cfd5e354239cd1438bbb1da95d5435892427a67e; non-agentic research vertical slice VALIDATED",
-        "in_flight=research-engine PR #7 head agentic-orchestrator-v1@25754ebd0093f15ea4cd7bbac90f9262d86e9049; second CI run 36809660246 queued after fixing real checkpoint FK and deterministic crash regression",
-        "purpose=prove PostgreSQL autonomous cycle with leases, lease-expiry recovery, retry, heterogeneous tiers, fan-out/fan-in, reconcilable planning, and durable HUMAN review gate",
-        "resume=inspect run 36809660246 / PR #7; repair remotely if red, merge if green; then implement production headless executor adapter against current verified Codex/OpenAI interface"
+        "last_validated_boundary=research-engine/main@80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2; PR #7 autonomous PostgreSQL cycle PASS",
+        "resume=implement production Responses API executor behind JobExecutor: configurable CHEAP/STANDARD/STRONG model profiles, structured JSON results, refusal/incomplete handling, usage metadata, and tests with mocked client; keep DETERMINISTIC and HUMAN outside model executor"
       ]
     },
     {
@@ -816,6 +830,16 @@
       "evidence": [
         "Validated research-engine baseline for agentic orchestration.",
         "Reusable arXiv provider present; CI 36807507382 PASS."
+      ]
+    },
+    {
+      "id": "research-engine-agentic-orchestrator-core",
+      "kind": "git_commit",
+      "identity": "80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2",
+      "required_for_resume": true,
+      "evidence": [
+        "Provider-neutral autonomous research orchestrator merged after real PostgreSQL CI.",
+        "Crash recovery, retry, heterogeneous tiers, fan-out/fan-in, and human gate all validated."
       ]
     }
   ],
@@ -1381,6 +1405,14 @@
         "The non-agentic research pipeline is sufficiently validated to become the substrate for autonomous orchestration.",
         "Manual literature scaling is now an acceptance workload for the future orchestrator rather than ongoing hand-driven implementation work."
       ]
+    },
+    {
+      "check": "agentic scheduler core",
+      "result": "PASS",
+      "evidence": [
+        "One complete autonomous scripted research cycle ran through real PostgreSQL to the human gate.",
+        "The scheduler is provider-neutral; attaching a production model executor does not change queue/state semantics."
+      ]
     }
   ],
   "blockers": [],
@@ -1392,7 +1424,7 @@
     "Add a production executor adapter suitable for headless Lambda/Codex workers after the provider-neutral orchestration core passes.",
     "Then use the autonomous cycle to resume the deferred RF corpus expansion instead of manually shepherding individual papers."
   ],
-  "next_safe_action": "Inspect research-engine PR #7 CI run 36809660246 for head 25754ebd0093f15ea4cd7bbac90f9262d86e9049. Repair remotely if red and merge when green. Then implement the production headless executor adapter using a currently verified OpenAI/Codex interface while preserving provider-neutral orchestration.",
+  "next_safe_action": "Branch from research-engine/main@80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2 and implement the production OpenAI Responses semantic executor behind the existing JobExecutor interface. Map CHEAP/STANDARD/STRONG through configurable model profiles, require structured JSON output, persist model/usage metadata, handle refusals/incomplete responses as retryable/non-retryable failures, and validate with mocked API tests before wiring a real credentialed worker runtime.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "The first pilot should use a narrow domain close to current expertise (for example open-set/open-world RF sensing and RF signal classification) so system outputs can be checked against expert understanding. The long-term engine is domain-general."

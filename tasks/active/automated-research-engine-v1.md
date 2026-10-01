@@ -1,8 +1,6 @@
 <!-- workspace-control:derived-task-handoff -->
 # Workspace Control Task Handoff
 
-Derived human-readable view.
-
 Authoritative capsule: tasks/active/automated-research-engine-v1.json
 
 ## Task
@@ -13,13 +11,11 @@ Authoritative capsule: tasks/active/automated-research-engine-v1.json
 
 ## Recovery restore point
 
-- Identity: cfd5e354239cd1438bbb1da95d5435892427a67e
+- Identity: 80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2
 - stage=agentic_orchestration_v1
-- last_validated_boundary=research-engine/main@cfd5e354239cd1438bbb1da95d5435892427a67e; non-agentic research vertical slice VALIDATED
-- in_flight=research-engine PR #7 head agentic-orchestrator-v1@25754ebd0093f15ea4cd7bbac90f9262d86e9049; second CI run 36809660246 queued after fixing real checkpoint FK and deterministic crash regression
-- purpose=prove PostgreSQL autonomous cycle with leases, lease-expiry recovery, retry, heterogeneous tiers, fan-out/fan-in, reconcilable planning, and durable HUMAN review gate
-- resume=inspect run 36809660246 / PR #7; repair remotely if red, merge if green; then implement production headless executor adapter against current verified Codex/OpenAI interface
+- last_validated_boundary=research-engine/main@80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2; PR #7 autonomous PostgreSQL cycle PASS
+- resume=implement production Responses API executor behind JobExecutor: configurable CHEAP/STANDARD/STRONG model profiles, structured JSON results, refusal/incomplete handling, usage metadata, and tests with mocked client; keep DETERMINISTIC and HUMAN outside model executor
 
 ## Next safe action
 
-Inspect research-engine PR #7 CI run 36809660246 for head 25754ebd0093f15ea4cd7bbac90f9262d86e9049. Repair remotely if red and merge when green. Then implement the production headless executor adapter using a currently verified OpenAI/Codex interface while preserving provider-neutral orchestration.
+Branch from research-engine/main@80ca8cdc6d35d8c8c8b6099f8cf370de41d18ee2 and implement the production OpenAI Responses semantic executor behind the existing JobExecutor interface. Map CHEAP/STANDARD/STRONG through configurable model profiles, require structured JSON output, persist model/usage metadata, handle refusals/incomplete responses as retryable/non-retryable failures, and validate with mocked API tests before wiring a real credentialed worker runtime.
