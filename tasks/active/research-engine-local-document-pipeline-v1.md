@@ -32,22 +32,21 @@ candidate_parser_bakeoff
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@fbd1508d364ec72a1cb2b3b9013b50a3a3e43286, fetch origin, verify canonical commit b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a descends from it, then fast-forward exactly to that commit. Run bash deploy/diagnose-cuda-host.sh and preserve the complete terminal output. This diagnostic is read-only: it calls libcuda cuInit(0) and cudaGetDeviceCount directly, inspects NVIDIA/UVM modules and device nodes, records kernel command line and recent UVM/Xid/HMM messages, and performs no modprobe, GPU reset, process kill, reboot or kernel-parameter change. Do not rerun Docling until this diagnostic is evaluated.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. The host CUDA stack is recovered after reboot and research-engine is clean on main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The runner should now pass its real CUDA allocation probe, bind a healthy GPU, run the standard/no-OCR SDK self-test, and execute the same 7-paper / 73-page structure benchmark. Do not rerun the host CUDA diagnostic unless CUDA regresses. Keep OCR, formula/code enrichment, VLM, Marker, PaddleOCR, and heavier MinerU tiers disabled.
 
 ## Remaining work
 
-- On the stopped Lambda, fast-forward clean research-engine main from fbd1508d364ec72a1cb2b3b9013b50a3a3e43286 exactly to b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a.
-- Run bash deploy/diagnose-cuda-host.sh and preserve the complete terminal output.
-- Interpret the direct cuInit error code/name/string, CUDA runtime result, nvidia_uvm module/device-node state, permissions, kernel command line and recent UVM/Xid/HMM messages.
-- Only after the diagnostic identifies a supported host-level remedy should any module/kernel/reboot action be considered.
-- Once direct CUDA initialization passes, return to the standard_no_ocr 73-page structure benchmark.
+- Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh on the recovered host and preserve the complete terminal output plus OUTPUT_ROOT.
+- Confirm the real CUDA allocation probe passes, a physical GPU is selected, SDK self-test passes, and Heron layout-model initialization proceeds.
+- If the 7-paper / 73-page benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use.
+- Normalize successful standard_no_ocr structured JSON into paper-package.v1 and compare semantic headings/tables/figures/captions against native + Mathpix.
+- Only if measured gaps remain should formula enrichment, OCR, Marker/Paddle, or other heavier tiers be opened.
 
 ## Blockers / gates
 
-- The Docling structure benchmark is paused until host-level CUDA initialization succeeds; unmasked CUDA initialization currently fails before any model allocation.
-- The root cause may be nvidia_uvm/HMM/device-node/driver initialization; no host mutation is authorized until the read-only diagnostic identifies the failure.
-- Do not reset/kill GPUs, reload modules, reboot, alter kernel parameters, or fall back to CPU before reviewing the diagnostic.
-- Research daemon must remain inactive/dead.
+- The Docling standard/no-OCR 73-page structure benchmark still has not completed; host CUDA is now recovered and no longer the active blocker.
+- Formula enrichment, OCR, VLM, Marker/Paddle, and heavier MinerU tiers remain disabled.
+- Research daemon must remain inactive/dead throughout the structure benchmark.
 
 ## Fresh-chat initialization
 
