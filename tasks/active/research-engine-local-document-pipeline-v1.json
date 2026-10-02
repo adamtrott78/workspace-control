@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "benchmark_corpus_and_mathpix_oracle",
+  "current_stage": "candidate_parser_bakeoff",
   "acceptance_criteria": [
     "A versioned paper-package.v1 contract exists and preserves the original PDF SHA-256 as scientific authority while representing normalized reading-order Markdown, page/block provenance, extracted figures, tables, equations, references/citations, diagnostics, confidence, and parser/model lineage.",
     "The pipeline uses a cascaded cost model: deterministic/native PDF extraction first, specialized local OCR/layout/table/formula/document models only where needed, and a general local VLM/agent only for low-confidence or structurally difficult regions.",
