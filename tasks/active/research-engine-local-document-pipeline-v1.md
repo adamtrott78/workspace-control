@@ -28,16 +28,16 @@ candidate_parser_bakeoff
 - Seven-paper / 73-page Mathpix seed and native pypdf baseline are canonical.
 - Isolated adapter/runtime contracts for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker are canonical.
 - Cheap runtime gate is open only for Docling `native` and MinerU `flash_native`.
-- `deploy/run-document-native-fast-bakeoff.sh` is canonical at research-engine `3729fadcc371e0a0d2b938a9e8b5842a134604f0`; PR and canonical-main CI are green.
+- `deploy/run-document-native-fast-bakeoff.sh` is corrected and canonical at research-engine `eef0995ff2454ad621921bbb6fc911cbbcc7370a`; PR #38 and canonical-main CI are green. The first Lambda invocation failed closed before parser installation because literal escaped Bash parameter expansions were committed in the prior runner.
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify the research-engine checkout is clean on main@73697608e3ab179b7ed617b1833796cc47f679c2, fetch origin, verify canonical commit 3729fadcc371e0a0d2b938a9e8b5842a134604f0 is present and descends from the current checkout, then fast-forward exactly to that commit. Run bash deploy/run-document-native-fast-bakeoff.sh and preserve the complete terminal output plus the reported OUTPUT_ROOT. The helper will create isolated Docling-native and MinerU-base environments, install only the pinned lightweight profiles, run document-adapter-status, benchmark docling/native and mineru/flash_native over the 7-paper/73-page seed, record disk/cache footprint, and finish with the daemon inactive/dead. Do not install Marker, PaddleOCR, Torch/full MinerU, Docling standard/VLM, or any other heavier model tier yet.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify the research-engine checkout is clean on main@3729fadcc371e0a0d2b938a9e8b5842a134604f0, fetch origin, verify canonical commit eef0995ff2454ad621921bbb6fc911cbbcc7370a is present and descends from the current checkout, then fast-forward exactly to that commit. Run bash deploy/run-document-native-fast-bakeoff.sh and preserve the complete terminal output plus the reported OUTPUT_ROOT. The corrected helper will create isolated Docling-native and MinerU-base environments, install only the pinned lightweight profiles, run document-adapter-status, benchmark docling/native and mineru/flash_native over the 7-paper/73-page seed, record disk/cache footprint, and finish with the daemon inactive/dead. Do not install Marker, PaddleOCR, Torch/full MinerU, Docling standard/VLM, or any other heavier model tier yet.
 
 ## Remaining work
 
-- On the stopped Lambda, fast-forward the clean research-engine main checkout from 73697608e3ab179b7ed617b1833796cc47f679c2 exactly to 3729fadcc371e0a0d2b938a9e8b5842a134604f0.
-- Run bash deploy/run-document-native-fast-bakeoff.sh and preserve the full terminal output plus its reported OUTPUT_ROOT.
+- On the stopped Lambda, fast-forward the clean research-engine main checkout from 3729fadcc371e0a0d2b938a9e8b5842a134604f0 exactly to eef0995ff2454ad621921bbb6fc911cbbcc7370a.
+- Rerun bash deploy/run-document-native-fast-bakeoff.sh and preserve the full terminal output plus its reported OUTPUT_ROOT.
 - Compare Lambda Docling-native and MinerU-flash-native fidelity, reading order, throughput, runtime footprint, and cache footprint against native-pypdf and Mathpix.
 - If either lightweight runtime command/install fails, patch only the exact runtime contract and rerun; do not fall through to remote APIs or heavier parser tiers.
 - Only after the cheap paths are measured decide whether to install/run Docling standard, MinerU basic/standard, Marker, or PaddleOCR.
@@ -45,7 +45,7 @@ Keep research-engine-daemon.service inactive/dead and do not START sustained res
 
 ## Blockers / gates
 
-- Docling-native and MinerU flash-native are canonical and CI-validated but have not yet been exercised on the Lambda hardware/runtime.
+- Docling-native and MinerU flash-native have not yet been exercised on the Lambda because the first helper invocation failed before installation; the runner bug is now fixed and CI-validated.
 - Additional scanned/broken-text-layer cases remain necessary before final corpus acceptance.
 - Specialized/VLM tiers, Marker, PaddleOCR, model weights, GPU/VRAM use, and multi-document concurrency remain unvalidated.
 - Research daemon must remain inactive/dead throughout the bounded parser-runtime experiment.
