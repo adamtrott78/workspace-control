@@ -73,7 +73,7 @@
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "fbd1508d364ec72a1cb2b3b9013b50a3a3e43286",
+        "head_sha": "b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -219,7 +219,8 @@
         "Lambda retry on research-engine main@d1dd1d32cf57e9c4423d4d31ef314611ebd4162f showed both RTX A4500s at compute mode Default, 0% utilization, no active compute processes, and ~20.0 GiB / ~18.1 GiB free. UUID-masked CUDA probes nevertheless failed on both devices during initialization with cuda_available=false while device_count=1.",
         "research-engine PR #47 switches the diagnostic to an unmasked 256 MiB CUDA allocation control followed by numeric-index CUDA_VISIBLE_DEVICES probes (0/1), retains UUID only as audit metadata, and binds Docling to the selected numeric index. PR CI 36959865580 PASS; canonical-main CI 36959974367 PASS; merged as fbd1508d364ec72a1cb2b3b9013b50a3a3e43286.",
         "Lambda retry on research-engine main@fbd1508d364ec72a1cb2b3b9013b50a3a3e43286 proved the CUDA failure is below Docling/PyTorch masking: unmasked cuda initialization failed with cuda_available=false while device_count=2, and CUDA_VISIBLE_DEVICES=0 and =1 failed identically. Both GPUs remained Default/idle with no active compute processes.",
-        "research-engine PR #48 adds a strictly read-only host CUDA diagnostic that calls libcuda cuInit(0) and CUDA runtime cudaGetDeviceCount directly, inspects nvidia_uvm/device nodes/permissions and recent kernel UVM/Xid/HMM evidence, and performs no host mutation. PR CI 36960458637 PASS; canonical-main CI 36960565039 PASS; merged as b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a."
+        "research-engine PR #48 adds a strictly read-only host CUDA diagnostic that calls libcuda cuInit(0) and CUDA runtime cudaGetDeviceCount directly, inspects nvidia_uvm/device nodes/permissions and recent kernel UVM/Xid/HMM evidence, and performs no host mutation. PR CI 36960458637 PASS; canonical-main CI 36960565039 PASS; merged as b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a.",
+        "Post-reboot host CUDA diagnostic on research-engine main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a passed: cuInit=CUDA_SUCCESS, cuDeviceGetCount=2, cudaGetDeviceCount=cudaSuccess count=2, PyTorch cuda_available=true with both RTX A4500s visible, nvidia_uvm loaded, and device nodes present. The reboot also advanced the host kernel from 6.8.0-124-generic to 6.8.0-138-generic. No current-boot Xid 31/154 recovery fault was present."
       ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
@@ -410,9 +411,10 @@
       "required_for_resume": true,
       "evidence": [
         "stage=candidate_parser_bakeoff",
-        "research-engine remote main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a canonical; PR #48 CI 36960458637 PASS; canonical-main CI 36960565039 PASS",
-        "Lambda/local clean main@fbd1508d364ec72a1cb2b3b9013b50a3a3e43286; unmasked and numeric-index PyTorch CUDA initialization failed",
-        "next=run read-only deploy/diagnose-cuda-host.sh to identify direct CUDA/UVM/driver failure before any host mutation"
+        "research-engine remote/local main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a; daemon inactive/dead PID 0",
+        "post-reboot direct CUDA driver/runtime APIs both PASS and expose two GPUs; PyTorch cuda_available=true",
+        "prior Xid 154 Node Reboot Required recovery state cleared after reboot; host now booted on kernel 6.8.0-138-generic",
+        "next=rerun stopped-daemon Docling standard/no-OCR 7-paper structure benchmark"
       ]
     }
   ],
@@ -601,22 +603,33 @@
         "research-engine PR #48 merged as b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a; PR CI 36960458637 PASS; canonical-main CI 36960565039 PASS.",
         "diagnose-cuda-host.sh is read-only and checks cuInit/cudaGetDeviceCount, driver/UVM modules, /dev/nvidia* permissions, uvm_disable_hmm if exposed, and recent NVIDIA/UVM/Xid kernel messages."
       ]
+    },
+    {
+      "check": "Post-reboot CUDA host recovery",
+      "result": "PASS",
+      "evidence": [
+        "research-engine local main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a; daemon inactive/dead PID 0.",
+        "libcuda cuInit returned CUDA_SUCCESS and cuDeviceGetCount returned 2.",
+        "CUDA runtime cudaGetDeviceCount returned cudaSuccess with count=2.",
+        "PyTorch 2.13.0+cu126 reported cuda_available=true and resolved both NVIDIA RTX A4500 devices.",
+        "nvidia_uvm remained loaded and /dev/nvidia-uvm plus /dev/nvidia-uvm-tools were present.",
+        "Host reboot cleared the prior Xid 154 Node Reboot Required recovery state; current boot is kernel 6.8.0-138-generic."
+      ]
     }
   ],
   "blockers": [
-    "The Docling structure benchmark is paused until host-level CUDA initialization succeeds; unmasked CUDA initialization currently fails before any model allocation.",
-    "The root cause may be nvidia_uvm/HMM/device-node/driver initialization; no host mutation is authorized until the read-only diagnostic identifies the failure.",
-    "Do not reset/kill GPUs, reload modules, reboot, alter kernel parameters, or fall back to CPU before reviewing the diagnostic.",
-    "Research daemon must remain inactive/dead."
+    "The Docling standard/no-OCR 73-page structure benchmark still has not completed; host CUDA is now recovered and no longer the active blocker.",
+    "Formula enrichment, OCR, VLM, Marker/Paddle, and heavier MinerU tiers remain disabled.",
+    "Research daemon must remain inactive/dead throughout the structure benchmark."
   ],
   "remaining_work": [
-    "On the stopped Lambda, fast-forward clean research-engine main from fbd1508d364ec72a1cb2b3b9013b50a3a3e43286 exactly to b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a.",
-    "Run bash deploy/diagnose-cuda-host.sh and preserve the complete terminal output.",
-    "Interpret the direct cuInit error code/name/string, CUDA runtime result, nvidia_uvm module/device-node state, permissions, kernel command line and recent UVM/Xid/HMM messages.",
-    "Only after the diagnostic identifies a supported host-level remedy should any module/kernel/reboot action be considered.",
-    "Once direct CUDA initialization passes, return to the standard_no_ocr 73-page structure benchmark."
+    "Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh on the recovered host and preserve the complete terminal output plus OUTPUT_ROOT.",
+    "Confirm the real CUDA allocation probe passes, a physical GPU is selected, SDK self-test passes, and Heron layout-model initialization proceeds.",
+    "If the 7-paper / 73-page benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use.",
+    "Normalize successful standard_no_ocr structured JSON into paper-package.v1 and compare semantic headings/tables/figures/captions against native + Mathpix.",
+    "Only if measured gaps remain should formula enrichment, OCR, Marker/Paddle, or other heavier tiers be opened."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@fbd1508d364ec72a1cb2b3b9013b50a3a3e43286, fetch origin, verify canonical commit b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a descends from it, then fast-forward exactly to that commit. Run bash deploy/diagnose-cuda-host.sh and preserve the complete terminal output. This diagnostic is read-only: it calls libcuda cuInit(0) and cudaGetDeviceCount directly, inspects NVIDIA/UVM modules and device nodes, records kernel command line and recent UVM/Xid/HMM messages, and performs no modprobe, GPU reset, process kill, reboot or kernel-parameter change. Do not rerun Docling until this diagnostic is evaluated.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. The host CUDA stack is recovered after reboot and research-engine is clean on main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The runner should now pass its real CUDA allocation probe, bind a healthy GPU, run the standard/no-OCR SDK self-test, and execute the same 7-paper / 73-page structure benchmark. Do not rerun the host CUDA diagnostic unless CUDA regresses. Keep OCR, formula/code enrichment, VLM, Marker, PaddleOCR, and heavier MinerU tiers disabled.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
