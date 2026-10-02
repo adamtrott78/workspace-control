@@ -28,26 +28,24 @@ candidate_parser_bakeoff
 - Seven-paper / 73-page Mathpix seed and native pypdf baseline are canonical.
 - Isolated adapter/runtime contracts for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker are canonical.
 - Cheap runtime gate is open only for Docling `native` and MinerU `flash_native`.
-- `deploy/run-document-native-fast-bakeoff.sh` is now corrected through the Docling dependency-profile fix at research-engine `4f64fd63e3586ef9685e63e7a090827df07c2f3b`. The second Lambda invocation reached Docling/native but exposed a missing official `convert-core` extra (`rtree`); PR #39 fixes that profile and adds an import preflight.
+- `deploy/run-document-native-fast-bakeoff.sh` is canonical at research-engine `9e343436ccda56c08936855b48079302f7470e0a`. Docling/native now bypasses the CLI and executes through the model-free SDK shim after the third Lambda attempt proved the CLI initializes unrelated OCR/VLM plugins.
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify the research-engine checkout is clean on main@eef0995ff2454ad621921bbb6fc911cbbcc7370a, fetch origin, verify canonical commit 4f64fd63e3586ef9685e63e7a090827df07c2f3b is present and descends from the current checkout, then fast-forward exactly to that commit. Rerun bash deploy/run-document-native-fast-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The helper now installs docling-slim[cli,convert-core,format-pdf]==2.131.0 into the existing isolated Docling venv and must print DOCLING_NATIVE_IMPORT_PREFLIGHT=PASS before corpus execution. Reuse the existing MinerU venv. Do not install Marker, PaddleOCR, Torch/full MinerU, Docling standard/VLM, or any other heavier tier yet.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify the research-engine checkout is clean on main@4f64fd63e3586ef9685e63e7a090827df07c2f3b, fetch origin, verify canonical commit 9e343436ccda56c08936855b48079302f7470e0a is present and descends from the current checkout, then fast-forward exactly to that commit. Rerun bash deploy/run-document-native-fast-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The helper will reuse the existing isolated Docling/MinerU venvs, preflight benchmarks/document_intelligence/runtimes/docling_native.py with --self-test, execute docling/native through the model-free Python SDK shim rather than the CLI, then run mineru/flash_native. Do not install Marker, PaddleOCR, Torch/full MinerU, Docling standard/VLM, or any other heavier tier yet.
 
 ## Remaining work
 
-- On the stopped Lambda, fast-forward the clean research-engine main checkout ## Remaining work
-
-- On the stopped Lambda, verify research-engine is clean on main@eef0995ff2454ad621921bbb6fc911cbbcc7370a and fast-forward exactly to 4f64fd63e3586ef9685e63e7a090827df07c2f3b.
+- On the stopped Lambda, verify research-engine is clean on main@4f64fd63e3586ef9685e63e7a090827df07c2f3b and fast-forward exactly to 9e343436ccda56c08936855b48079302f7470e0a.
 - Rerun bash deploy/run-document-native-fast-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT.
-- Confirm DOCLING_NATIVE_IMPORT_PREFLIGHT=PASS before accepting Docling benchmark execution.
-- Compare Lambda Docling-native and MinerU-flash-native fidelity, reading order, throughput, runtime footprint, and cache footprint against native-pypdf and Mathpix.
-- If another runtime import/command fails, patch only the exact dependency/runtime contract; do not fall through to remote APIs or heavier parser tiers.
+- Confirm DOCLING_NATIVE_SDK_SELF_TEST=PASS before accepting Docling benchmark execution.
+- Compare Lambda Docling-native SDK and MinerU-flash-native fidelity, reading order, throughput, runtime footprint, and cache footprint against native-pypdf and Mathpix.
+- If the SDK shim itself now fails, patch only that exact model-free runtime boundary; do not re-route native mode back through the CLI and do not fall through to heavier tiers.
 - Only after the cheap paths are measured decide whether to install/run Docling standard, MinerU basic/standard, Marker, or PaddleOCR.
 
 ## Blockers / gates
 
-- Docling-native and MinerU flash-native still have not completed the Lambda benchmark; Docling stopped the second attempt before MinerU benchmark execution.
+- Docling-native and MinerU flash-native still have not completed the Lambda benchmark because Docling's CLI initialization stopped the third attempt before conversion; the native path now bypasses the CLI.
 - Additional scanned/broken-text-layer cases remain necessary before final corpus acceptance.
 - Specialized/VLM tiers, Marker, PaddleOCR, model weights, GPU/VRAM use, and multi-document concurrency remain unvalidated.
 - Research daemon must remain inactive/dead throughout the bounded parser-runtime experiment.
