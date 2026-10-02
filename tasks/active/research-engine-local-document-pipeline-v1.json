@@ -67,7 +67,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "ac49579badbef02694a6f8b08061c50570704aee",
+        "checkpoint_sha": "95cd45877d5b847cad894d964b3374bb79db44f4",
         "verified": true
       },
       "local": {
@@ -155,17 +155,15 @@
         "manual Mathpix Markdown/image bundles"
       ],
       "outputs": [
-        "benchmark manifest by document/page difficulty class",
-        "Mathpix reference outputs where available",
-        "expected page/figure/table/equation inventories",
-        "copyright-safe GitHub result exchange conventions"
+        "milcom-mathpix-seed-v1: 7 PDF/oracle pairs, 73 pages",
+        "validated hashes and page counts"
       ],
       "validation": [],
       "resume_condition": "Corpus is representative enough that a converter cannot win merely by handling simple born-digital text."
     },
     {
       "id": "candidate_parser_bakeoff",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+ci",
@@ -180,10 +178,9 @@
         "native PDF extraction/OCR fallbacks"
       ],
       "outputs": [
-        "adapter/harness for each candidate",
-        "normalized benchmark outputs",
-        "quality/resource/throughput comparison",
-        "licensing/dependency matrix"
+        "native-pypdf plain/layout benchmark",
+        "document-benchmark-native CLI",
+        "native preflight metrics"
       ],
       "validation": [],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
