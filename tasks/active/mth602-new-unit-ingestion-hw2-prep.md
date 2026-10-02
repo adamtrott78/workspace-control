@@ -30,7 +30,7 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: 937fc502ce818a17eb313f9e8096a9158fa51f6b
+- Remote checkpoint: 240a5fb8e10a33dae94ffe94280784ceb67b96fb
 - Remote verified: true
 
 ### workspace-control
@@ -42,11 +42,11 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Continue from MTH602 unit-ingestion-hw2@937fc502ce818a17eb313f9e8096a9158fa51f6b. Required Floating-point Problem 1(a)-1(c) is substantively complete. Unless the student wants optional 1(d), proceed to Floating-point Problem 2 in LEARNING mode using the authoritative assignment contract.
+Continue HW2 from MTH602 unit-ingestion-hw2@240a5fb8e10a33dae94ffe94280784ceb67b96fb. Floating-point Problem 1(a)-1(c) is complete. Begin Floating-point Problem 2 in LEARNING mode with the smallest prerequisite diagnostic. Treat Problem 2 as handwritten-only for final submission under the later instructor policy; do not generate a typed final solution. Explicitly remember that required coding is not finished yet because Signal-detection Problems 3(b) and 3(c) remain.
 
 ## Remaining work
 
-- Package Floating-point Problem 1(a)-1(c) into the final reproducible HW2 report when artifact-building begins; required substantive work for Problem 1 is complete.
+- Proceed to Floating-point Problem 2 in LEARNING mode. This is a non-coding problem under the instructor's later HW2 policy, so the student must produce the final submitted derivation/calculation by hand; ChatGPT should act only as an on-demand tutor. Required coding work later resumes in Signal-detection Problems 3(b) and 3(c).
 - Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.
 - Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.
 - Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.
