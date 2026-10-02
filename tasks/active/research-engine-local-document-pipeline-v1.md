@@ -26,35 +26,36 @@ candidate_parser_bakeoff
 
 - Whole-pipeline localization inventory and `paper-package.v1` contract are validated.
 - Seven-paper / 73-page Mathpix seed is active; original PDFs remain authoritative.
-- Native pypdf baseline is canonical.
-- Isolated Docling/MinerU/Paddle/Marker runtime contracts are canonical.
-- Successful Lambda cheap-path bakeoff: Docling/native advanced; MinerU `flash_native` current configuration was rejected as noncompetitive.
-- Docling native result: 73 pages in 10.761208 s, 55,862 tokens vs Mathpix 56,191, mean text/order agreement 0.9250/0.8836.
-- DoclingDocument -> `paper-package.v1` structured normalizer is canonical at research-engine `01797e7a3d0805f02afc7a348125420663623956`; PR and canonical-main CI are green.
-- Successful raw bakeoff output is preserved at `/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-native-fast-20261002T012639Z`.
+- Docling native cheap path completed successfully and remains the leading text/order/provenance substrate.
+- Real structured replay completed at research-engine `01797e7a3d0805f02afc7a348125420663623956`: 100% page provenance and bbox coverage across all normalized body items.
+- Normalized text remained strong: 55,482 tokens vs Mathpix 56,191 with weighted text/read-order agreement about 0.930/0.891.
+- Native semantic structure is insufficient: zero tables, formulas, section headers and caption items across the seed; 289 native picture objects correspond to only 34 Mathpix semantic figures.
+- Therefore native `picture` items are not to be materialized as semantic figures. The next tier is specialized structure augmentation.
+- MinerU `flash_native` remains rejected only in its current configuration.
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify the research-engine checkout is clean on main@9e343436ccda56c08936855b48079302f7470e0a, fetch origin, verify canonical commit 01797e7a3d0805f02afc7a348125420663623956 is present and descends from the current checkout, then fast-forward exactly to that commit. Run bash deploy/run-docling-structured-normalization.sh /home/atrott/adamArchives/Adam/.workspace-control/tmp/document-native-fast-20261002T012639Z and preserve the complete terminal output plus the generated docling-normalization-summary.json. This replay reuses the existing successful Docling structured JSONs and must not rerun Docling, MinerU, or any model-backed parser. Keep the daemon inactive/dead throughout.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. Implement and CI-gate a Docling standard/no-OCR SDK structure benchmark from canonical research-engine main@01797e7a3d0805f02afc7a348125420663623956. Configure PdfPipelineOptions with do_ocr=false, do_table_structure=true, do_code_enrichment=false, do_formula_enrichment=false, generate_page_images=false, generate_picture_images=false and enable_remote_services=false; use an isolated runtime and explicit local model-artifact cache. Do not enable the Docling VLM pipeline, formula enrichment, OCR, Marker, PaddleOCR, or heavier MinerU tiers yet. After merge, run the stopped-daemon standard/no-OCR benchmark on the same seven-paper / 73-page Mathpix seed and preserve complete terminal output plus model/runtime size metrics.
 
 ## Remaining work
 
-- On the stopped Lambda, fast-forward clean research-engine main from 9e343436ccda56c08936855b48079302f7470e0a exactly to 01797e7a3d0805f02afc7a348125420663623956.
-- Run deploy/run-docling-structured-normalization.sh against /home/atrott/adamArchives/Adam/.workspace-control/tmp/document-native-fast-20261002T012639Z; do not rerun Docling or MinerU.
-- Evaluate real seven-paper paper-package.v1 outputs: body-item provenance coverage, bbox coverage, caption coverage, text/order agreement, table/formula/picture count agreement, warnings and any fail-closed cases.
-- After successful replay, implement deterministic figure/image materialization and content-aware structure fidelity tests rather than relying only on count agreement.
+- Implement an isolated Docling standard SDK shim that runs layout + table-structure inference with OCR disabled, formula/code enrichment disabled, picture description/classification disabled, page/picture image generation disabled and remote services disabled.
+- Keep the specialized structure runtime isolated from the 421M native Docling environment; record exact runtime size, model-artifact cache size and model versions.
+- Benchmark the standard/no-OCR structure tier against the same seven-paper / 73-page corpus while the daemon is stopped.
+- Normalize standard Docling JSON with the existing paper-package.v1 normalizer and compare headings, tables, formulas, semantic figures/captions, provenance, text/order fidelity, wall time and output volume to native + Mathpix.
+- Only if standard/no-OCR fails formula content should formula enrichment be benchmarked as a separate targeted escalation; do not enable it globally by default.
 - Run pypdf plain on the same Lambda for controlled throughput/resource comparison.
-- Then begin non-materializing EXTRACT/VERIFY A/B using paper-package.v1 before any production integration.
-- Only if native paths fail specific document classes should heavier Docling/Marker/Paddle/MinerU tiers be benchmarked.
+- After structure augmentation is characterized, run non-materializing EXTRACT/VERIFY A/B using paper-package.v1 before production integration.
+- Benchmark Marker/Paddle/MinerU heavier tiers only if Docling specialized structure cannot satisfy specific measured gaps.
 
 ## Blockers / gates
 
-- The canonical Docling structured normalizer has not yet been replayed against the seven real Lambda Docling JSON outputs.
-- Figure image materialization remains deliberately deferred; current normalization retains FIGURE blocks and caption/provenance metadata without claiming image assets.
-- Structure-count agreement is only a coarse diagnostic and is not equivalent to equation/table/figure content fidelity.
-- A same-Lambda pypdf plain benchmark is still needed before comparing native throughput directly across pypdf and Docling.
-- Scanned/malformed-text cases and heavier local-model tiers remain unvalidated.
-- Research daemon must remain inactive/dead throughout normalization replay.
+- Docling native is validated only as a text/order/provenance substrate; it does not provide usable semantic table/formula/heading/caption classification on this corpus.
+- Native Docling picture items must not be treated as semantic figures; 289 native picture items correspond to only 34 Mathpix figures across the seed.
+- A specialized local structure tier is now required for layout/heading/table/figure classification; formula LaTeX recognition remains a separate later escalation.
+- A same-Lambda pypdf plain benchmark is still needed before direct pypdf-vs-Docling native throughput comparison.
+- Scanned/malformed-text cases and OCR tiers remain unvalidated.
+- Research daemon must remain inactive/dead throughout specialized structure-tier benchmarking.
 
 ## Fresh-chat initialization
 
