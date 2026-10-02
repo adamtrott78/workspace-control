@@ -30,7 +30,7 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: c4303853391fd00618cb664fcb55dc67a9affbdd
+- Remote checkpoint: 937fc502ce818a17eb313f9e8096a9158fa51f6b
 - Remote verified: true
 
 ### workspace-control
@@ -42,11 +42,11 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Enter HW2 Floating-point Problem 1(c) in LEARNING mode from MTH602 unit-ingestion-hw2@c4303853391fd00618cb664fcb55dc67a9affbdd. Part 1(a) and 1(b) are complete. Ask the smallest diagnostic that tests whether the student can find a stable algebraic reformulation that avoids evaluating the Taylor series directly at a large negative argument while leaving taylor_exp unchanged. Do not reveal the reformulation unless the student is blocked.
+Continue from MTH602 unit-ingestion-hw2@937fc502ce818a17eb313f9e8096a9158fa51f6b. Required Floating-point Problem 1(a)-1(c) is substantively complete. Unless the student wants optional 1(d), proceed to Floating-point Problem 2 in LEARNING mode using the authoritative assignment contract.
 
 ## Remaining work
 
-- Begin Floating-point Problem 1(c) in LEARNING mode: diagnose a numerically stable reformulation for e^-20 that does not modify taylor_exp, then demonstrate it with a second convergence plot and interpret why it works.
+- Package Floating-point Problem 1(a)-1(c) into the final reproducible HW2 report when artifact-building begins; required substantive work for Problem 1 is complete.
 - Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.
 - Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.
 - Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.
