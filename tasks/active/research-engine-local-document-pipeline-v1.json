@@ -67,13 +67,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "2d78451b52e5e5dd667b18118ef4ce5373edf6c6",
+        "checkpoint_sha": "350e2d7bffd258248af78d540cc291a78ea83d9b",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "01797e7a3d0805f02afc7a348125420663623956",
+        "head_sha": "2d78451b52e5e5dd667b18118ef4ce5373edf6c6",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -398,15 +398,13 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "2d78451b52e5e5dd667b18118ef4ce5373edf6c6",
+      "identity": "350e2d7bffd258248af78d540cc291a78ea83d9b",
       "required_for_resume": true,
       "evidence": [
-        "stage=candidate_parser_bakeoff",
-        "research-engine remote main@2d78451b52e5e5dd667b18118ef4ce5373edf6c6 canonical; PR #43 CI 36953847303 PASS; canonical-main CI 36953962450 PASS",
-        "Lambda/local research-engine clean main@01797e7a3d0805f02afc7a348125420663623956; daemon inactive/dead PID 0",
-        "Docling native text/order/provenance substrate remains validated; native semantic structure remains insufficient",
-        "standard_no_ocr specialized structure benchmark is implemented and ready; only layout + TableFormer FAST models will be prefetched",
-        "next=fast-forward Lambda to 2d78451... and run deploy/run-document-docling-standard-no-ocr-bakeoff.sh"
+        "research-engine remote main@350e2d7bffd258248af78d540cc291a78ea83d9b; PR #44 and canonical-main CI PASS",
+        "Lambda/local clean main@2d78451b52e5e5dd667b18118ef4ce5373edf6c6; daemon inactive/dead PID 0",
+        "first standard_no_ocr attempt failed before model download/benchmark because docling-tools imported OCR code and lacked scipy",
+        "corrected runner bypasses docling-tools, directly prefetches layout + TableFormer only, and recreates the experimental runtime profile"
       ]
     }
   ],
@@ -569,7 +567,7 @@
     "After structure augmentation is characterized, run non-materializing EXTRACT/VERIFY A/B using paper-package.v1 before production integration.",
     "Benchmark Marker/Paddle/MinerU heavier tiers only if Docling specialized structure cannot satisfy specific measured gaps."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify research-engine is clean on main@01797e7a3d0805f02afc7a348125420663623956, fetch origin, verify canonical commit 2d78451b52e5e5dd667b18118ef4ce5373edf6c6 is present and descends from the current checkout, then fast-forward exactly to that commit. Run bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The helper creates/reuses an isolated standard-no-OCR Docling runtime, prefetches only layout + tableformer artifacts, forces conversion offline after prefetch, reports runtime/model sizes and CUDA visibility, and benchmarks the same 7-paper / 73-page Mathpix seed. Keep OCR, formula/code enrichment, VLM, Marker, PaddleOCR, and heavier MinerU tiers disabled. Keep the daemon inactive/dead throughout.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead. On Lambda, verify the clean research-engine checkout is main@2d78451b52e5e5dd667b18118ef4ce5373edf6c6, fetch origin, fast-forward only to canonical main@350e2d7bffd258248af78d540cc291a78ea83d9b, then rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the full output plus OUTPUT_ROOT. The corrected helper recreates the experimental structure venv under the direct-prefetch-v2 profile, installs docling-slim[format-pdf,models-local]==2.131.0 without CLI extras, directly prefetches only layout and TableFormer artifacts, and keeps OCR/formula/VLM/heavier tiers disabled. Keep the daemon inactive/dead throughout.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
