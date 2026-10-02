@@ -20,36 +20,34 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 ## Current stage
 
-benchmark_corpus_and_mathpix_oracle
+candidate_parser_bakeoff
 
 ## Validated so far
 
-- Whole-pipeline localization inventory: 27 components classified across deterministic local, specialized local model, on-demand local VLM, external web, remote reasoning, and human.
-- `paper-package.v1`: canonical executable contract with deterministic cache identity and page/bbox/section provenance.
-- Benchmark exchange convention: small Markdown/JSON parser and Mathpix oracle outputs may use GitHub; bulky PDFs/model weights stay out of Git.
-- research-engine canonical checkpoint: `ac49579badbef02694a6f8b08061c50570704aee` with PR and canonical-main CI green.
+- Whole-pipeline localization inventory and `paper-package.v1` are canonical.
+- Initial benchmark seed: 7 PDF + Mathpix oracle pairs / 73 pages.
+- Native baseline: pypdf plain and layout modes, page-grounded and non-materializing.
+- Plain preflight mean text/order F1 0.9130/0.8640; layout 0.8848/0.7662.
+- research-engine canonical checkpoint: `95cd45877d5b847cad894d964b3374bb79db44f4` with PR and main CI green.
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead. Do not install heavyweight OCR/VLM models on the Lambda yet. Build the benchmark corpus/oracle layer next against canonical research-engine main@ac49579badbef02694a6f8b08061c50570704aee: add benchmark case/oracle manifests plus a non-materializing runner, implement the deterministic native-PDF adapter as the baseline, and prepare adapter wrappers that keep Docling/MinerU/PaddleOCR/Marker optional and isolated. The user can meanwhile generate Mathpix Markdown/image bundles manually and provide or push them under the documented benchmark convention. Begin candidate model installation only after representative cases exist.
+Keep research-engine-daemon.service inactive/dead and leave Lambda at research-engine main@73697608e3ab179b7ed617b1833796cc47f679c2. Against canonical research-engine main@95cd45877d5b847cad894d964b3374bb79db44f4, implement isolated optional adapter scaffolding for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker/Surya with fail-closed availability checks, without adding their heavyweight dependencies to the core install or installing model weights on Lambda.
 
 ## Remaining work
 
-- Assemble a compact representative benchmark corpus: preserved research-engine papers plus deliberately difficult pages for two-column order, malformed text, scans, equations, tables, charts/figures, mixed layouts, and references.
-- User may manually generate Mathpix Markdown/image bundles for chosen cases using the desktop annual allowance and provide them in chat or push small outputs under benchmarks/document_intelligence/oracles/<case-id>/.
-- Add case/oracle manifests and a benchmark runner that validates source hashes and scores adapter outputs without mutating scientific state.
-- Implement native PDF adapter first as deterministic baseline, then add isolated adapters for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker/Surya without forcing all dependencies into the core production install.
-- Measure document fidelity, provenance, token density, pages/sec, memory/VRAM, model-load cost, and concurrent throughput before selecting component winners.
-- Only after desktop/CI bakeoff should selected local models be installed and benchmarked on the Lambda.
-- Then continue adaptive routing, structured scientific element handling, whole-pipeline localization decisions, and downstream EXTRACT/VERIFY A/B.
+- Implement isolated optional adapters for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker/Surya without adding heavy dependencies to the core install.
+- Record candidate versions, licenses, install/runtime contracts, and cache/resource expectations.
+- Run the seven-paper bakeoff and later add scan-oriented cases before final parser selection.
+- Compare structured-content fidelity, provenance, token density, throughput, load cost, and resource use.
+- Only then install selected candidate runtimes on Lambda for hardware/concurrency validation.
 
 ## Blockers / gates
 
-- Representative benchmark cases and manual Mathpix oracle bundles have not yet been assembled.
-- Candidate parser/model licensing and Lambda VRAM/RAM/throughput remain unvalidated.
-- No heavyweight local document model has been selected or installed; this is intentional until benchmark cases exist.
-- Research-engine Lambda checkout remains at 73697608e3ab179b7ed617b1833796cc47f679c2 and does not need to fast-forward for corpus/oracle assembly.
-- The research daemon must remain stopped during early benchmark/integration work.
+- Additional scan-oriented cases are still needed before final corpus acceptance.
+- Candidate parser runtimes and resource use remain unvalidated.
+- No heavyweight document model is installed on Lambda yet; this is intentional.
+- Research daemon remains stopped during early benchmark work.
 
 ## Fresh-chat initialization
 

@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "benchmark_corpus_and_mathpix_oracle",
+  "current_stage": "candidate_parser_bakeoff",
   "acceptance_criteria": [
     "A versioned paper-package.v1 contract exists and preserves the original PDF SHA-256 as scientific authority while representing normalized reading-order Markdown, page/block provenance, extracted figures, tables, equations, references/citations, diagnostics, confidence, and parser/model lineage.",
     "The pipeline uses a cascaded cost model: deterministic/native PDF extraction first, specialized local OCR/layout/table/formula/document models only where needed, and a general local VLM/agent only for low-confidence or structurally difficult regions.",
@@ -67,7 +67,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "ac49579badbef02694a6f8b08061c50570704aee",
+        "checkpoint_sha": "95cd45877d5b847cad894d964b3374bb79db44f4",
         "verified": true
       },
       "local": {
@@ -155,17 +155,18 @@
         "manual Mathpix Markdown/image bundles"
       ],
       "outputs": [
-        "benchmark manifest by document/page difficulty class",
-        "Mathpix reference outputs where available",
-        "expected page/figure/table/equation inventories",
-        "copyright-safe GitHub result exchange conventions"
+        "milcom-mathpix-seed-v1: 7 PDF/oracle pairs, 73 pages",
+        "validated hashes and page counts"
       ],
-      "validation": [],
+      "validation": [
+        "Uploaded seed: seven PDF + Mathpix pairs, 73 total pages; source hashes and page counts validate.",
+        "Seed includes multi-column scientific papers with figures, tables, equations, algorithms, and references; scan-specific cases remain to add."
+      ],
       "resume_condition": "Corpus is representative enough that a converter cannot win merely by handling simple born-digital text."
     },
     {
       "id": "candidate_parser_bakeoff",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+ci",
@@ -180,12 +181,15 @@
         "native PDF extraction/OCR fallbacks"
       ],
       "outputs": [
-        "adapter/harness for each candidate",
-        "normalized benchmark outputs",
-        "quality/resource/throughput comparison",
-        "licensing/dependency matrix"
+        "native-pypdf plain/layout benchmark",
+        "document-benchmark-native CLI",
+        "native preflight metrics"
       ],
-      "validation": [],
+      "validation": [
+        "research-engine PR #34 merged as 95cd45877d5b847cad894d964b3374bb79db44f4; PR CI 36944071769 PASS; main CI 36944228025 PASS.",
+        "73-page preflight: plain pypdf ~19.50 pages/s, mean text/order F1 0.9130/0.8640; layout ~16.44 pages/s, 0.8848/0.7662.",
+        "Plain extraction preserved ordered-token agreement better on 6/7 seed papers; both native modes are structure-loss baselines."
+      ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
     {
@@ -371,16 +375,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "ac49579badbef02694a6f8b08061c50570704aee",
+      "identity": "95cd45877d5b847cad894d964b3374bb79db44f4",
       "required_for_resume": true,
       "evidence": [
-        "stage=benchmark_corpus_and_mathpix_oracle",
-        "research-engine remote main@ac49579badbef02694a6f8b08061c50570704aee canonical; PR #33 CI 36940736267 PASS; canonical-main CI 36940888183 PASS",
-        "Lambda/local research-engine remains clean main@73697608e3ab179b7ed617b1833796cc47f679c2; daemon inactive/dead PID 0",
-        "localization matrix=27 pipeline components with deterministic/specialized-local/VLM/external/remote/human decisions",
-        "paper-package.v1 contract canonical with deterministic cache identity and page/bbox derivation provenance",
-        "benchmark tree accepts small Markdown/JSON parser and manual Mathpix oracle outputs while excluding large PDFs/model weights",
-        "next=assemble representative benchmark cases and Mathpix oracle outputs, then implement adapters beginning with native PDF baseline and candidate local parser runners; do not install heavy models on Lambda yet"
+        "stage=candidate_parser_bakeoff",
+        "research-engine remote main@95cd45877d5b847cad894d964b3374bb79db44f4; PR #34 CI 36944071769 PASS; main CI 36944228025 PASS",
+        "Lambda/local remains main@73697608e3ab179b7ed617b1833796cc47f679c2 clean; daemon inactive/dead PID 0",
+        "seed=7 PDF + Mathpix pairs / 73 pages",
+        "native plain mean text/order F1 0.9130/0.8640; layout 0.8848/0.7662",
+        "next=optional candidate adapter scaffolding; no Lambda model install yet"
       ]
     }
   ],
@@ -416,25 +419,31 @@
         "The first implementation adds no heavyweight OCR/VLM dependency and makes no production EXTRACT/VERIFY mutation.",
         "Mathpix remains manual benchmark/reference only; production has no paid per-page Mathpix API dependency."
       ]
+    },
+    {
+      "check": "Mathpix seed and native PDF baseline",
+      "result": "PASS",
+      "evidence": [
+        "7 PDF + Mathpix pairs / 73 pages validated.",
+        "research-engine PR #34 and canonical-main CI passed.",
+        "Plain native mode outperformed layout mode on ordered-token agreement in 6/7 cases."
+      ]
     }
   ],
   "blockers": [
-    "Representative benchmark cases and manual Mathpix oracle bundles have not yet been assembled.",
-    "Candidate parser/model licensing and Lambda VRAM/RAM/throughput remain unvalidated.",
-    "No heavyweight local document model has been selected or installed; this is intentional until benchmark cases exist.",
-    "Research-engine Lambda checkout remains at 73697608e3ab179b7ed617b1833796cc47f679c2 and does not need to fast-forward for corpus/oracle assembly.",
-    "The research daemon must remain stopped during early benchmark/integration work."
+    "Additional scan-oriented cases are still needed before final corpus acceptance.",
+    "Candidate parser runtimes and resource use remain unvalidated.",
+    "No heavyweight document model is installed on Lambda yet; this is intentional.",
+    "Research daemon remains stopped during early benchmark work."
   ],
   "remaining_work": [
-    "Assemble a compact representative benchmark corpus: preserved research-engine papers plus deliberately difficult pages for two-column order, malformed text, scans, equations, tables, charts/figures, mixed layouts, and references.",
-    "User may manually generate Mathpix Markdown/image bundles for chosen cases using the desktop annual allowance and provide them in chat or push small outputs under benchmarks/document_intelligence/oracles/<case-id>/.",
-    "Add case/oracle manifests and a benchmark runner that validates source hashes and scores adapter outputs without mutating scientific state.",
-    "Implement native PDF adapter first as deterministic baseline, then add isolated adapters for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker/Surya without forcing all dependencies into the core production install.",
-    "Measure document fidelity, provenance, token density, pages/sec, memory/VRAM, model-load cost, and concurrent throughput before selecting component winners.",
-    "Only after desktop/CI bakeoff should selected local models be installed and benchmarked on the Lambda.",
-    "Then continue adaptive routing, structured scientific element handling, whole-pipeline localization decisions, and downstream EXTRACT/VERIFY A/B."
+    "Implement isolated optional adapters for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker/Surya without adding heavy dependencies to the core install.",
+    "Record candidate versions, licenses, install/runtime contracts, and cache/resource expectations.",
+    "Run the seven-paper bakeoff and later add scan-oriented cases before final parser selection.",
+    "Compare structured-content fidelity, provenance, token density, throughput, load cost, and resource use.",
+    "Only then install selected candidate runtimes on Lambda for hardware/concurrency validation."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead. Do not install heavyweight OCR/VLM models on the Lambda yet. Build the benchmark corpus/oracle layer next against canonical research-engine main@ac49579badbef02694a6f8b08061c50570704aee: add benchmark case/oracle manifests plus a non-materializing runner, implement the deterministic native-PDF adapter as the baseline, and prepare adapter wrappers that keep Docling/MinerU/PaddleOCR/Marker optional and isolated. The user can meanwhile generate Mathpix Markdown/image bundles manually and provide or push them under the documented benchmark convention. Begin candidate model installation only after representative cases exist.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and leave Lambda at research-engine main@73697608e3ab179b7ed617b1833796cc47f679c2. Against canonical research-engine main@95cd45877d5b847cad894d964b3374bb79db44f4, implement isolated optional adapter scaffolding for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker/Surya with fail-closed availability checks, without adding their heavyweight dependencies to the core install or installing model weights on Lambda.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
