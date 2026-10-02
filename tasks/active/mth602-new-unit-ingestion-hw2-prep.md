@@ -30,7 +30,7 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: 37ee976148ee0a20ca8a8682c01285a0585c26fe
+- Remote checkpoint: 22d049f0a18fc03efcb591fd0828642ecb72528f
 - Remote verified: true
 
 ### workspace-control
@@ -42,11 +42,11 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Continue HW2 from MTH602 unit-ingestion-hw2@37ee976148ee0a20ca8a8682c01285a0585c26fe. Probability Problem 1 is complete and handwritten. Begin Probability Problem 2 (linearity of expectation) in LEARNING mode with the smallest diagnostic; do not generate a typed final submission solution.
+Continue HW2 from MTH602 unit-ingestion-hw2@22d049f0a18fc03efcb591fd0828642ecb72528f. Probability Problems 1 and 2 are complete and handwritten. Begin Probability Problem 4 with Bishop 2.16 in LEARNING mode using the exact source statement now persisted in homework/hw02/CONTEXT.md. Start with the smallest diagnostic on E[x_n x_m] for n != m versus n = m; do not dump the full proof.
 
 ## Remaining work
 
-- Proceed to Probability Problem 2 in LEARNING mode. Final submitted solution is handwritten-only under the later HW2 policy.
+- Proceed to Probability Problem 4 in LEARNING mode, starting with Bishop Problem 2.16. Exact textbook source statements for 2.16 and 2.18 are now resolved and persisted in homework/hw02/CONTEXT.md. Final submitted solutions remain handwritten-only.
 - Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.
 - Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.
 - Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.
