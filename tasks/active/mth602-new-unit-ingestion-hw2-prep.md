@@ -30,7 +30,7 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: 240a5fb8e10a33dae94ffe94280784ceb67b96fb
+- Remote checkpoint: e65414a2428c939747048be5efab197613fdb5ba
 - Remote verified: true
 
 ### workspace-control
@@ -42,11 +42,11 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Continue HW2 from MTH602 unit-ingestion-hw2@240a5fb8e10a33dae94ffe94280784ceb67b96fb. Floating-point Problem 1(a)-1(c) is complete. Begin Floating-point Problem 2 in LEARNING mode with the smallest prerequisite diagnostic. Treat Problem 2 as handwritten-only for final submission under the later instructor policy; do not generate a typed final solution. Explicitly remember that required coding is not finished yet because Signal-detection Problems 3(b) and 3(c) remain.
+Continue HW2 from MTH602 unit-ingestion-hw2@e65414a2428c939747048be5efab197613fdb5ba. Floating-point Problems 1 and 2 are complete. Begin Probability Problem 1 in LEARNING mode with the smallest prerequisite diagnostic. Final non-coding submission must be handwritten.
 
 ## Remaining work
 
-- Proceed to Floating-point Problem 2 in LEARNING mode. This is a non-coding problem under the instructor's later HW2 policy, so the student must produce the final submitted derivation/calculation by hand; ChatGPT should act only as an on-demand tutor. Required coding work later resumes in Signal-detection Problems 3(b) and 3(c).
+- Proceed to Probability Problem 1 in LEARNING mode. Under the later HW2 policy, the final submitted solution must be handwritten; ChatGPT should remain an on-demand tutor.
 - Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.
 - Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.
 - Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.
