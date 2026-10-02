@@ -25,17 +25,17 @@ candidate_parser_bakeoff
 ## Validated so far
 
 - Whole-pipeline localization inventory and `paper-package.v1` contract are validated.
-- Seven-paper / 73-page Mathpix seed is active; original PDFs remain authoritative.
-- Docling native cheap path completed successfully and remains the leading text/order/provenance substrate.
-- Real structured replay completed at research-engine `01797e7a3d0805f02afc7a348125420663623956`: 100% page provenance and bbox coverage across all normalized body items.
-- Normalized text remained strong: 55,482 tokens vs Mathpix 56,191 with weighted text/read-order agreement about 0.930/0.891.
-- Native semantic structure is insufficient: zero tables, formulas, section headers and caption items across the seed; 289 native picture objects correspond to only 34 Mathpix semantic figures.
-- Therefore native `picture` items are not to be materialized as semantic figures. The next tier is specialized structure augmentation.
-- MinerU `flash_native` remains rejected only in its current configuration.
+- Seven-paper / 73-page Mathpix seed remains the active benchmark; original PDFs remain authoritative.
+- Docling native is validated as the cheap text/order/provenance substrate with 100% page+bbox provenance coverage, but not as the semantic structure layer.
+- Real native structured replay exposed zero tables/formulas/section headers/captions and 289 low-level picture objects vs 34 Mathpix semantic figures.
+- The bounded specialized structure tier is now canonical at research-engine `2d78451b52e5e5dd667b18118ef4ce5373edf6c6`.
+- That tier uses standard Docling layout + TableFormer FAST inference with OCR, formula/code enrichment, picture description/classification, chart extraction, and remote services disabled.
+- PR #43 CI `36953847303` PASS and canonical-main CI `36953962450` PASS.
+- The next runtime gate measures only this specialized structure tier on the same 73 pages.
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. Implement and CI-gate a Docling standard/no-OCR SDK structure benchmark from canonical research-engine main@01797e7a3d0805f02afc7a348125420663623956. Configure PdfPipelineOptions with do_ocr=false, do_table_structure=true, do_code_enrichment=false, do_formula_enrichment=false, generate_page_images=false, generate_picture_images=false and enable_remote_services=false; use an isolated runtime and explicit local model-artifact cache. Do not enable the Docling VLM pipeline, formula enrichment, OCR, Marker, PaddleOCR, or heavier MinerU tiers yet. After merge, run the stopped-daemon standard/no-OCR benchmark on the same seven-paper / 73-page Mathpix seed and preserve complete terminal output plus model/runtime size metrics.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify research-engine is clean on main@01797e7a3d0805f02afc7a348125420663623956, fetch origin, verify canonical commit 2d78451b52e5e5dd667b18118ef4ce5373edf6c6 is present and descends from the current checkout, then fast-forward exactly to that commit. Run bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The helper creates/reuses an isolated standard-no-OCR Docling runtime, prefetches only layout + tableformer artifacts, forces conversion offline after prefetch, reports runtime/model sizes and CUDA visibility, and benchmarks the same 7-paper / 73-page Mathpix seed. Keep OCR, formula/code enrichment, VLM, Marker, PaddleOCR, and heavier MinerU tiers disabled. Keep the daemon inactive/dead throughout.
 
 ## Remaining work
 

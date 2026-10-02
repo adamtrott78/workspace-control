@@ -67,7 +67,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "01797e7a3d0805f02afc7a348125420663623956",
+        "checkpoint_sha": "2d78451b52e5e5dd667b18118ef4ce5373edf6c6",
         "verified": true
       },
       "local": {
@@ -210,7 +210,8 @@
         "Docling structured replay on the preserved seven-paper Lambda output completed with DOCLING_STRUCTURED_NORMALIZATION=PASS at research-engine main@01797e7a3d0805f02afc7a348125420663623956; daemon ended inactive/dead PID 0.",
         "Normalized Docling-native packages preserved the strong lexical path: 55482 normalized text tokens vs 56191 Mathpix oracle tokens (0.987x), mean text/read-order agreement ~0.9276/~0.8876, oracle-token-weighted ~0.9301/~0.8906.",
         "Native structured semantics were falsified as a sufficient structure layer: aggregate provenance and bbox coverage were 1.0, but every paper reported zero tables, zero formulas, zero section headers and zero caption items. Native 'picture' items are low-level graphics rather than semantic figures: 289 candidate picture items vs 34 Mathpix figures across the corpus.",
-        "Decision: retain Docling native as the cheap text/order/provenance substrate; do not materialize native picture items as semantic figures. Advance to a separate specialized structure-augmentation tier."
+        "Decision: retain Docling native as the cheap text/order/provenance substrate; do not materialize native picture items as semantic figures. Advance to a separate specialized structure-augmentation tier.",
+        "research-engine PR #43 added the isolated Docling standard_no_ocr specialized structure tier and merged as 2d78451b52e5e5dd667b18118ef4ce5373edf6c6. PR CI run 36953847303 PASS; canonical-main CI run 36953962450 PASS."
       ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
@@ -397,16 +398,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "01797e7a3d0805f02afc7a348125420663623956",
+      "identity": "2d78451b52e5e5dd667b18118ef4ce5373edf6c6",
       "required_for_resume": true,
       "evidence": [
         "stage=candidate_parser_bakeoff",
-        "research-engine remote/local main@01797e7a3d0805f02afc7a348125420663623956; structured normalization replay PASS; daemon inactive/dead PID 0",
-        "preserved raw bakeoff OUTPUT_ROOT=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-native-fast-20261002T012639Z",
-        "normalized package root=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-native-fast-20261002T012639Z/docling-paper-package-v1; size=13M",
-        "Docling native text/order/provenance substrate validated: 55482 normalized tokens vs Mathpix 56191, provenance/bbox coverage 1.0",
-        "Docling native semantic structure insufficient: 0 tables, 0 formulas, 0 section headers, 0 caption items; 289 low-level picture items vs 34 Mathpix figures",
-        "next=implement isolated Docling standard/no-OCR layout+table structure tier; no OCR/VLM/formula enrichment yet"
+        "research-engine remote main@2d78451b52e5e5dd667b18118ef4ce5373edf6c6 canonical; PR #43 CI 36953847303 PASS; canonical-main CI 36953962450 PASS",
+        "Lambda/local research-engine clean main@01797e7a3d0805f02afc7a348125420663623956; daemon inactive/dead PID 0",
+        "Docling native text/order/provenance substrate remains validated; native semantic structure remains insufficient",
+        "standard_no_ocr specialized structure benchmark is implemented and ready; only layout + TableFormer FAST models will be prefetched",
+        "next=fast-forward Lambda to 2d78451... and run deploy/run-document-docling-standard-no-ocr-bakeoff.sh"
       ]
     }
   ],
@@ -538,6 +538,17 @@
         "Docling native emitted 289 picture items vs 34 Mathpix semantic figures and zero table/formula/section-header/caption labels across the seven papers.",
         "Final runtime state research-engine main@01797e7a3d0805f02afc7a348125420663623956; daemon inactive/dead PID 0."
       ]
+    },
+    {
+      "check": "Docling standard/no-OCR structure tier implementation",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #43 merged as 2d78451b52e5e5dd667b18118ef4ce5373edf6c6.",
+        "PR CI 36953847303 PASS and canonical-main CI 36953962450 PASS.",
+        "SDK tier uses PdfPipelineOptions with OCR=false, table structure=true, TableFormer FAST, formula/code enrichment=false, picture classification/description=false, chart extraction=false, page/picture images=false, and remote services=false.",
+        "Runtime contract uses isolated docling-slim[format-pdf,models-local,cli]==2.131.0 and prefetches only layout + tableformer model artifacts.",
+        "External benchmark results now capture Docling structured-label inventory when structured JSON is emitted."
+      ]
     }
   ],
   "blockers": [
@@ -558,7 +569,7 @@
     "After structure augmentation is characterized, run non-materializing EXTRACT/VERIFY A/B using paper-package.v1 before production integration.",
     "Benchmark Marker/Paddle/MinerU heavier tiers only if Docling specialized structure cannot satisfy specific measured gaps."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Implement and CI-gate a Docling standard/no-OCR SDK structure benchmark from canonical research-engine main@01797e7a3d0805f02afc7a348125420663623956. Configure PdfPipelineOptions with do_ocr=false, do_table_structure=true, do_code_enrichment=false, do_formula_enrichment=false, generate_page_images=false, generate_picture_images=false and enable_remote_services=false; use an isolated runtime and explicit local model-artifact cache. Do not enable the Docling VLM pipeline, formula enrichment, OCR, Marker, PaddleOCR, or heavier MinerU tiers yet. After merge, run the stopped-daemon standard/no-OCR benchmark on the same seven-paper / 73-page Mathpix seed and preserve complete terminal output plus model/runtime size metrics.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify research-engine is clean on main@01797e7a3d0805f02afc7a348125420663623956, fetch origin, verify canonical commit 2d78451b52e5e5dd667b18118ef4ce5373edf6c6 is present and descends from the current checkout, then fast-forward exactly to that commit. Run bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The helper creates/reuses an isolated standard-no-OCR Docling runtime, prefetches only layout + tableformer artifacts, forces conversion offline after prefetch, reports runtime/model sizes and CUDA visibility, and benchmarks the same 7-paper / 73-page Mathpix seed. Keep OCR, formula/code enrichment, VLM, Marker, PaddleOCR, and heavier MinerU tiers disabled. Keep the daemon inactive/dead throughout.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
