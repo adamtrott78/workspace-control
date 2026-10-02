@@ -32,23 +32,21 @@ candidate_parser_bakeoff
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@d1dd1d32cf57e9c4423d4d31ef314611ebd4162f, fetch origin, verify canonical commit fbd1508d364ec72a1cb2b3b9013b50a3a3e43286 descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The helper first runs an unmasked real 256 MiB CUDA allocation control, then probes CUDA_VISIBLE_DEVICES=0 and =1 separately, binds Docling to the first numeric index that passes, and retains GPU UUID only as audit metadata. Do not kill/reset GPU processes, do not fall back to CPU, and keep OCR/formula/VLM/heavier parser tiers disabled.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@fbd1508d364ec72a1cb2b3b9013b50a3a3e43286, fetch origin, verify canonical commit b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a descends from it, then fast-forward exactly to that commit. Run bash deploy/diagnose-cuda-host.sh and preserve the complete terminal output. This diagnostic is read-only: it calls libcuda cuInit(0) and cudaGetDeviceCount directly, inspects NVIDIA/UVM modules and device nodes, records kernel command line and recent UVM/Xid/HMM messages, and performs no modprobe, GPU reset, process kill, reboot or kernel-parameter change. Do not rerun Docling until this diagnostic is evaluated.
 
 ## Remaining work
 
-- On the stopped Lambda, fast-forward clean research-engine main from d1dd1d32cf57e9c4423d4d31ef314611ebd4162f exactly to fbd1508d364ec72a1cb2b3b9013b50a3a3e43286.
-- Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT.
-- Inspect UNMASKED_CUDA_ALLOCATION and both numeric-index allocation probes.
-- If a numeric index passes, confirm CUDA_VISIBLE_DEVICES is pinned to that index, SDK self-test passes, and Heron initialization proceeds.
-- If the unmasked and both numeric-index probes fail, use the captured environment/device diagnostics to investigate driver/device access next before touching workloads.
-- If the corpus benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use.
+- On the stopped Lambda, fast-forward clean research-engine main from fbd1508d364ec72a1cb2b3b9013b50a3a3e43286 exactly to b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a.
+- Run bash deploy/diagnose-cuda-host.sh and preserve the complete terminal output.
+- Interpret the direct cuInit error code/name/string, CUDA runtime result, nvidia_uvm module/device-node state, permissions, kernel command line and recent UVM/Xid/HMM messages.
+- Only after the diagnostic identifies a supported host-level remedy should any module/kernel/reboot action be considered.
+- Once direct CUDA initialization passes, return to the standard_no_ocr 73-page structure benchmark.
 
 ## Blockers / gates
 
-- The Docling standard/no-OCR 73-page benchmark has still not completed; UUID-based CUDA_VISIBLE_DEVICES masks failed initialization on both otherwise-idle/default A4500s.
-- The next retry must distinguish UUID-mask incompatibility from a general CUDA allocation problem using the unmasked control and numeric-index probes.
-- Do not reset/kill GPU processes or fall back to CPU based on the current evidence.
-- Formula enrichment, OCR, VLM, Marker/Paddle, and heavier MinerU tiers remain disabled.
+- The Docling structure benchmark is paused until host-level CUDA initialization succeeds; unmasked CUDA initialization currently fails before any model allocation.
+- The root cause may be nvidia_uvm/HMM/device-node/driver initialization; no host mutation is authorized until the read-only diagnostic identifies the failure.
+- Do not reset/kill GPUs, reload modules, reboot, alter kernel parameters, or fall back to CPU before reviewing the diagnostic.
 - Research daemon must remain inactive/dead.
 
 ## Fresh-chat initialization
