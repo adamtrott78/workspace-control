@@ -67,13 +67,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "3729fadcc371e0a0d2b938a9e8b5842a134604f0",
+        "checkpoint_sha": "eef0995ff2454ad621921bbb6fc911cbbcc7370a",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
+        "head_sha": "3729fadcc371e0a0d2b938a9e8b5842a134604f0",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -196,7 +196,9 @@
         "Candidate runtimes are isolated from the core research-engine install, version-checked from the same runtime, invoked without a shell, and run with remote LLM/OCR API credentials stripped. MinerU remote mode, Marker --use_llm, Mathpix API calls, and scientific-state mutation are absent.",
         "Compute tiers are explicit: NATIVE_FAST_PATH (Docling native, MinerU flash-native, Marker fast-no-OCR); SPECIALIZED_INFERENCE; VLM_ESCALATION. Docling native has a lightweight docling-slim CLI/PDF profile. Marker fast-no-OCR remains a heavy environment because Marker 2.0 directly depends on Torch/Transformers/Surya.",
         "research-engine PR #37 added deploy/run-document-native-fast-bakeoff.sh, a stopped-daemon Lambda runner for the first cheap parser bakeoff. PR CI run 36946553321 PASS and canonical-main CI run 36946680708 PASS across compile, full pytest/PostgreSQL integration, Compose validation, image build, and cleanup.",
-        "The runner creates isolated Docling-native and MinerU-base virtual environments under AdamArchives, installs only docling-slim[cli,format-pdf]==2.131.0 and mineru>=4.0,<5, records venv/cache footprint, runs adapter status, then executes docling/native and mineru/flash_native over the 7-paper/73-page seed. Marker, PaddleOCR, Torch/full MinerU, and VLM tiers are explicitly excluded."
+        "The runner creates isolated Docling-native and MinerU-base virtual environments under AdamArchives, installs only docling-slim[cli,format-pdf]==2.131.0 and mineru>=4.0,<5, records venv/cache footprint, runs adapter status, then executes docling/native and mineru/flash_native over the 7-paper/73-page seed. Marker, PaddleOCR, Torch/full MinerU, and VLM tiers are explicitly excluded.",
+        "First Lambda invocation of deploy/run-document-native-fast-bakeoff.sh exposed a shell-escaping defect: literal \\\\${...} sequences made the PID guard fail closed and made fail() attempt a non-numeric literal exit code. No parser runtime installation or benchmark execution occurred before the guard failure.",
+        "research-engine PR #38 corrected Bash parameter expansion and added regression assertions forbidding literal \\\\${...} in the runner. PR CI run 36947599962 PASS and canonical-main CI run 36947735065 PASS."
       ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
@@ -383,16 +385,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "3729fadcc371e0a0d2b938a9e8b5842a134604f0",
+      "identity": "eef0995ff2454ad621921bbb6fc911cbbcc7370a",
       "required_for_resume": true,
       "evidence": [
         "stage=candidate_parser_bakeoff",
-        "research-engine remote main@3729fadcc371e0a0d2b938a9e8b5842a134604f0 canonical; PR #37 CI 36946553321 PASS; canonical-main CI 36946680708 PASS",
-        "Lambda/local research-engine remains clean main@73697608e3ab179b7ed617b1833796cc47f679c2; daemon inactive/dead PID 0",
-        "isolated adapter layer from PR #35 supports Docling/MinerU/Paddle/Marker with pinned runtime contracts and local-only credential stripping",
-        "first runtime experiment is limited to Docling native and MinerU flash_native over 7 papers / 73 pages",
-        "deploy/run-document-native-fast-bakeoff.sh owns isolated venv creation, pinned lightweight installs, adapter status, benchmark execution, disk/cache accounting, and daemon safety",
-        "next=fast-forward stopped Lambda exactly to 3729fadcc371e0a0d2b938a9e8b5842a134604f0 and run the bakeoff helper; preserve full output"
+        "research-engine remote main@eef0995ff2454ad621921bbb6fc911cbbcc7370a canonical; PR #38 CI 36947599962 PASS; canonical-main CI 36947735065 PASS",
+        "Lambda/local research-engine reached clean main@3729fadcc371e0a0d2b938a9e8b5842a134604f0 before first runner invocation; daemon remained stopped",
+        "first runner invocation failed closed before any Docling/MinerU install or benchmark because Bash parameter expansions were escaped literally",
+        "runner shell-expansion hotfix is canonical at eef0995ff2454ad621921bbb6fc911cbbcc7370a",
+        "next=fast-forward stopped Lambda one commit to eef0995... and rerun deploy/run-document-native-fast-bakeoff.sh"
       ]
     }
   ],
@@ -458,23 +459,34 @@
         "Runner hard-guards research-engine-daemon.service inactive/dead PID 0 before, between, and after benchmark phases.",
         "Runner installs only lightweight Docling-native and MinerU-base profiles into isolated AdamArchives virtual environments and benchmarks only docling/native plus mineru/flash_native."
       ]
+    },
+    {
+      "check": "Document bakeoff runner shell-expansion hotfix",
+      "result": "PASS",
+      "evidence": [
+        "Observed Lambda failure: RESEARCH_ENGINE_DAEMON_MUST_REMAIN_STOPPED followed by literal ${2:-1} numeric-argument error.",
+        "Root cause was committed backslashes before Bash parameter expansions in deploy/run-document-native-fast-bakeoff.sh.",
+        "research-engine PR #38 merged as eef0995ff2454ad621921bbb6fc911cbbcc7370a.",
+        "PR CI 36947599962 PASS; canonical-main CI 36947735065 PASS.",
+        "Failed invocation stopped before runtime installation or document benchmark execution."
+      ]
     }
   ],
   "blockers": [
-    "Docling-native and MinerU flash-native are canonical and CI-validated but have not yet been exercised on the Lambda hardware/runtime.",
+    "Docling-native and MinerU flash-native still have not been exercised on the Lambda because the first runner invocation failed before installation.",
     "Additional scanned/broken-text-layer cases remain necessary before final corpus acceptance.",
     "Specialized/VLM tiers, Marker, PaddleOCR, model weights, GPU/VRAM use, and multi-document concurrency remain unvalidated.",
     "Research daemon must remain inactive/dead throughout the bounded parser-runtime experiment."
   ],
   "remaining_work": [
-    "On the stopped Lambda, fast-forward the clean research-engine main checkout from 73697608e3ab179b7ed617b1833796cc47f679c2 exactly to 3729fadcc371e0a0d2b938a9e8b5842a134604f0.",
-    "Run bash deploy/run-document-native-fast-bakeoff.sh and preserve the full terminal output plus its reported OUTPUT_ROOT.",
+    "On the stopped Lambda, verify research-engine is clean on main@3729fadcc371e0a0d2b938a9e8b5842a134604f0 and fast-forward exactly one canonical descendant commit to eef0995ff2454ad621921bbb6fc911cbbcc7370a.",
+    "Rerun bash deploy/run-document-native-fast-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT.",
     "Compare Lambda Docling-native and MinerU-flash-native fidelity, reading order, throughput, runtime footprint, and cache footprint against native-pypdf and Mathpix.",
-    "If either lightweight runtime command/install fails, patch only the exact runtime contract and rerun; do not fall through to remote APIs or heavier parser tiers.",
+    "If a runtime install or parser command now fails, stop and patch only the exact runtime contract; do not fall through to remote APIs or heavier parser tiers.",
     "Only after the cheap paths are measured decide whether to install/run Docling standard, MinerU basic/standard, Marker, or PaddleOCR.",
     "Later add scanned/malformed-text cases, parser-specific provenance normalizers, structured-content fidelity metrics, and selected heavy-runtime/concurrency tests."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify the research-engine checkout is clean on main@73697608e3ab179b7ed617b1833796cc47f679c2, fetch origin, verify canonical commit 3729fadcc371e0a0d2b938a9e8b5842a134604f0 is present and descends from the current checkout, then fast-forward exactly to that commit. Run bash deploy/run-document-native-fast-bakeoff.sh and preserve the complete terminal output plus the reported OUTPUT_ROOT. The helper will create isolated Docling-native and MinerU-base environments, install only the pinned lightweight profiles, run document-adapter-status, benchmark docling/native and mineru/flash_native over the 7-paper/73-page seed, record disk/cache footprint, and finish with the daemon inactive/dead. Do not install Marker, PaddleOCR, Torch/full MinerU, Docling standard/VLM, or any other heavier model tier yet.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify the research-engine checkout is clean on main@3729fadcc371e0a0d2b938a9e8b5842a134604f0, fetch origin, verify canonical commit eef0995ff2454ad621921bbb6fc911cbbcc7370a is present and descends from the current checkout, then fast-forward exactly to that commit. Run bash deploy/run-document-native-fast-bakeoff.sh and preserve the complete terminal output plus the reported OUTPUT_ROOT. The corrected helper will create isolated Docling-native and MinerU-base environments, install only the pinned lightweight profiles, run document-adapter-status, benchmark docling/native and mineru/flash_native over the 7-paper/73-page seed, record disk/cache footprint, and finish with the daemon inactive/dead. Do not install Marker, PaddleOCR, Torch/full MinerU, Docling standard/VLM, or any other heavier model tier yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
