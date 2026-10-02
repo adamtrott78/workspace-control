@@ -22,32 +22,40 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 candidate_parser_bakeoff
 
+## Research-engine checkpoints
+
+- Canonical remote main: 94cd8366d6a78f35b18286cbf14f9c49af420d90
+- Lambda/local recorded HEAD: 73697608e3ab179b7ed617b1833796cc47f679c2
+- Lambda/local clean: true
+
 ## Validated so far
 
-- Whole-pipeline localization inventory and `paper-package.v1` are canonical.
-- Initial benchmark seed: 7 PDF + Mathpix oracle pairs / 73 pages.
-- Native baseline: pypdf plain and layout modes, page-grounded and non-materializing.
-- Plain preflight mean text/order F1 0.9130/0.8640; layout 0.8848/0.7662.
-- research-engine canonical checkpoint: `95cd45877d5b847cad894d964b3374bb79db44f4` with PR and main CI green.
+- `paper-package.v1` and whole-pipeline localization matrix.
+- Seven-paper / 73-page Mathpix seed and native pypdf baselines.
+- Isolated version/license/runtime contracts for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker.
+- External parser subprocesses are local-only, version-checked, shell-free, and cannot claim `paper-package.v1` provenance until a parser-specific normalizer is validated.
+- First runtime gate is deliberately limited to lightweight Docling native + MinerU flash-native.
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and leave Lambda at research-engine main@73697608e3ab179b7ed617b1833796cc47f679c2. Against canonical research-engine main@95cd45877d5b847cad894d964b3374bb79db44f4, implement isolated optional adapter scaffolding for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker/Surya with fail-closed availability checks, without adding their heavyweight dependencies to the core install or installing model weights on Lambda.
+Keep research-engine-daemon.service inactive/dead. On the Lambda, verify the clean research-engine checkout is main@73697608e3ab179b7ed617b1833796cc47f679c2 and fast-forward only to canonical main@94cd8366d6a78f35b18286cbf14f9c49af420d90. Under $HOME/adamArchives/Adam/.document-runtimes, create isolated Docling and MinerU virtual environments. Install only docling-slim[cli,format-pdf]==2.131.0 and mineru>=4.0,<5, set RESEARCH_ENGINE_DOCLING_BIN and RESEARCH_ENGINE_MINERU_BIN to those isolated executables, run research-engine document-adapter-status, then benchmark docling/native and mineru/flash_native over benchmarks/document_intelligence/cases/milcom-mathpix-seed-v1.json using the PADataset reference_notes directory as bundle root and a workspace-control tmp directory as output. Record venv/cache disk usage and complete benchmark output. Do not install Marker, PaddleOCR, Torch/full MinerU, VLM weights, or START sustained research.
 
 ## Remaining work
 
-- Implement isolated optional adapters for Docling, MinerU, PaddleOCR/PP-StructureV3, and Marker/Surya without adding heavy dependencies to the core install.
-- Record candidate versions, licenses, install/runtime contracts, and cache/resource expectations.
-- Run the seven-paper bakeoff and later add scan-oriented cases before final parser selection.
-- Compare structured-content fidelity, provenance, token density, throughput, load cost, and resource use.
-- Only then install selected candidate runtimes on Lambda for hardware/concurrency validation.
+- On the stopped Lambda, fast-forward research-engine main from 73697608e3ab179b7ed617b1833796cc47f679c2 to canonical 94cd8366d6a78f35b18286cbf14f9c49af420d90.
+- Create isolated Docling and MinerU virtual environments under AdamArchives without modifying the core research-engine venv.
+- Install only Docling slim native-PDF profile and MinerU base profile; capture venv/cache disk usage before and after.
+- Run document-adapter-status, then the seven-paper Docling native and MinerU flash-native external benchmarks against the existing PADataset PDFs/Mathpix oracles.
+- If either runtime command fails, stop and patch the exact command/version contract before retrying; do not fall through to remote services.
+- Compare the two fast paths against native-pypdf and Mathpix before deciding whether to test specialized or VLM tiers.
+- Later add scanned/malformed-text cases, structured-output provenance normalizers, and selected heavy-runtime/concurrency tests.
 
 ## Blockers / gates
 
-- Additional scan-oriented cases are still needed before final corpus acceptance.
-- Candidate parser runtimes and resource use remain unvalidated.
-- No heavyweight document model is installed on Lambda yet; this is intentional.
-- Research daemon remains stopped during early benchmark work.
+- Docling-native and MinerU flash-native command/runtime contracts are CI-validated but have not yet been exercised against the actual Lambda environments.
+- Additional scanned/broken-text-layer cases remain necessary before final corpus acceptance.
+- Specialized/VLM tiers, Marker, PaddleOCR, model weights, GPU/VRAM use, and multi-document concurrency remain unvalidated.
+- Research daemon must remain inactive/dead throughout the bounded parser-runtime experiment.
 
 ## Fresh-chat initialization
 
@@ -58,10 +66,11 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/research-engine-local-document-pipeline-v1.json
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the complete handoff.
+Start from the normal `workspace-control` root route.
+Treat the authoritative capsule, synchronized Markdown handoff, exact durable Git/runtime state, and referenced research-engine evidence as the complete handoff.
 Do not rely on previous conversation state.
-Follow the capsule's exact next_safe_action.
-Keep research-engine-daemon.service inactive/dead unless the capsule explicitly opens a bounded runtime gate.
-Mathpix outputs supplied by the user are benchmark/reference artifacts only; do not add a paid Mathpix API dependency.
+Follow the capsule's exact `next_safe_action`.
+Keep `research-engine-daemon.service` inactive/dead unless the capsule explicitly opens a different bounded runtime gate.
+Mathpix outputs are benchmark/reference artifacts only; do not add a paid Mathpix API dependency.
+Do not install Marker, PaddleOCR, Torch/full MinerU, VLM weights, or START sustained research during the current cheap-parser runtime gate.
 Every fresh-chat initialization or handoff prompt for this task must include the full workspace-control repository URL shown above.
