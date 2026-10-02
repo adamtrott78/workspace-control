@@ -67,13 +67,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "4f64fd63e3586ef9685e63e7a090827df07c2f3b",
+        "checkpoint_sha": "9e343436ccda56c08936855b48079302f7470e0a",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "eef0995ff2454ad621921bbb6fc911cbbcc7370a",
+        "head_sha": "4f64fd63e3586ef9685e63e7a090827df07c2f3b",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -200,7 +200,9 @@
         "First Lambda invocation of deploy/run-document-native-fast-bakeoff.sh exposed a shell-escaping defect: literal \\\\${...} sequences made the PID guard fail closed and made fail() attempt a non-numeric literal exit code. No parser runtime installation or benchmark execution occurred before the guard failure.",
         "research-engine PR #38 corrected Bash parameter expansion and added regression assertions forbidding literal \\\\${...} in the runner. PR CI run 36947599962 PASS and canonical-main CI run 36947735065 PASS.",
         "Second Lambda invocation reached the Docling/native benchmark but failed immediately inside Docling because docling.backend.pypdfium2_backend imports rtree and the native install profile docling-slim[cli,format-pdf]==2.131.0 omitted the official convert-core extra.",
-        "Docling 2.131.0 package metadata confirms rtree>=1.3,<2 lives under docling-slim[convert-core], while format-pdf only supplies PDF backend dependencies. research-engine PR #39 corrects native install to docling-slim[cli,convert-core,format-pdf]==2.131.0 and adds an rtree/PyPdfiumDocumentBackend import preflight. PR CI 36949176233 PASS."
+        "Docling 2.131.0 package metadata confirms rtree>=1.3,<2 lives under docling-slim[convert-core], while format-pdf only supplies PDF backend dependencies. research-engine PR #39 corrects native install to docling-slim[cli,convert-core,format-pdf]==2.131.0 and adds an rtree/PyPdfiumDocumentBackend import preflight. PR CI 36949176233 PASS.",
+        "Third Lambda invocation confirmed Docling native backend dependencies are healthy: DOCLING_NATIVE_IMPORT_PREFLIGHT=PASS, Docling 2.131.0 and MinerU 4.0.10 probes matched their runtime contracts, but the Docling CLI then failed before conversion because CLI module initialization loaded OCR/VLM plugin code and hit ModuleNotFoundError: packaging.",
+        "Official Docling documentation identifies NativePdfPipeline as a model-free Python SDK path using docling-parse alone. research-engine PR #40 therefore routes only docling/native through a standalone SDK shim using DocumentConverter + NativePdfFormatOption + NativePdfPipelineOptions, while leaving standard/VLM CLI modes deferred. PR CI 36950426927 PASS; canonical-main CI 36950551145 PASS."
       ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
@@ -387,16 +389,16 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "4f64fd63e3586ef9685e63e7a090827df07c2f3b",
+      "identity": "9e343436ccda56c08936855b48079302f7470e0a",
       "required_for_resume": true,
       "evidence": [
         "stage=candidate_parser_bakeoff",
-        "research-engine remote main@4f64fd63e3586ef9685e63e7a090827df07c2f3b canonical; PR #39 CI 36949176233 PASS",
-        "Lambda/local research-engine reached clean main@eef0995ff2454ad621921bbb6fc911cbbcc7370a; daemon remained stopped",
-        "Docling/native failed before document conversion because the previous native dependency profile omitted Docling convert-core and therefore rtree",
-        "Docling native profile is corrected to docling-slim[cli,convert-core,format-pdf]==2.131.0 with an import preflight",
-        "existing isolated Docling/MinerU venvs may be reused; rerunning the helper will install the added convert-core dependencies into the Docling venv and re-run both cheap candidates",
-        "next=fast-forward stopped Lambda from eef0995... to 4f64fd6... and rerun deploy/run-document-native-fast-bakeoff.sh"
+        "research-engine remote main@9e343436ccda56c08936855b48079302f7470e0a canonical; PR #40 CI 36950426927 PASS; canonical-main CI 36950551145 PASS",
+        "Lambda/local research-engine reached clean main@4f64fd63e3586ef9685e63e7a090827df07c2f3b; daemon was verified inactive/dead PID 0 at invocation start",
+        "Docling native dependency preflight passed; Docling CLI then failed before conversion because CLI initialization loaded OCR/VLM plugin code and lacked packaging",
+        "docling/native now executes through benchmarks/document_intelligence/runtimes/docling_native.py using DocumentConverter + NativePdfFormatOption + NativePdfPipelineOptions",
+        "standard/VLM Docling modes remain CLI-driven and deferred; no heavier model tier is authorized",
+        "next=fast-forward stopped Lambda from 4f64fd6... to 9e34343... and rerun the helper"
       ]
     }
   ],
@@ -484,23 +486,35 @@
         "PR CI 36949176233 PASS across compile, full pytest/PostgreSQL integration, Compose validation, image build, and cleanup.",
         "Corrected runner adds an explicit Docling native import preflight for rtree and PyPdfiumDocumentBackend before the 73-page benchmark."
       ]
+    },
+    {
+      "check": "Docling native SDK execution boundary",
+      "result": "PASS",
+      "evidence": [
+        "Lambda reached code_sha=4f64fd63e3586ef9685e63e7a090827df07c2f3b with daemon stopped.",
+        "Docling convert-core install succeeded and added rtree 1.4.1 plus scipy 1.18.1.",
+        "DOCLING_NATIVE_IMPORT_PREFLIGHT=PASS proved the PDF backend/import dependency layer itself is healthy.",
+        "The subsequent failure occurred in docling.cli.main OCR/VLM plugin initialization on missing packaging before any PDF conversion.",
+        "research-engine PR #40 merged as 9e343436ccda56c08936855b48079302f7470e0a and routes docling/native through the documented model-free Python SDK instead of the CLI.",
+        "PR CI 36950426927 PASS; canonical-main CI 36950551145 PASS."
+      ]
     }
   ],
   "blockers": [
-    "Docling-native and MinerU flash-native still have not completed the Lambda benchmark; Docling stopped the second attempt before MinerU benchmark execution.",
+    "Docling-native and MinerU flash-native still have not completed the Lambda benchmark because Docling's CLI initialization stopped the third attempt before conversion; the native path now bypasses the CLI.",
     "Additional scanned/broken-text-layer cases remain necessary before final corpus acceptance.",
     "Specialized/VLM tiers, Marker, PaddleOCR, model weights, GPU/VRAM use, and multi-document concurrency remain unvalidated.",
     "Research daemon must remain inactive/dead throughout the bounded parser-runtime experiment."
   ],
   "remaining_work": [
-    "On the stopped Lambda, verify research-engine is clean on main@eef0995ff2454ad621921bbb6fc911cbbcc7370a and fast-forward exactly to 4f64fd63e3586ef9685e63e7a090827df07c2f3b.",
+    "On the stopped Lambda, verify research-engine is clean on main@4f64fd63e3586ef9685e63e7a090827df07c2f3b and fast-forward exactly to 9e343436ccda56c08936855b48079302f7470e0a.",
     "Rerun bash deploy/run-document-native-fast-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT.",
-    "Confirm DOCLING_NATIVE_IMPORT_PREFLIGHT=PASS before accepting Docling benchmark execution.",
-    "Compare Lambda Docling-native and MinerU-flash-native fidelity, reading order, throughput, runtime footprint, and cache footprint against native-pypdf and Mathpix.",
-    "If another runtime import/command fails, patch only the exact dependency/runtime contract; do not fall through to remote APIs or heavier parser tiers.",
+    "Confirm DOCLING_NATIVE_SDK_SELF_TEST=PASS before accepting Docling benchmark execution.",
+    "Compare Lambda Docling-native SDK and MinerU-flash-native fidelity, reading order, throughput, runtime footprint, and cache footprint against native-pypdf and Mathpix.",
+    "If the SDK shim itself now fails, patch only that exact model-free runtime boundary; do not re-route native mode back through the CLI and do not fall through to heavier tiers.",
     "Only after the cheap paths are measured decide whether to install/run Docling standard, MinerU basic/standard, Marker, or PaddleOCR."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify the research-engine checkout is clean on main@eef0995ff2454ad621921bbb6fc911cbbcc7370a, fetch origin, verify canonical commit 4f64fd63e3586ef9685e63e7a090827df07c2f3b is present and descends from the current checkout, then fast-forward exactly to that commit. Rerun bash deploy/run-document-native-fast-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The helper now installs docling-slim[cli,convert-core,format-pdf]==2.131.0 into the existing isolated Docling venv and must print DOCLING_NATIVE_IMPORT_PREFLIGHT=PASS before corpus execution. Reuse the existing MinerU venv. Do not install Marker, PaddleOCR, Torch/full MinerU, Docling standard/VLM, or any other heavier tier yet.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify the research-engine checkout is clean on main@4f64fd63e3586ef9685e63e7a090827df07c2f3b, fetch origin, verify canonical commit 9e343436ccda56c08936855b48079302f7470e0a is present and descends from the current checkout, then fast-forward exactly to that commit. Rerun bash deploy/run-document-native-fast-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The helper will reuse the existing isolated Docling/MinerU venvs, preflight benchmarks/document_intelligence/runtimes/docling_native.py with --self-test, execute docling/native through the model-free Python SDK shim rather than the CLI, then run mineru/flash_native. Do not install Marker, PaddleOCR, Torch/full MinerU, Docling standard/VLM, or any other heavier tier yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
