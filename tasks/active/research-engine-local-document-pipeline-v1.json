@@ -67,7 +67,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a",
+        "checkpoint_sha": "6d7c682b58904829b59d57d2da1a50bee31e2565",
         "verified": true
       },
       "local": {
@@ -220,7 +220,9 @@
         "research-engine PR #47 switches the diagnostic to an unmasked 256 MiB CUDA allocation control followed by numeric-index CUDA_VISIBLE_DEVICES probes (0/1), retains UUID only as audit metadata, and binds Docling to the selected numeric index. PR CI 36959865580 PASS; canonical-main CI 36959974367 PASS; merged as fbd1508d364ec72a1cb2b3b9013b50a3a3e43286.",
         "Lambda retry on research-engine main@fbd1508d364ec72a1cb2b3b9013b50a3a3e43286 proved the CUDA failure is below Docling/PyTorch masking: unmasked cuda initialization failed with cuda_available=false while device_count=2, and CUDA_VISIBLE_DEVICES=0 and =1 failed identically. Both GPUs remained Default/idle with no active compute processes.",
         "research-engine PR #48 adds a strictly read-only host CUDA diagnostic that calls libcuda cuInit(0) and CUDA runtime cudaGetDeviceCount directly, inspects nvidia_uvm/device nodes/permissions and recent kernel UVM/Xid/HMM evidence, and performs no host mutation. PR CI 36960458637 PASS; canonical-main CI 36960565039 PASS; merged as b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a.",
-        "Post-reboot host CUDA diagnostic on research-engine main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a passed: cuInit=CUDA_SUCCESS, cuDeviceGetCount=2, cudaGetDeviceCount=cudaSuccess count=2, PyTorch cuda_available=true with both RTX A4500s visible, nvidia_uvm loaded, and device nodes present. The reboot also advanced the host kernel from 6.8.0-124-generic to 6.8.0-138-generic. No current-boot Xid 31/154 recovery fault was present."
+        "Post-reboot host CUDA diagnostic on research-engine main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a passed: cuInit=CUDA_SUCCESS, cuDeviceGetCount=2, cudaGetDeviceCount=cudaSuccess count=2, PyTorch cuda_available=true with both RTX A4500s visible, nvidia_uvm loaded, and device nodes present. The reboot also advanced the host kernel from 6.8.0-124-generic to 6.8.0-138-generic. No current-boot Xid 31/154 recovery fault was present.",
+        "Post-reboot Lambda rerun on research-engine main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a cleared GPU allocation, numeric GPU selection, layout/TableFormer model prefetch, SDK self-test, and entered the real 7-paper / 73-page structure benchmark. The first document then failed during TableFormer import because docling-ibm-models intentionally leaves OpenCV optional and cv2 was absent.",
+        "research-engine PR #49 adds the official docling-ibm-models[opencv-python-headless] extra, migrates the existing healthy v3 6.6G runtime in place to v4 instead of rebuilding it, and adds explicit cv2 + TFPredictor import preflight. PR CI 36962171595 PASS; canonical-main CI 36962278723 PASS; merged as 6d7c682b58904829b59d57d2da1a50bee31e2565."
       ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
@@ -407,14 +409,14 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a",
+      "identity": "6d7c682b58904829b59d57d2da1a50bee31e2565",
       "required_for_resume": true,
       "evidence": [
         "stage=candidate_parser_bakeoff",
-        "research-engine remote/local main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a; daemon inactive/dead PID 0",
-        "post-reboot direct CUDA driver/runtime APIs both PASS and expose two GPUs; PyTorch cuda_available=true",
-        "prior Xid 154 Node Reboot Required recovery state cleared after reboot; host now booted on kernel 6.8.0-138-generic",
-        "next=rerun stopped-daemon Docling standard/no-OCR 7-paper structure benchmark"
+        "research-engine remote main@6d7c682b58904829b59d57d2da1a50bee31e2565 canonical; PR #49 CI 36962171595 PASS; canonical-main CI 36962278723 PASS",
+        "Lambda/local research-engine clean main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a; post-reboot CUDA/GPU/model/SDK preflights all passed",
+        "real corpus run reached TableFormer and failed only on missing cv2; official headless OpenCV extra is now in v4 runtime profile",
+        "next=fast-forward Lambda to 6d7c682... and rerun stopped-daemon structure bakeoff with in-place v3->v4 migration"
       ]
     }
   ],
@@ -615,21 +617,35 @@
         "nvidia_uvm remained loaded and /dev/nvidia-uvm plus /dev/nvidia-uvm-tools were present.",
         "Host reboot cleared the prior Xid 154 Node Reboot Required recovery state; current boot is kernel 6.8.0-138-generic."
       ]
+    },
+    {
+      "check": "TableFormer OpenCV runtime boundary",
+      "result": "PASS_FIX_READY",
+      "evidence": [
+        "Recovered host CUDA allocation probe passed unmasked and on physical GPU 0; Torch 2.13.0+cu126 resolved NVIDIA RTX A4500.",
+        "Layout + TableFormer prefetch and standard_no_ocr SDK self-test both passed.",
+        "Real corpus execution reached TableStructureModel/TFPredictor and failed only on ModuleNotFoundError: cv2.",
+        "docling-ibm-models officially exposes opencv-python-headless as an optional dependency for headless/server TableFormer use.",
+        "PR #49 merged as 6d7c682b58904829b59d57d2da1a50bee31e2565; PR CI 36962171595 PASS; canonical-main CI 36962278723 PASS.",
+        "v4 runtime migrates existing v3 in place by installing only docling-ibm-models[opencv-python-headless], prints OpenCV/IBM-model versions, and fails before the benchmark unless cv2 and TFPredictor import."
+      ]
     }
   ],
   "blockers": [
-    "The Docling standard/no-OCR 73-page structure benchmark still has not completed; host CUDA is now recovered and no longer the active blocker.",
+    "The Docling standard/no-OCR 73-page structure benchmark still has not completed; the current blocker is the now-corrected optional OpenCV backend for TableFormer.",
+    "The next retry must pass TABLEFORMER_IMPORT_PREFLIGHT before corpus execution.",
     "Formula enrichment, OCR, VLM, Marker/Paddle, and heavier MinerU tiers remain disabled.",
-    "Research daemon must remain inactive/dead throughout the structure benchmark."
+    "Research daemon must remain inactive/dead."
   ],
   "remaining_work": [
-    "Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh on the recovered host and preserve the complete terminal output plus OUTPUT_ROOT.",
-    "Confirm the real CUDA allocation probe passes, a physical GPU is selected, SDK self-test passes, and Heron layout-model initialization proceeds.",
+    "On the stopped Lambda, fast-forward clean research-engine main from b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a exactly to 6d7c682b58904829b59d57d2da1a50bee31e2565.",
+    "Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT.",
+    "Confirm MIGRATE_RUNTIME_PROFILE=v3->v4, OPENCV_VERSION, TABLEFORMER_IMPORT_PREFLIGHT=PASS, GPU allocation, SDK self-test and Heron/TableFormer initialization all succeed.",
     "If the 7-paper / 73-page benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use.",
     "Normalize successful standard_no_ocr structured JSON into paper-package.v1 and compare semantic headings/tables/figures/captions against native + Mathpix.",
     "Only if measured gaps remain should formula enrichment, OCR, Marker/Paddle, or other heavier tiers be opened."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. The host CUDA stack is recovered after reboot and research-engine is clean on main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The runner should now pass its real CUDA allocation probe, bind a healthy GPU, run the standard/no-OCR SDK self-test, and execute the same 7-paper / 73-page structure benchmark. Do not rerun the host CUDA diagnostic unless CUDA regresses. Keep OCR, formula/code enrichment, VLM, Marker, PaddleOCR, and heavier MinerU tiers disabled.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a, fetch origin, verify canonical commit 6d7c682b58904829b59d57d2da1a50bee31e2565 descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The runner will migrate the existing healthy v3 structure runtime in place to profile docling-standard-no-ocr-core-cu126-opencv-v4 by installing only the official docling-ibm-models[opencv-python-headless] extra, then verify cv2 and TableFormer TFPredictor imports before model prefetch and corpus execution. Do not rebuild the full runtime unless the profile is unexpected. Keep OCR/formula/VLM/heavier parser tiers disabled and keep the daemon inactive/dead.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
