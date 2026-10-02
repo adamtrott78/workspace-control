@@ -67,7 +67,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "6d7c682b58904829b59d57d2da1a50bee31e2565",
+        "checkpoint_sha": "db78b236103213c6274e538b1736c4483032c06e",
         "verified": true
       },
       "local": {
@@ -186,7 +186,11 @@
         "native preflight metrics",
         "isolated Docling/MinerU/PaddleOCR/Marker runtime contracts",
         "document-adapter-status / document-adapter-run / document-benchmark-external",
-        "RAW_EXTERNAL_OUTPUT benchmark state pending parser-specific provenance normalization"
+        "RAW_EXTERNAL_OUTPUT benchmark state pending parser-specific provenance normalization",
+        "stopped-daemon standard_no_ocr paper-package.v1 normalization/evaluation replay",
+        "content-aware table cell/grid, equation, figure-caption, heading/section and provenance metrics",
+        "direct normalized Docling-native baseline comparison",
+        "mode-specific Docling structured compiler identity preserving the validated native package identity"
       ],
       "validation": [
         "research-engine PR #34 merged as 95cd45877d5b847cad894d964b3374bb79db44f4; PR CI 36944071769 PASS; main CI 36944228025 PASS.",
@@ -227,7 +231,11 @@
         "Aggregate standard_no_ocr runtime: 50.461477 s over 73 pages (~1.44665 pages/s), 52889 output tokens vs 56191 Mathpix oracle tokens (0.94124x), mean text/read-order agreement ~0.94590/~0.91726, oracle-token-weighted ~0.94506/~0.91727. Runtime footprint ~6.8G; specialized model artifacts 669M; benchmark output ~3.3M.",
         "Structure recovery is strong: Docling standard_no_ocr found 24 table items, exactly matching the Mathpix outer table-environment count across all seven papers; Mathpix has 28 tabular blocks because some outer tables contain multiple tabular blocks. Docling found 57 formula items vs 50 Mathpix display equations. It found 44 picture items vs 34 Mathpix figures, but 35 Docling pictures were caption-linked, nearly matching the 34 semantic figures. Provenance and bbox coverage remained 1.0 for every case.",
         "Compared with normalized Docling native, standard_no_ocr improves oracle-token-weighted text/read-order agreement from ~0.9301/~0.8906 to ~0.9451/~0.9173 while running ~4.69x slower than the earlier native 10.761 s run. Decision: retain native as the cheap text/order/provenance substrate and standard_no_ocr as the leading local semantic-structure augmentation tier.",
-        "Candidate-parser component winners are now identified for a hybrid pipeline. Do not open heavier parser families merely to continue the bakeoff; next verify standard_no_ocr structure content and associations after paper-package.v1 normalization."
+        "Candidate-parser component winners are now identified for a hybrid pipeline. Do not open heavier parser families merely to continue the bakeoff; next verify standard_no_ocr structure content and associations after paper-package.v1 normalization.",
+        "research-engine PR #50 added the stopped-daemon standard_no_ocr normalization/evaluation replay and merged as db78b236103213c6274e538b1736c4483032c06e. PR CI 36964163461 PASS; canonical-main CI 36964325648 PASS across compile, full pytest/PostgreSQL integration, Compose validation, daemon image build, and cleanup.",
+        "The replay reuses the existing DoclingDocument -> paper-package.v1 normalizer, preserves the already-validated native package identity, gives non-native Docling modes a distinct compiler identity/config, and invokes no parser runtime or model inference.",
+        "Content-aware evaluation now keeps structure-count agreement separate from fidelity and scores table text/grid/aligned cells, equation representation, semantic figure-caption association, title/heading content and section-path consistency, plus block/asset page+bbox provenance integrity.",
+        "The Lambda replay runner requires the preserved standard_no_ocr output root plus the existing normalized Docling-native package root and fails closed unless research-engine-daemon.service remains inactive/dead."
       ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
@@ -414,16 +422,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "6d7c682b58904829b59d57d2da1a50bee31e2565",
+      "identity": "db78b236103213c6274e538b1736c4483032c06e",
       "required_for_resume": true,
       "evidence": [
         "stage=candidate_parser_bakeoff",
-        "research-engine remote/local main@6d7c682b58904829b59d57d2da1a50bee31e2565; stopped-daemon standard_no_ocr structure bakeoff PASS",
-        "successful OUTPUT_ROOT=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z",
-        "73 pages / 50.461477 s (~1.44665 pages/s); 52889 tokens vs Mathpix 56191; weighted text/order ~0.94506/~0.91727",
-        "structure totals: 24 tables vs 24 Mathpix outer tables (28 tabular blocks), 57 formulas vs 50 display equations, 44 pictures with 35 caption-linked vs 34 Mathpix figures; provenance+bbox coverage 1.0",
-        "component decision=native cheap text/order/provenance substrate + standard_no_ocr specialized structure tier",
-        "next=normalize preserved standard_no_ocr JSON into paper-package.v1 and score structure content/associations; do not rerun parser"
+        "research-engine remote main@db78b236103213c6274e538b1736c4483032c06e; PR #50 replay/evaluator implementation merged and PR/main CI PASS",
+        "Lambda local research-engine is last verified clean at 6d7c682b58904829b59d57d2da1a50bee31e2565 and must be fast-forwarded before replay",
+        "successful preserved standard_no_ocr OUTPUT_ROOT=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z; do not rerun Docling",
+        "replay runner=deploy/run-docling-standard-structure-replay.sh; no parser/model inference",
+        "next=sync Lambda local main, identify existing normalized Docling-native root, run stopped-daemon replay, inspect content-aware fidelity"
       ]
     }
   ],
@@ -651,25 +658,36 @@
         "Runtime footprint ~6.8G; model artifacts 669M; output ~3.3M.",
         "Decision: Docling native remains the cheap substrate; Docling standard_no_ocr is the leading specialized structure tier."
       ]
+    },
+    {
+      "check": "Docling standard/no-OCR normalization/evaluation replay implementation",
+      "result": "PASS_READY",
+      "evidence": [
+        "research-engine PR #50 merged as db78b236103213c6274e538b1736c4483032c06e.",
+        "PR CI run 36964163461 PASS and canonical-main CI run 36964325648 PASS.",
+        "CI covered compile, full pytest/PostgreSQL integration, Compose validation, daemon image build, and cleanup.",
+        "Replay is normalization/evaluation only: no document-benchmark-external call, no parser/model runtime, no Docling inference, no OCR/formula enrichment/VLM/Marker/PaddleOCR/MinerU activation.",
+        "Content metrics cover table grid/cells, equations, figure-caption association, headings/section paths, provenance integrity, and direct normalized-native comparison while keeping counts separate."
+      ]
     }
   ],
   "blockers": [
-    "The successful standard_no_ocr outputs are still RAW_EXTERNAL_OUTPUT; paper-package.v1 normalization/provenance promotion over this exact OUTPUT_ROOT has not yet been run.",
-    "Current structure evidence is primarily label/count agreement. Table cell/grid fidelity, equation-content fidelity, semantic figure/caption association, heading quality and image materialization remain unvalidated.",
-    "Formula enrichment remains intentionally disabled; 57 formula labels vs 50 Mathpix display equations does not establish LaTeX fidelity.",
-    "The standard structure tier is ~4.69x slower than Docling native and has a ~6.8G runtime footprint, so routing policy still matters.",
-    "Research daemon must remain inactive/dead throughout the next normalization/evaluation gate."
+    "Lambda local research-engine is last verified clean at 6d7c682b58904829b59d57d2da1a50bee31e2565 while canonical remote main is db78b236103213c6274e538b1736c4483032c06e; fast-forward the stopped-daemon local checkout before replay.",
+    "The exact Lambda-local root of the already-normalized Docling-native paper-package.v1 corpus is not recorded in durable state. Identify the existing root locally and pass it to the replay; do not rerun Docling/native to recreate the benchmark.",
+    "The preserved standard_no_ocr structured JSON has not yet been normalized/evaluated with the merged content-aware gate, so table/equation/figure-caption/heading content fidelity remains unknown.",
+    "Formula enrichment remains intentionally disabled; only a measured equation-content residual from this replay may justify opening it.",
+    "The standard structure tier remains ~4.69x slower than Docling native with a ~6.8G runtime footprint, so routing policy still matters.",
+    "research-engine-daemon.service must remain inactive/dead throughout the Lambda normalization/evaluation replay."
   ],
   "remaining_work": [
-    "Reuse the successful standard_no_ocr OUTPUT_ROOT=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z; do not rerun Docling.",
-    "Generalize or add a stopped-daemon replay helper that feeds each standard_no_ocr structured JSON into the existing DoclingDocument -> paper-package.v1 normalizer.",
-    "Normalize all seven successful standard_no_ocr cases and verify source SHA/page-count, page+bbox provenance, section paths, table assets, equation assets, figure/caption metadata and fail-closed behavior.",
-    "Add content-aware structure metrics: table cell/grid content agreement, equation text/LaTeX usefulness, semantic figure/caption association and heading/section quality. Keep count agreement explicitly separate from content fidelity.",
-    "Compare normalized standard_no_ocr packages directly against normalized native packages and Mathpix references; preserve original PDFs as scientific authority.",
+    "With research-engine-daemon.service inactive/dead, verify the Lambda checkout is clean and fast-forward local research-engine main from 6d7c682b58904829b59d57d2da1a50bee31e2565 to canonical remote main@db78b236103213c6274e538b1736c4483032c06e.",
+    "Locate the already-existing normalized Docling-native paper-package.v1 root on Lambda; do not rerun the native parser or the 73-page benchmark.",
+    "Run deploy/run-docling-standard-structure-replay.sh against /home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z and the existing normalized-native root. This replay must not invoke Docling inference or model downloads.",
+    "Inspect docling-standard-no-ocr-paper-package-v1/docling-normalization-summary.json for provenance coverage and content-aware table cell/grid, equation, figure-caption, heading/section metrics plus standard-minus-native deltas.",
     "If structure content holds, close candidate_parser_bakeoff and advance to adaptive_page_region_router / structured_elements_and_semantic_escalation with native->standard escalation policy.",
-    "Only open formula enrichment, OCR, Marker/Paddle or heavier MinerU tiers for specific measured residual gaps."
+    "Only open formula enrichment, OCR, Marker/PaddleOCR or heavier MinerU tiers for a specific measured residual gap."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@6d7c682b58904829b59d57d2da1a50bee31e2565 and the successful standard_no_ocr OUTPUT_ROOT=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z as the exact baseline. Do not rerun Docling or redownload models. Implement and CI-gate a stopped-daemon normalization/evaluation replay for the preserved standard_no_ocr structured JSONs using the existing DoclingDocument -> paper-package.v1 normalizer. Then run that replay on Lambda and measure provenance coverage plus content-aware table/equation/figure-caption/heading quality against Mathpix and the normalized native packages. Keep formula enrichment, OCR, VLM, Marker, PaddleOCR and heavier MinerU tiers disabled until a specific measured residual gap justifies opening one.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat canonical research-engine remote main@db78b236103213c6274e538b1736c4483032c06e as the validated replay implementation and Lambda local main@6d7c682b58904829b59d57d2da1a50bee31e2565 as the last verified local state. On Lambda, first verify the checkout is clean and the daemon is inactive/dead, then fast-forward local main to db78b236103213c6274e538b1736c4483032c06e. Identify the already-existing normalized Docling-native paper-package root without rerunning Docling/native. Then run deploy/run-docling-standard-structure-replay.sh with the preserved standard_no_ocr OUTPUT_ROOT=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z and that normalized-native root. Return the terminal summary and docling-normalization-summary.json for evaluation. Do not rerun parser inference, redownload models, or enable formula enrichment, OCR, VLM, Marker, PaddleOCR or heavier MinerU tiers before a measured residual gap justifies one.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
