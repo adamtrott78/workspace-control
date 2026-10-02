@@ -32,24 +32,24 @@ candidate_parser_bakeoff
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@f77778587e40a7b65b462cf9fca1d987bab19dbd, fetch origin, verify canonical commit d1dd1d32cf57e9c4423d4d31ef314611ebd4162f descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The helper will inventory every GPU, report active compute processes, probe each GPU with a real 256 MiB CUDA allocation/write/synchronize, bind the first healthy device by GPU UUID using CUDA_VISIBLE_DEVICES, force Docling device=cuda, and fail closed if none pass. Do not kill/reset GPU processes, do not fall back to CPU, and keep OCR/formula/VLM/heavier parser tiers disabled.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@d1dd1d32cf57e9c4423d4d31ef314611ebd4162f, fetch origin, verify canonical commit fbd1508d364ec72a1cb2b3b9013b50a3a3e43286 descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The helper first runs an unmasked real 256 MiB CUDA allocation control, then probes CUDA_VISIBLE_DEVICES=0 and =1 separately, binds Docling to the first numeric index that passes, and retains GPU UUID only as audit metadata. Do not kill/reset GPU processes, do not fall back to CPU, and keep OCR/formula/VLM/heavier parser tiers disabled.
 
 ## Remaining work
 
-- On the stopped Lambda, fast-forward clean research-engine main from f77778587e40a7b65b462cf9fca1d987bab19dbd exactly to d1dd1d32cf57e9c4423d4d31ef314611ebd4162f.
-- Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT.
-- Inspect GPU inventory, compute mode, active compute processes and the per-GPU 256 MiB allocation probes.
-- Confirm a SELECTED_PHYSICAL_GPU_UUID is emitted, CUDA_VISIBLE_DEVICES is pinned to it, SDK self-test passes and Heron model initialization proceeds.
-- If the benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use across the same 7-paper / 73-page seed.
-- If all GPUs fail allocation, diagnose occupancy/compute-mode state from the captured output before taking any action that could affect other workloads.
+- On the stopped Lambda, fast-forward clean research-engine main from d1dd1d32cf57e9c4423d4d31ef314611ebd4162f exactly to fbd1508d364ec72a1cb2b3b9013b50a3a3e43286.
+- Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT.
+- Inspect UNMASKED_CUDA_ALLOCATION and both numeric-index allocation probes.
+- If a numeric index passes, confirm CUDA_VISIBLE_DEVICES is pinned to that index, SDK self-test passes, and Heron initialization proceeds.
+- If the unmasked and both numeric-index probes fail, use the captured environment/device diagnostics to investigate driver/device access next before touching workloads.
+- If the corpus benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use.
 
 ## Blockers / gates
 
-- The Docling standard/no-OCR 73-page structure benchmark still has not completed because actual Heron GPU allocation failed on the device selected by AUTO.
-- The next retry must establish whether at least one physical A4500 passes a real CUDA allocation probe and, if so, pin Docling to that device.
-- If no GPU passes the probe, the preserved GPU inventory/compute-process output must be evaluated before any reset, kill, or CPU fallback is considered.
+- The Docling standard/no-OCR 73-page benchmark has still not completed; UUID-based CUDA_VISIBLE_DEVICES masks failed initialization on both otherwise-idle/default A4500s.
+- The next retry must distinguish UUID-mask incompatibility from a general CUDA allocation problem using the unmasked control and numeric-index probes.
+- Do not reset/kill GPU processes or fall back to CPU based on the current evidence.
 - Formula enrichment, OCR, VLM, Marker/Paddle, and heavier MinerU tiers remain disabled.
-- Research daemon must remain inactive/dead throughout the retry.
+- Research daemon must remain inactive/dead.
 
 ## Fresh-chat initialization
 

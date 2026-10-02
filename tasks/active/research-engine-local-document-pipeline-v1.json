@@ -67,13 +67,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "d1dd1d32cf57e9c4423d4d31ef314611ebd4162f",
+        "checkpoint_sha": "fbd1508d364ec72a1cb2b3b9013b50a3a3e43286",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "f77778587e40a7b65b462cf9fca1d987bab19dbd",
+        "head_sha": "d1dd1d32cf57e9c4423d4d31ef314611ebd4162f",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -215,7 +215,9 @@
         "Second Lambda standard_no_ocr retry reached direct model prefetch successfully (DOCLING_STANDARD_NO_OCR_PREFETCH=PASS, 669M model artifacts) but SDK preflight still failed because DocumentConverter imports OCR factories whose BaseOcrModel requires SciPy even with do_ocr=false. The same run showed default torch 2.14.1+cu130 could not initialize CUDA against NVIDIA driver 570.133.07 (torch.cuda.is_available()=False).",
         "research-engine PR #45 fixes both boundaries: standard_no_ocr now installs official PyTorch 2.13.0/TorchVision 0.28.0 CUDA 12.6 wheels followed by docling-slim[convert-core,format-pdf,models-local]==2.131.0; runner fails closed if CUDA remains unavailable. PR CI 36956382368 PASS; canonical-main CI 36956500411 PASS; merged as f77778587e40a7b65b462cf9fca1d987bab19dbd.",
         "Latest Lambda standard_no_ocr attempt on research-engine main@f77778587e40a7b65b462cf9fca1d987bab19dbd cleared the full runtime boundary: Docling 2.131.0, Torch 2.13.0+cu126, TorchVision 0.28.0+cu126, SciPy 1.18.1, CUDA visibility, model prefetch (669M), and SDK self-test all passed. The 73-page benchmark then failed at actual Heron layout-model initialization with CUDA error cudaErrorDevicesUnavailable.",
-        "research-engine PR #46 adds non-destructive physical-GPU inventory and per-GPU real allocation probes, chooses the healthiest GPU by free-memory order, binds by GPU UUID through CUDA_VISIBLE_DEVICES, and forces Docling device=cuda. PR CI 36959179283 PASS; canonical-main CI 36959277130 PASS; merged as d1dd1d32cf57e9c4423d4d31ef314611ebd4162f."
+        "research-engine PR #46 adds non-destructive physical-GPU inventory and per-GPU real allocation probes, chooses the healthiest GPU by free-memory order, binds by GPU UUID through CUDA_VISIBLE_DEVICES, and forces Docling device=cuda. PR CI 36959179283 PASS; canonical-main CI 36959277130 PASS; merged as d1dd1d32cf57e9c4423d4d31ef314611ebd4162f.",
+        "Lambda retry on research-engine main@d1dd1d32cf57e9c4423d4d31ef314611ebd4162f showed both RTX A4500s at compute mode Default, 0% utilization, no active compute processes, and ~20.0 GiB / ~18.1 GiB free. UUID-masked CUDA probes nevertheless failed on both devices during initialization with cuda_available=false while device_count=1.",
+        "research-engine PR #47 switches the diagnostic to an unmasked 256 MiB CUDA allocation control followed by numeric-index CUDA_VISIBLE_DEVICES probes (0/1), retains UUID only as audit metadata, and binds Docling to the selected numeric index. PR CI 36959865580 PASS; canonical-main CI 36959974367 PASS; merged as fbd1508d364ec72a1cb2b3b9013b50a3a3e43286."
       ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
@@ -402,14 +404,14 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "d1dd1d32cf57e9c4423d4d31ef314611ebd4162f",
+      "identity": "fbd1508d364ec72a1cb2b3b9013b50a3a3e43286",
       "required_for_resume": true,
       "evidence": [
         "stage=candidate_parser_bakeoff",
-        "research-engine remote main@d1dd1d32cf57e9c4423d4d31ef314611ebd4162f canonical; PR #46 CI 36959179283 PASS; canonical-main CI 36959277130 PASS",
-        "Lambda/local research-engine clean main@f77778587e40a7b65b462cf9fca1d987bab19dbd; runtime/model/SDK preflights passed; actual Heron initialization failed with cudaErrorDevicesUnavailable",
-        "new runner performs non-destructive GPU inventory + per-GPU real allocation probes and binds a healthy GPU by UUID",
-        "next=fast-forward Lambda to d1dd1d32... and rerun stopped-daemon structure bakeoff"
+        "research-engine remote main@fbd1508d364ec72a1cb2b3b9013b50a3a3e43286 canonical; PR #47 CI 36959865580 PASS; canonical-main CI 36959974367 PASS",
+        "Lambda/local research-engine clean main@d1dd1d32cf57e9c4423d4d31ef314611ebd4162f",
+        "both A4500s idle/default/no active compute processes; UUID-masked PyTorch initialization failed on both",
+        "next=fast-forward Lambda to fbd1508... and rerun with unmasked control + numeric-index CUDA probes"
       ]
     }
   ],
@@ -576,24 +578,35 @@
         "PR #46 merged as d1dd1d32cf57e9c4423d4d31ef314611ebd4162f; PR CI 36959179283 PASS; canonical-main CI 36959277130 PASS.",
         "Corrected runner inventories compute mode/VRAM/utilization/processes, probes each GPU with a real 256 MiB allocation+write+synchronize, binds the first healthy device by GPU UUID, and never kills or resets another process."
       ]
+    },
+    {
+      "check": "Docling CUDA numeric-index binding diagnostic",
+      "result": "PASS_FIX_READY",
+      "evidence": [
+        "GPU0: RTX A4500, compute mode Default, util 0%, ~20010 MiB free; GPU1: RTX A4500, compute mode Default, util 0%, ~18103 MiB free.",
+        "No active GPU compute processes were reported.",
+        "Both UUID-masked fresh PyTorch probes failed CUDA initialization despite device_count=1, isolating the failure to the visibility/binding path rather than workload occupancy.",
+        "PR #47 merged as fbd1508d364ec72a1cb2b3b9013b50a3a3e43286; PR CI 36959865580 PASS; canonical-main CI 36959974367 PASS.",
+        "Corrected runner first tests an unmasked real allocation, then probes CUDA_VISIBLE_DEVICES=0 and =1 separately and binds Docling to the first numeric index that passes."
+      ]
     }
   ],
   "blockers": [
-    "The Docling standard/no-OCR 73-page structure benchmark still has not completed because actual Heron GPU allocation failed on the device selected by AUTO.",
-    "The next retry must establish whether at least one physical A4500 passes a real CUDA allocation probe and, if so, pin Docling to that device.",
-    "If no GPU passes the probe, the preserved GPU inventory/compute-process output must be evaluated before any reset, kill, or CPU fallback is considered.",
+    "The Docling standard/no-OCR 73-page benchmark has still not completed; UUID-based CUDA_VISIBLE_DEVICES masks failed initialization on both otherwise-idle/default A4500s.",
+    "The next retry must distinguish UUID-mask incompatibility from a general CUDA allocation problem using the unmasked control and numeric-index probes.",
+    "Do not reset/kill GPU processes or fall back to CPU based on the current evidence.",
     "Formula enrichment, OCR, VLM, Marker/Paddle, and heavier MinerU tiers remain disabled.",
-    "Research daemon must remain inactive/dead throughout the retry."
+    "Research daemon must remain inactive/dead."
   ],
   "remaining_work": [
-    "On the stopped Lambda, fast-forward clean research-engine main from f77778587e40a7b65b462cf9fca1d987bab19dbd exactly to d1dd1d32cf57e9c4423d4d31ef314611ebd4162f.",
-    "Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT.",
-    "Inspect GPU inventory, compute mode, active compute processes and the per-GPU 256 MiB allocation probes.",
-    "Confirm a SELECTED_PHYSICAL_GPU_UUID is emitted, CUDA_VISIBLE_DEVICES is pinned to it, SDK self-test passes and Heron model initialization proceeds.",
-    "If the benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use across the same 7-paper / 73-page seed.",
-    "If all GPUs fail allocation, diagnose occupancy/compute-mode state from the captured output before taking any action that could affect other workloads."
+    "On the stopped Lambda, fast-forward clean research-engine main from d1dd1d32cf57e9c4423d4d31ef314611ebd4162f exactly to fbd1508d364ec72a1cb2b3b9013b50a3a3e43286.",
+    "Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT.",
+    "Inspect UNMASKED_CUDA_ALLOCATION and both numeric-index allocation probes.",
+    "If a numeric index passes, confirm CUDA_VISIBLE_DEVICES is pinned to that index, SDK self-test passes, and Heron initialization proceeds.",
+    "If the unmasked and both numeric-index probes fail, use the captured environment/device diagnostics to investigate driver/device access next before touching workloads.",
+    "If the corpus benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@f77778587e40a7b65b462cf9fca1d987bab19dbd, fetch origin, verify canonical commit d1dd1d32cf57e9c4423d4d31ef314611ebd4162f descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The helper will inventory every GPU, report active compute processes, probe each GPU with a real 256 MiB CUDA allocation/write/synchronize, bind the first healthy device by GPU UUID using CUDA_VISIBLE_DEVICES, force Docling device=cuda, and fail closed if none pass. Do not kill/reset GPU processes, do not fall back to CPU, and keep OCR/formula/VLM/heavier parser tiers disabled.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@d1dd1d32cf57e9c4423d4d31ef314611ebd4162f, fetch origin, verify canonical commit fbd1508d364ec72a1cb2b3b9013b50a3a3e43286 descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The helper first runs an unmasked real 256 MiB CUDA allocation control, then probes CUDA_VISIBLE_DEVICES=0 and =1 separately, binds Docling to the first numeric index that passes, and retains GPU UUID only as audit metadata. Do not kill/reset GPU processes, do not fall back to CPU, and keep OCR/formula/VLM/heavier parser tiers disabled.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
