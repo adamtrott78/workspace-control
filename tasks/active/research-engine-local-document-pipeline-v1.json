@@ -67,13 +67,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "fbd1508d364ec72a1cb2b3b9013b50a3a3e43286",
+        "checkpoint_sha": "b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "d1dd1d32cf57e9c4423d4d31ef314611ebd4162f",
+        "head_sha": "fbd1508d364ec72a1cb2b3b9013b50a3a3e43286",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -404,14 +404,13 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "fbd1508d364ec72a1cb2b3b9013b50a3a3e43286",
+      "identity": "b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a",
       "required_for_resume": true,
       "evidence": [
-        "stage=candidate_parser_bakeoff",
-        "research-engine remote main@fbd1508d364ec72a1cb2b3b9013b50a3a3e43286 canonical; PR #47 CI 36959865580 PASS; canonical-main CI 36959974367 PASS",
-        "Lambda/local research-engine clean main@d1dd1d32cf57e9c4423d4d31ef314611ebd4162f",
-        "both A4500s idle/default/no active compute processes; UUID-masked PyTorch initialization failed on both",
-        "next=fast-forward Lambda to fbd1508... and rerun with unmasked control + numeric-index CUDA probes"
+        "research-engine remote main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a canonical; PR #48 CI 36960458637 PASS; canonical-main CI 36960565039 PASS",
+        "Lambda/local research-engine clean main@fbd1508d364ec72a1cb2b3b9013b50a3a3e43286; daemon inactive/dead PID 0",
+        "unmasked CUDA allocation control failed and both numeric-index probes failed while nvidia-smi showed both A4500s healthy/idle/default; failure is below Docling and likely below PyTorch",
+        "next=fast-forward Lambda to b9327a1... and run read-only deploy/diagnose-cuda-host.sh"
       ]
     }
   ],
@@ -606,7 +605,7 @@
     "If the unmasked and both numeric-index probes fail, use the captured environment/device diagnostics to investigate driver/device access next before touching workloads.",
     "If the corpus benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@d1dd1d32cf57e9c4423d4d31ef314611ebd4162f, fetch origin, verify canonical commit fbd1508d364ec72a1cb2b3b9013b50a3a3e43286 descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The helper first runs an unmasked real 256 MiB CUDA allocation control, then probes CUDA_VISIBLE_DEVICES=0 and =1 separately, binds Docling to the first numeric index that passes, and retains GPU UUID only as audit metadata. Do not kill/reset GPU processes, do not fall back to CPU, and keep OCR/formula/VLM/heavier parser tiers disabled.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@fbd1508d364ec72a1cb2b3b9013b50a3a3e43286, fetch origin, verify canonical commit b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a descends from it, then fast-forward exactly to that commit. Run bash deploy/diagnose-cuda-host.sh and preserve the complete terminal output. This is a read-only host diagnostic: it calls libcuda cuInit(0) and CUDA runtime cudaGetDeviceCount directly, inspects NVIDIA device nodes/UVM module state and recent NVIDIA/UVM/Xid kernel messages, and retains a PyTorch control. Do not rerun Docling or the 73-page benchmark until this host CUDA diagnostic is evaluated. Do not modprobe, reset GPUs, kill processes, or mutate the host.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
