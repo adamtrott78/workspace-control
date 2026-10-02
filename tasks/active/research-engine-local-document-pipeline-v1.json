@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "candidate_parser_bakeoff",
+  "current_stage": "adaptive_page_region_router",
   "acceptance_criteria": [
     "A versioned paper-package.v1 contract exists and preserves the original PDF SHA-256 as scientific authority while representing normalized reading-order Markdown, page/block provenance, extracted figures, tables, equations, references/citations, diagnostics, confidence, and parser/model lineage.",
     "The pipeline uses a cascaded cost model: deterministic/native PDF extraction first, specialized local OCR/layout/table/formula/document models only where needed, and a general local VLM/agent only for low-confidence or structurally difficult regions.",
@@ -73,7 +73,7 @@
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "6d7c682b58904829b59d57d2da1a50bee31e2565",
+        "head_sha": "db78b236103213c6274e538b1736c4483032c06e",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -166,7 +166,7 @@
     },
     {
       "id": "candidate_parser_bakeoff",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+ci",
@@ -190,7 +190,9 @@
         "stopped-daemon standard_no_ocr paper-package.v1 normalization/evaluation replay",
         "content-aware table cell/grid, equation, figure-caption, heading/section and provenance metrics",
         "direct normalized Docling-native baseline comparison",
-        "mode-specific Docling structured compiler identity preserving the validated native package identity"
+        "mode-specific Docling structured compiler identity preserving the validated native package identity",
+        "validated hybrid component decision: native lexical/order substrate + standard_no_ocr structure overlay",
+        "measured residual map: equations require targeted enrichment; tables require confidence gating/residual audit; caption-linked figures/headings/provenance accepted"
       ],
       "validation": [
         "research-engine PR #34 merged as 95cd45877d5b847cad894d964b3374bb79db44f4; PR CI 36944071769 PASS; main CI 36944228025 PASS.",
@@ -235,20 +237,31 @@
         "research-engine PR #50 added the stopped-daemon standard_no_ocr normalization/evaluation replay and merged as db78b236103213c6274e538b1736c4483032c06e. PR CI 36964163461 PASS; canonical-main CI 36964325648 PASS across compile, full pytest/PostgreSQL integration, Compose validation, daemon image build, and cleanup.",
         "The replay reuses the existing DoclingDocument -> paper-package.v1 normalizer, preserves the already-validated native package identity, gives non-native Docling modes a distinct compiler identity/config, and invokes no parser runtime or model inference.",
         "Content-aware evaluation now keeps structure-count agreement separate from fidelity and scores table text/grid/aligned cells, equation representation, semantic figure-caption association, title/heading content and section-path consistency, plus block/asset page+bbox provenance integrity.",
-        "The Lambda replay runner requires the preserved standard_no_ocr output root plus the existing normalized Docling-native package root and fails closed unless research-engine-daemon.service remains inactive/dead."
+        "The Lambda replay runner requires the preserved standard_no_ocr output root plus the existing normalized Docling-native package root and fails closed unless research-engine-daemon.service remains inactive/dead.",
+        "Stopped-daemon standard_no_ocr normalization/evaluation replay completed over all 7 papers / 73 pages as PAPER_PACKAGE_V1; original PDF remained authority and Mathpix remained reference only.",
+        "Provenance gate passed: mean body provenance coverage=1.0 and mean bbox coverage=1.0; every case reported block/asset page validity, bbox coverage, and heading-section-path self-consistency of 1.0.",
+        "Heading semantics passed strongly: mean matched heading-content F1=0.9672 and mean reference coverage at F1>=0.5=0.9717; standard adds ~+0.9672 matched heading F1 versus normalized native.",
+        "Figure-caption semantics passed with a routing caveat: matched caption-content F1=0.9462; 35/44 candidate picture blocks are caption-linked (~0.795 corpus-level association), while 33/34 Mathpix figure captions achieve F1>=0.5 (~0.971 reference coverage). Treat caption-linked pictures as semantic figures and leave unmatched graphics unpromoted.",
+        "Table structure is useful but heterogeneous. Across 24 candidate/reference outer tables, table-count agreement is exact; table-count-weighted matched content F1 is ~0.7593 and aligned-cell F1 ~0.6889. Tiwari and Stealth are strong, while Scheirer/Fadul are content failures and Broggi is weak. Do not claim unconditional table fidelity.",
+        "Equation semantics failed decisively without formula enrichment: all six equation-bearing papers report matched equation-content F1=0 and reference coverage=0 despite 57 candidate formula labels vs 50 Mathpix display equations. The aggregate 0.142857 mean is only the empty-equation paper's 1.0 score. This measured residual justifies a bounded formula-enrichment experiment.",
+        "Normalized standard text/read-order are not a reason to replace native: candidate-minus-native mean text fidelity=-0.0099 and reading-order=-0.0040. Decision: native remains lexical/order substrate; standard_no_ocr is a structure overlay.",
+        "Candidate-parser bakeoff acceptance is satisfied by component-level winners plus measured residuals. Do not reopen broad Marker/PaddleOCR/heavier MinerU evaluation absent a targeted residual that the selected stack cannot close."
       ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
     {
       "id": "adaptive_page_region_router",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+ci",
       "inputs": [
         "bakeoff metrics",
         "native text-quality signals",
-        "layout/OCR/table/formula/chart confidence"
+        "layout/OCR/table/formula/chart confidence",
+        "validated native lexical/order/provenance substrate",
+        "validated standard_no_ocr structure-overlay evidence",
+        "content-aware residual metrics from 7-paper / 73-page replay"
       ],
       "outputs": [
         "deterministic page/region triage",
@@ -425,12 +438,13 @@
       "identity": "db78b236103213c6274e538b1736c4483032c06e",
       "required_for_resume": true,
       "evidence": [
-        "stage=candidate_parser_bakeoff",
-        "research-engine remote main@db78b236103213c6274e538b1736c4483032c06e; PR #50 replay/evaluator implementation merged and PR/main CI PASS",
-        "Lambda local research-engine is last verified clean at 6d7c682b58904829b59d57d2da1a50bee31e2565 and must be fast-forwarded before replay",
-        "successful preserved standard_no_ocr OUTPUT_ROOT=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z; do not rerun Docling",
-        "replay runner=deploy/run-docling-standard-structure-replay.sh; no parser/model inference",
-        "next=sync Lambda local main, identify existing normalized Docling-native root, run stopped-daemon replay, inspect content-aware fidelity"
+        "stage=adaptive_page_region_router",
+        "research-engine remote/Lambda-local main@db78b236103213c6274e538b1736c4483032c06e; replay implementation CI PASS and stopped-daemon replay completed",
+        "standard_no_ocr normalized replay=7/7 PASS_NORMALIZED over 73 pages; provenance+bbox integrity 1.0",
+        "accepted components=headings + caption-linked figures + provenance; native retained for lexical text/order",
+        "tables=24 outer tables exact count but heterogeneous content (~0.759 table-weighted matched content F1; ~0.689 aligned-cell F1); confidence gate/residual audit required",
+        "equations=57 labels vs 50 references but 0 matched-content F1 on every equation-bearing paper; targeted formula enrichment is now justified",
+        "next=implement deterministic native->standard routing/confidence contract and a bounded formula-enrichment experiment; do not reopen broad parser bakeoff"
       ]
     }
   ],
@@ -669,25 +683,38 @@
         "Replay is normalization/evaluation only: no document-benchmark-external call, no parser/model runtime, no Docling inference, no OCR/formula enrichment/VLM/Marker/PaddleOCR/MinerU activation.",
         "Content metrics cover table grid/cells, equations, figure-caption association, headings/section paths, provenance integrity, and direct normalized-native comparison while keeping counts separate."
       ]
+    },
+    {
+      "check": "Docling standard/no-OCR content-aware normalization replay",
+      "result": "PASS_WITH_MEASURED_RESIDUALS",
+      "evidence": [
+        "7 cases / 73 pages normalized as PAPER_PACKAGE_V1; authority=ORIGINAL_PDF; reference=MATHPIX_MANUAL_REFERENCE.",
+        "Mean provenance coverage=1.0; mean bbox coverage=1.0.",
+        "Heading matched-content F1=0.9672; heading reference coverage=0.9717.",
+        "Figure-caption matched-content F1=0.9462; 35/44 candidate pictures caption-linked; 33/34 reference figures covered at F1>=0.5.",
+        "24 outer tables materialized with exact outer-table count agreement; table-count-weighted matched-content F1~0.7593 and aligned-cell F1~0.6889, with strong and failed cases.",
+        "Equations materially fail without enrichment: every equation-bearing paper has matched-content F1=0 and reference coverage=0.",
+        "Candidate-minus-native mean text fidelity=-0.0099 and reading order=-0.0040, confirming standard should overlay rather than replace native.",
+        "Final daemon state inactive/dead PID 0."
+      ]
     }
   ],
   "blockers": [
-    "Lambda local research-engine is last verified clean at 6d7c682b58904829b59d57d2da1a50bee31e2565 while canonical remote main is db78b236103213c6274e538b1736c4483032c06e; fast-forward the stopped-daemon local checkout before replay.",
-    "The exact Lambda-local root of the already-normalized Docling-native paper-package.v1 corpus is not recorded in durable state. Identify the existing root locally and pass it to the replay; do not rerun Docling/native to recreate the benchmark.",
-    "The preserved standard_no_ocr structured JSON has not yet been normalized/evaluated with the merged content-aware gate, so table/equation/figure-caption/heading content fidelity remains unknown.",
-    "Formula enrichment remains intentionally disabled; only a measured equation-content residual from this replay may justify opening it.",
-    "The standard structure tier remains ~4.69x slower than Docling native with a ~6.8G runtime footprint, so routing policy still matters.",
-    "research-engine-daemon.service must remain inactive/dead throughout the Lambda normalization/evaluation replay."
+    "Equation representation is not production-usable in standard_no_ocr with formula enrichment disabled: all six equation-bearing seed papers have matched equation-content F1=0 and reference coverage=0.",
+    "Table fidelity is heterogeneous despite exact outer-table counts. Before selecting any heavier table fallback, audit the low-scoring Scheirer, Fadul and Broggi cases to separate evaluator/LaTeX-normalization artifacts from genuine TableFormer cell/grid errors.",
+    "Uncaptioned Docling picture items must not be promoted as semantic figures; only caption-linked pictures are currently validated for semantic figure routing.",
+    "The standard structure tier remains ~4.69x slower than Docling native with a ~6.8G runtime footprint, so production routing must avoid unconditional whole-document structure inference."
   ],
   "remaining_work": [
-    "With research-engine-daemon.service inactive/dead, verify the Lambda checkout is clean and fast-forward local research-engine main from 6d7c682b58904829b59d57d2da1a50bee31e2565 to canonical remote main@db78b236103213c6274e538b1736c4483032c06e.",
-    "Locate the already-existing normalized Docling-native paper-package.v1 root on Lambda; do not rerun the native parser or the 73-page benchmark.",
-    "Run deploy/run-docling-standard-structure-replay.sh against /home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z and the existing normalized-native root. This replay must not invoke Docling inference or model downloads.",
-    "Inspect docling-standard-no-ocr-paper-package-v1/docling-normalization-summary.json for provenance coverage and content-aware table cell/grid, equation, figure-caption, heading/section metrics plus standard-minus-native deltas.",
-    "If structure content holds, close candidate_parser_bakeoff and advance to adaptive_page_region_router / structured_elements_and_semantic_escalation with native->standard escalation policy.",
-    "Only open formula enrichment, OCR, Marker/PaddleOCR or heavier MinerU tiers for a specific measured residual gap."
+    "Implement and CI-gate an adaptive routing contract that preserves Docling native as the default lexical/order/provenance package and applies standard_no_ocr only as a structure overlay under explicit page/region/document signals.",
+    "Add structure-confidence outputs: headings/provenance accepted directly; semantic figures require caption association; tables require cell/grid confidence and fail-closed residual flags.",
+    "Add a compact table-residual audit for the low-scoring Scheirer, Fadul and Broggi cases that exposes candidate/reference cells and LaTeX normalization effects before any heavier table parser is opened.",
+    "Design a bounded Docling formula-enrichment bakeoff only for formula-bearing pages/regions/cases. Keep OCR and VLM disabled; measure equation representation against the same Mathpix reference and original-PDF authority.",
+    "If formula enrichment closes the equation residual, fold it into structured_elements_and_semantic_escalation as an equation-only escalation path rather than enabling it globally.",
+    "Do not reopen Marker, PaddleOCR or heavier MinerU tiers unless the targeted table audit or formula-enrichment experiment leaves a specific residual that Docling cannot close.",
+    "After router and structured-element confidence paths are validated, advance to local_inference_service_and_concurrency and the broader research-pipeline localization matrix."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat canonical research-engine remote main@db78b236103213c6274e538b1736c4483032c06e as the validated replay implementation and Lambda local main@6d7c682b58904829b59d57d2da1a50bee31e2565 as the last verified local state. On Lambda, first verify the checkout is clean and the daemon is inactive/dead, then fast-forward local main to db78b236103213c6274e538b1736c4483032c06e. Identify the already-existing normalized Docling-native paper-package root without rerunning Docling/native. Then run deploy/run-docling-standard-structure-replay.sh with the preserved standard_no_ocr OUTPUT_ROOT=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z and that normalized-native root. Return the terminal summary and docling-normalization-summary.json for evaluation. Do not rerun parser inference, redownload models, or enable formula enrichment, OCR, VLM, Marker, PaddleOCR or heavier MinerU tiers before a measured residual gap justifies one.",
+  "next_safe_action": "Do not rerun the broad parser bakeoff. Treat candidate_parser_bakeoff as VALIDATED and begin adaptive_page_region_router on research-engine main@db78b236103213c6274e538b1736c4483032c06e. Implement and CI-gate a deterministic hybrid routing/confidence contract with Docling native as the default lexical/order/provenance substrate and standard_no_ocr as a structure overlay. Promote headings/provenance directly; promote only caption-linked pictures as semantic figures; gate tables by content/grid confidence and add a compact residual audit for the Scheirer, Fadul and Broggi failures before selecting any heavier table fallback. In parallel, open one narrowly bounded Docling formula-enrichment experiment for formula-bearing pages/regions because all six equation-bearing seed papers scored equation-content F1=0 without enrichment. Keep OCR, VLM, Marker, PaddleOCR and heavier MinerU disabled unless a measured residual from these targeted gates specifically justifies one. Keep research-engine-daemon.service inactive/dead during benchmark development and do not START sustained research.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
