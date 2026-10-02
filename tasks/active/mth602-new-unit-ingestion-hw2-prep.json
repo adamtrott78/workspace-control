@@ -46,7 +46,7 @@
       "base_sha": "62b7a03c7139cb3987b72ad66bdc532e8a61b82a",
       "remote": {
         "branch": "unit-ingestion-hw2",
-        "checkpoint_sha": "22d049f0a18fc03efcb591fd0828642ecb72528f",
+        "checkpoint_sha": "198ca461e44be92b2a3efa90be7a81fa9095ba7e",
         "verified": true
       },
       "local": null,
