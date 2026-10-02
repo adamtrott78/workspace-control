@@ -30,7 +30,7 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 - Intent: mutate
 - Remote branch: unit-ingestion-hw2
-- Remote checkpoint: e65414a2428c939747048be5efab197613fdb5ba
+- Remote checkpoint: 37ee976148ee0a20ca8a8682c01285a0585c26fe
 - Remote verified: true
 
 ### workspace-control
@@ -42,11 +42,11 @@ Bring MTH 602 course-content state current by visually synthesizing new classroo
 
 ## Next safe action
 
-Continue HW2 from MTH602 unit-ingestion-hw2@e65414a2428c939747048be5efab197613fdb5ba. Floating-point Problems 1 and 2 are complete. Begin Probability Problem 1 in LEARNING mode with the smallest prerequisite diagnostic. Final non-coding submission must be handwritten.
+Continue HW2 from MTH602 unit-ingestion-hw2@37ee976148ee0a20ca8a8682c01285a0585c26fe. Probability Problem 1 is complete and handwritten. Begin Probability Problem 2 (linearity of expectation) in LEARNING mode with the smallest diagnostic; do not generate a typed final submission solution.
 
 ## Remaining work
 
-- Proceed to Probability Problem 1 in LEARNING mode. Under the later HW2 policy, the final submitted solution must be handwritten; ChatGPT should remain an on-demand tutor.
+- Proceed to Probability Problem 2 in LEARNING mode. Final submitted solution is handwritten-only under the later HW2 policy.
 - Submit the completed Lab1 PDF/notebook through one of the instructor-approved channels; artifact production is complete but actual submission is a user action.
 - Complete exact-byte transfer of the HW2 PDF/CSV/PNG source package into homework/hw02 and verify against assignment/manifest.json when a suitable binary transfer surface is available.
 - Before Probability Problem 4, ingest the exact Bishop Problems 2.16 and 2.18 from the course textbook.
