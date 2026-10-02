@@ -28,14 +28,14 @@ candidate_parser_bakeoff
 - Seven-paper / 73-page Mathpix seed remains the active benchmark; original PDFs remain authoritative.
 - Docling native is validated as the cheap text/order/provenance substrate with 100% page+bbox provenance coverage, but not as the semantic structure layer.
 - Real native structured replay exposed zero tables/formulas/section headers/captions and 289 low-level picture objects vs 34 Mathpix semantic figures.
-- The bounded specialized structure tier is now canonical at research-engine `2d78451b52e5e5dd667b18118ef4ce5373edf6c6`.
+- The bounded specialized structure tier prefetch boundary is corrected and canonical at research-engine `350e2d7bffd258248af78d540cc291a78ea83d9b`; PR #44 and canonical-main CI are green.
 - That tier uses standard Docling layout + TableFormer FAST inference with OCR, formula/code enrichment, picture description/classification, chart extraction, and remote services disabled.
 - PR #43 CI `36953847303` PASS and canonical-main CI `36953962450` PASS.
 - The next runtime gate measures only this specialized structure tier on the same 73 pages.
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On the Lambda, verify research-engine is clean on main@01797e7a3d0805f02afc7a348125420663623956, fetch origin, verify canonical commit 2d78451b52e5e5dd667b18118ef4ce5373edf6c6 is present and descends from the current checkout, then fast-forward exactly to that commit. Run bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The helper creates/reuses an isolated standard-no-OCR Docling runtime, prefetches only layout + tableformer artifacts, forces conversion offline after prefetch, reports runtime/model sizes and CUDA visibility, and benchmarks the same 7-paper / 73-page Mathpix seed. Keep OCR, formula/code enrichment, VLM, Marker, PaddleOCR, and heavier MinerU tiers disabled. Keep the daemon inactive/dead throughout.
+Keep research-engine-daemon.service inactive/dead. On Lambda, verify the clean research-engine checkout is main@2d78451b52e5e5dd667b18118ef4ce5373edf6c6, fetch origin, fast-forward only to canonical main@350e2d7bffd258248af78d540cc291a78ea83d9b, then rerun `bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh` and preserve the full output plus OUTPUT_ROOT. The corrected helper recreates the experimental structure venv under the direct-prefetch-v2 profile, installs `docling-slim[format-pdf,models-local]==2.131.0` without CLI extras, directly prefetches only layout and TableFormer artifacts, and keeps OCR/formula/VLM/heavier tiers disabled. Keep the daemon inactive/dead throughout.
 
 ## Remaining work
 
