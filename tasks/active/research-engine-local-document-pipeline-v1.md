@@ -32,22 +32,23 @@ candidate_parser_bakeoff
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@350e2d7bffd258248af78d540cc291a78ea83d9b, fetch origin, verify canonical commit f77778587e40a7b65b462cf9fca1d987bab19dbd descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The helper will recreate the isolated runtime under profile docling-standard-no-ocr-core-cu126-v3, install official PyTorch 2.13.0/TorchVision 0.28.0 CUDA 12.6 wheels, then docling-slim[convert-core,format-pdf,models-local]==2.131.0, directly prefetch layout + TableFormer, and fail closed unless CUDA is available. Keep OCR, formula/code enrichment, VLM, Marker, PaddleOCR, and heavier MinerU tiers disabled.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@f77778587e40a7b65b462cf9fca1d987bab19dbd, fetch origin, verify canonical commit d1dd1d32cf57e9c4423d4d31ef314611ebd4162f descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The helper will inventory every GPU, report active compute processes, probe each GPU with a real 256 MiB CUDA allocation/write/synchronize, bind the first healthy device by GPU UUID using CUDA_VISIBLE_DEVICES, force Docling device=cuda, and fail closed if none pass. Do not kill/reset GPU processes, do not fall back to CPU, and keep OCR/formula/VLM/heavier parser tiers disabled.
 
 ## Remaining work
 
-- On the stopped Lambda, fast-forward clean research-engine main from 350e2d7bffd258248af78d540cc291a78ea83d9b exactly to f77778587e40a7b65b462cf9fca1d987bab19dbd.
+- On the stopped Lambda, fast-forward clean research-engine main from f77778587e40a7b65b462cf9fca1d987bab19dbd exactly to d1dd1d32cf57e9c4423d4d31ef314611ebd4162f.
 - Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT.
-- Confirm runtime recreation under profile docling-standard-no-ocr-core-cu126-v3, SciPy import/version, Torch 2.13.0 CUDA 12.6, torch.cuda.is_available()=True, and resolved RTX A4500 device.
-- Confirm DOCLING_STANDARD_NO_OCR_SDK_SELF_TEST=PASS, then evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use across the same 7-paper / 73-page seed.
-- Normalize successful standard_no_ocr JSON to paper-package.v1 and compare semantic headings/tables/figures/captions against native + Mathpix.
-- Only if measured gaps remain should formula enrichment, OCR, Marker/Paddle, or other heavier tiers be opened.
+- Inspect GPU inventory, compute mode, active compute processes and the per-GPU 256 MiB allocation probes.
+- Confirm a SELECTED_PHYSICAL_GPU_UUID is emitted, CUDA_VISIBLE_DEVICES is pinned to it, SDK self-test passes and Heron model initialization proceeds.
+- If the benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use across the same 7-paper / 73-page seed.
+- If all GPUs fail allocation, diagnose occupancy/compute-mode state from the captured output before taking any action that could affect other workloads.
 
 ## Blockers / gates
 
-- The Docling standard/no-OCR 73-page structure benchmark has not yet completed; the latest attempt stopped at SDK preflight after successful model prefetch.
-- The next Lambda retry must prove SciPy import success and CUDA visibility before corpus execution.
-- Formula LaTeX recognition and OCR/scanned-document tiers remain intentionally disabled and unvalidated.
+- The Docling standard/no-OCR 73-page structure benchmark still has not completed because actual Heron GPU allocation failed on the device selected by AUTO.
+- The next retry must establish whether at least one physical A4500 passes a real CUDA allocation probe and, if so, pin Docling to that device.
+- If no GPU passes the probe, the preserved GPU inventory/compute-process output must be evaluated before any reset, kill, or CPU fallback is considered.
+- Formula enrichment, OCR, VLM, Marker/Paddle, and heavier MinerU tiers remain disabled.
 - Research daemon must remain inactive/dead throughout the retry.
 
 ## Fresh-chat initialization
