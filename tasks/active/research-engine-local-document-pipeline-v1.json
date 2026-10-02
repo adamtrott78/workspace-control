@@ -67,13 +67,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "f77778587e40a7b65b462cf9fca1d987bab19dbd",
+        "checkpoint_sha": "d1dd1d32cf57e9c4423d4d31ef314611ebd4162f",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "350e2d7bffd258248af78d540cc291a78ea83d9b",
+        "head_sha": "f77778587e40a7b65b462cf9fca1d987bab19dbd",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -213,7 +213,9 @@
         "Decision: retain Docling native as the cheap text/order/provenance substrate; do not materialize native picture items as semantic figures. Advance to a separate specialized structure-augmentation tier.",
         "research-engine PR #43 added the isolated Docling standard_no_ocr specialized structure tier and merged as 2d78451b52e5e5dd667b18118ef4ce5373edf6c6. PR CI run 36953847303 PASS; canonical-main CI run 36953962450 PASS.",
         "Second Lambda standard_no_ocr retry reached direct model prefetch successfully (DOCLING_STANDARD_NO_OCR_PREFETCH=PASS, 669M model artifacts) but SDK preflight still failed because DocumentConverter imports OCR factories whose BaseOcrModel requires SciPy even with do_ocr=false. The same run showed default torch 2.14.1+cu130 could not initialize CUDA against NVIDIA driver 570.133.07 (torch.cuda.is_available()=False).",
-        "research-engine PR #45 fixes both boundaries: standard_no_ocr now installs official PyTorch 2.13.0/TorchVision 0.28.0 CUDA 12.6 wheels followed by docling-slim[convert-core,format-pdf,models-local]==2.131.0; runner fails closed if CUDA remains unavailable. PR CI 36956382368 PASS; canonical-main CI 36956500411 PASS; merged as f77778587e40a7b65b462cf9fca1d987bab19dbd."
+        "research-engine PR #45 fixes both boundaries: standard_no_ocr now installs official PyTorch 2.13.0/TorchVision 0.28.0 CUDA 12.6 wheels followed by docling-slim[convert-core,format-pdf,models-local]==2.131.0; runner fails closed if CUDA remains unavailable. PR CI 36956382368 PASS; canonical-main CI 36956500411 PASS; merged as f77778587e40a7b65b462cf9fca1d987bab19dbd.",
+        "Latest Lambda standard_no_ocr attempt on research-engine main@f77778587e40a7b65b462cf9fca1d987bab19dbd cleared the full runtime boundary: Docling 2.131.0, Torch 2.13.0+cu126, TorchVision 0.28.0+cu126, SciPy 1.18.1, CUDA visibility, model prefetch (669M), and SDK self-test all passed. The 73-page benchmark then failed at actual Heron layout-model initialization with CUDA error cudaErrorDevicesUnavailable.",
+        "research-engine PR #46 adds non-destructive physical-GPU inventory and per-GPU real allocation probes, chooses the healthiest GPU by free-memory order, binds by GPU UUID through CUDA_VISIBLE_DEVICES, and forces Docling device=cuda. PR CI 36959179283 PASS; canonical-main CI 36959277130 PASS; merged as d1dd1d32cf57e9c4423d4d31ef314611ebd4162f."
       ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
@@ -400,14 +402,14 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "f77778587e40a7b65b462cf9fca1d987bab19dbd",
+      "identity": "d1dd1d32cf57e9c4423d4d31ef314611ebd4162f",
       "required_for_resume": true,
       "evidence": [
         "stage=candidate_parser_bakeoff",
-        "research-engine remote main@f77778587e40a7b65b462cf9fca1d987bab19dbd canonical; PR #45 CI 36956382368 PASS; canonical-main CI 36956500411 PASS",
-        "Lambda/local research-engine clean main@350e2d7bffd258248af78d540cc291a78ea83d9b; daemon inactive/dead PID 0",
-        "direct model prefetch succeeded (669M artifacts), SDK preflight then failed on missing scipy; default torch cu130 also could not use GPU on driver 570.133.07",
-        "v3 runtime adds Docling convert-core and pins official PyTorch/TorchVision CUDA 12.6; retry must prove CUDA=true before benchmark"
+        "research-engine remote main@d1dd1d32cf57e9c4423d4d31ef314611ebd4162f canonical; PR #46 CI 36959179283 PASS; canonical-main CI 36959277130 PASS",
+        "Lambda/local research-engine clean main@f77778587e40a7b65b462cf9fca1d987bab19dbd; runtime/model/SDK preflights passed; actual Heron initialization failed with cudaErrorDevicesUnavailable",
+        "new runner performs non-destructive GPU inventory + per-GPU real allocation probes and binds a healthy GPU by UUID",
+        "next=fast-forward Lambda to d1dd1d32... and rerun stopped-daemon structure bakeoff"
       ]
     }
   ],
@@ -562,23 +564,36 @@
         "PR #45 merged as f77778587e40a7b65b462cf9fca1d987bab19dbd; PR CI 36956382368 PASS; canonical-main CI 36956500411 PASS.",
         "Corrected runtime pins official CUDA 12.6 Torch 2.13.0 + TorchVision 0.28.0, adds convert-core, and fails closed when torch.cuda.is_available() is false."
       ]
+    },
+    {
+      "check": "Docling GPU allocation boundary",
+      "result": "PASS_DIAGNOSTIC_FIX_READY",
+      "evidence": [
+        "Torch 2.13.0+cu126, TorchVision 0.28.0+cu126 and SciPy 1.18.1 loaded successfully on Lambda.",
+        "torch.cuda.is_available() returned True and device name resolved to NVIDIA RTX A4500 before corpus execution.",
+        "Layout + TableFormer prefetch passed and SDK self-test passed.",
+        "Actual Heron model initialization failed with cudaErrorDevicesUnavailable, proving global CUDA availability was insufficient as a readiness test.",
+        "PR #46 merged as d1dd1d32cf57e9c4423d4d31ef314611ebd4162f; PR CI 36959179283 PASS; canonical-main CI 36959277130 PASS.",
+        "Corrected runner inventories compute mode/VRAM/utilization/processes, probes each GPU with a real 256 MiB allocation+write+synchronize, binds the first healthy device by GPU UUID, and never kills or resets another process."
+      ]
     }
   ],
   "blockers": [
-    "The Docling standard/no-OCR 73-page structure benchmark has not yet completed; the latest attempt stopped at SDK preflight after successful model prefetch.",
-    "The next Lambda retry must prove SciPy import success and CUDA visibility before corpus execution.",
-    "Formula LaTeX recognition and OCR/scanned-document tiers remain intentionally disabled and unvalidated.",
+    "The Docling standard/no-OCR 73-page structure benchmark still has not completed because actual Heron GPU allocation failed on the device selected by AUTO.",
+    "The next retry must establish whether at least one physical A4500 passes a real CUDA allocation probe and, if so, pin Docling to that device.",
+    "If no GPU passes the probe, the preserved GPU inventory/compute-process output must be evaluated before any reset, kill, or CPU fallback is considered.",
+    "Formula enrichment, OCR, VLM, Marker/Paddle, and heavier MinerU tiers remain disabled.",
     "Research daemon must remain inactive/dead throughout the retry."
   ],
   "remaining_work": [
-    "On the stopped Lambda, fast-forward clean research-engine main from 350e2d7bffd258248af78d540cc291a78ea83d9b exactly to f77778587e40a7b65b462cf9fca1d987bab19dbd.",
+    "On the stopped Lambda, fast-forward clean research-engine main from f77778587e40a7b65b462cf9fca1d987bab19dbd exactly to d1dd1d32cf57e9c4423d4d31ef314611ebd4162f.",
     "Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT.",
-    "Confirm runtime recreation under profile docling-standard-no-ocr-core-cu126-v3, SciPy import/version, Torch 2.13.0 CUDA 12.6, torch.cuda.is_available()=True, and resolved RTX A4500 device.",
-    "Confirm DOCLING_STANDARD_NO_OCR_SDK_SELF_TEST=PASS, then evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use across the same 7-paper / 73-page seed.",
-    "Normalize successful standard_no_ocr JSON to paper-package.v1 and compare semantic headings/tables/figures/captions against native + Mathpix.",
-    "Only if measured gaps remain should formula enrichment, OCR, Marker/Paddle, or other heavier tiers be opened."
+    "Inspect GPU inventory, compute mode, active compute processes and the per-GPU 256 MiB allocation probes.",
+    "Confirm a SELECTED_PHYSICAL_GPU_UUID is emitted, CUDA_VISIBLE_DEVICES is pinned to it, SDK self-test passes and Heron model initialization proceeds.",
+    "If the benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use across the same 7-paper / 73-page seed.",
+    "If all GPUs fail allocation, diagnose occupancy/compute-mode state from the captured output before taking any action that could affect other workloads."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@350e2d7bffd258248af78d540cc291a78ea83d9b, fetch origin, verify canonical commit f77778587e40a7b65b462cf9fca1d987bab19dbd descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The helper will recreate the isolated runtime under profile docling-standard-no-ocr-core-cu126-v3, install official PyTorch 2.13.0/TorchVision 0.28.0 CUDA 12.6 wheels, then docling-slim[convert-core,format-pdf,models-local]==2.131.0, directly prefetch layout + TableFormer, and fail closed unless CUDA is available. Keep OCR, formula/code enrichment, VLM, Marker, PaddleOCR, and heavier MinerU tiers disabled.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@f77778587e40a7b65b462cf9fca1d987bab19dbd, fetch origin, verify canonical commit d1dd1d32cf57e9c4423d4d31ef314611ebd4162f descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The helper will inventory every GPU, report active compute processes, probe each GPU with a real 256 MiB CUDA allocation/write/synchronize, bind the first healthy device by GPU UUID using CUDA_VISIBLE_DEVICES, force Docling device=cuda, and fail closed if none pass. Do not kill/reset GPU processes, do not fall back to CPU, and keep OCR/formula/VLM/heavier parser tiers disabled.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
