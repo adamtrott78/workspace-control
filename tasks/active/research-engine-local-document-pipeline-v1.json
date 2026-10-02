@@ -158,7 +158,10 @@
         "milcom-mathpix-seed-v1: 7 PDF/oracle pairs, 73 pages",
         "validated hashes and page counts"
       ],
-      "validation": [],
+      "validation": [
+        "Uploaded seed: seven PDF + Mathpix pairs, 73 total pages; source hashes and page counts validate.",
+        "Seed includes multi-column scientific papers with figures, tables, equations, algorithms, and references; scan-specific cases remain to add."
+      ],
       "resume_condition": "Corpus is representative enough that a converter cannot win merely by handling simple born-digital text."
     },
     {
@@ -182,7 +185,11 @@
         "document-benchmark-native CLI",
         "native preflight metrics"
       ],
-      "validation": [],
+      "validation": [
+        "research-engine PR #34 merged as 95cd45877d5b847cad894d964b3374bb79db44f4; PR CI 36944071769 PASS; main CI 36944228025 PASS.",
+        "73-page preflight: plain pypdf ~19.50 pages/s, mean text/order F1 0.9130/0.8640; layout ~16.44 pages/s, 0.8848/0.7662.",
+        "Plain extraction preserved ordered-token agreement better on 6/7 seed papers; both native modes are structure-loss baselines."
+      ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
     {
@@ -412,6 +419,15 @@
         "PR CI 36940736267 PASS; canonical-main CI 36940888183 PASS.",
         "The first implementation adds no heavyweight OCR/VLM dependency and makes no production EXTRACT/VERIFY mutation.",
         "Mathpix remains manual benchmark/reference only; production has no paid per-page Mathpix API dependency."
+      ]
+    },
+    {
+      "check": "Mathpix seed and native PDF baseline",
+      "result": "PASS",
+      "evidence": [
+        "7 PDF + Mathpix pairs / 73 pages validated.",
+        "research-engine PR #34 and canonical-main CI passed.",
+        "Plain native mode outperformed layout mode on ordered-token agreement in 6/7 cases."
       ]
     }
   ],
