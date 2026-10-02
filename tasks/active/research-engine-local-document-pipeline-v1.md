@@ -32,21 +32,23 @@ candidate_parser_bakeoff
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. The host CUDA stack is recovered after reboot and research-engine is clean on main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus reported OUTPUT_ROOT. The runner should now pass its real CUDA allocation probe, bind a healthy GPU, run the standard/no-OCR SDK self-test, and execute the same 7-paper / 73-page structure benchmark. Do not rerun the host CUDA diagnostic unless CUDA regresses. Keep OCR, formula/code enrichment, VLM, Marker, PaddleOCR, and heavier MinerU tiers disabled.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a, fetch origin, verify canonical commit 6d7c682b58904829b59d57d2da1a50bee31e2565 descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The runner will migrate the existing healthy v3 structure runtime in place to profile docling-standard-no-ocr-core-cu126-opencv-v4 by installing only the official docling-ibm-models[opencv-python-headless] extra, then verify cv2 and TableFormer TFPredictor imports before model prefetch and corpus execution. Do not rebuild the full runtime unless the profile is unexpected. Keep OCR/formula/VLM/heavier parser tiers disabled and keep the daemon inactive/dead.
 
 ## Remaining work
 
-- Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh on the recovered host and preserve the complete terminal output plus OUTPUT_ROOT.
-- Confirm the real CUDA allocation probe passes, a physical GPU is selected, SDK self-test passes, and Heron layout-model initialization proceeds.
+- On the stopped Lambda, fast-forward clean research-engine main from b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a exactly to 6d7c682b58904829b59d57d2da1a50bee31e2565.
+- Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT.
+- Confirm MIGRATE_RUNTIME_PROFILE=v3->v4, OPENCV_VERSION, TABLEFORMER_IMPORT_PREFLIGHT=PASS, GPU allocation, SDK self-test and Heron/TableFormer initialization all succeed.
 - If the 7-paper / 73-page benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use.
 - Normalize successful standard_no_ocr structured JSON into paper-package.v1 and compare semantic headings/tables/figures/captions against native + Mathpix.
 - Only if measured gaps remain should formula enrichment, OCR, Marker/Paddle, or other heavier tiers be opened.
 
 ## Blockers / gates
 
-- The Docling standard/no-OCR 73-page structure benchmark still has not completed; host CUDA is now recovered and no longer the active blocker.
+- The Docling standard/no-OCR 73-page structure benchmark still has not completed; the current blocker is the now-corrected optional OpenCV backend for TableFormer.
+- The next retry must pass TABLEFORMER_IMPORT_PREFLIGHT before corpus execution.
 - Formula enrichment, OCR, VLM, Marker/Paddle, and heavier MinerU tiers remain disabled.
-- Research daemon must remain inactive/dead throughout the structure benchmark.
+- Research daemon must remain inactive/dead.
 
 ## Fresh-chat initialization
 
