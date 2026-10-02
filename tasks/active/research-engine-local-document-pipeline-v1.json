@@ -73,7 +73,7 @@
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a",
+        "head_sha": "6d7c682b58904829b59d57d2da1a50bee31e2565",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -222,7 +222,12 @@
         "research-engine PR #48 adds a strictly read-only host CUDA diagnostic that calls libcuda cuInit(0) and CUDA runtime cudaGetDeviceCount directly, inspects nvidia_uvm/device nodes/permissions and recent kernel UVM/Xid/HMM evidence, and performs no host mutation. PR CI 36960458637 PASS; canonical-main CI 36960565039 PASS; merged as b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a.",
         "Post-reboot host CUDA diagnostic on research-engine main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a passed: cuInit=CUDA_SUCCESS, cuDeviceGetCount=2, cudaGetDeviceCount=cudaSuccess count=2, PyTorch cuda_available=true with both RTX A4500s visible, nvidia_uvm loaded, and device nodes present. The reboot also advanced the host kernel from 6.8.0-124-generic to 6.8.0-138-generic. No current-boot Xid 31/154 recovery fault was present.",
         "Post-reboot Lambda rerun on research-engine main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a cleared GPU allocation, numeric GPU selection, layout/TableFormer model prefetch, SDK self-test, and entered the real 7-paper / 73-page structure benchmark. The first document then failed during TableFormer import because docling-ibm-models intentionally leaves OpenCV optional and cv2 was absent.",
-        "research-engine PR #49 adds the official docling-ibm-models[opencv-python-headless] extra, migrates the existing healthy v3 6.6G runtime in place to v4 instead of rebuilding it, and adds explicit cv2 + TFPredictor import preflight. PR CI 36962171595 PASS; canonical-main CI 36962278723 PASS; merged as 6d7c682b58904829b59d57d2da1a50bee31e2565."
+        "research-engine PR #49 adds the official docling-ibm-models[opencv-python-headless] extra, migrates the existing healthy v3 6.6G runtime in place to v4 instead of rebuilding it, and adds explicit cv2 + TFPredictor import preflight. PR CI 36962171595 PASS; canonical-main CI 36962278723 PASS; merged as 6d7c682b58904829b59d57d2da1a50bee31e2565.",
+        "Stopped-daemon Lambda standard_no_ocr structure bakeoff completed successfully on research-engine main@6d7c682b58904829b59d57d2da1a50bee31e2565 over the same 7-paper / 73-page seed. CUDA real-allocation probe, GPU0 numeric binding, layout/TableFormer prefetch, SDK self-test, cv2/TableFormer import preflight, corpus execution, and final daemon safety state all passed.",
+        "Aggregate standard_no_ocr runtime: 50.461477 s over 73 pages (~1.44665 pages/s), 52889 output tokens vs 56191 Mathpix oracle tokens (0.94124x), mean text/read-order agreement ~0.94590/~0.91726, oracle-token-weighted ~0.94506/~0.91727. Runtime footprint ~6.8G; specialized model artifacts 669M; benchmark output ~3.3M.",
+        "Structure recovery is strong: Docling standard_no_ocr found 24 table items, exactly matching the Mathpix outer table-environment count across all seven papers; Mathpix has 28 tabular blocks because some outer tables contain multiple tabular blocks. Docling found 57 formula items vs 50 Mathpix display equations. It found 44 picture items vs 34 Mathpix figures, but 35 Docling pictures were caption-linked, nearly matching the 34 semantic figures. Provenance and bbox coverage remained 1.0 for every case.",
+        "Compared with normalized Docling native, standard_no_ocr improves oracle-token-weighted text/read-order agreement from ~0.9301/~0.8906 to ~0.9451/~0.9173 while running ~4.69x slower than the earlier native 10.761 s run. Decision: retain native as the cheap text/order/provenance substrate and standard_no_ocr as the leading local semantic-structure augmentation tier.",
+        "Candidate-parser component winners are now identified for a hybrid pipeline. Do not open heavier parser families merely to continue the bakeoff; next verify standard_no_ocr structure content and associations after paper-package.v1 normalization."
       ],
       "resume_condition": "At least one reproducible local stack meets minimum quality and resource thresholds or component-level winners are identified for a hybrid pipeline."
     },
@@ -413,10 +418,12 @@
       "required_for_resume": true,
       "evidence": [
         "stage=candidate_parser_bakeoff",
-        "research-engine remote main@6d7c682b58904829b59d57d2da1a50bee31e2565 canonical; PR #49 CI 36962171595 PASS; canonical-main CI 36962278723 PASS",
-        "Lambda/local research-engine clean main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a; post-reboot CUDA/GPU/model/SDK preflights all passed",
-        "real corpus run reached TableFormer and failed only on missing cv2; official headless OpenCV extra is now in v4 runtime profile",
-        "next=fast-forward Lambda to 6d7c682... and rerun stopped-daemon structure bakeoff with in-place v3->v4 migration"
+        "research-engine remote/local main@6d7c682b58904829b59d57d2da1a50bee31e2565; stopped-daemon standard_no_ocr structure bakeoff PASS",
+        "successful OUTPUT_ROOT=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z",
+        "73 pages / 50.461477 s (~1.44665 pages/s); 52889 tokens vs Mathpix 56191; weighted text/order ~0.94506/~0.91727",
+        "structure totals: 24 tables vs 24 Mathpix outer tables (28 tabular blocks), 57 formulas vs 50 display equations, 44 pictures with 35 caption-linked vs 34 Mathpix figures; provenance+bbox coverage 1.0",
+        "component decision=native cheap text/order/provenance substrate + standard_no_ocr specialized structure tier",
+        "next=normalize preserved standard_no_ocr JSON into paper-package.v1 and score structure content/associations; do not rerun parser"
       ]
     }
   ],
@@ -629,23 +636,40 @@
         "PR #49 merged as 6d7c682b58904829b59d57d2da1a50bee31e2565; PR CI 36962171595 PASS; canonical-main CI 36962278723 PASS.",
         "v4 runtime migrates existing v3 in place by installing only docling-ibm-models[opencv-python-headless], prints OpenCV/IBM-model versions, and fails before the benchmark unless cv2 and TFPredictor import."
       ]
+    },
+    {
+      "check": "Docling standard/no-OCR 73-page structure bakeoff",
+      "result": "PASS",
+      "evidence": [
+        "research-engine remote/local main@6d7c682b58904829b59d57d2da1a50bee31e2565; final daemon state inactive/dead PID 0.",
+        "7/7 cases PASS_RAW; 73 pages; wall time 50.461477 s (~1.44665 pages/s).",
+        "52889 candidate tokens vs 56191 Mathpix tokens (0.94124x); mean text/read-order ~0.94590/~0.91726; weighted ~0.94506/~0.91727.",
+        "All cases retained provenance_coverage=1.0 and bbox_coverage=1.0.",
+        "Tables: 24 candidate table items, matching 24 Mathpix outer table environments exactly across the seven cases; oracle tabular-block count=28.",
+        "Formulas: 57 candidate formula items vs 50 oracle display equations.",
+        "Pictures: 44 candidate picture items vs 34 oracle figures; 35 candidate pictures are caption-linked.",
+        "Runtime footprint ~6.8G; model artifacts 669M; output ~3.3M.",
+        "Decision: Docling native remains the cheap substrate; Docling standard_no_ocr is the leading specialized structure tier."
+      ]
     }
   ],
   "blockers": [
-    "The Docling standard/no-OCR 73-page structure benchmark still has not completed; the current blocker is the now-corrected optional OpenCV backend for TableFormer.",
-    "The next retry must pass TABLEFORMER_IMPORT_PREFLIGHT before corpus execution.",
-    "Formula enrichment, OCR, VLM, Marker/Paddle, and heavier MinerU tiers remain disabled.",
-    "Research daemon must remain inactive/dead."
+    "The successful standard_no_ocr outputs are still RAW_EXTERNAL_OUTPUT; paper-package.v1 normalization/provenance promotion over this exact OUTPUT_ROOT has not yet been run.",
+    "Current structure evidence is primarily label/count agreement. Table cell/grid fidelity, equation-content fidelity, semantic figure/caption association, heading quality and image materialization remain unvalidated.",
+    "Formula enrichment remains intentionally disabled; 57 formula labels vs 50 Mathpix display equations does not establish LaTeX fidelity.",
+    "The standard structure tier is ~4.69x slower than Docling native and has a ~6.8G runtime footprint, so routing policy still matters.",
+    "Research daemon must remain inactive/dead throughout the next normalization/evaluation gate."
   ],
   "remaining_work": [
-    "On the stopped Lambda, fast-forward clean research-engine main from b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a exactly to 6d7c682b58904829b59d57d2da1a50bee31e2565.",
-    "Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT.",
-    "Confirm MIGRATE_RUNTIME_PROFILE=v3->v4, OPENCV_VERSION, TABLEFORMER_IMPORT_PREFLIGHT=PASS, GPU allocation, SDK self-test and Heron/TableFormer initialization all succeed.",
-    "If the 7-paper / 73-page benchmark completes, evaluate structure-label recovery, text/order fidelity, throughput, runtime/model footprint and GPU use.",
-    "Normalize successful standard_no_ocr structured JSON into paper-package.v1 and compare semantic headings/tables/figures/captions against native + Mathpix.",
-    "Only if measured gaps remain should formula enrichment, OCR, Marker/Paddle, or other heavier tiers be opened."
+    "Reuse the successful standard_no_ocr OUTPUT_ROOT=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z; do not rerun Docling.",
+    "Generalize or add a stopped-daemon replay helper that feeds each standard_no_ocr structured JSON into the existing DoclingDocument -> paper-package.v1 normalizer.",
+    "Normalize all seven successful standard_no_ocr cases and verify source SHA/page-count, page+bbox provenance, section paths, table assets, equation assets, figure/caption metadata and fail-closed behavior.",
+    "Add content-aware structure metrics: table cell/grid content agreement, equation text/LaTeX usefulness, semantic figure/caption association and heading/section quality. Keep count agreement explicitly separate from content fidelity.",
+    "Compare normalized standard_no_ocr packages directly against normalized native packages and Mathpix references; preserve original PDFs as scientific authority.",
+    "If structure content holds, close candidate_parser_bakeoff and advance to adaptive_page_region_router / structured_elements_and_semantic_escalation with native->standard escalation policy.",
+    "Only open formula enrichment, OCR, Marker/Paddle or heavier MinerU tiers for specific measured residual gaps."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify the clean research-engine checkout is main@b9327a1214bae6bde1d8f7c41f2d35834ef8cf7a, fetch origin, verify canonical commit 6d7c682b58904829b59d57d2da1a50bee31e2565 descends from it, then fast-forward exactly to that commit. Rerun bash deploy/run-document-docling-standard-no-ocr-bakeoff.sh and preserve the complete terminal output plus OUTPUT_ROOT. The runner will migrate the existing healthy v3 structure runtime in place to profile docling-standard-no-ocr-core-cu126-opencv-v4 by installing only the official docling-ibm-models[opencv-python-headless] extra, then verify cv2 and TableFormer TFPredictor imports before model prefetch and corpus execution. Do not rebuild the full runtime unless the profile is unexpected. Keep OCR/formula/VLM/heavier parser tiers disabled and keep the daemon inactive/dead.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@6d7c682b58904829b59d57d2da1a50bee31e2565 and the successful standard_no_ocr OUTPUT_ROOT=/home/atrott/adamArchives/Adam/.workspace-control/tmp/document-docling-standard-no-ocr-20261002T035925Z as the exact baseline. Do not rerun Docling or redownload models. Implement and CI-gate a stopped-daemon normalization/evaluation replay for the preserved standard_no_ocr structured JSONs using the existing DoclingDocument -> paper-package.v1 normalizer. Then run that replay on Lambda and measure provenance coverage plus content-aware table/equation/figure-caption/heading quality against Mathpix and the normalized native packages. Keep formula enrichment, OCR, VLM, Marker, PaddleOCR and heavier MinerU tiers disabled until a specific measured residual gap justifies opening one.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
