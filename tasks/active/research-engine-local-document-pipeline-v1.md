@@ -31,29 +31,29 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a83850016efe2e58b37a86a4203d69af811117a1
+- Remote checkpoint: 8c875a62d44e91ed91207cdc78d715acb0909346
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: f44a20e710f7fb9868eeb2b5a1c654c01f540a48
+- Local HEAD: a83850016efe2e58b37a86a4203d69af811117a1
 - Local clean: true
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at f44a20e710f7fb9868eeb2b5a1c654c01f540a48, fetch origin/main, require origin/main=a83850016efe2e58b37a86a4203d69af811117a1, and fast-forward only to that commit. Keep the PostgreSQL db service running/healthy and verify the research daemon remains inactive/dead PID 0. Then run bash deploy/resume-extract-verify-paper-package-ab.sh /home/atrott/adamArchives/Adam/workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z. The resume gate must reuse the already-normalized 9 native + 9 standard packages, invoke no Docling compilation/normalization/model download, require the zero-model preflight to PASS before semantic calls, then run representative semantic A/B with current-PDF controls only after package disagreement. Return the compact zero-model preflight, compact representative semantic A/B, REPRESENTATIVE_AB_DECISION, final safety state, or any ERROR/traceback.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at a83850016efe2e58b37a86a4203d69af811117a1, fetch origin/main, require origin/main=8c875a62d44e91ed91207cdc78d715acb0909346, and fast-forward only to that commit. Keep PostgreSQL db running/healthy and verify the research daemon remains inactive/dead PID 0. Then run bash deploy/run-paper-package-ab-posthoc.sh rf-open-world-corpus-expansion-v1. This gate must make no semantic/model/parser calls and must only compare already-recorded package and current-PDF calibration result summaries. Return the COMPACT CONTEMPORANEOUS POSTHOC SUMMARY, POSTHOC_DECISION, final safety state, or any ERROR/traceback.
 
 ## Remaining work
 
-- Fast-forward the clean Lambda research-engine checkout from f44a20e710f7fb9868eeb2b5a1c654c01f540a48 to canonical a83850016efe2e58b37a86a4203d69af811117a1 while research-engine-daemon.service remains inactive/dead.
-- Resume from /home/atrott/adamArchives/Adam/workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z using deploy/resume-extract-verify-paper-package-ab.sh. Do not rerun either Docling batch compiler or normalization; the resume gate requires exactly 9 native and 9 standard normalized packages.
-- Require the zero-model same-page quote/provenance preflight to PASS before semantic replay, then evaluate low/median/high EXTRACT and VERIFY package arms plus disagreement-triggered current-PDF controls.
-- Evaluate exact token/latency reductions and package-context regression signals without equating token savings to plan-allowance savings.
-- If quality-safe, validate extract_verify_paper_package_ab and advance to research_pipeline_localization_matrix_validation; otherwise correct context assembly without reopening parser bakeoffs.
+- Fast-forward the clean Lambda research-engine checkout from a83850016efe2e58b37a86a4203d69af811117a1 to canonical 8c875a62d44e91ed91207cdc78d715acb0909346 while research-engine-daemon.service remains inactive/dead.
+- Run deploy/run-paper-package-ab-posthoc.sh rf-open-world-corpus-expansion-v1. This is a zero-semantic-call, zero-parser-call comparison over the package/PDF calibration outputs already stored in PostgreSQL.
+- If all four controlled pairs pass direct package-vs-current-PDF agreement, combine that result with the 98.59% zero-model quote recovery and two package-history matches to decide the A/B stage quality-safe and advance. If any contemporaneous pair differs materially, inspect that measured context difference before promotion.
+- Use contemporaneous controlled-subset token deltas as the cleaner semantic-input efficiency measure; keep historical-relative 8.57% savings as secondary evidence and do not equate tokens with plan allowance.
+- After A/B closure, advance to research_pipeline_localization_matrix_validation and finish Lambda production acceptance/licensing.
 
 ## Blockers / gates
 
-- Lambda local research-engine is last verified clean at main@f44a20e710f7fb9868eeb2b5a1c654c01f540a48 while canonical remote main is a83850016efe2e58b37a86a4203d69af811117a1; fast-forward before resuming the A/B gate.
-- Zero-model preflight and representative semantic A/B have not yet completed; production paper-package replacement remains forbidden until measured.
+- Lambda local research-engine is last verified clean at main@a83850016efe2e58b37a86a4203d69af811117a1 while canonical remote main is 8c875a62d44e91ed91207cdc78d715acb0909346; fast-forward before the posthoc comparator.
+- Representative history comparison is confounded by model variance: four package arms and their current-PDF controls both fail historical agreement. Direct contemporaneous package-vs-PDF comparison of the already-recorded outputs is required before stage promotion.
 - CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement.
 
 ## Fresh-chat initialization

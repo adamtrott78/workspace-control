@@ -68,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "a83850016efe2e58b37a86a4203d69af811117a1",
+        "checkpoint_sha": "8c875a62d44e91ed91207cdc78d715acb0909346",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "f44a20e710f7fb9868eeb2b5a1c654c01f540a48",
+        "head_sha": "a83850016efe2e58b37a86a4203d69af811117a1",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -427,7 +427,9 @@
         "benchmarks/document_intelligence/runtimes/docling_standard_no_ocr_batch.py",
         "deploy/run-extract-verify-paper-package-ab.sh",
         "deploy/resume-extract-verify-paper-package-ab.sh",
-        "preserved normalized A/B packages at workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z"
+        "preserved normalized A/B packages at workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z",
+        "deploy/run-paper-package-ab-posthoc.sh",
+        "src/research_engine/paper_package_ab.py contemporaneous calibration-event comparator"
       ],
       "validation": [
         "research-engine PR #56 merged as f44a20e710f7fb9868eeb2b5a1c654c01f540a48.",
@@ -445,7 +447,15 @@
         "Zero-model preflight then failed before any semantic replay because PaperPackageABPreflight.run referenced stale self.package_extractor after the EXTRACT/VERIFY policy split; the valid attributes are package_extract_extractor/package_verify_extractor.",
         "No semantic Terra/Codex replay or scientific-state materialization occurred in the failed preflight attempt.",
         "research-engine PR #57 fixes the stale preflight extractor reference and adds deploy/resume-extract-verify-paper-package-ab.sh, which requires exactly 9 existing native and 9 existing standard normalized packages and invokes no Docling batch compile/normalization path.",
-        "PR #57 merged as a83850016efe2e58b37a86a4203d69af811117a1; PR CI 37158927062 PASS and canonical-main CI 37159024596 PASS."
+        "PR #57 merged as a83850016efe2e58b37a86a4203d69af811117a1; PR CI 37158927062 PASS and canonical-main CI 37159024596 PASS.",
+        "Resumed Lambda zero-model preflight PASS on research-engine main@a83850016efe2e58b37a86a4203d69af811117a1 with PostgreSQL healthy and daemon inactive/dead PID 0.",
+        "Package coverage was complete: 9/9 native and 9/9 standard; 140/142 historical evidence quotes passed same-page token recall >=0.8 for quote recovery 0.9859154929577465.",
+        "Package context contained 539609 chars vs 541406 current-PDF chars across the preflight, a modest 0.3319% character reduction while preserving quote/page evidence.",
+        "Representative semantic A/B sampled 6 jobs (low/median/high EXTRACT + VERIFY). Package inputs totaled 154941 vs 169461 historical input tokens, an 8.5683% reduction, but only 2/6 package arms reproduced historical outputs.",
+        "No package_context_regression_signals were observed. The four package-history disagreements each triggered current-PDF controls and all four PDF controls also failed historical agreement, so the measured decision is INCONCLUSIVE_MODEL_VARIANCE rather than package regression.",
+        "Two VERIFY package arms directly matched historical outcomes; four jobs remain model-variance ambiguous. Scientific state was not materialized and the daemon remained inactive/dead.",
+        "research-engine PR #58 adds a zero-semantic-call posthoc comparator over already-recorded calibration events, directly pairing package outputs with contemporaneous PDF controls and reporting controlled-subset token deltas.",
+        "PR #58 merged as 8c875a62d44e91ed91207cdc78d715acb0909346; PR CI 37159681676 PASS and canonical-main CI 37159760600 PASS."
       ],
       "resume_condition": "Paper-package path demonstrates quality-safe savings or the task records why it should not replace the baseline."
     },
@@ -531,15 +541,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "a83850016efe2e58b37a86a4203d69af811117a1",
+      "identity": "8c875a62d44e91ed91207cdc78d715acb0909346",
       "required_for_resume": true,
       "evidence": [
         "stage=extract_verify_paper_package_ab",
-        "research-engine remote main@a83850016efe2e58b37a86a4203d69af811117a1; PR #57 + canonical-main CI PASS",
-        "Lambda local last verified clean main@f44a20e710f7fb9868eeb2b5a1c654c01f540a48; daemon inactive/dead PID 0",
-        "9 native + 9 standard parses and 9 normalized package pairs already complete under visible 20261003T223020Z A/B root",
-        "preflight failed only on stale package_extractor attribute before semantic replay",
-        "next=fast-forward and resume from preserved normalized packages; no reparse"
+        "research-engine remote main@8c875a62d44e91ed91207cdc78d715acb0909346; PR #58 + canonical-main CI PASS",
+        "Lambda local last verified clean main@a83850016efe2e58b37a86a4203d69af811117a1; daemon inactive/dead PID 0",
+        "zero-model preflight PASS: 9/9 package coverage, 140/142 same-page quotes, recovery 0.9859154929577465",
+        "representative semantic history comparison=INCONCLUSIVE_MODEL_VARIANCE with 0 package-only regression signals; 4 package disagreements had PDF controls that also failed history",
+        "next=zero-call contemporaneous package-vs-PDF calibration-event comparison"
       ]
     }
   ],
@@ -919,21 +929,53 @@
         "Preserved reusable artifact root=/home/atrott/adamArchives/Adam/workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z.",
         "PR #57 hotfix merged as a83850016efe2e58b37a86a4203d69af811117a1; PR CI 37158927062 PASS; canonical-main CI 37159024596 PASS."
       ]
+    },
+    {
+      "check": "Lambda paper-package zero-model preflight",
+      "result": "PASS",
+      "evidence": [
+        "research-engine local main@a83850016efe2e58b37a86a4203d69af811117a1; daemon inactive/dead PID 0; PostgreSQL healthy.",
+        "9/9 native and 9/9 standard packages covered.",
+        "140/142 historical evidence quotes passed same-page token recall threshold; recovery=0.9859154929577465.",
+        "Package chars=539609 vs PDF chars=541406; reduction=0.003319135731779847."
+      ]
+    },
+    {
+      "check": "Representative EXTRACT/VERIFY paper-package semantic A/B",
+      "result": "INCONCLUSIVE_MODEL_VARIANCE_NO_PACKAGE_REGRESSION_SIGNAL",
+      "evidence": [
+        "6 jobs sampled: low/median/high historical-input EXTRACT and VERIFY.",
+        "2/6 package arms matched historical outcomes.",
+        "4/6 package-history disagreements triggered current-PDF controls; all four PDF controls also failed historical agreement.",
+        "package_context_regression_signals=0.",
+        "Historical input tokens=169461; package input tokens=154941; historical-relative reduction=0.08568343158602865.",
+        "Because historical outputs are not reproducible under the current model for four jobs, historical agreement cannot by itself establish package-context quality."
+      ]
+    },
+    {
+      "check": "Contemporaneous package-vs-PDF posthoc implementation",
+      "result": "PASS_READY_FOR_LAMBDA",
+      "evidence": [
+        "research-engine PR #58 merged as 8c875a62d44e91ed91207cdc78d715acb0909346.",
+        "PR CI 37159681676 PASS and canonical-main CI 37159760600 PASS.",
+        "Posthoc reads research_calibration_events only; performs no semantic calls, parser calls, normalization or scientific-state mutation.",
+        "It directly compares package vs current-PDF result summaries for the four controlled pairs using the existing EXTRACT/VERIFY agreement contracts and reports contemporaneous input/cached-input token deltas."
+      ]
     }
   ],
   "blockers": [
-    "Lambda local research-engine is last verified clean at main@f44a20e710f7fb9868eeb2b5a1c654c01f540a48 while canonical remote main is a83850016efe2e58b37a86a4203d69af811117a1; fast-forward before resuming the A/B gate.",
-    "Zero-model preflight and representative semantic A/B have not yet completed; production paper-package replacement remains forbidden until measured.",
+    "Lambda local research-engine is last verified clean at main@a83850016efe2e58b37a86a4203d69af811117a1 while canonical remote main is 8c875a62d44e91ed91207cdc78d715acb0909346; fast-forward before the posthoc comparator.",
+    "Representative history comparison is confounded by model variance: four package arms and their current-PDF controls both fail historical agreement. Direct contemporaneous package-vs-PDF comparison of the already-recorded outputs is required before stage promotion.",
     "CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement."
   ],
   "remaining_work": [
-    "Fast-forward the clean Lambda research-engine checkout from f44a20e710f7fb9868eeb2b5a1c654c01f540a48 to canonical a83850016efe2e58b37a86a4203d69af811117a1 while research-engine-daemon.service remains inactive/dead.",
-    "Resume from /home/atrott/adamArchives/Adam/workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z using deploy/resume-extract-verify-paper-package-ab.sh. Do not rerun either Docling batch compiler or normalization; the resume gate requires exactly 9 native and 9 standard normalized packages.",
-    "Require the zero-model same-page quote/provenance preflight to PASS before semantic replay, then evaluate low/median/high EXTRACT and VERIFY package arms plus disagreement-triggered current-PDF controls.",
-    "Evaluate exact token/latency reductions and package-context regression signals without equating token savings to plan-allowance savings.",
-    "If quality-safe, validate extract_verify_paper_package_ab and advance to research_pipeline_localization_matrix_validation; otherwise correct context assembly without reopening parser bakeoffs."
+    "Fast-forward the clean Lambda research-engine checkout from a83850016efe2e58b37a86a4203d69af811117a1 to canonical 8c875a62d44e91ed91207cdc78d715acb0909346 while research-engine-daemon.service remains inactive/dead.",
+    "Run deploy/run-paper-package-ab-posthoc.sh rf-open-world-corpus-expansion-v1. This is a zero-semantic-call, zero-parser-call comparison over the package/PDF calibration outputs already stored in PostgreSQL.",
+    "If all four controlled pairs pass direct package-vs-current-PDF agreement, combine that result with the 98.59% zero-model quote recovery and two package-history matches to decide the A/B stage quality-safe and advance. If any contemporaneous pair differs materially, inspect that measured context difference before promotion.",
+    "Use contemporaneous controlled-subset token deltas as the cleaner semantic-input efficiency measure; keep historical-relative 8.57% savings as secondary evidence and do not equate tokens with plan allowance.",
+    "After A/B closure, advance to research_pipeline_localization_matrix_validation and finish Lambda production acceptance/licensing."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at f44a20e710f7fb9868eeb2b5a1c654c01f540a48, fetch origin/main, require origin/main=a83850016efe2e58b37a86a4203d69af811117a1, and fast-forward only to that commit. Keep the PostgreSQL db service running/healthy and verify the research daemon remains inactive/dead PID 0. Then run bash deploy/resume-extract-verify-paper-package-ab.sh /home/atrott/adamArchives/Adam/workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z. The resume gate must reuse the already-normalized 9 native + 9 standard packages, invoke no Docling compilation/normalization/model download, require the zero-model preflight to PASS before semantic calls, then run representative semantic A/B with current-PDF controls only after package disagreement. Return the compact zero-model preflight, compact representative semantic A/B, REPRESENTATIVE_AB_DECISION, final safety state, or any ERROR/traceback.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at a83850016efe2e58b37a86a4203d69af811117a1, fetch origin/main, require origin/main=8c875a62d44e91ed91207cdc78d715acb0909346, and fast-forward only to that commit. Keep PostgreSQL db running/healthy and verify the research daemon remains inactive/dead PID 0. Then run bash deploy/run-paper-package-ab-posthoc.sh rf-open-world-corpus-expansion-v1. This gate must make no semantic/model/parser calls and must only compare already-recorded package and current-PDF calibration result summaries. Return the COMPACT CONTEMPORANEOUS POSTHOC SUMMARY, POSTHOC_DECISION, final safety state, or any ERROR/traceback.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
