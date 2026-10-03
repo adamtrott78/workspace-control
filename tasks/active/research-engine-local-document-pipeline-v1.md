@@ -31,7 +31,7 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 1d461988a9416937a9149e4dd8faeeb666ac0e03
+- Remote checkpoint: f44a20e710f7fb9868eeb2b5a1c654c01f540a48
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
@@ -40,20 +40,21 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@1d461988a9416937a9149e4dd8faeeb666ac0e03 as the validated shared-inference/concurrency baseline. Begin extract_verify_paper_package_ab by inspecting the current EXTRACT/VERIFY hydrator and existing replay/telemetry contracts, then design and CI-gate a non-materializing A/B harness that compares the current authoritative-PDF context path against paper-package-derived context on preserved verified sources. Preserve original-PDF authority and source locators, measure evidence/provenance agreement plus exact semantic token/latency/local-compute telemetry, do not mutate scientific state, and keep plan-allowance observations separate from token counts. Do not reopen parser/model bakeoffs.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda verify /home/atrott/adamArchives/Adam/research-engine is clean on main@1d461988a9416937a9149e4dd8faeeb666ac0e03, fetch origin/main, require origin/main=f44a20e710f7fb9868eeb2b5a1c654c01f540a48, and fast-forward only to that exact commit. Then run bash deploy/run-extract-verify-paper-package-ab.sh. The gate must reuse the existing Docling native and standard/no-OCR runtimes/model cache without environment/model rebuilds, compile the preserved nine source artifacts, require the zero-model same-page quote/provenance preflight to PASS before any semantic replay, then run the representative low/median/high EXTRACT and VERIFY package arms with current-PDF controls only after package disagreement. Scientific state must not be materialized; only operational calibration events may be recorded. Keep the daemon inactive/dead throughout and return the compact zero-model preflight, compact representative semantic A/B, REPRESENTATIVE_AB_DECISION, final safety state, or any ERROR line.
 
 ## Remaining work
 
-- Design and CI-gate a non-materializing EXTRACT/VERIFY A/B harness over the preserved research corpus comparing the current authoritative-PDF hydration path with paper-package-derived context.
-- Measure evidence/provenance agreement, semantic input/cached/output/reasoning tokens, latency, and local-compute cost separately; retain exact token telemetry and treat plan-allowance UI observations as censored/quantized evidence only.
-- Keep fail-closed access to authoritative PDF pages/regions and do not mutate scientific state during A/B replay.
-- Run the bounded stopped-daemon Lambda A/B gate and decide whether paper-package context is quality-safe enough to replace repeated PDF interpretation for EXTRACT/VERIFY.
-- Then finish the broader research_pipeline_localization_matrix_validation and Lambda production acceptance.
+- Fast-forward the clean Lambda research-engine checkout from 1d461988a9416937a9149e4dd8faeeb666ac0e03 to canonical f44a20e710f7fb9868eeb2b5a1c654c01f540a48 while the daemon remains inactive/dead.
+- Run deploy/run-extract-verify-paper-package-ab.sh once. The runner first compiles the nine preserved source artifacts with the existing native and standard/no-OCR runtimes, then requires the zero-model same-page quote/provenance preflight to PASS before semantic calls.
+- Evaluate the representative low/median/high EXTRACT and VERIFY package arms, exact token/latency reductions, package-context regression signals and any current-PDF controls. Do not equate token savings with plan-allowance savings.
+- If the A/B result is quality-safe, validate extract_verify_paper_package_ab and advance to research_pipeline_localization_matrix_validation. If a package-only regression appears, correct context assembly without reopening parser bakeoffs.
+- Then complete Lambda production acceptance, licensing review, bounded production integration and remaining localization decisions.
 
 ## Blockers / gates
 
+- Lambda local research-engine is last verified clean at main@1d461988a9416937a9149e4dd8faeeb666ac0e03 while canonical remote main is f44a20e710f7fb9868eeb2b5a1c654c01f540a48; fast-forward before the A/B gate.
+- EXTRACT/VERIFY paper-package A/B is CI-gated but not yet measured on the preserved nine-paper Lambda corpus; production replacement remains forbidden until the zero-model and representative semantic results are evaluated.
 - CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement.
-- EXTRACT/VERIFY paper-package A/B has not yet demonstrated evidence/provenance equivalence and semantic-token/allowance savings versus the current authoritative-PDF path; production replacement remains forbidden until measured.
 
 ## Fresh-chat initialization
 

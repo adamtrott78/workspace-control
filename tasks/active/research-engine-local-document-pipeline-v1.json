@@ -68,7 +68,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "1d461988a9416937a9149e4dd8faeeb666ac0e03",
+        "checkpoint_sha": "f44a20e710f7fb9868eeb2b5a1c654c01f540a48",
         "verified": true
       },
       "local": {
@@ -420,9 +420,22 @@
         "evidence/provenance agreement metrics",
         "semantic input/cached/output/reasoning token comparison",
         "plan-allowance observations where useful",
-        "latency and local-compute accounting"
+        "latency and local-compute accounting",
+        "src/research_engine/paper_package_context.py",
+        "src/research_engine/paper_package_ab.py",
+        "benchmarks/document_intelligence/runtimes/docling_native_batch.py",
+        "benchmarks/document_intelligence/runtimes/docling_standard_no_ocr_batch.py",
+        "deploy/run-extract-verify-paper-package-ab.sh"
       ],
-      "validation": [],
+      "validation": [
+        "research-engine PR #56 merged as f44a20e710f7fb9868eeb2b5a1c654c01f540a48.",
+        "PR CI 37157527345 PASS and canonical-main CI 37157598687 PASS across install, compile, full tests, Compose validation, daemon image build and cleanup.",
+        "Paper-package context uses Docling native as lexical substrate and standard/no-OCR only for conservative reference-section structure; EXTRACT may trim pages strictly after references begin while VERIFY always retains the full package page set.",
+        "A zero-model preflight verifies source SHA/byte identity, complete native+standard package coverage, same-page historical evidence quote recovery and context-size deltas before any semantic replay is allowed.",
+        "Representative semantic replay selects low/median/high historical-input-token EXTRACT and VERIFY jobs, invokes the STANDARD Codex delegate directly, records only research_calibration_events, and never calls SemanticResultMaterializer.",
+        "A current-PDF control replay is triggered only after package-arm disagreement so package-context regression is distinguished from model variance.",
+        "Lambda runner reuses the existing Docling native and standard/no-OCR runtimes/model cache, builds one converter per runtime for all nine papers, performs no venv/model rebuild or prefetch, keeps the daemon stopped, and writes all operator artifacts under visible workspace-control-tmp."
+      ],
       "resume_condition": "Paper-package path demonstrates quality-safe savings or the task records why it should not replace the baseline."
     },
     {
@@ -507,15 +520,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "1d461988a9416937a9149e4dd8faeeb666ac0e03",
+      "identity": "f44a20e710f7fb9868eeb2b5a1c654c01f540a48",
       "required_for_resume": true,
       "evidence": [
         "stage=extract_verify_paper_package_ab",
-        "research-engine remote/local main@1d461988a9416937a9149e4dd8faeeb666ac0e03; PR #55 and canonical-main CI PASS",
-        "Lambda shared inference gate PASS; daemon inactive/dead PID 0",
-        "formula/table owners each stayed at one PID/model load/spawn with zero failures and drained queues",
-        "dual-GPU peaks=1605/2784 MiB; warm mixed reuse 1.4713 s vs cold mixed 10.7875 s",
-        "next=non-materializing EXTRACT/VERIFY current-PDF vs paper-package A/B"
+        "research-engine remote main@f44a20e710f7fb9868eeb2b5a1c654c01f540a48; PR #56 + canonical-main CI PASS",
+        "Lambda local last verified clean main@1d461988a9416937a9149e4dd8faeeb666ac0e03; daemon inactive/dead PID 0",
+        "A/B implementation=zero-model all-nine preflight -> representative low/median/high EXTRACT+VERIFY -> current-PDF control only on disagreement",
+        "paper-package lexical source=Docling native; standard/no-OCR supplies conservative reference-boundary structure; VERIFY never trims cited pages",
+        "next=fast-forward Lambda and run stopped-daemon nine-paper A/B gate"
       ]
     }
   ],
@@ -860,21 +873,34 @@
         "Peak GPU memory 1605/2784 MiB and utilization 68%/65%; host peak used memory ~8.07 GiB.",
         "Visible report root=/home/atrott/adamArchives/Adam/workspace-control-tmp/local-inference-concurrency-20261003T215248Z."
       ]
+    },
+    {
+      "check": "EXTRACT/VERIFY paper-package A/B implementation",
+      "result": "PASS_READY_FOR_LAMBDA",
+      "evidence": [
+        "research-engine PR #56 -> f44a20e710f7fb9868eeb2b5a1c654c01f540a48.",
+        "PR CI 37157527345 PASS; canonical-main CI 37157598687 PASS.",
+        "Zero-model quote/provenance preflight gates semantic spending and fails closed before replay.",
+        "EXTRACT uses native lexical package context with conservative trailing-reference trimming; VERIFY keeps all package pages so cited-page verification cannot be trimmed away.",
+        "Representative replay is non-materializing and records operational calibration events only; current-PDF controls run only after package disagreement.",
+        "Runner reuses existing parser runtimes/caches, processes nine papers per converter instance, keeps research-engine-daemon.service inactive/dead and uses visible workspace-control-tmp."
+      ]
     }
   ],
   "blockers": [
-    "CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement.",
-    "EXTRACT/VERIFY paper-package A/B has not yet demonstrated evidence/provenance equivalence and semantic-token/allowance savings versus the current authoritative-PDF path; production replacement remains forbidden until measured."
+    "Lambda local research-engine is last verified clean at main@1d461988a9416937a9149e4dd8faeeb666ac0e03 while canonical remote main is f44a20e710f7fb9868eeb2b5a1c654c01f540a48; fast-forward before the A/B gate.",
+    "EXTRACT/VERIFY paper-package A/B is CI-gated but not yet measured on the preserved nine-paper Lambda corpus; production replacement remains forbidden until the zero-model and representative semantic results are evaluated.",
+    "CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement."
   ],
   "remaining_work": [
-    "Design and CI-gate a non-materializing EXTRACT/VERIFY A/B harness over the preserved research corpus comparing the current authoritative-PDF hydration path with paper-package-derived context.",
-    "Measure evidence/provenance agreement, semantic input/cached/output/reasoning tokens, latency, and local-compute cost separately; retain exact token telemetry and treat plan-allowance UI observations as censored/quantized evidence only.",
-    "Keep fail-closed access to authoritative PDF pages/regions and do not mutate scientific state during A/B replay.",
-    "Run the bounded stopped-daemon Lambda A/B gate and decide whether paper-package context is quality-safe enough to replace repeated PDF interpretation for EXTRACT/VERIFY.",
-    "Then finish the broader research_pipeline_localization_matrix_validation and Lambda production acceptance."
+    "Fast-forward the clean Lambda research-engine checkout from 1d461988a9416937a9149e4dd8faeeb666ac0e03 to canonical f44a20e710f7fb9868eeb2b5a1c654c01f540a48 while the daemon remains inactive/dead.",
+    "Run deploy/run-extract-verify-paper-package-ab.sh once. The runner first compiles the nine preserved source artifacts with the existing native and standard/no-OCR runtimes, then requires the zero-model same-page quote/provenance preflight to PASS before semantic calls.",
+    "Evaluate the representative low/median/high EXTRACT and VERIFY package arms, exact token/latency reductions, package-context regression signals and any current-PDF controls. Do not equate token savings with plan-allowance savings.",
+    "If the A/B result is quality-safe, validate extract_verify_paper_package_ab and advance to research_pipeline_localization_matrix_validation. If a package-only regression appears, correct context assembly without reopening parser bakeoffs.",
+    "Then complete Lambda production acceptance, licensing review, bounded production integration and remaining localization decisions."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@1d461988a9416937a9149e4dd8faeeb666ac0e03 as the validated shared-inference/concurrency baseline. Begin extract_verify_paper_package_ab by inspecting the current EXTRACT/VERIFY hydrator and existing replay/telemetry contracts, then design and CI-gate a non-materializing A/B harness that compares the current authoritative-PDF context path against paper-package-derived context on preserved verified sources. Preserve original-PDF authority and source locators, measure evidence/provenance agreement plus exact semantic token/latency/local-compute telemetry, do not mutate scientific state, and keep plan-allowance observations separate from token counts. Do not reopen parser/model bakeoffs.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda verify /home/atrott/adamArchives/Adam/research-engine is clean on main@1d461988a9416937a9149e4dd8faeeb666ac0e03, fetch origin/main, require origin/main=f44a20e710f7fb9868eeb2b5a1c654c01f540a48, and fast-forward only to that exact commit. Then run bash deploy/run-extract-verify-paper-package-ab.sh. The gate must reuse the existing Docling native and standard/no-OCR runtimes/model cache without environment/model rebuilds, compile the preserved nine source artifacts, require the zero-model same-page quote/provenance preflight to PASS before any semantic replay, then run the representative low/median/high EXTRACT and VERIFY package arms with current-PDF controls only after package disagreement. Scientific state must not be materialized; only operational calibration events may be recorded. Keep the daemon inactive/dead throughout and return the compact zero-model preflight, compact representative semantic A/B, REPRESENTATIVE_AB_DECISION, final safety state, or any ERROR line.",
   "last_executor": "chatgpt",
-  "last_surface": "github+local-runtime",
+  "last_surface": "github+lambda",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
 }
