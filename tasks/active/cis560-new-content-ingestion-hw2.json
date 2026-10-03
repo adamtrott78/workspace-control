@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "cis560-new-content-ingestion-hw2",
   "title": "CIS560 new-content ingestion + HW2 bootstrap and assignment work",
-  "status": "SUSPENDED",
+  "status": "IN_PROGRESS",
   "goal": "Bring CIS 560 durable course state current with all genuinely new instructor-covered topics and exact Sipser sections since the last checkpoint, ingest the authoritative Homework 2 PDF, bootstrap assignment-local HW2 routing and learning state, then tutor HW2 problem-by-problem and build/validate only the artifacts the assignment actually requires.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -186,19 +186,18 @@
     },
     {
       "id": "hw2_ingestion_bootstrap",
-      "status": "SUSPENDED",
+      "status": "IN_PROGRESS",
       "execution_owner": "course-assignment-work",
       "selected_executor": "chatgpt",
       "selected_surface": "conversation-files+github",
       "inputs": [
         "validated course_content_ingestion",
-        "authoritative user-uploaded HW2 PDF"
+        "authoritative user-uploaded 560-hw-2.pdf",
+        "companion user-uploaded 560-hw-2.md"
       ],
-      "outputs": [
-        "homework/hw02 assignment-local route, CONTEXT.md, LEARNING.md, source routing, requirement and problem mappings"
-      ],
+      "outputs": [],
       "validation": [],
-      "resume_condition": "User uploads the authoritative HW2 PDF. Then inspect the full PDF, preserve provenance, derive the exact assignment contract, and bootstrap homework/hw02 before any solution work."
+      "resume_condition": null
     },
     {
       "id": "hw2_tutoring",
@@ -314,9 +313,7 @@
       "evidence": []
     }
   ],
-  "blockers": [
-    "The authoritative HW2 PDF has not yet been uploaded in this task."
-  ],
+  "blockers": [],
   "remaining_work": [
     "Receive and fully inspect the authoritative HW2 PDF.",
     "Bootstrap homework/hw02 local owners, exact assignment contract, LEARNING state, source routing, and problem-to-skill/source mappings.",
@@ -325,8 +322,8 @@
     "Build and validate only the artifact types actually required by HW2.",
     "Synchronize final task state, establish HANDOFF_SAFE, and archive when complete."
   ],
-  "next_safe_action": "Obtain the authoritative HW2 PDF from the user. Once supplied, inspect the entire PDF before any solution work; derive exact problems/subparts, deliverables, deadline/submission/tool requirements, referenced Sipser items, and then bootstrap the homework/hw02 assignment-local route, CONTEXT.md, LEARNING.md, sources, and problem-to-skill/source mappings. Do not begin solving until that bootstrap is validated.",
+  "next_safe_action": "Inspect the full authoritative HW2 artifact and exact referenced Sipser items, then bootstrap homework/hw02 assignment-local owners and mappings without beginning solution work. Preserve the PDF as assignment authority and keep artifact requirements separate from mastery.",
   "last_executor": "chatgpt",
   "last_surface": "conversation-files+github",
-  "notes": "Cold start recovered only the routed durable owners requested for this task. At the starting checkpoint, course/LECTURES.md indexes Lecture 6 (2026-09-22) as the latest durably ingested lecture, and homework/README.md still routes Homework 1 as the active assignment. These are recovery observations, not permission to infer missing later course history. On 2026-10-03, the user supplied Lecture 7–9 note text plus Lecture 7/8 decks and pumping/Myhill-Nerode supporting materials. Gmail was checked for matching forwarded Lecture 7–9 messages and none were found; provenance therefore remains user-provided instructor-note text plus uploaded course files, without invented dates/message IDs. Lecture 7–9 course ingestion completed at CIS560 tutor-framework@edf5dc31df48abb785ed6b5635a0399bb2d784db. Exact course boundary is now §1.4 and §2.1 covered, §2.2 assigned/previewed for Lecture 10, and §2.3 next-topic guidance. Mastery was not changed."
+  "notes": "Cold start recovered only the routed durable owners requested for this task. At the starting checkpoint, course/LECTURES.md indexes Lecture 6 (2026-09-22) as the latest durably ingested lecture, and homework/README.md still routes Homework 1 as the active assignment. These are recovery observations, not permission to infer missing later course history. On 2026-10-03, the user supplied Lecture 7–9 note text plus Lecture 7/8 decks and pumping/Myhill-Nerode supporting materials. Gmail was checked for matching forwarded Lecture 7–9 messages and none were found; provenance therefore remains user-provided instructor-note text plus uploaded course files, without invented dates/message IDs. Lecture 7–9 course ingestion completed at CIS560 tutor-framework@edf5dc31df48abb785ed6b5635a0399bb2d784db. Exact course boundary is now §1.4 and §2.1 covered, §2.2 assigned/previewed for Lecture 10, and §2.3 next-topic guidance. Mastery was not changed. The authoritative one-page HW2 PDF was supplied and visually inspected on 2026-10-03. The assignment requires five problems worth 10 points total, word-processed work, Canvas submission, and a cover page; exact referenced Sipser items still must be resolved before bootstrap completion."
 }

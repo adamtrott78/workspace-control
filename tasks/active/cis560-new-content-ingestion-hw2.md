@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: cis560-new-content-ingestion-hw2
 - Title: CIS560 new-content ingestion + HW2 bootstrap and assignment work
-- Status: SUSPENDED
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -42,7 +42,7 @@ Bring CIS 560 durable course state current with all genuinely new instructor-cov
 
 ## Next safe action
 
-Obtain the authoritative HW2 PDF from the user. Once supplied, inspect the entire PDF before any solution work; derive exact problems/subparts, deliverables, deadline/submission/tool requirements, referenced Sipser items, and then bootstrap the homework/hw02 assignment-local route, CONTEXT.md, LEARNING.md, sources, and problem-to-skill/source mappings. Do not begin solving until that bootstrap is validated.
+Inspect the full authoritative HW2 artifact and exact referenced Sipser items, then bootstrap homework/hw02 assignment-local owners and mappings without beginning solution work. Preserve the PDF as assignment authority and keep artifact requirements separate from mastery.
 
 ## Remaining work
 
@@ -55,7 +55,7 @@ Obtain the authoritative HW2 PDF from the user. Once supplied, inspect the entir
 
 ## Blockers / gates
 
-- The authoritative HW2 PDF has not yet been uploaded in this task.
+- None.
 
 ## Fresh-chat initialization
 
