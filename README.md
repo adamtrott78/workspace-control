@@ -201,3 +201,24 @@ Status: `V2 CANDIDATE`
 
 The v2 architecture is being integrated and regression-tested before promotion
 to the canonical branch. Executor-specific adapters remain non-authoritative.
+
+
+## Operator-visible temporary artifacts
+
+Operator-facing temporary, benchmark, diagnostic, and handoff artifacts that a
+human may need to browse or download must be written beneath the visible
+workspace path:
+
+`~/adamArchives/Adam/workspace-control-tmp/`
+
+Do not create new human-facing artifacts under a dot-prefixed hidden directory
+by default. This keeps artifacts accessible from JupyterLab and similar file
+browsers that do not expose hidden paths.
+
+Existing `~/adamArchives/Adam/.workspace-control/tmp/` artifacts remain valid
+legacy inputs and recovery evidence. Do not move, delete, or regenerate them
+merely to satisfy this convention. New workflows may read legacy hidden inputs
+while writing all new outputs to the visible temporary root.
+
+A workflow may honor `WORKSPACE_CONTROL_TMP_ROOT` when an explicit alternate
+visible scratch root is needed.
