@@ -68,7 +68,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "1442e787317a94998a60a78d2a2f7582b6192170",
+        "checkpoint_sha": "e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198",
         "verified": true
       },
       "local": {
@@ -334,7 +334,12 @@
         "src/research_engine/document_table_residual.py",
         "benchmarks/document_intelligence/runtimes/docling_tableformer_accurate.py",
         "deploy/run-tableformer-accurate-residual-gate.sh",
-        "visible operator-facing temp root ~/adamArchives/Adam/workspace-control-tmp/"
+        "visible operator-facing temp root ~/adamArchives/Adam/workspace-control-tmp/",
+        "PaddleOCR General Table Recognition v2 three-crop fallback",
+        "benchmarks/document_intelligence/paddle-table-fallback-contract.v1.json",
+        "benchmarks/document_intelligence/runtimes/paddle_table_recognition_v2.py",
+        "src/research_engine/document_paddle_table_eval.py",
+        "deploy/run-paddle-table-fallback-gate.sh"
       ],
       "validation": [
         "research-engine PR #52 merged as 1442e787317a94998a60a78d2a2f7582b6192170.",
@@ -345,7 +350,12 @@
         "Lambda targeted TableFormer ACCURATE residual gate completed on research-engine main@1442e787317a94998a60a78d2a2f7582b6192170 with daemon inactive/dead PID 0 and visible outputs under ~/adamArchives/Adam/workspace-control-tmp/.",
         "Target plan selected exactly 3 tables on 3 pages across the Scheirer and Fadul cases.",
         "ACCURATE result did not recover any selected table: all_targets_materialized=false, matched_tables=0, reference coverage=0, weighted content F1=0, weighted aligned-cell F1=0; decision=MEASURED_RESIDUAL.",
-        "Do not infer a new parser family yet: first inspect the raw ACCURATE page JSON to distinguish a genuine TableFormer failure from a page-bounded execution/materialization issue."
+        "Do not infer a new parser family yet: first inspect the raw ACCURATE page JSON to distinguish a genuine TableFormer failure from a page-bounded execution/materialization issue.",
+        "Raw ACCURATE outputs prove the 3 residual tables are genuine TableFormer failures: every target has one table object/body reference but zero structured table cells.",
+        "Exactly one alternate component is opened: PaddleOCR General Table Recognition v2 on validated PDF table crops; full-document PP-StructureV3, Marker, MinerU and document VLM remain closed.",
+        "The fallback renders validated page+bbox regions at 300 DPI with 6pt padding and reuses one resident table-recognition pipeline across all three crops.",
+        "The isolated benchmark runner pins PaddleOCR 3.7.0 and PaddlePaddle GPU 3.3.0 CUDA 12.6 while the generic Paddle candidate registry retains its 3.7.x compatibility range.",
+        "research-engine PR #53 merged as e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; corrected PR CI 37153109439 PASS and canonical-main CI 37153202385 PASS."
       ],
       "resume_condition": "Structured scientific content is machine-usable without forcing expensive vision interpretation of every figure."
     },
@@ -472,15 +482,14 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "1442e787317a94998a60a78d2a2f7582b6192170",
+      "identity": "e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198",
       "required_for_resume": true,
       "evidence": [
         "stage=structured_elements_and_semantic_escalation",
-        "research-engine remote/local main@1442e787317a94998a60a78d2a2f7582b6192170; daemon inactive/dead PID 0",
-        "visible temp convention active at ~/adamArchives/Adam/workspace-control-tmp/",
-        "TableFormer ACCURATE target plan=3 tables / 3 pages / Scheirer+Fadul",
-        "ACCURATE evaluation=MEASURED_RESIDUAL, 0 matched, 0 coverage, all_targets_materialized=false",
-        "next=inspect existing raw accurate-page JSON before opening any alternate parser"
+        "research-engine remote main@e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; PR #53 and canonical-main CI PASS",
+        "Lambda local last verified clean main@1442e787317a94998a60a78d2a2f7582b6192170",
+        "TableFormer FAST+ACCURATE exhausted on exactly 3 zero-cell tables",
+        "next=run crop-only Paddle table fallback; outputs stay visible under workspace-control-tmp"
       ]
     }
   ],
@@ -777,21 +786,35 @@
         "Evaluation: all_targets_materialized=false; matched_tables=0; reference coverage=0; weighted content F1=0; weighted aligned-cell F1=0.",
         "Visible output root: /home/atrott/adamArchives/Adam/workspace-control-tmp/document-tableformer-accurate-residual-20261003T203427Z."
       ]
+    },
+    {
+      "check": "Persistent TableFormer empty-grid diagnosis",
+      "result": "MEASURED_COMPONENT_FAILURE",
+      "evidence": [
+        "Scheirer pages 2 and 12 and Fadul page 3 each contain a detected table object/body ref but zero table cells in ACCURATE mode; FAST had the same empty-grid residual."
+      ]
+    },
+    {
+      "check": "Targeted Paddle table fallback implementation",
+      "result": "PASS_READY_FOR_LAMBDA",
+      "evidence": [
+        "research-engine PR #53 merged as e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; corrected PR CI 37153109439 PASS; canonical-main CI 37153202385 PASS.",
+        "Fallback runs only on the 3 validated PDF table bboxes and writes user-facing outputs under visible workspace-control-tmp."
+      ]
     }
   ],
   "blockers": [
-    "Targeted TableFormer ACCURATE did not materialize any of the three empty-grid residual tables. Before selecting another parser family, inspect the raw accurate-page Docling JSON to determine whether the page-bounded invocation emitted zero table objects or emitted table items whose structure was not recognized by the evaluator.",
-    "CodeFormulaV2 passed its quality promotion gate, but production integration remains pending shared-model serving/concurrency work and final deployment/license review."
+    "Lambda local research-engine is last verified clean at main@1442e787317a94998a60a78d2a2f7582b6192170 while canonical remote main is e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; fast-forward before the Paddle fallback gate.",
+    "The crop-level Paddle table fallback is CI-gated but unmeasured on Lambda and is not production-promoted yet.",
+    "CodeFormulaV2 passed its quality gate but still awaits shared-serving/concurrency integration and final deployment/license review."
   ],
   "remaining_work": [
-    "Inspect the three raw TableFormer ACCURATE page outputs under visible workspace-control-tmp and report per-page table item counts, labels, and whether any table data/table_cells exist.",
-    "If ACCURATE emitted table objects with usable cells, fix the evaluator/materialization path and replay evaluation only.",
-    "If ACCURATE emitted zero usable table objects on all three pages, classify TableFormer as unable to close this residual and open one narrowly targeted alternate table fallback rather than a broad parser bakeoff.",
-    "Integrate CodeFormulaV2 as an equation-only escalation path without enabling it globally.",
-    "Advance to local_inference_service_and_concurrency after the table fallback decision so TableFormer/CodeFormula models can remain resident/batched rather than being repeatedly initialized per page.",
-    "Then validate paper-package consumption in EXTRACT/VERIFY and the broader localization matrix."
+    "Fast-forward Lambda research-engine main to e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198 with the daemon stopped.",
+    "Run deploy/run-paddle-table-fallback-gate.sh once on exactly the 3 persistent empty-grid targets.",
+    "If Paddle passes its explicit quality gate, promote it only as the persistent-empty-grid table fallback; otherwise characterize that residual before opening another component.",
+    "Integrate CodeFormulaV2 as equation-only escalation, then advance to shared local inference/concurrency and EXTRACT/VERIFY package-consumption validation."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead. Do not rerun TableFormer or open another parser yet. Inspect the existing visible output root /home/atrott/adamArchives/Adam/workspace-control-tmp/document-tableformer-accurate-residual-20261003T203427Z. For each JSON file under accurate-pages, print the case/page, len(document['tables']), body/table label counts, and for every table the number of data.table_cells plus any nonempty exported text. Also print the three target-plan entries. Return only that compact diagnostic. If the raw page JSON contains usable table cells, repair/replay evaluation only; if all three target pages contain zero usable table cells, treat TableFormer FAST+ACCURATE as a measured residual and choose a single targeted alternate table fallback.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead. On Lambda verify the research-engine checkout is clean on main@1442e787317a94998a60a78d2a2f7582b6192170, fetch origin/main, require origin/main=e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198, and fast-forward only to that commit. Then run bash deploy/run-paddle-table-fallback-gate.sh. It must derive exactly the 3 persistent TableFormer empty-grid targets, render only their authoritative-PDF table bboxes, run one resident PaddleOCR 3.7.0 General Table Recognition v2 pipeline across those crops, evaluate only those 3 references, keep the daemon stopped, and write user-facing outputs beneath visible ~/adamArchives/Adam/workspace-control-tmp/. Return the compact PADDLE TABLE FALLBACK summary or any ERROR line.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."

@@ -31,7 +31,7 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 1442e787317a94998a60a78d2a2f7582b6192170
+- Remote checkpoint: e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
@@ -40,21 +40,20 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead. Do not rerun TableFormer or open another parser yet. Inspect the existing visible output root /home/atrott/adamArchives/Adam/workspace-control-tmp/document-tableformer-accurate-residual-20261003T203427Z. For each JSON file under accurate-pages, print the case/page, len(document['tables']), body/table label counts, and for every table the number of data.table_cells plus any nonempty exported text. Also print the three target-plan entries. Return only that compact diagnostic. If the raw page JSON contains usable table cells, repair/replay evaluation only; if all three target pages contain zero usable table cells, treat TableFormer FAST+ACCURATE as a measured residual and choose a single targeted alternate table fallback.
+Keep research-engine-daemon.service inactive/dead. On Lambda verify the research-engine checkout is clean on main@1442e787317a94998a60a78d2a2f7582b6192170, fetch origin/main, require origin/main=e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198, and fast-forward only to that commit. Then run bash deploy/run-paddle-table-fallback-gate.sh. It must derive exactly the 3 persistent TableFormer empty-grid targets, render only their authoritative-PDF table bboxes, run one resident PaddleOCR 3.7.0 General Table Recognition v2 pipeline across those crops, evaluate only those 3 references, keep the daemon stopped, and write user-facing outputs beneath visible ~/adamArchives/Adam/workspace-control-tmp/. Return the compact PADDLE TABLE FALLBACK summary or any ERROR line.
 
 ## Remaining work
 
-- Inspect the three raw TableFormer ACCURATE page outputs under visible workspace-control-tmp and report per-page table item counts, labels, and whether any table data/table_cells exist.
-- If ACCURATE emitted table objects with usable cells, fix the evaluator/materialization path and replay evaluation only.
-- If ACCURATE emitted zero usable table objects on all three pages, classify TableFormer as unable to close this residual and open one narrowly targeted alternate table fallback rather than a broad parser bakeoff.
-- Integrate CodeFormulaV2 as an equation-only escalation path without enabling it globally.
-- Advance to local_inference_service_and_concurrency after the table fallback decision so TableFormer/CodeFormula models can remain resident/batched rather than being repeatedly initialized per page.
-- Then validate paper-package consumption in EXTRACT/VERIFY and the broader localization matrix.
+- Fast-forward Lambda research-engine main to e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198 with the daemon stopped.
+- Run deploy/run-paddle-table-fallback-gate.sh once on exactly the 3 persistent empty-grid targets.
+- If Paddle passes its explicit quality gate, promote it only as the persistent-empty-grid table fallback; otherwise characterize that residual before opening another component.
+- Integrate CodeFormulaV2 as equation-only escalation, then advance to shared local inference/concurrency and EXTRACT/VERIFY package-consumption validation.
 
 ## Blockers / gates
 
-- Targeted TableFormer ACCURATE did not materialize any of the three empty-grid residual tables. Before selecting another parser family, inspect the raw accurate-page Docling JSON to determine whether the page-bounded invocation emitted zero table objects or emitted table items whose structure was not recognized by the evaluator.
-- CodeFormulaV2 passed its quality promotion gate, but production integration remains pending shared-model serving/concurrency work and final deployment/license review.
+- Lambda local research-engine is last verified clean at main@1442e787317a94998a60a78d2a2f7582b6192170 while canonical remote main is e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; fast-forward before the Paddle fallback gate.
+- The crop-level Paddle table fallback is CI-gated but unmeasured on Lambda and is not production-promoted yet.
+- CodeFormulaV2 passed its quality gate but still awaits shared-serving/concurrency integration and final deployment/license review.
 
 ## Fresh-chat initialization
 
