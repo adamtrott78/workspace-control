@@ -68,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "f44a20e710f7fb9868eeb2b5a1c654c01f540a48",
+        "checkpoint_sha": "a83850016efe2e58b37a86a4203d69af811117a1",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "1d461988a9416937a9149e4dd8faeeb666ac0e03",
+        "head_sha": "f44a20e710f7fb9868eeb2b5a1c654c01f540a48",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -425,7 +425,9 @@
         "src/research_engine/paper_package_ab.py",
         "benchmarks/document_intelligence/runtimes/docling_native_batch.py",
         "benchmarks/document_intelligence/runtimes/docling_standard_no_ocr_batch.py",
-        "deploy/run-extract-verify-paper-package-ab.sh"
+        "deploy/run-extract-verify-paper-package-ab.sh",
+        "deploy/resume-extract-verify-paper-package-ab.sh",
+        "preserved normalized A/B packages at workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z"
       ],
       "validation": [
         "research-engine PR #56 merged as f44a20e710f7fb9868eeb2b5a1c654c01f540a48.",
@@ -437,7 +439,13 @@
         "Lambda runner reuses the existing Docling native and standard/no-OCR runtimes/model cache, builds one converter per runtime for all nine papers, performs no venv/model rebuild or prefetch, keeps the daemon stopped, and writes all operator artifacts under visible workspace-control-tmp.",
         "First Lambda A/B invocation reached the preserved-run discovery step and failed before any document compilation or semantic replay because PostgreSQL on 127.0.0.1:5432 was not running (connection refused).",
         "Repository deployment contract keeps PostgreSQL persistent under docker-compose.yml service db independently of research-engine-daemon.service; starting only db does not start sustained research.",
-        "No Docling inference, parser/model download, semantic delegate call, scientific materialization or calibration event occurred before this failure."
+        "No Docling inference, parser/model download, semantic delegate call, scientific materialization or calibration event occurred before this failure.",
+        "Second Lambda A/B invocation successfully resolved rf-open-world-corpus-expansion-v1 with exactly 9 source papers, verified source bytes, completed one-converter Docling native processing for all 9, completed one-converter standard/no-OCR processing for all 9 on GPU0, and normalized 9 native+standard package pairs.",
+        "Visible preserved A/B artifact root is /home/atrott/adamArchives/Adam/workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z.",
+        "Zero-model preflight then failed before any semantic replay because PaperPackageABPreflight.run referenced stale self.package_extractor after the EXTRACT/VERIFY policy split; the valid attributes are package_extract_extractor/package_verify_extractor.",
+        "No semantic Terra/Codex replay or scientific-state materialization occurred in the failed preflight attempt.",
+        "research-engine PR #57 fixes the stale preflight extractor reference and adds deploy/resume-extract-verify-paper-package-ab.sh, which requires exactly 9 existing native and 9 existing standard normalized packages and invokes no Docling batch compile/normalization path.",
+        "PR #57 merged as a83850016efe2e58b37a86a4203d69af811117a1; PR CI 37158927062 PASS and canonical-main CI 37159024596 PASS."
       ],
       "resume_condition": "Paper-package path demonstrates quality-safe savings or the task records why it should not replace the baseline."
     },
@@ -523,14 +531,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "f44a20e710f7fb9868eeb2b5a1c654c01f540a48",
+      "identity": "a83850016efe2e58b37a86a4203d69af811117a1",
       "required_for_resume": true,
       "evidence": [
         "stage=extract_verify_paper_package_ab",
-        "research-engine canonical remote main@f44a20e710f7fb9868eeb2b5a1c654c01f540a48; PR #56 + canonical-main CI PASS",
-        "first Lambda A/B attempt blocked at preserved-run discovery because PostgreSQL 127.0.0.1:5432 was down",
-        "no document compile/parser inference/model download/semantic replay/scientific materialization occurred",
-        "next=start only docker-compose db, verify healthy + daemon inactive/dead, rerun same A/B gate"
+        "research-engine remote main@a83850016efe2e58b37a86a4203d69af811117a1; PR #57 + canonical-main CI PASS",
+        "Lambda local last verified clean main@f44a20e710f7fb9868eeb2b5a1c654c01f540a48; daemon inactive/dead PID 0",
+        "9 native + 9 standard parses and 9 normalized package pairs already complete under visible 20261003T223020Z A/B root",
+        "preflight failed only on stale package_extractor attribute before semantic replay",
+        "next=fast-forward and resume from preserved normalized packages; no reparse"
       ]
     }
   ],
@@ -898,21 +907,33 @@
         "research-engine-daemon.service remains required inactive/dead during the gate.",
         "Production deployment contract defines PostgreSQL separately as docker-compose.yml service db."
       ]
+    },
+    {
+      "check": "Second Lambda EXTRACT/VERIFY paper-package A/B invocation",
+      "result": "BLOCKED_CODE_DEFECT_HOTFIX_READY",
+      "evidence": [
+        "Source run rf-open-world-corpus-expansion-v1 resolved with exactly 9 papers.",
+        "9 Docling-native documents completed, 9 standard/no-OCR documents completed, and 9 normalized package pairs were written.",
+        "Standard structure batch used physical GPU0 after a successful 256 MiB CUDA allocation probe.",
+        "Preflight failed on AttributeError: PaperPackageABPreflight has no attribute package_extractor; semantic replay never started.",
+        "Preserved reusable artifact root=/home/atrott/adamArchives/Adam/workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z.",
+        "PR #57 hotfix merged as a83850016efe2e58b37a86a4203d69af811117a1; PR CI 37158927062 PASS; canonical-main CI 37159024596 PASS."
+      ]
     }
   ],
   "blockers": [
-    "PostgreSQL durable-state service is currently unavailable on Lambda at 127.0.0.1:5432; start only docker-compose.yml service db and verify healthy before rerunning the A/B gate.",
-    "EXTRACT/VERIFY paper-package A/B is CI-gated but not yet measured on the preserved nine-paper Lambda corpus; production replacement remains forbidden until the zero-model and representative semantic results are evaluated.",
+    "Lambda local research-engine is last verified clean at main@f44a20e710f7fb9868eeb2b5a1c654c01f540a48 while canonical remote main is a83850016efe2e58b37a86a4203d69af811117a1; fast-forward before resuming the A/B gate.",
+    "Zero-model preflight and representative semantic A/B have not yet completed; production paper-package replacement remains forbidden until measured.",
     "CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement."
   ],
   "remaining_work": [
-    "With research-engine-daemon.service still inactive/dead, start only the repository PostgreSQL service using sudo docker compose -f docker-compose.yml up -d db and wait until pg_isready reports the research_engine database ready.",
-    "Verify the Lambda research-engine checkout is clean on main at canonical f44a20e710f7fb9868eeb2b5a1c654c01f540a48 (or stop and report if it differs), and verify the daemon remains inactive/dead PID 0.",
-    "Rerun deploy/run-extract-verify-paper-package-ab.sh. The runner must reuse existing native and standard/no-OCR runtimes/model caches and require the zero-model same-page quote/provenance preflight to PASS before semantic calls.",
-    "Evaluate representative low/median/high EXTRACT and VERIFY package arms, exact token/latency reductions, package-context regression signals and any current-PDF controls. Do not equate token savings with plan-allowance savings.",
-    "If the A/B result is quality-safe, validate extract_verify_paper_package_ab and advance to research_pipeline_localization_matrix_validation; otherwise correct context assembly without reopening parser bakeoffs."
+    "Fast-forward the clean Lambda research-engine checkout from f44a20e710f7fb9868eeb2b5a1c654c01f540a48 to canonical a83850016efe2e58b37a86a4203d69af811117a1 while research-engine-daemon.service remains inactive/dead.",
+    "Resume from /home/atrott/adamArchives/Adam/workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z using deploy/resume-extract-verify-paper-package-ab.sh. Do not rerun either Docling batch compiler or normalization; the resume gate requires exactly 9 native and 9 standard normalized packages.",
+    "Require the zero-model same-page quote/provenance preflight to PASS before semantic replay, then evaluate low/median/high EXTRACT and VERIFY package arms plus disagreement-triggered current-PDF controls.",
+    "Evaluate exact token/latency reductions and package-context regression signals without equating token savings to plan-allowance savings.",
+    "If quality-safe, validate extract_verify_paper_package_ab and advance to research_pipeline_localization_matrix_validation; otherwise correct context assembly without reopening parser bakeoffs."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at f44a20e710f7fb9868eeb2b5a1c654c01f540a48, then start only PostgreSQL with sudo docker compose -f docker-compose.yml up -d db. Wait until sudo docker compose -f docker-compose.yml exec -T db pg_isready -U research_engine -d research_engine succeeds. Re-verify research-engine-daemon.service is inactive/dead PID 0, then rerun bash deploy/run-extract-verify-paper-package-ab.sh. Return the compact zero-model preflight, compact representative semantic A/B, REPRESENTATIVE_AB_DECISION, final safety state, or any ERROR/traceback. Do not start the research daemon, rebuild parser/model runtimes, or start sustained research.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at f44a20e710f7fb9868eeb2b5a1c654c01f540a48, fetch origin/main, require origin/main=a83850016efe2e58b37a86a4203d69af811117a1, and fast-forward only to that commit. Keep the PostgreSQL db service running/healthy and verify the research daemon remains inactive/dead PID 0. Then run bash deploy/resume-extract-verify-paper-package-ab.sh /home/atrott/adamArchives/Adam/workspace-control-tmp/extract-verify-paper-package-ab-20261003T223020Z. The resume gate must reuse the already-normalized 9 native + 9 standard packages, invoke no Docling compilation/normalization/model download, require the zero-model preflight to PASS before semantic calls, then run representative semantic A/B with current-PDF controls only after package disagreement. Return the compact zero-model preflight, compact representative semantic A/B, REPRESENTATIVE_AB_DECISION, final safety state, or any ERROR/traceback.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
