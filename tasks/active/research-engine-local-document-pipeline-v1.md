@@ -35,26 +35,25 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: 99fbed6fac76b5feaa67b99625f64acb1f37de39
+- Local HEAD: 1442e787317a94998a60a78d2a2f7582b6192170
 - Local clean: true
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead. On Lambda, verify /home/atrott/adamArchives/Adam/research-engine is clean on main@99fbed6fac76b5feaa67b99625f64acb1f37de39, fetch origin/main, require origin/main=1442e787317a94998a60a78d2a2f7582b6192170, and fast-forward only to that exact commit. Then run bash deploy/run-tableformer-accurate-residual-gate.sh. The gate must reuse the existing Docling 2.131.0 standard runtime/model cache, select only the three FAST-mode table assets whose normalized grids are empty, run TableFormerMode.ACCURATE one page at a time only on those targets, keep OCR/formula/picture/general-VLM/remote-service paths disabled, and write all new artifacts beneath visible ~/adamArchives/Adam/workspace-control-tmp/. Return the compact TABLEFORMER ACCURATE summary and any ERROR line. Do not rerun the 73-page parser bakeoff and do not open another table parser family until this targeted residual is measured.
+Keep research-engine-daemon.service inactive/dead. Do not rerun TableFormer or open another parser yet. Inspect the existing visible output root /home/atrott/adamArchives/Adam/workspace-control-tmp/document-tableformer-accurate-residual-20261003T203427Z. For each JSON file under accurate-pages, print the case/page, len(document['tables']), body/table label counts, and for every table the number of data.table_cells plus any nonempty exported text. Also print the three target-plan entries. Return only that compact diagnostic. If the raw page JSON contains usable table cells, repair/replay evaluation only; if all three target pages contain zero usable table cells, treat TableFormer FAST+ACCURATE as a measured residual and choose a single targeted alternate table fallback.
 
 ## Remaining work
 
-- Fast-forward the clean Lambda research-engine checkout from 99fbed6fac76b5feaa67b99625f64acb1f37de39 to canonical 1442e787317a94998a60a78d2a2f7582b6192170 while the daemon remains inactive/dead.
-- Run deploy/run-tableformer-accurate-residual-gate.sh once. It must select only the 3 intrinsic empty-grid FAST residuals, reuse the existing Docling/TableFormer runtime and cache, and execute ACCURATE mode only on the selected pages.
-- Review the compact TableFormer ACCURATE evaluation. If the three tables recover above the promotion gate, integrate ACCURATE as an empty-grid-only table escalation; otherwise characterize the remaining table residual before considering any other parser family.
+- Inspect the three raw TableFormer ACCURATE page outputs under visible workspace-control-tmp and report per-page table item counts, labels, and whether any table data/table_cells exist.
+- If ACCURATE emitted table objects with usable cells, fix the evaluator/materialization path and replay evaluation only.
+- If ACCURATE emitted zero usable table objects on all three pages, classify TableFormer as unable to close this residual and open one narrowly targeted alternate table fallback rather than a broad parser bakeoff.
 - Integrate CodeFormulaV2 as an equation-only escalation path without enabling it globally.
-- Advance to local_inference_service_and_concurrency so TableFormer/CodeFormula models can remain resident/batched rather than being repeatedly initialized per page.
-- Then validate paper-package consumption in EXTRACT/VERIFY and the broader localization matrix; do not reopen Marker/PaddleOCR/heavier MinerU without a specific measured residual.
+- Advance to local_inference_service_and_concurrency after the table fallback decision so TableFormer/CodeFormula models can remain resident/batched rather than being repeatedly initialized per page.
+- Then validate paper-package consumption in EXTRACT/VERIFY and the broader localization matrix.
 
 ## Blockers / gates
 
-- Lambda local research-engine is verified at clean main@99fbed6fac76b5feaa67b99625f64acb1f37de39 while canonical remote main is 1442e787317a94998a60a78d2a2f7582b6192170; fast-forward locally before the targeted TableFormer ACCURATE gate.
-- The three intrinsic FAST-mode empty-grid table failures (2 Scheirer, 1 Fadul) still require the bounded TableFormer ACCURATE Lambda measurement before table escalation policy is final.
+- Targeted TableFormer ACCURATE did not materialize any of the three empty-grid residual tables. Before selecting another parser family, inspect the raw accurate-page Docling JSON to determine whether the page-bounded invocation emitted zero table objects or emitted table items whose structure was not recognized by the evaluator.
 - CodeFormulaV2 passed its quality promotion gate, but production integration remains pending shared-model serving/concurrency work and final deployment/license review.
 
 ## Fresh-chat initialization
