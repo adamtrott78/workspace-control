@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "cis560-new-content-ingestion-hw2",
   "title": "CIS560 new-content ingestion + HW2 bootstrap and assignment work",
-  "status": "SUSPENDED",
+  "status": "IN_PROGRESS",
   "goal": "Bring CIS 560 durable course state current with all genuinely new instructor-covered topics and exact Sipser sections since the last checkpoint, ingest the authoritative Homework 2 PDF, bootstrap assignment-local HW2 routing and learning state, then tutor HW2 problem-by-problem and build/validate only the artifacts the assignment actually requires.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -12,7 +12,7 @@
     "content_sha": "8a0f596add333737e03c72a81e71a7eb075b53fc"
   },
   "parent_execution_owner": "cis560-hw2",
-  "current_stage": "course_content_intake",
+  "current_stage": "course_content_ingestion",
   "acceptance_criteria": [
     "Fresh execution starts from CIS560 README.md on tutor-framework at the exact migrated checkpoint 9c5e492354449186898b5f038e227e5a92d15005 and follows COURSE.md plus only the routed source/course/study/homework owners needed for the active stage.",
     "New lecture/course material is ingested through the CIS560 typed-authority model with provenance preserved and no silent replacement of instructor evidence by generic theoretical-CS knowledge.",
@@ -102,26 +102,45 @@
     },
     {
       "id": "course_content_intake",
-      "status": "SUSPENDED",
+      "status": "VALIDATED",
       "execution_owner": "course-content-ingestion",
       "selected_executor": "chatgpt",
       "selected_surface": "conversation+github",
       "inputs": [
         "baseline_recovery"
       ],
-      "outputs": [],
-      "validation": [],
-      "resume_condition": "User provides the additional instructor-covered topics/material and exact textbook sections/references since the durable checkpoint."
+      "outputs": [
+        "User-provided instructor-note text for Lectures 7, 8, and 9",
+        "Week-4-Notes-L7.md and Week-4-Notes-L7.pdf",
+        "Week-5-Notes-L8.md and Week-5-Notes-L8.pdf",
+        "pumpingLemma-1.html.md and pumpingLemma-1.html",
+        "560-Myhill-Nerode.html.md and 560-Myhill-Nerode.html",
+        "Week-4-Notes-L6.md/pdf received as corroborating overlap; Lecture 6 is already durably represented"
+      ],
+      "validation": [
+        {
+          "check": "New course-content inputs available with provenance classes identified",
+          "result": "PASS",
+          "evidence": [
+            "Lecture 7 and Lecture 8 uploaded decks were read from the current conversation.",
+            "Lecture 7/8/9 instructor-note text was provided directly by the user in the current task.",
+            "No matching forwarded Gmail messages for Lectures 7–9 were found, so no Gmail provenance/date is claimed.",
+            "Lecture 6 material overlaps the existing durable L06 record and is treated as corroboration rather than new coverage."
+          ]
+        }
+      ],
+      "resume_condition": null
     },
     {
       "id": "course_content_ingestion",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "course-content-ingestion",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation-files+github",
       "inputs": [
-        "course_content_intake",
-        "workflows/course-content-ingestion.v1.json@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9"
+        "validated course_content_intake",
+        "workflows/course-content-ingestion.v1.json@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+        "CIS560 typed authority from COURSE.md"
       ],
       "outputs": [
         "updated course/source/skill/notation owners as justified by evidence"
@@ -237,19 +256,18 @@
     }
   ],
   "blockers": [
-    "Additional CIS560 course-content evidence since the 9c5e492354449186898b5f038e227e5a92d15005 durable checkpoint has not yet been provided in this task.",
     "The authoritative HW2 PDF has not yet been uploaded in this task."
   ],
   "remaining_work": [
-    "Receive and ingest the additional instructor-covered course topics/material and exact Sipser sections since the current durable checkpoint.",
+    "Ingest the genuinely new Lecture 7–9 coverage and exact current Sipser section relationship, preserving the distinction between covered material, assigned reading, and next-topic guidance.",
     "Inspect and ingest the full authoritative HW2 PDF only after course-content ingestion is current.",
     "Bootstrap homework/hw02 local owners, assignment contract, LEARNING state, source routing, and problem-to-skill/source mappings.",
     "Begin the first HW2 problem in LEARNING mode only after ingestion/bootstrap validation.",
     "Build and validate only the artifact types actually required by HW2.",
     "Synchronize final task state, establish HANDOFF_SAFE, and archive when complete."
   ],
-  "next_safe_action": "Obtain from the user the additional CIS560 course-content inputs covered since the 9c5e492354449186898b5f038e227e5a92d15005 checkpoint, including exact Sipser sections/references and any instructor notes/messages needed to establish coverage. Also obtain the authoritative HW2 PDF, but do not inspect/solve HW2 until the new course-content ingestion is complete. Resume with course_content_intake and preserve typed provenance.",
+  "next_safe_action": "Ingest the newly provided Lecture 7–9 instructor material into CIS560 tutor-framework, treating Lecture 6 uploads as overlap/no-op, recording exact covered/read-next Sipser relationships without promoting mastery, then validate the resulting course/source/skill/notation state. Do not inspect or solve HW2 until this ingestion is complete.",
   "last_executor": "chatgpt",
-  "last_surface": "github+conversation",
-  "notes": "Cold start recovered only the routed durable owners requested for this task. At the starting checkpoint, course/LECTURES.md indexes Lecture 6 (2026-09-22) as the latest durably ingested lecture, and homework/README.md still routes Homework 1 as the active assignment. These are recovery observations, not permission to infer missing later course history."
+  "last_surface": "conversation-files+github",
+  "notes": "Cold start recovered only the routed durable owners requested for this task. At the starting checkpoint, course/LECTURES.md indexes Lecture 6 (2026-09-22) as the latest durably ingested lecture, and homework/README.md still routes Homework 1 as the active assignment. These are recovery observations, not permission to infer missing later course history. On 2026-10-03, the user supplied Lecture 7–9 note text plus Lecture 7/8 decks and pumping/Myhill-Nerode supporting materials. Gmail was checked for matching forwarded Lecture 7–9 messages and none were found; provenance therefore remains user-provided instructor-note text plus uploaded course files, without invented dates/message IDs."
 }

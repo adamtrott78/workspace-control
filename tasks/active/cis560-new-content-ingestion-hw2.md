@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: cis560-new-content-ingestion-hw2
 - Title: CIS560 new-content ingestion + HW2 bootstrap and assignment work
-- Status: SUSPENDED
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -42,11 +42,11 @@ Bring CIS 560 durable course state current with all genuinely new instructor-cov
 
 ## Next safe action
 
-Obtain from the user the additional CIS560 course-content inputs covered since the 9c5e492354449186898b5f038e227e5a92d15005 checkpoint, including exact Sipser sections/references and any instructor notes/messages needed to establish coverage. Also obtain the authoritative HW2 PDF, but do not inspect/solve HW2 until the new course-content ingestion is complete. Resume with course_content_intake and preserve typed provenance.
+Ingest the newly provided Lecture 7–9 instructor material into CIS560 tutor-framework, treating Lecture 6 uploads as overlap/no-op, recording exact covered/read-next Sipser relationships without promoting mastery, then validate the resulting course/source/skill/notation state. Do not inspect or solve HW2 until this ingestion is complete.
 
 ## Remaining work
 
-- Receive and ingest the additional instructor-covered course topics/material and exact Sipser sections since the current durable checkpoint.
+- Ingest the genuinely new Lecture 7–9 coverage and exact current Sipser section relationship, preserving the distinction between covered material, assigned reading, and next-topic guidance.
 - Inspect and ingest the full authoritative HW2 PDF only after course-content ingestion is current.
 - Bootstrap homework/hw02 local owners, assignment contract, LEARNING state, source routing, and problem-to-skill/source mappings.
 - Begin the first HW2 problem in LEARNING mode only after ingestion/bootstrap validation.
@@ -55,7 +55,6 @@ Obtain from the user the additional CIS560 course-content inputs covered since t
 
 ## Blockers / gates
 
-- Additional CIS560 course-content evidence since the 9c5e492354449186898b5f038e227e5a92d15005 durable checkpoint has not yet been provided in this task.
 - The authoritative HW2 PDF has not yet been uploaded in this task.
 
 ## Fresh-chat initialization
