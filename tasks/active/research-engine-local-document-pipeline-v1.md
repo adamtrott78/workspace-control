@@ -31,7 +31,7 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d89d874949570ce8bb593f8ceffb7fd772af3f5f
+- Remote checkpoint: e5aa352d0f0d8d4556539cf5120954d80e8bb4f0
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
@@ -40,21 +40,21 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@d89d874949570ce8bb593f8ceffb7fd772af3f5f as the canonical localization-policy baseline. Begin lambda_production_acceptance by designing and CI-gating a bounded acceptance runner that verifies Lambda checkout/dependencies/runtime caches/shared-inference ownership/authoritative-PDF semantic policy and performs only finite smoke checks with explicit cleanup. The gate must not launch sustained research, must preserve rollback, must not materialize new scientific state, and must leave research-engine-daemon.service inactive/dead unless a deliberately bounded daemon lifecycle check is added with guaranteed stop/cleanup.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at 8c875a62d44e91ed91207cdc78d715acb0909346, fetch origin/main, require origin/main=e5aa352d0f0d8d4556539cf5120954d80e8bb4f0, and fast-forward only to that commit. Re-verify daemon inactive/dead PID 0. Then run bash deploy/configure-production-local-inference.sh and retain its BACKUP/ROLLBACK output. Without starting the daemon, run bash deploy/run-lambda-production-acceptance.sh. Return any ERROR line or, on success, the BUILD ACCEPTANCE REPORT / FINAL SAFETY STATE including LAMBDA_PRODUCTION_ACCEPTANCE=PASS. The acceptance gate may start/check PostgreSQL only and must perform no semantic/model inference or scientific-state materialization.
 
 ## Remaining work
 
-- Design and CI-gate a bounded Lambda production-acceptance runner that verifies canonical checkout, persistent PostgreSQL, parser/runtime/model-cache availability, shared local-inference configuration, authoritative-PDF EXTRACT/VERIFY policy, and operator recovery invariants without starting sustained research.
-- Exercise only bounded document-pipeline health/smoke operations required to prove the installed runtimes and shared model owners can initialize and shut down cleanly; preserve daemon rollback and no scientific-state mutation.
-- Perform/record CodeFormulaV2 license/deployment review before sustained production enablement.
-- Run the bounded Lambda production-acceptance gate and evaluate resource stability, dependency health, process cleanup, and exact configuration.
-- If accepted, advance to bounded_production_integration for a rollback-capable production comparison; otherwise fix only the measured deployment defect.
+- Fast-forward the clean Lambda research-engine checkout from 8c875a62d44e91ed91207cdc78d715acb0909346 to canonical e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 while research-engine-daemon.service remains inactive/dead.
+- Run deploy/configure-production-local-inference.sh once. Preserve the printed timestamped env backup/rollback path and keep the daemon stopped.
+- Run deploy/run-lambda-production-acceptance.sh. It may start/check PostgreSQL only; it must fail closed on non-quiescent research work and leave the research daemon inactive/dead.
+- Evaluate the acceptance report: systemd/env drift, queue quiescence, runtime/cache availability, two GPU probes, zero-spawn broker construction, authoritative-PDF hydration and read-only ops health.
+- If PASS, validate lambda_production_acceptance and advance to bounded_production_integration; do not start sustained research yet.
 
 ## Blockers / gates
 
-- Lambda local research-engine is last verified clean at main@8c875a62d44e91ed91207cdc78d715acb0909346 while canonical remote main is d89d874949570ce8bb593f8ceffb7fd772af3f5f; fast-forward before production acceptance.
-- CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement.
-- The complete document-pipeline production acceptance gate has not yet been executed on canonical Lambda main.
+- Lambda local research-engine is last verified clean at main@8c875a62d44e91ed91207cdc78d715acb0909346 while canonical remote main is e5aa352d0f0d8d4556539cf5120954d80e8bb4f0; fast-forward before production acceptance.
+- The live ~/.research-engine/research-engine.env has not yet been synchronized with the validated shared local-inference block; use the backup-first configurator while the daemon is stopped.
+- The bounded Lambda production-acceptance gate has not yet been executed on canonical main.
 
 ## Fresh-chat initialization
 

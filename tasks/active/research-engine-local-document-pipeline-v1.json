@@ -68,7 +68,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "d89d874949570ce8bb593f8ceffb7fd772af3f5f",
+        "checkpoint_sha": "e5aa352d0f0d8d4556539cf5120954d80e8bb4f0",
         "verified": true
       },
       "local": {
@@ -491,9 +491,20 @@
         "actual model/weight cache receipt",
         "single and concurrent document performance",
         "resource ceilings and failure recovery",
-        "daemon-safe integration receipt"
+        "daemon-safe integration receipt",
+        "deploy/configure-production-local-inference.sh",
+        "deploy/run-lambda-production-acceptance.sh",
+        "benchmarks/document_intelligence/lambda-production-acceptance-contract.v1.json",
+        "benchmarks/document_intelligence/codeformulav2-license-review.v1.json"
       ],
-      "validation": [],
+      "validation": [
+        "research-engine PR #60 merged as e5aa352d0f0d8d4556539cf5120954d80e8bb4f0; PR CI 37161048760 PASS and canonical-main CI 37161154038 PASS.",
+        "Production env contract now explicitly enables the validated shared local-inference broker with max_pending=8, timeout=900s, formula GPU0 and table GPU1 while preserving one worker per tier and VERIFY radius 0.",
+        "Rollback-safe env synchronizer requires daemon inactive/dead, creates a timestamped backup, replaces only a managed local-inference block, and prints an exact rollback command.",
+        "Bounded acceptance runner never starts research-engine-daemon.service; it fails closed on active RUNNING research runs or QUEUED/RUNNING non-HUMAN jobs, performs no semantic calls/model inference/scientific materialization, and leaves daemon inactive/dead.",
+        "Acceptance verifies installed systemd unit drift, Codex-only env/no API key, PostgreSQL health/quiescence, persistent artifact store, validated document runtimes/model caches, two GPU allocation probes, measured localization policy, CodeFormulaV2 deployment review, zero-spawn broker construction, one authoritative-PDF hydration smoke, and read-only ops health.",
+        "Published CodeFormulaV2 metadata declares cdla-permissive-2.0; engineering review records PASS_INTERNAL_DEPLOYMENT_WITH_SHARING_OBLIGATION for internal local inference, with re-review/license-text obligation if weights are redistributed."
+      ],
       "resume_condition": "The complete local document pipeline is reproducible and stable on the Lambda without paid per-page OCR."
     },
     {
@@ -557,14 +568,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "d89d874949570ce8bb593f8ceffb7fd772af3f5f",
+      "identity": "e5aa352d0f0d8d4556539cf5120954d80e8bb4f0",
       "required_for_resume": true,
       "evidence": [
         "stage=lambda_production_acceptance",
-        "research-engine remote main@d89d874949570ce8bb593f8ceffb7fd772af3f5f; PR #59 + canonical-main CI PASS",
+        "research-engine remote main@e5aa352d0f0d8d4556539cf5120954d80e8bb4f0; PR #60 + canonical-main CI PASS",
         "Lambda local last verified clean main@8c875a62d44e91ed91207cdc78d715acb0909346; daemon inactive/dead PID 0",
-        "localization matrix v2 validates every JobType placement and locks authoritative-PDF STANDARD EXTRACT/VERIFY baseline",
-        "next=bounded Lambda production acceptance with no sustained research"
+        "CodeFormulaV2 internal deployment license review PASS with sharing/redistribution obligation",
+        "acceptance tooling=backup-first env sync + daemon-stopped bounded production acceptance; no semantic/model inference",
+        "next=fast-forward, sync live env, run bounded Lambda production acceptance"
       ]
     }
   ],
@@ -1000,22 +1012,33 @@
         "Authoritative-PDF STANDARD EXTRACT/VERIFY baseline is locked after measured A/B rejection of package context.",
         "Web-dependent retrieval, strong reasoning and human authority boundaries remain explicit; deterministic/document support localization is limited to validated components."
       ]
+    },
+    {
+      "check": "Lambda production acceptance implementation",
+      "result": "PASS_READY_FOR_LAMBDA",
+      "evidence": [
+        "research-engine PR #60 -> e5aa352d0f0d8d4556539cf5120954d80e8bb4f0.",
+        "PR CI 37161048760 PASS; canonical-main CI 37161154038 PASS.",
+        "Production env sync is backup-first and daemon-stopped.",
+        "Acceptance runner is bounded/read-only with respect to research state and has CI assertions forbidding daemon start, semantic replay and heavyweight model inference.",
+        "CodeFormulaV2 published license=CDLA-Permissive-2.0; internal deployment review recorded with redistribution obligation."
+      ]
     }
   ],
   "blockers": [
-    "Lambda local research-engine is last verified clean at main@8c875a62d44e91ed91207cdc78d715acb0909346 while canonical remote main is d89d874949570ce8bb593f8ceffb7fd772af3f5f; fast-forward before production acceptance.",
-    "CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement.",
-    "The complete document-pipeline production acceptance gate has not yet been executed on canonical Lambda main."
+    "Lambda local research-engine is last verified clean at main@8c875a62d44e91ed91207cdc78d715acb0909346 while canonical remote main is e5aa352d0f0d8d4556539cf5120954d80e8bb4f0; fast-forward before production acceptance.",
+    "The live ~/.research-engine/research-engine.env has not yet been synchronized with the validated shared local-inference block; use the backup-first configurator while the daemon is stopped.",
+    "The bounded Lambda production-acceptance gate has not yet been executed on canonical main."
   ],
   "remaining_work": [
-    "Design and CI-gate a bounded Lambda production-acceptance runner that verifies canonical checkout, persistent PostgreSQL, parser/runtime/model-cache availability, shared local-inference configuration, authoritative-PDF EXTRACT/VERIFY policy, and operator recovery invariants without starting sustained research.",
-    "Exercise only bounded document-pipeline health/smoke operations required to prove the installed runtimes and shared model owners can initialize and shut down cleanly; preserve daemon rollback and no scientific-state mutation.",
-    "Perform/record CodeFormulaV2 license/deployment review before sustained production enablement.",
-    "Run the bounded Lambda production-acceptance gate and evaluate resource stability, dependency health, process cleanup, and exact configuration.",
-    "If accepted, advance to bounded_production_integration for a rollback-capable production comparison; otherwise fix only the measured deployment defect."
+    "Fast-forward the clean Lambda research-engine checkout from 8c875a62d44e91ed91207cdc78d715acb0909346 to canonical e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 while research-engine-daemon.service remains inactive/dead.",
+    "Run deploy/configure-production-local-inference.sh once. Preserve the printed timestamped env backup/rollback path and keep the daemon stopped.",
+    "Run deploy/run-lambda-production-acceptance.sh. It may start/check PostgreSQL only; it must fail closed on non-quiescent research work and leave the research daemon inactive/dead.",
+    "Evaluate the acceptance report: systemd/env drift, queue quiescence, runtime/cache availability, two GPU probes, zero-spawn broker construction, authoritative-PDF hydration and read-only ops health.",
+    "If PASS, validate lambda_production_acceptance and advance to bounded_production_integration; do not start sustained research yet."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@d89d874949570ce8bb593f8ceffb7fd772af3f5f as the canonical localization-policy baseline. Begin lambda_production_acceptance by designing and CI-gating a bounded acceptance runner that verifies Lambda checkout/dependencies/runtime caches/shared-inference ownership/authoritative-PDF semantic policy and performs only finite smoke checks with explicit cleanup. The gate must not launch sustained research, must preserve rollback, must not materialize new scientific state, and must leave research-engine-daemon.service inactive/dead unless a deliberately bounded daemon lifecycle check is added with guaranteed stop/cleanup.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at 8c875a62d44e91ed91207cdc78d715acb0909346, fetch origin/main, require origin/main=e5aa352d0f0d8d4556539cf5120954d80e8bb4f0, and fast-forward only to that commit. Re-verify daemon inactive/dead PID 0. Then run bash deploy/configure-production-local-inference.sh and retain its BACKUP/ROLLBACK output. Without starting the daemon, run bash deploy/run-lambda-production-acceptance.sh. Return any ERROR line or, on success, the BUILD ACCEPTANCE REPORT / FINAL SAFETY STATE including LAMBDA_PRODUCTION_ACCEPTANCE=PASS. The acceptance gate may start/check PostgreSQL only and must perform no semantic/model inference or scientific-state materialization.",
   "last_executor": "chatgpt",
-  "last_surface": "github+ci",
+  "last_surface": "github+ci+web-license-review",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
 }
