@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "extract_verify_paper_package_ab",
+  "current_stage": "research_pipeline_localization_matrix_validation",
   "acceptance_criteria": [
     "A versioned paper-package.v1 contract exists and preserves the original PDF SHA-256 as scientific authority while representing normalized reading-order Markdown, page/block provenance, extracted figures, tables, equations, references/citations, diagnostics, confidence, and parser/model lineage.",
     "The pipeline uses a cascaded cost model: deterministic/native PDF extraction first, specialized local OCR/layout/table/formula/document models only where needed, and a general local VLM/agent only for low-confidence or structurally difficult regions.",
@@ -74,7 +74,7 @@
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "a83850016efe2e58b37a86a4203d69af811117a1",
+        "head_sha": "8c875a62d44e91ed91207cdc78d715acb0909346",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -384,7 +384,7 @@
     },
     {
       "id": "research_pipeline_localization_matrix_validation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+ci",
@@ -404,7 +404,7 @@
     },
     {
       "id": "extract_verify_paper_package_ab",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
@@ -455,7 +455,15 @@
         "No package_context_regression_signals were observed. The four package-history disagreements each triggered current-PDF controls and all four PDF controls also failed historical agreement, so the measured decision is INCONCLUSIVE_MODEL_VARIANCE rather than package regression.",
         "Two VERIFY package arms directly matched historical outcomes; four jobs remain model-variance ambiguous. Scientific state was not materialized and the daemon remained inactive/dead.",
         "research-engine PR #58 adds a zero-semantic-call posthoc comparator over already-recorded calibration events, directly pairing package outputs with contemporaneous PDF controls and reporting controlled-subset token deltas.",
-        "PR #58 merged as 8c875a62d44e91ed91207cdc78d715acb0909346; PR CI 37159681676 PASS and canonical-main CI 37159760600 PASS."
+        "PR #58 merged as 8c875a62d44e91ed91207cdc78d715acb0909346; PR CI 37159681676 PASS and canonical-main CI 37159760600 PASS.",
+        "Zero-call contemporaneous posthoc executed on Lambda at research-engine main@8c875a62d44e91ed91207cdc78d715acb0909346 with PostgreSQL healthy and research daemon inactive/dead PID 0.",
+        "Posthoc decision=MEASURED_CONTEXT_DIFFERENCE: 4 controlled package-vs-current-PDF pairs, only 1/4 passed direct agreement (0.25).",
+        "All three controlled EXTRACT pairs failed direct package-vs-PDF agreement. The one controlled VERIFY pair passed verified/accepted-evidence agreement; its issues list differed but the verification decision/evidence set matched.",
+        "Controlled-subset input tokens were 100942 package vs 101565 PDF, only 0.6134% lower; controlled cached-input tokens were 22016 package vs 12032 PDF, so package context increased cached-input usage materially in this sample.",
+        "EXTRACT package-vs-PDF differences were substantive in evidence count/content despite same-page alignment being often preserved: direct agreement coverage/precision remained below the promotion threshold in all three controlled EXTRACT jobs.",
+        "Therefore paper-package-derived context is not promoted as a wholesale EXTRACT/VERIFY replacement. Current authoritative-PDF hydration remains the production baseline for EXTRACT and VERIFY.",
+        "VERIFY package context is quality-promising in this sample (two historical matches plus one contemporaneous control match) but does not demonstrate a compelling contemporaneous token advantage; no separate VERIFY production path is promoted at this stage.",
+        "Stage conclusion satisfies resume condition by recording measured evidence for why paper-package context should not replace the baseline."
       ],
       "resume_condition": "Paper-package path demonstrates quality-safe savings or the task records why it should not replace the baseline."
     },
@@ -544,12 +552,13 @@
       "identity": "8c875a62d44e91ed91207cdc78d715acb0909346",
       "required_for_resume": true,
       "evidence": [
-        "stage=extract_verify_paper_package_ab",
-        "research-engine remote main@8c875a62d44e91ed91207cdc78d715acb0909346; PR #58 + canonical-main CI PASS",
-        "Lambda local last verified clean main@a83850016efe2e58b37a86a4203d69af811117a1; daemon inactive/dead PID 0",
-        "zero-model preflight PASS: 9/9 package coverage, 140/142 same-page quotes, recovery 0.9859154929577465",
-        "representative semantic history comparison=INCONCLUSIVE_MODEL_VARIANCE with 0 package-only regression signals; 4 package disagreements had PDF controls that also failed history",
-        "next=zero-call contemporaneous package-vs-PDF calibration-event comparison"
+        "stage=research_pipeline_localization_matrix_validation",
+        "research-engine remote/local main@8c875a62d44e91ed91207cdc78d715acb0909346; PR #58 + canonical-main CI PASS",
+        "paper-package zero-model preflight PASS: 140/142 same-page quotes, 0.9859154929577465 recovery",
+        "representative history replay inconclusive from model variance, but contemporaneous posthoc measured 1/4 direct package-vs-PDF agreement",
+        "all 3 controlled EXTRACT pairs differed materially; controlled VERIFY pair matched decision/evidence",
+        "controlled input-token delta only 0.6134% lower for package and cached-input usage higher; baseline authoritative-PDF hydration retained",
+        "next=validate full research pipeline localization matrix and production placement"
       ]
     }
   ],
@@ -961,21 +970,33 @@
         "Posthoc reads research_calibration_events only; performs no semantic calls, parser calls, normalization or scientific-state mutation.",
         "It directly compares package vs current-PDF result summaries for the four controlled pairs using the existing EXTRACT/VERIFY agreement contracts and reports contemporaneous input/cached-input token deltas."
       ]
+    },
+    {
+      "check": "Zero-call contemporaneous package-vs-PDF posthoc",
+      "result": "MEASURED_CONTEXT_DIFFERENCE_BASELINE_RETAINED",
+      "evidence": [
+        "research-engine local main@8c875a62d44e91ed91207cdc78d715acb0909346; daemon inactive/dead PID 0.",
+        "4 controlled pairs; 1 direct agreement pass; agreement rate=0.25.",
+        "All three EXTRACT package-vs-current-PDF pairs failed direct agreement.",
+        "Controlled VERIFY pair passed verified/accepted-evidence agreement.",
+        "Controlled package input tokens=100942 vs PDF=101565; reduction=0.006134002855314331.",
+        "Controlled cached-input tokens=22016 package vs 12032 PDF; package cached-input usage was higher.",
+        "Decision=MEASURED_CONTEXT_DIFFERENCE."
+      ]
     }
   ],
   "blockers": [
-    "Lambda local research-engine is last verified clean at main@a83850016efe2e58b37a86a4203d69af811117a1 while canonical remote main is 8c875a62d44e91ed91207cdc78d715acb0909346; fast-forward before the posthoc comparator.",
-    "Representative history comparison is confounded by model variance: four package arms and their current-PDF controls both fail historical agreement. Direct contemporaneous package-vs-PDF comparison of the already-recorded outputs is required before stage promotion.",
-    "CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement."
+    "CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement.",
+    "The broader research_pipeline_localization_matrix_validation stage has not yet been completed; end-to-end production placement for each research operation still requires explicit validation."
   ],
   "remaining_work": [
-    "Fast-forward the clean Lambda research-engine checkout from a83850016efe2e58b37a86a4203d69af811117a1 to canonical 8c875a62d44e91ed91207cdc78d715acb0909346 while research-engine-daemon.service remains inactive/dead.",
-    "Run deploy/run-paper-package-ab-posthoc.sh rf-open-world-corpus-expansion-v1. This is a zero-semantic-call, zero-parser-call comparison over the package/PDF calibration outputs already stored in PostgreSQL.",
-    "If all four controlled pairs pass direct package-vs-current-PDF agreement, combine that result with the 98.59% zero-model quote recovery and two package-history matches to decide the A/B stage quality-safe and advance. If any contemporaneous pair differs materially, inspect that measured context difference before promotion.",
-    "Use contemporaneous controlled-subset token deltas as the cleaner semantic-input efficiency measure; keep historical-relative 8.57% savings as secondary evidence and do not equate tokens with plan allowance.",
-    "After A/B closure, advance to research_pipeline_localization_matrix_validation and finish Lambda production acceptance/licensing."
+    "Validate the localization matrix end-to-end against the now-measured document pipeline: keep authoritative-PDF hydration for EXTRACT/VERIFY, retain local deterministic document compilation/routing/escalation, and keep heavyweight formula/table models behind the shared local inference broker.",
+    "Review each research pipeline operation (DISCOVERY, ACQUIRE, EXTRACT, VERIFY, SYNTHESIZE, GAP_GENERATE, CHECKPOINT, HUMAN_REVIEW) for the intended local-vs-semantic execution boundary and verify no stale assumption expects paper-package context to replace authoritative PDF hydration.",
+    "Measure or reuse existing token/latency/resource evidence for the remaining semantic operations and confirm that localizing deterministic work does not reduce evidence fidelity or provenance.",
+    "Complete final Lambda production acceptance, including daemon integration, bounded concurrency, database/runtime dependencies, operator recovery behavior, and CodeFormulaV2 licensing/deployment review.",
+    "Only after those gates pass consider enabling sustained research."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at a83850016efe2e58b37a86a4203d69af811117a1, fetch origin/main, require origin/main=8c875a62d44e91ed91207cdc78d715acb0909346, and fast-forward only to that commit. Keep PostgreSQL db running/healthy and verify the research daemon remains inactive/dead PID 0. Then run bash deploy/run-paper-package-ab-posthoc.sh rf-open-world-corpus-expansion-v1. This gate must make no semantic/model/parser calls and must only compare already-recorded package and current-PDF calibration result summaries. Return the COMPACT CONTEMPORANEOUS POSTHOC SUMMARY, POSTHOC_DECISION, final safety state, or any ERROR/traceback.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@8c875a62d44e91ed91207cdc78d715acb0909346 as the validated document-pipeline/A-B baseline. Begin research_pipeline_localization_matrix_validation by inspecting benchmarks/document_intelligence/localization-matrix.v1.json plus the current worker/orchestration mappings, then reconcile every research job type against measured evidence. Preserve the decision that authoritative-PDF hydration remains the EXTRACT/VERIFY production baseline; paper-package context must not silently replace it. Validate local deterministic placement, semantic executor placement, shared-model ownership, provenance/fidelity boundaries, and resource/token evidence before production acceptance. Do not start the research daemon or sustained research.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."

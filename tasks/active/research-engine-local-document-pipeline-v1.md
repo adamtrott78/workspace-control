@@ -35,26 +35,25 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: a83850016efe2e58b37a86a4203d69af811117a1
+- Local HEAD: 8c875a62d44e91ed91207cdc78d715acb0909346
 - Local clean: true
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at a83850016efe2e58b37a86a4203d69af811117a1, fetch origin/main, require origin/main=8c875a62d44e91ed91207cdc78d715acb0909346, and fast-forward only to that commit. Keep PostgreSQL db running/healthy and verify the research daemon remains inactive/dead PID 0. Then run bash deploy/run-paper-package-ab-posthoc.sh rf-open-world-corpus-expansion-v1. This gate must make no semantic/model/parser calls and must only compare already-recorded package and current-PDF calibration result summaries. Return the COMPACT CONTEMPORANEOUS POSTHOC SUMMARY, POSTHOC_DECISION, final safety state, or any ERROR/traceback.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@8c875a62d44e91ed91207cdc78d715acb0909346 as the validated document-pipeline/A-B baseline. Begin research_pipeline_localization_matrix_validation by inspecting benchmarks/document_intelligence/localization-matrix.v1.json plus the current worker/orchestration mappings, then reconcile every research job type against measured evidence. Preserve the decision that authoritative-PDF hydration remains the EXTRACT/VERIFY production baseline; paper-package context must not silently replace it. Validate local deterministic placement, semantic executor placement, shared-model ownership, provenance/fidelity boundaries, and resource/token evidence before production acceptance. Do not start the research daemon or sustained research.
 
 ## Remaining work
 
-- Fast-forward the clean Lambda research-engine checkout from a83850016efe2e58b37a86a4203d69af811117a1 to canonical 8c875a62d44e91ed91207cdc78d715acb0909346 while research-engine-daemon.service remains inactive/dead.
-- Run deploy/run-paper-package-ab-posthoc.sh rf-open-world-corpus-expansion-v1. This is a zero-semantic-call, zero-parser-call comparison over the package/PDF calibration outputs already stored in PostgreSQL.
-- If all four controlled pairs pass direct package-vs-current-PDF agreement, combine that result with the 98.59% zero-model quote recovery and two package-history matches to decide the A/B stage quality-safe and advance. If any contemporaneous pair differs materially, inspect that measured context difference before promotion.
-- Use contemporaneous controlled-subset token deltas as the cleaner semantic-input efficiency measure; keep historical-relative 8.57% savings as secondary evidence and do not equate tokens with plan allowance.
-- After A/B closure, advance to research_pipeline_localization_matrix_validation and finish Lambda production acceptance/licensing.
+- Validate the localization matrix end-to-end against the now-measured document pipeline: keep authoritative-PDF hydration for EXTRACT/VERIFY, retain local deterministic document compilation/routing/escalation, and keep heavyweight formula/table models behind the shared local inference broker.
+- Review each research pipeline operation (DISCOVERY, ACQUIRE, EXTRACT, VERIFY, SYNTHESIZE, GAP_GENERATE, CHECKPOINT, HUMAN_REVIEW) for the intended local-vs-semantic execution boundary and verify no stale assumption expects paper-package context to replace authoritative PDF hydration.
+- Measure or reuse existing token/latency/resource evidence for the remaining semantic operations and confirm that localizing deterministic work does not reduce evidence fidelity or provenance.
+- Complete final Lambda production acceptance, including daemon integration, bounded concurrency, database/runtime dependencies, operator recovery behavior, and CodeFormulaV2 licensing/deployment review.
+- Only after those gates pass consider enabling sustained research.
 
 ## Blockers / gates
 
-- Lambda local research-engine is last verified clean at main@a83850016efe2e58b37a86a4203d69af811117a1 while canonical remote main is 8c875a62d44e91ed91207cdc78d715acb0909346; fast-forward before the posthoc comparator.
-- Representative history comparison is confounded by model variance: four package arms and their current-PDF controls both fail historical agreement. Direct contemporaneous package-vs-PDF comparison of the already-recorded outputs is required before stage promotion.
 - CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement.
+- The broader research_pipeline_localization_matrix_validation stage has not yet been completed; end-to-end production placement for each research operation still requires explicit validation.
 
 ## Fresh-chat initialization
 
