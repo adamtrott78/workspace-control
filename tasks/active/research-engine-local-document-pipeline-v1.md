@@ -31,28 +31,27 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: e5aa352d0f0d8d4556539cf5120954d80e8bb4f0
+- Remote checkpoint: a878f74f7d3c669374b12d2a903b56483b3770d7
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: 8c875a62d44e91ed91207cdc78d715acb0909346
+- Local HEAD: e5aa352d0f0d8d4556539cf5120954d80e8bb4f0
 - Local clean: true
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. Wait for research-engine PR #61 (production-env VERIFY-radius hotfix) to merge and canonical-main CI to pass. Then fast-forward the clean Lambda checkout from e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 to that exact canonical main, rerun bash deploy/configure-production-local-inference.sh to create a fresh rollback backup and enforce RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=0 plus the validated broker settings, then rerun bash deploy/run-lambda-production-acceptance.sh. Return the first ERROR/traceback or the final acceptance report.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at e5aa352d0f0d8d4556539cf5120954d80e8bb4f0, fetch origin/main, require origin/main=a878f74f7d3c669374b12d2a903b56483b3770d7, and fast-forward only to that commit. Then rerun bash deploy/configure-production-local-inference.sh, preserve the printed BACKUP/ROLLBACK receipt, and rerun bash deploy/run-lambda-production-acceptance.sh inside the persistent tmux shell with console logging. Return the first ERROR/traceback or the final BUILD ACCEPTANCE REPORT through LAMBDA_PRODUCTION_ACCEPTANCE=PASS.
 
 ## Remaining work
 
-- Merge PR #61 after CI and require canonical-main CI PASS.
-- Fast-forward Lambda to the resulting canonical main while research-engine-daemon.service remains inactive/dead.
-- Rerun deploy/configure-production-local-inference.sh to create a fresh backup and set VERIFY radius=0 plus validated local-inference settings.
-- Rerun deploy/run-lambda-production-acceptance.sh and evaluate the first subsequent fail-closed gate or complete PASS.
+- Fast-forward the clean Lambda research-engine checkout from e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 to canonical a878f74f7d3c669374b12d2a903b56483b3770d7 while research-engine-daemon.service remains inactive/dead.
+- Rerun deploy/configure-production-local-inference.sh to create a fresh rollback backup and enforce VERIFY radius=0 plus validated shared local-inference settings.
+- Rerun deploy/run-lambda-production-acceptance.sh in the persistent tmux shell/log wrapper and evaluate the next fail-closed gate or complete PASS.
 - If production acceptance passes, advance to bounded_production_integration; do not start sustained research before that stage is explicitly accepted.
 
 ## Blockers / gates
 
-- Live Lambda production env has stale RESEARCH_ENGINE_VERIFY_PAGE_RADIUS != 0; PR #61 hotfix must merge, Lambda must fast-forward, and the rollback-safe env synchronizer must be rerun before acceptance.
+- Lambda local research-engine is last verified clean at main@e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 while canonical remote main is a878f74f7d3c669374b12d2a903b56483b3770d7; fast-forward before rerunning acceptance.
 - Lambda production acceptance has not yet passed end-to-end.
 - Sustained research remains disabled until production acceptance and bounded production integration are complete.
 

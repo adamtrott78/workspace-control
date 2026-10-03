@@ -68,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "e5aa352d0f0d8d4556539cf5120954d80e8bb4f0",
+        "checkpoint_sha": "a878f74f7d3c669374b12d2a903b56483b3770d7",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "8c875a62d44e91ed91207cdc78d715acb0909346",
+        "head_sha": "e5aa352d0f0d8d4556539cf5120954d80e8bb4f0",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -506,7 +506,9 @@
         "Published CodeFormulaV2 metadata declares cdla-permissive-2.0; engineering review records PASS_INTERNAL_DEPLOYMENT_WITH_SHARING_OBLIGATION for internal local inference, with re-review/license-text obligation if weights are redistributed.",
         "First Lambda production-acceptance invocation on research-engine main@e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 verified the installed systemd unit exactly matched deploy/systemd/research-engine-daemon.service, then failed closed in the production-env contract with ERROR=VERIFY_PAGE_RADIUS_NOT_ZERO (exit 46).",
         "The failure occurred before PostgreSQL durable-state checks, runtime/cache checks, GPU probes, broker construction, authoritative-PDF hydration, model/server spawn, semantic calls or scientific-state materialization.",
-        "PR #61 updates the rollback-safe production env synchronizer to manage RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=0 together with the validated shared local-inference settings and adds a regression guard."
+        "PR #61 updates the rollback-safe production env synchronizer to manage RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=0 together with the validated shared local-inference settings and adds a regression guard.",
+        "PR #61 merged as a878f74f7d3c669374b12d2a903b56483b3770d7; PR CI 37162863926 PASS and canonical-main CI 37162938323 PASS.",
+        "The production env synchronizer now removes any stale RESEARCH_ENGINE_VERIFY_PAGE_RADIUS assignment, writes the validated radius 0 inside its managed backup-first block, and verifies the sourced live env equals 0 before returning success."
       ],
       "resume_condition": "The complete local document pipeline is reproducible and stable on the Lambda without paid per-page OCR."
     },
@@ -571,15 +573,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "e5aa352d0f0d8d4556539cf5120954d80e8bb4f0",
+      "identity": "a878f74f7d3c669374b12d2a903b56483b3770d7",
       "required_for_resume": true,
       "evidence": [
         "stage=lambda_production_acceptance",
-        "research-engine remote main@e5aa352d0f0d8d4556539cf5120954d80e8bb4f0; PR #60 + canonical-main CI PASS",
-        "Lambda local last verified clean main@8c875a62d44e91ed91207cdc78d715acb0909346; daemon inactive/dead PID 0",
-        "CodeFormulaV2 internal deployment license review PASS with sharing/redistribution obligation",
-        "acceptance tooling=backup-first env sync + daemon-stopped bounded production acceptance; no semantic/model inference",
-        "next=fast-forward, sync live env, run bounded Lambda production acceptance"
+        "research-engine remote main@a878f74f7d3c669374b12d2a903b56483b3770d7; PR #61 + canonical-main CI PASS",
+        "Lambda local last verified clean main@e5aa352d0f0d8d4556539cf5120954d80e8bb4f0; daemon inactive/dead PID 0",
+        "first acceptance failed only at live VERIFY radius drift after systemd unit match; no downstream acceptance work executed",
+        "hotfix now backup-first manages VERIFY radius=0 plus validated local-inference settings",
+        "next=fast-forward, rerun env synchronizer, rerun bounded acceptance"
       ]
     }
   ],
@@ -1037,21 +1039,29 @@
         "No PostgreSQL/GPU/broker/PDF hydration/model/semantic/scientific-state steps executed after the failure.",
         "Hotfix PR #61 manages and verifies RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=0 in the backup-first env synchronizer."
       ]
+    },
+    {
+      "check": "Production env VERIFY-radius hotfix",
+      "result": "PASS_READY_FOR_LAMBDA",
+      "evidence": [
+        "research-engine PR #61 -> a878f74f7d3c669374b12d2a903b56483b3770d7.",
+        "PR CI 37162863926 PASS; canonical-main CI 37162938323 PASS.",
+        "configure-production-local-inference.sh now manages RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=0 together with the validated local-inference settings and retains timestamped rollback backup behavior."
+      ]
     }
   ],
   "blockers": [
-    "Live Lambda production env has stale RESEARCH_ENGINE_VERIFY_PAGE_RADIUS != 0; PR #61 hotfix must merge, Lambda must fast-forward, and the rollback-safe env synchronizer must be rerun before acceptance.",
+    "Lambda local research-engine is last verified clean at main@e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 while canonical remote main is a878f74f7d3c669374b12d2a903b56483b3770d7; fast-forward before rerunning acceptance.",
     "Lambda production acceptance has not yet passed end-to-end.",
     "Sustained research remains disabled until production acceptance and bounded production integration are complete."
   ],
   "remaining_work": [
-    "Merge PR #61 after CI and require canonical-main CI PASS.",
-    "Fast-forward Lambda to the resulting canonical main while research-engine-daemon.service remains inactive/dead.",
-    "Rerun deploy/configure-production-local-inference.sh to create a fresh backup and set VERIFY radius=0 plus validated local-inference settings.",
-    "Rerun deploy/run-lambda-production-acceptance.sh and evaluate the first subsequent fail-closed gate or complete PASS.",
+    "Fast-forward the clean Lambda research-engine checkout from e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 to canonical a878f74f7d3c669374b12d2a903b56483b3770d7 while research-engine-daemon.service remains inactive/dead.",
+    "Rerun deploy/configure-production-local-inference.sh to create a fresh rollback backup and enforce VERIFY radius=0 plus validated shared local-inference settings.",
+    "Rerun deploy/run-lambda-production-acceptance.sh in the persistent tmux shell/log wrapper and evaluate the next fail-closed gate or complete PASS.",
     "If production acceptance passes, advance to bounded_production_integration; do not start sustained research before that stage is explicitly accepted."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Wait for research-engine PR #61 (production-env VERIFY-radius hotfix) to merge and canonical-main CI to pass. Then fast-forward the clean Lambda checkout from e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 to that exact canonical main, rerun bash deploy/configure-production-local-inference.sh to create a fresh rollback backup and enforce RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=0 plus the validated broker settings, then rerun bash deploy/run-lambda-production-acceptance.sh. Return the first ERROR/traceback or the final acceptance report.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at e5aa352d0f0d8d4556539cf5120954d80e8bb4f0, fetch origin/main, require origin/main=a878f74f7d3c669374b12d2a903b56483b3770d7, and fast-forward only to that commit. Then rerun bash deploy/configure-production-local-inference.sh, preserve the printed BACKUP/ROLLBACK receipt, and rerun bash deploy/run-lambda-production-acceptance.sh inside the persistent tmux shell with console logging. Return the first ERROR/traceback or the final BUILD ACCEPTANCE REPORT through LAMBDA_PRODUCTION_ACCEPTANCE=PASS.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
