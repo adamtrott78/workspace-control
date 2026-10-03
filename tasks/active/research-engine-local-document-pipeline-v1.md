@@ -35,25 +35,26 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: e5aa352d0f0d8d4556539cf5120954d80e8bb4f0
+- Local HEAD: a878f74f7d3c669374b12d2a903b56483b3770d7
 - Local clean: true
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at e5aa352d0f0d8d4556539cf5120954d80e8bb4f0, fetch origin/main, require origin/main=a878f74f7d3c669374b12d2a903b56483b3770d7, and fast-forward only to that commit. Then rerun bash deploy/configure-production-local-inference.sh, preserve the printed BACKUP/ROLLBACK receipt, and rerun bash deploy/run-lambda-production-acceptance.sh inside the persistent tmux shell with console logging. Return the first ERROR/traceback or the final BUILD ACCEPTANCE REPORT through LAMBDA_PRODUCTION_ACCEPTANCE=PASS.
+Keep sustained research disabled. Treat research-engine main@a878f74f7d3c669374b12d2a903b56483b3770d7 as the validated Lambda production-acceptance baseline. Begin bounded_production_integration by inspecting the current document-sidecar/compiler/router integration, feature/config gates, telemetry, daemon startup/worker registration, and rollback behavior. Preserve authoritative-PDF EXTRACT/VERIFY hydration and do not promote paper-package semantic context. Design and CI-gate a finite integration runner that fails closed unless PostgreSQL is quiescent, starts research-engine-daemon.service only for a bounded health interval with no runnable non-human jobs, verifies expected workers/broker configuration, stops the daemon unconditionally, and leaves no scientific-state mutation.
 
 ## Remaining work
 
-- Fast-forward the clean Lambda research-engine checkout from e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 to canonical a878f74f7d3c669374b12d2a903b56483b3770d7 while research-engine-daemon.service remains inactive/dead.
-- Rerun deploy/configure-production-local-inference.sh to create a fresh rollback backup and enforce VERIFY radius=0 plus validated shared local-inference settings.
-- Rerun deploy/run-lambda-production-acceptance.sh in the persistent tmux shell/log wrapper and evaluate the next fail-closed gate or complete PASS.
-- If production acceptance passes, advance to bounded_production_integration; do not start sustained research before that stage is explicitly accepted.
+- Design and CI-gate bounded production integration behind explicit configuration/feature controls while preserving authoritative-PDF EXTRACT/VERIFY semantics.
+- Integrate/verify content-addressed document-sidecar caching and telemetry for document compiler/router/local-model usage without making paper-package context the semantic baseline.
+- Add a rollback-capable bounded daemon lifecycle gate that first requires no RUNNING research runs or QUEUED/RUNNING non-human work, starts the daemon only for a finite health/worker registration interval, verifies shared broker ownership/configuration without launching research jobs, then stops the daemon and confirms cleanup.
+- Where model-server lifecycle must be exercised, use only bounded preselected document-sidecar smoke work with no scientific-state materialization and explicit rollback; otherwise reuse the already-passed local-inference concurrency evidence.
+- After bounded integration PASS, decide whether the task can be closed or whether a final deliberately bounded production comparison is still required before any sustained research enablement.
 
 ## Blockers / gates
 
-- Lambda local research-engine is last verified clean at main@e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 while canonical remote main is a878f74f7d3c669374b12d2a903b56483b3770d7; fast-forward before rerunning acceptance.
-- Lambda production acceptance has not yet passed end-to-end.
-- Sustained research remains disabled until production acceptance and bounded production integration are complete.
+- Bounded production integration has not yet demonstrated an explicit rollback-capable daemon lifecycle with the validated local document pipeline enabled.
+- Paper-package-derived context remains prohibited as the production EXTRACT/VERIFY semantic baseline; bounded integration must preserve authoritative-PDF hydration and use local document compilation only as validated support/escalation/cache behavior.
+- Sustained research remains disabled until bounded production integration passes.
 
 ## Fresh-chat initialization
 

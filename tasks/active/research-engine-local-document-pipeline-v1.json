@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "lambda_production_acceptance",
+  "current_stage": "bounded_production_integration",
   "acceptance_criteria": [
     "A versioned paper-package.v1 contract exists and preserves the original PDF SHA-256 as scientific authority while representing normalized reading-order Markdown, page/block provenance, extracted figures, tables, equations, references/citations, diagnostics, confidence, and parser/model lineage.",
     "The pipeline uses a cascaded cost model: deterministic/native PDF extraction first, specialized local OCR/layout/table/formula/document models only where needed, and a general local VLM/agent only for low-confidence or structurally difficult regions.",
@@ -74,7 +74,7 @@
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "e5aa352d0f0d8d4556539cf5120954d80e8bb4f0",
+        "head_sha": "a878f74f7d3c669374b12d2a903b56483b3770d7",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -477,7 +477,7 @@
     },
     {
       "id": "lambda_production_acceptance",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "hybrid",
       "selected_executor": "chatgpt+human",
       "selected_surface": "lambda+github",
@@ -508,13 +508,22 @@
         "The failure occurred before PostgreSQL durable-state checks, runtime/cache checks, GPU probes, broker construction, authoritative-PDF hydration, model/server spawn, semantic calls or scientific-state materialization.",
         "PR #61 updates the rollback-safe production env synchronizer to manage RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=0 together with the validated shared local-inference settings and adds a regression guard.",
         "PR #61 merged as a878f74f7d3c669374b12d2a903b56483b3770d7; PR CI 37162863926 PASS and canonical-main CI 37162938323 PASS.",
-        "The production env synchronizer now removes any stale RESEARCH_ENGINE_VERIFY_PAGE_RADIUS assignment, writes the validated radius 0 inside its managed backup-first block, and verifies the sourced live env equals 0 before returning success."
+        "The production env synchronizer now removes any stale RESEARCH_ENGINE_VERIFY_PAGE_RADIUS assignment, writes the validated radius 0 inside its managed backup-first block, and verifies the sourced live env equals 0 before returning success.",
+        "Final Lambda production acceptance PASS on research-engine main@a878f74f7d3c669374b12d2a903b56483b3770d7 with installed systemd unit matching repository production unit.",
+        "Live production env validated Codex backend, VERIFY radius 0, shared local inference enabled, formula GPU0, table GPU1, and codex-cli 0.155.1.",
+        "PostgreSQL durable state was healthy/quiescent: 0 active RUNNING runs, no pending jobs, 0 QUEUED/RUNNING non-human jobs; one COMPLETED run and one WAITING_HUMAN run were preserved.",
+        "All document runtimes/caches were present; formula cache ~938M and table cache ~1.1G.",
+        "Both bounded GPU probes passed on RTX A4500 assignments with 128 MiB allocations; formula PyTorch CUDA and table Paddle CUDA were healthy.",
+        "Broker bootstrap PASS with shared local inference enabled, max_pending=8, zero process spawns, zero requests, empty queues and no heavyweight model-server process started.",
+        "Localization matrix remained VALIDATED_POLICY; EXTRACT/VERIFY tiers remained STANDARD; CodeFormulaV2 review remained PASS_INTERNAL_DEPLOYMENT_WITH_SHARING_OBLIGATION.",
+        "Authoritative-PDF hydration smoke PASS on an existing 6-page PDF (33251 chars) with VERIFY radius 0.",
+        "Acceptance performed 0 semantic calls, spawned 0 model servers, materialized no scientific state, and left research-engine-daemon.service inactive/dead PID 0."
       ],
       "resume_condition": "The complete local document pipeline is reproducible and stable on the Lambda without paid per-page OCR."
     },
     {
       "id": "bounded_production_integration",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
@@ -576,12 +585,12 @@
       "identity": "a878f74f7d3c669374b12d2a903b56483b3770d7",
       "required_for_resume": true,
       "evidence": [
-        "stage=lambda_production_acceptance",
-        "research-engine remote main@a878f74f7d3c669374b12d2a903b56483b3770d7; PR #61 + canonical-main CI PASS",
-        "Lambda local last verified clean main@e5aa352d0f0d8d4556539cf5120954d80e8bb4f0; daemon inactive/dead PID 0",
-        "first acceptance failed only at live VERIFY radius drift after systemd unit match; no downstream acceptance work executed",
-        "hotfix now backup-first manages VERIFY radius=0 plus validated local-inference settings",
-        "next=fast-forward, rerun env synchronizer, rerun bounded acceptance"
+        "stage=bounded_production_integration",
+        "research-engine remote/local main@a878f74f7d3c669374b12d2a903b56483b3770d7; production acceptance PASS",
+        "systemd/env/PostgreSQL/runtimes/caches/GPU probes/policy/license/broker/PDF hydration all accepted",
+        "0 semantic calls; 0 heavyweight model-server spawns; no scientific-state materialization; daemon final inactive/dead PID 0",
+        "authoritative-PDF STANDARD EXTRACT/VERIFY baseline remains locked",
+        "next=CI-gated finite daemon lifecycle + sidecar/cache/telemetry integration with rollback"
       ]
     }
   ],
@@ -1048,20 +1057,35 @@
         "PR CI 37162863926 PASS; canonical-main CI 37162938323 PASS.",
         "configure-production-local-inference.sh now manages RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=0 together with the validated local-inference settings and retains timestamped rollback backup behavior."
       ]
+    },
+    {
+      "check": "Lambda document-pipeline production acceptance",
+      "result": "PASS",
+      "evidence": [
+        "research-engine local/remote main@a878f74f7d3c669374b12d2a903b56483b3770d7.",
+        "Installed systemd unit matched repository unit; live production env matched validated Codex/VERIFY/shared-inference contract.",
+        "PostgreSQL healthy and quiescent: active_running_runs=0, queued_or_running_nonhuman_jobs=0.",
+        "Formula/table GPU allocation probes passed on assigned RTX A4500 GPUs.",
+        "Shared local-inference broker constructed with zero formula/table process spawns and empty queues.",
+        "Authoritative PDF hydration smoke returned 6 pages / 33251 chars with verify_page_radius=0.",
+        "semantic_calls_performed=0; model_server_processes_spawned=0; scientific_state_materialized=false.",
+        "Final daemon state=inactive/dead PID 0; acceptance decision=PASS."
+      ]
     }
   ],
   "blockers": [
-    "Lambda local research-engine is last verified clean at main@e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 while canonical remote main is a878f74f7d3c669374b12d2a903b56483b3770d7; fast-forward before rerunning acceptance.",
-    "Lambda production acceptance has not yet passed end-to-end.",
-    "Sustained research remains disabled until production acceptance and bounded production integration are complete."
+    "Bounded production integration has not yet demonstrated an explicit rollback-capable daemon lifecycle with the validated local document pipeline enabled.",
+    "Paper-package-derived context remains prohibited as the production EXTRACT/VERIFY semantic baseline; bounded integration must preserve authoritative-PDF hydration and use local document compilation only as validated support/escalation/cache behavior.",
+    "Sustained research remains disabled until bounded production integration passes."
   ],
   "remaining_work": [
-    "Fast-forward the clean Lambda research-engine checkout from e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 to canonical a878f74f7d3c669374b12d2a903b56483b3770d7 while research-engine-daemon.service remains inactive/dead.",
-    "Rerun deploy/configure-production-local-inference.sh to create a fresh rollback backup and enforce VERIFY radius=0 plus validated shared local-inference settings.",
-    "Rerun deploy/run-lambda-production-acceptance.sh in the persistent tmux shell/log wrapper and evaluate the next fail-closed gate or complete PASS.",
-    "If production acceptance passes, advance to bounded_production_integration; do not start sustained research before that stage is explicitly accepted."
+    "Design and CI-gate bounded production integration behind explicit configuration/feature controls while preserving authoritative-PDF EXTRACT/VERIFY semantics.",
+    "Integrate/verify content-addressed document-sidecar caching and telemetry for document compiler/router/local-model usage without making paper-package context the semantic baseline.",
+    "Add a rollback-capable bounded daemon lifecycle gate that first requires no RUNNING research runs or QUEUED/RUNNING non-human work, starts the daemon only for a finite health/worker registration interval, verifies shared broker ownership/configuration without launching research jobs, then stops the daemon and confirms cleanup.",
+    "Where model-server lifecycle must be exercised, use only bounded preselected document-sidecar smoke work with no scientific-state materialization and explicit rollback; otherwise reuse the already-passed local-inference concurrency evidence.",
+    "After bounded integration PASS, decide whether the task can be closed or whether a final deliberately bounded production comparison is still required before any sustained research enablement."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at e5aa352d0f0d8d4556539cf5120954d80e8bb4f0, fetch origin/main, require origin/main=a878f74f7d3c669374b12d2a903b56483b3770d7, and fast-forward only to that commit. Then rerun bash deploy/configure-production-local-inference.sh, preserve the printed BACKUP/ROLLBACK receipt, and rerun bash deploy/run-lambda-production-acceptance.sh inside the persistent tmux shell with console logging. Return the first ERROR/traceback or the final BUILD ACCEPTANCE REPORT through LAMBDA_PRODUCTION_ACCEPTANCE=PASS.",
+  "next_safe_action": "Keep sustained research disabled. Treat research-engine main@a878f74f7d3c669374b12d2a903b56483b3770d7 as the validated Lambda production-acceptance baseline. Begin bounded_production_integration by inspecting the current document-sidecar/compiler/router integration, feature/config gates, telemetry, daemon startup/worker registration, and rollback behavior. Preserve authoritative-PDF EXTRACT/VERIFY hydration and do not promote paper-package semantic context. Design and CI-gate a finite integration runner that fails closed unless PostgreSQL is quiescent, starts research-engine-daemon.service only for a bounded health interval with no runnable non-human jobs, verifies expected workers/broker configuration, stops the daemon unconditionally, and leaves no scientific-state mutation.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
