@@ -1,0 +1,255 @@
+{
+  "schema_version": 2,
+  "task_id": "cis560-new-content-ingestion-hw2",
+  "title": "CIS560 new-content ingestion + HW2 bootstrap and assignment work",
+  "status": "SUSPENDED",
+  "goal": "Bring CIS 560 durable course state current with all genuinely new instructor-covered topics and exact Sipser sections since the last checkpoint, ingest the authoritative Homework 2 PDF, bootstrap assignment-local HW2 routing and learning state, then tutor HW2 problem-by-problem and build/validate only the artifacts the assignment actually requires.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/course-assignment-work.v1.json",
+    "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+    "content_sha": "8a0f596add333737e03c72a81e71a7eb075b53fc"
+  },
+  "parent_execution_owner": "cis560-hw2",
+  "current_stage": "course_content_intake",
+  "acceptance_criteria": [
+    "Fresh execution starts from CIS560 README.md on tutor-framework at the exact migrated checkpoint 9c5e492354449186898b5f038e227e5a92d15005 and follows COURSE.md plus only the routed source/course/study/homework owners needed for the active stage.",
+    "New lecture/course material is ingested through the CIS560 typed-authority model with provenance preserved and no silent replacement of instructor evidence by generic theoretical-CS knowledge.",
+    "Only genuinely new covered material is added; already durable content produces a verified no-op.",
+    "New Sipser coverage is routed through sources/TEXTBOOK.md at the smallest relevant section granularity with exact terminology/notation preserved.",
+    "Course exposure or ingestion never promotes mastery; mastery changes require independent behavioral evidence.",
+    "The uploaded HW2 PDF is fully inspected as authoritative assignment evidence before any solution work begins.",
+    "HW2 gets an assignment-local route, CONTEXT.md, LEARNING.md, source routing as needed, exact deliverables/requirements/tool boundaries, and problem-to-source/skill mappings before tutoring begins.",
+    "Referenced Sipser exercises/problems are matched to their exact durable textbook wording before tutoring those items; solution-manual entries are semantically matched and remain gated until a meaningful student attempt in LEARNING mode.",
+    "HW2 tutoring proceeds one bounded problem/subproblem at a time using study/TUTORING.md, with completion and mastery persisted separately.",
+    "Any required digital report, code, JFLAP, LaTeX, or other artifact is owned by the assignment-local artifact route and validated independently of mastery; no artifact type is assumed from HW1.",
+    "All tracked CIS560 mutations remain on tutor-framework unless a later authoritative task transition explicitly changes the branch plan.",
+    "Every material task JSON mutation is accompanied by synchronized derived Markdown before further task work or handoff.",
+    "Final state is recoverable from durable repository/task evidence without the originating conversation."
+  ],
+  "constraints": [
+    "The completed CIS560 course-workflows-v2 migration is baseline truth; do not perform another architecture migration or introduce a conversational builder authority model.",
+    "Use workspace-control workflow compatibility exactly at 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; do not silently follow newer shared contracts.",
+    "The task capsule binds only workflows/course-assignment-work.v1.json; stage-level content ingestion, study, communications, and document work route through the promoted procedures/local owners mapped by COURSE.md.",
+    "Instructor material owns what was actually covered/emphasized; Sipser owns formal definitions/theorems/constructions/examples/exact textbook wording unless instructor-specific evidence owns the fact; student recollection remains identified as recollection.",
+    "Do not recursively ingest CIS560 or the textbook; load only the smallest routed owner/source sections needed.",
+    "Do not infer HW2 requirements, deadlines, submission format, or tool use without the uploaded PDF or explicit instructor evidence.",
+    "If school Outlook evidence is needed but inaccessible, use the demonstrated forwarded-Gmail adapter model and persist only course-relevant facts plus minimal provenance.",
+    "Do not expose instructor-manual solutions before a meaningful student attempt in LEARNING mode; never count manual agreement or tutor-generated correction as mastery.",
+    "Use direct connected tooling for bounded authorized repository work and record any genuine byte/runtime/JFLAP capability bridge precisely.",
+    "External submission, email sending, destructive history changes, and irreversible actions remain explicit user-owned or separately authorized actions."
+  ],
+  "repositories": [
+    {
+      "name": "CIS560-AdamTrott",
+      "intent": "mutate",
+      "base_sha": "9c5e492354449186898b5f038e227e5a92d15005",
+      "remote": {
+        "branch": "tutor-framework",
+        "checkpoint_sha": "9c5e492354449186898b5f038e227e5a92d15005",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "course/**",
+        "sources/**",
+        "study/**",
+        "homework/**",
+        "README.md",
+        "COURSE.md"
+      ]
+    },
+    {
+      "name": "workspace-control",
+      "intent": "read",
+      "base_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "baseline_recovery",
+      "status": "VALIDATED",
+      "execution_owner": "cis560-course-content",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "CIS560-AdamTrott:tutor-framework@9c5e492354449186898b5f038e227e5a92d15005",
+        "workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9"
+      ],
+      "outputs": [
+        "Recovered README.md, COURSE.md, sources/README.md, course/LECTURES.md, study/TUTORING.md, study/SKILL_MAP.md, study/MASTERY.md, study/NOTATION.md, homework/README.md",
+        "Verified tutor-framework remote branch remains exactly at 9c5e492354449186898b5f038e227e5a92d15005"
+      ],
+      "validation": [
+        {
+          "check": "Exact CIS560 migrated baseline recovered without recursive ingestion",
+          "result": "PASS",
+          "evidence": [
+            "GitHub branch tutor-framework advertised 9c5e492354449186898b5f038e227e5a92d15005.",
+            "COURSE.md binds promoted workspace-control compatibility checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "course_content_intake",
+      "status": "SUSPENDED",
+      "execution_owner": "course-content-ingestion",
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation+github",
+      "inputs": [
+        "baseline_recovery"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "User provides the additional instructor-covered topics/material and exact textbook sections/references since the durable checkpoint."
+    },
+    {
+      "id": "course_content_ingestion",
+      "status": "PLANNED",
+      "execution_owner": "course-content-ingestion",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "course_content_intake",
+        "workflows/course-content-ingestion.v1.json@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9"
+      ],
+      "outputs": [
+        "updated course/source/skill/notation owners as justified by evidence"
+      ],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "hw2_ingestion_bootstrap",
+      "status": "PLANNED",
+      "execution_owner": "course-assignment-work",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated course_content_ingestion",
+        "authoritative user-uploaded HW2 PDF"
+      ],
+      "outputs": [
+        "homework/hw02 assignment-local route, CONTEXT.md, LEARNING.md, source routing, requirement and problem mappings"
+      ],
+      "validation": [],
+      "resume_condition": "User uploads the HW2 PDF; bootstrap begins only after course-content ingestion is validated."
+    },
+    {
+      "id": "hw2_tutoring",
+      "status": "PLANNED",
+      "execution_owner": "course-study-session",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated hw2_ingestion_bootstrap",
+        "study/TUTORING.md"
+      ],
+      "outputs": [
+        "problem-by-problem completion state and behavioral learning evidence"
+      ],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "artifact_build_if_required",
+      "status": "PLANNED",
+      "execution_owner": "document-artifact-build",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "actual HW2 assignment artifact contract, if any"
+      ],
+      "outputs": [
+        "required validated submission artifacts only"
+      ],
+      "validation": [],
+      "resume_condition": "Run only if authoritative HW2 evidence requires a document/code/JFLAP/other artifact."
+    },
+    {
+      "id": "final_validation_handoff",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control-task-state",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated assignment state",
+        "validated artifact state if applicable",
+        "current learning/mastery state"
+      ],
+      "outputs": [
+        "HANDOFF_SAFE final task state and archived capsule when complete"
+      ],
+      "validation": [],
+      "resume_condition": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "cis560_initial_project_baseline",
+      "kind": "git",
+      "identity": "CIS560-AdamTrott:tutor-framework@9c5e492354449186898b5f038e227e5a92d15005",
+      "required_for_resume": true,
+      "evidence": [
+        "Verified from the advertised tutor-framework branch before task creation."
+      ]
+    },
+    {
+      "id": "workspace_control_compatibility",
+      "kind": "git",
+      "identity": "workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "required_for_resume": true,
+      "evidence": [
+        "COURSE.md binds CIS560 reusable workflow mechanics to this exact checkpoint."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "CIS560 baseline and branch identity",
+      "result": "PASS",
+      "evidence": [
+        "tutor-framework is exactly 9c5e492354449186898b5f038e227e5a92d15005."
+      ]
+    },
+    {
+      "check": "Single reusable workflow binding",
+      "result": "PASS",
+      "evidence": [
+        "Bound to workflows/course-assignment-work.v1.json at workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9 with content SHA 8a0f596add333737e03c72a81e71a7eb075b53fc."
+      ]
+    },
+    {
+      "check": "Final HANDOFF_SAFE",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [
+    "Additional CIS560 course-content evidence since the 9c5e492354449186898b5f038e227e5a92d15005 durable checkpoint has not yet been provided in this task.",
+    "The authoritative HW2 PDF has not yet been uploaded in this task."
+  ],
+  "remaining_work": [
+    "Receive and ingest the additional instructor-covered course topics/material and exact Sipser sections since the current durable checkpoint.",
+    "Inspect and ingest the full authoritative HW2 PDF only after course-content ingestion is current.",
+    "Bootstrap homework/hw02 local owners, assignment contract, LEARNING state, source routing, and problem-to-skill/source mappings.",
+    "Begin the first HW2 problem in LEARNING mode only after ingestion/bootstrap validation.",
+    "Build and validate only the artifact types actually required by HW2.",
+    "Synchronize final task state, establish HANDOFF_SAFE, and archive when complete."
+  ],
+  "next_safe_action": "Obtain from the user the additional CIS560 course-content inputs covered since the 9c5e492354449186898b5f038e227e5a92d15005 checkpoint, including exact Sipser sections/references and any instructor notes/messages needed to establish coverage. Also obtain the authoritative HW2 PDF, but do not inspect/solve HW2 until the new course-content ingestion is complete. Resume with course_content_intake and preserve typed provenance.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+conversation",
+  "notes": "Cold start recovered only the routed durable owners requested for this task. At the starting checkpoint, course/LECTURES.md indexes Lecture 6 (2026-09-22) as the latest durably ingested lecture, and homework/README.md still routes Homework 1 as the active assignment. These are recovery observations, not permission to infer missing later course history."
+}
