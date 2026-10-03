@@ -40,19 +40,19 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda verify /home/atrott/adamArchives/Adam/research-engine is clean on main@1d461988a9416937a9149e4dd8faeeb666ac0e03, fetch origin/main, require origin/main=f44a20e710f7fb9868eeb2b5a1c654c01f540a48, and fast-forward only to that exact commit. Then run bash deploy/run-extract-verify-paper-package-ab.sh. The gate must reuse the existing Docling native and standard/no-OCR runtimes/model cache without environment/model rebuilds, compile the preserved nine source artifacts, require the zero-model same-page quote/provenance preflight to PASS before any semantic replay, then run the representative low/median/high EXTRACT and VERIFY package arms with current-PDF controls only after package disagreement. Scientific state must not be materialized; only operational calibration events may be recorded. Keep the daemon inactive/dead throughout and return the compact zero-model preflight, compact representative semantic A/B, REPRESENTATIVE_AB_DECISION, final safety state, or any ERROR line.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at f44a20e710f7fb9868eeb2b5a1c654c01f540a48, then start only PostgreSQL with sudo docker compose -f docker-compose.yml up -d db. Wait until sudo docker compose -f docker-compose.yml exec -T db pg_isready -U research_engine -d research_engine succeeds. Re-verify research-engine-daemon.service is inactive/dead PID 0, then rerun bash deploy/run-extract-verify-paper-package-ab.sh. Return the compact zero-model preflight, compact representative semantic A/B, REPRESENTATIVE_AB_DECISION, final safety state, or any ERROR/traceback. Do not start the research daemon, rebuild parser/model runtimes, or start sustained research.
 
 ## Remaining work
 
-- Fast-forward the clean Lambda research-engine checkout from 1d461988a9416937a9149e4dd8faeeb666ac0e03 to canonical f44a20e710f7fb9868eeb2b5a1c654c01f540a48 while the daemon remains inactive/dead.
-- Run deploy/run-extract-verify-paper-package-ab.sh once. The runner first compiles the nine preserved source artifacts with the existing native and standard/no-OCR runtimes, then requires the zero-model same-page quote/provenance preflight to PASS before semantic calls.
-- Evaluate the representative low/median/high EXTRACT and VERIFY package arms, exact token/latency reductions, package-context regression signals and any current-PDF controls. Do not equate token savings with plan-allowance savings.
-- If the A/B result is quality-safe, validate extract_verify_paper_package_ab and advance to research_pipeline_localization_matrix_validation. If a package-only regression appears, correct context assembly without reopening parser bakeoffs.
-- Then complete Lambda production acceptance, licensing review, bounded production integration and remaining localization decisions.
+- With research-engine-daemon.service still inactive/dead, start only the repository PostgreSQL service using sudo docker compose -f docker-compose.yml up -d db and wait until pg_isready reports the research_engine database ready.
+- Verify the Lambda research-engine checkout is clean on main at canonical f44a20e710f7fb9868eeb2b5a1c654c01f540a48 (or stop and report if it differs), and verify the daemon remains inactive/dead PID 0.
+- Rerun deploy/run-extract-verify-paper-package-ab.sh. The runner must reuse existing native and standard/no-OCR runtimes/model caches and require the zero-model same-page quote/provenance preflight to PASS before semantic calls.
+- Evaluate representative low/median/high EXTRACT and VERIFY package arms, exact token/latency reductions, package-context regression signals and any current-PDF controls. Do not equate token savings with plan-allowance savings.
+- If the A/B result is quality-safe, validate extract_verify_paper_package_ab and advance to research_pipeline_localization_matrix_validation; otherwise correct context assembly without reopening parser bakeoffs.
 
 ## Blockers / gates
 
-- Lambda local research-engine is last verified clean at main@1d461988a9416937a9149e4dd8faeeb666ac0e03 while canonical remote main is f44a20e710f7fb9868eeb2b5a1c654c01f540a48; fast-forward before the A/B gate.
+- PostgreSQL durable-state service is currently unavailable on Lambda at 127.0.0.1:5432; start only docker-compose.yml service db and verify healthy before rerunning the A/B gate.
 - EXTRACT/VERIFY paper-package A/B is CI-gated but not yet measured on the preserved nine-paper Lambda corpus; production replacement remains forbidden until the zero-model and representative semantic results are evaluated.
 - CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement.
 
