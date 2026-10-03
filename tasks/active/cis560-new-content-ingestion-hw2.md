@@ -30,7 +30,7 @@ Bring CIS 560 durable course state current with all genuinely new instructor-cov
 
 - Intent: mutate
 - Remote branch: tutor-framework
-- Remote checkpoint: edf5dc31df48abb785ed6b5635a0399bb2d784db
+- Remote checkpoint: e6ee68912a63eb2373780fd9b5ec3bcc42738084
 - Remote verified: true
 
 ### workspace-control
@@ -42,15 +42,15 @@ Bring CIS 560 durable course state current with all genuinely new instructor-cov
 
 ## Next safe action
 
-Inspect the full authoritative HW2 artifact and exact referenced Sipser items, then bootstrap homework/hw02 assignment-local owners and mappings without beginning solution work. Preserve the PDF as assignment authority and keep artifact requirements separate from mastery.
+Begin Homework 2 Problem 2-1 in LEARNING mode. Present the exact Sipser 1.36 task context without giving the construction away, then ask the smallest diagnostic: what finite information would a machine need to remember while reading a unary string a^k in order to decide whether k is a multiple of n? Persist the student's response in homework/hw02/LEARNING.md before advancing.
 
 ## Remaining work
 
-- Receive and fully inspect the authoritative HW2 PDF.
-- Bootstrap homework/hw02 local owners, exact assignment contract, LEARNING state, source routing, and problem-to-skill/source mappings.
-- Resolve exact Sipser problem wording for any textbook-referenced HW2 items before tutoring them.
-- Begin the first HW2 problem in LEARNING mode only after HW2 ingestion/bootstrap validation.
-- Build and validate only the artifact types actually required by HW2.
+- Tutor and complete HW2 one bounded problem/subproblem at a time, beginning with Problem 2-1 in LEARNING mode.
+- Persist actual student behavioral evidence and update mastery only when justified independently.
+- Use the solution manual only after meaningful attempts and semantic prompt matching.
+- Build and validate the required word-processed submission artifact after/alongside completed problem work without conflating artifact correctness with mastery.
+- Leave Canvas submission to the user unless separately and explicitly authorized.
 - Synchronize final task state, establish HANDOFF_SAFE, and archive when complete.
 
 ## Blockers / gates

@@ -12,7 +12,7 @@
     "content_sha": "8a0f596add333737e03c72a81e71a7eb075b53fc"
   },
   "parent_execution_owner": "cis560-hw2",
-  "current_stage": "hw2_ingestion_bootstrap",
+  "current_stage": "hw2_tutoring",
   "acceptance_criteria": [
     "Fresh execution starts from CIS560 README.md on tutor-framework at the exact migrated checkpoint 9c5e492354449186898b5f038e227e5a92d15005 and follows COURSE.md plus only the routed source/course/study/homework owners needed for the active stage.",
     "New lecture/course material is ingested through the CIS560 typed-authority model with provenance preserved and no silent replacement of instructor evidence by generic theoretical-CS knowledge.",
@@ -47,7 +47,7 @@
       "base_sha": "9c5e492354449186898b5f038e227e5a92d15005",
       "remote": {
         "branch": "tutor-framework",
-        "checkpoint_sha": "edf5dc31df48abb785ed6b5635a0399bb2d784db",
+        "checkpoint_sha": "e6ee68912a63eb2373780fd9b5ec3bcc42738084",
         "verified": true
       },
       "local": null,
@@ -186,7 +186,7 @@
     },
     {
       "id": "hw2_ingestion_bootstrap",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "course-assignment-work",
       "selected_executor": "chatgpt",
       "selected_surface": "conversation-files+github",
@@ -195,25 +195,70 @@
         "authoritative user-uploaded 560-hw-2.pdf",
         "companion user-uploaded 560-hw-2.md"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "homework/hw02/CONTEXT.md",
+        "homework/hw02/LEARNING.md",
+        "homework/hw02/sources/README.md",
+        "homework/hw02/sources/ASSIGNMENT.md",
+        "homework/hw02/sources/ASSIGNMENT_ORIGINAL.md",
+        "homework/hw02/sources/SIPSER_EXERCISES.md",
+        "homework/hw02/artifacts/README.md",
+        "homework/hw02/records/INGESTION.md",
+        "homework/README.md updated to route HW2",
+        "CIS560 tutor-framework@e6ee68912a63eb2373780fd9b5ec3bcc42738084"
+      ],
+      "validation": [
+        {
+          "check": "Authoritative HW2 PDF fully inspected",
+          "result": "PASS",
+          "evidence": [
+            "One-page 560-hw-2.pdf visually and textually inspected.",
+            "PDF SHA-256 e88c1f4de8f364ea1d28a24243bd76fb32cc951c2469aedf3997f1f69a5c8ae9 recorded.",
+            "Companion Markdown SHA-256 2f99f873d8264025eb9ef100069baa24f56cc329aa59726e3651c98a4e254b61 recorded and source text persisted."
+          ]
+        },
+        {
+          "check": "Exact assignment contract bootstrapped",
+          "result": "PASS",
+          "evidence": [
+            "Five problems / 10 points, due 2026-10-06 23:59, word-processor/Canvas requirements, cover-page fields/penalty, problem methods, and CFG rule constraint persisted.",
+            "No filename, extension, Java, or JFLAP requirement invented."
+          ]
+        },
+        {
+          "check": "Exact Sipser items resolved",
+          "result": "PASS",
+          "evidence": [
+            "1.36, 1.29(b), 1.46(a), 1.54(a), and 1.55(c),(e),(g) resolved from the pinned durable Sipser source.",
+            "Instructor method overrides recorded for pumping-lemma and closure-properties items."
+          ]
+        },
+        {
+          "check": "Learning/mastery separation",
+          "result": "PASS",
+          "evidence": [
+            "HW2 LEARNING.md initialized with all items NOT_STARTED / UNASSESSED.",
+            "No solution reasoning and no mastery promotion occurred during bootstrap."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "hw2_tutoring",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "course-study-session",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation+github",
       "inputs": [
         "validated hw2_ingestion_bootstrap",
+        "homework/hw02/CONTEXT.md",
+        "homework/hw02/LEARNING.md",
         "study/TUTORING.md"
       ],
-      "outputs": [
-        "problem-by-problem completion state and behavioral learning evidence"
-      ],
+      "outputs": [],
       "validation": [],
-      "resume_condition": null
+      "resume_condition": "Continue from the first bounded diagnostic for Problem 2-1 and persist actual student behavioral evidence as it occurs."
     },
     {
       "id": "artifact_build_if_required",
@@ -276,6 +321,16 @@
         "Verified advertised tutor-framework remote checkpoint after Lecture 7–9 ingestion.",
         "Compare against starting checkpoint shows one commit ahead and exactly the 15 intended course/source/study paths."
       ]
+    },
+    {
+      "id": "cis560_hw2_bootstrap",
+      "kind": "git",
+      "identity": "CIS560-AdamTrott:tutor-framework@e6ee68912a63eb2373780fd9b5ec3bcc42738084",
+      "required_for_resume": true,
+      "evidence": [
+        "Verified advertised tutor-framework checkpoint after HW2 bootstrap.",
+        "Commit is exactly one fast-forward commit from edf5dc31df48abb785ed6b5635a0399bb2d784db with nine intended homework routes/owners."
+      ]
     }
   ],
   "artifacts": [],
@@ -311,19 +366,27 @@
       "check": "HW2 authoritative source availability",
       "result": "NOT_RUN",
       "evidence": []
+    },
+    {
+      "check": "HW2 ingestion/bootstrap",
+      "result": "PASS",
+      "evidence": [
+        "CIS560 tutor-framework@e6ee68912a63eb2373780fd9b5ec3bcc42738084.",
+        "Assignment/source/learning/artifact owners created before solution work."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Receive and fully inspect the authoritative HW2 PDF.",
-    "Bootstrap homework/hw02 local owners, exact assignment contract, LEARNING state, source routing, and problem-to-skill/source mappings.",
-    "Resolve exact Sipser problem wording for any textbook-referenced HW2 items before tutoring them.",
-    "Begin the first HW2 problem in LEARNING mode only after HW2 ingestion/bootstrap validation.",
-    "Build and validate only the artifact types actually required by HW2.",
+    "Tutor and complete HW2 one bounded problem/subproblem at a time, beginning with Problem 2-1 in LEARNING mode.",
+    "Persist actual student behavioral evidence and update mastery only when justified independently.",
+    "Use the solution manual only after meaningful attempts and semantic prompt matching.",
+    "Build and validate the required word-processed submission artifact after/alongside completed problem work without conflating artifact correctness with mastery.",
+    "Leave Canvas submission to the user unless separately and explicitly authorized.",
     "Synchronize final task state, establish HANDOFF_SAFE, and archive when complete."
   ],
-  "next_safe_action": "Inspect the full authoritative HW2 artifact and exact referenced Sipser items, then bootstrap homework/hw02 assignment-local owners and mappings without beginning solution work. Preserve the PDF as assignment authority and keep artifact requirements separate from mastery.",
+  "next_safe_action": "Begin Homework 2 Problem 2-1 in LEARNING mode. Present the exact Sipser 1.36 task context without giving the construction away, then ask the smallest diagnostic: what finite information would a machine need to remember while reading a unary string a^k in order to decide whether k is a multiple of n? Persist the student's response in homework/hw02/LEARNING.md before advancing.",
   "last_executor": "chatgpt",
-  "last_surface": "conversation-files+github",
-  "notes": "Cold start recovered only the routed durable owners requested for this task. At the starting checkpoint, course/LECTURES.md indexes Lecture 6 (2026-09-22) as the latest durably ingested lecture, and homework/README.md still routes Homework 1 as the active assignment. These are recovery observations, not permission to infer missing later course history. On 2026-10-03, the user supplied Lecture 7–9 note text plus Lecture 7/8 decks and pumping/Myhill-Nerode supporting materials. Gmail was checked for matching forwarded Lecture 7–9 messages and none were found; provenance therefore remains user-provided instructor-note text plus uploaded course files, without invented dates/message IDs. Lecture 7–9 course ingestion completed at CIS560 tutor-framework@edf5dc31df48abb785ed6b5635a0399bb2d784db. Exact course boundary is now §1.4 and §2.1 covered, §2.2 assigned/previewed for Lecture 10, and §2.3 next-topic guidance. Mastery was not changed. The authoritative one-page HW2 PDF was supplied and visually inspected on 2026-10-03. The assignment requires five problems worth 10 points total, word-processed work, Canvas submission, and a cover page; exact referenced Sipser items still must be resolved before bootstrap completion."
+  "last_surface": "github+conversation",
+  "notes": "Cold start recovered only the routed durable owners requested for this task. At the starting checkpoint, course/LECTURES.md indexes Lecture 6 (2026-09-22) as the latest durably ingested lecture, and homework/README.md still routes Homework 1 as the active assignment. These are recovery observations, not permission to infer missing later course history. On 2026-10-03, the user supplied Lecture 7–9 note text plus Lecture 7/8 decks and pumping/Myhill-Nerode supporting materials. Gmail was checked for matching forwarded Lecture 7–9 messages and none were found; provenance therefore remains user-provided instructor-note text plus uploaded course files, without invented dates/message IDs. Lecture 7–9 course ingestion completed at CIS560 tutor-framework@edf5dc31df48abb785ed6b5635a0399bb2d784db. Exact course boundary is now §1.4 and §2.1 covered, §2.2 assigned/previewed for Lecture 10, and §2.3 next-topic guidance. Mastery was not changed. The authoritative one-page HW2 PDF was supplied and visually inspected on 2026-10-03. The assignment requires five problems worth 10 points total, word-processed work, Canvas submission, and a cover page; exact referenced Sipser items still must be resolved before bootstrap completion. HW2 bootstrap completed at CIS560 tutor-framework@e6ee68912a63eb2373780fd9b5ec3bcc42738084. The assignment artifact requires a word-processed Canvas submission with cover page; no specific filename/extension or JFLAP/code artifact is stated. Tutoring may now begin at Problem 2-1."
 }
