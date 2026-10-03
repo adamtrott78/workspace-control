@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "structured_elements_and_semantic_escalation",
+  "current_stage": "local_inference_service_and_concurrency",
   "acceptance_criteria": [
     "A versioned paper-package.v1 contract exists and preserves the original PDF SHA-256 as scientific authority while representing normalized reading-order Markdown, page/block provenance, extracted figures, tables, equations, references/citations, diagnostics, confidence, and parser/model lineage.",
     "The pipeline uses a cascaded cost model: deterministic/native PDF extraction first, specialized local OCR/layout/table/formula/document models only where needed, and a general local VLM/agent only for low-confidence or structurally difficult regions.",
@@ -68,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198",
+        "checkpoint_sha": "7e7a5575bbde84224290ce72a2c4c095b70d7aca",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "1442e787317a94998a60a78d2a2f7582b6192170",
+        "head_sha": "e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -295,14 +295,17 @@
     },
     {
       "id": "local_inference_service_and_concurrency",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": "chatgpt",
-      "selected_surface": "github+lambda",
+      "selected_executor": "chatgpt+lambda",
+      "selected_surface": "github+local-runtime",
       "inputs": [
         "selected local model components",
         "Lambda GPU/CPU/RAM/VRAM limits",
-        "expected concurrent document load"
+        "expected concurrent document load",
+        "validated equation escalation candidate: targeted Docling CodeFormulaV2",
+        "validated persistent-empty-grid table fallback: PaddleOCR General Table Recognition v2 / PP-TableMagic",
+        "existing isolated Lambda runtime/model caches for Docling formula and Paddle table models"
       ],
       "outputs": [
         "shared model-serving/batching architecture",
@@ -315,7 +318,7 @@
     },
     {
       "id": "structured_elements_and_semantic_escalation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt+lambda",
       "selected_surface": "github+local-runtime",
@@ -339,7 +342,9 @@
         "benchmarks/document_intelligence/paddle-table-fallback-contract.v1.json",
         "benchmarks/document_intelligence/runtimes/paddle_table_recognition_v2.py",
         "src/research_engine/document_paddle_table_eval.py",
-        "deploy/run-paddle-table-fallback-gate.sh"
+        "deploy/run-paddle-table-fallback-gate.sh",
+        "benchmarks/document_intelligence/paddle-table-promotion-decision.v1.json",
+        "production table cascade: TableFormer FAST -> targeted ACCURATE -> Paddle PP-TableMagic only on persistent empty grids"
       ],
       "validation": [
         "research-engine PR #52 merged as 1442e787317a94998a60a78d2a2f7582b6192170.",
@@ -355,7 +360,12 @@
         "Exactly one alternate component is opened: PaddleOCR General Table Recognition v2 on validated PDF table crops; full-document PP-StructureV3, Marker, MinerU and document VLM remain closed.",
         "The fallback renders validated page+bbox regions at 300 DPI with 6pt padding and reuses one resident table-recognition pipeline across all three crops.",
         "The isolated benchmark runner pins PaddleOCR 3.7.0 and PaddlePaddle GPU 3.3.0 CUDA 12.6 while the generic Paddle candidate registry retains its 3.7.x compatibility range.",
-        "research-engine PR #53 merged as e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; corrected PR CI 37153109439 PASS and canonical-main CI 37153202385 PASS."
+        "research-engine PR #53 merged as e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; corrected PR CI 37153109439 PASS and canonical-main CI 37153202385 PASS.",
+        "Lambda Paddle crop fallback PASS on all 3 persistent TableFormer empty-grid targets: 3/3 materialized, reference coverage=1.0, weighted matched-content F1=0.8902691511387163, weighted aligned-cell F1=0.8472714360469462.",
+        "Per-target Paddle quality: Scheirer page 12 content F1=1.0/aligned-cell F1=0.806208247534778; Scheirer page 2 content F1=0.9565217391304348/aligned-cell F1=0.975; Fadul page 3 content F1=0.7142857142857142/aligned-cell F1=0.7606060606060606. Fadul remains explicitly flagged for authoritative-PDF verification.",
+        "Paddle is promoted only as persistent-empty-grid recovery. Healthy FAST tables remain on TableFormer; unusable FAST tables try targeted ACCURATE first; only a still-empty ACCURATE grid opens the Paddle table-crop fallback.",
+        "Production routing remains oracle-free. Mathpix is retained solely as benchmark reference; original PDF remains authority.",
+        "research-engine PR #54 merged as 7e7a5575bbde84224290ce72a2c4c095b70d7aca. PR CI run 37154988289 PASS and canonical-main CI run 37155082405 PASS across install, compile, full tests, Compose validation, daemon image build, and cleanup."
       ],
       "resume_condition": "Structured scientific content is machine-usable without forcing expensive vision interpretation of every figure."
     },
@@ -482,14 +492,16 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198",
+      "identity": "7e7a5575bbde84224290ce72a2c4c095b70d7aca",
       "required_for_resume": true,
       "evidence": [
-        "stage=structured_elements_and_semantic_escalation",
-        "research-engine remote main@e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; PR #53 and canonical-main CI PASS",
-        "Lambda local last verified clean main@1442e787317a94998a60a78d2a2f7582b6192170",
-        "TableFormer FAST+ACCURATE exhausted on exactly 3 zero-cell tables",
-        "next=run crop-only Paddle table fallback; outputs stay visible under workspace-control-tmp"
+        "stage=local_inference_service_and_concurrency",
+        "research-engine canonical remote main@7e7a5575bbde84224290ce72a2c4c095b70d7aca; PR #54 + canonical-main CI PASS",
+        "Lambda local last verified clean main@e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; daemon inactive/dead PID 0",
+        "structured_elements_and_semantic_escalation VALIDATED",
+        "Paddle persistent-empty-grid fallback Lambda PASS: 3/3 tables, coverage=1.0, weighted content F1=0.8902691511387163, aligned-cell F1=0.8472714360469462",
+        "production table cascade=TableFormer FAST -> targeted ACCURATE -> Paddle crop only if still empty",
+        "targeted CodeFormulaV2 equation path already passed promotion gate; next=shared local model serving/concurrency"
       ]
     }
   ],
@@ -801,20 +813,41 @@
         "research-engine PR #53 merged as e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; corrected PR CI 37153109439 PASS; canonical-main CI 37153202385 PASS.",
         "Fallback runs only on the 3 validated PDF table bboxes and writes user-facing outputs under visible workspace-control-tmp."
       ]
+    },
+    {
+      "check": "Paddle table fallback Lambda promotion gate",
+      "result": "PASS",
+      "evidence": [
+        "3/3 persistent empty-grid targets materialized and matched.",
+        "Reference coverage at content F1>=0.5 = 1.0.",
+        "Weighted matched-content F1 = 0.8902691511387163.",
+        "Weighted aligned-cell F1 = 0.8472714360469462.",
+        "Final Lambda state: research-engine main@e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; daemon inactive/dead PID 0; outputs under visible workspace-control-tmp."
+      ]
+    },
+    {
+      "check": "Promoted structured table escalation routing",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #54 -> 7e7a5575bbde84224290ce72a2c4c095b70d7aca.",
+        "PR CI 37154988289 PASS; canonical-main CI 37155082405 PASS.",
+        "Policy is oracle-free and cascaded: FAST -> ACCURATE on unusable grid -> Paddle crop only on persistent empty grid -> authoritative-PDF verification."
+      ]
     }
   ],
   "blockers": [
-    "Lambda local research-engine is last verified clean at main@1442e787317a94998a60a78d2a2f7582b6192170 while canonical remote main is e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198; fast-forward before the Paddle fallback gate.",
-    "The crop-level Paddle table fallback is CI-gated but unmeasured on Lambda and is not production-promoted yet.",
-    "CodeFormulaV2 passed its quality gate but still awaits shared-serving/concurrency integration and final deployment/license review."
+    "Lambda local research-engine is last verified clean at main@e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198 while canonical remote main is 7e7a5575bbde84224290ce72a2c4c095b70d7aca; fast-forward before shared-serving work.",
+    "CodeFormulaV2 and Paddle PP-TableMagic have validated quality paths but still run from isolated benchmark runtimes. They need a shared local inference/concurrency design before production use so concurrent PDFs do not duplicate heavyweight model loads.",
+    "CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before production promotion."
   ],
   "remaining_work": [
-    "Fast-forward Lambda research-engine main to e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198 with the daemon stopped.",
-    "Run deploy/run-paddle-table-fallback-gate.sh once on exactly the 3 persistent empty-grid targets.",
-    "If Paddle passes its explicit quality gate, promote it only as the persistent-empty-grid table fallback; otherwise characterize that residual before opening another component.",
-    "Integrate CodeFormulaV2 as equation-only escalation, then advance to shared local inference/concurrency and EXTRACT/VERIFY package-consumption validation."
+    "Fast-forward the clean Lambda research-engine checkout from e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198 to canonical 7e7a5575bbde84224290ce72a2c4c095b70d7aca while the daemon remains inactive/dead.",
+    "Design and CI-gate a shared local inference service/concurrency contract that keeps CodeFormulaV2 and Paddle PP-TableMagic resident or otherwise serializes model ownership so multiple concurrent PDFs cannot duplicate heavyweight model loads.",
+    "Integrate the validated equation-only and persistent-empty-grid table escalation routes with that service while retaining region/page bounds, provenance, original-PDF authority, and fail-closed behavior.",
+    "Run stopped-daemon Lambda concurrency/resource tests for multiple simultaneous document jobs and record GPU/VRAM/RAM/model-load behavior.",
+    "Then advance to EXTRACT/VERIFY paper-package A/B validation and the broader research-pipeline localization matrix."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead. On Lambda verify the research-engine checkout is clean on main@1442e787317a94998a60a78d2a2f7582b6192170, fetch origin/main, require origin/main=e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198, and fast-forward only to that commit. Then run bash deploy/run-paddle-table-fallback-gate.sh. It must derive exactly the 3 persistent TableFormer empty-grid targets, render only their authoritative-PDF table bboxes, run one resident PaddleOCR 3.7.0 General Table Recognition v2 pipeline across those crops, evaluate only those 3 references, keep the daemon stopped, and write user-facing outputs beneath visible ~/adamArchives/Adam/workspace-control-tmp/. Return the compact PADDLE TABLE FALLBACK summary or any ERROR line.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, first verify /home/atrott/adamArchives/Adam/research-engine is clean on main@e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198, fetch origin/main, require origin/main=7e7a5575bbde84224290ce72a2c4c095b70d7aca, and fast-forward only to that exact commit. Then begin local_inference_service_and_concurrency: design and CI-gate one shared local model-serving/ownership contract for the validated CodeFormulaV2 equation path and Paddle PP-TableMagic persistent-empty-grid table fallback so concurrent PDFs cannot load duplicate heavyweight model instances. Preserve native+standard routing, region/page bounds, original-PDF authority, visible workspace-control-tmp operator artifacts, and fail-closed escalation semantics. Do not restart sustained research or reopen broad parser families.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
