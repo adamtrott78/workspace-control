@@ -31,7 +31,7 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8c875a62d44e91ed91207cdc78d715acb0909346
+- Remote checkpoint: d89d874949570ce8bb593f8ceffb7fd772af3f5f
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
@@ -40,20 +40,21 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@8c875a62d44e91ed91207cdc78d715acb0909346 as the validated document-pipeline/A-B baseline. Begin research_pipeline_localization_matrix_validation by inspecting benchmarks/document_intelligence/localization-matrix.v1.json plus the current worker/orchestration mappings, then reconcile every research job type against measured evidence. Preserve the decision that authoritative-PDF hydration remains the EXTRACT/VERIFY production baseline; paper-package context must not silently replace it. Validate local deterministic placement, semantic executor placement, shared-model ownership, provenance/fidelity boundaries, and resource/token evidence before production acceptance. Do not start the research daemon or sustained research.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@d89d874949570ce8bb593f8ceffb7fd772af3f5f as the canonical localization-policy baseline. Begin lambda_production_acceptance by designing and CI-gating a bounded acceptance runner that verifies Lambda checkout/dependencies/runtime caches/shared-inference ownership/authoritative-PDF semantic policy and performs only finite smoke checks with explicit cleanup. The gate must not launch sustained research, must preserve rollback, must not materialize new scientific state, and must leave research-engine-daemon.service inactive/dead unless a deliberately bounded daemon lifecycle check is added with guaranteed stop/cleanup.
 
 ## Remaining work
 
-- Validate the localization matrix end-to-end against the now-measured document pipeline: keep authoritative-PDF hydration for EXTRACT/VERIFY, retain local deterministic document compilation/routing/escalation, and keep heavyweight formula/table models behind the shared local inference broker.
-- Review each research pipeline operation (DISCOVERY, ACQUIRE, EXTRACT, VERIFY, SYNTHESIZE, GAP_GENERATE, CHECKPOINT, HUMAN_REVIEW) for the intended local-vs-semantic execution boundary and verify no stale assumption expects paper-package context to replace authoritative PDF hydration.
-- Measure or reuse existing token/latency/resource evidence for the remaining semantic operations and confirm that localizing deterministic work does not reduce evidence fidelity or provenance.
-- Complete final Lambda production acceptance, including daemon integration, bounded concurrency, database/runtime dependencies, operator recovery behavior, and CodeFormulaV2 licensing/deployment review.
-- Only after those gates pass consider enabling sustained research.
+- Design and CI-gate a bounded Lambda production-acceptance runner that verifies canonical checkout, persistent PostgreSQL, parser/runtime/model-cache availability, shared local-inference configuration, authoritative-PDF EXTRACT/VERIFY policy, and operator recovery invariants without starting sustained research.
+- Exercise only bounded document-pipeline health/smoke operations required to prove the installed runtimes and shared model owners can initialize and shut down cleanly; preserve daemon rollback and no scientific-state mutation.
+- Perform/record CodeFormulaV2 license/deployment review before sustained production enablement.
+- Run the bounded Lambda production-acceptance gate and evaluate resource stability, dependency health, process cleanup, and exact configuration.
+- If accepted, advance to bounded_production_integration for a rollback-capable production comparison; otherwise fix only the measured deployment defect.
 
 ## Blockers / gates
 
+- Lambda local research-engine is last verified clean at main@8c875a62d44e91ed91207cdc78d715acb0909346 while canonical remote main is d89d874949570ce8bb593f8ceffb7fd772af3f5f; fast-forward before production acceptance.
 - CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement.
-- The broader research_pipeline_localization_matrix_validation stage has not yet been completed; end-to-end production placement for each research operation still requires explicit validation.
+- The complete document-pipeline production acceptance gate has not yet been executed on canonical Lambda main.
 
 ## Fresh-chat initialization
 

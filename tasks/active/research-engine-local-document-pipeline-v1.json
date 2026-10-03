@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "research_pipeline_localization_matrix_validation",
+  "current_stage": "lambda_production_acceptance",
   "acceptance_criteria": [
     "A versioned paper-package.v1 contract exists and preserves the original PDF SHA-256 as scientific authority while representing normalized reading-order Markdown, page/block provenance, extracted figures, tables, equations, references/citations, diagnostics, confidence, and parser/model lineage.",
     "The pipeline uses a cascaded cost model: deterministic/native PDF extraction first, specialized local OCR/layout/table/formula/document models only where needed, and a general local VLM/agent only for low-confidence or structurally difficult regions.",
@@ -68,7 +68,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "8c875a62d44e91ed91207cdc78d715acb0909346",
+        "checkpoint_sha": "d89d874949570ce8bb593f8ceffb7fd772af3f5f",
         "verified": true
       },
       "local": {
@@ -384,7 +384,7 @@
     },
     {
       "id": "research_pipeline_localization_matrix_validation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+ci",
@@ -397,9 +397,17 @@
         "measured decision for acquisition/normalization/chunking/embedding/retrieval",
         "measured decision for SCREEN/EXTRACT/VERIFY offload",
         "explicit retain-remote decisions for web-dependent or high-level reasoning stages",
-        "fallback/escalation policy"
+        "fallback/escalation policy",
+        "benchmarks/document_intelligence/localization-matrix.v2.json",
+        "tests/test_localization_matrix.py"
       ],
-      "validation": [],
+      "validation": [
+        "research-engine PR #59 merged as d89d874949570ce8bb593f8ceffb7fd772af3f5f; PR CI 37160486177 PASS and canonical-main CI 37160579971 PASS.",
+        "localization-matrix.v2.json covers every Research JobType exactly once and is CI-checked against orchestration.JOB_TIERS.",
+        "Validated production placement: ACQUIRE/CHECKPOINT local deterministic; DISCOVERY/SCREEN/NOVELTY_SEARCH retain CHEAP semantic/external-web boundaries; EXTRACT/VERIFY retain STANDARD authoritative-PDF semantic hydration; SYNTHESIZE/GAP_GENERATE/NOVELTY_ARBITRATE retain STRONG reasoning; HUMAN_REVIEW remains human authority.",
+        "Document support placement is explicit: native/standard parsing remains local support; targeted formula/table residuals use shared local inference; OCR/general document VLM remain disabled; embeddings/reranking remain deferred; paper-package is derived cache/benchmark only and not semantic baseline.",
+        "Future SCREEN/EXTRACT/VERIFY retiering is contractually gated on a controlled quality benchmark plus material resource/allowance benefit."
+      ],
       "resume_condition": "Every research stage has an explicit localization decision backed by quality/resource evidence."
     },
     {
@@ -469,7 +477,7 @@
     },
     {
       "id": "lambda_production_acceptance",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "hybrid",
       "selected_executor": "chatgpt+human",
       "selected_surface": "lambda+github",
@@ -549,16 +557,14 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "8c875a62d44e91ed91207cdc78d715acb0909346",
+      "identity": "d89d874949570ce8bb593f8ceffb7fd772af3f5f",
       "required_for_resume": true,
       "evidence": [
-        "stage=research_pipeline_localization_matrix_validation",
-        "research-engine remote/local main@8c875a62d44e91ed91207cdc78d715acb0909346; PR #58 + canonical-main CI PASS",
-        "paper-package zero-model preflight PASS: 140/142 same-page quotes, 0.9859154929577465 recovery",
-        "representative history replay inconclusive from model variance, but contemporaneous posthoc measured 1/4 direct package-vs-PDF agreement",
-        "all 3 controlled EXTRACT pairs differed materially; controlled VERIFY pair matched decision/evidence",
-        "controlled input-token delta only 0.6134% lower for package and cached-input usage higher; baseline authoritative-PDF hydration retained",
-        "next=validate full research pipeline localization matrix and production placement"
+        "stage=lambda_production_acceptance",
+        "research-engine remote main@d89d874949570ce8bb593f8ceffb7fd772af3f5f; PR #59 + canonical-main CI PASS",
+        "Lambda local last verified clean main@8c875a62d44e91ed91207cdc78d715acb0909346; daemon inactive/dead PID 0",
+        "localization matrix v2 validates every JobType placement and locks authoritative-PDF STANDARD EXTRACT/VERIFY baseline",
+        "next=bounded Lambda production acceptance with no sustained research"
       ]
     }
   ],
@@ -983,21 +989,33 @@
         "Controlled cached-input tokens=22016 package vs 12032 PDF; package cached-input usage was higher.",
         "Decision=MEASURED_CONTEXT_DIFFERENCE."
       ]
+    },
+    {
+      "check": "Measured research pipeline localization matrix v2",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #59 -> d89d874949570ce8bb593f8ceffb7fd772af3f5f.",
+        "PR CI 37160486177 PASS; canonical-main CI 37160579971 PASS.",
+        "Every JobType has one explicit production placement and CI verifies the matrix tier equals JOB_TIERS.",
+        "Authoritative-PDF STANDARD EXTRACT/VERIFY baseline is locked after measured A/B rejection of package context.",
+        "Web-dependent retrieval, strong reasoning and human authority boundaries remain explicit; deterministic/document support localization is limited to validated components."
+      ]
     }
   ],
   "blockers": [
+    "Lambda local research-engine is last verified clean at main@8c875a62d44e91ed91207cdc78d715acb0909346 while canonical remote main is d89d874949570ce8bb593f8ceffb7fd772af3f5f; fast-forward before production acceptance.",
     "CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement.",
-    "The broader research_pipeline_localization_matrix_validation stage has not yet been completed; end-to-end production placement for each research operation still requires explicit validation."
+    "The complete document-pipeline production acceptance gate has not yet been executed on canonical Lambda main."
   ],
   "remaining_work": [
-    "Validate the localization matrix end-to-end against the now-measured document pipeline: keep authoritative-PDF hydration for EXTRACT/VERIFY, retain local deterministic document compilation/routing/escalation, and keep heavyweight formula/table models behind the shared local inference broker.",
-    "Review each research pipeline operation (DISCOVERY, ACQUIRE, EXTRACT, VERIFY, SYNTHESIZE, GAP_GENERATE, CHECKPOINT, HUMAN_REVIEW) for the intended local-vs-semantic execution boundary and verify no stale assumption expects paper-package context to replace authoritative PDF hydration.",
-    "Measure or reuse existing token/latency/resource evidence for the remaining semantic operations and confirm that localizing deterministic work does not reduce evidence fidelity or provenance.",
-    "Complete final Lambda production acceptance, including daemon integration, bounded concurrency, database/runtime dependencies, operator recovery behavior, and CodeFormulaV2 licensing/deployment review.",
-    "Only after those gates pass consider enabling sustained research."
+    "Design and CI-gate a bounded Lambda production-acceptance runner that verifies canonical checkout, persistent PostgreSQL, parser/runtime/model-cache availability, shared local-inference configuration, authoritative-PDF EXTRACT/VERIFY policy, and operator recovery invariants without starting sustained research.",
+    "Exercise only bounded document-pipeline health/smoke operations required to prove the installed runtimes and shared model owners can initialize and shut down cleanly; preserve daemon rollback and no scientific-state mutation.",
+    "Perform/record CodeFormulaV2 license/deployment review before sustained production enablement.",
+    "Run the bounded Lambda production-acceptance gate and evaluate resource stability, dependency health, process cleanup, and exact configuration.",
+    "If accepted, advance to bounded_production_integration for a rollback-capable production comparison; otherwise fix only the measured deployment defect."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@8c875a62d44e91ed91207cdc78d715acb0909346 as the validated document-pipeline/A-B baseline. Begin research_pipeline_localization_matrix_validation by inspecting benchmarks/document_intelligence/localization-matrix.v1.json plus the current worker/orchestration mappings, then reconcile every research job type against measured evidence. Preserve the decision that authoritative-PDF hydration remains the EXTRACT/VERIFY production baseline; paper-package context must not silently replace it. Validate local deterministic placement, semantic executor placement, shared-model ownership, provenance/fidelity boundaries, and resource/token evidence before production acceptance. Do not start the research daemon or sustained research.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@d89d874949570ce8bb593f8ceffb7fd772af3f5f as the canonical localization-policy baseline. Begin lambda_production_acceptance by designing and CI-gating a bounded acceptance runner that verifies Lambda checkout/dependencies/runtime caches/shared-inference ownership/authoritative-PDF semantic policy and performs only finite smoke checks with explicit cleanup. The gate must not launch sustained research, must preserve rollback, must not materialize new scientific state, and must leave research-engine-daemon.service inactive/dead unless a deliberately bounded daemon lifecycle check is added with guaranteed stop/cleanup.",
   "last_executor": "chatgpt",
-  "last_surface": "github+lambda",
+  "last_surface": "github+ci",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
 }
