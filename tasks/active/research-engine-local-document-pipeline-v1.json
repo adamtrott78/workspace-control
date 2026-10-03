@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "adaptive_page_region_router",
+  "current_stage": "structured_elements_and_semantic_escalation",
   "acceptance_criteria": [
     "A versioned paper-package.v1 contract exists and preserves the original PDF SHA-256 as scientific authority while representing normalized reading-order Markdown, page/block provenance, extracted figures, tables, equations, references/citations, diagnostics, confidence, and parser/model lineage.",
     "The pipeline uses a cascaded cost model: deterministic/native PDF extraction first, specialized local OCR/layout/table/formula/document models only where needed, and a general local VLM/agent only for low-confidence or structurally difficult regions.",
@@ -43,7 +43,8 @@
     "Do not silently replace the current EXTRACT/VERIFY path until downstream evidence and provenance equivalence are measured on representative preserved papers.",
     "Do not conflate token savings with plan-allowance savings; retain exact token telemetry and censored allowance observations as separate measurements.",
     "Prefer direct GitHub tooling for repository work; use the Lambda terminal only for genuine runtime/hardware/model validation boundaries.",
-    "Every fresh-chat initialization/handoff for this task must include https://github.com/adamtrott78/workspace-control."
+    "Every fresh-chat initialization/handoff for this task must include https://github.com/adamtrott78/workspace-control.",
+    "New operator-facing temporary, benchmark, diagnostic, and handoff artifacts that may need human download must be written under the visible ~/adamArchives/Adam/workspace-control-tmp/ root (or explicit WORKSPACE_CONTROL_TMP_ROOT). Existing ~/.workspace-control/tmp artifacts are legacy inputs only and must not be moved or regenerated solely for visibility."
   ],
   "repositories": [
     {
@@ -67,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "99fbed6fac76b5feaa67b99625f64acb1f37de39",
+        "checkpoint_sha": "1442e787317a94998a60a78d2a2f7582b6192170",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "db78b236103213c6274e538b1736c4483032c06e",
+        "head_sha": "99fbed6fac76b5feaa67b99625f64acb1f37de39",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -251,7 +252,7 @@
     },
     {
       "id": "adaptive_page_region_router",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+ci",
@@ -282,7 +283,13 @@
         "Formula target planning is derived exclusively from preserved standard_no_ocr formula provenance and schedules one page per conversion. It does not repeat the 73-page standard parser bakeoff.",
         "Targeted formula runtime pins Docling 2.131.0 and docling-project/CodeFormulaV2 revision 0284bc97b73c88776957d00d6695dd63a5a8784e. OCR, table structure, code enrichment, picture analysis, remote services, and the general document-VLM pipeline remain disabled; only the formula-specific CodeFormulaV2 stage is enabled.",
         "CodeFormulaV2 benchmark contract records cdla-permissive-2.0 and requires a deployment/redistribution review before production promotion.",
-        "One combined stopped-daemon runner executes routing report, table audit, bounded formula target derivation, isolated formula runtime/model prefetch, targeted page inference, and equation-content evaluation; output is summarized compactly and bulky/model artifacts remain Lambda-local."
+        "One combined stopped-daemon runner executes routing report, table audit, bounded formula target derivation, isolated formula runtime/model prefetch, targeted page inference, and equation-content evaluation; output is summarized compactly and bulky/model artifacts remain Lambda-local.",
+        "Lambda combined follow-up completed on research-engine main@99fbed6fac76b5feaa67b99625f64acb1f37de39 with final daemon inactive/dead PID 0.",
+        "Router promoted 119 headings and 35 caption-linked semantic figures, left 9 uncaptioned pictures unpromoted, accepted 21 tables as structure candidates, and flagged exactly 3 tables for residual review.",
+        "Formula target selector identified 57 formula regions on 22 pages across 6 equation-bearing cases; targeted CodeFormulaV2 produced 57 candidate equations and matched all 50 Mathpix reference equations.",
+        "Formula promotion gate passed: weighted matched-content F1=0.8236607354503158, reference coverage at F1>=0.5=0.98, and every equation-bearing case had nonzero content/coverage. Decision=PROMOTION_CANDIDATE.",
+        "The table diagnostic contained 9 benchmark residuals across 6 papers, but detailed grid inspection showed only 3 intrinsic extraction failures: both Scheirer tables and the Fadul table have literal empty candidate grids. The other 6 residuals are representational/reference-normalization effects or usable tables with high content agreement.",
+        "Adaptive routing acceptance is satisfied: production routing is oracle-free, native remains lexical/order/provenance substrate, standard_no_ocr remains selective structure overlay, equation pages use targeted formula escalation, and tables fail closed on intrinsic empty-grid residuals."
       ],
       "resume_condition": "Simple pages avoid unnecessary model inference while difficult regions escalate reproducibly and preserve provenance."
     },
@@ -308,10 +315,10 @@
     },
     {
       "id": "structured_elements_and_semantic_escalation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": "chatgpt",
-      "selected_surface": "github+lambda",
+      "selected_executor": "chatgpt+lambda",
+      "selected_surface": "github+local-runtime",
       "inputs": [
         "adaptive router",
         "figures/tables/equations from benchmark corpus"
@@ -321,9 +328,21 @@
         "equation LaTeX representation",
         "figure/image extraction and caption pairing",
         "on-demand chart/figure semantic-analysis job",
-        "confidence and provenance metadata"
+        "confidence and provenance metadata",
+        "targeted CodeFormulaV2 equation escalation promotion candidate",
+        "empty-grid-only TableFormer ACCURATE residual selector",
+        "src/research_engine/document_table_residual.py",
+        "benchmarks/document_intelligence/runtimes/docling_tableformer_accurate.py",
+        "deploy/run-tableformer-accurate-residual-gate.sh",
+        "visible operator-facing temp root ~/adamArchives/Adam/workspace-control-tmp/"
       ],
-      "validation": [],
+      "validation": [
+        "research-engine PR #52 merged as 1442e787317a94998a60a78d2a2f7582b6192170.",
+        "PR CI run 37151438051 PASS and canonical-main CI run 37151530445 PASS across install, compile, full pytest/PostgreSQL integration, Compose validation, daemon image build, and cleanup.",
+        "Table residual selector opens heavier table inference only for FAST-mode assets whose normalized grid is actually empty; low benchmark scores alone do not trigger escalation.",
+        "Targeted TableFormer ACCURATE reuses the existing Docling 2.131.0 standard runtime and model cache, operates one selected page at a time, and keeps OCR/formula/picture/general-VLM/remote-service paths disabled.",
+        "All new operator-facing outputs from the targeted table gate are written under visible ~/adamArchives/Adam/workspace-control-tmp/; hidden .workspace-control/tmp artifacts are read only as preserved legacy evidence."
+      ],
       "resume_condition": "Structured scientific content is machine-usable without forcing expensive vision interpretation of every figure."
     },
     {
@@ -449,18 +468,16 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "99fbed6fac76b5feaa67b99625f64acb1f37de39",
+      "identity": "1442e787317a94998a60a78d2a2f7582b6192170",
       "required_for_resume": true,
       "evidence": [
-        "stage=adaptive_page_region_router",
-        "research-engine canonical remote main@99fbed6fac76b5feaa67b99625f64acb1f37de39; PR #51 and canonical-main CI PASS",
-        "Lambda local research-engine remains last verified clean main@db78b236103213c6274e538b1736c4483032c06e and must fast-forward before execution",
-        "hybrid router implementation is oracle-free: native lexical/order/provenance substrate + selective standard_no_ocr structure overlay",
-        "caption-linked figures/headings accepted; table structure always retains authoritative-PDF verification; equations route to targeted enrichment",
-        "table residual audit reuses existing packages and Mathpix only as a diagnostic benchmark reference",
-        "formula target pages derive from preserved standard_no_ocr formula provenance; one page per conversion; no 73-page rerun",
-        "CodeFormulaV2 pinned at 0284bc97b73c88776957d00d6695dd63a5a8784e; formula-only specialized stage; OCR/general document VLM/remote services disabled",
-        "next=fast-forward Lambda to 99fbed6 and run deploy/run-document-hybrid-routing-followup.sh once; return compact terminal summary"
+        "stage=structured_elements_and_semantic_escalation",
+        "research-engine canonical remote main@1442e787317a94998a60a78d2a2f7582b6192170; PR #52 + canonical-main CI PASS",
+        "Lambda local last verified clean main@99fbed6fac76b5feaa67b99625f64acb1f37de39; daemon inactive/dead PID 0",
+        "adaptive router validated: 119 headings, 35 caption-linked figures, 21 table candidates, 3 intrinsic table residuals",
+        "targeted formula enrichment PROMOTION_CANDIDATE: weighted F1=0.8236607354503158, reference coverage=0.98, all six equation cases nonzero",
+        "table audit=9 benchmark residuals but only 3 genuine empty-grid failures (2 Scheirer + 1 Fadul)",
+        "next=fast-forward Lambda and run TableFormer ACCURATE only on those 3 targets; new artifacts go to visible workspace-control-tmp"
       ]
     }
   ],
@@ -726,25 +743,44 @@
         "Formula benchmark pins CodeFormulaV2 revision 0284bc97b73c88776957d00d6695dd63a5a8784e; OCR/table/code/general-document-VLM/remote services remain disabled.",
         "Combined runner keeps research-engine-daemon.service inactive/dead and emits compact summaries for all four gates."
       ]
+    },
+    {
+      "check": "Lambda adaptive routing + formula promotion",
+      "result": "PASS",
+      "evidence": [
+        "research-engine local main@99fbed6fac76b5feaa67b99625f64acb1f37de39; daemon inactive/dead PID 0.",
+        "Router: 119 headings promoted; 35 semantic figures promoted; 9 pictures unpromoted; 21 table structure candidates; 3 table residual-review cases.",
+        "Formula plan: 57 regions on 22 pages across 6 formula-bearing cases.",
+        "Formula evaluation: 57 candidate equations, 50 matched / 50 references, weighted content F1=0.8236607354503158, reference coverage=0.98, all equation-bearing cases nonzero; PROMOTION_CANDIDATE."
+      ]
+    },
+    {
+      "check": "Table residual classification and targeted ACCURATE implementation",
+      "result": "PASS_READY_FOR_LAMBDA",
+      "evidence": [
+        "Audit contained 24 candidate / 24 reference tables and 9 benchmark residuals.",
+        "Only 3 residuals are intrinsic empty-grid failures: 2 Scheirer tables + 1 Fadul table.",
+        "Liu residuals are dominated by multirow/header representation and one truncated nested-tabular reference; Stealth has perfect content F1 despite row flattening; Broggi and Tiwari references are truncated by nested-tabular parsing while candidate tables contain substantive rows.",
+        "research-engine PR #52 -> 1442e787317a94998a60a78d2a2f7582b6192170; PR and canonical-main CI PASS.",
+        "Next gate runs TableFormer ACCURATE only on pages containing the 3 empty-grid targets and writes all new outputs to visible workspace-control-tmp."
+      ]
     }
   ],
   "blockers": [
-    "Lambda local research-engine is last verified at clean main@db78b236103213c6274e538b1736c4483032c06e while canonical remote main is 99fbed6fac76b5feaa67b99625f64acb1f37de39. Fast-forward locally before running the combined gate.",
-    "Table residual classification is implemented but the real Scheirer/Fadul/Broggi diagnostic output has not yet been executed on Lambda; do not choose a heavier table parser until that audit is reviewed.",
-    "Targeted CodeFormulaV2 is implemented and CI-gated but has not yet been executed on the Lambda seed. Equation promotion remains blocked until measured content F1/coverage pass the explicit gate.",
-    "The new CodeFormulaV2 weights are intentionally not yet present in the production path. Benchmark fetch is justified by the measured equation residual; production promotion still requires benchmark quality plus license/deployment review."
+    "Lambda local research-engine is verified at clean main@99fbed6fac76b5feaa67b99625f64acb1f37de39 while canonical remote main is 1442e787317a94998a60a78d2a2f7582b6192170; fast-forward locally before the targeted TableFormer ACCURATE gate.",
+    "The three intrinsic FAST-mode empty-grid table failures (2 Scheirer, 1 Fadul) still require the bounded TableFormer ACCURATE Lambda measurement before table escalation policy is final.",
+    "CodeFormulaV2 passed its quality promotion gate, but production integration remains pending shared-model serving/concurrency work and final deployment/license review."
   ],
   "remaining_work": [
-    "Fast-forward the clean Lambda research-engine main checkout from db78b236103213c6274e538b1736c4483032c06e to canonical 99fbed6fac76b5feaa67b99625f64acb1f37de39 while the daemon remains inactive/dead.",
-    "Run deploy/run-document-hybrid-routing-followup.sh once. It must reuse preserved native/standard packages for routing and table audit, derive formula target pages from preserved standard_no_ocr provenance, and run CodeFormulaV2 only on those pages.",
-    "Review the compact table residual audit to separate evaluator/LaTeX normalization artifacts from genuine cell/grid failures before opening any heavier table fallback.",
-    "Evaluate targeted CodeFormulaV2 against the same Mathpix reference and original-PDF authority. Promote it only if the explicit formula content/coverage gate is met; otherwise characterize the remaining residual.",
-    "If formula enrichment passes, integrate it as an equation-only escalation path in structured_elements_and_semantic_escalation rather than enabling it globally.",
-    "Do not reopen Marker, PaddleOCR or heavier MinerU tiers unless the targeted table/formula results leave a specific measured residual that requires one.",
-    "After the Lambda routing/structure gate is validated, advance to local_inference_service_and_concurrency and then the broader research-pipeline localization validation."
+    "Fast-forward the clean Lambda research-engine checkout from 99fbed6fac76b5feaa67b99625f64acb1f37de39 to canonical 1442e787317a94998a60a78d2a2f7582b6192170 while the daemon remains inactive/dead.",
+    "Run deploy/run-tableformer-accurate-residual-gate.sh once. It must select only the 3 intrinsic empty-grid FAST residuals, reuse the existing Docling/TableFormer runtime and cache, and execute ACCURATE mode only on the selected pages.",
+    "Review the compact TableFormer ACCURATE evaluation. If the three tables recover above the promotion gate, integrate ACCURATE as an empty-grid-only table escalation; otherwise characterize the remaining table residual before considering any other parser family.",
+    "Integrate CodeFormulaV2 as an equation-only escalation path without enabling it globally.",
+    "Advance to local_inference_service_and_concurrency so TableFormer/CodeFormula models can remain resident/batched rather than being repeatedly initialized per page.",
+    "Then validate paper-package consumption in EXTRACT/VERIFY and the broader localization matrix; do not reopen Marker/PaddleOCR/heavier MinerU without a specific measured residual."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify /home/atrott/adamArchives/Adam/research-engine is clean on main@db78b236103213c6274e538b1736c4483032c06e, fetch origin/main, require origin/main=99fbed6fac76b5feaa67b99625f64acb1f37de39, and fast-forward only to that exact commit. Then run bash deploy/run-document-hybrid-routing-followup.sh with no arguments. The runner must reuse the preserved standard_no_ocr and normalized-native packages, execute the oracle-free hybrid routing report and compact table residual audit, derive formula-bearing target pages from preserved standard provenance, prefetch the pinned CodeFormulaV2 revision only into the isolated formula benchmark cache, run formula enrichment one page at a time only for those targets, and evaluate equation content against Mathpix as benchmark reference with the original PDF authoritative. Return only the compact terminal summary and any ERROR line. Do not rerun the 73-page standard parser bakeoff and do not enable OCR, broad document VLM, Marker, PaddleOCR or heavier MinerU.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead. On Lambda, verify /home/atrott/adamArchives/Adam/research-engine is clean on main@99fbed6fac76b5feaa67b99625f64acb1f37de39, fetch origin/main, require origin/main=1442e787317a94998a60a78d2a2f7582b6192170, and fast-forward only to that exact commit. Then run bash deploy/run-tableformer-accurate-residual-gate.sh. The gate must reuse the existing Docling 2.131.0 standard runtime/model cache, select only the three FAST-mode table assets whose normalized grids are empty, run TableFormerMode.ACCURATE one page at a time only on those targets, keep OCR/formula/picture/general-VLM/remote-service paths disabled, and write all new artifacts beneath visible ~/adamArchives/Adam/workspace-control-tmp/. Return the compact TABLEFORMER ACCURATE summary and any ERROR line. Do not rerun the 73-page parser bakeoff and do not open another table parser family until this targeted residual is measured.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture."
+  "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
 }

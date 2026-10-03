@@ -31,33 +31,31 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 99fbed6fac76b5feaa67b99625f64acb1f37de39
+- Remote checkpoint: 1442e787317a94998a60a78d2a2f7582b6192170
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: db78b236103213c6274e538b1736c4483032c06e
+- Local HEAD: 99fbed6fac76b5feaa67b99625f64acb1f37de39
 - Local clean: true
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify /home/atrott/adamArchives/Adam/research-engine is clean on main@db78b236103213c6274e538b1736c4483032c06e, fetch origin/main, require origin/main=99fbed6fac76b5feaa67b99625f64acb1f37de39, and fast-forward only to that exact commit. Then run bash deploy/run-document-hybrid-routing-followup.sh with no arguments. The runner must reuse the preserved standard_no_ocr and normalized-native packages, execute the oracle-free hybrid routing report and compact table residual audit, derive formula-bearing target pages from preserved standard provenance, prefetch the pinned CodeFormulaV2 revision only into the isolated formula benchmark cache, run formula enrichment one page at a time only for those targets, and evaluate equation content against Mathpix as benchmark reference with the original PDF authoritative. Return only the compact terminal summary and any ERROR line. Do not rerun the 73-page standard parser bakeoff and do not enable OCR, broad document VLM, Marker, PaddleOCR or heavier MinerU.
+Keep research-engine-daemon.service inactive/dead. On Lambda, verify /home/atrott/adamArchives/Adam/research-engine is clean on main@99fbed6fac76b5feaa67b99625f64acb1f37de39, fetch origin/main, require origin/main=1442e787317a94998a60a78d2a2f7582b6192170, and fast-forward only to that exact commit. Then run bash deploy/run-tableformer-accurate-residual-gate.sh. The gate must reuse the existing Docling 2.131.0 standard runtime/model cache, select only the three FAST-mode table assets whose normalized grids are empty, run TableFormerMode.ACCURATE one page at a time only on those targets, keep OCR/formula/picture/general-VLM/remote-service paths disabled, and write all new artifacts beneath visible ~/adamArchives/Adam/workspace-control-tmp/. Return the compact TABLEFORMER ACCURATE summary and any ERROR line. Do not rerun the 73-page parser bakeoff and do not open another table parser family until this targeted residual is measured.
 
 ## Remaining work
 
-- Fast-forward the clean Lambda research-engine main checkout from db78b236103213c6274e538b1736c4483032c06e to canonical 99fbed6fac76b5feaa67b99625f64acb1f37de39 while the daemon remains inactive/dead.
-- Run deploy/run-document-hybrid-routing-followup.sh once. It must reuse preserved native/standard packages for routing and table audit, derive formula target pages from preserved standard_no_ocr provenance, and run CodeFormulaV2 only on those pages.
-- Review the compact table residual audit to separate evaluator/LaTeX normalization artifacts from genuine cell/grid failures before opening any heavier table fallback.
-- Evaluate targeted CodeFormulaV2 against the same Mathpix reference and original-PDF authority. Promote it only if the explicit formula content/coverage gate is met; otherwise characterize the remaining residual.
-- If formula enrichment passes, integrate it as an equation-only escalation path in structured_elements_and_semantic_escalation rather than enabling it globally.
-- Do not reopen Marker, PaddleOCR or heavier MinerU tiers unless the targeted table/formula results leave a specific measured residual that requires one.
-- After the Lambda routing/structure gate is validated, advance to local_inference_service_and_concurrency and then the broader research-pipeline localization validation.
+- Fast-forward the clean Lambda research-engine checkout from 99fbed6fac76b5feaa67b99625f64acb1f37de39 to canonical 1442e787317a94998a60a78d2a2f7582b6192170 while the daemon remains inactive/dead.
+- Run deploy/run-tableformer-accurate-residual-gate.sh once. It must select only the 3 intrinsic empty-grid FAST residuals, reuse the existing Docling/TableFormer runtime and cache, and execute ACCURATE mode only on the selected pages.
+- Review the compact TableFormer ACCURATE evaluation. If the three tables recover above the promotion gate, integrate ACCURATE as an empty-grid-only table escalation; otherwise characterize the remaining table residual before considering any other parser family.
+- Integrate CodeFormulaV2 as an equation-only escalation path without enabling it globally.
+- Advance to local_inference_service_and_concurrency so TableFormer/CodeFormula models can remain resident/batched rather than being repeatedly initialized per page.
+- Then validate paper-package consumption in EXTRACT/VERIFY and the broader localization matrix; do not reopen Marker/PaddleOCR/heavier MinerU without a specific measured residual.
 
 ## Blockers / gates
 
-- Lambda local research-engine is last verified at clean main@db78b236103213c6274e538b1736c4483032c06e while canonical remote main is 99fbed6fac76b5feaa67b99625f64acb1f37de39. Fast-forward locally before running the combined gate.
-- Table residual classification is implemented but the real Scheirer/Fadul/Broggi diagnostic output has not yet been executed on Lambda; do not choose a heavier table parser until that audit is reviewed.
-- Targeted CodeFormulaV2 is implemented and CI-gated but has not yet been executed on the Lambda seed. Equation promotion remains blocked until measured content F1/coverage pass the explicit gate.
-- The new CodeFormulaV2 weights are intentionally not yet present in the production path. Benchmark fetch is justified by the measured equation residual; production promotion still requires benchmark quality plus license/deployment review.
+- Lambda local research-engine is verified at clean main@99fbed6fac76b5feaa67b99625f64acb1f37de39 while canonical remote main is 1442e787317a94998a60a78d2a2f7582b6192170; fast-forward locally before the targeted TableFormer ACCURATE gate.
+- The three intrinsic FAST-mode empty-grid table failures (2 Scheirer, 1 Fadul) still require the bounded TableFormer ACCURATE Lambda measurement before table escalation policy is final.
+- CodeFormulaV2 passed its quality promotion gate, but production integration remains pending shared-model serving/concurrency work and final deployment/license review.
 
 ## Fresh-chat initialization
 
