@@ -31,30 +31,29 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 7e7a5575bbde84224290ce72a2c4c095b70d7aca
+- Remote checkpoint: 1d461988a9416937a9149e4dd8faeeb666ac0e03
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198
+- Local HEAD: 1d461988a9416937a9149e4dd8faeeb666ac0e03
 - Local clean: true
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, first verify /home/atrott/adamArchives/Adam/research-engine is clean on main@e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198, fetch origin/main, require origin/main=7e7a5575bbde84224290ce72a2c4c095b70d7aca, and fast-forward only to that exact commit. Then begin local_inference_service_and_concurrency: design and CI-gate one shared local model-serving/ownership contract for the validated CodeFormulaV2 equation path and Paddle PP-TableMagic persistent-empty-grid table fallback so concurrent PDFs cannot load duplicate heavyweight model instances. Preserve native+standard routing, region/page bounds, original-PDF authority, visible workspace-control-tmp operator artifacts, and fail-closed escalation semantics. Do not restart sustained research or reopen broad parser families.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. Treat research-engine main@1d461988a9416937a9149e4dd8faeeb666ac0e03 as the validated shared-inference/concurrency baseline. Begin extract_verify_paper_package_ab by inspecting the current EXTRACT/VERIFY hydrator and existing replay/telemetry contracts, then design and CI-gate a non-materializing A/B harness that compares the current authoritative-PDF context path against paper-package-derived context on preserved verified sources. Preserve original-PDF authority and source locators, measure evidence/provenance agreement plus exact semantic token/latency/local-compute telemetry, do not mutate scientific state, and keep plan-allowance observations separate from token counts. Do not reopen parser/model bakeoffs.
 
 ## Remaining work
 
-- Fast-forward the clean Lambda research-engine checkout from e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198 to canonical 7e7a5575bbde84224290ce72a2c4c095b70d7aca while the daemon remains inactive/dead.
-- Design and CI-gate a shared local inference service/concurrency contract that keeps CodeFormulaV2 and Paddle PP-TableMagic resident or otherwise serializes model ownership so multiple concurrent PDFs cannot duplicate heavyweight model loads.
-- Integrate the validated equation-only and persistent-empty-grid table escalation routes with that service while retaining region/page bounds, provenance, original-PDF authority, and fail-closed behavior.
-- Run stopped-daemon Lambda concurrency/resource tests for multiple simultaneous document jobs and record GPU/VRAM/RAM/model-load behavior.
-- Then advance to EXTRACT/VERIFY paper-package A/B validation and the broader research-pipeline localization matrix.
+- Design and CI-gate a non-materializing EXTRACT/VERIFY A/B harness over the preserved research corpus comparing the current authoritative-PDF hydration path with paper-package-derived context.
+- Measure evidence/provenance agreement, semantic input/cached/output/reasoning tokens, latency, and local-compute cost separately; retain exact token telemetry and treat plan-allowance UI observations as censored/quantized evidence only.
+- Keep fail-closed access to authoritative PDF pages/regions and do not mutate scientific state during A/B replay.
+- Run the bounded stopped-daemon Lambda A/B gate and decide whether paper-package context is quality-safe enough to replace repeated PDF interpretation for EXTRACT/VERIFY.
+- Then finish the broader research_pipeline_localization_matrix_validation and Lambda production acceptance.
 
 ## Blockers / gates
 
-- Lambda local research-engine is last verified clean at main@e9ed7d17e91a8a221aa9f8c4b80793b6f5ce0198 while canonical remote main is 7e7a5575bbde84224290ce72a2c4c095b70d7aca; fast-forward before shared-serving work.
-- CodeFormulaV2 and Paddle PP-TableMagic have validated quality paths but still run from isolated benchmark runtimes. They need a shared local inference/concurrency design before production use so concurrent PDFs do not duplicate heavyweight model loads.
-- CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before production promotion.
+- CodeFormulaV2 deployment/redistribution obligations still require final license/deployment review before sustained production enablement.
+- EXTRACT/VERIFY paper-package A/B has not yet demonstrated evidence/provenance equivalence and semantic-token/allowance savings versus the current authoritative-PDF path; production replacement remains forbidden until measured.
 
 ## Fresh-chat initialization
 
