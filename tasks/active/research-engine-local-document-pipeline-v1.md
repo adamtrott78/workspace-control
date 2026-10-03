@@ -40,21 +40,21 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at 8c875a62d44e91ed91207cdc78d715acb0909346, fetch origin/main, require origin/main=e5aa352d0f0d8d4556539cf5120954d80e8bb4f0, and fast-forward only to that commit. Re-verify daemon inactive/dead PID 0. Then run bash deploy/configure-production-local-inference.sh and retain its BACKUP/ROLLBACK output. Without starting the daemon, run bash deploy/run-lambda-production-acceptance.sh. Return any ERROR line or, on success, the BUILD ACCEPTANCE REPORT / FINAL SAFETY STATE including LAMBDA_PRODUCTION_ACCEPTANCE=PASS. The acceptance gate may start/check PostgreSQL only and must perform no semantic/model inference or scientific-state materialization.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. Wait for research-engine PR #61 (production-env VERIFY-radius hotfix) to merge and canonical-main CI to pass. Then fast-forward the clean Lambda checkout from e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 to that exact canonical main, rerun bash deploy/configure-production-local-inference.sh to create a fresh rollback backup and enforce RESEARCH_ENGINE_VERIFY_PAGE_RADIUS=0 plus the validated broker settings, then rerun bash deploy/run-lambda-production-acceptance.sh. Return the first ERROR/traceback or the final acceptance report.
 
 ## Remaining work
 
-- Fast-forward the clean Lambda research-engine checkout from 8c875a62d44e91ed91207cdc78d715acb0909346 to canonical e5aa352d0f0d8d4556539cf5120954d80e8bb4f0 while research-engine-daemon.service remains inactive/dead.
-- Run deploy/configure-production-local-inference.sh once. Preserve the printed timestamped env backup/rollback path and keep the daemon stopped.
-- Run deploy/run-lambda-production-acceptance.sh. It may start/check PostgreSQL only; it must fail closed on non-quiescent research work and leave the research daemon inactive/dead.
-- Evaluate the acceptance report: systemd/env drift, queue quiescence, runtime/cache availability, two GPU probes, zero-spawn broker construction, authoritative-PDF hydration and read-only ops health.
-- If PASS, validate lambda_production_acceptance and advance to bounded_production_integration; do not start sustained research yet.
+- Merge PR #61 after CI and require canonical-main CI PASS.
+- Fast-forward Lambda to the resulting canonical main while research-engine-daemon.service remains inactive/dead.
+- Rerun deploy/configure-production-local-inference.sh to create a fresh backup and set VERIFY radius=0 plus validated local-inference settings.
+- Rerun deploy/run-lambda-production-acceptance.sh and evaluate the first subsequent fail-closed gate or complete PASS.
+- If production acceptance passes, advance to bounded_production_integration; do not start sustained research before that stage is explicitly accepted.
 
 ## Blockers / gates
 
-- Lambda local research-engine is last verified clean at main@8c875a62d44e91ed91207cdc78d715acb0909346 while canonical remote main is e5aa352d0f0d8d4556539cf5120954d80e8bb4f0; fast-forward before production acceptance.
-- The live ~/.research-engine/research-engine.env has not yet been synchronized with the validated shared local-inference block; use the backup-first configurator while the daemon is stopped.
-- The bounded Lambda production-acceptance gate has not yet been executed on canonical main.
+- Live Lambda production env has stale RESEARCH_ENGINE_VERIFY_PAGE_RADIUS != 0; PR #61 hotfix must merge, Lambda must fast-forward, and the rollback-safe env synchronizer must be rerun before acceptance.
+- Lambda production acceptance has not yet passed end-to-end.
+- Sustained research remains disabled until production acceptance and bounded production integration are complete.
 
 ## Fresh-chat initialization
 
