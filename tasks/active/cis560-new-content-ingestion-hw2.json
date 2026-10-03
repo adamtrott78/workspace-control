@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "cis560-new-content-ingestion-hw2",
   "title": "CIS560 new-content ingestion + HW2 bootstrap and assignment work",
-  "status": "IN_PROGRESS",
+  "status": "SUSPENDED",
   "goal": "Bring CIS 560 durable course state current with all genuinely new instructor-covered topics and exact Sipser sections since the last checkpoint, ingest the authoritative Homework 2 PDF, bootstrap assignment-local HW2 routing and learning state, then tutor HW2 problem-by-problem and build/validate only the artifacts the assignment actually requires.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -12,7 +12,7 @@
     "content_sha": "8a0f596add333737e03c72a81e71a7eb075b53fc"
   },
   "parent_execution_owner": "cis560-hw2",
-  "current_stage": "course_content_ingestion",
+  "current_stage": "hw2_ingestion_bootstrap",
   "acceptance_criteria": [
     "Fresh execution starts from CIS560 README.md on tutor-framework at the exact migrated checkpoint 9c5e492354449186898b5f038e227e5a92d15005 and follows COURSE.md plus only the routed source/course/study/homework owners needed for the active stage.",
     "New lecture/course material is ingested through the CIS560 typed-authority model with provenance preserved and no silent replacement of instructor evidence by generic theoretical-CS knowledge.",
@@ -47,7 +47,7 @@
       "base_sha": "9c5e492354449186898b5f038e227e5a92d15005",
       "remote": {
         "branch": "tutor-framework",
-        "checkpoint_sha": "9c5e492354449186898b5f038e227e5a92d15005",
+        "checkpoint_sha": "edf5dc31df48abb785ed6b5635a0399bb2d784db",
         "verified": true
       },
       "local": null,
@@ -133,7 +133,7 @@
     },
     {
       "id": "course_content_ingestion",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "course-content-ingestion",
       "selected_executor": "chatgpt",
       "selected_surface": "conversation-files+github",
@@ -143,17 +143,53 @@
         "CIS560 typed authority from COURSE.md"
       ],
       "outputs": [
-        "updated course/source/skill/notation owners as justified by evidence"
+        "course/lectures/L07.md",
+        "course/lectures/L08.md",
+        "course/lectures/L09.md",
+        "course/LECTURES.md updated through Lecture 9",
+        "sources/instructor/ durable Lecture 7–9 source package",
+        "sources/TEXTBOOK.md coverage map: §1.4 covered; §2.1 covered/current; §2.2 assigned/previewed; §2.3 next only",
+        "study/SKILL_MAP.md expanded for pumping lemma, Myhill–Nerode, CFG/CNF, and PDA boundary",
+        "study/NOTATION.md expanded for pumping/CFG notation and ε/Λ source distinction",
+        "CIS560 tutor-framework@edf5dc31df48abb785ed6b5635a0399bb2d784db"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Lecture 7–9 source/course ingestion is provenance-aware and bounded",
+          "result": "PASS",
+          "evidence": [
+            "Remote tutor-framework is verified at edf5dc31df48abb785ed6b5635a0399bb2d784db.",
+            "Commit is exactly one fast-forward commit from 9c5e492354449186898b5f038e227e5a92d15005 with 15 reviewed paths.",
+            "Lecture 6 upload was treated as corroborating overlap rather than duplicate new coverage."
+          ]
+        },
+        {
+          "check": "Textbook coverage boundary is explicit",
+          "result": "PASS",
+          "evidence": [
+            "§1.4 recorded covered/reinforced; §2.1 covered/current through Lecture 9.",
+            "§2.2 remains assigned/previewed because Lecture 9 explicitly assigns it for Lecture 10.",
+            "§2.3 remains next-topic guidance only.",
+            "Lecture 9 proof exclusions for Lemma 2.21 and Lemma 2.27 are preserved."
+          ]
+        },
+        {
+          "check": "No mastery promotion from ingestion",
+          "result": "PASS",
+          "evidence": [
+            "study/MASTERY.md is absent from the 15-path commit diff.",
+            "New skill scaffolding explicitly remains unassessed without behavioral evidence."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "hw2_ingestion_bootstrap",
-      "status": "PLANNED",
+      "status": "SUSPENDED",
       "execution_owner": "course-assignment-work",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation-files+github",
       "inputs": [
         "validated course_content_ingestion",
         "authoritative user-uploaded HW2 PDF"
@@ -162,7 +198,7 @@
         "homework/hw02 assignment-local route, CONTEXT.md, LEARNING.md, source routing, requirement and problem mappings"
       ],
       "validation": [],
-      "resume_condition": "User uploads the HW2 PDF; bootstrap begins only after course-content ingestion is validated."
+      "resume_condition": "User uploads the authoritative HW2 PDF. Then inspect the full PDF, preserve provenance, derive the exact assignment contract, and bootstrap homework/hw02 before any solution work."
     },
     {
       "id": "hw2_tutoring",
@@ -231,6 +267,16 @@
       "evidence": [
         "COURSE.md binds CIS560 reusable workflow mechanics to this exact checkpoint."
       ]
+    },
+    {
+      "id": "cis560_course_content_through_l09",
+      "kind": "git",
+      "identity": "CIS560-AdamTrott:tutor-framework@edf5dc31df48abb785ed6b5635a0399bb2d784db",
+      "required_for_resume": true,
+      "evidence": [
+        "Verified advertised tutor-framework remote checkpoint after Lecture 7–9 ingestion.",
+        "Compare against starting checkpoint shows one commit ahead and exactly the 15 intended course/source/study paths."
+      ]
     }
   ],
   "artifacts": [],
@@ -253,21 +299,34 @@
       "check": "Final HANDOFF_SAFE",
       "result": "NOT_RUN",
       "evidence": []
+    },
+    {
+      "check": "Lecture 7–9 course content ingestion",
+      "result": "PASS",
+      "evidence": [
+        "CIS560 tutor-framework@edf5dc31df48abb785ed6b5635a0399bb2d784db.",
+        "Durable lecture/source/textbook/skill/notation state now reaches Lecture 9 without false mastery promotion."
+      ]
+    },
+    {
+      "check": "HW2 authoritative source availability",
+      "result": "NOT_RUN",
+      "evidence": []
     }
   ],
   "blockers": [
     "The authoritative HW2 PDF has not yet been uploaded in this task."
   ],
   "remaining_work": [
-    "Ingest the genuinely new Lecture 7–9 coverage and exact current Sipser section relationship, preserving the distinction between covered material, assigned reading, and next-topic guidance.",
-    "Inspect and ingest the full authoritative HW2 PDF only after course-content ingestion is current.",
-    "Bootstrap homework/hw02 local owners, assignment contract, LEARNING state, source routing, and problem-to-skill/source mappings.",
-    "Begin the first HW2 problem in LEARNING mode only after ingestion/bootstrap validation.",
+    "Receive and fully inspect the authoritative HW2 PDF.",
+    "Bootstrap homework/hw02 local owners, exact assignment contract, LEARNING state, source routing, and problem-to-skill/source mappings.",
+    "Resolve exact Sipser problem wording for any textbook-referenced HW2 items before tutoring them.",
+    "Begin the first HW2 problem in LEARNING mode only after HW2 ingestion/bootstrap validation.",
     "Build and validate only the artifact types actually required by HW2.",
     "Synchronize final task state, establish HANDOFF_SAFE, and archive when complete."
   ],
-  "next_safe_action": "Ingest the newly provided Lecture 7–9 instructor material into CIS560 tutor-framework, treating Lecture 6 uploads as overlap/no-op, recording exact covered/read-next Sipser relationships without promoting mastery, then validate the resulting course/source/skill/notation state. Do not inspect or solve HW2 until this ingestion is complete.",
+  "next_safe_action": "Obtain the authoritative HW2 PDF from the user. Once supplied, inspect the entire PDF before any solution work; derive exact problems/subparts, deliverables, deadline/submission/tool requirements, referenced Sipser items, and then bootstrap the homework/hw02 assignment-local route, CONTEXT.md, LEARNING.md, sources, and problem-to-skill/source mappings. Do not begin solving until that bootstrap is validated.",
   "last_executor": "chatgpt",
   "last_surface": "conversation-files+github",
-  "notes": "Cold start recovered only the routed durable owners requested for this task. At the starting checkpoint, course/LECTURES.md indexes Lecture 6 (2026-09-22) as the latest durably ingested lecture, and homework/README.md still routes Homework 1 as the active assignment. These are recovery observations, not permission to infer missing later course history. On 2026-10-03, the user supplied Lecture 7–9 note text plus Lecture 7/8 decks and pumping/Myhill-Nerode supporting materials. Gmail was checked for matching forwarded Lecture 7–9 messages and none were found; provenance therefore remains user-provided instructor-note text plus uploaded course files, without invented dates/message IDs."
+  "notes": "Cold start recovered only the routed durable owners requested for this task. At the starting checkpoint, course/LECTURES.md indexes Lecture 6 (2026-09-22) as the latest durably ingested lecture, and homework/README.md still routes Homework 1 as the active assignment. These are recovery observations, not permission to infer missing later course history. On 2026-10-03, the user supplied Lecture 7–9 note text plus Lecture 7/8 decks and pumping/Myhill-Nerode supporting materials. Gmail was checked for matching forwarded Lecture 7–9 messages and none were found; provenance therefore remains user-provided instructor-note text plus uploaded course files, without invented dates/message IDs. Lecture 7–9 course ingestion completed at CIS560 tutor-framework@edf5dc31df48abb785ed6b5635a0399bb2d784db. Exact course boundary is now §1.4 and §2.1 covered, §2.2 assigned/previewed for Lecture 10, and §2.3 next-topic guidance. Mastery was not changed."
 }
