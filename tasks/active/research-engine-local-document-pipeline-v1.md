@@ -31,7 +31,7 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: db78b236103213c6274e538b1736c4483032c06e
+- Remote checkpoint: 99fbed6fac76b5feaa67b99625f64acb1f37de39
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
@@ -40,24 +40,24 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 ## Next safe action
 
-Do not rerun the broad parser bakeoff. Treat candidate_parser_bakeoff as VALIDATED and begin adaptive_page_region_router on research-engine main@db78b236103213c6274e538b1736c4483032c06e. Implement and CI-gate a deterministic hybrid routing/confidence contract with Docling native as the default lexical/order/provenance substrate and standard_no_ocr as a structure overlay. Promote headings/provenance directly; promote only caption-linked pictures as semantic figures; gate tables by content/grid confidence and add a compact residual audit for the Scheirer, Fadul and Broggi failures before selecting any heavier table fallback. In parallel, open one narrowly bounded Docling formula-enrichment experiment for formula-bearing pages/regions because all six equation-bearing seed papers scored equation-content F1=0 without enrichment. Keep OCR, VLM, Marker, PaddleOCR and heavier MinerU disabled unless a measured residual from these targeted gates specifically justifies one. Keep research-engine-daemon.service inactive/dead during benchmark development and do not START sustained research.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda, verify /home/atrott/adamArchives/Adam/research-engine is clean on main@db78b236103213c6274e538b1736c4483032c06e, fetch origin/main, require origin/main=99fbed6fac76b5feaa67b99625f64acb1f37de39, and fast-forward only to that exact commit. Then run bash deploy/run-document-hybrid-routing-followup.sh with no arguments. The runner must reuse the preserved standard_no_ocr and normalized-native packages, execute the oracle-free hybrid routing report and compact table residual audit, derive formula-bearing target pages from preserved standard provenance, prefetch the pinned CodeFormulaV2 revision only into the isolated formula benchmark cache, run formula enrichment one page at a time only for those targets, and evaluate equation content against Mathpix as benchmark reference with the original PDF authoritative. Return only the compact terminal summary and any ERROR line. Do not rerun the 73-page standard parser bakeoff and do not enable OCR, broad document VLM, Marker, PaddleOCR or heavier MinerU.
 
 ## Remaining work
 
-- Implement and CI-gate an adaptive routing contract that preserves Docling native as the default lexical/order/provenance package and applies standard_no_ocr only as a structure overlay under explicit page/region/document signals.
-- Add structure-confidence outputs: headings/provenance accepted directly; semantic figures require caption association; tables require cell/grid confidence and fail-closed residual flags.
-- Add a compact table-residual audit for the low-scoring Scheirer, Fadul and Broggi cases that exposes candidate/reference cells and LaTeX normalization effects before any heavier table parser is opened.
-- Design a bounded Docling formula-enrichment bakeoff only for formula-bearing pages/regions/cases. Keep OCR and VLM disabled; measure equation representation against the same Mathpix reference and original-PDF authority.
-- If formula enrichment closes the equation residual, fold it into structured_elements_and_semantic_escalation as an equation-only escalation path rather than enabling it globally.
-- Do not reopen Marker, PaddleOCR or heavier MinerU tiers unless the targeted table audit or formula-enrichment experiment leaves a specific residual that Docling cannot close.
-- After router and structured-element confidence paths are validated, advance to local_inference_service_and_concurrency and the broader research-pipeline localization matrix.
+- Fast-forward the clean Lambda research-engine main checkout from db78b236103213c6274e538b1736c4483032c06e to canonical 99fbed6fac76b5feaa67b99625f64acb1f37de39 while the daemon remains inactive/dead.
+- Run deploy/run-document-hybrid-routing-followup.sh once. It must reuse preserved native/standard packages for routing and table audit, derive formula target pages from preserved standard_no_ocr provenance, and run CodeFormulaV2 only on those pages.
+- Review the compact table residual audit to separate evaluator/LaTeX normalization artifacts from genuine cell/grid failures before opening any heavier table fallback.
+- Evaluate targeted CodeFormulaV2 against the same Mathpix reference and original-PDF authority. Promote it only if the explicit formula content/coverage gate is met; otherwise characterize the remaining residual.
+- If formula enrichment passes, integrate it as an equation-only escalation path in structured_elements_and_semantic_escalation rather than enabling it globally.
+- Do not reopen Marker, PaddleOCR or heavier MinerU tiers unless the targeted table/formula results leave a specific measured residual that requires one.
+- After the Lambda routing/structure gate is validated, advance to local_inference_service_and_concurrency and then the broader research-pipeline localization validation.
 
 ## Blockers / gates
 
-- Equation representation is not production-usable in standard_no_ocr with formula enrichment disabled: all six equation-bearing seed papers have matched equation-content F1=0 and reference coverage=0.
-- Table fidelity is heterogeneous despite exact outer-table counts. Before selecting any heavier table fallback, audit the low-scoring Scheirer, Fadul and Broggi cases to separate evaluator/LaTeX-normalization artifacts from genuine TableFormer cell/grid errors.
-- Uncaptioned Docling picture items must not be promoted as semantic figures; only caption-linked pictures are currently validated for semantic figure routing.
-- The standard structure tier remains ~4.69x slower than Docling native with a ~6.8G runtime footprint, so production routing must avoid unconditional whole-document structure inference.
+- Lambda local research-engine is last verified at clean main@db78b236103213c6274e538b1736c4483032c06e while canonical remote main is 99fbed6fac76b5feaa67b99625f64acb1f37de39. Fast-forward locally before running the combined gate.
+- Table residual classification is implemented but the real Scheirer/Fadul/Broggi diagnostic output has not yet been executed on Lambda; do not choose a heavier table parser until that audit is reviewed.
+- Targeted CodeFormulaV2 is implemented and CI-gated but has not yet been executed on the Lambda seed. Equation promotion remains blocked until measured content F1/coverage pass the explicit gate.
+- The new CodeFormulaV2 weights are intentionally not yet present in the production path. Benchmark fetch is justified by the measured equation residual; production promotion still requires benchmark quality plus license/deployment review.
 
 ## Fresh-chat initialization
 
