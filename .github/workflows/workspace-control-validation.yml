@@ -1,0 +1,174 @@
+name: Workspace Control Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: workspace-control-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validation:
+    name: validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout tested tree
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolve exact changed paths
+        id: changes
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          TESTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          : > changed-paths.txt
+
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            git diff --name-only "$BASE_SHA" "$TESTED_SHA" > changed-paths.txt
+          fi
+
+          if [[ ! -s changed-paths.txt ]]; then
+            printf '%s\n' '.github/workflows/workspace-control-validation.yml' > changed-paths.txt
+            echo "force_full=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "force_full=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "Changed paths:"
+          cat changed-paths.txt
+
+      - name: Plan validation tier
+        id: plan
+        shell: bash
+        env:
+          FORCE_FULL: ${{ steps.changes.outputs.force_full }}
+        run: |
+          set -euo pipefail
+
+          args=(
+            --profile policies/workspace-control.validation-profile.v1.json
+          )
+
+          while IFS= read -r path; do
+            [[ -n "$path" ]] || continue
+            args+=(--changed-path "$path")
+          done < changed-paths.txt
+
+          if [[ "$FORCE_FULL" == "true" ]]; then
+            args+=(--force-full)
+          fi
+
+          python3 scripts/validation_plan.py "${args[@]}" --json | tee validation-plan.json
+
+          tier="$(python3 -c 'import json; print(json.load(open("validation-plan.json"))["selected_tier"])')"
+
+          echo "tier=$tier" >> "$GITHUB_OUTPUT"
+          echo "Selected validation tier: $tier"
+
+      - name: Validate changed task contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r path; do
+            case "$path" in
+              tasks/active/*.json|tasks/archive/*.json)
+                python3 scripts/workspace_control.py task-validate --file "$path" --json
+                md="${path%.json}.md"
+                if [[ -f "$md" ]]; then
+                  tmp_dir="$(mktemp -d)"
+                  tmp="$tmp_dir/handoff.md"
+                  python3 scripts/workspace_control.py task-render --file "$path" --output "$tmp"
+                  diff -u "$md" "$tmp"
+                  rm -rf "$tmp_dir"
+                fi
+                ;;
+            esac
+          done < changed-paths.txt
+
+      - name: Run unit regression
+        if: steps.plan.outputs.tier != 'FAST_STATIC'
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Run full integration contracts
+        if: steps.plan.outputs.tier == 'FULL_INTEGRATION' || steps.plan.outputs.tier == 'CANONICAL_REGRESSION'
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          python3 -m compileall -q scripts tests
+          python3 -m json.tool policies/workspace-control.validation-profile.v1.json >/dev/null
+          python3 -m json.tool schemas/validation_profile.v1.schema.json >/dev/null
+
+          tested_invalid="$(mktemp)"
+          base_invalid="$(mktemp)"
+          newly_invalid="$(mktemp)"
+          : > "$tested_invalid"
+          : > "$base_invalid"
+          : > "$newly_invalid"
+
+          validate_task_tree() {
+            local root="$1"
+            local output="$2"
+            local label="$3"
+            local report
+            report="$(mktemp)"
+
+            for task in "$root"/tasks/active/*.json "$root"/tasks/archive/*.json; do
+              [[ -e "$task" ]] || continue
+              rel="${task#"$root"/}"
+              if ! python3 "$root/scripts/workspace_control.py" task-validate --file "$task" --json >"$report"; then
+                echo "$rel" >> "$output"
+                echo "::warning title=Invalid $label task capsule::$rel"
+                cat "$report"
+              fi
+            done
+
+            sort -u -o "$output" "$output"
+            rm -f "$report"
+          }
+
+          validate_task_tree "$PWD" "$tested_invalid" "tested-tree"
+
+          if [[ "$EVENT_NAME" == "pull_request" && -n "$BASE_SHA" ]]; then
+            base_parent="$(mktemp -d)"
+            base_root="$base_parent/base"
+            git worktree add --detach "$base_root" "$BASE_SHA"
+            validate_task_tree "$base_root" "$base_invalid" "baseline"
+            git worktree remove --force "$base_root"
+            rm -rf "$base_parent"
+
+            comm -13 "$base_invalid" "$tested_invalid" > "$newly_invalid"
+
+            if [[ -s "$base_invalid" ]]; then
+              echo "::notice title=Pre-existing task-contract debt::The following invalid capsules already existed on the PR base and are reported without blocking this regression:"
+              cat "$base_invalid"
+            fi
+
+            if [[ -s "$newly_invalid" ]]; then
+              echo "::error title=New task-contract regression::The tested tree introduces newly invalid task capsules:"
+              cat "$newly_invalid"
+              exit 1
+            fi
+          elif [[ -s "$tested_invalid" ]]; then
+            echo "::warning title=Task-contract debt::No comparable PR base is available, so repository-wide invalid capsules are reported as existing debt:"
+            cat "$tested_invalid"
+          fi
+
+          rm -f "$tested_invalid" "$base_invalid" "$newly_invalid"

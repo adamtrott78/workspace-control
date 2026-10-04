@@ -2685,7 +2685,7 @@ def render_task_handoff(path, data, control_root):
                 lines.extend([
                     f"- Remote branch: {remote.get('branch')}",
                     f"- Remote checkpoint: {remote.get('checkpoint_sha')}",
-                    f"- Remote verified: {remote.get('verified')}",
+                    "- Remote verified: " + json.dumps(remote.get("verified")),
                 ])
 
             local = entry.get("local")
@@ -2733,6 +2733,8 @@ def render_task_handoff(path, data, control_root):
         "## Fresh-chat initialization",
         "",
         "@GitHub",
+        "",
+        "https://github.com/adamtrott78/workspace-control",
         "",
         "Continue the durable workspace-control task defined by:",
         f"Task capsule: {ref}",

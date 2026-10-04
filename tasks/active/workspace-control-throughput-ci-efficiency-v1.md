@@ -18,45 +18,37 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execution loops while preserving provenance, fail-closed mutation semantics, durable recovery, and implementation quality. Optimize both orchestration overhead and CI topology so routine low-risk changes do not pay the same synchronous validation cost as high-risk production changes, without weakening the full safety net.
 
-## Current stage
+## Repositories
 
-baseline_measurement
+### workspace-control
 
-## Baseline already captured
+- Intent: mutate
+- Remote branch: throughput-ci-efficiency-v1
+- Remote checkpoint: 0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a
+- Remote verified: true
 
-- Five recent successful PR CI runs: 73, 75, 81, 81, 91 seconds; mean 80.2 s.
-- Five corresponding canonical-main CI runs: 75, 65, 81, 82, 81 seconds; mean 76.8 s.
-- Ten runs across five narrow fix cycles: 785 seconds (~13.1 minutes) of CI wall time before assistant polling/tool overhead.
-- Observed additional latency sources: serial file-level Git mutations, PRs opened before all follow-up changes were complete, repeated short-interval CI polling, full install/test/PostgreSQL/Compose/Docker-image validation for narrow harness changes, and synchronous waiting for both PR and post-merge CI.
+### research-engine
+
+- Intent: read
+- Remote branch: main
+- Remote checkpoint: 7a26e648ec409c96a3f9b7c8620f566658700894
+- Remote verified: true
 
 ## Next safe action
 
-Start from https://github.com/adamtrott78/workspace-control and follow the normal root route.
-
-Read this capsule plus the task-capsule/operator-workflow contracts. Do not mutate CI yet.
-
-First complete `baseline_measurement`: inspect recent research-engine workflow definitions and representative run/job timing, inventory GitHub connector capabilities that could reduce serial mutations/polling, and produce a measured latency decomposition distinguishing assistant orchestration overhead from actual CI execution.
-
-Then perform source-backed `external_practice_research` before proposing the risk-tiered validation architecture.
+Start from https://github.com/adamtrott78/workspace-control and the normal root route. PR #50 carries the FULL_INTEGRATION-validated implementation checkpoint 0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a. If PR #50 is not yet merged, inspect the latest synchronize run produced by this task-state-only coordination update: require selected tier FAST_STATIC, successful changed-task contract/handoff synchronization, and skipped unit/full-integration steps. Then reread current main and PR #50 base/head/mergeability and merge only with the exact expected head SHA. If PR #50 is already merged, treat merged main as canonical and collect efficiency telemetry from the active research-engine task without overriding its durable next_safe_action. Do not mutate research-engine from this capsule; any research-engine-specific profile or CI change requires explicit authority.
 
 ## Remaining work
 
-- Measure recent end-to-end control cycles more precisely, including Git mutation counts, PR creation timing, CI restarts, polling calls, and synchronous post-merge waits.
-- Inspect the available GitHub connector functions for atomic/multi-file commit and more efficient check-suite/status operations.
-- Research authoritative CI/CD and large-repository practices relevant to path-aware testing, affected-test selection, caching, concurrency cancellation, merge/tested-tree semantics, required versus advisory checks, and scheduled full regression.
-- Design a risk-tiered validation policy for workspace-control and representative repositories, with explicit escalation conditions and a force-full-validation escape hatch.
-- Design an assistant orchestration policy covering mutation batching, PR timing, CI polling cadence, useful parallel work, and when canonical-main CI is or is not on the critical path.
-- Implement the smallest safe changes in workspace-control first; only then consider representative research-engine CI changes if measurements justify them.
-- Benchmark trivial, moderate, and high-risk control cycles before/after and document both latency and validation coverage.
+- Use this task-state-only JSON/Markdown synchronization as the representative FAST_STATIC PR benchmark. Require the latest PR #50 run to select FAST_STATIC, pass changed-task validation/handoff sync, and skip unit/full-integration steps.
+- If the FAST_STATIC benchmark passes, reread current main plus PR #50 base/head/mergeability and merge with an expected head SHA. Prove whether the merged main tree equals the tested synthetic merge tree.
+- Collect field telemetry from the active research-engine task on mutation batching, PR timing/restarts, CI step cost, status-read frequency, tested-tree duplication, idle waits, and other workspace-control overhead. Treat this as observational evidence without replacing that task's next_safe_action.
+- Benchmark TARGETED_PR opportunistically on a real test-only change when one naturally occurs; do not manufacture code churn solely to obtain a timing sample.
+- Research-engine-specific validation tiers or CI workflow changes require a reviewed research-engine profile and explicit mutation authority; this capsule does not grant that authority.
 
-## Important constraints
+## Blockers / gates
 
-- Do not optimize by deleting tests or weakening provenance/safety invariants.
-- Do not assume duplicate-looking PR/main CI is redundant without proving tested-tree/merge semantics.
-- Keep research-engine read-only during initial measurement/research/design.
-- Prefer direct GitHub tooling over unnecessary human shell steps.
-- Preserve a force-full-validation path for ambiguous/high-risk changes.
-- Every fresh-chat initialization for this task must include the full repository URL below.
+- None.
 
 ## Fresh-chat initialization
 
@@ -65,15 +57,9 @@ Then perform source-backed `external_practice_research` before proposing the ris
 https://github.com/adamtrott78/workspace-control
 
 Continue the durable workspace-control task defined by:
-
-`tasks/active/workspace-control-throughput-ci-efficiency-v1.json`
+Task capsule: tasks/active/workspace-control-throughput-ci-efficiency-v1.json
 
 Start from the normal workspace-control root route.
-
-Treat the authoritative task capsule, synchronized Markdown handoff, exact durable Git state, and referenced research-engine CI evidence as the complete handoff.
-
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
-
-Follow the capsule's exact `next_safe_action`.
-
-Important initial boundary: do **not** begin by changing CI. First measure the actual control-cycle latency and separate assistant orchestration overhead from GitHub Actions runtime, then research documented CI/control-plane practices and design a risk-tiered validation model that preserves full-quality validation for high-consequence changes.
+Follow the capsule's next_safe_action.
