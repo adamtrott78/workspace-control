@@ -68,7 +68,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "9d2e56513f134e4dbb83970402ff9feccccc9fb3",
+        "checkpoint_sha": "9c636c4f00e47a8b8e507e4e011d4867a5da68f9",
         "verified": true
       },
       "local": {
@@ -593,7 +593,10 @@
         "updated localization matrix for any promoted local semantic tier",
         "benchmarks/document_intelligence/residual-escalation-contract.v1.json",
         "tests/test_residual_escalation_contract.py",
-        "minimum corpus expansion fixed to three new source PDFs plus reuse of existing formula/table and semantic-calibration evidence"
+        "minimum corpus expansion fixed to three new source PDFs plus reuse of existing formula/table and semantic-calibration evidence",
+        "benchmarks/document_intelligence/residual-candidate-selection.v1.json",
+        "tests/test_residual_candidate_selection.py",
+        "benchmark-only candidate set: PP-OCRv6_medium -> PaddleOCR-VL-1.6 -> Qwen3.5-4B"
       ],
       "validation": [
         "This stage is deliberately added after bounded production integration: current production policy still uses Codex STANDARD semantic EXTRACT/VERIFY over authoritative PDF and has not yet implemented a complete deterministic -> specialized local model -> local VLM/local agent -> remote Codex -> human fallback ladder.",
@@ -609,7 +612,12 @@
         "Global new-model ceiling is one owner per family, <=16384 MiB peak VRAM, <=32768 MiB peak RSS, <=120 s cold load, bounded queue depth 8, no remote API fallback, and no model downloads during a promotion gate.",
         "Minimum new corpus expansion is exactly three targeted source PDFs: scan-mixed-quality-v1, semantic-visuals-v1, and malformed-layout-v1. Existing formula/table residuals reuse the seven-paper corpus; semantic ambiguity reuses preserved authoritative source/calibration evidence.",
         "Concrete OCR/VLM/local-semantic model selection was intentionally kept closed until the contract became durable; no new runtime/model was downloaded or enabled while writing the contract.",
-        "research-engine PR #64 merged as 9d2e56513f134e4dbb83970402ff9feccccc9fb3. PR CI 37166055936 PASS and canonical-main CI 37166127123 PASS across install, compile, full tests, Compose validation, daemon image build, and cleanup."
+        "research-engine PR #64 merged as 9d2e56513f134e4dbb83970402ff9feccccc9fb3. PR CI 37166055936 PASS and canonical-main CI 37166127123 PASS across install, compile, full tests, Compose validation, daemon image build, and cleanup.",
+        "Concrete benchmark-only candidates are now selected after the residual contract became durable: PP-OCRv6_medium for targeted scan/text/layout recovery; PaddleOCR-VL-1.6 pinned at c5630abae1d940eafe0697512a0325494b02ab42 for document/region multimodal recovery; Qwen3.5-4B pinned at 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a for bounded local semantic EXTRACT/VERIFY and conditional general visual fallback.",
+        "Selection remains non-production: no weights/runtime download, no localization-matrix or JobType-tier change, no daemon lifecycle change, no scientific-state materialization.",
+        "Runtime order is purpose-built cheapest-first: OCR only after scan/text opener; PaddleOCR-VL only after visual/exhausted specialized opener; Qwen3.5 semantic only on bounded <=4-page EXTRACT or radius-0 VERIFY; Qwen3.5 visual only if PaddleOCR-VL fails/abstains.",
+        "Qwen3-VL-8B-Instruct-FP8 and Qwen3-8B-AWQ are explicitly deferred until measured failure justifies another family.",
+        "research-engine PR #65 merged as 9c636c4f00e47a8b8e507e4e011d4867a5da68f9. PR CI 37166527405 PASS and canonical-main CI 37166736955 PASS across install, compile, full tests, Compose validation, daemon image build, and cleanup."
       ],
       "resume_condition": "Measured residuals have an explicit quality-gated escalation ladder, including local multimodal/agent candidates where justified, so Codex is not used blindly where cheaper validated local recovery is sufficient."
     },
@@ -655,15 +663,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "9d2e56513f134e4dbb83970402ff9feccccc9fb3",
+      "identity": "9c636c4f00e47a8b8e507e4e011d4867a5da68f9",
       "required_for_resume": true,
       "evidence": [
         "stage=residual_escalation_and_local_semantic_fallbacks",
-        "research-engine remote main@9d2e56513f134e4dbb83970402ff9feccccc9fb3; residual escalation contract PR #64 + PR/canonical-main CI PASS",
-        "Lambda/local checkout was not mutated by the GitHub-only contract checkpoint and remains last verified clean at main@0e5b1464c5307b9b1824618b6e5cff0f13485146; bounded-production daemon evidence remains inactive/dead PID 0",
-        "residual-escalation-contract.v1.json CI-locks eight residual families, the deterministic/specialized -> targeted local recovery -> Codex -> human ladder, resource ceilings, provenance, and contemporaneous controls",
-        "minimum missing corpus is three targeted source PDFs; broad parser bakeoff remains closed",
-        "next=select/pin the minimum concrete OCR, multimodal-region, and local-semantic candidates only after this durable contract, then benchmark only against opened residuals"
+        "research-engine remote main@9c636c4f00e47a8b8e507e4e011d4867a5da68f9; residual contract PR #64 and candidate selection PR #65 both have PR/canonical-main CI PASS",
+        "Lambda/local checkout remains last verified clean at main@0e5b1464c5307b9b1824618b6e5cff0f13485146 because contract/candidate selection were GitHub-only; bounded-production daemon evidence remains inactive/dead PID 0",
+        "selected benchmark candidates=PP-OCRv6_medium; PaddleOCR-VL-1.6@c5630abae1d940eafe0697512a0325494b02ab42; Qwen3.5-4B@851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+        "no model/runtime has been downloaded or enabled; source-case manifests remain the next dependency",
+        "next=durably register exactly the three missing source cases with stable source locations/target annotations, then open one bounded Lambda prefetch/audit gate"
       ]
     }
   ],
@@ -1191,23 +1199,34 @@
         "Minimum new corpus expansion is three targeted PDFs; existing formula/table and semantic-calibration evidence is reused.",
         "No OCR/VLM/local-agent runtime or weights were downloaded or enabled during this checkpoint."
       ]
+    },
+    {
+      "check": "Residual fallback candidate selection",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #65 -> 9c636c4f00e47a8b8e507e4e011d4867a5da68f9.",
+        "PR CI 37166527405 PASS; canonical-main CI 37166736955 PASS.",
+        "Exactly three primary families selected: PP-OCRv6_medium, PaddleOCR-VL-1.6, Qwen3.5-4B.",
+        "PaddleOCR-VL-1.6 pinned to c5630abae1d940eafe0697512a0325494b02ab42; Qwen3.5-4B pinned to 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a.",
+        "No runtime/model download or production enablement occurred."
+      ]
     }
   ],
   "blockers": [
-    "The three targeted missing corpus cases (scan-mixed-quality-v1, semantic-visuals-v1, malformed-layout-v1) have not yet been materialized/registered with authoritative PDF hashes and required annotations.",
-    "Concrete OCR, multimodal-region, and local semantic candidate models/runtimes have not yet been selected, license-reviewed, pinned, or benchmarked against the now-durable residual contract.",
+    "The three targeted missing corpus cases (scan-mixed-quality-v1, semantic-visuals-v1, malformed-layout-v1) are not yet durably registered with stable source locations, target pages/regions, and later Lambda hash/native-opener audit requirements.",
+    "Selected candidate runtimes have not yet been installed/prefetched or measured on the Lambda; exact PP-OCRv6 weight metadata/checksum and runtime dependency receipts remain gated behind source-case durability.",
     "Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline until a candidate passes its residual-specific contemporaneous authoritative-PDF control and resource/token gates.",
-    "Sustained research remains disabled while residual fallback candidates are selected and benchmarked."
+    "Sustained research remains disabled while source cases and bounded candidate benchmarks are prepared."
   ],
   "remaining_work": [
-    "Materialize/register only the three new source cases required by residual-escalation-contract.v1.json, keeping bulky PDFs outside Git and committing only manifests/annotations/hashes that belong in the benchmark repository.",
-    "Now that the contract is durable, select and pin the smallest credible concrete candidate set: one local OCR/layout family, one document/region multimodal family, and one local text-reasoning family; document license/runtime constraints before any Lambda installation.",
-    "Benchmark candidate local recovery tiers only on residuals whose oracle-free opener fires; preserve existing healthy born-digital/formula/table paths as non-regression controls rather than reopening the broad parser bakeoff.",
-    "For any local semantic EXTRACT/VERIFY candidate, require contemporaneous STANDARD Codex controls over the same authoritative PDF pages/regions plus exact token/cached-token/reasoning-token and local resource telemetry.",
-    "Promote only candidates that pass every quality/provenance/resource gate; low-confidence, timeout, disagreement, backpressure, or missing provenance must fall through to Codex and then human review.",
-    "After measured promotion decisions, update localization-matrix.v2 or create the next measured version, CI-lock the production fallback ladder, and run a separate bounded Lambda integration gate before considering task completion or sustained research."
+    "Durably register exactly three missing source cases: one degraded scanned scientific report, one scientific PDF with quantitative chart plus relational diagram semantics, and one complex born-digital/hybrid layout case whose acceptance remains contingent on the deterministic layout opener firing during native audit.",
+    "Keep source PDF bytes outside Git where practical; record stable URLs/identifiers and target page/region annotations now, then capture authoritative SHA-256/page-count/native text-layout diagnostics during a bounded Lambda source-prefetch gate.",
+    "After all three case manifests are durable, create one bounded Lambda gate that fast-forwards from the last verified local baseline, downloads only the selected/pinned candidate runtimes/weights into explicit caches, records exact licenses/checksums/resource preflight, and leaves research-engine-daemon.service inactive/dead.",
+    "Benchmark PP-OCRv6_medium first only on scan/text residuals, PaddleOCR-VL-1.6 only on opened visual/exhausted specialized regions, and Qwen3.5-4B only on bounded semantic ambiguity plus conditional visual fallback.",
+    "Require contemporaneous authoritative-PDF STANDARD Codex controls for any semantic/visual promotion, exact token telemetry, and fail-closed fall-through on timeout/backpressure/disagreement/missing provenance.",
+    "After measured promotion decisions, update the localization matrix and CI-lock any production fallback ladder before a separate bounded integration gate."
   ],
-  "next_safe_action": "Keep sustained research disabled and do not start research-engine-daemon.service. Treat research-engine remote main@9d2e56513f134e4dbb83970402ff9feccccc9fb3 as the durable residual-contract baseline; the Lambda/local checkout remains last verified clean at 0e5b1464c5307b9b1824618b6e5cff0f13485146 because this checkpoint was GitHub-only. Do not fast-forward or install models merely to normalize that local checkout. First use the durable residual-escalation-contract.v1.json to select/pin the minimum concrete OCR/layout, multimodal-region, and local semantic candidate families with current license/runtime evidence, while separately preparing manifests for only scan-mixed-quality-v1, semantic-visuals-v1, and malformed-layout-v1. No global OCR/VLM/local-agent enablement, broad parser bakeoff, or sustained runtime work. Open Lambda model/runtime installation only after candidate selection plus source-case manifests are durable and a bounded benchmark gate explicitly owns local synchronization and daemon/model lifecycle.",
+  "next_safe_action": "Keep sustained research disabled and do not start research-engine-daemon.service. Treat research-engine remote main@9c636c4f00e47a8b8e507e4e011d4867a5da68f9 as the durable candidate-selection baseline; Lambda/local remains last verified clean at 0e5b1464c5307b9b1824618b6e5cff0f13485146 and should not be synchronized merely for bookkeeping. Next durably register exactly the three missing source-case manifests without moving bulky PDFs through GitHub: scan-mixed-quality-v1, semantic-visuals-v1, malformed-layout-v1. Each manifest must record a stable public/source locator, intended target pages/regions and annotations, and explicitly defer authoritative SHA-256 plus native opener diagnostics to the bounded Lambda prefetch/audit gate. Only after all three manifests are merged/CI-locked may a bounded Lambda gate own the fast-forward, source download/hash audit, selected model/runtime prefetch, license/checksum receipts, and candidate benchmarks. No global OCR/VLM/local-agent enablement and no broad parser bakeoff.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
