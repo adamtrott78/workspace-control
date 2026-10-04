@@ -68,7 +68,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "7a26e648ec409c96a3f9b7c8620f566658700894",
+        "checkpoint_sha": "d0debd205de46a608fce5b9a15f3fa0fdd6de4e6",
         "verified": true
       },
       "local": {
@@ -1509,25 +1509,43 @@
         "The current direct Transformers route is therefore retained only as evidence that PaddleOCR-VL can serve as a perceptual/element-recognition parser. It is not promoted as authoritative visual-semantic evidence or as a replacement for semantic EXTRACT/VERIFY.",
         "Official PaddleOCR-VL documentation recommends the official pipeline/optimized vLLM server for faster page-level parsing; direct Transformers is documented as element-level recognition/text spotting. Performance of this direct harness is not treated as a definitive ceiling for the model's parser throughput."
       ]
+    },
+    {
+      "check": "Qwen3.5-4B targeted visual-semantic fallback implementation",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #78 merged as d0debd205de46a608fce5b9a15f3fa0fdd6de4e6.",
+        "PR-head CI run 37242434658 PASS; canonical-main CI run 37242540771 PASS.",
+        "Gate uses the already-prefetched Qwen/Qwen3.5-4B revision 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a and verifies both pinned safetensor shard SHA-256 values before runtime construction.",
+        "Runtime is isolated vLLM 0.30.0 with one selected idle GPU, bfloat16, max_model_len=8192, max_num_seqs=1, one image per prompt, gpu_memory_utilization=0.65, and default optimized CUDA-graph serving path rather than forced eager execution.",
+        "Runner performs a fail-fast CUDA allocation self-test after vLLM install so any wheel/driver mismatch is classified before model inference.",
+        "Qwen runs in non-thinking mode with the model's documented instruct sampling family, fixed seed 0 for repeatability, and exactly three calls: Figure 6 cold, Figure 3 warm, Figure 6 warm repeat.",
+        "Prompts are evidence-specific and structured. Figure 6 forbids estimating unprinted curve values and requires curve_numeric_estimates=[]; Figure 3 directly tests architecture/shortcut relations. Fabricated-fact tolerance remains zero.",
+        "GPU telemetry is baseline-delta by selected GPU UUID and host-memory telemetry covers the full vLLM process tree, not only the parent process.",
+        "No daemon start, Codex call, production routing change, alternate model download, or scientific-state materialization is allowed by this initial local gate."
+      ]
     }
   ],
   "blockers": [
     "PP-OCRv6 remains resource-pass / quality-not-promoted; the blank scan target still requires replacement with a content-bearing image-only scan before scan-recovery promotion can be evaluated.",
-    "PaddleOCR-VL-1.6 direct element-level inference completed but is not promoted: it exceeded the current VRAM/latency ceilings and, more importantly, fabricated numeric chart values and failed key panel/shortcut relations. It may remain a perception/parser candidate, especially through its official optimized vLLM/page-level path, but not a semantic authority.",
-    "The next selected visual-semantic fallback, Qwen3.5-4B, is prefetched but has not yet been benchmarked on the validated Figure 6/Figure 3 residuals.",
-    "A broader local-only semantic architecture that could displace routine remote EXTRACT/VERIFY has not yet been validated end-to-end; provenance and abstention/fallback gates remain required.",
-    "Codex STANDARD EXTRACT/VERIFY remains the production semantic baseline until bounded local semantic controls demonstrate equivalent evidence quality."
+    "PaddleOCR-VL-1.6 direct element-level inference completed but is not promoted: it exceeded current VRAM/latency ceilings and, more importantly, fabricated chart numerics and failed key panel/shortcut relations. It remains perception/parser evidence only.",
+    "Qwen3.5-4B targeted visual-semantic inference is implemented and CI-validated but has not yet executed on Lambda, so actual vLLM CUDA compatibility, quality, latency, VRAM, and process-tree RSS remain unmeasured.",
+    "The vLLM 0.30.0 runtime must pass its CUDA allocation sentinel on the actual Lambda before model loading; a failure there is a runtime-binary compatibility result, not a Qwen model-quality result.",
+    "A broader local semantic replacement for routine EXTRACT/VERIFY remains unopened until Qwen's visual-semantic benchmark is adjudicated.",
+    "Codex STANDARD EXTRACT/VERIFY remains the production semantic baseline until bounded local controls demonstrate equivalent evidence/provenance quality."
   ],
   "remaining_work": [
-    "Record PaddleOCR-VL as perception-useful but semantic-quality-not-promoted; do not spend more cycles patching the direct Transformers path for semantic promotion.",
-    "Open the already-selected Qwen3.5-4B visual fallback on the same validated Figure 6/Figure 3 crops using explicit evidence questions and structured factual outputs rather than generic OCR/chart transcription prompts.",
-    "Benchmark Qwen3.5-4B as a unified local semantic candidate over both multimodal residuals and bounded authoritative text, because it is already prefetched and natively supports image-text-to-text; keep the same provenance/fabrication thresholds.",
-    "If Qwen3.5-4B visual quality is strong, extend the local semantic experiment to EXTRACT and VERIFY with authoritative page/context bounds and contemporaneous STANDARD Codex controls; measure what fraction of remote calls can be suppressed without quality regression.",
-    "Separately evaluate lightweight specialized local perception models only where they buy cost/latency: MinerU2.5-Pro for document/page parsing, Granite-Docling for very cheap DocTags structure, and DePlot/ChartGemma for chart-specific extraction. Do not add models merely for breadth.",
-    "Evaluate the official PaddleOCR-VL vLLM/page-level path only if a perception-parser role remains valuable after Qwen/MinerU comparison; the current 72-108 s direct element-level route is not the recommended optimized serving path.",
-    "Replace the invalid blank image-only scan benchmark before reopening PP-OCRv6 scan-recovery quality."
+    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@7a26e648ec409c96a3f9b7c8620f566658700894, fetch origin/main, require origin/main=d0debd205de46a608fce5b9a15f3fa0fdd6de4e6, and fast-forward only to that canonical Qwen benchmark commit.",
+    "Run bash deploy/run-qwen35-visual-benchmark.sh. Preserve the visible OUTPUT_ROOT and return qwen35-visual-benchmark-report.json, or the first hard error. Existing Figure 6/Figure 3 crops are already validated, so re-upload is unnecessary unless the rerender differs.",
+    "If the CUDA allocation sentinel fails before model inference, classify it strictly as vLLM runtime-binary/driver incompatibility and choose a compatible local runtime deliberately; do not score Qwen quality from a zero-inference failure.",
+    "If Qwen executes, score Figure 6 panel/model sets, line-style semantics, plain-110 absence, empty curve_numeric_estimates, and zero fabricated facts; score Figure 3 architecture columns, shortcut presence/relations, channel widths, caption FLOPs, and zero fabricated facts.",
+    "Analyze quality separately from resource-policy outcome. If Qwen quality is exceptional but a current latency/VRAM ceiling fails, open an explicit serving/resource optimization or policy-reconsideration gate rather than silently changing the governing thresholds.",
+    "If Qwen visual quality passes, run a separate contemporaneous authoritative-PDF Codex visual control on the exact same evidence questions before any promotion.",
+    "After visual control success, open bounded local Qwen EXTRACT and VERIFY calibration: EXTRACT <=4 authoritative pages; VERIFY exact radius-0 cited page; exact quote/page provenance; zero fabricated/unlocatable evidence; contemporaneous STANDARD Codex controls; measure remote-call avoidance and token savings.",
+    "Only after those semantic controls should production EXTRACT/VERIFY routing change. Continue to reserve remote STANDARD Codex for disagreement/low-confidence/fallback cases.",
+    "Evaluate MinerU2.5-Pro, Granite-Docling, DePlot/ChartGemma, or optimized PaddleOCR-VL only where measured residuals justify a cheaper specialized perception tier."
   ],
-  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat the completed PaddleOCR-VL direct benchmark as resource-fail and semantic-quality-not-promoted but perceptually informative: all three calls completed, yet VRAM/latency exceeded current ceilings and the chart output fabricated unsupported numeric values while both figures lost required visual relations. Do not continue patching this direct PaddleOCR-VL path for semantic promotion. Next open the already-prefetched Qwen3.5-4B visual fallback on the exact validated Figure 6 and Figure 3 crops, using explicit evidence questions and structured outputs that directly test the durable annotated facts/relations with zero fabricated-fact tolerance. If Qwen3.5-4B passes visual quality/resource gates, extend it into a bounded local EXTRACT/VERIFY calibration against contemporaneous STANDARD Codex controls to estimate how much remote semantic throughput can be eliminated. Specialized alternatives (MinerU2.5-Pro, Granite-Docling, DePlot/ChartGemma) should be evaluated only for clearly cheaper perception niches. Do not change production routing or materialize scientific state during these benchmarks.",
+  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6 as the canonical Qwen3.5-4B targeted visual-semantic benchmark baseline and Lambda/local main@7a26e648ec409c96a3f9b7c8620f566658700894 as the last verified clean local state. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly d0debd205de46a608fce5b9a15f3fa0fdd6de4e6, then fast-forward only to that commit. Run bash deploy/run-qwen35-visual-benchmark.sh. Return the visible OUTPUT_ROOT plus qwen35-visual-benchmark-report.json, or the first hard error. The runner must first prove vLLM/Torch CUDA allocation on the selected GPU; a pre-inference CUDA failure is runtime compatibility only. If three Qwen calls complete, evaluate semantic quality separately from resource ceilings. Do not start the daemon, invoke Codex during this initial local gate, change production routing, download alternate model weights, or materialize scientific state.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
