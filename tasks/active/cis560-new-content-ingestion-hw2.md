@@ -30,7 +30,7 @@ Bring CIS 560 durable course state current with all genuinely new instructor-cov
 
 - Intent: mutate
 - Remote branch: tutor-framework
-- Remote checkpoint: 2d202f15862725be3153f3ad948fbcf77e76b499
+- Remote checkpoint: f3a759860b4d30934149e660b3ac0c156907ef83
 - Remote verified: true
 
 ### workspace-control
@@ -50,13 +50,15 @@ Bring CIS 560 durable course state current with all genuinely new instructor-cov
 
 - Durable source: `homework/hw02/artifacts/SUBMISSION.md`
 - Word document: `CIS560_HW2_Adam_Trott.docx`
+- Reusable format authority: `homework/REPORT_STYLE.md`
+- Style parity: PASS against Problem Set 1 precedent
 - Semantic validation: PASS
-- Visual validation: PASS (5 pages inspected)
+- Visual validation: PASS (8 pages inspected)
 - Canvas submission: NOT_PERFORMED
 
 ## Next safe action
 
-Present the validated CIS560_HW2_Adam_Trott.docx to the user for final review. If no edits are requested, the next action is the user-owned Canvas submission; after confirmation, finalize HANDOFF_SAFE/archive.
+Present the reformatted CIS560_HW2_Adam_Trott.docx to the user for final review. If no edits are requested, the next action is the user-owned Canvas submission; after confirmation, finalize HANDOFF_SAFE/archive.
 
 ## Remaining work
 
