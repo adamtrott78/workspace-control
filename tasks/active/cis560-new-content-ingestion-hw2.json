@@ -47,7 +47,7 @@
       "base_sha": "9c5e492354449186898b5f038e227e5a92d15005",
       "remote": {
         "branch": "tutor-framework",
-        "checkpoint_sha": "2d202f15862725be3153f3ad948fbcf77e76b499",
+        "checkpoint_sha": "f3a759860b4d30934149e660b3ac0c156907ef83",
         "verified": true
       },
       "local": null,
@@ -285,7 +285,9 @@
       "outputs": [
         "homework/hw02/artifacts/SUBMISSION.md",
         "homework/hw02/artifacts/README.md validated artifact state",
-        "CIS560_HW2_Adam_Trott.docx attached in the conversation"
+        "CIS560_HW2_Adam_Trott.docx attached in the conversation",
+        "homework/REPORT_STYLE.md reusable CIS560 report-format authority",
+        "Reformatted CIS560_HW2_Adam_Trott.docx matching Problem Set 1 precedent"
       ],
       "validation": [
         {
@@ -303,6 +305,15 @@
           "evidence": [
             "DOCX rendered to five page images using the document render pipeline.",
             "All five pages were inspected with no clipping, overlap, missing glyphs, or orphaned derivation line."
+          ]
+        },
+        {
+          "check": "Problem Set 1 style parity",
+          "result": "PASS",
+          "evidence": [
+            "Recovered the Problem Set 1 source conventions: 12 pt Tinos, 1-inch margins, 1.05 line spacing, zero paragraph indent, approximately 0.55em paragraph spacing, simple bold labels, minimal four-line cover, and intentional page breaks.",
+            "Final HW2 DOCX rendered to 8 pages and every page was visually inspected after the final formatting pass.",
+            "Reusable formatting authority is now persisted at homework/REPORT_STYLE.md."
           ]
         }
       ],
@@ -368,11 +379,12 @@
     {
       "id": "cis560_hw2_submission_ready",
       "kind": "git",
-      "identity": "CIS560-AdamTrott:tutor-framework@2d202f15862725be3153f3ad948fbcf77e76b499",
+      "identity": "CIS560-AdamTrott:tutor-framework@f3a759860b4d30934149e660b3ac0c156907ef83",
       "required_for_resume": true,
       "evidence": [
         "HW2 learning record marks all assigned problem work complete.",
-        "Durable submission source and validated artifact metadata are present under homework/hw02/artifacts/."
+        "Durable submission source and validated artifact metadata are present under homework/hw02/artifacts/.",
+        "Reusable report style persisted at homework/REPORT_STYLE.md and HW2 artifact record updated after final formatting pass."
       ]
     }
   ],
@@ -443,8 +455,8 @@
     "User submits the final document to Canvas; external submission remains user-owned unless separately authorized.",
     "After submission confirmation or explicit closure, synchronize final HANDOFF_SAFE state and archive the task capsule."
   ],
-  "next_safe_action": "Present the validated CIS560_HW2_Adam_Trott.docx to the user for final review. If no edits are requested, the next action is the user-owned Canvas submission; after confirmation, finalize HANDOFF_SAFE/archive.",
+  "next_safe_action": "Present the reformatted CIS560_HW2_Adam_Trott.docx to the user for final review. If no edits are requested, the next action is the user-owned Canvas submission; after confirmation, finalize HANDOFF_SAFE/archive.",
   "last_executor": "chatgpt",
   "last_surface": "github+conversation+document",
-  "notes": "Cold start recovered only the routed durable owners requested for this task. At the starting checkpoint, course/LECTURES.md indexes Lecture 6 (2026-09-22) as the latest durably ingested lecture, and homework/README.md still routes Homework 1 as the active assignment. These are recovery observations, not permission to infer missing later course history. On 2026-10-03, the user supplied Lecture 7–9 note text plus Lecture 7/8 decks and pumping/Myhill-Nerode supporting materials. Gmail was checked for matching forwarded Lecture 7–9 messages and none were found; provenance therefore remains user-provided instructor-note text plus uploaded course files, without invented dates/message IDs. Lecture 7–9 course ingestion completed at CIS560 tutor-framework@edf5dc31df48abb785ed6b5635a0399bb2d784db. Exact course boundary is now §1.4 and §2.1 covered, §2.2 assigned/previewed for Lecture 10, and §2.3 next-topic guidance. Mastery was not changed. The authoritative one-page HW2 PDF was supplied and visually inspected on 2026-10-03. The assignment requires five problems worth 10 points total, word-processed work, Canvas submission, and a cover page; exact referenced Sipser items still must be resolved before bootstrap completion. HW2 bootstrap completed at CIS560 tutor-framework@e6ee68912a63eb2373780fd9b5ec3bcc42738084. The assignment artifact requires a word-processed Canvas submission with cover page; no specific filename/extension or JFLAP/code artifact is stated. Tutoring may now begin at Problem 2-1. On 2026-10-03, all HW2 tutoring items were completed and a five-page submission-ready DOCX was generated and visually validated. Durable semantic source is homework/hw02/artifacts/SUBMISSION.md. Final precision corrections: G1 branch B requires the generated string to end in 0, and G2 excludes epsilon because S has no epsilon production. Canvas submission remains user-owned."
+  "notes": "Cold start recovered only the routed durable owners requested for this task. At the starting checkpoint, course/LECTURES.md indexes Lecture 6 (2026-09-22) as the latest durably ingested lecture, and homework/README.md still routes Homework 1 as the active assignment. These are recovery observations, not permission to infer missing later course history. On 2026-10-03, the user supplied Lecture 7–9 note text plus Lecture 7/8 decks and pumping/Myhill-Nerode supporting materials. Gmail was checked for matching forwarded Lecture 7–9 messages and none were found; provenance therefore remains user-provided instructor-note text plus uploaded course files, without invented dates/message IDs. Lecture 7–9 course ingestion completed at CIS560 tutor-framework@edf5dc31df48abb785ed6b5635a0399bb2d784db. Exact course boundary is now §1.4 and §2.1 covered, §2.2 assigned/previewed for Lecture 10, and §2.3 next-topic guidance. Mastery was not changed. The authoritative one-page HW2 PDF was supplied and visually inspected on 2026-10-03. The assignment requires five problems worth 10 points total, word-processed work, Canvas submission, and a cover page; exact referenced Sipser items still must be resolved before bootstrap completion. HW2 bootstrap completed at CIS560 tutor-framework@e6ee68912a63eb2373780fd9b5ec3bcc42738084. The assignment artifact requires a word-processed Canvas submission with cover page; no specific filename/extension or JFLAP/code artifact is stated. Tutoring may now begin at Problem 2-1. On 2026-10-03, all HW2 tutoring items were completed and a five-page submission-ready DOCX was generated and visually validated. Durable semantic source is homework/hw02/artifacts/SUBMISSION.md. Final precision corrections: G1 branch B requires the generated string to end in 0, and G2 excludes epsilon because S has no epsilon production. Canvas submission remains user-owned. On 2026-10-03, the HW2 DOCX was rebuilt to match the established Problem Set 1 / prior same-instructor report style. A reusable formatting authority was added at CIS560 homework/REPORT_STYLE.md. The final DOCX renders to 8 pages and all pages were visually inspected."
 }
