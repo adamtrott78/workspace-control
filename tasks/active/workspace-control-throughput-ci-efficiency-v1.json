@@ -397,7 +397,7 @@
       "check": "Remote consistency after implementation checkpoint",
       "result": "PASS",
       "evidence": [
-        "workspace-control branch throughput-ci-efficiency-v1 is four commits ahead of observed main base 1a46337a35296554917f61a80ff21535f8e87c19 with the intended 11-path diff.",
+        "workspace-control branch throughput-ci-efficiency-v1 is based on observed main 1a46337a35296554917f61a80ff21535f8e87c19 and carries the intended 11-path implementation/coordination diff.",
         "Derived handoff contains the required derived marker, full workspace-control URL, and current next_safe_action.",
         "research-engine main remains exactly 7a26e648ec409c96a3f9b7c8620f566658700894 and was not mutated."
       ]
