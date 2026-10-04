@@ -6,101 +6,97 @@ Authoritative capsule: `tasks/active/research-engine-local-document-pipeline-v1.
 ## State
 - Task: `research-engine-local-document-pipeline-v1`
 - Stage: `residual_escalation_and_local_semantic_fallbacks`
-- research-engine remote canonical: `320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c`
-- research-engine Lambda/local last verified: `d9946729f92a15fe3a6c821dc366a53a37ca0756` clean
+- research-engine remote canonical: `9019be081db373395adeffa28fe515c33e582fb3`
+- research-engine Lambda/local last verified: `320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c` clean
 - research daemon: keep inactive/dead PID 0
 - sustained research: disabled
 - Codex STANDARD authoritative-PDF EXTRACT/VERIFY remains production semantic baseline
 
-## Corrected residual source gate
-The corrected bounded Lambda source audit is PASS with
-`model_prefetch_ready=true`.
+## Residual model-prefetch PASS
+The bounded model-prefetch report passed with zero candidate inference and no
+scientific-state materialization.
 
-Safety counters:
-- candidate model downloads: 0
-- candidate model inference calls: 0
-- scientific state materialized: false
-- authority: downloaded original PDFs
+Pinned PP-OCRv6 artifacts:
+- detection: `PaddlePaddle/PP-OCRv6_medium_det@8e0f56fb2ef86b461d99cfc7ac5c137738985f61`
+  - Apache-2.0
+  - `inference.pdiparams` SHA-256
+    `85218d2e3d98f5a21c58b4220627be923a97aee5db3cc71f39536ab31ac53960`
+- recognition: `PaddlePaddle/PP-OCRv6_medium_rec@e5a92bcbc5cc1b494628e458d267778f0704fd7c`
+  - Apache-2.0
+  - `inference.pdiparams` SHA-256
+    `1b01c79a914587933f615569e75de54f2e638ebb5d3f3b3c1b38c24ede8c7319`
 
-Pinned source evidence:
-- `scan-mixed-quality-v1`: SHA-256
-  `3948255a723380d8844bab31c60298cee00da9334efa377f1d596b306792b6a1`,
-  28 pages; scan opener pages zero-based `[1,3,5,27]`; low-confidence pages
-  `[8,9,15,16,19,22,24]`.
-- `semantic-visuals-v1`: SHA-256
-  `1e0651b6810ecba34a3dbc5b5b0209226f889004607c1f203540a48d64e5a93a`,
-  12 pages; Figure 6 page index 7 bbox
-  `[99.19828033447266,72.1703872680664,495.0450134277344,171.62620544433594]`;
-  Figure 3 page index 3 bbox
-  `[50.5037956237793,76.09317016601562,285.709716796875,618.7928466796875]`.
-- `malformed-layout-v1`: SHA-256
-  `f2630182ccfabd6fc89ac20270b4daf15a0ca849298a7db1e5d124ca443051f1`,
-  14 pages; both registered targets fire the layout opener and no replacement is required.
+Other prefetched candidates remain pinned:
+- PaddleOCR-VL-1.6:
+  `c5630abae1d940eafe0697512a0325494b02ab42`, 1,930,462,423 bytes,
+  offline reopen PASS.
+- Qwen3.5-4B:
+  `851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a`, 9,342,907,469 bytes,
+  offline reopen PASS.
 
-The compact uploaded audit report SHA-256 is
-`ade43b862493a6b21f3684a75870861769dcf7831c7fa6dbda7026df5081eb1c`.
+Uploaded model-prefetch report SHA-256:
+`a2f68c2b50a4fe416f825e369f9d85887ae295611540f5c06200c509807e3ca3`.
 
-## Model prefetch gate
-research-engine PR #70 merged as
-`320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c`.
+## PP-OCRv6 measurement gate
+research-engine PR #71 merged as
+`9019be081db373395adeffa28fe515c33e582fb3`.
 
-- PR-head CI `37171098792`: PASS
-- canonical-main CI `37171236633`: PASS
-- source PASS receipt: `benchmarks/document_intelligence/residual-source-audit-pass.v1.json`
-- contract: `benchmarks/document_intelligence/residual-model-prefetch-contract.v1.json`
-- runner: `deploy/run-residual-model-prefetch-gate.sh`
+- final PR-head CI `37172948330`: PASS
+- canonical-main CI `37173031391`: PASS
+- contract:
+  `benchmarks/document_intelligence/ppocrv6-residual-benchmark-contract.v1.json`
+- runner: `deploy/run-ppocrv6-residual-benchmark.sh`
 
-The gate prefetches four artifact repositories across the three selected
-candidate families:
-1. PP-OCRv6 medium detection
-2. PP-OCRv6 medium recognition
-3. PaddleOCR-VL-1.6
-4. Qwen3.5-4B
+This is the first candidate-model inference gate. It:
+- constructs one transactional isolated PaddlePaddle 3.2.0 / PaddleOCR 3.7.0
+  runtime;
+- verifies the prefetched PP-OCRv6 detection/recognition hashes;
+- renders only page indices 3 and 16 from the pinned authoritative NASA PDF at
+  200 DPI;
+- performs exactly three OCR calls: first scan target, warm low-confidence
+  target, warm repeat of the scan target;
+- measures model initialization, warm-page latency, process GPU VRAM, and peak
+  RSS;
+- saves OCR text/scores/boxes plus the two page PNGs under visible
+  `workspace-control-tmp`.
 
-It records exact resolved revisions, Apache-2.0 license metadata, per-file
-SHA-256 manifests, materialized bytes, offline reopenability, disk/host/GPU
-compatibility facts, and the pinned PaddleOCR 3.7.0 wheel.
+Resource success is intentionally
+`MEASURED_PENDING_HUMAN_QUALITY`, not promotion. The two rendered pages and
+OCR results must be reviewed for visible-text coverage, fabricated text, and
+page provenance before PP-OCRv6 can suppress a higher tier.
 
-It performs zero candidate inference and does not install PaddlePaddle, vLLM,
-SGLang, Transformers, or another candidate inference runtime.
+PaddleOCR-VL-1.6, Qwen3.5-4B, Codex, production routing, and scientific-state
+writes remain closed in this gate.
 
 ## Next safe action
 Keep sustained research disabled and `research-engine-daemon.service`
 inactive/dead. Treat research-engine remote
-`main@320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c` as canonical and Lambda/local
-`main@d9946729f92a15fe3a6c821dc366a53a37ca0756` as the last verified local
+`main@9019be081db373395adeffa28fe515c33e582fb3` as canonical and Lambda/local
+`main@320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c` as the last verified local
 state.
 
 On Lambda:
 1. require branch `main`, clean checkout, daemon inactive/dead PID 0;
 2. fetch origin and require `origin/main` exactly
-   `320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c`;
+   `9019be081db373395adeffa28fe515c33e582fb3`;
 3. fast-forward only to that commit;
-4. run `bash deploy/run-residual-model-prefetch-gate.sh`;
-5. return the visible `OUTPUT_ROOT` plus `model-prefetch-report.json`, or the
-   first hard failure.
+4. run `bash deploy/run-ppocrv6-residual-benchmark.sh`;
+5. return the visible `OUTPUT_ROOT` plus:
+   - `ppocrv6-benchmark-report.json`
+   - `scan_textless-page-zb3.png`
+   - `low_confidence_text-page-zb16.png`
+   or the first hard failure.
 
-Do not start the daemon, run candidate OCR/VLM/semantic inference, install
-PaddlePaddle/vLLM/SGLang/Transformers, invoke Codex, change production routing,
-or materialize scientific state.
-
-A PASS opens isolated PP-OCRv6 runtime construction and the first scan/text
-quality/resource benchmark. PaddleOCR-VL follows on targeted visual/structural
-residuals; Qwen3.5-4B semantic benchmarking remains bounded and contemporaneously
-controlled against STANDARD Codex.
+Do not send the full console log.
 
 ## Remaining work
-- Execute the bounded model artifact prefetch gate on Lambda.
-- Pin the resolved PP-OCRv6 detection/recognition revisions and compact
-  prefetch/license/checksum receipts.
-- Build isolated PP-OCRv6 inference runtime and human-check the promoted
-  scan/text benchmark targets.
-- Run PP-OCRv6 quality/resource benchmark first.
-- Then open PaddleOCR-VL-1.6 only on validated target regions / exhausted
+- Execute and human-review the PP-OCRv6 scan/text measurement.
+- Record scan/text promotion or fail-through decision.
+- Then open PaddleOCR-VL-1.6 only on validated semantic-visual / exhausted
   structural residuals.
 - Open Qwen3.5-4B semantic EXTRACT/VERIFY only on bounded authoritative-PDF
   inputs with contemporaneous STANDARD Codex controls.
-- Qwen visual use remains conditional on PaddleOCR-VL failure/abstention.
+- Qwen visual use remains fallback-only after PaddleOCR-VL failure/abstention.
 
 ## Fresh-chat initialization
 @GitHub
