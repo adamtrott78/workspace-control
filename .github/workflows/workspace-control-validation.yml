@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout tested tree
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -89,10 +89,11 @@ jobs:
                 python3 scripts/workspace_control.py task-validate --file "$path" --json
                 md="${path%.json}.md"
                 if [[ -f "$md" ]]; then
-                  tmp="$(mktemp)"
+                  tmp_dir="$(mktemp -d)"
+                  tmp="$tmp_dir/handoff.md"
                   python3 scripts/workspace_control.py task-render --file "$path" --output "$tmp"
                   cmp -s "$tmp" "$md"
-                  rm -f "$tmp"
+                  rm -rf "$tmp_dir"
                 fi
                 ;;
             esac
