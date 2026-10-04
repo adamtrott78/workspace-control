@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control",
-  "current_stage": "baseline_measurement",
+  "current_stage": "control_plane_implementation",
   "acceptance_criteria": [
     "Produce an empirical latency decomposition for representative recent ChatGPT/GitHub control cycles, separating tool-call/orchestration time, Git mutation count, PR CI, canonical-main CI, status polling, runtime/human handoffs, and genuinely necessary validation.",
     "Study documented practices from mature CI/CD and monorepo/control-plane systems using primary or authoritative sources where possible, including validation tiers, test-impact/path selection, caching, concurrency cancellation, merge queues or tested-merge semantics, pre-submit versus post-submit roles, and scheduled/full regression coverage.",
@@ -40,10 +40,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "4b493c05184fb6c565563618297e3e8c3534aad5",
+      "base_sha": "1a46337a35296554917f61a80ff21535f8e87c19",
       "remote": {
-        "branch": "main",
-        "checkpoint_sha": "4b493c05184fb6c565563618297e3e8c3534aad5",
+        "branch": "throughput-ci-efficiency-v1",
+        "checkpoint_sha": "28d1c892af9c015010e0700154cedd27aad21bac",
         "verified": true
       },
       "local": null,
@@ -77,7 +77,7 @@
   "stages": [
     {
       "id": "baseline_measurement",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -87,17 +87,51 @@
         "recent research-engine PR/main CI run history from PaddleOCR-VL iteration"
       ],
       "outputs": [
-        "measured control-cycle latency decomposition",
-        "catalog of avoidable orchestration and CI duplication"
+        "measured control-cycle latency decomposition in architecture/throughput-ci-efficiency-v1.md",
+        "connector mutation/status capability inventory with current update_ref lease limitation"
       ],
       "validation": [
         {
           "check": "Recent paired CI baseline captured",
           "result": "PASS",
           "evidence": [
-            "Five recent successful PR CI runs took 73, 75, 81, 81, and 91 seconds; mean 80.2 seconds.",
-            "Their corresponding canonical-main CI runs took 75, 65, 81, 82, and 81 seconds; mean 76.8 seconds.",
-            "Those ten runs consumed 785 seconds (~13.1 minutes) of CI wall time across five small fix cycles before counting assistant polling/tool orchestration."
+            "PR #73-#77 final successful pull-request runs: 73, 75, 81, 81, 91 seconds (401 seconds total; 80.2 second mean).",
+            "Corresponding canonical-main runs: 75, 65, 81, 82, 81 seconds (384 seconds total; 76.8 second mean).",
+            "The ten successful runs total 785 seconds (~13.1 minutes). PR #75 additionally consumed a failed 58-second PR run before a corrective commit, bringing observed CI consumption in the five-fix slice to at least 843 seconds (~14.1 minutes)."
+          ]
+        },
+        {
+          "check": "Representative successful-run cost decomposed",
+          "result": "PASS",
+          "evidence": [
+            "PR #77 log intervals: PostgreSQL pull/start ~12.0 s, health wait ~6.2 s, setup-python ~3.3 s, install ~12.0 s, pytest ~21.8 s, Compose validation ~2.7 s, Docker build ~18.7 s; compile/checkout were sub-second to ~1 s.",
+            "Main #77 showed the same dominant structure: PostgreSQL pull/start+health ~18.9 s, install ~9.2 s, pytest ~21.0 s, Docker build ~17.6 s."
+          ]
+        },
+        {
+          "check": "Orchestration overhead bounded from durable evidence",
+          "result": "PASS",
+          "evidence": [
+            "PRs #73-#77 contained 23 branch commits for five logical fixes; most commits were seconds apart and could be represented as fewer logical Git checkpoints.",
+            "PR #75 opened before the final correction and therefore ran a failed 58-second workflow before a second full PR run.",
+            "Exact historical connector polling count is not reconstructible because reads leave no Git/Actions record; it is retained as an explicitly unmeasured positive term rather than assumed zero."
+          ]
+        },
+        {
+          "check": "Tested-tree duplication verified for representative slice",
+          "result": "PASS",
+          "evidence": [
+            "For each final PR run #73-#77, the refs/pull/<N>/merge synthetic merge tree SHA exactly equaled the eventual squash-merged main commit tree SHA.",
+            "For this sample only, immediate post-merge main CI repeated the same workflow over the same Git tree; architecture preserves escalation when tree identity/equivalent merge semantics are not proven."
+          ]
+        },
+        {
+          "check": "GitHub connector capability inventory completed",
+          "result": "PASS",
+          "evidence": [
+            "create_blob, create_tree, create_commit, and plain update_ref were exercised successfully to create atomic multi-file commits.",
+            "The advertised update_ref expected_sha parameter was rejected by connector input validation, so current guidance requires immediate pre-write head verification and post-write ref verification instead of claiming lease protection.",
+            "High-level run/status, job, logs, diff, PR, and failed-job rerun surfaces are available, allowing status-first and logs-on-failure orchestration."
           ]
         }
       ],
@@ -105,7 +139,7 @@
     },
     {
       "id": "external_practice_research",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "web+github",
@@ -113,14 +147,26 @@
         "baseline_measurement"
       ],
       "outputs": [
-        "source-backed CI/orchestration design lessons applicable to this control plane"
+        "source-backed CI/orchestration design lessons captured in architecture/throughput-ci-efficiency-v1.md"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Authoritative/documented practices mapped to local failure modes",
+          "result": "PASS",
+          "evidence": [
+            "GitHub documentation: pull_request merge refs, strict required checks, merge queues/tested-latest-target semantics, path filters, concurrency cancellation, reusable/scheduled workflows.",
+            "Docker documentation: BuildKit external cache backends for CI cache reuse.",
+            "Nx documentation: affected-task selection from Git changed files plus project/dependency graph.",
+            "Kubernetes Prow documentation: presubmit, postsubmit, periodic, changed-file, required/advisory job separation.",
+            "Sources and direct URLs are recorded in architecture/throughput-ci-efficiency-v1.md."
+          ]
+        }
+      ],
       "resume_condition": "Baseline latency decomposition is durable."
     },
     {
       "id": "validation_architecture_design",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -129,14 +175,25 @@
         "external_practice_research"
       ],
       "outputs": [
-        "risk-tiered validation contract and orchestration contract"
+        "architecture/throughput-ci-efficiency-v1.md",
+        "procedures/validation_routing.md"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Risk-tiered architecture preserves fail-closed protection",
+          "result": "PASS",
+          "evidence": [
+            "Defines FAST_STATIC, TARGETED_PR, FULL_INTEGRATION, and CANONICAL_REGRESSION with monotonic escalation.",
+            "Unknown dependency/path state, high-consequence boundaries, classifier changes, or force-full requests escalate to FULL_INTEGRATION or stronger.",
+            "Tested-tree and canonical-main rules preserve post-submit dependencies when merge-tree equivalence or canonical-only behavior matters."
+          ]
+        }
+      ],
       "resume_condition": "External practices are mapped to local failure modes rather than copied generically."
     },
     {
       "id": "control_plane_implementation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -144,9 +201,31 @@
         "validation_architecture_design"
       ],
       "outputs": [
-        "minimal scripts/policies/workflows/tests implementing the selected fast paths"
+        "scripts/validation_plan.py",
+        "policies/workspace-control.validation-profile.v1.json",
+        "schemas/validation_profile.v1.schema.json",
+        "procedures/validation_routing.md",
+        "tests/test_validation_plan.py",
+        "task-render fresh-chat URL invariant fix in scripts/workspace_control.py and tests/test_workspace_control.py"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Focused validation-planner tests",
+          "result": "PASS",
+          "evidence": [
+            "Scratch execution of the exact planner/test design passed 10 focused unit tests covering fast, targeted, mixed, unknown-path fail-closed, force-full, normalization, dot-prefixed paths, traversal rejection, profile errors, and invalid force-full floor.",
+            "Validation profile was also checked against validation_profile.v1.schema.json in scratch and passed."
+          ]
+        },
+        {
+          "check": "Full workspace-control regression suite",
+          "result": "NOT_RUN",
+          "evidence": [
+            "workspace-control currently has no GitHub Actions workflow and this task is operating through the GitHub-only remote surface.",
+            "Because planner/profile/script/schema mutations self-classify as FULL_INTEGRATION, the implementation branch remains unmerged until the full repository unit/task-contract regression suite is executed in a suitable runtime."
+          ]
+        }
+      ],
       "resume_condition": "Design specifies preserved invariants and force-full-validation behavior."
     },
     {
@@ -162,7 +241,7 @@
         "before/after latency and quality evidence for low/moderate/high-risk mutation classes"
       ],
       "validation": [],
-      "resume_condition": "Implementation passes its own risk-appropriate validation."
+      "resume_condition": "Full workspace-control integration validation passes for the implementation checkpoint."
     }
   ],
   "checkpoints": [
@@ -175,6 +254,25 @@
         "Initial throughput task created from workspace-control main before any optimization mutation.",
         "research-engine representative baseline is main@7a26e648ec409c96a3f9b7c8620f566658700894.",
         "First action is measurement/research, not CI mutation."
+      ]
+    },
+    {
+      "id": "checkpoint:throughput-design",
+      "kind": "git_checkpoint",
+      "identity": "workspace-control:e7e4d416362a0a6cd53b4685f9deb8fcb1494577",
+      "required_for_resume": false,
+      "evidence": [
+        "Measured baseline, authoritative external research, and risk-tiered validation architecture committed on isolated branch."
+      ]
+    },
+    {
+      "id": "checkpoint:validation-planner-implementation",
+      "kind": "git_checkpoint",
+      "identity": "workspace-control:28d1c892af9c015010e0700154cedd27aad21bac",
+      "required_for_resume": true,
+      "evidence": [
+        "Isolated branch throughput-ci-efficiency-v1 contains planner/profile/schema/procedure/tests and durable-handoff URL fix.",
+        "research-engine remains read-only at 7a26e648ec409c96a3f9b7c8620f566658700894."
       ]
     }
   ],
@@ -202,6 +300,54 @@
       "evidence": [
         "Fresh-chat initialization must include the full workspace-control repository URL."
       ]
+    },
+    {
+      "path": "architecture/throughput-ci-efficiency-v1.md",
+      "state": "CHECKPOINTED",
+      "role": "measured baseline, research record, and validation architecture",
+      "origin": "workspace-control",
+      "persistence": "Git",
+      "regeneration": null,
+      "review_requirement": "Update when benchmark evidence or authority boundaries materially change.",
+      "evidence": [
+        "Committed on throughput-ci-efficiency-v1; design checkpoint e7e4d416362a0a6cd53b4685f9deb8fcb1494577."
+      ]
+    },
+    {
+      "path": "scripts/validation_plan.py",
+      "state": "IMPLEMENTED_UNMERGED",
+      "role": "fail-closed risk-tier planner",
+      "origin": "workspace-control",
+      "persistence": "Git",
+      "regeneration": null,
+      "review_requirement": "Full workspace-control regression required before merge.",
+      "evidence": [
+        "Implementation checkpoint 28d1c892af9c015010e0700154cedd27aad21bac."
+      ]
+    },
+    {
+      "path": "policies/workspace-control.validation-profile.v1.json",
+      "state": "IMPLEMENTED_UNMERGED",
+      "role": "workspace-control path/risk validation profile",
+      "origin": "workspace-control",
+      "persistence": "Git",
+      "regeneration": null,
+      "review_requirement": "Profile changes self-escalate to FULL_INTEGRATION.",
+      "evidence": [
+        "Implementation checkpoint 28d1c892af9c015010e0700154cedd27aad21bac."
+      ]
+    },
+    {
+      "path": "procedures/validation_routing.md",
+      "state": "IMPLEMENTED_UNMERGED",
+      "role": "executor-neutral validation and orchestration guidance",
+      "origin": "workspace-control",
+      "persistence": "Git",
+      "regeneration": null,
+      "review_requirement": "Keep aligned with planner semantics and measured connector surface.",
+      "evidence": [
+        "Implementation checkpoint 28d1c892af9c015010e0700154cedd27aad21bac."
+      ]
     }
   ],
   "validation": [
@@ -223,6 +369,29 @@
         "The full CI job includes installation, compile, full tests/PostgreSQL integration, Compose validation, and daemon image build even for narrow benchmark-script/contract changes.",
         "The conversation often synchronously waited for both PR-head and canonical-main CI before proceeding, even when the immediate next task was unrelated local runtime experimentation."
       ]
+    },
+    {
+      "check": "Baseline/research/design durable",
+      "result": "PASS",
+      "evidence": [
+        "architecture/throughput-ci-efficiency-v1.md records measurements, authoritative sources, risk tiers, tested-tree rules, orchestration policy, and benchmark plan."
+      ]
+    },
+    {
+      "check": "Initial control-plane fast-path implementation",
+      "result": "PASS",
+      "evidence": [
+        "Implementation checkpoint 28d1c892af9c015010e0700154cedd27aad21bac on throughput-ci-efficiency-v1.",
+        "research-engine mutation authority has not been expanded."
+      ]
+    },
+    {
+      "check": "Full integration validation before merge",
+      "result": "NOT_RUN",
+      "evidence": [
+        "Required by the new profile because control-plane scripts/schemas/policies changed.",
+        "No current GitHub Actions workflow exists in workspace-control; run the full suite through a suitable execution surface before merging."
+      ]
     }
   ],
   "blockers": [
@@ -231,16 +400,13 @@
     "Research-engine is read-only during the initial task stages; any representative CI mutation there requires explicit capsule authority expansion after design review."
   ],
   "remaining_work": [
-    "Measure recent end-to-end control cycles more precisely, including Git mutation counts, PR creation timing, CI restarts, polling calls, and synchronous post-merge waits.",
-    "Inspect the available GitHub connector functions for atomic/multi-file commit and more efficient check-suite/status operations.",
-    "Research authoritative CI/CD and large-repository practices relevant to path-aware testing, affected-test selection, caching, concurrency cancellation, merge/tested-tree semantics, required versus advisory checks, and scheduled full regression.",
-    "Design a risk-tiered validation policy for workspace-control and representative repositories, with explicit escalation conditions and a force-full-validation escape hatch.",
-    "Design an assistant orchestration policy covering mutation batching, PR timing, CI polling cadence, useful parallel work, and when canonical-main CI is or is not on the critical path.",
-    "Implement the smallest safe changes in workspace-control first; only then consider representative research-engine CI changes if measurements justify them.",
-    "Benchmark trivial, moderate, and high-risk control cycles before/after and document both latency and validation coverage."
+    "Run the full workspace-control unit/task-contract regression suite against implementation checkpoint 28d1c892af9c015010e0700154cedd27aad21bac in a suitable runtime; do not merge before it passes.",
+    "After full validation, open/review the workspace-control PR and benchmark representative FAST_STATIC, TARGETED_PR, and FULL_INTEGRATION control cycles.",
+    "Record before/after mutation-call count, commit count, PR CI latency/restarts, selected validation tier, synchronous post-merge wait, and preserved provenance/checkpoint invariants.",
+    "Only if benchmark evidence justifies repository-specific CI changes, explicitly expand research-engine mutation authority in this capsule before touching research-engine."
   ],
-  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and follow the normal root route. Read this capsule plus the task-capsule/operator-workflow contracts. Do not mutate CI yet. First complete baseline_measurement: inspect recent research-engine workflow definitions and representative run/job timing, inventory GitHub connector capabilities that could reduce serial mutations/polling, and produce a measured latency decomposition distinguishing assistant orchestration overhead from actual CI execution. Then perform source-backed external_practice_research before proposing the risk-tiered validation architecture.",
+  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. Resume on branch throughput-ci-efficiency-v1 at implementation checkpoint 28d1c892af9c015010e0700154cedd27aad21bac. Read architecture/throughput-ci-efficiency-v1.md and procedures/validation_routing.md. Do not mutate research-engine. The next gate is FULL_INTEGRATION validation of the workspace-control implementation: run the complete workspace-control unit/task-contract regression suite in a suitable runtime, inspect any failures, and repair on the isolated branch in one bounded mutation batch. Only after that passes should the representative before/after benchmark and PR/merge decision proceed.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "User priority is substantially higher control-plane throughput without sacrificing implementation quality. The triggering example was repeated PaddleOCR-VL harness fixes where each narrow change commonly paid ~80 s PR CI plus ~77 s main CI and additional assistant polling/serial Git operations. Do not interpret this task as permission to weaken correctness. Fresh-chat invariant: always include https://github.com/adamtrott78/workspace-control explicitly."
+  "notes": "Baseline measurement, external-practice research, and risk-tier design are complete and durable. Initial workspace-control implementation is isolated on throughput-ci-efficiency-v1. The GitHub connector's advertised update_ref expected_sha lease is currently rejected by input validation; current remote-only mutation guidance therefore uses immediate pre-write head verification plus post-write ref verification. research-engine remains read-only. Fresh-chat invariant: always include https://github.com/adamtrott78/workspace-control explicitly."
 }
