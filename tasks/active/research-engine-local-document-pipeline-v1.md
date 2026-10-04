@@ -6,32 +6,41 @@ Authoritative capsule: `tasks/active/research-engine-local-document-pipeline-v1.
 ## State
 - Task: research-engine-local-document-pipeline-v1
 - Stage: residual_escalation_and_local_semantic_fallbacks
-- research-engine remote: `17aaa3182821fed8aacea2f710184b3c1f3ec2a3`
-- Lambda/local last verified: `0e5b1464c5307b9b1824618b6e5cff0f13485146` clean
-- daemon: last verified inactive/dead PID 0
+- research-engine remote canonical: `93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a`
+- research-engine Lambda/local last verified: `0e5b1464c5307b9b1824618b6e5cff0f13485146` clean
+- research daemon: last verified inactive/dead PID 0
 - sustained research: disabled
 
-## Durable stage artifacts
-- residual escalation contract v1
-- residual candidate selection v1
-- source cases: `scan-mixed-quality-v1`, `semantic-visuals-v1`, `malformed-layout-v1`
-- no candidate model/runtime has been downloaded or enabled
+## Durable residual work
+- residual escalation contract v1: merged/CI-locked
+- benchmark candidate selection v1: merged/CI-locked
+- three residual source manifests: merged/CI-locked
+- bounded deterministic source audit: merged/CI-locked and READY_FOR_LAMBDA
+- source audit runner: `deploy/run-residual-source-prefetch-audit.sh`
+- candidate model downloads/inference remain zero
+
+## Source-audit representation correction
+The current Docling normalizer retains pictures as FIGURE document blocks with
+caption linkage in derivation metadata; it does not currently materialize
+FigureAsset records. The audit implementation was corrected to consume that
+production representation and a real normalizer regression test now locks it.
 
 ## Next safe action
-Keep sustained research disabled and keep research-engine-daemon.service inactive/dead. Treat research-engine remote main@17aaa3182821fed8aacea2f710184b3c1f3ec2a3 as the durable source-registration baseline; Lambda/local remains last verified clean at 0e5b1464c5307b9b1824618b6e5cff0f13485146. Next implement and merge a deterministic bounded source-prefetch/audit gate only: download the three registered PDFs into visible workspace-control-tmp, capture authoritative SHA-256/page count, run existing Docling native and standard_no_ocr without new candidate weights, and evaluate the residual contract's scan/low-confidence/layout openers. The layout case must fail closed and be replaced if its opener does not fire. Do not install PP-OCRv6_medium, PaddleOCR-VL-1.6, Qwen3.5-4B, start the daemon, change production routing, or materialize scientific state until that source audit is durable and PASS.
+Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a as the canonical bounded-source-audit baseline and Lambda/local main@0e5b1464c5307b9b1824618b6e5cff0f13485146 as the last verified local state. On Lambda, first require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly 93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a, then fast-forward only to that commit. Run bash deploy/run-residual-source-prefetch-audit.sh. Return the visible OUTPUT_ROOT plus residual-source-audit-report.json, or the first hard error/rejection. Do not install or invoke PP-OCRv6_medium, PaddleOCR-VL-1.6, Qwen3.5-4B, start the daemon, invoke Codex, change production routing, or materialize scientific state. A REJECT means revise only the failed source/region and rerun this deterministic gate; PASS requires model_prefetch_ready=true before the separate model-prefetch stage opens.
 
 ## Remaining work
-- Implement and CI-lock a bounded source-prefetch/audit harness that keeps the daemon stopped, downloads only the three registered PDFs to visible workspace-control-tmp, captures SHA-256/page counts, runs existing Docling native plus standard_no_ocr, and emits per-page deterministic residual-opener diagnostics.
-- Run that gate on Lambda only after its code is merged; fail closed if any source URL/hash/download is invalid or if malformed-layout-v1 has no target page satisfying the layout opener.
-- Use accepted scan/layout pages and located semantic-visual regions to finalize compact human annotations/region locators without committing bulky PDFs or rendered crops.
-- Only after source audit acceptance open a separate bounded model-prefetch gate for PP-OCRv6_medium, PaddleOCR-VL-1.6, and Qwen3.5-4B with exact license/checksum/resource receipts.
-- Then benchmark residual-scoped candidates with contemporaneous authoritative-PDF Codex controls where required; update localization matrix only after measured promotions.
+- On Lambda with research-engine-daemon.service inactive/dead, require clean main@0e5b1464c5307b9b1824618b6e5cff0f13485146, fetch origin/main, require origin/main=93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a, and fast-forward only to that canonical commit.
+- Run bash deploy/run-residual-source-prefetch-audit.sh. Preserve the visible output root and return the compact audit report or first hard failure.
+- If the audit REJECTS malformed-layout-v1, replace only that source manifest and rerun the source gate; do not relax opener thresholds or install a layout/VLM model.
+- If semantic visual targets do not both resolve to unique caption-linked bboxes, refine/replace only the source-region selection before any VLM prefetch.
+- If the audit PASSES with model_prefetch_ready=true, durably pin downloaded PDF SHA-256/page counts and accepted opener/region evidence, then implement a separate bounded model-prefetch/license/checksum gate for the already-selected candidates.
+- Only after model prefetch/audit should residual-scoped quality/resource benchmarks and contemporaneous Codex controls begin.
 
 ## Gates
-- The authoritative binaries for the three registered source cases have not yet been downloaded on Lambda, SHA-256 pinned, or audited with production-equivalent native/structure openers.
-- malformed-layout-v1 remains a source candidate until its deterministic layout opener fires; it must be replaced if it fails that audit.
-- Selected OCR/VLM/local-semantic candidate runtimes and weights remain uninstalled and unmeasured; their prefetch gate is still closed until the source audit passes.
-- Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline and sustained research remains disabled.
+- Lambda/local research-engine is still last verified clean at main@0e5b1464c5307b9b1824618b6e5cff0f13485146 while canonical remote main is 93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a; synchronize only as part of the bounded source-audit run while the daemon is stopped.
+- The bounded source-prefetch/audit has not yet executed on Lambda, so authoritative SHA-256/page counts, actual scan/text opener pages, semantic figure bboxes, and malformed-layout acceptance/replacement are still unresolved.
+- Selected candidate OCR/VLM/local-semantic runtimes and weights remain intentionally uninstalled until the source audit returns PASS with model_prefetch_ready=true.
+- Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline; sustained research remains disabled.
 
 ## Fresh-chat initialization
 @GitHub
