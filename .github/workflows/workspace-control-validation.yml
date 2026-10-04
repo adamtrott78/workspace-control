@@ -73,13 +73,7 @@ jobs:
 
           python3 scripts/validation_plan.py "${args[@]}" --json | tee validation-plan.json
 
-          tier="$(
-            python3 - <<'PY'
-import json
-from pathlib import Path
-print(json.loads(Path("validation-plan.json").read_text())["selected_tier"])
-PY
-          )"
+          tier="$(python3 -c 'import json; print(json.load(open("validation-plan.json"))["selected_tier"])')"
 
           echo "tier=$tier" >> "$GITHUB_OUTPUT"
           echo "Selected validation tier: $tier"
