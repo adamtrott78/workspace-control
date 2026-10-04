@@ -114,5 +114,6 @@ jobs:
           python3 -m json.tool schemas/validation_profile.v1.schema.json >/dev/null
 
           for task in tasks/active/*.json tasks/archive/*.json; do
-            python3 scripts/workspace_control.py task-validate --file "$task" --json >/dev/null
+            echo "VALIDATING_TASK=$task"
+            python3 scripts/workspace_control.py task-validate --file "$task" --json
           done
