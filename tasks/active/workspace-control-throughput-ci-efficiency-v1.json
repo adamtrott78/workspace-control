@@ -42,8 +42,8 @@
       "intent": "mutate",
       "base_sha": "1a46337a35296554917f61a80ff21535f8e87c19",
       "remote": {
-        "branch": "throughput-ci-efficiency-v1",
-        "checkpoint_sha": "0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a",
+        "branch": "main",
+        "checkpoint_sha": "016a8827e7ed5e7d59ff86240f6f974d330f819c",
         "verified": true
       },
       "local": null,
@@ -250,6 +250,15 @@
             "The run executed changed-task contract checks, 56 unit tests, compile/JSON checks, and baseline-aware repository-wide task-contract regression.",
             "The next task-state-only synchronization commit is intentionally used as the live FAST_STATIC benchmark."
           ]
+        },
+        {
+          "check": "Validated implementation promotion",
+          "result": "PASS",
+          "evidence": [
+            "PR #50 merged to workspace-control main as 016a8827e7ed5e7d59ff86240f6f974d330f819c.",
+            "Final PR-head run 37245048711 passed the full validation job for head 5a5b3b61aa4cda0c42d969277996306111e2f187.",
+            "The tested synthetic-merge tree and merged main tree are exactly identical at 91e41b06ea8a188ed4650e25bf15ea529427632a; no untested content was introduced by the squash merge."
+          ]
         }
       ],
       "resume_condition": "Full workspace-control integration validation passes for the implementation checkpoint."
@@ -289,11 +298,11 @@
     {
       "id": "checkpoint:validated-risk-routed-ci",
       "kind": "git_checkpoint",
-      "identity": "workspace-control:0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a",
+      "identity": "workspace-control:016a8827e7ed5e7d59ff86240f6f974d330f819c",
       "required_for_resume": true,
       "evidence": [
-        "PR #50 full-integration run 37244948999 passed on the synthetic merge tree.",
-        "Risk-tier planner, root operator policy, baseline-aware task-contract regression, concurrency cancellation, and stable validation job are present at this checkpoint.",
+        "Risk-routed validation implementation promoted to canonical workspace-control main through PR #50.",
+        "Final full validation run 37245048711 passed, and merged main tree is byte-identical to the tested synthetic merge tree.",
         "research-engine was not mutated by this throughput task."
       ]
     }
@@ -433,17 +442,27 @@
         "Unknown/control-plane/.github changes fail closed to FULL_INTEGRATION; task-state-only changes are eligible for FAST_STATIC.",
         "Concurrency cancellation, status-first diagnosis, and baseline-aware task-contract regression are implemented."
       ]
+    },
+    {
+      "check": "PR #50 tested-tree promotion",
+      "result": "PASS",
+      "evidence": [
+        "Merged main commit: 016a8827e7ed5e7d59ff86240f6f974d330f819c.",
+        "Synthetic merge tree == merged main tree == 91e41b06ea8a188ed4650e25bf15ea529427632a.",
+        "Because content identity is proven, the promotion requires no duplicate synchronous main rerun for tree-content confidence."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Use this task-state-only JSON/Markdown synchronization as the representative FAST_STATIC PR benchmark. Require the latest PR #50 run to select FAST_STATIC, pass changed-task validation/handoff sync, and skip unit/full-integration steps.",
-    "If the FAST_STATIC benchmark passes, reread current main plus PR #50 base/head/mergeability and merge with an expected head SHA. Prove whether the merged main tree equals the tested synthetic merge tree.",
-    "Collect field telemetry from the active research-engine task on mutation batching, PR timing/restarts, CI step cost, status-read frequency, tested-tree duplication, idle waits, and other workspace-control overhead. Treat this as observational evidence without replacing that task's next_safe_action.",
-    "Benchmark TARGETED_PR opportunistically on a real test-only change when one naturally occurs; do not manufacture code churn solely to obtain a timing sample.",
-    "Research-engine-specific validation tiers or CI workflow changes require a reviewed research-engine profile and explicit mutation authority; this capsule does not grant that authority."
+    "Use the follow-up branch throughput-fast-static-benchmark-v1, whose complete diff from merged main is limited to this task JSON and its derived Markdown handoff, as the representative FAST_STATIC benchmark.",
+    "Require its PR validation run to select FAST_STATIC, pass changed-task validation/handoff synchronization, and skip unit-regression plus full-integration steps. Record wall-clock evidence.",
+    "After the FAST_STATIC benchmark passes, merge the task-state-only follow-up with an exact expected head SHA and prove merged-tree identity.",
+    "Collect field telemetry from the active research-engine task on logical changes versus commits, mutation-call batching, PR timing/restarts, CI step cost, status-read/poll frequency, tested-tree duplication, idle waits, context/routing rereads, provenance repetition, runtime setup, and artifact-transfer overhead.",
+    "Benchmark TARGETED_PR opportunistically on a real test-only change when one naturally occurs; do not manufacture code churn solely for a timing sample.",
+    "Research-engine-specific validation tiers or CI workflow changes require a reviewed research-engine profile and explicit mutation authority; shared orchestration improvements do not grant that authority."
   ],
-  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. PR #50 carries the FULL_INTEGRATION-validated implementation checkpoint 0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a. If PR #50 is not yet merged, inspect the latest synchronize run produced by this task-state-only coordination update: require selected tier FAST_STATIC, successful changed-task contract/handoff synchronization, and skipped unit/full-integration steps. Then reread current main and PR #50 base/head/mergeability and merge only with the exact expected head SHA. If PR #50 is already merged, treat merged main as canonical and collect efficiency telemetry from the active research-engine task without overriding its durable next_safe_action. Do not mutate research-engine from this capsule; any research-engine-specific profile or CI change requires explicit authority.",
+  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. The risk-routed validation implementation is canonical on main@016a8827e7ed5e7d59ff86240f6f974d330f819c and its merged tree exactly equals the FULL_INTEGRATION-tested PR tree. The follow-up branch throughput-fast-static-benchmark-v1 is intentionally task-state-only. If that follow-up is not yet merged, require its PR run to select FAST_STATIC, pass changed-task capsule/handoff synchronization, and skip unit/full-integration work; then merge only with the exact expected head SHA and verify merged-tree identity. If it is already merged, use that run as the validated FAST_STATIC benchmark and continue collecting efficiency telemetry from the active research-engine task without overriding that task's durable next_safe_action. Do not mutate research-engine from this capsule; repository-specific CI/profile changes require explicit authority.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Baseline measurement, external-practice research, and risk-tier design are complete and durable. Initial workspace-control implementation is isolated on throughput-ci-efficiency-v1. The GitHub connector's advertised update_ref expected_sha lease is currently rejected by input validation; current remote-only mutation guidance therefore uses immediate pre-write head verification plus post-write ref verification. research-engine remains read-only. Fresh-chat invariant: always include https://github.com/adamtrott78/workspace-control explicitly."
