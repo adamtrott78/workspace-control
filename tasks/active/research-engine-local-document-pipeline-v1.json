@@ -74,7 +74,7 @@
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "0bded264aa4bb021450b9d62c66555843155ead8",
+        "head_sha": "7a26e648ec409c96a3f9b7c8620f566658700894",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -1496,27 +1496,38 @@
         "Each VLM call now emits flushed VLM_CALL_START and VLM_CALL_COMPLETE events so a long decode is observable rather than silent.",
         "No dependency, model file, weight, prompt, crop, inference-count, quality threshold, resource ceiling, daemon policy, Qwen/Codex boundary, production routing, or scientific-state policy changed."
       ]
+    },
+    {
+      "check": "Completed PaddleOCR-VL 1.6 targeted visual benchmark",
+      "result": "RESOURCE_FAIL_AND_SEMANTIC_QUALITY_NOT_PROMOTED",
+      "evidence": [
+        "All three bounded local VLM calls completed with failure=null; model init was 1.4238369059967226 s.",
+        "Figure 6 calls took 72.5341134469927 s and 72.99650769200525 s; Figure 3 took 108.51913859699562 s. Warm max 108.51913859699562 s exceeds the 45 s ceiling.",
+        "Peak process VRAM was 19,956 MiB, exceeding the 14,336 MiB ceiling and effectively occupying one 20 GiB RTX A4500; peak RSS was 2802.21484375 MiB.",
+        "Figure 6 Chart Recognition recovered all visible series/model names (plain-20/32/44/56; ResNet-20/32/44/56/110; residual-110/1202) consistently across the repeated run, but collapsed panel relationships and fabricated a dense numeric table with unsupported values. Fabricated-fact tolerance is zero, so semantic promotion fails closed.",
+        "Figure 3 OCR recovered many visible layer labels but flattened/conflated architecture columns and did not recover the required residual-shortcut/dotted-shortcut relationships; output also hit the 512-token cap.",
+        "The current direct Transformers route is therefore retained only as evidence that PaddleOCR-VL can serve as a perceptual/element-recognition parser. It is not promoted as authoritative visual-semantic evidence or as a replacement for semantic EXTRACT/VERIFY.",
+        "Official PaddleOCR-VL documentation recommends the official pipeline/optimized vLLM server for faster page-level parsing; direct Transformers is documented as element-level recognition/text spotting. Performance of this direct harness is not treated as a definitive ceiling for the model's parser throughput."
+      ]
     }
   ],
   "blockers": [
-    "Lambda/local research-engine is last verified clean at main@0bded264aa4bb021450b9d62c66555843155ead8 after the causal-mask-compatible run reached actual generation but the first 2048-token no-cache decode ran for >5 minutes; canonical remote main is bounded-generation hotfix 7a26e648ec409c96a3f9b7c8620f566658700894.",
-    "PaddleOCR-VL still lacks a completed quality/resource measurement. Prior zero-inference setup failures are diagnostic only, and the most recent long first-generation attempt should be discarded as a harness pacing defect rather than scored.",
-    "PaddleOCR-VL cannot be promoted from local measurement alone; human annotated-fact review and a later contemporaneous authoritative-PDF Codex control remain mandatory.",
     "PP-OCRv6 remains resource-pass / quality-not-promoted; the blank scan target still requires replacement with a content-bearing image-only scan before scan-recovery promotion can be evaluated.",
-    "Qwen3.5-4B remains prefetched but inference-closed unless PaddleOCR-VL completes and fails/abstains for visual semantics, or the separately bounded semantic gate opens.",
-    "Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline; sustained research remains disabled."
+    "PaddleOCR-VL-1.6 direct element-level inference completed but is not promoted: it exceeded the current VRAM/latency ceilings and, more importantly, fabricated numeric chart values and failed key panel/shortcut relations. It may remain a perception/parser candidate, especially through its official optimized vLLM/page-level path, but not a semantic authority.",
+    "The next selected visual-semantic fallback, Qwen3.5-4B, is prefetched but has not yet been benchmarked on the validated Figure 6/Figure 3 residuals.",
+    "A broader local-only semantic architecture that could displace routine remote EXTRACT/VERIFY has not yet been validated end-to-end; provenance and abstention/fallback gates remain required.",
+    "Codex STANDARD EXTRACT/VERIFY remains the production semantic baseline until bounded local semantic controls demonstrate equivalent evidence quality."
   ],
   "remaining_work": [
-    "If the currently running 2048-token PaddleOCR-VL generation has not already completed, interrupt it with Ctrl+C. Do not treat that interrupted attempt as benchmark evidence.",
-    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@0bded264aa4bb021450b9d62c66555843155ead8, fetch origin/main, require origin/main=7a26e648ec409c96a3f9b7c8620f566658700894, and fast-forward only to that canonical bounded-generation commit.",
-    "Rerun bash deploy/run-paddleocr-vl-residual-benchmark.sh. Reuse the existing runtime; no dependency rebuild or package upgrade is required. Each call should now print VLM_CALL_START and VLM_CALL_COMPLETE progress markers and use max_new_tokens=512 with use_cache=false.",
-    "Return the new visible OUTPUT_ROOT plus paddleocr-vl-benchmark-report.json, or the first hard error. Do not reuse prior zero-inference reports or the interrupted oversized-generation attempt as quality evidence.",
-    "Require measurement_decision=MEASURED_PENDING_HUMAN_AND_CODEX_CONTROL, exactly three candidate VLM calls, valid GPU telemetry, and all VLM resource ceilings passing before visual quality review.",
-    "Human-review Figure 6 Chart Recognition output and Figure 3 OCR output against the durable annotated facts; compute/record fact precision, recall, numeric accuracy, relation accuracy, provenance coverage, and fabricated facts.",
-    "If the model-native PaddleOCR-VL path completes but cannot meet the fact/relation thresholds, classify that as a legitimate capability miss and open Qwen3.5-4B visual fallback only for the failed residual.",
-    "Only if PaddleOCR-VL meets local visual quality thresholds, run a separate contemporaneous STANDARD Codex authoritative-PDF/figure control on the same evidence needs before promotion."
+    "Record PaddleOCR-VL as perception-useful but semantic-quality-not-promoted; do not spend more cycles patching the direct Transformers path for semantic promotion.",
+    "Open the already-selected Qwen3.5-4B visual fallback on the same validated Figure 6/Figure 3 crops using explicit evidence questions and structured factual outputs rather than generic OCR/chart transcription prompts.",
+    "Benchmark Qwen3.5-4B as a unified local semantic candidate over both multimodal residuals and bounded authoritative text, because it is already prefetched and natively supports image-text-to-text; keep the same provenance/fabrication thresholds.",
+    "If Qwen3.5-4B visual quality is strong, extend the local semantic experiment to EXTRACT and VERIFY with authoritative page/context bounds and contemporaneous STANDARD Codex controls; measure what fraction of remote calls can be suppressed without quality regression.",
+    "Separately evaluate lightweight specialized local perception models only where they buy cost/latency: MinerU2.5-Pro for document/page parsing, Granite-Docling for very cheap DocTags structure, and DePlot/ChartGemma for chart-specific extraction. Do not add models merely for breadth.",
+    "Evaluate the official PaddleOCR-VL vLLM/page-level path only if a perception-parser role remains valuable after Qwen/MinerU comparison; the current 72-108 s direct element-level route is not the recommended optimized serving path.",
+    "Replace the invalid blank image-only scan benchmark before reopening PP-OCRv6 scan-recovery quality."
   ],
-  "next_safe_action": "If the current long-running PaddleOCR-VL process is still active, interrupt it with Ctrl+C because the 2048-token no-cache generation bound is now classified as a benchmark-harness defect. Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@7a26e648ec409c96a3f9b7c8620f566658700894 as the canonical bounded-generation baseline and Lambda/local main@0bded264aa4bb021450b9d62c66555843155ead8 as the last verified clean local state. On Lambda require branch=main and clean checkout; fetch origin and require origin/main exactly 7a26e648ec409c96a3f9b7c8620f566658700894, then fast-forward only to that commit. Rerun bash deploy/run-paddleocr-vl-residual-benchmark.sh. The model/runtime/crops/prompts are unchanged; generation is capped at max_new_tokens=512 with use_cache=false and each call emits VLM_CALL_START/VLM_CALL_COMPLETE. Return the new OUTPUT_ROOT plus paddleocr-vl-benchmark-report.json, or the first hard error. Do not start the daemon, invoke Qwen3.5-4B or Codex, change production routing, or materialize scientific state.",
+  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat the completed PaddleOCR-VL direct benchmark as resource-fail and semantic-quality-not-promoted but perceptually informative: all three calls completed, yet VRAM/latency exceeded current ceilings and the chart output fabricated unsupported numeric values while both figures lost required visual relations. Do not continue patching this direct PaddleOCR-VL path for semantic promotion. Next open the already-prefetched Qwen3.5-4B visual fallback on the exact validated Figure 6 and Figure 3 crops, using explicit evidence questions and structured outputs that directly test the durable annotated facts/relations with zero fabricated-fact tolerance. If Qwen3.5-4B passes visual quality/resource gates, extend it into a bounded local EXTRACT/VERIFY calibration against contemporaneous STANDARD Codex controls to estimate how much remote semantic throughput can be eliminated. Specialized alternatives (MinerU2.5-Pro, Granite-Docling, DePlot/ChartGemma) should be evaluated only for clearly cheaper perception niches. Do not change production routing or materialize scientific state during these benchmarks.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
