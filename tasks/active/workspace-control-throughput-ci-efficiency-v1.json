@@ -1,0 +1,246 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-control-throughput-ci-efficiency-v1",
+  "title": "Workspace Control Throughput & CI Efficiency v1",
+  "status": "IN_PROGRESS",
+  "goal": "Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execution loops while preserving provenance, fail-closed mutation semantics, durable recovery, and implementation quality. Optimize both orchestration overhead and CI topology so routine low-risk changes do not pay the same synchronous validation cost as high-risk production changes, without weakening the full safety net.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-control",
+  "current_stage": "baseline_measurement",
+  "acceptance_criteria": [
+    "Produce an empirical latency decomposition for representative recent ChatGPT/GitHub control cycles, separating tool-call/orchestration time, Git mutation count, PR CI, canonical-main CI, status polling, runtime/human handoffs, and genuinely necessary validation.",
+    "Study documented practices from mature CI/CD and monorepo/control-plane systems using primary or authoritative sources where possible, including validation tiers, test-impact/path selection, caching, concurrency cancellation, merge queues or tested-merge semantics, pre-submit versus post-submit roles, and scheduled/full regression coverage.",
+    "Inventory the GitHub connector/tool surface for atomic or batched multi-file mutation, check-suite/status reads, pull-request/merge operations, and other capabilities that can reduce serial tool round trips without falling back to unnecessary chat-bash.",
+    "Define a risk-based validation taxonomy with at least fast/local-static, targeted PR, full integration, and scheduled/canonical regression tiers, including explicit escalation rules for schema, database, daemon, Docker/deployment, scientific-state, and other high-consequence changes.",
+    "Demonstrate that low-risk documentation/test/harness-only changes can avoid unnecessary Docker image or full PostgreSQL/integration work when dependency/production paths are provably unaffected, while high-risk changes retain equivalent or stronger validation.",
+    "Define when PR-head validation is sufficient to continue conversational work and when synchronous canonical-main CI is actually required, using verified Git tree/merge semantics rather than assuming duplicate CI is redundant.",
+    "Define an orchestration contract that batches related Git mutations before opening/updating a PR, avoids repeated CI restarts from incremental fix commits when preventable, performs useful work while CI runs, and polls status at bounded intervals rather than tight loops.",
+    "Evaluate GitHub Actions optimizations such as dependency caches, Docker layer caches, path filters, job decomposition, reusable workflows, concurrency/cancel-in-progress, required versus advisory checks, and merge-queue/tested-merge approaches against this repository's actual risk model.",
+    "Implement only evidence-supported changes and retain a simple escape hatch that forces the complete validation suite for any ambiguous or high-risk mutation.",
+    "Benchmark before/after end-to-end control-cycle latency on at least three mutation classes: trivial/low-risk, moderate code change, and high-risk integration/deployment change.",
+    "Show that the optimized system preserves task-capsule JSON/Markdown synchronization, remote checkpoint verification, branch cleanliness, authority boundaries, and fail-closed behavior.",
+    "Document the resulting execution guidance so a fresh ChatGPT/Codex session can choose the cheapest valid validation path without relying on prior conversation state.",
+    "Every fresh-chat initialization or handoff prompt for this task must include the full workspace-control repository URL https://github.com/adamtrott78/workspace-control so a new chat can initialize from the durable control plane."
+  ],
+  "constraints": [
+    "Do not optimize by simply deleting tests, weakening scientific/provenance invariants, skipping required branch-state checks, or treating failed/missing CI as success.",
+    "Do not assume every duplicate-looking PR/main CI pair is redundant; prove equivalence or define the integration risk that requires both.",
+    "Do not make research-engine production/scientific behavior changes merely to benchmark CI throughput.",
+    "Prefer direct GitHub tooling and connector-native operations over human shell steps when equivalent authority and evidence are available.",
+    "Do not introduce a new external CI vendor unless the measured bottleneck cannot be addressed with the existing GitHub/workspace-control stack and the tradeoff is explicitly justified.",
+    "Do not make workspace-control main a high-frequency telemetry sink; benchmark evidence should be compact and durable.",
+    "Use real recent workflow-run timestamps and job composition as baseline evidence instead of estimating latency from subjective waiting alone.",
+    "Separate assistant-orchestration inefficiency from GitHub Actions runtime: repeated polling, serial file mutations, premature PR creation, duplicated reads, and unnecessary synchronous waiting are first-class targets.",
+    "Do not require canonical-main CI to block the conversational critical path unless the validation design proves it is needed for the specific mutation class.",
+    "Preserve a force-full-validation path for ambiguous changes and any mutation affecting database schema, daemon lifecycle, deployment/container build, security/credentials, scientific-state materialization, or shared control-plane contracts.",
+    "Keep research-engine read-only during the initial measurement/research/design stages; expand mutation authority explicitly in the capsule only if a validated implementation plan requires representative CI changes there."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "4b493c05184fb6c565563618297e3e8c3534aad5",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "4b493c05184fb6c565563618297e3e8c3534aad5",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-control-throughput-ci-efficiency-v1.json",
+        "tasks/active/workspace-control-throughput-ci-efficiency-v1.md",
+        "architecture/**",
+        "policies/**",
+        "procedures/**",
+        "workflows/**",
+        "scripts/**",
+        "schemas/**",
+        "tests/**",
+        ".github/**",
+        "README.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "7a26e648ec409c96a3f9b7c8620f566658700894",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "7a26e648ec409c96a3f9b7c8620f566658700894",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "baseline_measurement",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "workspace-control@4b493c05184fb6c565563618297e3e8c3534aad5",
+        "research-engine@7a26e648ec409c96a3f9b7c8620f566658700894",
+        "recent research-engine PR/main CI run history from PaddleOCR-VL iteration"
+      ],
+      "outputs": [
+        "measured control-cycle latency decomposition",
+        "catalog of avoidable orchestration and CI duplication"
+      ],
+      "validation": [
+        {
+          "check": "Recent paired CI baseline captured",
+          "result": "PASS",
+          "evidence": [
+            "Five recent successful PR CI runs took 73, 75, 81, 81, and 91 seconds; mean 80.2 seconds.",
+            "Their corresponding canonical-main CI runs took 75, 65, 81, 82, and 81 seconds; mean 76.8 seconds.",
+            "Those ten runs consumed 785 seconds (~13.1 minutes) of CI wall time across five small fix cycles before counting assistant polling/tool orchestration."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "external_practice_research",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "web+github",
+      "inputs": [
+        "baseline_measurement"
+      ],
+      "outputs": [
+        "source-backed CI/orchestration design lessons applicable to this control plane"
+      ],
+      "validation": [],
+      "resume_condition": "Baseline latency decomposition is durable."
+    },
+    {
+      "id": "validation_architecture_design",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "baseline_measurement",
+        "external_practice_research"
+      ],
+      "outputs": [
+        "risk-tiered validation contract and orchestration contract"
+      ],
+      "validation": [],
+      "resume_condition": "External practices are mapped to local failure modes rather than copied generically."
+    },
+    {
+      "id": "control_plane_implementation",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "validation_architecture_design"
+      ],
+      "outputs": [
+        "minimal scripts/policies/workflows/tests implementing the selected fast paths"
+      ],
+      "validation": [],
+      "resume_condition": "Design specifies preserved invariants and force-full-validation behavior."
+    },
+    {
+      "id": "representative_benchmark",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "control_plane_implementation"
+      ],
+      "outputs": [
+        "before/after latency and quality evidence for low/moderate/high-risk mutation classes"
+      ],
+      "validation": [],
+      "resume_condition": "Implementation passes its own risk-appropriate validation."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "workspace-control:4b493c05184fb6c565563618297e3e8c3534aad5",
+      "required_for_resume": true,
+      "evidence": [
+        "Initial throughput task created from workspace-control main before any optimization mutation.",
+        "research-engine representative baseline is main@7a26e648ec409c96a3f9b7c8620f566658700894.",
+        "First action is measurement/research, not CI mutation."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "tasks/active/workspace-control-throughput-ci-efficiency-v1.json",
+      "state": "ACTIVE",
+      "role": "authoritative task capsule",
+      "origin": "workspace-control",
+      "persistence": "Git",
+      "regeneration": null,
+      "review_requirement": "Validate against task_capsule.v2 schema after material changes.",
+      "evidence": [
+        "Created to isolate throughput/CI optimization from the active research-engine document-intelligence task."
+      ]
+    },
+    {
+      "path": "tasks/active/workspace-control-throughput-ci-efficiency-v1.md",
+      "state": "DERIVED",
+      "role": "fresh-chat handoff",
+      "origin": "task capsule renderer semantics",
+      "persistence": "Git",
+      "regeneration": "Regenerate immediately after every material JSON capsule mutation.",
+      "review_requirement": "Must remain synchronized with authoritative JSON.",
+      "evidence": [
+        "Fresh-chat initialization must include the full workspace-control repository URL."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Observed CI duplication baseline",
+      "result": "PASS",
+      "evidence": [
+        "Recent small PaddleOCR-VL fixes repeatedly ran the same repository CI stack once for pull_request and again immediately after merge on main.",
+        "Representative paired means: PR 80.2 s; main 76.8 s; five pairs total 785 s."
+      ]
+    },
+    {
+      "check": "Observed orchestration latency causes",
+      "result": "PASS",
+      "evidence": [
+        "GitHub file mutations were frequently serialized as separate create/update commits because the current chat used file-level connector actions.",
+        "Several iterations opened a PR and then required follow-up commits, causing additional CI restarts.",
+        "The assistant repeatedly polled workflow/job state at short intervals while no state changed, adding connector round trips without increasing validation coverage.",
+        "The full CI job includes installation, compile, full tests/PostgreSQL integration, Compose validation, and daemon image build even for narrow benchmark-script/contract changes.",
+        "The conversation often synchronously waited for both PR-head and canonical-main CI before proceeding, even when the immediate next task was unrelated local runtime experimentation."
+      ]
+    }
+  ],
+  "blockers": [
+    "No external-practice research or risk-tier design has been completed yet; do not modify CI merely from intuition.",
+    "The current task does not yet prove which canonical-main validations may safely become asynchronous or scheduled.",
+    "Research-engine is read-only during the initial task stages; any representative CI mutation there requires explicit capsule authority expansion after design review."
+  ],
+  "remaining_work": [
+    "Measure recent end-to-end control cycles more precisely, including Git mutation counts, PR creation timing, CI restarts, polling calls, and synchronous post-merge waits.",
+    "Inspect the available GitHub connector functions for atomic/multi-file commit and more efficient check-suite/status operations.",
+    "Research authoritative CI/CD and large-repository practices relevant to path-aware testing, affected-test selection, caching, concurrency cancellation, merge/tested-tree semantics, required versus advisory checks, and scheduled full regression.",
+    "Design a risk-tiered validation policy for workspace-control and representative repositories, with explicit escalation conditions and a force-full-validation escape hatch.",
+    "Design an assistant orchestration policy covering mutation batching, PR timing, CI polling cadence, useful parallel work, and when canonical-main CI is or is not on the critical path.",
+    "Implement the smallest safe changes in workspace-control first; only then consider representative research-engine CI changes if measurements justify them.",
+    "Benchmark trivial, moderate, and high-risk control cycles before/after and document both latency and validation coverage."
+  ],
+  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and follow the normal root route. Read this capsule plus the task-capsule/operator-workflow contracts. Do not mutate CI yet. First complete baseline_measurement: inspect recent research-engine workflow definitions and representative run/job timing, inventory GitHub connector capabilities that could reduce serial mutations/polling, and produce a measured latency decomposition distinguishing assistant orchestration overhead from actual CI execution. Then perform source-backed external_practice_research before proposing the risk-tiered validation architecture.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "User priority is substantially higher control-plane throughput without sacrificing implementation quality. The triggering example was repeated PaddleOCR-VL harness fixes where each narrow change commonly paid ~80 s PR CI plus ~77 s main CI and additional assistant polling/serial Git operations. Do not interpret this task as permission to weaken correctness. Fresh-chat invariant: always include https://github.com/adamtrott78/workspace-control explicitly."
+}
