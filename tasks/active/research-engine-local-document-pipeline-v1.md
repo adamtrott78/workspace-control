@@ -6,34 +6,32 @@ Authoritative capsule: `tasks/active/research-engine-local-document-pipeline-v1.
 ## State
 - Task: research-engine-local-document-pipeline-v1
 - Stage: residual_escalation_and_local_semantic_fallbacks
-- research-engine remote checkpoint: `9c636c4f00e47a8b8e507e4e011d4867a5da68f9`
-- research-engine Lambda/local last verified checkpoint: `0e5b1464c5307b9b1824618b6e5cff0f13485146` (clean; not synchronized by GitHub-only work)
-- sustained research: disabled
+- research-engine remote: `17aaa3182821fed8aacea2f710184b3c1f3ec2a3`
+- Lambda/local last verified: `0e5b1464c5307b9b1824618b6e5cff0f13485146` clean
 - daemon: last verified inactive/dead PID 0
+- sustained research: disabled
 
-## Durable residual architecture
-- Contract: `benchmarks/document_intelligence/residual-escalation-contract.v1.json`
-- Candidates: `benchmarks/document_intelligence/residual-candidate-selection.v1.json`
-- Selected only for benchmarking: `PP-OCRv6_medium` -> `PaddleOCR-VL-1.6@c5630abae1d940eafe0697512a0325494b02ab42` -> `Qwen3.5-4B@851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a`
-- No model/runtime download or production enablement has occurred.
-- Existing CodeFormulaV2 and FAST -> ACCURATE -> PP-TableMagic paths remain unchanged.
+## Durable stage artifacts
+- residual escalation contract v1
+- residual candidate selection v1
+- source cases: `scan-mixed-quality-v1`, `semantic-visuals-v1`, `malformed-layout-v1`
+- no candidate model/runtime has been downloaded or enabled
 
 ## Next safe action
-Keep sustained research disabled and do not start research-engine-daemon.service. Treat research-engine remote main@9c636c4f00e47a8b8e507e4e011d4867a5da68f9 as the durable candidate-selection baseline; Lambda/local remains last verified clean at 0e5b1464c5307b9b1824618b6e5cff0f13485146 and should not be synchronized merely for bookkeeping. Next durably register exactly the three missing source-case manifests without moving bulky PDFs through GitHub: scan-mixed-quality-v1, semantic-visuals-v1, malformed-layout-v1. Each manifest must record a stable public/source locator, intended target pages/regions and annotations, and explicitly defer authoritative SHA-256 plus native opener diagnostics to the bounded Lambda prefetch/audit gate. Only after all three manifests are merged/CI-locked may a bounded Lambda gate own the fast-forward, source download/hash audit, selected model/runtime prefetch, license/checksum receipts, and candidate benchmarks. No global OCR/VLM/local-agent enablement and no broad parser bakeoff.
+Keep sustained research disabled and keep research-engine-daemon.service inactive/dead. Treat research-engine remote main@17aaa3182821fed8aacea2f710184b3c1f3ec2a3 as the durable source-registration baseline; Lambda/local remains last verified clean at 0e5b1464c5307b9b1824618b6e5cff0f13485146. Next implement and merge a deterministic bounded source-prefetch/audit gate only: download the three registered PDFs into visible workspace-control-tmp, capture authoritative SHA-256/page count, run existing Docling native and standard_no_ocr without new candidate weights, and evaluate the residual contract's scan/low-confidence/layout openers. The layout case must fail closed and be replaced if its opener does not fire. Do not install PP-OCRv6_medium, PaddleOCR-VL-1.6, Qwen3.5-4B, start the daemon, change production routing, or materialize scientific state until that source audit is durable and PASS.
 
 ## Remaining work
-- Durably register exactly three missing source cases: one degraded scanned scientific report, one scientific PDF with quantitative chart plus relational diagram semantics, and one complex born-digital/hybrid layout case whose acceptance remains contingent on the deterministic layout opener firing during native audit.
-- Keep source PDF bytes outside Git where practical; record stable URLs/identifiers and target page/region annotations now, then capture authoritative SHA-256/page-count/native text-layout diagnostics during a bounded Lambda source-prefetch gate.
-- After all three case manifests are durable, create one bounded Lambda gate that fast-forwards from the last verified local baseline, downloads only the selected/pinned candidate runtimes/weights into explicit caches, records exact licenses/checksums/resource preflight, and leaves research-engine-daemon.service inactive/dead.
-- Benchmark PP-OCRv6_medium first only on scan/text residuals, PaddleOCR-VL-1.6 only on opened visual/exhausted specialized regions, and Qwen3.5-4B only on bounded semantic ambiguity plus conditional visual fallback.
-- Require contemporaneous authoritative-PDF STANDARD Codex controls for any semantic/visual promotion, exact token telemetry, and fail-closed fall-through on timeout/backpressure/disagreement/missing provenance.
-- After measured promotion decisions, update the localization matrix and CI-lock any production fallback ladder before a separate bounded integration gate.
+- Implement and CI-lock a bounded source-prefetch/audit harness that keeps the daemon stopped, downloads only the three registered PDFs to visible workspace-control-tmp, captures SHA-256/page counts, runs existing Docling native plus standard_no_ocr, and emits per-page deterministic residual-opener diagnostics.
+- Run that gate on Lambda only after its code is merged; fail closed if any source URL/hash/download is invalid or if malformed-layout-v1 has no target page satisfying the layout opener.
+- Use accepted scan/layout pages and located semantic-visual regions to finalize compact human annotations/region locators without committing bulky PDFs or rendered crops.
+- Only after source audit acceptance open a separate bounded model-prefetch gate for PP-OCRv6_medium, PaddleOCR-VL-1.6, and Qwen3.5-4B with exact license/checksum/resource receipts.
+- Then benchmark residual-scoped candidates with contemporaneous authoritative-PDF Codex controls where required; update localization matrix only after measured promotions.
 
 ## Gates
-- The three targeted missing corpus cases (scan-mixed-quality-v1, semantic-visuals-v1, malformed-layout-v1) are not yet durably registered with stable source locations, target pages/regions, and later Lambda hash/native-opener audit requirements.
-- Selected candidate runtimes have not yet been installed/prefetched or measured on the Lambda; exact PP-OCRv6 weight metadata/checksum and runtime dependency receipts remain gated behind source-case durability.
-- Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline until a candidate passes its residual-specific contemporaneous authoritative-PDF control and resource/token gates.
-- Sustained research remains disabled while source cases and bounded candidate benchmarks are prepared.
+- The authoritative binaries for the three registered source cases have not yet been downloaded on Lambda, SHA-256 pinned, or audited with production-equivalent native/structure openers.
+- malformed-layout-v1 remains a source candidate until its deterministic layout opener fires; it must be replaced if it fails that audit.
+- Selected OCR/VLM/local-semantic candidate runtimes and weights remain uninstalled and unmeasured; their prefetch gate is still closed until the source audit passes.
+- Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline and sustained research remains disabled.
 
 ## Fresh-chat initialization
 @GitHub
