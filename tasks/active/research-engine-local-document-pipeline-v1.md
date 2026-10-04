@@ -3,96 +3,140 @@
 
 Derived human-readable view.
 
-Authoritative capsule: tasks/active/research-engine-local-document-pipeline-v1.json
+Authoritative capsule: `tasks/active/research-engine-local-document-pipeline-v1.json`
 
 If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
 
 ## State
 - Task: `research-engine-local-document-pipeline-v1`
 - Stage: `residual_escalation_and_local_semantic_fallbacks`
-- research-engine remote/local canonical for this completed benchmark: `7a26e648ec409c96a3f9b7c8620f566658700894`
+- research-engine remote canonical: `d0debd205de46a608fce5b9a15f3fa0fdd6de4e6`
+- research-engine Lambda/local last verified: `7a26e648ec409c96a3f9b7c8620f566658700894` clean
 - research daemon: keep inactive/dead PID 0
 - sustained research: disabled
 - STANDARD Codex authoritative-PDF EXTRACT/VERIFY remains production semantic baseline
 
-## PP-OCRv6 outcome
-PP-OCRv6 remains resource-pass / quality-not-promoted. The content-bearing chart
-was materially improved but did not establish the hard OCR quality thresholds,
-and the scan/textless target proved visually almost blank and must be replaced
-before scan-recovery quality can be evaluated.
+## Prior candidate outcomes
+### PP-OCRv6
+Resource/latency PASS but quality not promoted. The content-bearing chart improved
+substantially over native text but retained visible OCR errors, and the original
+image-only scan target proved nearly blank and must be replaced before scan
+recovery can be adjudicated.
 
-## Completed PaddleOCR-VL 1.6 benchmark
-The bounded direct-model run completed all three local inference calls with no
-runtime exception.
-
-Measured:
+### PaddleOCR-VL-1.6
+Three calls completed, but direct element-level inference was not promoted:
 - model init: 1.4238369059967226 s
-- Figure 6 first: 72.5341134469927 s
-- Figure 3 warm: 108.51913859699562 s
-- Figure 6 warm repeat: 72.99650769200525 s
+- Figure 6: 72.534 s first / 72.997 s repeat
+- Figure 3: 108.519 s
 - peak process VRAM: 19,956 MiB
-- peak RSS: 2802.21484375 MiB
-- warm-region max: 108.51913859699562 s
+- peak RSS: 2802.21 MiB
 
-The run therefore fails the precommitted 14,336 MiB VRAM and 45 s warm-region
-ceilings.
+Figure 6 recovered useful model labels but fabricated unsupported numeric table
+values and collapsed panel relations. Figure 3 recovered many visible labels
+but did not preserve the shortcut topology. PaddleOCR-VL remains useful
+perception/parser evidence, not semantic authority.
 
-Quality review is more important than the resource miss:
+## Qwen3.5-4B targeted visual-semantic gate
+research-engine PR #78 merged as
+`d0debd205de46a608fce5b9a15f3fa0fdd6de4e6`.
 
-- Figure 6 recovered the complete visible series/model-name inventory and did so
-  consistently across the repeated run.
-- However, the generated chart table collapsed the actual three-panel relations
-  and fabricated many exact numeric values that are not present as authoritative
-  table data in the figure. Fabricated-fact tolerance is zero.
-- Figure 3 recovered many visible layer labels but flattened/conflated the three
-  architecture columns and did not recover the required residual-shortcut or
-  dotted-shortcut relationships.
-- The current direct Transformers output is therefore useful as visual
-  perception/element-recognition evidence but is **not promoted** as semantic
-  authority and cannot replace EXTRACT/VERIFY.
+- PR-head CI `37242434658`: PASS
+- canonical-main CI `37242540771`: PASS
+- contract:
+  `benchmarks/document_intelligence/qwen35-visual-benchmark-contract.v1.json`
+- runner:
+  `deploy/run-qwen35-visual-benchmark.sh`
 
-Official PaddleOCR-VL documentation recommends its optimized official
-pipeline/vLLM serving path for faster page-level parsing; the direct
-Transformers path is documented as element-level recognition/text spotting.
-The measured 72-108 s route is therefore not treated as the definitive parser
-throughput ceiling.
+The gate uses the already-prefetched:
+- model: `Qwen/Qwen3.5-4B`
+- revision: `851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a`
+- exact pinned two-shard safetensor checksums
 
-## Architectural implication
-The local-AI direction remains promising, but the remaining gaps should be
-split into two roles:
+Runtime:
+- isolated vLLM 0.30.0
+- one idle selected GPU
+- bfloat16
+- max model length 8192
+- max sequences 1
+- one image per prompt
+- GPU memory utilization 0.65
+- optimized default CUDA-graph serving path, not forced eager
+- fail-fast CUDA allocation probe before model loading
+- full vLLM process-tree RSS measurement plus selected-GPU memory delta
 
-1. cheap/specialized perception converts difficult document regions into
-   structured local evidence;
-2. a local semantic multimodal/text model reasons over authoritative text plus
-   that evidence and must abstain/fall through when provenance or confidence is
-   insufficient.
+Qwen is run in non-thinking mode with a fixed seed and bounded output. The
+benchmark performs exactly three calls:
+1. Figure 6 first/cold
+2. Figure 3 warm
+3. Figure 6 warm repeat
 
-The already-prefetched `Qwen3.5-4B` is the next selected candidate because it
-can directly test both sides of that boundary: visual reasoning on the same
-Figure 6/Figure 3 crops and, if successful, bounded local EXTRACT/VERIFY over
-authoritative source context.
+The prompts test evidence rather than generic OCR:
+- Figure 6 must recover the three panel/model relationships, dashed/bold line
+  semantics, and plain-110 absence while keeping
+  `curve_numeric_estimates=[]`; unprinted curve-value estimation is forbidden.
+- Figure 3 must recover architecture columns, shortcut presence, solid/dotted
+  shortcut relations, stage channel widths, and supplied caption FLOPs.
 
-Potential later specialist comparisons are limited to clear niches:
-- MinerU2.5-Pro for document/page parsing;
-- Granite-Docling for very cheap DocTags structure;
-- DePlot/ChartGemma for chart-specific extraction/reasoning.
+Structured JSON is required and fabricated-fact tolerance remains zero.
+
+This local gate invokes no Codex. A successful local quality result must still
+be human-reviewed and then compared against a separate contemporaneous
+authoritative-PDF Codex visual control before promotion.
+
+## Localization strategy
+The working architecture is increasingly local-first:
+
+```text
+authoritative PDF
+  -> deterministic native/structure
+  -> specialized local formula/table/OCR/perception
+  -> local multimodal/semantic model
+  -> remote STANDARD Codex only on disagreement/low confidence/unsupported cases
+  -> human review
+```
+
+If Qwen succeeds visually, the next high-leverage experiment is the same model
+for bounded local semantic EXTRACT/VERIFY:
+- EXTRACT: <=4 authoritative pages
+- VERIFY: exact radius-0 cited page
+- structured evidence with exact quote/page provenance
+- zero fabricated/unlocatable evidence
+- contemporaneous STANDARD Codex controls
+- explicit remote-call avoidance and token-saving measurement
+
+Production EXTRACT/VERIFY routing stays unchanged until those controls pass.
 
 ## Next safe action
-Keep sustained research disabled and the daemon inactive/dead.
+Keep sustained research disabled and `research-engine-daemon.service`
+inactive/dead.
 
-Do not continue patching the direct PaddleOCR-VL path for semantic promotion.
+Treat remote
+`main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6`
+as canonical and Lambda/local
+`main@7a26e648ec409c96a3f9b7c8620f566658700894`
+as the last verified clean state.
 
-Open the already-prefetched Qwen3.5-4B visual fallback on the exact validated
-Figure 6 and Figure 3 crops. Use explicit evidence questions and structured
-outputs that directly test the durable annotated facts/relations with zero
-fabricated-fact tolerance.
+On Lambda:
+1. require branch `main`, clean checkout, daemon inactive/dead PID 0;
+2. fetch origin and require `origin/main` exactly
+   `d0debd205de46a608fce5b9a15f3fa0fdd6de4e6`;
+3. fast-forward only to that commit;
+4. run `bash deploy/run-qwen35-visual-benchmark.sh`;
+5. return the visible `OUTPUT_ROOT` plus
+   `qwen35-visual-benchmark-report.json`, or the first hard error.
 
-If Qwen3.5-4B passes visual quality/resource gates, extend it into a bounded
-local EXTRACT/VERIFY calibration against contemporaneous STANDARD Codex controls
-to estimate how much remote semantic throughput can be eliminated.
+The runner must first prove that vLLM's bundled Torch can allocate CUDA on the
+selected GPU. A failure there is runtime-binary compatibility only and must not
+be scored as Qwen quality.
 
-Do not change production routing or materialize scientific state during these
-benchmarks.
+If all three Qwen calls complete, evaluate semantic quality separately from the
+current resource ceilings. Exceptional quality may justify a later explicit
+serving/resource-policy experiment, but this gate does not silently relax
+thresholds.
+
+Do not start the daemon, invoke Codex during this initial local gate, change
+production routing, download alternate Qwen weights, or materialize scientific
+state.
 
 ## Fresh-chat initialization
 @GitHub
