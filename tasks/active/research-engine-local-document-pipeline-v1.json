@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "automated-research-engine-v1",
-  "current_stage": "bounded_production_integration",
+  "current_stage": "residual_escalation_and_local_semantic_fallbacks",
   "acceptance_criteria": [
     "A versioned paper-package.v1 contract exists and preserves the original PDF SHA-256 as scientific authority while representing normalized reading-order Markdown, page/block provenance, extracted figures, tables, equations, references/citations, diagnostics, confidence, and parser/model lineage.",
     "The pipeline uses a cascaded cost model: deterministic/native PDF extraction first, specialized local OCR/layout/table/formula/document models only where needed, and a general local VLM/agent only for low-confidence or structurally difficult regions.",
@@ -74,7 +74,7 @@
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86",
+        "head_sha": "0e5b1464c5307b9b1824618b6e5cff0f13485146",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -523,7 +523,7 @@
     },
     {
       "id": "bounded_production_integration",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
@@ -558,13 +558,23 @@
         "PR #63 fixes native/standard/ACCURATE runtime output discovery by requiring exactly one emitted runtime JSON artifact instead of assuming source.json, and makes document-sidecar-smoke emit a structured failure receipt before rethrow.",
         "PR #63 merged as 0e5b1464c5307b9b1824618b6e5cff0f13485146; PR CI 37165071919 PASS and canonical-main CI 37165156462 PASS.",
         "Hotfix removes all hard-coded source.json assumptions for Docling native, standard/no-OCR and targeted ACCURATE runtime outputs; each output directory must contain exactly one JSON artifact and ambiguous/missing outputs fail closed with explicit filenames.",
-        "document-sidecar-smoke now emits a structured FAIL receipt including exception type/message and broker health before rethrow, preventing silent empty smoke JSON on future failures."
+        "document-sidecar-smoke now emits a structured FAIL receipt including exception type/message and broker health before rethrow, preventing silent empty smoke JSON on future failures.",
+        "Lambda bounded production integration PASS on research-engine main@0e5b1464c5307b9b1824618b6e5cff0f13485146.",
+        "Quiescence preflight passed with 0 active RUNNING research runs, 0 QUEUED/RUNNING non-human jobs, 1 preserved pending human review, and safe_for_idle_daemon_smoke=true.",
+        "Derived sidecar smoke PASS on source-artifact:sha256:054aaba60e8b6cc4dfc5a35dab9f1adc6584bb9ef6ea68b2b9ced1cb71d52f22: first compile COMPLETED in 53742 ms and immediate second request CACHE_HIT in 0 ms.",
+        "Sidecar authority boundary held: authority=DERIVED_SIDECAR_ONLY and semantic_baseline=AUTHORITATIVE_PDF_HYDRATOR.",
+        "Sidecar routing on the smoke PDF: native blocks=1011, standard blocks=123, formula pages=3 (pages 2,3,4), FAST empty tables=0, ACCURATE pages=0, Paddle fallbacks=0.",
+        "Shared formula owner handled exactly 3 requests with one spawn/model load, 3 completed, 0 failed, queue drained; table owner did not spawn because no table residual required it.",
+        "Sidecar telemetry recorded COMPLETED then CACHE_HIT; cache-hit telemetry correctly recorded 0 new formula/table requests.",
+        "Finite daemon lifecycle PASS with MainPID 119445 and exactly one ACTIVE worker for DETERMINISTIC, CHEAP, STANDARD and STRONG tiers; no non-human work was processed.",
+        "Post-run scientific fingerprint matched pre-run across all 30 tracked scientific tables with changed_tables=[]; semantic_calls_performed=0 and scientific_state_materialized=false.",
+        "Final safety state PASS: research-engine-daemon.service inactive/dead PID 0 and BOUNDED_PRODUCTION_INTEGRATION=PASS."
       ],
       "resume_condition": "A bounded production run can compare old/new paths with rollback available and scientific authority unchanged."
     },
     {
       "id": "residual_escalation_and_local_semantic_fallbacks",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt+lambda",
       "selected_surface": "github+local-runtime",
@@ -584,7 +594,13 @@
       ],
       "validation": [
         "This stage is deliberately added after bounded production integration: current production policy still uses Codex STANDARD semantic EXTRACT/VERIFY over authoritative PDF and has not yet implemented a complete deterministic -> specialized local model -> local VLM/local agent -> remote Codex -> human fallback ladder.",
-        "General document VLM, OCR, embeddings/reranking and local semantic replacements remain disabled/deferred until this stage opens them based on measured residual evidence; they must not be introduced globally by default."
+        "General document VLM, OCR, embeddings/reranking and local semantic replacements remain disabled/deferred until this stage opens them based on measured residual evidence; they must not be introduced globally by default.",
+        "Bounded production integration is now validated, so this stage may open measured local semantic fallback candidates without weakening the authoritative-PDF boundary.",
+        "Current production baseline at stage entry remains: EXTRACT and VERIFY are STANDARD Codex semantic jobs over authoritative PDF/cited-page context; local document sidecars are derived support only.",
+        "Existing measured local specializations already promoted before this stage: CodeFormulaV2 for formula pages and FAST -> ACCURATE -> PP-TableMagic for persistent empty-grid tables.",
+        "Known unresolved/deferred residual classes at stage entry include scanned/image-only text/OCR cases, uncaptioned or semantically rich figures/charts, and broader semantic residuals where deterministic/specialized parsing cannot establish sufficient confidence.",
+        "Do not globally enable OCR, a general document VLM, embeddings/reranking, or a local semantic agent. Open each only against an explicit measured residual and require quality/provenance plus resource/cost evidence before promotion.",
+        "Target architecture to evaluate is residual-gated escalation, not unconditional replacement: deterministic/native+structure -> specialized local model -> targeted OCR/VLM/local semantic candidate when justified -> remote Codex semantic agent -> human review, with authoritative PDF/page/region retained throughout."
       ],
       "resume_condition": "Measured residuals have an explicit quality-gated escalation ladder, including local multimodal/agent candidates where justified, so Codex is not used blindly where cheaper validated local recovery is sufficient."
     },
@@ -633,12 +649,12 @@
       "identity": "0e5b1464c5307b9b1824618b6e5cff0f13485146",
       "required_for_resume": true,
       "evidence": [
-        "stage=bounded_production_integration",
-        "research-engine remote main@0e5b1464c5307b9b1824618b6e5cff0f13485146; PR #63 + canonical-main CI PASS",
-        "Lambda local last verified clean main@a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86; daemon inactive/dead PID 0",
-        "first bounded attempt failed only because Docling resolved source symlink to SHA stem and sidecar hard-coded source.json",
-        "hotfix now exact-one discovers runtime JSON for native/standard/ACCURATE and emits structured smoke failure receipts",
-        "post-bounded stage=residual_escalation_and_local_semantic_fallbacks before completion"
+        "stage=residual_escalation_and_local_semantic_fallbacks",
+        "research-engine remote/local main@0e5b1464c5307b9b1824618b6e5cff0f13485146; PR #63 + canonical-main CI PASS",
+        "bounded production integration PASS: sidecar COMPLETED -> CACHE_HIT, 3 formula requests/one model load, no table residual on smoke PDF",
+        "idle daemon lifecycle PASS with exactly four expected workers, no non-human work processed, final inactive/dead PID 0",
+        "scientific fingerprint unchanged across 30 tables; semantic_calls_performed=0; scientific_state_materialized=false",
+        "next=residual taxonomy + benchmark/promotion contract for OCR/VLM/local semantic fallbacks before any new model enablement"
       ]
     }
   ],
@@ -1156,18 +1172,21 @@
     }
   ],
   "blockers": [
-    "Lambda local research-engine is last verified clean at main@a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 while canonical remote main is 0e5b1464c5307b9b1824618b6e5cff0f13485146; fast-forward before bounded integration retry.",
-    "Bounded production integration has not yet passed on Lambda after the output-discovery hotfix.",
-    "Residual escalation/local semantic fallback architecture remains a planned post-bounded stage; Codex STANDARD EXTRACT/VERIFY remains the semantic baseline until that stage validates cheaper local fallbacks.",
-    "Sustained research remains disabled."
+    "The residual taxonomy and promotion gates for OCR, local multimodal/VLM, and local semantic-agent candidates have not yet been formalized or benchmarked.",
+    "The existing benchmark corpus is strong for born-digital scientific text/tables/equations but explicitly lacks sufficient scan/image-only cases; residual fallback validation must add targeted cases rather than reopen the broad parser bakeoff.",
+    "Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline until a cheaper local fallback demonstrates controlled quality/provenance equivalence on the specific residual class it is intended to handle.",
+    "Sustained research remains disabled while residual fallback architecture is being validated."
   ],
   "remaining_work": [
-    "Fast-forward Lambda from a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 to canonical 0e5b1464c5307b9b1824618b6e5cff0f13485146 while the daemon remains inactive/dead.",
-    "Rerun deploy/run-bounded-production-integration.sh. The managed env does not require another semantic-policy change; refresh via deploy/configure-production-local-inference.sh only if the live env receipt/settings are uncertain.",
-    "Require sidecar COMPLETED then CACHE_HIT, telemetry, bounded idle-daemon worker registration, no model-server leak, final inactive/dead daemon, and unchanged scientific fingerprints.",
-    "On PASS, advance to residual_escalation_and_local_semantic_fallbacks and benchmark measured residuals for OCR/VLM/local-agent escalation before any task completion or sustained research enablement."
+    "Define an explicit residual taxonomy from existing benchmark/production evidence: textless/scanned pages, low-confidence OCR/text recovery, formula residuals after CodeFormulaV2, table residuals after FAST/ACCURATE/Paddle, uncaptioned/semantic figures and charts, layout/reading-order anomalies, and semantic extraction/verification ambiguity.",
+    "Define stage-by-stage promotion/fallback gates with authority/provenance requirements, confidence thresholds, failure semantics, GPU/RAM/latency ceilings, and remote-token/allowance accounting.",
+    "Add only the benchmark cases needed to exercise missing residual classes, especially scan/image-only pages and semantically rich figure/chart regions; do not reopen the closed general parser bakeoff.",
+    "Benchmark candidate local recovery tiers in increasing cost order. OCR should be tested only on textless/scan residuals; local multimodal/VLM candidates only on visual/semantic residuals; local semantic-agent candidates only where deterministic/specialized/VLM outputs still require synthesis or interpretation.",
+    "Compare promoted local candidates against contemporaneous authoritative-PDF Codex controls and require provenance-preserving quality equivalence or a clearly bounded assistive role before production use.",
+    "Design the production escalation contract so successful lower-cost tiers suppress unnecessary Codex work, while low-confidence/disagreement cases fall through to Codex and then human review.",
+    "After measured promotion decisions, update localization-matrix.v2 (or create the next measured version), CI-lock the fallback ladder, and run a bounded Lambda integration gate before considering task completion or sustained research."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86, fetch origin/main, require origin/main=0e5b1464c5307b9b1824618b6e5cff0f13485146, and fast-forward only to that commit. Then rerun bash deploy/run-bounded-production-integration.sh inside the persistent tmux/log wrapper. The hotfix must discover SHA-stemmed native/standard/ACCURATE Docling JSON artifacts automatically. Return the first structured sidecar FAIL receipt/traceback or the final bounded integration report through BOUNDED_PRODUCTION_INTEGRATION=PASS. If PASS, advance next to residual_escalation_and_local_semantic_fallbacks, not completion.",
+  "next_safe_action": "Keep sustained research disabled and leave research-engine-daemon.service inactive/dead unless a later bounded gate explicitly owns its lifecycle. Treat research-engine main@0e5b1464c5307b9b1824618b6e5cff0f13485146 as the validated bounded-production baseline. Begin residual_escalation_and_local_semantic_fallbacks by reading the existing localization matrix, adaptive routing/table/formula evidence, sidecar telemetry, and benchmark corpus contracts. First produce an explicit residual taxonomy plus benchmark/promotion contract; do not download or globally enable OCR/VLM/local-agent models yet. The contract must distinguish scan/text residuals, formula/table residuals already served by specialized models, figure/chart visual semantics, layout anomalies, and semantic EXTRACT/VERIFY ambiguity; preserve authoritative PDF/page/region provenance; and define the intended escalation ladder deterministic/native+structure -> specialized local model -> targeted OCR/VLM/local semantic candidate when justified -> Codex -> human. Then identify the minimum additional corpus cases and candidate families needed for measured experiments without reopening the closed broad parser bakeoff.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."

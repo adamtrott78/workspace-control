@@ -35,26 +35,29 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86
+- Local HEAD: 0e5b1464c5307b9b1824618b6e5cff0f13485146
 - Local clean: true
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86, fetch origin/main, require origin/main=0e5b1464c5307b9b1824618b6e5cff0f13485146, and fast-forward only to that commit. Then rerun bash deploy/run-bounded-production-integration.sh inside the persistent tmux/log wrapper. The hotfix must discover SHA-stemmed native/standard/ACCURATE Docling JSON artifacts automatically. Return the first structured sidecar FAIL receipt/traceback or the final bounded integration report through BOUNDED_PRODUCTION_INTEGRATION=PASS. If PASS, advance next to residual_escalation_and_local_semantic_fallbacks, not completion.
+Keep sustained research disabled and leave research-engine-daemon.service inactive/dead unless a later bounded gate explicitly owns its lifecycle. Treat research-engine main@0e5b1464c5307b9b1824618b6e5cff0f13485146 as the validated bounded-production baseline. Begin residual_escalation_and_local_semantic_fallbacks by reading the existing localization matrix, adaptive routing/table/formula evidence, sidecar telemetry, and benchmark corpus contracts. First produce an explicit residual taxonomy plus benchmark/promotion contract; do not download or globally enable OCR/VLM/local-agent models yet. The contract must distinguish scan/text residuals, formula/table residuals already served by specialized models, figure/chart visual semantics, layout anomalies, and semantic EXTRACT/VERIFY ambiguity; preserve authoritative PDF/page/region provenance; and define the intended escalation ladder deterministic/native+structure -> specialized local model -> targeted OCR/VLM/local semantic candidate when justified -> Codex -> human. Then identify the minimum additional corpus cases and candidate families needed for measured experiments without reopening the closed broad parser bakeoff.
 
 ## Remaining work
 
-- Fast-forward Lambda from a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 to canonical 0e5b1464c5307b9b1824618b6e5cff0f13485146 while the daemon remains inactive/dead.
-- Rerun deploy/run-bounded-production-integration.sh. The managed env does not require another semantic-policy change; refresh via deploy/configure-production-local-inference.sh only if the live env receipt/settings are uncertain.
-- Require sidecar COMPLETED then CACHE_HIT, telemetry, bounded idle-daemon worker registration, no model-server leak, final inactive/dead daemon, and unchanged scientific fingerprints.
-- On PASS, advance to residual_escalation_and_local_semantic_fallbacks and benchmark measured residuals for OCR/VLM/local-agent escalation before any task completion or sustained research enablement.
+- Define an explicit residual taxonomy from existing benchmark/production evidence: textless/scanned pages, low-confidence OCR/text recovery, formula residuals after CodeFormulaV2, table residuals after FAST/ACCURATE/Paddle, uncaptioned/semantic figures and charts, layout/reading-order anomalies, and semantic extraction/verification ambiguity.
+- Define stage-by-stage promotion/fallback gates with authority/provenance requirements, confidence thresholds, failure semantics, GPU/RAM/latency ceilings, and remote-token/allowance accounting.
+- Add only the benchmark cases needed to exercise missing residual classes, especially scan/image-only pages and semantically rich figure/chart regions; do not reopen the closed general parser bakeoff.
+- Benchmark candidate local recovery tiers in increasing cost order. OCR should be tested only on textless/scan residuals; local multimodal/VLM candidates only on visual/semantic residuals; local semantic-agent candidates only where deterministic/specialized/VLM outputs still require synthesis or interpretation.
+- Compare promoted local candidates against contemporaneous authoritative-PDF Codex controls and require provenance-preserving quality equivalence or a clearly bounded assistive role before production use.
+- Design the production escalation contract so successful lower-cost tiers suppress unnecessary Codex work, while low-confidence/disagreement cases fall through to Codex and then human review.
+- After measured promotion decisions, update localization-matrix.v2 (or create the next measured version), CI-lock the fallback ladder, and run a bounded Lambda integration gate before considering task completion or sustained research.
 
 ## Blockers / gates
 
-- Lambda local research-engine is last verified clean at main@a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 while canonical remote main is 0e5b1464c5307b9b1824618b6e5cff0f13485146; fast-forward before bounded integration retry.
-- Bounded production integration has not yet passed on Lambda after the output-discovery hotfix.
-- Residual escalation/local semantic fallback architecture remains a planned post-bounded stage; Codex STANDARD EXTRACT/VERIFY remains the semantic baseline until that stage validates cheaper local fallbacks.
-- Sustained research remains disabled.
+- The residual taxonomy and promotion gates for OCR, local multimodal/VLM, and local semantic-agent candidates have not yet been formalized or benchmarked.
+- The existing benchmark corpus is strong for born-digital scientific text/tables/equations but explicitly lacks sufficient scan/image-only cases; residual fallback validation must add targeted cases rather than reopen the broad parser bakeoff.
+- Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline until a cheaper local fallback demonstrates controlled quality/provenance equivalence on the specific residual class it is intended to handle.
+- Sustained research remains disabled while residual fallback architecture is being validated.
 
 ## Fresh-chat initialization
 
