@@ -68,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "d228f8fab477b68a64b911e72e8b2ba2292cf114",
+        "checkpoint_sha": "0bded264aa4bb021450b9d62c66555843155ead8",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "a3635f817c49dd40613724cca1353487173305d5",
+        "head_sha": "d228f8fab477b68a64b911e72e8b2ba2292cf114",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -1451,27 +1451,50 @@
         "The same two validated crops, exactly three candidate calls, resource ceilings, human quality thresholds, Codex control requirement, daemon lifecycle, Qwen fallback boundary, production routing ban, and scientific-state prohibition are unchanged.",
         "If the model-native direct interface runs but Figure 3 cannot recover shortcut relationships or Figure 6 cannot recover chart facts, that becomes a legitimate capability result and should fall through rather than trigger another PaddleX wrapper patch."
       ]
+    },
+    {
+      "check": "Fourth targeted PaddleOCR-VL direct-loader Lambda attempt",
+      "result": "BLOCKED_CAUSAL_MASK_KEYWORD_MISMATCH_ZERO_INFERENCE",
+      "evidence": [
+        "The direct AutoModelForCausalLM+AutoProcessor path loaded far enough to allocate GPU memory; uploaded report records peak_process_vram_mib=2342.0 and gpu_process_samples=4.",
+        "candidate_inference_calls=0, runtime_completed=false, model_init=false, peak_rss=false, warm_region=false, scientific_state_materialized=false.",
+        "The sole hard failure was TypeError: create_causal_mask() got an unexpected keyword argument 'inputs_embeds'.",
+        "Transformers 4.55.0 defines create_causal_mask with singular input_embeds, while the pinned PaddleOCR-VL-1.6 custom model code invokes it with plural inputs_embeds.",
+        "This exact incompatibility is independently reported by PaddleOCR-VL-1.6 users; the prior result remains diagnostic only and is not VLM quality evidence."
+      ]
+    },
+    {
+      "check": "PaddleOCR-VL causal-mask keyword compatibility hotfix",
+      "result": "PASS_READY_FOR_LAMBDA_RERUN",
+      "evidence": [
+        "research-engine PR #76 merged as 0bded264aa4bb021450b9d62c66555843155ead8.",
+        "PR-head CI run 37176718312 PASS; canonical-main CI run 37176794527 PASS.",
+        "The helper now inspects transformers.masking_utils.create_causal_mask before the pinned custom modeling module loads.",
+        "For the Transformers 4.55.0 signature it applies only an in-memory keyword alias from inputs_embeds to input_embeds; it does not modify model files, weights, packages, prompts, or benchmark inputs.",
+        "The shim fails closed if neither expected parameter spelling is present, and rejects calls containing both spellings.",
+        "The model remains loaded through the exact pinned local AutoModelForCausalLM + AutoProcessor path with local_files_only=true, offline environment flags, exactly the same two validated crops and three-call budget."
+      ]
     }
   ],
   "blockers": [
-    "Lambda/local research-engine is last verified clean at main@a3635f817c49dd40613724cca1353487173305d5 after the third zero-inference VLM initialization failure, while canonical remote main is direct-loader hotfix d228f8fab477b68a64b911e72e8b2ba2292cf114; synchronize only with the research daemon stopped.",
-    "PaddleOCR-VL still has not executed a candidate inference call. The first failure lacked torchvision, the second lacked protobuf, and the third exposed PaddleX 3.7's AutoModelForImageTextToText mismatch with the model's declared AutoModelForCausalLM custom interface.",
+    "Lambda/local research-engine is last verified clean at main@d228f8fab477b68a64b911e72e8b2ba2292cf114 after the fourth zero-inference VLM attempt, while canonical remote main is causal-mask compatibility hotfix 0bded264aa4bb021450b9d62c66555843155ead8; synchronize only with the research daemon stopped.",
+    "PaddleOCR-VL still has not completed a candidate inference call. The fourth attempt reached the direct model code and GPU allocation but exposed the pinned model's inputs_embeds keyword mismatch with Transformers 4.55.0 create_causal_mask(input_embeds=...).",
     "PaddleOCR-VL cannot be promoted from local measurement alone; human annotated-fact review and a later contemporaneous authoritative-PDF Codex control remain mandatory.",
     "PP-OCRv6 remains resource-pass / quality-not-promoted; the blank scan target still requires replacement with a content-bearing image-only scan before scan-recovery promotion can be evaluated.",
-    "Qwen3.5-4B remains prefetched but inference-closed unless PaddleOCR-VL fails/abstains for visual semantics or the separately bounded semantic gate opens.",
+    "Qwen3.5-4B remains prefetched but inference-closed unless PaddleOCR-VL runs and fails/abstains for visual semantics, or the separately bounded semantic gate opens.",
     "Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline; sustained research remains disabled."
   ],
   "remaining_work": [
-    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@a3635f817c49dd40613724cca1353487173305d5, fetch origin/main, require origin/main=d228f8fab477b68a64b911e72e8b2ba2292cf114, and fast-forward only to that canonical direct-loader commit.",
-    "Rerun bash deploy/run-paddleocr-vl-residual-benchmark.sh. The existing runtime dependencies may be reused; the benchmark must preflight the pinned model's AutoModelForCausalLM + AutoProcessor mappings and then perform exactly three direct local Transformers generations.",
-    "Return the new visible OUTPUT_ROOT plus paddleocr-vl-benchmark-report.json, or the first hard error. Existing validated Figure 6/Figure 3 crop images may be reused for human review unless rerendered output differs.",
+    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@d228f8fab477b68a64b911e72e8b2ba2292cf114, fetch origin/main, require origin/main=0bded264aa4bb021450b9d62c66555843155ead8, and fast-forward only to that canonical hotfix commit.",
+    "Rerun bash deploy/run-paddleocr-vl-residual-benchmark.sh. Reuse the existing validated runtime; no dependency rebuild is required. The helper must install the narrow in-memory inputs_embeds -> input_embeds create_causal_mask alias before loading the pinned custom modeling module.",
+    "Return the new visible OUTPUT_ROOT plus paddleocr-vl-benchmark-report.json, or the first hard error. Do not reuse any prior zero-inference report as quality evidence.",
     "Require measurement_decision=MEASURED_PENDING_HUMAN_AND_CODEX_CONTROL, exactly three candidate VLM calls, valid GPU telemetry, and all VLM resource ceilings passing before visual quality review.",
     "Human-review Figure 6 Chart Recognition output and Figure 3 OCR output against the durable annotated facts; compute/record fact precision, recall, numeric accuracy, relation accuracy, provenance coverage, and fabricated facts.",
-    "If model-native PaddleOCR-VL outputs cannot meet the relation/fact thresholds, classify that as a legitimate local VLM capability miss and open Qwen3.5-4B visual fallback only for the failed visual residual; do not continue patching PaddleX.",
+    "If the model-native PaddleOCR-VL path completes but cannot meet the fact/relation thresholds, classify that as a legitimate capability miss and open Qwen3.5-4B visual fallback only for the failed residual. Do not continue framework-wrapper patching for a quality failure.",
     "Only if PaddleOCR-VL meets local visual quality thresholds, run a separate contemporaneous STANDARD Codex authoritative-PDF/figure control on the same evidence needs before promotion.",
     "Separately replace the invalid blank image-only scan benchmark with a content-bearing image-only/textless page before reopening PP-OCRv6 scan-recovery quality."
   ],
-  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@d228f8fab477b68a64b911e72e8b2ba2292cf114 as the canonical PaddleOCR-VL direct-loader baseline and Lambda/local main@a3635f817c49dd40613724cca1353487173305d5 as the last verified clean local state after a third zero-inference wrapper failure. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly d228f8fab477b68a64b911e72e8b2ba2292cf114, then fast-forward only to that commit. Rerun bash deploy/run-paddleocr-vl-residual-benchmark.sh. The benchmark must load the exact pinned local model through AutoModelForCausalLM + AutoProcessor with trust_remote_code=True, local_files_only=True and offline environment flags; Figure 6 uses Chart Recognition: and Figure 3 uses OCR:. Return the new visible OUTPUT_ROOT plus paddleocr-vl-benchmark-report.json, or the first hard error. Do not start the daemon, invoke Qwen3.5-4B or Codex, change production routing, or materialize scientific state.",
+  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@0bded264aa4bb021450b9d62c66555843155ead8 as the canonical PaddleOCR-VL causal-mask compatibility baseline and Lambda/local main@d228f8fab477b68a64b911e72e8b2ba2292cf114 as the last verified clean local state after a fourth zero-inference direct-model failure. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly 0bded264aa4bb021450b9d62c66555843155ead8, then fast-forward only to that commit. Rerun bash deploy/run-paddleocr-vl-residual-benchmark.sh. Do not rebuild or upgrade dependencies: the only new behavior is a fail-closed in-memory create_causal_mask keyword alias installed before the custom model module loads. Return the new visible OUTPUT_ROOT plus paddleocr-vl-benchmark-report.json, or the first hard error. Do not start the daemon, invoke Qwen3.5-4B or Codex, change production routing, or materialize scientific state.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
