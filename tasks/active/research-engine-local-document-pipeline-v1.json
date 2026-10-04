@@ -68,7 +68,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "a878f74f7d3c669374b12d2a903b56483b3770d7",
+        "checkpoint_sha": "a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86",
         "verified": true
       },
       "local": {
@@ -535,9 +535,23 @@
         "research-engine integration behind an explicit feature/config gate",
         "paper-package artifact caching",
         "fallback to authoritative PDF path",
-        "ops telemetry for compiler/router/local-model usage"
+        "ops telemetry for compiler/router/local-model usage",
+        "src/research_engine/document_sidecar.py",
+        "src/research_engine/bounded_integration.py",
+        "deploy/run-bounded-production-integration.sh",
+        "benchmarks/document_intelligence/bounded-production-integration-contract.v1.json",
+        "document_sidecar_events telemetry schema"
       ],
-      "validation": [],
+      "validation": [
+        "research-engine PR #62 merged as a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86; PR CI 37164150226 PASS and canonical-main CI 37164231379 PASS.",
+        "Feature-gated derived sidecar is wired after authoritative ACQUIRE commit; sidecar failure is fail-open and cannot invalidate acquired source truth.",
+        "Sidecar cache is atomic/content-addressed by authoritative source SHA-256; receipts declare DERIVED_SIDECAR_ONLY and AUTHORITATIVE_PDF_HYDRATOR semantic baseline.",
+        "Production routing preserves native + standard/no-OCR then targeted formula; FAST empty tables escalate to ACCURATE and only then Paddle when ACCURATE still has no non-empty grid.",
+        "Sidecar subprocesses are individually bounded to 900s; formula remains GPU0 while standard/ACCURATE/Paddle table-side work is assigned GPU1 to avoid structure/formula overlap.",
+        "document_sidecar_events telemetry records compile/cache/failure status, routing counts, local-inference summary and wall time; CACHE_HIT records zero new model requests.",
+        "Finite integration runner requires quiescent PostgreSQL, fingerprints scientific tables, proves uncached build then cache hit, validates telemetry, starts daemon only for a six-second idle registration interval, verifies one ACTIVE worker per tier under the daemon MainPID, stops unconditionally, rejects leaked formula/table servers, and requires unchanged scientific fingerprints.",
+        "CI contracts prohibit submit-run/autonomous-run in the bounded runner and preserve authoritative-PDF semantic hydration."
+      ],
       "resume_condition": "A bounded production run can compare old/new paths with rollback available and scientific authority unchanged."
     },
     {
@@ -582,15 +596,14 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "a878f74f7d3c669374b12d2a903b56483b3770d7",
+      "identity": "a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86",
       "required_for_resume": true,
       "evidence": [
         "stage=bounded_production_integration",
-        "research-engine remote/local main@a878f74f7d3c669374b12d2a903b56483b3770d7; production acceptance PASS",
-        "systemd/env/PostgreSQL/runtimes/caches/GPU probes/policy/license/broker/PDF hydration all accepted",
-        "0 semantic calls; 0 heavyweight model-server spawns; no scientific-state materialization; daemon final inactive/dead PID 0",
-        "authoritative-PDF STANDARD EXTRACT/VERIFY baseline remains locked",
-        "next=CI-gated finite daemon lifecycle + sidecar/cache/telemetry integration with rollback"
+        "research-engine remote main@a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86; PR #62 + canonical-main CI PASS",
+        "Lambda local last verified clean main@a878f74f7d3c669374b12d2a903b56483b3770d7; production acceptance PASS; daemon inactive/dead PID 0",
+        "derived sidecar is SHA-addressed/fail-open/non-authoritative and EXTRACT/VERIFY remain authoritative-PDF STANDARD semantics",
+        "next=fast-forward, refresh managed env, run finite sidecar/cache + idle-daemon integration gate"
       ]
     }
   ],
@@ -1071,21 +1084,32 @@
         "semantic_calls_performed=0; model_server_processes_spawned=0; scientific_state_materialized=false.",
         "Final daemon state=inactive/dead PID 0; acceptance decision=PASS."
       ]
+    },
+    {
+      "check": "Bounded production integration implementation",
+      "result": "PASS_READY_FOR_LAMBDA",
+      "evidence": [
+        "research-engine PR #62 -> a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86.",
+        "PR CI 37164150226 PASS; canonical-main CI 37164231379 PASS.",
+        "Derived sidecar cache + telemetry integrated fail-open after authoritative ACQUIRE.",
+        "Authoritative-PDF EXTRACT/VERIFY hydration remains unchanged.",
+        "Finite runner proves miss->hit caching, idle daemon worker registration, unconditional stop, no model-server leak, and scientific fingerprint invariance."
+      ]
     }
   ],
   "blockers": [
-    "Bounded production integration has not yet demonstrated an explicit rollback-capable daemon lifecycle with the validated local document pipeline enabled.",
-    "Paper-package-derived context remains prohibited as the production EXTRACT/VERIFY semantic baseline; bounded integration must preserve authoritative-PDF hydration and use local document compilation only as validated support/escalation/cache behavior.",
-    "Sustained research remains disabled until bounded production integration passes."
+    "Lambda local research-engine is last verified clean at main@a878f74f7d3c669374b12d2a903b56483b3770d7 while canonical remote main is a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86; fast-forward before bounded integration.",
+    "Bounded production integration has not yet been measured on the Lambda host.",
+    "Sustained research remains disabled until bounded production integration passes and the final task closure decision is recorded."
   ],
   "remaining_work": [
-    "Design and CI-gate bounded production integration behind explicit configuration/feature controls while preserving authoritative-PDF EXTRACT/VERIFY semantics.",
-    "Integrate/verify content-addressed document-sidecar caching and telemetry for document compiler/router/local-model usage without making paper-package context the semantic baseline.",
-    "Add a rollback-capable bounded daemon lifecycle gate that first requires no RUNNING research runs or QUEUED/RUNNING non-human work, starts the daemon only for a finite health/worker registration interval, verifies shared broker ownership/configuration without launching research jobs, then stops the daemon and confirms cleanup.",
-    "Where model-server lifecycle must be exercised, use only bounded preselected document-sidecar smoke work with no scientific-state materialization and explicit rollback; otherwise reuse the already-passed local-inference concurrency evidence.",
-    "After bounded integration PASS, decide whether the task can be closed or whether a final deliberately bounded production comparison is still required before any sustained research enablement."
+    "Fast-forward the clean Lambda checkout from a878f74f7d3c669374b12d2a903b56483b3770d7 to canonical a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 while the research daemon remains inactive/dead.",
+    "Rerun deploy/configure-production-local-inference.sh to create a fresh rollback backup and enable the managed document-sidecar gates/timeouts in the live env.",
+    "Run deploy/run-bounded-production-integration.sh in the persistent tmux/log wrapper. The gate will apply the idempotent sidecar telemetry schema, require queue quiescence, build/cache one derived sidecar, then perform one finite idle daemon lifecycle and stop.",
+    "Evaluate sidecar routing/model usage, cache miss->hit, telemetry, worker registration, process cleanup and scientific fingerprint invariance.",
+    "If PASS, close bounded_production_integration and decide whether this task is complete and sustained research can be separately enabled under the established operator controls."
   ],
-  "next_safe_action": "Keep sustained research disabled. Treat research-engine main@a878f74f7d3c669374b12d2a903b56483b3770d7 as the validated Lambda production-acceptance baseline. Begin bounded_production_integration by inspecting the current document-sidecar/compiler/router integration, feature/config gates, telemetry, daemon startup/worker registration, and rollback behavior. Preserve authoritative-PDF EXTRACT/VERIFY hydration and do not promote paper-package semantic context. Design and CI-gate a finite integration runner that fails closed unless PostgreSQL is quiescent, starts research-engine-daemon.service only for a bounded health interval with no runnable non-human jobs, verifies expected workers/broker configuration, stops the daemon unconditionally, and leaves no scientific-state mutation.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead before the gate and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at a878f74f7d3c669374b12d2a903b56483b3770d7, fetch origin/main, require origin/main=a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86, and fast-forward only to that commit. Rerun bash deploy/configure-production-local-inference.sh and preserve its fresh BACKUP/ROLLBACK receipt. Then, inside the persistent tmux shell with console logging, run bash deploy/run-bounded-production-integration.sh. The runner may start research-engine-daemon.service only for its finite idle lifecycle after proving there are no RUNNING research runs or QUEUED/RUNNING non-HUMAN jobs; it must stop the daemon unconditionally. Return the first ERROR/traceback or the final bounded integration report through BOUNDED_PRODUCTION_INTEGRATION=PASS.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."

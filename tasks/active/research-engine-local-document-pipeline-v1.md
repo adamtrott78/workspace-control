@@ -31,7 +31,7 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a878f74f7d3c669374b12d2a903b56483b3770d7
+- Remote checkpoint: a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
@@ -40,21 +40,21 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 ## Next safe action
 
-Keep sustained research disabled. Treat research-engine main@a878f74f7d3c669374b12d2a903b56483b3770d7 as the validated Lambda production-acceptance baseline. Begin bounded_production_integration by inspecting the current document-sidecar/compiler/router integration, feature/config gates, telemetry, daemon startup/worker registration, and rollback behavior. Preserve authoritative-PDF EXTRACT/VERIFY hydration and do not promote paper-package semantic context. Design and CI-gate a finite integration runner that fails closed unless PostgreSQL is quiescent, starts research-engine-daemon.service only for a bounded health interval with no runnable non-human jobs, verifies expected workers/broker configuration, stops the daemon unconditionally, and leaves no scientific-state mutation.
+Keep research-engine-daemon.service inactive/dead before the gate and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at a878f74f7d3c669374b12d2a903b56483b3770d7, fetch origin/main, require origin/main=a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86, and fast-forward only to that commit. Rerun bash deploy/configure-production-local-inference.sh and preserve its fresh BACKUP/ROLLBACK receipt. Then, inside the persistent tmux shell with console logging, run bash deploy/run-bounded-production-integration.sh. The runner may start research-engine-daemon.service only for its finite idle lifecycle after proving there are no RUNNING research runs or QUEUED/RUNNING non-HUMAN jobs; it must stop the daemon unconditionally. Return the first ERROR/traceback or the final bounded integration report through BOUNDED_PRODUCTION_INTEGRATION=PASS.
 
 ## Remaining work
 
-- Design and CI-gate bounded production integration behind explicit configuration/feature controls while preserving authoritative-PDF EXTRACT/VERIFY semantics.
-- Integrate/verify content-addressed document-sidecar caching and telemetry for document compiler/router/local-model usage without making paper-package context the semantic baseline.
-- Add a rollback-capable bounded daemon lifecycle gate that first requires no RUNNING research runs or QUEUED/RUNNING non-human work, starts the daemon only for a finite health/worker registration interval, verifies shared broker ownership/configuration without launching research jobs, then stops the daemon and confirms cleanup.
-- Where model-server lifecycle must be exercised, use only bounded preselected document-sidecar smoke work with no scientific-state materialization and explicit rollback; otherwise reuse the already-passed local-inference concurrency evidence.
-- After bounded integration PASS, decide whether the task can be closed or whether a final deliberately bounded production comparison is still required before any sustained research enablement.
+- Fast-forward the clean Lambda checkout from a878f74f7d3c669374b12d2a903b56483b3770d7 to canonical a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 while the research daemon remains inactive/dead.
+- Rerun deploy/configure-production-local-inference.sh to create a fresh rollback backup and enable the managed document-sidecar gates/timeouts in the live env.
+- Run deploy/run-bounded-production-integration.sh in the persistent tmux/log wrapper. The gate will apply the idempotent sidecar telemetry schema, require queue quiescence, build/cache one derived sidecar, then perform one finite idle daemon lifecycle and stop.
+- Evaluate sidecar routing/model usage, cache miss->hit, telemetry, worker registration, process cleanup and scientific fingerprint invariance.
+- If PASS, close bounded_production_integration and decide whether this task is complete and sustained research can be separately enabled under the established operator controls.
 
 ## Blockers / gates
 
-- Bounded production integration has not yet demonstrated an explicit rollback-capable daemon lifecycle with the validated local document pipeline enabled.
-- Paper-package-derived context remains prohibited as the production EXTRACT/VERIFY semantic baseline; bounded integration must preserve authoritative-PDF hydration and use local document compilation only as validated support/escalation/cache behavior.
-- Sustained research remains disabled until bounded production integration passes.
+- Lambda local research-engine is last verified clean at main@a878f74f7d3c669374b12d2a903b56483b3770d7 while canonical remote main is a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86; fast-forward before bounded integration.
+- Bounded production integration has not yet been measured on the Lambda host.
+- Sustained research remains disabled until bounded production integration passes and the final task closure decision is recorded.
 
 ## Fresh-chat initialization
 
