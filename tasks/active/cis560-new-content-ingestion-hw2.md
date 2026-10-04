@@ -9,10 +9,10 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 ## Task
 
-- ID: cis560-new-content-ingestion-hw2
+- ID: undefined
 - Title: CIS560 new-content ingestion + HW2 bootstrap and assignment work
 - Status: IN_PROGRESS
-- Capsule schema: v2
+- Capsule schema: 2
 
 ## Goal
 
@@ -30,7 +30,7 @@ Bring CIS 560 durable course state current with all genuinely new instructor-cov
 
 - Intent: mutate
 - Remote branch: tutor-framework
-- Remote checkpoint: e6ee68912a63eb2373780fd9b5ec3bcc42738084
+- Remote checkpoint: 2d202f15862725be3153f3ad948fbcf77e76b499
 - Remote verified: true
 
 ### workspace-control
@@ -40,18 +40,29 @@ Bring CIS 560 durable course state current with all genuinely new instructor-cov
 - Remote checkpoint: 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9
 - Remote verified: true
 
+## Current stage
+
+- HW2 tutoring: VALIDATED
+- Word-processed artifact build: VALIDATED
+- Final validation / handoff: IN_PROGRESS pending user review and Canvas submission
+
+## Artifact state
+
+- Durable source: `homework/hw02/artifacts/SUBMISSION.md`
+- Word document: `CIS560_HW2_Adam_Trott.docx`
+- Semantic validation: PASS
+- Visual validation: PASS (5 pages inspected)
+- Canvas submission: NOT_PERFORMED
+
 ## Next safe action
 
-Begin Homework 2 Problem 2-1 in LEARNING mode. Present the exact Sipser 1.36 task context without giving the construction away, then ask the smallest diagnostic: what finite information would a machine need to remember while reading a unary string a^k in order to decide whether k is a multiple of n? Persist the student's response in homework/hw02/LEARNING.md before advancing.
+Present the validated CIS560_HW2_Adam_Trott.docx to the user for final review. If no edits are requested, the next action is the user-owned Canvas submission; after confirmation, finalize HANDOFF_SAFE/archive.
 
 ## Remaining work
 
-- Tutor and complete HW2 one bounded problem/subproblem at a time, beginning with Problem 2-1 in LEARNING mode.
-- Persist actual student behavioral evidence and update mastery only when justified independently.
-- Use the solution manual only after meaningful attempts and semantic prompt matching.
-- Build and validate the required word-processed submission artifact after/alongside completed problem work without conflating artifact correctness with mastery.
-- Leave Canvas submission to the user unless separately and explicitly authorized.
-- Synchronize final task state, establish HANDOFF_SAFE, and archive when complete.
+- User reviews the attached submission-ready DOCX and requests any desired wording/layout edits.
+- User submits the final document to Canvas; external submission remains user-owned unless separately authorized.
+- After submission confirmation or explicit closure, synchronize final HANDOFF_SAFE state and archive the task capsule.
 
 ## Blockers / gates
 
