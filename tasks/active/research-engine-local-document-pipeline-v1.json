@@ -550,9 +550,40 @@
         "Sidecar subprocesses are individually bounded to 900s; formula remains GPU0 while standard/ACCURATE/Paddle table-side work is assigned GPU1 to avoid structure/formula overlap.",
         "document_sidecar_events telemetry records compile/cache/failure status, routing counts, local-inference summary and wall time; CACHE_HIT records zero new model requests.",
         "Finite integration runner requires quiescent PostgreSQL, fingerprints scientific tables, proves uncached build then cache hit, validates telemetry, starts daemon only for a six-second idle registration interval, verifies one ACTIVE worker per tier under the daemon MainPID, stops unconditionally, rejects leaked formula/table servers, and requires unchanged scientific fingerprints.",
-        "CI contracts prohibit submit-run/autonomous-run in the bounded runner and preserve authoritative-PDF semantic hydration."
+        "CI contracts prohibit submit-run/autonomous-run in the bounded runner and preserve authoritative-PDF semantic hydration.",
+        "First Lambda bounded-production-integration attempt applied the idempotent schema, passed quiescence preflight with 0 active RUNNING runs and 0 QUEUED/RUNNING non-human jobs, and wrote the pre-run scientific fingerprint.",
+        "The sidecar smoke then failed before emitting its normal result because Docling native resolved the source.pdf symlink to the extensionless content-addressed SHA path and wrote a SHA-stemmed JSON artifact, while the sidecar compiler incorrectly hard-coded raw/native/source.json.",
+        "Failure telemetry recorded source-artifact:sha256:054aaba60e8b6cc4dfc5a35dab9f1adc6584bb9ef6ea68b2b9ced1cb71d52f22 as FAILED_DERIVED_SIDECAR with FileNotFoundError for raw/native/source.json.",
+        "The daemon remained inactive/dead PID 0 and no docling_formula_server.py or paddle_table_server.py processes were present after the failure.",
+        "PR #63 fixes native/standard/ACCURATE runtime output discovery by requiring exactly one emitted runtime JSON artifact instead of assuming source.json, and makes document-sidecar-smoke emit a structured failure receipt before rethrow."
       ],
       "resume_condition": "A bounded production run can compare old/new paths with rollback available and scientific authority unchanged."
+    },
+    {
+      "id": "residual_escalation_and_local_semantic_fallbacks",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt+lambda",
+      "selected_surface": "github+local-runtime",
+      "inputs": [
+        "validated bounded production document sidecar",
+        "measured parser/formula/table residuals",
+        "authoritative PDF/page/region provenance",
+        "existing Codex EXTRACT/VERIFY baseline"
+      ],
+      "outputs": [
+        "explicit residual taxonomy and escalation policy",
+        "benchmarked OCR/VLM/local-agent candidate set opened only on measured residuals",
+        "confidence/provenance gates between deterministic, specialized, multimodal, semantic-agent and human tiers",
+        "cost/latency/GPU-memory/token evidence for each promoted fallback tier",
+        "production fallback contract preserving authoritative PDF scientific authority",
+        "updated localization matrix for any promoted local semantic tier"
+      ],
+      "validation": [
+        "This stage is deliberately added after bounded production integration: current production policy still uses Codex STANDARD semantic EXTRACT/VERIFY over authoritative PDF and has not yet implemented a complete deterministic -> specialized local model -> local VLM/local agent -> remote Codex -> human fallback ladder.",
+        "General document VLM, OCR, embeddings/reranking and local semantic replacements remain disabled/deferred until this stage opens them based on measured residual evidence; they must not be introduced globally by default."
+      ],
+      "resume_condition": "Measured residuals have an explicit quality-gated escalation ladder, including local multimodal/agent candidates where justified, so Codex is not used blindly where cheaper validated local recovery is sufficient."
     },
     {
       "id": "completion",
@@ -600,10 +631,11 @@
       "required_for_resume": true,
       "evidence": [
         "stage=bounded_production_integration",
-        "research-engine remote main@a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86; PR #62 + canonical-main CI PASS",
-        "Lambda local last verified clean main@a878f74f7d3c669374b12d2a903b56483b3770d7; production acceptance PASS; daemon inactive/dead PID 0",
-        "derived sidecar is SHA-addressed/fail-open/non-authoritative and EXTRACT/VERIFY remain authoritative-PDF STANDARD semantics",
-        "next=fast-forward, refresh managed env, run finite sidecar/cache + idle-daemon integration gate"
+        "research-engine remote/local baseline at a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 for first bounded Lambda attempt",
+        "first bounded attempt passed schema/quiescence/fingerprint, then sidecar failed on hard-coded source.json vs actual SHA-stemmed Docling JSON",
+        "daemon remained inactive/dead PID 0; no specialized model-server leak",
+        "PR #63 hotfix pending CI/merge",
+        "new post-bounded stage=residual_escalation_and_local_semantic_fallbacks before completion"
       ]
     }
   ],
@@ -1095,21 +1127,34 @@
         "Authoritative-PDF EXTRACT/VERIFY hydration remains unchanged.",
         "Finite runner proves miss->hit caching, idle daemon worker registration, unconditional stop, no model-server leak, and scientific fingerprint invariance."
       ]
+    },
+    {
+      "check": "First bounded production sidecar smoke",
+      "result": "BLOCKED_RUNTIME_OUTPUT_NAMING_DEFECT",
+      "evidence": [
+        "Schema application and quiescence preflight passed; active_running_runs=0 and queued_or_running_nonhuman_jobs=0.",
+        "Pre-run scientific fingerprint completed before sidecar smoke.",
+        "document_sidecar_events id=1 recorded FAILED_DERIVED_SIDECAR for source SHA 054aaba60e8b6cc4dfc5a35dab9f1adc6584bb9ef6ea68b2b9ced1cb71d52f22.",
+        "Error=FileNotFoundError for raw/native/source.json.",
+        "Root cause: Docling runtime resolves source.pdf symlink and names outputs from the resolved SHA stem; compiler hard-coded source.json.",
+        "Daemon final state inactive/dead PID 0; no formula/table model-server process leaked.",
+        "Hotfix PR #63 changes runtime JSON discovery to artifact-based exact-one matching."
+      ]
     }
   ],
   "blockers": [
-    "Lambda local research-engine is last verified clean at main@a878f74f7d3c669374b12d2a903b56483b3770d7 while canonical remote main is a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86; fast-forward before bounded integration.",
-    "Bounded production integration has not yet been measured on the Lambda host.",
-    "Sustained research remains disabled until bounded production integration passes and the final task closure decision is recorded."
+    "Bounded production integration is blocked only on the Docling runtime-output naming defect fixed by research-engine PR #63; merge/canonical CI and Lambda retry are required.",
+    "The complete residual escalation/local semantic fallback ladder (including VLM/local-agent candidates) is intentionally not yet built; a new stage now follows bounded production integration before completion.",
+    "Sustained research remains disabled until bounded production integration passes and residual escalation/local semantic fallback decisions are validated."
   ],
   "remaining_work": [
-    "Fast-forward the clean Lambda checkout from a878f74f7d3c669374b12d2a903b56483b3770d7 to canonical a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 while the research daemon remains inactive/dead.",
-    "Rerun deploy/configure-production-local-inference.sh to create a fresh rollback backup and enable the managed document-sidecar gates/timeouts in the live env.",
-    "Run deploy/run-bounded-production-integration.sh in the persistent tmux/log wrapper. The gate will apply the idempotent sidecar telemetry schema, require queue quiescence, build/cache one derived sidecar, then perform one finite idle daemon lifecycle and stop.",
-    "Evaluate sidecar routing/model usage, cache miss->hit, telemetry, worker registration, process cleanup and scientific fingerprint invariance.",
-    "If PASS, close bounded_production_integration and decide whether this task is complete and sustained research can be separately enabled under the established operator controls."
+    "Merge research-engine PR #63 after CI and require canonical-main CI PASS.",
+    "Fast-forward the clean Lambda checkout to the merged hotfix, refresh the managed production env only if required, and rerun deploy/run-bounded-production-integration.sh.",
+    "Require sidecar miss->hit, telemetry, bounded idle-daemon worker registration, cleanup and unchanged scientific fingerprints.",
+    "After bounded integration PASS, advance to residual_escalation_and_local_semantic_fallbacks rather than directly to completion.",
+    "In that stage, classify remaining parser/semantic residuals and benchmark only justified OCR/VLM/local-agent candidates before defining deterministic -> specialized -> local multimodal/agent -> Codex -> human escalation."
   ],
-  "next_safe_action": "Keep research-engine-daemon.service inactive/dead before the gate and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at a878f74f7d3c669374b12d2a903b56483b3770d7, fetch origin/main, require origin/main=a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86, and fast-forward only to that commit. Rerun bash deploy/configure-production-local-inference.sh and preserve its fresh BACKUP/ROLLBACK receipt. Then, inside the persistent tmux shell with console logging, run bash deploy/run-bounded-production-integration.sh. The runner may start research-engine-daemon.service only for its finite idle lifecycle after proving there are no RUNNING research runs or QUEUED/RUNNING non-HUMAN jobs; it must stop the daemon unconditionally. Return the first ERROR/traceback or the final bounded integration report through BOUNDED_PRODUCTION_INTEGRATION=PASS.",
+  "next_safe_action": "Keep research-engine-daemon.service inactive/dead and do not START sustained research. Wait for research-engine PR #63 (Docling sidecar runtime-output discovery hotfix) to merge and canonical-main CI to pass. Then fast-forward the clean Lambda checkout from a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 to that exact canonical main and rerun bash deploy/run-bounded-production-integration.sh inside the persistent tmux/log wrapper. The hotfix must discover the actual SHA-stemmed Docling native/standard/ACCURATE JSON artifact rather than assuming source.json. Return the first structured sidecar FAIL receipt/traceback or the final bounded integration report. If bounded integration passes, advance next to residual_escalation_and_local_semantic_fallbacks, not completion.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
