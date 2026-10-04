@@ -2734,6 +2734,8 @@ def render_task_handoff(path, data, control_root):
         "",
         "@GitHub",
         "",
+        "https://github.com/adamtrott78/workspace-control",
+        "",
         "Continue the durable workspace-control task defined by:",
         f"Task capsule: {ref}",
         "",

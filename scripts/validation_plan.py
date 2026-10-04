@@ -62,6 +62,18 @@ def validate_profile(data):
             "force_full_tier: must be FULL_INTEGRATION or stronger"
         )
 
+    tier_checks = data.get("tier_checks", {})
+    if not isinstance(tier_checks, dict):
+        raise ValidationPlanError("tier_checks: expected object")
+    for tier, checks in tier_checks.items():
+        if tier not in TIER_ORDER:
+            raise ValidationPlanError(f"tier_checks.{tier}: unknown tier")
+        _require_string_list(
+            checks,
+            f"tier_checks.{tier}",
+            allow_empty=True,
+        )
+
     rules = data.get("rules")
     if not isinstance(rules, list) or not rules:
         raise ValidationPlanError("rules: expected non-empty array")
@@ -96,10 +108,22 @@ def build_plan(profile, changed_paths, *, force_full=False):
     normalized = []
     for index, path in enumerate(changed_paths):
         _require_nonempty_string(path, f"changed_paths[{index}]")
-        clean = path.strip().lstrip("./")
+        clean = path.strip()
+        if clean.startswith("./"):
+            clean = clean[2:]
         if not clean:
             raise ValidationPlanError(
                 f"changed_paths[{index}]: path became empty after normalization"
+            )
+        if (
+            clean.startswith("/")
+            or clean == ".."
+            or clean.startswith("../")
+            or "/../" in clean
+            or clean.endswith("/..")
+        ):
+            raise ValidationPlanError(
+                f"changed_paths[{index}]: expected repository-relative path"
             )
         normalized.append(clean)
     normalized = sorted(set(normalized))

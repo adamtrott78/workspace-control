@@ -151,6 +151,10 @@ class TaskRenderTests(unittest.TestCase):
         )
         self.assertIn(data["next_safe_action"], first)
         self.assertIn(
+            "https://github.com/adamtrott78/workspace-control",
+            first,
+        )
+        self.assertIn(
             "tests/fixtures/task_capsule_v2_remote.json",
             first,
         )

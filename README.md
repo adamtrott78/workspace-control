@@ -174,6 +174,24 @@ Mutation preflight performs a read-only `git ls-remote` query when mutation is
 proposed directly on a registered canonical branch. This checks the advertised
 remote branch SHA without updating local Git refs.
 
+### Risk-tiered validation planning
+
+`scripts/validation_plan.py` computes a fail-closed validation tier from an
+exact changed-path set plus a project-owned profile.
+
+For workspace-control, use:
+
+```bash
+python scripts/validation_plan.py \
+  --profile policies/workspace-control.validation-profile.v1.json \
+  --changed-path path/to/change \
+  --json
+```
+
+The planner escalates unknown or mixed-risk changes and supports
+`--force-full`. See `procedures/validation_routing.md` and
+`architecture/throughput-ci-efficiency-v1.md`.
+
 ## Durable task capsules
 
 Long-running or executor-switchable work is represented by machine-readable

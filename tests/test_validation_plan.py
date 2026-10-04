@@ -108,6 +108,24 @@ class ValidationPlanTests(unittest.TestCase):
         )
         self.assertEqual(plan["changed_paths"], ["docs/readme.md"])
 
+    def test_dot_prefixed_repository_path_is_preserved(self):
+        local = dict(PROFILE)
+        local["rules"] = list(PROFILE["rules"]) + [
+            {
+                "id": "dot-agent",
+                "patterns": [".agents/**"],
+                "tier": "FULL_INTEGRATION",
+                "checks": ["agent-contract"],
+            }
+        ]
+        plan = validation_plan.build_plan(local, [".agents/router.md"])
+        self.assertEqual(plan["changed_paths"], [".agents/router.md"])
+        self.assertIn("agent-contract", plan["required_checks"])
+
+    def test_parent_traversal_path_is_rejected(self):
+        with self.assertRaises(validation_plan.ValidationPlanError):
+            validation_plan.build_plan(PROFILE, ["../docs/readme.md"])
+
     def test_invalid_force_full_floor_is_rejected(self):
         invalid = dict(PROFILE)
         invalid["force_full_tier"] = "TARGETED_PR"
