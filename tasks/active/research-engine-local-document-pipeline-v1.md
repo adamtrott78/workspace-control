@@ -31,30 +31,30 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86
+- Remote checkpoint: 0e5b1464c5307b9b1824618b6e5cff0f13485146
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: a878f74f7d3c669374b12d2a903b56483b3770d7
+- Local HEAD: a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86
 - Local clean: true
 
 ## Next safe action
 
-Keep research-engine-daemon.service inactive/dead and do not START sustained research. Wait for research-engine PR #63 (Docling sidecar runtime-output discovery hotfix) to merge and canonical-main CI to pass. Then fast-forward the clean Lambda checkout from a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 to that exact canonical main and rerun bash deploy/run-bounded-production-integration.sh inside the persistent tmux/log wrapper. The hotfix must discover the actual SHA-stemmed Docling native/standard/ACCURATE JSON artifact rather than assuming source.json. Return the first structured sidecar FAIL receipt/traceback or the final bounded integration report. If bounded integration passes, advance next to residual_escalation_and_local_semantic_fallbacks, not completion.
+Keep research-engine-daemon.service inactive/dead and do not START sustained research. On Lambda cd /home/atrott/adamArchives/Adam/research-engine, require a clean main checkout at a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86, fetch origin/main, require origin/main=0e5b1464c5307b9b1824618b6e5cff0f13485146, and fast-forward only to that commit. Then rerun bash deploy/run-bounded-production-integration.sh inside the persistent tmux/log wrapper. The hotfix must discover SHA-stemmed native/standard/ACCURATE Docling JSON artifacts automatically. Return the first structured sidecar FAIL receipt/traceback or the final bounded integration report through BOUNDED_PRODUCTION_INTEGRATION=PASS. If PASS, advance next to residual_escalation_and_local_semantic_fallbacks, not completion.
 
 ## Remaining work
 
-- Merge research-engine PR #63 after CI and require canonical-main CI PASS.
-- Fast-forward the clean Lambda checkout to the merged hotfix, refresh the managed production env only if required, and rerun deploy/run-bounded-production-integration.sh.
-- Require sidecar miss->hit, telemetry, bounded idle-daemon worker registration, cleanup and unchanged scientific fingerprints.
-- After bounded integration PASS, advance to residual_escalation_and_local_semantic_fallbacks rather than directly to completion.
-- In that stage, classify remaining parser/semantic residuals and benchmark only justified OCR/VLM/local-agent candidates before defining deterministic -> specialized -> local multimodal/agent -> Codex -> human escalation.
+- Fast-forward Lambda from a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 to canonical 0e5b1464c5307b9b1824618b6e5cff0f13485146 while the daemon remains inactive/dead.
+- Rerun deploy/run-bounded-production-integration.sh. The managed env does not require another semantic-policy change; refresh via deploy/configure-production-local-inference.sh only if the live env receipt/settings are uncertain.
+- Require sidecar COMPLETED then CACHE_HIT, telemetry, bounded idle-daemon worker registration, no model-server leak, final inactive/dead daemon, and unchanged scientific fingerprints.
+- On PASS, advance to residual_escalation_and_local_semantic_fallbacks and benchmark measured residuals for OCR/VLM/local-agent escalation before any task completion or sustained research enablement.
 
 ## Blockers / gates
 
-- Bounded production integration is blocked only on the Docling runtime-output naming defect fixed by research-engine PR #63; merge/canonical CI and Lambda retry are required.
-- The complete residual escalation/local semantic fallback ladder (including VLM/local-agent candidates) is intentionally not yet built; a new stage now follows bounded production integration before completion.
-- Sustained research remains disabled until bounded production integration passes and residual escalation/local semantic fallback decisions are validated.
+- Lambda local research-engine is last verified clean at main@a71a1bb04b0cdec0116e906dfed0d7aefd9f5b86 while canonical remote main is 0e5b1464c5307b9b1824618b6e5cff0f13485146; fast-forward before bounded integration retry.
+- Bounded production integration has not yet passed on Lambda after the output-discovery hotfix.
+- Residual escalation/local semantic fallback architecture remains a planned post-bounded stage; Codex STANDARD EXTRACT/VERIFY remains the semantic baseline until that stage validates cheaper local fallbacks.
+- Sustained research remains disabled.
 
 ## Fresh-chat initialization
 
