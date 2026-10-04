@@ -68,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "d9946729f92a15fe3a6c821dc366a53a37ca0756",
+        "checkpoint_sha": "320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "4d77fb64c5befb55362e9f689ef5b3c85d2c1f35",
+        "head_sha": "d9946729f92a15fe3a6c821dc366a53a37ca0756",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -1295,23 +1295,48 @@
         "The source-audit contract now explicitly permits normalized FIGURE caption linkage without requiring a separately materialized caption block.",
         "No source selection, residual opener threshold, candidate model, production routing, daemon policy, or scientific-state behavior changed."
       ]
+    },
+    {
+      "check": "Corrected bounded residual source audit",
+      "result": "PASS_MODEL_PREFETCH_READY",
+      "evidence": [
+        "Corrected Lambda audit report decision=PASS and model_prefetch_ready=true with authority=DOWNLOADED_ORIGINAL_PDF.",
+        "candidate_model_downloads=0, candidate_model_inference_calls=0, scientific_state_materialized=false.",
+        "scan-mixed-quality-v1 accepted: SHA-256 3948255a723380d8844bab31c60298cee00da9334efa377f1d596b306792b6a1, 28 pages; scan opener pages zero-based [1,3,5,27]; low-confidence opener pages [8,9,15,16,19,22,24].",
+        "semantic-visuals-v1 accepted: SHA-256 1e0651b6810ecba34a3dbc5b5b0209226f889004607c1f203540a48d64e5a93a, 12 pages; Figure 6 page index 7 bbox [99.19828033447266,72.1703872680664,495.0450134277344,171.62620544433594]; Figure 3 page index 3 bbox [50.5037956237793,76.09317016601562,285.709716796875,618.7928466796875]; region_locators_ready_for_model_prefetch=true.",
+        "malformed-layout-v1 accepted: SHA-256 f2630182ccfabd6fc89ac20270b4daf15a0ca849298a7db1e5d124ca443051f1, 14 pages; both registered target pages fired LAYOUT_OR_READING_ORDER_ANOMALY; replacement_required=false.",
+        "Uploaded compact audit report SHA-256 ade43b862493a6b21f3684a75870861769dcf7831c7fa6dbda7026df5081eb1."
+      ]
+    },
+    {
+      "check": "Bounded residual model artifact prefetch gate implementation",
+      "result": "PASS_READY_FOR_LAMBDA",
+      "evidence": [
+        "research-engine PR #70 merged as 320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c.",
+        "PR-head CI run 37171098792 PASS; canonical-main CI run 37171236633 PASS.",
+        "Source audit PASS is compactly pinned in residual-source-audit-pass.v1.json and the three case manifests now retain authoritative hashes, accepted opener evidence, and semantic PDF bboxes.",
+        "Prefetch gate covers four repositories across three selected families: PP-OCRv6_medium detection+recognition, PaddleOCR-VL-1.6, and Qwen3.5-4B.",
+        "Gate records exact resolved revisions, Apache-2.0 license metadata, sorted per-file SHA-256 manifests, materialized byte counts, offline reopenability, free-disk/host/GPU compatibility facts, and the pinned PaddleOCR 3.7.0 wheel SHA-256.",
+        "Gate installs only isolated Hugging Face transport tooling; it does not install PaddlePaddle, vLLM, SGLang, Transformers, or any candidate inference runtime and performs zero candidate inference."
+      ]
     }
   ],
   "blockers": [
-    "Lambda/local research-engine is last verified at clean main@4d77fb64c5befb55362e9f689ef5b3c85d2c1f35 while canonical remote main is semantic-linkage hotfix d9946729f92a15fe3a6c821dc366a53a37ca0756.",
-    "The completed source audit's underlying deterministic evidence is sufficient for all three benchmark families, but its report is REJECT/model_prefetch_ready=false because of the now-fixed stale standalone-caption-block acceptance check. Replay the audit logic over the preserved source/package artifacts after fast-forwarding; do not rerun Docling unless preserved artifacts are missing or invalid.",
-    "Selected candidate OCR/VLM/local-semantic runtimes and weights remain intentionally uninstalled until the corrected audit replay returns PASS with model_prefetch_ready=true.",
+    "Lambda/local research-engine is last verified clean at main@d9946729f92a15fe3a6c821dc366a53a37ca0756 while canonical remote main is model-prefetch gate 320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c; synchronize only with the research daemon stopped.",
+    "The bounded residual model artifact prefetch/license/checksum/host-compatibility gate has not yet executed on Lambda, so PP-OCRv6 detection/recognition exact resolved revisions, downloaded per-file checksums, offline reopenability, and local artifact footprints are not yet measured.",
+    "Candidate inference runtimes remain intentionally uninstalled and candidate inference remains closed until the prefetch gate passes.",
+    "Human ground-truth annotations for the promoted OCR scan/text targets and semantic visual questions remain pending before the later quality gates.",
     "Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline; sustained research remains disabled."
   ],
   "remaining_work": [
-    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@4d77fb64c5befb55362e9f689ef5b3c85d2c1f35, fetch origin/main, require origin/main=d9946729f92a15fe3a6c821dc366a53a37ca0756, and fast-forward only to that canonical hotfix commit.",
-    "Locate the newest completed residual-source-prefetch-audit output root containing sources/, packages/, and residual-source-audit-report.json. Replay only `research_engine.residual_source_audit audit` against those preserved artifacts under the corrected code; do not rerun native/standard Docling conversion unless artifact validation fails.",
-    "Require corrected replay decision=PASS, model_prefetch_ready=true, all three cases accepted, candidate model downloads/inference zero, and scientific_state_materialized=false.",
-    "After corrected PASS, durably pin authoritative PDF SHA-256/page counts plus accepted scan/low-confidence opener pages, semantic figure bboxes, and malformed-layout opener evidence into benchmark manifests/results.",
-    "Then implement the separate bounded model-prefetch/license/checksum/resource gate for PP-OCRv6_medium, PaddleOCR-VL-1.6, and Qwen3.5-4B.",
-    "Only after model prefetch/audit should residual-scoped quality/resource benchmarks and contemporaneous Codex controls begin."
+    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@d9946729f92a15fe3a6c821dc366a53a37ca0756, fetch origin/main, require origin/main=320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c, and fast-forward only to that canonical commit.",
+    "Run bash deploy/run-residual-model-prefetch-gate.sh. Preserve the visible OUTPUT_ROOT and return model-prefetch-report.json; hardware-compatibility.json and runtime-wheel-prefetch.json are compact supplemental receipts if needed.",
+    "Require prefetch decision=PASS, exactly four model artifacts across three candidate families, expected Apache-2.0 metadata, exact resolved revisions, per-file SHA-256 manifests, offline_reopen=true, PaddleOCR 3.7.0 wheel hash match, candidate_model_inference_calls=0, scientific_state_materialized=false, and daemon inactive/dead.",
+    "After PASS, durably pin the resolved PP-OCRv6 detection/recognition revisions and model-prefetch receipts, then build the isolated PP-OCRv6 inference runtime and annotate the promoted scan/text targets for the first quality/resource benchmark.",
+    "Only after PP-OCRv6 is measured should PaddleOCR-VL-1.6 inference open on the two validated visual regions and exhausted structural residuals; Qwen3.5-4B visual use remains conditional on PaddleOCR-VL failure/abstention.",
+    "Open Qwen3.5-4B semantic EXTRACT/VERIFY benchmarking only with bounded authoritative-PDF inputs and contemporaneous STANDARD Codex controls."
   ],
-  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@d9946729f92a15fe3a6c821dc366a53a37ca0756 as the canonical semantic-linkage source-audit hotfix and Lambda/local main@4d77fb64c5befb55362e9f689ef5b3c85d2c1f35 as the last verified local state. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly d9946729f92a15fe3a6c821dc366a53a37ca0756, then fast-forward only to that commit. Locate the newest completed residual-source-prefetch-audit output root containing sources/, packages/, and residual-source-audit-report.json and replay only the deterministic `research_engine.residual_source_audit audit` command against those preserved artifacts, writing a corrected report under the same visible output root. Do not rerun Docling unless artifact validation fails. Do not install or invoke PP-OCRv6_medium, PaddleOCR-VL-1.6, Qwen3.5-4B, start the daemon, invoke Codex, change production routing, or materialize scientific state. PASS requires decision=PASS and model_prefetch_ready=true.",
+  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c as the canonical bounded model-prefetch baseline and Lambda/local main@d9946729f92a15fe3a6c821dc366a53a37ca0756 as the last verified local state. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly 320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c, then fast-forward only to that commit. Run bash deploy/run-residual-model-prefetch-gate.sh. Return the visible OUTPUT_ROOT plus model-prefetch-report.json, or the first hard error. Do not start the daemon, run candidate OCR/VLM/semantic inference, install PaddlePaddle/vLLM/SGLang/Transformers, invoke Codex, change production routing, or materialize scientific state. PASS opens isolated inference-runtime construction and the first PP-OCRv6 scan/text quality/resource benchmark.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
