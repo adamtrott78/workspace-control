@@ -6,66 +6,79 @@ Authoritative capsule: `tasks/active/research-engine-local-document-pipeline-v1.
 ## State
 - Task: `research-engine-local-document-pipeline-v1`
 - Stage: `residual_escalation_and_local_semantic_fallbacks`
-- research-engine remote canonical: `a5117e4af6082e286942321ecea1b7c5b279b589`
-- research-engine Lambda/local last verified: `120aa27123111f27fb17a7e7cd7e1139d1a53a54` clean
+- research-engine remote canonical: `a3635f817c49dd40613724cca1353487173305d5`
+- research-engine Lambda/local last verified: `a5117e4af6082e286942321ecea1b7c5b279b589` clean
 - research daemon: keep inactive/dead PID 0
 - sustained research: disabled
 - STANDARD Codex authoritative-PDF EXTRACT/VERIFY remains production semantic baseline
 
-## PP-OCRv6 outcome
-PP-OCRv6 remains resource-pass / quality-not-promoted. The content-bearing chart
-was materially improved but did not establish the hard OCR quality thresholds,
-and the scan/textless target proved visually almost blank and must be replaced
-before scan-recovery quality can be evaluated.
+## Current PaddleOCR-VL status
+Two targeted Lambda initialization attempts have occurred, and **neither
+executed a VLM inference call**.
 
-## First PaddleOCR-VL attempt
-The first targeted PaddleOCR-VL Lambda attempt did **not** execute the VLM.
+### Attempt 1
+- missing runtime dependency: `torchvision`
+- candidate inference calls: 0
+- no quality/resource evidence
 
-At research-engine `main@120aa27123111f27fb17a7e7cd7e1139d1a53a54`:
-- the pinned local PaddleOCR-VL-1.6 custom Transformers code requested trust;
-- the operator approved it interactively;
-- model initialization then failed because `torchvision` was absent;
-- candidate inference calls: 0;
-- model init: null;
-- peak process VRAM: 0 MiB;
-- no visual quality evidence was produced.
+PR #73 corrected this by pinning:
+- `torch==2.8.0`
+- `torchvision==0.23.0`
+- `transformers==4.55.0`
+- scoped `trust_remote_code=True` for the pinned local model only
 
-The resulting `REJECT_RESOURCE_OR_RUNTIME` is an initialization/runtime
-failure only, not a PaddleOCR-VL quality rejection.
+### Attempt 2
+The exact validated crops rendered correctly:
+- Figure 6: expected three-panel CIFAR training/test-error chart
+- Figure 3: expected VGG-19 / 34-layer plain / 34-layer residual architecture diagram
 
-## Runtime hotfix
-research-engine PR #73 merged as
-`a5117e4af6082e286942321ecea1b7c5b279b589`.
+Model initialization then stopped because `protobuf` was absent.
 
-- PR-head CI `37174690298`: PASS
-- canonical-main CI `37174751650`: PASS
+Uploaded report:
+- candidate inference calls: 0
+- runtime_completed: false
+- model_init: false
+- GPU process samples: 0
+- peak process VRAM: 0 MiB
+- scientific_state_materialized: false
+- measurement_decision: `REJECT_RESOURCE_OR_RUNTIME`
 
-The corrected isolated runtime:
-- pins `torch==2.8.0`;
-- pins matching `torchvision==0.23.0`;
-- uses the CUDA 12.6 PyTorch wheel index;
-- keeps `transformers==4.55.0`;
-- passes `engine_config={"trust_remote_code": True}` only for the already
-  prefetched, checksum-verified local PaddleOCR-VL-1.6 model;
-- validates Torch/TorchVision/Transformers before accepting the runtime-ready
-  sentinel;
-- automatically invalidates and rebuilds the incomplete prior venv.
+This is a dependency failure only, **not** VLM quality evidence.
 
-No benchmark regions, inference-call count, resource ceilings, quality
-thresholds, daemon policy, Qwen/Codex policy, production routing, or scientific
-state behavior changed.
+## Protobuf hotfix
+research-engine PR #74 merged as
+`a3635f817c49dd40613724cca1353487173305d5`.
+
+- PR-head CI `37175354021`: PASS
+- canonical-main CI `37175428542`: PASS
+
+The isolated VLM runtime now additionally pins:
+- `protobuf==5.29.5`
+
+The runtime-ready sentinel now checks:
+- Torch 2.8.0
+- TorchVision 0.23.0
+- Transformers 4.55.0
+- protobuf 5.29.5
+
+Therefore the previous incomplete environment is automatically invalidated and
+rebuilt before the next inference attempt.
+
+No benchmark source/region, PaddleOCR-VL revision, model checksum, inference
+count, resource ceiling, quality threshold, trust scope, daemon policy,
+Qwen/Codex boundary, production routing, or scientific-state behavior changed.
 
 ## Next safe action
 Keep sustained research disabled and `research-engine-daemon.service`
 inactive/dead. Treat remote
-`main@a5117e4af6082e286942321ecea1b7c5b279b589` as canonical and Lambda/local
-`main@120aa27123111f27fb17a7e7cd7e1139d1a53a54` as the last verified clean
+`main@a3635f817c49dd40613724cca1353487173305d5` as canonical and Lambda/local
+`main@a5117e4af6082e286942321ecea1b7c5b279b589` as the last verified clean
 state.
 
 On Lambda:
 1. require branch `main`, clean checkout, daemon inactive/dead PID 0;
 2. fetch origin and require `origin/main` exactly
-   `a5117e4af6082e286942321ecea1b7c5b279b589`;
+   `a3635f817c49dd40613724cca1353487173305d5`;
 3. fast-forward only to that commit;
 4. rerun `bash deploy/run-paddleocr-vl-residual-benchmark.sh`;
 5. return the new visible `OUTPUT_ROOT` plus:
@@ -74,14 +87,12 @@ On Lambda:
    - `figure3_network_architecture-page-zb3.png`
    or the first hard error.
 
-The failed zero-inference report is diagnostic evidence only and must not be
-used for quality scoring.
-
-Do not start the daemon, invoke Qwen3.5-4B or Codex, change production routing,
-or materialize scientific state.
+Do not use either prior zero-inference report as quality evidence. Do not start
+the daemon, invoke Qwen3.5-4B or Codex, change production routing, or
+materialize scientific state.
 
 ## Remaining work
-- Rerun the targeted PaddleOCR-VL gate on the corrected runtime.
+- Execute the first actual PaddleOCR-VL calls on Lambda.
 - Human-score Figure 6 / Figure 3 outputs against the durable annotated facts.
 - If local VLM quality passes, execute the required separate contemporaneous
   STANDARD Codex authoritative-PDF control before promotion.
