@@ -68,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a",
+        "checkpoint_sha": "4d77fb64c5befb55362e9f689ef5b3c85d2c1f35",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "0e5b1464c5307b9b1824618b6e5cff0f13485146",
+        "head_sha": "93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -1251,23 +1251,45 @@
         "Runner does not start the daemon, install candidate models, invoke Codex/semantic models, or materialize scientific state.",
         "Gate fails closed on rejected layout source or unresolved semantic visual bboxes."
       ]
+    },
+    {
+      "check": "First bounded residual source-prefetch/audit invocation",
+      "result": "BLOCKED_RUNNER_GPU_SELECTOR_CAPTURE_DEFECT",
+      "evidence": [
+        "Lambda invocation ran research-engine main@93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a with the bounded source-audit runner and no candidate-model download.",
+        "Source prefetch itself passed all registered page-count checks: scan-mixed-quality-v1=28 pages SHA-256 3948255a723380d8844bab31c60298cee00da9334efa377f1d596b306792b6a1; semantic-visuals-v1=12 pages SHA-256 1e0651b6810ecba34a3dbc5b5b0209226f889004607c1f203540a48d64e5a93a; malformed-layout-v1=14 pages SHA-256 f2630182ccfabd6fc89ac20270b4daf15a0ca849298a7db1e5d124ca443051f1.",
+        "The native conversion of scan-mixed-quality-v1 completed, but standard_no_ocr failed before conversion with docling.exceptions.AcceleratorDeviceNotAvailableError.",
+        "Root cause was runner command-substitution pollution: select_structure_gpu emitted probe diagnostics and JSON on stdout, so structure_gpu became a multi-line value instead of the numeric GPU index 0 and CUDA_VISIBLE_DEVICES was invalid.",
+        "No residual-source-audit-report.json was produced, so scan/text, semantic-visual bbox, and malformed-layout opener acceptance remain unresolved; model_prefetch_ready was not reached."
+      ]
+    },
+    {
+      "check": "Residual source-audit GPU selector capture hotfix",
+      "result": "PASS_READY_FOR_LAMBDA",
+      "evidence": [
+        "research-engine PR #68 merged as 4d77fb64c5befb55362e9f689ef5b3c85d2c1f35.",
+        "PR-head CI run 37169271564 PASS; canonical-main CI run 37169339826 PASS.",
+        "GPU probe diagnostics and JSON now go to stderr so command substitution captures only the selected numeric GPU index.",
+        "The runner now fails closed unless the captured structure_gpu value matches a numeric GPU index before invoking Docling.",
+        "No benchmark thresholds, source manifests, candidate-model selections, production routing, daemon lifecycle policy, or scientific-state behavior changed."
+      ]
     }
   ],
   "blockers": [
-    "Lambda/local research-engine is still last verified clean at main@0e5b1464c5307b9b1824618b6e5cff0f13485146 while canonical remote main is 93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a; synchronize only as part of the bounded source-audit run while the daemon is stopped.",
-    "The bounded source-prefetch/audit has not yet executed on Lambda, so authoritative SHA-256/page counts, actual scan/text opener pages, semantic figure bboxes, and malformed-layout acceptance/replacement are still unresolved.",
+    "Lambda/local research-engine is last verified at clean main@93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a after the first bounded source-audit attempt, while canonical remote main is the GPU-selector hotfix 4d77fb64c5befb55362e9f689ef5b3c85d2c1f35; synchronize only while the daemon is stopped.",
+    "The first bounded source-prefetch/audit did not reach deterministic opener evaluation because the runner polluted the captured GPU selector and made CUDA_VISIBLE_DEVICES invalid. Source PDF fetch/hash/page-count validation passed, but scan/text opener pages, semantic figure bboxes, malformed-layout acceptance/replacement, and model_prefetch_ready remain unresolved until the hotfixed rerun.",
     "Selected candidate OCR/VLM/local-semantic runtimes and weights remain intentionally uninstalled until the source audit returns PASS with model_prefetch_ready=true.",
     "Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline; sustained research remains disabled."
   ],
   "remaining_work": [
-    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@0e5b1464c5307b9b1824618b6e5cff0f13485146, fetch origin/main, require origin/main=93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a, and fast-forward only to that canonical commit.",
-    "Run bash deploy/run-residual-source-prefetch-audit.sh. Preserve the visible output root and return the compact audit report or first hard failure.",
+    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a, fetch origin/main, require origin/main=4d77fb64c5befb55362e9f689ef5b3c85d2c1f35, and fast-forward only to that canonical hotfix commit.",
+    "Rerun bash deploy/run-residual-source-prefetch-audit.sh. Preserve the new visible output root and return residual-source-audit-report.json, or the first hard failure/rejection. The prior 20261004T013615Z output root remains diagnostic evidence only.",
     "If the audit REJECTS malformed-layout-v1, replace only that source manifest and rerun the source gate; do not relax opener thresholds or install a layout/VLM model.",
     "If semantic visual targets do not both resolve to unique caption-linked bboxes, refine/replace only the source-region selection before any VLM prefetch.",
     "If the audit PASSES with model_prefetch_ready=true, durably pin downloaded PDF SHA-256/page counts and accepted opener/region evidence, then implement a separate bounded model-prefetch/license/checksum gate for the already-selected candidates.",
     "Only after model prefetch/audit should residual-scoped quality/resource benchmarks and contemporaneous Codex controls begin."
   ],
-  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a as the canonical bounded-source-audit baseline and Lambda/local main@0e5b1464c5307b9b1824618b6e5cff0f13485146 as the last verified local state. On Lambda, first require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly 93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a, then fast-forward only to that commit. Run bash deploy/run-residual-source-prefetch-audit.sh. Return the visible OUTPUT_ROOT plus residual-source-audit-report.json, or the first hard error/rejection. Do not install or invoke PP-OCRv6_medium, PaddleOCR-VL-1.6, Qwen3.5-4B, start the daemon, invoke Codex, change production routing, or materialize scientific state. A REJECT means revise only the failed source/region and rerun this deterministic gate; PASS requires model_prefetch_ready=true before the separate model-prefetch stage opens.",
+  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@4d77fb64c5befb55362e9f689ef5b3c85d2c1f35 as the canonical bounded-source-audit hotfix baseline and Lambda/local main@93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a as the last verified local state. On Lambda, require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly 4d77fb64c5befb55362e9f689ef5b3c85d2c1f35, then fast-forward only to that commit. Rerun bash deploy/run-residual-source-prefetch-audit.sh. Return the new visible OUTPUT_ROOT plus residual-source-audit-report.json, or the first hard error/rejection. Do not install or invoke PP-OCRv6_medium, PaddleOCR-VL-1.6, Qwen3.5-4B, start the daemon, invoke Codex, change production routing, or materialize scientific state. A REJECT means revise only the failed source/region and rerun this deterministic gate; PASS requires model_prefetch_ready=true before the separate model-prefetch stage opens.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
