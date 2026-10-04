@@ -4,41 +4,87 @@
   "default_tier": "FULL_INTEGRATION",
   "force_full_tier": "FULL_INTEGRATION",
   "tier_checks": {
-    "FAST_STATIC": ["changed-path-review"],
-    "TARGETED_PR": ["changed-path-review", "targeted-tests"],
-    "FULL_INTEGRATION": ["changed-path-review", "full-unit-suite", "task-contract-regression"],
-    "CANONICAL_REGRESSION": ["changed-path-review", "full-unit-suite", "task-contract-regression"]
+    "FAST_STATIC": [
+      "changed-path-review"
+    ],
+    "TARGETED_PR": [
+      "changed-path-review",
+      "targeted-tests"
+    ],
+    "FULL_INTEGRATION": [
+      "changed-path-review",
+      "full-unit-suite",
+      "task-contract-regression"
+    ],
+    "CANONICAL_REGRESSION": [
+      "changed-path-review",
+      "full-unit-suite",
+      "task-contract-regression"
+    ]
   },
   "rules": [
     {
       "id": "task-state",
-      "patterns": ["tasks/active/*.json", "tasks/active/*.md"],
+      "patterns": [
+        "tasks/active/*.json",
+        "tasks/active/*.md"
+      ],
       "tier": "FAST_STATIC",
-      "checks": ["task-validate", "task-handoff-sync"]
+      "checks": [
+        "task-validate",
+        "task-handoff-sync"
+      ]
     },
     {
       "id": "architecture-docs",
-      "patterns": ["README.md", "architecture/**"],
+      "patterns": [
+        "README.md",
+        "architecture/**"
+      ],
       "tier": "FAST_STATIC",
-      "checks": ["documentation-review"]
+      "checks": [
+        "documentation-review"
+      ]
     },
     {
       "id": "tests",
-      "patterns": ["tests/**"],
+      "patterns": [
+        "tests/**"
+      ],
       "tier": "TARGETED_PR",
-      "checks": ["affected-unit-tests"]
+      "checks": [
+        "affected-unit-tests"
+      ]
     },
     {
       "id": "shared-policy",
-      "patterns": ["policies/**", "procedures/**", "workflows/**", "schemas/**"],
+      "patterns": [
+        "policies/**",
+        "procedures/**",
+        "workflows/**",
+        "schemas/**"
+      ],
       "tier": "FULL_INTEGRATION",
-      "checks": ["full-unit-suite", "contract-validation"]
+      "checks": [
+        "full-unit-suite",
+        "contract-validation"
+      ]
     },
     {
       "id": "control-code",
-      "patterns": ["scripts/**", "adapters/**", ".agents/**", "AGENTS.md", "repos.json"],
+      "patterns": [
+        "scripts/**",
+        "adapters/**",
+        ".agents/**",
+        "AGENTS.md",
+        "repos.json",
+        ".github/**"
+      ],
       "tier": "FULL_INTEGRATION",
-      "checks": ["full-unit-suite", "control-plane-regression"]
+      "checks": [
+        "full-unit-suite",
+        "control-plane-regression"
+      ]
     }
   ]
 }

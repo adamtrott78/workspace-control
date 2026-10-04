@@ -192,6 +192,8 @@ The planner escalates unknown or mixed-risk changes and supports
 `--force-full`. See `procedures/validation_routing.md` and
 `architecture/throughput-ci-efficiency-v1.md`.
 
+For routed mutation work, a reviewed project validation profile is normative: consult it before launching CI. If a repository has no reviewed profile, preserve the owning project's existing/full validation rather than inferring a cheaper tier.
+
 ## Durable task capsules
 
 Long-running or executor-switchable work is represented by machine-readable

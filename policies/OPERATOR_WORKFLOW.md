@@ -466,6 +466,36 @@ Examples:
 - a notebook containing output is not proof current source generated it;
 - a plot rendering is not proof the underlying numerical record is correct.
 
+## Validation routing and CI cost discipline
+
+Before launching CI or another expensive validation path for a tracked mutation
+governed through workspace-control, the executor MUST establish the exact changed
+path set and route validation deliberately.
+
+When the owning repository has a reviewed validation profile, use the shared
+planner/procedure in `procedures/validation_routing.md` before starting CI. The
+selected tier is a lower bound on required evidence, not permission to ignore an
+owning workflow's stronger requirement.
+
+When no reviewed project profile exists, when the planner/profile cannot be
+resolved, or when dependency/risk radius is ambiguous, preserve the owning
+project's existing/full validation. Do not infer a cheaper tier from model
+judgment alone.
+
+Cheap deterministic preflight SHOULD happen before opening a pull request. One
+logical mutation SHOULD be batched into one reviewed Git checkpoint where the
+operation surface permits it, rather than drip-fed as unrelated file commits.
+
+While external CI runs, status reads SHOULD occur at decision points rather than
+tight polling intervals. Prefer high-level run state first, job detail only when
+needed, and logs only for diagnosis.
+
+A passed pull-request check MAY unblock subsequent work without synchronously
+waiting for a duplicate canonical run only under the tested-tree conditions in
+`procedures/validation_routing.md`. Post-submit, scheduled, deployment, release,
+or other canonical-only validation remains authoritative whenever those
+conditions do not hold.
+
 ## Human review gates
 
 Some correctness properties are inherently visual, subjective, or user-owned.
