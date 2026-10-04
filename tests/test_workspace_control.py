@@ -154,6 +154,8 @@ class TaskRenderTests(unittest.TestCase):
             "https://github.com/adamtrott78/workspace-control",
             first,
         )
+        self.assertIn("- Remote verified: true", first)
+        self.assertNotIn("- Remote verified: True", first)
         self.assertIn(
             "tests/fixtures/task_capsule_v2_remote.json",
             first,
