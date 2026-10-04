@@ -68,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "4d77fb64c5befb55362e9f689ef5b3c85d2c1f35",
+        "checkpoint_sha": "d9946729f92a15fe3a6c821dc366a53a37ca0756",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a",
+        "head_sha": "4d77fb64c5befb55362e9f689ef5b3c85d2c1f35",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -1273,23 +1273,45 @@
         "The runner now fails closed unless the captured structure_gpu value matches a numeric GPU index before invoking Docling.",
         "No benchmark thresholds, source manifests, candidate-model selections, production routing, daemon lifecycle policy, or scientific-state behavior changed."
       ]
+    },
+    {
+      "check": "Completed bounded residual source audit before semantic-linkage hotfix",
+      "result": "REJECTED_BY_STALE_SEMANTIC_REPRESENTATION_CHECK",
+      "evidence": [
+        "All three registered PDFs were fetched, hashed, normalized, and deterministically audited with candidate_model_downloads=0, candidate_model_inference_calls=0, and scientific_state_materialized=false.",
+        "scan-mixed-quality-v1 accepted: scan opener pages zero-based [1,3,5,27]; low-confidence opener pages zero-based [8,9,15,16,19,22,24].",
+        "malformed-layout-v1 accepted with both registered target pages firing LAYOUT_OR_READING_ORDER_ANOMALY.",
+        "semantic-visuals-v1 resolved Figure 6 on page index 7 to exactly one LINKED_FIGURE bbox [99.19828033447266,72.1703872680664,495.0450134277344,171.62620544433594] and Figure 3 on page index 3 to exactly one LINKED_FIGURE bbox [50.5037956237793,76.09317016601562,285.709716796875,618.7928466796875].",
+        "Overall decision was REJECT/model_prefetch_ready=false only because acceptance still required standalone caption_blocks_found despite the validated FIGURE derivation caption linkage; both actual caption_blocks_found arrays were empty."
+      ]
+    },
+    {
+      "check": "Semantic residual source acceptance representation hotfix",
+      "result": "PASS_READY_FOR_LAMBDA_REPLAY",
+      "evidence": [
+        "research-engine PR #69 merged as d9946729f92a15fe3a6c821dc366a53a37ca0756.",
+        "Final PR-head CI run 37170199764 PASS; canonical-main CI run 37170287404 PASS.",
+        "semantic-visual acceptance now requires valid target pages and LINKED_FIGURE region status, which already guarantees exactly one caption-linked figure region with a PDF bbox.",
+        "The source-audit contract now explicitly permits normalized FIGURE caption linkage without requiring a separately materialized caption block.",
+        "No source selection, residual opener threshold, candidate model, production routing, daemon policy, or scientific-state behavior changed."
+      ]
     }
   ],
   "blockers": [
-    "Lambda/local research-engine is last verified at clean main@93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a after the first bounded source-audit attempt, while canonical remote main is the GPU-selector hotfix 4d77fb64c5befb55362e9f689ef5b3c85d2c1f35; synchronize only while the daemon is stopped.",
-    "The first bounded source-prefetch/audit did not reach deterministic opener evaluation because the runner polluted the captured GPU selector and made CUDA_VISIBLE_DEVICES invalid. Source PDF fetch/hash/page-count validation passed, but scan/text opener pages, semantic figure bboxes, malformed-layout acceptance/replacement, and model_prefetch_ready remain unresolved until the hotfixed rerun.",
-    "Selected candidate OCR/VLM/local-semantic runtimes and weights remain intentionally uninstalled until the source audit returns PASS with model_prefetch_ready=true.",
+    "Lambda/local research-engine is last verified at clean main@4d77fb64c5befb55362e9f689ef5b3c85d2c1f35 while canonical remote main is semantic-linkage hotfix d9946729f92a15fe3a6c821dc366a53a37ca0756.",
+    "The completed source audit's underlying deterministic evidence is sufficient for all three benchmark families, but its report is REJECT/model_prefetch_ready=false because of the now-fixed stale standalone-caption-block acceptance check. Replay the audit logic over the preserved source/package artifacts after fast-forwarding; do not rerun Docling unless preserved artifacts are missing or invalid.",
+    "Selected candidate OCR/VLM/local-semantic runtimes and weights remain intentionally uninstalled until the corrected audit replay returns PASS with model_prefetch_ready=true.",
     "Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline; sustained research remains disabled."
   ],
   "remaining_work": [
-    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a, fetch origin/main, require origin/main=4d77fb64c5befb55362e9f689ef5b3c85d2c1f35, and fast-forward only to that canonical hotfix commit.",
-    "Rerun bash deploy/run-residual-source-prefetch-audit.sh. Preserve the new visible output root and return residual-source-audit-report.json, or the first hard failure/rejection. The prior 20261004T013615Z output root remains diagnostic evidence only.",
-    "If the audit REJECTS malformed-layout-v1, replace only that source manifest and rerun the source gate; do not relax opener thresholds or install a layout/VLM model.",
-    "If semantic visual targets do not both resolve to unique caption-linked bboxes, refine/replace only the source-region selection before any VLM prefetch.",
-    "If the audit PASSES with model_prefetch_ready=true, durably pin downloaded PDF SHA-256/page counts and accepted opener/region evidence, then implement a separate bounded model-prefetch/license/checksum gate for the already-selected candidates.",
+    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@4d77fb64c5befb55362e9f689ef5b3c85d2c1f35, fetch origin/main, require origin/main=d9946729f92a15fe3a6c821dc366a53a37ca0756, and fast-forward only to that canonical hotfix commit.",
+    "Locate the newest completed residual-source-prefetch-audit output root containing sources/, packages/, and residual-source-audit-report.json. Replay only `research_engine.residual_source_audit audit` against those preserved artifacts under the corrected code; do not rerun native/standard Docling conversion unless artifact validation fails.",
+    "Require corrected replay decision=PASS, model_prefetch_ready=true, all three cases accepted, candidate model downloads/inference zero, and scientific_state_materialized=false.",
+    "After corrected PASS, durably pin authoritative PDF SHA-256/page counts plus accepted scan/low-confidence opener pages, semantic figure bboxes, and malformed-layout opener evidence into benchmark manifests/results.",
+    "Then implement the separate bounded model-prefetch/license/checksum/resource gate for PP-OCRv6_medium, PaddleOCR-VL-1.6, and Qwen3.5-4B.",
     "Only after model prefetch/audit should residual-scoped quality/resource benchmarks and contemporaneous Codex controls begin."
   ],
-  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@4d77fb64c5befb55362e9f689ef5b3c85d2c1f35 as the canonical bounded-source-audit hotfix baseline and Lambda/local main@93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a as the last verified local state. On Lambda, require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly 4d77fb64c5befb55362e9f689ef5b3c85d2c1f35, then fast-forward only to that commit. Rerun bash deploy/run-residual-source-prefetch-audit.sh. Return the new visible OUTPUT_ROOT plus residual-source-audit-report.json, or the first hard error/rejection. Do not install or invoke PP-OCRv6_medium, PaddleOCR-VL-1.6, Qwen3.5-4B, start the daemon, invoke Codex, change production routing, or materialize scientific state. A REJECT means revise only the failed source/region and rerun this deterministic gate; PASS requires model_prefetch_ready=true before the separate model-prefetch stage opens.",
+  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@d9946729f92a15fe3a6c821dc366a53a37ca0756 as the canonical semantic-linkage source-audit hotfix and Lambda/local main@4d77fb64c5befb55362e9f689ef5b3c85d2c1f35 as the last verified local state. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly d9946729f92a15fe3a6c821dc366a53a37ca0756, then fast-forward only to that commit. Locate the newest completed residual-source-prefetch-audit output root containing sources/, packages/, and residual-source-audit-report.json and replay only the deterministic `research_engine.residual_source_audit audit` command against those preserved artifacts, writing a corrected report under the same visible output root. Do not rerun Docling unless artifact validation fails. Do not install or invoke PP-OCRv6_medium, PaddleOCR-VL-1.6, Qwen3.5-4B, start the daemon, invoke Codex, change production routing, or materialize scientific state. PASS requires decision=PASS and model_prefetch_ready=true.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
