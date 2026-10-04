@@ -132,12 +132,20 @@ verify branch head/base tree
 -> create changed-file blobs in parallel
 -> create one tree containing the reviewed path set
 -> create one commit
--> update_ref(expected_sha=<verified head>)
--> reread exact resulting commit/tree
+-> immediately re-read the branch head
+-> update_ref to the new commit
+-> reread exact resulting branch/commit/tree
 ```
 
-Do not run same-path writes concurrently. A rejected ref lease means the branch
-moved: reread state and reconcile instead of forcing.
+The connector advertises an `expected_sha` lease for `update_ref`, but the
+current wrapper rejects that argument during input validation. Plain
+`update_ref` works. Until the wrapper is repaired, the safe connector sequence
+is therefore verify-head immediately before the ref move and verify again
+immediately after. Do not claim lease-protected mutation when the lease argument
+was not accepted.
+
+Do not run same-path writes concurrently. If the pre-write head check no longer
+matches, reread state and reconcile instead of forcing.
 
 ### PR timing
 
