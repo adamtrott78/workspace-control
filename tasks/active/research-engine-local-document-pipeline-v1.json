@@ -68,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c",
+        "checkpoint_sha": "9019be081db373395adeffa28fe515c33e582fb3",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "d9946729f92a15fe3a6c821dc366a53a37ca0756",
+        "head_sha": "320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -1319,24 +1319,50 @@
         "Gate records exact resolved revisions, Apache-2.0 license metadata, sorted per-file SHA-256 manifests, materialized byte counts, offline reopenability, free-disk/host/GPU compatibility facts, and the pinned PaddleOCR 3.7.0 wheel SHA-256.",
         "Gate installs only isolated Hugging Face transport tooling; it does not install PaddlePaddle, vLLM, SGLang, Transformers, or any candidate inference runtime and performs zero candidate inference."
       ]
+    },
+    {
+      "check": "Bounded residual model artifact prefetch",
+      "result": "PASS_READY_FOR_CANDIDATE_INFERENCE",
+      "evidence": [
+        "Uploaded model-prefetch-report.json decision=PASS, failure=null, network_use=MODEL_ARTIFACT_PREFETCH_ONLY, candidate_model_inference_calls=0, scientific_state_materialized=false.",
+        "PP-OCRv6 medium detection resolved exactly to 8e0f56fb2ef86b461d99cfc7ac5c137738985f61, Apache-2.0, 62,298,334 materialized bytes, offline_reopen=true; inference.pdiparams SHA-256 85218d2e3d98f5a21c58b4220627be923a97aee5db3cc71f39536ab31ac53960.",
+        "PP-OCRv6 medium recognition resolved exactly to e5a92bcbc5cc1b494628e458d267778f0704fd7c, Apache-2.0, 76,862,530 materialized bytes, offline_reopen=true; inference.pdiparams SHA-256 1b01c79a914587933f615569e75de54f2e638ebb5d3f3b3c1b38c24ede8c7319.",
+        "PaddleOCR-VL-1.6 stayed pinned at c5630abae1d940eafe0697512a0325494b02ab42, Apache-2.0, 1,930,462,423 bytes, offline_reopen=true; model.safetensors SHA-256 85a479d506a11e724e7285d395c551be69f41dbc16b6342d3cacfb189aed71db.",
+        "Qwen3.5-4B stayed pinned at 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a, Apache-2.0, 9,342,907,469 bytes, offline_reopen=true.",
+        "Free disk changed from 181,727,625,216 to 170,314,207,232 bytes; artifact prefetch remained comfortably bounded.",
+        "Uploaded model-prefetch report SHA-256 a2f68c2b50a4fe416f825e369f9d85887ae295611540f5c06200c509807e3ca3."
+      ]
+    },
+    {
+      "check": "Bounded PP-OCRv6 residual benchmark implementation",
+      "result": "PASS_READY_FOR_LAMBDA",
+      "evidence": [
+        "research-engine PR #71 merged as 9019be081db373395adeffa28fe515c33e582fb3.",
+        "Final PR-head CI run 37172948330 PASS; canonical-main CI run 37173031391 PASS.",
+        "Exact PP-OCRv6 det/rec revisions and primary weight hashes from the prefetch gate are CI-pinned.",
+        "Runner builds one transactional isolated PaddlePaddle 3.2.0 / PaddleOCR 3.7.0 runtime, uses paddle_static, local model paths, and disables orientation/unwarping/textline-orientation extras.",
+        "Only authoritative scan page index 3 and low-confidence page index 16 are rendered at 200 DPI; exactly three candidate inference calls are allowed (first scan, warm low-confidence, warm scan repeat).",
+        "Measurement records model-init time, warm-page time, process GPU VRAM, peak RSS, OCR text/scores/boxes, runtime freeze, exact page provenance, and two rendered PNGs.",
+        "Resource success is MEASURED_PENDING_HUMAN_QUALITY, never automatic promotion; daemon start, VLM/Qwen/Codex, production routing, and scientific-state writes remain forbidden."
+      ]
     }
   ],
   "blockers": [
-    "Lambda/local research-engine is last verified clean at main@d9946729f92a15fe3a6c821dc366a53a37ca0756 while canonical remote main is model-prefetch gate 320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c; synchronize only with the research daemon stopped.",
-    "The bounded residual model artifact prefetch/license/checksum/host-compatibility gate has not yet executed on Lambda, so PP-OCRv6 detection/recognition exact resolved revisions, downloaded per-file checksums, offline reopenability, and local artifact footprints are not yet measured.",
-    "Candidate inference runtimes remain intentionally uninstalled and candidate inference remains closed until the prefetch gate passes.",
-    "Human ground-truth annotations for the promoted OCR scan/text targets and semantic visual questions remain pending before the later quality gates.",
+    "Lambda/local research-engine is last verified clean at main@320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c after the successful model-prefetch gate, while canonical remote main is PP-OCRv6 benchmark gate 9019be081db373395adeffa28fe515c33e582fb3; synchronize only with the daemon stopped.",
+    "PP-OCRv6 candidate inference has not yet run on Lambda. Runtime compatibility, model-init latency, warm-page latency, peak process VRAM, peak RSS, and OCR output quality are therefore unmeasured.",
+    "PP-OCRv6 promotion is explicitly blocked on human quality review of the two rendered authoritative target pages and OCR outputs even if resource ceilings pass.",
+    "PaddleOCR-VL-1.6 and Qwen3.5-4B inference remain closed; Qwen visual use remains conditional on PaddleOCR-VL failure/abstention.",
     "Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline; sustained research remains disabled."
   ],
   "remaining_work": [
-    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@d9946729f92a15fe3a6c821dc366a53a37ca0756, fetch origin/main, require origin/main=320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c, and fast-forward only to that canonical commit.",
-    "Run bash deploy/run-residual-model-prefetch-gate.sh. Preserve the visible OUTPUT_ROOT and return model-prefetch-report.json; hardware-compatibility.json and runtime-wheel-prefetch.json are compact supplemental receipts if needed.",
-    "Require prefetch decision=PASS, exactly four model artifacts across three candidate families, expected Apache-2.0 metadata, exact resolved revisions, per-file SHA-256 manifests, offline_reopen=true, PaddleOCR 3.7.0 wheel hash match, candidate_model_inference_calls=0, scientific_state_materialized=false, and daemon inactive/dead.",
-    "After PASS, durably pin the resolved PP-OCRv6 detection/recognition revisions and model-prefetch receipts, then build the isolated PP-OCRv6 inference runtime and annotate the promoted scan/text targets for the first quality/resource benchmark.",
-    "Only after PP-OCRv6 is measured should PaddleOCR-VL-1.6 inference open on the two validated visual regions and exhausted structural residuals; Qwen3.5-4B visual use remains conditional on PaddleOCR-VL failure/abstention.",
-    "Open Qwen3.5-4B semantic EXTRACT/VERIFY benchmarking only with bounded authoritative-PDF inputs and contemporaneous STANDARD Codex controls."
+    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c, fetch origin/main, require origin/main=9019be081db373395adeffa28fe515c33e582fb3, and fast-forward only to that canonical commit.",
+    "Run bash deploy/run-ppocrv6-residual-benchmark.sh. This may construct the isolated PP-OCRv6 runtime, then performs exactly three candidate OCR calls on the two promoted pages.",
+    "Return ppocrv6-benchmark-report.json plus scan_textless-page-zb3.png and low_confidence_text-page-zb16.png from the visible OUTPUT_ROOT. Do not send the full console output.",
+    "Human-review the two rendered authoritative page images against PP-OCRv6 recognized text/scores/boxes and record coverage/fabrication/provenance findings. Resource PASS alone cannot promote the model.",
+    "After PP-OCRv6 is measured and reviewed, decide scan/text promotion/fall-through policy, then open PaddleOCR-VL-1.6 only on the validated visual/structural residual regions.",
+    "Open Qwen3.5-4B semantic EXTRACT/VERIFY only on bounded authoritative-PDF inputs with contemporaneous STANDARD Codex controls; visual Qwen remains fallback-only."
   ],
-  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c as the canonical bounded model-prefetch baseline and Lambda/local main@d9946729f92a15fe3a6c821dc366a53a37ca0756 as the last verified local state. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly 320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c, then fast-forward only to that commit. Run bash deploy/run-residual-model-prefetch-gate.sh. Return the visible OUTPUT_ROOT plus model-prefetch-report.json, or the first hard error. Do not start the daemon, run candidate OCR/VLM/semantic inference, install PaddlePaddle/vLLM/SGLang/Transformers, invoke Codex, change production routing, or materialize scientific state. PASS opens isolated inference-runtime construction and the first PP-OCRv6 scan/text quality/resource benchmark.",
+  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@9019be081db373395adeffa28fe515c33e582fb3 as the canonical PP-OCRv6 measurement baseline and Lambda/local main@320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c as the last verified local state. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly 9019be081db373395adeffa28fe515c33e582fb3, then fast-forward only to that commit. Run bash deploy/run-ppocrv6-residual-benchmark.sh. Return the visible OUTPUT_ROOT plus ppocrv6-benchmark-report.json and the two rendered target PNGs scan_textless-page-zb3.png and low_confidence_text-page-zb16.png, or the first hard error. Do not start the daemon, run PaddleOCR-VL-1.6 or Qwen3.5-4B, invoke Codex, change production routing, or materialize scientific state. A successful resource/runtime measurement remains PENDING_HUMAN_QUALITY and cannot promote PP-OCRv6 by itself.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
