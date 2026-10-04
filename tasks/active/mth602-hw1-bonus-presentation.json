@@ -43,7 +43,7 @@
       "base_sha": "b297c524d505715fe93f9a266d7d45564cbbe47f",
       "remote": {
         "branch": "hw1-bonus-presentation",
-        "checkpoint_sha": "17252384314bfa2acfc4362787eb56e078c408a9",
+        "checkpoint_sha": "e5548148dd9dcfa10c2f419f05d12b66031e877f",
         "verified": true
       },
       "local": null,
@@ -78,15 +78,14 @@
       ],
       "outputs": [
         "homework/hw01/presentation/SOURCE_NOTES.md",
-        "homework/hw01/presentation/CONTEXT.md",
-        "MTH602-AdamTrott:hw1-bonus-presentation@17252384314bfa2acfc4362787eb56e078c408a9"
+        "homework/hw01/presentation/CONTEXT.md"
       ],
       "validation": [
         {
           "check": "Original methodology recovered durably without relying on deleted chat state",
           "result": "PASS",
           "evidence": [
-            "The complete 866-line coefficient-recovery process supplied by the user was persisted as homework/hw01/presentation/SOURCE_NOTES.md.",
+            "The complete coefficient-recovery process supplied by the user was persisted as homework/hw01/presentation/SOURCE_NOTES.md.",
             "Existing records/bonus_analysis.json independently preserves the selected sparse candidate, Taylor competitor, residual statistics, likelihood comparisons, bootstrap evidence, hard-bound caveat, and decision rationale."
           ]
         },
@@ -113,60 +112,86 @@
         "homework/hw01/presentation/SOURCE_NOTES.md",
         "homework/hw01/records/bonus_analysis.json"
       ],
-      "outputs": [],
+      "outputs": [
+        "homework/hw01/presentation/STORYBOARD.md",
+        "homework/hw01/presentation/TALKING_POINTS.md",
+        "local draft PowerPoint and rendered contact sheet awaiting user review"
+      ],
       "validation": [],
       "resume_condition": null
     },
     {
       "id": "visual_asset_generation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "document-artifact-build",
       "selected_executor": "chatgpt",
       "selected_surface": "artifact-runtime",
       "inputs": [
-        "validated deck_plan"
+        "deck storyboard",
+        "homework/hw01/input/hw1.csv",
+        "homework/hw01/records/bonus_analysis.json"
       ],
-      "outputs": [],
+      "outputs": [
+        "local OLS coefficient chart",
+        "local bootstrap support chart",
+        "local candidate curve comparison chart"
+      ],
       "validation": [],
       "resume_condition": null
     },
     {
       "id": "deck_build",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "document-artifact-build",
       "selected_executor": "chatgpt",
       "selected_surface": "artifact-runtime+github",
       "inputs": [
-        "validated deck_plan",
-        "visual assets"
+        "storyboard",
+        "generated visual assets"
       ],
-      "outputs": [],
+      "outputs": [
+        "local 7-slide HW1_Bonus_Presentation.pptx draft with speaker notes"
+      ],
       "validation": [],
       "resume_condition": null
     },
     {
       "id": "visual_qa",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "document-artifact-build",
       "selected_executor": "chatgpt",
       "selected_surface": "artifact-runtime",
       "inputs": [
-        "built PowerPoint"
+        "local draft PowerPoint"
       ],
-      "outputs": [],
-      "validation": [],
+      "outputs": [
+        "rendered seven-slide contact sheet",
+        "slides_test structural validation"
+      ],
+      "validation": [
+        {
+          "check": "Current local draft has no detected slide overflow",
+          "result": "PASS",
+          "evidence": [
+            "slides_test.py passed on the current 7-slide PPTX.",
+            "Rendered contact sheet was inspected after fixing the Slide 7 card-title wrap."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "talking_points",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "mth602-hw1-bonus-presentation",
       "selected_executor": "chatgpt",
       "selected_surface": "conversation+github",
       "inputs": [
-        "visually validated slide sequence"
+        "current slide sequence"
       ],
-      "outputs": [],
+      "outputs": [
+        "homework/hw01/presentation/TALKING_POINTS.md"
+      ],
       "validation": [],
       "resume_condition": null
     },
@@ -177,8 +202,8 @@
       "selected_executor": "chatgpt",
       "selected_surface": "github+conversation",
       "inputs": [
-        "validated PowerPoint",
-        "talking points"
+        "user-approved PowerPoint",
+        "validated talking points"
       ],
       "outputs": [],
       "validation": [],
@@ -189,11 +214,11 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "git:17252384314bfa2acfc4362787eb56e078c408a9",
+      "identity": "git:e5548148dd9dcfa10c2f419f05d12b66031e877f",
       "required_for_resume": true,
       "evidence": [
-        "Isolated branch hw1-bonus-presentation contains durable SOURCE_NOTES.md and presentation/CONTEXT.md.",
-        "Resume with deck planning; no slide artifact has been built yet."
+        "Isolated branch hw1-bonus-presentation contains durable SOURCE_NOTES.md, CONTEXT.md, STORYBOARD.md, and TALKING_POINTS.md.",
+        "A 7-slide PPTX draft and visual assets exist locally and have passed initial structural/rendered QA; user review is the next presentation-content gate."
       ]
     }
   ],
@@ -211,34 +236,53 @@
       ]
     },
     {
-      "path": "homework/hw01/presentation/HW1_Bonus_Presentation.pptx",
-      "state": "planned",
-      "role": "class presentation",
-      "origin": "presentation source/build files",
+      "path": "homework/hw01/presentation/STORYBOARD.md",
+      "state": "draft_ready",
+      "role": "seven-slide narrative plan",
+      "origin": "SOURCE_NOTES.md and presentation/CONTEXT.md",
       "persistence": "git",
-      "regeneration": "Build from presentation source after deck plan is validated.",
-      "review_requirement": "Structural validation plus rendered visual QA.",
-      "evidence": []
+      "regeneration": "Revise only if presentation narrative changes.",
+      "review_requirement": "User review before final deck lock.",
+      "evidence": [
+        "Persisted at branch checkpoint e5548148dd9dcfa10c2f419f05d12b66031e877f."
+      ]
+    },
+    {
+      "path": "homework/hw01/presentation/HW1_Bonus_Presentation.pptx",
+      "state": "local_draft_ready",
+      "role": "class presentation",
+      "origin": "local PptxGenJS build from durable source evidence",
+      "persistence": "local_pending_user_review_then_git",
+      "regeneration": "Build from presentation source after requested revisions.",
+      "review_requirement": "User content review plus final structural/rendered QA.",
+      "evidence": [
+        "Current local draft has seven slides and embedded speaker notes.",
+        "slides_test.py reports no overflow and rendered contact sheet has been visually inspected."
+      ]
     },
     {
       "path": "homework/hw01/presentation/TALKING_POINTS.md",
-      "state": "planned",
+      "state": "draft_ready",
       "role": "5–10 minute natural delivery prompts",
-      "origin": "validated slide sequence and source notes",
+      "origin": "current slide sequence and source notes",
       "persistence": "git",
-      "regeneration": "Revise after slide order/content stabilizes.",
-      "review_requirement": "Must be prompts/transitions rather than a word-for-word script.",
-      "evidence": []
+      "regeneration": "Revise after any slide-order/content change.",
+      "review_requirement": "User review for preferred speaking style.",
+      "evidence": [
+        "Persisted at branch checkpoint e5548148dd9dcfa10c2f419f05d12b66031e877f."
+      ]
     },
     {
       "path": "homework/hw01/presentation/rendered/",
-      "state": "planned",
+      "state": "local_draft_ready",
       "role": "slide previews/contact sheet for visual QA",
-      "origin": "PowerPoint render",
-      "persistence": "git_or_generated_review_artifact",
+      "origin": "current local PowerPoint render",
+      "persistence": "local_pending_final_lock",
       "regeneration": "Render from final PPTX.",
-      "review_requirement": "Inspect every slide for clipping, density, legibility, narrative order, and reveal timing.",
-      "evidence": []
+      "review_requirement": "Inspect every slide after final revision.",
+      "evidence": [
+        "All seven slides rendered; initial visual QA passed after one Slide 7 wrap correction."
+      ]
     }
   ],
   "validation": [
@@ -246,31 +290,37 @@
       "check": "Presentation source evidence recovered and durable",
       "result": "PASS",
       "evidence": [
-        "MTH602 hw1-bonus-presentation branch checkpoint 17252384314bfa2acfc4362787eb56e078c408a9 contains presentation/CONTEXT.md and SOURCE_NOTES.md."
+        "MTH602 hw1-bonus-presentation branch contains presentation/CONTEXT.md and SOURCE_NOTES.md."
       ]
     },
     {
-      "check": "Final slide deck validated",
+      "check": "Current draft slide deck structurally and visually coherent",
+      "result": "PASS",
+      "evidence": [
+        "Current local 7-slide PPTX passed slides_test.py with no overflow detected.",
+        "Rendered contact sheet was visually inspected and Slide 7 title wrapping was corrected."
+      ]
+    },
+    {
+      "check": "Final slide deck user-approved and durably checkpointed",
       "result": "NOT_RUN",
       "evidence": []
     },
     {
-      "check": "5–10 minute talking points validated",
+      "check": "5–10 minute talking points user-reviewed",
       "result": "NOT_RUN",
       "evidence": []
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Reduce the 866-line methodology record into a 5–7 slide narrative emphasizing the objective, OLS failure, sparse search, two-candidate fork, decision evidence, and final reveal.",
-    "Choose/generate only the visuals that materially help the class understand the reasoning, preferably using existing numerical evidence rather than decorative graphics.",
-    "Build the PowerPoint on the isolated branch and preserve editable source/build files.",
-    "Render and visually inspect every slide; revise for legibility, pacing, and reveal timing.",
-    "Write concise talking points and transitions for a natural 5–10 minute delivery.",
-    "Checkpoint final artifacts and leave actual classroom presentation/delivery to the user."
+    "Have the user review the seven-slide first draft and narrative emphasis.",
+    "Apply any requested content/layout revisions and rerender the deck.",
+    "Persist editable build source, final PPTX, selected visual assets, and final rendered QA evidence to the isolated presentation branch after user approval.",
+    "Refresh final task checkpoint and validation evidence, then leave actual classroom presentation/delivery to the user."
   ],
-  "next_safe_action": "Create and review a 5–7 slide storyboard before building slides. Default narrative: (1) competition objective and why coefficient recovery differs from prediction, (2) degree-9 OLS looked accurate but was numerically unstable, (3) sparse search exposed simple odd-power structure and suggested sin(2t), (4) the analysis narrowed to the Taylor and sparse rational candidates, (5) show the strongest pre-submission evidence and why it favored sparse, (6) submitted sparse candidate / won competition, then reveal that the Taylor candidate was actually the hidden answer and close with the lesson about model-selection evidence versus structural prior knowledge.",
+  "next_safe_action": "Present the current seven-slide draft and talking points to the user for review. The draft already implements the intended reveal structure: objective -> unstable OLS -> sparse/BIC structure -> two-candidate fork -> why sparse was chosen -> competition win/post-hoc clue -> final Taylor reveal. Do not lock or persist the binary PPTX as final until the user approves the narrative/content or requests revisions.",
   "last_executor": "chatgpt",
-  "last_surface": "conversation-files+github",
-  "notes": "The original bonus-solving chat may have been deleted, but the user preserved a detailed methodology record. That record is now durable in the course repository. The presentation should not imply that post-competition knowledge influenced the original choice."
+  "last_surface": "conversation-files+github+artifact-runtime",
+  "notes": "The original bonus-solving chat may have been deleted, but the user preserved a detailed methodology record. That record is now durable in the course repository. The current PPTX is a first draft for user review; the post-competition truth that Taylor was correct is intentionally confined to the final reveal."
 }
