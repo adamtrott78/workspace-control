@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control",
-  "current_stage": "control_plane_implementation",
+  "current_stage": "representative_benchmark",
   "acceptance_criteria": [
     "Produce an empirical latency decomposition for representative recent ChatGPT/GitHub control cycles, separating tool-call/orchestration time, Git mutation count, PR CI, canonical-main CI, status polling, runtime/human handoffs, and genuinely necessary validation.",
     "Study documented practices from mature CI/CD and monorepo/control-plane systems using primary or authoritative sources where possible, including validation tiers, test-impact/path selection, caching, concurrency cancellation, merge queues or tested-merge semantics, pre-submit versus post-submit roles, and scheduled/full regression coverage.",
@@ -43,7 +43,7 @@
       "base_sha": "1a46337a35296554917f61a80ff21535f8e87c19",
       "remote": {
         "branch": "throughput-ci-efficiency-v1",
-        "checkpoint_sha": "28d1c892af9c015010e0700154cedd27aad21bac",
+        "checkpoint_sha": "0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a",
         "verified": true
       },
       "local": null,
@@ -193,7 +193,7 @@
     },
     {
       "id": "control_plane_implementation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -219,10 +219,11 @@
         },
         {
           "check": "Full workspace-control regression suite",
-          "result": "NOT_RUN",
+          "result": "PASS",
           "evidence": [
-            "workspace-control currently has no GitHub Actions workflow and this task is operating through the GitHub-only remote surface.",
-            "Because planner/profile/script/schema mutations self-classify as FULL_INTEGRATION, the implementation branch remains unmerged until the full repository unit/task-contract regression suite is executed in a suitable runtime."
+            "PR #50 synthetic-merge workflow run 37244948999 selected FULL_INTEGRATION and completed successfully.",
+            "The complete unittest discovery suite passed 56/56 tests; compileall and validation profile/schema JSON checks also passed.",
+            "Repository-wide task-contract regression compared the PR base against the tested tree. research-engine-local-document-pipeline-v1.json was invalid on both sides as pre-existing debt; the tested tree introduced zero newly invalid task capsules."
           ]
         }
       ],
@@ -230,7 +231,7 @@
     },
     {
       "id": "representative_benchmark",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -240,7 +241,17 @@
       "outputs": [
         "before/after latency and quality evidence for low/moderate/high-risk mutation classes"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "FULL_INTEGRATION self-hosted benchmark",
+          "result": "PASS",
+          "evidence": [
+            "PR #50 workflow run 37244948999 selected FULL_INTEGRATION and completed in roughly 13 seconds wall clock from run start to completion.",
+            "The run executed changed-task contract checks, 56 unit tests, compile/JSON checks, and baseline-aware repository-wide task-contract regression.",
+            "The next task-state-only synchronization commit is intentionally used as the live FAST_STATIC benchmark."
+          ]
+        }
+      ],
       "resume_condition": "Full workspace-control integration validation passes for the implementation checkpoint."
     }
   ],
@@ -273,6 +284,17 @@
       "evidence": [
         "Isolated branch throughput-ci-efficiency-v1 contains planner/profile/schema/procedure/tests and durable-handoff URL fix.",
         "research-engine remains read-only at 7a26e648ec409c96a3f9b7c8620f566658700894."
+      ]
+    },
+    {
+      "id": "checkpoint:validated-risk-routed-ci",
+      "kind": "git_checkpoint",
+      "identity": "workspace-control:0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #50 full-integration run 37244948999 passed on the synthetic merge tree.",
+        "Risk-tier planner, root operator policy, baseline-aware task-contract regression, concurrency cancellation, and stable validation job are present at this checkpoint.",
+        "research-engine was not mutated by this throughput task."
       ]
     }
   ],
@@ -387,10 +409,11 @@
     },
     {
       "check": "Full integration validation before merge",
-      "result": "NOT_RUN",
+      "result": "PASS",
       "evidence": [
-        "Required by the new profile because control-plane scripts/schemas/policies changed.",
-        "No current GitHub Actions workflow exists in workspace-control; run the full suite through a suitable execution surface before merging."
+        "PR #50 run 37244948999 selected FULL_INTEGRATION and passed on the synthetic merge tree.",
+        "56/56 unit tests passed; compileall/profile/schema checks passed.",
+        "Baseline-aware task-contract regression introduced zero new invalid capsules and surfaced the pre-existing research-engine task-capsule debt without hiding it."
       ]
     },
     {
@@ -401,20 +424,26 @@
         "Derived handoff contains the required derived marker, full workspace-control URL, and current next_safe_action.",
         "research-engine main remains exactly 7a26e648ec409c96a3f9b7c8620f566658700894 and was not mutated."
       ]
+    },
+    {
+      "check": "Risk-routed GitHub Actions gate",
+      "result": "PASS",
+      "evidence": [
+        "The workflow always emits one stable validation job and computes validation from the exact changed-path set.",
+        "Unknown/control-plane/.github changes fail closed to FULL_INTEGRATION; task-state-only changes are eligible for FAST_STATIC.",
+        "Concurrency cancellation, status-first diagnosis, and baseline-aware task-contract regression are implemented."
+      ]
     }
   ],
-  "blockers": [
-    "No external-practice research or risk-tier design has been completed yet; do not modify CI merely from intuition.",
-    "The current task does not yet prove which canonical-main validations may safely become asynchronous or scheduled.",
-    "Research-engine is read-only during the initial task stages; any representative CI mutation there requires explicit capsule authority expansion after design review."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Run the full workspace-control unit/task-contract regression suite against implementation checkpoint 28d1c892af9c015010e0700154cedd27aad21bac in a suitable runtime; do not merge before it passes.",
-    "After full validation, open/review the workspace-control PR and benchmark representative FAST_STATIC, TARGETED_PR, and FULL_INTEGRATION control cycles.",
-    "Record before/after mutation-call count, commit count, PR CI latency/restarts, selected validation tier, synchronous post-merge wait, and preserved provenance/checkpoint invariants.",
-    "Only if benchmark evidence justifies repository-specific CI changes, explicitly expand research-engine mutation authority in this capsule before touching research-engine."
+    "Use this task-state-only JSON/Markdown synchronization as the representative FAST_STATIC PR benchmark. Require the latest PR #50 run to select FAST_STATIC, pass changed-task validation/handoff sync, and skip unit/full-integration steps.",
+    "If the FAST_STATIC benchmark passes, reread current main plus PR #50 base/head/mergeability and merge with an expected head SHA. Prove whether the merged main tree equals the tested synthetic merge tree.",
+    "Collect field telemetry from the active research-engine task on mutation batching, PR timing/restarts, CI step cost, status-read frequency, tested-tree duplication, idle waits, and other workspace-control overhead. Treat this as observational evidence without replacing that task's next_safe_action.",
+    "Benchmark TARGETED_PR opportunistically on a real test-only change when one naturally occurs; do not manufacture code churn solely to obtain a timing sample.",
+    "Research-engine-specific validation tiers or CI workflow changes require a reviewed research-engine profile and explicit mutation authority; this capsule does not grant that authority."
   ],
-  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. Resume on branch throughput-ci-efficiency-v1 at implementation checkpoint 28d1c892af9c015010e0700154cedd27aad21bac. Read architecture/throughput-ci-efficiency-v1.md and procedures/validation_routing.md. Do not mutate research-engine. The next gate is FULL_INTEGRATION validation of the workspace-control implementation: run the complete workspace-control unit/task-contract regression suite in a suitable runtime, inspect any failures, and repair on the isolated branch in one bounded mutation batch. Only after that passes should the representative before/after benchmark and PR/merge decision proceed.",
+  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. PR #50 carries the FULL_INTEGRATION-validated implementation checkpoint 0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a. If PR #50 is not yet merged, inspect the latest synchronize run produced by this task-state-only coordination update: require selected tier FAST_STATIC, successful changed-task contract/handoff synchronization, and skipped unit/full-integration steps. Then reread current main and PR #50 base/head/mergeability and merge only with the exact expected head SHA. If PR #50 is already merged, treat merged main as canonical and collect efficiency telemetry from the active research-engine task without overriding its durable next_safe_action. Do not mutate research-engine from this capsule; any research-engine-specific profile or CI change requires explicit authority.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Baseline measurement, external-practice research, and risk-tier design are complete and durable. Initial workspace-control implementation is isolated on throughput-ci-efficiency-v1. The GitHub connector's advertised update_ref expected_sha lease is currently rejected by input validation; current remote-only mutation guidance therefore uses immediate pre-write head verification plus post-write ref verification. research-engine remains read-only. Fresh-chat invariant: always include https://github.com/adamtrott78/workspace-control explicitly."

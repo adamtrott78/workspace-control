@@ -24,7 +24,7 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 
 - Intent: mutate
 - Remote branch: throughput-ci-efficiency-v1
-- Remote checkpoint: 28d1c892af9c015010e0700154cedd27aad21bac
+- Remote checkpoint: 0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a
 - Remote verified: true
 
 ### research-engine
@@ -36,20 +36,19 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 
 ## Next safe action
 
-Start from https://github.com/adamtrott78/workspace-control and the normal root route. Resume on branch throughput-ci-efficiency-v1 at implementation checkpoint 28d1c892af9c015010e0700154cedd27aad21bac. Read architecture/throughput-ci-efficiency-v1.md and procedures/validation_routing.md. Do not mutate research-engine. The next gate is FULL_INTEGRATION validation of the workspace-control implementation: run the complete workspace-control unit/task-contract regression suite in a suitable runtime, inspect any failures, and repair on the isolated branch in one bounded mutation batch. Only after that passes should the representative before/after benchmark and PR/merge decision proceed.
+Start from https://github.com/adamtrott78/workspace-control and the normal root route. PR #50 carries the FULL_INTEGRATION-validated implementation checkpoint 0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a. If PR #50 is not yet merged, inspect the latest synchronize run produced by this task-state-only coordination update: require selected tier FAST_STATIC, successful changed-task contract/handoff synchronization, and skipped unit/full-integration steps. Then reread current main and PR #50 base/head/mergeability and merge only with the exact expected head SHA. If PR #50 is already merged, treat merged main as canonical and collect efficiency telemetry from the active research-engine task without overriding its durable next_safe_action. Do not mutate research-engine from this capsule; any research-engine-specific profile or CI change requires explicit authority.
 
 ## Remaining work
 
-- Run the full workspace-control unit/task-contract regression suite against implementation checkpoint 28d1c892af9c015010e0700154cedd27aad21bac in a suitable runtime; do not merge before it passes.
-- After full validation, open/review the workspace-control PR and benchmark representative FAST_STATIC, TARGETED_PR, and FULL_INTEGRATION control cycles.
-- Record before/after mutation-call count, commit count, PR CI latency/restarts, selected validation tier, synchronous post-merge wait, and preserved provenance/checkpoint invariants.
-- Only if benchmark evidence justifies repository-specific CI changes, explicitly expand research-engine mutation authority in this capsule before touching research-engine.
+- Use this task-state-only JSON/Markdown synchronization as the representative FAST_STATIC PR benchmark. Require the latest PR #50 run to select FAST_STATIC, pass changed-task validation/handoff sync, and skip unit/full-integration steps.
+- If the FAST_STATIC benchmark passes, reread current main plus PR #50 base/head/mergeability and merge with an expected head SHA. Prove whether the merged main tree equals the tested synthetic merge tree.
+- Collect field telemetry from the active research-engine task on mutation batching, PR timing/restarts, CI step cost, status-read frequency, tested-tree duplication, idle waits, and other workspace-control overhead. Treat this as observational evidence without replacing that task's next_safe_action.
+- Benchmark TARGETED_PR opportunistically on a real test-only change when one naturally occurs; do not manufacture code churn solely to obtain a timing sample.
+- Research-engine-specific validation tiers or CI workflow changes require a reviewed research-engine profile and explicit mutation authority; this capsule does not grant that authority.
 
 ## Blockers / gates
 
-- No external-practice research or risk-tier design has been completed yet; do not modify CI merely from intuition.
-- The current task does not yet prove which canonical-main validations may safely become asynchronous or scheduled.
-- Research-engine is read-only during the initial task stages; any representative CI mutation there requires explicit capsule authority expansion after design review.
+- None.
 
 ## Fresh-chat initialization
 
