@@ -213,7 +213,7 @@
           "check": "Focused validation-planner tests",
           "result": "PASS",
           "evidence": [
-            "Scratch execution of the exact planner/test design passed 10 focused unit tests covering fast, targeted, mixed, unknown-path fail-closed, force-full, normalization, dot-prefixed paths, traversal rejection, profile errors, and invalid force-full floor.",
+            "Scratch execution of behavior-equivalent planner/test logic passed 10 focused unit tests covering fast, targeted, mixed, unknown-path fail-closed, force-full, normalization, dot-prefixed paths, traversal rejection, profile errors, and invalid force-full floor.",
             "Validation profile was also checked against validation_profile.v1.schema.json in scratch and passed."
           ]
         },
@@ -391,6 +391,15 @@
       "evidence": [
         "Required by the new profile because control-plane scripts/schemas/policies changed.",
         "No current GitHub Actions workflow exists in workspace-control; run the full suite through a suitable execution surface before merging."
+      ]
+    },
+    {
+      "check": "Remote consistency after implementation checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "workspace-control branch throughput-ci-efficiency-v1 is four commits ahead of observed main base 1a46337a35296554917f61a80ff21535f8e87c19 with the intended 11-path diff.",
+        "Derived handoff contains the required derived marker, full workspace-control URL, and current next_safe_action.",
+        "research-engine main remains exactly 7a26e648ec409c96a3f9b7c8620f566658700894 and was not mutated."
       ]
     }
   ],
