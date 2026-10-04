@@ -30,7 +30,7 @@ Create a concise 5–10 minute MTH 602 class presentation and natural talking po
 
 - Intent: mutate
 - Remote branch: hw1-bonus-presentation
-- Remote checkpoint: 17252384314bfa2acfc4362787eb56e078c408a9
+- Remote checkpoint: e5548148dd9dcfa10c2f419f05d12b66031e877f
 - Remote verified: true
 
 ### workspace-control
@@ -42,20 +42,26 @@ Create a concise 5–10 minute MTH 602 class presentation and natural talking po
 
 ## Next safe action
 
-Create and review a 5–7 slide storyboard before building slides. Default narrative: (1) competition objective and why coefficient recovery differs from prediction, (2) degree-9 OLS looked accurate but was numerically unstable, (3) sparse search exposed simple odd-power structure and suggested sin(2t), (4) the analysis narrowed to the Taylor and sparse rational candidates, (5) show the strongest pre-submission evidence and why it favored sparse, (6) submitted sparse candidate / won competition, then reveal that the Taylor candidate was actually the hidden answer and close with the lesson about model-selection evidence versus structural prior knowledge.
+Present the current seven-slide draft and talking points to the user for review. The draft already implements the intended reveal structure: objective -> unstable OLS -> sparse/BIC structure -> two-candidate fork -> why sparse was chosen -> competition win/post-hoc clue -> final Taylor reveal. Do not lock or persist the binary PPTX as final until the user approves the narrative/content or requests revisions.
 
 ## Remaining work
 
-- Reduce the 866-line methodology record into a 5–7 slide narrative emphasizing the objective, OLS failure, sparse search, two-candidate fork, decision evidence, and final reveal.
-- Choose/generate only the visuals that materially help the class understand the reasoning, preferably using existing numerical evidence rather than decorative graphics.
-- Build the PowerPoint on the isolated branch and preserve editable source/build files.
-- Render and visually inspect every slide; revise for legibility, pacing, and reveal timing.
-- Write concise talking points and transitions for a natural 5–10 minute delivery.
-- Checkpoint final artifacts and leave actual classroom presentation/delivery to the user.
+- Have the user review the seven-slide first draft and narrative emphasis.
+- Apply any requested content/layout revisions and rerender the deck.
+- Persist editable build source, final PPTX, selected visual assets, and final rendered QA evidence to the isolated presentation branch after user approval.
+- Refresh final task checkpoint and validation evidence, then leave actual classroom presentation/delivery to the user.
+
+## Current draft state
+
+- Durable storyboard: `homework/hw01/presentation/STORYBOARD.md`
+- Durable talking points: `homework/hw01/presentation/TALKING_POINTS.md`
+- Local draft: 7-slide PowerPoint with embedded speaker notes.
+- Initial structural validation: PASS (`slides_test.py`, no overflow).
+- Initial rendered QA: PASS after correcting the Slide 7 card-title wrap.
 
 ## Blockers / gates
 
-- None.
+- None; user content review is the current gate before final artifact lock.
 
 ## Fresh-chat initialization
 
