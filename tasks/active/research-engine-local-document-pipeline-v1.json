@@ -68,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "a5117e4af6082e286942321ecea1b7c5b279b589",
+        "checkpoint_sha": "a3635f817c49dd40613724cca1353487173305d5",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "120aa27123111f27fb17a7e7cd7e1139d1a53a54",
+        "head_sha": "a5117e4af6082e286942321ecea1b7c5b279b589",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -1406,27 +1406,48 @@
         "Runtime sentinel validation now imports and version-checks torch, torchvision, and transformers. The incomplete prior venv therefore invalidates its ready sentinel and is rebuilt automatically on rerun.",
         "No benchmark regions, inference-call count, resource ceilings, quality thresholds, Codex/Qwen policy, daemon lifecycle, production routing, or scientific-state policy changed."
       ]
+    },
+    {
+      "check": "Second targeted PaddleOCR-VL Lambda initialization attempt",
+      "result": "BLOCKED_PROTOBUF_ZERO_INFERENCE",
+      "evidence": [
+        "The two validated semantic-visual crops rendered correctly: Figure 6 is the expected three-panel CIFAR error chart and Figure 3 is the expected VGG-19 / 34-layer plain / 34-layer residual architecture diagram.",
+        "Uploaded paddleocr-vl-benchmark-report.json records candidate_inference_calls=0, runtime_completed=false, gpu_telemetry_valid=false, model_init=false, and measurement_decision=REJECT_RESOURCE_OR_RUNTIME.",
+        "The sole hard failure was ImportError: protobuf library not found during local Transformers custom-model initialization.",
+        "peak_process_vram_mib=0.0 and scientific_state_materialized=false; therefore this attempt produced no VLM quality or resource evidence and must not be scored as model failure."
+      ]
+    },
+    {
+      "check": "PaddleOCR-VL protobuf runtime hotfix",
+      "result": "PASS_READY_FOR_LAMBDA_RERUN",
+      "evidence": [
+        "research-engine PR #74 merged as a3635f817c49dd40613724cca1353487173305d5.",
+        "PR-head CI run 37175354021 PASS; canonical-main CI run 37175428542 PASS.",
+        "Runtime now pins protobuf==5.29.5 in addition to torch==2.8.0, torchvision==0.23.0, transformers==4.55.0 and accelerate>=1.6,<2.",
+        "Runtime-ready sentinel validation now imports google.protobuf and requires protobuf version 5.29.5; the prior environment is therefore invalidated/rebuilt automatically.",
+        "No benchmark source/region, model revision, weight checksum, inference count, resource ceiling, quality threshold, trust policy, daemon lifecycle, Codex/Qwen boundary, production routing, or scientific-state behavior changed."
+      ]
     }
   ],
   "blockers": [
-    "Lambda/local research-engine is last verified clean at main@120aa27123111f27fb17a7e7cd7e1139d1a53a54 after the zero-inference VLM initialization failure, while canonical remote main is runtime hotfix a5117e4af6082e286942321ecea1b7c5b279b589; synchronize only with the research daemon stopped.",
-    "The first PaddleOCR-VL attempt produced zero candidate inference calls because torchvision was missing; it provides no quality or resource measurement of the VLM itself. Rerun is required on the hotfixed runtime.",
+    "Lambda/local research-engine is last verified clean at main@a5117e4af6082e286942321ecea1b7c5b279b589 after the second zero-inference VLM initialization failure, while canonical remote main is protobuf hotfix a3635f817c49dd40613724cca1353487173305d5; synchronize only with the research daemon stopped.",
+    "PaddleOCR-VL still has not executed any candidate inference calls. The first attempt lacked torchvision; the second lacked protobuf. Both are diagnostic runtime failures only and provide no VLM quality/resource measurement.",
     "PaddleOCR-VL cannot be promoted from local measurement alone; human annotated-fact review and a later contemporaneous authoritative-PDF Codex control remain mandatory.",
     "PP-OCRv6 remains resource-pass / quality-not-promoted; the blank scan target still requires replacement with a content-bearing image-only scan before scan-recovery promotion can be evaluated.",
     "Qwen3.5-4B remains prefetched but inference-closed unless PaddleOCR-VL fails/abstains for visual semantics or the separately bounded semantic gate opens.",
     "Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline; sustained research remains disabled."
   ],
   "remaining_work": [
-    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@120aa27123111f27fb17a7e7cd7e1139d1a53a54, fetch origin/main, require origin/main=a5117e4af6082e286942321ecea1b7c5b279b589, and fast-forward only to that canonical hotfix commit.",
-    "Rerun bash deploy/run-paddleocr-vl-residual-benchmark.sh. The runner must invalidate/rebuild the prior incomplete VLM runtime automatically because torchvision is absent from its ready contract.",
-    "Return the new visible OUTPUT_ROOT plus paddleocr-vl-benchmark-report.json and the two rendered crops figure6_cifar_training_chart-page-zb7.png and figure3_network_architecture-page-zb3.png, or the first hard error. Do not reuse the zero-inference failed report as quality evidence.",
+    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@a5117e4af6082e286942321ecea1b7c5b279b589, fetch origin/main, require origin/main=a3635f817c49dd40613724cca1353487173305d5, and fast-forward only to that canonical hotfix commit.",
+    "Rerun bash deploy/run-paddleocr-vl-residual-benchmark.sh. The runner must invalidate/rebuild the prior VLM runtime automatically because protobuf 5.29.5 is absent from the ready contract.",
+    "Return the new visible OUTPUT_ROOT plus paddleocr-vl-benchmark-report.json and the two rendered crops, or the first hard error. Do not reuse either zero-inference failed report as quality evidence.",
     "Require measurement_decision=MEASURED_PENDING_HUMAN_AND_CODEX_CONTROL, exactly three candidate VLM calls, valid GPU telemetry, and all VLM resource ceilings passing before visual quality review.",
     "Human-review VLM outputs against the durable annotated facts for Figure 6 and Figure 3; compute/record fact precision, recall, numeric accuracy, relation accuracy, provenance coverage, and fabricated facts.",
     "Only if PaddleOCR-VL meets local visual quality thresholds, run a separate contemporaneous STANDARD Codex authoritative-PDF/figure control on the same evidence needs before promotion.",
     "If PaddleOCR-VL fails/abstains, open Qwen3.5-4B visual fallback only for the failed visual residual; do not run Qwen by default.",
     "Separately replace the invalid blank image-only scan benchmark with a content-bearing image-only/textless page before reopening PP-OCRv6 scan-recovery quality."
   ],
-  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@a5117e4af6082e286942321ecea1b7c5b279b589 as the canonical PaddleOCR-VL runtime-hotfix baseline and Lambda/local main@120aa27123111f27fb17a7e7cd7e1139d1a53a54 as the last verified clean local state after a zero-inference initialization failure. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly a5117e4af6082e286942321ecea1b7c5b279b589, then fast-forward only to that commit. Rerun bash deploy/run-paddleocr-vl-residual-benchmark.sh. The runner must rebuild the stale isolated runtime with torch 2.8.0 + torchvision 0.23.0 and non-interactive trust_remote_code scoped to the pinned local model. Return the new visible OUTPUT_ROOT plus paddleocr-vl-benchmark-report.json and the two rendered crops, or the first hard error. Do not start the daemon, invoke Qwen3.5-4B or Codex, change production routing, or materialize scientific state.",
+  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@a3635f817c49dd40613724cca1353487173305d5 as the canonical PaddleOCR-VL protobuf-hotfix baseline and Lambda/local main@a5117e4af6082e286942321ecea1b7c5b279b589 as the last verified clean local state after a second zero-inference initialization failure. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly a3635f817c49dd40613724cca1353487173305d5, then fast-forward only to that commit. Rerun bash deploy/run-paddleocr-vl-residual-benchmark.sh. The runner must rebuild the stale isolated runtime with torch 2.8.0 + torchvision 0.23.0 + transformers 4.55.0 + protobuf 5.29.5 and non-interactive trust_remote_code scoped to the pinned local model. Return the new visible OUTPUT_ROOT plus paddleocr-vl-benchmark-report.json and the two rendered crops, or the first hard error. Do not start the daemon, invoke Qwen3.5-4B or Codex, change production routing, or materialize scientific state.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
