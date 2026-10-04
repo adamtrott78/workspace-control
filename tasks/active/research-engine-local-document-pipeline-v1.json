@@ -68,13 +68,13 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "9019be081db373395adeffa28fe515c33e582fb3",
+        "checkpoint_sha": "120aa27123111f27fb17a7e7cd7e1139d1a53a54",
         "verified": true
       },
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c",
+        "head_sha": "9019be081db373395adeffa28fe515c33e582fb3",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -1358,25 +1358,52 @@
         "Disk free decreased from 181,727,625,216 to 170,314,207,232 bytes during bounded prefetch.",
         "Uploaded report SHA-256 a2f68c2b50a4fe416f825e369f9d85887ae295611540f5c06200c509807e3ca3."
       ]
+    },
+    {
+      "check": "Bounded PP-OCRv6 residual benchmark execution and human quality review",
+      "result": "RESOURCE_PASS_QUALITY_NOT_PROMOTED",
+      "evidence": [
+        "Lambda report measurement_decision=MEASURED_PENDING_HUMAN_QUALITY; exactly 3 candidate inference calls; failure=null; all runtime/resource checks true.",
+        "Measured model init=0.7756724039791152 s, peak process VRAM=1818 MiB, peak RSS=1443.69140625 MiB, worst warm page=0.3322868350078352 s; all substantially below the durable ceilings.",
+        "Zero-based page 3 rendered visually almost blank with scan speckle and no meaningful visible text. PP-OCRv6 emitted zero lines on both first and warm-repeat calls; this is a correct abstention but the target is INVALID_FOR_OCR_RECOVERY_QUALITY and must be replaced with a content-bearing image-only scan.",
+        "Zero-based page 16 produced 51 OCR lines with mean recognition score 0.9763420913733688, but human review found visible quality errors including HEIGHT (KM) truncated to HEI (KM), missed/detached right-margin orbit-week digits, fused token 222, an anomalous -8- token, and imperfect braced date/row structure.",
+        "The low-confidence chart materially improves the unusable native/standard text layer, but the hard >=0.95 token-F1 / >=0.90 ordered-bigram promotion thresholds are not established; fail closed and do not promote PP-OCRv6 from this result.",
+        "Compact review is durable at benchmarks/document_intelligence/ppocrv6-human-quality-review.v1.json on research-engine main after PR #72."
+      ]
+    },
+    {
+      "check": "Targeted PaddleOCR-VL 1.6 visual residual benchmark implementation",
+      "result": "PASS_READY_FOR_LAMBDA",
+      "evidence": [
+        "research-engine PR #72 merged as 120aa27123111f27fb17a7e7cd7e1139d1a53a54.",
+        "PR-head CI run 37174205004 PASS; canonical-main CI run 37174284154 PASS.",
+        "Benchmark is restricted to the two previously validated ResNet figure bboxes: Figure 6 page index 7 and Figure 3 page index 3.",
+        "Runner uses the prefetched PaddleOCR-VL-1.6 revision c5630abae1d940eafe0697512a0325494b02ab42 and model.safetensors SHA-256 85a479d506a11e724e7285d395c551be69f41dbc16b6342d3cacfb189aed71db.",
+        "Runtime uses PaddleOCRVL with Transformers engine and explicitly disables layout detection, document orientation classification, document unwarping, and queues; PP-DocLayoutV3 is not opened.",
+        "Exactly three targeted local VLM calls are allowed. Resource success remains MEASURED_PENDING_HUMAN_AND_CODEX_CONTROL and cannot promote the VLM without annotated-fact human review plus a later contemporaneous authoritative-PDF Codex control.",
+        "No Qwen3.5-4B, Codex, daemon start, production routing, or scientific-state mutation is allowed in this initial local VLM gate."
+      ]
     }
   ],
   "blockers": [
-    "Lambda/local research-engine is last verified clean at main@320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c after the successful model-prefetch gate, while canonical remote main is PP-OCRv6 benchmark gate 9019be081db373395adeffa28fe515c33e582fb3; synchronize only with the research daemon stopped.",
-    "PP-OCRv6 runtime compatibility, actual inference latency/VRAM/RSS, and OCR quality on the two promoted scan/text targets are not yet measured on Lambda.",
-    "PP-OCRv6 cannot be promoted from resource measurements alone; the two rendered authoritative page images and OCR output require human quality review.",
-    "PaddleOCR-VL-1.6 and Qwen3.5-4B remain prefetched but inference-closed until their later residual-specific gates.",
+    "Lambda/local research-engine is last verified clean at main@9019be081db373395adeffa28fe515c33e582fb3 after the bounded PP-OCRv6 run, while canonical remote main is targeted PaddleOCR-VL gate 120aa27123111f27fb17a7e7cd7e1139d1a53a54; synchronize only with the research daemon stopped.",
+    "PP-OCRv6 resource/latency measurements passed but quality is not promoted. The low-confidence chart fails closed against the hard quality bar; the current image-only scan target is visually blank and must be replaced with a content-bearing scan before scan-OCR promotion can be evaluated.",
+    "PaddleOCR-VL-1.6 targeted visual inference has not yet executed on Lambda, so actual runtime compatibility, latency, VRAM/RSS, and visual fact/relation quality remain unmeasured.",
+    "PaddleOCR-VL cannot be promoted from local measurement alone; human annotated-fact review and a later contemporaneous authoritative-PDF Codex control are mandatory.",
+    "Qwen3.5-4B remains prefetched but inference-closed unless PaddleOCR-VL fails/abstains for visual semantics or the separately bounded semantic gate opens.",
     "Codex STANDARD EXTRACT/VERIFY remains the semantic production baseline; sustained research remains disabled."
   ],
   "remaining_work": [
-    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c, fetch origin/main, require origin/main=9019be081db373395adeffa28fe515c33e582fb3, and fast-forward only to that canonical commit.",
-    "Run bash deploy/run-ppocrv6-residual-benchmark.sh. Preserve the visible OUTPUT_ROOT. Return ppocrv6-benchmark-report.json plus scan_textless-page-zb3.png and low_confidence_text-page-zb16.png, or the first hard error.",
-    "Require measurement_decision=MEASURED_PENDING_HUMAN_QUALITY, exactly three candidate inference calls, valid GPU telemetry, and all PP-OCRv6 resource ceilings passing before quality review.",
-    "Human-review both rendered pages against recognized text/scores/boxes; document coverage, hallucinations/false positives, missed text, and whether PP-OCRv6 is acceptable for each residual family separately.",
-    "Only after PP-OCRv6 scan/text quality is adjudicated should a production promotion decision or PaddleOCR-VL-1.6 benchmark gate be opened.",
-    "PaddleOCR-VL-1.6 should next be benchmarked only on the two validated semantic visual regions and exhausted structural residuals; Qwen3.5-4B visual use remains conditional on PaddleOCR-VL failure/abstention.",
+    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@9019be081db373395adeffa28fe515c33e582fb3, fetch origin/main, require origin/main=120aa27123111f27fb17a7e7cd7e1139d1a53a54, and fast-forward only to that canonical commit.",
+    "Run bash deploy/run-paddleocr-vl-residual-benchmark.sh. Preserve the visible OUTPUT_ROOT and return paddleocr-vl-benchmark-report.json plus figure6_cifar_training_chart-page-zb7.png and figure3_network_architecture-page-zb3.png, or the first hard error. The compact report already includes text projections; raw JSON is supplemental only if needed.",
+    "Require measurement_decision=MEASURED_PENDING_HUMAN_AND_CODEX_CONTROL, exactly three candidate VLM calls, valid GPU telemetry, and all VLM resource ceilings passing before visual quality review.",
+    "Human-review the VLM outputs against the durable annotated facts for Figure 6 and Figure 3; compute/record fact precision, recall, numeric accuracy, relation accuracy, provenance coverage, and any fabricated facts.",
+    "Only if PaddleOCR-VL meets the local visual quality thresholds, run a separate contemporaneous STANDARD Codex authoritative-PDF/figure control on the same evidence needs before any promotion decision.",
+    "If PaddleOCR-VL fails/abstains, open Qwen3.5-4B visual fallback only for the failed visual residual; do not run Qwen by default.",
+    "Separately replace the invalid blank image-only scan benchmark with a content-bearing image-only/textless page before reopening PP-OCRv6 scan-recovery quality.",
     "Open Qwen3.5-4B semantic EXTRACT/VERIFY benchmarking only on bounded authoritative-PDF inputs with contemporaneous STANDARD Codex controls."
   ],
-  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@9019be081db373395adeffa28fe515c33e582fb3 as the canonical bounded PP-OCRv6 benchmark baseline and Lambda/local main@320bfd037ce51dee63dc1ec4bb0e7d5d984d2c5c as the last verified local state after model prefetch PASS. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly 9019be081db373395adeffa28fe515c33e582fb3, then fast-forward only to that commit. Run bash deploy/run-ppocrv6-residual-benchmark.sh. Return the visible OUTPUT_ROOT plus ppocrv6-benchmark-report.json and the two rendered review PNGs scan_textless-page-zb3.png and low_confidence_text-page-zb16.png, or the first hard error. Do not start the daemon, run PaddleOCR-VL/Qwen/Codex, change production routing, or materialize scientific state. A successful resource measurement remains PENDING_HUMAN_QUALITY and does not promote PP-OCRv6 automatically.",
+  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@120aa27123111f27fb17a7e7cd7e1139d1a53a54 as the canonical targeted PaddleOCR-VL benchmark baseline and Lambda/local main@9019be081db373395adeffa28fe515c33e582fb3 as the last verified clean local state after PP-OCRv6 measurement. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly 120aa27123111f27fb17a7e7cd7e1139d1a53a54, then fast-forward only to that commit. Run bash deploy/run-paddleocr-vl-residual-benchmark.sh. Return the visible OUTPUT_ROOT plus paddleocr-vl-benchmark-report.json and the two rendered crops figure6_cifar_training_chart-page-zb7.png and figure3_network_architecture-page-zb3.png, or the first hard error. Do not start the daemon, invoke Qwen3.5-4B or Codex, change production routing, or materialize scientific state. A successful local VLM resource measurement remains pending human annotated-fact review and a separate contemporaneous Codex control before promotion.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
