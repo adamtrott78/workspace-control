@@ -23,8 +23,8 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: throughput-ci-efficiency-v1
-- Remote checkpoint: 0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a
+- Remote branch: main
+- Remote checkpoint: 016a8827e7ed5e7d59ff86240f6f974d330f819c
 - Remote verified: true
 
 ### research-engine
@@ -36,15 +36,16 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 
 ## Next safe action
 
-Start from https://github.com/adamtrott78/workspace-control and the normal root route. PR #50 carries the FULL_INTEGRATION-validated implementation checkpoint 0c50ab9123d7b1cfa16d10925c09f74e0ba7d91a. If PR #50 is not yet merged, inspect the latest synchronize run produced by this task-state-only coordination update: require selected tier FAST_STATIC, successful changed-task contract/handoff synchronization, and skipped unit/full-integration steps. Then reread current main and PR #50 base/head/mergeability and merge only with the exact expected head SHA. If PR #50 is already merged, treat merged main as canonical and collect efficiency telemetry from the active research-engine task without overriding its durable next_safe_action. Do not mutate research-engine from this capsule; any research-engine-specific profile or CI change requires explicit authority.
+Start from https://github.com/adamtrott78/workspace-control and the normal root route. The risk-routed validation implementation is canonical on main@016a8827e7ed5e7d59ff86240f6f974d330f819c and its merged tree exactly equals the FULL_INTEGRATION-tested PR tree. The follow-up branch throughput-fast-static-benchmark-v1 is intentionally task-state-only. If that follow-up is not yet merged, require its PR run to select FAST_STATIC, pass changed-task capsule/handoff synchronization, and skip unit/full-integration work; then merge only with the exact expected head SHA and verify merged-tree identity. If it is already merged, use that run as the validated FAST_STATIC benchmark and continue collecting efficiency telemetry from the active research-engine task without overriding that task's durable next_safe_action. Do not mutate research-engine from this capsule; repository-specific CI/profile changes require explicit authority.
 
 ## Remaining work
 
-- Use this task-state-only JSON/Markdown synchronization as the representative FAST_STATIC PR benchmark. Require the latest PR #50 run to select FAST_STATIC, pass changed-task validation/handoff sync, and skip unit/full-integration steps.
-- If the FAST_STATIC benchmark passes, reread current main plus PR #50 base/head/mergeability and merge with an expected head SHA. Prove whether the merged main tree equals the tested synthetic merge tree.
-- Collect field telemetry from the active research-engine task on mutation batching, PR timing/restarts, CI step cost, status-read frequency, tested-tree duplication, idle waits, and other workspace-control overhead. Treat this as observational evidence without replacing that task's next_safe_action.
-- Benchmark TARGETED_PR opportunistically on a real test-only change when one naturally occurs; do not manufacture code churn solely to obtain a timing sample.
-- Research-engine-specific validation tiers or CI workflow changes require a reviewed research-engine profile and explicit mutation authority; this capsule does not grant that authority.
+- Use the follow-up branch throughput-fast-static-benchmark-v1, whose complete diff from merged main is limited to this task JSON and its derived Markdown handoff, as the representative FAST_STATIC benchmark.
+- Require its PR validation run to select FAST_STATIC, pass changed-task validation/handoff synchronization, and skip unit-regression plus full-integration steps. Record wall-clock evidence.
+- After the FAST_STATIC benchmark passes, merge the task-state-only follow-up with an exact expected head SHA and prove merged-tree identity.
+- Collect field telemetry from the active research-engine task on logical changes versus commits, mutation-call batching, PR timing/restarts, CI step cost, status-read/poll frequency, tested-tree duplication, idle waits, context/routing rereads, provenance repetition, runtime setup, and artifact-transfer overhead.
+- Benchmark TARGETED_PR opportunistically on a real test-only change when one naturally occurs; do not manufacture code churn solely for a timing sample.
+- Research-engine-specific validation tiers or CI workflow changes require a reviewed research-engine profile and explicit mutation authority; shared orchestration improvements do not grant that authority.
 
 ## Blockers / gates
 
