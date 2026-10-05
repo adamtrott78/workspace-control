@@ -44,22 +44,23 @@ research-engine-local-document-pipeline-v1
 
 ## Current stage
 
-problem_reframe_and_external_solution_survey
+architecture_selection_and_benchmark_contract
 
 ## Next safe action
 
-Conduct a current external research survey of mostly-local scientific/document EXTRACT architectures and implementations, explicitly comparing architectural decomposition rather than simply trying another general local chat model. Reuse the accepted document/provenance pipeline as substrate, exclude previously failed approaches as-is, and checkpoint a shortlist plus benchmark/fallback hypotheses before any new heavyweight model download or Lambda bakeoff.
+Define the Local Evidence Agent v1 benchmark/architecture contract before downloading new heavyweight models. The contract should test a hierarchical mostly-local path: accepted sidecar/document structure -> lexical/vector retrieval and BGE-style reranking -> exact candidate spans/records (GLiNER2.5 and deterministic rules where useful) -> local atomic-claim normalization -> exact quote/page anchoring -> local scientific entailment/verification -> confidence gate; only unresolved units proceed to a stronger local agent candidate, and only its residuals fall through to STANDARD Codex. Compare role-specific candidates rather than whole-pipeline one-shot models, include Lift/NuExtract3 as bounded structured-extractor candidates and Qwen3.6-35B-A3B only as a hard-case feasibility candidate, and specify how Codex fallback outputs are retained as teacher data so fallback frequency can decrease over time.
 
 ## Remaining work
 
-- Survey current research and open-source systems for local scientific structured extraction, evidence-first claim extraction, schema-guided IE, retrieval/reranking, extractive QA, NLI/verification, and confidence-gated remote fallback.
-- Build a reuse/exclusion matrix from the parent evidence so already-failed approaches are not reintroduced under new names.
-- Select a small set of materially distinct architectures that can run on the current Lambda hardware.
-- Define a benchmark/fallback contract before downloading or integrating new heavyweight models.
+- Specify Local Evidence Agent v1 stage interfaces, provenance invariants, and confidence/fallback policy.
+- Define a role-specific benchmark matrix using preserved EXTRACT jobs: candidate-region recall, atomic-claim precision/recall, normalized-form agreement, exact quote/page grounding, type agreement, unsupported-claim rate, latency/VRAM/RAM, and projected Codex fallback fraction.
+- Choose the minimum candidate set for a first bounded prototype; prioritize reuse of the existing Qwen3.5-4B runtime in a narrower normalization/decision role where materially different from the failed one-shot EXTRACT architecture, plus lightweight retrieval/reranking/span models before any heavyweight download.
+- Define teacher-data capture so every future Codex fallback can become supervised training/evaluation data for local candidate generation/normalization.
+- Only after the contract is checkpointed, authorize at most the smallest necessary new model downloads/runtime bakeoffs.
 
 ## Blockers / gates
 
-- None recorded at task creation.
+- None recorded.
 
 ## Fresh-chat initialization
 
