@@ -222,6 +222,28 @@
             "PR #74 merged to main as fd3589a997219b4bd7d1895cb2eb20d1e8b5edcf.",
             "P2-A bootstrap is fail-closed: transient process/filesystem, network, and device probes precede user creation; no GitHub runner registration occurs in P2-A."
           ]
+        },
+        {
+          "check": "P2-A Lambda execution",
+          "result": "PASS",
+          "evidence": [
+            "Uploaded P2-A receipt decision=PASS at 2026-10-05T22:29:43Z.",
+            "transient process/filesystem sandbox PASS; transient network sandbox PASS; DevicePolicy default denial PASS; narrow GPU0 diagnostic PASS.",
+            "ci-controller and ci-research-engine identity isolation PASS.",
+            "Actions runner v2.337.0 installed from archive SHA-256 70920811a4f8ad4328818682bca5c6469c1c942fab52448868071d0063816613.",
+            "firewall_rules_modified=false, production_services_modified=false, runner_registered=false."
+          ]
+        },
+        {
+          "check": "P2-B armed",
+          "result": "PASS_PENDING_LAMBDA_RUNNER",
+          "evidence": [
+            "Trusted research-engine default-branch workflow merged via PR #96 as c2455062cbc6ba1315bf3ede0b0ba28ddf63522f; workflow blob=244cae824f1803a0baf599cf66441cde45382a85.",
+            "actions/upload-artifact pinned to ea165f8d65b6e75b540449e92b4886f43607fa02 (v4.6.2).",
+            "Workspace-control JIT launcher merged via PR #75 as fb86b027c096af9f92f949050564799ce87f2052 after full validation.",
+            "Trigger comment /lambda-ci-noop ab36b358a0c7ac33d2887fa681f418033554eae0 posted by repository owner on research-engine PR #95.",
+            "GitHub Actions run 37383893507 (Lambda CI P2-B No-Op) is queued on trusted main c2455062cbc6ba1315bf3ede0b0ba28ddf63522f waiting for matching self-hosted runner."
+          ]
         }
       ],
       "resume_condition": "Runner can accept a no-op project job while denied unrelated project/home/production access."
@@ -298,14 +320,14 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "fd3589a997219b4bd7d1895cb2eb20d1e8b5edcf",
+      "identity": "fb86b027c096af9f92f949050564799ce87f2052",
       "required_for_resume": true,
       "evidence": [
-        "P0 host discovery complete",
-        "P1 foundation complete",
-        "P2 authorized by user",
-        "P2-A reviewed bootstrap merged on workspace-control main at fd3589a997219b4bd7d1895cb2eb20d1e8b5edcf",
-        "next action is one authorized sudo execution of the exact P2-A bootstrap; no runner registration yet"
+        "P2-A real Lambda bootstrap PASS",
+        "research-engine trusted P2-B workflow merged c2455062cbc6ba1315bf3ede0b0ba28ddf63522f",
+        "workspace-control P2-B JIT launcher merged and validated",
+        "research-engine run 37383893507 queued waiting matching Lambda runner",
+        "next safe action=one local token prompt + one P2-B launcher execution; token never leaves Lambda TTY"
       ]
     }
   ],
@@ -327,18 +349,19 @@
     }
   ],
   "blockers": [
-    "P2-A must PASS on the real Lambda before P2-B JIT runner registration.",
-    "P2-B still requires a short-lived repository-admin credential path solely to mint the encoded JIT config; the credential must not be exposed to job code or persisted."
+    "P2-B requires one local fine-grained GitHub token scoped only to adamtrott78/research-engine with repository Administration:write so the launcher can call the JIT-config endpoint. The token must be pasted only into the Lambda TTY prompt, never into ChatGPT/Git or a shell command.",
+    "P2 completion requires queued run 37383893507 to execute on the JIT runner, return a PASS artifact, and the launcher to prove workspace/project-process cleanup."
   ],
   "remaining_work": [
-    "Execute P2-A bootstrap on Lambda at the exact workspace-control main SHA and inspect its visible JSON receipt.",
-    "If P2-A passes, implement/trigger P2-B: one repository-scoped JIT no-op runner under ci-research-engine with trusted default-branch workflow and artifact receipt.",
-    "P3: CPU candidate validation with ephemeral environment/database and GitHub artifact return.",
+    "Create a short-lived fine-grained GitHub PAT scoped only to research-engine with repository Administration: Read and write; paste it only into the local launcher prompt.",
+    "Execute the reviewed workspace-control P2-B launcher once; it will generate one JIT runner, service queued run 37383893507, then destroy its workspace/config.",
+    "Inspect GitHub run 37383893507 and download/validate lambda-ci-p2b-receipt; compare with local launcher receipt and diagnostics.",
+    "If P2-B passes, close P2 and start P3 CPU candidate validation with candidate checkout, ephemeral environment/database, and artifact return.",
     "P4: bounded GPU validation with explicit device grant and post-job GPU/process cleanup.",
     "P5: closed-loop ChatGPT fail-diagnose-fix-rerun-PASS acceptance without SSH.",
     "P6: second-project cross-project isolation pilot under separate UID/root/cache."
   ],
-  "next_safe_action": "Execute P2-A on Lambda from workspace-control main exactly at `fd3589a997219b4bd7d1895cb2eb20d1e8b5edcf`: run `scripts/bootstrap_lambda_ci_research_engine.sh` as root with `WORKSPACE_CI_P2_AUTHORIZED=YES` and `WORKSPACE_CI_P2_EXPECTED_SHA=fd3589a997219b4bd7d1895cb2eb20d1e8b5edcf`. The script must stop before persistent mutation if any transient isolation probe fails. On PASS, return the visible `lambda-ci-p2-bootstrap.json` receipt; P2-B runner registration remains separate.",
+  "next_safe_action": "On Lambda, execute `scripts/launch_lambda_ci_p2b_noop.py` from workspace-control main exactly at `fb86b027c096af9f92f949050564799ce87f2052` with `WORKSPACE_CI_P2B_AUTHORIZED=YES` under sudo. When prompted, paste a short-lived fine-grained GitHub PAT scoped only to `adamtrott78/research-engine` with repository Administration:write. Do not put the token in the command, chat, Git, or a file. The trusted GitHub run is already queued as run 37383893507; after launcher exit, return only the non-secret local `lambda-ci-p2b-launcher.json` receipt.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
   "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation."
