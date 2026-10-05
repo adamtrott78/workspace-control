@@ -664,10 +664,19 @@ A progress update should summarize:
 
 The update is a concise reasoning/progress summary, not private chain-of-thought.
 
-Default cadence for operator-visible work is approximately every 15 seconds or
-2-3 tool operations, whichever comes first, and immediately when the objective,
-diagnosis, scope classification, milestone, external-wait state, recovery point,
-or closure decision materially changes.
+During substantial work, each operator-visible heartbeat grants a hard lease for
+at most three subsequent tool operations. After three tool operations, the next
+tool operation MUST NOT occur until another human-readable heartbeat is emitted.
+
+The lease expires immediately on a material objective, diagnosis, scope
+classification, milestone, external-wait, recovery-point, or closure change, so
+the heartbeat must be emitted before the next tool operation even if fewer than
+three calls have occurred.
+
+Approximately 15 seconds without an update also requires a heartbeat at the next
+available operator-visible boundary. If the current executor surface cannot emit
+the required heartbeat, stop launching additional tools rather than continuing
+through an opaque tool wall.
 
 Do not narrate every connector call. Repeated checks of the same unchanged CI,
 runtime, or remote dependency are not distinct progress. Compress them into a

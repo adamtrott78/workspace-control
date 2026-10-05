@@ -49,6 +49,32 @@ A useful heartbeat answers six questions:
 The update should be concise. It may be prose rather than a rigid card so long as
 these semantics remain clear.
 
+## Hard heartbeat lease
+
+During substantial work, an operator-visible heartbeat grants a lease for at
+most **three subsequent tool operations**.
+
+The fourth tool operation is forbidden until another human-readable heartbeat
+has been emitted to the operator.
+
+This is a control gate, not a suggestion. A tool call includes connector reads,
+writes, CI/status reads, log retrieval, file operations, runtime calls, or other
+executor-visible operations. Multiple calls batched inside one orchestration
+turn still consume the lease according to the actual operations performed.
+
+A meaningful state-change event (objective/diagnosis/scope/milestone/external
+wait/recovery/closure change) expires the current lease immediately: emit the
+heartbeat before the next tool operation even when fewer than three calls have
+occurred.
+
+If the executor surface cannot emit a heartbeat when the lease expires, it MUST
+stop launching additional tools rather than silently continue through an opaque
+tool wall.
+
+Heartbeat removal/collapse by a client UI is outside repository control. The
+executor requirement is to emit the update; persisted transcripts should show
+the heartbeat boundary when the surface preserves commentary.
+
 ## Cadence
 
 Emit a human-readable heartbeat during substantial work when any of the
@@ -63,10 +89,12 @@ following occurs:
 - the Scope Closure Gate is evaluated;
 - approximately 15 seconds of operator-visible work pass without a meaningful
   update;
-- roughly 2-3 tool operations occur without a meaningful update.
+- three tool operations have occurred since the last heartbeat; at that point
+  the tool lease is exhausted and another tool call MUST NOT occur first.
 
-These cadence values are operator-feedback defaults, not scientific timing
-requirements. Do not fabricate timestamps when the executor cannot observe them.
+The 15-second value is an operator-feedback default, not a scientific timing
+requirement. The three-tool lease is a hard upper bound, not an approximate
+cadence. Do not fabricate timestamps when the executor cannot observe them.
 
 ## Polling is not progress
 

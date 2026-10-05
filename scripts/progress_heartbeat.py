@@ -15,6 +15,8 @@ STATES = {
     "RECOVERING",
     "CLOSING",
 }
+MAX_TOOL_CALLS_PER_HEARTBEAT_LEASE = 3
+
 TRIGGER_EVENTS = {
     "OBJECTIVE_CHANGED",
     "DIAGNOSIS_CHANGED",
@@ -157,6 +159,32 @@ def should_emit(*, event, tool_calls_since_update, elapsed_seconds,
     return False
 
 
+def tool_gate(*, event, tool_calls_since_heartbeat, elapsed_seconds,
+              meaningful_change):
+    """Return whether another tool operation is allowed before a heartbeat.
+
+    A heartbeat resets tool_calls_since_heartbeat to zero. Once three tool
+    operations have occurred, the lease is exhausted and the next tool call is
+    blocked until a human-readable heartbeat is emitted.
+    """
+    if event is not None and event not in TRIGGER_EVENTS | {"POLL_UNCHANGED"}:
+        raise ProgressHeartbeatError("event: unknown heartbeat event")
+    calls = _nonnegative_int(
+        tool_calls_since_heartbeat,
+        "tool_calls_since_heartbeat",
+    )
+    elapsed = _nonnegative_int(elapsed_seconds, "elapsed_seconds")
+    changed = _bool(meaningful_change, "meaningful_change")
+
+    if changed or event in TRIGGER_EVENTS:
+        return "HEARTBEAT_REQUIRED"
+    if calls >= MAX_TOOL_CALLS_PER_HEARTBEAT_LEASE:
+        return "HEARTBEAT_REQUIRED"
+    if elapsed >= 15:
+        return "HEARTBEAT_REQUIRED"
+    return "ALLOW_TOOL"
+
+
 def render_snapshot(snapshot):
     validate_snapshot(snapshot)
 
@@ -241,6 +269,12 @@ def parse_args(argv=None):
     due.add_argument("--elapsed-seconds", type=int, default=0)
     due.add_argument("--meaningful-change", action="store_true")
 
+    gate = sub.add_parser("gate")
+    gate.add_argument("--event")
+    gate.add_argument("--tool-calls", type=int, default=0)
+    gate.add_argument("--elapsed-seconds", type=int, default=0)
+    gate.add_argument("--meaningful-change", action="store_true")
+
     return parser.parse_args(argv)
 
 
@@ -262,6 +296,15 @@ def main(argv=None):
                     meaningful_change=args.meaningful_change,
                 )
                 else "SUPPRESS"
+            )
+        elif args.command == "gate":
+            print(
+                tool_gate(
+                    event=args.event,
+                    tool_calls_since_heartbeat=args.tool_calls,
+                    elapsed_seconds=args.elapsed_seconds,
+                    meaningful_change=args.meaningful_change,
+                )
             )
         else:
             raise ProgressHeartbeatError("unknown command")
