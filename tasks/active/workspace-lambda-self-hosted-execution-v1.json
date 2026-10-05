@@ -327,7 +327,7 @@
         "research-engine trusted P2-B workflow merged c2455062cbc6ba1315bf3ede0b0ba28ddf63522f",
         "workspace-control P2-B JIT launcher merged and validated",
         "research-engine run 37383893507 queued waiting matching Lambda runner",
-        "next safe action=one local token prompt + one P2-B launcher execution; token never leaves Lambda TTY"
+        "next safe action=detached worktree at fb86b027c096af9f92f949050564799ce87f2052, local token prompt, one P2-B launcher execution; token never leaves Lambda TTY"
       ]
     }
   ],
@@ -361,7 +361,7 @@
     "P5: closed-loop ChatGPT fail-diagnose-fix-rerun-PASS acceptance without SSH.",
     "P6: second-project cross-project isolation pilot under separate UID/root/cache."
   ],
-  "next_safe_action": "On Lambda, execute `scripts/launch_lambda_ci_p2b_noop.py` from workspace-control main exactly at `fb86b027c096af9f92f949050564799ce87f2052` with `WORKSPACE_CI_P2B_AUTHORIZED=YES` under sudo. When prompted, paste a short-lived fine-grained GitHub PAT scoped only to `adamtrott78/research-engine` with repository Administration:write. Do not put the token in the command, chat, Git, or a file. The trusted GitHub run is already queued as run 37383893507; after launcher exit, return only the non-secret local `lambda-ci-p2b-launcher.json` receipt.",
+  "next_safe_action": "On Lambda, create a clean detached workspace-control worktree exactly at `fb86b027c096af9f92f949050564799ce87f2052`, then execute `scripts/launch_lambda_ci_p2b_noop.py` from that detached tree with `WORKSPACE_CI_P2B_AUTHORIZED=YES` under sudo. When prompted, paste a short-lived fine-grained GitHub PAT scoped only to `adamtrott78/research-engine` with repository Administration:write. Do not put the token in the command, chat, Git, or a file. The trusted GitHub run is already queued as run 37383893507; after launcher exit, return only the non-secret local `lambda-ci-p2b-launcher.json` receipt.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
   "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation."
