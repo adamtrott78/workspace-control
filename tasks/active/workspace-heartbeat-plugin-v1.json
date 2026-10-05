@@ -2,12 +2,12 @@
   "schema_version": 2,
   "task_id": "workspace-heartbeat-plugin-v1",
   "title": "Workspace Heartbeat MCP Plugin v1",
-  "status": "IN_PROGRESS",
+  "status": "VALIDATING",
   "goal": "Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel UI so long-running workspace-control tasks can publish natural-language progress through a real tool call into one continuously updating side panel.",
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control",
-  "current_stage": "mvp_implementation",
+  "current_stage": "repository_validation",
   "acceptance_criteria": [
     "Expose a model-callable heartbeat_update tool whose user-facing progress content is natural prose rather than rigid structured headings.",
     "Expose a read-only heartbeat_get tool that returns the latest heartbeat for the current ChatGPT conversation and optional task ID.",
@@ -37,7 +37,7 @@
       "base_sha": "b6fcc8562c919d506b491aac6d0f046b8b8c7186",
       "remote": {
         "branch": "workspace-heartbeat-plugin-v1",
-        "checkpoint_sha": "b6fcc8562c919d506b491aac6d0f046b8b8c7186",
+        "checkpoint_sha": "abdd2315af71748c9c369e4cb076981a9d214f54",
         "verified": true
       },
       "local": null,
@@ -74,7 +74,7 @@
     },
     {
       "id": "mvp_implementation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -87,14 +87,30 @@
         "plugins/workspace-heartbeat/public/heartbeat-panel.html",
         "plugins/workspace-heartbeat/test/store.test.js",
         "plugins/workspace-heartbeat/package.json",
-        "plugins/workspace-heartbeat/README.md"
+        "plugins/workspace-heartbeat/README.md",
+        "implementation checkpoint git:abdd2315af71748c9c369e4cb076981a9d214f54"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Dependency-free heartbeat store tests",
+          "result": "PASS",
+          "evidence": [
+            "Node built-in test runner passed 4/4 focused tests for sequence increments, session isolation, latest-task lookup, and empty-state behavior."
+          ]
+        },
+        {
+          "check": "JavaScript parse checks",
+          "result": "PASS",
+          "evidence": [
+            "node --check passed for src/store.js and server.js source shape before PR creation."
+          ]
+        }
+      ],
       "resume_condition": "Current OpenAI thread-entrypoint and session-metadata contracts are verified."
     },
     {
       "id": "repository_validation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -135,6 +151,16 @@
       "evidence": [
         "workspace-control main exact checkpoint verified before task initialization."
       ]
+    },
+    {
+      "id": "mvp-source",
+      "kind": "git_checkpoint",
+      "identity": "git:abdd2315af71748c9c369e4cb076981a9d214f54",
+      "required_for_resume": true,
+      "evidence": [
+        "MVP source committed on workspace-heartbeat-plugin-v1.",
+        "Exact implementation diff contains six plugin files plus the task capsule/handoff."
+      ]
     }
   ],
   "artifacts": [],
@@ -147,10 +173,12 @@
       ]
     },
     {
-      "check": "Plugin implementation validation",
-      "result": "NOT_RUN",
+      "check": "Plugin implementation preflight",
+      "result": "PASS",
       "evidence": [
-        "Pending branch commit and CI."
+        "Focused dependency-free store tests passed 4/4.",
+        "JavaScript parse checks passed.",
+        "MVP source checkpoint is git:abdd2315af71748c9c369e4cb076981a9d214f54."
       ]
     },
     {
@@ -163,15 +191,14 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Commit MVP source and synchronized task handoff.",
-    "Run workspace-control validation and inspect the exact diff.",
-    "After repository validation, run npm install/npm test and MCP Inspector on the user's Lambda or other local machine.",
+    "Open and pass workspace-control PR validation for the exact MVP branch.",
+    "After repository validation, run npm install/npm test and MCP Inspector on the user's Lambda or another local machine with network access.",
     "Expose the local MCP endpoint through an HTTPS development tunnel and connect it in ChatGPT Developer mode.",
     "Open the thread panel, call heartbeat_update from a test chat, and verify the same panel updates in place.",
     "Only after the developer-mode smoke succeeds, decide whether persistence, OAuth, public hosting, history, or SSE/event push are actually needed."
   ],
-  "next_safe_action": "Finish the bounded MVP implementation on workspace-heartbeat-plugin-v1, validate the exact repository diff/CI, then hand off a single local developer-mode smoke sequence. Do not add persistence, OAuth, cloud hosting, history, or SSE before the basic heartbeat_update -> heartbeat_get -> thread-panel loop is proven in ChatGPT.",
+  "next_safe_action": "Open a workspace-control PR for workspace-heartbeat-plugin-v1 and require repository validation on the exact branch head. If it passes, stop repository implementation and hand off one local developer-mode smoke sequence: npm install/test, MCP Inspector, HTTPS tunnel, ChatGPT Developer-mode connection, thread-panel open, and heartbeat_update in-place refresh verification. Do not add persistence/auth/hosting/history/SSE before that smoke.",
   "last_executor": "chatgpt",
   "last_surface": "web+github",
   "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while keeping heartbeat prose natural and easy to read."
-}\n
+}
