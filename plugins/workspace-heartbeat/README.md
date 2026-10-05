@@ -64,3 +64,13 @@ The panel is event-driven only.
 - `heartbeat_get` remains available for explicit model/user reconciliation when needed.
 
 This removes both the v0.2 one-second polling loop and the v0.3 five-second fallback reconciliation that still produced recurring transport traffic.
+
+
+## v0.3.2 mounted-panel delivery
+
+Both heartbeat tools are associated with the same UI resource URI.
+
+- `heartbeat_get` remains the only tool that advertises the thread sidebar entrypoint.
+- `heartbeat_update` now also declares `_meta.ui.resourceUri` for the same panel resource so ChatGPT can route model-initiated update results to an already-mounted heartbeat app.
+- The panel remains event-driven only: no timer, background polling, or automatic `heartbeat_get` calls.
+- The resource key is bumped to `panel-v5.html` so the updated tool/UI association is rediscovered cleanly.
