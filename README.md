@@ -194,6 +194,26 @@ The planner escalates unknown or mixed-risk changes and supports
 
 For routed mutation work, a reviewed project validation profile is normative: consult it before launching CI. If a repository has no reviewed profile, preserve the owning project's existing/full validation rather than inferring a cheaper tier.
 
+## Scope adherence and heavyweight runtime recovery
+
+For substantial multi-step work, use the Wave-3 control-plane gates before
+expanding the task:
+
+- `procedures/scope_closure.md` and `scripts/scope_control.py` classify new
+  findings as required corrections, bounded enabling changes, explicitly
+  authorized scope expansion, or deferred follow-up work;
+- once the owning objective is durably satisfied and required validation passes,
+  the Scope Closure Gate requires `CHECKPOINT_AND_STOP` when only non-blocking
+  follow-ups remain;
+- `procedures/runtime_certification.md` and
+  `scripts/runtime_certification.py` provide staged C0-C4 heavyweight-runtime
+  certification, typed invalidation, idempotent recovery, structured process
+  identity, and compact failure envelopes.
+
+Do not implement adjacent non-blocking improvements merely because they are
+discovered during current work. Record them as follow-ups unless the owning task
+explicitly expands scope.
+
 ## Durable task capsules
 
 Long-running or executor-switchable work is represented by machine-readable
