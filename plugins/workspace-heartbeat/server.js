@@ -10,7 +10,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
-const PANEL_URI = "ui://workspace-heartbeat/panel-v5.html";
+const PANEL_URI = "ui://workspace-heartbeat/panel-v6.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
   "utf8",
@@ -28,6 +28,7 @@ const heartbeatSchema = z.object({
 const heartbeatOutputSchema = {
   heartbeat: heartbeatSchema.nullable(),
   history: z.array(heartbeatSchema),
+  timeline: z.array(heartbeatSchema),
 };
 
 function sessionIdFromMeta(meta) {
@@ -45,7 +46,7 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.3.2",
+      version: "0.3.3",
     },
     {
       instructions:
