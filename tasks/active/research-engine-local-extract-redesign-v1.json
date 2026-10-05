@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "research-engine-local-document-pipeline-v1",
-  "current_stage": "problem_reframe_and_external_solution_survey",
+  "current_stage": "architecture_selection_and_benchmark_contract",
   "acceptance_criteria": [
     "A current literature and implementation survey identifies how comparable local scientific-document, structured-information-extraction, evidence-grounding, claim-extraction, and high-precision fallback systems solve the same or adjacent problem.",
     "Previously failed approaches are explicitly excluded from reconsideration unless new evidence changes the failed premise; in particular, the already-tested Qwen3.5-4B grounded-candidate EXTRACT architecture is not simply rerun with cosmetic prompt changes.",
@@ -78,7 +78,7 @@
   "stages": [
     {
       "id": "problem_reframe_and_external_solution_survey",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "web+scholar+github",
@@ -88,11 +88,11 @@
         "current public research papers, model cards, open-source implementations, and practitioner evidence"
       ],
       "outputs": [
-        "problem decomposition for mostly-local scientific EXTRACT",
-        "explicit reuse/exclusion matrix",
-        "survey of comparable architectures and local components",
-        "shortlist of materially distinct architecture families",
-        "recommended next experimental architecture with rationale"
+        "problem decomposition: open-ended scientific EXTRACT = candidate discovery + exact span grounding + atomic claim normalization + type assignment + confidence/verification",
+        "reuse/exclusion matrix preserving accepted document/VERIFY infrastructure and excluding failed one-shot grounded Qwen3.5-4B EXTRACT as-is",
+        "current external survey covering ExtractBench/LlamaExtract agentic extraction, LangExtract grounding, GLiNER2/2.5, NuExtract3, Lift 9B, Qwen3.6-35B-A3B, SciFact/MultiVerS, BGE reranking, and teacher-student distillation",
+        "three architecture families plus preferred hierarchical hybrid",
+        "preferred direction: Local Evidence Agent v1 — retrieve/inspect/ground/normalize/verify locally, escalate only hard residuals, Codex last"
       ],
       "validation": [
         {
@@ -103,26 +103,65 @@
             "User explicitly reopened only local/mostly-local EXTRACT research and requested a return to the drawing board rather than repeating accepted VERIFY work.",
             "Inherited research-engine implementation checkpoint is 5f6eec7b629b4746117f2f0a74d4531c642f8025."
           ]
+        },
+        {
+          "check": "Current extraction architecture evidence",
+          "result": "PASS",
+          "evidence": [
+            "ExtractBench 2026 evaluates value accuracy, completeness and source grounding across 370 documents / 4,869 pages; its public baseline ranks agentic extraction above one-shot self-hosted models, supporting architecture/harness work rather than another blind model swap.",
+            "LlamaIndex Extract v2.5 reports a purpose-built extraction agent harness with structural reasoning over document representations, intermediate representations, source-return tools, cross-page inspection, citations and confidence-gated review.",
+            "Google LangExtract demonstrates a local-compatible chunk/parallel/multipass extraction architecture with deterministic mapping of extracted values back to exact source character spans."
+          ]
+        },
+        {
+          "check": "Local component evidence",
+          "result": "PASS",
+          "evidence": [
+            "GLiNER2/2.5 provides compact schema-driven encoder IE; current GLiNER2.5 base is 194M and supports entities, classification, records/relations and constrained joint IE, making it a candidate span/type/relationship detector rather than a complete open-ended claim generator.",
+            "NuExtract3 explicitly separates verbatim-string extraction from abstractive string fields, matching raw_source_form versus normalized_form semantics, but ExtractBench reports weak one-shot value F1 relative to agentic systems; use only as a bounded component candidate.",
+            "Lift is a self-hosted schema-constrained document extractor with local HF/vLLM modes and materially stronger public extraction scores than NuExtract3, but its weights use a modified OpenRAIL-M license and its local path lacks the hosted verification/citation layer; benchmark/review before any promotion.",
+            "Qwen3.6-35B-A3B is a materially stronger 35B-total/3B-active MoE candidate for a hard-case local agent, but official serving recipes target newer/larger hardware than the Lambda A4500s; quantized feasibility must be proven before download."
+          ]
+        },
+        {
+          "check": "Scientific evidence and distillation precedent",
+          "result": "PASS",
+          "evidence": [
+            "SciFact decomposes scientific fact checking into retrieval/rationale selection and label prediction, and publishes citation-context to atomic-claim generation data; MultiVerS provides local scientific claim-verification checkpoints.",
+            "Recent clinical IE distillation work reports small BioBERT students trained from LLM teacher labels approaching teacher performance with much lower inference cost, supporting a strategy where Codex fallback results become supervised data for the local pipeline.",
+            "GUIDEX and broader distillation literature support synthetic/guideline-driven domain adaptation rather than relying indefinitely on zero-shot general models."
+          ]
+        },
+        {
+          "check": "Non-redundant architecture shortlist",
+          "result": "PASS",
+          "evidence": [
+            "Family A — modular scientific IE cascade: local retrieval/reranking -> GLiNER2.5/structured span candidates -> small local claim normalizer -> MultiVerS/NLI + deterministic quote/page guards -> Codex residual fallback.",
+            "Family B — specialized document extractor: targeted Lift 9B or NuExtract3 on retrieved page/region subsets -> deterministic source anchoring -> local verifier -> Codex residual fallback.",
+            "Family C — local tool-using extraction agent: stronger quantized local reasoner (candidate Qwen3.6-35B-A3B) operates over sidecar search/read/locate tools and must cite exact regions; verifier/guard decides acceptance; Codex only on unresolved units.",
+            "Preferred architecture is hierarchical hybrid D: cheap A first, specialized B only where helpful, local agent C only for hard residuals, Codex STANDARD last. This maximizes reuse of accepted infrastructure and allows empirical fallback-rate measurement at each tier."
+          ]
         }
       ],
       "resume_condition": "External evidence and the prior-failure boundary are sufficient to select a small, non-redundant candidate architecture set without another broad model bakeoff."
     },
     {
       "id": "architecture_selection_and_benchmark_contract",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+web+scholar",
       "inputs": [
-        "survey shortlist",
-        "preserved EXTRACT jobs",
-        "accepted document sidecars/provenance"
+        "validated external survey and exclusion/reuse matrix",
+        "accepted paper-package/document sidecar provenance at research-engine@5f6eec7b629b4746117f2f0a74d4531c642f8025",
+        "preserved historical EXTRACT jobs and Codex outputs as controls/teacher labels",
+        "current Lambda dual RTX A4500 resource envelope"
       ],
       "outputs": [
-        "architecture decision",
-        "benchmark contract",
-        "fallback-confidence policy",
-        "candidate resource plan"
+        "Local Evidence Agent v1 stage contract",
+        "role-specific candidate matrix for retrieval, span detection, claim normalization, verification and hard-case local reasoning",
+        "offline benchmark plan with per-tier acceptance/fallback telemetry",
+        "teacher-data capture/distillation plan for Codex fallbacks"
       ],
       "validation": [],
       "resume_condition": "One primary and at most a small number of secondary architectures are justified for implementation/bakeoff."
@@ -201,10 +240,12 @@
       "identity": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
       "required_for_resume": true,
       "evidence": [
-        "stage=problem_reframe_and_external_solution_survey",
-        "reuse accepted document parsing/specialized-model/provenance/broker infrastructure",
-        "do not reopen VERIFY or production acceptance",
-        "next safe action=research comparable local extraction architectures and produce a non-redundant shortlist before any new model download or bakeoff"
+        "stage=architecture_selection_and_benchmark_contract",
+        "survey validated: agentic/decomposed extraction architecture is the leading design pattern; one-shot model replacement is not the selected direction",
+        "preferred=hierarchical Local Evidence Agent v1: retrieve/rerank -> span/record candidates -> normalize -> exact ground -> local verify -> stronger local residual agent -> Codex last",
+        "reuse accepted sidecar/provenance, formula/table models, broker, existing Qwen runtime and bounded VERIFY where role-appropriate",
+        "exclude same Qwen3.5-4B grounded-candidate EXTRACT architecture as-is; do not rerun prior failed bakeoffs",
+        "next safe action=write benchmark/architecture contract before new heavyweight downloads"
       ]
     }
   ],
@@ -222,12 +263,13 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Survey current research and open-source systems for local scientific structured extraction, evidence-first claim extraction, schema-guided IE, retrieval/reranking, extractive QA, NLI/verification, and confidence-gated remote fallback.",
-    "Build a reuse/exclusion matrix from the parent evidence so already-failed approaches are not reintroduced under new names.",
-    "Select a small set of materially distinct architectures that can run on the current Lambda hardware.",
-    "Define a benchmark/fallback contract before downloading or integrating new heavyweight models."
+    "Specify Local Evidence Agent v1 stage interfaces, provenance invariants, and confidence/fallback policy.",
+    "Define a role-specific benchmark matrix using preserved EXTRACT jobs: candidate-region recall, atomic-claim precision/recall, normalized-form agreement, exact quote/page grounding, type agreement, unsupported-claim rate, latency/VRAM/RAM, and projected Codex fallback fraction.",
+    "Choose the minimum candidate set for a first bounded prototype; prioritize reuse of the existing Qwen3.5-4B runtime in a narrower normalization/decision role where materially different from the failed one-shot EXTRACT architecture, plus lightweight retrieval/reranking/span models before any heavyweight download.",
+    "Define teacher-data capture so every future Codex fallback can become supervised training/evaluation data for local candidate generation/normalization.",
+    "Only after the contract is checkpointed, authorize at most the smallest necessary new model downloads/runtime bakeoffs."
   ],
-  "next_safe_action": "Conduct a current external research survey of mostly-local scientific/document EXTRACT architectures and implementations, explicitly comparing architectural decomposition rather than simply trying another general local chat model. Reuse the accepted document/provenance pipeline as substrate, exclude previously failed approaches as-is, and checkpoint a shortlist plus benchmark/fallback hypotheses before any new heavyweight model download or Lambda bakeoff.",
+  "next_safe_action": "Define the Local Evidence Agent v1 benchmark/architecture contract before downloading new heavyweight models. The contract should test a hierarchical mostly-local path: accepted sidecar/document structure -> lexical/vector retrieval and BGE-style reranking -> exact candidate spans/records (GLiNER2.5 and deterministic rules where useful) -> local atomic-claim normalization -> exact quote/page anchoring -> local scientific entailment/verification -> confidence gate; only unresolved units proceed to a stronger local agent candidate, and only its residuals fall through to STANDARD Codex. Compare role-specific candidates rather than whole-pipeline one-shot models, include Lift/NuExtract3 as bounded structured-extractor candidates and Qwen3.6-35B-A3B only as a hard-case feasibility candidate, and specify how Codex fallback outputs are retained as teacher data so fallback frequency can decrease over time.",
   "last_executor": "chatgpt",
   "last_surface": "github+web+scholar",
   "notes": "This child task intentionally branches from the accepted local-document/Qwen-VERIFY production checkpoint. It does not invalidate or reopen the parent task's production acceptance."
