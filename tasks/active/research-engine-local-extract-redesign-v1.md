@@ -48,19 +48,24 @@ architecture_selection_and_benchmark_contract
 
 ## Next safe action
 
-Define the Local Evidence Agent v1 benchmark/architecture contract before downloading new heavyweight models. The contract should test a hierarchical mostly-local path: accepted sidecar/document structure -> lexical/vector retrieval and BGE-style reranking -> exact candidate spans/records (GLiNER2.5 and deterministic rules where useful) -> local atomic-claim normalization -> exact quote/page anchoring -> local scientific entailment/verification -> confidence gate; only unresolved units proceed to a stronger local agent candidate, and only its residuals fall through to STANDARD Codex. Compare role-specific candidates rather than whole-pipeline one-shot models, include Lift/NuExtract3 as bounded structured-extractor candidates and Qwen3.6-35B-A3B only as a hard-case feasibility candidate, and specify how Codex fallback outputs are retained as teacher data so fallback frequency can decrease over time.
+Wait only for the two already-running contract validations: research-engine PR #95 and workspace-control PR #70. If both pass, merge them, verify the resulting canonical SHAs, bind this task to the exact merged `workflows/evidence-first-solution-research.v1.json` identity, mark `architecture_selection_and_benchmark_contract` VALIDATED, and begin Phase 1 of `bounded_local_extract_prototype`: an offline zero-materialization preserved-EXTRACT dataset adapter plus deterministic lexical/section retrieval baseline and exact teacher-quote/page recall measurement. Do not download any new heavyweight model and do not change production VERIFY during Phase 1.
 
 ## Remaining work
 
-- Specify Local Evidence Agent v1 stage interfaces, provenance invariants, and confidence/fallback policy.
-- Define a role-specific benchmark matrix using preserved EXTRACT jobs: candidate-region recall, atomic-claim precision/recall, normalized-form agreement, exact quote/page grounding, type agreement, unsupported-claim rate, latency/VRAM/RAM, and projected Codex fallback fraction.
-- Choose the minimum candidate set for a first bounded prototype; prioritize reuse of the existing Qwen3.5-4B runtime in a narrower normalization/decision role where materially different from the failed one-shot EXTRACT architecture, plus lightweight retrieval/reranking/span models before any heavyweight download.
-- Define teacher-data capture so every future Codex fallback can become supervised training/evaluation data for local candidate generation/normalization.
-- Only after the contract is checkpointed, authorize at most the smallest necessary new model downloads/runtime bakeoffs.
+- Land and pin the reusable workspace-control evidence-first-solution-research workflow (PR #70) so future project/chat architecture decisions can invoke the same method before implementation.
+- Land the research-engine Local Evidence Agent v1 contract (PR #95). Its first CI attempt was cancelled before runner assignment with zero steps; the unchanged job has been retried.
+- Phase 1 — offline substrate/retrieval: build a zero-materialization adapter over preserved EXTRACT jobs, measure deterministic lexical/section retrieval and exact teacher-quote/page recall before adding any model.
+- Phase 2 — first-wave local evidence path: add exact candidate-span handling, use the existing certified Qwen3.5-4B only for bounded quote-to-atomic-claim normalization, and add an independent local scientific verifier/completeness audit. Do not download a new heavyweight model yet.
+- Phase 3 — measure the combined system: claim precision/coverage, grounding/page/type agreement, unsupported-claim rate, job-local completion fraction, Codex fallback fraction, latency/VRAM/RAM, and remote token suppression.
+- Phase 4 — residual-only escalation: add GLiNER2.5 / compact reranker / scientific verifier components only where measured first-wave residuals justify them; open NuExtract3, Lift 9B, or Qwen3.6-35B-A3B one at a time only if lighter decomposition cannot meet gates.
+- Phase 5 — teacher adaptation: retain verified Codex fallback cases as versioned training/evaluation data with paper-level holdouts; use them to reduce fallback frequency without contaminating evaluation.
+- Phase 6 — VERIFY impact measurement: after EXTRACT meets promotion gates, compare the new pre-materialization local verifier with current post-materialization page-scoped Qwen VERIFY. Preserve current VERIFY unchanged until evidence shows whether it should stay independent, narrow to residual/sample audit, or be separately redesigned.
+- Phase 7 — production integration only after passing gates: local-first EXTRACT with Codex STANDARD as rare fallback, empirical fallback telemetry, accepted VERIFY behavior, and separate Lambda acceptance.
 
 ## Blockers / gates
 
-- None recorded.
+- research-engine PR #95 contract CI retry is pending after the first attempt was cancelled in queue with runner_id=0 and zero executed steps; this is an external CI scheduling boundary, not a code/test failure.
+- workspace-control PR #70 full-integration validation is pending before the shared evidence-first workflow can be pinned by this task.
 
 ## Fresh-chat initialization
 
