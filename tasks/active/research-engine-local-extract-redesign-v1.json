@@ -1,0 +1,234 @@
+{
+  "schema_version": 2,
+  "task_id": "research-engine-local-extract-redesign-v1",
+  "title": "Research Engine Mostly-Local EXTRACT Redesign v1",
+  "status": "IN_PROGRESS",
+  "goal": "Return to first principles on research-engine EXTRACT and identify, benchmark, and if justified implement a provenance-preserving mostly-local extraction architecture that makes STANDARD Codex a rare ambiguity/failure fallback rather than the default, while reusing accepted local document/VERIFY infrastructure and not repeating approaches already invalidated by durable evidence.",
+  "execution_topology": "composed",
+  "workflow": null,
+  "parent_execution_owner": "research-engine-local-document-pipeline-v1",
+  "current_stage": "problem_reframe_and_external_solution_survey",
+  "acceptance_criteria": [
+    "A current literature and implementation survey identifies how comparable local scientific-document, structured-information-extraction, evidence-grounding, claim-extraction, and high-precision fallback systems solve the same or adjacent problem.",
+    "Previously failed approaches are explicitly excluded from reconsideration unless new evidence changes the failed premise; in particular, the already-tested Qwen3.5-4B grounded-candidate EXTRACT architecture is not simply rerun with cosmetic prompt changes.",
+    "The design reuses accepted production assets where they help: authoritative-PDF provenance, paper-package/document sidecars, native+structured parsing, CodeFormulaV2, table escalation, the local inference broker, and bounded Qwen VERIFY.",
+    "At least three materially distinct mostly-local EXTRACT architectures are compared on expected semantic quality, provenance preservation, local resource cost, implementation complexity, and likely Codex-fallback rate.",
+    "The selected architecture is evidence-first and fail-closed: every accepted extracted claim remains traceable to authoritative PDF page/region/text evidence, and low-confidence/disputed cases fall through to STANDARD Codex rather than being silently accepted.",
+    "A benchmark plan evaluates claim-level precision/recall or agreement, page/type agreement, evidence grounding, hallucination/unsupported-claim rate, local latency/VRAM/RAM, and empirical Codex fallback fraction on preserved production-like jobs.",
+    "The primary local path is runnable on the current Lambda host with dual RTX A4500 GPUs, using quantization/CPU offload or model specialization where justified; hosted APIs are not introduced into the primary local path.",
+    "A candidate is promoted only if it materially reduces Codex EXTRACT usage while preserving a predeclared semantic-quality floor and authoritative provenance.",
+    "Production routing, if eventually changed, retains Codex STANDARD as a rare fallback and leaves the already-accepted bounded Qwen VERIFY route unchanged unless a separate task explicitly reopens it.",
+    "The task records both successful and rejected architectural families so future work does not repeat failed bakeoffs."
+  ],
+  "constraints": [
+    "Do not reopen or rerun the accepted page-scoped Qwen VERIFY production gate, daemon boot-health gate, production acceptance, visual benchmark, or guarded semantic calibration.",
+    "Do not treat the prior Qwen3.5-4B grounded-candidate EXTRACT result as a model-runtime failure: runtime/provenance safety passed but semantic equivalence to STANDARD Codex failed decisively, so the same architecture is excluded absent a materially different decomposition.",
+    "Do not reconsider PaddleOCR-VL-1.6 as the general document/semantic solution absent new evidence that directly addresses its prior resource/semantic-quality failures.",
+    "Do not replace the accepted native/Docling/CodeFormula/table components merely to revisit parsing; the new problem is semantic EXTRACT localization.",
+    "Use current external research and implementation evidence before selecting another model family. Search for architectural solutions, not just larger local chat models.",
+    "Prefer decomposition, retrieval/reranking, extractive selection, schema-guided IE, NLI/verification, domain models, constrained decoding, ensembles, or other high-precision local components when they can reduce the burden on a general local LLM.",
+    "Preserve original PDF/evidence as scientific authority; local structured outputs remain derived until accepted through existing materialization semantics.",
+    "No new scientific state is materialized during research or offline benchmark design.",
+    "Do not start sustained daemon operation merely to research or benchmark EXTRACT candidates.",
+    "Large model downloads or Lambda bakeoffs require a bounded candidate-selection checkpoint first; do not download every interesting model found in the survey.",
+    "New operator-facing temporary artifacts belong under ~/adamArchives/Adam/workspace-control-tmp/.",
+    "Every fresh-chat handoff for this child task must include https://github.com/adamtrott78/workspace-control."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "796dd9fb9c5fd25009d756a4fd42d53b85a5ac3d",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "796dd9fb9c5fd25009d756a4fd42d53b85a5ac3d",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/research-engine-local-extract-redesign-v1.json",
+        "tasks/active/research-engine-local-extract-redesign-v1.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "mutate",
+      "base_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
+        "verified": true
+      },
+      "local": {
+        "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
+        "branch": "main",
+        "head_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
+        "clean": true
+      },
+      "allowed_mutation_scope": [
+        "benchmarks/**",
+        "src/research_engine/**",
+        "tests/**",
+        "deploy/**",
+        "README.md",
+        ".github/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "problem_reframe_and_external_solution_survey",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "web+scholar+github",
+      "inputs": [
+        "parent task research-engine-local-document-pipeline-v1 accepted checkpoint at research-engine@5f6eec7b629b4746117f2f0a74d4531c642f8025",
+        "prior grounded-candidate EXTRACT failure metrics and accepted local document/VERIFY components",
+        "current public research papers, model cards, open-source implementations, and practitioner evidence"
+      ],
+      "outputs": [
+        "problem decomposition for mostly-local scientific EXTRACT",
+        "explicit reuse/exclusion matrix",
+        "survey of comparable architectures and local components",
+        "shortlist of materially distinct architecture families",
+        "recommended next experimental architecture with rationale"
+      ],
+      "validation": [
+        {
+          "check": "Child-task scope separation",
+          "result": "PASS",
+          "evidence": [
+            "Parent production document/Qwen VERIFY integration is checkpointed with Scope Closure decision CHECKPOINT_AND_STOP.",
+            "User explicitly reopened only local/mostly-local EXTRACT research and requested a return to the drawing board rather than repeating accepted VERIFY work.",
+            "Inherited research-engine implementation checkpoint is 5f6eec7b629b4746117f2f0a74d4531c642f8025."
+          ]
+        }
+      ],
+      "resume_condition": "External evidence and the prior-failure boundary are sufficient to select a small, non-redundant candidate architecture set without another broad model bakeoff."
+    },
+    {
+      "id": "architecture_selection_and_benchmark_contract",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "survey shortlist",
+        "preserved EXTRACT jobs",
+        "accepted document sidecars/provenance"
+      ],
+      "outputs": [
+        "architecture decision",
+        "benchmark contract",
+        "fallback-confidence policy",
+        "candidate resource plan"
+      ],
+      "validation": [],
+      "resume_condition": "One primary and at most a small number of secondary architectures are justified for implementation/bakeoff."
+    },
+    {
+      "id": "bounded_local_extract_prototype",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "selected architecture",
+        "benchmark contract"
+      ],
+      "outputs": [
+        "offline local EXTRACT prototype",
+        "deterministic provenance/guard path",
+        "Codex fallback contract"
+      ],
+      "validation": [],
+      "resume_condition": "Prototype can execute without scientific-state materialization and emit evidence-linked claims plus confidence/fallback decisions."
+    },
+    {
+      "id": "preserved_job_benchmark_and_fallback_measurement",
+      "status": "PLANNED",
+      "execution_owner": "hybrid",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "prototype",
+        "preserved production-like EXTRACT jobs",
+        "STANDARD Codex controls"
+      ],
+      "outputs": [
+        "claim-quality metrics",
+        "grounding metrics",
+        "resource metrics",
+        "empirical projected Codex fallback fraction"
+      ],
+      "validation": [],
+      "resume_condition": "Evidence shows whether the candidate can make Codex a rare fallback without unacceptable semantic regression."
+    },
+    {
+      "id": "production_integration_if_promoted",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "passing benchmark decision"
+      ],
+      "outputs": [
+        "bounded production route",
+        "fallback telemetry",
+        "Lambda acceptance evidence"
+      ],
+      "validation": [],
+      "resume_condition": "Only entered if the benchmark gate promotes the architecture."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "parent-local-document-pipeline-checkpoint",
+      "kind": "git_commit",
+      "identity": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
+      "required_for_resume": true,
+      "evidence": [
+        "Parent task accepted production local-document infrastructure and page-scoped bounded Qwen VERIFY through Lambda production acceptance and daemon boot-health.",
+        "EXTRACT remains STANDARD Codex at this checkpoint.",
+        "Prior Qwen3.5-4B grounded-candidate EXTRACT was provenance-safe but failed semantic-equivalence thresholds and is excluded as-is."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
+      "required_for_resume": true,
+      "evidence": [
+        "stage=problem_reframe_and_external_solution_survey",
+        "reuse accepted document parsing/specialized-model/provenance/broker infrastructure",
+        "do not reopen VERIFY or production acceptance",
+        "next safe action=research comparable local extraction architectures and produce a non-redundant shortlist before any new model download or bakeoff"
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Parent production boundary inherited",
+      "result": "PASS",
+      "evidence": [
+        "research-engine canonical production checkpoint=5f6eec7b629b4746117f2f0a74d4531c642f8025",
+        "bounded page-scoped Qwen VERIFY is accepted; EXTRACT remains STANDARD Codex",
+        "new task changes no live production routing at creation"
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Survey current research and open-source systems for local scientific structured extraction, evidence-first claim extraction, schema-guided IE, retrieval/reranking, extractive QA, NLI/verification, and confidence-gated remote fallback.",
+    "Build a reuse/exclusion matrix from the parent evidence so already-failed approaches are not reintroduced under new names.",
+    "Select a small set of materially distinct architectures that can run on the current Lambda hardware.",
+    "Define a benchmark/fallback contract before downloading or integrating new heavyweight models."
+  ],
+  "next_safe_action": "Conduct a current external research survey of mostly-local scientific/document EXTRACT architectures and implementations, explicitly comparing architectural decomposition rather than simply trying another general local chat model. Reuse the accepted document/provenance pipeline as substrate, exclude previously failed approaches as-is, and checkpoint a shortlist plus benchmark/fallback hypotheses before any new heavyweight model download or Lambda bakeoff.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+web+scholar",
+  "notes": "This child task intentionally branches from the accepted local-document/Qwen-VERIFY production checkpoint. It does not invalidate or reopen the parent task's production acceptance."
+}
