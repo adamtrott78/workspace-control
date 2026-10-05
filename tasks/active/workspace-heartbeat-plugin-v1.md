@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
-- Status: VALIDATING
+- Status: BLOCKED_RUNTIME
 - Capsule schema: v2
 
 ## Goal
@@ -23,24 +23,23 @@ Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel 
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-heartbeat-history-v2
-- Remote checkpoint: 906478d671dc750b5c739a716fb32a1a650f0b0c
+- Remote branch: main
+- Remote checkpoint: 3214ec2be4f0c20933784b3d265386d9652dfd0b
 - Remote verified: true
 
 ## Next safe action
 
-Open and validate the workspace-heartbeat-history-v2 correction at 906478d671dc750b5c739a716fb32a1a650f0b0c. After repository validation passes, merge it, update the Lambda to the canonical merge, restart heartbeat-up, reopen the custom MCP thread panel, and use the user's fresh research-engine handoff chat as the long stability smoke. The pass condition is not merely that a heartbeat appears: multiple task-scoped updates must remain in chronological history, the latest state must persist between updates, and empty/failed polls must never force a false IDLE or erase known-good progress.
+On the Lambda, sync workspace-control main to 3214ec2be4f0c20933784b3d265386d9652dfd0b; stop and restart the workspace-heartbeat tmux service so v0.2 is actually running; verify heartbeat-status; refresh/reopen the Workspace Heartbeat thread panel; then use the user's new research-engine handoff chat as a long rehydration smoke. The pass condition is: multiple updates accumulate as a sequential log, the latest heartbeat remains visible between events, no empty/failed poll forces IDLE after valid state exists, and successful /mcp traffic is visible in the MCP console.
 
 ## Remaining work
 
-- Run workspace-control repository validation on workspace-heartbeat-history-v2.
-- If validation passes, merge the correction and sync the Lambda checkout to the exact canonical commit.
-- Restart the persistent workspace-heartbeat tmux service so server.js and the panel resource use v0.2.
-- Refresh/reopen the Workspace Heartbeat custom MCP plugin/thread panel so ChatGPT loads panel-v2.html.
-- Use the new research-engine handoff chat as a long rehydration smoke: emit several natural-language heartbeat_update calls under the same owning task_id.
-- Verify old updates remain visible as a sequential log, the newest update remains WORKING/WAITING/BLOCKED/DONE as emitted, and the panel never switches to IDLE unless it has never received a heartbeat.
-- Verify successful /mcp requests appear in the MCP tmux window.
-- After the stability/history smoke passes, decide separately whether a future explicit turn-reset event is worth adding; do not fake assistant-response-start detection.
+- On the Lambda, fast-forward workspace-control main to 3214ec2be4f0c20933784b3d265386d9652dfd0b.
+- Restart the persistent workspace-heartbeat tmux session so the server and panel use v0.2.
+- Confirm heartbeat-status shows both MCP and ngrok UP, and that the MCP window logs successful /mcp requests.
+- Refresh/reopen the Workspace Heartbeat thread panel so ChatGPT loads panel-v2.html.
+- Start the fresh research-engine handoff chat with the Workspace Heartbeat plugin enabled and the owning workspace-control task ID reused consistently.
+- During the lengthy rehydration, verify several heartbeat_update calls append in chronological order, the latest state remains visible between updates, and the panel never falls back to IDLE after valid progress exists.
+- If the live smoke passes, mark panel_stability_correction VALIDATED and close this heartbeat task; defer any explicit turn-reset/IDLE lifecycle feature until there is a reliable response-start signal.
 
 ## Blockers / gates
 
