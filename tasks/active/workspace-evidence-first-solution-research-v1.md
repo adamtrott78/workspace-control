@@ -28,19 +28,18 @@ workflow_design_and_promotion
 
 ## Next safe action
 
-Create an isolated workspace-control branch from main@aa24d3f25a54745bcffb607f9ff43310181c9b85 and implement the evidence-first solution-research procedure, workflow descriptor, and root-route discoverability. Validate with the workflow descriptor validator and workspace-control FULL_INTEGRATION tier before merging. Do not modify project-specific research-engine truth in this workspace-level task.
+Wait for workspace-control PR #70 validation run 37369399893. If it passes, merge PR #70 without additional scope expansion, verify the canonical main commit and merged workflow contents, then checkpoint this task as COMPLETE/CHECKPOINTED-equivalent and return the exact workflow identity to `research-engine-local-extract-redesign-v1`. If CI fails, diagnose only the demonstrated validation defect.
 
 ## Remaining work
 
-- Write the workspace-level evidence-first research procedure.
-- Write the reusable workflow descriptor.
-- Add root-route discoverability without making research mandatory for trivial work.
-- Run workflow validation, full workspace-control tests, and task contract regression.
-- Merge the validated workflow and return its exact identity to the originating EXTRACT task.
+- Wait for full-integration validation of PR #70.
+- If validation passes, merge PR #70 and verify canonical workspace-control main.
+- Record the exact durable workflow identity for workflows/evidence-first-solution-research.v1.json.
+- Return that identity to research-engine-local-extract-redesign-v1 so the originating task can formally bind the reusable workflow.
 
 ## Blockers / gates
 
-- None recorded.
+- Workspace Control Validation run 37369399893 is queued for PR #70; no additional workflow mutation is justified unless validation fails.
 
 ## Fresh-chat initialization
 
