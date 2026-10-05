@@ -42,8 +42,8 @@
       "intent": "mutate",
       "base_sha": "1a46337a35296554917f61a80ff21535f8e87c19",
       "remote": {
-        "branch": "throughput-efficiency-wave2-design-v1",
-        "checkpoint_sha": "f998b89ac88bf564aa2836f3116d9ac979b4969d",
+        "branch": "main",
+        "checkpoint_sha": "0e726530c0869dfb126958867cf0b7144e4e28de",
         "verified": true
       },
       "local": null,
@@ -305,6 +305,15 @@
             "The design branch remained unchanged after the rejected lease attempt.",
             "The safe fallback was then used: reread exact branch head, plain non-force ref move, immediate post-write reread."
           ]
+        },
+        {
+          "check": "Wave-2 design promotion",
+          "result": "PASS",
+          "evidence": [
+            "PR #52 run 37247590209 selected FULL_INTEGRATION and passed all 56 workspace-control tests plus the full contract gate.",
+            "PR #52 merged as 0e726530c0869dfb126958867cf0b7144e4e28de.",
+            "The tested synthetic-merge tree cc852ef07af75c18fe431a658816558816f62a77 exactly equals the merged main tree."
+          ]
         }
       ],
       "resume_condition": "Second-wave field observations are converted into a bounded, fail-closed architecture."
@@ -375,12 +384,12 @@
     {
       "id": "checkpoint:wave2-efficiency-design",
       "kind": "git_checkpoint",
-      "identity": "workspace-control:f998b89ac88bf564aa2836f3116d9ac979b4969d",
+      "identity": "workspace-control:0e726530c0869dfb126958867cf0b7144e4e28de",
       "required_for_resume": true,
       "evidence": [
-        "Wave-2 runtime/artifact efficiency architecture is committed on throughput-efficiency-wave2-design-v1.",
-        "Layered runtime preflight, runtime/wheel identity reuse, deterministic artifact caching, failure receipts, task-sync, and connector capability fallback are explicitly designed.",
-        "research-engine remains outside this task's mutation authority; field implementation/testing occurs only through its own active task authority."
+        "Wave-2 runtime/artifact efficiency architecture is canonical on workspace-control main.",
+        "PR #52 FULL_INTEGRATION validation passed and merged-tree identity equals the tested synthetic merge tree.",
+        "The active stage is now field_efficiency_wave2_validation; research-engine-specific testing remains governed by its own task authority."
       ]
     }
   ],
@@ -537,6 +546,15 @@
         "The corrected CUDA-12.9 Torch runtime allocates successfully, but the current exact multimodal vLLM path fails on torchcodec/libnvrtc.so.13 before Qwen inference, motivating an exact import/native-library smoke preflight after runtime construction.",
         "Additional field opportunities are exact runtime/wheel reuse, compact early-failure receipts, content-addressed render reuse, one-logical-change Git batching, and JSON-authoritative task handoff generation."
       ]
+    },
+    {
+      "check": "Wave-2 architecture promoted",
+      "result": "PASS",
+      "evidence": [
+        "Canonical workspace-control main now includes the layered runtime preflight, runtime/wheel reuse, deterministic artifact cache, compact failure-receipt, task-sync, and capability-aware Git mutation design.",
+        "PR #52 run 37247590209 passed FULL_INTEGRATION with 56/56 tests.",
+        "Tested and merged trees are identical at cc852ef07af75c18fe431a658816558816f62a77."
+      ]
     }
   ],
   "blockers": [],
@@ -551,7 +569,7 @@
     "Continue opportunistic TARGETED_PR measurement on real changes; do not manufacture churn only to obtain a benchmark.",
     "Do not create the final repo-by-repo efficiency rollout task until Wave-2 field validation stops uncovering substantive shared architecture changes."
   ],
-  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. Resume Wave-2 efficiency validation from checkpoint f998b89ac88bf564aa2836f3116d9ac979b4969d and architecture/throughput-ci-efficiency-v1.md. Do not mutate research-engine from this capsule. Use the active research-engine Qwen task as field evidence without replacing its durable next_safe_action: measure and, only through that task's existing authority, test layered host/build plus exact execution-path preflight, runtime/wheel reuse, compact failure receipts, content-addressed deterministic render reuse, and Git/task-handoff overhead. Keep research-engine-specific package/cache semantics project-local. Delay the final cross-repository rollout task until this Wave-2 field pass stops finding substantive shared improvements.",
+  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. Wave-2 efficiency architecture is canonical on main@0e726530c0869dfb126958867cf0b7144e4e28de. Continue field_efficiency_wave2_validation without starting the final cross-repository rollout task. Do not mutate research-engine from this capsule. Use the active research-engine Qwen task as the natural field workload and preserve its exact durable next_safe_action; through that task's own authority, measure/test layered host/build plus exact execution-path preflight, exact runtime/wheel reuse, compact early-failure receipts, content-addressed deterministic render reuse, Git mutation/write-call behavior, and task-handoff synchronization overhead. Keep package/model/cache specifics project-local and return measured evidence before promoting further shared implementation.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Baseline measurement, external-practice research, and risk-tier design are complete and durable. Initial workspace-control implementation is isolated on throughput-ci-efficiency-v1. The GitHub connector's advertised update_ref expected_sha lease is currently rejected by input validation; current remote-only mutation guidance therefore uses immediate pre-write head verification plus post-write ref verification. research-engine remains read-only. Fresh-chat invariant: always include https://github.com/adamtrott78/workspace-control explicitly."
