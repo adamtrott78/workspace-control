@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "actions_scaleset": {
+    "repository": "actions/scaleset",
+    "commit_sha": "e6daac702355cdb5b880b4fbdcf6d85dcd9e48e5",
+    "status_at_pin": "Public Preview",
+    "go_module": "github.com/actions/scaleset",
+    "go_version_declared_upstream": "1.26.3",
+    "update_policy": "manual evidence-reviewed bump only; no floating @latest in production bootstrap",
+    "wrapper_policy": "all upstream client usage must remain behind workspace-control's narrow ci-controller adapter"
+  },
+  "actions_runner": {
+    "repository": "actions/runner",
+    "version": "2.337.0",
+    "linux_x64_sha256": "70920811a4f8ad4328818682bca5c6469c1c942fab52448868071d0063816613",
+    "asset_name": "actions-runner-linux-x64-2.337.0.tar.gz",
+    "update_policy": "manual evidence-reviewed bump with checksum update and P3/P4 regression before promotion"
+  }
+}
