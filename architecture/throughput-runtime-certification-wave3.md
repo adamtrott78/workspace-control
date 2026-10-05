@@ -374,11 +374,16 @@ The heartbeat is an operator-facing reasoning summary, not private
 chain-of-thought. It explains why the current operation is necessary without
 dumping hidden scratch reasoning.
 
-During substantial work, emit a meaningful operator update when control state
-changes and approximately every 15 seconds or 2-3 tool operations during opaque
-stretches. Polling the same unchanged dependency must be compressed: report that
-no meaningful state changed, identify the pending dependency, and do not imply
-that additional implementation occurred.
+During substantial work, each heartbeat grants a hard lease for at most three
+subsequent tool operations. A fourth tool operation is forbidden until another
+human-readable heartbeat is emitted. Material control-state changes expire the
+lease immediately and require a heartbeat before the next tool call. Approximately
+15 seconds without an update also requires a heartbeat at the next available
+operator-visible boundary.
+
+Polling the same unchanged dependency must be compressed: report that no
+meaningful state changed, identify the pending dependency, and do not imply that
+additional implementation occurred.
 
 Heartbeat scope counts derive from the Scope Closure classification. When no
 execute-now work remains, the heartbeat must make that visible; if the owning

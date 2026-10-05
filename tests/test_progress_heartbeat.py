@@ -97,6 +97,39 @@ class ProgressHeartbeatTests(unittest.TestCase):
             )
         )
 
+    def test_fourth_tool_is_blocked_after_three_call_lease(self):
+        self.assertEqual(
+            heartbeat.tool_gate(
+                event="POLL_UNCHANGED",
+                tool_calls_since_heartbeat=3,
+                elapsed_seconds=5,
+                meaningful_change=False,
+            ),
+            "HEARTBEAT_REQUIRED",
+        )
+
+    def test_tool_allowed_before_lease_exhaustion(self):
+        self.assertEqual(
+            heartbeat.tool_gate(
+                event="POLL_UNCHANGED",
+                tool_calls_since_heartbeat=2,
+                elapsed_seconds=5,
+                meaningful_change=False,
+            ),
+            "ALLOW_TOOL",
+        )
+
+    def test_state_change_expires_lease_early(self):
+        self.assertEqual(
+            heartbeat.tool_gate(
+                event="MILESTONE_COMPLETED",
+                tool_calls_since_heartbeat=1,
+                elapsed_seconds=2,
+                meaningful_change=False,
+            ),
+            "HEARTBEAT_REQUIRED",
+        )
+
     def test_fifteen_seconds_emit(self):
         self.assertTrue(
             heartbeat.should_emit(
@@ -141,6 +174,15 @@ class ProgressHeartbeatTests(unittest.TestCase):
             )
             self.assertEqual(
                 heartbeat.main(["render", "--file", str(path)]),
+                0,
+            )
+            self.assertEqual(
+                heartbeat.main([
+                    "gate",
+                    "--event", "POLL_UNCHANGED",
+                    "--tool-calls", "3",
+                    "--elapsed-seconds", "5",
+                ]),
                 0,
             )
 
