@@ -2,6 +2,7 @@ import base64
 import importlib.util
 import json
 import pathlib
+import sys
 import uuid
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -9,6 +10,7 @@ MODULE_PATH = ROOT / "scripts" / "lambda_ci_provisioner.py"
 
 spec = importlib.util.spec_from_file_location("lambda_ci_provisioner", MODULE_PATH)
 mod = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = mod
 spec.loader.exec_module(mod)
 
 MANIFEST = json.loads(
