@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "workflow_id": "evidence-first-solution-research-v1",
+  "title": "Evidence-First Solution Research",
+  "purpose": "Research materially uncertain implementation problems before selecting or integrating an architecture, model, library, service, or heavyweight runtime; recover known-good and failed local evidence, study comparable solutions, synthesize architecture families, review system-boundary impacts, produce a bounded shortlist, and define measurable promotion gates before implementation.",
+  "owner": {
+    "repository": "workspace-control",
+    "context_path": "procedures/evidence_first_solution_research.md"
+  },
+  "entry_route": [
+    "procedures/evidence_first_solution_research.md",
+    "policies/OPERATOR_WORKFLOW.md",
+    "procedures/scope_closure.md",
+    "procedures/task_capsule.md"
+  ],
+  "stages": [
+    {
+      "id": "frame-problem",
+      "execution_owner": "evidence-first-solution-research",
+      "authority_owners": [
+        "procedures/evidence_first_solution_research.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [],
+      "required_capabilities": [
+        "project-context-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "The implementation question is reframed as a capability/problem statement with current baseline, immutable constraints, measurable success criteria, and known-good rollback state.",
+        "The workflow is skipped when the work is trivial, deterministic, or already fully specified."
+      ],
+      "gates": [
+        "material-implementation-uncertainty"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "recover-local-evidence",
+      "execution_owner": "evidence-first-solution-research",
+      "authority_owners": [
+        "procedures/evidence_first_solution_research.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "frame-problem"
+      ],
+      "required_capabilities": [
+        "project-context-read",
+        "task-state-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Known-good reusable components are identified.",
+        "Previously failed approaches are recorded with the exact failed premise and are not silently reopened."
+      ],
+      "gates": [
+        "project-authority-loaded"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "research-external-solutions",
+      "execution_owner": "evidence-first-solution-research",
+      "authority_owners": [
+        "procedures/evidence_first_solution_research.md"
+      ],
+      "depends_on": [
+        "recover-local-evidence"
+      ],
+      "required_capabilities": [
+        "current-web-research",
+        "scholarly-or-primary-source-research",
+        "repository-or-implementation-research"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Research targets comparable problems and architecture patterns rather than only product/model names.",
+        "Material decisions are supported by current primary/official/benchmark evidence where available.",
+        "Benchmark evidence, practitioner evidence, and vendor/model claims are distinguished."
+      ],
+      "gates": [
+        "evidence-sufficient-for-architecture-synthesis"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "synthesize-architecture-families",
+      "execution_owner": "evidence-first-solution-research",
+      "authority_owners": [
+        "procedures/evidence_first_solution_research.md"
+      ],
+      "depends_on": [
+        "research-external-solutions"
+      ],
+      "required_capabilities": [
+        "reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "At least materially distinct architecture/decomposition families are considered when the evidence supports them.",
+        "The synthesis explains which responsibilities belong to deterministic components, specialized models, general reasoning, verification, fallback, and humans."
+      ],
+      "gates": [],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "review-system-boundaries",
+      "execution_owner": "evidence-first-solution-research",
+      "authority_owners": [
+        "procedures/evidence_first_solution_research.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "synthesize-architecture-families"
+      ],
+      "required_capabilities": [
+        "project-context-read",
+        "reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "Upstream/downstream contracts, verification, materialization, telemetry, rollback, and human gates are reviewed.",
+        "Already accepted production stages remain known-good until a separate measured replacement/simplification gate passes."
+      ],
+      "gates": [
+        "known-good-baseline-preserved"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "select-bounded-shortlist",
+      "execution_owner": "evidence-first-solution-research",
+      "authority_owners": [
+        "procedures/evidence_first_solution_research.md"
+      ],
+      "depends_on": [
+        "review-system-boundaries"
+      ],
+      "required_capabilities": [
+        "reasoning"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "The shortlist is small and non-redundant.",
+        "Every heavyweight candidate is tied to a measured or explicitly hypothesized residual rather than curiosity.",
+        "Reuse, license, resource, and implementation-complexity implications are explicit."
+      ],
+      "gates": [
+        "bounded-candidate-set"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "define-benchmark-contract",
+      "execution_owner": "evidence-first-solution-research",
+      "authority_owners": [
+        "procedures/evidence_first_solution_research.md",
+        "procedures/scope_closure.md"
+      ],
+      "depends_on": [
+        "select-bounded-shortlist"
+      ],
+      "required_capabilities": [
+        "reasoning",
+        "project-context-read"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "The known-good control, quality/coverage/provenance/resource metrics, fallback measurement, promotion threshold, stop conditions, and rollback conditions are declared before heavyweight implementation.",
+        "Remote/fallback suppression is measured rather than assumed."
+      ],
+      "gates": [
+        "benchmark-before-heavyweight-work"
+      ],
+      "forbidden_mutations": []
+    },
+    {
+      "id": "handoff-to-implementation",
+      "execution_owner": "evidence-first-solution-research",
+      "authority_owners": [
+        "procedures/evidence_first_solution_research.md",
+        "procedures/task_capsule.md",
+        "policies/OPERATOR_WORKFLOW.md"
+      ],
+      "depends_on": [
+        "define-benchmark-contract"
+      ],
+      "required_capabilities": [
+        "task-state-write"
+      ],
+      "deterministic_entrypoint": null,
+      "expected_artifacts": [],
+      "artifact_lifecycle": [],
+      "validation": [
+        "The owning task records the selected architecture, preserved baseline, exclusions, first bounded implementation slice, validation plan, and the next escalation allowed only by measured failure.",
+        "The exact durable workflow identity is pinned when a v2 task formally depends on this workflow."
+      ],
+      "gates": [
+        "project-mutation-authority",
+        "scope-closure"
+      ],
+      "forbidden_mutations": []
+    }
+  ],
+  "forbidden_mutations": [],
+  "idempotency_identity": null
+}
