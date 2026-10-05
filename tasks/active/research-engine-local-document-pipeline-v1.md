@@ -31,7 +31,7 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 243ce2601b7f39231f0bbdaaf402874070be2ab4
+- Remote checkpoint: a3ba5eb388041c3e00f1cf03a697431f8fd993e3
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
@@ -40,25 +40,24 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 ## Next safe action
 
-Keep sustained research disabled and research-engine-daemon.service inactive/dead. research-engine canonical main is 243ce2601b7f39231f0bbdaaf402874070be2ab4; PR #82 head CI 37254700478 and canonical-main CI 37254821768 both PASS. The exact Qwen3.5-4B three-call visual benchmark on clean Lambda main@a3d80e9329e231889b11430f98c0de342349fe1f completed successfully and must not be rerun: 3/3 calls, valid structured outputs, model init 117.64840551599627 s, peak GPU delta 11989 MiB, peak RSS 5807.02734375 MiB, warm max 5.179953836006462 s, 2/2 crop reuse, no package install/download, no scientific-state materialization or production-routing change. The contemporaneous STANDARD Codex control agrees on Figure 6 and establishes the exact Figure 3 same-width identity-shortcut relation; Qwen is now the selected local VLM family, but free-text relation output remains guarded and Codex STANDARD stays the production baseline. Do not test another VLM and do not rerun Qwen for Wave-3. Next, implement on GitHub a narrow guarded Qwen residual adapter and bounded local EXTRACT/VERIFY calibration harness that preserves authoritative PDF/page/bbox/caption/model provenance, safely canonicalizes only deterministic structured fields, rejects/abstains on unsupported relations, and falls through to REMOTE_CODEX_AUTHORITATIVE_PDF. After that code passes PR and canonical-main CI, perform one bounded natural Lambda calibration run; collect R0/R1/R2/R3 and engine/compile/warmup reuse evidence opportunistically from that same boot without extra certification calls.
+Keep sustained research disabled and research-engine-daemon.service inactive/dead. research-engine canonical main is a3ba5eb388041c3e00f1cf03a697431f8fd993e3; PR #83 head CI 37255866525 and canonical-main CI 37255961585 both PASS. Qwen3.5-4B is already selected as the local VLM family; do not rerun the exact three-call visual benchmark and do not test another VLM. Lambda/local is last verified clean on main@a3d80e9329e231889b11430f98c0de342349fe1f. First re-inspect branch/HEAD/worktree and fast-forward only if still clean on main to a3ba5eb388041c3e00f1cf03a697431f8fd993e3; do not reset/stash/clean unrelated work. Keep the daemon stopped. Then run exactly `bash deploy/run-qwen35-guarded-semantic-calibration.sh`. The merged gate requires the existing native-sampler-v3 certified package environment and performs no install/download; it selects exactly one bounded EXTRACT and one radius-0 VERIFY preserved ambiguity case, serves both from one Qwen engine boot, deterministically rejects ungrounded/unbounded output, runs contemporaneous STANDARD Codex controls on the same authoritative-PDF contexts, invokes no SemanticResultMaterializer, changes no production routing, and materializes no scientific state. This same natural boot records the pending Wave-3 R2/engine-init evidence without any C3 or extra certification inference. Return OUTPUT_ROOT, calibration-report.json, and qwen-runtime-reuse-evidence.json; only include qwen-results.json/codex-control-results.json if adjudication needs row-level diagnosis.
 
 ## Remaining work
 
-- Keep sustained research disabled and research-engine-daemon.service inactive/dead. Do not rerun the completed exact three-call Qwen visual benchmark and do not open another VLM family bakeoff.
-- Implement a narrow guarded Qwen visual/semantic residual adapter plus bounded downstream EXTRACT/VERIFY calibration harness on canonical research-engine main@243ce2601b7f39231f0bbdaaf402874070be2ab4. Preserve source PDF SHA, page/bbox, linked caption context, model/runtime lineage, structured field confidence/validation, and explicit authoritative-PDF Codex fallthrough.
-- Canonicalize only intrinsically safe structured fields (for example stable de-duplication of repeated stage-width labels). Do not rewrite or infer unsupported semantic relations; an unvalidated/disagreeing relation must abstain/fall through.
-- After the guarded calibration implementation is CI-validated and merged, re-inspect the Lambda checkout and fast-forward only if it is still clean on main from its last verified local head a3d80e9329e231889b11430f98c0de342349fe1f to the new canonical checkpoint; do not reset/stash/clean unrelated work.
-- Run the bounded downstream calibration once. That natural Qwen engine boot may opportunistically record R0/R1/R2/R3 reuse, total model initialization, torch/vLLM compile time, profiling/warmup, and persistent compile/JIT cache classification versus the successful cold-v3 baseline. Do not add a canary call or rerun solely for efficiency evidence.
-- Keep C3 synthetic same-modality certification designed but disabled until separately authorized. When used later it must share the same live initialized engine with subsequent domain work and must never consume one of the scientific benchmark's exact three calls.
-- After guarded downstream calibration, decide whether to promote Qwen only for the validated residual/question classes while keeping fail-closed Codex/human fallthrough. No production routing or scientific-state materialization occurs before that gate passes.
-- Separately retain the unresolved scan/OCR source-selection work: replace the invalid blank scan target with a content-bearing image-only page before any PP-OCRv6 scan-recovery promotion claim.
+- Keep sustained research disabled and research-engine-daemon.service inactive/dead. Re-inspect the Lambda checkout and fast-forward only if it is still clean on main from a3d80e9329e231889b11430f98c0de342349fe1f to canonical main@a3ba5eb388041c3e00f1cf03a697431f8fd993e3; do not reset, stash, clean, or overwrite unrelated work.
+- Run exactly `bash deploy/run-qwen35-guarded-semantic-calibration.sh`. This is the next natural Qwen engine boot and the only Qwen work authorized now: exactly two semantic calls in one engine session, plus two contemporaneous STANDARD Codex controls.
+- Do not rerun deploy/run-qwen35-visual-benchmark.sh, do not add C3, do not install/download Qwen packages, and do not test another VLM family.
+- Return the visible OUTPUT_ROOT plus calibration-report.json and qwen-runtime-reuse-evidence.json. If the deterministic guard or Qwen-vs-Codex agreement fails, retain Codex and inspect only the relevant qwen-results/codex-control rows; do not broaden the benchmark.
+- Use the natural boot's qwen-runtime-reuse-evidence.json to complete Wave-3 R2 and engine-init before/after measurements. Keep R0/R1/R2/R3 separately classified.
+- If the calibration decision is PROMOTION_CANDIDATE_GUARDED_BOUNDED_SEMANTICS, open a separate production-integration decision for only the validated residual/job classes with mandatory fail-closed Codex/human fallthrough. Do not silently retier all EXTRACT/VERIFY.
+- Retain the separate unresolved PP-OCRv6 scan-source replacement work after the Qwen semantic decision.
 
 ## Blockers / gates
 
 - PP-OCRv6 remains resource-pass / quality-not-promoted; the blank scan target still requires replacement with a content-bearing image-only scan before scan-recovery promotion can be evaluated.
-- PaddleOCR-VL-1.6 is not promoted: it exceeded current resource ceilings and fabricated chart numerics / missed key semantic relations; it remains perception/parser evidence only.
-- Qwen3.5-4B is selected as the local VLM family, but unguarded free-text relation output is not production-promoted. The bounded downstream EXTRACT/VERIFY calibration must prove fail-closed relation validation, provenance preservation, and authoritative-PDF Codex fallthrough.
-- Codex STANDARD EXTRACT/VERIFY remains the production semantic baseline until the bounded guarded-Qwen downstream calibration demonstrates equivalent grounded evidence/provenance quality.
+- PaddleOCR-VL-1.6 remains not promoted because of resource and semantic-quality failures; no further VLM family bakeoff is open.
+- Qwen3.5-4B is the selected local VLM family, but production semantic authority remains Codex STANDARD until the merged guarded EXTRACT/VERIFY calibration gate is executed on Lambda and both local jobs pass deterministic grounding plus contemporaneous Codex agreement.
+- The guarded calibration has not yet been executed on Lambda. Lambda/local remains last verified clean on main@a3d80e9329e231889b11430f98c0de342349fe1f; canonical research-engine main is now a3ba5eb388041c3e00f1cf03a697431f8fd993e3.
 
 ## Fresh-chat initialization
 
