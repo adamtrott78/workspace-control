@@ -24,7 +24,7 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 0e726530c0869dfb126958867cf0b7144e4e28de
+- Remote checkpoint: da5653093799324ba90f45364ec8d6ce752140d2
 - Remote verified: true
 
 ### research-engine
@@ -36,19 +36,20 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 
 ## Next safe action
 
-Start from https://github.com/adamtrott78/workspace-control and the normal root route. Wave-2 efficiency architecture is canonical on main@0e726530c0869dfb126958867cf0b7144e4e28de. Continue field_efficiency_wave2_validation without starting the final cross-repository rollout task. Do not mutate research-engine from this capsule. Use the active research-engine Qwen task as the natural field workload and preserve its exact durable next_safe_action; through that task's own authority, measure/test layered host/build plus exact execution-path preflight, exact runtime/wheel reuse, compact early-failure receipts, content-addressed deterministic render reuse, Git mutation/write-call behavior, and task-handoff synchronization overhead. Keep package/model/cache specifics project-local and return measured evidence before promoting further shared implementation.
+Start from https://github.com/adamtrott78/workspace-control and the normal root route. The current canonical base for this Wave-3 design is main@da5653093799324ba90f45364ec8d6ce752140d2. Complete and validate field_efficiency_wave3_design on branch throughput-efficiency-wave3-design-v1. Do not start the final cross-repository rollout task and do not mutate research-engine from this capsule. Preserve the active research-engine Qwen task's exact durable next_safe_action; use its natural retries only as field evidence to calibrate C2a backend/toolchain resolution, C2b engine boot, C3 same-modality canary, persistent compile-cache reuse, subprocess failure envelopes, resumable stage receipts, structured process identity, bounded diagnosis, and control-cycle latency. Keep Qwen/vLLM/FlashInfer/package/model/scientific specifics project-local. After FULL_INTEGRATION validation and promotion, synchronize the task checkpoint and move to Wave-3 field validation.
 
 ## Remaining work
 
-- Use the current research-engine Qwen task as the primary Wave-2 field workload without replacing or weakening its durable next_safe_action.
-- Measure layered runtime preflight: host/build selection before heavyweight install, then exact vLLM multimodal import/native-library/CUDA smoke validation before deterministic render or inference.
-- Measure exact runtime/wheel cache reuse with a canonical identity plus verified wheel hashes and a matching execution-path smoke receipt.
-- Implement/measure compact failure receipts for early benchmark failure and compare receipt size plus diagnosis tool calls against full console-log handoff.
-- Measure content-addressed deterministic render reuse using complete PDF SHA/page/bbox/DPI/renderer identity; incomplete identity must fail closed to rerender.
-- Design the follow-up task-sync implementation so authoritative task JSON and derived Markdown are one semantic mutation transaction instead of two independently managed surfaces.
-- Continue measuring connector write capability and file/write/commit counts; the advertised expected_sha lease remains broken on the current connector despite appearing in its schema.
-- Continue opportunistic TARGETED_PR measurement on real changes; do not manufacture churn only to obtain a benchmark.
-- Do not create the final repo-by-repo efficiency rollout task until Wave-2 field validation stops uncovering substantive shared architecture changes.
+- Validate and promote the Wave-3 design without creating the final cross-repository rollout task.
+- Continue using the active research-engine Qwen task as a natural field workload through its own authority; do not mutate research-engine from this capsule.
+- Calibrate C2a backend/toolchain resolution against the demonstrated FlashInfer/nvcc failure and any subsequent natural backend selection evidence.
+- Calibrate C2b real engine-boot certification and record cold versus persistent compile/JIT cache behavior on required natural retries.
+- Define the minimum C3 same-modality synthetic canary that proves request-path viability without consuming scientific/domain inputs.
+- Prototype generic failure-envelope fields that preserve first causal child/JIT/subprocess errors while keeping full logs referenced rather than inlined.
+- Measure interruption recovery and root-cause-to-durable-correction control-cycle latency; treat repeated opaque reasoning/recovery cycles as first-class waste.
+- Measure append-only Git mutation with fewer dedicated rereads while preserving non-fast-forward safety and hard verification at semantic boundaries.
+- Continue task JSON→Markdown semantic-transaction work; authoritative JSON must remain the single edit surface.
+- Freeze Wave 3 only after the architecture survives additional natural runtime evidence without substantive shared redesign; only then plan broad rollout.
 
 ## Blockers / gates
 
