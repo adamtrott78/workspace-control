@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/scope_envelope.v1.schema.json",
+  "title": "Workspace Control Scope Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "objective",
+    "next_safe_action",
+    "allowed_now",
+    "defer_by_default",
+    "explicit_authorizations",
+    "closure_policy"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "objective": {"type": "string", "minLength": 1},
+    "next_safe_action": {"type": "string", "minLength": 1},
+    "allowed_now": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "defer_by_default": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "explicit_authorizations": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "closure_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stop_when_objective_satisfied",
+        "defer_nonblocking_findings",
+        "require_validation_pass",
+        "require_durable_checkpoint"
+      ],
+      "properties": {
+        "stop_when_objective_satisfied": {"type": "boolean"},
+        "defer_nonblocking_findings": {"type": "boolean"},
+        "require_validation_pass": {"type": "boolean"},
+        "require_durable_checkpoint": {"type": "boolean"}
+      }
+    }
+  }
+}
