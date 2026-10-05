@@ -1,6 +1,6 @@
 {
   "name": "workspace-heartbeat",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "MCP heartbeat tool and ChatGPT conversation panel for workspace-control.",
