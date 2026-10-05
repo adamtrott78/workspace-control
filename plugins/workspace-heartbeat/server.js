@@ -10,7 +10,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
-const PANEL_URI = "ui://workspace-heartbeat/panel-v2.html";
+const PANEL_URI = "ui://workspace-heartbeat/panel-v3.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
   "utf8",
@@ -45,7 +45,7 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.2.0",
+      version: "0.3.0",
     },
     {
       instructions:
