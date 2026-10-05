@@ -24,7 +24,7 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: e25ba2c4e602a525b213450bf8a9c2f5014321e0
+- Remote checkpoint: 54758e227ed452ac0d7598889158ddd04e254a4c
 - Remote verified: true
 
 ### research-engine
@@ -36,20 +36,17 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 
 ## Next safe action
 
-Start from https://github.com/adamtrott78/workspace-control and the normal root route. Wave-3 execution-certification and control-cycle architecture is canonical on main@e25ba2c4e602a525b213450bf8a9c2f5014321e0. Continue field_efficiency_wave3_validation; do not start the final cross-repository rollout task and do not mutate research-engine from this capsule. Preserve the active research-engine Qwen task's exact durable next_safe_action and use only its natural retries as field evidence. Prioritize: (1) C2a backend/toolchain resolution and explicit backend identity, (2) C2b real engine boot plus persistent compile/JIT cache cold-vs-reuse measurement, (3) a minimal C3 same-modality synthetic canary before reusable runtime-ready certification, (4) structured child/JIT/subprocess failure envelopes, (5) idempotent interruption recovery, and (6) root-cause-to-durable-correction/control-cycle latency. Keep Qwen/vLLM/FlashInfer/package/model/scientific specifics project-local. Freeze Wave 3 only when its exit criteria survive additional natural evidence without substantive shared redesign.
+Start from https://github.com/adamtrott78/workspace-control and the normal root route. Wave-3 shared runtime-certification/recovery primitives are implemented and FULL_INTEGRATION validated on main@54758e227ed452ac0d7598889158ddd04e254a4c through scripts/runtime_certification.py plus runtime certification/operation/failure-envelope schemas and focused tests. Continue field_efficiency_wave3_validation without rerunning workloads solely for telemetry and without weakening any owning project's scientific or production next_safe_action. On the next natural heavyweight-runtime work, adopt the shared primitives opportunistically and collect only the remaining evidence: (1) verified R2 compile/JIT cache cold-vs-reuse timing under unchanged execution identity; (2) one actual C3 same-modality synthetic canary that shares the already-booted engine with subsequent domain work; (3) compact operation/certification receipts and any structured causal failure envelope; and (4) control-cycle/recovery measurements when naturally observable. Keep project-specific model/backend/package/scientific facts project-local. If R2 and C3 pass without exposing a new shared mechanism, freeze Wave 3 and prepare the cross-repository rollout task.
 
 ## Remaining work
 
-- Use natural owning-project work, beginning with the active research-engine Qwen task, to validate Wave-3 mechanisms without replacing or weakening the owning task's next_safe_action.
-- Measure C2a execution-backend/toolchain resolution against dynamic optional backend requirements; backend choice must be explicit execution identity, not silent fallback.
-- Measure C2b real engine boot and persistent compile/JIT cache behavior on required natural retries; preserve partial-init resource values as diagnostic only.
-- Define and validate a minimal C3 same-modality synthetic canary; reusable runtime-ready certification must not be written before C3 passes.
-- Capture the first causal child/JIT/subprocess error in a compact failure envelope so routine diagnosis does not require full console logs.
-- Demonstrate interruption recovery from durable operation/stage receipts with no repeat of already valid expensive stages.
-- Measure root-cause-to-durable-correction and total control-cycle latency, including avoidable assistant/recovery cycles when observable.
-- Continue append-only Git mutation measurement with direct-descendant force=false updates and verification coalesced at semantic boundaries; use conservative CAS/read paths outside that invariant.
-- Implement the generic task-sync helper only after Wave-3 field evidence stops changing the required receipt/task fields.
-- Do not create the final cross-repository rollout task until Wave-3 exit criteria are met and new findings are predominantly project-specific.
+- Use the merged shared implementation at workspace-control main@54758e227ed452ac0d7598889158ddd04e254a4c for future heavyweight-runtime work; owning projects may adopt it incrementally without changing their scientific/production authority.
+- On the next natural second engine boot under an unchanged execution identity, measure R2 persistent compile/JIT cache reuse against the cold-v3 baseline (18.17 s compile, 48.84 s profiling/warmup, 117.6484 s total model initialization). Do not rerun solely for telemetry.
+- Execute one owning-project C3 same-modality synthetic canary when naturally authorized. It must be cheap, non-scientific, and share the already-booted engine with subsequent domain work rather than triggering a second model boot.
+- Return compact operation/certification receipts and failure envelopes by default; retrieve full logs only when the compact evidence does not identify the first causal failure.
+- Continue measuring control-cycle latency and interruption recovery opportunistically, especially root-cause-to-durable-correction delay and duplicate-stage work avoided.
+- Implement the generic task-sync helper after Wave-3 receipt/task fields remain stable through the next natural adoption.
+- Freeze Wave 3 and open the final cross-repository rollout task once R2 reuse and one real C3 adoption pass without revealing a new shared control-plane mechanism.
 
 ## Blockers / gates
 

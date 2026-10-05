@@ -1,6 +1,26 @@
 # Throughput Efficiency Wave 3 — Execution Certification and Control-Cycle Economy
 
-Status: **design candidate**
+Status: **implemented v1; field validation active**
+
+## Shared implementation
+
+Wave-3 shared control-plane primitives are implemented on workspace-control
+main at commit `54758e227ed452ac0d7598889158ddd04e254a4c` (PR #56,
+FULL_INTEGRATION run 37257188954 PASS).
+
+Implemented surfaces:
+
+- `scripts/runtime_certification.py`: canonical execution/operation identities,
+  C0-C4 stage validation, typed certification invalidation, R0-R3 reuse state,
+  idempotent recovery decisions, and structured process matching;
+- `schemas/runtime_certification.v1.schema.json`;
+- `schemas/runtime_operation_receipt.v1.schema.json`;
+- `schemas/runtime_failure_envelope.v1.schema.json`;
+- `tests/test_runtime_certification.py`: 16 focused regression tests.
+
+Implementation does not move project-specific model/backend/scientific truth into
+workspace-control. Field validation remains active for verified R2 compile/JIT
+cache reuse and the first real owning-project C3 same-modality canary.
 
 ## Purpose
 
