@@ -74,7 +74,7 @@
       "local": {
         "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
         "branch": "main",
-        "head_sha": "7a26e648ec409c96a3f9b7c8620f566658700894",
+        "head_sha": "d0debd205de46a608fce5b9a15f3fa0fdd6de4e6",
         "clean": true
       },
       "allowed_mutation_scope": [
@@ -1524,28 +1524,66 @@
         "GPU telemetry is baseline-delta by selected GPU UUID and host-memory telemetry covers the full vLLM process tree, not only the parent process.",
         "No daemon start, Codex call, production routing change, alternate model download, or scientific-state materialization is allowed by this initial local gate."
       ]
+    },
+    {
+      "check": "First Qwen3.5-4B Lambda runtime attempt with default vLLM 0.30.0 install",
+      "result": "BLOCKED_DRIVER_CUDA13_ZERO_INFERENCE",
+      "evidence": [
+        "Lambda ran research-engine main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6 with scientific_state_materialized=false and selected idle GPU 0 (RTX A4500).",
+        "The exact validated Figure 6 and Figure 3 regions were rendered successfully before runtime initialization.",
+        "The default pip-installed vLLM 0.30.0 environment reached the CUDA allocation preflight and failed with RuntimeError: NVIDIA driver too old, found driver API version 12080.",
+        "The failure occurred before Qwen model inference; no QWEN_CALL_START event occurred and no semantic/model-quality evidence was produced.",
+        "This result is runtime-binary/driver compatibility evidence only and must not be scored as Qwen quality."
+      ]
+    },
+    {
+      "check": "Qwen3.5-4B CUDA 12.9 isolated runtime rebuild preflight",
+      "result": "PASS_CUDA_ALLOCATION",
+      "evidence": [
+        "The failed isolated Qwen runtime was rebuilt using vLLM 0.30.0 CUDA-12.9 plus torch 2.13.0+cu129.",
+        "Runtime preflight reported cuda_allocation_probe=PASS on NVIDIA RTX A4500.",
+        "Reported runtime identity: torch=2.13.0+cu129, torch_cuda_runtime=12.9, vllm=0.30.0, vllm_cuda_build=cu129.",
+        "This proves the current host driver can execute the CUDA-12.9 Torch allocation path; no host-driver update was required for this preflight."
+      ]
+    },
+    {
+      "check": "Qwen3.5-4B CUDA 12.9 benchmark rerun",
+      "result": "BLOCKED_TORCHCODEC_NVRTC13_ZERO_INFERENCE",
+      "evidence": [
+        "Benchmark reran from research-engine main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6 with scientific_state_materialized=false.",
+        "Visible output root was /home/atrott/adamArchives/Adam/workspace-control-tmp/qwen35-visual-benchmark-20261005T000739Z.",
+        "GPU 0 was selected with 20,037 MiB free and 18 MiB baseline usage; the authoritative semantic-visual PDF was found at the previously validated source path.",
+        "Figure 6 rerendered at 1650x414 pixels from page index 7 using bbox [99.19828033447266,72.1703872680664,495.0450134277344,171.62620544433594].",
+        "Figure 3 rerendered at 980x2261 pixels from page index 3 using bbox [50.5037956237793,76.09317016601562,285.709716796875,618.7928466796875].",
+        "The runner's CUDA 12.9 allocation preflight passed again before the benchmark helper started.",
+        "Importing vLLM inside run_qwen35_visual_benchmark.py then failed before any Qwen inference because torchcodec/libtorchcodec_image.so attempted to load libnvrtc.so.13, which was absent.",
+        "Observed terminal cause: OSError: libnvrtc.so.13: cannot open shared object file, followed by OSError loading torchcodec/libtorchcodec_image.so.",
+        "No QWEN_CALL_START event occurred, so candidate inference count remains zero and no Qwen quality, latency, VRAM, or process-tree RSS result exists from this attempt.",
+        "The failure must remain classified as isolated runtime/dependency compatibility evidence, not Qwen model-quality evidence."
+      ]
     }
   ],
   "blockers": [
     "PP-OCRv6 remains resource-pass / quality-not-promoted; the blank scan target still requires replacement with a content-bearing image-only scan before scan-recovery promotion can be evaluated.",
     "PaddleOCR-VL-1.6 direct element-level inference completed but is not promoted: it exceeded current VRAM/latency ceilings and, more importantly, fabricated chart numerics and failed key panel/shortcut relations. It remains perception/parser evidence only.",
-    "Qwen3.5-4B targeted visual-semantic inference is implemented and CI-validated but has not yet executed on Lambda, so actual vLLM CUDA compatibility, quality, latency, VRAM, and process-tree RSS remain unmeasured.",
-    "The vLLM 0.30.0 runtime must pass its CUDA allocation sentinel on the actual Lambda before model loading; a failure there is a runtime-binary compatibility result, not a Qwen model-quality result.",
-    "A broader local semantic replacement for routine EXTRACT/VERIFY remains unopened until Qwen's visual-semantic benchmark is adjudicated.",
+    "Qwen3.5-4B visual-semantic model quality is still unmeasured because both Lambda attempts failed before the first candidate inference.",
+    "The default vLLM 0.30.0 runtime selected a CUDA-13 path incompatible with the host driver API version 12080; this was bypassed by an isolated CUDA-12.9 vLLM/Torch rebuild whose CUDA allocation probe passed.",
+    "The CUDA-12.9 rebuild then failed during vLLM import because torchcodec/libtorchcodec_image.so attempted to load libnvrtc.so.13. The exact runtime/dependency composition must be reconciled before Qwen inference can begin.",
+    "A broader local semantic replacement for routine EXTRACT/VERIFY remains unopened until Qwen's visual-semantic benchmark is actually executed and adjudicated.",
     "Codex STANDARD EXTRACT/VERIFY remains the production semantic baseline until bounded local controls demonstrate equivalent evidence/provenance quality."
   ],
   "remaining_work": [
-    "On Lambda with research-engine-daemon.service inactive/dead, require clean main@7a26e648ec409c96a3f9b7c8620f566658700894, fetch origin/main, require origin/main=d0debd205de46a608fce5b9a15f3fa0fdd6de4e6, and fast-forward only to that canonical Qwen benchmark commit.",
-    "Run bash deploy/run-qwen35-visual-benchmark.sh. Preserve the visible OUTPUT_ROOT and return qwen35-visual-benchmark-report.json, or the first hard error. Existing Figure 6/Figure 3 crops are already validated, so re-upload is unnecessary unless the rerender differs.",
-    "If the CUDA allocation sentinel fails before model inference, classify it strictly as vLLM runtime-binary/driver incompatibility and choose a compatible local runtime deliberately; do not score Qwen quality from a zero-inference failure.",
-    "If Qwen executes, score Figure 6 panel/model sets, line-style semantics, plain-110 absence, empty curve_numeric_estimates, and zero fabricated facts; score Figure 3 architecture columns, shortcut presence/relations, channel widths, caption FLOPs, and zero fabricated facts.",
-    "Analyze quality separately from resource-policy outcome. If Qwen quality is exceptional but a current latency/VRAM ceiling fails, open an explicit serving/resource optimization or policy-reconsideration gate rather than silently changing the governing thresholds.",
-    "If Qwen visual quality passes, run a separate contemporaneous authoritative-PDF Codex visual control on the exact same evidence questions before any promotion.",
-    "After visual control success, open bounded local Qwen EXTRACT and VERIFY calibration: EXTRACT <=4 authoritative pages; VERIFY exact radius-0 cited page; exact quote/page provenance; zero fabricated/unlocatable evidence; contemporaneous STANDARD Codex controls; measure remote-call avoidance and token savings.",
-    "Only after those semantic controls should production EXTRACT/VERIFY routing change. Continue to reserve remote STANDARD Codex for disagreement/low-confidence/fallback cases.",
-    "Evaluate MinerU2.5-Pro, Granite-Docling, DePlot/ChartGemma, or optimized PaddleOCR-VL only where measured residuals justify a cheaper specialized perception tier."
+    "Continue from research-engine main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6 with the daemon inactive/dead and sustained research disabled.",
+    "Treat the first default-vLLM CUDA-13 failure and the later torchcodec/libnvrtc.so.13 failure strictly as zero-inference runtime evidence; do not draw any Qwen quality conclusion from either attempt.",
+    "Diagnose the isolated Qwen vLLM 0.30.0 CUDA-12.9 environment so the full vLLM import path no longer requires unavailable libnvrtc.so.13 while preserving the already-passing torch 2.13.0+cu129 CUDA allocation path.",
+    "Do not update the host NVIDIA driver merely to resolve the already-bypassed default CUDA-13 preflight unless later evidence establishes that a host-driver change is actually required.",
+    "Before rerunning the three-call benchmark, add or execute a fail-fast import/runtime preflight that imports the same vLLM multimodal path used by run_qwen35_visual_benchmark.py, not only torch.cuda allocation.",
+    "Once the runtime import preflight passes, rerun the exact existing Qwen3.5-4B Figure 6/Figure 3 benchmark without changing source PDF, bboxes, prompts, model revision, inference count, quality thresholds, daemon policy, or scientific-state boundary.",
+    "If three Qwen calls complete, score Figure 6 panel/model sets, line-style semantics, plain-110 absence, empty curve_numeric_estimates, and zero fabricated facts; score Figure 3 architecture columns, shortcut presence/relations, channel widths, caption FLOPs, and zero fabricated facts.",
+    "Analyze Qwen quality separately from resource-policy outcome. If visual quality passes, run the separate contemporaneous authoritative-PDF Codex control before any promotion.",
+    "Only after visual-control success should bounded local Qwen EXTRACT/VERIFY calibration open."
   ],
-  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Treat research-engine remote main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6 as the canonical Qwen3.5-4B targeted visual-semantic benchmark baseline and Lambda/local main@7a26e648ec409c96a3f9b7c8620f566658700894 as the last verified clean local state. On Lambda require branch=main, clean checkout, and daemon inactive/dead PID 0; fetch origin and require origin/main exactly d0debd205de46a608fce5b9a15f3fa0fdd6de4e6, then fast-forward only to that commit. Run bash deploy/run-qwen35-visual-benchmark.sh. Return the visible OUTPUT_ROOT plus qwen35-visual-benchmark-report.json, or the first hard error. The runner must first prove vLLM/Torch CUDA allocation on the selected GPU; a pre-inference CUDA failure is runtime compatibility only. If three Qwen calls complete, evaluate semantic quality separately from resource ceilings. Do not start the daemon, invoke Codex during this initial local gate, change production routing, download alternate model weights, or materialize scientific state.",
+  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Continue from research-engine main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6. Preserve the existing Qwen3.5-4B targeted visual-semantic benchmark contract and exact validated Figure 6/Figure 3 inputs. Treat the completed CUDA-12.9 allocation probe as PASS: torch 2.13.0+cu129, CUDA runtime 12.9, vLLM 0.30.0, RTX A4500 all allocated successfully. The current blocker occurs later, before the first Qwen call: importing vLLM pulls torchcodec/libtorchcodec_image.so, which attempts to load unavailable libnvrtc.so.13 and raises OSError. No QWEN_CALL_START occurred, candidate inference remains zero, and no Qwen quality/resource result exists. First diagnose and correct only this isolated runtime/dependency compatibility problem, adding a fail-fast preflight that imports the same vLLM multimodal path used by the benchmark helper. Do not score Qwen, change benchmark inputs/prompts/thresholds, start the daemon, invoke Codex, change production routing, materialize scientific state, or update the host driver unless later evidence requires it. Once the full vLLM import/runtime preflight passes, rerun bash deploy/run-qwen35-visual-benchmark.sh and return the visible OUTPUT_ROOT plus qwen35-visual-benchmark-report.json or the first hard error.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
