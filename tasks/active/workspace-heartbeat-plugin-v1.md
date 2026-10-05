@@ -24,22 +24,22 @@ Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel 
 
 - Intent: mutate
 - Remote branch: heartbeat-v2-smoke-checkpoint
-- Remote checkpoint: 9303ab5708e0622747e63601b0372e74521fd8a8
+- Remote checkpoint: fd615356972cbe1d306cca793c387badf2f7168a
 - Remote verified: true
 
 ## Next safe action
 
-Validate and deploy Workspace Heartbeat v0.3.2. The key live test is now narrow: with panel-v5 mounted and left open, a model-initiated heartbeat_update must appear in the existing sidebar without closing/reopening it, while the idle panel remains free of recurring heartbeat_get traffic. Do not redesign heartbeat cadence: retained history already proves at least seven heartbeat updates were emitted during the long research turn; the earlier two-update appearance was a stale mounted-panel display problem.
+Validate and deploy Workspace Heartbeat v0.3.3. The next live acceptance should exercise both fixes together: leave panel-v6 mounted, verify model-initiated heartbeat_update results appear without closing/reopening, and when ownership moves to a child durable task in the same chat, verify prior-task updates remain visible with a task-boundary label while child-task updates append. The panel must remain event-driven only with no recurring heartbeat_get polling.
 
 ## Remaining work
 
-- Validate the final v0.3.2 PR #69 head through workspace-control CI once the unrelated research-engine task-contract state on main no longer invalidates the repository.
-- Deploy the exact validated v0.3.2 head/canonical merge to the isolated Lambda heartbeat runtime and restart workspace-heartbeat.
-- Recreate the ChatGPT custom plugin so the updated tool metadata and panel-v5.html resource are loaded.
-- Keep the heartbeat sidebar open and allow ordinary research work to emit a new heartbeat_update; verify it appears live without closing/reopening the panel.
-- Confirm there is still no recurring background heartbeat_get traffic while idle.
-- Treat occasional isolated 400 responses during plugin/panel initialization separately from recurring application polling; investigate only if they correlate with failed heartbeat delivery.
-- Close the heartbeat task after live mounted refresh, idle quietness, and normal heartbeat delivery all pass.
+- Validate the final Workspace Heartbeat v0.3.3 PR #69 head through workspace-control CI.
+- If validation passes, merge the exact head and deploy the canonical merge to the isolated Lambda heartbeat runtime.
+- Restart workspace-heartbeat and recreate/refresh the custom MCP plugin so panel-v6.html and the v0.3.3 tool schema are loaded.
+- With the sidebar left mounted, verify a new heartbeat_update appears live without close/reopen and no recurring background heartbeat_get traffic occurs.
+- During a real durable task ownership change in the same research chat, verify prior-task heartbeats remain visible, a task-boundary label appears, and new-task heartbeats append to the same bounded operator timeline.
+- Treat isolated 400 responses during plugin/panel initialization separately from recurring application polling; only investigate further if they correlate with failed heartbeat delivery.
+- Close the heartbeat task after mounted live refresh, idle quietness, normal delivery, and cross-task timeline continuity all pass.
 
 ## Blockers / gates
 
