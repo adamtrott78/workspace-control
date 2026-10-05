@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
-- Status: VALIDATING
+- Status: BLOCKED_EVIDENCE
 - Capsule schema: v2
 
 ## Goal
@@ -29,21 +29,19 @@ Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel 
 
 ## Next safe action
 
-Validate and deploy Workspace Heartbeat v0.3.3. The next live acceptance should exercise both fixes together: leave panel-v6 mounted, verify model-initiated heartbeat_update results appear without closing/reopening, and when ownership moves to a child durable task in the same chat, verify prior-task updates remain visible with a task-boundary label while child-task updates append. The panel must remain event-driven only with no recurring heartbeat_get polling.
+Do not change heartbeat source further. Wait for the owning research chat to restore a schema-valid research-engine-local-document-pipeline-v1 capsule on workspace-control main, then rerun PR #69 validation on the unchanged v0.3.3 head. Merge/deploy only after heartbeat validation actually runs and passes.
 
 ## Remaining work
 
-- Validate the final Workspace Heartbeat v0.3.3 PR #69 head through workspace-control CI.
-- If validation passes, merge the exact head and deploy the canonical merge to the isolated Lambda heartbeat runtime.
-- Restart workspace-heartbeat and recreate/refresh the custom MCP plugin so panel-v6.html and the v0.3.3 tool schema are loaded.
-- With the sidebar left mounted, verify a new heartbeat_update appears live without close/reopen and no recurring background heartbeat_get traffic occurs.
-- During a real durable task ownership change in the same research chat, verify prior-task heartbeats remain visible, a task-boundary label appears, and new-task heartbeats append to the same bounded operator timeline.
-- Treat isolated 400 responses during plugin/panel initialization separately from recurring application polling; only investigate further if they correlate with failed heartbeat delivery.
-- Close the heartbeat task after mounted live refresh, idle quietness, normal delivery, and cross-task timeline continuity all pass.
+- Wait for the owning research chat to restore schema-valid research-engine-local-document-pipeline-v1 state; do not mutate that concurrent task here.
+- Rerun PR #69 validation on unchanged heartbeat v0.3.3.
+- After a real heartbeat validation pass, merge and deploy panel-v6.html.
+- Verify mounted live refresh without close/reopen, idle quietness, and cross-task timeline continuity.
+- Close the task only after those live checks pass.
 
 ## Blockers / gates
 
-- None.
+- PR #69 validation is blocked by an unrelated invalid research-engine-local-document-pipeline-v1 task capsule on current workspace-control main; CI exits during task-contract validation before heartbeat tests run.
 
 ## Fresh-chat initialization
 
