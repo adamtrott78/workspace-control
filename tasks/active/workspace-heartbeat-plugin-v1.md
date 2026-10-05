@@ -24,22 +24,21 @@ Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel 
 
 - Intent: mutate
 - Remote branch: heartbeat-v2-smoke-checkpoint
-- Remote checkpoint: f542f3bed7a3555877eb7bff14a38b13a4921692
+- Remote checkpoint: ff9347f347540fbe0f2a20b8b5106e80dc4572e5
 - Remote verified: true
 
 ## Next safe action
 
-Validate the v0.3 event-driven/adaptive correction at f542f3bed7a3555877eb7bff14a38b13a4921692 through workspace-control PR #69. If CI passes, merge it, deploy the canonical commit to the Lambda, restart workspace-heartbeat, load panel-v3.html in ChatGPT, and first verify the idle MCP request rate is no longer approximately one POST per second. Then resume the normal multi-heartbeat stability smoke.
+Validate the final event-driven-only Workspace Heartbeat v0.3.1 head on PR #69. After CI passes, merge and deploy the canonical commit, mount panel-v4.html, and verify that an idle open panel produces no recurring MCP heartbeat_get traffic while ordinary heartbeat_update calls still append promptly. Multi-heartbeat history itself is already proven PASS and must not be repeated as a prerequisite.
 
 ## Remaining work
 
-- Run workspace-control validation on PR #69 with the v0.3 source and synchronized task state.
-- If validation passes, merge the exact PR head and sync the Lambda workspace-control checkout to the canonical merge.
-- Restart workspace-heartbeat so server v0.3 and panel-v3.html are served.
-- Recreate or refresh the ChatGPT custom MCP plugin if needed so the panel-v3 resource is loaded.
-- With the panel open and otherwise idle, verify MCP request volume drops sharply from the v0.2 approximately one-request-per-second stream.
-- Resume normal research work and verify multiple heartbeats append chronologically without false IDLE, erasure, or UNAVAILABLE.
-- Close the task only after both request-rate/availability and multi-heartbeat history pass.
+- Validate the final event-driven-only v0.3.1 PR #69 head through workspace-control CI.
+- If validation passes, merge the exact head and deploy the canonical merge to the Lambda heartbeat runtime.
+- Restart workspace-heartbeat and recreate/refresh the custom MCP plugin so panel-v4.html is mounted.
+- Open the panel and observe the MCP/ngrok console while idle; there must be no recurring background heartbeat_get traffic.
+- Trigger ordinary research work with one or more heartbeat_update calls and confirm updates still append promptly through ui/notifications/tool-result without UNAVAILABLE.
+- If idle request-rate and delivery availability pass, mark panel_stability_correction VALIDATED and close the heartbeat task.
 
 ## Blockers / gates
 
