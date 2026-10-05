@@ -2,12 +2,12 @@
   "schema_version": 2,
   "task_id": "workspace-heartbeat-plugin-v1",
   "title": "Workspace Heartbeat MCP Plugin v1",
-  "status": "VALIDATING",
+  "status": "BLOCKED_RUNTIME",
   "goal": "Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel UI so long-running workspace-control tasks can publish natural-language progress through a real tool call into one continuously updating side panel.",
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control",
-  "current_stage": "repository_validation",
+  "current_stage": "local_developer_mode_handoff",
   "acceptance_criteria": [
     "Expose a model-callable heartbeat_update tool whose user-facing progress content is natural prose rather than rigid structured headings.",
     "Expose a read-only heartbeat_get tool that returns the latest heartbeat for the current ChatGPT conversation and optional task ID.",
@@ -36,8 +36,8 @@
       "intent": "mutate",
       "base_sha": "b6fcc8562c919d506b491aac6d0f046b8b8c7186",
       "remote": {
-        "branch": "workspace-heartbeat-plugin-v1",
-        "checkpoint_sha": "abdd2315af71748c9c369e4cb076981a9d214f54",
+        "branch": "main",
+        "checkpoint_sha": "3487c55f6cc604eb046547d419c7511544ac256f",
         "verified": true
       },
       "local": null,
@@ -110,7 +110,7 @@
     },
     {
       "id": "repository_validation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -118,15 +118,26 @@
         "mvp_implementation"
       ],
       "outputs": [
-        "workspace-control CI result",
-        "targeted plugin static/unit validation evidence"
+        "workspace-control PR #64",
+        "merged implementation checkpoint git:3487c55f6cc604eb046547d419c7511544ac256f",
+        "Workspace Control Validation run 37266748021"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Workspace-control FULL_INTEGRATION",
+          "result": "PASS",
+          "evidence": [
+            "PR #64 run 37266748021 completed SUCCESS.",
+            "Changed task contracts, unit regression, and full integration contracts all passed.",
+            "PR #64 merged as 3487c55f6cc604eb046547d419c7511544ac256f."
+          ]
+        }
+      ],
       "resume_condition": "MVP source is durably committed on the task branch."
     },
     {
       "id": "local_developer_mode_handoff",
-      "status": "PLANNED",
+      "status": "SUSPENDED",
       "execution_owner": "human+chatgpt",
       "selected_executor": "human",
       "selected_surface": "lambda+chatgpt-developer-mode",
@@ -139,7 +150,7 @@
         "ChatGPT conversation-panel smoke result"
       ],
       "validation": [],
-      "resume_condition": "Repository implementation is validated and exact branch/commit is known."
+      "resume_condition": "User runs the bounded local npm/MCP Inspector/tunnel setup and connects the MCP endpoint in ChatGPT Developer mode."
     }
   ],
   "checkpoints": [
@@ -161,6 +172,16 @@
         "MVP source committed on workspace-heartbeat-plugin-v1.",
         "Exact implementation diff contains six plugin files plus the task capsule/handoff."
       ]
+    },
+    {
+      "id": "canonical-mvp",
+      "kind": "git_checkpoint",
+      "identity": "git:3487c55f6cc604eb046547d419c7511544ac256f",
+      "required_for_resume": true,
+      "evidence": [
+        "workspace-heartbeat MCP plugin MVP merged to canonical workspace-control main.",
+        "Repository validation passed before merge."
+      ]
     }
   ],
   "artifacts": [],
@@ -173,12 +194,12 @@
       ]
     },
     {
-      "check": "Plugin implementation preflight",
+      "check": "Plugin implementation validation",
       "result": "PASS",
       "evidence": [
-        "Focused dependency-free store tests passed 4/4.",
-        "JavaScript parse checks passed.",
-        "MVP source checkpoint is git:abdd2315af71748c9c369e4cb076981a9d214f54."
+        "Focused preflight tests passed.",
+        "Workspace-control PR #64 FULL_INTEGRATION run 37266748021 passed.",
+        "Canonical merged checkpoint is 3487c55f6cc604eb046547d419c7511544ac256f."
       ]
     },
     {
@@ -189,16 +210,20 @@
       ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Open and pass workspace-control PR validation for the exact MVP branch.",
-    "After repository validation, run npm install/npm test and MCP Inspector on the user's Lambda or another local machine with network access.",
-    "Expose the local MCP endpoint through an HTTPS development tunnel and connect it in ChatGPT Developer mode.",
-    "Open the thread panel, call heartbeat_update from a test chat, and verify the same panel updates in place.",
-    "Only after the developer-mode smoke succeeds, decide whether persistence, OAuth, public hosting, history, or SSE/event push are actually needed."
+  "blockers": [
+    "Live panel smoke requires a human-accessible local runtime plus ChatGPT Developer-mode MCP connection; this executor cannot create the user's local tunnel or install the custom MCP connection on their behalf."
   ],
-  "next_safe_action": "Open a workspace-control PR for workspace-heartbeat-plugin-v1 and require repository validation on the exact branch head. If it passes, stop repository implementation and hand off one local developer-mode smoke sequence: npm install/test, MCP Inspector, HTTPS tunnel, ChatGPT Developer-mode connection, thread-panel open, and heartbeat_update in-place refresh verification. Do not add persistence/auth/hosting/history/SSE before that smoke.",
+  "remaining_work": [
+    "On the user's machine, fast-forward workspace-control main to the canonical MVP checkpoint and enter plugins/workspace-heartbeat.",
+    "Run npm install, npm test, and start the MCP server.",
+    "Verify the local MCP endpoint with MCP Inspector.",
+    "Expose port 8787 through an HTTPS development tunnel.",
+    "Enable ChatGPT Developer mode, add the HTTPS /mcp endpoint as a personal plugin, and open the thread panel beside a test conversation.",
+    "Call heartbeat_update twice and verify the same panel box updates in place with increasing sequence numbers.",
+    "Only after the live smoke succeeds, decide whether persistence, OAuth, public hosting, history, or push events are warranted."
+  ],
+  "next_safe_action": "On the user's machine, sync workspace-control main to 3487c55f6cc604eb046547d419c7511544ac256f, then run the bounded local developer-mode smoke from plugins/workspace-heartbeat: npm install; npm test; npm start; inspect http://localhost:8787/mcp with MCP Inspector; expose port 8787 through an HTTPS development tunnel; add the resulting https://.../mcp endpoint in ChatGPT Developer mode; open the thread conversation panel; invoke heartbeat_update twice and confirm one panel updates in place. Return exact npm/Inspector/tunnel/ChatGPT evidence. Do not add persistence/auth/hosting/history/SSE before this smoke.",
   "last_executor": "chatgpt",
-  "last_surface": "web+github",
-  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while keeping heartbeat prose natural and easy to read."
+  "last_surface": "github",
+  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while keeping heartbeat prose natural and easy to read. Repository implementation is complete and canonical. The only active boundary is the live local/ChatGPT developer-mode smoke."
 }

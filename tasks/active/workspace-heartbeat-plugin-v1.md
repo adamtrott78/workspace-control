@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
-- Status: VALIDATING
+- Status: BLOCKED_RUNTIME
 - Capsule schema: v2
 
 ## Goal
@@ -23,25 +23,27 @@ Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel 
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-heartbeat-plugin-v1
-- Remote checkpoint: abdd2315af71748c9c369e4cb076981a9d214f54
+- Remote branch: main
+- Remote checkpoint: 3487c55f6cc604eb046547d419c7511544ac256f
 - Remote verified: true
 
 ## Next safe action
 
-Open a workspace-control PR for workspace-heartbeat-plugin-v1 and require repository validation on the exact branch head. If it passes, stop repository implementation and hand off one local developer-mode smoke sequence: npm install/test, MCP Inspector, HTTPS tunnel, ChatGPT Developer-mode connection, thread-panel open, and heartbeat_update in-place refresh verification. Do not add persistence/auth/hosting/history/SSE before that smoke.
+On the user's machine, sync workspace-control main to 3487c55f6cc604eb046547d419c7511544ac256f, then run the bounded local developer-mode smoke from plugins/workspace-heartbeat: npm install; npm test; npm start; inspect http://localhost:8787/mcp with MCP Inspector; expose port 8787 through an HTTPS development tunnel; add the resulting https://.../mcp endpoint in ChatGPT Developer mode; open the thread conversation panel; invoke heartbeat_update twice and confirm one panel updates in place. Return exact npm/Inspector/tunnel/ChatGPT evidence. Do not add persistence/auth/hosting/history/SSE before this smoke.
 
 ## Remaining work
 
-- Open and pass workspace-control PR validation for the exact MVP branch.
-- After repository validation, run npm install/npm test and MCP Inspector on the user's Lambda or another local machine with network access.
-- Expose the local MCP endpoint through an HTTPS development tunnel and connect it in ChatGPT Developer mode.
-- Open the thread panel, call heartbeat_update from a test chat, and verify the same panel updates in place.
-- Only after the developer-mode smoke succeeds, decide whether persistence, OAuth, public hosting, history, or SSE/event push are actually needed.
+- On the user's machine, fast-forward workspace-control main to the canonical MVP checkpoint and enter plugins/workspace-heartbeat.
+- Run npm install, npm test, and start the MCP server.
+- Verify the local MCP endpoint with MCP Inspector.
+- Expose port 8787 through an HTTPS development tunnel.
+- Enable ChatGPT Developer mode, add the HTTPS /mcp endpoint as a personal plugin, and open the thread panel beside a test conversation.
+- Call heartbeat_update twice and verify the same panel box updates in place with increasing sequence numbers.
+- Only after the live smoke succeeds, decide whether persistence, OAuth, public hosting, history, or push events are warranted.
 
 ## Blockers / gates
 
-- None.
+- Live panel smoke requires a human-accessible local runtime plus ChatGPT Developer-mode MCP connection; this executor cannot create the user's local tunnel or install the custom MCP connection on their behalf.
 
 ## Fresh-chat initialization
 
