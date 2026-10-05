@@ -11,12 +11,16 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: research-engine-local-document-pipeline-v1
 - Title: Research Engine Local Document Intelligence and Compute Offload v1
-- Status: IN_PROGRESS
+- Status: CHECKPOINTED
 - Capsule schema: v2
 
 ## Goal
 
 Design, benchmark, and integrate a provenance-preserving local document-intelligence pipeline that converts content-addressed research PDFs into reusable LLM-ready paper packages, minimizes paid/plan semantic usage and repeated PDF interpretation, and systematically evaluates every research-engine stage for safe deterministic or local-model offload before production deployment on the Lambda.
+
+## Parent execution owner
+
+automated-research-engine-v1
 
 ## Repositories
 
@@ -38,9 +42,13 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 - Local HEAD: 5f6eec7b629b4746117f2f0a74d4531c642f8025
 - Local clean: true
 
+## Current stage
+
+residual_escalation_and_local_semantic_fallbacks
+
 ## Next safe action
 
-Scope Closure Gate decision: CHECKPOINT_AND_STOP. The production local-document pipeline and bounded page-scoped Qwen VERIFY integration have passed stopped-daemon production acceptance and the corrected bounded daemon boot-health transition at research-engine main@5f6eec7b629b4746117f2f0a74d4531c642f8025. Leave research-engine-daemon.service inactive/dead after this acceptance checkpoint. Do not rerun Qwen/Codex/model/boot validation and do not start scientific work merely to exercise the integration. When the parent automated-research-engine task explicitly resumes sustained scientific research, re-enter through its durable state and start the accepted daemon as part of that owning work. Deferred Qwen token telemetry, R2 compile/JIT evidence, Codex-backoff redesign, PP-OCRv6 scan-source replacement, and local/Codex-free EXTRACT remain deferred and do not block production use.
+CHECKPOINTED. The production local-document pipeline and bounded page-scoped Qwen VERIFY integration remain accepted at research-engine@5f6eec7b629b4746117f2f0a74d4531c642f8025 and must not be reopened merely for more validation. The explicitly reopened mostly-local EXTRACT research is now owned by child task `research-engine-local-extract-redesign-v1`. Resume this parent only if the accepted production document/VERIFY implementation itself requires new work or another deferred parent-owned residual is explicitly authorized.
 
 ## Remaining work
 
@@ -70,6 +78,6 @@ Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/research-engine-local-document-pipeline-v1.json
 
 Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the complete handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
