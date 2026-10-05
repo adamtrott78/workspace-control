@@ -28,19 +28,22 @@ threat_model_and_architecture_research
 
 ## Next safe action
 
-Research current GitHub self-hosted runner behavior and security from primary sources, then produce a threat model and architecture decision for a project-isolated Lambda execution lane. Do not install/register any runner or change existing CI yet. Preserve existing GitHub-hosted CI as the known-good control and design the research-engine pilot so it can prove closed-loop ChatGPT -> GitHub -> Lambda -> GitHub execution without production-state access.
+Execute the tracked read-only P0 host probe from `workspace-control:lambda-self-hosted-execution-v1-design@0f3ff4531f70ed4f65392030a8e308cab7ea19b5` on Lambda and return `lambda-runner-host-probe.json`. This probe writes only its diagnostic output under the visible workspace-control-tmp root and must not use sudo or mutate users/services/firewall/runner registration. After analyzing that receipt, implement the bootstrap/controller/systemd/kill-switch artifacts against the actual host capabilities before any runner registration.
 
 ## Remaining work
 
-- Research current GitHub self-hosted runner security, ephemeral/JIT configuration, repository scoping, token/secret behavior, artifacts/logs, and billing.
-- Compare isolation architectures: dedicated Unix user, disposable VM, rootless container, systemd sandbox, and hybrid runner+job sandbox.
-- Define project-specific filesystem, credentials, network, production-state, GPU, cache, concurrency, and cleanup boundaries.
-- Select the smallest safe research-engine pilot architecture.
-- Only after design acceptance, create the Lambda runner foundation and a no-op isolation test before real CI/GPU workloads.
+- Run the tracked P0 read-only Lambda host probe and analyze the JSON receipt.
+- Using only the observed host facts, implement/review root-owned controller, dedicated-user bootstrap, systemd sandbox profile, kill switch, and trusted research-engine trigger workflow without registering the runner yet.
+- Perform P2 isolation acceptance: create ci-research-engine, prove denial of /home/atrott, unrelated projects, sudo, Docker socket, production DB/daemon/broker, then execute one no-op ephemeral repo-scoped runner job.
+- Perform P3 CPU validation with ephemeral project environment/database and GitHub artifact return.
+- Perform P4 bounded GPU validation with process/VRAM cleanup receipt.
+- Perform P5 closed-loop acceptance where ChatGPT creates a deliberate failure, triggers Lambda, diagnoses/fixes it, reruns to PASS, and consumes a returned artifact without human SSH.
+- Only after research-engine acceptance, opt in a second project such as PADataset under a separate UID/root/cache and prove cross-project denial.
 
 ## Blockers / gates
 
-- None recorded.
+- P0 host facts must be collected from the actual Lambda before choosing/enforcing systemd device/network/filesystem restrictions. No runner/user/service/firewall mutation is authorized before this receipt is analyzed.
+- workspace-control evidence-first workflow PR #70 remains blocked by GitHub-hosted runner allocation: two attempts were cancelled after 15 minutes with runner_id=0 and zero executed steps. This is external scheduling evidence, not a test failure.
 
 ## Fresh-chat initialization
 
