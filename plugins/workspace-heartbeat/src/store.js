@@ -1,12 +1,34 @@
 export class HeartbeatStore {
-  constructor({ historyLimit = 50 } = {}) {
+  constructor({ historyLimit = 50, timelineLimit = 50 } = {}) {
     this.historyLimit = historyLimit;
+    this.timelineLimit = timelineLimit;
     this.tasks = new Map();
     this.latestTaskBySession = new Map();
+    this.timelineBySession = new Map();
+    this.latestTimelineByTask = new Map();
+    this.timelines = new Map();
+    this.timelineCounter = 0;
   }
 
   _sessionKey(sessionId) {
     return sessionId || "dev-session";
+  }
+
+  _newTimelineId() {
+    this.timelineCounter += 1;
+    return `timeline-${this.timelineCounter}`;
+  }
+
+  _timelineIdForUpdate({ sessionId, taskId }) {
+    const sessionKey = this._sessionKey(sessionId);
+    let timelineId = this.timelineBySession.get(sessionKey);
+
+    if (!timelineId) {
+      timelineId = this.latestTimelineByTask.get(taskId) ?? this._newTimelineId();
+      this.timelineBySession.set(sessionKey, timelineId);
+    }
+
+    return timelineId;
   }
 
   update({ sessionId, taskId, message, state, now = new Date() }) {
@@ -22,9 +44,17 @@ export class HeartbeatStore {
     const history = [...(previous?.history ?? []), heartbeat].slice(
       -this.historyLimit,
     );
-
     this.tasks.set(taskId, { heartbeat, history });
-    this.latestTaskBySession.set(this._sessionKey(sessionId), taskId);
+
+    const sessionKey = this._sessionKey(sessionId);
+    this.latestTaskBySession.set(sessionKey, taskId);
+
+    const timelineId = this._timelineIdForUpdate({ sessionId, taskId });
+    const timeline = [...(this.timelines.get(timelineId) ?? []), heartbeat].slice(
+      -this.timelineLimit,
+    );
+    this.timelines.set(timelineId, timeline);
+    this.latestTimelineByTask.set(taskId, timelineId);
 
     return heartbeat;
   }
@@ -32,6 +62,16 @@ export class HeartbeatStore {
   _resolveTaskId({ sessionId, taskId }) {
     if (taskId) return taskId;
     return this.latestTaskBySession.get(this._sessionKey(sessionId)) ?? null;
+  }
+
+  _resolveTimeline({ sessionId, taskId }) {
+    if (taskId) {
+      const timelineId = this.latestTimelineByTask.get(taskId);
+      return timelineId ? [...(this.timelines.get(timelineId) ?? [])] : [];
+    }
+
+    const timelineId = this.timelineBySession.get(this._sessionKey(sessionId));
+    return timelineId ? [...(this.timelines.get(timelineId) ?? [])] : [];
   }
 
   get({ sessionId, taskId }) {
@@ -42,18 +82,24 @@ export class HeartbeatStore {
 
   getSnapshot({ sessionId, taskId }) {
     const resolvedTaskId = this._resolveTaskId({ sessionId, taskId });
+    const timeline = this._resolveTimeline({
+      sessionId,
+      taskId: resolvedTaskId ?? taskId,
+    });
+
     if (!resolvedTaskId) {
-      return { heartbeat: null, history: [] };
+      return { heartbeat: null, history: [], timeline };
     }
 
     const record = this.tasks.get(resolvedTaskId);
     if (!record) {
-      return { heartbeat: null, history: [] };
+      return { heartbeat: null, history: [], timeline };
     }
 
     return {
       heartbeat: record.heartbeat,
       history: [...record.history],
+      timeline,
     };
   }
 }
