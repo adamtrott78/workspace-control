@@ -185,7 +185,24 @@ from the failed certification stage.
 Additional exploration is justified only when required for safety/correctness or
 when new evidence contradicts the current diagnosis.
 
-## 13. Measurement
+## 13. Scope adherence and closure
+
+Apply procedures/scope_closure.md during heavyweight runtime work as well as
+ordinary implementation.
+
+Before acting on an adjacent finding, classify it with the owning scope envelope.
+Only REQUIRED_CORRECTION, BOUNDED_ENABLING_CHANGE, or explicitly
+AUTHORIZED_SCOPE_EXPANSION findings may extend the current implementation.
+
+Non-blocking findings are DEFERRED_FOLLOWUP items. Record them and return to the
+owning operation.
+
+After the current objective is durable and required validation passes, evaluate
+the Scope Closure Gate. If no blocker or execute-now finding remains, the
+required decision is CHECKPOINT_AND_STOP. Do not continue hardening neighboring
+surfaces merely because they were discovered during the current work.
+
+## 14. Measurement
 
 For each natural field run record when available:
 

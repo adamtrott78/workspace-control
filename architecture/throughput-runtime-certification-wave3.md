@@ -323,6 +323,34 @@ or future-phase design is off the critical path.
 
 New evidence may reopen diagnosis.
 
+## Scope adherence and closure
+
+Wave 3 also bounds implementation scope, not only runtime execution and
+diagnosis.
+
+Before substantial multi-step work, derive a compact scope envelope from the
+owning task and classify newly discovered work into:
+
+- REQUIRED_CORRECTION: correctness/safety/durability defects that must be fixed;
+- BOUNDED_ENABLING_CHANGE: the smallest change that directly unblocks the
+  recorded next_safe_action or required validation;
+- AUTHORIZED_SCOPE_EXPANSION: adjacent work explicitly authorized by the owning
+  scope;
+- DEFERRED_FOLLOWUP: useful but non-blocking adjacent work that must be recorded
+  rather than implemented now.
+
+The shared implementation is scripts/scope_control.py with
+schemas/scope_envelope.v1.schema.json and procedures/scope_closure.md.
+
+A Scope Closure Gate is mandatory once the owning objective is durably satisfied:
+if required validation passes, no blocker remains, and no required/bounded/
+authorized finding remains, the decision is CHECKPOINT_AND_STOP. Deferred
+follow-ups do not keep the current session alive.
+
+This complements the actionability gate: actionability stops unnecessary
+diagnosis after a bounded correction is known; scope closure stops unnecessary
+implementation after the owning objective is complete.
+
 ## Control-cycle latency
 
 Wave 3 measures the end-to-end interval between durable actionable states, not
