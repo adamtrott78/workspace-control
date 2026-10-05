@@ -24,7 +24,7 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 54758e227ed452ac0d7598889158ddd04e254a4c
+- Remote checkpoint: 02092a64ade2a123ed4a1724f5815a46fed7db67
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 
 ## Next safe action
 
-Start from https://github.com/adamtrott78/workspace-control and the normal root route. Wave-3 shared runtime-certification/recovery primitives are implemented and FULL_INTEGRATION validated on main@54758e227ed452ac0d7598889158ddd04e254a4c through scripts/runtime_certification.py plus runtime certification/operation/failure-envelope schemas and focused tests. Continue field_efficiency_wave3_validation without rerunning workloads solely for telemetry and without weakening any owning project's scientific or production next_safe_action. On the next natural heavyweight-runtime work, adopt the shared primitives opportunistically and collect only the remaining evidence: (1) verified R2 compile/JIT cache cold-vs-reuse timing under unchanged execution identity; (2) one actual C3 same-modality synthetic canary that shares the already-booted engine with subsequent domain work; (3) compact operation/certification receipts and any structured causal failure envelope; and (4) control-cycle/recovery measurements when naturally observable. Keep project-specific model/backend/package/scientific facts project-local. If R2 and C3 pass without exposing a new shared mechanism, freeze Wave 3 and prepare the cross-repository rollout task.
+Start from https://github.com/adamtrott78/workspace-control and the normal root route. Wave-3 shared runtime-certification/recovery primitives plus their implemented-v1 architecture/procedure status are canonical on main@02092a64ade2a123ed4a1724f5815a46fed7db67. Continue field_efficiency_wave3_validation without rerunning workloads solely for telemetry and without weakening any owning project's scientific or production next_safe_action. On the next natural heavyweight-runtime work, adopt the shared primitives from scripts/runtime_certification.py and the versioned runtime certification/operation/failure-envelope schemas, then collect only the remaining evidence: (1) verified R2 compile/JIT cache cold-vs-reuse timing under unchanged execution identity; (2) one actual C3 same-modality synthetic canary sharing the already-booted engine with subsequent domain work; (3) compact operation/certification receipts or structured causal failure envelopes when naturally produced; and (4) control-cycle/recovery measurements when naturally observable. Keep project-specific model/backend/package/scientific facts project-local. If R2 and C3 pass without exposing a new shared mechanism, freeze Wave 3 and prepare the cross-repository rollout task.
 
 ## Remaining work
 

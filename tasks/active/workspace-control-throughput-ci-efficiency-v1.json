@@ -49,7 +49,7 @@
       "base_sha": "1a46337a35296554917f61a80ff21535f8e87c19",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "54758e227ed452ac0d7598889158ddd04e254a4c",
+        "checkpoint_sha": "02092a64ade2a123ed4a1724f5815a46fed7db67",
         "verified": true
       },
       "local": null,
@@ -444,6 +444,15 @@
             "The structured-process regression explicitly rejects a bash -lc wrapper whose shell source contains a future benchmark command while accepting the actual script argv shape.",
             "Runtime certification remains execution evidence only; project scientific/production promotion authority is not granted by runtime_certified=true."
           ]
+        },
+        {
+          "check": "Wave-3 durable activation sync",
+          "result": "PASS",
+          "evidence": [
+            "PR #57 promoted the Wave-3 architecture/procedure status to implemented v1, added the validated implementation stage, and narrowed remaining field validation to natural R2 reuse plus one real C3 canary.",
+            "After one schema-only correction to represent pending measurements as NOT_RUN, Workspace Control Validation run 37257855510 passed changed-task contracts, unit regression, and full integration contracts.",
+            "PR #57 merged by squash as 02092a64ade2a123ed4a1724f5815a46fed7db67."
+          ]
         }
       ],
       "resume_condition": "Wave-3 design has field evidence sufficient to implement the generic mechanism without coupling workspace-control to project-specific Qwen/vLLM/scientific facts."
@@ -745,7 +754,7 @@
     "Implement the generic task-sync helper after Wave-3 receipt/task fields remain stable through the next natural adoption.",
     "Freeze Wave 3 and open the final cross-repository rollout task once R2 reuse and one real C3 adoption pass without revealing a new shared control-plane mechanism."
   ],
-  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. Wave-3 shared runtime-certification/recovery primitives are implemented and FULL_INTEGRATION validated on main@54758e227ed452ac0d7598889158ddd04e254a4c through scripts/runtime_certification.py plus runtime certification/operation/failure-envelope schemas and focused tests. Continue field_efficiency_wave3_validation without rerunning workloads solely for telemetry and without weakening any owning project's scientific or production next_safe_action. On the next natural heavyweight-runtime work, adopt the shared primitives opportunistically and collect only the remaining evidence: (1) verified R2 compile/JIT cache cold-vs-reuse timing under unchanged execution identity; (2) one actual C3 same-modality synthetic canary that shares the already-booted engine with subsequent domain work; (3) compact operation/certification receipts and any structured causal failure envelope; and (4) control-cycle/recovery measurements when naturally observable. Keep project-specific model/backend/package/scientific facts project-local. If R2 and C3 pass without exposing a new shared mechanism, freeze Wave 3 and prepare the cross-repository rollout task.",
+  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. Wave-3 shared runtime-certification/recovery primitives plus their implemented-v1 architecture/procedure status are canonical on main@02092a64ade2a123ed4a1724f5815a46fed7db67. Continue field_efficiency_wave3_validation without rerunning workloads solely for telemetry and without weakening any owning project's scientific or production next_safe_action. On the next natural heavyweight-runtime work, adopt the shared primitives from scripts/runtime_certification.py and the versioned runtime certification/operation/failure-envelope schemas, then collect only the remaining evidence: (1) verified R2 compile/JIT cache cold-vs-reuse timing under unchanged execution identity; (2) one actual C3 same-modality synthetic canary sharing the already-booted engine with subsequent domain work; (3) compact operation/certification receipts or structured causal failure envelopes when naturally produced; and (4) control-cycle/recovery measurements when naturally observable. Keep project-specific model/backend/package/scientific facts project-local. If R2 and C3 pass without exposing a new shared mechanism, freeze Wave 3 and prepare the cross-repository rollout task.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Baseline measurement, external-practice research, and risk-tier design are complete and durable. Initial workspace-control implementation is isolated on throughput-ci-efficiency-v1. The GitHub connector's advertised update_ref expected_sha lease is currently rejected by input validation; current remote-only mutation guidance therefore uses immediate pre-write head verification plus post-write ref verification. research-engine remains read-only. Fresh-chat invariant: always include https://github.com/adamtrott78/workspace-control explicitly."
