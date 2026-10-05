@@ -1,0 +1,246 @@
+{
+  "schema_version": 2,
+  "task_id": "wave3-rollout-cis560-v1",
+  "title": "Wave-3 Rollout — CIS560 Tutor v1",
+  "status": "BLOCKED_EVIDENCE",
+  "goal": "Adopt the frozen Wave-3 scope-adherence contract into the active CIS560 tutor lineage and assess heavyweight-runtime certification applicability without changing course truth, homework state, pedagogical/mastery evidence, or source authority.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-control-throughput-ci-efficiency-v1",
+  "current_stage": "freeze_gate",
+  "acceptance_criteria": [
+    "Do not mutate CIS560-AdamTrott until the parent workspace-control-throughput-ci-efficiency-v1 task explicitly records Wave-3 freeze readiness and authorizes cross-repository rollout.",
+    "Re-verify the active CIS560-AdamTrott lineage and exact remote checkpoint immediately before first mutation; if tutor-framework advanced from 9156e4e269d4ad10e5876b983ffb44864e1762e9, update this capsule before proceeding rather than silently adopting against stale state.",
+    "Route the target repository's normal root entrypoint through the pinned shared workspace-control Scope Closure Gate without vendoring or duplicating the shared scope-control implementation.",
+    "Preserve project authority: CIS 560 coursework, tutoring state, homework evidence, and course-facing artifacts; Wave-3 adoption may change orchestration/control-plane bindings but must not rewrite project/domain truth.",
+    "Classify newly discovered adoption work as REQUIRED_CORRECTION, BOUNDED_ENABLING_CHANGE, AUTHORIZED_SCOPE_EXPANSION, or DEFERRED_FOLLOWUP; non-blocking adjacent improvements must not expand the rollout task.",
+    "Assess whether the target has heavyweight/failure-prone runtime paths where C0-C3 certification, durable receipts, structured process identity, failure envelopes, R0-R3 reuse semantics, or idempotent recovery provide material value.",
+    "If heavyweight runtime certification is not materially applicable, record a validated SKIPPED decision for that stage rather than imposing certification overhead on trivial workflows.",
+    "If deeper target-runtime files must change, explicitly expand this capsule's allowed_mutation_scope before mutating them; initial authorization is limited to root routing, a project-local adapter/policy, and focused adoption tests.",
+    "Run the target repository's existing validation appropriate to the changed surfaces, preserve any stronger project-specific checks, and promote only an exact reviewed/validated head.",
+    "After durable adoption, required validation, and task synchronization, apply CHECKPOINT_AND_STOP; do not continue into unrelated cleanup, refactors, experiments, or neighboring feature work."
+  ],
+  "constraints": [
+    "The shared Wave-3 control-plane source of truth remains workspace-control; target repositories own only thin project bindings and project-specific runtime facts.",
+    "Do not copy scripts/scope_control.py, schemas/scope_envelope.v1.schema.json, or generic Wave-3 runtime schemas into the target unless a later frozen rollout contract explicitly requires vendoring; prefer pinned shared-contract references.",
+    "Do not change scientific/course/source truth, mastery evidence, experiment conclusions, prompts/thresholds, production routing, or artifact semantics merely to adopt Wave-3.",
+    "Do not manufacture heavyweight runtime executions, benchmark calls, or failures solely to prove adoption.",
+    "Do not start rollout while the parent freeze gate is unsatisfied.",
+    "Use exact Git identities and durable receipts/checkpoints; interruption recovery resumes from the first unfinished adoption stage.",
+    "Any target branch advancement after capsule initialization must be reconciled explicitly before mutation.",
+    "Apply the Wave-3 Scope Closure Gate to the rollout itself: useful but non-blocking adjacent findings become durable follow-ups."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "read",
+      "base_sha": "1295477546c802029d7c52755beeacdef31b5346",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "1295477546c802029d7c52755beeacdef31b5346",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "CIS560-AdamTrott",
+      "intent": "mutate",
+      "base_sha": "9156e4e269d4ad10e5876b983ffb44864e1762e9",
+      "remote": {
+        "branch": "tutor-framework",
+        "checkpoint_sha": "9156e4e269d4ad10e5876b983ffb44864e1762e9",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "README.md",
+        "policies/workspace-control-scope-adapter.v1.json",
+        "tests/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "freeze_gate",
+      "status": "SUSPENDED",
+      "execution_owner": "workspace-control-throughput-ci-efficiency-v1",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "workspace-control@1295477546c802029d7c52755beeacdef31b5346",
+        "tasks/active/workspace-control-throughput-ci-efficiency-v1.json"
+      ],
+      "outputs": [
+        "explicit durable Wave-3 freeze/rollout authorization"
+      ],
+      "validation": [
+        {
+          "check": "Parent Wave-3 freeze gate satisfied",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Parent task workspace-control-throughput-ci-efficiency-v1 at workspace-control@1295477546c802029d7c52755beeacdef31b5346 remains in field_efficiency_wave3_validation and requires verified R2 reuse plus an actual C3 canary before Wave-3 freeze/rollout authorization."
+          ]
+        }
+      ],
+      "resume_condition": "Resume only after tasks/active/workspace-control-throughput-ci-efficiency-v1.json durably records Wave-3 freeze readiness / rollout authorization."
+    },
+    {
+      "id": "lineage_revalidation",
+      "status": "PLANNED",
+      "execution_owner": "CIS560-AdamTrott",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "CIS560-AdamTrott:tutor-framework@9156e4e269d4ad10e5876b983ffb44864e1762e9",
+        "workspace-control@1295477546c802029d7c52755beeacdef31b5346"
+      ],
+      "outputs": [
+        "re-verified target branch/head and root-route state",
+        "updated capsule checkpoint if target branch advanced"
+      ],
+      "validation": [],
+      "resume_condition": "freeze_gate is released."
+    },
+    {
+      "id": "scope_adoption",
+      "status": "PLANNED",
+      "execution_owner": "CIS560-AdamTrott",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "procedures/scope_closure.md",
+        "schemas/scope_envelope.v1.schema.json",
+        "scripts/scope_control.py",
+        "lineage_revalidation"
+      ],
+      "outputs": [
+        "target root routing to pinned shared Scope Closure Gate",
+        "thin project-local scope adapter/policy",
+        "focused scope-adoption validation"
+      ],
+      "validation": [],
+      "resume_condition": "Target lineage is re-verified and mutation scope remains sufficient."
+    },
+    {
+      "id": "runtime_applicability",
+      "status": "PLANNED",
+      "execution_owner": "CIS560-AdamTrott",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "procedures/runtime_certification.md",
+        "scripts/runtime_certification.py",
+        "scope_adoption"
+      ],
+      "outputs": [
+        "evidence-backed applicability decision for heavyweight runtime certification",
+        "project-local runtime binding only if materially applicable"
+      ],
+      "validation": [],
+      "resume_condition": "Scope adoption is durable; any deeper runtime mutation scope is explicitly added to this capsule before use."
+    },
+    {
+      "id": "validation_promotion",
+      "status": "PLANNED",
+      "execution_owner": "CIS560-AdamTrott",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "scope_adoption",
+        "runtime_applicability"
+      ],
+      "outputs": [
+        "validated target-repository adoption checkpoint",
+        "exact reviewed/merged Git identity where project workflow uses PR promotion"
+      ],
+      "validation": [],
+      "resume_condition": "All required target changes are bounded and complete."
+    },
+    {
+      "id": "handoff_sync",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "validation_promotion"
+      ],
+      "outputs": [
+        "tasks/active/wave3-rollout-cis560-v1.json updated to final state",
+        "tasks/active/wave3-rollout-cis560-v1.md regenerated from authoritative JSON",
+        "CHECKPOINT_AND_STOP decision"
+      ],
+      "validation": [],
+      "resume_condition": "Target adoption checkpoint is durable and required validation passed."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "shared-contract:wave3",
+      "kind": "git_checkpoint",
+      "identity": "git:1295477546c802029d7c52755beeacdef31b5346",
+      "required_for_resume": true,
+      "evidence": [
+        "workspace-control main exact checkpoint verified before capsule initialization.",
+        "Includes Wave-3 scope closure root routing and shared runtime-certification/recovery primitives."
+      ]
+    },
+    {
+      "id": "target-baseline:tutor-framework",
+      "kind": "git_checkpoint",
+      "identity": "git:9156e4e269d4ad10e5876b983ffb44864e1762e9",
+      "required_for_resume": true,
+      "evidence": [
+        "CIS560-AdamTrott remote branch tutor-framework resolved exactly to 9156e4e269d4ad10e5876b983ffb44864e1762e9 during capsule initialization."
+      ]
+    },
+    {
+      "id": "parent-freeze-gate:initial",
+      "kind": "control_gate",
+      "identity": "task:workspace-control-throughput-ci-efficiency-v1@1295477546c802029d7c52755beeacdef31b5346",
+      "required_for_resume": true,
+      "evidence": [
+        "Parent task workspace-control-throughput-ci-efficiency-v1 at workspace-control@1295477546c802029d7c52755beeacdef31b5346 remains in field_efficiency_wave3_validation and requires verified R2 reuse plus an actual C3 canary before Wave-3 freeze/rollout authorization."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Shared Wave-3 contract checkpoint verified",
+      "result": "PASS",
+      "evidence": [
+        "workspace-control main resolved to 1295477546c802029d7c52755beeacdef31b5346 before child-capsule initialization."
+      ]
+    },
+    {
+      "check": "Target active-lineage checkpoint verified",
+      "result": "PASS",
+      "evidence": [
+        "CIS560-AdamTrott:tutor-framework resolved exactly to 9156e4e269d4ad10e5876b983ffb44864e1762e9 before child-capsule initialization."
+      ]
+    },
+    {
+      "check": "Wave-3 rollout freeze authorization",
+      "result": "NOT_RUN",
+      "evidence": [
+        "Parent task workspace-control-throughput-ci-efficiency-v1 at workspace-control@1295477546c802029d7c52755beeacdef31b5346 remains in field_efficiency_wave3_validation and requires verified R2 reuse plus an actual C3 canary before Wave-3 freeze/rollout authorization."
+      ]
+    }
+  ],
+  "blockers": [
+    "Wave-3 rollout is gated until parent task workspace-control-throughput-ci-efficiency-v1 durably records freeze readiness after the remaining R2/C3 field evidence is satisfied."
+  ],
+  "remaining_work": [
+    "Release the freeze gate only from durable parent-task evidence; do not infer readiness from conversation state.",
+    "Re-verify CIS560-AdamTrott:tutor-framework and reconcile any advancement from 9156e4e269d4ad10e5876b983ffb44864e1762e9.",
+    "Adopt root scope routing plus a thin project-local scope adapter without vendoring generic control-plane logic.",
+    "Assess heavyweight runtime-certification applicability and either adopt bounded project-local integration or record a validated SKIPPED result.",
+    "Run project-appropriate validation, promote the exact reviewed head, synchronize this task capsule/derived handoff, and CHECKPOINT_AND_STOP."
+  ],
+  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. Read tasks/active/workspace-control-throughput-ci-efficiency-v1.json first. Do not mutate CIS560-AdamTrott while the parent Wave-3 freeze/rollout gate remains unsatisfied. If and only if the parent capsule durably authorizes cross-repository rollout, re-verify CIS560-AdamTrott branch tutor-framework against recorded checkpoint 9156e4e269d4ad10e5876b983ffb44864e1762e9; if it advanced, update this capsule JSON and regenerate its Markdown before any target mutation. Then enter lineage_revalidation and follow the frozen shared Wave-3 contracts using the smallest project-local binding. If the parent gate is still closed, make no target-repository changes and stop.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Initialized as a blocked rollout child. This capsule intentionally prepares exact recovery/branch state before Wave-3 freeze without authorizing premature target mutation."
+}
