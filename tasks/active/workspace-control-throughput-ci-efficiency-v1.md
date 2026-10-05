@@ -23,8 +23,8 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 016a8827e7ed5e7d59ff86240f6f974d330f819c
+- Remote branch: throughput-efficiency-wave2-design-v1
+- Remote checkpoint: f998b89ac88bf564aa2836f3116d9ac979b4969d
 - Remote verified: true
 
 ### research-engine
@@ -36,16 +36,19 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 
 ## Next safe action
 
-Start from https://github.com/adamtrott78/workspace-control and the normal root route. The risk-routed validation implementation is canonical on main@016a8827e7ed5e7d59ff86240f6f974d330f819c and its merged tree exactly equals the FULL_INTEGRATION-tested PR tree. The follow-up branch throughput-fast-static-benchmark-v1 is intentionally task-state-only. If that follow-up is not yet merged, require its PR run to select FAST_STATIC, pass changed-task capsule/handoff synchronization, and skip unit/full-integration work; then merge only with the exact expected head SHA and verify merged-tree identity. If it is already merged, use that run as the validated FAST_STATIC benchmark and continue collecting efficiency telemetry from the active research-engine task without overriding that task's durable next_safe_action. Do not mutate research-engine from this capsule; repository-specific CI/profile changes require explicit authority.
+Start from https://github.com/adamtrott78/workspace-control and the normal root route. Resume Wave-2 efficiency validation from checkpoint f998b89ac88bf564aa2836f3116d9ac979b4969d and architecture/throughput-ci-efficiency-v1.md. Do not mutate research-engine from this capsule. Use the active research-engine Qwen task as field evidence without replacing its durable next_safe_action: measure and, only through that task's existing authority, test layered host/build plus exact execution-path preflight, runtime/wheel reuse, compact failure receipts, content-addressed deterministic render reuse, and Git/task-handoff overhead. Keep research-engine-specific package/cache semantics project-local. Delay the final cross-repository rollout task until this Wave-2 field pass stops finding substantive shared improvements.
 
 ## Remaining work
 
-- Use the follow-up branch throughput-fast-static-benchmark-v1, whose complete diff from merged main is limited to this task JSON and its derived Markdown handoff, as the representative FAST_STATIC benchmark.
-- Require its PR validation run to select FAST_STATIC, pass changed-task validation/handoff synchronization, and skip unit-regression plus full-integration steps. Record wall-clock evidence.
-- After the FAST_STATIC benchmark passes, merge the task-state-only follow-up with an exact expected head SHA and prove merged-tree identity.
-- Collect field telemetry from the active research-engine task on logical changes versus commits, mutation-call batching, PR timing/restarts, CI step cost, status-read/poll frequency, tested-tree duplication, idle waits, context/routing rereads, provenance repetition, runtime setup, and artifact-transfer overhead.
-- Benchmark TARGETED_PR opportunistically on a real test-only change when one naturally occurs; do not manufacture code churn solely for a timing sample.
-- Research-engine-specific validation tiers or CI workflow changes require a reviewed research-engine profile and explicit mutation authority; shared orchestration improvements do not grant that authority.
+- Use the current research-engine Qwen task as the primary Wave-2 field workload without replacing or weakening its durable next_safe_action.
+- Measure layered runtime preflight: host/build selection before heavyweight install, then exact vLLM multimodal import/native-library/CUDA smoke validation before deterministic render or inference.
+- Measure exact runtime/wheel cache reuse with a canonical identity plus verified wheel hashes and a matching execution-path smoke receipt.
+- Implement/measure compact failure receipts for early benchmark failure and compare receipt size plus diagnosis tool calls against full console-log handoff.
+- Measure content-addressed deterministic render reuse using complete PDF SHA/page/bbox/DPI/renderer identity; incomplete identity must fail closed to rerender.
+- Design the follow-up task-sync implementation so authoritative task JSON and derived Markdown are one semantic mutation transaction instead of two independently managed surfaces.
+- Continue measuring connector write capability and file/write/commit counts; the advertised expected_sha lease remains broken on the current connector despite appearing in its schema.
+- Continue opportunistic TARGETED_PR measurement on real changes; do not manufacture churn only to obtain a benchmark.
+- Do not create the final repo-by-repo efficiency rollout task until Wave-2 field validation stops uncovering substantive shared architecture changes.
 
 ## Blockers / gates
 

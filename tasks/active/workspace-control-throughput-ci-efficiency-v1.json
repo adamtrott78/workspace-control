@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control",
-  "current_stage": "representative_benchmark",
+  "current_stage": "field_efficiency_wave2_validation",
   "acceptance_criteria": [
     "Produce an empirical latency decomposition for representative recent ChatGPT/GitHub control cycles, separating tool-call/orchestration time, Git mutation count, PR CI, canonical-main CI, status polling, runtime/human handoffs, and genuinely necessary validation.",
     "Study documented practices from mature CI/CD and monorepo/control-plane systems using primary or authoritative sources where possible, including validation tiers, test-impact/path selection, caching, concurrency cancellation, merge queues or tested-merge semantics, pre-submit versus post-submit roles, and scheduled/full regression coverage.",
@@ -42,8 +42,8 @@
       "intent": "mutate",
       "base_sha": "1a46337a35296554917f61a80ff21535f8e87c19",
       "remote": {
-        "branch": "main",
-        "checkpoint_sha": "016a8827e7ed5e7d59ff86240f6f974d330f819c",
+        "branch": "throughput-efficiency-wave2-design-v1",
+        "checkpoint_sha": "f998b89ac88bf564aa2836f3116d9ac979b4969d",
         "verified": true
       },
       "local": null,
@@ -259,9 +259,75 @@
             "Final PR-head run 37245048711 passed the full validation job for head 5a5b3b61aa4cda0c42d969277996306111e2f187.",
             "The tested synthetic-merge tree and merged main tree are exactly identical at 91e41b06ea8a188ed4650e25bf15ea529427632a; no untested content was introduced by the squash merge."
           ]
+        },
+        {
+          "check": "FAST_STATIC self-hosted benchmark",
+          "result": "PASS",
+          "evidence": [
+            "PR #51 run 37245159432 selected FAST_STATIC for a two-file task JSON/Markdown-only diff and completed successfully in roughly 9 seconds.",
+            "Changed-task capsule/handoff checks passed while unit-regression and full-integration steps were skipped.",
+            "PR #51 merged as a3a5514d582fba4c31b1100c09d7236b62aab073 and the tested synthetic-merge tree exactly equaled the merged main tree."
+          ]
         }
       ],
       "resume_condition": "Full workspace-control integration validation passes for the implementation checkpoint."
+    },
+    {
+      "id": "field_efficiency_wave2_design",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+research-engine-field-evidence",
+      "inputs": [
+        "research-engine Qwen3.5 runtime field telemetry from 2026-10-04",
+        "workspace-control risk-routed validation implementation",
+        "active research-engine durable task state"
+      ],
+      "outputs": [
+        "architecture/throughput-ci-efficiency-v1.md Wave-2 runtime/artifact economy design",
+        "procedures/validation_routing.md connector-capability evidence correction"
+      ],
+      "validation": [
+        {
+          "check": "Wave-2 field findings mapped to control-plane boundaries",
+          "result": "PASS",
+          "evidence": [
+            "Field evidence identifies cheap compatibility preflight, exact runtime/wheel caching, compact failure receipts, deterministic artifact reuse, connector atomic-write limitations, PR stabilization, and task JSON→Markdown derivation as separate efficiency opportunities.",
+            "Current research-engine evidence shows CUDA-12.9 Torch allocation PASS but exact multimodal vLLM import failure on torchcodec/libnvrtc.so.13 before Qwen inference, proving layered execution-path preflight is required.",
+            "The design keeps Qwen/vLLM/package-specific cache semantics in research-engine while promoting only generic phase ordering, reuse identity, receipt, Git-surface, and synchronization contracts as shared candidates."
+          ]
+        },
+        {
+          "check": "Connector expected-head capability probe",
+          "result": "PASS",
+          "evidence": [
+            "The current connector schema advertises update_ref(expected_sha=...), but a direct probe returned InvalidActionArgumentsError before any ref movement.",
+            "The design branch remained unchanged after the rejected lease attempt.",
+            "The safe fallback was then used: reread exact branch head, plain non-force ref move, immediate post-write reread."
+          ]
+        }
+      ],
+      "resume_condition": "Second-wave field observations are converted into a bounded, fail-closed architecture."
+    },
+    {
+      "id": "field_efficiency_wave2_validation",
+      "status": "IN_PROGRESS",
+      "execution_owner": "research-engine-active-task + workspace-control",
+      "selected_executor": "chatgpt+human-lambda",
+      "selected_surface": "github+lambda",
+      "inputs": [
+        "field_efficiency_wave2_design"
+      ],
+      "outputs": [
+        "measured runtime-preflight savings",
+        "runtime/wheel cache reuse evidence",
+        "compact failure-receipt evidence",
+        "content-addressed render reuse evidence",
+        "task-sync implementation recommendation",
+        "updated ranked efficiency backlog"
+      ],
+      "validation": [],
+      "resume_condition": "Wave-2 architecture is durably designed and the active research-engine task provides a natural field workload."
     }
   ],
   "checkpoints": [
@@ -304,6 +370,17 @@
         "Risk-routed validation implementation promoted to canonical workspace-control main through PR #50.",
         "Final full validation run 37245048711 passed, and merged main tree is byte-identical to the tested synthetic merge tree.",
         "research-engine was not mutated by this throughput task."
+      ]
+    },
+    {
+      "id": "checkpoint:wave2-efficiency-design",
+      "kind": "git_checkpoint",
+      "identity": "workspace-control:f998b89ac88bf564aa2836f3116d9ac979b4969d",
+      "required_for_resume": true,
+      "evidence": [
+        "Wave-2 runtime/artifact efficiency architecture is committed on throughput-efficiency-wave2-design-v1.",
+        "Layered runtime preflight, runtime/wheel identity reuse, deterministic artifact caching, failure receipts, task-sync, and connector capability fallback are explicitly designed.",
+        "research-engine remains outside this task's mutation authority; field implementation/testing occurs only through its own active task authority."
       ]
     }
   ],
@@ -451,18 +528,30 @@
         "Synthetic merge tree == merged main tree == 91e41b06ea8a188ed4650e25bf15ea529427632a.",
         "Because content identity is proven, the promotion requires no duplicate synchronous main rerun for tree-content confidence."
       ]
+    },
+    {
+      "check": "Wave-2 research-engine field evidence incorporated",
+      "result": "PASS",
+      "evidence": [
+        "Default vLLM CUDA-13 selection failed only after heavyweight environment setup because the host driver/API supports CUDA 12.8, motivating host/build selection before installation.",
+        "The corrected CUDA-12.9 Torch runtime allocates successfully, but the current exact multimodal vLLM path fails on torchcodec/libnvrtc.so.13 before Qwen inference, motivating an exact import/native-library smoke preflight after runtime construction.",
+        "Additional field opportunities are exact runtime/wheel reuse, compact early-failure receipts, content-addressed render reuse, one-logical-change Git batching, and JSON-authoritative task handoff generation."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Use the follow-up branch throughput-fast-static-benchmark-v1, whose complete diff from merged main is limited to this task JSON and its derived Markdown handoff, as the representative FAST_STATIC benchmark.",
-    "Require its PR validation run to select FAST_STATIC, pass changed-task validation/handoff synchronization, and skip unit-regression plus full-integration steps. Record wall-clock evidence.",
-    "After the FAST_STATIC benchmark passes, merge the task-state-only follow-up with an exact expected head SHA and prove merged-tree identity.",
-    "Collect field telemetry from the active research-engine task on logical changes versus commits, mutation-call batching, PR timing/restarts, CI step cost, status-read/poll frequency, tested-tree duplication, idle waits, context/routing rereads, provenance repetition, runtime setup, and artifact-transfer overhead.",
-    "Benchmark TARGETED_PR opportunistically on a real test-only change when one naturally occurs; do not manufacture code churn solely for a timing sample.",
-    "Research-engine-specific validation tiers or CI workflow changes require a reviewed research-engine profile and explicit mutation authority; shared orchestration improvements do not grant that authority."
+    "Use the current research-engine Qwen task as the primary Wave-2 field workload without replacing or weakening its durable next_safe_action.",
+    "Measure layered runtime preflight: host/build selection before heavyweight install, then exact vLLM multimodal import/native-library/CUDA smoke validation before deterministic render or inference.",
+    "Measure exact runtime/wheel cache reuse with a canonical identity plus verified wheel hashes and a matching execution-path smoke receipt.",
+    "Implement/measure compact failure receipts for early benchmark failure and compare receipt size plus diagnosis tool calls against full console-log handoff.",
+    "Measure content-addressed deterministic render reuse using complete PDF SHA/page/bbox/DPI/renderer identity; incomplete identity must fail closed to rerender.",
+    "Design the follow-up task-sync implementation so authoritative task JSON and derived Markdown are one semantic mutation transaction instead of two independently managed surfaces.",
+    "Continue measuring connector write capability and file/write/commit counts; the advertised expected_sha lease remains broken on the current connector despite appearing in its schema.",
+    "Continue opportunistic TARGETED_PR measurement on real changes; do not manufacture churn only to obtain a benchmark.",
+    "Do not create the final repo-by-repo efficiency rollout task until Wave-2 field validation stops uncovering substantive shared architecture changes."
   ],
-  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. The risk-routed validation implementation is canonical on main@016a8827e7ed5e7d59ff86240f6f974d330f819c and its merged tree exactly equals the FULL_INTEGRATION-tested PR tree. The follow-up branch throughput-fast-static-benchmark-v1 is intentionally task-state-only. If that follow-up is not yet merged, require its PR run to select FAST_STATIC, pass changed-task capsule/handoff synchronization, and skip unit/full-integration work; then merge only with the exact expected head SHA and verify merged-tree identity. If it is already merged, use that run as the validated FAST_STATIC benchmark and continue collecting efficiency telemetry from the active research-engine task without overriding that task's durable next_safe_action. Do not mutate research-engine from this capsule; repository-specific CI/profile changes require explicit authority.",
+  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. Resume Wave-2 efficiency validation from checkpoint f998b89ac88bf564aa2836f3116d9ac979b4969d and architecture/throughput-ci-efficiency-v1.md. Do not mutate research-engine from this capsule. Use the active research-engine Qwen task as field evidence without replacing its durable next_safe_action: measure and, only through that task's existing authority, test layered host/build plus exact execution-path preflight, runtime/wheel reuse, compact failure receipts, content-addressed deterministic render reuse, and Git/task-handoff overhead. Keep research-engine-specific package/cache semantics project-local. Delay the final cross-repository rollout task until this Wave-2 field pass stops finding substantive shared improvements.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Baseline measurement, external-practice research, and risk-tier design are complete and durable. Initial workspace-control implementation is isolated on throughput-ci-efficiency-v1. The GitHub connector's advertised update_ref expected_sha lease is currently rejected by input validation; current remote-only mutation guidance therefore uses immediate pre-write head verification plus post-write ref verification. research-engine remains read-only. Fresh-chat invariant: always include https://github.com/adamtrott78/workspace-control explicitly."
