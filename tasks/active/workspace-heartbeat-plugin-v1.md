@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
-- Status: IN_PROGRESS
+- Status: VALIDATING
 - Capsule schema: v2
 
 ## Goal
@@ -23,22 +23,24 @@ Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel 
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 838022e9af0feff8a07894863a96663a73dc9d83
+- Remote branch: workspace-heartbeat-history-v2
+- Remote checkpoint: 906478d671dc750b5c739a716fb32a1a650f0b0c
 - Remote verified: true
 
 ## Next safe action
 
-With the Workspace heartbeat thread panel visibly open in normal Chat mode, invoke heartbeat_update once for the owning task and verify the panel changes from its idle state to the emitted natural-language message with sequence 1. Then invoke heartbeat_update a second time and verify the same panel updates in place to sequence 2. Treat model prose such as 'the panel is working' as non-evidence unless the user visibly observes the panel update. Successful MCP requests are not currently printed by server.js, so an empty MCP terminal is not evidence of no request; use the ngrok request log or add explicit request logging if transport proof is needed. Do not add persistence/auth/history/SSE before the update loop is proven.
+Open and validate the workspace-heartbeat-history-v2 correction at 906478d671dc750b5c739a716fb32a1a650f0b0c. After repository validation passes, merge it, update the Lambda to the canonical merge, restart heartbeat-up, reopen the custom MCP thread panel, and use the user's fresh research-engine handoff chat as the long stability smoke. The pass condition is not merely that a heartbeat appears: multiple task-scoped updates must remain in chronological history, the latest state must persist between updates, and empty/failed polls must never force a false IDLE or erase known-good progress.
 
 ## Remaining work
 
-- In the live research chat with the Workspace heartbeat panel already open, invoke heartbeat_update for the owning task with a short natural-language working-state message.
-- Verify the panel replaces its idle text with the new heartbeat and shows sequence 1.
-- Invoke heartbeat_update again with different prose and verify the same panel updates in place to sequence 2 rather than creating another panel/card.
-- Capture ngrok HTTP request evidence or add explicit server request logging if transport observability is still needed; do not infer successful delivery from an empty MCP terminal because successful requests are not currently logged.
-- After the live update loop passes, add a bounded runtime preflight declaring Node >=20 so future startup fails clearly on unsupported Node 12.
-- Only after the end-to-end update loop is proven, decide whether persistence/history/SSE/auth/public hosting are warranted.
+- Run workspace-control repository validation on workspace-heartbeat-history-v2.
+- If validation passes, merge the correction and sync the Lambda checkout to the exact canonical commit.
+- Restart the persistent workspace-heartbeat tmux service so server.js and the panel resource use v0.2.
+- Refresh/reopen the Workspace Heartbeat custom MCP plugin/thread panel so ChatGPT loads panel-v2.html.
+- Use the new research-engine handoff chat as a long rehydration smoke: emit several natural-language heartbeat_update calls under the same owning task_id.
+- Verify old updates remain visible as a sequential log, the newest update remains WORKING/WAITING/BLOCKED/DONE as emitted, and the panel never switches to IDLE unless it has never received a heartbeat.
+- Verify successful /mcp requests appear in the MCP tmux window.
+- After the stability/history smoke passes, decide separately whether a future explicit turn-reset event is worth adding; do not fake assistant-response-start detection.
 
 ## Blockers / gates
 
