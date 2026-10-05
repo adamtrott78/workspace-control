@@ -28,14 +28,12 @@ safe_runner_foundation
 
 ## Next safe action
 
-P2 is authorized. Create and validate a P2 implementation branch from workspace-control main after `2bbdb81f97b5ce7743074a71bd0554f47b75b4a0`. The P2 bootstrap must run root-only transient firewall/process/network/device isolation probes first and fail closed before mutation; only on PASS may it create `ci-controller`/`ci-research-engine`, `/srv/workspace-ci/research-engine` roots, install checksum-pinned runner/controller assets, and prepare the first repository-scoped one-job no-op runner. Do not expose controller/personal credentials to job code and do not touch production research-engine services/state.
+Execute P2-A on Lambda from workspace-control main exactly at `fd3589a997219b4bd7d1895cb2eb20d1e8b5edcf`: run `scripts/bootstrap_lambda_ci_research_engine.sh` as root with `WORKSPACE_CI_P2_AUTHORIZED=YES` and `WORKSPACE_CI_P2_EXPECTED_SHA=fd3589a997219b4bd7d1895cb2eb20d1e8b5edcf`. The script must stop before persistent mutation if any transient isolation probe fails. On PASS, return the visible `lambda-ci-p2-bootstrap.json` receipt; P2-B runner registration remains separate.
 
 ## Remaining work
 
-- P2: validate root firewall state and transient systemd process/network/device sandbox behavior.
-- P2: create dedicated ci-controller and ci-research-engine identities and /srv/workspace-ci roots only after transient gates pass.
-- P2: install the exact pinned Actions runner package and controller toolchain with checksum verification.
-- P2: register and execute one repository-scoped one-job no-op runner; prove home/Docker/production-service/system write denial and cleanup.
+- Execute P2-A bootstrap on Lambda at the exact workspace-control main SHA and inspect its visible JSON receipt.
+- If P2-A passes, implement/trigger P2-B: one repository-scoped JIT no-op runner under ci-research-engine with trusted default-branch workflow and artifact receipt.
 - P3: CPU candidate validation with ephemeral environment/database and GitHub artifact return.
 - P4: bounded GPU validation with explicit device grant and post-job GPU/process cleanup.
 - P5: closed-loop ChatGPT fail-diagnose-fix-rerun-PASS acceptance without SSH.
@@ -43,8 +41,8 @@ P2 is authorized. Create and validate a P2 implementation branch from workspace-
 
 ## Blockers / gates
 
-- P2 must begin with root-only transient sandbox/firewall/device/network probes and stop before user/runner creation if any mandatory isolation primitive fails.
-- A repository-scoped GitHub credential path for the first ephemeral runner must be resolved without exposing personal/controller credentials to job code.
+- P2-A must PASS on the real Lambda before P2-B JIT runner registration.
+- P2-B still requires a short-lived repository-admin credential path solely to mint the encoded JIT config; the credential must not be exposed to job code or persisted.
 
 ## Fresh-chat initialization
 
