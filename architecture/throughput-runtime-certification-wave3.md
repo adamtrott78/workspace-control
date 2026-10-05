@@ -351,6 +351,40 @@ This complements the actionability gate: actionability stops unnecessary
 diagnosis after a bounded correction is known; scope closure stops unnecessary
 implementation after the owning objective is complete.
 
+## Operator progress heartbeat
+
+Long-running work must remain legible to the human operator while it executes.
+
+Tool activity is not progress reporting. Repeated connector reads, CI polling,
+job inspection, or log retrieval must be summarized in terms of the current
+bounded objective and control state rather than exposed as an opaque stream of
+low-level actions.
+
+The shared heartbeat contract is implemented by:
+
+- procedures/progress_heartbeat.md;
+- schemas/progress_heartbeat.v1.schema.json;
+- scripts/progress_heartbeat.py.
+
+A heartbeat reports the current bounded objective, durable milestone progress,
+the operation currently on the critical path, remaining execute-now scope,
+the next durable milestone, and any external dependency preventing transition.
+
+The heartbeat is an operator-facing reasoning summary, not private
+chain-of-thought. It explains why the current operation is necessary without
+dumping hidden scratch reasoning.
+
+During substantial work, emit a meaningful operator update when control state
+changes and approximately every 15 seconds or 2-3 tool operations during opaque
+stretches. Polling the same unchanged dependency must be compressed: report that
+no meaningful state changed, identify the pending dependency, and do not imply
+that additional implementation occurred.
+
+Heartbeat scope counts derive from the Scope Closure classification. When no
+execute-now work remains, the heartbeat must make that visible; if the owning
+objective is durable and validated, evaluate CHECKPOINT_AND_STOP rather than
+inventing another milestone.
+
 ## Control-cycle latency
 
 Wave 3 measures the end-to-end interval between durable actionable states, not

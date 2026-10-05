@@ -645,6 +645,39 @@ checkpoint per operation. Historical scientific/implementation checkpoints
 remain separate immutable evidence; the rolling restore point exists only to
 accelerate recovery.
 
+## Operator progress heartbeat
+
+Substantial or long-running work MUST remain understandable to the operator
+while execution is in progress.
+
+Use procedures/progress_heartbeat.md for the shared contract.
+
+A progress update should summarize:
+
+- the current bounded objective;
+- meaningful milestones already completed;
+- the operation happening now and why it is on the critical path;
+- remaining REQUIRED_CORRECTION, BOUNDED_ENABLING_CHANGE, or explicitly
+  authorized scope work;
+- the next durable milestone;
+- any external CI/runtime/human dependency that is currently pending.
+
+The update is a concise reasoning/progress summary, not private chain-of-thought.
+
+Default cadence for operator-visible work is approximately every 15 seconds or
+2-3 tool operations, whichever comes first, and immediately when the objective,
+diagnosis, scope classification, milestone, external-wait state, recovery point,
+or closure decision materially changes.
+
+Do not narrate every connector call. Repeated checks of the same unchanged CI,
+runtime, or remote dependency are not distinct progress. Compress them into a
+heartbeat such as: the implementation is complete, CI is the only remaining
+gate, no additional mutation is justified unless validation fails.
+
+Polling alone MUST NOT create new implementation work. If no independent
+in-scope work remains, preserve the current scope and report the dependency and
+the next decision enabled by its result.
+
 ## Failure handling
 
 On a failed guard or validator:

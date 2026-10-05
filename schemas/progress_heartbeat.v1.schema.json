@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/progress_heartbeat.v1.schema.json",
+  "title": "Workspace Control Operator Progress Heartbeat v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "objective",
+    "state",
+    "milestones",
+    "current_operation",
+    "scope_progress",
+    "next_milestone",
+    "wait_state",
+    "meaningful_change"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "objective": {"type": "string", "minLength": 1},
+    "state": {
+      "enum": [
+        "PLANNING",
+        "IMPLEMENTING",
+        "VALIDATING",
+        "WAITING_EXTERNAL",
+        "RECOVERING",
+        "CLOSING"
+      ]
+    },
+    "milestones": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "status"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "label": {"type": "string", "minLength": 1},
+          "status": {
+            "enum": ["DONE", "CURRENT", "PENDING", "BLOCKED"]
+          }
+        }
+      }
+    },
+    "current_operation": {"type": "string", "minLength": 1},
+    "scope_progress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "completed_execute_now",
+        "total_execute_now",
+        "required_corrections_remaining",
+        "bounded_enabling_remaining",
+        "authorized_expansion_remaining",
+        "deferred_followups"
+      ],
+      "properties": {
+        "completed_execute_now": {"type": "integer", "minimum": 0},
+        "total_execute_now": {"type": "integer", "minimum": 0},
+        "required_corrections_remaining": {"type": "integer", "minimum": 0},
+        "bounded_enabling_remaining": {"type": "integer", "minimum": 0},
+        "authorized_expansion_remaining": {"type": "integer", "minimum": 0},
+        "deferred_followups": {"type": "integer", "minimum": 0}
+      }
+    },
+    "next_milestone": {"type": "string", "minLength": 1},
+    "wait_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["active", "reason", "dependency"],
+      "properties": {
+        "active": {"type": "boolean"},
+        "reason": {"type": ["string", "null"], "minLength": 1},
+        "dependency": {"type": ["string", "null"], "minLength": 1}
+      }
+    },
+    "meaningful_change": {"type": "boolean"}
+  }
+}
