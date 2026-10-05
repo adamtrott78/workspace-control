@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 const server = readFileSync(new URL("../server.js", import.meta.url), "utf8");
 
 test("both heartbeat tools bind to the same panel resource", () => {
-  assert.equal(server.includes('const PANEL_URI = "ui://workspace-heartbeat/panel-v5.html";'), true);
+  assert.equal(server.includes('const PANEL_URI = "ui://workspace-heartbeat/panel-v6.html";'), true);
 
   const updateStart = server.indexOf('"heartbeat_update"');
   const getStart = server.indexOf('"heartbeat_get"');
@@ -28,4 +28,9 @@ test("only heartbeat_get advertises the thread entrypoint", () => {
 
   assert.equal(updateBlock.includes('entrypoints: [{ type: "thread" }]'), false);
   assert.equal(getBlock.includes('entrypoints: [{ type: "thread" }]'), true);
+});
+
+test("heartbeat output schema exposes task history and operator timeline", () => {
+  assert.equal(server.includes("history: z.array(heartbeatSchema)"), true);
+  assert.equal(server.includes("timeline: z.array(heartbeatSchema)"), true);
 });
