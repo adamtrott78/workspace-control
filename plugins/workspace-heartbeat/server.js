@@ -10,12 +10,12 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
-const PANEL_URI = "ui://workspace-heartbeat/panel-v1.html";
+const PANEL_URI = "ui://workspace-heartbeat/panel-v2.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
   "utf8",
 );
-const store = new HeartbeatStore();
+const store = new HeartbeatStore({ historyLimit: 50 });
 
 const heartbeatSchema = z.object({
   task_id: z.string(),
@@ -27,15 +27,16 @@ const heartbeatSchema = z.object({
 
 const heartbeatOutputSchema = {
   heartbeat: heartbeatSchema.nullable(),
+  history: z.array(heartbeatSchema),
 };
 
 function sessionIdFromMeta(meta) {
   return meta?.["openai/session"] ?? "dev-session";
 }
 
-function resultFor(heartbeat, text) {
+function resultFor(snapshot, text) {
   return {
-    structuredContent: { heartbeat },
+    structuredContent: snapshot,
     content: [{ type: "text", text }],
   };
 }
@@ -44,11 +45,11 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.1.0",
+      version: "0.2.0",
     },
     {
       instructions:
-        "For substantial long-running work, keep the operator informed through heartbeat_update. Use natural conversational prose, not rigid status headings. Call heartbeat_update on meaningful state changes and before a fourth non-heartbeat tool operation occurs.",
+        "For substantial long-running work, keep the operator informed through heartbeat_update. Use natural conversational prose, not rigid status headings. Call heartbeat_update on meaningful state changes and before a fourth non-heartbeat tool operation occurs. Reuse the owning task_id across chat handoffs so the operator panel can keep a continuous bounded history.",
     },
   );
 
@@ -79,7 +80,7 @@ function createHeartbeatServer() {
     {
       title: "Update operator heartbeat",
       description:
-        "Use this during substantial long-running work to replace the operator's current progress heartbeat with a concise natural-language update. Call on meaningful state changes and before a fourth non-heartbeat tool operation.",
+        "Use this during substantial long-running work to append a concise natural-language progress heartbeat for the owning task. Call on meaningful state changes and before a fourth non-heartbeat tool operation.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
         message: z.string().min(1).max(4000),
@@ -99,14 +100,19 @@ function createHeartbeatServer() {
       },
     },
     async ({ task_id, message, state }, { _meta } = {}) => {
+      const sessionId = sessionIdFromMeta(_meta);
       const heartbeat = store.update({
-        sessionId: sessionIdFromMeta(_meta),
+        sessionId,
         taskId: task_id.trim(),
         message: message.trim(),
         state,
       });
+      const snapshot = store.getSnapshot({
+        sessionId,
+        taskId: heartbeat.task_id,
+      });
       return resultFor(
-        heartbeat,
+        snapshot,
         `Heartbeat updated for ${heartbeat.task_id} (sequence ${heartbeat.sequence}).`,
       );
     },
@@ -118,7 +124,7 @@ function createHeartbeatServer() {
     {
       title: "Read operator heartbeat",
       description:
-        "Read the latest operator heartbeat for this ChatGPT conversation. Omit task_id to read the most recently updated task.",
+        "Read the latest heartbeat and bounded history for a task. Pass task_id whenever it is known; this keeps the panel stable even when ChatGPT model and app calls use different session identities.",
       inputSchema: {
         task_id: z.string().min(1).max(160).optional(),
       },
@@ -142,16 +148,19 @@ function createHeartbeatServer() {
       },
     },
     async ({ task_id }, { _meta } = {}) => {
-      const heartbeat = store.get({
+      const snapshot = store.getSnapshot({
         sessionId: sessionIdFromMeta(_meta),
         taskId: task_id?.trim(),
       });
-      if (!heartbeat) {
-        return resultFor(null, "No heartbeat has been recorded in this conversation yet.");
+      if (!snapshot.heartbeat) {
+        return resultFor(
+          snapshot,
+          "No heartbeat has been recorded for this task yet.",
+        );
       }
       return resultFor(
-        heartbeat,
-        `Latest heartbeat for ${heartbeat.task_id}: ${heartbeat.message}`,
+        snapshot,
+        `Latest heartbeat for ${snapshot.heartbeat.task_id}: ${snapshot.heartbeat.message}`,
       );
     },
   );
@@ -189,6 +198,13 @@ const httpServer = createServer(async (req, res) => {
 
   const methods = new Set(["POST", "GET", "DELETE"]);
   if (url.pathname === MCP_PATH && req.method && methods.has(req.method)) {
+    const startedAt = Date.now();
+    res.on("finish", () => {
+      console.log(
+        `[mcp] ${req.method} ${url.pathname} -> ${res.statusCode} (${Date.now() - startedAt} ms)`,
+      );
+    });
+
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Expose-Headers", "Mcp-Session-Id");
 

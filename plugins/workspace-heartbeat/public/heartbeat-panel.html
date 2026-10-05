@@ -37,19 +37,35 @@
         text-transform: uppercase;
         letter-spacing: .06em;
       }
-      .message {
-        white-space: pre-wrap;
-        font-size: 15px;
-        line-height: 1.55;
-        margin: 0;
-      }
-      .meta {
-        margin-top: 16px;
-        font-size: 11px;
-        opacity: .62;
-      }
       .empty {
         opacity: .65;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .history {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .entry {
+        border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+        padding-top: 12px;
+      }
+      .entry:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+      .message {
+        white-space: pre-wrap;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .entry-meta,
+      .footer {
+        margin-top: 7px;
+        font-size: 11px;
+        opacity: .58;
       }
       .error {
         opacity: .72;
@@ -62,41 +78,115 @@
         <h1>Workspace heartbeat</h1>
         <span id="state" class="state">idle</span>
       </div>
-      <p id="message" class="message empty">No heartbeat yet.</p>
-      <div id="meta" class="meta">Waiting for the first update…</div>
+      <div id="history" class="history">
+        <div id="empty" class="empty">No heartbeat yet.</div>
+      </div>
+      <div id="footer" class="footer">Waiting for the first update…</div>
     </main>
 
     <script type="module">
       const stateEl = document.getElementById("state");
-      const messageEl = document.getElementById("message");
-      const metaEl = document.getElementById("meta");
-      let newestSequence = -1;
+      const historyEl = document.getElementById("history");
+      const footerEl = document.getElementById("footer");
+
+      const persisted = window.openai?.widgetState ?? {};
+      let activeTaskId = persisted.task_id ?? null;
+      let knownHistory = Array.isArray(persisted.history) ? persisted.history : [];
       let busy = false;
 
-      function render(heartbeat) {
-        if (!heartbeat) {
+      function heartbeatKey(item) {
+        return `${item.updated_at}:${item.sequence}:${item.task_id}`;
+      }
+
+      function mergeHistory(incoming) {
+        const byKey = new Map();
+        for (const item of [...knownHistory, ...(incoming ?? [])]) {
+          if (item?.task_id && item?.updated_at) {
+            byKey.set(heartbeatKey(item), item);
+          }
+        }
+        knownHistory = [...byKey.values()]
+          .sort((a, b) => {
+            const timeDelta = Date.parse(a.updated_at) - Date.parse(b.updated_at);
+            return timeDelta || a.sequence - b.sequence;
+          })
+          .slice(-50);
+      }
+
+      function formatTime(value) {
+        const timestamp = new Date(value);
+        return Number.isNaN(timestamp.getTime())
+          ? value
+          : timestamp.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+              second: "2-digit",
+            });
+      }
+
+      function persist() {
+        window.openai?.setWidgetState?.({
+          task_id: activeTaskId,
+          history: knownHistory,
+        });
+      }
+
+      function render() {
+        if (!knownHistory.length) {
           stateEl.textContent = "idle";
-          messageEl.textContent = "No heartbeat yet.";
-          messageEl.className = "message empty";
-          metaEl.textContent = "Waiting for the first update…";
+          historyEl.innerHTML = '<div class="empty">No heartbeat yet.</div>';
+          footerEl.textContent = "Waiting for the first update…";
           return;
         }
 
-        if (heartbeat.sequence < newestSequence) return;
-        newestSequence = heartbeat.sequence;
+        const latest = knownHistory[knownHistory.length - 1];
+        activeTaskId = latest.task_id;
+        stateEl.textContent = latest.state;
 
-        stateEl.textContent = heartbeat.state;
-        messageEl.textContent = heartbeat.message;
-        messageEl.className = "message";
+        historyEl.replaceChildren(
+          ...knownHistory.map((item) => {
+            const entry = document.createElement("section");
+            entry.className = "entry";
 
-        const timestamp = new Date(heartbeat.updated_at);
-        const when = Number.isNaN(timestamp.getTime())
-          ? heartbeat.updated_at
-          : timestamp.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+            const message = document.createElement("p");
+            message.className = "message";
+            message.textContent = item.message;
 
-        metaEl.textContent =
-          `${heartbeat.task_id} · update ${heartbeat.sequence} · ${when}`;
+            const meta = document.createElement("div");
+            meta.className = "entry-meta";
+            meta.textContent =
+              `update ${item.sequence} · ${formatTime(item.updated_at)} · ${item.state}`;
+
+            entry.append(message, meta);
+            return entry;
+          }),
+        );
+
+        footerEl.textContent =
+          `${latest.task_id} · ${knownHistory.length} retained update${knownHistory.length === 1 ? "" : "s"}`;
+        persist();
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
       }
+
+      function applySnapshot(snapshot) {
+        if (!snapshot) return;
+        const incoming = Array.isArray(snapshot.history) ? snapshot.history : [];
+        if (snapshot.heartbeat && !incoming.length) incoming.push(snapshot.heartbeat);
+
+        if (snapshot.heartbeat?.task_id) {
+          activeTaskId = snapshot.heartbeat.task_id;
+        }
+
+        if (incoming.length) {
+          mergeHistory(incoming);
+          render();
+        } else if (!knownHistory.length) {
+          render();
+        }
+      }
+
+      applySnapshot(window.openai?.toolOutput ?? null);
+      render();
 
       async function refresh() {
         if (busy) return;
@@ -105,13 +195,26 @@
           if (!window.openai?.callTool) {
             throw new Error("ChatGPT tool bridge is unavailable.");
           }
-          const result = await window.openai.callTool("heartbeat_get", {});
-          render(result?.structuredContent?.heartbeat ?? null);
+
+          const args = activeTaskId ? { task_id: activeTaskId } : {};
+          const result = await window.openai.callTool("heartbeat_get", args);
+          const snapshot = result?.structuredContent ?? null;
+
+          // Empty polls are non-authoritative once a valid heartbeat is known.
+          // Never erase the operator's last known progress because app/model
+          // session metadata temporarily diverged or the server returned no task.
+          if (snapshot?.heartbeat || snapshot?.history?.length) {
+            applySnapshot(snapshot);
+          }
         } catch (error) {
-          stateEl.textContent = "offline";
-          messageEl.textContent = "Heartbeat panel could not refresh.";
-          messageEl.className = "message error";
-          metaEl.textContent = error instanceof Error ? error.message : String(error);
+          // Preserve the last known-good heartbeat history on refresh failures.
+          if (!knownHistory.length) {
+            stateEl.textContent = "offline";
+            historyEl.innerHTML =
+              '<div class="empty error">Heartbeat panel could not refresh.</div>';
+            footerEl.textContent =
+              error instanceof Error ? error.message : String(error);
+          }
         } finally {
           busy = false;
         }
