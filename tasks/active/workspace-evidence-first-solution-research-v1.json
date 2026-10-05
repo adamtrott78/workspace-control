@@ -1,0 +1,121 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-evidence-first-solution-research-v1",
+  "title": "Workspace Evidence-First Solution Research v1",
+  "status": "IN_PROGRESS",
+  "goal": "Promote a reusable workspace-level research-before-implementation workflow that lets any project/chat investigate comparable problems, current literature, open-source implementations, practitioner patterns, and candidate architectures before committing to a material implementation direction.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "research-engine-local-extract-redesign-v1",
+  "current_stage": "workflow_design_and_promotion",
+  "acceptance_criteria": [
+    "A workspace-control-owned procedure defines when evidence-first solution research should trigger and when it should not.",
+    "A reusable workflow descriptor separates problem framing, prior-work/exclusion recovery, external research, architecture synthesis, candidate narrowing, benchmark planning, and implementation handoff.",
+    "The workflow requires current external evidence for materially uncertain architecture/model/library choices instead of defaulting to implementation-first trial-and-error.",
+    "Project/domain truth remains owned by the project repository; workspace-control owns only the reusable research/decision mechanics.",
+    "The workflow explicitly reuses known-good implementations and excludes previously failed approaches unless new evidence changes the failed premise.",
+    "The workflow produces a bounded shortlist and measurable implementation/benchmark hypotheses before heavyweight downloads, expensive runtime work, or broad implementation begins.",
+    "The workflow supports web, scholarly, repository, file, and connected-source evidence without depending on one specific executor/tool vendor.",
+    "The workflow is discoverable from the normal workspace-control root route so future chats can invoke it.",
+    "The descriptor and procedure pass workspace-control full integration/contract validation.",
+    "The originating EXTRACT redesign task can pin the exact durable workflow identity after promotion."
+  ],
+  "constraints": [
+    "Do not move project-specific scientific or implementation truth into workspace-control.",
+    "Do not require external research for trivial, deterministic, or already-specified implementation work.",
+    "Do not treat popularity, benchmark marketing, or one source as sufficient architectural evidence.",
+    "Research is a decision stage, not permission for uncontrolled scope expansion; the owning task still defines what may be changed.",
+    "Separate current evidence from historical failed approaches and from project-specific constraints.",
+    "Do not download/install heavyweight candidates merely because they appear promising in the research survey.",
+    "Preserve executor portability: the workflow may name capability classes but not require one specific chat model or connector.",
+    "Keep the current accepted research-engine VERIFY implementation and production checkpoint unchanged while this workspace workflow is promoted."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "aa24d3f25a54745bcffb607f9ff43310181c9b85",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "aa24d3f25a54745bcffb607f9ff43310181c9b85",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-evidence-first-solution-research-v1.json",
+        "tasks/active/workspace-evidence-first-solution-research-v1.md",
+        "procedures/evidence_first_solution_research.md",
+        "workflows/evidence-first-solution-research.v1.json",
+        "README.md",
+        "tests/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "workflow_design_and_promotion",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "observed research-engine EXTRACT redesign where external solution research materially changed the architecture",
+        "workspace-control workflow descriptor and operator contracts",
+        "existing reusable workflow conventions"
+      ],
+      "outputs": [
+        "procedures/evidence_first_solution_research.md",
+        "workflows/evidence-first-solution-research.v1.json",
+        "root-route discoverability update",
+        "validation evidence and exact workflow identity"
+      ],
+      "validation": [
+        {
+          "check": "Workspace-level ownership classification",
+          "result": "PASS",
+          "evidence": [
+            "The method governs cross-project decision mechanics rather than research-engine scientific truth.",
+            "workspace-control is registered as owner of cross-project operating policy and reusable coordination tooling.",
+            "The originating research-engine child task retains all EXTRACT-specific architecture and benchmark truth."
+          ]
+        }
+      ],
+      "resume_condition": "Reusable workflow is durable, discoverable, validated, and can be pinned by project tasks."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "originating-use-case",
+      "kind": "recovery_restore_point",
+      "identity": "aa24d3f25a54745bcffb607f9ff43310181c9b85",
+      "required_for_resume": true,
+      "evidence": [
+        "origin=research-engine-local-extract-redesign-v1",
+        "trigger=external research changed implementation direction from model bakeoff to decomposed Local Evidence Agent",
+        "next safe action=implement workspace-level procedure/descriptor on an isolated branch and run full validation"
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Explicit user authorization",
+      "result": "PASS",
+      "evidence": [
+        "User explicitly requested promoting the research method into workspace-control for reuse across chats.",
+        "User requested consolidation into a plan and continuation into implementation."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Write the workspace-level evidence-first research procedure.",
+    "Write the reusable workflow descriptor.",
+    "Add root-route discoverability without making research mandatory for trivial work.",
+    "Run workflow validation, full workspace-control tests, and task contract regression.",
+    "Merge the validated workflow and return its exact identity to the originating EXTRACT task."
+  ],
+  "next_safe_action": "Create an isolated workspace-control branch from main@aa24d3f25a54745bcffb607f9ff43310181c9b85 and implement the evidence-first solution-research procedure, workflow descriptor, and root-route discoverability. Validate with the workflow descriptor validator and workspace-control FULL_INTEGRATION tier before merging. Do not modify project-specific research-engine truth in this workspace-level task.",
+  "last_executor": "chatgpt",
+  "last_surface": "github"
+}
