@@ -31,21 +31,22 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a3ba5eb388041c3e00f1cf03a697431f8fd993e3
+- Remote checkpoint: 42f82d959a93013cee0f3a18122b2e5b3f6773d8
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: a3d80e9329e231889b11430f98c0de342349fe1f
+- Local HEAD: a3ba5eb388041c3e00f1cf03a697431f8fd993e3
 - Local clean: true
 
 ## Next safe action
 
-Keep sustained research disabled and research-engine-daemon.service inactive/dead. research-engine canonical main is a3ba5eb388041c3e00f1cf03a697431f8fd993e3; PR #83 head CI 37255866525 and canonical-main CI 37255961585 both PASS. Qwen3.5-4B is already selected as the local VLM family; do not rerun the exact three-call visual benchmark and do not test another VLM. Lambda/local is last verified clean on main@a3d80e9329e231889b11430f98c0de342349fe1f. First re-inspect branch/HEAD/worktree and fast-forward only if still clean on main to a3ba5eb388041c3e00f1cf03a697431f8fd993e3; do not reset/stash/clean unrelated work. Keep the daemon stopped. Then run exactly `bash deploy/run-qwen35-guarded-semantic-calibration.sh`. The merged gate requires the existing native-sampler-v3 certified package environment and performs no install/download; it selects exactly one bounded EXTRACT and one radius-0 VERIFY preserved ambiguity case, serves both from one Qwen engine boot, deterministically rejects ungrounded/unbounded output, runs contemporaneous STANDARD Codex controls on the same authoritative-PDF contexts, invokes no SemanticResultMaterializer, changes no production routing, and materializes no scientific state. This same natural boot records the pending Wave-3 R2/engine-init evidence without any C3 or extra certification inference. Return OUTPUT_ROOT, calibration-report.json, and qwen-runtime-reuse-evidence.json; only include qwen-results.json/codex-control-results.json if adjudication needs row-level diagnosis.
+Keep sustained research disabled and research-engine-daemon.service inactive/dead. research-engine canonical main is 42f82d959a93013cee0f3a18122b2e5b3f6773d8; PR #84 head CI 37256469562 and canonical-main CI 37256559196 both PASS. The first guarded-calibration invocation on Lambda reached clean main@a3ba5eb388041c3e00f1cf03a697431f8fd993e3, verified R0 package reuse and R1 execution certification, performed no package work, then stopped before plan construction/model initialization because the Compose PostgreSQL service was not running after host reboots. That attempt performed zero Qwen calls and is not semantic-quality evidence. First re-inspect branch/HEAD/worktree and fast-forward only if still clean on main from a3ba5eb388041c3e00f1cf03a697431f8fd993e3 to 42f82d959a93013cee0f3a18122b2e5b3f6773d8; do not reset/stash/clean unrelated work. Then run exactly `bash deploy/run-qwen35-guarded-semantic-calibration.sh`. The corrected runner will `docker compose up -d db`, wait boundedly for pg_isready, and keep the research daemon stopped; the db service now has `restart: unless-stopped`, applying durable reboot persistence when Compose reconciles it. After DB readiness, allow only the existing one bounded EXTRACT + one radius-0 VERIFY Qwen calls in one engine session plus their two contemporaneous STANDARD Codex controls. The same natural boot should collect the pending Wave-3 R2/init evidence. Do not rerun the visual benchmark, add C3, install/download Qwen packages, change production routing, or materialize scientific state.
 
 ## Remaining work
 
-- Keep sustained research disabled and research-engine-daemon.service inactive/dead. Re-inspect the Lambda checkout and fast-forward only if it is still clean on main from a3d80e9329e231889b11430f98c0de342349fe1f to canonical main@a3ba5eb388041c3e00f1cf03a697431f8fd993e3; do not reset, stash, clean, or overwrite unrelated work.
-- Run exactly `bash deploy/run-qwen35-guarded-semantic-calibration.sh`. This is the next natural Qwen engine boot and the only Qwen work authorized now: exactly two semantic calls in one engine session, plus two contemporaneous STANDARD Codex controls.
+- Keep sustained research disabled and research-engine-daemon.service inactive/dead. Re-inspect the Lambda checkout and fast-forward only if it is still clean on main from a3ba5eb388041c3e00f1cf03a697431f8fd993e3 to canonical main@42f82d959a93013cee0f3a18122b2e5b3f6773d8; do not reset, stash, clean, or overwrite unrelated work.
+- Run exactly `bash deploy/run-qwen35-guarded-semantic-calibration.sh`. The corrected runner will reconcile/start only the PostgreSQL db service, wait for pg_isready, and preserve research-engine-daemon.service inactive/dead. Reconciliation also applies `restart: unless-stopped`, so PostgreSQL should return automatically with Docker after future Lambda reboots.
+- This remains the next natural Qwen engine boot and the only Qwen work authorized now: exactly one bounded EXTRACT and one radius-0 VERIFY call in one live engine session, plus two contemporaneous STANDARD Codex controls. The prior DB-stopped attempt performed zero Qwen calls and is not a scientific rerun.
 - Do not rerun deploy/run-qwen35-visual-benchmark.sh, do not add C3, do not install/download Qwen packages, and do not test another VLM family.
 - Return the visible OUTPUT_ROOT plus calibration-report.json and qwen-runtime-reuse-evidence.json. If the deterministic guard or Qwen-vs-Codex agreement fails, retain Codex and inspect only the relevant qwen-results/codex-control rows; do not broaden the benchmark.
 - Use the natural boot's qwen-runtime-reuse-evidence.json to complete Wave-3 R2 and engine-init before/after measurements. Keep R0/R1/R2/R3 separately classified.
@@ -57,7 +58,7 @@ Keep sustained research disabled and research-engine-daemon.service inactive/dea
 - PP-OCRv6 remains resource-pass / quality-not-promoted; the blank scan target still requires replacement with a content-bearing image-only scan before scan-recovery promotion can be evaluated.
 - PaddleOCR-VL-1.6 remains not promoted because of resource and semantic-quality failures; no further VLM family bakeoff is open.
 - Qwen3.5-4B is the selected local VLM family, but production semantic authority remains Codex STANDARD until the merged guarded EXTRACT/VERIFY calibration gate is executed on Lambda and both local jobs pass deterministic grounding plus contemporaneous Codex agreement.
-- The guarded calibration has not yet been executed on Lambda. Lambda/local remains last verified clean on main@a3d80e9329e231889b11430f98c0de342349fe1f; canonical research-engine main is now a3ba5eb388041c3e00f1cf03a697431f8fd993e3.
+- The first guarded-calibration invocation after host reboot reached verified R0/R1 reuse but stopped before planning/model initialization because PostgreSQL was not running. PR #84 durably fixes DB boot persistence and runner self-heal; the scientific calibration itself remains unexecuted.
 
 ## Fresh-chat initialization
 
