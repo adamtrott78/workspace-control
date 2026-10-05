@@ -85,18 +85,6 @@
         "tests/**",
         "README.md"
       ]
-    },
-    {
-      "name": "PADataset",
-      "intent": "read_only",
-      "base_sha": null,
-      "remote": {
-        "branch": "main",
-        "checkpoint_sha": null,
-        "verified": false
-      },
-      "local": null,
-      "allowed_mutation_scope": []
     }
   ],
   "stages": [
@@ -336,5 +324,5 @@
   "next_safe_action": "Run the tracked read-only P1 compatibility probe from workspace-control PR #72 head `46d3d33aa560df2adf90137e0951097ed973ee1d` on Lambda and return `lambda-runner-p1-probe.json`. The probe writes only its receipt under the visible workspace-control-tmp directory and performs no user/service/runner/firewall/cgroup mutation. In parallel, allow PR #72 repository validation to instantiate. P2 remains explicitly unauthorized until the compatibility receipt, static tests, and later non-runner transient sandbox probes pass.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
-  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2."
+  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding."
 }
