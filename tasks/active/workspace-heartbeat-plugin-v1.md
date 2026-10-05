@@ -29,20 +29,20 @@ Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel 
 
 ## Next safe action
 
-Continue ordinary research work with Workspace Heartbeat v0.2 enabled. The fresh-chat single-heartbeat retention smoke has passed, so do not repeat it. Wait for a naturally long/tool-heavy research turn that emits at least a second heartbeat, then visually verify the existing first entry remains, the new entry appends chronologically, the footer reports 2+ retained updates, and no false-IDLE transition occurs. Only that multi-heartbeat accumulation check remains before closing the panel-stability correction.
+Continue ordinary research work with Workspace Heartbeat v0.2 enabled, but treat the heartbeat system as not yet stable. If heartbeat_update returns UNAVAILABLE again, immediately capture the MCP tmux window and ngrok request log around the failure before restarting or modifying anything; use those logs to classify whether the request reached the tunnel/server. If multiple heartbeats instead deliver successfully in one long turn, also verify chronological accumulation and non-erasure. Do not repeat the already-passed single-heartbeat retention test.
 
 ## Remaining work
 
-- Keep the current v0.2 Lambda service and custom MCP plugin configuration unchanged.
-- Use ordinary research work as the next smoke; do not manufacture extra tool calls solely to force a heartbeat.
-- When a sufficiently long response naturally emits a second or later heartbeat, verify prior entries remain visible and the footer increases from 1 retained update to 2+ retained updates.
-- Verify the newest heartbeat controls WORKING / WAITING / BLOCKED / DONE while earlier entries remain in chronological order.
-- If multi-heartbeat accumulation passes without false IDLE or erasure, mark panel_stability_correction VALIDATED and close this heartbeat task.
-- If history still disappears or resets, capture the visible footer/state plus MCP request log before changing implementation.
+- Keep the current v0.2 Lambda service and custom MCP plugin configuration unchanged until the intermittent UNAVAILABLE boundary is observed with transport evidence.
+- On the next heartbeat UNAVAILABLE, capture the Workspace Heartbeat MCP console request/error lines and the ngrok request lines covering the failure before restarting or changing anything.
+- If a subsequent long/tool-heavy turn successfully emits multiple heartbeats, verify earlier entries remain visible, the footer increases to 2+ retained updates, and the newest state controls the panel.
+- Classify UNAVAILABLE only after correlating ChatGPT tool failure with MCP/ngrok evidence; do not assume a server, tunnel, or UI cause from the model-visible error alone.
+- Close the heartbeat task only after both delivery availability and multi-heartbeat chronological accumulation are proven stable.
 
 ## Blockers / gates
 
-- Final live validation is blocked only on observing a naturally long/tool-heavy research turn that emits at least two v0.2 heartbeats for the same owning task.
+- Heartbeat v0.2 end-to-end availability is intermittently failing: a later heartbeat_update returned UNAVAILABLE after earlier successful deliveries.
+- Multi-heartbeat chronological accumulation remains unproven because the qualifying long turn has not yet produced two successfully delivered v0.2 heartbeat updates.
 
 ## Fresh-chat initialization
 
