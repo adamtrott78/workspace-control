@@ -54,14 +54,13 @@ For substantial long-running work:
 Do not replace normal reasoning with rigid status-card prose.
 
 
-## v0.3 delivery model
+## v0.3.1 delivery model
 
-The panel now prefers the MCP Apps standard bridge and listens for `ui/notifications/tool-result` so model-driven tool results can update the mounted panel without a one-second polling loop.
+The panel is event-driven only.
 
-A reconciliation read remains only as a safety net:
-- every 5 seconds while recent progress is active;
-- every 15 seconds after one minute without a new heartbeat;
-- every 30 seconds after a reconciliation error;
-- hidden panels do not actively reconcile until visible again.
+- Model-initiated heartbeat results arrive through the MCP Apps `ui/notifications/tool-result` lifecycle.
+- Existing state hydrates from the tool result and persisted widget state when the panel mounts.
+- The panel does not automatically call `heartbeat_get`, does not run a timer, and does not poll in the background.
+- `heartbeat_get` remains available for explicit model/user reconciliation when needed.
 
-This replaces the v0.2 one-second `heartbeat_get` loop that generated excessive MCP traffic and was correlated with intermittent `UNAVAILABLE` delivery failures.
+This removes both the v0.2 one-second polling loop and the v0.3 five-second fallback reconciliation that still produced recurring transport traffic.
