@@ -85,18 +85,6 @@
         "tests/**",
         "README.md"
       ]
-    },
-    {
-      "name": "PADataset",
-      "intent": "read_only",
-      "base_sha": null,
-      "remote": {
-        "branch": "main",
-        "checkpoint_sha": null,
-        "verified": false
-      },
-      "local": null,
-      "allowed_mutation_scope": []
     }
   ],
   "stages": [
@@ -178,14 +166,21 @@
         "P0 host probe receipt from 2026-10-05T21:29:38Z"
       ],
       "outputs": [
-        "pinned actions/scaleset client identity/update strategy",
-        "ci-controller service/user design",
-        "narrow root provisioner protocol and root-owned project/profile manifest",
-        "systemd sandbox profiles with tested device/network policy",
-        "trusted read-only cache-manager/layout",
-        "corrected filesystem/quota and PostgreSQL-bindir receipts",
-        "kill-switch/remove/recovery scripts",
-        "static review receipt before any user/service/runner registration"
+        "architecture/lambda-ci-upstream-pins.v1.json",
+        "architecture/lambda-ci-project-research-engine.v1.json",
+        "architecture/lambda-ci-provisioner-protocol.v1.md",
+        "architecture/lambda-ci-controller-adapter.v1.md",
+        "architecture/lambda-ci-systemd-profiles.v1.json",
+        "architecture/lambda-ci-trusted-cache-policy.v1.md",
+        "scripts/lambda_ci_provisioner.py",
+        "scripts/lambda_runner_p1_compatibility_probe.py",
+        "scripts/lambda_ci_kill_switch.sh",
+        "scripts/remove_lambda_ci.sh",
+        "templates/lambda-ci/workspace-ci-runner@.service.in",
+        "tests/test_lambda_ci_provisioner.py",
+        "tests/test_lambda_ci_foundation.py",
+        "architecture/lambda-ci-p1-static-review.v1.json",
+        "workspace-control PR #72"
       ],
       "validation": [
         {
@@ -195,6 +190,17 @@
             "Read-only probe performed no runner registration, user/service/firewall mutation, or production-state change.",
             "Host has systemd/cgroup/GPU/resource primitives required for the selected pilot.",
             "Additional read-only compatibility probes remain required before enforcing disk/device/network policies."
+          ]
+        },
+        {
+          "check": "P1 static implementation",
+          "result": "PASS_PENDING_EXTERNAL_VALIDATION",
+          "evidence": [
+            "PR #72 head=46d3d33aa560df2adf90137e0951097ed973ee1d; branch is 0 commits behind current main and changes exactly 19 intended Lambda-CI files.",
+            "actions/scaleset is pinned to e6daac702355cdb5b880b4fbdcf6d85dcd9e48e5; Actions runner is pinned to v2.337.0 with Linux x64 SHA-256 70920811a4f8ad4328818682bca5c6469c1c942fab52448868071d0063816613.",
+            "Provisioner request surface excludes arbitrary command/path/environment/device/systemd inputs and JIT is environment-only/redacted.",
+            "Systemd profiles, trusted cache policy, kill switch, guarded uninstall/bootstrap skeletons, and regression tests are present.",
+            "Existing GitHub-hosted CI remains unchanged; no Lambda host mutation has occurred."
           ]
         }
       ],
@@ -272,17 +278,16 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "be9b425b10898a4b5bf4301e8075bb44b2e62a80",
+      "identity": "46d3d33aa560df2adf90137e0951097ed973ee1d",
       "required_for_resume": true,
       "evidence": [
         "stage=safe_runner_foundation",
-        "evidence-first external survey=PASS",
-        "design branch=lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80",
-        "selected=pinned official GitHub scale-set listener (unprivileged) + narrow root provisioner (no GitHub credential) + one-job per-project UID systemd sandbox",
-        "persistent candidate-writable trusted cache rejected; promoted caches trusted-write/read-only to jobs",
-        "P0 actual-host probe=PASS_WITH_FOLLOWUPS",
-        "no users/services/runner registrations/firewall mutations performed",
-        "next safe action=P1 static implementation/review only"
+        "P1 static implementation complete on lambda-self-hosted-execution-v1-design@46d3d33aa560df2adf90137e0951097ed973ee1d",
+        "PR #72 open against current main with exactly 19 intended files",
+        "upstream scale-set client and runner artifacts exact-pinned",
+        "provisioner policy/injection tests, systemd profiles/template, cache policy, kill switch and uninstall recovery present",
+        "no host users/services/runners/firewall changes performed",
+        "next safe action=read-only P1 compatibility probe; P2 not authorized"
       ]
     }
   ],
@@ -304,22 +309,20 @@
     }
   ],
   "blockers": [
-    "No host mutation is authorized yet. P1 static artifacts must be implemented/reviewed first, and the remaining read-only host follow-ups must prove filesystem/quota, PostgreSQL test-database location, current firewall state, and systemd device/network policy compatibility.",
-    "GitHub's actions/scaleset client is Public Preview; pin an exact version/commit and isolate it behind a narrow local adapter before relying on it.",
-    "workspace-control evidence-first workflow PR #70 remains externally blocked by GitHub-hosted runner allocation after two 15-minute runner_id=0 / zero-step cancellations; this does not block design work here."
+    "P1 compatibility receipt from the actual Lambda is still required before P2: resolve /srv filesystem/quota support, PostgreSQL bindir, firewall/nft state, and remaining sandbox compatibility facts.",
+    "workspace-control PR #72 repository validation has not yet instantiated a workflow run; P2 remains unauthorized until static tests validate.",
+    "Transient systemd device/network probes remain required after the read-only compatibility receipt and before any real runner registration.",
+    "workspace-control evidence-first workflow PR #70 remains separately blocked by GitHub-hosted runner allocation and does not block this P1 branch."
   ],
   "remaining_work": [
-    "P1 static implementation: pin actions/scaleset client identity/update policy; define unprivileged ci-controller; define narrow root provisioner IPC/request schema and root-owned project/profile manifest.",
-    "Add corrected read-only host follow-up probes for /srv filesystem/quota support, PostgreSQL bindir/test DB strategy, firewall/nftables state, and transient systemd device/network restrictions.",
-    "Implement/review systemd CPU/GPU sandbox profiles, trusted cache layout/manager, diagnostic retention, kill switch, and full uninstall/recovery path in Git only; do not activate yet.",
-    "After static review and read-only compatibility PASS, perform P2 one-time root bootstrap: create ci-controller/ci-research-engine identities and roots, then one no-op repository-scoped one-job runner isolation test.",
-    "Perform P3 CPU validation with ephemeral project environment/database and GitHub artifact return.",
-    "Perform P4 bounded GPU validation with explicit device grant and process/VRAM cleanup receipt.",
-    "Perform P5 closed-loop acceptance where ChatGPT creates a deliberate failure, triggers Lambda, diagnoses/fixes it, reruns to PASS, and consumes an artifact without human SSH.",
-    "Only after research-engine acceptance, opt in PADataset under a separate scale set/UID/root/cache and prove cross-project denial."
+    "Run scripts/lambda_runner_p1_compatibility_probe.py read-only on Lambda and analyze the JSON receipt.",
+    "Use that receipt to finalize disk/quota, PostgreSQL ephemeral-test-DB, firewall/network and controller build strategy.",
+    "Run repository validation for PR #72 and fix only demonstrated static/test defects.",
+    "Perform non-runner transient sandbox probes for ProtectProc/ProcSubset, IPAddressDeny/Allow, and DevicePolicy=closed CUDA access.",
+    "Only if all P1 gates pass, authorize P2 one-time host bootstrap and first no-op ephemeral repository-scoped runner."
   ],
-  "next_safe_action": "Implement and statically review P1 artifacts on the isolated design branch at be9b425b10898a4b5bf4301e8075bb44b2e62a80: a pinned `actions/scaleset` listener strategy, unprivileged `ci-controller`, narrow local-only root provisioner protocol/manifest, systemd sandbox profiles, trusted-write/read-only cache layout, corrected read-only filesystem/PostgreSQL/firewall/device/network probes, and kill-switch/uninstall path. Do not create users/services, install/register any runner, expose secrets, change firewall rules, or change existing GitHub-hosted CI until these artifacts and follow-up probes pass review.",
+  "next_safe_action": "Run the tracked read-only P1 compatibility probe from workspace-control PR #72 head `46d3d33aa560df2adf90137e0951097ed973ee1d` on Lambda and return `lambda-runner-p1-probe.json`. The probe writes only its receipt under the visible workspace-control-tmp directory and performs no user/service/runner/firewall/cgroup mutation. In parallel, allow PR #72 repository validation to instantiate. P2 remains explicitly unauthorized until the compatibility receipt, static tests, and later non-runner transient sandbox probes pass.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
-  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2."
+  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding."
 }
