@@ -68,7 +68,7 @@
       "base_sha": "73697608e3ab179b7ed617b1833796cc47f679c2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "d0debd205de46a608fce5b9a15f3fa0fdd6de4e6",
+        "checkpoint_sha": "032922019d3602d51312e895691f8c851814aaf7",
         "verified": true
       },
       "local": {
@@ -636,7 +636,8 @@
         "A pre-Lambda review found and fixed a representation mismatch: the current Docling normalizer retains pictures as FIGURE DocumentBlock records with caption linkage in derivation metadata, not FigureAsset records. Source audit now consumes that production representation and retains future FigureAsset compatibility.",
         "A real normalizer regression test proves a synthetic Docling picture+caption normalizes to a FIGURE block and is recoverable as a unique caption-linked PDF bbox by the source audit.",
         "malformed-layout-v1 remains fail-closed: the Lambda audit must reject/replace it if no registered target page fires the durable layout opener. Semantic model prefetch also remains closed unless both visual targets resolve to unique linked figure bboxes.",
-        "research-engine PR #67 merged as 93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a. Final PR-head CI 37167850823 PASS and canonical-main CI 37167916582 PASS across install, compile, 238 tests, Compose validation, daemon image build, and cleanup."
+        "research-engine PR #67 merged as 93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a. Final PR-head CI 37167850823 PASS and canonical-main CI 37167916582 PASS across install, compile, 238 tests, Compose validation, daemon image build, and cleanup.",
+        "Qwen CUDA-12.9 runtime compatibility repair merged through research-engine PR #79 as 032922019d3602d51312e895691f8c851814aaf7. PR-head CI 37247452874 PASS and canonical-main CI 37247584085 PASS across install, compile, full tests, Compose validation, daemon image build, and cleanup. The runner now pins the official vLLM 0.30.0+cu129 release wheel with torch 2.13.0+cu129 and torchcodec 0.15.0+cu129, can repair only TorchCodec when the existing cu129 runtime identity is otherwise valid, writes the package freeze before the risky import, and requires torchcodec plus the same `from vllm import LLM, SamplingParams` path used by the benchmark helper and a real CUDA allocation before the ready sentinel is written. This is implementation/runtime compatibility evidence only; it does not establish that the Lambda multimodal preflight passes and does not change the zero-call Qwen quality state."
       ],
       "resume_condition": "Measured residuals have an explicit quality-gated escalation ladder, including local multimodal/agent candidates where justified, so Codex is not used blindly where cheaper validated local recovery is sufficient."
     },
@@ -682,15 +683,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a",
+      "identity": "032922019d3602d51312e895691f8c851814aaf7",
       "required_for_resume": true,
       "evidence": [
         "stage=residual_escalation_and_local_semantic_fallbacks",
-        "research-engine remote main@93d1f2c9c8fe120084512cf4fa44e1e6606a9a9a; PR #67 final head CI 37167850823 PASS and canonical-main CI 37167916582 PASS",
-        "Lambda/local remains last verified clean at main@0e5b1464c5307b9b1824618b6e5cff0f13485146; GitHub-only source-audit implementation did not synchronize or mutate Lambda",
-        "bounded source audit runner=deploy/run-residual-source-prefetch-audit.sh; candidate model downloads/inference=0 by contract",
-        "source audit uses normalized FIGURE blocks/derivation caption metadata, verified by a real normalizer regression test",
-        "next=fast-forward Lambda under stopped-daemon preflight and run only the bounded source-prefetch/audit gate"
+        "research-engine remote main@032922019d3602d51312e895691f8c851814aaf7; PR #79 head CI 37247452874 PASS and canonical-main CI 37247584085 PASS",
+        "PR #79 changes only deploy/run-qwen35-visual-benchmark.sh and tests/test_qwen35_visual_benchmark.py; the benchmark contract, model revision, source PDF, validated Figure 6/Figure 3 regions, prompts, thresholds, three-call budget, daemon policy, production routing, and scientific-state boundary are unchanged",
+        "runner now pins official vLLM 0.30.0+cu129, torch 2.13.0+cu129, and torchcodec 0.15.0+cu129 and requires torchcodec plus the exact `from vllm import LLM, SamplingParams` path and a real CUDA allocation to pass before writing the runtime-ready sentinel",
+        "Lambda/local remains last verified clean at main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6; the GitHub repair has not yet been synchronized or executed on Lambda",
+        "next=under stopped-daemon preflight fast-forward the clean Lambda checkout to 032922019d3602d51312e895691f8c851814aaf7, then run only bash deploy/run-qwen35-visual-benchmark.sh and return OUTPUT_ROOT plus report or first hard error"
       ]
     }
   ],
@@ -1566,24 +1567,22 @@
   "blockers": [
     "PP-OCRv6 remains resource-pass / quality-not-promoted; the blank scan target still requires replacement with a content-bearing image-only scan before scan-recovery promotion can be evaluated.",
     "PaddleOCR-VL-1.6 direct element-level inference completed but is not promoted: it exceeded current VRAM/latency ceilings and, more importantly, fabricated chart numerics and failed key panel/shortcut relations. It remains perception/parser evidence only.",
-    "Qwen3.5-4B visual-semantic model quality is still unmeasured because both Lambda attempts failed before the first candidate inference.",
-    "The default vLLM 0.30.0 runtime selected a CUDA-13 path incompatible with the host driver API version 12080; this was bypassed by an isolated CUDA-12.9 vLLM/Torch rebuild whose CUDA allocation probe passed.",
-    "The CUDA-12.9 rebuild then failed during vLLM import because torchcodec/libtorchcodec_image.so attempted to load libnvrtc.so.13. The exact runtime/dependency composition must be reconciled before Qwen inference can begin.",
+    "Qwen3.5-4B visual-semantic model quality is still unmeasured: all prior Lambda attempts stopped before QWEN_CALL_START, so candidate inference remains zero.",
+    "The isolated CUDA-12.9 runtime repair is merged and CI-validated on research-engine main@032922019d3602d51312e895691f8c851814aaf7, but it has not yet been synchronized to or executed on Lambda. Lambda/local remains last verified clean at main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6.",
+    "The historical default-vLLM CUDA-13 failure and torchcodec/libnvrtc.so.13 failure remain runtime compatibility evidence only; neither is Qwen model-quality evidence.",
     "A broader local semantic replacement for routine EXTRACT/VERIFY remains unopened until Qwen's visual-semantic benchmark is actually executed and adjudicated.",
     "Codex STANDARD EXTRACT/VERIFY remains the production semantic baseline until bounded local controls demonstrate equivalent evidence/provenance quality."
   ],
   "remaining_work": [
-    "Continue from research-engine main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6 with the daemon inactive/dead and sustained research disabled.",
-    "Treat the first default-vLLM CUDA-13 failure and the later torchcodec/libnvrtc.so.13 failure strictly as zero-inference runtime evidence; do not draw any Qwen quality conclusion from either attempt.",
-    "Diagnose the isolated Qwen vLLM 0.30.0 CUDA-12.9 environment so the full vLLM import path no longer requires unavailable libnvrtc.so.13 while preserving the already-passing torch 2.13.0+cu129 CUDA allocation path.",
-    "Do not update the host NVIDIA driver merely to resolve the already-bypassed default CUDA-13 preflight unless later evidence establishes that a host-driver change is actually required.",
-    "Before rerunning the three-call benchmark, add or execute a fail-fast import/runtime preflight that imports the same vLLM multimodal path used by run_qwen35_visual_benchmark.py, not only torch.cuda allocation.",
-    "Once the runtime import preflight passes, rerun the exact existing Qwen3.5-4B Figure 6/Figure 3 benchmark without changing source PDF, bboxes, prompts, model revision, inference count, quality thresholds, daemon policy, or scientific-state boundary.",
-    "If three Qwen calls complete, score Figure 6 panel/model sets, line-style semantics, plain-110 absence, empty curve_numeric_estimates, and zero fabricated facts; score Figure 3 architecture columns, shortcut presence/relations, channel widths, caption FLOPs, and zero fabricated facts.",
+    "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Under a clean-main preflight, fast-forward the Lambda research-engine checkout from its last verified d0debd205de46a608fce5b9a15f3fa0fdd6de4e6 state to canonical main@032922019d3602d51312e895691f8c851814aaf7; do not reset, stash, clean, or overwrite unrelated work.",
+    "Run the exact existing `bash deploy/run-qwen35-visual-benchmark.sh`. The runner must reconcile the isolated runtime to vLLM 0.30.0+cu129 / torch 2.13.0+cu129 / torchcodec 0.15.0+cu129 and pass the full torchcodec + `from vllm import LLM, SamplingParams` multimodal import plus real CUDA allocation preflight before any Qwen call.",
+    "If the runtime fails before QWEN_CALL_START, return the visible OUTPUT_ROOT and first hard error, keep candidate inference at zero, and do not draw a Qwen quality or resource conclusion.",
+    "Do not update the host NVIDIA driver unless later evidence establishes that the explicit CUDA-12.9 runtime still requires a host change.",
+    "If exactly three Qwen calls complete, score Figure 6 panel/model sets, line-style semantics, plain-110 absence, empty curve_numeric_estimates, and zero fabricated facts; score Figure 3 architecture columns, shortcut presence/relations, channel widths, caption FLOPs, and zero fabricated facts.",
     "Analyze Qwen quality separately from resource-policy outcome. If visual quality passes, run the separate contemporaneous authoritative-PDF Codex control before any promotion.",
     "Only after visual-control success should bounded local Qwen EXTRACT/VERIFY calibration open."
   ],
-  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. Continue from research-engine main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6. Preserve the existing Qwen3.5-4B targeted visual-semantic benchmark contract and exact validated Figure 6/Figure 3 inputs. Treat the completed CUDA-12.9 allocation probe as PASS: torch 2.13.0+cu129, CUDA runtime 12.9, vLLM 0.30.0, RTX A4500 all allocated successfully. The current blocker occurs later, before the first Qwen call: importing vLLM pulls torchcodec/libtorchcodec_image.so, which attempts to load unavailable libnvrtc.so.13 and raises OSError. No QWEN_CALL_START occurred, candidate inference remains zero, and no Qwen quality/resource result exists. First diagnose and correct only this isolated runtime/dependency compatibility problem, adding a fail-fast preflight that imports the same vLLM multimodal path used by the benchmark helper. Do not score Qwen, change benchmark inputs/prompts/thresholds, start the daemon, invoke Codex, change production routing, materialize scientific state, or update the host driver unless later evidence requires it. Once the full vLLM import/runtime preflight passes, rerun bash deploy/run-qwen35-visual-benchmark.sh and return the visible OUTPUT_ROOT plus qwen35-visual-benchmark-report.json or the first hard error.",
+  "next_safe_action": "Keep sustained research disabled and research-engine-daemon.service inactive/dead. research-engine canonical main is now 032922019d3602d51312e895691f8c851814aaf7; PR #79 head CI 37247452874 and canonical-main CI 37247584085 both PASS. The benchmark contract and exact validated Figure 6/Figure 3 source regions, prompts, Qwen revision, three-call budget, quality/resource thresholds, provenance requirements, production routing, and scientific-state boundary are unchanged. Lambda/local is still last verified clean at main@d0debd205de46a608fce5b9a15f3fa0fdd6de4e6. First re-inspect that checkout and fast-forward it to 032922019d3602d51312e895691f8c851814aaf7 only if it is still clean on main; do not reset/stash/clean unrelated work. Keep the daemon stopped. Then run exactly `bash deploy/run-qwen35-visual-benchmark.sh`. The corrected runner pins the isolated CUDA-12.9 stack to vLLM 0.30.0+cu129, torch 2.13.0+cu129, and torchcodec 0.15.0+cu129, and it must pass a fail-fast preflight importing torchcodec and the same `from vllm import LLM, SamplingParams` multimodal path plus a real CUDA allocation before any QWEN_CALL_START. If that preflight fails, return the visible OUTPUT_ROOT and first hard error and keep candidate inference at zero. If it passes, allow only the existing three bounded Qwen calls to run and return OUTPUT_ROOT plus qwen35-visual-benchmark-report.json. Do not score prior zero-inference failures, start sustained research, invoke Codex, change benchmark inputs/prompts/thresholds, change production routing, materialize scientific state, or update the host driver unless later evidence requires it.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This task is a sibling of research-engine-observability-agent-ops-v1 under automated-research-engine-v1. Mathpix is an optional human-generated benchmark oracle, not a production dependency. Development may use GitHub for code, small fixtures, Markdown/JSON outputs, and metrics; bulky PDFs/model weights stay out of workspace-control. The task deliberately inventories the entire research pipeline for localization once, so document parsing, local inference, embeddings/retrieval, and repetitive semantic work are evaluated together instead of repeatedly revisiting the architecture. Operator-facing temporary artifacts use visible ~/adamArchives/Adam/workspace-control-tmp/; legacy ~/.workspace-control/tmp/ remains preserved read-only input compatibility."
