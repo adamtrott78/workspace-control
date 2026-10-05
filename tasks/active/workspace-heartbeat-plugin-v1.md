@@ -29,16 +29,15 @@ Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel 
 
 ## Next safe action
 
-Validate the final event-driven-only Workspace Heartbeat v0.3.1 head on PR #69. After CI passes, merge and deploy the canonical commit, mount panel-v4.html, and verify that an idle open panel produces no recurring MCP heartbeat_get traffic while ordinary heartbeat_update calls still append promptly. Multi-heartbeat history itself is already proven PASS and must not be repeated as a prerequisite.
+Do not redesign transport based on the observation that a 15+ minute research turn emitted only two heartbeats. First finish/deploy v0.3.1, whose purpose is to eliminate all automatic background heartbeat_get traffic. Then run one genuine heartbeat_update to prove event-driven delivery. Separately audit the research chat's tool-call cadence: if more than three non-heartbeat tool operations occurred between the two visible heartbeat updates, treat that as an executor lease-compliance defect rather than a UI/transport defect.
 
 ## Remaining work
 
-- Validate the final event-driven-only v0.3.1 PR #69 head through workspace-control CI.
-- If validation passes, merge the exact head and deploy the canonical merge to the Lambda heartbeat runtime.
-- Restart workspace-heartbeat and recreate/refresh the custom MCP plugin so panel-v4.html is mounted.
-- Open the panel and observe the MCP/ngrok console while idle; there must be no recurring background heartbeat_get traffic.
-- Trigger ordinary research work with one or more heartbeat_update calls and confirm updates still append promptly through ui/notifications/tool-result without UNAVAILABLE.
-- If idle request-rate and delivery availability pass, mark panel_stability_correction VALIDATED and close the heartbeat task.
+- Validate/deploy the final event-driven-only v0.3.1 heartbeat panel once the unrelated research-engine task-contract failure on workspace-control main is repaired or no longer blocks PR validation.
+- After v0.3.1 is mounted, confirm an idle open panel produces no recurring MCP traffic and that a genuine heartbeat_update still appears promptly.
+- Then audit executor cadence separately: during a long research turn, compare heartbeat_update events with non-heartbeat tool operations and verify the required heartbeat-before-fourth-tool lease is being followed.
+- Do not add polling back merely because heartbeats are sparse; sparse model updates and background transport traffic are separate concerns.
+- Close the heartbeat task only after event-driven delivery availability and executor heartbeat cadence are both accepted.
 
 ## Blockers / gates
 
