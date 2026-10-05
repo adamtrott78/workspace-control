@@ -498,7 +498,7 @@
         },
         {
           "check": "R2 compile/JIT cache baseline",
-          "result": "PENDING_NATURAL_REUSE_MEASUREMENT",
+          "result": "NOT_RUN",
           "evidence": [
             "Cold-v3 baseline measured approximately 18.17 s torch.compile and 48.84 s profiling/warmup under the new persistent runtime-contract/model-keyed cache.",
             "A natural second boot under the unchanged v3 execution identity is still required to measure verified R2 cache-hit savings; no rerun should be manufactured solely for this metric."
@@ -506,7 +506,7 @@
         },
         {
           "check": "C3 same-modality canary",
-          "result": "DESIGNED_NOT_YET_EXECUTED",
+          "result": "NOT_RUN",
           "evidence": [
             "C3 is explicitly separate from the exact three-call scientific benchmark and must not consume or alter those scientific calls.",
             "The shared implementation enforces that reusable runtime_certified=true requires C0 through C3 PASS.",
