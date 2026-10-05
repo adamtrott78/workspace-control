@@ -28,24 +28,22 @@ safe_runner_foundation
 
 ## Next safe action
 
-Implement and statically review P1 artifacts on the isolated design branch at be9b425b10898a4b5bf4301e8075bb44b2e62a80: a pinned `actions/scaleset` listener strategy, unprivileged `ci-controller`, narrow local-only root provisioner protocol/manifest, systemd sandbox profiles, trusted-write/read-only cache layout, corrected read-only filesystem/PostgreSQL/firewall/device/network probes, and kill-switch/uninstall path. Do not create users/services, install/register any runner, expose secrets, change firewall rules, or change existing GitHub-hosted CI until these artifacts and follow-up probes pass review.
+Run the tracked read-only P1 compatibility probe from workspace-control PR #72 head `46d3d33aa560df2adf90137e0951097ed973ee1d` on Lambda and return `lambda-runner-p1-probe.json`. The probe writes only its receipt under the visible workspace-control-tmp directory and performs no user/service/runner/firewall/cgroup mutation. In parallel, allow PR #72 repository validation to instantiate. P2 remains explicitly unauthorized until the compatibility receipt, static tests, and later non-runner transient sandbox probes pass.
 
 ## Remaining work
 
-- P1 static implementation: pin actions/scaleset client identity/update policy; define unprivileged ci-controller; define narrow root provisioner IPC/request schema and root-owned project/profile manifest.
-- Add corrected read-only host follow-up probes for /srv filesystem/quota support, PostgreSQL bindir/test DB strategy, firewall/nftables state, and transient systemd device/network restrictions.
-- Implement/review systemd CPU/GPU sandbox profiles, trusted cache layout/manager, diagnostic retention, kill switch, and full uninstall/recovery path in Git only; do not activate yet.
-- After static review and read-only compatibility PASS, perform P2 one-time root bootstrap: create ci-controller/ci-research-engine identities and roots, then one no-op repository-scoped one-job runner isolation test.
-- Perform P3 CPU validation with ephemeral project environment/database and GitHub artifact return.
-- Perform P4 bounded GPU validation with explicit device grant and process/VRAM cleanup receipt.
-- Perform P5 closed-loop acceptance where ChatGPT creates a deliberate failure, triggers Lambda, diagnoses/fixes it, reruns to PASS, and consumes an artifact without human SSH.
-- Only after research-engine acceptance, opt in PADataset under a separate scale set/UID/root/cache and prove cross-project denial.
+- Run scripts/lambda_runner_p1_compatibility_probe.py read-only on Lambda and analyze the JSON receipt.
+- Use that receipt to finalize disk/quota, PostgreSQL ephemeral-test-DB, firewall/network and controller build strategy.
+- Run repository validation for PR #72 and fix only demonstrated static/test defects.
+- Perform non-runner transient sandbox probes for ProtectProc/ProcSubset, IPAddressDeny/Allow, and DevicePolicy=closed CUDA access.
+- Only if all P1 gates pass, authorize P2 one-time host bootstrap and first no-op ephemeral repository-scoped runner.
 
 ## Blockers / gates
 
-- No host mutation is authorized yet. P1 static artifacts must be implemented/reviewed first, and the remaining read-only host follow-ups must prove filesystem/quota, PostgreSQL test-database location, current firewall state, and systemd device/network policy compatibility.
-- GitHub's actions/scaleset client is Public Preview; pin an exact version/commit and isolate it behind a narrow local adapter before relying on it.
-- workspace-control evidence-first workflow PR #70 remains externally blocked by GitHub-hosted runner allocation after two 15-minute runner_id=0 / zero-step cancellations; this does not block design work here.
+- P1 compatibility receipt from the actual Lambda is still required before P2: resolve /srv filesystem/quota support, PostgreSQL bindir, firewall/nft state, and remaining sandbox compatibility facts.
+- workspace-control PR #72 repository validation has not yet instantiated a workflow run; P2 remains unauthorized until static tests validate.
+- Transient systemd device/network probes remain required after the read-only compatibility receipt and before any real runner registration.
+- workspace-control evidence-first workflow PR #70 remains separately blocked by GitHub-hosted runner allocation and does not block this P1 branch.
 
 ## Fresh-chat initialization
 
