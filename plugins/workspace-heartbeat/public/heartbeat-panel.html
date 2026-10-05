@@ -11,7 +11,8 @@ body{margin:0;background:transparent;color:CanvasText}main{padding:18px}
 h1{font-size:14px;margin:0;font-weight:650}
 .state{border:1px solid color-mix(in srgb,CanvasText 20%,transparent);border-radius:999px;padding:4px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
 .empty{opacity:.65;font-size:14px;line-height:1.5}.history{display:flex;flex-direction:column;gap:14px}
-.entry{border-top:1px solid color-mix(in srgb,CanvasText 12%,transparent);padding-top:12px}.entry:first-child{border-top:0;padding-top:0}
+.task-boundary{font-size:11px;font-weight:650;opacity:.72;letter-spacing:.02em;padding-top:4px}
+.entry{border-top:1px solid color-mix(in srgb,CanvasText 12%,transparent);padding-top:12px}.task-boundary+.entry{border-top:0;padding-top:0}
 .message{white-space:pre-wrap;font-size:14px;line-height:1.5;margin:0}.entry-meta,.footer{margin-top:7px;font-size:11px;opacity:.58}
 </style>
 </head>
@@ -25,7 +26,6 @@ h1{font-size:14px;margin:0;font-weight:650}
 const stateEl=document.getElementById("state");
 const historyEl=document.getElementById("history");
 const footerEl=document.getElementById("footer");
-
 const persisted=window.openai?.widgetState??{};
 let activeTaskId=persisted.task_id??null;
 let knownHistory=Array.isArray(persisted.history)?persisted.history:[];
@@ -33,9 +33,7 @@ let knownHistory=Array.isArray(persisted.history)?persisted.history:[];
 let rpcId=0;
 const pending=new Map();
 
-function notify(method,params){
-  window.parent.postMessage({jsonrpc:"2.0",method,params},"*");
-}
+function notify(method,params){window.parent.postMessage({jsonrpc:"2.0",method,params},"*")}
 function request(method,params){
   return new Promise((resolve,reject)=>{
     const id=++rpcId;
@@ -59,9 +57,7 @@ function fmt(value){
   const d=new Date(value);
   return Number.isNaN(d.getTime())?value:d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit",second:"2-digit"});
 }
-function persist(){
-  window.openai?.setWidgetState?.({task_id:activeTaskId,history:knownHistory});
-}
+function persist(){window.openai?.setWidgetState?.({task_id:activeTaskId,history:knownHistory})}
 function render(){
   if(!knownHistory.length){
     stateEl.textContent="idle";
@@ -72,7 +68,17 @@ function render(){
   const latest=knownHistory.at(-1);
   activeTaskId=latest.task_id;
   stateEl.textContent=latest.state;
-  historyEl.replaceChildren(...knownHistory.map(item=>{
+
+  const nodes=[];
+  let previousTask=null;
+  for(const item of knownHistory){
+    if(item.task_id!==previousTask){
+      const boundary=document.createElement("div");
+      boundary.className="task-boundary";
+      boundary.textContent=item.task_id;
+      nodes.push(boundary);
+      previousTask=item.task_id;
+    }
     const entry=document.createElement("section");
     entry.className="entry";
     const msg=document.createElement("p");
@@ -82,14 +88,20 @@ function render(){
     meta.className="entry-meta";
     meta.textContent="update "+item.sequence+" · "+fmt(item.updated_at)+" · "+item.state;
     entry.append(msg,meta);
-    return entry;
-  }));
-  footerEl.textContent=latest.task_id+" · "+knownHistory.length+" retained update"+(knownHistory.length===1?"":"s");
+    nodes.push(entry);
+  }
+  historyEl.replaceChildren(...nodes);
+
+  const taskCount=new Set(knownHistory.map(item=>item.task_id)).size;
+  footerEl.textContent=knownHistory.length+" retained update"+(knownHistory.length===1?"":"s")+" across "+taskCount+" task"+(taskCount===1?"":"s");
   persist();
 }
 function apply(snapshot){
   if(!snapshot)return;
-  const incoming=Array.isArray(snapshot.history)?[...snapshot.history]:[];
+  const source=Array.isArray(snapshot.timeline)&&snapshot.timeline.length
+    ? snapshot.timeline
+    : (Array.isArray(snapshot.history)?snapshot.history:[]);
+  const incoming=[...source];
   if(snapshot.heartbeat&&!incoming.length)incoming.push(snapshot.heartbeat);
   if(snapshot.heartbeat?.task_id)activeTaskId=snapshot.heartbeat.task_id;
   if(!incoming.length)return;
@@ -98,15 +110,12 @@ function apply(snapshot){
     window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
   }
 }
-function fromResult(result){
-  return result?.structuredContent??null;
-}
+function fromResult(result){return result?.structuredContent??null}
 
 window.addEventListener("message",event=>{
   if(event.source!==window.parent)return;
   const message=event.data;
   if(!message||message.jsonrpc!=="2.0")return;
-
   if(typeof message.id==="number"){
     const p=pending.get(message.id);
     if(!p)return;
@@ -114,7 +123,6 @@ window.addEventListener("message",event=>{
     message.error?p.reject(message.error):p.resolve(message.result);
     return;
   }
-
   if(message.method==="ui/notifications/tool-result"){
     apply(fromResult(message.params));
   }
@@ -123,14 +131,12 @@ window.addEventListener("message",event=>{
 async function initializeBridge(){
   try{
     await request("ui/initialize",{
-      appInfo:{name:"workspace-heartbeat-panel",version:"0.3.1"},
+      appInfo:{name:"workspace-heartbeat-panel",version:"0.3.3"},
       appCapabilities:{},
       protocolVersion:"2026-01-26"
     });
     notify("ui/notifications/initialized",{});
-  }catch{
-    // Initial window.openai tool output/widget state still keeps the panel useful.
-  }
+  }catch{}
 }
 
 apply(window.openai?.toolOutput??null);
