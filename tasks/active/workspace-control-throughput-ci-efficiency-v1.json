@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control",
-  "current_stage": "field_efficiency_wave3_design",
+  "current_stage": "field_efficiency_wave3_validation",
   "acceptance_criteria": [
     "Produce an empirical latency decomposition for representative recent ChatGPT/GitHub control cycles, separating tool-call/orchestration time, Git mutation count, PR CI, canonical-main CI, status polling, runtime/human handoffs, and genuinely necessary validation.",
     "Study documented practices from mature CI/CD and monorepo/control-plane systems using primary or authoritative sources where possible, including validation tiers, test-impact/path selection, caching, concurrency cancellation, merge queues or tested-merge semantics, pre-submit versus post-submit roles, and scheduled/full regression coverage.",
@@ -49,7 +49,7 @@
       "base_sha": "1a46337a35296554917f61a80ff21535f8e87c19",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "da5653093799324ba90f45364ec8d6ce752140d2",
+        "checkpoint_sha": "e25ba2c4e602a525b213450bf8a9c2f5014321e0",
         "verified": true
       },
       "local": null,
@@ -374,7 +374,7 @@
     },
     {
       "id": "field_efficiency_wave3_design",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -387,8 +387,50 @@
         "Wave-3 orchestration/Git critical-path refinements",
         "durable Wave-3 field-calibration plan"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Wave-3 architecture promotion",
+          "result": "PASS",
+          "evidence": [
+            "PR #54 changed six files in one logical commit and introduced the dedicated Wave-3 architecture plus runtime-certification procedure while keeping project-specific runtime/scientific facts in owning repositories.",
+            "Workspace Control Validation run 37252957386 completed successfully; changed-task contracts, unit regression, and full integration contracts all passed.",
+            "PR #54 merged by squash as e25ba2c4e602a525b213450bf8a9c2f5014321e0."
+          ]
+        },
+        {
+          "check": "Append-only Git critical-path refinement exercised",
+          "result": "PASS",
+          "evidence": [
+            "The Wave-3 design branch was created from an exact verified base and received one direct-descendant commit via update_ref(force=false) without a redundant immediate pre-write reread.",
+            "PR creation returned head_sha=878201ed52ab458ce37befec9bd0a1957a9c243d, coalescing post-write head verification with the next semantic operation.",
+            "Merge used expected_head_sha=878201ed52ab458ce37befec9bd0a1957a9c243d, preserving a hard lease at the PR promotion boundary."
+          ]
+        }
+      ],
       "resume_condition": "Wave-2 natural field evidence demonstrates a stable need for execution certification and bounded orchestration while C2/C3 implementation details remain calibratable."
+    },
+    {
+      "id": "field_efficiency_wave3_validation",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+owning-runtime-evidence",
+      "inputs": [
+        "field_efficiency_wave3_design"
+      ],
+      "outputs": [
+        "C2a execution-backend/toolchain field evidence",
+        "C2b engine-boot certification evidence",
+        "C3 same-modality synthetic-canary contract and evidence",
+        "persistent compile/JIT cache cold-versus-reuse measurement",
+        "structured child-process failure-envelope evidence",
+        "idempotent interruption/recovery evidence",
+        "control-cycle latency and root-cause-to-action measurements",
+        "append-only Git reread-savings measurement",
+        "Wave-3 freeze/readiness recommendation"
+      ],
+      "validation": [],
+      "resume_condition": "Wave-3 design is canonical and FULL_INTEGRATION validated; natural owning-task failures/retries can now calibrate the open certification and orchestration details."
     }
   ],
   "checkpoints": [
@@ -611,18 +653,18 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Validate and promote the Wave-3 design without creating the final cross-repository rollout task.",
-    "Continue using the active research-engine Qwen task as a natural field workload through its own authority; do not mutate research-engine from this capsule.",
-    "Calibrate C2a backend/toolchain resolution against the demonstrated FlashInfer/nvcc failure and any subsequent natural backend selection evidence.",
-    "Calibrate C2b real engine-boot certification and record cold versus persistent compile/JIT cache behavior on required natural retries.",
-    "Define the minimum C3 same-modality synthetic canary that proves request-path viability without consuming scientific/domain inputs.",
-    "Prototype generic failure-envelope fields that preserve first causal child/JIT/subprocess errors while keeping full logs referenced rather than inlined.",
-    "Measure interruption recovery and root-cause-to-durable-correction control-cycle latency; treat repeated opaque reasoning/recovery cycles as first-class waste.",
-    "Measure append-only Git mutation with fewer dedicated rereads while preserving non-fast-forward safety and hard verification at semantic boundaries.",
-    "Continue task JSON→Markdown semantic-transaction work; authoritative JSON must remain the single edit surface.",
-    "Freeze Wave 3 only after the architecture survives additional natural runtime evidence without substantive shared redesign; only then plan broad rollout."
+    "Use natural owning-project work, beginning with the active research-engine Qwen task, to validate Wave-3 mechanisms without replacing or weakening the owning task's next_safe_action.",
+    "Measure C2a execution-backend/toolchain resolution against dynamic optional backend requirements; backend choice must be explicit execution identity, not silent fallback.",
+    "Measure C2b real engine boot and persistent compile/JIT cache behavior on required natural retries; preserve partial-init resource values as diagnostic only.",
+    "Define and validate a minimal C3 same-modality synthetic canary; reusable runtime-ready certification must not be written before C3 passes.",
+    "Capture the first causal child/JIT/subprocess error in a compact failure envelope so routine diagnosis does not require full console logs.",
+    "Demonstrate interruption recovery from durable operation/stage receipts with no repeat of already valid expensive stages.",
+    "Measure root-cause-to-durable-correction and total control-cycle latency, including avoidable assistant/recovery cycles when observable.",
+    "Continue append-only Git mutation measurement with direct-descendant force=false updates and verification coalesced at semantic boundaries; use conservative CAS/read paths outside that invariant.",
+    "Implement the generic task-sync helper only after Wave-3 field evidence stops changing the required receipt/task fields.",
+    "Do not create the final cross-repository rollout task until Wave-3 exit criteria are met and new findings are predominantly project-specific."
   ],
-  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. The current canonical base for this Wave-3 design is main@da5653093799324ba90f45364ec8d6ce752140d2. Complete and validate field_efficiency_wave3_design on branch throughput-efficiency-wave3-design-v1. Do not start the final cross-repository rollout task and do not mutate research-engine from this capsule. Preserve the active research-engine Qwen task's exact durable next_safe_action; use its natural retries only as field evidence to calibrate C2a backend/toolchain resolution, C2b engine boot, C3 same-modality canary, persistent compile-cache reuse, subprocess failure envelopes, resumable stage receipts, structured process identity, bounded diagnosis, and control-cycle latency. Keep Qwen/vLLM/FlashInfer/package/model/scientific specifics project-local. After FULL_INTEGRATION validation and promotion, synchronize the task checkpoint and move to Wave-3 field validation.",
+  "next_safe_action": "Start from https://github.com/adamtrott78/workspace-control and the normal root route. Wave-3 execution-certification and control-cycle architecture is canonical on main@e25ba2c4e602a525b213450bf8a9c2f5014321e0. Continue field_efficiency_wave3_validation; do not start the final cross-repository rollout task and do not mutate research-engine from this capsule. Preserve the active research-engine Qwen task's exact durable next_safe_action and use only its natural retries as field evidence. Prioritize: (1) C2a backend/toolchain resolution and explicit backend identity, (2) C2b real engine boot plus persistent compile/JIT cache cold-vs-reuse measurement, (3) a minimal C3 same-modality synthetic canary before reusable runtime-ready certification, (4) structured child/JIT/subprocess failure envelopes, (5) idempotent interruption recovery, and (6) root-cause-to-durable-correction/control-cycle latency. Keep Qwen/vLLM/FlashInfer/package/model/scientific specifics project-local. Freeze Wave 3 only when its exit criteria survive additional natural evidence without substantive shared redesign.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Baseline measurement, external-practice research, and risk-tier design are complete and durable. Initial workspace-control implementation is isolated on throughput-ci-efficiency-v1. The GitHub connector's advertised update_ref expected_sha lease is currently rejected by input validation; current remote-only mutation guidance therefore uses immediate pre-write head verification plus post-write ref verification. research-engine remains read-only. Fresh-chat invariant: always include https://github.com/adamtrott78/workspace-control explicitly."
