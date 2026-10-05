@@ -641,3 +641,10 @@ For each class record:
 
 Success means lower critical-path latency for classes 1-2 with no reduction in
 the required T2/T3 coverage for class 3.
+
+
+## Wave 3: execution certification and control-cycle economy
+
+Wave-2 field validation exposed a deeper class of runtime and orchestration failures that import/native-library/CUDA smoke alone cannot certify. The canonical Wave-3 design is defined in `architecture/throughput-runtime-certification-wave3.md` and operationalized by `procedures/runtime_certification.md`.
+
+Wave 3 is a field-design/calibration stage, not the final cross-repository rollout. Project-specific model/package/backend/scientific truth remains in the owning repository.

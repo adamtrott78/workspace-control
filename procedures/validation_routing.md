@@ -58,18 +58,17 @@ therefore self-escalate.
 
 For one logical mutation batch:
 
-1. verify the branch head and reviewed base tree;
+1. verify the starting branch head and reviewed base tree;
 2. create independent blobs in parallel;
-3. create one tree and one commit for the complete reviewed path set;
-4. immediately recheck the branch head before moving the ref;
-5. move the ref;
-6. reread the resulting branch/commit/tree and changed files.
+3. create one tree and one direct-descendant commit for the complete reviewed path set;
+4. move the ref with `force=false`;
+5. verify the resulting head at the next required semantic boundary (for example PR creation/status), or immediately when no such boundary follows.
 
-The current GitHub connector accepts plain `update_ref` but a direct
-2026-10-04 capability probe reconfirmed that its advertised `expected_sha`
-argument is rejected before the ref move. Until repaired, step 4 plus immediate
-post-write verification is mandatory; do not claim lease-protected mutation.
-Treat tool-schema capability as advertised capability, not execution evidence.
+For an append-only managed branch, if the new commit's parent is exactly the previously verified head and `force=false`, a normal concurrent branch advance makes the update non-fast-forward and GitHub rejects it. A redundant immediate pre-move reread is therefore optional under that narrow invariant. Likewise, post-write verification may be coalesced with the next operation that returns/verifies the head instead of requiring a dedicated read.
+
+Do **not** apply this optimization to force rewrites, arbitrary existing descendants, uncertain/shared writers, destructive ref changes, or any operation where a concurrent force move is plausible. Those still require true compare-and-swap/lease semantics or the conservative read/check/write/read path.
+
+The current GitHub connector accepts plain `update_ref` but direct 2026-10-04 probes reconfirmed that its advertised `expected_sha` argument is rejected before the ref move. The defect is filed publicly as openai/codex#50987. Do not claim lease-protected mutation until runtime capability is actually verified; tool-schema capability is only advertised capability.
 
 Do not run concurrent writes to the same path.
 
