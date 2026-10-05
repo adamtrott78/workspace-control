@@ -370,6 +370,224 @@ A post-submit regression may still run asynchronously even when it is not on the
 conversation critical path. Failure remains a real failure and must be surfaced;
 "asynchronous" does not mean "optional truth."
 
+## Field efficiency wave 2: runtime and artifact economy
+
+The first CI/orchestration pass removed duplicated validation and avoidable
+control-loop latency. A subsequent research-engine Qwen3.5 field run exposed a
+second cost class: expensive runtime setup, deterministic artifact regeneration,
+and oversized failure handoffs occurring before useful model inference.
+
+These findings extend the throughput architecture without weakening repository or
+scientific authority.
+
+### Critical-path ordering
+
+Expensive runtime workflows SHOULD order work by expected cost and information
+value rather than historical script order:
+
+1. establish repository/task/daemon authority and exact source identity;
+2. perform cheap host capability checks before downloading/installing a runtime;
+3. look for an exact reusable runtime identity and verify its sentinel/receipt;
+4. when a runtime must be built, install only the selected compatible build;
+5. run an execution-path smoke preflight that imports the same library/model path
+   the real workload will use and performs the minimum required accelerator
+   allocation;
+6. look for exact content-addressed deterministic input artifacts and materialize
+   only cache misses;
+7. execute the expensive benchmark/inference/build;
+8. emit a compact machine-readable run receipt on both success and ordinary
+   failure.
+
+A failure in an earlier phase MUST stop later expensive phases unless those later
+operations are themselves required to diagnose the demonstrated failure.
+
+The Qwen field evidence shows why this preflight must be layered. A host
+driver/API check can prevent selecting a CUDA build that the machine cannot
+support, while a later execution-path import check can still catch native-library
+or plugin incompatibilities that a simple Torch CUDA allocation does not
+exercise.
+
+### Runtime compatibility preflight
+
+A reusable runtime preflight separates two questions.
+
+**Host/build selection preflight**
+
+Run before environment construction and record the minimum facts needed to select
+a compatible build, such as:
+
+- accelerator vendor/model and compute capability when material;
+- installed driver and driver-reported CUDA API capability;
+- operating system/architecture and Python ABI;
+- requested runtime/model family and candidate build requirements.
+
+Its output is a small runtime plan. It may reject an impossible build or select a
+compatible build family before downloading hundreds of megabytes.
+
+**Execution-path smoke preflight**
+
+After constructing or reusing the runtime, execute the narrowest import/allocation
+path representative of the real workload. For multimodal inference, importing
+only Torch is insufficient if the runner later imports vLLM, TorchCodec,
+image/video plugins, custom model code, or other native libraries.
+
+The smoke preflight should prove:
+
+- exact pinned runtime/package identity;
+- required imports from the actual runner path;
+- accelerator visibility and one bounded real allocation;
+- required native/shared-library resolution;
+- no model inference unless inference itself is the minimum compatibility probe.
+
+A passing smoke receipt becomes part of runtime-reuse evidence.
+
+### Versioned runtime and wheel reuse
+
+Runtime setup MAY be reused when identity and host compatibility are proven. Do
+not cache by a human label such as `qwen-env`.
+
+A runtime identity should derive from canonical structured inputs such as:
+
+- Python version/ABI;
+- runtime family and exact version;
+- CUDA/build flavor;
+- exact Torch version/build;
+- exact release-wheel or lockfile hashes;
+- project runtime-contract version;
+- any native dependency identity required by the runner.
+
+Driver capability and GPU architecture are compatibility predicates attached to
+the cached runtime, not reasons to silently treat different package bytes as the
+same runtime.
+
+Release wheels should be stored by exact filename plus verified SHA-256. A cached
+environment is reusable only when its identity matches and its smoke-preflight
+receipt remains valid for current host capability. Otherwise rebuild or
+revalidate deliberately.
+
+### Content-addressed deterministic artifacts
+
+Deterministic derived artifacts SHOULD be reusable when their complete
+transformation identity is known.
+
+For a PDF crop, an adequate key includes at least:
+
+- source PDF SHA-256;
+- page index;
+- exact bounding box;
+- DPI;
+- renderer/implementation identity and all output-affecting options.
+
+The artifact receipt records this key and the output hash. An exact verified cache
+hit can replace rerendering/copying. A changed renderer contract, missing hash,
+ambiguous source identity, or altered transform is a cache miss.
+
+This pattern generalizes to deterministic preprocessing, but it must not be used
+to reuse scientific state whose provenance/freshness contract is not completely
+represented by the cache key.
+
+### Compact failure receipts
+
+Every long or externally executed bounded operation SHOULD attempt to leave a
+small structured receipt even when it fails before its primary report.
+
+A generic receipt should be able to identify:
+
+- operation and schema version;
+- durable source/task/Git identity;
+- terminal stage reached;
+- status and concise failure class/message;
+- runtime identity and compatibility facts known so far;
+- expensive-operation count, such as inference calls started/completed;
+- important artifact/log paths and hashes when available;
+- timing/resource summary when measurements exist.
+
+Project runners may extend the shape with domain-specific fields.
+
+Write the receipt atomically to an operator-visible artifact location from a
+`finally`/trap/finalizer path where practical. Hard process/host loss can still
+prevent finalization; this is best-effort for failures the runner can observe,
+not a claim that SIGKILL or power loss always produces a file.
+
+The normal handoff should become a small receipt plus targeted logs only when
+diagnosis needs them, rather than a full console transcript.
+
+### Derived task handoffs: one authority, one semantic transaction
+
+Task JSON remains authoritative. Its Markdown companion is a deterministic
+derived view and MUST NOT be treated as an independent editing surface.
+
+The desired control-loop operation is:
+
+```text
+mutate authoritative JSON
+→ validate JSON
+→ deterministically render Markdown from that exact post-mutation JSON
+→ compare/verify
+→ commit JSON + Markdown together as one semantic checkpoint
+```
+
+A follow-up implementation should provide one task-sync operation/helper so
+executors do not manually manage these as two independent edits. Remote Git
+surfaces may still require two blobs, but both must derive from one post-mutation
+JSON object and land in one tree/commit.
+
+Keep checked-in Markdown for fresh-chat ergonomics until evidence supports a
+different storage model; optimize synchronization mechanics rather than deleting
+the handoff.
+
+### Capability-aware Git mutation
+
+The preferred one-logical-change path remains:
+
+```text
+independent blobs
+→ one tree
+→ one commit
+→ lease-protected ref movement when the surface truly supports it
+→ post-write verification
+```
+
+Operation-surface capability can vary by connector version, repository permission,
+or path policy. The executor should discover/use the strongest safe primitive
+actually available rather than trusting an advertised schema alone.
+
+Preferred order:
+
+1. Git data API with atomic tree/commit and working expected-head/lease protection;
+2. Git data API with immediate pre-write head reread, plain non-force ref movement,
+   and immediate post-write verification when lease input is unavailable/broken;
+3. supported contents mutation with the smallest safe write count;
+4. an authorized prepared local/composed Git surface when the direct connector
+   cannot perform the required bounded mutation.
+
+A platform limitation is recorded as a surface limitation, not worked around by
+weakening repository authority or validation.
+
+A 2026-10-04 direct capability probe reconfirmed that the current connector
+advertises `update_ref(expected_sha=...)` but rejects that argument before the
+ref move. Therefore this environment still requires the read-before/plain-update/
+read-after fallback until the connector wrapper is repaired.
+
+### Wave-2 measurement plan
+
+Use natural research-engine work without manufacturing benchmark-only churn to
+measure:
+
+- runtime install/download time avoided by host/build preflight;
+- runtime setup time avoided by exact cache reuse;
+- deterministic render/materialization time avoided by content-address hits;
+- receipt size versus full console-log handoff size;
+- time/tool calls to diagnose early failures with and without a receipt;
+- files/write calls/commits per logical mutation;
+- whether lease-protected atomic Git mutation is available on each active surface;
+- JSON/Markdown task checkpoint write/read calls before/after task-sync;
+- preserved source/runtime/artifact/provenance identity for every reuse decision.
+
+Promote a Wave-2 mechanism into shared workspace-control policy only after field
+evidence demonstrates recurring cross-project benefit. Keep research-engine-
+specific cache keys, package facts, and benchmark semantics in research-engine.
+
 ## Proposed research-engine shape after explicit authority expansion
 
 No research-engine mutation is authorized by this document.
