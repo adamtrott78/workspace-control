@@ -290,6 +290,15 @@
             "The observed response completed before a second heartbeat was naturally emitted.",
             "Sequential update accumulation therefore remains the only unproven v0.2 UI behavior."
           ]
+        },
+        {
+          "check": "Heartbeat delivery availability",
+          "result": "FAIL",
+          "evidence": [
+            "After earlier v0.2 heartbeat updates successfully rendered, a later heartbeat_update attempt returned UNAVAILABLE.",
+            "The research chat explicitly did not claim the heartbeat UI stable after this failure.",
+            "No causal attribution is made yet: the observed evidence proves intermittent delivery unavailability, not whether the cause is ChatGPT plugin availability, tunnel transport, MCP server availability, or another boundary."
+          ]
         }
       ],
       "resume_condition": "User syncs Lambda workspace-control main to 3214ec2be4f0c20933784b3d265386d9652dfd0b, restarts workspace-heartbeat, and begins the fresh research-engine handoff chat with Workspace Heartbeat enabled."
@@ -391,27 +400,28 @@
     },
     {
       "check": "Live ChatGPT panel smoke",
-      "result": "NOT_RUN",
+      "result": "FAIL",
       "evidence": [
         "v0.2 panel load and single-heartbeat retention are proven PASS.",
         "The original false-IDLE regression was not observed during the approximately 1m56s single-update run.",
-        "Final closure requires a naturally long/tool-heavy turn that emits multiple heartbeats and proves chronological accumulation without erasure."
+        "A later heartbeat delivery returned UNAVAILABLE after earlier successful v0.2 updates, so end-to-end availability is not yet stable.",
+        "Multi-heartbeat chronological accumulation also remains unproven."
       ]
     }
   ],
   "blockers": [
-    "Final live validation is blocked only on observing a naturally long/tool-heavy research turn that emits at least two v0.2 heartbeats for the same owning task."
+    "Heartbeat v0.2 end-to-end availability is intermittently failing: a later heartbeat_update returned UNAVAILABLE after earlier successful deliveries.",
+    "Multi-heartbeat chronological accumulation remains unproven because the qualifying long turn has not yet produced two successfully delivered v0.2 heartbeat updates."
   ],
   "remaining_work": [
-    "Keep the current v0.2 Lambda service and custom MCP plugin configuration unchanged.",
-    "Use ordinary research work as the next smoke; do not manufacture extra tool calls solely to force a heartbeat.",
-    "When a sufficiently long response naturally emits a second or later heartbeat, verify prior entries remain visible and the footer increases from 1 retained update to 2+ retained updates.",
-    "Verify the newest heartbeat controls WORKING / WAITING / BLOCKED / DONE while earlier entries remain in chronological order.",
-    "If multi-heartbeat accumulation passes without false IDLE or erasure, mark panel_stability_correction VALIDATED and close this heartbeat task.",
-    "If history still disappears or resets, capture the visible footer/state plus MCP request log before changing implementation."
+    "Keep the current v0.2 Lambda service and custom MCP plugin configuration unchanged until the intermittent UNAVAILABLE boundary is observed with transport evidence.",
+    "On the next heartbeat UNAVAILABLE, capture the Workspace Heartbeat MCP console request/error lines and the ngrok request lines covering the failure before restarting or changing anything.",
+    "If a subsequent long/tool-heavy turn successfully emits multiple heartbeats, verify earlier entries remain visible, the footer increases to 2+ retained updates, and the newest state controls the panel.",
+    "Classify UNAVAILABLE only after correlating ChatGPT tool failure with MCP/ngrok evidence; do not assume a server, tunnel, or UI cause from the model-visible error alone.",
+    "Close the heartbeat task only after both delivery availability and multi-heartbeat chronological accumulation are proven stable."
   ],
-  "next_safe_action": "Continue ordinary research work with Workspace Heartbeat v0.2 enabled. The fresh-chat single-heartbeat retention smoke has passed, so do not repeat it. Wait for a naturally long/tool-heavy research turn that emits at least a second heartbeat, then visually verify the existing first entry remains, the new entry appends chronologically, the footer reports 2+ retained updates, and no false-IDLE transition occurs. Only that multi-heartbeat accumulation check remains before closing the panel-stability correction.",
+  "next_safe_action": "Continue ordinary research work with Workspace Heartbeat v0.2 enabled, but treat the heartbeat system as not yet stable. If heartbeat_update returns UNAVAILABLE again, immediately capture the MCP tmux window and ngrok request log around the failure before restarting or modifying anything; use those logs to classify whether the request reached the tunnel/server. If multiple heartbeats instead deliver successfully in one long turn, also verify chronological accumulation and non-erasure. Do not repeat the already-passed single-heartbeat retention test.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects. New live evidence proved transport and rendering but exposed a session-correlation defect: the panel sometimes polled heartbeat_get under a different or missing ChatGPT session identity, received no task, switched to IDLE, and later resurrected the prior heartbeat. The v0.2 correction makes task_id authoritative, retains bounded task history, persists active task/history in widget state, ignores empty polls after valid state, declares Node >=20, and logs successful MCP requests. The user's preferred UX is a sequential heartbeat log that does not disappear between updates. Automatic reset to IDLE on assistant-response start is intentionally deferred because no reliable response-start lifecycle signal is available. The panel-stability correction is repository-valid and canonical at 3214ec2be4f0c20933784b3d265386d9652dfd0b. The task is now blocked only on the user's live Lambda/ChatGPT smoke. Fresh-chat v0.2 field evidence on 2026-10-05: the first heartbeat rendered as WORKING with a footer showing 1 retained update and remained visible throughout an approximately 1m56s response. The prior false-IDLE/disappearing behavior was not observed. No second heartbeat was emitted during that run, so multi-heartbeat sequential accumulation remains the sole pending live acceptance check. Do not repeat the single-heartbeat smoke; use normal research work to obtain the next qualifying multi-update observation."
+  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects. New live evidence proved transport and rendering but exposed a session-correlation defect: the panel sometimes polled heartbeat_get under a different or missing ChatGPT session identity, received no task, switched to IDLE, and later resurrected the prior heartbeat. The v0.2 correction makes task_id authoritative, retains bounded task history, persists active task/history in widget state, ignores empty polls after valid state, declares Node >=20, and logs successful MCP requests. The user's preferred UX is a sequential heartbeat log that does not disappear between updates. Automatic reset to IDLE on assistant-response start is intentionally deferred because no reliable response-start lifecycle signal is available. The panel-stability correction is repository-valid and canonical at 3214ec2be4f0c20933784b3d265386d9652dfd0b. The task is now blocked only on the user's live Lambda/ChatGPT smoke. Fresh-chat v0.2 field evidence on 2026-10-05: the first heartbeat rendered as WORKING with a footer showing 1 retained update and remained visible throughout an approximately 1m56s response. The prior false-IDLE/disappearing behavior was not observed. No second heartbeat was emitted during that run, so multi-heartbeat sequential accumulation remains the sole pending live acceptance check. Do not repeat the single-heartbeat smoke; use normal research work to obtain the next qualifying multi-update observation. Additional field evidence: after earlier v0.2 heartbeats landed, a later heartbeat_update returned UNAVAILABLE. This makes end-to-end delivery availability a separate open failure from the already-corrected false-IDLE UI bug. Do not infer the cause without correlating the model-visible UNAVAILABLE with MCP server and ngrok request evidence."
 }
