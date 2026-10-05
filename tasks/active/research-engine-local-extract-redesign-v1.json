@@ -17,7 +17,7 @@
     "A benchmark plan evaluates claim-level precision/recall or agreement, page/type agreement, evidence grounding, hallucination/unsupported-claim rate, local latency/VRAM/RAM, and empirical Codex fallback fraction on preserved production-like jobs.",
     "The primary local path is runnable on the current Lambda host with dual RTX A4500 GPUs, using quantization/CPU offload or model specialization where justified; hosted APIs are not introduced into the primary local path.",
     "A candidate is promoted only if it materially reduces Codex EXTRACT usage while preserving a predeclared semantic-quality floor and authoritative provenance.",
-    "Production routing, if eventually changed, retains Codex STANDARD as a rare fallback and leaves the already-accepted bounded Qwen VERIFY route unchanged unless a separate task explicitly reopens it.",
+    "Production routing, if eventually changed, retains Codex STANDARD as a rare fallback. The already-accepted bounded page-scoped Qwen VERIFY route remains the known-good post-materialization safety baseline; this task may measure whether the new EXTRACT architecture makes parts of VERIFY redundant or complementary, but any production simplification/change requires an explicit later validation gate with the current route preserved as rollback.",
     "The task records both successful and rejected architectural families so future work does not repeat failed bakeoffs."
   ],
   "constraints": [
@@ -32,7 +32,8 @@
     "Do not start sustained daemon operation merely to research or benchmark EXTRACT candidates.",
     "Large model downloads or Lambda bakeoffs require a bounded candidate-selection checkpoint first; do not download every interesting model found in the survey.",
     "New operator-facing temporary artifacts belong under ~/adamArchives/Adam/workspace-control-tmp/.",
-    "Every fresh-chat handoff for this child task must include https://github.com/adamtrott78/workspace-control."
+    "Every fresh-chat handoff for this child task must include https://github.com/adamtrott78/workspace-control.",
+    "Do not change production VERIFY merely because Local Evidence Agent v1 performs pre-materialization local verification. First measure independent failure coverage, disagreement, redundancy, latency, and Codex-suppression impact while the accepted page-scoped Qwen VERIFY route remains active as the rollback-known-good path."
   ],
   "repositories": [
     {
@@ -161,9 +162,38 @@
         "Local Evidence Agent v1 stage contract",
         "role-specific candidate matrix for retrieval, span detection, claim normalization, verification and hard-case local reasoning",
         "offline benchmark plan with per-tier acceptance/fallback telemetry",
-        "teacher-data capture/distillation plan for Codex fallbacks"
+        "teacher-data capture/distillation plan for Codex fallbacks",
+        "explicit VERIFY-boundary plan preserving current page-scoped Qwen VERIFY as independent post-materialization safety baseline during EXTRACT prototyping"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Local Evidence Agent v1 contract implementation",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #95 at head ab36b358a0c7ac33d2887fa681f418033554eae0 contains benchmarks/document_intelligence/local-extract-redesign-contract.v1.json plus static contract tests.",
+            "The first wave is deliberately decomposition-first and heavyweight-download-free: accepted document substrate, deterministic retrieval/grounding, existing certified Qwen3.5-4B only as exact-span-to-atomic-claim normalizer, then local scientific verification/completeness.",
+            "NuExtract3, Lift 9B and Qwen3.6-35B-A3B remain residual-only candidates opened only by measured failure."
+          ]
+        },
+        {
+          "check": "VERIFY boundary preservation and future reassessment plan",
+          "result": "PASS",
+          "evidence": [
+            "Current pipeline materializes EXTRACT evidence first; VERIFY independently hydrates those evidence IDs and upgrades accepted evidence to MACHINE_CHECKED.",
+            "Local Evidence Agent v1 will initially perform retrieval/grounding/local scientific verification inside the EXTRACT delegate before returning any evidence, while the accepted page-scoped Qwen VERIFY continues unchanged as an independent post-materialization safety layer.",
+            "A later measurement stage may compare independent failure coverage, disagreement, redundancy, cost and latency; no VERIFY simplification is authorized until that evidence exists, and the current production route remains rollback-known-good."
+          ]
+        },
+        {
+          "check": "Evidence-first workflow promotion dependency",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control child task workspace-evidence-first-solution-research-v1 is promoting the reusable research-before-implementation method.",
+            "workspace-control PR #70 at head 4600dcd0f77a1e707e60d812e82fe7e2ef08c601 contains the shared procedure, workflow descriptor, root discoverability and regression test.",
+            "The EXTRACT task will pin the exact merged workflow identity before beginning the next implementation batch."
+          ]
+        }
+      ],
       "resume_condition": "One primary and at most a small number of secondary architectures are justified for implementation/bakeoff."
     },
     {
@@ -173,16 +203,21 @@
       "selected_executor": null,
       "selected_surface": null,
       "inputs": [
-        "selected architecture",
-        "benchmark contract"
+        "CI-locked Local Evidence Agent v1 architecture/benchmark contract",
+        "merged evidence-first-solution-research workflow identity",
+        "preserved production-like EXTRACT jobs and authoritative PDFs",
+        "accepted document sidecar/provenance substrate"
       ],
       "outputs": [
-        "offline local EXTRACT prototype",
-        "deterministic provenance/guard path",
-        "Codex fallback contract"
+        "offline preserved-job dataset adapter with zero scientific-state materialization",
+        "deterministic lexical/section retrieval baseline and candidate-region recall metrics",
+        "exact quote/page candidate-span contract",
+        "existing Qwen3.5-4B narrow quote-to-atomic-claim normalizer prototype",
+        "local scientific verifier/completeness interfaces",
+        "Codex residual fallback decision record"
       ],
       "validation": [],
-      "resume_condition": "Prototype can execute without scientific-state materialization and emit evidence-linked claims plus confidence/fallback decisions."
+      "resume_condition": "First-wave decomposition can execute offline and quantify where retrieval, normalization, local verification, or completeness still requires escalation."
     },
     {
       "id": "preserved_job_benchmark_and_fallback_measurement",
@@ -196,13 +231,37 @@
         "STANDARD Codex controls"
       ],
       "outputs": [
-        "claim-quality metrics",
-        "grounding metrics",
-        "resource metrics",
-        "empirical projected Codex fallback fraction"
+        "candidate-region recall and teacher-quote coverage",
+        "atomic-claim precision/recall and normalized-form agreement",
+        "exact grounding/page/type agreement and unsupported-claim rate",
+        "local verification false-accept/abstention/conflict metrics",
+        "job-local completion fraction and empirical Codex fallback fraction",
+        "resource/latency/token-suppression metrics",
+        "teacher-data capture set with paper-level holdout separation"
       ],
       "validation": [],
       "resume_condition": "Evidence shows whether the candidate can make Codex a rare fallback without unacceptable semantic regression."
+    },
+    {
+      "id": "verify_boundary_impact_measurement",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "passing Local Evidence Agent benchmark result",
+        "current accepted page-scoped Qwen VERIFY route",
+        "preserved VERIFY outcomes and per-evidence verification state"
+      ],
+      "outputs": [
+        "pre-materialization local-verifier vs post-materialization Qwen VERIFY agreement matrix",
+        "independent failure catches by each layer",
+        "redundancy/complementarity analysis",
+        "latency/resource/remote-fallback impact",
+        "decision: retain unchanged, narrow to residuals/sample audit, or open separately gated VERIFY redesign"
+      ],
+      "validation": [],
+      "resume_condition": "Only entered after EXTRACT itself passes its promotion-quality gate; current VERIFY remains unchanged until this stage produces affirmative evidence."
     },
     {
       "id": "production_integration_if_promoted",
@@ -211,12 +270,15 @@
       "selected_executor": null,
       "selected_surface": null,
       "inputs": [
-        "passing benchmark decision"
+        "passing mostly-local EXTRACT benchmark decision",
+        "VERIFY-boundary impact decision with current route preserved or separately validated"
       ],
       "outputs": [
-        "bounded production route",
-        "fallback telemetry",
-        "Lambda acceptance evidence"
+        "bounded production EXTRACT route with STANDARD Codex residual fallback",
+        "local-vs-Codex fallback telemetry",
+        "teacher-data capture path",
+        "preserved or explicitly revalidated VERIFY route",
+        "Lambda production acceptance evidence"
       ],
       "validation": [],
       "resume_condition": "Only entered if the benchmark gate promotes the architecture."
@@ -241,11 +303,11 @@
       "required_for_resume": true,
       "evidence": [
         "stage=architecture_selection_and_benchmark_contract",
-        "survey validated: agentic/decomposed extraction architecture is the leading design pattern; one-shot model replacement is not the selected direction",
-        "preferred=hierarchical Local Evidence Agent v1: retrieve/rerank -> span/record candidates -> normalize -> exact ground -> local verify -> stronger local residual agent -> Codex last",
-        "reuse accepted sidecar/provenance, formula/table models, broker, existing Qwen runtime and bounded VERIFY where role-appropriate",
-        "exclude same Qwen3.5-4B grounded-candidate EXTRACT architecture as-is; do not rerun prior failed bakeoffs",
-        "next safe action=write benchmark/architecture contract before new heavyweight downloads"
+        "preferred architecture=Local Evidence Agent v1: document substrate -> retrieve/rerank -> exact spans/records -> atomic normalization -> local scientific verification -> completeness audit -> stronger local residual agent -> Codex last",
+        "research-engine PR #95 head=ab36b358a0c7ac33d2887fa681f418033554eae0; first CI attempt had zero runner/zero steps and was retried unchanged",
+        "workspace-control evidence-first workflow promotion PR #70 head=4600dcd0f77a1e707e60d812e82fe7e2ef08c601",
+        "current production page-scoped Qwen VERIFY remains rollback-known-good and unchanged during first-wave EXTRACT work",
+        "next safe action=after both contract PRs pass/merge, pin workflow identity and build offline deterministic retrieval baseline; no heavyweight downloads"
       ]
     }
   ],
@@ -261,16 +323,23 @@
       ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Specify Local Evidence Agent v1 stage interfaces, provenance invariants, and confidence/fallback policy.",
-    "Define a role-specific benchmark matrix using preserved EXTRACT jobs: candidate-region recall, atomic-claim precision/recall, normalized-form agreement, exact quote/page grounding, type agreement, unsupported-claim rate, latency/VRAM/RAM, and projected Codex fallback fraction.",
-    "Choose the minimum candidate set for a first bounded prototype; prioritize reuse of the existing Qwen3.5-4B runtime in a narrower normalization/decision role where materially different from the failed one-shot EXTRACT architecture, plus lightweight retrieval/reranking/span models before any heavyweight download.",
-    "Define teacher-data capture so every future Codex fallback can become supervised training/evaluation data for local candidate generation/normalization.",
-    "Only after the contract is checkpointed, authorize at most the smallest necessary new model downloads/runtime bakeoffs."
+  "blockers": [
+    "research-engine PR #95 contract CI retry is pending after the first attempt was cancelled in queue with runner_id=0 and zero executed steps; this is an external CI scheduling boundary, not a code/test failure.",
+    "workspace-control PR #70 full-integration validation is pending before the shared evidence-first workflow can be pinned by this task."
   ],
-  "next_safe_action": "Define the Local Evidence Agent v1 benchmark/architecture contract before downloading new heavyweight models. The contract should test a hierarchical mostly-local path: accepted sidecar/document structure -> lexical/vector retrieval and BGE-style reranking -> exact candidate spans/records (GLiNER2.5 and deterministic rules where useful) -> local atomic-claim normalization -> exact quote/page anchoring -> local scientific entailment/verification -> confidence gate; only unresolved units proceed to a stronger local agent candidate, and only its residuals fall through to STANDARD Codex. Compare role-specific candidates rather than whole-pipeline one-shot models, include Lift/NuExtract3 as bounded structured-extractor candidates and Qwen3.6-35B-A3B only as a hard-case feasibility candidate, and specify how Codex fallback outputs are retained as teacher data so fallback frequency can decrease over time.",
+  "remaining_work": [
+    "Land and pin the reusable workspace-control evidence-first-solution-research workflow (PR #70) so future project/chat architecture decisions can invoke the same method before implementation.",
+    "Land the research-engine Local Evidence Agent v1 contract (PR #95). Its first CI attempt was cancelled before runner assignment with zero steps; the unchanged job has been retried.",
+    "Phase 1 — offline substrate/retrieval: build a zero-materialization adapter over preserved EXTRACT jobs, measure deterministic lexical/section retrieval and exact teacher-quote/page recall before adding any model.",
+    "Phase 2 — first-wave local evidence path: add exact candidate-span handling, use the existing certified Qwen3.5-4B only for bounded quote-to-atomic-claim normalization, and add an independent local scientific verifier/completeness audit. Do not download a new heavyweight model yet.",
+    "Phase 3 — measure the combined system: claim precision/coverage, grounding/page/type agreement, unsupported-claim rate, job-local completion fraction, Codex fallback fraction, latency/VRAM/RAM, and remote token suppression.",
+    "Phase 4 — residual-only escalation: add GLiNER2.5 / compact reranker / scientific verifier components only where measured first-wave residuals justify them; open NuExtract3, Lift 9B, or Qwen3.6-35B-A3B one at a time only if lighter decomposition cannot meet gates.",
+    "Phase 5 — teacher adaptation: retain verified Codex fallback cases as versioned training/evaluation data with paper-level holdouts; use them to reduce fallback frequency without contaminating evaluation.",
+    "Phase 6 — VERIFY impact measurement: after EXTRACT meets promotion gates, compare the new pre-materialization local verifier with current post-materialization page-scoped Qwen VERIFY. Preserve current VERIFY unchanged until evidence shows whether it should stay independent, narrow to residual/sample audit, or be separately redesigned.",
+    "Phase 7 — production integration only after passing gates: local-first EXTRACT with Codex STANDARD as rare fallback, empirical fallback telemetry, accepted VERIFY behavior, and separate Lambda acceptance."
+  ],
+  "next_safe_action": "Wait only for the two already-running contract validations: research-engine PR #95 and workspace-control PR #70. If both pass, merge them, verify the resulting canonical SHAs, bind this task to the exact merged `workflows/evidence-first-solution-research.v1.json` identity, mark `architecture_selection_and_benchmark_contract` VALIDATED, and begin Phase 1 of `bounded_local_extract_prototype`: an offline zero-materialization preserved-EXTRACT dataset adapter plus deterministic lexical/section retrieval baseline and exact teacher-quote/page recall measurement. Do not download any new heavyweight model and do not change production VERIFY during Phase 1.",
   "last_executor": "chatgpt",
   "last_surface": "github+web+scholar",
-  "notes": "This child task intentionally branches from the accepted local-document/Qwen-VERIFY production checkpoint. It does not invalidate or reopen the parent task's production acceptance."
+  "notes": "This child task intentionally branches from the accepted local-document/Qwen-VERIFY production checkpoint. It does not invalidate or reopen the parent task's production acceptance.\n\n2026-10-05 consolidated plan: EXTRACT redesign proceeds as a hierarchical evidence agent with current VERIFY preserved as an independent safety layer. The new workspace-level evidence-first solution-research workflow is being promoted in parallel so future chats can perform architecture research before implementation selection."
 }
