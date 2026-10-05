@@ -24,23 +24,28 @@ research-engine-local-extract-redesign-v1
 
 ## Current stage
 
-threat_model_and_architecture_research
+safe_runner_foundation
 
 ## Next safe action
 
-Research current GitHub self-hosted runner behavior and security from primary sources, then produce a threat model and architecture decision for a project-isolated Lambda execution lane. Do not install/register any runner or change existing CI yet. Preserve existing GitHub-hosted CI as the known-good control and design the research-engine pilot so it can prove closed-loop ChatGPT -> GitHub -> Lambda -> GitHub execution without production-state access.
+Implement and statically review P1 artifacts on the isolated design branch at be9b425b10898a4b5bf4301e8075bb44b2e62a80: a pinned `actions/scaleset` listener strategy, unprivileged `ci-controller`, narrow local-only root provisioner protocol/manifest, systemd sandbox profiles, trusted-write/read-only cache layout, corrected read-only filesystem/PostgreSQL/firewall/device/network probes, and kill-switch/uninstall path. Do not create users/services, install/register any runner, expose secrets, change firewall rules, or change existing GitHub-hosted CI until these artifacts and follow-up probes pass review.
 
 ## Remaining work
 
-- Research current GitHub self-hosted runner security, ephemeral/JIT configuration, repository scoping, token/secret behavior, artifacts/logs, and billing.
-- Compare isolation architectures: dedicated Unix user, disposable VM, rootless container, systemd sandbox, and hybrid runner+job sandbox.
-- Define project-specific filesystem, credentials, network, production-state, GPU, cache, concurrency, and cleanup boundaries.
-- Select the smallest safe research-engine pilot architecture.
-- Only after design acceptance, create the Lambda runner foundation and a no-op isolation test before real CI/GPU workloads.
+- P1 static implementation: pin actions/scaleset client identity/update policy; define unprivileged ci-controller; define narrow root provisioner IPC/request schema and root-owned project/profile manifest.
+- Add corrected read-only host follow-up probes for /srv filesystem/quota support, PostgreSQL bindir/test DB strategy, firewall/nftables state, and transient systemd device/network restrictions.
+- Implement/review systemd CPU/GPU sandbox profiles, trusted cache layout/manager, diagnostic retention, kill switch, and full uninstall/recovery path in Git only; do not activate yet.
+- After static review and read-only compatibility PASS, perform P2 one-time root bootstrap: create ci-controller/ci-research-engine identities and roots, then one no-op repository-scoped one-job runner isolation test.
+- Perform P3 CPU validation with ephemeral project environment/database and GitHub artifact return.
+- Perform P4 bounded GPU validation with explicit device grant and process/VRAM cleanup receipt.
+- Perform P5 closed-loop acceptance where ChatGPT creates a deliberate failure, triggers Lambda, diagnoses/fixes it, reruns to PASS, and consumes an artifact without human SSH.
+- Only after research-engine acceptance, opt in PADataset under a separate scale set/UID/root/cache and prove cross-project denial.
 
 ## Blockers / gates
 
-- None recorded.
+- No host mutation is authorized yet. P1 static artifacts must be implemented/reviewed first, and the remaining read-only host follow-ups must prove filesystem/quota, PostgreSQL test-database location, current firewall state, and systemd device/network policy compatibility.
+- GitHub's actions/scaleset client is Public Preview; pin an exact version/commit and isolate it behind a narrow local adapter before relying on it.
+- workspace-control evidence-first workflow PR #70 remains externally blocked by GitHub-hosted runner allocation after two 15-minute runner_id=0 / zero-step cancellations; this does not block design work here.
 
 ## Fresh-chat initialization
 

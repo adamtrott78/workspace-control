@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "research-engine-local-extract-redesign-v1",
-  "current_stage": "threat_model_and_architecture_research",
+  "current_stage": "safe_runner_foundation",
   "acceptance_criteria": [
     "Current GitHub self-hosted runner capabilities, security guidance, ephemeral/JIT registration options, runner isolation boundaries, artifact/log handling, and billing implications are researched from current primary sources.",
     "The design explicitly distinguishes ordinary GitHub-hosted CI from heavyweight Lambda validation and does not replace the existing known-good CI path merely because a Lambda lane exists.",
@@ -102,7 +102,7 @@
   "stages": [
     {
       "id": "threat_model_and_architecture_research",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "web+github",
@@ -113,33 +113,91 @@
         "Lambda workstation constraints and existing project topology"
       ],
       "outputs": [
-        "runner threat model",
-        "architecture alternatives",
-        "recommended project-isolated execution topology",
-        "secrets/cache/resource/recovery policies",
-        "pilot acceptance contract"
+        "architecture/lambda-self-hosted-execution-research.v1.md",
+        "architecture/lambda-self-hosted-execution-v1.md",
+        "architecture/lambda-self-hosted-execution-pilot-contract.v1.json",
+        "selected topology: pinned GitHub Runner Scale Set Client in unprivileged ci-controller + narrow local-only root provisioner with no GitHub credentials + one-job repository-scoped project UID runner in hardened systemd sandbox",
+        "trusted default-branch exact-SHA trigger model",
+        "trusted-write/read-only persistent model/dependency cache policy",
+        "rootless Podman + NVIDIA CDI retained only as later hardening option"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Closed-loop connector feasibility",
+          "result": "PASS",
+          "evidence": [
+            "Current GitHub connector can mutate branches/PRs, create PR conversation comments, inspect workflow runs/jobs, list/download workflow artifacts, and rerun jobs.",
+            "This is sufficient for ChatGPT -> GitHub trigger -> Lambda execution -> GitHub evidence -> ChatGPT revision without routine human SSH once the runner foundation exists."
+          ]
+        },
+        {
+          "check": "Evidence-first external architecture survey",
+          "result": "PASS",
+          "evidence": [
+            "GitHub, GitLab, and Buildkite converge on ephemeral/single-job workers, clean workspaces, scoped credentials, network segmentation, and compartmentalized runner responsibilities.",
+            "GitHub's official actions/scaleset Runner Scale Set Client supports custom autoscaling outside Kubernetes, JIT configs, message sessions, and ephemeral runners by default; it is Public Preview, so the implementation must pin an exact version/commit behind a local adapter.",
+            "GitHub pwn-request guidance supports keeping the trusted Lambda workflow on the default branch and treating candidate PR source as untrusted data with no secrets/write token.",
+            "systemd/cgroup-v2 controls on Ubuntu 22.04 support the selected native filesystem/process/resource/device/network sandbox family.",
+            "NVIDIA CDI/rootless container support is credible second-stage hardening but is not required for the native systemd pilot."
+          ]
+        },
+        {
+          "check": "Research-driven architecture refinement",
+          "result": "PASS",
+          "evidence": [
+            "Replaced hand-rolled GitHub queue/JIT polling with a pinned official Runner Scale Set Client.",
+            "Split the network-facing GitHub listener (ci-controller, unprivileged, repo-scoped App/PAT) from a tiny root provisioner that has no GitHub credentials and accepts only root-manifest-allow-listed project/profile/JIT requests.",
+            "Changed persistent cache policy from project-writable to trusted-write/read-only-to-candidate-jobs; candidate downloads/build cache remain ephemeral staging.",
+            "Retained per-project Unix identities, fresh one-job runner workspaces, no Docker socket, no sudo, no personal credentials, and current GitHub-hosted CI as rollback/control."
+          ]
+        },
+        {
+          "check": "P0 actual-host compatibility",
+          "result": "PASS_WITH_FOLLOWUPS",
+          "evidence": [
+            "Probe confirms Ubuntu 22.04.5, kernel 6.8, systemd 249, unified cgroup v2, 32 logical CPUs, ~270 GB RAM, and dual RTX A4500 20,470 MiB GPUs.",
+            "ci-research-engine does not yet exist and /home/atrott is 0750, supporting dedicated-UID isolation if the new UID receives no atrott group membership.",
+            "NVIDIA character devices are currently broadly writable, proving GPU assignment must use a real device/cgroup boundary rather than CUDA_VISIBLE_DEVICES alone.",
+            "Production PostgreSQL listens on wildcard IPv4/IPv6 and Tailscale/local services exist, proving network denial is mandatory.",
+            "Follow-ups before host mutation: correct /srv filesystem/quota probe, locate PostgreSQL bindir, inspect firewall/nft state, and positively test systemd device/network restrictions with non-runner transient probes."
+          ]
+        }
+      ],
       "resume_condition": "A design exists that materially reduces human-terminal dependence without granting an AI-controlled workflow unrestricted access to the Lambda host."
     },
     {
       "id": "safe_runner_foundation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "hybrid",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "hybrid",
+      "selected_surface": "github+one-time-read-only-lambda-probes",
       "inputs": [
-        "accepted threat model",
-        "accepted runner topology"
+        "research-validated design at workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80",
+        "architecture/lambda-self-hosted-execution-research.v1.md",
+        "architecture/lambda-self-hosted-execution-pilot-contract.v1.json",
+        "P0 host probe receipt from 2026-10-05T21:29:38Z"
       ],
       "outputs": [
-        "project-specific runner identity",
-        "isolated runner/workspace root",
-        "kill switch and cleanup procedure",
-        "registration/bootstrap scripts",
-        "host-level validation receipt"
+        "pinned actions/scaleset client identity/update strategy",
+        "ci-controller service/user design",
+        "narrow root provisioner protocol and root-owned project/profile manifest",
+        "systemd sandbox profiles with tested device/network policy",
+        "trusted read-only cache-manager/layout",
+        "corrected filesystem/quota and PostgreSQL-bindir receipts",
+        "kill-switch/remove/recovery scripts",
+        "static review receipt before any user/service/runner registration"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "P0 core host probe",
+          "result": "PASS_WITH_FOLLOWUPS",
+          "evidence": [
+            "Read-only probe performed no runner registration, user/service/firewall mutation, or production-state change.",
+            "Host has systemd/cgroup/GPU/resource primitives required for the selected pilot.",
+            "Additional read-only compatibility probes remain required before enforcing disk/device/network policies."
+          ]
+        }
+      ],
       "resume_condition": "Runner can accept a no-op project job while denied unrelated project/home/production access."
     },
     {
@@ -214,16 +272,27 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "e11032f71bab72dbe84061afe305f34ba44d6e77",
+      "identity": "be9b425b10898a4b5bf4301e8075bb44b2e62a80",
       "required_for_resume": true,
       "evidence": [
-        "stage=threat_model_and_architecture_research",
-        "no self-hosted runner installed or registered yet",
-        "next safe action=research GitHub self-hosted/ephemeral runner security and compare isolation architectures before host mutation"
+        "stage=safe_runner_foundation",
+        "evidence-first external survey=PASS",
+        "design branch=lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80",
+        "selected=pinned official GitHub scale-set listener (unprivileged) + narrow root provisioner (no GitHub credential) + one-job per-project UID systemd sandbox",
+        "persistent candidate-writable trusted cache rejected; promoted caches trusted-write/read-only to jobs",
+        "P0 actual-host probe=PASS_WITH_FOLLOWUPS",
+        "no users/services/runner registrations/firewall mutations performed",
+        "next safe action=P1 static implementation/review only"
       ]
     }
   ],
-  "artifacts": [],
+  "artifacts": [
+    "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-research.v1.md",
+    "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-v1.md",
+    "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-pilot-contract.v1.json",
+    "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:scripts/lambda_runner_host_probe.py",
+    "operator evidence: lambda-runner-host-probe-20261005T212938Z/lambda-runner-host-probe.json"
+  ],
   "validation": [
     {
       "check": "Scope/ownership split",
@@ -234,15 +303,23 @@
       ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Research current GitHub self-hosted runner security, ephemeral/JIT configuration, repository scoping, token/secret behavior, artifacts/logs, and billing.",
-    "Compare isolation architectures: dedicated Unix user, disposable VM, rootless container, systemd sandbox, and hybrid runner+job sandbox.",
-    "Define project-specific filesystem, credentials, network, production-state, GPU, cache, concurrency, and cleanup boundaries.",
-    "Select the smallest safe research-engine pilot architecture.",
-    "Only after design acceptance, create the Lambda runner foundation and a no-op isolation test before real CI/GPU workloads."
+  "blockers": [
+    "No host mutation is authorized yet. P1 static artifacts must be implemented/reviewed first, and the remaining read-only host follow-ups must prove filesystem/quota, PostgreSQL test-database location, current firewall state, and systemd device/network policy compatibility.",
+    "GitHub's actions/scaleset client is Public Preview; pin an exact version/commit and isolate it behind a narrow local adapter before relying on it.",
+    "workspace-control evidence-first workflow PR #70 remains externally blocked by GitHub-hosted runner allocation after two 15-minute runner_id=0 / zero-step cancellations; this does not block design work here."
   ],
-  "next_safe_action": "Research current GitHub self-hosted runner behavior and security from primary sources, then produce a threat model and architecture decision for a project-isolated Lambda execution lane. Do not install/register any runner or change existing CI yet. Preserve existing GitHub-hosted CI as the known-good control and design the research-engine pilot so it can prove closed-loop ChatGPT -> GitHub -> Lambda -> GitHub execution without production-state access.",
+  "remaining_work": [
+    "P1 static implementation: pin actions/scaleset client identity/update policy; define unprivileged ci-controller; define narrow root provisioner IPC/request schema and root-owned project/profile manifest.",
+    "Add corrected read-only host follow-up probes for /srv filesystem/quota support, PostgreSQL bindir/test DB strategy, firewall/nftables state, and transient systemd device/network restrictions.",
+    "Implement/review systemd CPU/GPU sandbox profiles, trusted cache layout/manager, diagnostic retention, kill switch, and full uninstall/recovery path in Git only; do not activate yet.",
+    "After static review and read-only compatibility PASS, perform P2 one-time root bootstrap: create ci-controller/ci-research-engine identities and roots, then one no-op repository-scoped one-job runner isolation test.",
+    "Perform P3 CPU validation with ephemeral project environment/database and GitHub artifact return.",
+    "Perform P4 bounded GPU validation with explicit device grant and process/VRAM cleanup receipt.",
+    "Perform P5 closed-loop acceptance where ChatGPT creates a deliberate failure, triggers Lambda, diagnoses/fixes it, reruns to PASS, and consumes an artifact without human SSH.",
+    "Only after research-engine acceptance, opt in PADataset under a separate scale set/UID/root/cache and prove cross-project denial."
+  ],
+  "next_safe_action": "Implement and statically review P1 artifacts on the isolated design branch at be9b425b10898a4b5bf4301e8075bb44b2e62a80: a pinned `actions/scaleset` listener strategy, unprivileged `ci-controller`, narrow local-only root provisioner protocol/manifest, systemd sandbox profiles, trusted-write/read-only cache layout, corrected read-only filesystem/PostgreSQL/firewall/device/network probes, and kill-switch/uninstall path. Do not create users/services, install/register any runner, expose secrets, change firewall rules, or change existing GitHub-hosted CI until these artifacts and follow-up probes pass review.",
   "last_executor": "chatgpt",
-  "last_surface": "github+web"
+  "last_surface": "github+web",
+  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2."
 }
