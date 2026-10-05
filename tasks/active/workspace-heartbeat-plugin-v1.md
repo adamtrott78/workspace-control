@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
-- Status: BLOCKED_RUNTIME
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -24,26 +24,25 @@ Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 3487c55f6cc604eb046547d419c7511544ac256f
+- Remote checkpoint: 838022e9af0feff8a07894863a96663a73dc9d83
 - Remote verified: true
 
 ## Next safe action
 
-On the user's machine, sync workspace-control main to 3487c55f6cc604eb046547d419c7511544ac256f, then run the bounded local developer-mode smoke from plugins/workspace-heartbeat: npm install; npm test; npm start; inspect http://localhost:8787/mcp with MCP Inspector; expose port 8787 through an HTTPS development tunnel; add the resulting https://.../mcp endpoint in ChatGPT Developer mode; open the thread conversation panel; invoke heartbeat_update twice and confirm one panel updates in place. Return exact npm/Inspector/tunnel/ChatGPT evidence. Do not add persistence/auth/hosting/history/SSE before this smoke.
+With the Workspace heartbeat thread panel visibly open in normal Chat mode, invoke heartbeat_update once for the owning task and verify the panel changes from its idle state to the emitted natural-language message with sequence 1. Then invoke heartbeat_update a second time and verify the same panel updates in place to sequence 2. Treat model prose such as 'the panel is working' as non-evidence unless the user visibly observes the panel update. Successful MCP requests are not currently printed by server.js, so an empty MCP terminal is not evidence of no request; use the ngrok request log or add explicit request logging if transport proof is needed. Do not add persistence/auth/history/SSE before the update loop is proven.
 
 ## Remaining work
 
-- On the user's machine, fast-forward workspace-control main to the canonical MVP checkpoint and enter plugins/workspace-heartbeat.
-- Run npm install, npm test, and start the MCP server.
-- Verify the local MCP endpoint with MCP Inspector.
-- Expose port 8787 through an HTTPS development tunnel.
-- Enable ChatGPT Developer mode, add the HTTPS /mcp endpoint as a personal plugin, and open the thread panel beside a test conversation.
-- Call heartbeat_update twice and verify the same panel box updates in place with increasing sequence numbers.
-- Only after the live smoke succeeds, decide whether persistence, OAuth, public hosting, history, or push events are warranted.
+- In the live research chat with the Workspace heartbeat panel already open, invoke heartbeat_update for the owning task with a short natural-language working-state message.
+- Verify the panel replaces its idle text with the new heartbeat and shows sequence 1.
+- Invoke heartbeat_update again with different prose and verify the same panel updates in place to sequence 2 rather than creating another panel/card.
+- Capture ngrok HTTP request evidence or add explicit server request logging if transport observability is still needed; do not infer successful delivery from an empty MCP terminal because successful requests are not currently logged.
+- After the live update loop passes, add a bounded runtime preflight declaring Node >=20 so future startup fails clearly on unsupported Node 12.
+- Only after the end-to-end update loop is proven, decide whether persistence/history/SSE/auth/public hosting are warranted.
 
 ## Blockers / gates
 
-- Live panel smoke requires a human-accessible local runtime plus ChatGPT Developer-mode MCP connection; this executor cannot create the user's local tunnel or install the custom MCP connection on their behalf.
+- None.
 
 ## Fresh-chat initialization
 
