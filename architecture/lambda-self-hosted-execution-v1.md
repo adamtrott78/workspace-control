@@ -176,13 +176,11 @@ It improves filesystem/process isolation but introduces additional complexity fo
 CUDA/NVIDIA access and Actions/service-container compatibility. It should be
 considered only if the native systemd sandbox is insufficient.
 
-### F. Trusted controller + one-job repository-scoped runner + dedicated project
-identity + systemd sandbox
+### F. Privilege-separated scale-set listener + narrow root provisioner + one-job repository-scoped runner + dedicated project identity + systemd sandbox
 
-**Selected for the pilot.**
+**Selected for the pilot after external research.**
 
-This gives the strongest practical isolation while retaining native GPU access
-and avoiding Docker/root-equivalent workflow permissions.
+GitHub's official Runner Scale Set Client owns the Actions polling/session/JIT protocol in an unprivileged `ci-controller`. A separate root-owned local provisioner holds no GitHub credentials and may only instantiate root-owned allow-listed project/profile sandbox templates. This gives strong practical isolation while retaining native GPU access and avoiding Docker/root-equivalent workflow permissions.
 
 ## Selected topology
 
@@ -194,11 +192,20 @@ GitHub private repository
 queued Lambda job
         │
         ▼
-root-owned trusted controller on Lambda
+ci-controller (unprivileged)
+GitHub Runner Scale Set Client
         │
-        ├─ obtains short-lived repo-scoped runner registration/JIT config
+        ├─ owns repo-scoped GitHub App credential
+        ├─ receives scale-set demand / JIT runner config
+        └─ cannot access project/home/root authority
+        │
+        ▼
+workspace-ci-provisioner (root, local-only)
+        │
+        ├─ owns NO GitHub credential
+        ├─ validates root-owned project/profile manifest
         ├─ creates fresh one-job runner directory
-        ├─ launches runner as dedicated project UID in hardened systemd cgroup
+        └─ launches dedicated project UID in hardened systemd cgroup
         ▼
 ci-research-engine
         │
@@ -224,7 +231,7 @@ runner automatically deregisters
         └─ destroys work/config directory
 ```
 
-The controller then provisions the next clean one-job runner.
+The unprivileged scale-set listener requests the next runner; the narrow root provisioner instantiates only an allow-listed sandbox. After acceptance, `minRunners=1` may be evaluated for active projects to remove cold-start latency, while every runner still executes only one job.
 
 ## Trigger model
 
@@ -270,20 +277,27 @@ branch and treat the candidate SHA as data.
 
 The controller and job runner use **different credentials**.
 
-### Controller
+### GitHub listener
 
-The trusted root-owned controller needs permission to create repository-scoped
-runner registration/JIT configurations.
+Run a pinned version of GitHub's official `actions/scaleset` client as an
+unprivileged `ci-controller` identity. The listener owns the repository-scoped
+GitHub credential and JIT/scale-set protocol, but cannot launch arbitrary root
+commands or read project/home/production data.
 
-Pilot options:
+Preferred credential: a private GitHub App installed only on explicitly opted-in
+repositories and exchanging for short-lived installation tokens.
 
-1. fine-grained PAT scoped only to `adamtrott78/research-engine` with the
-   minimum repository Administration permission required by GitHub's runner API;
-2. preferred long-term: a private GitHub App installed only on opt-in
-   repositories, generating short-lived installation tokens.
+Pilot fallback: a narrowly scoped fine-grained PAT only if GitHub App bring-up
+blocks the first controlled test.
 
-The controller credential is readable only by the root-owned controller. It is
-never placed in the runner work directory or job environment.
+### Root provisioner
+
+A separate root-owned local-only provisioner holds **no GitHub credential**.
+It accepts only a structured, allow-listed project/profile/JIT request from the
+controller, validates it against a root-owned manifest, creates the transient
+runner workspace, and launches the systemd sandbox under the project UID.
+
+The root provisioner is deliberately not a general command executor.
 
 ### Job
 
@@ -468,19 +482,21 @@ Caches are performance aids, never sources of truth.
 
 Pilot:
 
-- each project gets a private writable cache;
-- no project can modify another project's cache;
-- caches survive jobs but workspaces do not;
-- cache keys include dependency/model/runtime identities where applicable;
-- jobs must tolerate cache miss/rebuild.
+- workspaces are always ephemeral;
+- candidate jobs receive only ephemeral writable cache/download staging;
+- long-lived executable/model dependency caches are written or promoted only by
+  trusted cache-management/default-branch operations;
+- promoted caches are mounted read-only into candidate jobs;
+- cache identities include immutable dependency/model/runtime identities;
+- jobs must tolerate cache miss/rebuild;
+- no project can modify another project's cache.
 
-Model cache options:
+Hugging Face already uses revision snapshots backed by hashed blobs; later a
+trusted cache manager can exploit that layout for deduplicated read-only model
+snapshots across projects without granting candidate jobs write access.
 
-1. project-private Hugging Face/Torch caches initially;
-2. later, content-addressed shared model snapshots exposed read-only to multiple
-   projects after a separate cache-manager design.
-
-Do not bind the normal user's writable model cache into a job.
+Do not bind the normal user's writable model cache into a job and do not trust
+candidate-written persistent cache state.
 
 ## Resource profiles
 
@@ -688,3 +704,25 @@ Do not implement these before the research-engine pilot proves the basic model:
 - public-repository jobs;
 - arbitrary workflow-defined privilege/resource profiles;
 - migration of every workspace project at once.
+
+
+## Evidence-first research revision
+
+The initial design was re-evaluated using the workspace evidence-first research
+method before host mutation.
+
+The resulting survey is recorded in:
+
+`architecture/lambda-self-hosted-execution-research.v1.md`
+
+Material changes from the initial candidate:
+
+- use GitHub's official pinned Runner Scale Set Client instead of hand-rolled
+  GitHub queue/JIT polling;
+- split the unprivileged GitHub listener from the root provisioner;
+- make long-lived model/dependency caches trusted-write/read-only-to-jobs rather
+  than candidate-writable;
+- treat the issue-comment trigger explicitly as a pwn-request boundary with no
+  secrets and a read-only job token;
+- retain native systemd/cgroup-v2 isolation for the first pilot while keeping
+  rootless Podman + NVIDIA CDI as a later hardening option.
