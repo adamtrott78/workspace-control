@@ -209,6 +209,12 @@ expanding the task:
   `scripts/runtime_certification.py` provide staged C0-C4 heavyweight-runtime
   certification, typed invalidation, idempotent recovery, structured process
   identity, and compact failure envelopes.
+- `procedures/progress_heartbeat.md` and
+  `scripts/progress_heartbeat.py` keep long-running work operator-visible by
+  reporting bounded objective, milestone progress, current critical-path
+  operation, remaining execute-now scope, next durable milestone, and external
+  waits; repeated polling is summarized rather than presented as progress;
+
 
 Do not implement adjacent non-blocking improvements merely because they are
 discovered during current work. Record them as follow-ups unless the owning task
