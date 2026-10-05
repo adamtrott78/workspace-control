@@ -23,8 +23,8 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: throughput-efficiency-wave2-design-v1
-- Remote checkpoint: f998b89ac88bf564aa2836f3116d9ac979b4969d
+- Remote branch: main
+- Remote checkpoint: 0e726530c0869dfb126958867cf0b7144e4e28de
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Measure and remove avoidable latency from ChatGPT/GitHub/workspace-control execu
 
 ## Next safe action
 
-Start from https://github.com/adamtrott78/workspace-control and the normal root route. Resume Wave-2 efficiency validation from checkpoint f998b89ac88bf564aa2836f3116d9ac979b4969d and architecture/throughput-ci-efficiency-v1.md. Do not mutate research-engine from this capsule. Use the active research-engine Qwen task as field evidence without replacing its durable next_safe_action: measure and, only through that task's existing authority, test layered host/build plus exact execution-path preflight, runtime/wheel reuse, compact failure receipts, content-addressed deterministic render reuse, and Git/task-handoff overhead. Keep research-engine-specific package/cache semantics project-local. Delay the final cross-repository rollout task until this Wave-2 field pass stops finding substantive shared improvements.
+Start from https://github.com/adamtrott78/workspace-control and the normal root route. Wave-2 efficiency architecture is canonical on main@0e726530c0869dfb126958867cf0b7144e4e28de. Continue field_efficiency_wave2_validation without starting the final cross-repository rollout task. Do not mutate research-engine from this capsule. Use the active research-engine Qwen task as the natural field workload and preserve its exact durable next_safe_action; through that task's own authority, measure/test layered host/build plus exact execution-path preflight, exact runtime/wheel reuse, compact early-failure receipts, content-addressed deterministic render reuse, Git mutation/write-call behavior, and task-handoff synchronization overhead. Keep package/model/cache specifics project-local and return measured evidence before promoting further shared implementation.
 
 ## Remaining work
 
