@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/runtime_certification.v1.schema.json",
+  "title": "Workspace Control Runtime Certification v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "execution_identity",
+    "package_identity",
+    "compatibility_predicates",
+    "runtime_certified",
+    "stage_receipts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "execution_identity": {
+      "$ref": "#/$defs/identity"
+    },
+    "package_identity": {
+      "$ref": "#/$defs/identity"
+    },
+    "compatibility_predicates": {
+      "type": "object"
+    },
+    "runtime_certified": {
+      "type": "boolean"
+    },
+    "stage_receipts": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "$ref": "#/$defs/stage_receipt"
+      }
+    },
+    "reuse_layers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "R0_ENVIRONMENT": {
+          "$ref": "#/$defs/reuse_state"
+        },
+        "R1_CERTIFICATION": {
+          "$ref": "#/$defs/reuse_state"
+        },
+        "R2_COMPILED_CACHE": {
+          "$ref": "#/$defs/reuse_state"
+        },
+        "R3_LIVE_SESSION": {
+          "$ref": "#/$defs/reuse_state"
+        }
+      }
+    },
+    "failure_envelope": {
+      "$ref": "runtime_failure_envelope.v1.schema.json"
+    }
+  },
+  "$defs": {
+    "identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stage": {
+      "enum": [
+        "C0_STATIC",
+        "C1_IMPORT_ACCELERATOR",
+        "C2A_BACKEND_TOOLCHAIN",
+        "C2B_ENGINE_BOOT",
+        "C3_CANARY",
+        "C4_DOMAIN"
+      ]
+    },
+    "status": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "RUNNING",
+        "NOT_RUN"
+      ]
+    },
+    "stage_receipt": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "stage",
+        "status",
+        "execution_identity"
+      ],
+      "properties": {
+        "stage": {
+          "$ref": "#/$defs/stage"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "execution_identity": {
+          "$ref": "#/$defs/identity"
+        }
+      }
+    },
+    "reuse_state": {
+      "enum": [
+        "NOT_APPLICABLE",
+        "MISS",
+        "PRESENT_UNVERIFIED",
+        "VERIFIED_REUSE",
+        "VERIFIED_HIT",
+        "HEALTHY_REUSE"
+      ]
+    }
+  }
+}
