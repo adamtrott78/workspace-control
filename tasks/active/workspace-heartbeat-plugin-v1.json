@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-heartbeat-plugin-v1",
   "title": "Workspace Heartbeat MCP Plugin v1",
-  "status": "BLOCKED_RUNTIME",
+  "status": "VALIDATING",
   "goal": "Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel UI so long-running workspace-control tasks can publish natural-language progress through a real tool call into one continuously updating side panel.",
   "execution_topology": "remote_only",
   "workflow": null,
@@ -38,8 +38,8 @@
       "intent": "mutate",
       "base_sha": "e1607f473e0e359f6b75059bfb9a4f0dec7a7e40",
       "remote": {
-        "branch": "main",
-        "checkpoint_sha": "3214ec2be4f0c20933784b3d265386d9652dfd0b",
+        "branch": "heartbeat-v2-smoke-checkpoint",
+        "checkpoint_sha": "f542f3bed7a3555877eb7bff14a38b13a4921692",
         "verified": true
       },
       "local": null,
@@ -230,7 +230,7 @@
     },
     {
       "id": "panel_stability_correction",
-      "status": "SUSPENDED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda+chatgpt",
@@ -248,7 +248,12 @@
         "successful MCP request logging",
         "canonical correction checkpoint git:3214ec2be4f0c20933784b3d265386d9652dfd0b",
         "workspace-control PR #67",
-        "Workspace Control Validation run 37348100020"
+        "Workspace Control Validation run 37348100020",
+        "MCP Apps ui/notifications/tool-result primary update path",
+        "adaptive visibility-aware reconciliation fallback",
+        "panel-v3.html cache-busting resource",
+        "v0.3 static panel contract test",
+        "v0.3 source checkpoint git:f542f3bed7a3555877eb7bff14a38b13a4921692"
       ],
       "validation": [
         {
@@ -307,6 +312,31 @@
             "With the v0.2 thread panel open, the MCP console showed successful POST /mcp requests streaming approximately once per second.",
             "The v0.2 panel source contains setInterval(refresh, 1000), directly explaining the observed request rate.",
             "OpenAI's current MCP Apps guidance supports ui/notifications/tool-result for model-initiated tool results, so one-second polling is not required for the primary update path."
+          ]
+        },
+        {
+          "check": "v0.3 hot-polling correction source",
+          "result": "PASS",
+          "evidence": [
+            "v0.3 source is committed at git:f542f3bed7a3555877eb7bff14a38b13a4921692.",
+            "The panel listens for ui/notifications/tool-result and initializes the MCP Apps bridge.",
+            "The one-second setInterval(refresh, 1000) loop is removed.",
+            "Fallback reconciliation uses 5s active, 15s quiet, and 30s error intervals and avoids active reconciliation while hidden.",
+            "The UI resource URI is bumped to panel-v3.html."
+          ]
+        },
+        {
+          "check": "v0.3 repository validation",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Pending workspace-control validation on PR #69."
+          ]
+        },
+        {
+          "check": "v0.3 live request-rate smoke",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Requires deploying the validated v0.3 resource and observing the MCP console with the panel open."
           ]
         }
       ],
@@ -387,6 +417,17 @@
         "No false-IDLE transition was observed.",
         "Multi-heartbeat accumulation remains pending."
       ]
+    },
+    {
+      "id": "panel-event-driven-v3-source",
+      "kind": "git_checkpoint",
+      "identity": "git:f542f3bed7a3555877eb7bff14a38b13a4921692",
+      "required_for_resume": true,
+      "evidence": [
+        "Replaces v0.2 one-second polling with MCP Apps tool-result notifications plus adaptive reconciliation.",
+        "Bumps UI cache key to panel-v3.html.",
+        "Adds static contract coverage for notification handling and reconciliation intervals."
+      ]
     }
   ],
   "artifacts": [],
@@ -418,19 +459,18 @@
       ]
     }
   ],
-  "blockers": [
-    "Heartbeat v0.2 uses an excessive one-second heartbeat_get reconciliation loop while the thread panel is open; this creates continuous MCP traffic and is a plausible contributor to intermittent UNAVAILABLE delivery.",
-    "Multi-heartbeat chronological accumulation remains unproven until the polling defect is corrected and a long normal research turn is observed."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Replace the v0.2 one-second heartbeat_get loop with MCP Apps ui/notifications/tool-result handling for immediate model-driven updates plus a substantially slower, visibility-aware reconciliation fallback.",
-    "Bump the UI resource URI so ChatGPT cannot reuse the v0.2 panel iframe.",
-    "Validate the correction in workspace-control CI, sync/restart the Lambda service, and recreate or refresh the custom plugin if required to load the new resource.",
-    "Verify the MCP console no longer receives approximately one POST /mcp per second from an idle open panel.",
-    "Then resume normal research work and verify multiple heartbeats accumulate chronologically without false IDLE, erasure, or UNAVAILABLE."
+    "Run workspace-control validation on PR #69 with the v0.3 source and synchronized task state.",
+    "If validation passes, merge the exact PR head and sync the Lambda workspace-control checkout to the canonical merge.",
+    "Restart workspace-heartbeat so server v0.3 and panel-v3.html are served.",
+    "Recreate or refresh the ChatGPT custom MCP plugin if needed so the panel-v3 resource is loaded.",
+    "With the panel open and otherwise idle, verify MCP request volume drops sharply from the v0.2 approximately one-request-per-second stream.",
+    "Resume normal research work and verify multiple heartbeats append chronologically without false IDLE, erasure, or UNAVAILABLE.",
+    "Close the task only after both request-rate/availability and multi-heartbeat history pass."
   ],
-  "next_safe_action": "Correct the v0.2 hot polling defect before further live acceptance. The open panel currently issues heartbeat_get about once per second via setInterval(refresh, 1000). Replace that primary polling path with the MCP Apps ui/notifications/tool-result lifecycle and retain only a slow visibility-aware reconciliation fallback. After repository validation, deploy the new resource URI, confirm idle request volume drops sharply, then resume the multi-heartbeat stability smoke.",
+  "next_safe_action": "Validate the v0.3 event-driven/adaptive correction at f542f3bed7a3555877eb7bff14a38b13a4921692 through workspace-control PR #69. If CI passes, merge it, deploy the canonical commit to the Lambda, restart workspace-heartbeat, load panel-v3.html in ChatGPT, and first verify the idle MCP request rate is no longer approximately one POST per second. Then resume the normal multi-heartbeat stability smoke.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects. New live evidence proved transport and rendering but exposed a session-correlation defect: the panel sometimes polled heartbeat_get under a different or missing ChatGPT session identity, received no task, switched to IDLE, and later resurrected the prior heartbeat. The v0.2 correction makes task_id authoritative, retains bounded task history, persists active task/history in widget state, ignores empty polls after valid state, declares Node >=20, and logs successful MCP requests. The user's preferred UX is a sequential heartbeat log that does not disappear between updates. Automatic reset to IDLE on assistant-response start is intentionally deferred because no reliable response-start lifecycle signal is available. The panel-stability correction is repository-valid and canonical at 3214ec2be4f0c20933784b3d265386d9652dfd0b. The task is now blocked only on the user's live Lambda/ChatGPT smoke. Fresh-chat v0.2 field evidence on 2026-10-05: the first heartbeat rendered as WORKING with a footer showing 1 retained update and remained visible throughout an approximately 1m56s response. The prior false-IDLE/disappearing behavior was not observed. No second heartbeat was emitted during that run, so multi-heartbeat sequential accumulation remains the sole pending live acceptance check. Do not repeat the single-heartbeat smoke; use normal research work to obtain the next qualifying multi-update observation. Additional field evidence: after earlier v0.2 heartbeats landed, a later heartbeat_update returned UNAVAILABLE. This makes end-to-end delivery availability a separate open failure from the already-corrected false-IDLE UI bug. Do not infer the cause without correlating the model-visible UNAVAILABLE with MCP server and ngrok request evidence. New field evidence: with the v0.2 panel open, successful POST /mcp requests streamed roughly once per second. This is directly explained by setInterval(refresh, 1000) in heartbeat-panel.html. OpenAI's current MCP Apps documentation recommends receiving model tool results through ui/notifications/tool-result; the one-second window.openai.callTool polling loop is therefore unnecessary as the primary update mechanism and may contribute to intermittent UNAVAILABLE failures."
+  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects. New live evidence proved transport and rendering but exposed a session-correlation defect: the panel sometimes polled heartbeat_get under a different or missing ChatGPT session identity, received no task, switched to IDLE, and later resurrected the prior heartbeat. The v0.2 correction makes task_id authoritative, retains bounded task history, persists active task/history in widget state, ignores empty polls after valid state, declares Node >=20, and logs successful MCP requests. The user's preferred UX is a sequential heartbeat log that does not disappear between updates. Automatic reset to IDLE on assistant-response start is intentionally deferred because no reliable response-start lifecycle signal is available. The panel-stability correction is repository-valid and canonical at 3214ec2be4f0c20933784b3d265386d9652dfd0b. The task is now blocked only on the user's live Lambda/ChatGPT smoke. Fresh-chat v0.2 field evidence on 2026-10-05: the first heartbeat rendered as WORKING with a footer showing 1 retained update and remained visible throughout an approximately 1m56s response. The prior false-IDLE/disappearing behavior was not observed. No second heartbeat was emitted during that run, so multi-heartbeat sequential accumulation remains the sole pending live acceptance check. Do not repeat the single-heartbeat smoke; use normal research work to obtain the next qualifying multi-update observation. Additional field evidence: after earlier v0.2 heartbeats landed, a later heartbeat_update returned UNAVAILABLE. This makes end-to-end delivery availability a separate open failure from the already-corrected false-IDLE UI bug. Do not infer the cause without correlating the model-visible UNAVAILABLE with MCP server and ngrok request evidence. New field evidence: with the v0.2 panel open, successful POST /mcp requests streamed roughly once per second. This is directly explained by setInterval(refresh, 1000) in heartbeat-panel.html. OpenAI's current MCP Apps documentation recommends receiving model tool results through ui/notifications/tool-result; the one-second window.openai.callTool polling loop is therefore unnecessary as the primary update mechanism and may contribute to intermittent UNAVAILABLE failures. The v0.3 correction is implemented at f542f3bed7a3555877eb7bff14a38b13a4921692: it uses the MCP Apps ui/notifications/tool-result lifecycle as the primary UI update path, retains a 5s/15s/30s adaptive reconciliation fallback, skips active reconciliation while hidden, bumps the resource URI to panel-v3.html, and adds a static panel contract test. Repository and live validation are pending."
 }
