@@ -2,42 +2,44 @@
   "schema_version": 2,
   "task_id": "workspace-heartbeat-plugin-v1",
   "title": "Workspace Heartbeat MCP Plugin v1",
-  "status": "IN_PROGRESS",
+  "status": "VALIDATING",
   "goal": "Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel UI so long-running workspace-control tasks can publish natural-language progress through a real tool call into one continuously updating side panel.",
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control",
-  "current_stage": "local_developer_mode_handoff",
+  "current_stage": "panel_stability_correction",
   "acceptance_criteria": [
     "Expose a model-callable heartbeat_update tool whose user-facing progress content is natural prose rather than rigid structured headings.",
-    "Expose a read-only heartbeat_get tool that returns the latest heartbeat for the current ChatGPT conversation and optional task ID.",
-    "Use the anonymized openai/session tool-call metadata to isolate heartbeat state between ChatGPT conversations while retaining task_id as the domain identifier.",
-    "Advertise a ChatGPT thread conversation-panel entrypoint that displays one rolling heartbeat box beside the chat.",
-    "Update the panel in place by reading heartbeat_get without creating one inline widget per heartbeat_update call.",
-    "Assign monotonic per-session/task sequence numbers so stale panel refreshes cannot overwrite newer state.",
-    "Keep the MVP useful without UI through normal structuredContent/content tool results.",
-    "Keep v0.1 storage in memory and explicitly defer persistence, auth, deployment, history, and stronger cross-tool lease enforcement.",
-    "Provide focused deterministic unit tests for store sequencing, session isolation, latest-task lookup, and empty state.",
-    "Provide a local run/test/developer-mode handoff using the official MCP Inspector and an HTTPS development tunnel or deployment.",
+    "Expose a read-only heartbeat_get tool that returns the latest heartbeat plus bounded history for an optional task ID.",
+    "Use task_id as the stable heartbeat identity across ChatGPT model/app session differences and chat handoffs; session metadata may resolve omitted task IDs but must not partition authoritative task progress.",
+    "Advertise a ChatGPT thread conversation-panel entrypoint that renders beside a normal Chat conversation.",
+    "Keep the last known valid heartbeat visible until a newer heartbeat arrives; empty/failed polls must never erase valid progress or force a false IDLE state.",
+    "Render a bounded chronological log of prior heartbeat updates in the same panel, newest update last.",
+    "Assign monotonically increasing sequence numbers per task while the server process is alive and tolerate sequence restart after server restart through timestamp-based UI merge semantics.",
+    "Keep heartbeat state and history in memory only for this iteration; do not add a database or durable telemetry sink.",
+    "Require Node.js 20 or newer and fail dependency/runtime setup clearly on older runtimes.",
+    "Log successful MCP requests with method, status, and latency so live transport can be observed directly.",
+    "Keep the tools useful without UI through normal structuredContent/content results.",
     "Do not mutate research-engine or any course/research repository as part of this plugin implementation."
   ],
   "constraints": [
     "Use current documented OpenAI/MCP Apps APIs and a ChatGPT thread entrypoint; do not depend on hidden client behavior.",
-    "Do not treat UI commentary/thought rendering as authoritative heartbeat delivery.",
+    "Do not treat transient ChatGPT commentary/thought rendering as authoritative heartbeat delivery.",
     "Do not expose private chain-of-thought; heartbeat_update carries concise operator-facing progress prose only.",
     "Do not commit per-heartbeat runtime state to Git.",
-    "Do not introduce a database, OAuth flow, public cloud deployment, or event-streaming backend until the local/developer-mode MVP works.",
+    "Do not add OAuth, a database, cloud hosting, durable history, or SSE/event streaming until the stable polling/history loop is proven.",
     "Do not claim this MCP server can physically block unrelated GitHub or other external tool calls; the three-tool lease remains an executor contract unless operations are later proxied through a controllable orchestrator.",
+    "Do not automatically reset the panel to IDLE on assistant-response start because the current MCP App surface does not provide a reliable response-start lifecycle event.",
     "Keep all implementation inside workspace-control plugins/workspace-heartbeat/** plus this task capsule/handoff."
   ],
   "repositories": [
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "b6fcc8562c919d506b491aac6d0f046b8b8c7186",
+      "base_sha": "e1607f473e0e359f6b75059bfb9a4f0dec7a7e40",
       "remote": {
-        "branch": "main",
-        "checkpoint_sha": "838022e9af0feff8a07894863a96663a73dc9d83",
+        "branch": "workspace-heartbeat-history-v2",
+        "checkpoint_sha": "906478d671dc750b5c739a716fb32a1a650f0b0c",
         "verified": true
       },
       "local": null,
@@ -137,7 +139,7 @@
     },
     {
       "id": "local_developer_mode_handoff",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "human+chatgpt",
       "selected_executor": "human",
       "selected_surface": "lambda+chatgpt-developer-mode",
@@ -152,7 +154,9 @@
         "tmux workspace-heartbeat session with mcp and ngrok windows",
         "ChatGPT custom MCP plugin connected with no authentication",
         "ChatGPT authorization prompt observed for heartbeat tool",
-        "ChatGPT thread side panel visibly rendered Workspace heartbeat UI"
+        "ChatGPT thread side panel visibly rendered Workspace heartbeat UI",
+        "live heartbeat update visibly rendered in the ChatGPT thread panel",
+        "repeated false-IDLE / later-resurrection behavior observed during panel polling"
       ],
       "validation": [
         {
@@ -206,13 +210,67 @@
         },
         {
           "check": "Heartbeat update propagation",
-          "result": "NOT_RUN",
+          "result": "PASS",
           "evidence": [
-            "The panel is visible, but a confirmed heartbeat_update -> heartbeat_get -> in-place sequence increment has not yet been observed."
+            "User visibly observed task heartbeat content in the Workspace heartbeat thread panel with state WORKING and update sequence 5.",
+            "The same heartbeat was later visible again after transient disappearance, proving update transport and panel rendering are functional."
+          ]
+        },
+        {
+          "check": "Stable panel state retention",
+          "result": "FAIL",
+          "evidence": [
+            "After a valid heartbeat rendered, the panel repeatedly switched to IDLE and removed the update without a new heartbeat event.",
+            "The prior heartbeat later reappeared after minutes, consistent with app/model session identity divergence during heartbeat_get polling.",
+            "The observed behavior violates the desired invariant that known-good progress remains visible until a newer heartbeat arrives."
           ]
         }
       ],
-      "resume_condition": "Workspace Heartbeat thread panel is visibly rendered in normal Chat mode; continue the bounded end-to-end update propagation smoke."
+      "resume_condition": "Live transport/render is proven; continue with the bounded panel stability correction and then repeat the live smoke in a fresh research chat."
+    },
+    {
+      "id": "panel_stability_correction",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+lambda+chatgpt",
+      "inputs": [
+        "live false-IDLE / heartbeat-resurrection field evidence",
+        "current OpenAI MCP Apps guidance for widget state and tool calls",
+        "source checkpoint git:906478d671dc750b5c739a716fb32a1a650f0b0c"
+      ],
+      "outputs": [
+        "task-scoped heartbeat store",
+        "bounded chronological heartbeat history",
+        "panel active-task persistence",
+        "non-destructive empty-poll behavior",
+        "Node >=20 runtime declaration",
+        "successful MCP request logging"
+      ],
+      "validation": [
+        {
+          "check": "Source implementation committed",
+          "result": "PASS",
+          "evidence": [
+            "Correction source committed at git:906478d671dc750b5c739a716fb32a1a650f0b0c."
+          ]
+        },
+        {
+          "check": "Repository validation",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Pending workspace-control CI on workspace-heartbeat-history-v2."
+          ]
+        },
+        {
+          "check": "Fresh-chat stability/history smoke",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Requires pulling the validated correction to Lambda, restarting heartbeat-up, refreshing/reconnecting the custom MCP plugin if needed, and observing a lengthy new-chat rehydration."
+          ]
+        }
+      ],
+      "resume_condition": "Repository validation passes and the Lambda is updated to the exact correction checkpoint."
     }
   ],
   "checkpoints": [
@@ -255,6 +313,17 @@
         "Workspace heartbeat thread side panel visibly rendered in normal Chat mode.",
         "Panel idle state visible; update propagation not yet validated."
       ]
+    },
+    {
+      "id": "panel-stability-correction-source",
+      "kind": "git_checkpoint",
+      "identity": "git:906478d671dc750b5c739a716fb32a1a650f0b0c",
+      "required_for_resume": true,
+      "evidence": [
+        "Task-scoped heartbeat history replaces session-partitioned authoritative state.",
+        "Panel preserves known-good heartbeat state across empty/failed polls and renders bounded chronological history.",
+        "Node >=20 and successful MCP request logging are included."
+      ]
     }
   ],
   "artifacts": [],
@@ -277,24 +346,27 @@
     },
     {
       "check": "Live ChatGPT panel smoke",
-      "result": "NOT_RUN",
+      "result": "FAIL",
       "evidence": [
-        "Thread panel render is now proven PASS in normal Chat mode.",
-        "Final live smoke remains incomplete until a real heartbeat_update changes the already-open panel in place and sequence increments are observed."
+        "Thread panel render and heartbeat propagation are proven PASS in normal Chat mode.",
+        "Stability failed: valid heartbeat content disappeared into a false IDLE state and later reappeared without a new heartbeat event.",
+        "Bounded correction is implemented at 906478d671dc750b5c739a716fb32a1a650f0b0c and awaits repository/live validation."
       ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "In the live research chat with the Workspace heartbeat panel already open, invoke heartbeat_update for the owning task with a short natural-language working-state message.",
-    "Verify the panel replaces its idle text with the new heartbeat and shows sequence 1.",
-    "Invoke heartbeat_update again with different prose and verify the same panel updates in place to sequence 2 rather than creating another panel/card.",
-    "Capture ngrok HTTP request evidence or add explicit server request logging if transport observability is still needed; do not infer successful delivery from an empty MCP terminal because successful requests are not currently logged.",
-    "After the live update loop passes, add a bounded runtime preflight declaring Node >=20 so future startup fails clearly on unsupported Node 12.",
-    "Only after the end-to-end update loop is proven, decide whether persistence/history/SSE/auth/public hosting are warranted."
+    "Run workspace-control repository validation on workspace-heartbeat-history-v2.",
+    "If validation passes, merge the correction and sync the Lambda checkout to the exact canonical commit.",
+    "Restart the persistent workspace-heartbeat tmux service so server.js and the panel resource use v0.2.",
+    "Refresh/reopen the Workspace Heartbeat custom MCP plugin/thread panel so ChatGPT loads panel-v2.html.",
+    "Use the new research-engine handoff chat as a long rehydration smoke: emit several natural-language heartbeat_update calls under the same owning task_id.",
+    "Verify old updates remain visible as a sequential log, the newest update remains WORKING/WAITING/BLOCKED/DONE as emitted, and the panel never switches to IDLE unless it has never received a heartbeat.",
+    "Verify successful /mcp requests appear in the MCP tmux window.",
+    "After the stability/history smoke passes, decide separately whether a future explicit turn-reset event is worth adding; do not fake assistant-response-start detection."
   ],
-  "next_safe_action": "With the Workspace heartbeat thread panel visibly open in normal Chat mode, invoke heartbeat_update once for the owning task and verify the panel changes from its idle state to the emitted natural-language message with sequence 1. Then invoke heartbeat_update a second time and verify the same panel updates in place to sequence 2. Treat model prose such as 'the panel is working' as non-evidence unless the user visibly observes the panel update. Successful MCP requests are not currently printed by server.js, so an empty MCP terminal is not evidence of no request; use the ngrok request log or add explicit request logging if transport proof is needed. Do not add persistence/auth/history/SSE before the update loop is proven.",
+  "next_safe_action": "Open and validate the workspace-heartbeat-history-v2 correction at 906478d671dc750b5c739a716fb32a1a650f0b0c. After repository validation passes, merge it, update the Lambda to the canonical merge, restart heartbeat-up, reopen the custom MCP thread panel, and use the user's fresh research-engine handoff chat as the long stability smoke. The pass condition is not merely that a heartbeat appears: multiple task-scoped updates must remain in chronological history, the latest state must persist between updates, and empty/failed polls must never force a false IDLE or erase known-good progress.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects."
+  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects. New live evidence proved transport and rendering but exposed a session-correlation defect: the panel sometimes polled heartbeat_get under a different or missing ChatGPT session identity, received no task, switched to IDLE, and later resurrected the prior heartbeat. The v0.2 correction makes task_id authoritative, retains bounded task history, persists active task/history in widget state, ignores empty polls after valid state, declares Node >=20, and logs successful MCP requests. The user's preferred UX is a sequential heartbeat log that does not disappear between updates. Automatic reset to IDLE on assistant-response start is intentionally deferred because no reliable response-start lifecycle signal is available."
 }

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { HeartbeatStore } from "../src/store.js";
 
-test("update increments sequence per session and task", () => {
+test("sequence is monotonic per task across ChatGPT sessions", () => {
   const store = new HeartbeatStore();
   const first = store.update({
     sessionId: "s1",
@@ -12,7 +12,7 @@ test("update increments sequence per session and task", () => {
     now: new Date("2026-10-05T04:00:00Z"),
   });
   const second = store.update({
-    sessionId: "s1",
+    sessionId: "s2",
     taskId: "task-a",
     message: "Second",
     state: "waiting",
@@ -24,19 +24,22 @@ test("update increments sequence per session and task", () => {
   assert.equal(store.get({ sessionId: "s1", taskId: "task-a" }).message, "Second");
 });
 
-test("sessions do not leak heartbeats into each other", () => {
+test("explicit task lookup works across session identity changes", () => {
   const store = new HeartbeatStore();
   store.update({
-    sessionId: "s1",
+    sessionId: "model-session",
     taskId: "task-a",
-    message: "Private to s1",
+    message: "Visible to the task",
     state: "working",
   });
 
-  assert.equal(store.get({ sessionId: "s2", taskId: "task-a" }), null);
+  assert.equal(
+    store.get({ sessionId: "app-session", taskId: "task-a" }).message,
+    "Visible to the task",
+  );
 });
 
-test("get without task id returns latest task for the session", () => {
+test("omitted task id still resolves the latest task for that session", () => {
   const store = new HeartbeatStore();
   store.update({
     sessionId: "s1",
@@ -54,7 +57,43 @@ test("get without task id returns latest task for the session", () => {
   assert.equal(store.get({ sessionId: "s1" }).task_id, "task-b");
 });
 
-test("missing heartbeat returns null", () => {
+test("snapshot returns ordered bounded history", () => {
+  const store = new HeartbeatStore({ historyLimit: 2 });
+  store.update({
+    sessionId: "s1",
+    taskId: "task-a",
+    message: "One",
+    state: "working",
+    now: new Date("2026-10-05T04:00:00Z"),
+  });
+  store.update({
+    sessionId: "s1",
+    taskId: "task-a",
+    message: "Two",
+    state: "working",
+    now: new Date("2026-10-05T04:00:01Z"),
+  });
+  store.update({
+    sessionId: "s2",
+    taskId: "task-a",
+    message: "Three",
+    state: "done",
+    now: new Date("2026-10-05T04:00:02Z"),
+  });
+
+  const snapshot = store.getSnapshot({ sessionId: "s9", taskId: "task-a" });
+  assert.deepEqual(
+    snapshot.history.map((item) => item.message),
+    ["Two", "Three"],
+  );
+  assert.equal(snapshot.heartbeat.message, "Three");
+  assert.equal(snapshot.heartbeat.sequence, 3);
+});
+
+test("missing heartbeat returns an empty snapshot", () => {
   const store = new HeartbeatStore();
-  assert.equal(store.get({ sessionId: "s1" }), null);
+  assert.deepEqual(store.getSnapshot({ sessionId: "s1" }), {
+    heartbeat: null,
+    history: [],
+  });
 });
