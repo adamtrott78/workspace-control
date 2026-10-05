@@ -194,13 +194,24 @@
         },
         {
           "check": "P1 static implementation",
-          "result": "PASS_PENDING_EXTERNAL_VALIDATION",
+          "result": "PASS",
           "evidence": [
-            "PR #72 head=46d3d33aa560df2adf90137e0951097ed973ee1d; branch is 0 commits behind current main and changes exactly 19 intended Lambda-CI files.",
-            "actions/scaleset is pinned to e6daac702355cdb5b880b4fbdcf6d85dcd9e48e5; Actions runner is pinned to v2.337.0 with Linux x64 SHA-256 70920811a4f8ad4328818682bca5c6469c1c942fab52448868071d0063816613.",
-            "Provisioner request surface excludes arbitrary command/path/environment/device/systemd inputs and JIT is environment-only/redacted.",
-            "Systemd profiles, trusted cache policy, kill switch, guarded uninstall/bootstrap skeletons, and regression tests are present.",
-            "Existing GitHub-hosted CI remains unchanged; no Lambda host mutation has occurred."
+            "workspace-control PR #72 exact head bcb6bf3a97ebd58c5c36434d598066cca27cc5ea passed task-contract validation, unit regression, and full integration.",
+            "PR #72 merged to main as 2bbdb81f97b5ce7743074a71bd0554f47b75b4a0.",
+            "Security boundary artifacts remain exact-pinned and existing GitHub-hosted CI was not replaced."
+          ]
+        },
+        {
+          "check": "P1 Lambda compatibility",
+          "result": "PASS_WITH_P2_ROOT_PREFLIGHT",
+          "evidence": [
+            "Read-only receipt timestamp 2026-10-05T22:17:39Z reports host_mutation_performed=false and runner_registered=false.",
+            "/srv is ext4 on root /dev/nvme0n1p2 with ~136.3 GB available; quota/setquota/xfs_quota are absent, so P2 must not remount production root for quotas.",
+            "systemd 249, systemd-run, systemd-analyze, Go, GCC, curl, git and Python are available.",
+            "NVIDIA devices are broadly mode 0666; P2 must prove DevicePolicy=closed + explicit DeviceAllow before any GPU job.",
+            "PostgreSQL is listening on 0.0.0.0/[::]:5432 and Tailscale/local/container listeners exist; network denial is mandatory.",
+            "Unprivileged nft/iptables/ufw inspection was denied as expected; exact firewall state moves into the authorized P2 root preflight before mutation.",
+            "pg_config reports /usr/lib/postgresql/14/bin; ephemeral database tooling availability will be resolved before P3 rather than blocking the P2 no-op runner."
           ]
         }
       ],
@@ -278,16 +289,14 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "46d3d33aa560df2adf90137e0951097ed973ee1d",
+      "identity": "2bbdb81f97b5ce7743074a71bd0554f47b75b4a0",
       "required_for_resume": true,
       "evidence": [
-        "stage=safe_runner_foundation",
-        "P1 static implementation complete on lambda-self-hosted-execution-v1-design@46d3d33aa560df2adf90137e0951097ed973ee1d",
-        "PR #72 open against current main with exactly 19 intended files",
-        "upstream scale-set client and runner artifacts exact-pinned",
-        "provisioner policy/injection tests, systemd profiles/template, cache policy, kill switch and uninstall recovery present",
-        "no host users/services/runners/firewall changes performed",
-        "next safe action=read-only P1 compatibility probe; P2 not authorized"
+        "P0 host discovery complete",
+        "P1 static foundation complete and merged via PR #72",
+        "P1 read-only compatibility receipt accepted with root-only firewall/device/network checks moved to P2 pre-registration gate",
+        "user explicitly authorized transition to P2",
+        "no host mutation or runner registration has yet occurred"
       ]
     }
   ],
@@ -309,20 +318,21 @@
     }
   ],
   "blockers": [
-    "P1 compatibility receipt from the actual Lambda is still required before P2: resolve /srv filesystem/quota support, PostgreSQL bindir, firewall/nft state, and remaining sandbox compatibility facts.",
-    "workspace-control PR #72 repository validation has not yet instantiated a workflow run; P2 remains unauthorized until static tests validate.",
-    "Transient systemd device/network probes remain required after the read-only compatibility receipt and before any real runner registration.",
-    "workspace-control evidence-first workflow PR #70 remains separately blocked by GitHub-hosted runner allocation and does not block this P1 branch."
+    "P2 must begin with root-only transient sandbox/firewall/device/network probes and stop before user/runner creation if any mandatory isolation primitive fails.",
+    "A repository-scoped GitHub credential path for the first ephemeral runner must be resolved without exposing personal/controller credentials to job code."
   ],
   "remaining_work": [
-    "Run scripts/lambda_runner_p1_compatibility_probe.py read-only on Lambda and analyze the JSON receipt.",
-    "Use that receipt to finalize disk/quota, PostgreSQL ephemeral-test-DB, firewall/network and controller build strategy.",
-    "Run repository validation for PR #72 and fix only demonstrated static/test defects.",
-    "Perform non-runner transient sandbox probes for ProtectProc/ProcSubset, IPAddressDeny/Allow, and DevicePolicy=closed CUDA access.",
-    "Only if all P1 gates pass, authorize P2 one-time host bootstrap and first no-op ephemeral repository-scoped runner."
+    "P2: validate root firewall state and transient systemd process/network/device sandbox behavior.",
+    "P2: create dedicated ci-controller and ci-research-engine identities and /srv/workspace-ci roots only after transient gates pass.",
+    "P2: install the exact pinned Actions runner package and controller toolchain with checksum verification.",
+    "P2: register and execute one repository-scoped one-job no-op runner; prove home/Docker/production-service/system write denial and cleanup.",
+    "P3: CPU candidate validation with ephemeral environment/database and GitHub artifact return.",
+    "P4: bounded GPU validation with explicit device grant and post-job GPU/process cleanup.",
+    "P5: closed-loop ChatGPT fail-diagnose-fix-rerun-PASS acceptance without SSH.",
+    "P6: second-project cross-project isolation pilot under separate UID/root/cache."
   ],
-  "next_safe_action": "Run the tracked read-only P1 compatibility probe from workspace-control PR #72 head `46d3d33aa560df2adf90137e0951097ed973ee1d` on Lambda and return `lambda-runner-p1-probe.json`. The probe writes only its receipt under the visible workspace-control-tmp directory and performs no user/service/runner/firewall/cgroup mutation. In parallel, allow PR #72 repository validation to instantiate. P2 remains explicitly unauthorized until the compatibility receipt, static tests, and later non-runner transient sandbox probes pass.",
+  "next_safe_action": "P2 is authorized. Create and validate a P2 implementation branch from workspace-control main after `2bbdb81f97b5ce7743074a71bd0554f47b75b4a0`. The P2 bootstrap must run root-only transient firewall/process/network/device isolation probes first and fail closed before mutation; only on PASS may it create `ci-controller`/`ci-research-engine`, `/srv/workspace-ci/research-engine` roots, install checksum-pinned runner/controller assets, and prepare the first repository-scoped one-job no-op runner. Do not expose controller/personal credentials to job code and do not touch production research-engine services/state.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
-  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding."
+  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation."
 }
