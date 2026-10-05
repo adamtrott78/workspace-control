@@ -10,7 +10,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
-const PANEL_URI = "ui://workspace-heartbeat/panel-v4.html";
+const PANEL_URI = "ui://workspace-heartbeat/panel-v5.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
   "utf8",
@@ -45,7 +45,7 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.3.1",
+      version: "0.3.2",
     },
     {
       instructions:
@@ -94,7 +94,7 @@ function createHeartbeatServer() {
         idempotentHint: false,
       },
       _meta: {
-        ui: { visibility: ["model"] },
+        ui: { resourceUri: PANEL_URI, visibility: ["model"] },
         "openai/toolInvocation/invoking": "Updating progress…",
         "openai/toolInvocation/invoked": "Progress updated",
       },
