@@ -52,3 +52,16 @@ For substantial long-running work:
 5. update immediately when diagnosis, scope, milestone, wait state, recovery point, or closure decision changes.
 
 Do not replace normal reasoning with rigid status-card prose.
+
+
+## v0.3 delivery model
+
+The panel now prefers the MCP Apps standard bridge and listens for `ui/notifications/tool-result` so model-driven tool results can update the mounted panel without a one-second polling loop.
+
+A reconciliation read remains only as a safety net:
+- every 5 seconds while recent progress is active;
+- every 15 seconds after one minute without a new heartbeat;
+- every 30 seconds after a reconciliation error;
+- hidden panels do not actively reconcile until visible again.
+
+This replaces the v0.2 one-second `heartbeat_get` loop that generated excessive MCP traffic and was correlated with intermittent `UNAVAILABLE` delivery failures.
