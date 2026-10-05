@@ -74,3 +74,15 @@ Both heartbeat tools are associated with the same UI resource URI.
 - `heartbeat_update` now also declares `_meta.ui.resourceUri` for the same panel resource so ChatGPT can route model-initiated update results to an already-mounted heartbeat app.
 - The panel remains event-driven only: no timer, background polling, or automatic `heartbeat_get` calls.
 - The resource key is bumped to `panel-v5.html` so the updated tool/UI association is rediscovered cleanly.
+
+
+## v0.3.3 cross-task operator timeline
+
+Task-local history remains authoritative for task APIs, while the mounted operator panel renders a bounded conversation timeline across task ownership changes.
+
+- Heartbeats keep per-task sequence numbers and task-local history.
+- The store also maintains a bounded timeline for the model session producing updates.
+- A task remembers its latest timeline so explicit task reads can recover the surrounding operator context even if app/model session metadata differs.
+- The panel prefers `timeline` for display and shows task-boundary labels when ownership changes.
+- This avoids making a parent-to-child durable task handoff look like lost heartbeat history.
+- The panel remains event-driven only and does not reintroduce background polling.
