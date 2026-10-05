@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/runtime_failure_envelope.v1.schema.json",
+  "title": "Workspace Control Runtime Failure Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "parent_failure",
+    "causal_failure",
+    "counts",
+    "state_flags"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "stage": {
+      "$ref": "#/$defs/stage"
+    },
+    "parent_failure": {
+      "$ref": "#/$defs/failure"
+    },
+    "causal_failure": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/failure"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "role": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "process": {
+      "$ref": "#/$defs/process"
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine_init_completed",
+        "inference_calls_started",
+        "inference_calls_completed"
+      ],
+      "properties": {
+        "engine_init_completed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inference_calls_started": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "inference_calls_completed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "state_flags": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "scientific_state_materialized",
+        "production_routing_changed"
+      ],
+      "properties": {
+        "scientific_state_materialized": {
+          "type": "boolean"
+        },
+        "production_routing_changed": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stage": {
+      "enum": [
+        "C0_STATIC",
+        "C1_IMPORT_ACCELERATOR",
+        "C2A_BACKEND_TOOLCHAIN",
+        "C2B_ENGINE_BOOT",
+        "C3_CANARY",
+        "C4_DOMAIN"
+      ]
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "class",
+        "message"
+      ],
+      "properties": {
+        "class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "process": {
+      "type": "object",
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "pid"
+          ]
+        },
+        {
+          "required": [
+            "executable"
+          ]
+        },
+        {
+          "required": [
+            "argv"
+          ]
+        }
+      ],
+      "properties": {
+        "pid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "executable": {
+          "type": "string",
+          "minLength": 1
+        },
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
