@@ -31,11 +31,11 @@ Design, benchmark, and integrate a provenance-preserving local document-intellig
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 31d407abcf486e73d284cd66ddfe486ccab377a4
+- Remote checkpoint: 2a12b907bf509a21c088b6ee865d5672b567a676
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
-- Local HEAD: 8a40b617cbdaf3d16e9ddeed41d6c9df9fbbb3db
+- Local HEAD: 31d407abcf486e73d284cd66ddfe486ccab377a4
 - Local clean: true
 
 ## Next safe action
@@ -52,6 +52,7 @@ Do not rerun Qwen. The corrected guarded calibration on research-engine main@a72
 - Record natural Wave-3 adoption evidence as R0=REUSED, R1=VERIFIED_HIT, R2=PRESENT_UNVERIFIED, R3=REUSED with the observed timing improvements. Do not manufacture another boot or C3 call solely to turn R2/C3 green.
 - When future owning scientific work naturally authorizes a same-modality canary and C4 in one live engine session, adopt the shared workspace-control C0-C4/operation receipt framework and reassess WAVE_3_FREEZE_READY.
 - Retain the separate unresolved PP-OCRv6 scan-source replacement work after the Qwen semantic integration decision.
+- Authorized grounded-candidate expansion: fast-forward the clean Lambda checkout from last-verified main@31d407abcf486e73d284cd66ddfe486ccab377a4 to research-engine main@2a12b907bf509a21c088b6ee865d5672b567a676, locate the completed operation sha256:4109274a960d9c637e167adfc3132ce78a5b1e52fe32cffcd9e770cfc337a7b6, and replay only grounded EXTRACT `evaluate` over that operation's existing grounded-candidate-plan.json, qwen-grounded-results.json, and codex-control-results.json. Do not rerun Qwen, Codex, sidecar compilation, C3, C4, or the daemon.
 
 ## Blockers / gates
 
@@ -61,6 +62,8 @@ Do not rerun Qwen. The corrected guarded calibration on research-engine main@a72
 - Qwen3.5-4B bounded EXTRACT is not promoted: six returned raw_source_form fields failed exact page-grounding on the cited authoritative pages. Diagnose the already-existing qwen-results.json against calibration-plan.json before deciding whether this is deterministic PDF-text normalization or genuine Qwen paraphrase/fabrication.
 - R2 compiled/JIT reuse remains PRESENT_UNVERIFIED despite large natural-boot timing reductions because the runtime log exposed no explicit reuse marker. Do not rerun solely to strengthen telemetry.
 - Shared Wave-3 runtime_certified=true / WAVE_3_FREEZE_READY remain false until a naturally authorized C3 same-modality canary can share a live engine with C4; do not run C3 solely for telemetry.
+- Latest grounded-candidate scientific operation completed C4, but its original report is stale under the corrected PR #91 claim-reuse guard. Offline re-adjudication from the already-saved local plan/Qwen/Codex artifacts is required before interpreting promotion thresholds.
+- The 31d407ab runtime-certification artifact overclaimed R3_HEALTHY_REUSE despite C3 being reused with zero new calls. PR #92 fixes future certification; treat that original R3 field as historical misclassification and use R3=NOT_APPLICABLE for this run unless a corrected derived receipt is regenerated offline.
 
 ## Fresh-chat initialization
 
