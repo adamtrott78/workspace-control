@@ -370,7 +370,9 @@
       ]
     }
   ],
-  "blockers": [],
+  "blockers": [
+    "Live validation is blocked on the user-controlled Lambda/ChatGPT smoke: sync the canonical v0.2 commit, restart the persistent workspace-heartbeat service, reopen the thread panel, and exercise multiple heartbeats during fresh-chat rehydration."
+  ],
   "remaining_work": [
     "On the Lambda, fast-forward workspace-control main to 3214ec2be4f0c20933784b3d265386d9652dfd0b.",
     "Restart the persistent workspace-heartbeat tmux session so the server and panel use v0.2.",

@@ -43,7 +43,7 @@ On the Lambda, sync workspace-control main to 3214ec2be4f0c20933784b3d265386d965
 
 ## Blockers / gates
 
-- None.
+- Live validation is blocked on the user-controlled Lambda/ChatGPT smoke: sync the canonical v0.2 commit, restart the persistent workspace-heartbeat service, reopen the thread panel, and exercise multiple heartbeats during fresh-chat rehydration.
 
 ## Fresh-chat initialization
 
