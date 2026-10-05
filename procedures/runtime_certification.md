@@ -1,8 +1,20 @@
 # Runtime Certification and Resumable Heavyweight Execution
 
-Status: **Wave-3 design candidate**
+Status: **Wave-3 v1 implemented; field validation active**
 
 Implements `architecture/throughput-runtime-certification-wave3.md`.
+
+## Shared implementation entry point
+
+Use `scripts/runtime_certification.py` and the versioned runtime certification,
+operation-receipt, and failure-envelope schemas for the generic mechanism.
+Owning projects supply their own execution identity payloads, compatibility
+predicates, backend/toolchain facts, canary workload, and scientific/domain
+policy.
+
+A project may adopt stages incrementally, but it MUST NOT claim reusable
+`runtime_certified=true` unless C0 through C3 all pass for the same execution
+identity and compatible host.
 
 ## When this procedure applies
 
