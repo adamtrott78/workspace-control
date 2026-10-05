@@ -65,9 +65,11 @@ For one logical mutation batch:
 5. move the ref;
 6. reread the resulting branch/commit/tree and changed files.
 
-The current GitHub connector accepts plain `update_ref` but rejects its
-advertised `expected_sha` argument. Until repaired, step 4 plus immediate
+The current GitHub connector accepts plain `update_ref` but a direct
+2026-10-04 capability probe reconfirmed that its advertised `expected_sha`
+argument is rejected before the ref move. Until repaired, step 4 plus immediate
 post-write verification is mandatory; do not claim lease-protected mutation.
+Treat tool-schema capability as advertised capability, not execution evidence.
 
 Do not run concurrent writes to the same path.
 
