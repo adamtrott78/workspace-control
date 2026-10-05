@@ -1,0 +1,248 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-lambda-self-hosted-execution-v1",
+  "title": "Workspace Lambda Self-Hosted Execution v1",
+  "status": "IN_PROGRESS",
+  "goal": "Design, validate, and if safety gates pass pilot a project-isolated GitHub Actions execution lane on the existing Lambda workstation so ChatGPT/GitHub-driven software work can execute and validate directly in the real target environment without routine human-terminal mediation, while preserving project authority, minimizing host risk, and keeping existing GitHub-hosted CI as the known-good control.",
+  "execution_topology": "composed",
+  "workflow": null,
+  "parent_execution_owner": "research-engine-local-extract-redesign-v1",
+  "current_stage": "threat_model_and_architecture_research",
+  "acceptance_criteria": [
+    "Current GitHub self-hosted runner capabilities, security guidance, ephemeral/JIT registration options, runner isolation boundaries, artifact/log handling, and billing implications are researched from current primary sources.",
+    "The design explicitly distinguishes ordinary GitHub-hosted CI from heavyweight Lambda validation and does not replace the existing known-good CI path merely because a Lambda lane exists.",
+    "A threat model identifies risks from AI-generated workflow code, repository compromise, credential leakage, cross-project access, host filesystem access, Docker/root-equivalent access, network reachability, GPU/resource exhaustion, persistence, stale workspaces, and production-state mutation.",
+    "Each project receives an isolated execution identity and workspace; a research-engine job cannot read/write PADataset, course repositories, personal SSH credentials, production research data, or another project's runner state unless a separately authorized bridge is declared.",
+    "Runner processes do not execute as the normal `atrott` login account and have no sudo access or personal SSH/Git credentials.",
+    "A cleanup/reprovision strategy prevents one job's mutable workspace/environment from silently contaminating later jobs while still allowing bounded reusable caches for expensive dependencies/models.",
+    "A cache design separates immutable/read-mostly shared model/package caches from per-project mutable environments and records ownership/versioning/invalidations.",
+    "A resource-control design covers CPU, RAM, GPU allocation, disk quotas/scratch, concurrency, timeouts, process cleanup, and model-server leak detection.",
+    "A secrets model uses least-privilege GitHub tokens/runner registration material and prevents workflow code from gaining broader host or account credentials than required.",
+    "The pilot supports a closed loop: ChatGPT mutates an isolated Git branch -> GitHub dispatches Lambda validation -> the runner executes/tests/benchmarks -> logs/checks/artifacts are returned through GitHub -> ChatGPT can inspect evidence and revise/re-run without human SSH.",
+    "The first pilot is bounded to research-engine and cannot mutate production scientific state or start sustained daemon work.",
+    "The pilot proves both ordinary code validation and one representative GPU/hardware-aware validation path on Lambda.",
+    "The design documents how additional repositories such as PADataset can opt in through separate project runner identities and policies rather than sharing one unrestricted runner account.",
+    "Existing human-terminal execution remains available as break-glass recovery but is no longer required for routine Lambda validation once the pilot is accepted.",
+    "No self-hosted runner is registered as a persistent privileged host service until the threat model, isolation design, and recovery/kill-switch plan are durably accepted."
+  ],
+  "constraints": [
+    "Do not modify or disable the existing GitHub-hosted CI implementation during architecture research.",
+    "Do not register a self-hosted runner, install a runner service, change host users/groups, expose Docker/root privileges, or alter production Lambda state until the safety architecture reaches an explicit implementation gate.",
+    "Do not use ChatGPT Work or paid cloud compute as the primary execution surface.",
+    "Treat the Lambda workstation as valuable multi-project infrastructure, not a disposable CI VM.",
+    "Do not grant the runner access to the normal user's SSH keys, shell history, browser credentials, personal home contents, or unrelated repositories.",
+    "Do not add the runner identity to the Docker group merely for convenience; Docker-socket access is root-equivalent and requires an explicitly reviewed isolation design if ever used.",
+    "Prefer repository-scoped runners or equivalently strong project-level authorization boundaries for the initial pilot.",
+    "Prefer ephemeral/per-job runner semantics or explicit post-job destruction/cleanup where technically feasible; persistent mutable runners require stronger contamination controls.",
+    "Heavyweight model caches may be shared only if mounted read-only or governed by a cache-specific owner/policy; jobs must not be able to corrupt another project's cache or production model state.",
+    "No workflow originating from an untrusted fork/public contribution may execute on the Lambda pilot.",
+    "Production databases, daemon services, and scientific materialization paths are denied by default for CI jobs; explicit acceptance workflows may receive narrower capabilities later.",
+    "Preserve the current EXTRACT redesign state and its PR/CI progress; this infrastructure task is a sibling/child capability project, not a replacement."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "e11032f71bab72dbe84061afe305f34ba44d6e77",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "e11032f71bab72dbe84061afe305f34ba44d6e77",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-lambda-self-hosted-execution-v1.json",
+        "tasks/active/workspace-lambda-self-hosted-execution-v1.md",
+        "architecture/**",
+        "procedures/**",
+        "workflows/**",
+        "templates/**",
+        "scripts/**",
+        "tests/**",
+        "README.md",
+        "policies/**"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "mutate",
+      "base_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
+        "verified": true
+      },
+      "local": {
+        "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
+        "branch": "main",
+        "head_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
+        "clean": true
+      },
+      "allowed_mutation_scope": [
+        ".github/workflows/**",
+        "deploy/**",
+        "benchmarks/**",
+        "tests/**",
+        "README.md"
+      ]
+    },
+    {
+      "name": "PADataset",
+      "intent": "read_only",
+      "base_sha": null,
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": null,
+        "verified": false
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "threat_model_and_architecture_research",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "web+github",
+      "inputs": [
+        "current workspace-control operator/security contracts",
+        "current research-engine CI and Lambda execution history",
+        "current GitHub self-hosted runner documentation and security guidance",
+        "Lambda workstation constraints and existing project topology"
+      ],
+      "outputs": [
+        "runner threat model",
+        "architecture alternatives",
+        "recommended project-isolated execution topology",
+        "secrets/cache/resource/recovery policies",
+        "pilot acceptance contract"
+      ],
+      "validation": [],
+      "resume_condition": "A design exists that materially reduces human-terminal dependence without granting an AI-controlled workflow unrestricted access to the Lambda host."
+    },
+    {
+      "id": "safe_runner_foundation",
+      "status": "PLANNED",
+      "execution_owner": "hybrid",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "accepted threat model",
+        "accepted runner topology"
+      ],
+      "outputs": [
+        "project-specific runner identity",
+        "isolated runner/workspace root",
+        "kill switch and cleanup procedure",
+        "registration/bootstrap scripts",
+        "host-level validation receipt"
+      ],
+      "validation": [],
+      "resume_condition": "Runner can accept a no-op project job while denied unrelated project/home/production access."
+    },
+    {
+      "id": "research_engine_pilot",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated runner foundation",
+        "research-engine pilot workflow"
+      ],
+      "outputs": [
+        "Lambda-backed code/test CI lane",
+        "hardware/GPU validation lane",
+        "GitHub-visible logs/checks/artifacts",
+        "closed-loop edit-run-diagnose-rerun evidence"
+      ],
+      "validation": [],
+      "resume_condition": "Research-engine branch validation can complete without human SSH and without production-state mutation."
+    },
+    {
+      "id": "project_isolation_and_cache_validation",
+      "status": "PLANNED",
+      "execution_owner": "hybrid",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "passing research-engine pilot"
+      ],
+      "outputs": [
+        "cross-project denial tests",
+        "cache contamination/invalidation tests",
+        "resource/concurrency tests",
+        "runner cleanup/recovery tests"
+      ],
+      "validation": [],
+      "resume_condition": "Isolation and cleanup survive deliberate adversarial/accidental test cases."
+    },
+    {
+      "id": "workspace_opt_in_rollout",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "accepted pilot",
+        "project isolation contract"
+      ],
+      "outputs": [
+        "reusable workspace-control runner workflow/procedure",
+        "project opt-in template",
+        "PADataset or other selected second-project pilot"
+      ],
+      "validation": [],
+      "resume_condition": "At least two projects can use distinct Lambda execution identities without cross-project authority leakage."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "originating-extract-state",
+      "kind": "recovery_restore_point",
+      "identity": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
+      "required_for_resume": true,
+      "evidence": [
+        "originating task=research-engine-local-extract-redesign-v1",
+        "research-engine PR #95 contract CI passed before this infrastructure branch was opened",
+        "workspace-control evidence-first workflow PR #70 remains separately tracked",
+        "this task must not rewrite or discard the EXTRACT redesign"
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "e11032f71bab72dbe84061afe305f34ba44d6e77",
+      "required_for_resume": true,
+      "evidence": [
+        "stage=threat_model_and_architecture_research",
+        "no self-hosted runner installed or registered yet",
+        "next safe action=research GitHub self-hosted/ephemeral runner security and compare isolation architectures before host mutation"
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Scope/ownership split",
+      "result": "PASS",
+      "evidence": [
+        "User explicitly authorized investigating/implementing a safe Lambda runner capability while preserving the EXTRACT redesign.",
+        "Cross-project execution infrastructure belongs to workspace-control; research-engine will be only the first bounded pilot."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Research current GitHub self-hosted runner security, ephemeral/JIT configuration, repository scoping, token/secret behavior, artifacts/logs, and billing.",
+    "Compare isolation architectures: dedicated Unix user, disposable VM, rootless container, systemd sandbox, and hybrid runner+job sandbox.",
+    "Define project-specific filesystem, credentials, network, production-state, GPU, cache, concurrency, and cleanup boundaries.",
+    "Select the smallest safe research-engine pilot architecture.",
+    "Only after design acceptance, create the Lambda runner foundation and a no-op isolation test before real CI/GPU workloads."
+  ],
+  "next_safe_action": "Research current GitHub self-hosted runner behavior and security from primary sources, then produce a threat model and architecture decision for a project-isolated Lambda execution lane. Do not install/register any runner or change existing CI yet. Preserve existing GitHub-hosted CI as the known-good control and design the research-engine pilot so it can prove closed-loop ChatGPT -> GitHub -> Lambda -> GitHub execution without production-state access.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+web"
+}
