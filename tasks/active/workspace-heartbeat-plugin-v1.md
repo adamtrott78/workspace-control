@@ -24,20 +24,22 @@ Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel 
 
 - Intent: mutate
 - Remote branch: heartbeat-v2-smoke-checkpoint
-- Remote checkpoint: ff9347f347540fbe0f2a20b8b5106e80dc4572e5
+- Remote checkpoint: 9303ab5708e0622747e63601b0372e74521fd8a8
 - Remote verified: true
 
 ## Next safe action
 
-Do not redesign transport based on the observation that a 15+ minute research turn emitted only two heartbeats. First finish/deploy v0.3.1, whose purpose is to eliminate all automatic background heartbeat_get traffic. Then run one genuine heartbeat_update to prove event-driven delivery. Separately audit the research chat's tool-call cadence: if more than three non-heartbeat tool operations occurred between the two visible heartbeat updates, treat that as an executor lease-compliance defect rather than a UI/transport defect.
+Validate and deploy Workspace Heartbeat v0.3.2. The key live test is now narrow: with panel-v5 mounted and left open, a model-initiated heartbeat_update must appear in the existing sidebar without closing/reopening it, while the idle panel remains free of recurring heartbeat_get traffic. Do not redesign heartbeat cadence: retained history already proves at least seven heartbeat updates were emitted during the long research turn; the earlier two-update appearance was a stale mounted-panel display problem.
 
 ## Remaining work
 
-- Validate/deploy the final event-driven-only v0.3.1 heartbeat panel once the unrelated research-engine task-contract failure on workspace-control main is repaired or no longer blocks PR validation.
-- After v0.3.1 is mounted, confirm an idle open panel produces no recurring MCP traffic and that a genuine heartbeat_update still appears promptly.
-- Then audit executor cadence separately: during a long research turn, compare heartbeat_update events with non-heartbeat tool operations and verify the required heartbeat-before-fourth-tool lease is being followed.
-- Do not add polling back merely because heartbeats are sparse; sparse model updates and background transport traffic are separate concerns.
-- Close the heartbeat task only after event-driven delivery availability and executor heartbeat cadence are both accepted.
+- Validate the final v0.3.2 PR #69 head through workspace-control CI once the unrelated research-engine task-contract state on main no longer invalidates the repository.
+- Deploy the exact validated v0.3.2 head/canonical merge to the isolated Lambda heartbeat runtime and restart workspace-heartbeat.
+- Recreate the ChatGPT custom plugin so the updated tool metadata and panel-v5.html resource are loaded.
+- Keep the heartbeat sidebar open and allow ordinary research work to emit a new heartbeat_update; verify it appears live without closing/reopening the panel.
+- Confirm there is still no recurring background heartbeat_get traffic while idle.
+- Treat occasional isolated 400 responses during plugin/panel initialization separately from recurring application polling; investigate only if they correlate with failed heartbeat delivery.
+- Close the heartbeat task after live mounted refresh, idle quietness, and normal heartbeat delivery all pass.
 
 ## Blockers / gates
 
