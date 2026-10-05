@@ -273,6 +273,23 @@
           "evidence": [
             "Requires syncing the Lambda to the canonical correction, restarting workspace-heartbeat, refreshing/reopening the panel, and observing a lengthy fresh-chat rehydration with multiple heartbeat updates."
           ]
+        },
+        {
+          "check": "Fresh-chat v0.2 single-heartbeat retention",
+          "result": "PASS",
+          "evidence": [
+            "Fresh normal Chat loaded the v0.2 panel.",
+            "First heartbeat rendered WORKING with 1 retained update.",
+            "It remained visible through an approximately 1m56s response without the prior false-IDLE regression."
+          ]
+        },
+        {
+          "check": "Fresh-chat v0.2 multi-heartbeat history",
+          "result": "NOT_RUN",
+          "evidence": [
+            "The observed response completed before a second heartbeat was naturally emitted.",
+            "Sequential update accumulation therefore remains the only unproven v0.2 UI behavior."
+          ]
         }
       ],
       "resume_condition": "User syncs Lambda workspace-control main to 3214ec2be4f0c20933784b3d265386d9652dfd0b, restarts workspace-heartbeat, and begins the fresh research-engine handoff chat with Workspace Heartbeat enabled."
@@ -340,6 +357,18 @@
         "Task-scoped bounded heartbeat history and false-IDLE prevention are canonical.",
         "Node >=20 runtime contract and successful /mcp request logging are canonical."
       ]
+    },
+    {
+      "id": "v2-single-heartbeat-retention",
+      "kind": "runtime_checkpoint",
+      "identity": "chatgpt-thread-panel:workspace-heartbeat:v0.2-single-retention-pass",
+      "required_for_resume": true,
+      "evidence": [
+        "Fresh normal Chat loaded v0.2.",
+        "First heartbeat remained visible with WORKING state and 1 retained update through the observed response.",
+        "No false-IDLE transition was observed.",
+        "Multi-heartbeat accumulation remains pending."
+      ]
     }
   ],
   "artifacts": [],
@@ -362,28 +391,27 @@
     },
     {
       "check": "Live ChatGPT panel smoke",
-      "result": "FAIL",
+      "result": "NOT_RUN",
       "evidence": [
-        "Thread panel render and heartbeat propagation are proven PASS in normal Chat mode.",
-        "Stability failed: valid heartbeat content disappeared into a false IDLE state and later reappeared without a new heartbeat event.",
-        "Bounded correction is implemented at 906478d671dc750b5c739a716fb32a1a650f0b0c and awaits repository/live validation."
+        "v0.2 panel load and single-heartbeat retention are proven PASS.",
+        "The original false-IDLE regression was not observed during the approximately 1m56s single-update run.",
+        "Final closure requires a naturally long/tool-heavy turn that emits multiple heartbeats and proves chronological accumulation without erasure."
       ]
     }
   ],
   "blockers": [
-    "Live validation is blocked on the user-controlled Lambda/ChatGPT smoke: sync the canonical v0.2 commit, restart the persistent workspace-heartbeat service, reopen the thread panel, and exercise multiple heartbeats during fresh-chat rehydration."
+    "Final live validation is blocked only on observing a naturally long/tool-heavy research turn that emits at least two v0.2 heartbeats for the same owning task."
   ],
   "remaining_work": [
-    "On the Lambda, fast-forward workspace-control main to 3214ec2be4f0c20933784b3d265386d9652dfd0b.",
-    "Restart the persistent workspace-heartbeat tmux session so the server and panel use v0.2.",
-    "Confirm heartbeat-status shows both MCP and ngrok UP, and that the MCP window logs successful /mcp requests.",
-    "Refresh/reopen the Workspace Heartbeat thread panel so ChatGPT loads panel-v2.html.",
-    "Start the fresh research-engine handoff chat with the Workspace Heartbeat plugin enabled and the owning workspace-control task ID reused consistently.",
-    "During the lengthy rehydration, verify several heartbeat_update calls append in chronological order, the latest state remains visible between updates, and the panel never falls back to IDLE after valid progress exists.",
-    "If the live smoke passes, mark panel_stability_correction VALIDATED and close this heartbeat task; defer any explicit turn-reset/IDLE lifecycle feature until there is a reliable response-start signal."
+    "Keep the current v0.2 Lambda service and custom MCP plugin configuration unchanged.",
+    "Use ordinary research work as the next smoke; do not manufacture extra tool calls solely to force a heartbeat.",
+    "When a sufficiently long response naturally emits a second or later heartbeat, verify prior entries remain visible and the footer increases from 1 retained update to 2+ retained updates.",
+    "Verify the newest heartbeat controls WORKING / WAITING / BLOCKED / DONE while earlier entries remain in chronological order.",
+    "If multi-heartbeat accumulation passes without false IDLE or erasure, mark panel_stability_correction VALIDATED and close this heartbeat task.",
+    "If history still disappears or resets, capture the visible footer/state plus MCP request log before changing implementation."
   ],
-  "next_safe_action": "On the Lambda, sync workspace-control main to 3214ec2be4f0c20933784b3d265386d9652dfd0b; stop and restart the workspace-heartbeat tmux service so v0.2 is actually running; verify heartbeat-status; refresh/reopen the Workspace Heartbeat thread panel; then use the user's new research-engine handoff chat as a long rehydration smoke. The pass condition is: multiple updates accumulate as a sequential log, the latest heartbeat remains visible between events, no empty/failed poll forces IDLE after valid state exists, and successful /mcp traffic is visible in the MCP console.",
+  "next_safe_action": "Continue ordinary research work with Workspace Heartbeat v0.2 enabled. The fresh-chat single-heartbeat retention smoke has passed, so do not repeat it. Wait for a naturally long/tool-heavy research turn that emits at least a second heartbeat, then visually verify the existing first entry remains, the new entry appends chronologically, the footer reports 2+ retained updates, and no false-IDLE transition occurs. Only that multi-heartbeat accumulation check remains before closing the panel-stability correction.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects. New live evidence proved transport and rendering but exposed a session-correlation defect: the panel sometimes polled heartbeat_get under a different or missing ChatGPT session identity, received no task, switched to IDLE, and later resurrected the prior heartbeat. The v0.2 correction makes task_id authoritative, retains bounded task history, persists active task/history in widget state, ignores empty polls after valid state, declares Node >=20, and logs successful MCP requests. The user's preferred UX is a sequential heartbeat log that does not disappear between updates. Automatic reset to IDLE on assistant-response start is intentionally deferred because no reliable response-start lifecycle signal is available. The panel-stability correction is repository-valid and canonical at 3214ec2be4f0c20933784b3d265386d9652dfd0b. The task is now blocked only on the user's live Lambda/ChatGPT smoke."
+  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects. New live evidence proved transport and rendering but exposed a session-correlation defect: the panel sometimes polled heartbeat_get under a different or missing ChatGPT session identity, received no task, switched to IDLE, and later resurrected the prior heartbeat. The v0.2 correction makes task_id authoritative, retains bounded task history, persists active task/history in widget state, ignores empty polls after valid state, declares Node >=20, and logs successful MCP requests. The user's preferred UX is a sequential heartbeat log that does not disappear between updates. Automatic reset to IDLE on assistant-response start is intentionally deferred because no reliable response-start lifecycle signal is available. The panel-stability correction is repository-valid and canonical at 3214ec2be4f0c20933784b3d265386d9652dfd0b. The task is now blocked only on the user's live Lambda/ChatGPT smoke. Fresh-chat v0.2 field evidence on 2026-10-05: the first heartbeat rendered as WORKING with a footer showing 1 retained update and remained visible throughout an approximately 1m56s response. The prior false-IDLE/disappearing behavior was not observed. No second heartbeat was emitted during that run, so multi-heartbeat sequential accumulation remains the sole pending live acceptance check. Do not repeat the single-heartbeat smoke; use normal research work to obtain the next qualifying multi-update observation."
 }
