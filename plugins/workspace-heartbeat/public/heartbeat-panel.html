@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Workspace Heartbeat</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      body {
+        margin: 0;
+        background: transparent;
+        color: CanvasText;
+      }
+      main {
+        padding: 18px;
+      }
+      .topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      h1 {
+        font-size: 14px;
+        margin: 0;
+        font-weight: 650;
+      }
+      .state {
+        border: 1px solid color-mix(in srgb, CanvasText 20%, transparent);
+        border-radius: 999px;
+        padding: 4px 8px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+      }
+      .message {
+        white-space: pre-wrap;
+        font-size: 15px;
+        line-height: 1.55;
+        margin: 0;
+      }
+      .meta {
+        margin-top: 16px;
+        font-size: 11px;
+        opacity: .62;
+      }
+      .empty {
+        opacity: .65;
+      }
+      .error {
+        opacity: .72;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="topline">
+        <h1>Workspace heartbeat</h1>
+        <span id="state" class="state">idle</span>
+      </div>
+      <p id="message" class="message empty">No heartbeat yet.</p>
+      <div id="meta" class="meta">Waiting for the first update…</div>
+    </main>
+
+    <script type="module">
+      const stateEl = document.getElementById("state");
+      const messageEl = document.getElementById("message");
+      const metaEl = document.getElementById("meta");
+      let newestSequence = -1;
+      let busy = false;
+
+      function render(heartbeat) {
+        if (!heartbeat) {
+          stateEl.textContent = "idle";
+          messageEl.textContent = "No heartbeat yet.";
+          messageEl.className = "message empty";
+          metaEl.textContent = "Waiting for the first update…";
+          return;
+        }
+
+        if (heartbeat.sequence < newestSequence) return;
+        newestSequence = heartbeat.sequence;
+
+        stateEl.textContent = heartbeat.state;
+        messageEl.textContent = heartbeat.message;
+        messageEl.className = "message";
+
+        const timestamp = new Date(heartbeat.updated_at);
+        const when = Number.isNaN(timestamp.getTime())
+          ? heartbeat.updated_at
+          : timestamp.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+
+        metaEl.textContent =
+          `${heartbeat.task_id} · update ${heartbeat.sequence} · ${when}`;
+      }
+
+      async function refresh() {
+        if (busy) return;
+        busy = true;
+        try {
+          if (!window.openai?.callTool) {
+            throw new Error("ChatGPT tool bridge is unavailable.");
+          }
+          const result = await window.openai.callTool("heartbeat_get", {});
+          render(result?.structuredContent?.heartbeat ?? null);
+        } catch (error) {
+          stateEl.textContent = "offline";
+          messageEl.textContent = "Heartbeat panel could not refresh.";
+          messageEl.className = "message error";
+          metaEl.textContent = error instanceof Error ? error.message : String(error);
+        } finally {
+          busy = false;
+        }
+      }
+
+      refresh();
+      setInterval(refresh, 1000);
+    </script>
+  </body>
+</html>
