@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "task_id": "workspace-lambda-self-hosted-execution-v1",
+  "status": "RESEARCH_VALIDATED_STATIC_IMPLEMENTATION_NEXT",
+  "selected_topology": "PINNED_GITHUB_SCALESET_LISTENER_PLUS_NARROW_ROOT_PROVISIONER_PLUS_EPHEMERAL_PROJECT_UID_SYSTEMD_SANDBOX",
+  "known_good_control": {
+    "ordinary_ci": "GitHub-hosted CI remains enabled and unchanged",
+    "heavyweight_runtime": "human-terminal Lambda execution remains break-glass until pilot acceptance"
+  },
+  "security_invariants": [
+    "runner job never executes as atrott",
+    "runner job has no sudo and no Docker socket/group access",
+    "runner job cannot read /home/atrott or unrelated project roots",
+    "GitHub scale-set credential is owned by unprivileged ci-controller, unavailable to root provisioner and job UID",
+    "runner is repository-scoped and one-job/ephemeral",
+    "candidate branch does not control the trusted Lambda workflow",
+    "job GITHUB_TOKEN is contents:read only and checkout credentials are not persisted",
+    "pilot exposes no repository secrets",
+    "fresh runner/work directory per job",
+    "entire job cgroup is terminated after runner exit",
+    "project-specific caches are the only mutable state allowed to survive jobs",
+    "production DB/daemon/broker access denied by default",
+    "GitHub-hosted CI is not disabled or weakened",
+    "root provisioner owns no GitHub credential and is not a general command executor",
+    "candidate jobs cannot write long-lived trusted model/dependency caches",
+    "scale-set client version/commit is pinned because the upstream client is Public Preview"
+  ],
+  "controller": {
+    "github_listener": {
+      "user": "ci-controller",
+      "implementation": "pinned actions/scaleset Runner Scale Set Client",
+      "privilege": "unprivileged",
+      "repository_authority": "repository-scoped runner scale-set control only",
+      "host_authority": "no project/home/root/production access",
+      "preferred_credential": "private GitHub App installed only on opted-in repositories",
+      "pilot_fallback_credential": "narrow fine-grained PAT only if GitHub App bring-up blocks pilot"
+    },
+    "root_provisioner": {
+      "owner": "root",
+      "network_requirement": "none beyond local IPC",
+      "github_credential": "none",
+      "interface": "structured allow-listed project/profile/JIT request only",
+      "responsibility": [
+        "validate root-owned project/profile manifest",
+        "create fresh runner/work directory",
+        "launch project UID via hardened systemd transient unit",
+        "preserve diagnostics",
+        "kill the full cgroup and verify CPU/GPU process cleanup",
+        "delete runner config/work directory"
+      ]
+    }
+  },
+  "trigger": {
+    "event": "issue_comment_on_pull_request",
+    "command_shape": "/lambda-ci <exact-head-sha> <profile>",
+    "workflow_source": "default branch only",
+    "requirements": [
+      "same private repository PR",
+      "trusted owner association/actor",
+      "comment SHA equals current PR head SHA",
+      "allow-listed profile",
+      "no candidate-controlled workflow definition"
+    ]
+  },
+  "research_engine_identity": {
+    "user": "ci-research-engine",
+    "work_root": "/srv/workspace-ci/research-engine/jobs",
+    "cache_root": "/srv/workspace-ci/research-engine/cache",
+    "log_root": "/srv/workspace-ci/research-engine/logs",
+    "other_project_access": "DENY"
+  },
+  "systemd_policy_family": {
+    "required": [
+      "NoNewPrivileges=yes",
+      "CapabilityBoundingSet=",
+      "RestrictSUIDSGID=yes",
+      "PrivateTmp=yes",
+      "ProtectSystem=strict",
+      "ProtectHome=yes",
+      "ProtectKernelTunables=yes",
+      "ProtectKernelModules=yes",
+      "ProtectKernelLogs=yes",
+      "ProtectControlGroups=yes",
+      "ProtectClock=yes",
+      "ProtectHostname=yes",
+      "RestrictRealtime=yes",
+      "UMask=0077",
+      "KillMode=control-group",
+      "SendSIGKILL=yes",
+      "bounded RuntimeMaxSec",
+      "bounded MemoryMax",
+      "bounded TasksMax",
+      "bounded CPUQuota"
+    ],
+    "probe_before_enforcement": [
+      "ProtectProc=invisible / ProcSubset=pid compatibility",
+      "DevicePolicy=closed plus required NVIDIA device nodes",
+      "IPAddressDeny/Allow rules preserving DNS/public egress while blocking loopback/private/Tailscale"
+    ],
+    "explicitly_forbidden_initially": [
+      "MemoryDenyWriteExecute=yes without ML/JIT compatibility proof",
+      "aggressive syscall allow-listing without runtime characterization"
+    ]
+  },
+  "profiles": {
+    "cpu-test": {
+      "gpu": false,
+      "production_services": false,
+      "database": "ephemeral CI-owned PostgreSQL only",
+      "purpose": "compile/unit/integration validation"
+    },
+    "gpu-small": {
+      "gpu": "one selected GPU",
+      "production_services": false,
+      "purpose": "bounded CUDA/model/runtime validation"
+    },
+    "gpu-heavy": {
+      "gpu": "one or both only with explicit owning-task authorization",
+      "production_services": false,
+      "purpose": "large-model benchmark after lighter profile cannot answer question"
+    },
+    "production-acceptance": {
+      "status": "DEFERRED_SEPARATE_AUTHORITY",
+      "purpose": "later only; not part of pilot"
+    }
+  },
+  "pilot_gates": [
+    {
+      "id": "P0_HOST_PROBE",
+      "mutation": false,
+      "pass": [
+        "OS/kernel/systemd/cgroup-v2 captured",
+        "GPU device nodes/permissions captured",
+        "disk/free-space captured",
+        "DNS/network topology captured",
+        "production local/private listeners identified",
+        "systemd hardening feature availability established",
+        "external architecture survey completed",
+        "official scale-set listener selected over hand-rolled GitHub polling",
+        "controller/root/job privilege separation selected",
+        "persistent-cache trust policy selected"
+      ]
+    },
+    {
+      "id": "P1_STATIC_BOOTSTRAP_REVIEW",
+      "mutation": "repository only",
+      "pass": [
+        "controller/bootstrap/kill-switch scripts reviewed",
+        "no secrets committed",
+        "no Docker-group path",
+        "project manifest describes exact writable paths/resources"
+      ]
+    },
+    {
+      "id": "P2_NOOP_ISOLATION",
+      "mutation": "one-time root host bootstrap",
+      "pass": [
+        "ci-research-engine cannot read /home/atrott",
+        "cannot read unrelated project roots",
+        "cannot sudo",
+        "cannot access Docker socket",
+        "cannot reach production DB/daemon/broker",
+        "one-job runner registers and auto-deregisters",
+        "workspace/config destroyed after job",
+        "diagnostics preserved"
+      ]
+    },
+    {
+      "id": "P3_CPU_VALIDATION",
+      "pass": [
+        "candidate SHA checkout with persist-credentials=false",
+        "ephemeral venv/test DB works",
+        "GitHub check/log/artifact returned",
+        "no post-job project UID process leak"
+      ]
+    },
+    {
+      "id": "P4_GPU_VALIDATION",
+      "pass": [
+        "bounded CUDA allocation on assigned GPU",
+        "one representative hardware/model test executes",
+        "resource receipt emitted",
+        "no post-job GPU process leak"
+      ]
+    },
+    {
+      "id": "P5_CLOSED_LOOP_ACCEPTANCE",
+      "pass": [
+        "ChatGPT creates a deliberate bounded failing branch change",
+        "ChatGPT posts /lambda-ci trigger",
+        "Lambda returns FAIL evidence",
+        "ChatGPT diagnoses and fixes branch without human SSH",
+        "Lambda rerun returns PASS",
+        "ChatGPT downloads/reads a produced workflow artifact",
+        "human terminal not used during the loop"
+      ]
+    },
+    {
+      "id": "P6_SECOND_PROJECT_ISOLATION",
+      "pass": [
+        "second project has distinct UID/root/cache",
+        "cross-project read/write denial proven both directions",
+        "independent runner/job cleanup proven"
+      ]
+    }
+  ],
+  "rollout_policy": {
+    "pilot_project": "research-engine",
+    "second_project_candidate": "PADataset",
+    "course_repositories": "opt in only after pilot/second-project isolation acceptance",
+    "one_unrestricted_shared_runner": "FORBIDDEN"
+  },
+  "next_safe_action": "Implement and statically review P1 artifacts only: pinned actions/scaleset listener strategy, ci-controller identity, narrow root provisioner protocol/manifest, systemd sandbox profiles, trusted read-only cache layout, corrected filesystem/quota and PostgreSQL-bindir probes, and kill switch. Do not create users/services, install/register a runner, or change existing GitHub-hosted CI until those artifacts pass static review.",
+  "cache_policy": {
+    "workspace": "ephemeral and destroyed after every job",
+    "candidate_writable_cache": "ephemeral staging only",
+    "persistent_cache_writer": "trusted cache-manager/default-branch operation only",
+    "persistent_cache_mount": "read-only to candidate jobs",
+    "model_identity": "immutable repository revision/digest plus runtime identity",
+    "cross_project_write": "denied"
+  },
+  "research_evidence": [
+    "GitHub recommends ephemeral self-hosted runners for autoscaling and external retention of ephemeral runner diagnostics.",
+    "GitHub actions/scaleset is the official custom-autoscaling client outside Kubernetes and provides scale-set polling/JIT primitives.",
+    "GitLab warns that non-ephemeral multi-project runners increase compromise risk and recommends single-job ephemeral instances plus network segmentation.",
+    "Buildkite recommends compartmentalized agents, expiring agents after jobs and scoped caches.",
+    "systemd on cgroup v2 supports the required process/filesystem/device/network/resource policy family.",
+    "NVIDIA CDI supports specific GPU injection and improves compatibility with rootless containers, making rootless Podman a later hardening option.",
+    "GitHub warns caches are unsigned/unverified; persistent candidate-writable cache state is therefore excluded from the trusted pilot design."
+  ],
+  "host_probe_findings": {
+    "os": "Ubuntu 22.04.5 LTS",
+    "kernel": "6.8.0-138-generic",
+    "systemd": "249",
+    "cgroup": "v2",
+    "cpu_threads": 32,
+    "ram_bytes": 270094327808,
+    "gpu": "2x NVIDIA RTX A4500 20470 MiB",
+    "unprivileged_userns_clone": true,
+    "ci_research_engine_user_exists": false,
+    "docker_socket": "root:docker 0660; runner must not join docker group",
+    "home_atrott": "0750; dedicated project UID must receive no atrott group membership",
+    "production_postgres": "wildcard IPv4/IPv6 listener observed; network denial is mandatory",
+    "dns_stub": "127.0.0.53",
+    "free_bytes_observed": 136293199872,
+    "unresolved": [
+      "original findmnt probe failed; resolve /srv filesystem/quota support before hard disk quota promise",
+      "locate PostgreSQL bindir before native ephemeral CI database design"
+    ]
+  }
+}

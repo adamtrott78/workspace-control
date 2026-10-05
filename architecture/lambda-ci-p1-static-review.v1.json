@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "status": "P1_STATIC_REVIEW_PENDING_COMPATIBILITY_PROBE",
+  "required_artifacts": [
+    "architecture/lambda-self-hosted-execution-research.v1.md",
+    "architecture/lambda-self-hosted-execution-v1.md",
+    "architecture/lambda-self-hosted-execution-pilot-contract.v1.json",
+    "architecture/lambda-ci-upstream-pins.v1.json",
+    "architecture/lambda-ci-project-research-engine.v1.json",
+    "architecture/lambda-ci-provisioner-protocol.v1.md",
+    "architecture/lambda-ci-controller-adapter.v1.md",
+    "architecture/lambda-ci-systemd-profiles.v1.json",
+    "architecture/lambda-ci-trusted-cache-policy.v1.md",
+    "scripts/lambda_ci_provisioner.py",
+    "scripts/lambda_runner_p1_compatibility_probe.py",
+    "scripts/lambda_ci_kill_switch.sh",
+    "scripts/remove_lambda_ci.sh",
+    "templates/lambda-ci/workspace-ci-runner@.service.in",
+    "tests/test_lambda_ci_provisioner.py",
+    "tests/test_lambda_ci_foundation.py"
+  ],
+  "static_gates": {
+    "exact_upstream_pins": true,
+    "runner_checksum_pinned": true,
+    "project_uid_separate": true,
+    "arbitrary_command_api_forbidden": true,
+    "arbitrary_path_env_device_input_forbidden": true,
+    "jit_secret_redacted": true,
+    "docker_socket_forbidden": true,
+    "production_profile_forbidden": true,
+    "persistent_candidate_writable_cache_forbidden": true,
+    "kill_switch_present": true,
+    "existing_github_ci_unchanged": true
+  },
+  "host_followups_required": [
+    "P1 compatibility probe receipt",
+    "resolve /srv filesystem and quota support",
+    "resolve PostgreSQL bindir",
+    "inspect firewall/nft state",
+    "positive transient probe of ProtectProc/ProcSubset",
+    "positive/negative transient probe of IPAddressDeny/Allow",
+    "non-scientific transient CUDA probe with DevicePolicy=closed"
+  ],
+  "P2_authorized": false
+}
