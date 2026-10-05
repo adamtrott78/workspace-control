@@ -66,8 +66,9 @@
       "outputs": [
         "procedures/evidence_first_solution_research.md",
         "workflows/evidence-first-solution-research.v1.json",
-        "root-route discoverability update",
-        "validation evidence and exact workflow identity"
+        "README.md root-route discoverability update",
+        "tests/test_evidence_first_solution_research.py",
+        "workspace-control PR #70"
       ],
       "validation": [
         {
@@ -78,6 +79,15 @@
             "workspace-control is registered as owner of cross-project operating policy and reusable coordination tooling.",
             "The originating research-engine child task retains all EXTRACT-specific architecture and benchmark truth."
           ]
+        },
+        {
+          "check": "Implementation checkpoint",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control branch evidence-first-solution-research-v1 is exactly four intended files ahead of PR base: procedure, workflow descriptor, README routing, and focused regression test.",
+            "PR #70 head is 4600dcd0f77a1e707e60d812e82fe7e2ef08c601.",
+            "Validation profile classifies procedures/workflows as FULL_INTEGRATION; run 37369399893 is queued."
+          ]
         }
       ],
       "resume_condition": "Reusable workflow is durable, discoverable, validated, and can be pinned by project tasks."
@@ -87,12 +97,14 @@
     {
       "id": "originating-use-case",
       "kind": "recovery_restore_point",
-      "identity": "aa24d3f25a54745bcffb607f9ff43310181c9b85",
+      "identity": "4600dcd0f77a1e707e60d812e82fe7e2ef08c601",
       "required_for_resume": true,
       "evidence": [
         "origin=research-engine-local-extract-redesign-v1",
-        "trigger=external research changed implementation direction from model bakeoff to decomposed Local Evidence Agent",
-        "next safe action=implement workspace-level procedure/descriptor on an isolated branch and run full validation"
+        "shared method implementation complete on branch evidence-first-solution-research-v1",
+        "PR #70 head=4600dcd0f77a1e707e60d812e82fe7e2ef08c601",
+        "CI=Workspace Control Validation run 37369399893 queued",
+        "next safe action=if CI passes, merge PR #70, verify canonical main, record exact workflow binding, then return to originating EXTRACT task"
       ]
     }
   ],
@@ -107,15 +119,16 @@
       ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Write the workspace-level evidence-first research procedure.",
-    "Write the reusable workflow descriptor.",
-    "Add root-route discoverability without making research mandatory for trivial work.",
-    "Run workflow validation, full workspace-control tests, and task contract regression.",
-    "Merge the validated workflow and return its exact identity to the originating EXTRACT task."
+  "blockers": [
+    "Workspace Control Validation run 37369399893 is queued for PR #70; no additional workflow mutation is justified unless validation fails."
   ],
-  "next_safe_action": "Create an isolated workspace-control branch from main@aa24d3f25a54745bcffb607f9ff43310181c9b85 and implement the evidence-first solution-research procedure, workflow descriptor, and root-route discoverability. Validate with the workflow descriptor validator and workspace-control FULL_INTEGRATION tier before merging. Do not modify project-specific research-engine truth in this workspace-level task.",
+  "remaining_work": [
+    "Wait for full-integration validation of PR #70.",
+    "If validation passes, merge PR #70 and verify canonical workspace-control main.",
+    "Record the exact durable workflow identity for workflows/evidence-first-solution-research.v1.json.",
+    "Return that identity to research-engine-local-extract-redesign-v1 so the originating task can formally bind the reusable workflow."
+  ],
+  "next_safe_action": "Wait for workspace-control PR #70 validation run 37369399893. If it passes, merge PR #70 without additional scope expansion, verify the canonical main commit and merged workflow contents, then checkpoint this task as COMPLETE/CHECKPOINTED-equivalent and return the exact workflow identity to `research-engine-local-extract-redesign-v1`. If CI fails, diagnose only the demonstrated validation defect.",
   "last_executor": "chatgpt",
   "last_surface": "github"
 }
