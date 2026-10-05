@@ -28,7 +28,7 @@ safe_runner_foundation
 
 ## Next safe action
 
-On Lambda, execute `scripts/launch_lambda_ci_p2b_noop.py` from workspace-control main exactly at `fb86b027c096af9f92f949050564799ce87f2052` with `WORKSPACE_CI_P2B_AUTHORIZED=YES` under sudo. When prompted, paste a short-lived fine-grained GitHub PAT scoped only to `adamtrott78/research-engine` with repository Administration:write. Do not put the token in the command, chat, Git, or a file. The trusted GitHub run is already queued as run 37383893507; after launcher exit, return only the non-secret local `lambda-ci-p2b-launcher.json` receipt.
+On Lambda, create a clean detached workspace-control worktree exactly at `fb86b027c096af9f92f949050564799ce87f2052`, then execute `scripts/launch_lambda_ci_p2b_noop.py` from that detached tree with `WORKSPACE_CI_P2B_AUTHORIZED=YES` under sudo. When prompted, paste a short-lived fine-grained GitHub PAT scoped only to `adamtrott78/research-engine` with repository Administration:write. Do not put the token in the command, chat, Git, or a file. The trusted GitHub run is already queued as run 37383893507; after launcher exit, return only the non-secret local `lambda-ci-p2b-launcher.json` receipt.
 
 ## Remaining work
 
