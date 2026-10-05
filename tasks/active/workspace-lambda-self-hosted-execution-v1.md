@@ -28,22 +28,23 @@ safe_runner_foundation
 
 ## Next safe action
 
-Run the tracked read-only P1 compatibility probe from workspace-control PR #72 head `46d3d33aa560df2adf90137e0951097ed973ee1d` on Lambda and return `lambda-runner-p1-probe.json`. The probe writes only its receipt under the visible workspace-control-tmp directory and performs no user/service/runner/firewall/cgroup mutation. In parallel, allow PR #72 repository validation to instantiate. P2 remains explicitly unauthorized until the compatibility receipt, static tests, and later non-runner transient sandbox probes pass.
+P2 is authorized. Create and validate a P2 implementation branch from workspace-control main after `2bbdb81f97b5ce7743074a71bd0554f47b75b4a0`. The P2 bootstrap must run root-only transient firewall/process/network/device isolation probes first and fail closed before mutation; only on PASS may it create `ci-controller`/`ci-research-engine`, `/srv/workspace-ci/research-engine` roots, install checksum-pinned runner/controller assets, and prepare the first repository-scoped one-job no-op runner. Do not expose controller/personal credentials to job code and do not touch production research-engine services/state.
 
 ## Remaining work
 
-- Run scripts/lambda_runner_p1_compatibility_probe.py read-only on Lambda and analyze the JSON receipt.
-- Use that receipt to finalize disk/quota, PostgreSQL ephemeral-test-DB, firewall/network and controller build strategy.
-- Run repository validation for PR #72 and fix only demonstrated static/test defects.
-- Perform non-runner transient sandbox probes for ProtectProc/ProcSubset, IPAddressDeny/Allow, and DevicePolicy=closed CUDA access.
-- Only if all P1 gates pass, authorize P2 one-time host bootstrap and first no-op ephemeral repository-scoped runner.
+- P2: validate root firewall state and transient systemd process/network/device sandbox behavior.
+- P2: create dedicated ci-controller and ci-research-engine identities and /srv/workspace-ci roots only after transient gates pass.
+- P2: install the exact pinned Actions runner package and controller toolchain with checksum verification.
+- P2: register and execute one repository-scoped one-job no-op runner; prove home/Docker/production-service/system write denial and cleanup.
+- P3: CPU candidate validation with ephemeral environment/database and GitHub artifact return.
+- P4: bounded GPU validation with explicit device grant and post-job GPU/process cleanup.
+- P5: closed-loop ChatGPT fail-diagnose-fix-rerun-PASS acceptance without SSH.
+- P6: second-project cross-project isolation pilot under separate UID/root/cache.
 
 ## Blockers / gates
 
-- P1 compatibility receipt from the actual Lambda is still required before P2: resolve /srv filesystem/quota support, PostgreSQL bindir, firewall/nft state, and remaining sandbox compatibility facts.
-- workspace-control PR #72 repository validation has not yet instantiated a workflow run; P2 remains unauthorized until static tests validate.
-- Transient systemd device/network probes remain required after the read-only compatibility receipt and before any real runner registration.
-- workspace-control evidence-first workflow PR #70 remains separately blocked by GitHub-hosted runner allocation and does not block this P1 branch.
+- P2 must begin with root-only transient sandbox/firewall/device/network probes and stop before user/runner creation if any mandatory isolation primitive fails.
+- A repository-scoped GitHub credential path for the first ephemeral runner must be resolved without exposing personal/controller credentials to job code.
 
 ## Fresh-chat initialization
 
