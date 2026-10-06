@@ -18,24 +18,46 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Design, validate, and if safety gates pass pilot a project-isolated GitHub Actions execution lane on the existing Lambda workstation so ChatGPT/GitHub-driven software work can execute and validate directly in the real target environment without routine human-terminal mediation, while preserving project authority, minimizing host risk, and keeping existing GitHub-hosted CI as the known-good control.
 
-## Current stage
+## Repositories
 
-project_isolation_and_cache_validation
+### workspace-control
+
+- Intent: mutate
+- Remote branch: main
+- Remote checkpoint: d33ca95a8d63d7e9f9d7f85afc1fa02540faff16
+- Remote verified: true
+
+### research-engine
+
+- Intent: mutate
+- Remote branch: main
+- Remote checkpoint: aa1cdaafb4728c70be7bab0041df5f395f16141c
+- Remote verified: true
 
 ## Next safe action
 
-Human live gate A retry only: on Lambda use a clean detached workspace-control tree exactly at `2b026c41f6dd8e3fcaa5e30fddaedb9babe09391` and run `scripts/bootstrap_lambda_ci_p5.sh` via sudo with `WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES`, `WORKSPACE_CI_P5_EXPECTED_SHA=2b026c41f6dd8e3fcaa5e30fddaedb9babe09391`, and no `WORKSPACE_CI_P5_ACTIVATE_CONTROLLER` flag. The isolated Go prerequisite is already PASS at `/opt/workspace-ci/go/1.26.3`; do not rerun the Go bootstrap unless the prefix is missing or version-drift evidence appears. This service bootstrap must install/start only the root provisioner, verify `/run/workspace-ci/provisioner.sock` is `root:workspace-ci-controller` mode `0660`, leave `workspace-ci-controller` installed but inactive, handle no GitHub credential, and emit a visible receipt. Do not stage the PAT or activate the controller until that provisioner-only receipt is reviewed.
+Continue from the accepted live P5 baseline at workspace-control d33ca95a8d63d7e9f9d7f85afc1fa02540faff16 and research-engine aa1cdaafb4728c70be7bab0041df5f395f16141c. The research-engine autonomous cpu-test scale-set lane is accepted for routine bounded validation. Next, execute the P5 recovery/adversarial acceptance gate: test controller restart/recovery, replay protection, cleanup-failure blocking, and kill-switch behavior using the existing trusted P5 workflow and without restaging the PAT, rerunning the Go bootstrap, broadening provisioner network/device authority, or granting production/scientific-state access.
 
 ## Remaining work
 
-- P5 live gate A retry: run scripts/bootstrap_lambda_ci_p5.sh from exact workspace-control 2b026c41f6dd8e3fcaa5e30fddaedb9babe09391 with controller activation disabled; require provisioner service/socket PASS and review receipt.
-- P5 live gate B: stage the existing clean research-engine PAT directly as ci-controller using /opt/workspace-ci/controller/stage-pat; never paste token into chat.
-- P5 live gate C: rerun the exact P5 bootstrap with WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES and require controller/provisioner both active.
-- P5 autonomous acceptance: trigger trusted CPU scale-set demand and prove autonomous provision/cleanup/evidence without human SSH/PAT relay.
-- P5 recovery: prove controller restart/recovery, replay protection, cleanup-failure blocking, and kill switch.
-- P6: perform second-project isolation pilot under distinct UID/root/cache and prove mutual denial.
+- P5 recovery/adversarial acceptance: prove controller restart/recovery, replay protection, cleanup-failure blocking, and kill switch behavior without weakening the accepted live boundary.
+- P5 cache/resource hardening: exercise trusted-cache immutability/invalidation and bounded concurrency/resource-failure paths.
+- P6 second-project isolation pilot: opt in a second repository under a distinct UID/root/cache policy and prove mutual denial.
 
 ## Blockers / gates
 
-- P5 live gate A service install has not yet been retried after the isolated Go prerequisite PASS; provisioner/controller code is not yet accepted on-host.
-- Controller activation remains intentionally gated on later ci-controller-owned credential staging; do not stage or activate the controller before provisioner-only receipt review.
+- None.
+
+## Fresh-chat initialization
+
+@GitHub
+
+https://github.com/adamtrott78/workspace-control
+
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-lambda-self-hosted-execution-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
