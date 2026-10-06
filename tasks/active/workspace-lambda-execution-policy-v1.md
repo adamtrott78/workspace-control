@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 5d9aea62cfeceb73052ccdf325d648f6e44f1134
+- Remote checkpoint: 4d4d14480f2cd6b573e33b10efc61a81a316327a
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-In GitHub Settings > Developer settings > Personal access tokens > Fine-grained tokens, open the existing research-engine controller token if editable (otherwise mint a replacement with the same existing repository/runner permissions) and add repository permission Actions: Read only; do not add Actions: Write. Keep repository access restricted to adamtrott78/research-engine. If the token value changes, restage it only with sudo -u ci-controller /opt/workspace-ci/controller/stage-pat; if the existing token is edited in place, no restaging is required. Then run a non-secret child-shell probe against GET /repos/adamtrott78/research-engine/actions/runs/37540379924 using /var/lib/workspace-ci/controller/github-token and require HTTP 200, followed by systemctl restart workspace-ci-controller.service workspace-ci-controller-gpu.service and a zero-restart-delta health check. Only after that credential gate passes, trigger a NEW /lambda-ci-p5 f5ba8278d7dfa22e63623ddf51896a6dec002813 on PR #106; use /lambda-ci-cancel <run_id> through the merged GitHub-hosted control workflow for stale acceptance cancellation. Do not enable model-scale classes or gpu-heavy.
+First stop workspace-ci-controller.service before changing any more token permissions; leave the canceled run 37540379924 terminal. In GitHub fine-grained token settings for the existing research-engine controller token, keep Actions: Read and add Contents: Read plus Pull requests: Read only; do not grant Actions: Write and do not broaden repository scope. Before restarting any controller, run a non-secret ci-controller probe requiring HTTP 200 for: GET /actions/runs/37540379924, GET /actions/runs/37540379924/jobs?per_page=100, GET /contents/.github/workflows/lambda-ci-p5-autonomous.yml?ref=12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d, and GET /pulls/106. Only after all four return 200, install and activate exact workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a from a fresh detached clean worktree using the accepted P5 bootstrap. Prove CPU/GPU controllers active/running and no NRestarts delta over an 8-second window. Then trigger a NEW /lambda-ci-p5 f5ba8278d7dfa22e63623ddf51896a6dec002813; use the GitHub-hosted /lambda-ci-cancel <run_id> control for any stale acceptance cancellation. Do not enable model-scale classes or gpu-heavy.
 
 ## Remaining work
 
-- Add GitHub Actions: Read to the existing narrow research-engine controller credential, verify the live controller is stable, then run fresh non-scientific admission-v2 CPU and gpu-small acceptance and validate root receipts plus residue-free cleanup.
+- Stop the crash-looping CPU controller, add Contents: Read and Pull requests: Read to the existing narrow research-engine controller token, prove all four attestor REST endpoints return HTTP 200, install exact terminal-safe workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a, then run fresh CPU and gpu-small acceptance.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,8 +48,9 @@ In GitHub Settings > Developer settings > Personal access tokens > Fine-grained 
 
 ## Blockers / gates
 
-- Lambda controller fine-grained PAT lacks GitHub Actions repository permission Read. Add Actions: Read for research-engine while preserving the existing narrow repository scope and all currently required controller permissions; do not grant Actions: Write.
-- After the server-side permission change, verify the stored controller token can GET the research-engine Actions run endpoint with HTTP 200 and verify workspace-ci-controller.service stops restart-looping before triggering another CPU acceptance.
+- CPU controller is crash-looping on GitHub Contents API 403 under live f2468001; stop the CPU controller before widening the existing token's remaining read permissions so the old binary cannot process stale canceled recovery metadata.
+- Fine-grained research-engine controller token must include exactly the currently required read surface: Actions: Read (already proven), Contents: Read, and Pull requests: Read, while preserving existing runner/scale-set permissions and without Actions: Write.
+- After all four attestor endpoint probes return HTTP 200, exact workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a must be installed/activated and controller restart delta proven stable before a new CPU acceptance.
 
 ## Fresh-chat initialization
 
