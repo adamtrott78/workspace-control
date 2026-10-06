@@ -28,20 +28,21 @@ research_engine_pilot
 
 ## Next safe action
 
-On Lambda, create a clean detached workspace-control worktree exactly at `c2e2c1a6a1f75cca424e94041e39c1e375ce63ca`, then run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES`. Paste a short-lived fine-grained GitHub PAT scoped only to `adamtrott78/research-engine` with repository Administration:write into the hidden prompt. Do not put the token in chat, Git, argv, environment, or a file. The trusted P3 run is already queued as 37394877505. After launcher exit, return only the non-secret `lambda-ci-p3-launcher.json` receipt; ChatGPT will inspect the GitHub run/artifact directly.
+Wait for research-engine PR #98 exact-head ordinary CI. If PASS, merge it, queue a fresh P3 CPU run for PR #95 exact head `ab36b358a0c7ac33d2887fa681f418033554eae0`, then execute the bounded pgvector dependency repair from workspace-control `04b2750bc71818b7ca5be970bda4bc541da4034e` before launching the new P3 JIT runner. Do not advance to P4 until install/compile/full pytest pass on Lambda.
 
 ## Remaining work
 
-- Execute the reviewed P3 one-job JIT launcher on Lambda using a short-lived research-engine Administration:write token pasted only into the hidden local prompt.
-- Inspect GitHub run 37394877505 and lambda-ci-p3-receipt; if failure occurs, diagnose exact host/candidate incompatibility and iterate through a new exact SHA/run.
-- If P3 passes, checkpoint CPU validation and begin P4 bounded GPU validation with explicit device grant and post-job GPU/process cleanup.
-- P5: install/accept autonomous scale-set listener + narrow root provisioner and prove closed-loop fail-diagnose-fix-rerun-PASS with no human SSH/token relay.
-- P6: second-project isolation pilot under separate UID/root/cache.
+- Wait for research-engine PR #98 ordinary CI; merge only on PASS.
+- Execute workspace-control pgvector repair from exact merged SHA 04b2750bc71818b7ca5be970bda4bc541da4034e and inspect its visible receipt.
+- Queue a fresh trusted /lambda-ci-cpu trigger against unchanged PR #95 head ab36b358a0c7ac33d2887fa681f418033554eae0 and launch one new JIT CPU runner.
+- Inspect the new P3 receipt/logs; if a new host/candidate incompatibility appears, repair only that demonstrated issue and rerun.
+- Only after full P3 PASS, begin P4 bounded GPU validation.
 
 ## Blockers / gates
 
-- P3 run 37394877505 requires one local short-lived research-engine Administration:write token to mint the one-job JIT runner because the autonomous scale-set controller is intentionally deferred until P5.
-- P3 may reveal host-specific PostgreSQL/pgvector or candidate-test failures; those should be diagnosed from the returned GitHub receipt/logs rather than bypassing isolation.
+- research-engine PR #98 must pass ordinary CI and merge before the P3 retry is armed.
+- The merged pgvector repair must PASS on the real Lambda before a new P3 JIT runner is started.
+- The P3 retry must then reach and pass actual candidate install/compile/pytest before P4 may begin.
 
 ## Fresh-chat initialization
 
