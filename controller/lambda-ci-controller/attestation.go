@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/rsa"
+	"errors"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -22,7 +23,10 @@ import (
 
 const githubAPIVersion = "2022-11-28"
 
-var lowerHex40 = regexp.MustCompile(`^[0-9a-f]{40}$`)
+var (
+	lowerHex40 = regexp.MustCompile(`^[0-9a-f]{40}$`)
+	errTerminalWorkflowJob = errors.New("workflow job is already terminal")
+)
 
 type controllerAttestation struct {
 	SchemaVersion                  int    `json:"schema_version"`
@@ -395,6 +399,8 @@ func (a *githubJobAttestor) Attest(
 		HeadSHA    string `json:"head_sha"`
 		Path       string `json:"path"`
 		Event      string `json:"event"`
+		Status     string `json:"status"`
+		Conclusion string `json:"conclusion"`
 		Actor      struct{ Login string `json:"login"` } `json:"actor"`
 		Triggering struct{ Login string `json:"login"` } `json:"triggering_actor"`
 		Repository struct{ FullName string `json:"full_name"` } `json:"repository"`
@@ -407,6 +413,14 @@ func (a *githubJobAttestor) Attest(
 	)
 	if err := a.getJSON(ctx, runPath, &run); err != nil {
 		return controllerAttestation{}, err
+	}
+	if run.Status == "completed" {
+		return controllerAttestation{}, fmt.Errorf(
+			"%w: workflow run %d completed with conclusion %q",
+			errTerminalWorkflowJob,
+			run.ID,
+			run.Conclusion,
+		)
 	}
 	if run.ID != job.WorkflowRunID ||
 		run.Path != workflowPath ||
@@ -421,9 +435,11 @@ func (a *githubJobAttestor) Attest(
 	var jobs struct {
 		TotalCount int `json:"total_count"`
 		Jobs       []struct {
-			ID    int64  `json:"id"`
-			RunID int64  `json:"run_id"`
-			Name  string `json:"name"`
+			ID         int64  `json:"id"`
+			RunID      int64  `json:"run_id"`
+			Name       string `json:"name"`
+			Status     string `json:"status"`
+			Conclusion string `json:"conclusion"`
 		} `json:"jobs"`
 	}
 	jobsPath := fmt.Sprintf(
@@ -441,6 +457,14 @@ func (a *githubJobAttestor) Attest(
 		if runJob.Name == job.JobDisplayName {
 			if runJob.ID <= 0 || (runJob.RunID != 0 && runJob.RunID != job.WorkflowRunID) {
 				return controllerAttestation{}, fmt.Errorf("workflow job REST identity is invalid")
+			}
+			if runJob.Status == "completed" {
+				return controllerAttestation{}, fmt.Errorf(
+					"%w: workflow job %d completed with conclusion %q",
+					errTerminalWorkflowJob,
+					runJob.ID,
+					runJob.Conclusion,
+				)
 			}
 			canonicalJobID = runJob.ID
 			matches++

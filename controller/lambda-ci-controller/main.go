@@ -398,6 +398,15 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 					s.profile,
 				)
 				if err != nil {
+					if errors.Is(err, errTerminalWorkflowJob) {
+						s.logger.Info(
+							"Ignoring terminal JobAvailable metadata",
+							slog.Int64("runner_request_id", job.RunnerRequestID),
+							slog.Int64("workflow_run_id", job.WorkflowRunID),
+							slog.String("reason", err.Error()),
+						)
+						continue
+					}
 					return fmt.Errorf("attest available job before acquire: %w", err)
 				}
 				jobKey := attestation.JobID
@@ -462,6 +471,15 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				s.profile,
 			)
 			if err != nil {
+				if errors.Is(err, errTerminalWorkflowJob) {
+					s.logger.Info(
+						"Ignoring terminal JobAssigned recovery metadata",
+						slog.Int64("runner_request_id", assigned.RunnerRequestID),
+						slog.Int64("workflow_run_id", assigned.WorkflowRunID),
+						slog.String("reason", err.Error()),
+					)
+					continue
+				}
 				return fmt.Errorf("attest assigned job recovery metadata: %w", err)
 			}
 			jobKey := attestation.JobID

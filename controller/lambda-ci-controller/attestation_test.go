@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -46,7 +47,12 @@ func availableCPUJob() *scaleset.JobAvailable {
 	return &scaleset.JobAvailable{JobMessageBase: base}
 }
 
-func fakeGitHubAttestor(t *testing.T, mutatePull func(map[string]any)) *githubJobAttestor {
+func fakeGitHubAttestorWithLifecycle(
+	t *testing.T,
+	mutatePull func(map[string]any),
+	mutateRun func(map[string]any),
+	mutateJob func(map[string]any),
+) *githubJobAttestor {
 	t.Helper()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if got := r.Header.Get("Authorization"); got != "Bearer test-token" {
@@ -55,11 +61,13 @@ func fakeGitHubAttestor(t *testing.T, mutatePull func(map[string]any)) *githubJo
 		w.Header().Set("Content-Type", "application/json")
 		switch {
 		case r.URL.Path == "/repos/adamtrott78/research-engine/actions/runs/99":
-			_ = json.NewEncoder(w).Encode(map[string]any{
-				"id":       99,
-				"head_sha": testWorkflowHead,
-				"path":     ".github/workflows/lambda-ci-p5-autonomous.yml",
-				"event":    "issue_comment",
+			payload := map[string]any{
+				"id":         99,
+				"head_sha":   testWorkflowHead,
+				"path":       ".github/workflows/lambda-ci-p5-autonomous.yml",
+				"event":      "issue_comment",
+				"status":     "queued",
+				"conclusion": nil,
 				"actor": map[string]any{
 					"login": "adamtrott78",
 				},
@@ -69,18 +77,26 @@ func fakeGitHubAttestor(t *testing.T, mutatePull func(map[string]any)) *githubJo
 				"repository": map[string]any{
 					"full_name": "adamtrott78/research-engine",
 				},
-			})
+			}
+			if mutateRun != nil {
+				mutateRun(payload)
+			}
+			_ = json.NewEncoder(w).Encode(payload)
 		case r.URL.Path == "/repos/adamtrott78/research-engine/actions/runs/99/jobs":
+			jobPayload := map[string]any{
+				"id":         777,
+				"run_id":     99,
+				"status":     "queued",
+				"conclusion": nil,
+				"name": "wc-admission-v1|workload=cpu-test|pr=101|" +
+					"request=/lambda-ci-p5 " + testCandidateSHA,
+			}
+			if mutateJob != nil {
+				mutateJob(jobPayload)
+			}
 			_ = json.NewEncoder(w).Encode(map[string]any{
 				"total_count": 1,
-				"jobs": []map[string]any{
-					{
-						"id":     777,
-						"run_id": 99,
-						"name": "wc-admission-v1|workload=cpu-test|pr=101|" +
-							"request=/lambda-ci-p5 " + testCandidateSHA,
-					},
-				},
+				"jobs":       []map[string]any{jobPayload},
 			})
 		case r.URL.Path == "/repos/adamtrott78/research-engine/contents/.github/workflows/lambda-ci-p5-autonomous.yml":
 			if got := r.URL.Query().Get("ref"); got != testWorkflowHead {
@@ -121,6 +137,10 @@ func fakeGitHubAttestor(t *testing.T, mutatePull func(map[string]any)) *githubJo
 			return time.Date(2026, 10, 6, 20, 30, 0, 0, time.UTC)
 		},
 	}
+}
+
+func fakeGitHubAttestor(t *testing.T, mutatePull func(map[string]any)) *githubJobAttestor {
+	return fakeGitHubAttestorWithLifecycle(t, mutatePull, nil, nil)
 }
 
 func TestAdmissionDisplayClaimIsExact(t *testing.T) {
@@ -213,6 +233,46 @@ func TestGitHubAttestorRejectsCandidateMismatch(t *testing.T) {
 		"cpu-test",
 	); err == nil {
 		t.Fatal("candidate mismatch was attested")
+	}
+}
+
+func TestGitHubAttestorRejectsTerminalRunAndJob(t *testing.T) {
+	terminalRun := fakeGitHubAttestorWithLifecycle(
+		t,
+		nil,
+		func(payload map[string]any) {
+			payload["status"] = "completed"
+			payload["conclusion"] = "cancelled"
+		},
+		nil,
+	)
+	_, err := terminalRun.Attest(
+		context.Background(),
+		&assignedCPUJob().JobMessageBase,
+		"lambda-research-engine",
+		"cpu-test",
+	)
+	if err == nil || !errors.Is(err, errTerminalWorkflowJob) {
+		t.Fatalf("terminal workflow run was not rejected with sentinel: %v", err)
+	}
+
+	terminalJob := fakeGitHubAttestorWithLifecycle(
+		t,
+		nil,
+		nil,
+		func(payload map[string]any) {
+			payload["status"] = "completed"
+			payload["conclusion"] = "cancelled"
+		},
+	)
+	_, err = terminalJob.Attest(
+		context.Background(),
+		&assignedCPUJob().JobMessageBase,
+		"lambda-research-engine",
+		"cpu-test",
+	)
+	if err == nil || !errors.Is(err, errTerminalWorkflowJob) {
+		t.Fatalf("terminal workflow job was not rejected with sentinel: %v", err)
 	}
 }
 
