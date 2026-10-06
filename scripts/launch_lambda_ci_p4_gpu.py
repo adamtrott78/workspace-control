@@ -351,6 +351,7 @@ def systemd_command(
         "-p", "DevicePolicy=closed",
         "-p", "DeviceAllow=/dev/nvidiactl rw",
         "-p", f"DeviceAllow={selected_device} rw",
+        "-p", "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6",
         "-p", "IPAddressAllow=127.0.0.53/32",
         "-p", "IPAddressDeny=127.0.0.0/8",
         "-p", "IPAddressDeny=::1/128",
