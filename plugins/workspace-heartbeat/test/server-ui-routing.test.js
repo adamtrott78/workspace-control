@@ -4,8 +4,9 @@ import { readFileSync } from "node:fs";
 
 const server = readFileSync(new URL("../server.js", import.meta.url), "utf8");
 
-test("both heartbeat tools bind to the same panel resource", () => {
-  assert.equal(server.includes('const PANEL_URI = "ui://workspace-heartbeat/panel-v6.html";'), true);
+test("heartbeat_update and heartbeat_get use separate UI resources", () => {
+  assert.equal(server.includes('const PANEL_URI = "ui://workspace-heartbeat/panel-v7.html";'), true);
+  assert.equal(server.includes('const UPDATE_CARD_URI = "ui://workspace-heartbeat/update-card-v1.html";'), true);
 
   const updateStart = server.indexOf('"heartbeat_update"');
   const getStart = server.indexOf('"heartbeat_get"');
@@ -16,8 +17,10 @@ test("both heartbeat tools bind to the same panel resource", () => {
   const updateBlock = server.slice(updateStart, getStart);
   const getBlock = server.slice(getStart);
 
-  assert.equal(updateBlock.includes("resourceUri: PANEL_URI"), true);
+  assert.equal(updateBlock.includes("resourceUri: UPDATE_CARD_URI"), true);
+  assert.equal(updateBlock.includes("resourceUri: PANEL_URI"), false);
   assert.equal(getBlock.includes("resourceUri: PANEL_URI"), true);
+  assert.equal(getBlock.includes("resourceUri: UPDATE_CARD_URI"), false);
 });
 
 test("only heartbeat_get advertises the thread entrypoint", () => {
@@ -30,7 +33,19 @@ test("only heartbeat_get advertises the thread entrypoint", () => {
   assert.equal(getBlock.includes('entrypoints: [{ type: "thread" }]'), true);
 });
 
-test("heartbeat output schema exposes task history and operator timeline", () => {
+test("heartbeat_update returns only the newest heartbeat", () => {
+  assert.equal(server.includes("const heartbeatUpdateOutputSchema"), true);
+  assert.equal(server.includes("structuredContent: { heartbeat }"), true);
+
+  const updateSchemaStart = server.indexOf("const heartbeatUpdateOutputSchema");
+  const historySchemaStart = server.indexOf("const heartbeatOutputSchema");
+  const updateSchema = server.slice(updateSchemaStart, historySchemaStart);
+
+  assert.equal(updateSchema.includes("history:"), false);
+  assert.equal(updateSchema.includes("timeline:"), false);
+});
+
+test("heartbeat_get retains task history and operator timeline", () => {
   assert.equal(server.includes("history: z.array(heartbeatSchema)"), true);
   assert.equal(server.includes("timeline: z.array(heartbeatSchema)"), true);
 });
