@@ -85,6 +85,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
             self.assertIn(deny, CONTROLLER_UNIT)
         self.assertNotIn("User=root", CONTROLLER_UNIT)
         self.assertNotIn("sudo", CONTROLLER_UNIT)
+        self.assertNotIn("WORKSPACE_CI_ADMISSION_V2_ENABLED", CONTROLLER_UNIT)
 
     def test_gpu_controller_unit_is_unprivileged_and_fixed_to_gpu_small(self):
         self.assertIn("User=ci-controller", GPU_CONTROLLER_UNIT)
@@ -102,6 +103,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         self.assertIn("RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6", GPU_CONTROLLER_UNIT)
         self.assertIn("DevicePolicy=closed", GPU_CONTROLLER_UNIT)
         self.assertNotIn("User=root", GPU_CONTROLLER_UNIT)
+        self.assertNotIn("WORKSPACE_CI_ADMISSION_V2_ENABLED", GPU_CONTROLLER_UNIT)
 
     def test_bootstrap_never_reads_or_accepts_token_material(self):
         self.assertIn("github_credential_handled_by_bootstrap", BOOTSTRAP)

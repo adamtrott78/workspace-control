@@ -49,6 +49,7 @@ _ATTESTATION_KEYS = {
     "actor_login",
     "triggering_actor_login",
     "pr_number",
+    "pr_state",
     "pr_head_repository",
     "candidate_sha",
     "candidate_verification",
@@ -232,6 +233,8 @@ def validate_controller_attestation(
 
     if not isinstance(attestation.get("pr_number"), int) or attestation["pr_number"] <= 0:
         raise AdmissionError("pr_number must be positive")
+    if attestation.get("pr_state") != "open":
+        raise AdmissionError("pull request is not open")
     if attestation.get("pr_head_repository") != manifest.get("repository"):
         raise AdmissionError("fork or foreign PR head repository is not admitted")
     candidate_sha = _require_hex40(attestation.get("candidate_sha"), "candidate_sha")
@@ -258,12 +261,24 @@ def validate_controller_attestation(
 
 
 def request_digest(request: dict[str, Any]) -> str:
-    nonsecret = {
-        key: value
-        for key, value in request.items()
-        if key != "jit_config"
-    }
-    nonsecret["jit_config_sha256"] = sha256_text(str(request.get("jit_config", "")))
+    """Hash only authoritative, replay-stable request identity.
+
+    JIT configuration is an ephemeral GitHub transport credential under the
+    unprivileged controller's authority. GitHub may regenerate it for the same
+    assigned job after controller recovery, so it must not create a new root
+    admission identity.
+    """
+
+    nonsecret = copy.deepcopy(
+        {
+            key: value
+            for key, value in request.items()
+            if key != "jit_config"
+        }
+    )
+    attestation = nonsecret.get("attestation")
+    if isinstance(attestation, dict):
+        attestation.pop("verified_at", None)
     return sha256_json(nonsecret)
 
 

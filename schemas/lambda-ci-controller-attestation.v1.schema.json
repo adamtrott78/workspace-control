@@ -21,6 +21,7 @@
     "actor_login",
     "triggering_actor_login",
     "pr_number",
+    "pr_state",
     "pr_head_repository",
     "candidate_sha",
     "candidate_verification",
@@ -101,6 +102,9 @@
     "verified_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "pr_state": {
+      "const": "open"
     }
   },
   "$defs": {
