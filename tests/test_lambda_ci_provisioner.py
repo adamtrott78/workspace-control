@@ -41,6 +41,7 @@ def test_valid_request_builds_only_fixed_runner_command():
     assert launch["runner"]["fixed_command"] == ["./run.sh"]
     assert launch["run_as"]["user"] == "ci-research-engine"
     assert launch["project_id"] == "research-engine"
+    assert launch["paths"]["home"] == "/srv/workspace-ci/research-engine/home"
     assert launch["allow_production_services"] is False
 
 
