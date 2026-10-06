@@ -24,24 +24,25 @@ Design, validate, and if safety gates pass pilot a project-isolated GitHub Actio
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d33ca95a8d63d7e9f9d7f85afc1fa02540faff16
+- Remote checkpoint: ebfbae64dc82afaf81123ba49b03d170a0196757
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: aa1cdaafb4728c70be7bab0041df5f395f16141c
+- Remote checkpoint: 577764f4db10e4f4f894b1613518c358c6da7b95
 - Remote verified: true
 
 ## Next safe action
 
-Continue from the accepted live P5 baseline at workspace-control d33ca95a8d63d7e9f9d7f85afc1fa02540faff16 and research-engine aa1cdaafb4728c70be7bab0041df5f395f16141c. The research-engine autonomous cpu-test scale-set lane is accepted for routine bounded validation. Next, execute the P5 recovery/adversarial acceptance gate: test controller restart/recovery, replay protection, cleanup-failure blocking, and kill-switch behavior using the existing trusted P5 workflow and without restaging the PAT, rerunning the Go bootstrap, broadening provisioner network/device authority, or granting production/scientific-state access.
+Treat workspace-control ebfbae64dc82afaf81123ba49b03d170a0196757 and research-engine 577764f4db10e4f4f894b1613518c358c6da7b95 as the accepted autonomous CPU+gpu-small baseline. Before enabling gpu-heavy, dual-GPU, model-server, persistent model downloads, production/scientific-state access, or arbitrary model execution, design and validate a P5 execution-policy/model-workload governance contract. Reuse the existing trusted-cache split (candidate-writable staging vs runner-read-only trusted cache) and require immutable model/dependency identity, explicit resource/network/secrets/state-effects declarations, fail-closed admission, and durable execution/cleanup receipts. Then implement the policy in the root-owned project/profile manifests and trusted default-branch workflows, followed by adversarial recovery/cache/resource tests.
 
 ## Remaining work
 
-- P5 recovery/adversarial acceptance: prove controller restart/recovery, replay protection, cleanup-failure blocking, and kill switch behavior without weakening the accepted live boundary.
-- P5 cache/resource hardening: exercise trusted-cache immutability/invalidation and bounded concurrency/resource-failure paths.
+- P5 execution-policy/model-workload governance: define workload classes, admission manifests, model/dependency provenance, trusted-cache promotion, egress/secrets policy, resource profiles, evidence requirements, and explicit forbidden/exception paths before model-scale or gpu-heavy workloads.
+- P5 recovery/adversarial acceptance: prove controller restart/recovery, replay protection, cleanup-failure blocking, kill switch behavior, timeout/OOM/disk-pressure handling, and CPU/GPU contention behavior.
+- P5 trusted-cache/resource hardening: exercise immutable cache promotion/invalidation, commit-pinned model snapshots, package/model cache poisoning resistance, and bounded failure cleanup.
 - P6 second-project isolation pilot: opt in a second repository under a distinct UID/root/cache policy and prove mutual denial.
 
 ## Blockers / gates
