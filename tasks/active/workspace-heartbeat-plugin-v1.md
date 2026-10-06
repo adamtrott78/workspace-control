@@ -108,3 +108,47 @@ Otherwise validate or improve the server-generated `turn_id` design.
 
 The accepted live v0.4.3 runtime remains the rollback/current production
 implementation during this research.
+
+
+## 2026-10-06 research review — candidate refined, still no implementation
+
+External protocol review supports assistant-turn/run scoping. The strongest analogue
+is AG-UI's durable `threadId` plus per-run `runId`, with run-start/run-finish
+boundaries. OpenAI's Agents SDK likewise separates persistent session history
+from each `Runner.run(...)` execution.
+
+The candidate is refined as follows:
+
+- `heartbeat_begin_turn(task_id, message, state)` atomically supersedes the
+  previous active Heartbeat turn, generates an opaque server-owned `turn_id`,
+  writes the first heartbeat, and mounts the current rolling-three card.
+- The returned `turn_id` is **explicitly required** on every later
+  `heartbeat_update(task_id, turn_id, message, state)`.
+- Do not rely on `_meta["openai/session"]` as the update-routing key. Use it only
+  to verify conversation ownership / reject cross-chat conflicts.
+- The app calls
+  `heartbeat_snapshot(task_id, turn_id)`; the response includes whether that
+  turn remains active or has been superseded.
+- A superseded card stops polling and remains static historical transcript UI.
+- `heartbeat_get(task_id)` remains explicit task-level history/debugging across
+  turns.
+- `_meta["openai/widgetSessionId"]` is useful only for diagnostics of one
+  mounted UI instance; it is not the turn identity.
+- MCP `progressToken`/progress notifications are not suitable because they are
+  scoped to one outstanding MCP request.
+- MCP Tasks are not suitable as the primary mechanism because they represent one
+  server-side asynchronous MCP request, not an assistant response that reasons
+  across multiple unrelated tool calls.
+- MCP Apps `ui/resource-teardown` can clean up a widget but correctness must not
+  depend on teardown reaching the server; the next begin-turn supersedes old
+  state deterministically.
+- After changing Heartbeat tool/schema/UI metadata, refresh the plugin and start
+  a **new conversation**. Existing conversations may retain stale tool/UI
+  definitions and are unsupported for the upgraded contract.
+- Preserve one active writer per durable task. A begin-turn arriving from a
+  different ChatGPT conversation should fail closed unless a future explicit
+  user-authorized takeover mechanism is designed.
+
+The live v0.4.3 runtime remains untouched and is the rollback production path.
+
+Next action is user review/freeze of this exact policy, then implementation.
