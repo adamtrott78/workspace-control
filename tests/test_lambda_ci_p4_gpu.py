@@ -36,12 +36,17 @@ def test_token_and_jit_secret_boundary():
     assert "--jitconfig" not in SCRIPT
 
 
-def test_gpu_boundary_is_real_device_policy_not_cuda_env_only():
+def test_gpu_boundary_is_uuid_resolved_not_static_indexed():
     assert "DevicePolicy=closed" in SCRIPT
     assert "DeviceAllow=/dev/nvidiactl rw" in SCRIPT
-    assert "DeviceAllow=/dev/nvidia0 rw" in SCRIPT
-    assert "DeviceAllow=/dev/nvidia1" not in SCRIPT
-    assert "Environment=CUDA_VISIBLE_DEVICES=0" in SCRIPT
+    assert 'TARGET_GPU_UUID = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"' in SCRIPT
+    assert '"--query-gpu=uuid,minor_number"' in SCRIPT
+    assert 'f"DeviceAllow={selected_device} rw"' in SCRIPT
+    assert "DeviceAllow=/dev/nvidia0 rw" not in SCRIPT
+    assert "DeviceAllow=/dev/nvidia1 rw" not in SCRIPT
+    assert "Environment=CUDA_VISIBLE_DEVICES={target_uuid}" in SCRIPT
+    assert "P4_SELECTED_GPU_DEVICE" in SCRIPT
+    assert "P4_DENIED_GPU_DEVICES" in SCRIPT
 
 
 def test_network_home_docker_boundaries_preserved():
@@ -69,15 +74,25 @@ def test_p4_timeout_hierarchy():
     assert watchdog == 22 * 60
     assert workflow < systemd_runtime < watchdog
 
+    assignment = {
+        "target_uuid": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+        "selected_device": "/dev/nvidia1",
+        "selected_minor": 1,
+        "denied_devices": ["/dev/nvidia0"],
+        "inventory": [],
+    }
     command = ns["systemd_command"](
         "workspace-ci-test.service",
         Path("/tmp/runner"),
         "134.88.12.0/22",
+        assignment,
     )
     assert f"RuntimeMaxSec={systemd_runtime}s" in command
-    assert "DeviceAllow=/dev/nvidia0 rw" in command
-    assert "DeviceAllow=/dev/nvidia1 rw" not in command
-    assert "Environment=CUDA_VISIBLE_DEVICES=0" in command
+    assert "DeviceAllow=/dev/nvidia1 rw" in command
+    assert "DeviceAllow=/dev/nvidia0 rw" not in command
+    assert "Environment=CUDA_VISIBLE_DEVICES=GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea" in command
+    assert "Environment=P4_SELECTED_GPU_DEVICE=/dev/nvidia1" in command
+    assert "Environment=P4_DENIED_GPU_DEVICES=/dev/nvidia0" in command
 
 
 def test_gpu_cleanup_is_checked_after_runner_exit():
@@ -112,3 +127,13 @@ def test_live_output_is_preserved():
 
 def test_script_parses():
     ast.parse(SCRIPT)
+
+
+def test_launcher_receipt_records_resolved_gpu_identity():
+    for token in (
+        '"gpu_target_uuid": gpu_assignment["target_uuid"]',
+        '"gpu_selected_device": gpu_assignment["selected_device"]',
+        '"gpu_denied_devices": gpu_assignment["denied_devices"]',
+        '"gpu_inventory": gpu_assignment["inventory"]',
+    ):
+        assert token in SCRIPT
