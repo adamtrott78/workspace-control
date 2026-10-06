@@ -8,6 +8,7 @@ then derives the bounded admission that may be consumed by the provisioner.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import re
@@ -256,7 +257,7 @@ def validate_controller_attestation(
     return dict(attestation)
 
 
-def _request_digest(request: dict[str, Any]) -> str:
+def request_digest(request: dict[str, Any]) -> str:
     nonsecret = {
         key: value
         for key, value in request.items()
@@ -265,6 +266,23 @@ def _request_digest(request: dict[str, Any]) -> str:
     nonsecret["jit_config_sha256"] = sha256_text(str(request.get("jit_config", "")))
     return sha256_json(nonsecret)
 
+
+
+def project_profile_digest(
+    manifest: dict[str, Any],
+    route: dict[str, Any],
+    admission_cfg: dict[str, Any],
+) -> str:
+    return sha256_json(
+        {
+            "project_id": manifest["project_id"],
+            "repository": manifest["repository"],
+            "profile": route["execution_profile"],
+            "profile_contract": manifest["profiles"][route["execution_profile"]],
+            "admission_route": route,
+            "kill_switch_epoch": admission_cfg["kill_switch_epoch"],
+        }
+    )
 
 def mint_admission(
     request: dict[str, Any],
@@ -337,20 +355,15 @@ def mint_admission(
         if key not in policy.get(collection, {}):
             raise AdmissionError(f"workload references unknown {collection}: {key}")
 
-    request_digest = _request_digest(request)
+    request_digest_sha256 = request_digest(request)
     effective_policy_sha256 = policy_sha256 or sha256_json(policy)
     if _HEX64.fullmatch(effective_policy_sha256) is None:
         raise AdmissionError("policy_sha256 must be 64 lowercase hex characters")
 
-    project_profile_sha256 = sha256_json(
-        {
-            "project_id": manifest["project_id"],
-            "repository": manifest["repository"],
-            "profile": route["execution_profile"],
-            "profile_contract": manifest["profiles"][route["execution_profile"]],
-            "admission_route": route,
-            "kill_switch_epoch": admission_cfg["kill_switch_epoch"],
-        }
+    project_profile_sha256 = project_profile_digest(
+        manifest,
+        route,
+        admission_cfg,
     )
     issued_at = now
     expires_at = now + timedelta(seconds=ttl_seconds)
@@ -359,7 +372,7 @@ def mint_admission(
         "schema_version": 1,
         "admission_id": str(uuid.uuid4()),
         "request_id": request["request_id"],
-        "request_digest_sha256": request_digest,
+        "request_digest_sha256": request_digest_sha256,
         "policy": {
             "policy_id": policy["policy_id"],
             "policy_epoch": int(policy["policy_epoch"]),
@@ -407,3 +420,110 @@ def mint_admission(
         "exception_ids": [],
         "required_receipt_schema": "lambda-ci-execution-receipt-v1",
     }
+
+
+
+def validate_admission_freshness(
+    admission: dict[str, Any],
+    manifest: dict[str, Any],
+    policy: dict[str, Any],
+    *,
+    now: datetime | None = None,
+    policy_sha256: str | None = None,
+) -> None:
+    """Revalidate a minted admission immediately before single-use consumption."""
+
+    if not isinstance(admission, dict):
+        raise AdmissionError("admission must be an object")
+    if admission.get("schema_version") != 1:
+        raise AdmissionError("unsupported admission schema")
+
+    lifecycle = admission.get("lifecycle")
+    if not isinstance(lifecycle, dict) or lifecycle.get("single_use") is not True:
+        raise AdmissionError("admission must be single-use")
+    if lifecycle.get("consumed_at") is not None:
+        raise AdmissionError("admission is already consumed")
+
+    now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    not_before = _parse_datetime(lifecycle.get("not_before"), "not_before")
+    expires_at = _parse_datetime(lifecycle.get("expires_at"), "expires_at")
+    if now < not_before:
+        raise AdmissionError("admission is not active yet")
+    if now >= expires_at:
+        raise AdmissionError("admission is expired")
+
+    workload_class = admission.get("workload_class")
+    if not isinstance(workload_class, str) or not workload_class:
+        raise AdmissionError("admission workload class is missing")
+    admission_cfg, route, workload = _validated_route(
+        manifest,
+        policy,
+        workload_class,
+    )
+
+    current_policy_sha256 = policy_sha256 or sha256_json(policy)
+    if _HEX64.fullmatch(current_policy_sha256) is None:
+        raise AdmissionError("policy_sha256 must be 64 lowercase hex characters")
+
+    bound_policy = admission.get("policy")
+    if not isinstance(bound_policy, dict):
+        raise AdmissionError("admission policy binding is missing")
+    if bound_policy.get("policy_id") != policy.get("policy_id"):
+        raise AdmissionError("admission policy id is stale")
+    if int(bound_policy.get("policy_epoch", -1)) != int(policy.get("policy_epoch", -2)):
+        raise AdmissionError("admission policy epoch is stale")
+    if bound_policy.get("policy_sha256") != current_policy_sha256:
+        raise AdmissionError("admission policy digest is stale")
+    if int(bound_policy.get("kill_switch_epoch", -1)) != int(
+        admission_cfg.get("kill_switch_epoch", -2)
+    ):
+        raise AdmissionError("admission kill-switch epoch is stale")
+
+    current_project_profile = project_profile_digest(
+        manifest,
+        route,
+        admission_cfg,
+    )
+    if bound_policy.get("project_profile_sha256") != current_project_profile:
+        raise AdmissionError("admission project/profile binding is stale")
+
+    project = admission.get("project")
+    if not isinstance(project, dict):
+        raise AdmissionError("admission project binding is missing")
+    if (
+        project.get("project_id") != manifest.get("project_id")
+        or project.get("repository") != manifest.get("repository")
+    ):
+        raise AdmissionError("admission project binding is stale")
+
+    if admission.get("execution_profile") != route.get("execution_profile"):
+        raise AdmissionError("admission execution profile is stale")
+    if admission.get("resource_class") != workload.get("resource_class"):
+        raise AdmissionError("admission resource class is stale")
+
+
+def consume_admission(
+    admission: dict[str, Any],
+    manifest: dict[str, Any],
+    policy: dict[str, Any],
+    *,
+    now: datetime | None = None,
+    policy_sha256: str | None = None,
+) -> dict[str, Any]:
+    """Atomically represent the root decision to consume one admission.
+
+    Persistence/serialization of the returned object is owned by the root
+    provisioner state store; this function is intentionally side-effect free.
+    """
+
+    now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    validate_admission_freshness(
+        admission,
+        manifest,
+        policy,
+        now=now,
+        policy_sha256=policy_sha256,
+    )
+    consumed = copy.deepcopy(admission)
+    consumed["lifecycle"]["consumed_at"] = _iso(now)
+    return consumed

@@ -459,6 +459,40 @@ def _pump(stream, log) -> None:
         stream.close()
 
 
+
+def admission_receipt_identity(spec: dict[str, Any]) -> dict[str, Any]:
+    admission = spec.get("admission")
+    if not isinstance(admission, dict):
+        return {}
+    policy_binding = admission.get("policy")
+    workflow = admission.get("trusted_workflow")
+    if not isinstance(policy_binding, dict) or not isinstance(workflow, dict):
+        raise RuntimeLaunchError("v2 launch spec admission identity is incomplete")
+    lifecycle = admission.get("lifecycle")
+    if not isinstance(lifecycle, dict) or lifecycle.get("consumed_at") is None:
+        raise RuntimeLaunchError("v2 launch spec admission is not consumed")
+    return {
+        "admission_identity": {
+            "admission_id": admission["admission_id"],
+            "request_digest_sha256": admission["request_digest_sha256"],
+            "candidate_sha": admission["candidate_sha"],
+            "workload_class": admission["workload_class"],
+            "execution_profile": admission["execution_profile"],
+            "resource_class": admission["resource_class"],
+            "policy_id": policy_binding["policy_id"],
+            "policy_epoch": policy_binding["policy_epoch"],
+            "policy_sha256": policy_binding["policy_sha256"],
+            "project_profile_sha256": policy_binding["project_profile_sha256"],
+            "kill_switch_epoch": policy_binding["kill_switch_epoch"],
+            "workflow_path": workflow["path"],
+            "workflow_default_branch_commit_sha": workflow[
+                "default_branch_commit_sha"
+            ],
+            "workflow_blob_sha": workflow["workflow_blob_sha"],
+            "consumed_at": lifecycle["consumed_at"],
+        }
+    }
+
 def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     """Launch one accepted CPU runner and return a non-secret cleanup receipt."""
     if spec["profile"] != "cpu-test":
@@ -568,6 +602,7 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "jit_config_persisted": False,
             "github_credential_present": False,
         }
+        receipt.update(admission_receipt_identity(spec))
         receipt_path.write_text(
             json.dumps(receipt, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
@@ -723,6 +758,7 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "gpu_support_devices": assignment["support_devices"],
             "cuda_visible_devices": assignment["target_uuid"],
         }
+        receipt.update(admission_receipt_identity(spec))
         receipt_path.write_text(
             json.dumps(receipt, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",

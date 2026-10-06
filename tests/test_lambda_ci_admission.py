@@ -233,5 +233,101 @@ class AdmissionContractTests(unittest.TestCase):
             mod.mint_admission(request, enabled_manifest(), POLICY, now=NOW)
 
 
+    def test_consumption_binds_single_use_and_rejects_reuse(self):
+        manifest = enabled_manifest()
+        admission = mod.mint_admission(
+            good_request(),
+            manifest,
+            POLICY,
+            now=NOW,
+            policy_sha256="1" * 64,
+        )
+        consumed = mod.consume_admission(
+            admission,
+            manifest,
+            POLICY,
+            now=NOW + timedelta(seconds=1),
+            policy_sha256="1" * 64,
+        )
+        self.assertIsNotNone(consumed["lifecycle"]["consumed_at"])
+        self.assertIsNone(admission["lifecycle"]["consumed_at"])
+        with self.assertRaisesRegex(mod.AdmissionError, "already consumed"):
+            mod.consume_admission(
+                consumed,
+                manifest,
+                POLICY,
+                now=NOW + timedelta(seconds=2),
+                policy_sha256="1" * 64,
+            )
+
+    def test_stale_policy_digest_epoch_profile_and_kill_switch_fail_closed(self):
+        manifest = enabled_manifest()
+        admission = mod.mint_admission(
+            good_request(),
+            manifest,
+            POLICY,
+            now=NOW,
+            policy_sha256="1" * 64,
+        )
+
+        with self.assertRaisesRegex(mod.AdmissionError, "policy digest"):
+            mod.consume_admission(
+                admission,
+                manifest,
+                POLICY,
+                now=NOW + timedelta(seconds=1),
+                policy_sha256="2" * 64,
+            )
+
+        changed_policy = copy.deepcopy(POLICY)
+        changed_policy["policy_epoch"] += 1
+        with self.assertRaisesRegex(mod.AdmissionError, "policy epoch"):
+            mod.consume_admission(
+                admission,
+                manifest,
+                changed_policy,
+                now=NOW + timedelta(seconds=1),
+                policy_sha256="1" * 64,
+            )
+
+        changed_manifest = copy.deepcopy(manifest)
+        changed_manifest["profiles"]["cpu-test"]["cpu_quota_percent"] -= 1
+        with self.assertRaisesRegex(mod.AdmissionError, "project/profile"):
+            mod.consume_admission(
+                admission,
+                changed_manifest,
+                POLICY,
+                now=NOW + timedelta(seconds=1),
+                policy_sha256="1" * 64,
+            )
+
+        killed_manifest = copy.deepcopy(manifest)
+        killed_manifest["admission_v2"]["kill_switch_epoch"] += 1
+        with self.assertRaisesRegex(mod.AdmissionError, "kill-switch"):
+            mod.consume_admission(
+                admission,
+                killed_manifest,
+                POLICY,
+                now=NOW + timedelta(seconds=1),
+                policy_sha256="1" * 64,
+            )
+
+    def test_expired_admission_cannot_be_consumed(self):
+        manifest = enabled_manifest()
+        admission = mod.mint_admission(
+            good_request(),
+            manifest,
+            POLICY,
+            now=NOW,
+        )
+        with self.assertRaisesRegex(mod.AdmissionError, "expired"):
+            mod.consume_admission(
+                admission,
+                manifest,
+                POLICY,
+                now=NOW + timedelta(seconds=901),
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

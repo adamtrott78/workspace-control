@@ -49,12 +49,14 @@ mkdir -p "$BACKUP"
 TARGETS=(
   /opt/workspace-ci/controller/lambda-ci-controller
   /opt/workspace-ci/controller/stage-pat
+  /opt/workspace-ci/provisioner/lambda_ci_admission.py
   /opt/workspace-ci/provisioner/lambda_ci_provisioner.py
   /opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py
   /opt/workspace-ci/provisioner/lambda_ci_runtime.py
   /etc/workspace-ci/projects/research-engine.json
   /etc/workspace-ci/lambda-ci-systemd-profiles.v1.json
   /etc/workspace-ci/lambda-ci-upstream-pins.v1.json
+  /etc/workspace-ci/lambda-ci-workload-policy.v1.json
   /etc/systemd/system/workspace-ci-provisioner.service
   /etc/systemd/system/workspace-ci-controller.service
   /etc/systemd/system/workspace-ci-controller.service.d/network.conf
@@ -122,6 +124,7 @@ runuser -u ci-controller -- env \
 
 install -o root -g root -m 0755 "$BUILD_ROOT/lambda-ci-controller" /opt/workspace-ci/controller/lambda-ci-controller
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/stage_lambda_ci_controller_pat.sh" /opt/workspace-ci/controller/stage-pat
+install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_admission.py" /opt/workspace-ci/provisioner/lambda_ci_admission.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_provisioner.py" /opt/workspace-ci/provisioner/lambda_ci_provisioner.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_provisioner_service.py" /opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_runtime.py" /opt/workspace-ci/provisioner/lambda_ci_runtime.py
@@ -129,6 +132,7 @@ install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_runtime.py" /opt/w
 install -o root -g root -m 0644 "$REPO_ROOT/architecture/lambda-ci-project-research-engine.v1.json" /etc/workspace-ci/projects/research-engine.json
 install -o root -g root -m 0644 "$REPO_ROOT/architecture/lambda-ci-systemd-profiles.v1.json" /etc/workspace-ci/lambda-ci-systemd-profiles.v1.json
 install -o root -g root -m 0644 "$REPO_ROOT/architecture/lambda-ci-upstream-pins.v1.json" /etc/workspace-ci/lambda-ci-upstream-pins.v1.json
+install -o root -g root -m 0644 "$REPO_ROOT/architecture/lambda-ci-workload-policy.v1.json" /etc/workspace-ci/lambda-ci-workload-policy.v1.json
 
 install -o root -g root -m 0644 "$REPO_ROOT/systemd/workspace-ci-provisioner.service" /etc/systemd/system/workspace-ci-provisioner.service
 install -o root -g root -m 0644 "$REPO_ROOT/systemd/workspace-ci-controller.service" /etc/systemd/system/workspace-ci-controller.service

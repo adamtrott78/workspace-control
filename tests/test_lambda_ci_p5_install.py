@@ -136,6 +136,25 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         self.assertIn('"gpu_controller_state": gpu_controller_state', BOOTSTRAP)
 
 
+
+    def test_admission_v2_install_payload_is_complete_but_not_activated(self):
+        self.assertIn(
+            "/opt/workspace-ci/provisioner/lambda_ci_admission.py",
+            BOOTSTRAP,
+        )
+        self.assertIn(
+            "/etc/workspace-ci/lambda-ci-workload-policy.v1.json",
+            BOOTSTRAP,
+        )
+        self.assertIn(
+            "--workload-policy /etc/workspace-ci/lambda-ci-workload-policy.v1.json",
+            PROVISIONER_UNIT,
+        )
+        project = json.loads(
+            (ROOT / "architecture" / "lambda-ci-project-research-engine.v1.json").read_text()
+        )
+        self.assertFalse(project["admission_v2"]["enabled"])
+
     def test_go_toolchain_pin_is_exact_official_release(self):
         pin = PINS["go_toolchain"]
         self.assertEqual(pin["version"], "1.26.3")
@@ -193,8 +212,10 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         for target in (
             "/opt/workspace-ci/controller/lambda-ci-controller",
             "/opt/workspace-ci/controller/stage-pat",
+            "/opt/workspace-ci/provisioner/lambda_ci_admission.py",
             "/opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py",
             "/etc/workspace-ci/projects/research-engine.json",
+            "/etc/workspace-ci/lambda-ci-workload-policy.v1.json",
             "/etc/systemd/system/workspace-ci-controller.service",
             "/etc/systemd/system/workspace-ci-controller-gpu.service",
             "/etc/systemd/system/workspace-ci-provisioner.service",
