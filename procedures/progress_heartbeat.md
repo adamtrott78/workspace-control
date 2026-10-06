@@ -96,6 +96,25 @@ The accepted local helper currently targets:
 If that target changes, validate the new runtime before treating
 `heartbeat-up` as production-ready.
 
+## Candidate ChatGPT Workspace Heartbeat delivery — v0.4.4 (VALIDATING)
+
+v0.4.3 remains the accepted production runtime until the gates below pass.
+
+For each **substantial assistant response**:
+
+1. call `heartbeat_begin_turn(task_id, message, state)` as the first Heartbeat operation;
+2. that call supersedes the prior active turn for this conversation/task, creates an opaque server-owned `turn_id`, writes the first heartbeat, and mounts the current-turn rolling-three card;
+3. carry that exact `turn_id` on every later `heartbeat_update(task_id, turn_id, message, state)`;
+4. the mounted app calls app-only `heartbeat_snapshot(task_id, turn_id)`;
+5. a later begin-turn supersedes the old turn; its old card stops polling and remains static;
+6. `heartbeat_get(task_id)` is explicit task-level history/debugging across turns.
+
+`_meta["openai/session"]` is ownership evidence only, never the turn-routing key. Missing/stale/wrong-task/cross-conversation turn IDs fail closed.
+
+After Heartbeat tool/schema/UI changes, refresh the existing plugin connection and start a **new conversation**. Existing conversations may retain stale metadata and are unsupported for the upgraded contract.
+
+The live resource key is cache-busted for v0.4.4. `workspace-heartbeat-runtime-v043` remains rollback until exact Node tests and multi-turn live acceptance pass.
+
 ## Shared representation
 
 The optional structured snapshot is defined by:
