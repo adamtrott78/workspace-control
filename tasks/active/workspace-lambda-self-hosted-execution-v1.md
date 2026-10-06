@@ -24,17 +24,17 @@ project_isolation_and_cache_validation
 
 ## Next safe action
 
-Begin P5 static/recovery analysis from the accepted workspace-control architecture and current main: re-read `architecture/lambda-self-hosted-execution-v1.md`, `architecture/lambda-ci-controller-adapter.v1.md`, `architecture/lambda-ci-provisioner-protocol.v1.md`, `architecture/lambda-ci-systemd-profiles.v1.json`, and the current controller/provisioner scripts/tests. Compare those accepted contracts against the proven P2-P4 manual JIT launchers and identify the minimal implementation delta for an autonomous unprivileged `ci-controller` + narrow root provisioner. Do not mutate the live Lambda host until the P5 static implementation is CI-green.
+Implement the P5 installation/bootstrap layer on a fresh workspace-control branch from `c23ce9a7031d567981a56a49261fdf0508b68ed8`: root-owned `workspace-ci-provisioner.service`, unprivileged `workspace-ci-controller.service`, `/run/workspace-ci/provisioner.sock` root:workspace-ci-controller 0660, controller-only credential-file ownership, pinned controller binary build/install, and kill-switch integration. Add executable regressions for unit users/groups, credential separation, socket permissions, no-network provisioner policy, controller network access, restart policy, and uninstall/rollback. Do not mutate Lambda until the install/bootstrap PR is CI-green.
 
 ## Remaining work
 
-- P5: re-read the accepted scale-set/controller/provisioner architecture and current implementation artifacts, then identify the smallest delta from the proven P2-P4 manual JIT launchers to an autonomous controller.
-- P5: implement hosted-CI validation for an unprivileged ci-controller listener using the pinned official actions/scaleset client (or accepted adapter) and a narrow local root provisioner with no GitHub credential.
-- P5: on Lambda, install/enable only the accepted controller/provisioner pieces and prove ChatGPT can trigger a deliberate bounded failure, consume evidence, repair, and rerun PASS without human SSH or PAT relay.
-- P5: prove controller restart/recovery, one-job cleanup, credential non-exposure, and kill-switch behavior.
+- P5: implement root-owned install/bootstrap for workspace-ci-provisioner and unprivileged ci-controller systemd units, controller-only credential file, socket ownership/mode, and kill-switch integration.
+- P5: validate install/bootstrap statically and with executable unit/property regressions; merge before host mutation.
+- P5: install/enable the accepted units on Lambda and run a no-op/autonomous CPU pilot proving GitHub demand creates and cleans one runner without human SSH/PAT relay.
+- P5: prove controller restart/recovery, provisioner replay protection, cleanup failure blocking, and kill-switch behavior.
 - P6: perform second-project isolation pilot under a distinct UID/root/cache and prove mutual denial.
 
 ## Blockers / gates
 
-- P5 controller/provisioner acceptance is not yet implemented on the live Lambda host; routine JIT execution still requires the operator's local sudo/PAT relay.
-- P5 must not persist a broad GitHub credential in root context or grant arbitrary command/device/path selection to the network-facing controller.
+- P5 service installation/bootstrap is not yet implemented or accepted; live Lambda still requires manual launchers until root-owned units and credential-file boundaries are installed and proven.
+- P5 live activation must not place GitHub credentials in root/provisioner context and must preserve P2-P4 runner isolation.
