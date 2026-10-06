@@ -21,7 +21,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-const githubAPIVersion = "2022-11-28"
+const (
+	githubAPIVersion = "2022-11-28"
+	controllerVerifiedAtLayout = "2006-01-02T15:04:05.000000Z07:00"
+)
 
 var (
 	lowerHex40 = regexp.MustCompile(`^[0-9a-f]{40}$`)
@@ -547,7 +550,7 @@ func (a *githubJobAttestor) Attest(
 		PRHeadRepository:               pull.Head.Repo.FullName,
 		CandidateSHA:                   candidateSHA,
 		CandidateVerification:          "PR_HEAD_MATCH",
-		VerifiedAt:                     a.now().UTC().Format(time.RFC3339Nano),
+		VerifiedAt:                     a.now().UTC().Format(controllerVerifiedAtLayout),
 	}, nil
 }
 

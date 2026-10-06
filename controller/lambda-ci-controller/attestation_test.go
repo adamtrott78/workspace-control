@@ -134,7 +134,7 @@ func fakeGitHubAttestorWithLifecycle(
 		httpClient:  server.Client(),
 		tokenSource: fixedTokenSource("test-token"),
 		now: func() time.Time {
-			return time.Date(2026, 10, 6, 20, 30, 0, 0, time.UTC)
+			return time.Date(2026, 10, 6, 20, 30, 0, 987654321, time.UTC)
 		},
 	}
 }
@@ -191,6 +191,9 @@ func TestGitHubAttestorBindsRunBlobAndOpenPRHead(t *testing.T) {
 	}
 	if att.ActorLogin != "adamtrott78" || att.TriggeringActorLogin != "adamtrott78" {
 		t.Fatalf("actor binding missing: %#v", att)
+	}
+	if att.VerifiedAt != "2026-10-06T20:30:00.987654Z" {
+		t.Fatalf("verified_at is not Python-compatible RFC3339 microseconds: %q", att.VerifiedAt)
 	}
 }
 

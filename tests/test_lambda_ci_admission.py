@@ -345,6 +345,17 @@ class AdmissionContractTests(unittest.TestCase):
                 now=NOW + timedelta(seconds=901),
             )
 
+    def test_verified_at_accepts_controller_microsecond_rfc3339(self):
+        request = good_request()
+        request["attestation"]["verified_at"] = "2026-10-06T20:30:00.987654Z"
+        admission = mod.mint_admission(
+            request,
+            enabled_manifest(),
+            POLICY,
+            now=NOW,
+        )
+        self.assertEqual(admission["candidate_sha"], CANDIDATE)
+
     def test_lifecycle_identity_requires_available_handle_or_assigned_job(self):
         request = good_request()
         request["attestation"]["job_message_type"] = "JobAvailable"
