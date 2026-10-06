@@ -40,7 +40,7 @@ Cancel stale research-engine CPU workflow runs 37533291290 and 37534646664 in Gi
 
 ## Remaining work
 
-- Cancel stale CPU runs 37533291290 and 37534646664, then run fresh non-scientific admission-v2 CPU and gpu-small acceptance against live workspace-control 526e020a4d4ef429ceeac173b9f51fbd75912d99 and validate root receipts plus residue-free cleanup.
+- Cancel stale CPU runs 37533291290 and 37534646664, then run fresh non-scientific admission-v2 CPU and gpu-small acceptance against the live 526e020a4d4ef429ceeac173b9f51fbd75912d99 controller and validate root receipts plus residue-free cleanup.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
