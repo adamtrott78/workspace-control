@@ -28,11 +28,14 @@ accepted delivery contract is:
 
 1. emit an initial `heartbeat_update(task_id, message, state)` with natural
    operator-facing progress;
-2. call `heartbeat_open(task_id)` **exactly once near the beginning** of a
-   sustained task/assistant turn;
+2. call `heartbeat_open(task_id)` once near the beginning of a sustained
+   task/assistant turn to establish the live card;
 3. continue data-only `heartbeat_update` calls at meaningful state changes and
    before the hard three-tool lease would expire;
-4. do **not** reopen/render another progress card for later updates;
+4. while that card is healthy, do **not** reopen/render another card merely to
+   deliver later updates; if the card is demonstrably absent, unmounted, failed
+   (for example "couldn't load app"), or lost after a chat/plugin reload, one
+   recovery `heartbeat_open(task_id)` is allowed to restore the live surface;
 5. the already-mounted card independently reads app-only
    `heartbeat_snapshot(task_id)` through the MCP Apps `tools/call` bridge and
    replaces its own DOM with the latest three updates for that exact task;
@@ -44,6 +47,11 @@ accepted delivery contract is:
 The model must never call `heartbeat_snapshot` directly. It is read-only and
 app-only. The live card may poll while visible/working; that polling is UI
 transport and does not consume the model's heartbeat lease or tool-call budget.
+
+The invariant is **one healthy live card per task/chat surface**, not "only one
+heartbeat_open forever." Recovery opens are for restoring a missing/failed
+surface only; they must not be used as a refresh mechanism when an existing card
+is still healthy.
 
 This contract was host-accepted on 2026-10-06: one card opened once, visibly
 advanced multiple times during continued GitHub/tool work, rolled to the latest
