@@ -52,7 +52,7 @@
       "base_sha": "e11032f71bab72dbe84061afe305f34ba44d6e77",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "d33ca95a8d63d7e9f9d7f85afc1fa02540faff16",
+        "checkpoint_sha": "ebfbae64dc82afaf81123ba49b03d170a0196757",
         "verified": true
       },
       "local": null,
@@ -75,7 +75,7 @@
       "base_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "aa1cdaafb4728c70be7bab0041df5f395f16141c",
+        "checkpoint_sha": "577764f4db10e4f4f894b1613518c358c6da7b95",
         "verified": true
       },
       "local": null,
@@ -539,7 +539,10 @@
         "runner cleanup/recovery tests",
         "live P5 controller/provisioner service activation with controller-owned repository credential",
         "trusted default-branch P5 autonomous CPU acceptance workflow",
-        "two sequential autonomous one-job JIT runners with residue-free cleanup"
+        "two sequential autonomous one-job JIT runners with residue-free cleanup",
+        "trusted default-branch P5 autonomous GPU acceptance workflow",
+        "two sequential autonomous gpu-small JIT runners with exact UUID isolation, real CUDA allocation, and residue-free cleanup",
+        "execution-policy/model-workload governance contract before any gpu-heavy or model-scale promotion"
       ],
       "validation": [
         {
@@ -635,6 +638,46 @@
             "After both autonomous runs, /srv/workspace-ci/research-engine/jobs and staging-cache contained no residual p5-* workspace and ps for ci-research-engine showed no residual project processes.",
             "The two accepted runs used distinct runner names/request directories, and the later run verified the earlier run's marker/workspace had been destroyed before execution."
           ]
+        },
+        {
+          "check": "P5 autonomous gpu-small controller/runtime promotion",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control PR #97 promoted the accepted P4 one-GPU sandbox into a second fixed P5 scale set lambda-research-engine-gpu -> gpu-small while preserving the existing lambda-research-engine -> cpu-test mapping and rejecting gpu-heavy.",
+            "GPU authority is pinned to stable UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea, with DevicePolicy=closed and only the selected physical GPU node plus nvidiactl/UVM support granted to the runner; the other RTX A4500 remains a denial target.",
+            "PR #97 passed Workspace Control Validation and merged as 2de1fdc4d4aa518bcd855200ea7cef2003d0398a.",
+            "research-engine PR #104 added the trusted default-branch Lambda CI P5 Autonomous GPU Acceptance workflow, passed normal GitHub-hosted CI, and merged as 577764f4db10e4f4f894b1613518c358c6da7b95."
+          ]
+        },
+        {
+          "check": "P5 GPU provisioner device-visibility repair",
+          "result": "PASS",
+          "evidence": [
+            "First autonomous GPU request 850d8c8b-0a44-47c1-8ec2-aa9ff82ad72b proved the scale-set/controller path worked but failed before runner launch because PrivateDevices=yes hid /dev/nvidia1 from the root provisioner's UUID resolver.",
+            "Accepted P4 evidence already proved target UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea maps to /dev/nvidia1 and non-selected GPU /dev/nvidia0 must remain denied to the runner.",
+            "workspace-control PR #98 kept DevicePolicy=closed, restored host /dev visibility to the broker, granted the broker only /dev/nvidiactl,/dev/nvidia0,/dev/nvidia1 for mapping/cleanup inspection, passed full validation, and merged as ebfbae64dc82afaf81123ba49b03d170a0196757."
+          ]
+        },
+        {
+          "check": "P5 autonomous gpu-small live acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Final exact-SHA live install at workspace-control ebfbae64dc82afaf81123ba49b03d170a0196757 passed with cpu and gpu controllers ACTIVE, credential ready, provisioner active, socket root:workspace-ci-controller 0660, and production_services_modified=false.",
+            "GitHub Actions run 37512259673 PASS on ephemeral runner lambda-research-engine-gpu-b8aec734f582; artifact 11437401396 digest sha256:98c26b3db098f434ceec4216aafb3c763a577d6edf58064953f96b3df4b58257.",
+            "GitHub Actions run 37515305255 PASS on distinct ephemeral runner lambda-research-engine-gpu-a0e44f66d7b5; artifact 11435883779 digest sha256:7798a52104eca7c4a1dc37e8a41ea792b30836390f878e1ff9eabc1e5fc5a7ad.",
+            "Both runs saw exactly one CUDA-visible NVIDIA RTX A4500 with exact target UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea, selected /dev/nvidia1, and denied /dev/nvidia0 with EPERM.",
+            "Both runs created a CUDA context and allocated/freed 268435456 bytes; free VRAM returned exactly to the pre-allocation value.",
+            "Both runs denied personal home/controller credential/Docker/production PostgreSQL access, persisted no checkout credential, started no model server, and materialized no scientific state."
+          ]
+        },
+        {
+          "check": "P5 autonomous gpu-small post-job cleanup acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Request 3e8bf4ec-479c-47e2-b3fc-cdb7fed22962 final state COMPLETED with RUNNER_EXITED_CLEANLY, exit 0, github_credential_present=false, jit_config_persisted=false, project_uid_process_cleanup=true, project_uid_gpu_process_cleanup=true, runner_workspace_destroyed=true, and staging_workspace_destroyed=true.",
+            "Request 6605c134-6bad-4b96-a809-1b52e6889c32 completed with the same security/cleanup invariants on a distinct ephemeral runner.",
+            "After both runs there were no residual p5-* job/staging workspaces, no ci-research-engine processes, and no NVIDIA compute processes."
+          ]
         }
       ],
       "resume_condition": "Isolation and cleanup survive deliberate adversarial/accidental test cases."
@@ -674,7 +717,7 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "d33ca95a8d63d7e9f9d7f85afc1fa02540faff16",
+      "identity": "ebfbae64dc82afaf81123ba49b03d170a0196757",
       "required_for_resume": true,
       "evidence": [
         "P0 PASS",
@@ -693,7 +736,13 @@
         "Autonomous CPU acceptance runs 37422040174 and 37433722972 both PASS on distinct ephemeral runners for exact candidate ab36b358a0c7ac33d2887fa681f418033554eae0",
         "Artifacts 11397464532 and 11397719082 preserve the two GitHub-side P5 acceptance receipts",
         "Local provisioner receipts for requests 6d41b8c1-55ca-4d80-b193-5df69a497cf7 and 434ed5d8-1402-495e-8ad5-475272f5f341 both report RUNNER_EXITED_CLEANLY, exit 0, no GitHub credential/JIT persistence, full process cleanup, and job/staging destruction",
-        "Post-acceptance host check found no residual p5-* workspaces and no ci-research-engine project processes"
+        "Post-acceptance host check found no residual p5-* workspaces and no ci-research-engine project processes",
+        "P5 autonomous gpu-small static promotion PASS merged workspace-control 2de1fdc4d4aa518bcd855200ea7cef2003d0398a and research-engine workflow 577764f4db10e4f4f894b1613518c358c6da7b95",
+        "P5 GPU broker device-visibility repair PASS merged workspace-control ebfbae64dc82afaf81123ba49b03d170a0196757",
+        "Final live install at ebfbae64dc82afaf81123ba49b03d170a0196757 PASS with CPU/GPU controllers ACTIVE and production services untouched",
+        "Autonomous GPU runs 37512259673 and 37515305255 both PASS on distinct ephemeral runners; artifacts 11437401396 and 11435883779",
+        "Both GPU runs proved exact UUID isolation, /dev/nvidia0 denial, real 256 MiB CUDA allocation/free, and exact VRAM restoration",
+        "Local cleanup receipts 3e8bf4ec-479c-47e2-b3fc-cdb7fed22962 and 6605c134-6bad-4b96-a809-1b52e6889c32 both RUNNER_EXITED_CLEANLY with zero process/GPU/workspace residue"
       ]
     }
   ],
@@ -853,6 +902,43 @@
       "evidence": [
         "Final live P5 install/activation receipt at exact workspace-control d33ca95a8d63d7e9f9d7f85afc1fa02540faff16."
       ]
+    },
+    {
+      "path": "research-engine GitHub Actions run 37512259673 / artifact 11437401396",
+      "state": "accepted",
+      "evidence": [
+        "Autonomous gpu-small PASS on lambda-research-engine-gpu-b8aec734f582.",
+        "Artifact digest sha256:98c26b3db098f434ceec4216aafb3c763a577d6edf58064953f96b3df4b58257."
+      ]
+    },
+    {
+      "path": "research-engine GitHub Actions run 37515305255 / artifact 11435883779",
+      "state": "accepted",
+      "evidence": [
+        "Second sequential autonomous gpu-small PASS on lambda-research-engine-gpu-a0e44f66d7b5.",
+        "Artifact digest sha256:7798a52104eca7c4a1dc37e8a41ea792b30836390f878e1ff9eabc1e5fc5a7ad."
+      ]
+    },
+    {
+      "path": "/srv/workspace-ci/research-engine/logs/p5-3e8bf4ec-479c-47e2-b3fc-cdb7fed22962-receipt.json",
+      "state": "accepted",
+      "evidence": [
+        "RUNNER_EXITED_CLEANLY; exit 0; no GitHub/JIT persistence; CPU/GPU process cleanup true; runner/staging workspaces destroyed."
+      ]
+    },
+    {
+      "path": "/srv/workspace-ci/research-engine/logs/p5-6605c134-6bad-4b96-a809-1b52e6889c32-receipt.json",
+      "state": "accepted",
+      "evidence": [
+        "RUNNER_EXITED_CLEANLY; exit 0; no GitHub/JIT persistence; CPU/GPU process cleanup true; runner/staging workspaces destroyed."
+      ]
+    },
+    {
+      "path": "/home/atrott/adamArchives/Adam/workspace-control-tmp/lambda-ci-p5-install-20261006T185512Z/lambda-ci-p5-install.json",
+      "state": "accepted",
+      "evidence": [
+        "Final autonomous CPU+GPU controller install at exact workspace-control ebfbae64dc82afaf81123ba49b03d170a0196757."
+      ]
     }
   ],
   "validation": [
@@ -867,12 +953,13 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "P5 recovery/adversarial acceptance: prove controller restart/recovery, replay protection, cleanup-failure blocking, and kill switch behavior without weakening the accepted live boundary.",
-    "P5 cache/resource hardening: exercise trusted-cache immutability/invalidation and bounded concurrency/resource-failure paths.",
+    "P5 execution-policy/model-workload governance: define workload classes, admission manifests, model/dependency provenance, trusted-cache promotion, egress/secrets policy, resource profiles, evidence requirements, and explicit forbidden/exception paths before model-scale or gpu-heavy workloads.",
+    "P5 recovery/adversarial acceptance: prove controller restart/recovery, replay protection, cleanup-failure blocking, kill switch behavior, timeout/OOM/disk-pressure handling, and CPU/GPU contention behavior.",
+    "P5 trusted-cache/resource hardening: exercise immutable cache promotion/invalidation, commit-pinned model snapshots, package/model cache poisoning resistance, and bounded failure cleanup.",
     "P6 second-project isolation pilot: opt in a second repository under a distinct UID/root/cache policy and prove mutual denial."
   ],
-  "next_safe_action": "Continue from the accepted live P5 baseline at workspace-control d33ca95a8d63d7e9f9d7f85afc1fa02540faff16 and research-engine aa1cdaafb4728c70be7bab0041df5f395f16141c. The research-engine autonomous cpu-test scale-set lane is accepted for routine bounded validation. Next, execute the P5 recovery/adversarial acceptance gate: test controller restart/recovery, replay protection, cleanup-failure blocking, and kill-switch behavior using the existing trusted P5 workflow and without restaging the PAT, rerunning the Go bootstrap, broadening provisioner network/device authority, or granting production/scientific-state access.",
+  "next_safe_action": "Treat workspace-control ebfbae64dc82afaf81123ba49b03d170a0196757 and research-engine 577764f4db10e4f4f894b1613518c358c6da7b95 as the accepted autonomous CPU+gpu-small baseline. Before enabling gpu-heavy, dual-GPU, model-server, persistent model downloads, production/scientific-state access, or arbitrary model execution, design and validate a P5 execution-policy/model-workload governance contract. Reuse the existing trusted-cache split (candidate-writable staging vs runner-read-only trusted cache) and require immutable model/dependency identity, explicit resource/network/secrets/state-effects declarations, fail-closed admission, and durable execution/cleanup receipts. Then implement the policy in the root-owned project/profile manifests and trusted default-branch workflows, followed by adversarial recovery/cache/resource tests.",
   "last_executor": "chatgpt",
-  "last_surface": "github+lambda-controller",
-  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow.\n\n2026-10-06 P3 guard correction: production safety checks must measure stable service identity/boundaries, not volatile implementation details such as every PostgreSQL background-worker PID. The TCP 5432 listener identity is now the production invariant; runuser boundaries also start from `/` to avoid inherited private-cwd warnings.\n\n2026-10-06 P3 timeout correction: the previous regression actively blessed RuntimeMaxSec=15min even though the trusted workflow timeout was 30min. Timeout policy is now encoded as workflow(1800s) < systemd(2400s) < launcher watchdog(2520s), and tests execute the rendered systemd command.\n\n2026-10-06 P3 accepted: real candidate validation completed on Lambda in 21s once runner was assigned, using isolated PostgreSQL 14.24 + pgvector 0.8.6, Python 3.12.15, exact SHA checkout, and full pytest. P4 may now validate the explicit one-GPU hardware lane without scientific/model execution.\n\n2026-10-06 P4 hardware identity correction: NVIDIA logical index/device-node assumptions are not durable identity. P4 now selects the intended physical GPU by stable UUID, resolves the current minor/device node at launch time, grants only that node under DevicePolicy=closed, and treats all other GPU nodes as explicit denial targets.\n\n2026-10-06 P4 CUDA support correction: after physical GPU selection/denial passed, CUDA Driver API initialization failed with rc=999 under the minimal /dev/nvidiactl + selected GPU grant. The gpu-small-v1 profile now adds only the shared UVM compute support nodes /dev/nvidia-uvm and /dev/nvidia-uvm-tools when present; modeset and broad NVIDIA wildcard access remain excluded.\n\n2026-10-06 P4 accepted: UUID-resolved gpu-small-v1 validation passed end-to-end on Lambda. The selected RTX A4500 was isolated as the only CUDA-visible GPU, the other physical GPU node was denied with EPERM, CUDA Driver API initialized, a real 256 MiB VRAM allocation/free completed with exact free-memory restoration, and no production/scientific state or GPU/project processes leaked. P5 may now remove the manual local sudo/PAT JIT relay without relaxing P2-P4 boundaries.\n\n2026-10-06 P5 static core accepted: the privilege split is now executable and CI-green. `ci-controller` owns GitHub scale-set/JIT authority, root provisioner owns only manifest-derived local launch authority, and JIT config crosses the boundary only over the local Unix socket. Live installation remains separately gated.\n\n2026-10-06 P5 install layer accepted statically: root provisioner and unprivileged controller units, credential-blind bootstrap, controller-only TTY PAT staging helper, rollback, kill switch, and bounded uninstall are CI-green. Live activation is split into provisioner-only install, credential staging, then controller activation so no GitHub secret crosses the root provisioner/bootstrap boundary.\n\n2026-10-06 P5 live gate A prerequisite correction: Lambda system Go is 1.18.1, so the accepted install failed closed before mutation. P5 now pins official go1.26.3 linux-amd64 by exact SHA256 and installs it side-by-side under /opt/workspace-ci/go/1.26.3 using unprivileged ci-controller download + root-owned promotion. System Go and apt remain untouched.\n\n2026-10-06 P5 live Go prerequisite accepted: official Go 1.26.3 was downloaded as ci-controller, checksum/version verified, and promoted side-by-side to /opt/workspace-ci/go/1.26.3 root:root with no group/world write. apt/dpkg and system Go were not modified. The earlier GO_1_26_3_REQUIRED failure is resolved; next action is provisioner-only service install retry from exact workspace-control 2b026c41 with controller inactive and no PAT.\n\n2026-10-06 P5 LIVE ACCEPTED: Gate A/B/C activation completed with credential separation intact. Two live launch-boundary defects were found and repaired fail-closed: missing manifest `home` in the immutable launch spec (PR #94 -> 43a38085) and missing AF_NETLINK for root-provisioner route discovery while retaining no AF_INET/AF_INET6/AF_PACKET authority (PR #95 -> d33ca95). After the final exact-SHA reinstall, autonomous GitHub runs 37422040174 and 37433722972 both completed successfully on distinct ephemeral runners. Both GitHub receipts and both local provisioner cleanup receipts passed; no JIT/PAT persisted, no production PostgreSQL/GPU access was available to cpu-test, both job/staging workspaces were destroyed, and no project processes or p5-* workspaces remained. Routine bounded research-engine CPU validation no longer requires human SSH or PAT relay."
+  "last_surface": "web+github+lambda-controller",
+  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow.\n\n2026-10-06 P3 guard correction: production safety checks must measure stable service identity/boundaries, not volatile implementation details such as every PostgreSQL background-worker PID. The TCP 5432 listener identity is now the production invariant; runuser boundaries also start from `/` to avoid inherited private-cwd warnings.\n\n2026-10-06 P3 timeout correction: the previous regression actively blessed RuntimeMaxSec=15min even though the trusted workflow timeout was 30min. Timeout policy is now encoded as workflow(1800s) < systemd(2400s) < launcher watchdog(2520s), and tests execute the rendered systemd command.\n\n2026-10-06 P3 accepted: real candidate validation completed on Lambda in 21s once runner was assigned, using isolated PostgreSQL 14.24 + pgvector 0.8.6, Python 3.12.15, exact SHA checkout, and full pytest. P4 may now validate the explicit one-GPU hardware lane without scientific/model execution.\n\n2026-10-06 P4 hardware identity correction: NVIDIA logical index/device-node assumptions are not durable identity. P4 now selects the intended physical GPU by stable UUID, resolves the current minor/device node at launch time, grants only that node under DevicePolicy=closed, and treats all other GPU nodes as explicit denial targets.\n\n2026-10-06 P4 CUDA support correction: after physical GPU selection/denial passed, CUDA Driver API initialization failed with rc=999 under the minimal /dev/nvidiactl + selected GPU grant. The gpu-small-v1 profile now adds only the shared UVM compute support nodes /dev/nvidia-uvm and /dev/nvidia-uvm-tools when present; modeset and broad NVIDIA wildcard access remain excluded.\n\n2026-10-06 P4 accepted: UUID-resolved gpu-small-v1 validation passed end-to-end on Lambda. The selected RTX A4500 was isolated as the only CUDA-visible GPU, the other physical GPU node was denied with EPERM, CUDA Driver API initialized, a real 256 MiB VRAM allocation/free completed with exact free-memory restoration, and no production/scientific state or GPU/project processes leaked. P5 may now remove the manual local sudo/PAT JIT relay without relaxing P2-P4 boundaries.\n\n2026-10-06 P5 static core accepted: the privilege split is now executable and CI-green. `ci-controller` owns GitHub scale-set/JIT authority, root provisioner owns only manifest-derived local launch authority, and JIT config crosses the boundary only over the local Unix socket. Live installation remains separately gated.\n\n2026-10-06 P5 install layer accepted statically: root provisioner and unprivileged controller units, credential-blind bootstrap, controller-only TTY PAT staging helper, rollback, kill switch, and bounded uninstall are CI-green. Live activation is split into provisioner-only install, credential staging, then controller activation so no GitHub secret crosses the root provisioner/bootstrap boundary.\n\n2026-10-06 P5 live gate A prerequisite correction: Lambda system Go is 1.18.1, so the accepted install failed closed before mutation. P5 now pins official go1.26.3 linux-amd64 by exact SHA256 and installs it side-by-side under /opt/workspace-ci/go/1.26.3 using unprivileged ci-controller download + root-owned promotion. System Go and apt remain untouched.\n\n2026-10-06 P5 live Go prerequisite accepted: official Go 1.26.3 was downloaded as ci-controller, checksum/version verified, and promoted side-by-side to /opt/workspace-ci/go/1.26.3 root:root with no group/world write. apt/dpkg and system Go were not modified. The earlier GO_1_26_3_REQUIRED failure is resolved; next action is provisioner-only service install retry from exact workspace-control 2b026c41 with controller inactive and no PAT.\n\n2026-10-06 P5 LIVE ACCEPTED: Gate A/B/C activation completed with credential separation intact. Two live launch-boundary defects were found and repaired fail-closed: missing manifest `home` in the immutable launch spec (PR #94 -> 43a38085) and missing AF_NETLINK for root-provisioner route discovery while retaining no AF_INET/AF_INET6/AF_PACKET authority (PR #95 -> d33ca95). After the final exact-SHA reinstall, autonomous GitHub runs 37422040174 and 37433722972 both completed successfully on distinct ephemeral runners. Both GitHub receipts and both local provisioner cleanup receipts passed; no JIT/PAT persisted, no production PostgreSQL/GPU access was available to cpu-test, both job/staging workspaces were destroyed, and no project processes or p5-* workspaces remained. Routine bounded research-engine CPU validation no longer requires human SSH or PAT relay.\n\n2026-10-06 P5 AUTONOMOUS GPU ACCEPTED: gpu-small is now fully autonomous on a separate scale set. After fixing root-provisioner device visibility without broadening runner GPU authority, two sequential trusted default-branch jobs ran on distinct one-job JIT runners, each seeing exactly the pinned RTX A4500 UUID, denying the second GPU, allocating/freeing 256 MiB through the CUDA Driver API, and returning VRAM exactly to baseline. Both local cleanup receipts report no JIT/PAT persistence, no leaked CPU/GPU processes, and destroyed job/staging workspaces; final host checks show no residual P5 or NVIDIA compute processes. With CPU+gpu-small execution proven, capability expansion is intentionally paused for execution-policy/model-workload governance before model-scale or gpu-heavy use."
 }
