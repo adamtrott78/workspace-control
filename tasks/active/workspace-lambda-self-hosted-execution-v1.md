@@ -28,20 +28,20 @@ research_engine_pilot
 
 ## Next safe action
 
-Begin P3 static implementation: inspect the accepted research-engine CI commands and project dependencies, then add a trusted default-branch Lambda CPU-validation workflow plus a P3 JIT launcher/profile that checks out exact PR #95 head `ab36b358a0c7ac33d2887fa681f418033554eae0`, uses `persist-credentials:false`, creates an ephemeral ci-research-engine-owned PostgreSQL test cluster on a Unix socket, executes the real compile/unit/integration validation on Lambda, uploads a structured receipt, and destroys its workspace/database afterward. Do not access production PostgreSQL, production daemon state, or GPUs in P3.
+On Lambda, create a clean detached workspace-control worktree exactly at `c2e2c1a6a1f75cca424e94041e39c1e375ce63ca`, then run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES`. Paste a short-lived fine-grained GitHub PAT scoped only to `adamtrott78/research-engine` with repository Administration:write into the hidden prompt. Do not put the token in chat, Git, argv, environment, or a file. The trusted P3 run is already queued as 37394877505. After launcher exit, return only the non-secret `lambda-ci-p3-launcher.json` receipt; ChatGPT will inspect the GitHub run/artifact directly.
 
 ## Remaining work
 
-- P3: add a trusted default-branch CPU-validation workflow that checks out an exact same-repository PR head with persist-credentials=false, creates a fresh venv, launches an ephemeral ci-research-engine-owned PostgreSQL cluster over a Unix socket, installs/tests the candidate, and uploads a structured receipt.
-- P3: launch one ephemeral CPU runner, execute candidate research-engine PR #95 exact head ab36b358a0c7ac33d2887fa681f418033554eae0, inspect logs/artifacts, and prove cleanup.
-- P4: add bounded GPU validation with explicit device grant and post-job GPU/process cleanup.
-- P5: install/accept the autonomous scale-set listener + root provisioner path and prove ChatGPT fail-diagnose-fix-rerun-PASS acceptance without human SSH/token relay.
-- P6: second-project cross-project isolation pilot under separate UID/root/cache.
+- Execute the reviewed P3 one-job JIT launcher on Lambda using a short-lived research-engine Administration:write token pasted only into the hidden local prompt.
+- Inspect GitHub run 37394877505 and lambda-ci-p3-receipt; if failure occurs, diagnose exact host/candidate incompatibility and iterate through a new exact SHA/run.
+- If P3 passes, checkpoint CPU validation and begin P4 bounded GPU validation with explicit device grant and post-job GPU/process cleanup.
+- P5: install/accept autonomous scale-set listener + narrow root provisioner and prove closed-loop fail-diagnose-fix-rerun-PASS with no human SSH/token relay.
+- P6: second-project isolation pilot under separate UID/root/cache.
 
 ## Blockers / gates
 
-- P3 must use an ephemeral test database owned by ci-research-engine over a Unix socket or equally isolated endpoint; production PostgreSQL remains forbidden.
-- Until the autonomous scale-set controller/GitHub App path is installed, each new JIT runner still requires a local short-lived repository Administration token bootstrap; this is acceptable for P3/P4 but must be eliminated before P5 closed-loop acceptance.
+- P3 run 37394877505 requires one local short-lived research-engine Administration:write token to mint the one-job JIT runner because the autonomous scale-set controller is intentionally deferred until P5.
+- P3 may reveal host-specific PostgreSQL/pgvector or candidate-test failures; those should be diagnosed from the returned GitHub receipt/logs rather than bypassing isolation.
 
 ## Fresh-chat initialization
 
