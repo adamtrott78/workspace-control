@@ -24,17 +24,18 @@ project_isolation_and_cache_validation
 
 ## Next safe action
 
-Implement the P5 installation/bootstrap layer on a fresh workspace-control branch from `c23ce9a7031d567981a56a49261fdf0508b68ed8`: root-owned `workspace-ci-provisioner.service`, unprivileged `workspace-ci-controller.service`, `/run/workspace-ci/provisioner.sock` root:workspace-ci-controller 0660, controller-only credential-file ownership, pinned controller binary build/install, and kill-switch integration. Add executable regressions for unit users/groups, credential separation, socket permissions, no-network provisioner policy, controller network access, restart policy, and uninstall/rollback. Do not mutate Lambda until the install/bootstrap PR is CI-green.
+Human live gate A only: on Lambda, use a clean detached workspace-control tree exactly at `7febbb619962bd32e8a6e68c70e38b869affc6e7` and run `scripts/bootstrap_lambda_ci_p5.sh` via sudo with `WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES`, `WORKSPACE_CI_P5_EXPECTED_SHA=7febbb619962bd32e8a6e68c70e38b869affc6e7`, and no controller-activation flag. The bootstrap must fail closed before mutation if Go <1.26.3 or host prerequisites drift. On PASS it installs/starts only the root provisioner, verifies `/run/workspace-ci/provisioner.sock` root:workspace-ci-controller 0660, leaves the controller installed but inactive, handles no GitHub credential, and emits a receipt under the visible workspace-control-tmp directory. Do not stage or activate the controller until that receipt is reviewed.
 
 ## Remaining work
 
-- P5: implement root-owned install/bootstrap for workspace-ci-provisioner and unprivileged ci-controller systemd units, controller-only credential file, socket ownership/mode, and kill-switch integration.
-- P5: validate install/bootstrap statically and with executable unit/property regressions; merge before host mutation.
-- P5: install/enable the accepted units on Lambda and run a no-op/autonomous CPU pilot proving GitHub demand creates and cleans one runner without human SSH/PAT relay.
-- P5: prove controller restart/recovery, provisioner replay protection, cleanup failure blocking, and kill-switch behavior.
+- P5 live gate A: run the exact-SHA install bootstrap on Lambda with controller activation disabled; require provisioner service/socket PASS and no production-service changes.
+- P5 live gate B: stage the existing clean research-engine PAT directly as ci-controller using /opt/workspace-ci/controller/stage-pat; do not paste the token into chat.
+- P5 live gate C: rerun exact-SHA bootstrap with WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES and require controller/provisioner both active.
+- P5 acceptance: trigger a trusted scale-set CPU job from GitHub and prove autonomous runner provisioning, exact candidate validation, cleanup, evidence consumption, repair/rerun without human SSH/PAT relay.
+- P5 recovery: prove controller restart/recovery, replay protection, cleanup-failure blocking, and kill switch.
 - P6: perform second-project isolation pilot under a distinct UID/root/cache and prove mutual denial.
 
 ## Blockers / gates
 
-- P5 service installation/bootstrap is not yet implemented or accepted; live Lambda still requires manual launchers until root-owned units and credential-file boundaries are installed and proven.
-- P5 live activation must not place GitHub credentials in root/provisioner context and must preserve P2-P4 runner isolation.
+- P5 live services are not yet installed on Lambda; manual JIT launchers remain the active path until the accepted install bootstrap passes on-host.
+- Controller activation remains intentionally gated on one-time ci-controller-owned credential staging.
