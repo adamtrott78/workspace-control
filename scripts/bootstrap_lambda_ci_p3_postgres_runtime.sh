@@ -158,7 +158,7 @@ else
   chmod -R go-w "$PREFIX"
 
   python3 - "$MANIFEST" "$HEAD" "$PREFIX"     "$POSTGRES_VERSION" "$POSTGRES_SHA256" "$PGVECTOR_VERSION" "$PGVECTOR_COMMIT" <<'PY'
-import hashlib,json,pathlib,sys
+import hashlib,json,pathlib,subprocess,sys
 manifest,control_sha,prefix,pg_version,pg_sha,vec_version,vec_commit=sys.argv[1:]
 root=pathlib.Path(prefix)
 important=[
@@ -166,8 +166,8 @@ important=[
     root/"bin/initdb",
     root/"bin/pg_ctl",
     root/"bin/psql",
-    root/"lib/postgresql/vector.so",
-    root/"share/postgresql/extension/vector.control",
+    pathlib.Path(subprocess.check_output([str(root/"bin/pg_config"), "--pkglibdir"], text=True).strip())/"vector.so",
+    pathlib.Path(subprocess.check_output([str(root/"bin/pg_config"), "--sharedir"], text=True).strip())/"extension/vector.control",
 ]
 files=[]
 for p in important:
@@ -209,6 +209,17 @@ runuser -u ci-research-engine -- env   PREFIX="$PREFIX" SMOKE_ROOT="$SMOKE_ROOT"
     sock="$SMOKE_ROOT/socket"
     mkdir -m 0700 "$data" "$sock"
 
+    started=0
+    stop_db() {
+      rc=$?
+      set +e
+      if [[ "$started" == "1" ]]; then
+        "$PREFIX/bin/pg_ctl" -D "$data" -m fast -w stop >/dev/null 2>&1 || true
+      fi
+      exit "$rc"
+    }
+    trap stop_db EXIT
+
     "$PREFIX/bin/initdb"       -D "$data"       --username=research_engine       --auth-local=trust       --auth-host=reject       --no-locale       --encoding=UTF8       >/dev/null
 
     cat >> "$data/postgresql.conf" <<EOF
@@ -218,6 +229,7 @@ port = 55435
 EOF
 
     "$PREFIX/bin/pg_ctl" -D "$data" -w start >/dev/null
+    started=1
     "$PREFIX/bin/createdb"       -h "$sock" -p 55435 -U research_engine research_engine
 
     version="$(
@@ -229,6 +241,7 @@ EOF
       grep -qx t
 
     "$PREFIX/bin/pg_ctl" -D "$data" -m fast -w stop >/dev/null
+    started=0
   '
 SMOKE_STARTED=0
 
