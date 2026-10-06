@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = (ROOT / "scripts" / "bootstrap_lambda_ci_p3_postgres_runtime.sh").read_text()
@@ -42,7 +43,7 @@ def test_build_is_unprivileged_and_promotion_is_read_only():
     assert "--without-readline" in SCRIPT
     assert "--without-zlib" in SCRIPT
     assert 'make DESTDIR="$WORK/postgres-stage" install' in SCRIPT
-    assert 'chmod -R go-w "$PREFIX"' in SCRIPT
+    assert 'chmod -R a+rX,go-w "$PREFIX"' in SCRIPT
 
 
 def test_pgvector_build_uses_exact_commit_and_runtime_pg_config():
@@ -80,3 +81,17 @@ def test_shell_parses():
     # CI also runs repository-wide tests; this explicit marker ensures the
     # intended validation contract includes a shell syntax check.
     assert SCRIPT.startswith("#!/usr/bin/env bash")
+
+
+def test_promoted_postgres_is_usable_by_ci_controller_before_pgvector_build():
+    normalize = SCRIPT.index('chmod -R a+rX,go-w "$PREFIX"')
+    execute_probe = SCRIPT.index('runuser -u ci-controller -- test -x "$PREFIX/bin/pg_config"')
+    header_probe = SCRIPT.index('runuser -u ci-controller -- test -r "$PREFIX/include/server/postgres.h"')
+    pgvector_build = SCRIPT.index('make -C pgvector -j"$JOBS" PG_CONFIG="$PREFIX/bin/pg_config"')
+    assert normalize < execute_probe < pgvector_build
+    assert normalize < header_probe < pgvector_build
+
+
+def test_shell_syntax_is_valid():
+    script_path = ROOT / "scripts" / "bootstrap_lambda_ci_p3_postgres_runtime.sh"
+    subprocess.run(["bash", "-n", str(script_path)], check=True)

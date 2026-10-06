@@ -133,7 +133,16 @@ else
   [[ ! -e "$PREFIX" ]] || die "RUNTIME_APPEARED_DURING_BUILD"
   cp -a -- "$STAGED_PREFIX" "$PREFIX"
   chown -R root:root "$PREFIX"
-  chmod -R go-w "$PREFIX"
+  chmod -R a+rX,go-w "$PREFIX"
+
+  # The PostgreSQL build inherits the script's restrictive umask. Normalize
+  # the promoted runtime so unprivileged ci-controller can execute pg_config
+  # and read headers while keeping the tree root-owned and non-writable.
+  runuser -u ci-controller -- test -x "$PREFIX/bin/pg_config" ||
+    die "PROMOTED_PG_CONFIG_NOT_EXECUTABLE_BY_CI_CONTROLLER"
+  runuser -u ci-controller -- test -r "$PREFIX/include/server/postgres.h" ||
+    die "PROMOTED_POSTGRES_HEADERS_NOT_READABLE_BY_CI_CONTROLLER"
+
   CREATED_PREFIX=1
 
   runuser -u ci-controller -- env     WORK="$WORK" PREFIX="$PREFIX" JOBS="$JOBS"     PGVECTOR_REPO="$PGVECTOR_REPO" PGVECTOR_COMMIT="$PGVECTOR_COMMIT"     bash -ceu '
@@ -155,7 +164,7 @@ else
 
   cp -a -- "$VECTOR_STAGE/." "$PREFIX/"
   chown -R root:root "$PREFIX"
-  chmod -R go-w "$PREFIX"
+  chmod -R a+rX,go-w "$PREFIX"
 
   python3 - "$MANIFEST" "$HEAD" "$PREFIX"     "$POSTGRES_VERSION" "$POSTGRES_SHA256" "$PGVECTOR_VERSION" "$PGVECTOR_COMMIT" <<'PY'
 import hashlib,json,pathlib,subprocess,sys
