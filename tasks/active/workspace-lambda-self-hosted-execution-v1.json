@@ -464,7 +464,7 @@
         },
         {
           "check": "P4 run 37410285336 diagnosis",
-          "result": "FAIL_CLOSED_REPAIR_IN_PROGRESS",
+          "result": "REPAIR_MERGED_RETRY_QUEUED",
           "evidence": [
             "Local launcher receipt decision=RUNNER_EXITED_CLEANLY for runner 26 lambda-research-engine-p4-084a5ed25d5d; only /dev/nvidiactl and /dev/nvidia0 were granted; no project UID or GPU compute process leaked; workspace destroyed.",
             "GitHub P4 run 37410285336 exact-SHA gate and checkout passed; bounded GPU validation failed in ~2 seconds.",
@@ -472,7 +472,9 @@
             "The device isolation boundary therefore worked, but the static assumption that /dev/nvidia0 maps to a previously recorded logical GPU index/UUID is not a stable hardware identity contract.",
             "workspace-control PR #86 exact head 281e938e0a61d26518e1cb4b66315be520e4be3c passed full validation and merged as c2c69daa2b61d869dfaad3ff289e4b957201e564.",
             "P4 launcher now resolves the intended physical GPU UUID to the current NVIDIA minor/device node at launch time, grants only that exact node + /dev/nvidiactl, passes all other GPU nodes as denial targets, and sets CUDA_VISIBLE_DEVICES to the stable UUID.",
-            "research-engine PR #102 exact head db2bd065472a4a19b3dd41cfa519d6593e7378a2 consumes launcher-selected UUID/device metadata, uses CUDA Driver API rather than numeric nvidia-smi index, and always emits a PASS/FAIL hardware receipt; hosted CI is in progress."
+            "research-engine PR #102 exact head db2bd065472a4a19b3dd41cfa519d6593e7378a2 consumes launcher-selected UUID/device metadata, uses CUDA Driver API rather than numeric nvidia-smi index, and always emits a PASS/FAIL hardware receipt; hosted CI is in progress.",
+            "research-engine PR #102 exact head db2bd065472a4a19b3dd41cfa519d6593e7378a2 passed hosted CI and merged as 83de7f9ac2004d6163255025d94c0344434dadeb.",
+            "Fresh P4 retry #2 run 37411162940 is queued on self-hosted/lambda-research-engine/gpu-small-v1 for unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0."
           ]
         }
       ],
@@ -538,9 +540,10 @@
         "P1 PASS",
         "P2 PASS",
         "P3 PASS run 37408781519 artifact 11388222514",
-        "P4 run 37410285336 failed fast only on static device-index/UUID mapping assumption",
+        "P4 attempt #1 proved device isolation but exposed static index->UUID assumption",
         "UUID-resolving P4 launcher merged workspace-control@c2c69daa2b61d869dfaad3ff289e4b957201e564",
-        "research-engine PR #102 db2bd065472a4a19b3dd41cfa519d6593e7378a2 hosted CI in progress"
+        "UUID-aware P4 workflow merged research-engine@83de7f9ac2004d6163255025d94c0344434dadeb",
+        "P4 retry #2 run 37411162940 queued on gpu-small-v1"
       ]
     }
   ],
@@ -568,19 +571,17 @@
     }
   ],
   "blockers": [
-    "research-engine PR #102 ordinary CI must PASS and merge before a fresh P4 run is armed.",
-    "After PR #102 merges, P4 must pass stable UUID-selected device grant, non-selected GPU denial, real CUDA context + 256 MiB allocation, and post-exit project/GPU cleanup.",
-    "Human-only JIT credential relay remains required until P5; the clean short-lived PAT may be reused if it has only ever been entered into the hidden Lambda prompt."
+    "Human-only JIT credential gate: launch queued P4 retry #2 run 37411162940 using exact workspace-control c2c69daa2b61d869dfaad3ff289e4b957201e564. A clean PAT that has only ever been entered into the hidden Lambda prompt may be reused.",
+    "P4 retry #2 must pass UUID-resolved selected-device grant, all non-selected GPU device denials, one visible CUDA device with target UUID, real 256 MiB allocation/free, and post-exit process/GPU cleanup before P5."
   ],
   "remaining_work": [
-    "Consume research-engine PR #102 hosted CI immediately when terminal; merge only on PASS or repair the demonstrated defect.",
-    "After PR #102 merges, queue a fresh /lambda-ci-gpu trigger against unchanged PR #95 candidate ab36b358a0c7ac33d2887fa681f418033554eae0.",
-    "Launch the fresh P4 job using the UUID-resolving launcher from workspace-control c2c69daa2b61d869dfaad3ff289e4b957201e564.",
-    "Immediately consume the P4 artifact and launcher receipt; continue bounded repair/re-run until PASS.",
+    "Launch P4 retry #2 run 37411162940 using scripts/launch_lambda_ci_p4_gpu.py from exact workspace-control c2c69daa2b61d869dfaad3ff289e4b957201e564.",
+    "Watch live output; immediately consume the always-uploaded P4 PASS/FAIL receipt and launcher receipt when terminal.",
+    "If CUDA demonstrates a requirement for an additional exact NVIDIA support device node (for example UVM), add only that measured node and rerun; do not grant broad NVIDIA wildcards.",
     "After P4 PASS, begin P5 autonomous controller/provisioner acceptance.",
     "P6: second-project isolation pilot under separate UID/root/cache."
   ],
-  "next_safe_action": "Continue consuming research-engine PR #102 exact-head hosted CI. On PASS, merge PR #102, queue a fresh P4 GPU validation against unchanged PR #95 head ab36b358a0c7ac33d2887fa681f418033554eae0, then use the UUID-resolving launcher from workspace-control c2c69daa2b61d869dfaad3ff289e4b957201e564. The launcher must resolve target UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea to the current /dev/nvidia<minor>, grant only that device + /dev/nvidiactl, and pass all non-selected GPU devices as explicit denial targets.",
+  "next_safe_action": "Human-only credential gate: on Lambda create/reuse a clean detached workspace-control tree exactly at `c2c69daa2b61d869dfaad3ff289e4b957201e564` and run `scripts/launch_lambda_ci_p4_gpu.py` under sudo with `WORKSPACE_CI_P4_AUTHORIZED=YES`. The launcher will resolve target UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea to the current NVIDIA minor/device node before creating the systemd unit, grant only that device + /dev/nvidiactl, and pass all other GPU device nodes as explicit denial targets. P4 retry #2 run 37411162940 is already queued on gpu-small-v1. A clean PAT used only in hidden prompts may be reused.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
   "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow.\n\n2026-10-06 P3 guard correction: production safety checks must measure stable service identity/boundaries, not volatile implementation details such as every PostgreSQL background-worker PID. The TCP 5432 listener identity is now the production invariant; runuser boundaries also start from `/` to avoid inherited private-cwd warnings.\n\n2026-10-06 P3 timeout correction: the previous regression actively blessed RuntimeMaxSec=15min even though the trusted workflow timeout was 30min. Timeout policy is now encoded as workflow(1800s) < systemd(2400s) < launcher watchdog(2520s), and tests execute the rendered systemd command.\n\n2026-10-06 P3 accepted: real candidate validation completed on Lambda in 21s once runner was assigned, using isolated PostgreSQL 14.24 + pgvector 0.8.6, Python 3.12.15, exact SHA checkout, and full pytest. P4 may now validate the explicit one-GPU hardware lane without scientific/model execution.\n\n2026-10-06 P4 hardware identity correction: NVIDIA logical index/device-node assumptions are not durable identity. P4 now selects the intended physical GPU by stable UUID, resolves the current minor/device node at launch time, grants only that node under DevicePolicy=closed, and treats all other GPU nodes as explicit denial targets."
