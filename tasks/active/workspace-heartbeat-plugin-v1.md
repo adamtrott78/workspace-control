@@ -11,8 +11,8 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
-- Status: VALIDATING
-- Current stage: chronology_preserving_transcript_updates
+- Status: COMPLETED
+- Current stage: accepted_v041_chronology
 - Exact v0.4.1 source: `568acaaf1e8350bb6c781415668d2e965af46f00`
 - Branch: `heartbeat-v2-smoke-checkpoint`
 - PR: #69
@@ -48,3 +48,26 @@ Before mutating shared Lambda/GitHub tooling, rehydrate:
 `tasks/active/workspace-lambda-self-hosted-execution-v1.json`
 
 because its P3/P4/P5 state may have advanced independently.
+
+
+## Final acceptance — 2026-10-05
+
+- Lambda runtime deployed from exact v0.4.1 source `568acaaf1e8350bb6c781415668d2e965af46f00`.
+- Dedicated `workspace-heartbeat-node` runtime reported Node v20.20.2.
+- Live custom-plugin descriptor was refreshed after deployment.
+- Acceptance sequence passed in one ChatGPT turn: `heartbeat_update` → ordinary GitHub tool call → `heartbeat_update` → explicit `heartbeat_get`.
+- Routine heartbeat updates remained ordinary transcript/tool results rather than host-hoisted custom cards.
+- `heartbeat_get` retained explicit bounded history/timeline inspection.
+- Heartbeat side project is accepted and closed at v0.4.1. Do not reopen UI/card placement work unless new field evidence shows a functional regression.
+
+## Transfer
+
+Resume:
+
+`tasks/active/workspace-lambda-github-tooling-optimization-v1.json`
+
+Before mutating shared Lambda/GitHub tooling, rehydrate:
+
+`tasks/active/workspace-lambda-self-hosted-execution-v1.json`
+
+and use its current durable state rather than the older heartbeat-era snapshot.
