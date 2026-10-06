@@ -13,6 +13,7 @@ fi
 
 systemctl stop workspace-ci-controller.service 2>/dev/null || true
 systemctl stop workspace-ci-provisioner.socket workspace-ci-provisioner.service 2>/dev/null || true
+rm -f -- /run/workspace-ci/provisioner.sock
 
 mapfile -t units < <(
   systemctl list-units --all --plain --no-legend 'workspace-ci-*.service' 2>/dev/null |
