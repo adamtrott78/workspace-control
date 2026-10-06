@@ -120,5 +120,54 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
             self.assertNotIn(forbidden, source)
 
 
+    def test_v2_admission_identity_is_bound_into_runtime_receipt(self):
+        spec = self.gpu_spec()
+        spec["admission"] = {
+            "admission_id": "11111111-2222-4333-8444-555555555555",
+            "request_digest_sha256": "1" * 64,
+            "candidate_sha": "a" * 40,
+            "workload_class": "gpu-small",
+            "execution_profile": "gpu-small",
+            "resource_class": "gpu_small_v1",
+            "policy": {
+                "policy_id": "lambda-ci-workload-policy-v1",
+                "policy_epoch": 1,
+                "policy_sha256": "2" * 64,
+                "project_profile_sha256": "3" * 64,
+                "kill_switch_epoch": 0,
+            },
+            "trusted_workflow": {
+                "path": ".github/workflows/lambda-ci-p5-gpu-autonomous.yml",
+                "default_branch_commit_sha": "b" * 40,
+                "workflow_blob_sha": "c" * 40,
+            },
+            "lifecycle": {
+                "consumed_at": "2026-10-06T20:00:00Z",
+            },
+        }
+        identity = runtime.admission_receipt_identity(spec)["admission_identity"]
+        self.assertEqual(
+            identity["admission_id"],
+            "11111111-2222-4333-8444-555555555555",
+        )
+        self.assertEqual(identity["candidate_sha"], "a" * 40)
+        self.assertEqual(identity["policy_sha256"], "2" * 64)
+        self.assertEqual(
+            identity["workflow_blob_sha"],
+            "c" * 40,
+        )
+        self.assertEqual(identity["workload_class"], "gpu-small")
+
+    def test_v2_unconsumed_admission_is_rejected_by_runtime_identity_binding(self):
+        spec = self.gpu_spec()
+        spec["admission"] = {
+            "policy": {},
+            "trusted_workflow": {},
+            "lifecycle": {"consumed_at": None},
+        }
+        with self.assertRaises(runtime.RuntimeLaunchError):
+            runtime.admission_receipt_identity(spec)
+
+
 if __name__ == "__main__":
     unittest.main()
