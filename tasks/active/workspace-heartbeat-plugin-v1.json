@@ -2,37 +2,26 @@
   "schema_version": 2,
   "task_id": "workspace-heartbeat-plugin-v1",
   "title": "Workspace Heartbeat MCP Plugin v1",
-  "status": "VALIDATING",
-  "goal": "Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel UI so long-running workspace-control tasks can publish natural-language progress through a real tool call into one continuously updating side panel.",
+  "status": "COMPLETE",
+  "goal": "Provide reliable operator-visible progress for long ChatGPT workspace-control tasks through natural data-only heartbeat updates plus one early-mounted, self-refreshing, task-scoped live card.",
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control",
   "current_stage": "live_app_self_refresh_v043",
   "acceptance_criteria": [
-    "Expose a model-callable heartbeat_update tool whose user-facing progress content is natural prose rather than rigid structured headings.",
-    "Expose a read-only heartbeat_get tool that returns the latest heartbeat plus bounded history for an optional task ID.",
-    "Use task_id as the stable heartbeat identity across ChatGPT model/app session differences and chat handoffs; session metadata may resolve omitted task IDs but must not partition authoritative task progress.",
-    "Advertise a ChatGPT thread conversation-panel entrypoint that renders beside a normal Chat conversation.",
-    "Render a bounded chronological log of prior heartbeat updates in the same panel, newest update last.",
-    "Assign monotonically increasing sequence numbers per task while the server process is alive and tolerate sequence restart after server restart through timestamp-based UI merge semantics.",
-    "Keep heartbeat state and history in memory only for this iteration; do not add a database or durable telemetry sink.",
-    "Require Node.js 20 or newer and fail dependency/runtime setup clearly on older runtimes.",
-    "Log successful MCP requests with method, status, and latency so live transport can be observed directly.",
-    "Keep the tools useful without UI through normal structuredContent/content results.",
-    "Do not mutate research-engine or any course/research repository as part of this plugin implementation.",
-    "Deliver mounted-panel updates from the MCP Apps ui/notifications/tool-result lifecycle without automatic background heartbeat_get polling.",
-    "Hydrate mounted UI from the invoking tool result and persisted widget state; keep heartbeat_get available only for explicit reconciliation.",
-    "Do not generate recurring MCP traffic while an idle heartbeat panel is merely open.",
-    "Preserve a bounded operator-visible timeline across task ownership changes within the same ChatGPT work session, while keeping task-local history authoritative for task APIs.",
-    "Keep heartbeat_get as a separate optional history/sidebar surface rather than making mounted sidebar live refresh the primary progress-delivery path.",
-    "Keep heartbeat_update data-only during long tool sequences; call heartbeat_render at most once near the end of a substantial turn to render exactly one compact card containing only the latest three updates for the supplied task_id.",
-    "The compact card must never mix task histories; heartbeat_get remains the explicit full-history/sidebar surface for the selected task.",
-    "Heartbeat prose should be natural conversational progress commentary focused on meaningful findings, decisions, state changes, and next actions rather than telemetry-style narration of tool mechanics.",
-    "One model-visible heartbeat_open(task_id) must mount one task-scoped app early in work; no repeated render tool is part of the normal progress loop.",
-    "The app-only heartbeat_snapshot must return only the last three updates for the explicit task and must not expose any cross-task timeline.",
-    "An already-mounted live card must call heartbeat_snapshot through MCP Apps tools/call and update its existing DOM without creating additional rendered cards.",
-    "The live card must have bounded request timeouts, no overlapping polls, retries without discarding known-good state, visibility pause/resume, and terminal done stop.",
-    "Host-side acceptance must demonstrate that the card mounts before the task is nearly complete and visibly advances as heartbeat_update calls arrive; code-only tests cannot establish this."
+    "Expose model-visible heartbeat_update(task_id, message, state) as a data-only natural-language progress write.",
+    "Use task_id as the stable heartbeat identity across ChatGPT model/app session differences and chat handoffs.",
+    "Assign monotonically increasing per-task sequence numbers while the server process is alive and keep bounded in-memory task history.",
+    "Require Node.js 20 or newer and gate startup with node --check server.js plus the plugin test suite.",
+    "Expose model-visible heartbeat_open(task_id) and call it exactly once near the beginning of sustained work after the first heartbeat_update.",
+    "Expose heartbeat_snapshot(task_id) as app-only and read-only, returning only the latest three updates for the explicit task.",
+    "Have the already-mounted live card call heartbeat_snapshot through MCP Apps tools/call and update its existing DOM without creating additional cards.",
+    "Keep the live card task-local, rolling-three, visibility-aware, bounded against overlapping/failed requests, and stopped on terminal done state.",
+    "Keep heartbeat_get(task_id) as explicit bounded full task-local history/sidebar inspection rather than routine progress delivery.",
+    "Keep heartbeat prose conversational and focused on meaningful findings, decisions, blockers, state changes, and next actions rather than tool telemetry.",
+    "Preserve the hard executor lease: no more than three non-heartbeat tool operations may occur before another operator-visible heartbeat is due.",
+    "Live ChatGPT host acceptance must show one card visibly advance multiple times during continued tool work, roll the latest-three window, transition to DONE, and avoid duplicate render/open cards.",
+    "The normal Lambda operator startup command is heartbeat-up, whose accepted helper target is workspace-heartbeat-runtime-v043."
   ],
   "constraints": [
     "Use current documented OpenAI/MCP Apps APIs and a ChatGPT thread entrypoint; do not depend on hidden client behavior.",
@@ -45,12 +34,12 @@
     "Do not depend on undocumented control of inline MCP App placement; ChatGPT owns inline surface ordering, so chronology-sensitive routine updates must not attach custom inline UI.",
     "Do not rely on native assistant commentary as the guaranteed heartbeat delivery path; long-turn stress testing showed intermediate commentary can be truncated after early tool operations.",
     "Do not attach UI to heartbeat_update itself; otherwise one card per update can be host-collected at the bottom.",
-    "Do not call heartbeat_render more than once per substantial assistant turn for the same owning task.",
-    "Keep the compact-card rolling window at three updates unless later user field evidence justifies changing it.",
-    "The v0.4.2 end-of-turn render pattern is rejected by operator screenshots: it produces delayed, immutable snapshots rather than a live progress display.",
     "Do not assert that MCP Apps host guarantees immediate initial iframe mount; accept only observed live user UI evidence.",
     "Use app-only visibility for heartbeat_snapshot and require an explicit task_id so one live view cannot conflate task histories.",
-    "Do not ask the model to poll heartbeat_snapshot; the live iframe owns the refresh loop."
+    "Do not ask the model to poll heartbeat_snapshot; the live iframe owns the refresh loop.",
+    "heartbeat_render is retired; do not reintroduce repeated model-side render snapshots as the routine progress path.",
+    "Do not ask the model to call heartbeat_snapshot; the mounted app owns the live refresh loop.",
+    "Do not claim a new heartbeat runtime accepted merely because source tests pass; changing the runtime target requires live host validation."
   ],
   "repositories": [
     {
@@ -59,14 +48,15 @@
       "base_sha": "e1607f473e0e359f6b75059bfb9a4f0dec7a7e40",
       "remote": {
         "branch": "heartbeat-v2-smoke-checkpoint",
-        "checkpoint_sha": "568acaaf1e8350bb6c781415668d2e965af46f00",
+        "checkpoint_sha": "d7e692171c93f96adf7a70c6a1e514113a18075e",
         "verified": true
       },
       "local": null,
       "allowed_mutation_scope": [
         "plugins/workspace-heartbeat/**",
         "tasks/active/workspace-heartbeat-plugin-v1.json",
-        "tasks/active/workspace-heartbeat-plugin-v1.md"
+        "tasks/active/workspace-heartbeat-plugin-v1.md",
+        "procedures/progress_heartbeat.md"
       ]
     }
   ],
@@ -250,7 +240,7 @@
     },
     {
       "id": "panel_stability_correction",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda+chatgpt",
@@ -598,6 +588,47 @@
         }
       ],
       "resume_condition": "Deploy/refresh revised v0.4.2 and validate a long tool-heavy turn: many data-only heartbeat_update calls may occur, but exactly one compact task-scoped rolling-three card should render near the end; explicit side-panel history must remain task-local."
+    },
+    {
+      "id": "live_app_self_refresh_v043",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+lambda+chatgpt",
+      "inputs": [
+        "v0.4.2 delayed immutable snapshot field evidence",
+        "MCP Apps app-origin tools/call contract",
+        "exact v0.4.3 implementation checkpoint git:d7e692171c93f96adf7a70c6a1e514113a18075e"
+      ],
+      "outputs": [
+        "heartbeat_open one-early-mount model tool",
+        "app-only heartbeat_snapshot read",
+        "self-refreshing rolling-three live card",
+        "task-local explicit history panel",
+        "Lambda runtime workspace-heartbeat-runtime-v043",
+        "operator helper ~/bin/heartbeat-up targeting v0.4.3"
+      ],
+      "validation": [
+        {
+          "check": "Live ChatGPT same-card refresh acceptance",
+          "result": "PASS",
+          "evidence": [
+            "User directly observed the same original card update repeatedly while later GitHub/tool operations continued.",
+            "Only one heartbeat_open was used; no later render/open call was required.",
+            "The card rolled to the newest three task-local messages and transitioned to DONE.",
+            "User explicitly confirmed the behavior worked exactly as expected."
+          ]
+        },
+        {
+          "check": "Accepted Lambda startup target",
+          "result": "PASS",
+          "evidence": [
+            "User inspected ~/bin/heartbeat-up and reported DIR=/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v043/plugins/workspace-heartbeat.",
+            "The v0.4.3 plugin was live in ChatGPT during the successful host acceptance run."
+          ]
+        }
+      ],
+      "resume_condition": null
     }
   ],
   "checkpoints": [
@@ -761,30 +792,20 @@
       ]
     },
     {
-      "check": "Live ChatGPT panel smoke",
-      "result": "NOT_RUN",
+      "check": "v0.4.3 live ChatGPT host acceptance",
+      "result": "PASS",
       "evidence": [
-        "Heartbeat emission, task-scoped retained history, and multi-update accumulation are proven.",
-        "v0.3.2 addresses mounted live-refresh routing by associating heartbeat_update with the panel resource.",
-        "A later field observation exposed a distinct cross-task continuity issue: durable ownership transfer visually replaced prior-task history with the new task's history.",
-        "v0.3.3 preserves task-local APIs while adding a bounded cross-task operator timeline and awaits repository/live validation."
+        "One early heartbeat_open mounted a task-scoped live card.",
+        "Six later data-only heartbeat_update calls were issued during continued GitHub/tool work without reopening the card.",
+        "The user observed the same card updating in place, rolling the latest-three window, and reaching DONE.",
+        "No duplicate snapshot/render cards were required."
       ]
     }
   ],
-  "blockers": [
-    "Repository-wide CI is currently unable to exercise heartbeat tests because an unrelated research-engine-local-document-pipeline-v1 task capsule is schema-invalid on the tested workspace-control base; do not treat that as heartbeat failure."
-  ],
-  "remaining_work": [
-    "Run node --check server.js and the complete npm test suite (including live bridge simulation) from the exact v0.4.3 checkout on Lambda.",
-    "Deploy exact v0.4.3 source only after tests pass; restart isolated heartbeat MCP/ngrok and verify local health.",
-    "Refresh/recreate the Workspace Heartbeat plugin so heartbeat_open and app-only heartbeat_snapshot are rediscovered.",
-    "Run a long live UI smoke: heartbeat_update, heartbeat_open once early, six or more later heartbeat_update calls, zero additional render/open calls.",
-    "Visually confirm the SAME card rolls from updates 1–3 to 2–4 to 3–5 rather than creating additional snapshots, and initial mounting is timely.",
-    "Verify task-local full-history side panel independently; record host limitations if mounting is delayed or UI tool access is denied.",
-    "Close the heartbeat side project only after live host acceptance, not from source tests alone."
-  ],
-  "next_safe_action": "Validate exact v0.4.3 branch with node --check server.js and npm test on Lambda. If PASS, deploy/refresh the plugin and run one-card early-mount + six-update live host acceptance; keep v0.4.2 available for rollback.",
+  "blockers": [],
+  "remaining_work": [],
+  "next_safe_action": "Heartbeat v0.4.3 is accepted and complete. Resume tasks/active/workspace-lambda-github-tooling-optimization-v1.json; reopen heartbeat work only for a new functional regression or an explicitly authorized runtime change.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+chatgpt",
-  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects. New live evidence proved transport and rendering but exposed a session-correlation defect: the panel sometimes polled heartbeat_get under a different or missing ChatGPT session identity, received no task, switched to IDLE, and later resurrected the prior heartbeat. The v0.2 correction makes task_id authoritative, retains bounded task history, persists active task/history in widget state, ignores empty polls after valid state, declares Node >=20, and logs successful MCP requests. The user's preferred UX is a sequential heartbeat log that does not disappear between updates. Automatic reset to IDLE on assistant-response start is intentionally deferred because no reliable response-start lifecycle signal is available. The panel-stability correction is repository-valid and canonical at 3214ec2be4f0c20933784b3d265386d9652dfd0b. The task is now blocked only on the user's live Lambda/ChatGPT smoke. Fresh-chat v0.2 field evidence on 2026-10-05: the first heartbeat rendered as WORKING with a footer showing 1 retained update and remained visible throughout an approximately 1m56s response. The prior false-IDLE/disappearing behavior was not observed. No second heartbeat was emitted during that run, so multi-heartbeat sequential accumulation remains the sole pending live acceptance check. Do not repeat the single-heartbeat smoke; use normal research work to obtain the next qualifying multi-update observation. Additional field evidence: after earlier v0.2 heartbeats landed, a later heartbeat_update returned UNAVAILABLE. This makes end-to-end delivery availability a separate open failure from the already-corrected false-IDLE UI bug. Do not infer the cause without correlating the model-visible UNAVAILABLE with MCP server and ngrok request evidence. New field evidence: with the v0.2 panel open, successful POST /mcp requests streamed roughly once per second. This is directly explained by setInterval(refresh, 1000) in heartbeat-panel.html. OpenAI's current MCP Apps documentation recommends receiving model tool results through ui/notifications/tool-result; the one-second window.openai.callTool polling loop is therefore unnecessary as the primary update mechanism and may contribute to intermittent UNAVAILABLE failures. The v0.3 correction is implemented at f542f3bed7a3555877eb7bff14a38b13a4921692: it uses the MCP Apps ui/notifications/tool-result lifecycle as the primary UI update path, retains a 5s/15s/30s adaptive reconciliation fallback, skips active reconciliation while hidden, bumps the resource URI to panel-v3.html, and adds a static panel contract test. Repository and live validation are pending. Additional live evidence: the v0.3 mounted panel successfully retained two sequential updates at once, proving multi-heartbeat chronological accumulation. However, the five-second reconciliation fallback still generated recurring 400/200/202 MCP request clusters. The design was therefore simplified again to v0.3.1: event-driven ui/notifications/tool-result only, no automatic tools/call, no reconciliation timer, no background heartbeat_get polling, with panel-v4.html as a fresh resource key. Final acceptance now depends only on repository validation plus deployed idle request-rate/delivery availability smoke. New observation: a >15-minute research turn emitted only two visible heartbeat_update events while the v0.3 panel continued making recurring fallback reconciliation requests. This cleanly separates model heartbeat cadence from panel transport behavior. v0.3.1 should be tested before further transport redesign; after deployment, audit whether the executing chat actually obeys the heartbeat-before-fourth-non-heartbeat-tool lease. New live evidence resolves the apparent executor-cadence concern: exported history contained seven retained heartbeat updates, so the long research turn emitted substantially more than the two visible in the stale mounted panel. The remaining issue is mounted live refresh. OpenAI documents ui/notifications/tool-result for model-initiated tool results associated with a UI resource. heartbeat_update lacked _meta.ui.resourceUri while heartbeat_get owned the panel resource. v0.3.2 associates heartbeat_update with the same panel-v5 resource while leaving the thread entrypoint only on heartbeat_get; no background polling is reintroduced. New field evidence exposed a separate continuity defect after mounted history itself was working: one long research chat transferred ownership from research-engine-local-extract-redesign-v1 to workspace-evidence-first-solution-research-v1. The new task showed 6 retained updates, while prior-task updates disappeared from the operator view. This reflects the v0.3.2 task-local history contract, not confirmed record deletion. v0.3.3 therefore keeps task-local history authoritative but adds a bounded conversation timeline keyed from the model session, remembers the latest timeline for each task, exposes timeline in structured output, and renders task boundaries in the panel. This preserves operator continuity across parent/child task handoffs without globally mixing concurrent chats. Product direction changed after successful in-chat rendering proved more reliable than mounted sidebar live refresh. v0.4.0 splits the UI resources: heartbeat_update renders a dedicated stateless single-heartbeat card, while heartbeat_get retains the richer history/sidebar panel. This intentionally stops replaying the full timeline into every heartbeat update card and makes in-chat progress the primary operator UX. A separate research-engine field incident showed a genuine executor stall: P3 run 37394877505 had already completed with a receipt-level FAIL at postgres-discovery because pgvector was unavailable, yet the model continued reasoning without surfacing the state transition through a heartbeat. Final handoff update: user accepted the in-chat card direction as the preferred primary UX. Heartbeat is explicitly a side project relative to the larger Lambda/GitHub tooling optimization effort. A separate child task now exists on branch workspace-lambda-github-tooling-optimization-v1 at durable head 7c5afaa48f4b5b51b0594f6db49e0bb91da5d6a6; after v0.4 acceptance, resume that task rather than continuing sidebar experimentation. Final v0.4 field evidence from user screenshots: single-message cards were visually correct, but ChatGPT host rendering collected inline MCP heartbeat cards at the bottom of the thinking/tool block, obscuring when each update occurred. Current OpenAI UI guidance says inline surfaces are host-positioned before the generated model response and provides no supported exact tool-position control. v0.4.1 therefore removes custom UI from routine heartbeat_update and uses ordinary MCP content for chronology, while heartbeat_get remains the rich historical/sidebar surface. Final acceptance on 2026-10-05: exact v0.4.1 source 568acaaf1e8350bb6c781415668d2e965af46f00 was deployed under Node v20.20.2, the custom plugin descriptor was refreshed, and a live heartbeat_update -> GitHub tool -> heartbeat_update -> heartbeat_get sequence passed. Routine updates remained ordinary transcript/tool results and explicit history remained available. Heartbeat side project is accepted and closed; do not reopen card/sidebar placement work absent a new functional regression.\n\n2026-10-05 correction: user screenshots disproved the claimed v0.4.1 chronology PASS. Data-only MCP results were collapsed into generic tool rows and did not visibly show heartbeat prose at the invocation point; explicit heartbeat_get then aggregated history into a later bottom/side widget. v0.4.2 uses a host-aware dual path: authoritative heartbeat_update plus immediate native assistant commentary mirror, with heartbeat_get explicit-only. The commentary mirror is presentation, not durable state.\n\n2026-10-05 revised v0.4.2 decision: native commentary mirrors failed a deliberate long-turn stress test after only two visible heartbeats. The accepted direction is now data-only heartbeat_update during work plus one end-of-turn heartbeat_render card showing the latest three updates for exactly one task. heartbeat_get remains full task-local history. Prose guidance is relaxed toward natural semantic commentary rather than telemetry/status-report phrasing.\n\n2026-10-05 Lambda validation correction: npm test exposed a stale panel-contract test that still required the old cross-task timeline and legacy single-update card. The runtime/UI source was already on the approved task-local rolling-three design; regression coverage was corrected before deployment continued.\n\n2026-10-05 startup correction: live npm start exposed a real syntax defect missed by source-contract tests: heartbeat_update description lacked a trailing comma before inputSchema. The defect is fixed and npm test now includes node --check server.js before node --test.\n\n2026-10-05 v0.4.3 redesign: operator screenshots proved v0.4.2 rendered two delayed independent snapshots (first card 1–2 never advanced; second card 5–7 appeared at end). This is rejected for live progress. New candidate is one early heartbeat_open app with app-only heartbeat_snapshot via MCP Apps tools/call and bounded 1.5s/3.5s in-widget refresh; acceptance hinges on host mount timing and verified in-place updates."
+  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects. New live evidence proved transport and rendering but exposed a session-correlation defect: the panel sometimes polled heartbeat_get under a different or missing ChatGPT session identity, received no task, switched to IDLE, and later resurrected the prior heartbeat. The v0.2 correction makes task_id authoritative, retains bounded task history, persists active task/history in widget state, ignores empty polls after valid state, declares Node >=20, and logs successful MCP requests. The user's preferred UX is a sequential heartbeat log that does not disappear between updates. Automatic reset to IDLE on assistant-response start is intentionally deferred because no reliable response-start lifecycle signal is available. The panel-stability correction is repository-valid and canonical at 3214ec2be4f0c20933784b3d265386d9652dfd0b. The task is now blocked only on the user's live Lambda/ChatGPT smoke. Fresh-chat v0.2 field evidence on 2026-10-05: the first heartbeat rendered as WORKING with a footer showing 1 retained update and remained visible throughout an approximately 1m56s response. The prior false-IDLE/disappearing behavior was not observed. No second heartbeat was emitted during that run, so multi-heartbeat sequential accumulation remains the sole pending live acceptance check. Do not repeat the single-heartbeat smoke; use normal research work to obtain the next qualifying multi-update observation. Additional field evidence: after earlier v0.2 heartbeats landed, a later heartbeat_update returned UNAVAILABLE. This makes end-to-end delivery availability a separate open failure from the already-corrected false-IDLE UI bug. Do not infer the cause without correlating the model-visible UNAVAILABLE with MCP server and ngrok request evidence. New field evidence: with the v0.2 panel open, successful POST /mcp requests streamed roughly once per second. This is directly explained by setInterval(refresh, 1000) in heartbeat-panel.html. OpenAI's current MCP Apps documentation recommends receiving model tool results through ui/notifications/tool-result; the one-second window.openai.callTool polling loop is therefore unnecessary as the primary update mechanism and may contribute to intermittent UNAVAILABLE failures. The v0.3 correction is implemented at f542f3bed7a3555877eb7bff14a38b13a4921692: it uses the MCP Apps ui/notifications/tool-result lifecycle as the primary UI update path, retains a 5s/15s/30s adaptive reconciliation fallback, skips active reconciliation while hidden, bumps the resource URI to panel-v3.html, and adds a static panel contract test. Repository and live validation are pending. Additional live evidence: the v0.3 mounted panel successfully retained two sequential updates at once, proving multi-heartbeat chronological accumulation. However, the five-second reconciliation fallback still generated recurring 400/200/202 MCP request clusters. The design was therefore simplified again to v0.3.1: event-driven ui/notifications/tool-result only, no automatic tools/call, no reconciliation timer, no background heartbeat_get polling, with panel-v4.html as a fresh resource key. Final acceptance now depends only on repository validation plus deployed idle request-rate/delivery availability smoke. New observation: a >15-minute research turn emitted only two visible heartbeat_update events while the v0.3 panel continued making recurring fallback reconciliation requests. This cleanly separates model heartbeat cadence from panel transport behavior. v0.3.1 should be tested before further transport redesign; after deployment, audit whether the executing chat actually obeys the heartbeat-before-fourth-non-heartbeat-tool lease. New live evidence resolves the apparent executor-cadence concern: exported history contained seven retained heartbeat updates, so the long research turn emitted substantially more than the two visible in the stale mounted panel. The remaining issue is mounted live refresh. OpenAI documents ui/notifications/tool-result for model-initiated tool results associated with a UI resource. heartbeat_update lacked _meta.ui.resourceUri while heartbeat_get owned the panel resource. v0.3.2 associates heartbeat_update with the same panel-v5 resource while leaving the thread entrypoint only on heartbeat_get; no background polling is reintroduced. New field evidence exposed a separate continuity defect after mounted history itself was working: one long research chat transferred ownership from research-engine-local-extract-redesign-v1 to workspace-evidence-first-solution-research-v1. The new task showed 6 retained updates, while prior-task updates disappeared from the operator view. This reflects the v0.3.2 task-local history contract, not confirmed record deletion. v0.3.3 therefore keeps task-local history authoritative but adds a bounded conversation timeline keyed from the model session, remembers the latest timeline for each task, exposes timeline in structured output, and renders task boundaries in the panel. This preserves operator continuity across parent/child task handoffs without globally mixing concurrent chats. Product direction changed after successful in-chat rendering proved more reliable than mounted sidebar live refresh. v0.4.0 splits the UI resources: heartbeat_update renders a dedicated stateless single-heartbeat card, while heartbeat_get retains the richer history/sidebar panel. This intentionally stops replaying the full timeline into every heartbeat update card and makes in-chat progress the primary operator UX. A separate research-engine field incident showed a genuine executor stall: P3 run 37394877505 had already completed with a receipt-level FAIL at postgres-discovery because pgvector was unavailable, yet the model continued reasoning without surfacing the state transition through a heartbeat. Final handoff update: user accepted the in-chat card direction as the preferred primary UX. Heartbeat is explicitly a side project relative to the larger Lambda/GitHub tooling optimization effort. A separate child task now exists on branch workspace-lambda-github-tooling-optimization-v1 at durable head 7c5afaa48f4b5b51b0594f6db49e0bb91da5d6a6; after v0.4 acceptance, resume that task rather than continuing sidebar experimentation. Final v0.4 field evidence from user screenshots: single-message cards were visually correct, but ChatGPT host rendering collected inline MCP heartbeat cards at the bottom of the thinking/tool block, obscuring when each update occurred. Current OpenAI UI guidance says inline surfaces are host-positioned before the generated model response and provides no supported exact tool-position control. v0.4.1 therefore removes custom UI from routine heartbeat_update and uses ordinary MCP content for chronology, while heartbeat_get remains the rich historical/sidebar surface. Final acceptance on 2026-10-05: exact v0.4.1 source 568acaaf1e8350bb6c781415668d2e965af46f00 was deployed under Node v20.20.2, the custom plugin descriptor was refreshed, and a live heartbeat_update -> GitHub tool -> heartbeat_update -> heartbeat_get sequence passed. Routine updates remained ordinary transcript/tool results and explicit history remained available. Heartbeat side project is accepted and closed; do not reopen card/sidebar placement work absent a new functional regression.\n\n2026-10-05 correction: user screenshots disproved the claimed v0.4.1 chronology PASS. Data-only MCP results were collapsed into generic tool rows and did not visibly show heartbeat prose at the invocation point; explicit heartbeat_get then aggregated history into a later bottom/side widget. v0.4.2 uses a host-aware dual path: authoritative heartbeat_update plus immediate native assistant commentary mirror, with heartbeat_get explicit-only. The commentary mirror is presentation, not durable state.\n\n2026-10-05 revised v0.4.2 decision: native commentary mirrors failed a deliberate long-turn stress test after only two visible heartbeats. The accepted direction is now data-only heartbeat_update during work plus one end-of-turn heartbeat_render card showing the latest three updates for exactly one task. heartbeat_get remains full task-local history. Prose guidance is relaxed toward natural semantic commentary rather than telemetry/status-report phrasing.\n\n2026-10-05 Lambda validation correction: npm test exposed a stale panel-contract test that still required the old cross-task timeline and legacy single-update card. The runtime/UI source was already on the approved task-local rolling-three design; regression coverage was corrected before deployment continued.\n\n2026-10-05 startup correction: live npm start exposed a real syntax defect missed by source-contract tests: heartbeat_update description lacked a trailing comma before inputSchema. The defect is fixed and npm test now includes node --check server.js before node --test.\n\n2026-10-05 v0.4.3 redesign: operator screenshots proved v0.4.2 rendered two delayed independent snapshots (first card 1–2 never advanced; second card 5–7 appeared at end). This is rejected for live progress. New candidate is one early heartbeat_open app with app-only heartbeat_snapshot via MCP Apps tools/call and bounded 1.5s/3.5s in-widget refresh; acceptance hinges on host mount timing and verified in-place updates.\n\n2026-10-06 FINAL ACCEPTANCE: v0.4.3 passed the live ChatGPT host gate. One heartbeat_open was called early, the same mounted card visibly advanced in place through later data-only heartbeat_update calls while GitHub work continued, the rolling-three window advanced, and DONE stopped the live sequence without duplicate cards. The operator-local ~/bin/heartbeat-up helper was inspected by the user and points at workspace-heartbeat-runtime-v043. This closes the heartbeat side project; heartbeat_render and native-commentary workarounds remain rejected historical experiments."
 }

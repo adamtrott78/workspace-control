@@ -2,6 +2,40 @@
 
 MCP plugin for operator-visible progress during long-running workspace-control tasks.
 
+## Current accepted production contract — v0.4.3
+
+v0.4.3 passed live ChatGPT host acceptance on 2026-10-06.
+
+- `heartbeat_update`: model-visible, data-only natural progress write.
+- `heartbeat_open(task_id)`: model-visible, called **once early** after the
+  first update to mount one live task-scoped card.
+- `heartbeat_snapshot(task_id)`: app-only, read-only latest-three projection
+  called by the mounted iframe through MCP Apps `tools/call`.
+- `heartbeat_get(task_id)`: explicit full task-local history/sidebar read.
+
+The same mounted card was observed advancing repeatedly while later GitHub/tool
+operations continued, rolling its visible history to the newest three updates,
+then transitioning to DONE without any second open/render call.
+
+### Lambda operator startup
+
+The normal operator command is:
+
+```bash
+heartbeat-up
+```
+
+The accepted operator-local helper at `~/bin/heartbeat-up` currently uses:
+
+```text
+DIR="/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v043/plugins/workspace-heartbeat"
+```
+
+It owns the managed `workspace-heartbeat` tmux runtime and the existing ngrok
+endpoint. If the helper's runtime target changes, run the plugin test/startup
+gates before relying on the new target.
+
+
 ## What it does
 
 - `heartbeat_update(task_id, message, state)` appends one natural-language heartbeat to the owning task.
@@ -142,7 +176,7 @@ Messages should normally be one or two conversational sentences focused on a mea
 The rolling-card window is three updates for v0.4.2. Full bounded task history remains available through the side panel.
 
 
-## v0.4.3 — one self-refreshing task card (candidate; host smoke pending)
+## v0.4.3 — one self-refreshing task card (accepted)
 
 **Field evidence:** v0.4.2 `heartbeat_render` displayed late and produced a separate immutable snapshot on every call. A mid-turn render with updates 1–2 did not receive subsequent updates; a second end-turn render displayed only 5–7 in a separate card. Therefore `heartbeat_render` is removed.
 
@@ -156,6 +190,6 @@ Updated responsibilities:
 
 `heartbeat_snapshot` is declared `_meta.ui.visibility: ["app"]` and `readOnlyHint: true`. It never returns cross-task timeline data. UI scripts use MCP Apps `ui/initialize` / `ui/notifications/initialized` and `tools/call`, never direct HTTP from the iframe.
 
-This implementation does **not** guarantee ChatGPT will mount a resource immediately; host placement is outside the plugin's control. Acceptance requires a real long-running live UI smoke showing the first card mounts while meaningful work remains, then visibly changes **without another model render call**. Unit tests additionally emulate the host bridge and validate rolling window, isolation, hidden pause, and terminal-state stop.
+ChatGPT still controls initial resource placement, but live host acceptance passed on 2026-10-06: one early-mounted card visibly refreshed in place through repeated later heartbeat_update calls, rolled to the newest three messages, and reached DONE without a second open/render call. Unit tests additionally cover the bridge contract, rolling window, isolation, hidden pause, and terminal-state stop.
 
 Side-panel isolation tightening for v0.4.3: widget state is filtered to the active task on load; changes of explicit tool input/result task ID reset the cached view before merging. History from other tasks can never appear in this task's panel.
