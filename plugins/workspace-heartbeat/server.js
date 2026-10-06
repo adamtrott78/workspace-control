@@ -116,7 +116,7 @@ function createHeartbeatServer() {
     {
       title: "Update operator heartbeat",
       description:
-        "Record a concise natural-language progress update for the owning task. Write it like normal ChatGPT commentary: one or two conversational sentences focused on a meaningful finding, decision, state change, or next action. Prefer 'The runner reached checkout, but dependency setup failed, so I am isolating that path next' over 'GitHub read completed'. Avoid headings, task IDs, sequence numbers, stage labels, and telemetry-style boilerplate. This tool is state-only and intentionally has no UI. Call heartbeat_render once near the end of the substantial turn to show the latest three updates in one compact card."
+        "Record a concise natural-language progress update for the owning task. Write it like normal ChatGPT commentary: one or two conversational sentences focused on a meaningful finding, decision, state change, or next action. Prefer 'The runner reached checkout, but dependency setup failed, so I am isolating that path next' over 'GitHub read completed'. Avoid headings, task IDs, sequence numbers, stage labels, and telemetry-style boilerplate. This tool is state-only and intentionally has no UI. Call heartbeat_render once near the end of the substantial turn to show the latest three updates in one compact card.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
         message: z.string().min(1).max(4000),

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "node --test"
+    "test": "node --check server.js && node --test"
   },
   "dependencies": {
     "@modelcontextprotocol/ext-apps": "^1.0.1",
