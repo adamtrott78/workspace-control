@@ -31,12 +31,12 @@ PINS = json.loads(
 )
 
 
-def good_request():
+def good_request(profile="cpu-test"):
     return {
         "schema_version": 1,
         "request_id": str(uuid.uuid4()),
         "project_id": "research-engine",
-        "profile": "cpu-test",
+        "profile": profile,
         "runner_name": "lambda-research-engine-test1",
         "jit_config": base64.b64encode(b'{"opaque":"secret"}').decode(),
     }
@@ -49,6 +49,16 @@ def test_valid_request_builds_only_fixed_runner_command():
     assert launch["run_as"]["user"] == "ci-research-engine"
     assert launch["project_id"] == "research-engine"
     assert launch["paths"]["home"] == "/srv/workspace-ci/research-engine/home"
+    assert launch["allow_production_services"] is False
+
+
+def test_gpu_small_launch_spec_carries_stable_uuid_and_bounded_runtime():
+    req = mod.validate_request(good_request("gpu-small"), MANIFEST)
+    launch = mod.build_launch_spec(req, MANIFEST, PROFILES, PINS)
+    assert launch["profile"] == "gpu-small"
+    assert launch["resources"]["gpu_indices"] == [0]
+    assert launch["resources"]["gpu_uuid"] == "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+    assert launch["resources"]["runtime_max_seconds"] == 1200
     assert launch["allow_production_services"] is False
 
 
