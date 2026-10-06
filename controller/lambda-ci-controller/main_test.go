@@ -15,6 +15,37 @@ import (
 	"github.com/actions/scaleset"
 )
 
+type fakeRunnerJITClient struct {
+	runner        *scaleset.RunnerReference
+	removedIDs    []int64
+	generated     int
+}
+
+func (f *fakeRunnerJITClient) GenerateJitRunnerConfig(
+	context.Context,
+	*scaleset.RunnerScaleSetJitRunnerSetting,
+	int,
+) (*scaleset.RunnerScaleSetJitRunnerConfig, error) {
+	f.generated++
+	return &scaleset.RunnerScaleSetJitRunnerConfig{
+		Runner: &scaleset.RunnerReference{ID: 9001, Name: "generated", RunnerScaleSetID: 1},
+		EncodedJITConfig: "opaque",
+	}, nil
+}
+
+func (f *fakeRunnerJITClient) GetRunnerByName(
+	context.Context,
+	string,
+) (*scaleset.RunnerReference, error) {
+	return f.runner, nil
+}
+
+func (f *fakeRunnerJITClient) RemoveRunner(_ context.Context, id int64) error {
+	f.removedIDs = append(f.removedIDs, id)
+	f.runner = nil
+	return nil
+}
+
 func TestProvisionRequestSchemaIsExact(t *testing.T) {
 	req := provisionRequest{
 		SchemaVersion: 1,
@@ -255,5 +286,89 @@ func TestAssignedRecoveryAllowsMissingRunnerRequestID(t *testing.T) {
 	}
 	if !recoveryMetadataComplete(&job) {
 		t.Fatal("JobAssigned recovery with stable workflow/job provenance was rejected")
+	}
+}
+
+func TestProvisionStatusQueryIsNonSecretAndExact(t *testing.T) {
+	dir := t.TempDir()
+	socketPath := filepath.Join(dir, "provisioner-status.sock")
+	ln, err := net.Listen("unix", socketPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ln.Close()
+
+	received := make(chan provisionStatusRequest, 1)
+	go func() {
+		conn, err := ln.Accept()
+		if err != nil {
+			return
+		}
+		defer conn.Close()
+		var req provisionStatusRequest
+		if err := json.NewDecoder(bufio.NewReader(conn)).Decode(&req); err != nil {
+			return
+		}
+		received <- req
+		_ = json.NewEncoder(conn).Encode(provisionStatusResponse{
+			SchemaVersion: 2,
+			Status:        "MISSING",
+			RequestID:     req.RequestID,
+		})
+	}()
+
+	requestID := "01234567-89ab-5cde-8fab-0123456789ab"
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	response, err := sendProvisionStatusQuery(ctx, socketPath, requestID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.Status != "MISSING" {
+		t.Fatalf("unexpected status %q", response.Status)
+	}
+	req := <-received
+	if req.SchemaVersion != 2 || req.Operation != "STATUS" || req.RequestID != requestID {
+		t.Fatalf("unexpected status request %#v", req)
+	}
+	raw, _ := json.Marshal(req)
+	if strings.Contains(string(raw), "jit") || strings.Contains(string(raw), "attestation") {
+		t.Fatalf("status query unexpectedly carried execution material: %s", raw)
+	}
+}
+
+func TestOrphanJITRegistrationIsRemovedOnlyFromExpectedScaleSet(t *testing.T) {
+	client := &fakeRunnerJITClient{
+		runner: &scaleset.RunnerReference{
+			ID:               77,
+			Name:             "lambda-research-engine-deadbeef0001",
+			RunnerScaleSetID: 1,
+		},
+	}
+	removed, err := reconcileOrphanJITRegistration(
+		context.Background(),
+		client,
+		"lambda-research-engine-deadbeef0001",
+		1,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !removed || !reflect.DeepEqual(client.removedIDs, []int64{77}) {
+		t.Fatalf("orphan registration was not removed: %#v", client.removedIDs)
+	}
+
+	client.runner = &scaleset.RunnerReference{
+		ID:               78,
+		Name:             "lambda-research-engine-deadbeef0001",
+		RunnerScaleSetID: 2,
+	}
+	if _, err := reconcileOrphanJITRegistration(
+		context.Background(),
+		client,
+		"lambda-research-engine-deadbeef0001",
+		1,
+	); err == nil {
+		t.Fatal("cross-scale-set runner registration was removed")
 	}
 }

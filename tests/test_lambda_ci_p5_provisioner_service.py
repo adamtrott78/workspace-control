@@ -390,3 +390,62 @@ def test_v2_busy_request_is_not_consumed_or_claimed():
         assert not svc.state_store.path(second["request_id"]).exists()
         release.set()
         wait_for(lambda: not svc._active)
+
+def test_v2_status_query_reports_missing_and_existing_without_execution_material():
+    with tempfile.TemporaryDirectory() as tmp:
+        entered = threading.Event()
+        release = threading.Event()
+
+        def launcher(req, spec):
+            entered.set()
+            release.wait(1)
+            return {"decision": "RUNNER_EXITED_CLEANLY"}
+
+        svc = build_service(
+            tmp,
+            launcher,
+            manifest=enabled_v2_manifest(),
+            clock=lambda: V2_NOW,
+        )
+        request_id = str(uuid.uuid4())
+        missing = svc.handle_request(
+            {
+                "schema_version": 2,
+                "operation": "STATUS",
+                "request_id": request_id,
+            },
+            peer_uid=12345,
+        )
+        assert missing == {
+            "schema_version": 2,
+            "status": "MISSING",
+            "request_id": request_id,
+        }
+
+        req = v2_request()
+        # Keep this test aligned with the current controller attestation schema.
+        req["attestation"]["schema_version"] = 2
+        req["attestation"]["job_message_type"] = "JobAssigned"
+        req["attestation"]["runner_request_id"] = 0
+        req["attestation"]["job_id"] = "777"
+        accepted = svc.handle_request(req, peer_uid=12345)
+        assert accepted["status"] == "ACCEPTED"
+        assert entered.wait(1)
+
+        status = svc.handle_request(
+            {
+                "schema_version": 2,
+                "operation": "STATUS",
+                "request_id": req["request_id"],
+            },
+            peer_uid=12345,
+        )
+        assert status["status"] == "ACCEPTED"
+        assert status["request_id"] == req["request_id"]
+        assert status["runner_name"] == req["runner_name"]
+        assert "admission_id" in status
+        assert "jit_config" not in status
+        assert "attestation" not in status
+
+        release.set()
+        wait_for(lambda: not svc._active)
