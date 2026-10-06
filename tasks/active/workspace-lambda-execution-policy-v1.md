@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 526e020a4d4ef429ceeac173b9f51fbd75912d99
+- Remote checkpoint: a5242a642ce0da545adea01929d47b383a1dcc4f
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-First cancel stale research-engine CPU workflow runs 37533291290 and 37534646664 in GitHub Actions so no pre-fix assigned job remains eligible to consume a newly admitted runner. Then, on Lambda from the normal operator account, install and activate exact corrected workspace-control 526e020a4d4ef429ceeac173b9f51fbd75912d99 using a fresh detached worktree inside an explicit child bash. Verify exact clean HEAD and invoke scripts/bootstrap_lambda_ci_p5.sh via sudo with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=526e020a4d4ef429ceeac173b9f51fbd75912d99, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not restage the valid controller credential. Require both controllers ACTIVE, provisioner active, credential ready, production services unchanged, and CPU controller restart count stable after activation. Only then trigger a NEW /lambda-ci-p5 <exact_sha> run on the open non-scientific research-engine candidate; require it to complete before triggering fresh /lambda-ci-p5-gpu <exact_sha>. Do not count runs 37533291290 or 37534646664 as acceptance evidence and do not enable model-scale classes or gpu-heavy.
+Cancel stale research-engine CPU workflow runs 37533291290 and 37534646664 in GitHub Actions before triggering anything new, because they remain queued/assigned evidence from pre-fix controller attempts and must not consume a runner admitted for a fresh attestation. The Lambda host is already correctly installed on workspace-control 526e020a4d4ef429ceeac173b9f51fbd75912d99 with CPU/GPU controllers and provisioner active and zero restarts immediately after activation, so do not reinstall again unless new evidence requires it. After both stale runs are canceled, trigger one NEW trusted /lambda-ci-p5 <exact_sha> issue-comment run on the open same-repository non-scientific research-engine candidate, require it to complete and validate its execution/root cleanup evidence, then trigger one NEW /lambda-ci-p5-gpu <exact_sha> run and validate GPU UUID/profile/cleanup evidence. Do not count runs 37533291290 or 37534646664 as acceptance evidence. Do not enable model-scale classes or gpu-heavy.
 
 ## Remaining work
 
-- Install and activate corrected workspace-control 526e020a4d4ef429ceeac173b9f51fbd75912d99 on Lambda, cancel stale CPU runs 37533291290 and 37534646664, then run fresh non-scientific admission-v2 CPU and gpu-small acceptance and validate root receipts plus residue-free cleanup.
+- Cancel stale CPU runs 37533291290 and 37534646664, then run fresh non-scientific admission-v2 CPU and gpu-small acceptance against the live 526e020a4d4ef429ceeac173b9f51fbd75912d99 controller and validate root receipts plus residue-free cleanup.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,7 +48,6 @@ First cancel stale research-engine CPU workflow runs 37533291290 and 37534646664
 
 ## Blockers / gates
 
-- Lambda host still runs 10901ebef59983da2d499ebd57125667c21edddf and its CPU controller crash-loops on sparse JobAssigned recovery metadata. Exact corrected workspace-control 526e020a4d4ef429ceeac173b9f51fbd75912d99 must be installed and activated before acceptance resumes.
 - Stale CPU workflow runs 37533291290 and 37534646664 must be canceled before the next acceptance trigger so no old assigned job can consume a runner admitted for a fresh attestation.
 
 ## Fresh-chat initialization
