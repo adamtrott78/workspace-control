@@ -7,8 +7,10 @@ MCP plugin for operator-visible progress during long-running workspace-control t
 v0.4.3 passed live ChatGPT host acceptance on 2026-10-06.
 
 - `heartbeat_update`: model-visible, data-only natural progress write.
-- `heartbeat_open(task_id)`: model-visible, called **once early** after the
-  first update to mount one live task-scoped card.
+- `heartbeat_open(task_id)`: model-visible, called once early after the first
+  update to mount one live task-scoped card. If that card is later absent,
+  unmounted, or failed, one recovery open is allowed; do not reopen healthy
+  cards merely to refresh them.
 - `heartbeat_snapshot(task_id)`: app-only, read-only latest-three projection
   called by the mounted iframe through MCP Apps `tools/call`.
 - `heartbeat_get(task_id)`: explicit full task-local history/sidebar read.
