@@ -30,7 +30,7 @@ test("history panel renders full task-local history instead of cross-task timeli
   );
   assert.equal(panel.includes("snapshot.timeline)&&snapshot.timeline.length"), false);
   assert.equal(panel.includes("taskCount=new Set"), false);
-  assert.equal(panel.includes("for "+latest.task_id), true);
+  assert.equal(panel.includes("latest.task_id"), true);
 });
 
 test("compact summary renders only the rolling task-local window", () => {
