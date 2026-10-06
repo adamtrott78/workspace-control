@@ -95,3 +95,26 @@ def test_promoted_postgres_is_usable_by_ci_controller_before_pgvector_build():
 def test_shell_syntax_is_valid():
     script_path = ROOT / "scripts" / "bootstrap_lambda_ci_p3_postgres_runtime.sh"
     subprocess.run(["bash", "-n", str(script_path)], check=True)
+
+
+def test_staged_pgvector_paths_follow_custom_runtime_pg_config():
+    assert 'PKGLIBDIR="$("$PREFIX/bin/pg_config" --pkglibdir)"' in SCRIPT
+    assert 'PGSHARE="$("$PREFIX/bin/pg_config" --sharedir)"' in SCRIPT
+    assert 'VECTOR_STAGE_SO="$VECTOR_STAGE_ROOT$PKGLIBDIR/vector.so"' in SCRIPT
+    assert 'VECTOR_STAGE_CONTROL="$VECTOR_STAGE_ROOT$PGSHARE/extension/vector.control"' in SCRIPT
+    assert '$VECTOR_STAGE/lib/postgresql/vector.so' not in SCRIPT
+    assert '$VECTOR_STAGE/share/postgresql/extension/vector.control' not in SCRIPT
+
+
+def test_existing_runtime_vector_control_uses_pg_config_sharedir():
+    assert 'EXISTING_PGSHARE="$("$PREFIX/bin/pg_config" --sharedir)"' in SCRIPT
+    assert '"$EXISTING_PGSHARE/extension/vector.control"' in SCRIPT
+    assert '"$PREFIX/share/postgresql/extension/vector.control"' not in SCRIPT
+
+
+def test_failure_always_emits_compact_receipt_before_cleanup_returns():
+    assert 'P3_RUNTIME_REPORT="$OUT/lambda-ci-p3-runtime.json"' in SCRIPT
+    assert '"decision": "FAIL"' in SCRIPT
+    assert '"failure_stage": os.environ["P3_RUNTIME_STAGE"]' in SCRIPT
+    assert '"exit_code": int(os.environ["P3_RUNTIME_RC"])' in SCRIPT
+    assert '"partial_runtime_removed": os.environ["P3_RUNTIME_PARTIAL_REMOVED"] == "true"' in SCRIPT
