@@ -32,10 +32,10 @@ class LambdaCIP5InstallTests(unittest.TestCase):
             )
             self.assertEqual(proc.returncode, 0, f"{rel}: {proc.stderr}")
 
-    def test_provisioner_unit_has_no_github_credential_or_network(self):
+    def test_provisioner_unit_has_no_github_credential_or_external_network(self):
         self.assertIn("User=root", PROVISIONER_UNIT)
         self.assertIn("Group=root", PROVISIONER_UNIT)
-        self.assertIn("RestrictAddressFamilies=AF_UNIX", PROVISIONER_UNIT)
+        self.assertIn("RestrictAddressFamilies=AF_UNIX AF_NETLINK", PROVISIONER_UNIT)
         self.assertIn("DevicePolicy=closed", PROVISIONER_UNIT)
         self.assertIn(
             "CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER CAP_SETUID CAP_SETGID",
@@ -47,6 +47,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
             "GH_TOKEN",
             "AF_INET ",
             "AF_INET6",
+            "AF_PACKET",
             "curl ",
         ):
             self.assertNotIn(forbidden, PROVISIONER_UNIT)
