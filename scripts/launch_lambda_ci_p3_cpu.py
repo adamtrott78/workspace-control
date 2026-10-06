@@ -23,6 +23,7 @@ import shutil
 import subprocess
 import sys
 import time
+import threading
 import urllib.error
 import urllib.request
 import uuid
@@ -269,6 +270,18 @@ def systemd_command(unit: str, runner_dir: pathlib.Path, subnet: str) -> list[st
     ]
 
 
+def pump_runner_output(stream, log) -> None:
+    """Mirror runner output live to the operator terminal and durable log."""
+    try:
+        for line in iter(stream.readline, ""):
+            log.write(line)
+            log.flush()
+            sys.stdout.write(line)
+            sys.stdout.flush()
+    finally:
+        stream.close()
+
+
 def collect_diag(runner_dir: pathlib.Path, output_dir: pathlib.Path) -> None:
     diag = runner_dir / "_diag"
     if not diag.is_dir():
@@ -333,11 +346,22 @@ def main() -> int:
             proc = subprocess.Popen(
                 systemd_command(unit, runner_dir, subnet),
                 stdin=subprocess.PIPE,
-                stdout=log,
+                stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                bufsize=1,
             )
             assert proc.stdin is not None
+            assert proc.stdout is not None
+
+            output_thread = threading.Thread(
+                target=pump_runner_output,
+                args=(proc.stdout, log),
+                name="p3-runner-output",
+                daemon=True,
+            )
+            output_thread.start()
+
             proc.stdin.write(jit + "\n")
             proc.stdin.flush()
             proc.stdin.close()
@@ -346,12 +370,21 @@ def main() -> int:
             token = ""
             jit = None
 
+            print(
+                f"P3_RUNNER_STARTED name={runner_name} id={runner_id} "
+                f"systemd_limit={SYSTEMD_RUNTIME_SECONDS}s "
+                f"watchdog={LAUNCHER_WATCHDOG_SECONDS}s",
+                flush=True,
+            )
+
             try:
                 rc = proc.wait(timeout=LAUNCHER_WATCHDOG_SECONDS)
             except subprocess.TimeoutExpired:
                 run(["systemctl", "stop", unit], check=False)
                 run(["systemctl", "kill", "--kill-who=all", "--signal=KILL", unit], check=False)
                 raise LaunchError("P3 runner exceeded launcher watchdog")
+            finally:
+                output_thread.join(timeout=10)
 
         if rc != 0:
             raise LaunchError(f"systemd-run/runner exited rc={rc}")
