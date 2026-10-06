@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4d9e48d4a48b5f0f89bffde15639904bff178168
+- Remote checkpoint: 10901ebef59983da2d499ebd57125667c21edddf
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Create a same-repository non-scientific research-engine candidate PR whose exact head SHA is safe to execute on the accepted P5 CPU/gpu-small lanes. Trigger the existing trusted /lambda-ci-p5 <exact_sha> and /lambda-ci-p5-gpu <exact_sha> issue_comment workflows on that PR. Require both GitHub jobs and root execution receipts to prove admission-v2 identity, exact trusted workflow blob/candidate binding, accepted cpu-test/gpu-small profile isolation, terminal status, and residue-free cleanup. If either lane fails, diagnose from GitHub/controller/provisioner evidence without widening authority. Do not enable model-acquire, cache-promote, model-eval-single-gpu, gpu-heavy, production routing, or scientific-state mutation in this stage.
+On Lambda from the normal operator account, install and activate exact corrected workspace-control 10901ebef59983da2d499ebd57125667c21edddf using a fresh detached worktree inside an explicit child bash so failures return to the existing SSH prompt. Verify exact clean HEAD, then invoke the canonical scripts/bootstrap_lambda_ci_p5.sh via sudo with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=10901ebef59983da2d499ebd57125667c21edddf, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not restage the already-valid controller credential. Require the install receipt to show both controllers ACTIVE, provisioner active, controller_credential_ready=true, and production_services_modified=false. After that PASS, create a NEW trusted /lambda-ci-p5 <exact_sha> issue-comment run on the open same-repository non-scientific research-engine candidate (or an equivalent fresh candidate) and require it to complete; do not count pre-fix queued run 37533291290 as sole acceptance evidence. Then trigger a fresh /lambda-ci-p5-gpu <exact_sha> run and validate both root receipts and residue-free cleanup. Do not enable model-scale classes or gpu-heavy.
 
 ## Remaining work
 
-- Run live non-scientific admission-v2 acceptance through same-repository research-engine candidate PR using trusted /lambda-ci-p5 <exact_sha> and /lambda-ci-p5-gpu <exact_sha>, then validate root receipts and residue-free cleanup.
+- Install and activate corrected workspace-control 10901ebef59983da2d499ebd57125667c21edddf on Lambda, then run fresh non-scientific admission-v2 CPU and gpu-small acceptance and validate root receipts plus residue-free cleanup.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,7 +48,7 @@ Create a same-repository non-scientific research-engine candidate PR whose exact
 
 ## Blockers / gates
 
-- None.
+- Lambda host still runs the earlier d2326042 admission-v2 controller. Exact corrected workspace-control 10901ebef59983da2d499ebd57125667c21edddf must be installed and activated through the reviewed sudo bootstrap before fresh CPU/GPU acceptance.
 
 ## Fresh-chat initialization
 
