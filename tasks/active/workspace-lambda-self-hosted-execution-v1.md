@@ -24,18 +24,19 @@ project_isolation_and_cache_validation
 
 ## Next safe action
 
-Human live gate A only: on Lambda, use a clean detached workspace-control tree exactly at `7febbb619962bd32e8a6e68c70e38b869affc6e7` and run `scripts/bootstrap_lambda_ci_p5.sh` via sudo with `WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES`, `WORKSPACE_CI_P5_EXPECTED_SHA=7febbb619962bd32e8a6e68c70e38b869affc6e7`, and no controller-activation flag. The bootstrap must fail closed before mutation if Go <1.26.3 or host prerequisites drift. On PASS it installs/starts only the root provisioner, verifies `/run/workspace-ci/provisioner.sock` root:workspace-ci-controller 0660, leaves the controller installed but inactive, handles no GitHub credential, and emits a receipt under the visible workspace-control-tmp directory. Do not stage or activate the controller until that receipt is reviewed.
+Human live prerequisite only: on Lambda use a clean detached workspace-control tree exactly at `2b026c41f6dd8e3fcaa5e30fddaedb9babe09391` and run `scripts/bootstrap_lambda_ci_go_toolchain.sh` via sudo with `WORKSPACE_CI_GO_BOOTSTRAP_AUTHORIZED=YES` and `WORKSPACE_CI_GO_EXPECTED_SHA=2b026c41f6dd8e3fcaa5e30fddaedb9babe09391`. It must download go1.26.3 as ci-controller, verify SHA256 `2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556`, promote only `/opt/workspace-ci/go/1.26.3` as root-owned non-group/world-writable runtime, leave system Go/apt untouched, and emit a visible receipt. Do not retry the P5 service install until that receipt is reviewed.
 
 ## Remaining work
 
-- P5 live gate A: run the exact-SHA install bootstrap on Lambda with controller activation disabled; require provisioner service/socket PASS and no production-service changes.
-- P5 live gate B: stage the existing clean research-engine PAT directly as ci-controller using /opt/workspace-ci/controller/stage-pat; do not paste the token into chat.
-- P5 live gate C: rerun exact-SHA bootstrap with WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES and require controller/provisioner both active.
-- P5 acceptance: trigger a trusted scale-set CPU job from GitHub and prove autonomous runner provisioning, exact candidate validation, cleanup, evidence consumption, repair/rerun without human SSH/PAT relay.
-- P5 recovery: prove controller restart/recovery, replay protection, cleanup-failure blocking, and kill switch.
-- P6: perform second-project isolation pilot under a distinct UID/root/cache and prove mutual denial.
+- P5 live prerequisite: install the exact pinned Go 1.26.3 runtime under /opt/workspace-ci/go/1.26.3 using scripts/bootstrap_lambda_ci_go_toolchain.sh from workspace-control 2b026c41f6dd8e3fcaa5e30fddaedb9babe09391 and review its receipt.
+- P5 live gate A retry: rerun scripts/bootstrap_lambda_ci_p5.sh from the same exact SHA with controller activation disabled; require provisioner/socket PASS.
+- P5 live gate B: stage the clean research-engine PAT directly as ci-controller using /opt/workspace-ci/controller/stage-pat; never paste token into chat.
+- P5 live gate C: activate controller and require controller/provisioner both active.
+- P5 autonomous acceptance: trigger trusted CPU scale-set demand and prove autonomous provision/cleanup/evidence without human SSH/PAT relay.
+- P5 recovery: prove restart/recovery, replay protection, cleanup-failure blocking, and kill switch.
+- P6: second-project isolation pilot under distinct UID/root/cache.
 
 ## Blockers / gates
 
-- P5 live services are not yet installed on Lambda; manual JIT launchers remain the active path until the accepted install bootstrap passes on-host.
-- Controller activation remains intentionally gated on one-time ci-controller-owned credential staging.
+- P5 isolated Go 1.26.3 runtime is not yet installed on Lambda; the accepted toolchain bootstrap must pass before retrying service install.
+- Controller activation remains intentionally gated on later ci-controller-owned credential staging.
