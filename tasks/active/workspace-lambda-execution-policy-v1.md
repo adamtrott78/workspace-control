@@ -65,4 +65,3 @@ Treat the task capsule, exact durable Git/runtime state, and referenced owning c
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
 
-For substantial work in this fresh chat, use the connected Workspace Heartbeat plugin with task_id `workspace-lambda-execution-policy-v1`: emit one initial heartbeat_update, then call heartbeat_open exactly once early in this chat. Do not inherit an `already mounted` claim from another chat. Continue data-only heartbeat_update calls at meaningful state changes and before the three-tool lease expires.
