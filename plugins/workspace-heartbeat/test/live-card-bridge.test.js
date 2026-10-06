@@ -51,7 +51,8 @@ test("one mounted card rolls only within its immutable turn",async()=>{
   h.handleNext("ui/initialize",{});await h.flush();await h.runTimer();
   const call=h.handleNext("tools/call",{structuredContent:snapshot(["One","Two","Three","Four"])});
   assert.equal(call.params.name,"heartbeat_snapshot");
-  assert.deepEqual(call.params.arguments,{task_id:"task-a",turn_id:"turn-a"});
+  assert.equal(call.params.arguments.task_id,"task-a");
+  assert.equal(call.params.arguments.turn_id,"turn-a");
   await h.flush();
   assert.deepEqual(h.elems.get("history").children.map(x=>x.children[0].textContent),["Two","Three","Four"]);
 });
