@@ -217,6 +217,26 @@ def resolve_gpu_assignment(target_uuid: str) -> dict[str, object]:
         "inventory": inventory,
     }
 
+def resolve_cuda_support_devices() -> list[str]:
+    """Return only the shared NVIDIA compute-support character devices we allow."""
+    allowed = (
+        pathlib.Path("/dev/nvidia-uvm"),
+        pathlib.Path("/dev/nvidia-uvm-tools"),
+    )
+    resolved: list[str] = []
+    for path in allowed:
+        if not path.exists():
+            continue
+        if not stat.S_ISCHR(path.stat().st_mode):
+            raise LaunchError(f"NVIDIA support path is not a character device: {path}")
+        resolved.append(str(path))
+    if "/dev/nvidia-uvm" not in resolved:
+        raise LaunchError(
+            "CUDA UVM device /dev/nvidia-uvm is missing; cannot validate bounded CUDA"
+        )
+    return resolved
+
+
 def github_jit_config(token: str, runner_name: str) -> tuple[str, int]:
     url = f"https://api.github.com/repos/{REPOSITORY}/actions/runners/generate-jitconfig"
     body = json.dumps(
@@ -290,8 +310,9 @@ def systemd_command(
     selected_device = str(assignment["selected_device"])
     target_uuid = str(assignment["target_uuid"])
     denied_devices = ",".join(str(path) for path in assignment["denied_devices"])
+    support_devices = [str(path) for path in assignment["support_devices"]]
 
-    return [
+    command = [
         "systemd-run",
         "--quiet",
         "--wait",
@@ -330,7 +351,6 @@ def systemd_command(
         "-p", "DevicePolicy=closed",
         "-p", "DeviceAllow=/dev/nvidiactl rw",
         "-p", f"DeviceAllow={selected_device} rw",
-        "-p", "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6",
         "-p", "IPAddressAllow=127.0.0.53/32",
         "-p", "IPAddressDeny=127.0.0.0/8",
         "-p", "IPAddressDeny=::1/128",
@@ -357,10 +377,17 @@ def systemd_command(
         "-p", f"Environment=P4_TARGET_GPU_UUID={target_uuid}",
         "-p", f"Environment=P4_SELECTED_GPU_DEVICE={selected_device}",
         "-p", f"Environment=P4_DENIED_GPU_DEVICES={denied_devices}",
+        "-p", f"Environment=P4_GPU_SUPPORT_DEVICES={','.join(support_devices)}",
         "/bin/bash",
         "-ceu",
         bash_script,
     ]
+
+    insert_at = command.index("-p", command.index(f"DeviceAllow={selected_device} rw") + 1)
+    for support_device in support_devices:
+        command[insert_at:insert_at] = ["-p", f"DeviceAllow={support_device} rw"]
+        insert_at += 2
+    return command
 
 
 def pump_runner_output(stream, log) -> None:
@@ -445,6 +472,7 @@ def main() -> int:
     verify_host_foundation()
     subnet = primary_subnet()
     gpu_assignment = resolve_gpu_assignment(TARGET_GPU_UUID)
+    gpu_assignment["support_devices"] = resolve_cuda_support_devices()
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     run_id = uuid.uuid4().hex
@@ -518,6 +546,7 @@ def main() -> int:
                 f"gpu_uuid={gpu_assignment['target_uuid']} "
                 f"gpu_device={gpu_assignment['selected_device']} "
                 f"denied_devices={','.join(str(x) for x in gpu_assignment['denied_devices'])} "
+                f"support_devices={','.join(str(x) for x in gpu_assignment['support_devices'])} "
                 f"systemd_limit={SYSTEMD_RUNTIME_SECONDS}s "
                 f"watchdog={LAUNCHER_WATCHDOG_SECONDS}s",
                 flush=True,
@@ -598,7 +627,12 @@ def main() -> int:
             "gpu_selected_minor": gpu_assignment["selected_minor"],
             "gpu_denied_devices": gpu_assignment["denied_devices"],
             "gpu_inventory": gpu_assignment["inventory"],
-            "gpu_device_grants": ["/dev/nvidiactl", gpu_assignment["selected_device"]],
+            "gpu_support_devices": gpu_assignment["support_devices"],
+            "gpu_device_grants": [
+                "/dev/nvidiactl",
+                gpu_assignment["selected_device"],
+                *gpu_assignment["support_devices"],
+            ],
             "cuda_visible_devices": gpu_assignment["target_uuid"],
             "github_workflow_result": "inspect Lambda CI P4 GPU Validation via GitHub Actions",
         }
