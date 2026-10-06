@@ -20,6 +20,7 @@ import os
 import pathlib
 import pwd
 import shutil
+import stat
 import subprocess
 import sys
 import time
@@ -44,6 +45,7 @@ API_VERSION = "2026-03-10"
 WORKFLOW_TIMEOUT_SECONDS = 15 * 60
 SYSTEMD_RUNTIME_SECONDS = 20 * 60
 LAUNCHER_WATCHDOG_SECONDS = 22 * 60
+TARGET_GPU_UUID = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
 
 
 class LaunchError(RuntimeError):
@@ -139,6 +141,71 @@ def primary_subnet() -> str:
     raise LaunchError("unable to resolve directly connected primary IPv4 subnet")
 
 
+def resolve_gpu_assignment(target_uuid: str) -> dict[str, object]:
+    """Resolve the selected physical GPU UUID to its current NVIDIA device node."""
+    proc = run(
+        [
+            "nvidia-smi",
+            "--query-gpu=uuid,minor_number",
+            "--format=csv,noheader,nounits",
+        ]
+    )
+
+    inventory: list[dict[str, object]] = []
+    for line in proc.stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        parts = [part.strip() for part in line.split(",")]
+        if len(parts) != 2:
+            raise LaunchError(f"unexpected nvidia-smi inventory row: {line!r}")
+        gpu_uuid, minor_text = parts
+        try:
+            minor = int(minor_text)
+        except ValueError as exc:
+            raise LaunchError(f"invalid NVIDIA minor number: {line!r}") from exc
+        device = pathlib.Path(f"/dev/nvidia{minor}")
+        if not device.exists():
+            raise LaunchError(f"NVIDIA device node missing for {gpu_uuid}: {device}")
+        mode = device.stat().st_mode
+        if not stat.S_ISCHR(mode):
+            raise LaunchError(f"NVIDIA GPU path is not a character device: {device}")
+        inventory.append(
+            {
+                "uuid": gpu_uuid,
+                "minor": minor,
+                "device": str(device),
+            }
+        )
+
+    selected = [row for row in inventory if row["uuid"].lower() == target_uuid.lower()]
+    if len(selected) != 1:
+        raise LaunchError(
+            f"expected exactly one GPU matching {target_uuid}, found {len(selected)}"
+        )
+
+    selected_row = selected[0]
+    denied_devices = [
+        row["device"]
+        for row in inventory
+        if row["uuid"].lower() != target_uuid.lower()
+    ]
+    if not denied_devices:
+        raise LaunchError("P4 requires at least one non-selected GPU for denial proof")
+
+    nvidiactl = pathlib.Path("/dev/nvidiactl")
+    if not nvidiactl.exists() or not stat.S_ISCHR(nvidiactl.stat().st_mode):
+        raise LaunchError("/dev/nvidiactl missing or not a character device")
+
+    return {
+        "target_uuid": target_uuid,
+        "selected_device": selected_row["device"],
+        "selected_minor": selected_row["minor"],
+        "denied_devices": denied_devices,
+        "inventory": inventory,
+    }
+
+
 def github_jit_config(token: str, runner_name: str) -> tuple[str, int]:
     url = f"https://api.github.com/repos/{REPOSITORY}/actions/runners/generate-jitconfig"
     body = json.dumps(
@@ -196,7 +263,12 @@ def chown_tree(path: pathlib.Path, uid: int, gid: int) -> None:
             os.chown(pathlib.Path(root) / name, uid, gid, follow_symlinks=False)
 
 
-def systemd_command(unit: str, runner_dir: pathlib.Path, subnet: str) -> list[str]:
+def systemd_command(
+    unit: str,
+    runner_dir: pathlib.Path,
+    subnet: str,
+    assignment: dict[str, object],
+) -> list[str]:
     bash_script = r"""
         IFS= read -r jit
         [[ -n "$jit" ]]
@@ -204,6 +276,10 @@ def systemd_command(unit: str, runner_dir: pathlib.Path, subnet: str) -> list[st
         unset jit
         exec ./run.sh
     """
+    selected_device = str(assignment["selected_device"])
+    target_uuid = str(assignment["target_uuid"])
+    denied_devices = ",".join(str(path) for path in assignment["denied_devices"])
+
     return [
         "systemd-run",
         "--quiet",
@@ -242,7 +318,7 @@ def systemd_command(unit: str, runner_dir: pathlib.Path, subnet: str) -> list[st
         "-p", "InaccessiblePaths=/run/docker.sock",
         "-p", "DevicePolicy=closed",
         "-p", "DeviceAllow=/dev/nvidiactl rw",
-        "-p", "DeviceAllow=/dev/nvidia0 rw",
+        "-p", f"DeviceAllow={selected_device} rw",
         "-p", "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6",
         "-p", "IPAddressAllow=127.0.0.53/32",
         "-p", "IPAddressDeny=127.0.0.0/8",
@@ -266,7 +342,10 @@ def systemd_command(unit: str, runner_dir: pathlib.Path, subnet: str) -> list[st
         "-p", f"Environment=HOME={PROJECT_HOME}",
         "-p", f"Environment=XDG_CACHE_HOME={STAGING_CACHE}",
         "-p", f"Environment=HF_HOME={STAGING_CACHE}/huggingface",
-        "-p", "Environment=CUDA_VISIBLE_DEVICES=0",
+        "-p", f"Environment=CUDA_VISIBLE_DEVICES={target_uuid}",
+        "-p", f"Environment=P4_TARGET_GPU_UUID={target_uuid}",
+        "-p", f"Environment=P4_SELECTED_GPU_DEVICE={selected_device}",
+        "-p", f"Environment=P4_DENIED_GPU_DEVICES={denied_devices}",
         "/bin/bash",
         "-ceu",
         bash_script,
@@ -354,6 +433,7 @@ def main() -> int:
     uid, gid = require_clean_identity()
     verify_host_foundation()
     subnet = primary_subnet()
+    gpu_assignment = resolve_gpu_assignment(TARGET_GPU_UUID)
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     run_id = uuid.uuid4().hex
@@ -396,7 +476,7 @@ def main() -> int:
 
         with console_log.open("w", encoding="utf-8") as log:
             proc = subprocess.Popen(
-                systemd_command(unit, runner_dir, subnet),
+                systemd_command(unit, runner_dir, subnet, gpu_assignment),
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -424,6 +504,9 @@ def main() -> int:
 
             print(
                 f"P4_RUNNER_STARTED name={runner_name} id={runner_id} "
+                f"gpu_uuid={gpu_assignment['target_uuid']} "
+                f"gpu_device={gpu_assignment['selected_device']} "
+                f"denied_devices={','.join(str(x) for x in gpu_assignment['denied_devices'])} "
                 f"systemd_limit={SYSTEMD_RUNTIME_SECONDS}s "
                 f"watchdog={LAUNCHER_WATCHDOG_SECONDS}s",
                 flush=True,
@@ -499,8 +582,13 @@ def main() -> int:
             "project_uid_process_cleanup": cleanup_pass,
             "project_uid_gpu_process_cleanup": gpu_cleanup_pass,
             "leaked_gpu_processes": leaked_gpu_processes,
-            "gpu_device_grants": ["/dev/nvidiactl", "/dev/nvidia0"],
-            "cuda_visible_devices": "0",
+            "gpu_target_uuid": gpu_assignment["target_uuid"],
+            "gpu_selected_device": gpu_assignment["selected_device"],
+            "gpu_selected_minor": gpu_assignment["selected_minor"],
+            "gpu_denied_devices": gpu_assignment["denied_devices"],
+            "gpu_inventory": gpu_assignment["inventory"],
+            "gpu_device_grants": ["/dev/nvidiactl", gpu_assignment["selected_device"]],
+            "cuda_visible_devices": gpu_assignment["target_uuid"],
             "github_workflow_result": "inspect Lambda CI P4 GPU Validation via GitHub Actions",
         }
         receipt_path.write_text(
