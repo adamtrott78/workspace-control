@@ -51,7 +51,7 @@ type controllerAttestation struct {
 type jobAttestor interface {
 	Attest(
 		context.Context,
-		*scaleset.JobAssigned,
+		*scaleset.JobMessageBase,
 		string,
 		string,
 	) (controllerAttestation, error)
@@ -342,21 +342,21 @@ func escapeContentPath(path string) string {
 
 func (a *githubJobAttestor) Attest(
 	ctx context.Context,
-	job *scaleset.JobAssigned,
+	job *scaleset.JobMessageBase,
 	scaleSetName string,
 	workload string,
 ) (controllerAttestation, error) {
 	if job == nil {
-		return controllerAttestation{}, fmt.Errorf("assigned job is required")
+		return controllerAttestation{}, fmt.Errorf("job metadata is required")
 	}
 	if job.OwnerName != a.owner || job.RepositoryName != a.repo {
-		return controllerAttestation{}, fmt.Errorf("assigned job repository mismatch")
+		return controllerAttestation{}, fmt.Errorf("job repository mismatch")
 	}
 	if job.EventName != "issue_comment" {
-		return controllerAttestation{}, fmt.Errorf("assigned job event is not issue_comment")
+		return controllerAttestation{}, fmt.Errorf("job event is not issue_comment")
 	}
 	if job.RunnerRequestID <= 0 || job.WorkflowRunID <= 0 || job.JobID == "" {
-		return controllerAttestation{}, fmt.Errorf("assigned job identity is incomplete")
+		return controllerAttestation{}, fmt.Errorf("job identity is incomplete")
 	}
 
 	command, err := requestCommandForWorkload(workload)
