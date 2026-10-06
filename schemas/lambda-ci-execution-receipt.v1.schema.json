@@ -1,0 +1,549 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/lambda-ci-execution-receipt.v1.schema.json",
+  "title": "Lambda CI Execution Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "admission_id",
+    "request_id",
+    "policy",
+    "project",
+    "workload_class",
+    "execution_profile",
+    "resource_class",
+    "trusted_workflow",
+    "candidate_sha",
+    "started_at",
+    "ended_at",
+    "terminal_status",
+    "exit_code",
+    "models",
+    "runtime",
+    "executor",
+    "hardware",
+    "resource_usage",
+    "network_evidence",
+    "state_effect_evidence",
+    "cleanup",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "admission_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "policy_epoch",
+        "policy_sha256",
+        "admission_sha256"
+      ],
+      "properties": {
+        "policy_id": {
+          "const": "lambda-ci-workload-policy-v1"
+        },
+        "policy_epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "policy_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "admission_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project_id",
+        "repository"
+      ],
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "pattern": "^[^/]+/[^/]+$"
+        }
+      }
+    },
+    "workload_class": {
+      "enum": [
+        "cpu-test",
+        "gpu-small",
+        "model-acquire",
+        "cache-promote",
+        "model-eval-single-gpu"
+      ]
+    },
+    "execution_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resource_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trusted_workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "default_branch_commit_sha",
+        "workflow_blob_sha"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "default_branch_commit_sha": {
+          "$ref": "#/$defs/gitsha"
+        },
+        "workflow_blob_sha": {
+          "$ref": "#/$defs/gitsha"
+        }
+      }
+    },
+    "candidate_sha": {
+      "$ref": "#/$defs/gitsha"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "terminal_status": {
+      "enum": [
+        "SUCCEEDED",
+        "FAILED",
+        "TIMED_OUT",
+        "CPU_OR_RAM_RESOURCE_EXHAUSTED",
+        "CUDA_OOM",
+        "DISK_PRESSURE",
+        "KILL_SWITCHED",
+        "CANCELLED",
+        "CLEANUP_FAILED",
+        "INDETERMINATE"
+      ]
+    },
+    "exit_code": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "model_id",
+          "repository",
+          "revision",
+          "object_state",
+          "object_id",
+          "tree_sha256",
+          "manifest_sha256",
+          "promotion_receipt_sha256",
+          "serialization_risk_class",
+          "complete_offline"
+        ],
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revision": {
+            "$ref": "#/$defs/gitsha"
+          },
+          "object_state": {
+            "enum": [
+              "QUARANTINE",
+              "PROMOTED"
+            ]
+          },
+          "object_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tree_sha256": {
+            "$ref": "#/$defs/sha256"
+          },
+          "manifest_sha256": {
+            "$ref": "#/$defs/sha256"
+          },
+          "promotion_receipt_sha256": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/$defs/sha256"
+              }
+            ]
+          },
+          "serialization_risk_class": {
+            "enum": [
+              "SAFE",
+              "UNSAFE_PICKLE",
+              "CUSTOM_EXECUTABLE_CODE",
+              "MIXED_OR_UNKNOWN"
+            ]
+          },
+          "complete_offline": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "runtime": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "runtime_id",
+            "object_state",
+            "object_id",
+            "tree_sha256",
+            "dependency_manifest_sha256",
+            "promotion_receipt_sha256"
+          ],
+          "properties": {
+            "runtime_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "object_state": {
+              "enum": [
+                "QUARANTINE",
+                "PROMOTED"
+              ]
+            },
+            "object_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tree_sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "dependency_manifest_sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "promotion_receipt_sha256": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/$defs/sha256"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "executor": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "scale_set",
+            "runner_name",
+            "project_uid",
+            "jit_single_job"
+          ],
+          "properties": {
+            "kind": {
+              "const": "jit_runner"
+            },
+            "scale_set": {
+              "type": "string",
+              "minLength": 1
+            },
+            "runner_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "project_uid": {
+              "type": "string",
+              "minLength": 1
+            },
+            "jit_single_job": {
+              "const": true
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "identity",
+            "project_uid",
+            "jit_single_job"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "trusted_acquisition",
+                "trusted_cache_manager"
+              ]
+            },
+            "identity": {
+              "type": "string",
+              "minLength": 1
+            },
+            "project_uid": {
+              "type": "string",
+              "minLength": 1
+            },
+            "jit_single_job": {
+              "const": false
+            }
+          }
+        }
+      ]
+    },
+    "hardware": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gpu_uuids",
+        "nvidia_driver",
+        "cuda_runtime"
+      ],
+      "properties": {
+        "gpu_uuids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "nvidia_driver": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cuda_runtime": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "resource_usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wall_seconds",
+        "peak_rss_bytes",
+        "peak_tasks",
+        "peak_scratch_bytes",
+        "peak_staging_bytes",
+        "peak_vram_bytes"
+      ],
+      "properties": {
+        "wall_seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "peak_rss_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peak_tasks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peak_scratch_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peak_staging_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peak_vram_bytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "network_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payload_network_class",
+        "model_registry_requests",
+        "private_or_local_connection_attempts_allowed"
+      ],
+      "properties": {
+        "payload_network_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_registry_requests": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "private_or_local_connection_attempts_allowed": {
+          "const": false
+        }
+      }
+    },
+    "state_effect_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state_effect_class",
+        "production_routing_changed",
+        "scientific_state_materialized",
+        "trusted_cache_mutated"
+      ],
+      "properties": {
+        "state_effect_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "production_routing_changed": {
+          "type": "boolean"
+        },
+        "scientific_state_materialized": {
+          "type": "boolean"
+        },
+        "trusted_cache_mutated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "cgroup_empty",
+        "project_uid_processes_zero",
+        "gpu_compute_processes_zero",
+        "model_servers_zero",
+        "job_workspace_removed",
+        "ephemeral_staging_removed",
+        "jit_config_absent",
+        "github_credential_absent",
+        "lane_quarantined"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL"
+          ]
+        },
+        "cgroup_empty": {
+          "type": "boolean"
+        },
+        "project_uid_processes_zero": {
+          "type": "boolean"
+        },
+        "gpu_compute_processes_zero": {
+          "type": "boolean"
+        },
+        "model_servers_zero": {
+          "type": "boolean"
+        },
+        "job_workspace_removed": {
+          "type": "boolean"
+        },
+        "ephemeral_staging_removed": {
+          "type": "boolean"
+        },
+        "jit_config_absent": {
+          "type": "boolean"
+        },
+        "github_credential_absent": {
+          "type": "boolean"
+        },
+        "lane_quarantined": {
+          "type": "boolean"
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "location",
+          "sha256"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "location": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "$ref": "#/$defs/sha256"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "gitsha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

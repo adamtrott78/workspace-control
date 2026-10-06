@@ -1,0 +1,430 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/lambda-ci-admission-manifest.v1.schema.json",
+  "title": "Lambda CI Root-Owned Admission Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "admission_id",
+    "request_id",
+    "request_digest_sha256",
+    "policy",
+    "lifecycle",
+    "project",
+    "trusted_workflow",
+    "candidate_sha",
+    "workload_class",
+    "execution_profile",
+    "resource_class",
+    "capability_classes",
+    "resource_ceiling",
+    "models",
+    "runtime",
+    "exception_ids",
+    "required_receipt_schema"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "admission_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_digest_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "policy_epoch",
+        "policy_sha256",
+        "project_profile_sha256",
+        "kill_switch_epoch"
+      ],
+      "properties": {
+        "policy_id": {
+          "const": "lambda-ci-workload-policy-v1"
+        },
+        "policy_epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "policy_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "project_profile_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "kill_switch_epoch": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issued_at",
+        "not_before",
+        "expires_at",
+        "single_use",
+        "consumed_at"
+      ],
+      "properties": {
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "not_before": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "single_use": {
+          "const": true
+        },
+        "consumed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project_id",
+        "repository"
+      ],
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "pattern": "^[^/]+/[^/]+$"
+        }
+      }
+    },
+    "trusted_workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "default_branch_commit_sha",
+        "workflow_blob_sha"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "default_branch_commit_sha": {
+          "$ref": "#/$defs/gitsha"
+        },
+        "workflow_blob_sha": {
+          "$ref": "#/$defs/gitsha"
+        }
+      }
+    },
+    "candidate_sha": {
+      "$ref": "#/$defs/gitsha"
+    },
+    "workload_class": {
+      "enum": [
+        "cpu-test",
+        "gpu-small",
+        "model-acquire",
+        "cache-promote",
+        "model-eval-single-gpu"
+      ]
+    },
+    "execution_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resource_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability_classes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payload_network",
+        "payload_secrets",
+        "filesystem",
+        "cache_access",
+        "state_effect"
+      ],
+      "properties": {
+        "payload_network": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payload_secrets": {
+          "type": "string",
+          "minLength": 1
+        },
+        "filesystem": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cache_access": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state_effect": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "resource_ceiling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime_seconds",
+        "scratch_max_bytes",
+        "staging_max_bytes",
+        "gpu_uuids"
+      ],
+      "properties": {
+        "runtime_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "scratch_max_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "staging_max_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gpu_uuids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "model_id",
+          "repository",
+          "revision",
+          "required_serialization_policy",
+          "cache_object"
+        ],
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "repository": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revision": {
+            "$ref": "#/$defs/gitsha"
+          },
+          "required_serialization_policy": {
+            "enum": [
+              "SAFE_ONLY",
+              "EXPLICIT_EXCEPTION_REQUIRED"
+            ]
+          },
+          "cache_object": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "object_state",
+                  "object_id",
+                  "tree_sha256",
+                  "manifest_sha256",
+                  "promotion_receipt_sha256",
+                  "complete_offline"
+                ],
+                "properties": {
+                  "object_state": {
+                    "enum": [
+                      "QUARANTINE",
+                      "PROMOTED"
+                    ]
+                  },
+                  "object_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "tree_sha256": {
+                    "$ref": "#/$defs/sha256"
+                  },
+                  "manifest_sha256": {
+                    "$ref": "#/$defs/sha256"
+                  },
+                  "promotion_receipt_sha256": {
+                    "oneOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "$ref": "#/$defs/sha256"
+                      }
+                    ]
+                  },
+                  "complete_offline": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "runtime": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "runtime_id",
+            "cache_object",
+            "owning_contracts"
+          ],
+          "properties": {
+            "runtime_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cache_object": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "object_state",
+                    "object_id",
+                    "tree_sha256",
+                    "dependency_manifest_sha256",
+                    "promotion_receipt_sha256"
+                  ],
+                  "properties": {
+                    "object_state": {
+                      "enum": [
+                        "QUARANTINE",
+                        "PROMOTED"
+                      ]
+                    },
+                    "object_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "tree_sha256": {
+                      "$ref": "#/$defs/sha256"
+                    },
+                    "dependency_manifest_sha256": {
+                      "$ref": "#/$defs/sha256"
+                    },
+                    "promotion_receipt_sha256": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "$ref": "#/$defs/sha256"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "owning_contracts": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "repository",
+                  "path",
+                  "commit_sha"
+                ],
+                "properties": {
+                  "repository": {
+                    "type": "string",
+                    "pattern": "^[^/]+/[^/]+$"
+                  },
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "commit_sha": {
+                    "$ref": "#/$defs/gitsha"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "exception_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "required_receipt_schema": {
+      "const": "lambda-ci-execution-receipt-v1"
+    }
+  },
+  "$defs": {
+    "gitsha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

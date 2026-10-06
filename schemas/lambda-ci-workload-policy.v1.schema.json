@@ -1,0 +1,368 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/lambda-ci-workload-policy.v1.schema.json",
+  "title": "Lambda CI Workload Policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "policy_id",
+    "status",
+    "owning_task",
+    "policy_epoch",
+    "authority",
+    "baselines",
+    "admission_semantics",
+    "payload_network_classes",
+    "payload_secret_classes",
+    "filesystem_classes",
+    "cache_access_classes",
+    "state_effect_classes",
+    "serialization_policy",
+    "failure_semantics",
+    "resource_classes",
+    "workload_classes",
+    "project_bindings",
+    "required_execution_receipt"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "policy_id": {
+      "const": "lambda-ci-workload-policy-v1"
+    },
+    "status": {
+      "enum": [
+        "CONTRACT_ONLY_NOT_LIVE_ENFORCEMENT",
+        "ACTIVE"
+      ]
+    },
+    "owning_task": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_epoch": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "principle",
+        "live_lambda_mutation_authorized_by_this_contract"
+      ],
+      "properties": {
+        "owner": {
+          "const": "workspace-control"
+        },
+        "principle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "live_lambda_mutation_authorized_by_this_contract": {
+          "type": "boolean"
+        }
+      }
+    },
+    "baselines": {
+      "type": "object",
+      "minProperties": 3
+    },
+    "admission_semantics": {
+      "type": "object",
+      "required": [
+        "root_issued_manifest_required",
+        "single_use",
+        "request_id_conflict_behavior",
+        "expiry_behavior",
+        "admission_ttl_seconds_max"
+      ],
+      "properties": {
+        "root_issued_manifest_required": {
+          "const": true
+        },
+        "single_use": {
+          "const": true
+        },
+        "request_id_conflict_behavior": {
+          "const": "REJECT"
+        },
+        "expiry_behavior": {
+          "type": "string",
+          "minLength": 1
+        },
+        "admission_ttl_seconds_max": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        }
+      }
+    },
+    "payload_network_classes": {
+      "type": "object",
+      "minProperties": 4
+    },
+    "payload_secret_classes": {
+      "type": "object",
+      "minProperties": 3
+    },
+    "filesystem_classes": {
+      "type": "object",
+      "minProperties": 4
+    },
+    "cache_access_classes": {
+      "type": "object",
+      "minProperties": 4
+    },
+    "state_effect_classes": {
+      "type": "object",
+      "minProperties": 4
+    },
+    "serialization_policy": {
+      "type": "object",
+      "required": [
+        "default_model_serialization",
+        "deny_without_exception",
+        "trust_remote_code_default",
+        "approved_exceptions"
+      ],
+      "properties": {
+        "default_model_serialization": {
+          "const": "SAFE_ONLY"
+        },
+        "deny_without_exception": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "trust_remote_code_default": {
+          "const": false
+        },
+        "approved_exceptions": {
+          "type": "array"
+        }
+      }
+    },
+    "failure_semantics": {
+      "type": "object",
+      "required": [
+        "cleanup_required_after_every_terminal_state",
+        "cleanup_failure_action",
+        "model_server_leak_action",
+        "gpu_process_leak_action"
+      ],
+      "properties": {
+        "cleanup_required_after_every_terminal_state": {
+          "const": true
+        },
+        "cleanup_failure_action": {
+          "const": "QUARANTINE_LANE_AND_BLOCK_NEW_ADMISSIONS"
+        },
+        "model_server_leak_action": {
+          "const": "QUARANTINE_LANE_AND_BLOCK_NEW_ADMISSIONS"
+        },
+        "gpu_process_leak_action": {
+          "const": "QUARANTINE_LANE_AND_BLOCK_NEW_ADMISSIONS"
+        }
+      }
+    },
+    "resource_classes": {
+      "type": "object",
+      "required": [
+        "cpu_test_v1",
+        "gpu_small_v1",
+        "model_acquire_v1",
+        "cache_promote_v1",
+        "model_eval_single_gpu_v1"
+      ],
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "execution_profile",
+          "max_runtime_seconds",
+          "scratch_max_bytes",
+          "staging_max_bytes",
+          "gpu_count"
+        ],
+        "properties": {
+          "execution_profile": {
+            "type": "string",
+            "minLength": 1
+          },
+          "max_runtime_seconds": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "scratch_max_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "staging_max_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "gpu_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2
+          },
+          "gpu_uuids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "workload_classes": {
+      "type": "object",
+      "required": [
+        "cpu-test",
+        "gpu-small",
+        "model-acquire",
+        "cache-promote",
+        "model-eval-single-gpu",
+        "gpu-heavy"
+      ],
+      "properties": {
+        "cpu-test": {
+          "$ref": "#/$defs/workloadClass"
+        },
+        "gpu-small": {
+          "$ref": "#/$defs/workloadClass"
+        },
+        "model-acquire": {
+          "$ref": "#/$defs/workloadClass"
+        },
+        "cache-promote": {
+          "$ref": "#/$defs/workloadClass"
+        },
+        "model-eval-single-gpu": {
+          "$ref": "#/$defs/workloadClass"
+        },
+        "gpu-heavy": {
+          "type": "object",
+          "required": [
+            "policy_decision",
+            "admission_enabled_after_enforcement",
+            "execution_plane",
+            "candidate_payload_allowed",
+            "underlying_profile",
+            "denial_reason"
+          ],
+          "properties": {
+            "policy_decision": {
+              "const": "DENY"
+            },
+            "admission_enabled_after_enforcement": {
+              "const": false
+            },
+            "execution_plane": {
+              "type": "string",
+              "minLength": 1
+            },
+            "candidate_payload_allowed": {
+              "const": false
+            },
+            "underlying_profile": {
+              "const": "gpu-heavy"
+            },
+            "denial_reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "project_bindings": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "required_execution_receipt": {
+      "type": "object",
+      "required": [
+        "bind_policy_and_admission_identity",
+        "record_cleanup_result",
+        "cleanup_checks"
+      ]
+    }
+  },
+  "$defs": {
+    "workloadClass": {
+      "type": "object",
+      "required": [
+        "policy_decision",
+        "admission_enabled_after_enforcement",
+        "execution_plane",
+        "candidate_payload_allowed",
+        "resource_class",
+        "payload_network_class",
+        "payload_secret_class",
+        "filesystem_class",
+        "cache_access_class",
+        "state_effect_class",
+        "model_binding",
+        "runtime_binding"
+      ],
+      "properties": {
+        "policy_decision": {
+          "enum": [
+            "EXISTING_P5_CAPABILITY",
+            "DESIGNED_NOT_LIVE"
+          ]
+        },
+        "admission_enabled_after_enforcement": {
+          "type": "boolean"
+        },
+        "execution_plane": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_payload_allowed": {
+          "type": "boolean"
+        },
+        "resource_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payload_network_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payload_secret_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "filesystem_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cache_access_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state_effect_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_binding": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runtime_binding": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
