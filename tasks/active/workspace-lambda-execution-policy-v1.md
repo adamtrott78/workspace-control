@@ -50,11 +50,6 @@ On the Lambda host from the normal operator account, run the exact-SHA install f
 
 - Live admission-v2 activation requires reviewed sudo execution of the exact-SHA workspace-control bootstrap on Lambda. The accepted self-hosted runner and credential-blind provisioner intentionally cannot install or upgrade root services.
 
-## Operator-shell invariants
-
-- Operator-facing shell instructions must preserve the interactive SSH/session on every validation or install failure. Never emit a top-level `exit`, `logout`, `exec`, shell-kill, or equivalent in a pasteable operator block. Put fail-fast checks inside an explicit child shell/subshell or otherwise return control to the operator prompt.
-- Any operator command that depends on a repository must enter that repository inside the same child shell/subshell, verify the exact git toplevel/cleanliness/HEAD before privileged execution, and print diagnostics on mismatch without terminating the parent SSH session.
-
 ## Fresh-chat initialization
 
 @GitHub
