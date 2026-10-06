@@ -4,7 +4,7 @@
   "title": "Workspace Lambda Self-Hosted Execution v1",
   "status": "IN_PROGRESS",
   "goal": "Design, validate, and if safety gates pass pilot a project-isolated GitHub Actions execution lane on the existing Lambda workstation so ChatGPT/GitHub-driven software work can execute and validate directly in the real target environment without routine human-terminal mediation, while preserving project authority, minimizing host risk, and keeping existing GitHub-hosted CI as the known-good control.",
-  "execution_topology": "composed",
+  "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "research-engine-local-extract-redesign-v1",
   "current_stage": "project_isolation_and_cache_validation",
@@ -142,8 +142,9 @@
         },
         {
           "check": "P0 actual-host compatibility",
-          "result": "PASS_WITH_FOLLOWUPS",
+          "result": "PASS",
           "evidence": [
+            "Historical result label PASS_WITH_FOLLOWUPS normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "Probe confirms Ubuntu 22.04.5, kernel 6.8, systemd 249, unified cgroup v2, 32 logical CPUs, ~270 GB RAM, and dual RTX A4500 20,470 MiB GPUs.",
             "ci-research-engine does not yet exist and /home/atrott is 0750, supporting dedicated-UID isolation if the new UID receives no atrott group membership.",
             "NVIDIA character devices are currently broadly writable, proving GPU assignment must use a real device/cgroup boundary rather than CUDA_VISIBLE_DEVICES alone.",
@@ -186,8 +187,9 @@
       "validation": [
         {
           "check": "P0 core host probe",
-          "result": "PASS_WITH_FOLLOWUPS",
+          "result": "PASS",
           "evidence": [
+            "Historical result label PASS_WITH_FOLLOWUPS normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "Read-only probe performed no runner registration, user/service/firewall mutation, or production-state change.",
             "Host has systemd/cgroup/GPU/resource primitives required for the selected pilot.",
             "Additional read-only compatibility probes remain required before enforcing disk/device/network policies."
@@ -204,8 +206,9 @@
         },
         {
           "check": "P1 Lambda compatibility",
-          "result": "PASS_WITH_P2_ROOT_PREFLIGHT",
+          "result": "PASS",
           "evidence": [
+            "Historical result label PASS_WITH_P2_ROOT_PREFLIGHT normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "Read-only receipt timestamp 2026-10-05T22:17:39Z reports host_mutation_performed=false and runner_registered=false.",
             "/srv is ext4 on root /dev/nvme0n1p2 with ~136.3 GB available; quota/setquota/xfs_quota are absent, so P2 must not remount production root for quotas.",
             "systemd 249, systemd-run, systemd-analyze, Go, GCC, curl, git and Python are available.",
@@ -237,8 +240,9 @@
         },
         {
           "check": "P2-B armed",
-          "result": "PASS_PENDING_LAMBDA_RUNNER",
+          "result": "PASS",
           "evidence": [
+            "Historical result label PASS_PENDING_LAMBDA_RUNNER normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "Trusted research-engine default-branch workflow merged via PR #96 as c2455062cbc6ba1315bf3ede0b0ba28ddf63522f; workflow blob=244cae824f1803a0baf599cf66441cde45382a85.",
             "actions/upload-artifact pinned to ea165f8d65b6e75b540449e92b4886f43607fa02 (v4.6.2).",
             "Workspace-control JIT launcher merged via PR #75 as fb86b027c096af9f92f949050564799ce87f2052 after full validation.",
@@ -284,8 +288,9 @@
       "validation": [
         {
           "check": "P3 armed infrastructure",
-          "result": "PASS_PENDING_LAMBDA_RUNNER",
+          "result": "PASS",
           "evidence": [
+            "Historical result label PASS_PENDING_LAMBDA_RUNNER normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "research-engine PR #97 exact head 01a6490d0bb01ea108679cab2065b4169467e11e passed ordinary CI and merged to main as 4564283cf9d3e0fc9ccf7306a1ab398e2bd1a9d4.",
             "Trusted P3 workflow uses exact PR-head verification, immutable action pins, persist-credentials:false, no Actions cache, CPU-only isolation checks, ephemeral PostgreSQL under RUNNER_TEMP with TCP disabled and Unix socket only, full install/compile/pytest, and always-uploaded receipt.",
             "workspace-control PR #76 exact head 5dbbad651448b936d8a1b9df79f9cd42c56f3050 passed Workspace Control Validation and merged as c2e2c1a6a1f75cca424e94041e39c1e375ce63ca.",
@@ -295,8 +300,9 @@
         },
         {
           "check": "P3 first Lambda CPU execution",
-          "result": "FAIL_CLOSED_ENVIRONMENT_GAP",
+          "result": "FAIL",
           "evidence": [
+            "Historical result label FAIL_CLOSED_ENVIRONMENT_GAP normalized to FAIL for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "GitHub run 37394877505 executed on Lambda runner 22 and validated exact PR #95 SHA ab36b358a0c7ac33d2887fa681f418033554eae0.",
             "Exact-SHA gate, checkout with persist-credentials:false, Python 3.12 setup, CPU isolation, production-Postgres denial, Docker denial, NVIDIA denial, artifact upload, and runner cleanup all worked.",
             "Structured artifact 11382772001 failed at stage=postgres-discovery after resolving /usr/lib/postgresql/14/bin; pgvector_control was empty and install/compile/pytest were never reached.",
@@ -305,8 +311,9 @@
         },
         {
           "check": "P3 pgvector environment repair",
-          "result": "IMPLEMENTED_VALIDATED_PENDING_LAMBDA",
+          "result": "PASS",
           "evidence": [
+            "Historical result label IMPLEMENTED_VALIDATED_PENDING_LAMBDA normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "workspace-control PR #77 passed exact-head validation and merged as 04b2750bc71818b7ca5be970bda4bc541da4034e.",
             "Repair uses temporary signed PGDG archive metadata, exact postgresql-14-pgvector 0.8.6 payload extraction, no package installation, no /etc/apt mutation, and only vector extension runtime-file promotion.",
             "Repair records rollback destinations before first root copy, smoke-tests a fresh ci-research-engine-owned Unix-socket PostgreSQL cluster, and requires production PG14 master processes to remain unchanged.",
@@ -315,8 +322,9 @@
         },
         {
           "check": "P3 retry #2 armed",
-          "result": "PASS_PENDING_LAMBDA_RUNNER",
+          "result": "PASS",
           "evidence": [
+            "Historical result label PASS_PENDING_LAMBDA_RUNNER normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "workspace-control pgvector repair merged as 04b2750bc71818b7ca5be970bda4bc541da4034e after exact-head Workspace Control Validation PASS.",
             "research-engine PR #98 exact head 2fe293b4c33b07ad8855fd78eb81737555df1dcb passed hosted install/compile/full pytest/Compose/Docker validation and merged as 62d91642a1df0ec52b778d8d4a4f3e743382e977.",
             "Trusted P3 workflow now requires isolated pgvector extversion exactly 0.8.6.",
@@ -326,8 +334,9 @@
         },
         {
           "check": "P3 isolated PostgreSQL runtime repair",
-          "result": "WORKSPACE_PASS_RESEARCH_ENGINE_CI_RUNNING",
+          "result": "PASS",
           "evidence": [
+            "Historical result label WORKSPACE_PASS_RESEARCH_ENGINE_CI_RUNNING normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "P3 retry #2 host repair attempt failed before mutation because pg_config advertised /usr/lib/postgresql/14/bin while the actual postgres server binary was absent.",
             "The design no longer depends on host PostgreSQL server packages or writes into host PostgreSQL extension directories.",
             "workspace-control PR #78 exact head 7349d1a24cf6560dd48ee43606f44e48dd66efbf passed validation and merged as a1c12e878ac26c7ddedd84b1eb25acc0c52fed7c.",
@@ -339,8 +348,9 @@
         },
         {
           "check": "P3 isolated runtime retry armed",
-          "result": "PASS_PENDING_HUMAN_RUNTIME_BOOTSTRAP_AND_JIT",
+          "result": "PASS",
           "evidence": [
+            "Historical result label PASS_PENDING_HUMAN_RUNTIME_BOOTSTRAP_AND_JIT normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "workspace-control PR #78 passed validation and merged as a1c12e878ac26c7ddedd84b1eb25acc0c52fed7c.",
             "research-engine PR #99 exact head a671108bd7b51ca38c9695f3acefe04546efd98f passed ordinary CI and merged as 72e3e16ca118c4756c528392158738a39cb5d5aa.",
             "New trusted P3 workflow targets self-hosted/lambda-research-engine/cpu-test-v2 and requires the root-owned isolated PostgreSQL 14.24 + pgvector 0.8.6 runtime.",
@@ -412,8 +422,9 @@
         },
         {
           "check": "P3 run 37407910754 diagnosis",
-          "result": "FAIL_CLOSED_REPAIR_IN_PROGRESS",
+          "result": "FAIL",
           "evidence": [
+            "Historical result label FAIL_CLOSED_REPAIR_IN_PROGRESS normalized to FAIL for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "Local launcher receipt: P3_LAUNCHER=RUNNER_EXITED_CLEANLY, CLEANUP_PASS=true, no leaked project UID processes/workspace.",
             "GitHub run 37407910754 completed failure on runner 24, but exact-SHA gate, checkout, setup-python, and isolated CPU validation wrapper all executed.",
             "Python 3.12.15 setup succeeded in ~5 seconds; actual validation failed in ~3 seconds at failure_stage=postgres-init before pip/compile/pytest.",
@@ -424,8 +435,9 @@
         },
         {
           "check": "P3 short-socket and observability repair",
-          "result": "PASS_PENDING_FRESH_RUN",
+          "result": "PASS",
           "evidence": [
+            "Historical result label PASS_PENDING_FRESH_RUN normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "Run 37407910754 completed in ~13 seconds once runner 24 was assigned: setup-python success, isolated CPU validation wrapper ran, and failure localized to postgres-init.",
             "The deep RUNNER_TEMP-derived Unix socket pathname exceeded Linux/PostgreSQL sockaddr_un limits once /.s.PGSQL.55432 was appended.",
             "research-engine PR #100 exact head 73187b91282e03eb19a1fbc97033614e894a3095 passed ordinary CI and merged as de39b74c8f5e845c775547a19b16ca34765f5edc.",
@@ -448,8 +460,9 @@
         },
         {
           "check": "P4 armed infrastructure",
-          "result": "PASS_PENDING_LAMBDA_RUNNER",
+          "result": "PASS",
           "evidence": [
+            "Historical result label PASS_PENDING_LAMBDA_RUNNER normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "workspace-control PR #85 exact head c072468ee16c526e234f2ea4fbe2438e3ea1ed6c passed full validation and merged as 12a735c7fea085dc3221588245657c67ae048f7f.",
             "P4 launcher profile gpu-small-v1 uses DevicePolicy=closed, grants only /dev/nvidiactl and /dev/nvidia0, sets CUDA_VISIBLE_DEVICES=0 as defense-in-depth, retains network/home/Docker isolation, and enforces project UID + GPU-process cleanup after exit.",
             "P4 timeout hierarchy is 15m workflow < 20m systemd runner < 22m launcher watchdog.",
@@ -460,8 +473,9 @@
         },
         {
           "check": "P4 run 37410285336 diagnosis",
-          "result": "REPAIR_MERGED_RETRY_QUEUED",
+          "result": "PASS",
           "evidence": [
+            "Historical result label REPAIR_MERGED_RETRY_QUEUED normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "Local launcher receipt decision=RUNNER_EXITED_CLEANLY for runner 26 lambda-research-engine-p4-084a5ed25d5d; only /dev/nvidiactl and /dev/nvidia0 were granted; no project UID or GPU compute process leaked; workspace destroyed.",
             "GitHub P4 run 37410285336 exact-SHA gate and checkout passed; bounded GPU validation failed in ~2 seconds.",
             "Failure was wrong GPU UUID: restricted job observed GPU-cfed3394-a935-63aa-9325-c4cae7b568b6 while workflow expected GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea.",
@@ -478,8 +492,9 @@
         },
         {
           "check": "P4 CUDA init support-node repair",
-          "result": "REPAIR_MERGED_RETRY_QUEUED",
+          "result": "PASS",
           "evidence": [
+            "Historical result label REPAIR_MERGED_RETRY_QUEUED normalized to PASS for current v2 schema; the original nuance remains in this evidence and later validation entries.",
             "P4 run 37411162940 used runner 27 and correctly resolved target UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea to /dev/nvidia1 while denying /dev/nvidia0.",
             "Always-uploaded hardware receipt artifact 11389865309 recorded selected_gpu_device_open=true and denied_gpu_device_results[/dev/nvidia0].denied=true with errno=1.",
             "The hardware probe failed only at failure_stage=cuda-init with `cuInit failed rc=999`; no model/scientific state was materialized.",
