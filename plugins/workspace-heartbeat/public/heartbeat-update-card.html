@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Workspace Heartbeat Update</title>
+<style>
+:root{color-scheme:light dark;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{margin:0;background:transparent;color:CanvasText}
+main{padding:14px 16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.title{font-size:12px;font-weight:650;opacity:.72}
+.state{border:1px solid color-mix(in srgb,CanvasText 20%,transparent);border-radius:999px;padding:3px 7px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+.message{margin:0;font-size:14px;line-height:1.5;white-space:pre-wrap}
+.meta{margin-top:7px;font-size:11px;opacity:.55}
+.empty{font-size:13px;opacity:.6}
+</style>
+</head>
+<body>
+<main>
+<div class="top">
+  <div class="title">Workspace heartbeat</div>
+  <div id="state" class="state">working</div>
+</div>
+<div id="content" class="empty">Waiting for heartbeat…</div>
+</main>
+<script type="module">
+const stateEl=document.getElementById("state");
+const contentEl=document.getElementById("content");
+
+function fmt(value){
+  const d=new Date(value);
+  return Number.isNaN(d.getTime())?value:d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit",second:"2-digit"});
+}
+
+function render(heartbeat){
+  if(!heartbeat)return;
+  stateEl.textContent=heartbeat.state;
+
+  const wrapper=document.createElement("div");
+  const message=document.createElement("p");
+  message.className="message";
+  message.textContent=heartbeat.message;
+
+  const meta=document.createElement("div");
+  meta.className="meta";
+  meta.textContent=heartbeat.task_id+" · update "+heartbeat.sequence+" · "+fmt(heartbeat.updated_at);
+
+  wrapper.append(message,meta);
+  contentEl.replaceWith(wrapper);
+}
+
+function apply(result){
+  const structured=result?.structuredContent??result;
+  render(structured?.heartbeat??null);
+}
+
+window.addEventListener("message",event=>{
+  if(event.source!==window.parent)return;
+  const message=event.data;
+  if(!message||message.jsonrpc!=="2.0")return;
+  if(message.method==="ui/notifications/tool-result")apply(message.params);
+},{passive:true});
+
+apply(window.openai?.toolOutput??null);
+</script>
+</body>
+</html>
