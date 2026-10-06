@@ -3,15 +3,22 @@ import importlib.util
 import json
 import pathlib
 import sys
+import unittest
 import uuid
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "scripts" / "lambda_ci_provisioner.py"
+RUNTIME_MODULE_PATH = ROOT / "scripts" / "lambda_ci_runtime.py"
 
 spec = importlib.util.spec_from_file_location("lambda_ci_provisioner", MODULE_PATH)
 mod = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = mod
 spec.loader.exec_module(mod)
+
+runtime_spec = importlib.util.spec_from_file_location("lambda_ci_runtime", RUNTIME_MODULE_PATH)
+runtime = importlib.util.module_from_spec(runtime_spec)
+sys.modules[runtime_spec.name] = runtime
+runtime_spec.loader.exec_module(runtime)
 
 MANIFEST = json.loads(
     (ROOT / "architecture" / "lambda-ci-project-research-engine.v1.json").read_text()
@@ -136,3 +143,25 @@ def test_go_toolchain_is_checksum_pinned_and_isolated():
     )
     assert go["install_prefix"] == "/opt/workspace-ci/go/1.26.3"
     assert go["architecture"] == "linux-amd64"
+
+
+def test_launch_spec_satisfies_runtime_path_contract():
+    req = mod.validate_request(good_request(), MANIFEST)
+    launch = mod.build_launch_spec(req, MANIFEST, PROFILES, PINS)
+    command = runtime.build_cpu_systemd_command(
+        launch,
+        pathlib.Path("/srv/workspace-ci/research-engine/jobs/p5-test/runner"),
+        pathlib.Path("/srv/workspace-ci/research-engine/staging-cache/p5-test"),
+        "134.88.12.0/22",
+    )
+    assert launch["paths"]["home"] == "/srv/workspace-ci/research-engine/home"
+    assert "Environment=HOME=/srv/workspace-ci/research-engine/home" in command
+    assert "ReadWritePaths=/srv/workspace-ci/research-engine/home" in command
+
+
+def load_tests(loader, tests, pattern):
+    suite = unittest.TestSuite()
+    for name, obj in sorted(globals().items()):
+        if name.startswith("test_") and callable(obj):
+            suite.addTest(unittest.FunctionTestCase(obj, description=name))
+    return suite

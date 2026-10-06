@@ -110,6 +110,7 @@ def build_launch_spec(
     job_root = pathlib.PurePosixPath(manifest["roots"]["jobs"])
     staging = pathlib.PurePosixPath(manifest["roots"]["staging_cache"])
     trusted = pathlib.PurePosixPath(manifest["roots"]["trusted_cache"])
+    home = pathlib.PurePosixPath(manifest["roots"]["home"])
     logs = pathlib.PurePosixPath(manifest["roots"]["logs"])
 
     unit_name = f"workspace-ci-{request.project_id}-{request.request_id}.service"
@@ -131,6 +132,7 @@ def build_launch_spec(
             "job_root": str(job_root),
             "staging_cache": str(staging),
             "trusted_cache": str(trusted),
+            "home": str(home),
             "logs": str(logs),
         },
         "runner": {
