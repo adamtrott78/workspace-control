@@ -235,7 +235,8 @@ func TestAdmissionV2TargetRemainsBounded(t *testing.T) {
 
 func TestSparseJobAssignedRecoveryMetadataIsNonAuthoritative(t *testing.T) {
 	sparse := scaleset.JobMessageBase{
-		RunnerRequestID: 12345,
+		JobMessageType: scaleset.JobMessageType{MessageType: scaleset.MessageTypeJobAssigned},
+		WorkflowRunID:  99,
 	}
 	if recoveryMetadataComplete(&sparse) {
 		t.Fatal("sparse JobAssigned metadata was treated as sufficient for recovery attestation")
@@ -244,5 +245,15 @@ func TestSparseJobAssignedRecoveryMetadataIsNonAuthoritative(t *testing.T) {
 	complete := assignedCPUJob().JobMessageBase
 	if !recoveryMetadataComplete(&complete) {
 		t.Fatal("complete JobAssigned metadata was rejected for recovery attestation")
+	}
+}
+
+func TestAssignedRecoveryAllowsMissingRunnerRequestID(t *testing.T) {
+	job := assignedCPUJob().JobMessageBase
+	if job.RunnerRequestID != 0 {
+		t.Fatalf("test fixture unexpectedly has runner request id %d", job.RunnerRequestID)
+	}
+	if !recoveryMetadataComplete(&job) {
+		t.Fatal("JobAssigned recovery with stable workflow/job provenance was rejected")
 	}
 }

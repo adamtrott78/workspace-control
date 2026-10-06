@@ -37,6 +37,7 @@ _ATTESTATION_KEYS = {
     "source",
     "repository",
     "scale_set_name",
+    "job_message_type",
     "runner_request_id",
     "workflow_run_id",
     "job_id",
@@ -192,7 +193,7 @@ def validate_controller_attestation(
         raise AdmissionError("controller attestation must be an object")
     _require_exact_keys(attestation, _ATTESTATION_KEYS, "controller attestation")
 
-    if attestation.get("schema_version") != 1:
+    if attestation.get("schema_version") != 2:
         raise AdmissionError("unsupported controller attestation schema")
     if attestation.get("source") != "github_scale_set_controller":
         raise AdmissionError("controller attestation source is not trusted")
@@ -200,12 +201,22 @@ def validate_controller_attestation(
         raise AdmissionError("controller repository attestation does not match project")
     if attestation.get("scale_set_name") != route.get("scale_set_name"):
         raise AdmissionError("controller scale-set attestation does not match route")
-    if not isinstance(attestation.get("runner_request_id"), int) or attestation["runner_request_id"] <= 0:
-        raise AdmissionError("runner_request_id must be positive")
+    message_type = attestation.get("job_message_type")
+    if message_type not in {"JobAvailable", "JobAssigned"}:
+        raise AdmissionError("job_message_type is not an admitted lifecycle source")
+    runner_request_id = attestation.get("runner_request_id")
+    if not isinstance(runner_request_id, int) or runner_request_id < 0:
+        raise AdmissionError("runner_request_id must be a non-negative integer")
+    if message_type == "JobAvailable" and runner_request_id <= 0:
+        raise AdmissionError("JobAvailable runner_request_id must be positive")
     if not isinstance(attestation.get("workflow_run_id"), int) or attestation["workflow_run_id"] <= 0:
         raise AdmissionError("workflow_run_id must be positive")
-    if not isinstance(attestation.get("job_id"), str) or not attestation["job_id"]:
-        raise AdmissionError("job_id must be non-empty")
+    if (
+        not isinstance(attestation.get("job_id"), str)
+        or not attestation["job_id"].isdigit()
+        or int(attestation["job_id"]) <= 0
+    ):
+        raise AdmissionError("job_id must be a positive GitHub Actions REST job id")
 
     trusted = route.get("trusted_workflow")
     if not isinstance(trusted, dict):
@@ -279,6 +290,8 @@ def request_digest(request: dict[str, Any]) -> str:
     attestation = nonsecret.get("attestation")
     if isinstance(attestation, dict):
         attestation.pop("verified_at", None)
+        attestation.pop("job_message_type", None)
+        attestation.pop("runner_request_id", None)
     return sha256_json(nonsecret)
 
 
