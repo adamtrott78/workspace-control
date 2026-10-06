@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 12f9d9e3a59f042bcf832dfe89a3b389b92f21ce
+- Remote checkpoint: e77af13b3ad43b4252031d27f72773cfd8f232dd
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,10 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Start from architecture/lambda-ci-execution-policy-hydration.v1.md and the accepted parent baseline. Complete the policy_contract_and_hydration stage by designing a versioned workload-class taxonomy plus root-owned admission manifest/schema and execution-receipt contract. Preserve cpu-test/gpu-small as already accepted capabilities, keep gpu-heavy denied, keep candidate jobs unable to promote trusted cache content, and keep model-eval offline/no-registry-credential by default. Do not mutate the live Lambda or run a model-scale workload until the policy contract has passed workspace-control validation.
+Begin admission_manifest_and_enforcement from canonical workspace-control e77af13b3ad43b4252031d27f72773cfd8f232dd. Hydrate the accepted P5 controller/provisioner request protocol and implement root-owned validation against architecture/lambda-ci-workload-policy.v1.json plus the versioned admission and execution-receipt schemas: exact project/trusted-workflow/candidate-SHA binding, declared workload/profile/model/runtime/resource/capability binding, atomic single-use admission consumption, stale/replay/kill-switch rejection, and receipt identity binding. Preserve existing cpu-test/gpu-small authority, keep model-acquire/cache-promote/model-eval-single-gpu non-live until their enforcement gates pass, keep gpu-heavy denied, and do not mutate production research routing or run a model-scale workload in this stage.
 
 ## Remaining work
 
-- Finish and validate the workload-class taxonomy, admission schema, exception model, and execution-receipt contract.
 - Implement root-owned admission enforcement without broadening the accepted P5 controller/provisioner authority.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
