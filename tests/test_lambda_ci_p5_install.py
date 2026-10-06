@@ -1,3 +1,4 @@
+import json
 import pathlib
 import subprocess
 import unittest
@@ -6,6 +7,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 PROVISIONER_UNIT = (ROOT / "systemd" / "workspace-ci-provisioner.service").read_text()
 CONTROLLER_UNIT = (ROOT / "systemd" / "workspace-ci-controller.service").read_text()
 BOOTSTRAP = (ROOT / "scripts" / "bootstrap_lambda_ci_p5.sh").read_text()
+GO_BOOTSTRAP = (ROOT / "scripts" / "bootstrap_lambda_ci_go_toolchain.sh").read_text()
+PINS = json.loads((ROOT / "architecture" / "lambda-ci-upstream-pins.v1.json").read_text())
 STAGE = (ROOT / "scripts" / "stage_lambda_ci_controller_pat.sh").read_text()
 KILL = (ROOT / "scripts" / "lambda_ci_kill_switch.sh").read_text()
 REMOVE = (ROOT / "scripts" / "remove_lambda_ci.sh").read_text()
@@ -15,6 +18,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
     def test_shell_artifacts_parse(self):
         for rel in (
             "scripts/bootstrap_lambda_ci_p5.sh",
+            "scripts/bootstrap_lambda_ci_go_toolchain.sh",
             "scripts/stage_lambda_ci_controller_pat.sh",
             "scripts/lambda_ci_kill_switch.sh",
             "scripts/remove_lambda_ci.sh",
@@ -92,8 +96,51 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         self.assertIn("trap rollback ERR", BOOTSTRAP)
         self.assertIn("P5_INSTALL_ROLLBACK=COMPLETE", BOOTSTRAP)
         self.assertIn("systemd-analyze verify", BOOTSTRAP)
-        self.assertIn("GO_1_26_3_REQUIRED", BOOTSTRAP)
+        self.assertIn("ISOLATED_GO_TOOLCHAIN_REQUIRED:/opt/workspace-ci/go/1.26.3", BOOTSTRAP)
+        self.assertIn('GO_BIN=/opt/workspace-ci/go/1.26.3/bin/go', BOOTSTRAP)
+        self.assertNotIn("command -v go", BOOTSTRAP)
         self.assertIn("IPAddressDeny=$LOCAL_SUBNET", BOOTSTRAP)
+
+
+    def test_go_toolchain_pin_is_exact_official_release(self):
+        pin = PINS["go_toolchain"]
+        self.assertEqual(pin["version"], "1.26.3")
+        self.assertEqual(
+            pin["source_url"],
+            "https://go.dev/dl/go1.26.3.linux-amd64.tar.gz",
+        )
+        self.assertEqual(
+            pin["source_sha256"],
+            "2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556",
+        )
+        self.assertEqual(pin["install_prefix"], "/opt/workspace-ci/go/1.26.3")
+
+    def test_go_toolchain_bootstrap_is_unprivileged_download_and_root_promotion(self):
+        self.assertIn("WORKSPACE_CI_GO_BOOTSTRAP_AUTHORIZED", GO_BOOTSTRAP)
+        self.assertIn("WORKSPACE_CI_GO_EXPECTED_SHA", GO_BOOTSTRAP)
+        self.assertIn("runuser -u ci-controller --", GO_BOOTSTRAP)
+        self.assertIn("curl --fail --location --silent --show-error", GO_BOOTSTRAP)
+        self.assertIn("ACTUAL_SHA=", GO_BOOTSTRAP)
+        self.assertIn('[[ "$ACTUAL_SHA" == "$SHA256" ]]', GO_BOOTSTRAP)
+        self.assertIn('mv -- "$STAGE/go" "$TARGET"', GO_BOOTSTRAP)
+        self.assertIn('chown -R root:root "$TARGET"', GO_BOOTSTRAP)
+        self.assertIn('chmod -R a+rX,go-w "$TARGET"', GO_BOOTSTRAP)
+        self.assertIn("P5_GO_TOOLCHAIN_ROLLBACK=COMPLETE", GO_BOOTSTRAP)
+        self.assertIn('"host_package_database_modified": False', GO_BOOTSTRAP)
+        self.assertIn('"system_go_replaced": False', GO_BOOTSTRAP)
+        for forbidden in (
+            "apt ",
+            "apt-get",
+            "dpkg ",
+            "/usr/bin/go",
+            "/usr/local/go",
+        ):
+            self.assertNotIn(forbidden, GO_BOOTSTRAP)
+
+    def test_p5_install_uses_only_isolated_go_toolchain(self):
+        self.assertIn('GO_BIN=/opt/workspace-ci/go/1.26.3/bin/go', BOOTSTRAP)
+        self.assertIn('[[ "$GO_VERSION" == "go1.26.3" ]]', BOOTSTRAP)
+        self.assertNotIn("command -v go", BOOTSTRAP)
 
     def test_socket_contract_is_checked_before_controller_activation(self):
         socket_check = BOOTSTRAP.index("SOCKET_MODE_DRIFT")
