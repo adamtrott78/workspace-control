@@ -147,7 +147,7 @@ def github_jit_config(token: str, runner_name: str) -> tuple[str, int]:
                 "Linux",
                 "X64",
                 "lambda-research-engine",
-                "cpu-test",
+                "cpu-test-v2",
             ],
             "work_folder": "_work",
         }
@@ -391,7 +391,7 @@ def main() -> int:
             "runner_name": runner_name,
             "runner_id": runner_id,
             "unit": unit,
-            "profile": "cpu-test",
+            "profile": "cpu-test-v2",
             "runner_user": RUNNER_USER,
             "network_local_subnet_denied": subnet,
             "jit_config_persisted": False,

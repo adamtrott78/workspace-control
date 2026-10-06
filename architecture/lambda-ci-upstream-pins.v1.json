@@ -15,5 +15,18 @@
     "linux_x64_sha256": "70920811a4f8ad4328818682bca5c6469c1c942fab52448868071d0063816613",
     "asset_name": "actions-runner-linux-x64-2.337.0.tar.gz",
     "update_policy": "manual evidence-reviewed bump with checksum update and P3/P4 regression before promotion"
+  },
+  "postgresql_ci_runtime": {
+    "version": "14.24",
+    "source_url": "https://ftp.postgresql.org/pub/source/v14.24/postgresql-14.24.tar.bz2",
+    "source_sha256": "a7fa7ed3d558172355f51406097a7bd4f6b473be80f311ef7cda96bf383d8897",
+    "install_prefix": "/opt/workspace-ci/postgresql/postgresql-14.24-pgvector-0.8.6",
+    "build_policy": "compile from official release source as unprivileged ci-controller; stage before root-owned read-only promotion; no host package/database/service mutation"
+  },
+  "pgvector_ci_runtime": {
+    "version": "0.8.6",
+    "repository": "pgvector/pgvector",
+    "commit_sha": "8ee86c96f0fd72390f890aa8a336fda6d3ab4c6c",
+    "build_policy": "build exact commit against isolated PostgreSQL runtime; stage before root-owned read-only promotion"
   }
 }
