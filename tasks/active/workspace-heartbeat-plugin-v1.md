@@ -12,7 +12,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
 - Status: VALIDATING
-- Current stage: native_commentary_bridge_v042
+- Current stage: compact_task_summary_v042
 - Exact v0.4.1 source: `568acaaf1e8350bb6c781415668d2e965af46f00`
 - Branch: `heartbeat-v2-smoke-checkpoint`
 - PR: #69
@@ -98,3 +98,20 @@ The commentary mirror is presentation only. The backend heartbeat store remains 
 ### Next safe action
 
 Deploy/refresh v0.4.2 and test this dual path during real long-running work, including the other active Lambda chat. Close heartbeat only after the native commentary mirrors remain chronologically interleaved and no routine aggregate history widget appears.
+
+
+## Revised v0.4.2 — compact task summary
+
+The native-commentary bridge was rejected by a deliberate long-turn stress test: visible inline mirrors survived only through heartbeat 2 while later tool execution continued.
+
+The revised delivery contract is:
+
+1. `heartbeat_update` remains data-only and may run repeatedly during long tool sequences.
+2. `heartbeat_render(task_id)` is called once near the end of a substantial turn.
+3. That render shows **only the latest three updates for exactly that task**.
+4. `heartbeat_get(task_id)` remains the explicit full-history/sidebar view.
+5. The side panel renders task-local history rather than a cross-task timeline.
+
+Heartbeat prose should sound like ordinary ChatGPT progress commentary: findings, decisions, meaningful state changes, and the next action. Avoid telemetry-style phrases such as “tool call completed,” sequence narration, repeated task IDs, or rigid status headings.
+
+The rolling-card window is intentionally 3 for initial acceptance and can be increased later if user field evidence justifies it.

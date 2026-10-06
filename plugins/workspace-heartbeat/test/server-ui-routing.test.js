@@ -3,64 +3,71 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const server = readFileSync(new URL("../server.js", import.meta.url), "utf8");
+const summary = readFileSync(
+  new URL("../public/heartbeat-summary-card.html", import.meta.url),
+  "utf8",
+);
+const panel = readFileSync(
+  new URL("../public/heartbeat-panel.html", import.meta.url),
+  "utf8",
+);
 
-test("heartbeat_update is data-only while heartbeat_get owns the history UI", () => {
-  assert.equal(server.includes('const PANEL_URI = "ui://workspace-heartbeat/panel-v7.html";'), true);
-  assert.equal(server.includes("UPDATE_CARD_URI"), false);
-
+test("heartbeat_update remains data-only", () => {
   const updateStart = server.indexOf('"heartbeat_update"');
-  const getStart = server.indexOf('"heartbeat_get"');
-
+  const renderStart = server.indexOf('"heartbeat_render"');
   assert.notEqual(updateStart, -1);
-  assert.notEqual(getStart, -1);
-
-  const updateBlock = server.slice(updateStart, getStart);
-  const getBlock = server.slice(getStart);
-
+  assert.notEqual(renderStart, -1);
+  const updateBlock = server.slice(updateStart, renderStart);
   assert.equal(updateBlock.includes("resourceUri:"), false);
-  assert.equal(updateBlock.includes("heartbeat.message"), true);
-  assert.equal(getBlock.includes("resourceUri: PANEL_URI"), true);
+  assert.equal(updateBlock.includes("structuredContent: { heartbeat }"), true);
 });
 
-test("only heartbeat_get advertises the thread entrypoint", () => {
-  const updateStart = server.indexOf('"heartbeat_update"');
+test("heartbeat_render owns one compact summary UI and is task scoped", () => {
+  assert.equal(
+    server.includes('const SUMMARY_URI = "ui://workspace-heartbeat/summary-v1.html";'),
+    true,
+  );
+  const renderStart = server.indexOf('"heartbeat_render"');
   const getStart = server.indexOf('"heartbeat_get"');
-  const updateBlock = server.slice(updateStart, getStart);
-  const getBlock = server.slice(getStart);
+  const renderBlock = server.slice(renderStart, getStart);
+  assert.equal(renderBlock.includes("resourceUri: SUMMARY_URI"), true);
+  assert.equal(renderBlock.includes("task_id: z.string().min(1).max(160)"), true);
+  assert.equal(renderBlock.includes("snapshot.history.slice(-3)"), true);
+  assert.equal(renderBlock.includes("snapshot.timeline"), false);
+});
 
-  assert.equal(updateBlock.includes('entrypoints: [{ type: "thread" }]'), false);
+test("summary card renders at most three task-local updates", () => {
+  assert.equal(summary.includes("snapshot.recent.slice(-3)"), true);
+  assert.equal(summary.includes("full history in heartbeat panel"), true);
+  assert.equal(summary.includes("timeline"), false);
+});
+
+test("heartbeat_get remains the full-history thread panel", () => {
+  assert.equal(
+    server.includes('const PANEL_URI = "ui://workspace-heartbeat/panel-v8.html";'),
+    true,
+  );
+  const getStart = server.indexOf('"heartbeat_get"');
+  const getBlock = server.slice(getStart);
+  assert.equal(getBlock.includes("resourceUri: PANEL_URI"), true);
   assert.equal(getBlock.includes('entrypoints: [{ type: "thread" }]'), true);
 });
 
-test("heartbeat_update returns only the newest heartbeat", () => {
-  assert.equal(server.includes("const heartbeatUpdateOutputSchema"), true);
-  assert.equal(server.includes("structuredContent: { heartbeat }"), true);
-
-  const updateSchemaStart = server.indexOf("const heartbeatUpdateOutputSchema");
-  const historySchemaStart = server.indexOf("const heartbeatOutputSchema");
-  const updateSchema = server.slice(updateSchemaStart, historySchemaStart);
-
-  assert.equal(updateSchema.includes("history:"), false);
-  assert.equal(updateSchema.includes("timeline:"), false);
+test("side panel renders task history rather than cross-task timeline", () => {
+  assert.equal(
+    panel.includes("const source=Array.isArray(snapshot.history)?snapshot.history:[];"),
+    true,
+  );
+  assert.equal(panel.includes("snapshot.timeline)&&snapshot.timeline.length"), false);
 });
 
-test("heartbeat_get retains task history and operator timeline", () => {
-  assert.equal(server.includes("history: z.array(heartbeatSchema)"), true);
-  assert.equal(server.includes("timeline: z.array(heartbeatSchema)"), true);
+test("heartbeat prose guidance prefers natural semantic updates", () => {
+  assert.equal(server.includes("normal conversational progress commentary"), true);
+  assert.equal(server.includes("Prefer findings and decisions over narration of tool mechanics"), true);
+  assert.equal(server.includes("Avoid headings, task IDs, sequence numbers, stage labels"), true);
 });
 
-
-test("tool descriptions enforce native commentary mirror and explicit-only history", () => {
-  assert.equal(
-    server.includes("immediately repeat the exact heartbeat message as native assistant commentary"),
-    true,
-  );
-  assert.equal(
-    server.includes("Explicit history inspection only."),
-    true,
-  );
-  assert.equal(
-    server.includes("Do not call this during routine progress delivery"),
-    true,
-  );
+test("heartbeat_render is end-of-turn only", () => {
+  assert.equal(server.includes("call heartbeat_render exactly once"), true);
+  assert.equal(server.includes("Call this at most once near the end"), true);
 });

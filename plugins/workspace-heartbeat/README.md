@@ -113,18 +113,30 @@ To preserve operator chronology:
 - No background polling, reconciliation timer, or duplicate render tool is introduced.
 
 
-## v0.4.2 native-commentary chronology bridge
+## v0.4.2 compact task summary
 
-v0.4.1 removed the hoisted update-card iframe, but live screenshots proved that ordinary MCP tool-result content is not guaranteed to render as visible prose at the invocation point. ChatGPT may collapse the result into a generic tool row, while an explicit `heartbeat_get` call renders the full history as one aggregate UI surface later in the response.
+Long-turn stress testing showed that native assistant commentary is not preserved reliably deep into large tool sequences, while MCP tool calls continue to execute. v0.4.2 therefore stops requiring native commentary mirrors.
 
-v0.4.2 therefore separates **authoritative state** from **visible chronological delivery**:
+Routine delivery now has three distinct roles:
 
-- `heartbeat_update` remains the authoritative backend heartbeat write.
-- After every successful `heartbeat_update`, the executor must immediately repeat the exact heartbeat message as native assistant commentary at that point in the response.
-- The commentary mirror is presentation only; backend heartbeat state remains authoritative.
-- `heartbeat_get` is explicit history/sidebar inspection only. It must not be called during routine heartbeat delivery or merely to verify that an update landed.
-- Routine work therefore produces compact native progress commentary in chronological order without a custom inline widget.
-- The rich history/sidebar remains available on demand.
-- Server-side history is still in-memory and resets when the heartbeat server restarts.
+- `heartbeat_update` is data-only and records natural-language progress throughout the turn.
+- `heartbeat_render(task_id)` is called **once near the end of a substantial turn** and renders one compact card containing only the latest three updates for that exact task.
+- `heartbeat_get(task_id)` remains the explicit full-history/sidebar surface.
 
-This is intentionally a host-aware bridge: current OpenAI plugin UI does not expose a supported per-tool control for pinning custom MCP UI to the exact invocation position.
+The summary card never mixes tasks and never replays the full history. The side panel now renders task-local `history` rather than preferring the cross-task `timeline`.
+
+### Natural heartbeat prose
+
+Heartbeat messages should sound like normal ChatGPT progress commentary, not telemetry.
+
+Good:
+
+> The runner reached checkout cleanly, but dependency setup failed before tests started. I’m isolating that path before changing the candidate code.
+
+Avoid:
+
+> Heartbeat 7: GitHub job read completed; continuing the validation sequence.
+
+Messages should normally be one or two conversational sentences focused on a meaningful finding, decision, state change, or next action. Structured metadata already carries task ID, state, sequence, and timestamp, so prose does not need to repeat them.
+
+The rolling-card window is three updates for v0.4.2. Full bounded task history remains available through the side panel.

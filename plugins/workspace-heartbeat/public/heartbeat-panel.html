@@ -70,15 +70,7 @@ function render(){
   stateEl.textContent=latest.state;
 
   const nodes=[];
-  let previousTask=null;
   for(const item of knownHistory){
-    if(item.task_id!==previousTask){
-      const boundary=document.createElement("div");
-      boundary.className="task-boundary";
-      boundary.textContent=item.task_id;
-      nodes.push(boundary);
-      previousTask=item.task_id;
-    }
     const entry=document.createElement("section");
     entry.className="entry";
     const msg=document.createElement("p");
@@ -92,15 +84,12 @@ function render(){
   }
   historyEl.replaceChildren(...nodes);
 
-  const taskCount=new Set(knownHistory.map(item=>item.task_id)).size;
-  footerEl.textContent=knownHistory.length+" retained update"+(knownHistory.length===1?"":"s")+" across "+taskCount+" task"+(taskCount===1?"":"s");
+  footerEl.textContent=knownHistory.length+" retained update"+(knownHistory.length===1?"":"s")+" for "+latest.task_id;
   persist();
 }
 function apply(snapshot){
   if(!snapshot)return;
-  const source=Array.isArray(snapshot.timeline)&&snapshot.timeline.length
-    ? snapshot.timeline
-    : (Array.isArray(snapshot.history)?snapshot.history:[]);
+  const source=Array.isArray(snapshot.history)?snapshot.history:[];
   const incoming=[...source];
   if(snapshot.heartbeat&&!incoming.length)incoming.push(snapshot.heartbeat);
   if(snapshot.heartbeat?.task_id)activeTaskId=snapshot.heartbeat.task_id;
@@ -131,7 +120,7 @@ window.addEventListener("message",event=>{
 async function initializeBridge(){
   try{
     await request("ui/initialize",{
-      appInfo:{name:"workspace-heartbeat-panel",version:"0.4.0"},
+      appInfo:{name:"workspace-heartbeat-panel",version:"0.4.2"},
       appCapabilities:{},
       protocolVersion:"2026-01-26"
     });
