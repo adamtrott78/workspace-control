@@ -73,7 +73,7 @@ class ProvisionerService:
         pins: dict[str, Any],
         state_store: StateStore,
         controller_uid: int,
-        launcher: Callable[[Any, dict[str, Any]], dict[str, Any]] = runtime.launch_cpu_runner,
+        launcher: Callable[[Any, dict[str, Any]], dict[str, Any]] = runtime.launch_runner,
     ):
         self.manifest = manifest
         self.profiles = profiles
@@ -117,8 +117,8 @@ class ProvisionerService:
             raise ServiceError("peer UID is not ci-controller")
 
         req = policy.validate_request(data, self.manifest)
-        if req.profile != "cpu-test":
-            raise ServiceError("P5 pilot provisioner enables cpu-test only")
+        if req.profile not in {"cpu-test", "gpu-small"}:
+            raise ServiceError("P5 provisioner enables only cpu-test and gpu-small")
 
         spec = policy.build_launch_spec(req, self.manifest, self.profiles, self.pins)
         concurrency = int(self.manifest["concurrency"])
