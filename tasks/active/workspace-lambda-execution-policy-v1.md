@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d2326042f49ae1bd771c33b1ce56f49795827661
+- Remote checkpoint: 46af3b986cbd8e2d7dc879b9dcc325783d1f112d
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-On the Lambda host from the normal operator account, use the clean workspace-control checkout and fast-forward it to exact canonical main d2326042f49ae1bd771c33b1ce56f49795827661. Verify the checkout is clean and HEAD is exact, then run the canonical scripts/bootstrap_lambda_ci_p5.sh via sudo with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES and WORKSPACE_CI_P5_EXPECTED_SHA=d2326042f49ae1bd771c33b1ce56f49795827661. Preserve the generated install receipt under ~/adamArchives/Adam/workspace-control-tmp/. After live install PASS, create/choose a non-scientific research-engine candidate PR and trigger the existing trusted /lambda-ci-p5 <exact_sha> and /lambda-ci-p5-gpu <exact_sha> workflows. Require both GitHub jobs and root receipts to prove v2 admission identity, exact trusted workflow blob/candidate binding, unchanged cpu-test/gpu-small isolation, and residue-free cleanup before marking admission_manifest_and_enforcement VALIDATED. Do not enable any model-scale class or gpu-heavy in this stage.
+On the Lambda host from the normal operator account, run the exact-SHA install from an explicit child bash so any validation failure exits only that child shell and NEVER the interactive SSH session. The child shell must cd to ~/adamArchives/Adam/workspace-control itself, verify that git rev-parse --show-toplevel equals that directory, verify a clean tree, fetch origin, detach exactly d2326042f49ae1bd771c33b1ce56f49795827661, re-verify clean HEAD, and only then invoke sudo env WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES WORKSPACE_CI_P5_EXPECTED_SHA=d2326042f49ae1bd771c33b1ce56f49795827661 ./scripts/bootstrap_lambda_ci_p5.sh. On any preflight failure, print pwd/git diagnostics and return to the existing SSH prompt. Preserve the generated install receipt under ~/adamArchives/Adam/workspace-control-tmp/. After live install PASS, create/choose a non-scientific research-engine candidate PR and trigger the existing trusted /lambda-ci-p5 <exact_sha> and /lambda-ci-p5-gpu <exact_sha> workflows. Require both GitHub jobs and root receipts to prove v2 admission identity, exact trusted workflow blob/candidate binding, unchanged cpu-test/gpu-small isolation, and residue-free cleanup before marking admission_manifest_and_enforcement VALIDATED. Do not enable any model-scale class or gpu-heavy in this stage.
 
 ## Remaining work
 
