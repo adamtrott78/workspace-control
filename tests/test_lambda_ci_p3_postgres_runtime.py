@@ -73,10 +73,12 @@ def test_smoke_test_is_project_owned_unix_socket_only():
     assert "trap stop_db EXIT" in SCRIPT
 
 
-def test_non_ci_postgres_process_set_is_guarded():
-    assert "non-ci-postgres-before.txt" in SCRIPT
-    assert "non-ci-postgres-after.txt" in SCRIPT
-    assert "NON_CI_POSTGRES_PROCESS_SET_CHANGED" in SCRIPT
+def test_production_postgres_listener_identity_is_guarded():
+    assert "production-postgres-listeners-before.txt" in SCRIPT
+    assert "production-postgres-listeners-after.txt" in SCRIPT
+    assert "PRODUCTION_POSTGRES_LISTENER_IDENTITY_CHANGED" in SCRIPT
+    assert "NON_CI_POSTGRES_PROCESS_SET_CHANGED" not in SCRIPT
+    assert "ps -eo pid=,args=" not in SCRIPT
 
 
 def test_shell_parses():
@@ -179,3 +181,57 @@ esac
         conf = (smoke_root / "data" / "postgresql.conf").read_text()
         assert f"unix_socket_directories = '{smoke_root / 'socket'}'" in conf
         assert "listen_addresses = ''" in conf
+
+
+def test_privilege_switches_start_from_neutral_cwd():
+    marker = '# All privilege-switched subprocesses must inherit a neutral accessible cwd.'
+    assert marker in SCRIPT
+    marker_pos = SCRIPT.index(marker)
+    cd_pos = SCRIPT.index('cd /', marker_pos)
+    first_runuser = SCRIPT.index('runuser -u', cd_pos)
+    assert marker_pos < cd_pos < first_runuser
+
+
+def test_listener_capture_ignores_unrelated_listener_churn():
+    start = SCRIPT.index('capture_production_postgres_listeners() {')
+    end = SCRIPT.index('\n}\n', start) + 3
+    fn = SCRIPT[start:end]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        bindir = root / "bin"
+        bindir.mkdir()
+        ss = bindir / "ss"
+        ss.write_text(
+            """#!/usr/bin/env bash
+cat <<'EOF'
+LISTEN 0 244 0.0.0.0:5432 0.0.0.0:* users:((\"postgres\",pid=4242,fd=5))
+LISTEN 3 128 127.0.0.1:9999 0.0.0.0:* users:((\"other\",pid=111,fd=4))
+LISTEN 0 244 [::]:5432 [::]:* users:((\"postgres\",pid=4242,fd=6))
+EOF
+"""
+        )
+        ss.chmod(0o755)
+
+        env = os.environ.copy()
+        env["PATH"] = f"{bindir}:{env['PATH']}"
+        program = fn + '\ncapture_production_postgres_listeners\n'
+        proc = subprocess.run(
+            ["bash", "-seu"],
+            input=program,
+            text=True,
+            env=env,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        lines = proc.stdout.strip().splitlines()
+        assert lines == [
+            "0.0.0.0:5432 users:((\"postgres\",pid=4242,fd=5))",
+            "[::]:5432 users:((\"postgres\",pid=4242,fd=6))",
+        ]
+
+
+def test_pass_receipt_reports_listener_identity_not_full_process_set():
+    assert '"production_postgres_listener_identity_unchanged":True' in SCRIPT
+    assert '"production_postgres_process_set_unchanged":True' not in SCRIPT

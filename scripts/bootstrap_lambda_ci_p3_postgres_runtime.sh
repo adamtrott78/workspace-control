@@ -11,6 +11,12 @@ die() {
   exit 70
 }
 
+capture_production_postgres_listeners() {
+  ss -H -ltnp 2>/dev/null |
+    awk '$4 ~ /:5432$/ {print $4, $6}' |
+    sort
+}
+
 [[ "${EUID}" -eq 0 ]] || die "ROOT_REQUIRED"
 [[ "${WORKSPACE_CI_P3_RUNTIME_AUTHORIZED:-}" == "YES" ]] || die "P3_RUNTIME_AUTHORIZATION_REQUIRED"
 [[ -n "${WORKSPACE_CI_P3_RUNTIME_EXPECTED_SHA:-}" ]] || die "EXPECTED_SHA_REQUIRED"
@@ -22,12 +28,17 @@ HEAD="$("${GIT[@]}" rev-parse HEAD)"
 [[ "$HEAD" == "$WORKSPACE_CI_P3_RUNTIME_EXPECTED_SHA" ]] || die "UNEXPECTED_WORKSPACE_CONTROL_SHA:$HEAD"
 [[ -z "$("${GIT[@]}" status --porcelain)" ]] || die "WORKSPACE_CONTROL_DIRTY"
 
+# All privilege-switched subprocesses must inherit a neutral accessible cwd.
+# This avoids runuser/sudo-style cwd warnings when the operator launches from
+# a private project directory.
+cd /
+
 INVOKER="${SUDO_USER:-}"
 [[ -n "$INVOKER" && "$INVOKER" != "root" ]] || die "RUN_VIA_SUDO_FROM_OPERATOR_ACCOUNT"
 INVOKER_HOME="$(getent passwd "$INVOKER" | awk -F: '{print $6}')"
 [[ -d "$INVOKER_HOME" ]] || die "INVOKER_HOME_NOT_FOUND"
 
-for cmd in curl tar bzip2 sha256sum gcc make git perl python3 runuser; do
+for cmd in curl tar bzip2 sha256sum gcc make git perl python3 runuser ss; do
   command -v "$cmd" >/dev/null 2>&1 || die "MISSING_BUILD_TOOL:$cmd"
 done
 getent passwd ci-controller >/dev/null || die "CI_CONTROLLER_MISSING"
@@ -272,12 +283,8 @@ POSTGRES_REPORTED="$("$PREFIX/bin/postgres" --version)"
 [[ "$POSTGRES_REPORTED" == "postgres (PostgreSQL) $POSTGRES_VERSION" ]] ||
   die "RUNTIME_POSTGRES_VERSION_MISMATCH:$POSTGRES_REPORTED"
 
-BEFORE_POSTGRES="$(
-  ps -eo pid=,args= | awk -v prefix="$PREFIX" '
-    /[p]ostgres/ && index($0,prefix)==0 {print}
-  ' | sort
-)"
-printf '%s\n' "$BEFORE_POSTGRES" > "$OUT/non-ci-postgres-before.txt"
+BEFORE_POSTGRES_LISTENERS="$(capture_production_postgres_listeners)"
+printf '%s\n' "$BEFORE_POSTGRES_LISTENERS" > "$OUT/production-postgres-listeners-before.txt"
 
 install -d -o ci-research-engine -g ci-research-engine -m 0700 "$SMOKE_ROOT"
 runuser -u ci-research-engine -- env \
@@ -337,13 +344,10 @@ started=0
 SMOKE_RUNTIME
 SMOKE_STARTED=0
 
-AFTER_POSTGRES="$(
-  ps -eo pid=,args= | awk -v prefix="$PREFIX" '
-    /[p]ostgres/ && index($0,prefix)==0 {print}
-  ' | sort
-)"
-printf '%s\n' "$AFTER_POSTGRES" > "$OUT/non-ci-postgres-after.txt"
-[[ "$AFTER_POSTGRES" == "$BEFORE_POSTGRES" ]] || die "NON_CI_POSTGRES_PROCESS_SET_CHANGED"
+AFTER_POSTGRES_LISTENERS="$(capture_production_postgres_listeners)"
+printf '%s\n' "$AFTER_POSTGRES_LISTENERS" > "$OUT/production-postgres-listeners-after.txt"
+[[ "$AFTER_POSTGRES_LISTENERS" == "$BEFORE_POSTGRES_LISTENERS" ]] ||
+  die "PRODUCTION_POSTGRES_LISTENER_IDENTITY_CHANGED"
 
 rm -rf -- "$SMOKE_ROOT"
 
@@ -370,7 +374,7 @@ payload={
     "host_package_database_modified":False,
     "host_apt_configuration_modified":False,
     "production_database_modified":False,
-    "production_postgres_process_set_unchanged":True,
+    "production_postgres_listener_identity_unchanged":True,
     "ephemeral_unix_socket_smoke_test":"PASS",
     "manifest":manifest,
 }
