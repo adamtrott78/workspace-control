@@ -126,3 +126,13 @@ def test_scaleset_client_is_commit_pinned():
     assert PINS["actions_scaleset"]["commit_sha"] == (
         "e6daac702355cdb5b880b4fbdcf6d85dcd9e48e5"
     )
+
+
+def test_go_toolchain_is_checksum_pinned_and_isolated():
+    go = PINS["go_toolchain"]
+    assert go["version"] == "1.26.3"
+    assert go["source_sha256"] == (
+        "2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"
+    )
+    assert go["install_prefix"] == "/opt/workspace-ci/go/1.26.3"
+    assert go["architecture"] == "linux-amd64"
