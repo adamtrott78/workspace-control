@@ -411,6 +411,18 @@
             "Timeout hierarchy is now explicit and executable: workflow=1800s < systemd runner=2400s < launcher watchdog=2520s.",
             "Fresh P3 run 37407910754 is queued on self-hosted/lambda-research-engine/cpu-test-v2 for unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0."
           ]
+        },
+        {
+          "check": "P3 run 37407910754 diagnosis",
+          "result": "FAIL_CLOSED_REPAIR_IN_PROGRESS",
+          "evidence": [
+            "Local launcher receipt: P3_LAUNCHER=RUNNER_EXITED_CLEANLY, CLEANUP_PASS=true, no leaked project UID processes/workspace.",
+            "GitHub run 37407910754 completed failure on runner 24, but exact-SHA gate, checkout, setup-python, and isolated CPU validation wrapper all executed.",
+            "Python 3.12.15 setup succeeded in ~5 seconds; actual validation failed in ~3 seconds at failure_stage=postgres-init before pip/compile/pytest.",
+            "The generated Unix socket path under deeply nested RUNNER_TEMP exceeded PostgreSQL/Linux sockaddr_un pathname limits once /.s.PGSQL.55432 was appended.",
+            "research-engine PR #100 exact head 73187b91282e03eb19a1fbc97033614e894a3095 shortens socket directory to /tmp/p3pg-<run-id>, adds a <108-byte assertion, captures p3-postgres.log, and emits stage notices; ordinary CI currently running.",
+            "workspace-control PR #84 exact head f510a75a6f30b12e7b48474b4ac09c3529b239ac passed validation and merged as fbd9a1b9a0f0d811641fd4091c9aed3528b5ab16; future P3 launcher output is mirrored live to terminal and durable log."
+          ]
         }
       ],
       "resume_condition": "Research-engine branch validation can complete without human SSH and without production-state mutation."
@@ -468,17 +480,17 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "744e7f67e22fb5bd7de35ad8a0284a63f2b2cced",
+      "identity": "fbd9a1b9a0f0d811641fd4091c9aed3528b5ab16",
       "required_for_resume": true,
       "evidence": [
         "P0 PASS",
         "P1 PASS",
         "P2 PASS",
-        "P3 isolated PostgreSQL 14.24 + pgvector 0.8.6 runtime PASS",
-        "P3 run 37398604653 failed only because systemd RuntimeMaxSec=15min killed runner after setup-python installed Python 3.12.15",
-        "timeout hierarchy repair CI-green and merged workspace-control@744e7f67e22fb5bd7de35ad8a0284a63f2b2cced",
-        "fresh P3 run 37407910754 queued on cpu-test-v2",
-        "previous PAT exposed in chat and must be revoked before reuse"
+        "P3 isolated PostgreSQL runtime PASS",
+        "P3 run 37407910754 launcher cleanup PASS but validation failed at postgres-init",
+        "root cause=Unix socket path too long under nested RUNNER_TEMP",
+        "live-output launcher merged workspace-control@fbd9a1b9a0f0d811641fd4091c9aed3528b5ab16",
+        "research-engine short-socket PR #100 CI in progress"
       ]
     }
   ],
@@ -503,17 +515,18 @@
     }
   ],
   "blockers": [
-    "Human-only JIT credential gate: run the fixed P3 launcher from exact workspace-control 744e7f67e22fb5bd7de35ad8a0284a63f2b2cced and paste a newly-created short-lived research-engine Administration:write token only into the hidden prompt. The previously pasted token is compromised and must be revoked.",
-    "Fresh P3 run 37407910754 must reach full candidate install/compile/pytest PASS before P4."
+    "research-engine PR #100 ordinary CI must PASS and merge before a fresh P3 run is armed.",
+    "After PR #100 merges, a fresh P3 run and one short-lived research-engine Administration:write JIT token are required because run 37407910754 is terminal.",
+    "The PAT previously pasted into chat is compromised and must remain revoked; never reuse it."
   ],
   "remaining_work": [
-    "Revoke/delete the fine-grained PAT that was pasted into chat; never reuse it.",
-    "On Lambda, execute scripts/launch_lambda_ci_p3_cpu.py from exact workspace-control 744e7f67e22fb5bd7de35ad8a0284a63f2b2cced. Do not rebuild PostgreSQL/pgvector; the isolated runtime already passed and remains installed.",
-    "Paste a newly-created short-lived research-engine Administration:write token only into the hidden local prompt to service queued run 37407910754.",
-    "Immediately consume run 37407910754 and its receipt when terminal; continue bounded repair/re-run without waiting if any new issue is demonstrated.",
+    "Consume research-engine PR #100 CI immediately when terminal; merge only on PASS or repair the demonstrated defect.",
+    "After PR #100 merges, queue a fresh /lambda-ci-cpu trigger against unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0.",
+    "Use the live-output P3 launcher from workspace-control fbd9a1b9a0f0d811641fd4091c9aed3528b5ab16 or newer exact merged main to launch one cpu-test-v2 JIT runner with a new short-lived PAT.",
+    "Immediately consume the fresh P3 run; continue bounded repair/re-run until install/compile/pytest PASS.",
     "Only after P3 full PASS begin P4 GPU validation."
   ],
-  "next_safe_action": "Human-only credential gate: first revoke the fine-grained PAT that was pasted into chat. Then, on Lambda, create/reuse a clean detached workspace-control tree exactly at `744e7f67e22fb5bd7de35ad8a0284a63f2b2cced` and run only `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES`. Do not rerun the PostgreSQL runtime bootstrap; the isolated PostgreSQL 14.24 + pgvector 0.8.6 runtime already passed and is installed read-only. Paste a newly-created short-lived research-engine Administration:write token only into the hidden prompt. Fresh run 37407910754 is already queued on cpu-test-v2.",
+  "next_safe_action": "Continue consuming research-engine PR #100 exact-head CI. On PASS, merge PR #100, queue a fresh P3 CPU validation run against unchanged PR #95 head ab36b358a0c7ac33d2887fa681f418033554eae0, then use the newly merged live-output workspace-control launcher to service it with a new short-lived research-engine Administration:write token. Do not rerun PostgreSQL runtime bootstrap; it already passed and remains installed.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
   "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow.\n\n2026-10-06 P3 guard correction: production safety checks must measure stable service identity/boundaries, not volatile implementation details such as every PostgreSQL background-worker PID. The TCP 5432 listener identity is now the production invariant; runuser boundaries also start from `/` to avoid inherited private-cwd warnings.\n\n2026-10-06 P3 timeout correction: the previous regression actively blessed RuntimeMaxSec=15min even though the trusted workflow timeout was 30min. Timeout policy is now encoded as workflow(1800s) < systemd(2400s) < launcher watchdog(2520s), and tests execute the rendered systemd command."
