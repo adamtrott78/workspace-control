@@ -9,9 +9,10 @@ Authoritative capsule: `tasks/active/workspace-heartbeat-plugin-v1.json`
 - Stage: `turn_scoped_implementation_v044`
 - Release branch: `workspace-heartbeat-turn-scoped-v044`
 - Base main: `7ad3f357e9ee75d9a01bb19a4bda062f0d59d801`
-- Candidate branch head before this metadata commit: `1a18fac7dea77acd332f3d426314659fec6b0b73`
+- Implementation checkpoint: `bdfed66f59df69fffded0a2fa6d7ed1cb73458d0`
 - Production rollback: v0.4.3
 - Candidate: v0.4.4
+- Canonical release PR: #110
 
 ## Contract
 
