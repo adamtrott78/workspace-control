@@ -20,6 +20,7 @@ for path in \
   /etc/systemd/system/workspace-ci-provisioner.service \
   /etc/systemd/system/workspace-ci-provisioner.socket \
   /opt/workspace-ci/controller/lambda-ci-controller \
+  /opt/workspace-ci/controller/stage-pat \
   /opt/workspace-ci/provisioner/lambda_ci_provisioner.py \
   /opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py \
   /opt/workspace-ci/provisioner/lambda_ci_runtime.py \
