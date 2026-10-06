@@ -28,20 +28,19 @@ research_engine_pilot
 
 ## Next safe action
 
-On Lambda, use one clean detached workspace-control tree exactly at `04b2750bc71818b7ca5be970bda4bc541da4034e`. First run `scripts/bootstrap_lambda_ci_p3_pgvector.sh` under sudo with `WORKSPACE_CI_P3_PGVECTOR_AUTHORIZED=YES` and `WORKSPACE_CI_P3_PGVECTOR_EXPECTED_SHA=04b2750bc71818b7ca5be970bda4bc541da4034e`. If and only if it reports PASS, run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES` and paste a short-lived research-engine Administration:write token only into its hidden prompt. The trusted P3 retry is already queued as run 37396492836 against unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0. Return the pgvector receipt and P3 launcher receipt, or compact failure output if the repair fails.
+Human-only gate: on Lambda use one clean detached workspace-control tree exactly at `a1c12e878ac26c7ddedd84b1eb25acc0c52fed7c`. First run `scripts/bootstrap_lambda_ci_p3_postgres_runtime.sh` under sudo with `WORKSPACE_CI_P3_RUNTIME_AUTHORIZED=YES` and `WORKSPACE_CI_P3_RUNTIME_EXPECTED_SHA=a1c12e878ac26c7ddedd84b1eb25acc0c52fed7c`. If and only if it reports P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS, run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES` and paste a short-lived research-engine Administration:write token only into the hidden prompt. Corrected run 37398604653 is already queued on cpu-test-v2.
 
 ## Remaining work
 
-- Execute workspace-control pgvector repair from exact SHA 04b2750bc71818b7ca5be970bda4bc541da4034e; require its smoke test and production-master invariants to PASS.
-- Only after repair PASS, execute the P3 one-job JIT launcher from the same detached tree and service queued run 37396492836.
-- Inspect the new GitHub receipt/logs and local launcher receipt; repair only any newly demonstrated host/candidate issue.
-- Only after P3 full PASS, begin P4 bounded GPU validation.
+- On Lambda, execute the isolated runtime bootstrap from exact workspace-control a1c12e878ac26c7ddedd84b1eb25acc0c52fed7c and require P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS.
+- Only after runtime PASS, launch the cpu-test-v2 one-job JIT runner from the same exact tree and service queued run 37398604653.
+- Immediately consume run 37398604653 and its receipt when terminal; continue bounded repair/re-run without waiting if any new issue is demonstrated.
+- Only after P3 full PASS begin P4 GPU validation.
 
 ## Blockers / gates
 
-- The bounded pgvector dependency bootstrap must PASS on real Lambda before P3 retry #2 runner launch.
-- P3 retry #2 must reach and pass candidate install/compile/full pytest before P4 may begin.
-- Until P5 autonomous controller acceptance, the JIT runner still requires a short-lived local research-engine Administration:write token prompt.
+- Human-only root/credential gate: build and smoke-test the isolated PostgreSQL 14.24 + pgvector 0.8.6 runtime on Lambda, then provide a short-lived research-engine Administration:write token only to the hidden JIT launcher prompt.
+- P3 run 37398604653 must reach full candidate install/compile/pytest PASS before P4.
 
 ## Fresh-chat initialization
 
