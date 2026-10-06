@@ -107,7 +107,24 @@ To preserve operator chronology:
 
 - `heartbeat_update` is now a data-only MCP tool with no `_meta.ui.resourceUri`.
 - Its normal MCP `content` contains the heartbeat prose itself followed by task ID, sequence, and state.
-- This keeps the visible heartbeat attached to the ordinary tool-result transcript path rather than allowing a custom iframe to be hoisted to the end of the response block.
+- This keeps heartbeat state on the ordinary tool-result path, but field evidence showed ChatGPT may still collapse the result into a generic tool row instead of displaying the heartbeat prose inline.
 - `heartbeat_get` remains the explicit rich history/sidebar surface at `ui://workspace-heartbeat/panel-v7.html`.
 - The v0.4.0 update-card resource remains historical source but is no longer bound to routine heartbeat updates.
 - No background polling, reconciliation timer, or duplicate render tool is introduced.
+
+
+## v0.4.2 native-commentary chronology bridge
+
+v0.4.1 removed the hoisted update-card iframe, but live screenshots proved that ordinary MCP tool-result content is not guaranteed to render as visible prose at the invocation point. ChatGPT may collapse the result into a generic tool row, while an explicit `heartbeat_get` call renders the full history as one aggregate UI surface later in the response.
+
+v0.4.2 therefore separates **authoritative state** from **visible chronological delivery**:
+
+- `heartbeat_update` remains the authoritative backend heartbeat write.
+- After every successful `heartbeat_update`, the executor must immediately repeat the exact heartbeat message as native assistant commentary at that point in the response.
+- The commentary mirror is presentation only; backend heartbeat state remains authoritative.
+- `heartbeat_get` is explicit history/sidebar inspection only. It must not be called during routine heartbeat delivery or merely to verify that an update landed.
+- Routine work therefore produces compact native progress commentary in chronological order without a custom inline widget.
+- The rich history/sidebar remains available on demand.
+- Server-side history is still in-memory and resets when the heartbeat server restarts.
+
+This is intentionally a host-aware bridge: current OpenAI plugin UI does not expose a supported per-tool control for pinning custom MCP UI to the exact invocation position.

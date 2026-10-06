@@ -48,3 +48,19 @@ test("heartbeat_get retains task history and operator timeline", () => {
   assert.equal(server.includes("history: z.array(heartbeatSchema)"), true);
   assert.equal(server.includes("timeline: z.array(heartbeatSchema)"), true);
 });
+
+
+test("tool descriptions enforce native commentary mirror and explicit-only history", () => {
+  assert.equal(
+    server.includes("immediately repeat the exact heartbeat message as native assistant commentary"),
+    true,
+  );
+  assert.equal(
+    server.includes("Explicit history inspection only."),
+    true,
+  );
+  assert.equal(
+    server.includes("Do not call this during routine progress delivery"),
+    true,
+  );
+});

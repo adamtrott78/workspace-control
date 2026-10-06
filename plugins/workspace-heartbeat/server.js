@@ -50,11 +50,11 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.4.1",
+      version: "0.4.2",
     },
     {
       instructions:
-        "For substantial long-running work, keep the operator informed through heartbeat_update. Use natural conversational prose, not rigid status headings. Call heartbeat_update on meaningful state changes and before a fourth non-heartbeat tool operation occurs. Reuse the owning task_id across chat handoffs so the operator panel can keep a continuous bounded history.",
+        "For substantial long-running work, keep the operator informed through heartbeat_update. Use natural conversational prose, not rigid status headings. Call heartbeat_update on meaningful state changes and before a fourth non-heartbeat tool operation occurs. After every successful heartbeat_update, immediately surface the same heartbeat message to the user as native assistant commentary at that point in the response; the MCP tool result is authoritative state but ChatGPT may collapse or reposition tool-result UI. Reuse the owning task_id across chat handoffs. Use heartbeat_get only when the user explicitly asks to inspect heartbeat history or the sidebar; do not call heartbeat_get for routine delivery or update verification.",
     },
   );
 
@@ -85,7 +85,7 @@ function createHeartbeatServer() {
     {
       title: "Update operator heartbeat",
       description:
-        "Use this during substantial long-running work to append a concise natural-language progress heartbeat for the owning task. Call on meaningful state changes and before a fourth non-heartbeat tool operation.",
+        "Use this during substantial long-running work to append a concise natural-language progress heartbeat for the owning task. Call on meaningful state changes and before a fourth non-heartbeat tool operation. IMPORTANT: after a successful call, immediately repeat the exact heartbeat message as native assistant commentary so the user sees it at the chronological invocation point; do not rely on the MCP result row or custom UI for visible placement.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
         message: z.string().min(1).max(4000),
@@ -129,7 +129,7 @@ function createHeartbeatServer() {
     {
       title: "Read operator heartbeat",
       description:
-        "Read the latest heartbeat and bounded history for a task. Pass task_id whenever it is known; this keeps the panel stable even when ChatGPT model and app calls use different session identities.",
+        "Explicit history inspection only. Read the latest heartbeat and bounded history for a task when the user asks to inspect heartbeat history/sidebar or when recovery genuinely requires historical state. Do not call this during routine progress delivery or merely to verify heartbeat_update, because it renders aggregate history UI that ChatGPT may place away from the update point. Pass task_id whenever it is known.",
       inputSchema: {
         task_id: z.string().min(1).max(160).optional(),
       },

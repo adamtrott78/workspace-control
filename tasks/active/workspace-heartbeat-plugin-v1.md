@@ -11,8 +11,8 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
-- Status: COMPLETED
-- Current stage: accepted_v041_chronology
+- Status: VALIDATING
+- Current stage: native_commentary_bridge_v042
 - Exact v0.4.1 source: `568acaaf1e8350bb6c781415668d2e965af46f00`
 - Branch: `heartbeat-v2-smoke-checkpoint`
 - PR: #69
@@ -50,7 +50,7 @@ Before mutating shared Lambda/GitHub tooling, rehydrate:
 because its P3/P4/P5 state may have advanced independently.
 
 
-## Final acceptance — 2026-10-05
+## Retracted v0.4.1 acceptance — 2026-10-05
 
 - Lambda runtime deployed from exact v0.4.1 source `568acaaf1e8350bb6c781415668d2e965af46f00`.
 - Dedicated `workspace-heartbeat-node` runtime reported Node v20.20.2.
@@ -58,7 +58,7 @@ because its P3/P4/P5 state may have advanced independently.
 - Acceptance sequence passed in one ChatGPT turn: `heartbeat_update` → ordinary GitHub tool call → `heartbeat_update` → explicit `heartbeat_get`.
 - Routine heartbeat updates remained ordinary transcript/tool results rather than host-hoisted custom cards.
 - `heartbeat_get` retained explicit bounded history/timeline inspection.
-- Heartbeat side project is accepted and closed at v0.4.1. Do not reopen UI/card placement work unless new field evidence shows a functional regression.
+- This acceptance was retracted after the user supplied screenshots showing the visible heartbeat prose was still not interleaved at the invocation points.
 
 ## Transfer
 
@@ -71,3 +71,30 @@ Before mutating shared Lambda/GitHub tooling, rehydrate:
 `tasks/active/workspace-lambda-self-hosted-execution-v1.json`
 
 and use its current durable state rather than the older heartbeat-era snapshot.
+
+
+## v0.4.2 correction
+
+The v0.4.1 live-placement PASS was incorrect.
+
+User screenshots showed:
+
+- routine `heartbeat_update` calls collapsed into generic tool rows;
+- their actual heartbeat prose was not visibly rendered at those invocation points;
+- the explicit `heartbeat_get` call then rendered multiple retained updates together in one later history surface.
+
+Current OpenAI plugin UI documentation confirms that custom inline app surfaces are host-positioned and exposes no supported control to pin a widget to an exact tool-call position.
+
+The v0.4.2 contract is therefore:
+
+1. call `heartbeat_update` for authoritative state;
+2. after success, immediately repeat the exact heartbeat message as native assistant commentary;
+3. continue work;
+4. never call `heartbeat_get` for routine delivery or update verification;
+5. use `heartbeat_get` only when the user explicitly requests history/sidebar inspection or recovery genuinely needs history.
+
+The commentary mirror is presentation only. The backend heartbeat store remains authoritative.
+
+### Next safe action
+
+Deploy/refresh v0.4.2 and test this dual path during real long-running work, including the other active Lambda chat. Close heartbeat only after the native commentary mirrors remain chronologically interleaved and no routine aggregate history widget appears.
