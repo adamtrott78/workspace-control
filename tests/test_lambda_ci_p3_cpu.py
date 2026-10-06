@@ -1,5 +1,6 @@
 import ast
 from pathlib import Path
+import runpy
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = (ROOT / "scripts" / "launch_lambda_ci_p3_cpu.py").read_text()
@@ -14,7 +15,7 @@ def test_jit_endpoint_is_repository_scoped_and_one_job_labeled():
         '"Linux"',
         '"X64"',
         '"lambda-research-engine"',
-        '"cpu-test"',
+        '"cpu-test-v2"',
     ):
         assert label in SCRIPT
 
@@ -64,7 +65,6 @@ def test_runner_executes_as_project_uid_with_bounded_resources():
         "CPUQuota=800%",
         "MemoryMax=32G",
         "TasksMax=4096",
-        "RuntimeMaxSec=15min",
         "KillMode=control-group",
     ):
         assert token in SCRIPT
@@ -82,6 +82,22 @@ def test_script_parses_as_python():
     ast.parse(SCRIPT)
 
 
-def test_p3_runtime_allows_real_cpu_validation_window():
-    assert "MAX_RUNTIME_SECONDS = 2100" in SCRIPT
-    assert "RuntimeMaxSec=15min" in SCRIPT
+def test_p3_timeout_hierarchy_exceeds_workflow_timeout():
+    ns = runpy.run_path(str(ROOT / "scripts" / "launch_lambda_ci_p3_cpu.py"), run_name="lambda_ci_p3_cpu_test")
+    workflow = ns["WORKFLOW_TIMEOUT_SECONDS"]
+    systemd_runtime = ns["SYSTEMD_RUNTIME_SECONDS"]
+    watchdog = ns["LAUNCHER_WATCHDOG_SECONDS"]
+
+    assert workflow == 30 * 60
+    assert systemd_runtime == 40 * 60
+    assert watchdog == 42 * 60
+    assert workflow < systemd_runtime < watchdog
+
+    command = ns["systemd_command"](
+        "workspace-ci-test.service",
+        Path("/tmp/runner"),
+        "134.88.12.0/22",
+    )
+    assert f"RuntimeMaxSec={systemd_runtime}s" in command
+    assert "RuntimeMaxSec=15min" not in command
+    assert "proc.wait(timeout=LAUNCHER_WATCHDOG_SECONDS)" in SCRIPT

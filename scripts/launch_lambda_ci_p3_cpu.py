@@ -40,7 +40,9 @@ LOG_ROOT = PROJECT_ROOT / "logs"
 RUNNER_USER = "ci-research-engine"
 RUNNER_GROUP = "ci-research-engine"
 API_VERSION = "2026-03-10"
-MAX_RUNTIME_SECONDS = 2100
+WORKFLOW_TIMEOUT_SECONDS = 30 * 60
+SYSTEMD_RUNTIME_SECONDS = 40 * 60
+LAUNCHER_WATCHDOG_SECONDS = 42 * 60
 
 
 class LaunchError(RuntimeError):
@@ -254,7 +256,7 @@ def systemd_command(unit: str, runner_dir: pathlib.Path, subnet: str) -> list[st
         "-p", "MemoryHigh=28G",
         "-p", "MemoryMax=32G",
         "-p", "TasksMax=4096",
-        "-p", "RuntimeMaxSec=15min",
+        "-p", f"RuntimeMaxSec={SYSTEMD_RUNTIME_SECONDS}s",
         "-p", "KillMode=control-group",
         "-p", "SendSIGKILL=yes",
         "-p", "TimeoutStopSec=20s",
@@ -345,11 +347,11 @@ def main() -> int:
             jit = None
 
             try:
-                rc = proc.wait(timeout=MAX_RUNTIME_SECONDS + 60)
+                rc = proc.wait(timeout=LAUNCHER_WATCHDOG_SECONDS)
             except subprocess.TimeoutExpired:
                 run(["systemctl", "stop", unit], check=False)
                 run(["systemctl", "kill", "--kill-who=all", "--signal=KILL", unit], check=False)
-                raise LaunchError("P3 runner exceeded bounded runtime")
+                raise LaunchError("P3 runner exceeded launcher watchdog")
 
         if rc != 0:
             raise LaunchError(f"systemd-run/runner exited rc={rc}")
