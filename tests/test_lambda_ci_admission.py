@@ -347,7 +347,7 @@ class AdmissionContractTests(unittest.TestCase):
 
     def test_verified_at_accepts_controller_microsecond_rfc3339(self):
         request = good_request()
-        request["attestation"]["verified_at"] = "2026-10-06T20:30:00.987654Z"
+        request["attestation"]["verified_at"] = "2026-10-06T19:59:59.987654Z"
         admission = mod.mint_admission(
             request,
             enabled_manifest(),
