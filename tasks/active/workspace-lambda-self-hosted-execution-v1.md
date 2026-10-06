@@ -24,17 +24,17 @@ research_engine_pilot
 
 ## Next safe action
 
-Human-only credential gate: on Lambda create/reuse a clean detached workspace-control tree exactly at `5ad3396a9b959a1932e0ea2973139ac4a3faae04` and run `scripts/launch_lambda_ci_p4_gpu.py` under sudo with `WORKSPACE_CI_P4_AUTHORIZED=YES`. The launcher now resolves target UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea from `/proc/driver/nvidia/gpus/*/information` to the current Device Minor and `/dev/nvidia<minor>`, grants only that node + /dev/nvidiactl, and passes all other GPU nodes as denial targets. Existing P4 retry #2 run 37411162940 remains queued on gpu-small-v1.
+Human-only credential gate: on Lambda create/reuse a clean detached workspace-control tree exactly at `550371aa7afba3de2af5fa6afe360ad4b21f0511` and run `scripts/launch_lambda_ci_p4_gpu.py` under sudo with `WORKSPACE_CI_P4_AUTHORIZED=YES`. The launcher will grant only /dev/nvidiactl, the UUID-resolved selected physical GPU node, and the exact shared CUDA UVM support nodes /dev/nvidia-uvm plus /dev/nvidia-uvm-tools when present. P4 retry #3 run 37412644570 is already queued on gpu-small-v1. A clean PAT used only in hidden prompts may be reused.
 
 ## Remaining work
 
-- Launch queued P4 retry #2 run 37411162940 using scripts/launch_lambda_ci_p4_gpu.py from exact workspace-control 5ad3396a9b959a1932e0ea2973139ac4a3faae04.
-- Immediately consume the always-uploaded P4 PASS/FAIL receipt and launcher receipt when terminal.
-- If CUDA demonstrates a requirement for an additional exact NVIDIA support device node, add only that measured node and rerun; do not grant broad NVIDIA wildcards.
+- Launch queued P4 retry #3 run 37412644570 using scripts/launch_lambda_ci_p4_gpu.py from exact workspace-control 550371aa7afba3de2af5fa6afe360ad4b21f0511.
+- Immediately consume the always-uploaded P4 PASS/FAIL hardware receipt and launcher receipt when terminal.
+- If CUDA still fails, use the receipt's exact failure stage/reason to add only the next measured support requirement; do not broaden physical GPU access.
 - After P4 PASS, begin P5 autonomous controller/provisioner acceptance.
 - P6: second-project isolation pilot under separate UID/root/cache.
 
 ## Blockers / gates
 
-- Human-only JIT credential gate: service still-queued P4 retry #2 run 37411162940 using exact workspace-control 5ad3396a9b959a1932e0ea2973139ac4a3faae04. A clean PAT used only in hidden prompts may be reused.
-- P4 retry #2 must pass UUID-resolved selected-device grant, explicit non-selected GPU denial, real CUDA context + 256 MiB allocation, and post-exit cleanup before P5.
+- Human-only JIT credential gate: launch queued P4 retry #3 run 37412644570 using exact workspace-control 550371aa7afba3de2af5fa6afe360ad4b21f0511. A clean PAT used only in hidden prompts may be reused.
+- P4 retry #3 must pass CUDA initialization, exactly one visible target UUID, real 256 MiB allocation/free, explicit non-selected GPU denial, and post-exit project/GPU cleanup before P5.
