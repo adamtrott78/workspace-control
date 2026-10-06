@@ -36,6 +36,11 @@ func assignedCPUJob() *scaleset.JobAssigned {
 	}
 }
 
+func availableCPUJob() *scaleset.JobAvailable {
+	assigned := assignedCPUJob()
+	return &scaleset.JobAvailable{JobMessageBase: assigned.JobMessageBase}
+}
+
 func fakeGitHubAttestor(t *testing.T, mutatePull func(map[string]any)) *githubJobAttestor {
 	t.Helper()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -129,7 +134,7 @@ func TestGitHubAttestorBindsRunBlobAndOpenPRHead(t *testing.T) {
 	attestor := fakeGitHubAttestor(t, nil)
 	att, err := attestor.Attest(
 		context.Background(),
-		assignedCPUJob(),
+		&availableCPUJob().JobMessageBase,
 		"lambda-research-engine",
 		"cpu-test",
 	)
@@ -155,7 +160,7 @@ func TestGitHubAttestorRejectsClosedOrForkPR(t *testing.T) {
 	})
 	if _, err := closed.Attest(
 		context.Background(),
-		assignedCPUJob(),
+		&assignedCPUJob().JobMessageBase,
 		"lambda-research-engine",
 		"cpu-test",
 	); err == nil {
@@ -168,7 +173,7 @@ func TestGitHubAttestorRejectsClosedOrForkPR(t *testing.T) {
 	})
 	if _, err := fork.Attest(
 		context.Background(),
-		assignedCPUJob(),
+		&assignedCPUJob().JobMessageBase,
 		"lambda-research-engine",
 		"cpu-test",
 	); err == nil {
@@ -183,7 +188,7 @@ func TestGitHubAttestorRejectsCandidateMismatch(t *testing.T) {
 	})
 	if _, err := mismatch.Attest(
 		context.Background(),
-		assignedCPUJob(),
+		&assignedCPUJob().JobMessageBase,
 		"lambda-research-engine",
 		"cpu-test",
 	); err == nil {

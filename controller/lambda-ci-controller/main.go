@@ -75,6 +75,11 @@ type provisionResponse struct {
 	Error         string `json:"error,omitempty"`
 }
 
+type pendingAdmissionJob struct {
+	Metadata    scaleset.JobMessageBase
+	Attestation controllerAttestation
+}
+
 type scaler struct {
 	mu              sync.Mutex
 	active          map[string]string
@@ -87,7 +92,7 @@ type scaler struct {
 	provisionerSock string
 	admissionV2     bool
 	attestor        jobAttestor
-	pending         map[int64]*scaleset.JobAssigned
+	pending         map[int64]pendingAdmissionJob
 	logger          *slog.Logger
 }
 
@@ -306,16 +311,34 @@ func sendProvisionRequest(ctx context.Context, socketPath string, request any) (
 	}
 }
 
-func (s *scaler) nextPendingAssigned() *scaleset.JobAssigned {
+func (s *scaler) nextPendingAdmission() (pendingAdmissionJob, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	var selected *scaleset.JobAssigned
+	var (
+		selected pendingAdmissionJob
+		found    bool
+	)
 	for _, job := range s.pending {
-		if selected == nil || job.RunnerRequestID < selected.RunnerRequestID {
+		if !found || job.Metadata.RunnerRequestID < selected.Metadata.RunnerRequestID {
 			selected = job
+			found = true
 		}
 	}
-	return selected
+	return selected, found
+}
+
+func desiredRunnerTarget(stats *scaleset.RunnerScaleSetStatistic, pending int) int {
+	target := 0
+	if stats != nil {
+		target = stats.TotalAssignedJobs
+	}
+	if pending > target {
+		target = pending
+	}
+	if target > maxRunners {
+		target = maxRunners
+	}
+	return target
 }
 
 func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage) error {
@@ -325,19 +348,99 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 
 	if len(msg.JobAvailableMessages) > 0 {
 		requestIDs := make([]int64, 0, len(msg.JobAvailableMessages))
-		for _, job := range msg.JobAvailableMessages {
-			requestIDs = append(requestIDs, job.RunnerRequestID)
+		stagedIDs := make([]int64, 0, len(msg.JobAvailableMessages))
+
+		if s.admissionV2 {
+			if s.attestor == nil {
+				return fmt.Errorf("admission v2 enabled without GitHub attestor")
+			}
+
+			s.mu.Lock()
+			capacity := maxRunners - len(s.active) - len(s.pending)
+			s.mu.Unlock()
+
+			for _, job := range msg.JobAvailableMessages {
+				if capacity <= 0 {
+					break
+				}
+				attestation, err := s.attestor.Attest(
+					ctx,
+					&job.JobMessageBase,
+					s.scaleSetName,
+					s.profile,
+				)
+				if err != nil {
+					return fmt.Errorf("attest available job before acquire: %w", err)
+				}
+				s.mu.Lock()
+				if _, exists := s.pending[job.RunnerRequestID]; !exists {
+					s.pending[job.RunnerRequestID] = pendingAdmissionJob{
+						Metadata:    job.JobMessageBase,
+						Attestation: attestation,
+					}
+					stagedIDs = append(stagedIDs, job.RunnerRequestID)
+					requestIDs = append(requestIDs, job.RunnerRequestID)
+					capacity--
+				}
+				s.mu.Unlock()
+			}
+		} else {
+			for _, job := range msg.JobAvailableMessages {
+				requestIDs = append(requestIDs, job.RunnerRequestID)
+			}
 		}
-		if _, err := s.sessionClient.AcquireJobs(ctx, requestIDs); err != nil {
-			return fmt.Errorf("acquire jobs: %w", err)
+
+		if len(requestIDs) > 0 {
+			if _, err := s.sessionClient.AcquireJobs(ctx, requestIDs); err != nil {
+				if s.admissionV2 {
+					s.mu.Lock()
+					for _, requestID := range stagedIDs {
+						delete(s.pending, requestID)
+					}
+					s.mu.Unlock()
+				}
+				return fmt.Errorf("acquire jobs: %w", err)
+			}
+		}
+	}
+
+	if s.admissionV2 {
+		if s.attestor == nil {
+			return fmt.Errorf("admission v2 enabled without GitHub attestor")
+		}
+		for _, assigned := range msg.JobAssignedMessages {
+			s.mu.Lock()
+			_, exists := s.pending[assigned.RunnerRequestID]
+			capacity := maxRunners - len(s.active) - len(s.pending)
+			s.mu.Unlock()
+			if exists {
+				continue
+			}
+			if capacity <= 0 {
+				continue
+			}
+			attestation, err := s.attestor.Attest(
+				ctx,
+				&assigned.JobMessageBase,
+				s.scaleSetName,
+				s.profile,
+			)
+			if err != nil {
+				return fmt.Errorf("attest assigned job recovery metadata: %w", err)
+			}
+			s.mu.Lock()
+			if _, exists := s.pending[assigned.RunnerRequestID]; !exists {
+				s.pending[assigned.RunnerRequestID] = pendingAdmissionJob{
+					Metadata:    assigned.JobMessageBase,
+					Attestation: attestation,
+				}
+			}
+			s.mu.Unlock()
 		}
 	}
 
 	s.mu.Lock()
 	if s.admissionV2 {
-		for _, assigned := range msg.JobAssignedMessages {
-			s.pending[assigned.RunnerRequestID] = assigned
-		}
 		for _, started := range msg.JobStartedMessages {
 			delete(s.pending, started.RunnerRequestID)
 		}
@@ -349,15 +452,10 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		}
 	}
 	current := len(s.active)
+	pendingCount := len(s.pending)
 	s.mu.Unlock()
 
-	if msg.Statistics == nil {
-		return nil
-	}
-	target := msg.Statistics.TotalAssignedJobs
-	if target > maxRunners {
-		target = maxRunners
-	}
+	target := desiredRunnerTarget(msg.Statistics, pendingCount)
 	if target <= 0 {
 		s.mu.Lock()
 		clear(s.active)
@@ -373,31 +471,21 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 
 	for current < target {
 		var (
-			name       string
-			requestID  string
+			name        string
+			requestID   string
 			attestation controllerAttestation
-			assigned   *scaleset.JobAssigned
-			err        error
+			pendingJob  pendingAdmissionJob
+			pendingOK   bool
+			err         error
 		)
 
 		if s.admissionV2 {
-			if s.attestor == nil {
-				return fmt.Errorf("admission v2 enabled without GitHub attestor")
-			}
-			assigned = s.nextPendingAssigned()
-			if assigned == nil {
-				s.logger.Info("Admission v2 waiting for trusted JobAssigned metadata")
+			pendingJob, pendingOK = s.nextPendingAdmission()
+			if !pendingOK {
+				s.logger.Info("Admission v2 waiting for pre-attested job metadata")
 				return nil
 			}
-			attestation, err = s.attestor.Attest(
-				ctx,
-				assigned,
-				s.scaleSetName,
-				s.profile,
-			)
-			if err != nil {
-				return fmt.Errorf("attest assigned job: %w", err)
-			}
+			attestation = pendingJob.Attestation
 			requestID, name, err = deterministicAdmissionExecutionIDs(
 				s.profile,
 				attestation,
@@ -465,8 +553,8 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			switch response.ReceiptStatus {
 			case "COMPLETED", "FAILED":
 				s.mu.Lock()
-				if assigned != nil {
-					delete(s.pending, assigned.RunnerRequestID)
+				if pendingOK {
+					delete(s.pending, pendingJob.Metadata.RunnerRequestID)
 				}
 				s.mu.Unlock()
 				s.logger.Info(
@@ -481,9 +569,9 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 
 		s.mu.Lock()
 		s.active[name] = requestID
-		if s.admissionV2 && assigned != nil {
-			delete(s.pending, assigned.RunnerRequestID)
-		}
+		// Keep the admission metadata until JobStarted so a subsequent
+		// JobAssigned lifecycle message cannot trigger a second attestation
+		// or runner grant for the same scale-set request.
 		current = len(s.active)
 		s.mu.Unlock()
 
@@ -547,7 +635,7 @@ func runController(ctx context.Context, cfg config, logger *slog.Logger) error {
 		provisionerSock: cfg.ProvisionerSock,
 		admissionV2:     cfg.AdmissionV2,
 		attestor:        attestor,
-		pending:         make(map[int64]*scaleset.JobAssigned),
+		pending:         make(map[int64]pendingAdmissionJob),
 		logger:          logger.WithGroup("scaler"),
 	}
 

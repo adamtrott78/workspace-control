@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/actions/scaleset"
 )
 
 func TestProvisionRequestSchemaIsExact(t *testing.T) {
@@ -207,5 +209,26 @@ func TestAdmissionV2RequiresExplicitYes(t *testing.T) {
 	t.Setenv("WORKSPACE_CI_ADMISSION_V2_ENABLED", "true")
 	if _, err := loadConfig(); err == nil {
 		t.Fatal("non-canonical admission v2 flag was accepted")
+	}
+}
+
+func TestAdmissionV2CanProvisionFromPreAttestedJobAvailable(t *testing.T) {
+	stats := &scaleset.RunnerScaleSetStatistic{
+		TotalAvailableJobs: 1,
+		TotalAcquiredJobs:  0,
+		TotalAssignedJobs:  0,
+	}
+	if got := desiredRunnerTarget(stats, 1); got != 1 {
+		t.Fatalf("pre-attested JobAvailable did not create runner target: %d", got)
+	}
+	if got := desiredRunnerTarget(stats, 0); got != 0 {
+		t.Fatalf("unattested available job unexpectedly created runner target: %d", got)
+	}
+}
+
+func TestAdmissionV2TargetRemainsBounded(t *testing.T) {
+	stats := &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 99}
+	if got := desiredRunnerTarget(stats, 99); got != maxRunners {
+		t.Fatalf("target exceeded maxRunners: %d", got)
 	}
 }
