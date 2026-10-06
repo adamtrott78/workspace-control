@@ -359,6 +359,17 @@
             "New regression enforces permission-normalization ordering before pgvector build and runs bash -n on the bootstrap.",
             "Corrected research-engine P3 run 37398604653 remains queued on cpu-test-v2 for unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0."
           ]
+        },
+        {
+          "check": "P3 staged pgvector path repair",
+          "result": "PASS",
+          "evidence": [
+            "Real Lambda build successfully compiled and installed pgvector 0.8.6 into vector-stage under custom-prefix paths ending in /lib/vector.so and /share/extension/vector.control.",
+            "Bootstrap falsely raised STAGED_VECTOR_SO_MISSING because it checked distro-style /lib/postgresql/vector.so and /share/postgresql/extension/vector.control.",
+            "workspace-control PR #80 exact head b84ca999b4dab52216456ba47efd58f3a7ac0ebb passed validation and merged as 4863e194fce4eafdba99ae5b5df32e345e403635.",
+            "Repair derives staged vector.so from the isolated runtime's pg_config --pkglibdir and vector.control from pg_config --sharedir, rejects paths outside the trusted prefix, and applies the same sharedir logic to existing-runtime validation.",
+            "Bootstrap cleanup now writes lambda-ci-p3-runtime.json with decision=FAIL, failure_stage, exit_code, and partial_runtime_removed on any failure, preventing empty evidence directories."
+          ]
         }
       ],
       "resume_condition": "Research-engine branch validation can complete without human SSH and without production-state mutation."
@@ -416,17 +427,17 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "ae2d25ee5a5afedc843292ce134dd5533e6eb492",
+      "identity": "4863e194fce4eafdba99ae5b5df32e345e403635",
       "required_for_resume": true,
       "evidence": [
         "P0 PASS",
         "P1 PASS",
         "P2 PASS",
-        "P3 prior host-package assumptions failed before candidate tests",
-        "isolated PostgreSQL runtime design merged",
-        "real Lambda runtime build exposed permission bug before pgvector build",
-        "permission repair CI-green and merged workspace-control@ae2d25ee5a5afedc843292ce134dd5533e6eb492",
-        "corrected P3 run 37398604653 queued on cpu-test-v2 for unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0"
+        "P3 host/runtime assumptions failed before candidate tests",
+        "permission repair PASS",
+        "real Lambda pgvector build succeeded but staged-path checker falsely failed",
+        "staged-path/failure-receipt repair CI-green and merged workspace-control@4863e194fce4eafdba99ae5b5df32e345e403635",
+        "corrected P3 run 37398604653 remains queued on cpu-test-v2 for unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0"
       ]
     }
   ],
@@ -451,16 +462,16 @@
     }
   ],
   "blockers": [
-    "Human-only root/credential gate: rerun the isolated runtime bootstrap from exact workspace-control ae2d25ee5a5afedc843292ce134dd5533e6eb492; only on PASS may the cpu-test-v2 JIT launcher run.",
+    "Human-only root/credential gate: rerun the isolated runtime bootstrap from exact workspace-control 4863e194fce4eafdba99ae5b5df32e345e403635; only on PASS may the cpu-test-v2 JIT launcher run.",
     "P3 run 37398604653 must reach full candidate install/compile/pytest PASS before P4."
   ],
   "remaining_work": [
-    "On Lambda, execute scripts/bootstrap_lambda_ci_p3_postgres_runtime.sh from exact workspace-control ae2d25ee5a5afedc843292ce134dd5533e6eb492 and require P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS.",
+    "On Lambda, execute scripts/bootstrap_lambda_ci_p3_postgres_runtime.sh from exact workspace-control 4863e194fce4eafdba99ae5b5df32e345e403635 and require P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS.",
     "Only after runtime PASS, execute scripts/launch_lambda_ci_p3_cpu.py from the same exact tree and service queued run 37398604653.",
     "Immediately consume run 37398604653 and its receipt when terminal; continue bounded repair/re-run without waiting if any new issue is demonstrated.",
     "Only after P3 full PASS begin P4 GPU validation."
   ],
-  "next_safe_action": "Human-only gate: on Lambda create/reuse one clean detached workspace-control tree exactly at `ae2d25ee5a5afedc843292ce134dd5533e6eb492`. First run `scripts/bootstrap_lambda_ci_p3_postgres_runtime.sh` under sudo with `WORKSPACE_CI_P3_RUNTIME_AUTHORIZED=YES` and `WORKSPACE_CI_P3_RUNTIME_EXPECTED_SHA=ae2d25ee5a5afedc843292ce134dd5533e6eb492`. If and only if it reports P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS, run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES` and paste a short-lived research-engine Administration:write token only into the hidden prompt. Corrected run 37398604653 is already queued on cpu-test-v2.",
+  "next_safe_action": "Human-only gate: on Lambda create/reuse one clean detached workspace-control tree exactly at `4863e194fce4eafdba99ae5b5df32e345e403635`. First run `scripts/bootstrap_lambda_ci_p3_postgres_runtime.sh` under sudo with `WORKSPACE_CI_P3_RUNTIME_AUTHORIZED=YES` and `WORKSPACE_CI_P3_RUNTIME_EXPECTED_SHA=4863e194fce4eafdba99ae5b5df32e345e403635`. If and only if it reports P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS, run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES` and paste a short-lived research-engine Administration:write token only into the hidden prompt. Corrected run 37398604653 is already queued on cpu-test-v2.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
   "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately."
