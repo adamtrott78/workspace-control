@@ -553,11 +553,12 @@
         },
         {
           "check": "v0.4.2 native-commentary bridge source",
-          "result": "SUPERSEDED",
+          "result": "NOT_RUN",
           "evidence": [
             "Long-turn stress test attempted a heartbeat tool call plus native commentary after every ordinary tool operation.",
             "User observed visible inline commentary only through heartbeat 2; later commentary was truncated while tool execution continued.",
-            "Therefore native commentary cannot be the required reliable delivery path."
+            "Therefore native commentary cannot be the required reliable delivery path.",
+            "Historical experiment was superseded by later Heartbeat delivery designs; represented as NOT_RUN for current acceptance semantics."
           ]
         },
         {

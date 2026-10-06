@@ -1,43 +1,59 @@
 <!-- workspace-control:derived-task-handoff -->
 # Workspace Control Task Handoff
 
-Authoritative capsule: `tasks/active/workspace-heartbeat-plugin-v1.json`
+Derived human-readable view.
 
-## Current state
+Authoritative capsule: tasks/active/workspace-heartbeat-plugin-v1.json
 
-- Status: **VALIDATING**
-- Stage: `turn_scoped_implementation_v044`
-- Release branch: `workspace-heartbeat-turn-scoped-v044`
-- Base main: `7ad3f357e9ee75d9a01bb19a4bda062f0d59d801`
-- Implementation checkpoint: `bdfed66f59df69fffded0a2fa6d7ed1cb73458d0`
-- Production rollback: v0.4.3
-- Candidate: v0.4.4
-- Canonical release PR: #110
+If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
 
-## Contract
+## Task
 
-Every substantial assistant response starts with one
-`heartbeat_begin_turn(task_id, message, state)`. It atomically supersedes the
-prior turn, creates an opaque server `turn_id`, writes the first heartbeat, and
-mounts the current-turn rolling-three card.
+- ID: workspace-heartbeat-plugin-v1
+- Title: Workspace Heartbeat MCP Plugin v1
+- Status: VALIDATING
+- Capsule schema: v2
 
-Later writes require:
-`heartbeat_update(task_id, turn_id, message, state)`.
+## Goal
 
-The app reads only `heartbeat_snapshot(task_id, turn_id)`. Superseded/completed
-cards stop polling. `heartbeat_get(task_id)` remains explicit task history.
+Provide reliable operator-visible progress for each substantial ChatGPT assistant response through one atomic turn-begin operation, explicit turn-scoped updates, and one self-refreshing rolling-three card, while retaining task-level history separately.
 
-Conversation metadata is used only for one-writer ownership enforcement.
-A terminal `done` releases the in-memory ownership lease.
+## Repositories
 
-## Validation
+### workspace-control
 
-In-session V8 source/lifecycle harness: PASS.
+- Intent: mutate
+- Remote branch: workspace-heartbeat-turn-scoped-v044
+- Remote checkpoint: bdfed66f59df69fffded0a2fa6d7ed1cb73458d0
+- Remote verified: true
 
-Still required:
-1. exact Node 20 `npm test`;
-2. isolated v0.4.4 Lambda deployment;
-3. plugin refresh and a **new conversation**;
-4. live two-turn acceptance proving turn A freezes when turn B begins.
+## Next safe action
 
-Do not replace v0.4.3 before those gates pass.
+Validate the exact fresh v0.4.4 release branch with Node 20: run node --check server.js and npm test from plugins/workspace-heartbeat. Do not change the live v0.4.3 runtime unless those gates pass.
+
+## Remaining work
+
+- Run node --check server.js and the complete npm test suite from the exact fresh v0.4.4 release branch on Lambda.
+- If tests PASS, deploy v0.4.4 to an isolated runtime path while preserving workspace-heartbeat-runtime-v043 as rollback.
+- Refresh the existing custom plugin connection instead of deleting/recreating it, then start a brand-new conversation so v0.4.4 schemas/UI are loaded.
+- Run a multi-turn live acceptance: assistant turn A begins once and rolls updates; after the next user message, turn B begins once; turn A becomes superseded/static and turn B rolls independently.
+- Verify stale turn_id rejection, cross-conversation active-writer denial, done ownership release, task-level sidebar history, and no duplicate live cards.
+- Only after live PASS update heartbeat-up to the accepted runtime target, promote v0.4.4 docs from candidate to accepted, and merge the release PR.
+
+## Blockers / gates
+
+- None.
+
+## Fresh-chat initialization
+
+@GitHub
+
+https://github.com/adamtrott78/workspace-control
+
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-heartbeat-plugin-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
