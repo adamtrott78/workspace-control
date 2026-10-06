@@ -103,11 +103,11 @@ jobs:
         if: steps.plan.outputs.tier != 'FAST_STATIC'
         run: python3 -m unittest discover -s tests -v
 
-      - name: Set up Go 1.25 for Lambda controller
+      - name: Set up Go 1.26.3 for Lambda controller
         if: steps.plan.outputs.tier != 'FAST_STATIC'
         uses: actions/setup-go@v6
         with:
-          go-version: '1.25.x'
+          go-version: '1.26.3'
           cache-dependency-path: controller/lambda-ci-controller/go.mod
 
       - name: Validate pinned Lambda scale-set controller
