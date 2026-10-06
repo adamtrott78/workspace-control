@@ -2,8 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-const panel = readFileSync(new URL("../public/heartbeat-panel.html", import.meta.url), "utf8");
-const card = readFileSync(new URL("../public/heartbeat-update-card.html", import.meta.url), "utf8");
+const panel = readFileSync(
+  new URL("../public/heartbeat-panel.html", import.meta.url),
+  "utf8",
+);
+const summary = readFileSync(
+  new URL("../public/heartbeat-summary-card.html", import.meta.url),
+  "utf8",
+);
 
 test("history panel is event-driven without background polling", () => {
   assert.equal(panel.includes("ui/notifications/tool-result"), true);
@@ -15,19 +21,24 @@ test("history panel is event-driven without background polling", () => {
   assert.equal(panel.includes("setWidgetState"), true);
 });
 
-test("history panel renders cross-task operator timeline", () => {
-  assert.equal(panel.includes("snapshot.timeline"), true);
-  assert.equal(panel.includes("task-boundary"), true);
-  assert.equal(panel.includes("taskCount=new Set"), true);
+test("history panel renders full task-local history instead of cross-task timeline", () => {
+  assert.equal(
+    panel.includes(
+      "const source=Array.isArray(snapshot.history)?snapshot.history:[];",
+    ),
+    true,
+  );
+  assert.equal(panel.includes("snapshot.timeline)&&snapshot.timeline.length"), false);
+  assert.equal(panel.includes("taskCount=new Set"), false);
+  assert.equal(panel.includes("for "+latest.task_id), true);
 });
 
-test("update card renders only the invoking heartbeat", () => {
-  assert.equal(card.includes("structured?.heartbeat"), true);
-  assert.equal(card.includes("heartbeat.message"), true);
-  assert.equal(card.includes("heartbeat.task_id"), true);
-  assert.equal(card.includes("history"), false);
-  assert.equal(card.includes("timeline"), false);
-  assert.equal(card.includes("setWidgetState"), false);
-  assert.equal(card.includes("setInterval("), false);
-  assert.equal(card.includes("setTimeout("), false);
+test("compact summary renders only the rolling task-local window", () => {
+  assert.equal(summary.includes("snapshot.recent.slice(-3)"), true);
+  assert.equal(summary.includes("latest.task_id"), true);
+  assert.equal(summary.includes("full history in heartbeat panel"), true);
+  assert.equal(summary.includes("timeline"), false);
+  assert.equal(summary.includes("setWidgetState"), false);
+  assert.equal(summary.includes("setInterval("), false);
+  assert.equal(summary.includes("setTimeout("), false);
 });
