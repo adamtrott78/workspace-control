@@ -52,7 +52,7 @@
       "base_sha": "e11032f71bab72dbe84061afe305f34ba44d6e77",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "e11032f71bab72dbe84061afe305f34ba44d6e77",
+        "checkpoint_sha": "d33ca95a8d63d7e9f9d7f85afc1fa02540faff16",
         "verified": true
       },
       "local": null,
@@ -75,15 +75,10 @@
       "base_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
+        "checkpoint_sha": "aa1cdaafb4728c70be7bab0041df5f395f16141c",
         "verified": true
       },
-      "local": {
-        "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
-        "branch": "main",
-        "head_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
-        "clean": true
-      },
+      "local": null,
       "allowed_mutation_scope": [
         ".github/workflows/**",
         "deploy/**",
@@ -526,7 +521,10 @@
         "cross-project denial tests",
         "cache contamination/invalidation tests",
         "resource/concurrency tests",
-        "runner cleanup/recovery tests"
+        "runner cleanup/recovery tests",
+        "live P5 controller/provisioner service activation with controller-owned repository credential",
+        "trusted default-branch P5 autonomous CPU acceptance workflow",
+        "two sequential autonomous one-job JIT runners with residue-free cleanup"
       ],
       "validation": [
         {
@@ -580,6 +578,48 @@
             "Visible receipt path: /home/atrott/adamArchives/Adam/workspace-control-tmp/lambda-ci-go-20261006T051148Z/lambda-ci-go-toolchain.json.",
             "P5 service bootstrap at 2b026c41 now resolves GO_BIN only as /opt/workspace-ci/go/1.26.3/bin/go and requires GOVERSION=go1.26.3."
           ]
+        },
+        {
+          "check": "P5 live install and controller activation acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Gate A provisioner-only install passed from exact workspace-control 2b026c41f6dd8e3fcaa5e30fddaedb9babe09391 with provisioner active, controller INSTALLED_INACTIVE, socket /run/workspace-ci/provisioner.sock owner root:workspace-ci-controller mode 0660, no credential handled, and production_services_modified=false.",
+            "Gate B controller credential staging passed via ci-controller-owned hidden TTY helper; the repository-scoped PAT was never pasted into chat or passed through root bootstrap.",
+            "Gate C activation passed with controller_state=ACTIVE and controller_credential_ready=true while provisioner/socket/production-service invariants remained intact.",
+            "Final accepted live reinstall is workspace-control d33ca95a8d63d7e9f9d7f85afc1fa02540faff16; receipt /home/atrott/adamArchives/Adam/workspace-control-tmp/lambda-ci-p5-install-20261006T081054Z/lambda-ci-p5-install.json reports decision=PASS, controller ACTIVE, credential ready, provisioner active, socket 0660 root:workspace-ci-controller, go1.26.3, and production_services_modified=false."
+          ]
+        },
+        {
+          "check": "P5 live launch-boundary repair acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Initial autonomous provision attempts reached the root provisioner but failed deterministically with KeyError('home') before runner launch; workspace-control PR #94 added the manifest-authorized project home path to the immutable launch spec and made the provisioner regressions unittest-discoverable.",
+            "PR #94 passed Workspace Control Validation and merged as 43a380855a03e1191a9165eef455eae55b5c6b42.",
+            "The next live attempt passed the home boundary and failed in primary_subnet() because the root provisioner unit allowed AF_UNIX only while ip route discovery requires AF_NETLINK.",
+            "workspace-control PR #95 added only AF_NETLINK alongside AF_UNIX, retained denial of AF_INET/AF_INET6/AF_PACKET and existing capability/device/filesystem boundaries, passed full Workspace Control Validation, and merged as d33ca95a8d63d7e9f9d7f85afc1fa02540faff16."
+          ]
+        },
+        {
+          "check": "P5 autonomous scale-set acceptance",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #103 added the trusted default-branch Lambda CI P5 Autonomous Acceptance workflow and merged as aa1cdaafb4728c70be7bab0041df5f395f16141c after normal GitHub-hosted CI passed.",
+            "GitHub Actions run 37422040174 completed success on ephemeral runner lambda-research-engine-0d2d8c17ae01 for exact candidate ab36b358a0c7ac33d2887fa681f418033554eae0.",
+            "GitHub Actions run 37433722972 completed success on a distinct ephemeral runner lambda-research-engine-747e2acd5363 for the same exact candidate.",
+            "Both runs passed exact PR-head verification, fresh bounded-runner checks, exact SHA checkout, non-secret receipt creation, artifact upload, and post-checkout cleanup.",
+            "Run 37422040174 artifact 11397464532 digest sha256:08058674cc44462f5409d783612e76bc65463776de31301a710e32029ebc4ea4 and run 37433722972 artifact 11397719082 digest sha256:2c7253655f4a3bb7d7069a36ed2a07d3f6e5ea696e179758cb424ba176d2fa69 are durable acceptance receipts.",
+            "Both receipts report stale job/staging workspaces absent, stale marker absent, personal home unreadable, controller credential unreadable, production PostgreSQL unreachable, NVIDIA invisible for cpu-test, checkout credentials not persisted, and scale_set_target=lambda-research-engine."
+          ]
+        },
+        {
+          "check": "P5 post-job cleanup and ephemerality acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Request 6d41b8c1-55ca-4d80-b193-5df69a497cf7 final state is COMPLETED with decision=RUNNER_EXITED_CLEANLY, runner_exit_code=0, github_credential_present=false, jit_config_persisted=false, project_uid_process_cleanup=true, runner_workspace_destroyed=true, and staging_workspace_destroyed=true.",
+            "Request 434ed5d8-1402-495e-8ad5-475272f5f341 final state is COMPLETED with the same cleanup/security invariants and runner_exit_code=0.",
+            "After both autonomous runs, /srv/workspace-ci/research-engine/jobs and staging-cache contained no residual p5-* workspace and ps for ci-research-engine showed no residual project processes.",
+            "The two accepted runs used distinct runner names/request directories, and the later run verified the earlier run's marker/workspace had been destroyed before execution."
+          ]
         }
       ],
       "resume_condition": "Isolation and cleanup survive deliberate adversarial/accidental test cases."
@@ -619,7 +659,7 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "2b026c41f6dd8e3fcaa5e30fddaedb9babe09391",
+      "identity": "d33ca95a8d63d7e9f9d7f85afc1fa02540faff16",
       "required_for_resume": true,
       "evidence": [
         "P0 PASS",
@@ -627,34 +667,178 @@
         "P2 PASS",
         "P3 PASS run 37408781519 artifact 11388222514",
         "P4 PASS run 37412644570 artifact 11389971129",
-        "P5 static controller core PASS merged c23ce9a7031d567981a56a49261fdf0508b68ed8",
+        "P5 controller/provisioner static core PASS merged c23ce9a7031d567981a56a49261fdf0508b68ed8",
         "P5 install/bootstrap static PASS merged 7febbb619962bd32e8a6e68c70e38b869affc6e7",
-        "P5 first live install preflight failed closed on system Go 1.18.1 before mutation",
-        "P5 isolated Go prerequisite static PASS run 37417031060 merged 2b026c41f6dd8e3fcaa5e30fddaedb9babe09391",
-        "P5 isolated Go prerequisite LIVE PASS receipt /home/atrott/adamArchives/Adam/workspace-control-tmp/lambda-ci-go-20261006T051148Z/lambda-ci-go-toolchain.json",
-        "isolated Go /opt/workspace-ci/go/1.26.3 root:root non-group/world-writable; system Go/apt untouched",
-        "next live gate=P5 provisioner-only install retry; controller inactive/no credential"
+        "P5 isolated Go prerequisite static/live PASS at 2b026c41f6dd8e3fcaa5e30fddaedb9babe09391; /opt/workspace-ci/go/1.26.3 accepted without replacing system Go",
+        "P5 live Gate A/B/C PASS; controller ACTIVE with credential separation and provisioner socket root:workspace-ci-controller mode 0660",
+        "P5 home launch-spec repair PR #94 merged 43a380855a03e1191a9165eef455eae55b5c6b42",
+        "P5 AF_NETLINK route-discovery repair PR #95 merged d33ca95a8d63d7e9f9d7f85afc1fa02540faff16",
+        "Final live install receipt /home/atrott/adamArchives/Adam/workspace-control-tmp/lambda-ci-p5-install-20261006T081054Z/lambda-ci-p5-install.json decision=PASS at exact d33ca95a8d63d7e9f9d7f85afc1fa02540faff16",
+        "research-engine trusted P5 workflow merged aa1cdaafb4728c70be7bab0041df5f395f16141c",
+        "Autonomous CPU acceptance runs 37422040174 and 37433722972 both PASS on distinct ephemeral runners for exact candidate ab36b358a0c7ac33d2887fa681f418033554eae0",
+        "Artifacts 11397464532 and 11397719082 preserve the two GitHub-side P5 acceptance receipts",
+        "Local provisioner receipts for requests 6d41b8c1-55ca-4d80-b193-5df69a497cf7 and 434ed5d8-1402-495e-8ad5-475272f5f341 both report RUNNER_EXITED_CLEANLY, exit 0, no GitHub credential/JIT persistence, full process cleanup, and job/staging destruction",
+        "Post-acceptance host check found no residual p5-* workspaces and no ci-research-engine project processes"
       ]
     }
   ],
   "artifacts": [
-    "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-research.v1.md",
-    "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-v1.md",
-    "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-pilot-contract.v1.json",
-    "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:scripts/lambda_runner_host_probe.py",
-    "operator evidence: lambda-runner-host-probe-20261005T212938Z/lambda-runner-host-probe.json",
-    "GitHub Actions run 37383893507: Lambda CI P2-B No-Op",
-    "GitHub artifact 11380060652: lambda-ci-p2b-receipt; sha256:93e56b904a2ddc6bd6e3efecbd148cabbf0132c1d28586b10ad851281fa50b67",
-    "local receipt: lambda-ci-p2b-20261005T230606Z/lambda-ci-p2b-launcher.json",
-    "GitHub Actions run 37408781519: Lambda CI P3 CPU Validation PASS",
-    "GitHub artifact 11388222514: lambda-ci-p3-receipt; sha256:12cf36d8e5346f8d1143ad873aa2df3dc75fdf99b13455a62de2731a528f9703",
-    "local P3 launcher receipt: runner 25 lambda-research-engine-p3-4efa7bacc41f cleanup PASS",
-    "GitHub Actions run 37412644570: Lambda CI P4 GPU Validation PASS",
-    "GitHub artifact 11389971129: lambda-ci-p4-gpu-receipt; sha256:cfbc4cb17a26d503840b86f0d3a1f638e228f01f2ac5693e0c63021da2d1a59d",
-    "local P4 launcher receipt: runner 28 lambda-research-engine-p4-83bbe0e05fe3 cleanup PASS",
-    "P5 isolated Go live receipt: /home/atrott/adamArchives/Adam/workspace-control-tmp/lambda-ci-go-20261006T051148Z/lambda-ci-go-toolchain.json",
-    "P5 Go source SHA256: 2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556",
-    "P5 isolated Go runtime: /opt/workspace-ci/go/1.26.3; owner root:root; system Go not replaced"
+    {
+      "path": "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-research.v1.md",
+      "state": "accepted",
+      "evidence": [
+        "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-research.v1.md"
+      ]
+    },
+    {
+      "path": "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-v1.md",
+      "state": "accepted",
+      "evidence": [
+        "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-v1.md"
+      ]
+    },
+    {
+      "path": "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-pilot-contract.v1.json",
+      "state": "accepted",
+      "evidence": [
+        "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:architecture/lambda-self-hosted-execution-pilot-contract.v1.json"
+      ]
+    },
+    {
+      "path": "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:scripts/lambda_runner_host_probe.py",
+      "state": "accepted",
+      "evidence": [
+        "workspace-control:lambda-self-hosted-execution-v1-design@be9b425b10898a4b5bf4301e8075bb44b2e62a80:scripts/lambda_runner_host_probe.py"
+      ]
+    },
+    {
+      "path": "operator evidence: lambda-runner-host-probe-20261005T212938Z/lambda-runner-host-probe.json",
+      "state": "accepted",
+      "evidence": [
+        "operator evidence: lambda-runner-host-probe-20261005T212938Z/lambda-runner-host-probe.json"
+      ]
+    },
+    {
+      "path": "GitHub Actions run 37383893507: Lambda CI P2-B No-Op",
+      "state": "accepted",
+      "evidence": [
+        "GitHub Actions run 37383893507: Lambda CI P2-B No-Op"
+      ]
+    },
+    {
+      "path": "GitHub artifact 11380060652: lambda-ci-p2b-receipt; sha256:93e56b904a2ddc6bd6e3efecbd148cabbf0132c1d28586b10ad851281fa50b67",
+      "state": "accepted",
+      "evidence": [
+        "GitHub artifact 11380060652: lambda-ci-p2b-receipt; sha256:93e56b904a2ddc6bd6e3efecbd148cabbf0132c1d28586b10ad851281fa50b67"
+      ]
+    },
+    {
+      "path": "local receipt: lambda-ci-p2b-20261005T230606Z/lambda-ci-p2b-launcher.json",
+      "state": "accepted",
+      "evidence": [
+        "local receipt: lambda-ci-p2b-20261005T230606Z/lambda-ci-p2b-launcher.json"
+      ]
+    },
+    {
+      "path": "GitHub Actions run 37408781519: Lambda CI P3 CPU Validation PASS",
+      "state": "accepted",
+      "evidence": [
+        "GitHub Actions run 37408781519: Lambda CI P3 CPU Validation PASS"
+      ]
+    },
+    {
+      "path": "GitHub artifact 11388222514: lambda-ci-p3-receipt; sha256:12cf36d8e5346f8d1143ad873aa2df3dc75fdf99b13455a62de2731a528f9703",
+      "state": "accepted",
+      "evidence": [
+        "GitHub artifact 11388222514: lambda-ci-p3-receipt; sha256:12cf36d8e5346f8d1143ad873aa2df3dc75fdf99b13455a62de2731a528f9703"
+      ]
+    },
+    {
+      "path": "local P3 launcher receipt: runner 25 lambda-research-engine-p3-4efa7bacc41f cleanup PASS",
+      "state": "accepted",
+      "evidence": [
+        "local P3 launcher receipt: runner 25 lambda-research-engine-p3-4efa7bacc41f cleanup PASS"
+      ]
+    },
+    {
+      "path": "GitHub Actions run 37412644570: Lambda CI P4 GPU Validation PASS",
+      "state": "accepted",
+      "evidence": [
+        "GitHub Actions run 37412644570: Lambda CI P4 GPU Validation PASS"
+      ]
+    },
+    {
+      "path": "GitHub artifact 11389971129: lambda-ci-p4-gpu-receipt; sha256:cfbc4cb17a26d503840b86f0d3a1f638e228f01f2ac5693e0c63021da2d1a59d",
+      "state": "accepted",
+      "evidence": [
+        "GitHub artifact 11389971129: lambda-ci-p4-gpu-receipt; sha256:cfbc4cb17a26d503840b86f0d3a1f638e228f01f2ac5693e0c63021da2d1a59d"
+      ]
+    },
+    {
+      "path": "local P4 launcher receipt: runner 28 lambda-research-engine-p4-83bbe0e05fe3 cleanup PASS",
+      "state": "accepted",
+      "evidence": [
+        "local P4 launcher receipt: runner 28 lambda-research-engine-p4-83bbe0e05fe3 cleanup PASS"
+      ]
+    },
+    {
+      "path": "P5 isolated Go live receipt: /home/atrott/adamArchives/Adam/workspace-control-tmp/lambda-ci-go-20261006T051148Z/lambda-ci-go-toolchain.json",
+      "state": "accepted",
+      "evidence": [
+        "P5 isolated Go live receipt: /home/atrott/adamArchives/Adam/workspace-control-tmp/lambda-ci-go-20261006T051148Z/lambda-ci-go-toolchain.json"
+      ]
+    },
+    {
+      "path": "P5 Go source SHA256: 2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556",
+      "state": "accepted",
+      "evidence": [
+        "P5 Go source SHA256: 2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"
+      ]
+    },
+    {
+      "path": "P5 isolated Go runtime: /opt/workspace-ci/go/1.26.3; owner root:root; system Go not replaced",
+      "state": "accepted",
+      "evidence": [
+        "P5 isolated Go runtime: /opt/workspace-ci/go/1.26.3; owner root:root; system Go not replaced"
+      ]
+    },
+    {
+      "path": "research-engine GitHub Actions run 37422040174 / artifact 11397464532",
+      "state": "accepted",
+      "evidence": [
+        "Lambda CI P5 Autonomous Acceptance run completed success on runner lambda-research-engine-0d2d8c17ae01.",
+        "Artifact digest sha256:08058674cc44462f5409d783612e76bc65463776de31301a710e32029ebc4ea4."
+      ]
+    },
+    {
+      "path": "research-engine GitHub Actions run 37433722972 / artifact 11397719082",
+      "state": "accepted",
+      "evidence": [
+        "Lambda CI P5 Autonomous Acceptance run completed success on runner lambda-research-engine-747e2acd5363.",
+        "Artifact digest sha256:2c7253655f4a3bb7d7069a36ed2a07d3f6e5ea696e179758cb424ba176d2fa69."
+      ]
+    },
+    {
+      "path": "/srv/workspace-ci/research-engine/logs/p5-6d41b8c1-55ca-4d80-b193-5df69a497cf7-receipt.json",
+      "state": "accepted",
+      "evidence": [
+        "RUNNER_EXITED_CLEANLY; exit 0; credential/JIT persistence false; process cleanup true; runner/staging workspaces destroyed."
+      ]
+    },
+    {
+      "path": "/srv/workspace-ci/research-engine/logs/p5-434ed5d8-1402-495e-8ad5-475272f5f341-receipt.json",
+      "state": "accepted",
+      "evidence": [
+        "RUNNER_EXITED_CLEANLY; exit 0; credential/JIT persistence false; process cleanup true; runner/staging workspaces destroyed."
+      ]
+    },
+    {
+      "path": "/home/atrott/adamArchives/Adam/workspace-control-tmp/lambda-ci-p5-install-20261006T081054Z/lambda-ci-p5-install.json",
+      "state": "accepted",
+      "evidence": [
+        "Final live P5 install/activation receipt at exact workspace-control d33ca95a8d63d7e9f9d7f85afc1fa02540faff16."
+      ]
+    }
   ],
   "validation": [
     {
@@ -666,20 +850,14 @@
       ]
     }
   ],
-  "blockers": [
-    "P5 live gate A service install has not yet been retried after the isolated Go prerequisite PASS; provisioner/controller code is not yet accepted on-host.",
-    "Controller activation remains intentionally gated on later ci-controller-owned credential staging; do not stage or activate the controller before provisioner-only receipt review."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "P5 live gate A retry: run scripts/bootstrap_lambda_ci_p5.sh from exact workspace-control 2b026c41f6dd8e3fcaa5e30fddaedb9babe09391 with controller activation disabled; require provisioner service/socket PASS and review receipt.",
-    "P5 live gate B: stage the existing clean research-engine PAT directly as ci-controller using /opt/workspace-ci/controller/stage-pat; never paste token into chat.",
-    "P5 live gate C: rerun the exact P5 bootstrap with WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES and require controller/provisioner both active.",
-    "P5 autonomous acceptance: trigger trusted CPU scale-set demand and prove autonomous provision/cleanup/evidence without human SSH/PAT relay.",
-    "P5 recovery: prove controller restart/recovery, replay protection, cleanup-failure blocking, and kill switch.",
-    "P6: perform second-project isolation pilot under distinct UID/root/cache and prove mutual denial."
+    "P5 recovery/adversarial acceptance: prove controller restart/recovery, replay protection, cleanup-failure blocking, and kill switch behavior without weakening the accepted live boundary.",
+    "P5 cache/resource hardening: exercise trusted-cache immutability/invalidation and bounded concurrency/resource-failure paths.",
+    "P6 second-project isolation pilot: opt in a second repository under a distinct UID/root/cache policy and prove mutual denial."
   ],
-  "next_safe_action": "Human live gate A retry only: on Lambda use a clean detached workspace-control tree exactly at `2b026c41f6dd8e3fcaa5e30fddaedb9babe09391` and run `scripts/bootstrap_lambda_ci_p5.sh` via sudo with `WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES`, `WORKSPACE_CI_P5_EXPECTED_SHA=2b026c41f6dd8e3fcaa5e30fddaedb9babe09391`, and no `WORKSPACE_CI_P5_ACTIVATE_CONTROLLER` flag. The isolated Go prerequisite is already PASS at `/opt/workspace-ci/go/1.26.3`; do not rerun the Go bootstrap unless the prefix is missing or version-drift evidence appears. This service bootstrap must install/start only the root provisioner, verify `/run/workspace-ci/provisioner.sock` is `root:workspace-ci-controller` mode `0660`, leave `workspace-ci-controller` installed but inactive, handle no GitHub credential, and emit a visible receipt. Do not stage the PAT or activate the controller until that provisioner-only receipt is reviewed.",
+  "next_safe_action": "Continue from the accepted live P5 baseline at workspace-control d33ca95a8d63d7e9f9d7f85afc1fa02540faff16 and research-engine aa1cdaafb4728c70be7bab0041df5f395f16141c. The research-engine autonomous cpu-test scale-set lane is accepted for routine bounded validation. Next, execute the P5 recovery/adversarial acceptance gate: test controller restart/recovery, replay protection, cleanup-failure blocking, and kill-switch behavior using the existing trusted P5 workflow and without restaging the PAT, rerunning the Go bootstrap, broadening provisioner network/device authority, or granting production/scientific-state access.",
   "last_executor": "chatgpt",
-  "last_surface": "github+web",
-  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow.\n\n2026-10-06 P3 guard correction: production safety checks must measure stable service identity/boundaries, not volatile implementation details such as every PostgreSQL background-worker PID. The TCP 5432 listener identity is now the production invariant; runuser boundaries also start from `/` to avoid inherited private-cwd warnings.\n\n2026-10-06 P3 timeout correction: the previous regression actively blessed RuntimeMaxSec=15min even though the trusted workflow timeout was 30min. Timeout policy is now encoded as workflow(1800s) < systemd(2400s) < launcher watchdog(2520s), and tests execute the rendered systemd command.\n\n2026-10-06 P3 accepted: real candidate validation completed on Lambda in 21s once runner was assigned, using isolated PostgreSQL 14.24 + pgvector 0.8.6, Python 3.12.15, exact SHA checkout, and full pytest. P4 may now validate the explicit one-GPU hardware lane without scientific/model execution.\n\n2026-10-06 P4 hardware identity correction: NVIDIA logical index/device-node assumptions are not durable identity. P4 now selects the intended physical GPU by stable UUID, resolves the current minor/device node at launch time, grants only that node under DevicePolicy=closed, and treats all other GPU nodes as explicit denial targets.\n\n2026-10-06 P4 CUDA support correction: after physical GPU selection/denial passed, CUDA Driver API initialization failed with rc=999 under the minimal /dev/nvidiactl + selected GPU grant. The gpu-small-v1 profile now adds only the shared UVM compute support nodes /dev/nvidia-uvm and /dev/nvidia-uvm-tools when present; modeset and broad NVIDIA wildcard access remain excluded.\n\n2026-10-06 P4 accepted: UUID-resolved gpu-small-v1 validation passed end-to-end on Lambda. The selected RTX A4500 was isolated as the only CUDA-visible GPU, the other physical GPU node was denied with EPERM, CUDA Driver API initialized, a real 256 MiB VRAM allocation/free completed with exact free-memory restoration, and no production/scientific state or GPU/project processes leaked. P5 may now remove the manual local sudo/PAT JIT relay without relaxing P2-P4 boundaries.\n\n2026-10-06 P5 static core accepted: the privilege split is now executable and CI-green. `ci-controller` owns GitHub scale-set/JIT authority, root provisioner owns only manifest-derived local launch authority, and JIT config crosses the boundary only over the local Unix socket. Live installation remains separately gated.\n\n2026-10-06 P5 install layer accepted statically: root provisioner and unprivileged controller units, credential-blind bootstrap, controller-only TTY PAT staging helper, rollback, kill switch, and bounded uninstall are CI-green. Live activation is split into provisioner-only install, credential staging, then controller activation so no GitHub secret crosses the root provisioner/bootstrap boundary.\n\n2026-10-06 P5 live gate A prerequisite correction: Lambda system Go is 1.18.1, so the accepted install failed closed before mutation. P5 now pins official go1.26.3 linux-amd64 by exact SHA256 and installs it side-by-side under /opt/workspace-ci/go/1.26.3 using unprivileged ci-controller download + root-owned promotion. System Go and apt remain untouched.\n\n2026-10-06 P5 live Go prerequisite accepted: official Go 1.26.3 was downloaded as ci-controller, checksum/version verified, and promoted side-by-side to /opt/workspace-ci/go/1.26.3 root:root with no group/world write. apt/dpkg and system Go were not modified. The earlier GO_1_26_3_REQUIRED failure is resolved; next action is provisioner-only service install retry from exact workspace-control 2b026c41 with controller inactive and no PAT."
+  "last_surface": "github+lambda-controller",
+  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow.\n\n2026-10-06 P3 guard correction: production safety checks must measure stable service identity/boundaries, not volatile implementation details such as every PostgreSQL background-worker PID. The TCP 5432 listener identity is now the production invariant; runuser boundaries also start from `/` to avoid inherited private-cwd warnings.\n\n2026-10-06 P3 timeout correction: the previous regression actively blessed RuntimeMaxSec=15min even though the trusted workflow timeout was 30min. Timeout policy is now encoded as workflow(1800s) < systemd(2400s) < launcher watchdog(2520s), and tests execute the rendered systemd command.\n\n2026-10-06 P3 accepted: real candidate validation completed on Lambda in 21s once runner was assigned, using isolated PostgreSQL 14.24 + pgvector 0.8.6, Python 3.12.15, exact SHA checkout, and full pytest. P4 may now validate the explicit one-GPU hardware lane without scientific/model execution.\n\n2026-10-06 P4 hardware identity correction: NVIDIA logical index/device-node assumptions are not durable identity. P4 now selects the intended physical GPU by stable UUID, resolves the current minor/device node at launch time, grants only that node under DevicePolicy=closed, and treats all other GPU nodes as explicit denial targets.\n\n2026-10-06 P4 CUDA support correction: after physical GPU selection/denial passed, CUDA Driver API initialization failed with rc=999 under the minimal /dev/nvidiactl + selected GPU grant. The gpu-small-v1 profile now adds only the shared UVM compute support nodes /dev/nvidia-uvm and /dev/nvidia-uvm-tools when present; modeset and broad NVIDIA wildcard access remain excluded.\n\n2026-10-06 P4 accepted: UUID-resolved gpu-small-v1 validation passed end-to-end on Lambda. The selected RTX A4500 was isolated as the only CUDA-visible GPU, the other physical GPU node was denied with EPERM, CUDA Driver API initialized, a real 256 MiB VRAM allocation/free completed with exact free-memory restoration, and no production/scientific state or GPU/project processes leaked. P5 may now remove the manual local sudo/PAT JIT relay without relaxing P2-P4 boundaries.\n\n2026-10-06 P5 static core accepted: the privilege split is now executable and CI-green. `ci-controller` owns GitHub scale-set/JIT authority, root provisioner owns only manifest-derived local launch authority, and JIT config crosses the boundary only over the local Unix socket. Live installation remains separately gated.\n\n2026-10-06 P5 install layer accepted statically: root provisioner and unprivileged controller units, credential-blind bootstrap, controller-only TTY PAT staging helper, rollback, kill switch, and bounded uninstall are CI-green. Live activation is split into provisioner-only install, credential staging, then controller activation so no GitHub secret crosses the root provisioner/bootstrap boundary.\n\n2026-10-06 P5 live gate A prerequisite correction: Lambda system Go is 1.18.1, so the accepted install failed closed before mutation. P5 now pins official go1.26.3 linux-amd64 by exact SHA256 and installs it side-by-side under /opt/workspace-ci/go/1.26.3 using unprivileged ci-controller download + root-owned promotion. System Go and apt remain untouched.\n\n2026-10-06 P5 live Go prerequisite accepted: official Go 1.26.3 was downloaded as ci-controller, checksum/version verified, and promoted side-by-side to /opt/workspace-ci/go/1.26.3 root:root with no group/world write. apt/dpkg and system Go were not modified. The earlier GO_1_26_3_REQUIRED failure is resolved; next action is provisioner-only service install retry from exact workspace-control 2b026c41 with controller inactive and no PAT.\n\n2026-10-06 P5 LIVE ACCEPTED: Gate A/B/C activation completed with credential separation intact. Two live launch-boundary defects were found and repaired fail-closed: missing manifest `home` in the immutable launch spec (PR #94 -> 43a38085) and missing AF_NETLINK for root-provisioner route discovery while retaining no AF_INET/AF_INET6/AF_PACKET authority (PR #95 -> d33ca95). After the final exact-SHA reinstall, autonomous GitHub runs 37422040174 and 37433722972 both completed successfully on distinct ephemeral runners. Both GitHub receipts and both local provisioner cleanup receipts passed; no JIT/PAT persisted, no production PostgreSQL/GPU access was available to cpu-test, both job/staging workspaces were destroyed, and no project processes or p5-* workspaces remained. Routine bounded research-engine CPU validation no longer requires human SSH or PAT relay."
 }
