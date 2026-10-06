@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: b6bf6ca2618cc747bba974f71f52901907cea4c5
+- Remote checkpoint: 4716726d7b705158f12005ee23daecb51b66e259
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Install and activate exact workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a on Lambda from a fresh detached clean worktree using the accepted P5 bootstrap with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=4d4d14480f2cd6b573e33b10efc61a81a316327a, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not restage the controller token. After activation, capture CPU/GPU controller NRestarts and active/running state, wait 8 seconds, capture again, and require both services remain active/running with zero restart delta and no recent 403/controller-exited errors. Only then trigger a NEW /lambda-ci-p5 f5ba8278d7dfa22e63623ddf51896a6dec002813 on PR #106; use the GitHub-hosted /lambda-ci-cancel <run_id> control for stale acceptance cancellation. Do not enable model-scale classes or gpu-heavy.
+Install and activate exact workspace-control 4716726d7b705158f12005ee23daecb51b66e259 on Lambda from a fresh detached clean worktree using the accepted P5 bootstrap with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=4716726d7b705158f12005ee23daecb51b66e259, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not restage the controller token and do not cancel active CPU run 37546267761 before activation. After activation, capture CPU/GPU NRestarts and active/running state, wait 8 seconds, and require zero restart delta. Then observe the existing CPU run 37546267761: the corrected controller must either recover ACCEPTED/terminal durable provision state without a second JIT/root grant, or remove only an orphaned exact-name/same-scale-set runner registration when root state is MISSING and regenerate JIT once. Require the run to reach actionable terminal evidence plus root receipt/cleanup before gpu-small acceptance. Use /lambda-ci-cancel <run_id> only if a new P5 failure makes cancellation necessary. Do not enable model-scale classes or gpu-heavy.
 
 ## Remaining work
 
-- Install and activate exact terminal-safe workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a, prove restart-delta stability with the now-complete read-only controller credential, then run fresh CPU and gpu-small admission-v2 acceptance and validate root receipts plus residue-free cleanup.
+- Install and activate exact deterministic-JIT-recovery workspace-control 4716726d7b705158f12005ee23daecb51b66e259, allow active CPU run 37546267761 to recover through durable provision-state reconciliation, then validate terminal CPU receipt/cleanup before launching gpu-small acceptance.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,8 +48,8 @@ Install and activate exact workspace-control 4d4d14480f2cd6b573e33b10efc61a81a31
 
 ## Blockers / gates
 
-- Exact terminal-safe workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a is validated but not yet installed on Lambda. Install/activate it before any new acceptance run.
-- After activation, prove CPU/GPU controllers are active/running with no NRestarts delta over a bounded 8-second window before launching a fresh CPU acceptance.
+- Lambda still runs 4d4d14480f2cd6b573e33b10efc61a81a316327a and the CPU controller is crash-looping on deterministic JIT runner 409 for active run 37546267761. Install exact 4716726d7b705158f12005ee23daecb51b66e259 before further acceptance evaluation.
+- After exact 4716726d activation, prove CPU/GPU controllers remain active/running with zero restart delta while the existing run 37546267761 is allowed to recover; do not trigger another CPU run until this active run reaches actionable terminal evidence or is explicitly canceled for a P5 reason.
 
 ## Fresh-chat initialization
 
