@@ -2,12 +2,12 @@
   "schema_version": 2,
   "task_id": "workspace-heartbeat-plugin-v1",
   "title": "Workspace Heartbeat MCP Plugin v1",
-  "status": "BLOCKED_EVIDENCE",
+  "status": "VALIDATING",
   "goal": "Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel UI so long-running workspace-control tasks can publish natural-language progress through a real tool call into one continuously updating side panel.",
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-control",
-  "current_stage": "panel_stability_correction",
+  "current_stage": "in_chat_single_update_cards",
   "acceptance_criteria": [
     "Expose a model-callable heartbeat_update tool whose user-facing progress content is natural prose rather than rigid structured headings.",
     "Expose a read-only heartbeat_get tool that returns the latest heartbeat plus bounded history for an optional task ID.",
@@ -23,7 +23,10 @@
     "Deliver mounted-panel updates from the MCP Apps ui/notifications/tool-result lifecycle without automatic background heartbeat_get polling.",
     "Hydrate mounted UI from the invoking tool result and persisted widget state; keep heartbeat_get available only for explicit reconciliation.",
     "Do not generate recurring MCP traffic while an idle heartbeat panel is merely open.",
-    "Preserve a bounded operator-visible timeline across task ownership changes within the same ChatGPT work session, while keeping task-local history authoritative for task APIs."
+    "Preserve a bounded operator-visible timeline across task ownership changes within the same ChatGPT work session, while keeping task-local history authoritative for task APIs.",
+    "Render each heartbeat_update as a compact in-chat card containing only that newest heartbeat, without replaying task history or cross-task timeline into every update card.",
+    "Keep heartbeat_get as a separate optional history/sidebar surface rather than making mounted sidebar live refresh the primary progress-delivery path.",
+    "Fresh chats must not inherit prior in-chat heartbeat-card contents; each update card is scoped to its invoking heartbeat result."
   ],
   "constraints": [
     "Use current documented OpenAI/MCP Apps APIs and a ChatGPT thread entrypoint; do not depend on hidden client behavior.",
@@ -233,7 +236,7 @@
     },
     {
       "id": "panel_stability_correction",
-      "status": "SUSPENDED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda+chatgpt",
@@ -271,7 +274,11 @@
         "visible task-boundary labels in panel",
         "panel-v6.html resource key",
         "v0.3.3 cross-task timeline regression coverage",
-        "v0.3.3 source checkpoint git:fd615356972cbe1d306cca793c387badf2f7168a"
+        "v0.3.3 source checkpoint git:fd615356972cbe1d306cca793c387badf2f7168a",
+        "dedicated heartbeat_update card resource",
+        "separate heartbeat_get history/sidebar resource",
+        "heartbeat_update structured output limited to newest heartbeat",
+        "v0.4.0 single-message in-chat heartbeat cards"
       ],
       "validation": [
         {
@@ -455,6 +462,32 @@
             "The failing file was tasks/active/research-engine-local-document-pipeline-v1.json from concurrent workspace-control work.",
             "Heartbeat unit and integration tests did not execute, so the run is not evidence against v0.3.3."
           ]
+        },
+        {
+          "check": "v0.4.0 single-update card source",
+          "result": "PASS",
+          "evidence": [
+            "heartbeat_update now uses a dedicated update-card UI resource instead of the history/sidebar panel.",
+            "heartbeat_update structuredContent contains only the newest heartbeat object.",
+            "heartbeat_get retains the full history/sidebar resource with task history and operator timeline.",
+            "Static regression tests assert the update card contains no history/timeline rendering and no polling."
+          ]
+        },
+        {
+          "check": "v0.4.0 repository validation",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Pending validation on the final v0.4.0 PR head."
+          ]
+        },
+        {
+          "check": "v0.4.0 live in-chat card smoke",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Requires deploying/remounting v0.4.0 and observing two or more heartbeat_update calls in one chat.",
+            "Pass requires each in-chat card to show only its own newest heartbeat, without replaying earlier heartbeats.",
+            "A fresh chat must begin with no prior update-card contents."
+          ]
         }
       ],
       "resume_condition": "User syncs Lambda workspace-control main to 3214ec2be4f0c20933784b3d265386d9652dfd0b, restarts workspace-heartbeat, and begins the fresh research-engine handoff chat with Workspace Heartbeat enabled."
@@ -620,18 +653,17 @@
       ]
     }
   ],
-  "blockers": [
-    "PR #69 validation is blocked by an unrelated invalid research-engine-local-document-pipeline-v1 task capsule on current workspace-control main; CI exits during task-contract validation before heartbeat tests run."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Wait for the owning research chat to restore schema-valid research-engine-local-document-pipeline-v1 state; do not mutate that concurrent task here.",
-    "Rerun PR #69 validation on unchanged heartbeat v0.3.3.",
-    "After a real heartbeat validation pass, merge and deploy panel-v6.html.",
-    "Verify mounted live refresh without close/reopen, idle quietness, and cross-task timeline continuity.",
-    "Close the task only after those live checks pass."
+    "Validate the final Workspace Heartbeat v0.4.0 PR head.",
+    "Deploy the exact validated v0.4.0 head/canonical merge to the Lambda heartbeat runtime and recreate/refresh the plugin.",
+    "In a long-running research chat, verify each heartbeat_update creates one compact in-chat card containing only that heartbeat.",
+    "Start a fresh chat and verify new heartbeat cards do not replay prior chat heartbeat contents.",
+    "Use heartbeat_get only when explicit history/sidebar inspection is wanted; mounted sidebar live refresh is no longer the primary acceptance path.",
+    "Separately investigate executor stalls when an external dependency resolves but the model remains in a long reasoning loop without emitting a state-change heartbeat."
   ],
-  "next_safe_action": "Do not change heartbeat source further. Wait for the owning research chat to restore a schema-valid research-engine-local-document-pipeline-v1 capsule on workspace-control main, then rerun PR #69 validation on the unchanged v0.3.3 head. Merge/deploy only after heartbeat validation actually runs and passes.",
+  "next_safe_action": "Validate and deploy Workspace Heartbeat v0.4.0. The primary live test is now the in-chat surface: each heartbeat_update must render exactly one compact card containing only that newest heartbeat, with no replayed history/timeline; a fresh chat must start visually clean. Keep heartbeat_get as the optional history/sidebar surface. Separately, treat long reasoning after an already-resolved external dependency as an executor-stall/heartbeat-cadence issue rather than a UI transport issue.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects. New live evidence proved transport and rendering but exposed a session-correlation defect: the panel sometimes polled heartbeat_get under a different or missing ChatGPT session identity, received no task, switched to IDLE, and later resurrected the prior heartbeat. The v0.2 correction makes task_id authoritative, retains bounded task history, persists active task/history in widget state, ignores empty polls after valid state, declares Node >=20, and logs successful MCP requests. The user's preferred UX is a sequential heartbeat log that does not disappear between updates. Automatic reset to IDLE on assistant-response start is intentionally deferred because no reliable response-start lifecycle signal is available. The panel-stability correction is repository-valid and canonical at 3214ec2be4f0c20933784b3d265386d9652dfd0b. The task is now blocked only on the user's live Lambda/ChatGPT smoke. Fresh-chat v0.2 field evidence on 2026-10-05: the first heartbeat rendered as WORKING with a footer showing 1 retained update and remained visible throughout an approximately 1m56s response. The prior false-IDLE/disappearing behavior was not observed. No second heartbeat was emitted during that run, so multi-heartbeat sequential accumulation remains the sole pending live acceptance check. Do not repeat the single-heartbeat smoke; use normal research work to obtain the next qualifying multi-update observation. Additional field evidence: after earlier v0.2 heartbeats landed, a later heartbeat_update returned UNAVAILABLE. This makes end-to-end delivery availability a separate open failure from the already-corrected false-IDLE UI bug. Do not infer the cause without correlating the model-visible UNAVAILABLE with MCP server and ngrok request evidence. New field evidence: with the v0.2 panel open, successful POST /mcp requests streamed roughly once per second. This is directly explained by setInterval(refresh, 1000) in heartbeat-panel.html. OpenAI's current MCP Apps documentation recommends receiving model tool results through ui/notifications/tool-result; the one-second window.openai.callTool polling loop is therefore unnecessary as the primary update mechanism and may contribute to intermittent UNAVAILABLE failures. The v0.3 correction is implemented at f542f3bed7a3555877eb7bff14a38b13a4921692: it uses the MCP Apps ui/notifications/tool-result lifecycle as the primary UI update path, retains a 5s/15s/30s adaptive reconciliation fallback, skips active reconciliation while hidden, bumps the resource URI to panel-v3.html, and adds a static panel contract test. Repository and live validation are pending. Additional live evidence: the v0.3 mounted panel successfully retained two sequential updates at once, proving multi-heartbeat chronological accumulation. However, the five-second reconciliation fallback still generated recurring 400/200/202 MCP request clusters. The design was therefore simplified again to v0.3.1: event-driven ui/notifications/tool-result only, no automatic tools/call, no reconciliation timer, no background heartbeat_get polling, with panel-v4.html as a fresh resource key. Final acceptance now depends only on repository validation plus deployed idle request-rate/delivery availability smoke. New observation: a >15-minute research turn emitted only two visible heartbeat_update events while the v0.3 panel continued making recurring fallback reconciliation requests. This cleanly separates model heartbeat cadence from panel transport behavior. v0.3.1 should be tested before further transport redesign; after deployment, audit whether the executing chat actually obeys the heartbeat-before-fourth-non-heartbeat-tool lease. New live evidence resolves the apparent executor-cadence concern: exported history contained seven retained heartbeat updates, so the long research turn emitted substantially more than the two visible in the stale mounted panel. The remaining issue is mounted live refresh. OpenAI documents ui/notifications/tool-result for model-initiated tool results associated with a UI resource. heartbeat_update lacked _meta.ui.resourceUri while heartbeat_get owned the panel resource. v0.3.2 associates heartbeat_update with the same panel-v5 resource while leaving the thread entrypoint only on heartbeat_get; no background polling is reintroduced. New field evidence exposed a separate continuity defect after mounted history itself was working: one long research chat transferred ownership from research-engine-local-extract-redesign-v1 to workspace-evidence-first-solution-research-v1. The new task showed 6 retained updates, while prior-task updates disappeared from the operator view. This reflects the v0.3.2 task-local history contract, not confirmed record deletion. v0.3.3 therefore keeps task-local history authoritative but adds a bounded conversation timeline keyed from the model session, remembers the latest timeline for each task, exposes timeline in structured output, and renders task boundaries in the panel. This preserves operator continuity across parent/child task handoffs without globally mixing concurrent chats."
+  "notes": "The user explicitly wants heartbeat delivery to be a tool call and the UI to be one updating formatted box, while heartbeat prose remains natural and conversational. Live evidence now proves the thread side panel renders in normal Chat mode. The first authorization attempt using 'Use once' produced an 'Unable to load conversation' error; retrying after refresh with 'Always allow' allowed the chat to continue. The research chat claimed the live heartbeat panel was working before the user had observed any panel; such model prose is not accepted as evidence. The MCP server currently logs startup/errors only, not successful requests, so an idle MCP terminal cannot prove that no request occurred. System Node v12.22.9 is unsupported for this implementation; Node 20 in a dedicated conda environment is the working runtime. tmux helpers heartbeat-up/heartbeat-status/heartbeat-console/heartbeat-down keep both MCP and ngrok alive across SSH disconnects. New live evidence proved transport and rendering but exposed a session-correlation defect: the panel sometimes polled heartbeat_get under a different or missing ChatGPT session identity, received no task, switched to IDLE, and later resurrected the prior heartbeat. The v0.2 correction makes task_id authoritative, retains bounded task history, persists active task/history in widget state, ignores empty polls after valid state, declares Node >=20, and logs successful MCP requests. The user's preferred UX is a sequential heartbeat log that does not disappear between updates. Automatic reset to IDLE on assistant-response start is intentionally deferred because no reliable response-start lifecycle signal is available. The panel-stability correction is repository-valid and canonical at 3214ec2be4f0c20933784b3d265386d9652dfd0b. The task is now blocked only on the user's live Lambda/ChatGPT smoke. Fresh-chat v0.2 field evidence on 2026-10-05: the first heartbeat rendered as WORKING with a footer showing 1 retained update and remained visible throughout an approximately 1m56s response. The prior false-IDLE/disappearing behavior was not observed. No second heartbeat was emitted during that run, so multi-heartbeat sequential accumulation remains the sole pending live acceptance check. Do not repeat the single-heartbeat smoke; use normal research work to obtain the next qualifying multi-update observation. Additional field evidence: after earlier v0.2 heartbeats landed, a later heartbeat_update returned UNAVAILABLE. This makes end-to-end delivery availability a separate open failure from the already-corrected false-IDLE UI bug. Do not infer the cause without correlating the model-visible UNAVAILABLE with MCP server and ngrok request evidence. New field evidence: with the v0.2 panel open, successful POST /mcp requests streamed roughly once per second. This is directly explained by setInterval(refresh, 1000) in heartbeat-panel.html. OpenAI's current MCP Apps documentation recommends receiving model tool results through ui/notifications/tool-result; the one-second window.openai.callTool polling loop is therefore unnecessary as the primary update mechanism and may contribute to intermittent UNAVAILABLE failures. The v0.3 correction is implemented at f542f3bed7a3555877eb7bff14a38b13a4921692: it uses the MCP Apps ui/notifications/tool-result lifecycle as the primary UI update path, retains a 5s/15s/30s adaptive reconciliation fallback, skips active reconciliation while hidden, bumps the resource URI to panel-v3.html, and adds a static panel contract test. Repository and live validation are pending. Additional live evidence: the v0.3 mounted panel successfully retained two sequential updates at once, proving multi-heartbeat chronological accumulation. However, the five-second reconciliation fallback still generated recurring 400/200/202 MCP request clusters. The design was therefore simplified again to v0.3.1: event-driven ui/notifications/tool-result only, no automatic tools/call, no reconciliation timer, no background heartbeat_get polling, with panel-v4.html as a fresh resource key. Final acceptance now depends only on repository validation plus deployed idle request-rate/delivery availability smoke. New observation: a >15-minute research turn emitted only two visible heartbeat_update events while the v0.3 panel continued making recurring fallback reconciliation requests. This cleanly separates model heartbeat cadence from panel transport behavior. v0.3.1 should be tested before further transport redesign; after deployment, audit whether the executing chat actually obeys the heartbeat-before-fourth-non-heartbeat-tool lease. New live evidence resolves the apparent executor-cadence concern: exported history contained seven retained heartbeat updates, so the long research turn emitted substantially more than the two visible in the stale mounted panel. The remaining issue is mounted live refresh. OpenAI documents ui/notifications/tool-result for model-initiated tool results associated with a UI resource. heartbeat_update lacked _meta.ui.resourceUri while heartbeat_get owned the panel resource. v0.3.2 associates heartbeat_update with the same panel-v5 resource while leaving the thread entrypoint only on heartbeat_get; no background polling is reintroduced. New field evidence exposed a separate continuity defect after mounted history itself was working: one long research chat transferred ownership from research-engine-local-extract-redesign-v1 to workspace-evidence-first-solution-research-v1. The new task showed 6 retained updates, while prior-task updates disappeared from the operator view. This reflects the v0.3.2 task-local history contract, not confirmed record deletion. v0.3.3 therefore keeps task-local history authoritative but adds a bounded conversation timeline keyed from the model session, remembers the latest timeline for each task, exposes timeline in structured output, and renders task boundaries in the panel. This preserves operator continuity across parent/child task handoffs without globally mixing concurrent chats. Product direction changed after successful in-chat rendering proved more reliable than mounted sidebar live refresh. v0.4.0 splits the UI resources: heartbeat_update renders a dedicated stateless single-heartbeat card, while heartbeat_get retains the richer history/sidebar panel. This intentionally stops replaying the full timeline into every heartbeat update card and makes in-chat progress the primary operator UX. A separate research-engine field incident showed a genuine executor stall: P3 run 37394877505 had already completed with a receipt-level FAIL at postgres-discovery because pgvector was unavailable, yet the model continued reasoning without surfacing the state transition through a heartbeat."
 }
