@@ -1,0 +1,328 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-lambda-execution-policy-v1",
+  "title": "Workspace Lambda Execution Policy and Model Workload Governance v1",
+  "status": "IN_PROGRESS",
+  "goal": "Design, implement, and adversarially validate a fail-closed workload admission, trusted model/dependency cache, resource-governance, and execution-evidence layer on top of the accepted Lambda P5 CPU and gpu-small autonomous runner substrate so ChatGPT/GitHub-driven work can safely execute pinned model-scale workloads without granting candidate workflow code the ability to invent capabilities, persist mutable cross-job state, access production/scientific state, or widen host authority.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-lambda-self-hosted-execution-v1",
+  "current_stage": "policy_contract_and_hydration",
+  "acceptance_criteria": [
+    "The accepted parent substrate remains the immutable starting boundary: one-job JIT runners, separate CPU and gpu-small scale sets, unprivileged GitHub-facing controller, credential-blind root provisioner, project UID isolation, private/local-network denial, production-state denial, and residue-free cleanup.",
+    "A versioned declarative workload-admission contract exists and binds repository/project, trusted workflow identity, exact candidate SHA, workload class, execution profile, model/dependency identities, resource class, egress class, secrets class, filesystem/state-effect class, cache class, and required evidence.",
+    "Workflow/candidate input is treated as a claim to validate against root-owned policy; candidate code cannot directly widen device, filesystem, network, secret, cache-promotion, production-state, or runtime authority.",
+    "Approved workload classes distinguish ordinary cpu-test, hardware-only gpu-small, model acquisition, trusted cache promotion, offline model evaluation, and later gpu-heavy/dual-GPU work; production daemon/scientific-state mutation remains outside ordinary CI.",
+    "Model acquisition is separated from model evaluation. Candidate model-eval jobs receive no model-registry credential and run from promoted read-only content with offline/local-files-only behavior by default.",
+    "Trusted model/dependency cache promotion is performed by a separate trusted authority unavailable to candidate workflow code.",
+    "A promoted model object records exact upstream repository, exact immutable revision/commit, source/archive and per-file digests, resulting tree/content digest, license/usage metadata, serialization format, custom-code/executable-dependency risk, promotion recipe identity, and a durable promotion receipt.",
+    "Mutable branch names such as main are never the durable identity of a promoted model/runtime object; resolve-once inputs are converted to exact immutable revisions before promotion.",
+    "Unsafe serialization is fail-closed by default: safetensors/safe serialization is preferred, pickle/deserialization paths that can execute arbitrary code require an explicit separately reviewed exception, and remote/custom model code is treated as executable dependency material.",
+    "Dependency/runtime identity is pinned independently of model weights and is included in admission and execution receipts.",
+    "Trusted cache is read-only to candidate jobs; candidate jobs write only per-job workspace or ephemeral staging and cannot mutate another job's promoted cache object.",
+    "Cache completeness can be verified offline; partial/incomplete snapshots fail closed rather than being treated as valid local models.",
+    "Resource policy covers CPU, RAM, GPU UUIDs, wall-clock timeout, TasksMax/process count, scratch/staging disk ceilings, concurrency, OOM/timeout/disk-pressure behavior, process cleanup, GPU-process cleanup, and model-server leak detection.",
+    "Network policy is explicit by workload class. Model-eval is offline/no-model-egress by default; acquisition/promotion gets only the minimum registry/public egress required and still cannot reach local/private/production services.",
+    "Secrets policy is explicit by workload class. Candidate model-eval jobs receive no personal, controller, SSH, production database, or model-registry credentials; any trusted acquisition credential is isolated from candidate code.",
+    "Every admitted job produces a non-secret receipt that binds policy/admission identity, workflow SHA, candidate SHA, execution profile, model/runtime/cache object identity, GPU UUID(s), relevant CUDA/runtime versions, resource evidence, terminal status, and cleanup result.",
+    "The controller/provisioner rejects unknown workload classes, mismatched project/profile/model bindings, stale/replayed admissions, unauthorized gpu-heavy requests, and attempts to bypass cache/promotion policy.",
+    "Controller restart/recovery, duplicate/replayed request IDs, cleanup failure, kill-switch operation, timeout, CPU/GPU process leak, CUDA OOM, RAM OOM or equivalent bounded memory failure, disk-pressure failure, and concurrent CPU/GPU demand are tested fail-closed.",
+    "The existing trusted-cache policy is promoted from static design into executable policy/tooling without silently changing project scientific authority.",
+    "The first model-scale pilot uses the already-certified Qwen/Qwen3.5-4B exact revision 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a and does not introduce a new heavyweight model before the policy/cache path is proven.",
+    "The first model pilot uses a non-scientific bounded canary/benchmark, runs on the accepted single-A4500 class, performs no production routing change or scientific materialization, leaves no resident model server/processes, and proves cleanup before any research-engine scientific benchmark uses the lane.",
+    "gpu-heavy/dual-GPU remains denied until a separate policy decision and acceptance gate after single-GPU model-eval plus adversarial/cache/resource validation pass.",
+    "Current GitHub-hosted CI remains a known-good control path and is not replaced by heavyweight Lambda validation.",
+    "The task preserves project ownership: workspace-control owns cross-project admission/cache/execution policy; research-engine owns model-specific scientific/runtime truth and benchmark semantics.",
+    "Every fresh ChatGPT chat/surface doing substantial work for this task emits heartbeat_update and then heartbeat_open exactly once early in that chat; chat-local mount state is never inherited from another chat."
+  ],
+  "constraints": [
+    "Do not weaken or bypass the accepted P5 CPU or gpu-small isolation boundaries merely to simplify model execution.",
+    "Do not enable gpu-heavy, dual-GPU, sustained model servers, production daemon execution, or scientific-state mutation before their explicit policy/acceptance gates.",
+    "Do not grant candidate code root, sudo, Docker-socket access, personal home access, controller credentials, SSH keys, browser credentials, or production database credentials.",
+    "Do not let candidate workflow code invoke trusted-cache promotion directly.",
+    "Do not use model repository branch names or tags as final promoted identity when an exact commit/revision can be resolved.",
+    "Do not permit arbitrary pickle loading or trust_remote_code/custom model code by default; executable model material requires explicit pinning/review and a separately declared exception.",
+    "Do not store model registry tokens, GitHub credentials, JIT config, SSH keys, environment files with secrets, or production credentials in trusted model/package caches.",
+    "Do not make candidate-writable caches persistent across jobs.",
+    "Do not silently reuse a cached model/runtime object whose recorded digest, exact revision, dependency identity, license/risk metadata, or completeness check no longer matches policy.",
+    "Do not let model-eval jobs fetch missing model files from the network; missing/incomplete promoted content must fail closed.",
+    "Do not allow model acquisition/promotion to execute model inference merely because artifacts were downloaded.",
+    "Do not mutate research-engine production routing as part of policy-layer acceptance.",
+    "Do not duplicate research-engine scientific/model-selection truth in workspace-control; reference exact owning contracts and identities.",
+    "Do not expand to another repository/project UID until this task has accepted its admission/cache/recovery semantics on research-engine.",
+    "Keep operator-facing temporary diagnostic/benchmark artifacts under ~/adamArchives/Adam/workspace-control-tmp/ or an explicit visible WORKSPACE_CONTROL_TMP_ROOT.",
+    "Follow procedures/progress_heartbeat.md. New chats mount their own live Heartbeat card; never carry an already-mounted claim across chat handoff."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "12f9d9e3a59f042bcf832dfe89a3b389b92f21ce",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "12f9d9e3a59f042bcf832dfe89a3b389b92f21ce",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-lambda-execution-policy-v1.json",
+        "tasks/active/workspace-lambda-execution-policy-v1.md",
+        "architecture/lambda-ci-execution-policy-hydration.v1.md",
+        "architecture/lambda-ci-workload-policy*.md",
+        "architecture/lambda-ci-workload-policy*.json",
+        "architecture/lambda-ci-trusted-cache-policy*.md",
+        "architecture/lambda-ci-project-*.json",
+        "architecture/lambda-ci-systemd-profiles*.json",
+        "policies/lambda-ci-*",
+        "schemas/lambda-ci-*",
+        "procedures/progress_heartbeat.md",
+        "scripts/lambda_ci_*",
+        "controller/lambda-ci-controller/**",
+        "systemd/workspace-ci-*",
+        "templates/lambda-ci/**",
+        "tests/test_lambda_ci_*"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "mutate",
+      "base_sha": "577764f4db10e4f4f894b1613518c358c6da7b95",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "577764f4db10e4f4f894b1613518c358c6da7b95",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        ".github/workflows/**",
+        "benchmarks/document_intelligence/**",
+        "deploy/**",
+        "tests/**",
+        "README.md"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "policy_contract_and_hydration",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+web",
+      "inputs": [
+        "parent task workspace-lambda-self-hosted-execution-v1 accepted CPU+gpu-small baseline",
+        "architecture/lambda-ci-execution-policy-hydration.v1.md",
+        "architecture/lambda-ci-trusted-cache-policy.v1.md",
+        "architecture/lambda-ci-project-research-engine.v1.json",
+        "architecture/lambda-ci-systemd-profiles.v1.json",
+        "research-engine residual-model-prefetch and local-inference contracts",
+        "research-engine Qwen3.5-4B runtime-certification and production-acceptance contracts",
+        "current GitHub self-hosted runner/JIT/security guidance",
+        "current Hugging Face cache/download/serialization security guidance"
+      ],
+      "outputs": [
+        "versioned workload-class taxonomy",
+        "versioned admission-manifest/schema design",
+        "threat model for model acquisition, promotion, evaluation, and heavy-GPU workloads",
+        "execution receipt/evidence contract",
+        "explicit exception model for executable/custom model code and unsafe serialization"
+      ],
+      "validation": [
+        {
+          "check": "Hydrated accepted execution baseline",
+          "result": "PASS",
+          "evidence": [
+            "Parent workspace-control task durably accepts autonomous cpu-test and gpu-small one-job JIT lanes with residue-free cleanup.",
+            "Final accepted live substrate is rooted at workspace-control ebfbae64dc82afaf81123ba49b03d170a0196757; parent checkpoint merged as 12f9d9e3a59f042bcf832dfe89a3b389b92f21ce.",
+            "research-engine trusted GPU workflow baseline is 577764f4db10e4f4f894b1613518c358c6da7b95."
+          ]
+        },
+        {
+          "check": "Hydrated existing cache/model governance",
+          "result": "PASS",
+          "evidence": [
+            "Existing trusted-cache design already separates candidate-writable staging from runner-read-only trusted cache and requires immutable identity, digests, license/risk review, recipe identity, tree digest, and promotion receipt.",
+            "research-engine residual-model-prefetch contract already records exact model revisions, per-file SHA-256 manifests, licenses, disk ceilings, local-files-only reopen checks, and zero-inference acquisition behavior.",
+            "Qwen3.5-4B exact accepted revision is 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a under runtime contract qwen35-vllm-cu129-image-native-sampler-v3."
+          ]
+        },
+        {
+          "check": "Hydrated current external security/cache guidance",
+          "result": "PASS",
+          "evidence": [
+            "Current GitHub guidance continues to warn that self-hosted runners do not inherently provide clean ephemeral VMs and supports single-job JIT/autoscaled runner patterns.",
+            "Current Hugging Face guidance supports exact-revision snapshots, local-files-only completeness failure, and safe serialization; pickle deserialization can execute arbitrary code.",
+            "These external constraints align with the existing P5 one-job runner and trusted-cache architecture rather than requiring a new execution substrate."
+          ]
+        }
+      ],
+      "resume_condition": "The workload/admission and cache trust boundaries are explicit enough to implement without granting candidate code new authority."
+    },
+    {
+      "id": "admission_manifest_and_enforcement",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated policy contract",
+        "accepted P5 controller/provisioner manifests and protocol"
+      ],
+      "outputs": [
+        "root-owned workload admission manifest/schema",
+        "controller/provisioner admission validation",
+        "workload-class/profile/model binding",
+        "replay/stale-admission rejection",
+        "execution receipt identity binding"
+      ],
+      "validation": [],
+      "resume_condition": "Candidate requests can only select previously authorized capabilities and unknown/mismatched/replayed admissions fail closed."
+    },
+    {
+      "id": "trusted_cache_promotion_and_provenance",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control+research-engine",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated admission manifest",
+        "existing trusted-cache policy",
+        "research-engine model prefetch provenance"
+      ],
+      "outputs": [
+        "trusted acquisition/quarantine path",
+        "trusted promotion operation unavailable to candidate jobs",
+        "content-addressed immutable cache object layout",
+        "model/runtime promotion receipt",
+        "offline completeness and digest verification",
+        "eviction/invalidation policy"
+      ],
+      "validation": [],
+      "resume_condition": "A candidate job can consume but cannot corrupt/promote persistent model/runtime objects, and a promoted object can be verified offline from its receipt."
+    },
+    {
+      "id": "adversarial_recovery_and_resource_validation",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "admission enforcement",
+        "trusted cache tooling",
+        "accepted CPU/gpu-small lanes"
+      ],
+      "outputs": [
+        "controller restart/recovery proof",
+        "replay protection proof",
+        "cleanup-failure blocking proof",
+        "kill-switch proof",
+        "timeout/OOM/disk-pressure failure receipts",
+        "CPU/GPU contention and concurrency proof",
+        "cache poisoning/incomplete snapshot rejection proof"
+      ],
+      "validation": [],
+      "resume_condition": "Policy and cache boundaries survive deliberate failure/adversarial cases without host residue or authority expansion."
+    },
+    {
+      "id": "qwen35_model_eval_pilot",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control+research-engine",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "accepted policy/admission/cache gates",
+        "Qwen/Qwen3.5-4B@851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+        "qwen35-vllm-cu129-image-native-sampler-v3"
+      ],
+      "outputs": [
+        "promoted trusted Qwen model/runtime object",
+        "offline single-GPU model-eval workflow",
+        "non-scientific bounded canary/benchmark",
+        "model/runtime/hardware/resource execution receipt",
+        "post-model cleanup proof"
+      ],
+      "validation": [],
+      "resume_condition": "A real pinned model executes autonomously from trusted cache on gpu-small, produces complete evidence, and disappears without production/scientific-state mutation or persistent model processes."
+    },
+    {
+      "id": "gpu_heavy_policy_decision",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "accepted single-GPU model pilot",
+        "adversarial/resource evidence"
+      ],
+      "outputs": [
+        "explicit ACCEPT/DEFER/REJECT decision for gpu-heavy/dual-GPU",
+        "separate heavy-profile contract if accepted"
+      ],
+      "validation": [],
+      "resume_condition": "Dual-GPU authority is either explicitly accepted behind a bounded contract or remains denied."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "parent-p5-accepted",
+      "kind": "recovery_restore_point",
+      "identity": "12f9d9e3a59f042bcf832dfe89a3b389b92f21ce",
+      "required_for_resume": true,
+      "evidence": [
+        "Parent task workspace-lambda-self-hosted-execution-v1 accepted autonomous CPU and gpu-small execution before this child was created.",
+        "workspace-control parent checkpoint PR #99 merged as 12f9d9e3a59f042bcf832dfe89a3b389b92f21ce.",
+        "research-engine main at child creation is 577764f4db10e4f4f894b1613518c358c6da7b95.",
+        "No gpu-heavy/model-scale capability is granted by creating this child task."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "12f9d9e3a59f042bcf832dfe89a3b389b92f21ce",
+      "required_for_resume": true,
+      "evidence": [
+        "Child task initialized from accepted parent CPU+gpu-small baseline.",
+        "Hydration source map created at architecture/lambda-ci-execution-policy-hydration.v1.md.",
+        "First unfinished stage is policy_contract_and_hydration; implementation has not yet widened live Lambda authority."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "architecture/lambda-ci-execution-policy-hydration.v1.md",
+      "state": "bootstrap",
+      "role": "cold-start source map",
+      "origin": "workspace-control + research-engine + current primary-source guidance",
+      "persistence": "git",
+      "regeneration": "manual evidence refresh when owning baselines materially change",
+      "review_requirement": "review before policy implementation",
+      "evidence": [
+        "Captures accepted P5 CPU/GPU evidence, existing trusted-cache policy, current model/runtime identities, research-engine governance primitives, policy gaps, and recommended workload classes."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Child-task ownership boundary",
+      "result": "PASS",
+      "evidence": [
+        "Parent task owns the accepted execution substrate.",
+        "This child owns cross-project workload admission/cache/resource policy and its bounded implementation.",
+        "research-engine remains authoritative for model-specific scientific/runtime truth and benchmark semantics."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Finish and validate the workload-class taxonomy, admission schema, exception model, and execution-receipt contract.",
+    "Implement root-owned admission enforcement without broadening the accepted P5 controller/provisioner authority.",
+    "Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.",
+    "Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.",
+    "Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.",
+    "Decide separately whether gpu-heavy/dual-GPU should be accepted."
+  ],
+  "next_safe_action": "Start from architecture/lambda-ci-execution-policy-hydration.v1.md and the accepted parent baseline. Complete the policy_contract_and_hydration stage by designing a versioned workload-class taxonomy plus root-owned admission manifest/schema and execution-receipt contract. Preserve cpu-test/gpu-small as already accepted capabilities, keep gpu-heavy denied, keep candidate jobs unable to promote trusted cache content, and keep model-eval offline/no-registry-credential by default. Do not mutate the live Lambda or run a model-scale workload until the policy contract has passed workspace-control validation.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+web",
+  "notes": "2026-10-06: Created as a child of workspace-lambda-self-hosted-execution-v1 after autonomous CPU and gpu-small execution were accepted. The task is intentionally policy-first: substrate capability expansion is paused until admission/cache/resource governance is explicit and validated. Hydration deliberately reuses existing workspace-control trusted-cache primitives and research-engine model-prefetch/runtime-certification contracts rather than duplicating domain truth. Heartbeat mount state is chat-local; every fresh substantial chat must update then open one live card."
+}
