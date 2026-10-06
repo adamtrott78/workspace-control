@@ -53,6 +53,28 @@ heartbeat_open forever." Recovery opens are for restoring a missing/failed
 surface only; they must not be used as a refresh mechanism when an existing card
 is still healthy.
 
+
+### Fresh-chat mount rule
+
+Heartbeat mount state is **chat-surface-local**, not task-global durable state.
+
+- A new ChatGPT chat, thread, or equivalent conversation surface MUST NOT inherit
+  an `already mounted` claim from a previous chat.
+- On the first substantial assistant turn in every fresh chat/surface, emit the
+  initial `heartbeat_update(task_id, ...)` and then call
+  `heartbeat_open(task_id)` exactly once early in that chat.
+- After that open, use data-only `heartbeat_update` calls while the card remains
+  healthy. Do not reopen merely to refresh it.
+- A durable task handoff may carry the stable `task_id`, but it MUST NOT carry
+  chat-local card-mount state as if it were durable task state.
+- If a receiving chat is told that a card was mounted in another chat, treat that
+  statement as historical evidence only and still establish the receiving
+  chat's own card once.
+
+This rule prevents the common failure mode where backend heartbeat updates
+continue correctly but no card is mounted in the current chat because an older
+handoff said not to reopen the previous surface.
+
 This contract was host-accepted on 2026-10-06: one card opened once, visibly
 advanced multiple times during continued GitHub/tool work, rolled to the latest
 three task-local updates, transitioned to DONE, and did not create duplicate
