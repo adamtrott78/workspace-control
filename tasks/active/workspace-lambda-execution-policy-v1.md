@@ -24,23 +24,23 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: e77af13b3ad43b4252031d27f72773cfd8f232dd
+- Remote checkpoint: d2326042f49ae1bd771c33b1ce56f49795827661
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 577764f4db10e4f4f894b1613518c358c6da7b95
+- Remote checkpoint: 12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d
 - Remote verified: true
 
 ## Next safe action
 
-Begin admission_manifest_and_enforcement from canonical workspace-control e77af13b3ad43b4252031d27f72773cfd8f232dd. Hydrate the accepted P5 controller/provisioner request protocol and implement root-owned validation against architecture/lambda-ci-workload-policy.v1.json plus the versioned admission and execution-receipt schemas: exact project/trusted-workflow/candidate-SHA binding, declared workload/profile/model/runtime/resource/capability binding, atomic single-use admission consumption, stale/replay/kill-switch rejection, and receipt identity binding. Preserve existing cpu-test/gpu-small authority, keep model-acquire/cache-promote/model-eval-single-gpu non-live until their enforcement gates pass, keep gpu-heavy denied, and do not mutate production research routing or run a model-scale workload in this stage.
+On the Lambda host from the normal operator account, use the clean workspace-control checkout and fast-forward it to exact canonical main d2326042f49ae1bd771c33b1ce56f49795827661. Verify the checkout is clean and HEAD is exact, then run the canonical scripts/bootstrap_lambda_ci_p5.sh via sudo with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES and WORKSPACE_CI_P5_EXPECTED_SHA=d2326042f49ae1bd771c33b1ce56f49795827661. Preserve the generated install receipt under ~/adamArchives/Adam/workspace-control-tmp/. After live install PASS, create/choose a non-scientific research-engine candidate PR and trigger the existing trusted /lambda-ci-p5 <exact_sha> and /lambda-ci-p5-gpu <exact_sha> workflows. Require both GitHub jobs and root receipts to prove v2 admission identity, exact trusted workflow blob/candidate binding, unchanged cpu-test/gpu-small isolation, and residue-free cleanup before marking admission_manifest_and_enforcement VALIDATED. Do not enable any model-scale class or gpu-heavy in this stage.
 
 ## Remaining work
 
-- Implement root-owned admission enforcement without broadening the accepted P5 controller/provisioner authority.
+- Install canonical workspace-control d2326042f49ae1bd771c33b1ce56f49795827661 on Lambda through the exact-SHA root bootstrap and live-validate admission-v2 CPU and gpu-small receipts.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,7 +48,7 @@ Begin admission_manifest_and_enforcement from canonical workspace-control e77af1
 
 ## Blockers / gates
 
-- None.
+- Live admission-v2 activation requires reviewed sudo execution of the exact-SHA workspace-control bootstrap on Lambda. The accepted self-hosted runner and credential-blind provisioner intentionally cannot install or upgrade root services.
 
 ## Fresh-chat initialization
 
