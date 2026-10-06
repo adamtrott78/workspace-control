@@ -2,7 +2,11 @@
 set -Eeuo pipefail
 umask 077
 
+FAILURE_REASON=""
+STAGE="startup"
+
 die() {
+  FAILURE_REASON="$*"
   echo "ERROR=$*" >&2
   exit 70
 }
@@ -71,18 +75,53 @@ cleanup() {
     runuser -u ci-research-engine -- rm -rf -- "$SMOKE_ROOT" >/dev/null 2>&1 || true
   fi
 
+  PARTIAL_RUNTIME_REMOVED=false
   if [[ "$rc" -ne 0 && "$CREATED_PREFIX" == "1" ]]; then
     rm -rf -- "$PREFIX"
     rm -f -- "$MANIFEST"
+    PARTIAL_RUNTIME_REMOVED=true
   fi
 
   rm -rf -- "$WORK"
+
+  if [[ "$rc" -ne 0 ]]; then
+    export P3_RUNTIME_RC="$rc"
+    export P3_RUNTIME_STAGE="$STAGE"
+    export P3_RUNTIME_FAILURE_REASON="$FAILURE_REASON"
+    export P3_RUNTIME_PARTIAL_REMOVED="$PARTIAL_RUNTIME_REMOVED"
+    export P3_RUNTIME_REPORT="$OUT/lambda-ci-p3-runtime.json"
+    export P3_RUNTIME_HEAD="$HEAD"
+    export P3_RUNTIME_PREFIX="$PREFIX"
+    python3 - <<'PY'
+import json, os, pathlib
+from datetime import datetime, timezone
+
+payload = {
+    "schema_version": 1,
+    "phase": "P3-ISOLATED-POSTGRES-RUNTIME",
+    "decision": "FAIL",
+    "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+    "workspace_control_sha": os.environ["P3_RUNTIME_HEAD"],
+    "prefix": os.environ["P3_RUNTIME_PREFIX"],
+    "failure_stage": os.environ["P3_RUNTIME_STAGE"],
+    "failure_reason": os.environ.get("P3_RUNTIME_FAILURE_REASON") or None,
+    "exit_code": int(os.environ["P3_RUNTIME_RC"]),
+    "partial_runtime_removed": os.environ["P3_RUNTIME_PARTIAL_REMOVED"] == "true",
+}
+pathlib.Path(os.environ["P3_RUNTIME_REPORT"]).write_text(
+    json.dumps(payload, indent=2, sort_keys=True) + "\n",
+    encoding="utf-8",
+)
+PY
+  fi
+
   chown -R "$INVOKER":"$(id -gn "$INVOKER")" "$OUT" >/dev/null 2>&1 || true
   exit "$rc"
 }
 trap cleanup EXIT
 
 if [[ -e "$PREFIX" ]]; then
+  STAGE="validate-existing-runtime"
   python3 - "$MANIFEST" "$POSTGRES_VERSION" "$POSTGRES_SHA256" "$PGVECTOR_VERSION" "$PGVECTOR_COMMIT" <<'PY'
 import json,pathlib,sys
 path=pathlib.Path(sys.argv[1])
@@ -101,11 +140,15 @@ PY
   [[ -x "$PREFIX/bin/initdb" ]] || die "EXISTING_RUNTIME_INITDB_MISSING"
   [[ -x "$PREFIX/bin/pg_ctl" ]] || die "EXISTING_RUNTIME_PG_CTL_MISSING"
   [[ -x "$PREFIX/bin/psql" ]] || die "EXISTING_RUNTIME_PSQL_MISSING"
-  [[ -r "$PREFIX/share/postgresql/extension/vector.control" ]] || die "EXISTING_RUNTIME_VECTOR_CONTROL_MISSING"
-  grep -Eq "^[[:space:]]*default_version[[:space:]]*=[[:space:]]*'0\.8\.6'"     "$PREFIX/share/postgresql/extension/vector.control" ||
+  EXISTING_PGSHARE="$("$PREFIX/bin/pg_config" --sharedir)"
+  [[ "$EXISTING_PGSHARE" == "$PREFIX" || "$EXISTING_PGSHARE" == "$PREFIX/"* ]] ||
+    die "EXISTING_RUNTIME_SHAREDIR_OUTSIDE_PREFIX:$EXISTING_PGSHARE"
+  [[ -r "$EXISTING_PGSHARE/extension/vector.control" ]] || die "EXISTING_RUNTIME_VECTOR_CONTROL_MISSING"
+  grep -Eq "^[[:space:]]*default_version[[:space:]]*=[[:space:]]*'0\.8\.6'"     "$EXISTING_PGSHARE/extension/vector.control" ||
     die "EXISTING_RUNTIME_VECTOR_VERSION_MISMATCH"
   echo "RUNTIME_ALREADY_PRESENT=$RUNTIME_ID" > "$OUT/build.txt"
 else
+  STAGE="build-postgresql"
   install -d -o ci-controller -g workspace-ci-controller -m 0700 "$WORK"
 
   JOBS="$(nproc)"
@@ -145,6 +188,7 @@ else
 
   CREATED_PREFIX=1
 
+  STAGE="build-pgvector"
   runuser -u ci-controller -- env     WORK="$WORK" PREFIX="$PREFIX" JOBS="$JOBS"     PGVECTOR_REPO="$PGVECTOR_REPO" PGVECTOR_COMMIT="$PGVECTOR_COMMIT"     bash -ceu '
       cd "$WORK"
       git clone --no-checkout "$PGVECTOR_REPO" pgvector
@@ -156,13 +200,24 @@ else
       make -C pgvector PG_CONFIG="$PREFIX/bin/pg_config"         DESTDIR="$WORK/vector-stage" install
     '
 
-  VECTOR_STAGE="$WORK/vector-stage$PREFIX"
-  [[ -r "$VECTOR_STAGE/lib/postgresql/vector.so" ]] || die "STAGED_VECTOR_SO_MISSING"
-  [[ -r "$VECTOR_STAGE/share/postgresql/extension/vector.control" ]] || die "STAGED_VECTOR_CONTROL_MISSING"
-  grep -Eq "^[[:space:]]*default_version[[:space:]]*=[[:space:]]*'0\.8\.6'"     "$VECTOR_STAGE/share/postgresql/extension/vector.control" ||
+  STAGE="validate-staged-pgvector"
+  PKGLIBDIR="$("$PREFIX/bin/pg_config" --pkglibdir)"
+  PGSHARE="$("$PREFIX/bin/pg_config" --sharedir)"
+  [[ "$PKGLIBDIR" == "$PREFIX" || "$PKGLIBDIR" == "$PREFIX/"* ]] ||
+    die "PKGLIBDIR_OUTSIDE_PREFIX:$PKGLIBDIR"
+  [[ "$PGSHARE" == "$PREFIX" || "$PGSHARE" == "$PREFIX/"* ]] ||
+    die "PGSHARE_OUTSIDE_PREFIX:$PGSHARE"
+
+  VECTOR_STAGE_ROOT="$WORK/vector-stage"
+  VECTOR_STAGE_SO="$VECTOR_STAGE_ROOT$PKGLIBDIR/vector.so"
+  VECTOR_STAGE_CONTROL="$VECTOR_STAGE_ROOT$PGSHARE/extension/vector.control"
+  [[ -r "$VECTOR_STAGE_SO" ]] || die "STAGED_VECTOR_SO_MISSING:$VECTOR_STAGE_SO"
+  [[ -r "$VECTOR_STAGE_CONTROL" ]] || die "STAGED_VECTOR_CONTROL_MISSING:$VECTOR_STAGE_CONTROL"
+  grep -Eq "^[[:space:]]*default_version[[:space:]]*=[[:space:]]*'0\.8\.6'"     "$VECTOR_STAGE_CONTROL" ||
     die "STAGED_VECTOR_VERSION_MISMATCH"
 
-  cp -a -- "$VECTOR_STAGE/." "$PREFIX/"
+  STAGE="promote-pgvector"
+  cp -a -- "$VECTOR_STAGE_ROOT$PREFIX/." "$PREFIX/"
   chown -R root:root "$PREFIX"
   chmod -R a+rX,go-w "$PREFIX"
 
@@ -201,6 +256,7 @@ PY
   chmod 0600 "$MANIFEST"
 fi
 
+STAGE="smoke-test"
 POSTGRES_REPORTED="$("$PREFIX/bin/postgres" --version)"
 [[ "$POSTGRES_REPORTED" == "postgres (PostgreSQL) $POSTGRES_VERSION" ]] ||
   die "RUNTIME_POSTGRES_VERSION_MISMATCH:$POSTGRES_REPORTED"
@@ -264,6 +320,7 @@ printf '%s\n' "$AFTER_POSTGRES" > "$OUT/non-ci-postgres-after.txt"
 
 rm -rf -- "$SMOKE_ROOT"
 
+STAGE="write-pass-receipt"
 python3 - "$OUT/lambda-ci-p3-runtime.json"   "$HEAD" "$PREFIX" "$POSTGRES_VERSION" "$POSTGRES_SHA256"   "$PGVECTOR_VERSION" "$PGVECTOR_COMMIT" "$MANIFEST" <<'PY'
 import json,pathlib,sys
 from datetime import datetime,timezone
