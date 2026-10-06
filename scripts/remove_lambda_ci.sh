@@ -15,6 +15,8 @@ fi
 
 # Only exact workspace-ci service/config paths are eligible for removal.
 for path in \
+  /etc/systemd/system/workspace-ci-controller-gpu.service.d/network.conf \
+  /etc/systemd/system/workspace-ci-controller-gpu.service \
   /etc/systemd/system/workspace-ci-controller.service.d/network.conf \
   /etc/systemd/system/workspace-ci-controller.service \
   /etc/systemd/system/workspace-ci-provisioner.service \
