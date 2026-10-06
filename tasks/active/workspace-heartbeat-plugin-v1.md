@@ -24,21 +24,22 @@ Provide reliable operator-visible progress for each substantial ChatGPT assistan
 
 - Intent: mutate
 - Remote branch: workspace-heartbeat-turn-scoped-v044
-- Remote checkpoint: bdfed66f59df69fffded0a2fa6d7ed1cb73458d0
+- Remote checkpoint: bbb4f09fac1864196b62a3126803a11b233d01f4
 - Remote verified: true
 
 ## Next safe action
 
-Validate the exact fresh v0.4.4 release branch with Node 20: run node --check server.js and npm test from plugins/workspace-heartbeat. Do not change the live v0.4.3 runtime unless those gates pass.
+Controlled live cutover: deploy exact tested v0.4.4 SHA bbb4f09fac1864196b62a3126803a11b233d01f4 to a new runtime path, switch heartbeat-up/ngrok only after startup PASS, refresh the existing ChatGPT plugin connection, then start a brand-new conversation and run the two-turn acceptance. Keep workspace-heartbeat-runtime-v043 intact as rollback until host acceptance passes.
 
 ## Remaining work
 
-- Run node --check server.js and the complete npm test suite from the exact fresh v0.4.4 release branch on Lambda.
-- If tests PASS, deploy v0.4.4 to an isolated runtime path while preserving workspace-heartbeat-runtime-v043 as rollback.
-- Refresh the existing custom plugin connection instead of deleting/recreating it, then start a brand-new conversation so v0.4.4 schemas/UI are loaded.
-- Run a multi-turn live acceptance: assistant turn A begins once and rolls updates; after the next user message, turn B begins once; turn A becomes superseded/static and turn B rolls independently.
-- Verify stale turn_id rejection, cross-conversation active-writer denial, done ownership release, task-level sidebar history, and no duplicate live cards.
-- Only after live PASS update heartbeat-up to the accepted runtime target, promote v0.4.4 docs from candidate to accepted, and merge the release PR.
+- Deploy exact tested v0.4.4 SHA bbb4f09fac1864196b62a3126803a11b233d01f4 to a dedicated active runtime without deleting workspace-heartbeat-runtime-v043.
+- Switch the managed heartbeat-up runtime target to v0.4.4 only after exact-startup verification; preserve a one-command rollback target to v0.4.3.
+- Refresh the existing custom ChatGPT plugin connection instead of deleting/recreating it.
+- Start a brand-new ChatGPT conversation so the v0.4.4 tool schema and live-v2 UI resource are loaded.
+- Run live two-turn acceptance: turn A begin_turn + rolling updates; user sends another message; turn B begin_turn; verify A becomes superseded/static and B rolls independently.
+- Verify stale turn_id rejection, cross-conversation writer denial, terminal done ownership release, sidebar task history, and no duplicate live cards.
+- Only after live PASS mark v0.4.4 accepted, update heartbeat-up as the canonical operator entrypoint, merge PR #110, and archive the v0.4.3 runtime as rollback.
 
 ## Blockers / gates
 
