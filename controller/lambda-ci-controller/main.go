@@ -341,6 +341,18 @@ func desiredRunnerTarget(stats *scaleset.RunnerScaleSetStatistic, pending int) i
 	return target
 }
 
+func recoveryMetadataComplete(job *scaleset.JobMessageBase) bool {
+	return job != nil &&
+		job.RunnerRequestID > 0 &&
+		job.WorkflowRunID > 0 &&
+		job.JobID != "" &&
+		job.RepositoryName != "" &&
+		job.OwnerName != "" &&
+		job.JobWorkflowRef != "" &&
+		job.JobDisplayName != "" &&
+		job.EventName != ""
+}
+
 func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage) error {
 	if msg == nil {
 		return nil
@@ -417,6 +429,17 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				continue
 			}
 			if capacity <= 0 {
+				continue
+			}
+			if !recoveryMetadataComplete(&assigned.JobMessageBase) {
+				s.logger.Warn(
+					"Ignoring incomplete JobAssigned recovery metadata",
+					slog.Int64("runner_request_id", assigned.RunnerRequestID),
+					slog.Int64("workflow_run_id", assigned.WorkflowRunID),
+					slog.Bool("job_id_present", assigned.JobID != ""),
+					slog.Bool("workflow_ref_present", assigned.JobWorkflowRef != ""),
+					slog.Bool("display_name_present", assigned.JobDisplayName != ""),
+				)
 				continue
 			}
 			attestation, err := s.attestor.Attest(
