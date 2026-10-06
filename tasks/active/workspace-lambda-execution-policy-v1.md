@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4d4d14480f2cd6b573e33b10efc61a81a316327a
+- Remote checkpoint: b6bf6ca2618cc747bba974f71f52901907cea4c5
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-First stop workspace-ci-controller.service before changing any more token permissions; leave the canceled run 37540379924 terminal. In GitHub fine-grained token settings for the existing research-engine controller token, keep Actions: Read and add Contents: Read plus Pull requests: Read only; do not grant Actions: Write and do not broaden repository scope. Before restarting any controller, run a non-secret ci-controller probe requiring HTTP 200 for: GET /actions/runs/37540379924, GET /actions/runs/37540379924/jobs?per_page=100, GET /contents/.github/workflows/lambda-ci-p5-autonomous.yml?ref=12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d, and GET /pulls/106. Only after all four return 200, install and activate exact workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a from a fresh detached clean worktree using the accepted P5 bootstrap. Prove CPU/GPU controllers active/running and no NRestarts delta over an 8-second window. Then trigger a NEW /lambda-ci-p5 f5ba8278d7dfa22e63623ddf51896a6dec002813; use the GitHub-hosted /lambda-ci-cancel <run_id> control for any stale acceptance cancellation. Do not enable model-scale classes or gpu-heavy.
+Install and activate exact workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a on Lambda from a fresh detached clean worktree using the accepted P5 bootstrap with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=4d4d14480f2cd6b573e33b10efc61a81a316327a, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not restage the controller token. After activation, capture CPU/GPU controller NRestarts and active/running state, wait 8 seconds, capture again, and require both services remain active/running with zero restart delta and no recent 403/controller-exited errors. Only then trigger a NEW /lambda-ci-p5 f5ba8278d7dfa22e63623ddf51896a6dec002813 on PR #106; use the GitHub-hosted /lambda-ci-cancel <run_id> control for stale acceptance cancellation. Do not enable model-scale classes or gpu-heavy.
 
 ## Remaining work
 
-- Stop the crash-looping CPU controller, add Contents: Read and Pull requests: Read to the existing narrow research-engine controller token, prove all four attestor REST endpoints return HTTP 200, install exact terminal-safe workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a, then run fresh CPU and gpu-small acceptance.
+- Install and activate exact terminal-safe workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a, prove restart-delta stability with the now-complete read-only controller credential, then run fresh CPU and gpu-small admission-v2 acceptance and validate root receipts plus residue-free cleanup.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,9 +48,8 @@ First stop workspace-ci-controller.service before changing any more token permis
 
 ## Blockers / gates
 
-- CPU controller is crash-looping on GitHub Contents API 403 under live f2468001; stop the CPU controller before widening the existing token's remaining read permissions so the old binary cannot process stale canceled recovery metadata.
-- Fine-grained research-engine controller token must include exactly the currently required read surface: Actions: Read (already proven), Contents: Read, and Pull requests: Read, while preserving existing runner/scale-set permissions and without Actions: Write.
-- After all four attestor endpoint probes return HTTP 200, exact workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a must be installed/activated and controller restart delta proven stable before a new CPU acceptance.
+- Exact terminal-safe workspace-control 4d4d14480f2cd6b573e33b10efc61a81a316327a is validated but not yet installed on Lambda. Install/activate it before any new acceptance run.
+- After activation, prove CPU/GPU controllers are active/running with no NRestarts delta over a bounded 8-second window before launching a fresh CPU acceptance.
 
 ## Fresh-chat initialization
 
