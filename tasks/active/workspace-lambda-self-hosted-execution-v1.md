@@ -28,19 +28,20 @@ research_engine_pilot
 
 ## Next safe action
 
-Human-only gate: on Lambda create/reuse one clean detached workspace-control tree exactly at `2c3c880debaddd3ea3336caca8ca59df57101043`. First run `scripts/bootstrap_lambda_ci_p3_postgres_runtime.sh` under sudo with `WORKSPACE_CI_P3_RUNTIME_AUTHORIZED=YES` and `WORKSPACE_CI_P3_RUNTIME_EXPECTED_SHA=2c3c880debaddd3ea3336caca8ca59df57101043`. If and only if it reports P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS, run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES` and paste a short-lived research-engine Administration:write token only into the hidden prompt. Corrected run 37398604653 remains queued on cpu-test-v2.
+Human-only credential gate: first revoke the fine-grained PAT that was pasted into chat. Then, on Lambda, create/reuse a clean detached workspace-control tree exactly at `744e7f67e22fb5bd7de35ad8a0284a63f2b2cced` and run only `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES`. Do not rerun the PostgreSQL runtime bootstrap; the isolated PostgreSQL 14.24 + pgvector 0.8.6 runtime already passed and is installed read-only. Paste a newly-created short-lived research-engine Administration:write token only into the hidden prompt. Fresh run 37407910754 is already queued on cpu-test-v2.
 
 ## Remaining work
 
-- On Lambda, execute scripts/bootstrap_lambda_ci_p3_postgres_runtime.sh from exact workspace-control 2c3c880debaddd3ea3336caca8ca59df57101043 and require P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS.
-- Only after runtime PASS, execute scripts/launch_lambda_ci_p3_cpu.py from the same exact tree and service queued run 37398604653.
-- Immediately consume run 37398604653 and its receipt when terminal; continue bounded repair/re-run without waiting if any new issue is demonstrated.
+- Revoke/delete the fine-grained PAT that was pasted into chat; never reuse it.
+- On Lambda, execute scripts/launch_lambda_ci_p3_cpu.py from exact workspace-control 744e7f67e22fb5bd7de35ad8a0284a63f2b2cced. Do not rebuild PostgreSQL/pgvector; the isolated runtime already passed and remains installed.
+- Paste a newly-created short-lived research-engine Administration:write token only into the hidden local prompt to service queued run 37407910754.
+- Immediately consume run 37407910754 and its receipt when terminal; continue bounded repair/re-run without waiting if any new issue is demonstrated.
 - Only after P3 full PASS begin P4 GPU validation.
 
 ## Blockers / gates
 
-- Human-only root/credential gate: rerun the isolated runtime bootstrap from exact workspace-control 2c3c880debaddd3ea3336caca8ca59df57101043; only on PASS may the cpu-test-v2 JIT launcher run.
-- P3 run 37398604653 must reach full candidate install/compile/pytest PASS before P4.
+- Human-only JIT credential gate: run the fixed P3 launcher from exact workspace-control 744e7f67e22fb5bd7de35ad8a0284a63f2b2cced and paste a newly-created short-lived research-engine Administration:write token only into the hidden prompt. The previously pasted token is compromised and must be revoked.
+- Fresh P3 run 37407910754 must reach full candidate install/compile/pytest PASS before P4.
 
 ## Fresh-chat initialization
 
