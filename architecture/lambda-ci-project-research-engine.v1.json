@@ -33,12 +33,13 @@
       "cpu_quota_percent": 1200,
       "memory_max_bytes": 68719476736,
       "tasks_max": 8192,
-      "runtime_max_seconds": 3600,
+      "runtime_max_seconds": 1200,
       "gpu_indices": [
         0
       ],
       "allow_public_egress": true,
-      "allow_production_services": false
+      "allow_production_services": false,
+      "gpu_uuid": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
     },
     "gpu-heavy": {
       "cpu_quota_percent": 2400,
