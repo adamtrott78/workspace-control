@@ -28,5 +28,13 @@
     "repository": "pgvector/pgvector",
     "commit_sha": "8ee86c96f0fd72390f890aa8a336fda6d3ab4c6c",
     "build_policy": "build exact commit against isolated PostgreSQL runtime; stage before root-owned read-only promotion"
+  },
+  "go_toolchain": {
+    "version": "1.26.3",
+    "source_url": "https://go.dev/dl/go1.26.3.linux-amd64.tar.gz",
+    "source_sha256": "2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556",
+    "install_prefix": "/opt/workspace-ci/go/1.26.3",
+    "architecture": "linux-amd64",
+    "install_policy": "download as unprivileged ci-controller; verify exact official SHA256 before root-owned read-only promotion; do not replace system Go or modify host package-manager state"
   }
 }
