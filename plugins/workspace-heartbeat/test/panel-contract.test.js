@@ -17,5 +17,7 @@ test("panel is event-driven without background polling", () => {
 test("panel renders a cross-task operator timeline", () => {
   assert.equal(html.includes("snapshot.timeline"), true);
   assert.equal(html.includes("task-boundary"), true);
-  assert.equal(html.includes("across "+taskCount+" task"), true);
+  assert.equal(html.includes("taskCount=new Set"), true);
+  assert.equal(html.includes('+" retained update"+'), true);
+  assert.equal(html.includes('+" across "+taskCount+" task"+'), true);
 });
