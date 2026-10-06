@@ -1,10 +1,12 @@
 import base64
+import copy
 import importlib.util
 import json
 import pathlib
 import sys
 import unittest
 import uuid
+from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "scripts" / "lambda_ci_provisioner.py"
@@ -29,6 +31,11 @@ PROFILES = json.loads(
 PINS = json.loads(
     (ROOT / "architecture" / "lambda-ci-upstream-pins.v1.json").read_text()
 )
+WORKLOAD_POLICY = json.loads(
+    (ROOT / "architecture" / "lambda-ci-workload-policy.v1.json").read_text()
+)
+V2_NOW = datetime(2026, 10, 6, 20, 0, tzinfo=timezone.utc)
+V2_CANDIDATE = "a" * 40
 
 
 def good_request(profile="cpu-test"):
@@ -167,6 +174,126 @@ def test_launch_spec_satisfies_runtime_path_contract():
     assert launch["paths"]["home"] == "/srv/workspace-ci/research-engine/home"
     assert "Environment=HOME=/srv/workspace-ci/research-engine/home" in command
     assert "ReadWritePaths=/srv/workspace-ci/research-engine/home" in command
+
+
+
+def enabled_v2_manifest():
+    value = copy.deepcopy(MANIFEST)
+    value["admission_v2"]["enabled"] = True
+    return value
+
+
+def good_v2_request(workload="cpu-test"):
+    manifest = enabled_v2_manifest()
+    route = manifest["admission_v2"]["routes"][workload]
+    trusted = route["trusted_workflow"]
+    command = trusted["job_display_claim"]["command"]
+    return {
+        "schema_version": 2,
+        "request_id": str(uuid.uuid4()),
+        "project_id": "research-engine",
+        "workload_class": workload,
+        "runner_name": "lambda-research-engine-v2test",
+        "jit_config": base64.b64encode(b'{"opaque":"secret-v2"}').decode(),
+        "attestation": {
+            "schema_version": 1,
+            "source": "github_scale_set_controller",
+            "repository": "adamtrott78/research-engine",
+            "scale_set_name": route["scale_set_name"],
+            "runner_request_id": 1234,
+            "workflow_run_id": 37422040174,
+            "job_id": "job-v2",
+            "job_workflow_ref": trusted["job_workflow_ref"],
+            "workflow_path": trusted["path"],
+            "workflow_default_branch_commit_sha": "b" * 40,
+            "workflow_blob_sha": trusted["blob_sha"],
+            "event_name": trusted["event_name"],
+            "job_display_name": (
+                f"wc-admission-v1|workload={workload}|pr=101"
+                f"|request={command} {V2_CANDIDATE}"
+            ),
+            "actor_login": "adamtrott78",
+            "triggering_actor_login": "adamtrott78",
+            "pr_number": 101,
+            "pr_head_repository": "adamtrott78/research-engine",
+            "candidate_sha": V2_CANDIDATE,
+            "candidate_verification": "PR_HEAD_MATCH",
+            "verified_at": V2_NOW.isoformat().replace("+00:00", "Z"),
+        },
+    }
+
+
+def test_v2_is_additive_and_canonical_manifest_keeps_it_disabled():
+    try:
+        mod.validate_request_v2(
+            good_v2_request(),
+            MANIFEST,
+            WORKLOAD_POLICY,
+            now=V2_NOW,
+        )
+    except mod.PolicyError as exc:
+        assert "not enabled" in str(exc)
+    else:
+        raise AssertionError("canonical disabled v2 admission unexpectedly passed")
+
+
+def test_v2_cpu_request_derives_profile_and_admission_from_root_policy():
+    request = good_v2_request("cpu-test")
+    manifest = enabled_v2_manifest()
+    req = mod.validate_request_v2(
+        request,
+        manifest,
+        WORKLOAD_POLICY,
+        now=V2_NOW,
+        policy_sha256="1" * 64,
+    )
+    assert req.profile == "cpu-test"
+    assert req.workload_class == "cpu-test"
+    assert req.admission["candidate_sha"] == V2_CANDIDATE
+    assert req.admission["policy"]["policy_sha256"] == "1" * 64
+    assert req.request_digest_sha256 == req.admission["request_digest_sha256"]
+    launch = mod.build_launch_spec(req, manifest, PROFILES, PINS)
+    assert launch["schema_version"] == 2
+    assert launch["workload_class"] == "cpu-test"
+    assert launch["profile"] == "cpu-test"
+    assert launch["admission"]["admission_id"] == req.admission["admission_id"]
+    assert request["jit_config"] not in json.dumps(mod.redacted_spec(launch))
+
+
+def test_v2_gpu_request_cannot_widen_beyond_gpu_small():
+    request = good_v2_request("gpu-small")
+    manifest = enabled_v2_manifest()
+    req = mod.validate_request_v2(
+        request,
+        manifest,
+        WORKLOAD_POLICY,
+        now=V2_NOW,
+    )
+    launch = mod.build_launch_spec(req, manifest, PROFILES, PINS)
+    assert launch["profile"] == "gpu-small"
+    assert launch["resources"]["gpu_indices"] == [0]
+    assert launch["resources"]["gpu_uuid"] == (
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+    )
+    assert req.admission["resource_ceiling"]["gpu_uuids"] == [
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+    ]
+
+
+def test_v2_rejects_profile_or_command_injection_fields():
+    request = good_v2_request()
+    request["profile"] = "gpu-heavy"
+    try:
+        mod.validate_request_v2(
+            request,
+            enabled_v2_manifest(),
+            WORKLOAD_POLICY,
+            now=V2_NOW,
+        )
+    except mod.PolicyError as exc:
+        assert "keys mismatch" in str(exc)
+    else:
+        raise AssertionError("v2 accepted controller-supplied profile authority")
 
 
 def load_tests(loader, tests, pattern):
