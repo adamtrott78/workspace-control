@@ -31,6 +31,9 @@ test("history panel renders full task-local history instead of cross-task timeli
   assert.equal(panel.includes("snapshot.timeline)&&snapshot.timeline.length"), false);
   assert.equal(panel.includes("taskCount=new Set"), false);
   assert.equal(panel.includes("latest.task_id"), true);
+  assert.equal(panel.includes("x?.task_id===activeTaskId"), true);
+  assert.equal(panel.includes("knownHistory=[];"), true);
+  assert.equal(panel.includes('message.method==="ui/notifications/tool-input"'), true);
 });
 
 test("live card is scoped, rolling-three, and event-driven after a timed refresh", () => {

@@ -6,11 +6,11 @@ MCP plugin for operator-visible progress during long-running workspace-control t
 
 - `heartbeat_update(task_id, message, state)` appends one natural-language heartbeat to the owning task.
 - `heartbeat_get(task_id?)` returns the latest heartbeat plus a bounded in-memory history.
-- A ChatGPT thread/conversation panel polls `heartbeat_get` and updates one persistent panel in place.
+- A ChatGPT thread/conversation panel displays full task-local history on explicit `heartbeat_get`; it does not automatically poll.
 - `task_id` is the stable progress identity across ChatGPT model/app session differences and chat handoffs.
 - ChatGPT's anonymized `_meta["openai/session"]` remains useful for resolving an omitted task ID, but it is not the authority for stored heartbeat state.
 - The server assigns monotonically increasing sequence numbers per task while the server process is alive.
-- The panel retains up to 50 ordered updates and never clears a known-good heartbeat merely because a later poll is empty or fails.
+- The panel retains up to 50 ordered updates for the selected task, and clears cached entries when explicitly switching to another task.
 
 Heartbeat text is intentionally normal prose. Structured fields exist only for routing and UI state.
 
@@ -157,3 +157,5 @@ Updated responsibilities:
 `heartbeat_snapshot` is declared `_meta.ui.visibility: ["app"]` and `readOnlyHint: true`. It never returns cross-task timeline data. UI scripts use MCP Apps `ui/initialize` / `ui/notifications/initialized` and `tools/call`, never direct HTTP from the iframe.
 
 This implementation does **not** guarantee ChatGPT will mount a resource immediately; host placement is outside the plugin's control. Acceptance requires a real long-running live UI smoke showing the first card mounts while meaningful work remains, then visibly changes **without another model render call**. Unit tests additionally emulate the host bridge and validate rolling window, isolation, hidden pause, and terminal-state stop.
+
+Side-panel isolation tightening for v0.4.3: widget state is filtered to the active task on load; changes of explicit tool input/result task ID reset the cached view before merging. History from other tasks can never appear in this task's panel.

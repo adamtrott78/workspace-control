@@ -28,7 +28,7 @@ const historyEl=document.getElementById("history");
 const footerEl=document.getElementById("footer");
 const persisted=window.openai?.widgetState??{};
 let activeTaskId=persisted.task_id??null;
-let knownHistory=Array.isArray(persisted.history)?persisted.history:[];
+let knownHistory=Array.isArray(persisted.history)?persisted.history.filter(item=>item.task_id===activeTaskId):[];
 
 let rpcId=0;
 const pending=new Map();
@@ -46,7 +46,7 @@ function merge(items){
   const before=knownHistory.length?key(knownHistory.at(-1)):null;
   const byKey=new Map();
   for(const x of [...knownHistory,...(items??[])]) {
-    if(x?.task_id&&x?.updated_at) byKey.set(key(x),x);
+    if(x?.task_id===activeTaskId&&x?.updated_at) byKey.set(key(x),x);
   }
   knownHistory=[...byKey.values()]
     .sort((a,b)=>(Date.parse(a.updated_at)-Date.parse(b.updated_at))||(a.sequence-b.sequence))
@@ -87,12 +87,21 @@ function render(){
   footerEl.textContent=knownHistory.length+" retained update"+(knownHistory.length===1?"":"s")+" for "+latest.task_id;
   persist();
 }
+function setScope(value){
+  const scoped=typeof value==="string"?value.trim():"";
+  if(!scoped||scoped===activeTaskId)return;
+  activeTaskId=scoped;
+  knownHistory=[];
+  render();
+  persist();
+}
 function apply(snapshot){
   if(!snapshot)return;
   const source=Array.isArray(snapshot.history)?snapshot.history:[];
   const incoming=[...source];
   if(snapshot.heartbeat&&!incoming.length)incoming.push(snapshot.heartbeat);
-  if(snapshot.heartbeat?.task_id)activeTaskId=snapshot.heartbeat.task_id;
+  const nextTaskId=snapshot.heartbeat?.task_id??incoming[0]?.task_id??null;
+  setScope(nextTaskId);
   if(!incoming.length)return;
   if(merge(incoming)){
     render();
@@ -112,6 +121,10 @@ window.addEventListener("message",event=>{
     message.error?p.reject(message.error):p.resolve(message.result);
     return;
   }
+  if(message.method==="ui/notifications/tool-input"){
+    const args=message.params?.arguments??message.params??{};
+    setScope(args.task_id);
+  }
   if(message.method==="ui/notifications/tool-result"){
     apply(fromResult(message.params));
   }
@@ -120,7 +133,7 @@ window.addEventListener("message",event=>{
 async function initializeBridge(){
   try{
     await request("ui/initialize",{
-      appInfo:{name:"workspace-heartbeat-panel",version:"0.4.2"},
+      appInfo:{name:"workspace-heartbeat-panel",version:"0.4.3"},
       appCapabilities:{},
       protocolVersion:"2026-01-26"
     });
@@ -128,6 +141,7 @@ async function initializeBridge(){
   }catch{}
 }
 
+setScope(window.openai?.toolInput?.task_id);
 apply(window.openai?.toolOutput??null);
 render();
 await initializeBridge();
