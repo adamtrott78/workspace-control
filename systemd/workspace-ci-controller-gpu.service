@@ -14,6 +14,7 @@ Environment=WORKSPACE_CI_GITHUB_URL=https://github.com/adamtrott78/research-engi
 Environment=WORKSPACE_CI_SCALESET_NAME=lambda-research-engine-gpu
 Environment=WORKSPACE_CI_PROJECT_ID=research-engine
 Environment=WORKSPACE_CI_PROFILE=gpu-small
+Environment=WORKSPACE_CI_ADMISSION_V2_ENABLED=YES
 Environment=WORKSPACE_CI_PROVISIONER_SOCKET=/run/workspace-ci/provisioner.sock
 Environment=WORKSPACE_CI_PAT_FILE=/var/lib/workspace-ci/controller/github-token
 Restart=on-failure

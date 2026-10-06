@@ -77,9 +77,9 @@ def good_request(workload="cpu-test"):
 
 
 class AdmissionContractTests(unittest.TestCase):
-    def test_canonical_project_manifest_keeps_v2_disabled(self):
+    def test_canonical_project_manifest_enables_only_accepted_p5_classes(self):
         admission = MANIFEST["admission_v2"]
-        self.assertFalse(admission["enabled"])
+        self.assertTrue(admission["enabled"])
         self.assertEqual(
             admission["live_enabled_workload_classes"],
             ["cpu-test", "gpu-small"],
@@ -87,8 +87,10 @@ class AdmissionContractTests(unittest.TestCase):
         self.assertNotIn("gpu-heavy", admission["live_enabled_workload_classes"])
 
     def test_disabled_v2_fails_closed(self):
+        disabled = copy.deepcopy(MANIFEST)
+        disabled["admission_v2"]["enabled"] = False
         with self.assertRaisesRegex(mod.AdmissionError, "not enabled"):
-            mod.mint_admission(good_request(), MANIFEST, POLICY, now=NOW)
+            mod.mint_admission(good_request(), disabled, POLICY, now=NOW)
 
     def test_cpu_admission_is_root_derived_and_nonsecret(self):
         request = good_request("cpu-test")

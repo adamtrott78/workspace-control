@@ -224,18 +224,15 @@ def good_v2_request(workload="cpu-test"):
     }
 
 
-def test_v2_is_additive_and_canonical_manifest_keeps_it_disabled():
-    try:
-        mod.validate_request_v2(
-            good_v2_request(),
-            MANIFEST,
-            WORKLOAD_POLICY,
-            now=V2_NOW,
-        )
-    except mod.PolicyError as exc:
-        assert "not enabled" in str(exc)
-    else:
-        raise AssertionError("canonical disabled v2 admission unexpectedly passed")
+def test_v2_canonical_manifest_enables_root_derived_admission():
+    req = mod.validate_request_v2(
+        good_v2_request(),
+        MANIFEST,
+        WORKLOAD_POLICY,
+        now=V2_NOW,
+    )
+    assert req.profile == "cpu-test"
+    assert req.workload_class == "cpu-test"
 
 
 def test_v2_cpu_request_derives_profile_and_admission_from_root_policy():
