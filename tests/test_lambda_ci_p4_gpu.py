@@ -147,3 +147,34 @@ def test_gpu_assignment_uses_driver_proc_metadata_not_nvidia_smi_query_fields():
     assert 'fields.get("GPU UUID")' in SCRIPT
     assert 'fields.get("Device Minor")' in SCRIPT
     assert '"information_path": str(info_path)' in SCRIPT
+
+
+def test_cuda_support_devices_are_exact_and_network_sandbox_remains():
+    assert 'pathlib.Path("/dev/nvidia-uvm")' in SCRIPT
+    assert 'pathlib.Path("/dev/nvidia-uvm-tools")' in SCRIPT
+    assert '/dev/nvidia-modeset' not in SCRIPT
+    assert 'DeviceAllow={support_device} rw' in SCRIPT
+    assert 'Environment=P4_GPU_SUPPORT_DEVICES=' in SCRIPT
+    assert '"gpu_support_devices": gpu_assignment["support_devices"]' in SCRIPT
+    assert "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6" in SCRIPT
+
+    ns = load()
+    assignment = {
+        "target_uuid": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+        "selected_device": "/dev/nvidia1",
+        "selected_minor": 1,
+        "denied_devices": ["/dev/nvidia0"],
+        "support_devices": ["/dev/nvidia-uvm", "/dev/nvidia-uvm-tools"],
+        "inventory": [],
+    }
+    command = ns["systemd_command"](
+        "workspace-ci-test.service",
+        Path("/tmp/runner"),
+        "134.88.12.0/22",
+        assignment,
+    )
+    assert "DeviceAllow=/dev/nvidia1 rw" in command
+    assert "DeviceAllow=/dev/nvidia0 rw" not in command
+    assert "DeviceAllow=/dev/nvidia-uvm rw" in command
+    assert "DeviceAllow=/dev/nvidia-uvm-tools rw" in command
+    assert "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6" in command
