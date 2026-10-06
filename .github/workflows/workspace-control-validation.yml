@@ -103,6 +103,21 @@ jobs:
         if: steps.plan.outputs.tier != 'FAST_STATIC'
         run: python3 -m unittest discover -s tests -v
 
+      - name: Set up Go 1.25 for Lambda controller
+        if: steps.plan.outputs.tier != 'FAST_STATIC'
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25.x'
+          cache-dependency-path: controller/lambda-ci-controller/go.mod
+
+      - name: Validate pinned Lambda scale-set controller
+        if: steps.plan.outputs.tier != 'FAST_STATIC'
+        working-directory: controller/lambda-ci-controller
+        run: |
+          set -euo pipefail
+          go test -mod=mod ./...
+          go build -mod=mod ./...
+
       - name: Run full integration contracts
         if: steps.plan.outputs.tier == 'FULL_INTEGRATION' || steps.plan.outputs.tier == 'CANONICAL_REGRESSION'
         shell: bash
