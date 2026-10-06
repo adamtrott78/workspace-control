@@ -154,17 +154,24 @@ else
   JOBS="$(nproc)"
   if [[ "$JOBS" -gt 12 ]]; then JOBS=12; fi
 
-  runuser -u ci-controller -- env     WORK="$WORK" PREFIX="$PREFIX" JOBS="$JOBS"     POSTGRES_ARCHIVE="$POSTGRES_ARCHIVE" POSTGRES_URL="$POSTGRES_URL"     POSTGRES_SHA256="$POSTGRES_SHA256"     bash -ceu '
-      cd "$WORK"
-      curl -fsSL --retry 3 --retry-delay 2 "$POSTGRES_URL" -o "$POSTGRES_ARCHIVE"
-      echo "$POSTGRES_SHA256  $POSTGRES_ARCHIVE" | sha256sum -c -
+  runuser -u ci-controller -- env \
+    WORK="$WORK" PREFIX="$PREFIX" JOBS="$JOBS" \
+    POSTGRES_ARCHIVE="$POSTGRES_ARCHIVE" POSTGRES_URL="$POSTGRES_URL" \
+    POSTGRES_SHA256="$POSTGRES_SHA256" \
+    bash -seu <<'BUILD_POSTGRES'
+cd "$WORK"
+curl -fsSL --retry 3 --retry-delay 2 "$POSTGRES_URL" -o "$POSTGRES_ARCHIVE"
+echo "$POSTGRES_SHA256  $POSTGRES_ARCHIVE" | sha256sum -c -
 
-      tar -xjf "$POSTGRES_ARCHIVE"
-      cd "postgresql-14.24"
-      ./configure         --prefix="$PREFIX"         --without-readline         --without-zlib
-      make -j"$JOBS"
-      make DESTDIR="$WORK/postgres-stage" install
-    '
+tar -xjf "$POSTGRES_ARCHIVE"
+cd "postgresql-14.24"
+./configure \
+  --prefix="$PREFIX" \
+  --without-readline \
+  --without-zlib
+make -j"$JOBS"
+make DESTDIR="$WORK/postgres-stage" install
+BUILD_POSTGRES
 
   STAGED_PREFIX="$WORK/postgres-stage$PREFIX"
   [[ -x "$STAGED_PREFIX/bin/postgres" ]] || die "STAGED_POSTGRES_MISSING"
@@ -189,16 +196,20 @@ else
   CREATED_PREFIX=1
 
   STAGE="build-pgvector"
-  runuser -u ci-controller -- env     WORK="$WORK" PREFIX="$PREFIX" JOBS="$JOBS"     PGVECTOR_REPO="$PGVECTOR_REPO" PGVECTOR_COMMIT="$PGVECTOR_COMMIT"     bash -ceu '
-      cd "$WORK"
-      git clone --no-checkout "$PGVECTOR_REPO" pgvector
-      git -C pgvector fetch --depth=1 origin "$PGVECTOR_COMMIT"
-      git -C pgvector checkout --detach "$PGVECTOR_COMMIT"
-      [[ "$(git -C pgvector rev-parse HEAD)" == "$PGVECTOR_COMMIT" ]]
+  runuser -u ci-controller -- env \
+    WORK="$WORK" PREFIX="$PREFIX" JOBS="$JOBS" \
+    PGVECTOR_REPO="$PGVECTOR_REPO" PGVECTOR_COMMIT="$PGVECTOR_COMMIT" \
+    bash -seu <<'BUILD_PGVECTOR'
+cd "$WORK"
+git clone --no-checkout "$PGVECTOR_REPO" pgvector
+git -C pgvector fetch --depth=1 origin "$PGVECTOR_COMMIT"
+git -C pgvector checkout --detach "$PGVECTOR_COMMIT"
+[[ "$(git -C pgvector rev-parse HEAD)" == "$PGVECTOR_COMMIT" ]]
 
-      make -C pgvector -j"$JOBS" PG_CONFIG="$PREFIX/bin/pg_config"
-      make -C pgvector PG_CONFIG="$PREFIX/bin/pg_config"         DESTDIR="$WORK/vector-stage" install
-    '
+make -C pgvector -j"$JOBS" PG_CONFIG="$PREFIX/bin/pg_config"
+make -C pgvector PG_CONFIG="$PREFIX/bin/pg_config" \
+  DESTDIR="$WORK/vector-stage" install
+BUILD_PGVECTOR
 
   STAGE="validate-staged-pgvector"
   PKGLIBDIR="$("$PREFIX/bin/pg_config" --pkglibdir)"
@@ -269,45 +280,61 @@ BEFORE_POSTGRES="$(
 printf '%s\n' "$BEFORE_POSTGRES" > "$OUT/non-ci-postgres-before.txt"
 
 install -d -o ci-research-engine -g ci-research-engine -m 0700 "$SMOKE_ROOT"
-runuser -u ci-research-engine -- env   PREFIX="$PREFIX" SMOKE_ROOT="$SMOKE_ROOT" LD_LIBRARY_PATH="$PREFIX/lib"   bash -ceu '
-    data="$SMOKE_ROOT/data"
-    sock="$SMOKE_ROOT/socket"
-    mkdir -m 0700 "$data" "$sock"
+runuser -u ci-research-engine -- env \
+  PREFIX="$PREFIX" SMOKE_ROOT="$SMOKE_ROOT" LD_LIBRARY_PATH="$PREFIX/lib" \
+  bash -seu <<'SMOKE_RUNTIME'
+data="$SMOKE_ROOT/data"
+sock="$SMOKE_ROOT/socket"
+mkdir -m 0700 "$data" "$sock"
 
-    started=0
-    stop_db() {
-      rc=$?
-      set +e
-      if [[ "$started" == "1" ]]; then
-        "$PREFIX/bin/pg_ctl" -D "$data" -m fast -w stop >/dev/null 2>&1 || true
-      fi
-      exit "$rc"
-    }
-    trap stop_db EXIT
+started=0
+stop_db() {
+  rc=$?
+  set +e
+  if [[ "$started" == "1" ]]; then
+    "$PREFIX/bin/pg_ctl" -D "$data" -m fast -w stop >/dev/null 2>&1 || true
+  fi
+  exit "$rc"
+}
+trap stop_db EXIT
 
-    "$PREFIX/bin/initdb"       -D "$data"       --username=research_engine       --auth-local=trust       --auth-host=reject       --no-locale       --encoding=UTF8       >/dev/null
+"$PREFIX/bin/initdb" \
+  -D "$data" \
+  --username=research_engine \
+  --auth-local=trust \
+  --auth-host=reject \
+  --no-locale \
+  --encoding=UTF8 \
+  >/dev/null
 
-    cat >> "$data/postgresql.conf" <<EOF
+cat >> "$data/postgresql.conf" <<EOF
 listen_addresses = ''
 unix_socket_directories = '$sock'
 port = 55435
 EOF
 
-    "$PREFIX/bin/pg_ctl" -D "$data" -w start >/dev/null
-    started=1
-    "$PREFIX/bin/createdb"       -h "$sock" -p 55435 -U research_engine research_engine
+"$PREFIX/bin/pg_ctl" -D "$data" -w start >/dev/null
+started=1
+"$PREFIX/bin/createdb" \
+  -h "$sock" -p 55435 -U research_engine research_engine
 
-    version="$(
-      "$PREFIX/bin/psql"         -h "$sock" -p 55435 -U research_engine -d research_engine         -v ON_ERROR_STOP=1 -Atc         "CREATE EXTENSION vector; SELECT extversion FROM pg_extension WHERE extname='vector';"
-    )"
-    [[ "$version" == "0.8.6" ]]
+version="$(
+  "$PREFIX/bin/psql" \
+    -h "$sock" -p 55435 -U research_engine -d research_engine \
+    -v ON_ERROR_STOP=1 -Atc \
+    "CREATE EXTENSION vector; SELECT extversion FROM pg_extension WHERE extname='vector';"
+)"
+[[ "$version" == "0.8.6" ]]
 
-    "$PREFIX/bin/psql"       -h "$sock" -p 55435 -U research_engine -d research_engine       -v ON_ERROR_STOP=1 -Atc       "SELECT ('[1,2,3]'::vector <-> '[4,5,6]'::vector) > 0;" |
-      grep -qx t
+"$PREFIX/bin/psql" \
+  -h "$sock" -p 55435 -U research_engine -d research_engine \
+  -v ON_ERROR_STOP=1 -Atc \
+  "SELECT ('[1,2,3]'::vector <-> '[4,5,6]'::vector) > 0;" |
+  grep -qx t
 
-    "$PREFIX/bin/pg_ctl" -D "$data" -m fast -w stop >/dev/null
-    started=0
-  '
+"$PREFIX/bin/pg_ctl" -D "$data" -m fast -w stop >/dev/null
+started=0
+SMOKE_RUNTIME
 SMOKE_STARTED=0
 
 AFTER_POSTGRES="$(
