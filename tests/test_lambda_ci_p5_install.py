@@ -110,6 +110,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
     def test_uninstall_is_bounded_and_preserves_credential_state(self):
         for target in (
             "/opt/workspace-ci/controller/lambda-ci-controller",
+            "/opt/workspace-ci/controller/stage-pat",
             "/opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py",
             "/etc/workspace-ci/projects/research-engine.json",
             "/etc/systemd/system/workspace-ci-controller.service",
