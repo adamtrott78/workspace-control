@@ -13,8 +13,8 @@ def test_bootstrap_requires_root_explicit_authorization_and_exact_sha():
 def test_exact_pgvector_version_and_official_key_are_pinned():
     assert 'VERSION="0.8.6-1.pgdg22.04+2"' in SCRIPT
     assert 'PGDG_FINGERPRINT="B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8"' in SCRIPT
-    assert 'https://apt.postgresql.org/pub/repos/apt' in SCRIPT
-    assert 'https://www.postgresql.org/media/keys/ACCC4CF8.asc' in SCRIPT
+    assert 'https://apt-archive.postgresql.org/pub/repos/apt' in SCRIPT
+    assert 'https://www.postgresql.org/media/keys/ACCC4CF8.asc' in SCRIPT\n    assert "jammy-pgdg-archive" in SCRIPT
 
 
 def test_no_package_install_or_system_apt_configuration_mutation():
