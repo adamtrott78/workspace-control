@@ -185,6 +185,40 @@ class ProvisionerService:
             raise ServiceError("peer UID is not ci-controller")
 
         schema_version = data.get("schema_version")
+        if schema_version == 2 and data.get("operation") == "STATUS":
+            expected = {"schema_version", "operation", "request_id"}
+            if set(data) != expected:
+                raise ServiceError("status query keys mismatch")
+            try:
+                request_id = str(uuid.UUID(str(data.get("request_id"))))
+            except (ValueError, AttributeError, TypeError) as exc:
+                raise ServiceError("status query request_id must be UUID") from exc
+
+            with self._lock:
+                existing = self.state_store.read(request_id)
+            if existing is None:
+                return {
+                    "schema_version": 2,
+                    "status": "MISSING",
+                    "request_id": request_id,
+                }
+
+            status = existing.get("status")
+            if status not in {"ACCEPTED", "COMPLETED", "FAILED"}:
+                raise ServiceError(
+                    f"stored request has unsupported status for recovery: {status!r}"
+                )
+            response = {
+                "schema_version": 2,
+                "status": status,
+                "request_id": request_id,
+                "runner_name": existing.get("runner_name", ""),
+            }
+            identity = existing.get("admission_identity")
+            if isinstance(identity, dict) and isinstance(identity.get("admission_id"), str):
+                response["admission_id"] = identity["admission_id"]
+            return response
+
         if schema_version == 2:
             try:
                 request_id = str(uuid.UUID(str(data.get("request_id"))))

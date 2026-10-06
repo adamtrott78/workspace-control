@@ -75,6 +75,32 @@ type provisionResponse struct {
 	Error         string `json:"error,omitempty"`
 }
 
+type provisionStatusRequest struct {
+	SchemaVersion int    `json:"schema_version"`
+	Operation     string `json:"operation"`
+	RequestID     string `json:"request_id"`
+}
+
+type provisionStatusResponse struct {
+	SchemaVersion int    `json:"schema_version"`
+	Status        string `json:"status"`
+	RequestID     string `json:"request_id"`
+	RunnerName    string `json:"runner_name,omitempty"`
+	AdmissionID   string `json:"admission_id,omitempty"`
+	ErrorType     string `json:"error_type,omitempty"`
+	Error         string `json:"error,omitempty"`
+}
+
+type runnerJITClient interface {
+	GenerateJitRunnerConfig(
+		context.Context,
+		*scaleset.RunnerScaleSetJitRunnerSetting,
+		int,
+	) (*scaleset.RunnerScaleSetJitRunnerConfig, error)
+	GetRunnerByName(context.Context, string) (*scaleset.RunnerReference, error)
+	RemoveRunner(context.Context, int64) error
+}
+
 type pendingAdmissionJob struct {
 	Metadata    scaleset.JobMessageBase
 	Attestation controllerAttestation
@@ -84,7 +110,7 @@ type pendingAdmissionJob struct {
 type scaler struct {
 	mu              sync.Mutex
 	active          map[string]string
-	client          *scaleset.Client
+	client          runnerJITClient
 	sessionClient   listener.Client
 	scaleSetID      int
 	projectID       string
@@ -310,6 +336,85 @@ func sendProvisionRequest(ctx context.Context, socketPath string, request any) (
 	default:
 		return response, fmt.Errorf("unexpected provisioner status %q", response.Status)
 	}
+}
+
+func sendProvisionStatusQuery(
+	ctx context.Context,
+	socketPath string,
+	requestID string,
+) (provisionStatusResponse, error) {
+	dialer := net.Dialer{Timeout: 5 * time.Second}
+	conn, err := dialer.DialContext(ctx, "unix", socketPath)
+	if err != nil {
+		return provisionStatusResponse{}, fmt.Errorf("connect provisioner status: %w", err)
+	}
+	defer conn.Close()
+
+	unixConn, ok := conn.(*net.UnixConn)
+	if !ok {
+		return provisionStatusResponse{}, fmt.Errorf("provisioner status connection is not Unix domain")
+	}
+	request := provisionStatusRequest{
+		SchemaVersion: 2,
+		Operation:     "STATUS",
+		RequestID:     requestID,
+	}
+	if err := json.NewEncoder(unixConn).Encode(request); err != nil {
+		return provisionStatusResponse{}, fmt.Errorf("write provision status request: %w", err)
+	}
+	if err := unixConn.CloseWrite(); err != nil {
+		return provisionStatusResponse{}, fmt.Errorf("close provision status write side: %w", err)
+	}
+
+	var response provisionStatusResponse
+	if err := json.NewDecoder(unixConn).Decode(&response); err != nil {
+		return provisionStatusResponse{}, fmt.Errorf("read provision status response: %w", err)
+	}
+	if response.RequestID != requestID {
+		return provisionStatusResponse{}, fmt.Errorf(
+			"provision status request id mismatch: got %q want %q",
+			response.RequestID,
+			requestID,
+		)
+	}
+	switch response.Status {
+	case "MISSING", "ACCEPTED", "COMPLETED", "FAILED":
+		return response, nil
+	case "REJECTED":
+		return response, fmt.Errorf(
+			"provisioner rejected status query: %s: %s",
+			response.ErrorType,
+			response.Error,
+		)
+	default:
+		return response, fmt.Errorf("unexpected provision status %q", response.Status)
+	}
+}
+
+func reconcileOrphanJITRegistration(
+	ctx context.Context,
+	client runnerJITClient,
+	runnerName string,
+	scaleSetID int,
+) (bool, error) {
+	existing, err := client.GetRunnerByName(ctx, runnerName)
+	if err != nil {
+		return false, fmt.Errorf("lookup deterministic runner registration: %w", err)
+	}
+	if existing == nil {
+		return false, nil
+	}
+	if existing.Name != runnerName || existing.RunnerScaleSetID != scaleSetID {
+		return false, fmt.Errorf(
+			"deterministic runner registration mismatch name=%q scale_set_id=%d",
+			existing.Name,
+			existing.RunnerScaleSetID,
+		)
+	}
+	if err := client.RemoveRunner(ctx, int64(existing.ID)); err != nil {
+		return false, fmt.Errorf("remove orphaned deterministic runner registration: %w", err)
+	}
+	return true, nil
 }
 
 func (s *scaler) nextPendingAdmission() (string, pendingAdmissionJob, bool) {
@@ -560,6 +665,81 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			}
 		}
 
+		if s.admissionV2 {
+			status, err := sendProvisionStatusQuery(
+				ctx,
+				s.provisionerSock,
+				requestID,
+			)
+			if err != nil {
+				return fmt.Errorf("query durable provision state: %w", err)
+			}
+			switch status.Status {
+			case "ACCEPTED":
+				if status.RunnerName != name {
+					return fmt.Errorf(
+						"durable provision runner mismatch: got %q want %q",
+						status.RunnerName,
+						name,
+					)
+				}
+				s.mu.Lock()
+				s.active[name] = requestID
+				if pendingOK {
+					pendingJob.RunnerName = name
+					s.pending[pendingKey] = pendingJob
+				}
+				s.mu.Unlock()
+				s.logger.Info(
+					"Recovered accepted durable provision state",
+					slog.String("request_id", requestID),
+					slog.String("runner_name", name),
+					slog.String("admission_id", status.AdmissionID),
+				)
+				return nil
+			case "COMPLETED", "FAILED":
+				if status.RunnerName != "" && status.RunnerName != name {
+					return fmt.Errorf(
+						"terminal provision runner mismatch: got %q want %q",
+						status.RunnerName,
+						name,
+					)
+				}
+				s.mu.Lock()
+				if pendingOK {
+					delete(s.pending, pendingKey)
+				}
+				s.mu.Unlock()
+				s.logger.Info(
+					"Recovered terminal durable provision state",
+					slog.String("request_id", requestID),
+					slog.String("runner_name", name),
+					slog.String("receipt_status", status.Status),
+					slog.String("admission_id", status.AdmissionID),
+				)
+				return nil
+			case "MISSING":
+				removed, err := reconcileOrphanJITRegistration(
+					ctx,
+					s.client,
+					name,
+					s.scaleSetID,
+				)
+				if err != nil {
+					return err
+				}
+				if removed {
+					s.logger.Info(
+						"Removed orphaned JIT runner registration before regeneration",
+						slog.String("request_id", requestID),
+						slog.String("runner_name", name),
+					)
+				}
+			default:
+				return fmt.Errorf("unsupported durable provision state %q", status.Status)
+			}
+		}
+
 		jit, err := s.client.GenerateJitRunnerConfig(
 			ctx,
 			&scaleset.RunnerScaleSetJitRunnerSetting{Name: name},
@@ -597,8 +777,16 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		}
 
 		if response.Status == "BUSY" {
+			if s.admissionV2 && jit.Runner != nil {
+				if err := s.client.RemoveRunner(ctx, int64(jit.Runner.ID)); err != nil {
+					return fmt.Errorf(
+						"remove unconsumed JIT runner after BUSY: %w",
+						err,
+					)
+				}
+			}
 			s.logger.Info(
-				"Provisioner busy; retrying on next listener statistic",
+				"Provisioner busy; removed unconsumed JIT registration and will retry",
 				slog.String("request_id", requestID),
 				slog.String("runner_name", name),
 			)
