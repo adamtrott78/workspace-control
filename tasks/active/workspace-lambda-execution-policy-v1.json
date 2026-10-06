@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-lambda-self-hosted-execution-v1",
-  "current_stage": "policy_contract_and_hydration",
+  "current_stage": "admission_manifest_and_enforcement",
   "acceptance_criteria": [
     "The accepted parent substrate remains the immutable starting boundary: one-job JIT runners, separate CPU and gpu-small scale sets, unprivileged GitHub-facing controller, credential-blind root provisioner, project UID isolation, private/local-network denial, production-state denial, and residue-free cleanup.",
     "A versioned declarative workload-admission contract exists and binds repository/project, trusted workflow identity, exact candidate SHA, workload class, execution profile, model/dependency identities, resource class, egress class, secrets class, filesystem/state-effect class, cache class, and required evidence.",
@@ -57,10 +57,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "12f9d9e3a59f042bcf832dfe89a3b389b92f21ce",
+      "base_sha": "e77af13b3ad43b4252031d27f72773cfd8f232dd",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "12f9d9e3a59f042bcf832dfe89a3b389b92f21ce",
+        "checkpoint_sha": "e77af13b3ad43b4252031d27f72773cfd8f232dd",
         "verified": true
       },
       "local": null,
@@ -105,7 +105,7 @@
   "stages": [
     {
       "id": "policy_contract_and_hydration",
-      "status": "IN_PROGRESS",
+      "status": "COMPLETE",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github+web",
@@ -154,16 +154,26 @@
             "Current Hugging Face guidance supports exact-revision snapshots, local-files-only completeness failure, and safe serialization; pickle deserialization can execute arbitrary code.",
             "These external constraints align with the existing P5 one-job runner and trusted-cache architecture rather than requiring a new execution substrate."
           ]
+        },
+        {
+          "check": "Validated workload admission policy contract",
+          "result": "PASS",
+          "evidence": [
+            "PR #101 merged the policy-contract branch to workspace-control main as e77af13b3ad43b4252031d27f72773cfd8f232dd.",
+            "Workspace Control Validation run 37521301993 passed changed-task checks, Python unit regression including adversarial policy tests, pinned Go controller validation, and FULL_INTEGRATION contracts on corrected head bca5786c17073c43245bd17bd21007eb7cede988.",
+            "The canonical contract defines root-owned workload classes, admission/receipt schemas, exact model/runtime/cache identity semantics, explicit network/secrets/filesystem/state-effect/resource classes, single-use stale/replay semantics, fail-closed unsafe-serialization/custom-code handling, and cleanup quarantine behavior.",
+            "No controller, systemd, live project profile, research-engine production routing, Lambda host state, gpu-heavy authority, or model-scale workload was changed by the policy-contract stage."
+          ]
         }
       ],
       "resume_condition": "The workload/admission and cache trust boundaries are explicit enough to implement without granting candidate code new authority."
     },
     {
       "id": "admission_manifest_and_enforcement",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "validated policy contract",
         "accepted P5 controller/provisioner manifests and protocol"
@@ -278,12 +288,12 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "12f9d9e3a59f042bcf832dfe89a3b389b92f21ce",
+      "identity": "e77af13b3ad43b4252031d27f72773cfd8f232dd",
       "required_for_resume": true,
       "evidence": [
-        "Child task initialized from accepted parent CPU+gpu-small baseline.",
-        "Hydration source map created at architecture/lambda-ci-execution-policy-hydration.v1.md.",
-        "First unfinished stage is policy_contract_and_hydration; implementation has not yet widened live Lambda authority."
+        "Policy contract and schemas are canonical on workspace-control main at e77af13b3ad43b4252031d27f72773cfd8f232dd after PR #101 FULL_INTEGRATION PASS.",
+        "policy_contract_and_hydration is complete; first unfinished stage is admission_manifest_and_enforcement.",
+        "Live Lambda authority remains unchanged: cpu-test and gpu-small are the accepted substrate, model-scale classes are not live, and gpu-heavy remains denied."
       ]
     }
   ],
@@ -299,6 +309,55 @@
       "evidence": [
         "Captures accepted P5 CPU/GPU evidence, existing trusted-cache policy, current model/runtime identities, research-engine governance primitives, policy gaps, and recommended workload classes."
       ]
+    },
+    {
+      "path": "architecture/lambda-ci-workload-policy.v1.json",
+      "state": "validated",
+      "role": "root-owned workload/admission policy contract",
+      "origin": "workspace-control policy_contract_and_hydration stage",
+      "persistence": "git",
+      "regeneration": "manual reviewed policy revision with policy-epoch change when semantics materially change",
+      "review_requirement": "FULL_INTEGRATION before canonical use",
+      "evidence": [
+        "Merged through PR #101 as workspace-control e77af13b3ad43b4252031d27f72773cfd8f232dd.",
+        "gpu-heavy is denied; model-acquire, cache-promote, and model-eval-single-gpu are designed but not live."
+      ]
+    },
+    {
+      "path": "schemas/lambda-ci-workload-policy.v1.schema.json",
+      "state": "validated",
+      "role": "workload-policy structural contract",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": "versioned schema change only",
+      "review_requirement": "FULL_INTEGRATION",
+      "evidence": [
+        "Validated by PR #101 Workspace Control Validation run 37521301993."
+      ]
+    },
+    {
+      "path": "schemas/lambda-ci-admission-manifest.v1.schema.json",
+      "state": "validated",
+      "role": "root-issued per-execution admission schema",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": "versioned schema change only",
+      "review_requirement": "FULL_INTEGRATION",
+      "evidence": [
+        "Validated by PR #101 Workspace Control Validation run 37521301993."
+      ]
+    },
+    {
+      "path": "schemas/lambda-ci-execution-receipt.v1.schema.json",
+      "state": "validated",
+      "role": "non-secret execution and cleanup receipt schema",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": "versioned schema change only",
+      "review_requirement": "FULL_INTEGRATION",
+      "evidence": [
+        "Validated by PR #101 Workspace Control Validation run 37521301993."
+      ]
     }
   ],
   "validation": [
@@ -310,19 +369,27 @@
         "This child owns cross-project workload admission/cache/resource policy and its bounded implementation.",
         "research-engine remains authoritative for model-specific scientific/runtime truth and benchmark semantics."
       ]
+    },
+    {
+      "check": "Policy-contract canonical checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "workspace-control main verified at e77af13b3ad43b4252031d27f72773cfd8f232dd after merging PR #101.",
+        "Research-engine remains at the child-task baseline 577764f4db10e4f4f894b1613518c358c6da7b95.",
+        "The next implementation stage may consume the canonical policy contract but must not widen authority beyond its declared classes."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Finish and validate the workload-class taxonomy, admission schema, exception model, and execution-receipt contract.",
     "Implement root-owned admission enforcement without broadening the accepted P5 controller/provisioner authority.",
     "Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.",
     "Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.",
     "Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.",
     "Decide separately whether gpu-heavy/dual-GPU should be accepted."
   ],
-  "next_safe_action": "Start from architecture/lambda-ci-execution-policy-hydration.v1.md and the accepted parent baseline. Complete the policy_contract_and_hydration stage by designing a versioned workload-class taxonomy plus root-owned admission manifest/schema and execution-receipt contract. Preserve cpu-test/gpu-small as already accepted capabilities, keep gpu-heavy denied, keep candidate jobs unable to promote trusted cache content, and keep model-eval offline/no-registry-credential by default. Do not mutate the live Lambda or run a model-scale workload until the policy contract has passed workspace-control validation.",
+  "next_safe_action": "Begin admission_manifest_and_enforcement from canonical workspace-control e77af13b3ad43b4252031d27f72773cfd8f232dd. Hydrate the accepted P5 controller/provisioner request protocol and implement root-owned validation against architecture/lambda-ci-workload-policy.v1.json plus the versioned admission and execution-receipt schemas: exact project/trusted-workflow/candidate-SHA binding, declared workload/profile/model/runtime/resource/capability binding, atomic single-use admission consumption, stale/replay/kill-switch rejection, and receipt identity binding. Preserve existing cpu-test/gpu-small authority, keep model-acquire/cache-promote/model-eval-single-gpu non-live until their enforcement gates pass, keep gpu-heavy denied, and do not mutate production research routing or run a model-scale workload in this stage.",
   "last_executor": "chatgpt",
-  "last_surface": "github+web",
-  "notes": "2026-10-06: Created as a child of workspace-lambda-self-hosted-execution-v1 after autonomous CPU and gpu-small execution were accepted. The task is intentionally policy-first: substrate capability expansion is paused until admission/cache/resource governance is explicit and validated. Hydration deliberately reuses existing workspace-control trusted-cache primitives and research-engine model-prefetch/runtime-certification contracts rather than duplicating domain truth. Heartbeat mount state is chat-local; every fresh substantial chat must update then open one live card."
+  "last_surface": "github",
+  "notes": "2026-10-06: Created as a child of workspace-lambda-self-hosted-execution-v1 after autonomous CPU and gpu-small execution were accepted. The task is intentionally policy-first: substrate capability expansion is paused until admission/cache/resource governance is explicit and validated. Hydration deliberately reuses existing workspace-control trusted-cache primitives and research-engine model-prefetch/runtime-certification contracts rather than duplicating domain truth. Heartbeat mount state is chat-local; every fresh substantial chat must update then open one live card. 2026-10-06: PR #101 merged the validated policy contract as e77af13b3ad43b4252031d27f72773cfd8f232dd after FULL_INTEGRATION PASS. policy_contract_and_hydration is complete; admission_manifest_and_enforcement is now the first unfinished stage. No live Lambda/model-scale authority was widened."
 }
