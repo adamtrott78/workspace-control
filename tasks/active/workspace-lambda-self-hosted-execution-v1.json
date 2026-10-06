@@ -384,6 +384,19 @@
             "CI now extracts and executes the exact production smoke child-shell block with a fake PostgreSQL runtime under bash -seu, exercising socket-path expansion, pgvector-version/query behavior, and cleanup.",
             "A control-plane invariant now forbids privileged multi-line bash -c orchestration without executable child-shell regression."
           ]
+        },
+        {
+          "check": "P3 production Postgres guard repair",
+          "result": "PASS",
+          "evidence": [
+            "Real Lambda isolated-runtime smoke execution reached the post-smoke guard and failed with NON_CI_POSTGRES_PROCESS_SET_CHANGED.",
+            "The failure receipt records decision=FAIL, failure_stage=smoke-test, exit_code=70, partial_runtime_removed=true at workspace-control 0a5c8e2ba6cd64592cf531b461548732189afe37.",
+            "Root cause: guard compared the entire non-CI PostgreSQL PID set, which can legitimately change as background workers churn; repeated PADataset warnings came from inherited inaccessible cwd across runuser boundaries.",
+            "workspace-control PR #82 exact head 1486baad4b6ce4114a8b7cf0ec942a04aa955779 passed validation and merged as 2c3c880debaddd3ea3336caca8ca59df57101043.",
+            "Repair compares stable root-visible TCP 5432 listener endpoint+owning-process identity before/after the isolated smoke test, ignores unrelated listeners/background workers/queue depths, and forces the privileged bootstrap to cd / before runuser boundaries.",
+            "Regression executes the exact listener-capture function with unrelated listener noise and confirms only the production PostgreSQL listener identity is retained.",
+            "Corrected P3 run 37398604653 remains queued on cpu-test-v2 for unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0."
+          ]
         }
       ],
       "resume_condition": "Research-engine branch validation can complete without human SSH and without production-state mutation."
@@ -441,16 +454,16 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "0a5c8e2ba6cd64592cf531b461548732189afe37",
+      "identity": "2c3c880debaddd3ea3336caca8ca59df57101043",
       "required_for_resume": true,
       "evidence": [
         "P0 PASS",
         "P1 PASS",
         "P2 PASS",
-        "P3 heavy PostgreSQL/pgvector build repeatedly succeeded while orchestration checks exposed brittle shell/path assumptions",
-        "dynamic pg_config path repair PASS",
-        "shell-boundary orchestration repair PASS workspace-control@0a5c8e2ba6cd64592cf531b461548732189afe37",
-        "exact production smoke child-shell block now executes in CI under bash -seu",
+        "P3 heavy PostgreSQL/pgvector build and smoke path reached post-smoke guard",
+        "production Postgres full-PID-set guard was a false positive",
+        "stable TCP 5432 listener-identity guard merged workspace-control@2c3c880debaddd3ea3336caca8ca59df57101043",
+        "privilege-switched subprocesses now inherit neutral cwd /",
         "corrected P3 run 37398604653 remains queued on cpu-test-v2"
       ]
     }
@@ -476,17 +489,17 @@
     }
   ],
   "blockers": [
-    "Human-only root/credential gate: rerun the isolated runtime bootstrap from exact workspace-control 0a5c8e2ba6cd64592cf531b461548732189afe37; only on PASS may the cpu-test-v2 JIT launcher run.",
+    "Human-only root/credential gate: rerun the isolated runtime bootstrap from exact workspace-control 2c3c880debaddd3ea3336caca8ca59df57101043; only on PASS may the cpu-test-v2 JIT launcher run.",
     "P3 run 37398604653 must reach full candidate install/compile/pytest PASS before P4."
   ],
   "remaining_work": [
-    "On Lambda, execute scripts/bootstrap_lambda_ci_p3_postgres_runtime.sh from exact workspace-control 0a5c8e2ba6cd64592cf531b461548732189afe37 and require P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS.",
+    "On Lambda, execute scripts/bootstrap_lambda_ci_p3_postgres_runtime.sh from exact workspace-control 2c3c880debaddd3ea3336caca8ca59df57101043 and require P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS.",
     "Only after runtime PASS, execute scripts/launch_lambda_ci_p3_cpu.py from the same exact tree and service queued run 37398604653.",
     "Immediately consume run 37398604653 and its receipt when terminal; continue bounded repair/re-run without waiting if any new issue is demonstrated.",
     "Only after P3 full PASS begin P4 GPU validation."
   ],
-  "next_safe_action": "Human-only gate: on Lambda create/reuse one clean detached workspace-control tree exactly at `0a5c8e2ba6cd64592cf531b461548732189afe37`. First run `scripts/bootstrap_lambda_ci_p3_postgres_runtime.sh` under sudo with `WORKSPACE_CI_P3_RUNTIME_AUTHORIZED=YES` and `WORKSPACE_CI_P3_RUNTIME_EXPECTED_SHA=0a5c8e2ba6cd64592cf531b461548732189afe37`. If and only if it reports P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS, run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES` and paste a short-lived research-engine Administration:write token only into the hidden prompt. Corrected run 37398604653 remains queued on cpu-test-v2.",
+  "next_safe_action": "Human-only gate: on Lambda create/reuse one clean detached workspace-control tree exactly at `2c3c880debaddd3ea3336caca8ca59df57101043`. First run `scripts/bootstrap_lambda_ci_p3_postgres_runtime.sh` under sudo with `WORKSPACE_CI_P3_RUNTIME_AUTHORIZED=YES` and `WORKSPACE_CI_P3_RUNTIME_EXPECTED_SHA=2c3c880debaddd3ea3336caca8ca59df57101043`. If and only if it reports P3_ISOLATED_RUNTIME_BOOTSTRAP=PASS, run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES` and paste a short-lived research-engine Administration:write token only into the hidden prompt. Corrected run 37398604653 remains queued on cpu-test-v2.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
-  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow."
+  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow.\n\n2026-10-06 P3 guard correction: production safety checks must measure stable service identity/boundaries, not volatile implementation details such as every PostgreSQL background-worker PID. The TCP 5432 listener identity is now the production invariant; runuser boundaries also start from `/` to avoid inherited private-cwd warnings."
 }
