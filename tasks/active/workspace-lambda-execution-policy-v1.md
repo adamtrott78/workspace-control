@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a5242a642ce0da545adea01929d47b383a1dcc4f
+- Remote checkpoint: 5557b54a147ee64cc486af2d1709bd50b67459ac
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Cancel stale research-engine CPU workflow runs 37533291290 and 37534646664 in GitHub Actions before triggering anything new, because they remain queued/assigned evidence from pre-fix controller attempts and must not consume a runner admitted for a fresh attestation. The Lambda host is already correctly installed on workspace-control 526e020a4d4ef429ceeac173b9f51fbd75912d99 with CPU/GPU controllers and provisioner active and zero restarts immediately after activation, so do not reinstall again unless new evidence requires it. After both stale runs are canceled, trigger one NEW trusted /lambda-ci-p5 <exact_sha> issue-comment run on the open same-repository non-scientific research-engine candidate, require it to complete and validate its execution/root cleanup evidence, then trigger one NEW /lambda-ci-p5-gpu <exact_sha> run and validate GPU UUID/profile/cleanup evidence. Do not count runs 37533291290 or 37534646664 as acceptance evidence. Do not enable model-scale classes or gpu-heavy.
+Trigger one NEW trusted /lambda-ci-p5 <exact_sha> issue-comment run on the open same-repository non-scientific research-engine candidate f5ba8278d7dfa22e63623ddf51896a6dec002813. Require that fresh CPU run to leave queued state, execute only under the accepted cpu-test profile, complete successfully, and produce/retain root admission plus residue-free cleanup evidence. Only after CPU PASS, trigger one NEW /lambda-ci-p5-gpu <exact_sha> run on the same candidate and require accepted gpu-small profile binding, the pinned single-A4500 UUID, bounded CUDA proof, terminal receipt, and residue-free cleanup. Do not count canceled runs 37533291290 or 37534646664 as acceptance evidence. Do not enable model-scale classes or gpu-heavy.
 
 ## Remaining work
 
-- Cancel stale CPU runs 37533291290 and 37534646664, then run fresh non-scientific admission-v2 CPU and gpu-small acceptance against the live 526e020a4d4ef429ceeac173b9f51fbd75912d99 controller and validate root receipts plus residue-free cleanup.
+- Run fresh non-scientific admission-v2 CPU and gpu-small acceptance against the live 526e020a4d4ef429ceeac173b9f51fbd75912d99 controller and validate root receipts plus residue-free cleanup.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,7 +48,7 @@ Cancel stale research-engine CPU workflow runs 37533291290 and 37534646664 in Gi
 
 ## Blockers / gates
 
-- Stale CPU workflow runs 37533291290 and 37534646664 must be canceled before the next acceptance trigger so no old assigned job can consume a runner admitted for a fresh attestation.
+- None.
 
 ## Fresh-chat initialization
 
