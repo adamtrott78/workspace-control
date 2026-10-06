@@ -347,9 +347,12 @@ def test_v2_same_request_id_different_digest_is_replay_conflict():
 
 def test_v2_disabled_manifest_rejects_before_state_claim():
     with tempfile.TemporaryDirectory() as tmp:
+        disabled = copy.deepcopy(MANIFEST)
+        disabled["admission_v2"]["enabled"] = False
         svc = build_service(
             tmp,
             lambda req, spec: {},
+            manifest=disabled,
             clock=lambda: V2_NOW,
         )
         req = v2_request()

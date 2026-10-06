@@ -85,7 +85,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
             self.assertIn(deny, CONTROLLER_UNIT)
         self.assertNotIn("User=root", CONTROLLER_UNIT)
         self.assertNotIn("sudo", CONTROLLER_UNIT)
-        self.assertNotIn("WORKSPACE_CI_ADMISSION_V2_ENABLED", CONTROLLER_UNIT)
+        self.assertIn("Environment=WORKSPACE_CI_ADMISSION_V2_ENABLED=YES", CONTROLLER_UNIT)
 
     def test_gpu_controller_unit_is_unprivileged_and_fixed_to_gpu_small(self):
         self.assertIn("User=ci-controller", GPU_CONTROLLER_UNIT)
@@ -103,7 +103,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         self.assertIn("RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6", GPU_CONTROLLER_UNIT)
         self.assertIn("DevicePolicy=closed", GPU_CONTROLLER_UNIT)
         self.assertNotIn("User=root", GPU_CONTROLLER_UNIT)
-        self.assertNotIn("WORKSPACE_CI_ADMISSION_V2_ENABLED", GPU_CONTROLLER_UNIT)
+        self.assertIn("Environment=WORKSPACE_CI_ADMISSION_V2_ENABLED=YES", GPU_CONTROLLER_UNIT)
 
     def test_bootstrap_never_reads_or_accepts_token_material(self):
         self.assertIn("github_credential_handled_by_bootstrap", BOOTSTRAP)
@@ -139,7 +139,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
 
 
 
-    def test_admission_v2_install_payload_is_complete_but_not_activated(self):
+    def test_admission_v2_install_payload_and_static_activation_are_complete(self):
         self.assertIn(
             "/opt/workspace-ci/provisioner/lambda_ci_admission.py",
             BOOTSTRAP,
@@ -155,7 +155,19 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         project = json.loads(
             (ROOT / "architecture" / "lambda-ci-project-research-engine.v1.json").read_text()
         )
-        self.assertFalse(project["admission_v2"]["enabled"])
+        self.assertTrue(project["admission_v2"]["enabled"])
+        self.assertEqual(
+            project["admission_v2"]["live_enabled_workload_classes"],
+            ["cpu-test", "gpu-small"],
+        )
+        self.assertEqual(
+            project["admission_v2"]["routes"]["cpu-test"]["trusted_workflow"]["blob_sha"],
+            "e0fc6f49f4638fc2609580899a66d980a80c7005",
+        )
+        self.assertEqual(
+            project["admission_v2"]["routes"]["gpu-small"]["trusted_workflow"]["blob_sha"],
+            "0565cc736d76e4e67e641dce32c4276097ea2241",
+        )
 
     def test_go_toolchain_pin_is_exact_official_release(self):
         pin = PINS["go_toolchain"]

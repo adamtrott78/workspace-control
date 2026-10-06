@@ -63,7 +63,7 @@
   "concurrency": 1,
   "production_acceptance_profile": "not_authorized_in_v1_pilot",
   "admission_v2": {
-    "enabled": false,
+    "enabled": true,
     "policy_id": "lambda-ci-workload-policy-v1",
     "admission_ttl_seconds": 900,
     "kill_switch_epoch": 0,
@@ -79,7 +79,7 @@
           "path": ".github/workflows/lambda-ci-p5-autonomous.yml",
           "ref": "refs/heads/main",
           "job_workflow_ref": "adamtrott78/research-engine/.github/workflows/lambda-ci-p5-autonomous.yml@refs/heads/main",
-          "blob_sha": "1963af0ea0a672c8d1ef643fc08e0c82b1a86504",
+          "blob_sha": "e0fc6f49f4638fc2609580899a66d980a80c7005",
           "event_name": "issue_comment",
           "allowed_actors": [
             "adamtrott78"
@@ -97,7 +97,7 @@
           "path": ".github/workflows/lambda-ci-p5-gpu-autonomous.yml",
           "ref": "refs/heads/main",
           "job_workflow_ref": "adamtrott78/research-engine/.github/workflows/lambda-ci-p5-gpu-autonomous.yml@refs/heads/main",
-          "blob_sha": "f8368fd3b1b1eb83590838b8accc5b46f38b18f6",
+          "blob_sha": "0565cc736d76e4e67e641dce32c4276097ea2241",
           "event_name": "issue_comment",
           "allowed_actors": [
             "adamtrott78"
@@ -109,6 +109,6 @@
         }
       }
     },
-    "activation_note": "Static v2 routing contract only. Keep disabled until controller attestation, root enforcement, coordinated trusted-workflow claim names, install wiring, and acceptance are all validated."
+    "activation_note": "Admission v2 is statically enabled only for the already accepted cpu-test and gpu-small workload classes, pinned to the merged trusted workflow blobs from research-engine 12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d. Live host activation still requires an exact-SHA workspace-control reinstall and acceptance; model-scale classes and gpu-heavy remain non-live."
   }
 }
