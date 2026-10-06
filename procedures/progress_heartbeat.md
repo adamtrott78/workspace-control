@@ -21,6 +21,51 @@ but it must not replace a concise explanation of:
 The heartbeat is an operator-facing reasoning summary. It is not private
 chain-of-thought and must not expose hidden scratch reasoning.
 
+## Accepted ChatGPT Workspace Heartbeat delivery — v0.4.3
+
+For ChatGPT work using the connected Workspace Heartbeat MCP plugin, the
+accepted delivery contract is:
+
+1. emit an initial `heartbeat_update(task_id, message, state)` with natural
+   operator-facing progress;
+2. call `heartbeat_open(task_id)` **exactly once near the beginning** of a
+   sustained task/assistant turn;
+3. continue data-only `heartbeat_update` calls at meaningful state changes and
+   before the hard three-tool lease would expire;
+4. do **not** reopen/render another progress card for later updates;
+5. the already-mounted card independently reads app-only
+   `heartbeat_snapshot(task_id)` through the MCP Apps `tools/call` bridge and
+   replaces its own DOM with the latest three updates for that exact task;
+6. use `heartbeat_get(task_id)` only for explicit full-history/recovery
+   inspection;
+7. emit a terminal `heartbeat_update(..., state="done")` when the owning task
+   is actually complete.
+
+The model must never call `heartbeat_snapshot` directly. It is read-only and
+app-only. The live card may poll while visible/working; that polling is UI
+transport and does not consume the model's heartbeat lease or tool-call budget.
+
+This contract was host-accepted on 2026-10-06: one card opened once, visibly
+advanced multiple times during continued GitHub/tool work, rolled to the latest
+three task-local updates, transitioned to DONE, and did not create duplicate
+cards. The rejected v0.4.2 `heartbeat_render` snapshot pattern and native
+commentary-mirroring experiments are historical only.
+
+Operator runtime entrypoint on the Lambda host is:
+
+```bash
+heartbeat-up
+```
+
+The accepted local helper currently targets:
+
+```text
+/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v043/plugins/workspace-heartbeat
+```
+
+If that target changes, validate the new runtime before treating
+`heartbeat-up` as production-ready.
+
 ## Shared representation
 
 The optional structured snapshot is defined by:
