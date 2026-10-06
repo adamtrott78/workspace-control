@@ -38,6 +38,19 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         self.assertIn("Group=root", PROVISIONER_UNIT)
         self.assertIn("RestrictAddressFamilies=AF_UNIX AF_NETLINK", PROVISIONER_UNIT)
         self.assertIn("DevicePolicy=closed", PROVISIONER_UNIT)
+        self.assertIn("PrivateDevices=no", PROVISIONER_UNIT)
+        for allowed in (
+            "DeviceAllow=/dev/nvidiactl rw",
+            "DeviceAllow=/dev/nvidia0 rw",
+            "DeviceAllow=/dev/nvidia1 rw",
+        ):
+            self.assertIn(allowed, PROVISIONER_UNIT)
+        for forbidden_device in (
+            "DeviceAllow=/dev/nvidia-uvm rw",
+            "DeviceAllow=/dev/nvidia-uvm-tools rw",
+            "DeviceAllow=/dev/nvidia-modeset rw",
+        ):
+            self.assertNotIn(forbidden_device, PROVISIONER_UNIT)
         self.assertIn(
             "CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER CAP_SETUID CAP_SETGID",
             PROVISIONER_UNIT,
