@@ -215,6 +215,7 @@ def good_v2_request(workload="cpu-test"):
             "actor_login": "adamtrott78",
             "triggering_actor_login": "adamtrott78",
             "pr_number": 101,
+            "pr_state": "open",
             "pr_head_repository": "adamtrott78/research-engine",
             "candidate_sha": V2_CANDIDATE,
             "candidate_verification": "PR_HEAD_MATCH",

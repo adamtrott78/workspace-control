@@ -108,6 +108,7 @@ def v2_request(workload="cpu-test"):
             "actor_login": "adamtrott78",
             "triggering_actor_login": "adamtrott78",
             "pr_number": 101,
+            "pr_state": "open",
             "pr_head_repository": "adamtrott78/research-engine",
             "candidate_sha": V2_CANDIDATE,
             "candidate_verification": "PR_HEAD_MATCH",
@@ -324,8 +325,21 @@ def test_v2_same_request_id_different_digest_is_replay_conflict():
         assert done.wait(1)
         wait_for(lambda: not svc._active)
 
+        # Regenerated JIT for the same trusted job is recovery-stable.
+        retry = copy.deepcopy(req)
+        retry["jit_config"] = base64.b64encode(b'{"opaque":"regenerated"}').decode()
+        duplicate = svc.handle_request(retry, peer_uid=12345)
+        assert duplicate["status"] == "DUPLICATE"
+
+        # Changing an authoritative candidate claim under the same request ID
+        # is a real replay conflict.
         conflict = copy.deepcopy(req)
-        conflict["jit_config"] = base64.b64encode(b'{"opaque":"different"}').decode()
+        conflict_sha = "c" * 40
+        conflict["attestation"]["candidate_sha"] = conflict_sha
+        conflict["attestation"]["job_display_name"] = (
+            "wc-admission-v1|workload=cpu-test|pr=101"
+            f"|request=/lambda-ci-p5 {conflict_sha}"
+        )
         rejected = svc.handle_request(conflict, peer_uid=12345)
         assert rejected["status"] == "REJECTED"
         assert rejected["error_type"] == "ReplayConflict"

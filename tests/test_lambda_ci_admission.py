@@ -56,6 +56,7 @@ def good_attestation(workload="cpu-test"):
         "actor_login": "adamtrott78",
         "triggering_actor_login": "adamtrott78",
         "pr_number": 101,
+        "pr_state": "open",
         "pr_head_repository": "adamtrott78/research-engine",
         "candidate_sha": CANDIDATE,
         "candidate_verification": "PR_HEAD_MATCH",
@@ -185,6 +186,12 @@ class AdmissionContractTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.AdmissionError, "fork or foreign"):
             mod.mint_admission(request, enabled_manifest(), POLICY, now=NOW)
 
+    def test_closed_pr_is_rejected(self):
+        request = good_request()
+        request["attestation"]["pr_state"] = "closed"
+        with self.assertRaisesRegex(mod.AdmissionError, "not open"):
+            mod.mint_admission(request, enabled_manifest(), POLICY, now=NOW)
+
     def test_stale_and_future_attestations_are_rejected(self):
         request = good_request()
         request["attestation"]["verified_at"] = (
@@ -200,15 +207,18 @@ class AdmissionContractTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.AdmissionError, "future"):
             mod.mint_admission(request, enabled_manifest(), POLICY, now=NOW)
 
-    def test_request_digest_binds_jit_without_persisting_it(self):
+    def test_request_digest_ignores_recoverable_jit_transport_secret(self):
         manifest = enabled_manifest()
         first = good_request()
         second = copy.deepcopy(first)
         second["jit_config"] = "different-jit-secret"
+        second["attestation"]["verified_at"] = (
+            NOW + timedelta(seconds=5)
+        ).isoformat().replace("+00:00", "Z")
 
         a = mod.mint_admission(first, manifest, POLICY, now=NOW)
         b = mod.mint_admission(second, manifest, POLICY, now=NOW)
-        self.assertNotEqual(
+        self.assertEqual(
             a["request_digest_sha256"],
             b["request_digest_sha256"],
         )

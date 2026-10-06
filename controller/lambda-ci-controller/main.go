@@ -43,6 +43,7 @@ type config struct {
 	AppClientID     string
 	AppInstallID    int64
 	AppPrivateKey   string
+	AdmissionV2     bool
 }
 
 type provisionRequest struct {
@@ -54,10 +55,22 @@ type provisionRequest struct {
 	JITConfig     string `json:"jit_config"`
 }
 
+type provisionRequestV2 struct {
+	SchemaVersion int                   `json:"schema_version"`
+	RequestID     string                `json:"request_id"`
+	ProjectID     string                `json:"project_id"`
+	WorkloadClass string                `json:"workload_class"`
+	RunnerName    string                `json:"runner_name"`
+	JITConfig     string                `json:"jit_config"`
+	Attestation   controllerAttestation `json:"attestation"`
+}
+
 type provisionResponse struct {
 	SchemaVersion int    `json:"schema_version"`
 	Status        string `json:"status"`
 	RequestID     string `json:"request_id,omitempty"`
+	AdmissionID   string `json:"admission_id,omitempty"`
+	ReceiptStatus string `json:"receipt_status,omitempty"`
 	ErrorType     string `json:"error_type,omitempty"`
 	Error         string `json:"error,omitempty"`
 }
@@ -70,7 +83,11 @@ type scaler struct {
 	scaleSetID      int
 	projectID       string
 	profile         string
+	scaleSetName    string
 	provisionerSock string
+	admissionV2     bool
+	attestor        jobAttestor
+	pending         map[int64]*scaleset.JobAssigned
 	logger          *slog.Logger
 }
 
@@ -104,6 +121,17 @@ func loadConfig() (config, error) {
 			return config{}, fmt.Errorf("invalid WORKSPACE_CI_APP_INSTALLATION_ID")
 		}
 		cfg.AppInstallID = value
+	}
+
+	switch raw := strings.TrimSpace(os.Getenv("WORKSPACE_CI_ADMISSION_V2_ENABLED")); raw {
+	case "", "NO":
+		cfg.AdmissionV2 = false
+	case "YES":
+		cfg.AdmissionV2 = true
+	default:
+		return config{}, fmt.Errorf(
+			"WORKSPACE_CI_ADMISSION_V2_ENABLED must be YES or NO",
+		)
 	}
 
 	if cfg.ProjectID != defaultProjectID {
@@ -245,7 +273,7 @@ func runnerName(profile string) (string, error) {
 	return prefix + hex.EncodeToString(raw[:]), nil
 }
 
-func sendProvisionRequest(ctx context.Context, socketPath string, request provisionRequest) (provisionResponse, error) {
+func sendProvisionRequest(ctx context.Context, socketPath string, request any) (provisionResponse, error) {
 	dialer := net.Dialer{Timeout: 5 * time.Second}
 	conn, err := dialer.DialContext(ctx, "unix", socketPath)
 	if err != nil {
@@ -278,6 +306,18 @@ func sendProvisionRequest(ctx context.Context, socketPath string, request provis
 	}
 }
 
+func (s *scaler) nextPendingAssigned() *scaleset.JobAssigned {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var selected *scaleset.JobAssigned
+	for _, job := range s.pending {
+		if selected == nil || job.RunnerRequestID < selected.RunnerRequestID {
+			selected = job
+		}
+	}
+	return selected
+}
+
 func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage) error {
 	if msg == nil {
 		return nil
@@ -294,8 +334,19 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 	}
 
 	s.mu.Lock()
+	if s.admissionV2 {
+		for _, assigned := range msg.JobAssignedMessages {
+			s.pending[assigned.RunnerRequestID] = assigned
+		}
+		for _, started := range msg.JobStartedMessages {
+			delete(s.pending, started.RunnerRequestID)
+		}
+	}
 	for _, completed := range msg.JobCompletedMessages {
 		delete(s.active, completed.RunnerName)
+		if s.admissionV2 {
+			delete(s.pending, completed.RunnerRequestID)
+		}
 	}
 	current := len(s.active)
 	s.mu.Unlock()
@@ -310,6 +361,9 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 	if target <= 0 {
 		s.mu.Lock()
 		clear(s.active)
+		if s.admissionV2 {
+			clear(s.pending)
+		}
 		s.mu.Unlock()
 		return nil
 	}
@@ -318,10 +372,50 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 	}
 
 	for current < target {
-		name, err := runnerName(s.profile)
-		if err != nil {
-			return fmt.Errorf("runner name: %w", err)
+		var (
+			name       string
+			requestID  string
+			attestation controllerAttestation
+			assigned   *scaleset.JobAssigned
+			err        error
+		)
+
+		if s.admissionV2 {
+			if s.attestor == nil {
+				return fmt.Errorf("admission v2 enabled without GitHub attestor")
+			}
+			assigned = s.nextPendingAssigned()
+			if assigned == nil {
+				s.logger.Info("Admission v2 waiting for trusted JobAssigned metadata")
+				return nil
+			}
+			attestation, err = s.attestor.Attest(
+				ctx,
+				assigned,
+				s.scaleSetName,
+				s.profile,
+			)
+			if err != nil {
+				return fmt.Errorf("attest assigned job: %w", err)
+			}
+			requestID, name, err = deterministicAdmissionExecutionIDs(
+				s.profile,
+				attestation,
+			)
+			if err != nil {
+				return fmt.Errorf("derive deterministic admission identity: %w", err)
+			}
+		} else {
+			name, err = runnerName(s.profile)
+			if err != nil {
+				return fmt.Errorf("runner name: %w", err)
+			}
+			requestID, err = randomID()
+			if err != nil {
+				return fmt.Errorf("request id: %w", err)
+			}
 		}
+
 		jit, err := s.client.GenerateJitRunnerConfig(
 			ctx,
 			&scaleset.RunnerScaleSetJitRunnerSetting{Name: name},
@@ -330,19 +424,30 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		if err != nil {
 			return fmt.Errorf("generate JIT config: %w", err)
 		}
-		requestID, err := randomID()
-		if err != nil {
-			return fmt.Errorf("request id: %w", err)
+
+		var request any
+		if s.admissionV2 {
+			request = provisionRequestV2{
+				SchemaVersion: 2,
+				RequestID:     requestID,
+				ProjectID:     s.projectID,
+				WorkloadClass: s.profile,
+				RunnerName:    name,
+				JITConfig:     jit.EncodedJITConfig,
+				Attestation:   attestation,
+			}
+		} else {
+			request = provisionRequest{
+				SchemaVersion: 1,
+				RequestID:     requestID,
+				ProjectID:     s.projectID,
+				Profile:       s.profile,
+				RunnerName:    name,
+				JITConfig:     jit.EncodedJITConfig,
+			}
 		}
 
-		response, err := sendProvisionRequest(ctx, s.provisionerSock, provisionRequest{
-			SchemaVersion: 1,
-			RequestID:     requestID,
-			ProjectID:     s.projectID,
-			Profile:       s.profile,
-			RunnerName:    name,
-			JITConfig:     jit.EncodedJITConfig,
-		})
+		response, err := sendProvisionRequest(ctx, s.provisionerSock, request)
 		if err != nil {
 			return err
 		}
@@ -356,8 +461,29 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			return nil
 		}
 
+		if s.admissionV2 && response.Status == "DUPLICATE" {
+			switch response.ReceiptStatus {
+			case "COMPLETED", "FAILED":
+				s.mu.Lock()
+				if assigned != nil {
+					delete(s.pending, assigned.RunnerRequestID)
+				}
+				s.mu.Unlock()
+				s.logger.Info(
+					"Recovered terminal admission receipt without re-execution",
+					slog.String("request_id", requestID),
+					slog.String("receipt_status", response.ReceiptStatus),
+					slog.String("admission_id", response.AdmissionID),
+				)
+				return nil
+			}
+		}
+
 		s.mu.Lock()
 		s.active[name] = requestID
+		if s.admissionV2 && assigned != nil {
+			delete(s.pending, assigned.RunnerRequestID)
+		}
 		current = len(s.active)
 		s.mu.Unlock()
 
@@ -366,6 +492,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			slog.String("request_id", requestID),
 			slog.String("runner_name", name),
 			slog.String("status", response.Status),
+			slog.String("admission_id", response.AdmissionID),
 		)
 	}
 	return nil
@@ -401,6 +528,14 @@ func runController(ctx context.Context, cfg config, logger *slog.Logger) error {
 		return fmt.Errorf("create listener: %w", err)
 	}
 
+	var attestor jobAttestor
+	if cfg.AdmissionV2 {
+		attestor, err = newGitHubJobAttestor(cfg)
+		if err != nil {
+			return fmt.Errorf("create admission v2 GitHub attestor: %w", err)
+		}
+	}
+
 	s := &scaler{
 		active:          make(map[string]string),
 		client:          client,
@@ -408,7 +543,11 @@ func runController(ctx context.Context, cfg config, logger *slog.Logger) error {
 		scaleSetID:      scaleSet.ID,
 		projectID:       cfg.ProjectID,
 		profile:         cfg.Profile,
+		scaleSetName:    cfg.ScaleSetName,
 		provisionerSock: cfg.ProvisionerSock,
+		admissionV2:     cfg.AdmissionV2,
+		attestor:        attestor,
+		pending:         make(map[int64]*scaleset.JobAssigned),
 		logger:          logger.WithGroup("scaler"),
 	}
 
@@ -417,6 +556,7 @@ func runController(ctx context.Context, cfg config, logger *slog.Logger) error {
 		slog.Int("scale_set_id", scaleSet.ID),
 		slog.String("scale_set_name", cfg.ScaleSetName),
 		slog.Int("max_runners", maxRunners),
+		slog.Bool("admission_v2", cfg.AdmissionV2),
 	)
 
 	if err := l.Run(ctx, s); !errors.Is(err, context.Canceled) {

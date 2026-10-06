@@ -170,3 +170,42 @@ func contains(haystack, needle string) bool {
 	}
 	return false
 }
+
+
+func TestAdmissionV2RequiresExplicitYes(t *testing.T) {
+	for _, key := range []string{
+		"WORKSPACE_CI_GITHUB_URL",
+		"WORKSPACE_CI_SCALESET_NAME",
+		"WORKSPACE_CI_PROJECT_ID",
+		"WORKSPACE_CI_PROFILE",
+		"WORKSPACE_CI_PROVISIONER_SOCKET",
+		"WORKSPACE_CI_APP_CLIENT_ID",
+		"WORKSPACE_CI_APP_INSTALLATION_ID",
+		"WORKSPACE_CI_APP_PRIVATE_KEY_FILE",
+	} {
+		t.Setenv(key, "")
+	}
+	t.Setenv("WORKSPACE_CI_PAT_FILE", "/tmp/controller-token-for-config-test")
+	t.Setenv("WORKSPACE_CI_ADMISSION_V2_ENABLED", "")
+	cfg, err := loadConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.AdmissionV2 {
+		t.Fatal("admission v2 enabled without explicit YES")
+	}
+
+	t.Setenv("WORKSPACE_CI_ADMISSION_V2_ENABLED", "YES")
+	cfg, err = loadConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !cfg.AdmissionV2 {
+		t.Fatal("explicit admission v2 YES was ignored")
+	}
+
+	t.Setenv("WORKSPACE_CI_ADMISSION_V2_ENABLED", "true")
+	if _, err := loadConfig(); err == nil {
+		t.Fatal("non-canonical admission v2 flag was accepted")
+	}
+}
