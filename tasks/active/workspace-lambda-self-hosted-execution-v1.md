@@ -20,21 +20,21 @@ Design, validate, and if safety gates pass pilot a project-isolated GitHub Actio
 
 ## Current stage
 
-research_engine_pilot
+project_isolation_and_cache_validation
 
 ## Next safe action
 
-Human-only credential gate: on Lambda create/reuse a clean detached workspace-control tree exactly at `550371aa7afba3de2af5fa6afe360ad4b21f0511` and run `scripts/launch_lambda_ci_p4_gpu.py` under sudo with `WORKSPACE_CI_P4_AUTHORIZED=YES`. The launcher will grant only /dev/nvidiactl, the UUID-resolved selected physical GPU node, and the exact shared CUDA UVM support nodes /dev/nvidia-uvm plus /dev/nvidia-uvm-tools when present. P4 retry #3 run 37412644570 is already queued on gpu-small-v1. A clean PAT used only in hidden prompts may be reused.
+Begin P5 static/recovery analysis from the accepted workspace-control architecture and current main: re-read `architecture/lambda-self-hosted-execution-v1.md`, `architecture/lambda-ci-controller-adapter.v1.md`, `architecture/lambda-ci-provisioner-protocol.v1.md`, `architecture/lambda-ci-systemd-profiles.v1.json`, and the current controller/provisioner scripts/tests. Compare those accepted contracts against the proven P2-P4 manual JIT launchers and identify the minimal implementation delta for an autonomous unprivileged `ci-controller` + narrow root provisioner. Do not mutate the live Lambda host until the P5 static implementation is CI-green.
 
 ## Remaining work
 
-- Launch queued P4 retry #3 run 37412644570 using scripts/launch_lambda_ci_p4_gpu.py from exact workspace-control 550371aa7afba3de2af5fa6afe360ad4b21f0511.
-- Immediately consume the always-uploaded P4 PASS/FAIL hardware receipt and launcher receipt when terminal.
-- If CUDA still fails, use the receipt's exact failure stage/reason to add only the next measured support requirement; do not broaden physical GPU access.
-- After P4 PASS, begin P5 autonomous controller/provisioner acceptance.
-- P6: second-project isolation pilot under separate UID/root/cache.
+- P5: re-read the accepted scale-set/controller/provisioner architecture and current implementation artifacts, then identify the smallest delta from the proven P2-P4 manual JIT launchers to an autonomous controller.
+- P5: implement hosted-CI validation for an unprivileged ci-controller listener using the pinned official actions/scaleset client (or accepted adapter) and a narrow local root provisioner with no GitHub credential.
+- P5: on Lambda, install/enable only the accepted controller/provisioner pieces and prove ChatGPT can trigger a deliberate bounded failure, consume evidence, repair, and rerun PASS without human SSH or PAT relay.
+- P5: prove controller restart/recovery, one-job cleanup, credential non-exposure, and kill-switch behavior.
+- P6: perform second-project isolation pilot under a distinct UID/root/cache and prove mutual denial.
 
 ## Blockers / gates
 
-- Human-only JIT credential gate: launch queued P4 retry #3 run 37412644570 using exact workspace-control 550371aa7afba3de2af5fa6afe360ad4b21f0511. A clean PAT used only in hidden prompts may be reused.
-- P4 retry #3 must pass CUDA initialization, exactly one visible target UUID, real 256 MiB allocation/free, explicit non-selected GPU denial, and post-exit project/GPU cleanup before P5.
+- P5 controller/provisioner acceptance is not yet implemented on the live Lambda host; routine JIT execution still requires the operator's local sudo/PAT relay.
+- P5 must not persist a broad GitHub credential in root context or grant arbitrary command/device/path selection to the network-facing controller.
