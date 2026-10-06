@@ -52,7 +52,7 @@ chmod 0700 "$WORK"
 PACKAGE="postgresql-14-pgvector"
 VERSION="0.8.6-1.pgdg22.04+2"
 PGDG_FINGERPRINT="B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8"
-SOURCE_URL="https://apt.postgresql.org/pub/repos/apt"
+SOURCE_URL="https://apt-archive.postgresql.org/pub/repos/apt"
 KEY_URL="https://www.postgresql.org/media/keys/ACCC4CF8.asc"
 
 MASTER_BEFORE="$(
@@ -120,7 +120,7 @@ else
       [[ "$fpr" == "$PGDG_FINGERPRINT" ]]
 
       cat > apt/sources.list <<EOF
-deb [arch=amd64 signed-by=$WORK/apt/pgdg.asc] $SOURCE_URL jammy-pgdg main
+deb [arch=amd64 signed-by=$WORK/apt/pgdg.asc] $SOURCE_URL jammy-pgdg-archive main
 EOF
 
       APT=(
