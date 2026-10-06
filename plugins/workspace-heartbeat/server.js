@@ -10,9 +10,14 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
-const PANEL_URI = "ui://workspace-heartbeat/panel-v6.html";
+const PANEL_URI = "ui://workspace-heartbeat/panel-v7.html";
+const UPDATE_CARD_URI = "ui://workspace-heartbeat/update-card-v1.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
+  "utf8",
+);
+const updateCardHtml = readFileSync(
+  new URL("./public/heartbeat-update-card.html", import.meta.url),
   "utf8",
 );
 const store = new HeartbeatStore({ historyLimit: 50 });
@@ -24,6 +29,10 @@ const heartbeatSchema = z.object({
   sequence: z.number().int().nonnegative(),
   updated_at: z.string(),
 });
+
+const heartbeatUpdateOutputSchema = {
+  heartbeat: heartbeatSchema,
+};
 
 const heartbeatOutputSchema = {
   heartbeat: heartbeatSchema.nullable(),
@@ -46,7 +55,7 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.3.3",
+      version: "0.4.0",
     },
     {
       instructions:
@@ -75,6 +84,27 @@ function createHeartbeatServer() {
     }),
   );
 
+  registerAppResource(
+    server,
+    "workspace-heartbeat-update-card",
+    UPDATE_CARD_URI,
+    {},
+    async () => ({
+      contents: [
+        {
+          uri: UPDATE_CARD_URI,
+          mimeType: RESOURCE_MIME_TYPE,
+          text: updateCardHtml,
+          _meta: {
+            ui: {
+              prefersBorder: false,
+            },
+          },
+        },
+      ],
+    }),
+  );
+
   registerAppTool(
     server,
     "heartbeat_update",
@@ -87,7 +117,7 @@ function createHeartbeatServer() {
         message: z.string().min(1).max(4000),
         state: z.enum(["working", "waiting", "blocked", "done"]).default("working"),
       },
-      outputSchema: heartbeatOutputSchema,
+      outputSchema: heartbeatUpdateOutputSchema,
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -95,7 +125,7 @@ function createHeartbeatServer() {
         idempotentHint: false,
       },
       _meta: {
-        ui: { resourceUri: PANEL_URI, visibility: ["model"] },
+        ui: { resourceUri: UPDATE_CARD_URI, visibility: ["model"] },
         "openai/toolInvocation/invoking": "Updating progress…",
         "openai/toolInvocation/invoked": "Progress updated",
       },
@@ -108,14 +138,15 @@ function createHeartbeatServer() {
         message: message.trim(),
         state,
       });
-      const snapshot = store.getSnapshot({
-        sessionId,
-        taskId: heartbeat.task_id,
-      });
-      return resultFor(
-        snapshot,
-        `Heartbeat updated for ${heartbeat.task_id} (sequence ${heartbeat.sequence}).`,
-      );
+      return {
+        structuredContent: { heartbeat },
+        content: [
+          {
+            type: "text",
+            text: `Heartbeat updated for ${heartbeat.task_id} (sequence ${heartbeat.sequence}).`,
+          },
+        ],
+      };
     },
   );
 
