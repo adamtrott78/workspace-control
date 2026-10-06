@@ -1,6 +1,7 @@
 import ast
 from pathlib import Path
 import runpy
+import io
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = (ROOT / "scripts" / "launch_lambda_ci_p3_cpu.py").read_text()
@@ -101,3 +102,29 @@ def test_p3_timeout_hierarchy_exceeds_workflow_timeout():
     assert f"RuntimeMaxSec={systemd_runtime}s" in command
     assert "RuntimeMaxSec=15min" not in command
     assert "proc.wait(timeout=LAUNCHER_WATCHDOG_SECONDS)" in SCRIPT
+
+
+def test_p3_runner_output_is_mirrored_live_and_logged():
+    ns = runpy.run_path(
+        str(ROOT / "scripts" / "launch_lambda_ci_p3_cpu.py"),
+        run_name="lambda_ci_p3_stream_test",
+    )
+
+    class NonClosingStringIO(io.StringIO):
+        def close(self):
+            self.flush()
+
+    source = NonClosingStringIO("step-one\nstep-two\n")
+    durable = io.StringIO()
+    visible = io.StringIO()
+    original_stdout = ns["sys"].stdout
+    try:
+        ns["sys"].stdout = visible
+        ns["pump_runner_output"](source, durable)
+    finally:
+        ns["sys"].stdout = original_stdout
+
+    assert durable.getvalue() == "step-one\nstep-two\n"
+    assert visible.getvalue() == "step-one\nstep-two\n"
+    assert "P3_RUNNER_STARTED" in SCRIPT
+    assert "stdout=subprocess.PIPE" in SCRIPT
