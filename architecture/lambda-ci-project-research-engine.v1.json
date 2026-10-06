@@ -61,5 +61,54 @@
     "persist_checkout_credentials": false
   },
   "concurrency": 1,
-  "production_acceptance_profile": "not_authorized_in_v1_pilot"
+  "production_acceptance_profile": "not_authorized_in_v1_pilot",
+  "admission_v2": {
+    "enabled": false,
+    "policy_id": "lambda-ci-workload-policy-v1",
+    "admission_ttl_seconds": 900,
+    "kill_switch_epoch": 0,
+    "live_enabled_workload_classes": [
+      "cpu-test",
+      "gpu-small"
+    ],
+    "routes": {
+      "cpu-test": {
+        "scale_set_name": "lambda-research-engine",
+        "execution_profile": "cpu-test",
+        "trusted_workflow": {
+          "path": ".github/workflows/lambda-ci-p5-autonomous.yml",
+          "ref": "refs/heads/main",
+          "job_workflow_ref": "adamtrott78/research-engine/.github/workflows/lambda-ci-p5-autonomous.yml@refs/heads/main",
+          "blob_sha": "1963af0ea0a672c8d1ef643fc08e0c82b1a86504",
+          "event_name": "issue_comment",
+          "allowed_actors": [
+            "adamtrott78"
+          ],
+          "job_display_claim": {
+            "version": "wc-admission-v1",
+            "command": "/lambda-ci-p5"
+          }
+        }
+      },
+      "gpu-small": {
+        "scale_set_name": "lambda-research-engine-gpu",
+        "execution_profile": "gpu-small",
+        "trusted_workflow": {
+          "path": ".github/workflows/lambda-ci-p5-gpu-autonomous.yml",
+          "ref": "refs/heads/main",
+          "job_workflow_ref": "adamtrott78/research-engine/.github/workflows/lambda-ci-p5-gpu-autonomous.yml@refs/heads/main",
+          "blob_sha": "f8368fd3b1b1eb83590838b8accc5b46f38b18f6",
+          "event_name": "issue_comment",
+          "allowed_actors": [
+            "adamtrott78"
+          ],
+          "job_display_claim": {
+            "version": "wc-admission-v1",
+            "command": "/lambda-ci-p5-gpu"
+          }
+        }
+      }
+    },
+    "activation_note": "Static v2 routing contract only. Keep disabled until controller attestation, root enforcement, coordinated trusted-workflow claim names, install wiring, and acceptance are all validated."
+  }
 }
