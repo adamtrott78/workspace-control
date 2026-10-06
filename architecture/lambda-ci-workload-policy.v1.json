@@ -1,0 +1,385 @@
+{
+  "schema_version": 1,
+  "policy_id": "lambda-ci-workload-policy-v1",
+  "status": "CONTRACT_ONLY_NOT_LIVE_ENFORCEMENT",
+  "owning_task": "workspace-lambda-execution-policy-v1",
+  "policy_epoch": 1,
+  "authority": {
+    "owner": "workspace-control",
+    "principle": "workflow_or_candidate_input_is_a_claim_root_owned_policy_is_authority",
+    "live_lambda_mutation_authorized_by_this_contract": false
+  },
+  "baselines": {
+    "workspace_control_sha": "94ad261fa61bb281c961f4418bd7683111306a6f",
+    "research_engine_sha": "577764f4db10e4f4f894b1613518c358c6da7b95",
+    "project_manifest": {
+      "path": "architecture/lambda-ci-project-research-engine.v1.json",
+      "blob_sha": "fd5517fab2715a142e1a3862295f91ab768d824c"
+    },
+    "systemd_profiles": {
+      "path": "architecture/lambda-ci-systemd-profiles.v1.json",
+      "blob_sha": "e3e5ffc15e4e73b4c8d71c2851c772f0b2989245"
+    },
+    "trusted_cache_policy": "architecture/lambda-ci-trusted-cache-policy.v1.md"
+  },
+  "admission_semantics": {
+    "root_issued_manifest_required": true,
+    "single_use": true,
+    "request_id_conflict_behavior": "REJECT",
+    "identical_unconsumed_request_behavior": "RETURN_SAME_ADMISSION",
+    "identical_consumed_terminal_request_behavior": "RETURN_EXISTING_RECEIPT_NO_REEXECUTION",
+    "consumed_without_terminal_receipt_behavior": "ABORT_INDETERMINATE_REQUIRE_FRESH_REQUEST",
+    "expiry_behavior": "REJECT_REQUIRE_FRESH_REQUEST",
+    "stale_if_policy_epoch_changes": true,
+    "stale_if_policy_digest_changes": true,
+    "stale_if_project_profile_digest_changes": true,
+    "stale_if_required_cache_object_changes_or_disappears": true,
+    "stale_if_exception_is_revoked_or_expired": true,
+    "admission_ttl_seconds_max": 900
+  },
+  "payload_network_classes": {
+    "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD": {
+      "description": "Accepted P5 compatibility mode: runner control plane plus public payload egress; private/local/production services remain denied."
+    },
+    "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE": {
+      "description": "GitHub runner control traffic may remain outside the payload sandbox; candidate/model payload gets no public model/network egress."
+    },
+    "TRUSTED_ARTIFACT_ACQUISITION_ONLY": {
+      "description": "No candidate payload. A trusted fetcher may contact only the declared public model/package source path and unavoidable public CDN redirects; private/local/production ranges remain denied."
+    },
+    "NO_NETWORK": {
+      "description": "No payload or trusted-operation network access beyond local IPC required by the bounded operation."
+    }
+  },
+  "payload_secret_classes": {
+    "NONE": {
+      "candidate_visible_secrets": [],
+      "model_registry_credential": false
+    },
+    "CONTROL_PLANE_EPHEMERAL_ONLY": {
+      "candidate_visible_secrets": [],
+      "model_registry_credential": false,
+      "note": "Ephemeral GitHub/JIT control material remains outside durable payload/cache state and is not an application secret grant."
+    },
+    "TRUSTED_ACQUISITION_REGISTRY_OPTIONAL": {
+      "candidate_visible_secrets": [],
+      "model_registry_credential": "trusted_fetcher_only",
+      "persistence_forbidden": true
+    }
+  },
+  "filesystem_classes": {
+    "EPHEMERAL_JOB_ONLY": {
+      "candidate_write_roots": [
+        "job_workspace",
+        "ephemeral_home"
+      ],
+      "trusted_cache": "not_mounted",
+      "persistent_candidate_write": false
+    },
+    "EPHEMERAL_JOB_PLUS_QUARANTINE_TRUSTED_WRITE": {
+      "candidate_write_roots": [],
+      "trusted_operation_write_roots": [
+        "unique_admission_quarantine"
+      ],
+      "trusted_cache": "not_mounted",
+      "persistent_candidate_write": false
+    },
+    "TRUSTED_PROMOTION_FILESYSTEM": {
+      "candidate_write_roots": [],
+      "trusted_operation_write_roots": [
+        "unique_admission_quarantine",
+        "trusted_cache_atomic_target"
+      ],
+      "trusted_cache": "cache_manager_only",
+      "persistent_candidate_write": false
+    },
+    "EPHEMERAL_JOB_PLUS_TRUSTED_CACHE_READONLY": {
+      "candidate_write_roots": [
+        "job_workspace",
+        "ephemeral_home"
+      ],
+      "trusted_cache": "read_only",
+      "persistent_candidate_write": false
+    }
+  },
+  "cache_access_classes": {
+    "NO_PERSISTENT_CACHE_AUTHORITY": {
+      "trusted_cache": "none",
+      "candidate_persistent_write": false
+    },
+    "QUARANTINE_WRITE_TRUSTED_ONLY": {
+      "trusted_cache": "none",
+      "quarantine_write": "trusted_acquisition_only",
+      "candidate_persistent_write": false
+    },
+    "TRUSTED_CACHE_PROMOTION_ONLY": {
+      "trusted_cache": "trusted_cache_manager_write_only",
+      "candidate_invocable": false
+    },
+    "TRUSTED_MODEL_RUNTIME_READONLY": {
+      "trusted_cache": "read_only",
+      "candidate_persistent_write": false,
+      "completeness_verify_before_execution": true,
+      "digest_verify_before_execution": true
+    }
+  },
+  "state_effect_classes": {
+    "CI_VALIDATION_ONLY": {
+      "production_routing_change": false,
+      "scientific_state_materialization": false
+    },
+    "QUARANTINE_ARTIFACTS_ONLY": {
+      "production_routing_change": false,
+      "scientific_state_materialization": false,
+      "trusted_cache_mutation": false
+    },
+    "TRUSTED_CACHE_PROMOTION_ONLY": {
+      "production_routing_change": false,
+      "scientific_state_materialization": false,
+      "trusted_cache_mutation": true
+    },
+    "NON_SCIENTIFIC_MODEL_EVAL_ONLY": {
+      "production_routing_change": false,
+      "scientific_state_materialization": false,
+      "sustained_model_server_after_job": false
+    }
+  },
+  "serialization_policy": {
+    "default_model_serialization": "SAFE_ONLY",
+    "safe_serialization_examples": [
+      "safetensors",
+      "json",
+      "text",
+      "tokenizer_assets"
+    ],
+    "deny_without_exception": [
+      "pickle",
+      "torch_pickle_checkpoint",
+      "custom_remote_code",
+      "mixed_or_unknown_executable_model_material"
+    ],
+    "trust_remote_code_default": false,
+    "approved_exceptions": [],
+    "future_exception_required_bindings": [
+      "exception_id",
+      "project_id",
+      "model_repository",
+      "model_revision",
+      "model_cache_object_digest",
+      "runtime_cache_object_digest",
+      "executable_dependency_digest",
+      "allowed_entrypoint_or_deserializer",
+      "reviewer",
+      "issued_at",
+      "expires_at"
+    ]
+  },
+  "failure_semantics": {
+    "automatic_retry_after_payload_failure": false,
+    "automatic_retry_after_timeout": false,
+    "automatic_retry_after_cpu_or_ram_oom": false,
+    "automatic_retry_after_cuda_oom": false,
+    "automatic_retry_after_disk_pressure": false,
+    "cleanup_required_after_every_terminal_state": true,
+    "cleanup_failure_action": "QUARANTINE_LANE_AND_BLOCK_NEW_ADMISSIONS",
+    "model_server_leak_action": "QUARANTINE_LANE_AND_BLOCK_NEW_ADMISSIONS",
+    "gpu_process_leak_action": "QUARANTINE_LANE_AND_BLOCK_NEW_ADMISSIONS",
+    "indeterminate_controller_recovery_action": "DO_NOT_REEXECUTE_REQUIRE_RECOVERY_OR_FRESH_REQUEST"
+  },
+  "resource_classes": {
+    "cpu_test_v1": {
+      "execution_profile": "cpu-test",
+      "max_runtime_seconds": 1800,
+      "scratch_max_bytes": 17179869184,
+      "staging_max_bytes": 0,
+      "gpu_count": 0
+    },
+    "gpu_small_v1": {
+      "execution_profile": "gpu-small",
+      "max_runtime_seconds": 1200,
+      "scratch_max_bytes": 17179869184,
+      "staging_max_bytes": 0,
+      "gpu_count": 1,
+      "gpu_uuids": [
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+      ]
+    },
+    "model_acquire_v1": {
+      "execution_profile": "cpu-test",
+      "max_runtime_seconds": 1800,
+      "scratch_max_bytes": 4294967296,
+      "staging_max_bytes": 17179869184,
+      "gpu_count": 0,
+      "minimum_free_disk_before_bytes": 25769803776
+    },
+    "cache_promote_v1": {
+      "execution_profile": "cpu-test-envelope",
+      "max_runtime_seconds": 1200,
+      "scratch_max_bytes": 17179869184,
+      "staging_max_bytes": 17179869184,
+      "gpu_count": 0
+    },
+    "model_eval_single_gpu_v1": {
+      "execution_profile": "gpu-small",
+      "max_runtime_seconds": 1200,
+      "scratch_max_bytes": 17179869184,
+      "staging_max_bytes": 0,
+      "gpu_count": 1,
+      "gpu_uuids": [
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+      ]
+    }
+  },
+  "workload_classes": {
+    "cpu-test": {
+      "policy_decision": "EXISTING_P5_CAPABILITY",
+      "admission_enabled_after_enforcement": true,
+      "execution_plane": "jit_runner",
+      "candidate_payload_allowed": true,
+      "resource_class": "cpu_test_v1",
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "payload_secret_class": "CONTROL_PLANE_EPHEMERAL_ONLY",
+      "filesystem_class": "EPHEMERAL_JOB_ONLY",
+      "cache_access_class": "NO_PERSISTENT_CACHE_AUTHORITY",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_binding": "FORBIDDEN",
+      "runtime_binding": "OPTIONAL_PROJECT_TEST_RUNTIME"
+    },
+    "gpu-small": {
+      "policy_decision": "EXISTING_P5_CAPABILITY",
+      "admission_enabled_after_enforcement": true,
+      "execution_plane": "jit_runner",
+      "candidate_payload_allowed": true,
+      "resource_class": "gpu_small_v1",
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "payload_secret_class": "CONTROL_PLANE_EPHEMERAL_ONLY",
+      "filesystem_class": "EPHEMERAL_JOB_ONLY",
+      "cache_access_class": "NO_PERSISTENT_CACHE_AUTHORITY",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_binding": "FORBIDDEN",
+      "runtime_binding": "OPTIONAL_PROJECT_TEST_RUNTIME"
+    },
+    "model-acquire": {
+      "policy_decision": "DESIGNED_NOT_LIVE",
+      "admission_enabled_after_enforcement": true,
+      "execution_plane": "trusted_acquisition",
+      "candidate_payload_allowed": false,
+      "resource_class": "model_acquire_v1",
+      "payload_network_class": "TRUSTED_ARTIFACT_ACQUISITION_ONLY",
+      "payload_secret_class": "TRUSTED_ACQUISITION_REGISTRY_OPTIONAL",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_QUARANTINE_TRUSTED_WRITE",
+      "cache_access_class": "QUARANTINE_WRITE_TRUSTED_ONLY",
+      "state_effect_class": "QUARANTINE_ARTIFACTS_ONLY",
+      "model_binding": "REQUIRED_EXACT_REVISION",
+      "runtime_binding": "TRANSPORT_TOOLING_ONLY",
+      "inference_forbidden": true
+    },
+    "cache-promote": {
+      "policy_decision": "DESIGNED_NOT_LIVE",
+      "admission_enabled_after_enforcement": true,
+      "execution_plane": "trusted_cache_manager",
+      "candidate_payload_allowed": false,
+      "candidate_invocable": false,
+      "resource_class": "cache_promote_v1",
+      "payload_network_class": "NO_NETWORK",
+      "payload_secret_class": "NONE",
+      "filesystem_class": "TRUSTED_PROMOTION_FILESYSTEM",
+      "cache_access_class": "TRUSTED_CACHE_PROMOTION_ONLY",
+      "state_effect_class": "TRUSTED_CACHE_PROMOTION_ONLY",
+      "model_binding": "PROMOTION_RECEIPT_REQUIRED",
+      "runtime_binding": "PROMOTION_RECEIPT_REQUIRED",
+      "inference_forbidden": true
+    },
+    "model-eval-single-gpu": {
+      "policy_decision": "DESIGNED_NOT_LIVE",
+      "admission_enabled_after_enforcement": true,
+      "execution_plane": "jit_runner",
+      "candidate_payload_allowed": true,
+      "resource_class": "model_eval_single_gpu_v1",
+      "payload_network_class": "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE",
+      "payload_secret_class": "CONTROL_PLANE_EPHEMERAL_ONLY",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_TRUSTED_CACHE_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_binding": "REQUIRED_PROMOTED_EXACT",
+      "runtime_binding": "REQUIRED_PROMOTED_EXACT",
+      "model_registry_credential_forbidden": true
+    },
+    "gpu-heavy": {
+      "policy_decision": "DENY",
+      "admission_enabled_after_enforcement": false,
+      "execution_plane": "jit_runner",
+      "candidate_payload_allowed": false,
+      "underlying_profile": "gpu-heavy",
+      "denial_reason": "dual-GPU authority requires a separate post-pilot acceptance gate"
+    }
+  },
+  "project_bindings": {
+    "research-engine": {
+      "repository": "adamtrott78/research-engine",
+      "allowed_workload_classes": [
+        "cpu-test",
+        "gpu-small",
+        "model-acquire",
+        "cache-promote",
+        "model-eval-single-gpu"
+      ],
+      "denied_workload_classes": [
+        "gpu-heavy"
+      ],
+      "trusted_workflow_requirement": "exact_default_branch_workflow_identity",
+      "candidate_sha_requirement": "exact_40_hex_commit",
+      "allowed_models": [
+        {
+          "model_id": "qwen3.5-4b",
+          "repository": "Qwen/Qwen3.5-4B",
+          "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+          "serialization_requirement": "SAFE_ONLY",
+          "promotion_required_before_eval": true,
+          "owning_contracts": [
+            "benchmarks/document_intelligence/residual-model-prefetch-contract.v1.json",
+            "benchmarks/document_intelligence/qwen35-runtime-certification-contract.v1.json"
+          ]
+        }
+      ],
+      "allowed_runtimes": [
+        {
+          "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+          "promotion_required_before_eval": true,
+          "owning_contracts": [
+            "benchmarks/document_intelligence/qwen35-runtime-certification-contract.v1.json",
+            "benchmarks/document_intelligence/local-inference-service-contract.v1.json",
+            "benchmarks/document_intelligence/qwen35-guarded-semantic-calibration-contract.v1.json"
+          ]
+        }
+      ],
+      "first_model_pilot": {
+        "workload_class": "model-eval-single-gpu",
+        "model_id": "qwen3.5-4b",
+        "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+        "scientific": false,
+        "production_routing_change": false,
+        "canary_contract": "benchmarks/document_intelligence/qwen35-runtime-certification-contract.v1.json"
+      }
+    }
+  },
+  "required_execution_receipt": {
+    "bind_policy_and_admission_identity": true,
+    "bind_workflow_and_candidate_sha": true,
+    "bind_model_runtime_cache_identity_when_applicable": true,
+    "record_gpu_uuid_and_cuda_runtime_when_applicable": true,
+    "record_resource_peaks": true,
+    "record_terminal_status": true,
+    "record_cleanup_result": true,
+    "cleanup_checks": [
+      "cgroup_empty",
+      "project_uid_processes_zero",
+      "gpu_compute_processes_zero",
+      "model_servers_zero",
+      "job_workspace_removed",
+      "ephemeral_staging_removed",
+      "jit_config_absent",
+      "github_credential_absent"
+    ]
+  }
+}
