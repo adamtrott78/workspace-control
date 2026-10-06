@@ -89,3 +89,15 @@ Measured duplication:
 This strongly supports one generic profile-driven JIT launcher rather than continuing phase-specific copies.
 
 The existing project manifest and systemd profile files already contain most resource/isolation policy. The next design step is to make one versioned execution-profile contract the single source of truth and keep dependency bootstrap project/profile-scoped.
+
+
+## Execution-profile design checkpoint
+
+The inventory has been converted into a versioned design:
+
+- `architecture/lambda-ci-execution-profile.v1.schema.json`
+- `architecture/lambda-ci-generic-launcher-design.v1.md`
+
+The contract makes project/profile policy declarative and keeps one-job JIT lifecycle implementation generic. PostgreSQL/pgvector remains a research-engine dependency prerequisite, not global launcher behavior.
+
+The next implementation is deliberately parallel/non-default: add a generic profile loader/launcher plus executable P2-B/P3 equivalence tests. Legacy launchers and the parent P3/P4/P5 path remain untouched until equivalence passes.

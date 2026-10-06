@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "workspace-lambda-self-hosted-execution-v1",
-  "current_stage": "duplication_latency_operator_friction_inventory",
+  "current_stage": "execution_profile_contract_design",
   "acceptance_criteria": [
     "The task begins from the exact accepted/self-hosted-runner pilot evidence rather than redesigning the Lambda runner architecture from scratch.",
     "The active P3/P4/P5 acceptance lineage owned by workspace-lambda-self-hosted-execution-v1 remains authoritative and is not silently rewritten by optimization work.",
@@ -157,6 +157,36 @@
         }
       ],
       "resume_condition": "Inventory is durable and identifies a bounded reusable launcher/profile schema without altering parent P3/P4/P5 acceptance."
+    },
+    {
+      "id": "execution_profile_contract_design",
+      "status": "CHECKPOINTED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "durable duplication inventory",
+        "current research-engine project manifest",
+        "current systemd profile candidate",
+        "current provisioner protocol"
+      ],
+      "outputs": [
+        "architecture/lambda-ci-execution-profile.v1.schema.json",
+        "architecture/lambda-ci-generic-launcher-design.v1.md",
+        "executable equivalence/regression matrix"
+      ],
+      "validation": [
+        {
+          "check": "Policy/lifecycle separation specified",
+          "result": "PASS",
+          "evidence": [
+            "Schema moves repository/runner/roots/profile/resource/network/filesystem/dependency/receipt inputs into declarative policy.",
+            "Design keeps token/JIT/job lifecycle in one generic launcher and keeps project dependency bootstrap separate.",
+            "Regression plan requires executable privilege-boundary tests and P2-B/P3 behavior equivalence before deletion of legacy launchers."
+          ]
+        }
+      ],
+      "resume_condition": "Implement generic launcher only after schema/design are durable on the optimization branch and current parent acceptance boundaries remain unchanged."
     }
   ],
   "checkpoints": [
@@ -211,15 +241,15 @@
     "Do not change shared runtime behavior until the inventory/profile-contract design is reviewed against current main and executable regression coverage is defined."
   ],
   "remaining_work": [
-    "Finish the duplication/latency/operator-friction inventory with current launcher/bootstrap/provisioner/profile evidence.",
-    "Define a versioned generic execution-profile schema that owns runner labels, bounded runtime, resource class, roots, cache policy, denied capabilities, receipt metadata, and dependency prerequisites.",
-    "Refactor P2B/P3 launcher mechanics behind one profile-driven JIT launcher while preserving exact existing security invariants and adding executable regression coverage.",
-    "Model PostgreSQL/pgvector bootstrap as a project/profile dependency rather than global behavior.",
-    "Measure reduction in duplicate code, operator terminal steps, and runner spin-up/failure-diagnosis friction.",
-    "Demonstrate a second bounded project/profile without cross-project authority leakage."
+    "Implement the generic profile loader/validator and one-job JIT launcher behind the v1 execution-profile schema without deleting legacy launchers.",
+    "Add executable regression fixtures for P2-B/P3 equivalence, token non-persistence, sandbox generation, dependency gating, timeout, cleanup, and cross-project denial.",
+    "Represent current research-engine cpu-test/cpu-test-v2 policy as data under the new contract without changing parent P3 acceptance behavior.",
+    "Run repository validation and compare generic-launcher receipts/commands against legacy fixtures.",
+    "Only after equivalence PASS retire phase-specific launcher duplication.",
+    "Measure code/terminal-step/diagnosis reductions and demonstrate a second project profile."
   ],
-  "next_safe_action": "Continue from the durable duplication inventory on current workspace-control main. Define the generic execution-profile contract and executable regression plan before modifying launcher/runtime behavior; do not service or rewrite the parent P3 human bootstrap/JIT gate from this child task.",
+  "next_safe_action": "Implement the generic profile loader/validator and generic one-job JIT launcher as a parallel, non-default path with executable P2-B/P3 equivalence tests. Do not delete legacy launchers or alter the parent P3/P4/P5 acceptance path until equivalence validation passes.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Initialized 2026-10-05 from the live Lambda self-hosted runner pilot. The user wants heartbeat treated as a side project; once heartbeat is accepted, resume the larger workspace-control optimization effort around GitHub tooling executing on the Lambda. Important live evidence at initialization: workspace-control main bb0b234b79498c14f7e7bdee18a787a69a0c29a8 includes the execution-loop correction after a terminal GitHub job completed but the chat remained in a thought/wait state; research-engine main 62d91642a1df0ec52b778d8d4a4f3e743382e977 includes exact pgvector 0.8.6 gating; parent task workspace-lambda-self-hosted-execution-v1 owns P3/P4/P5 and recorded P3 retry run 37396492836 as queued. The optimization target is not merely faster CI: it is a durable, low-friction ChatGPT↔GitHub↔Lambda control plane with exact provenance, bounded privileges, compact evidence, automatic terminal-result continuation, CPU/GPU profile support, and minimal routine SSH.\n\n2026-10-05 ownership transfer after heartbeat v0.4.1 acceptance: parent task was rehydrated from current main. workspace-control main=d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a; research-engine main=72e3e16ca118c4756c528392158738a39cb5d5aa; run 37398604653 remains queued. Inventory measured P2B/P3 launchers at 94.8% same-position identity (405/427 lines) with identical function sets, confirming a high-value generic-launcher refactor target."
+  "notes": "Initialized 2026-10-05 from the live Lambda self-hosted runner pilot. The user wants heartbeat treated as a side project; once heartbeat is accepted, resume the larger workspace-control optimization effort around GitHub tooling executing on the Lambda. Important live evidence at initialization: workspace-control main bb0b234b79498c14f7e7bdee18a787a69a0c29a8 includes the execution-loop correction after a terminal GitHub job completed but the chat remained in a thought/wait state; research-engine main 62d91642a1df0ec52b778d8d4a4f3e743382e977 includes exact pgvector 0.8.6 gating; parent task workspace-lambda-self-hosted-execution-v1 owns P3/P4/P5 and recorded P3 retry run 37396492836 as queued. The optimization target is not merely faster CI: it is a durable, low-friction ChatGPT↔GitHub↔Lambda control plane with exact provenance, bounded privileges, compact evidence, automatic terminal-result continuation, CPU/GPU profile support, and minimal routine SSH.\n\n2026-10-05 ownership transfer after heartbeat v0.4.1 acceptance: parent task was rehydrated from current main. workspace-control main=d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a; research-engine main=72e3e16ca118c4756c528392158738a39cb5d5aa; run 37398604653 remains queued. Inventory measured P2B/P3 launchers at 94.8% same-position identity (405/427 lines) with identical function sets, confirming a high-value generic-launcher refactor target.\n\n2026-10-05 design checkpoint: lambda-ci-execution-profile.v1.schema.json and lambda-ci-generic-launcher-design.v1.md define the policy/lifecycle split and executable regression matrix. This remains a parallel design path; parent P3 acceptance and legacy launchers are unchanged."
 }
