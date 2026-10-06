@@ -142,41 +142,53 @@ def primary_subnet() -> str:
 
 
 def resolve_gpu_assignment(target_uuid: str) -> dict[str, object]:
-    """Resolve the selected physical GPU UUID to its current NVIDIA device node."""
-    proc = run(
-        [
-            "nvidia-smi",
-            "--query-gpu=uuid,minor_number",
-            "--format=csv,noheader,nounits",
-        ]
-    )
+    """Resolve stable NVIDIA GPU UUIDs to current /dev/nvidia<minor> nodes."""
+    gpu_root = pathlib.Path("/proc/driver/nvidia/gpus")
+    if not gpu_root.is_dir():
+        raise LaunchError("NVIDIA driver GPU metadata directory is missing")
 
     inventory: list[dict[str, object]] = []
-    for line in proc.stdout.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        parts = [part.strip() for part in line.split(",")]
-        if len(parts) != 2:
-            raise LaunchError(f"unexpected nvidia-smi inventory row: {line!r}")
-        gpu_uuid, minor_text = parts
+    for info_path in sorted(gpu_root.glob("*/information")):
+        fields: dict[str, str] = {}
+        for raw_line in info_path.read_text(encoding="utf-8", errors="replace").splitlines():
+            if ":" not in raw_line:
+                continue
+            key, value = raw_line.split(":", 1)
+            fields[key.strip()] = value.strip()
+
+        gpu_uuid = fields.get("GPU UUID")
+        minor_text = fields.get("Device Minor")
+        if not gpu_uuid or minor_text is None:
+            raise LaunchError(
+                f"NVIDIA information file missing GPU UUID/Device Minor: {info_path}"
+            )
         try:
             minor = int(minor_text)
         except ValueError as exc:
-            raise LaunchError(f"invalid NVIDIA minor number: {line!r}") from exc
+            raise LaunchError(
+                f"invalid NVIDIA Device Minor in {info_path}: {minor_text!r}"
+            ) from exc
+
         device = pathlib.Path(f"/dev/nvidia{minor}")
         if not device.exists():
             raise LaunchError(f"NVIDIA device node missing for {gpu_uuid}: {device}")
         mode = device.stat().st_mode
         if not stat.S_ISCHR(mode):
             raise LaunchError(f"NVIDIA GPU path is not a character device: {device}")
+
         inventory.append(
             {
                 "uuid": gpu_uuid,
                 "minor": minor,
                 "device": str(device),
+                "bus_location": fields.get("Bus Location"),
+                "model": fields.get("Model"),
+                "information_path": str(info_path),
             }
         )
+
+    if not inventory:
+        raise LaunchError("NVIDIA driver reported no GPUs")
 
     selected = [row for row in inventory if row["uuid"].lower() == target_uuid.lower()]
     if len(selected) != 1:
@@ -204,7 +216,6 @@ def resolve_gpu_assignment(target_uuid: str) -> dict[str, object]:
         "denied_devices": denied_devices,
         "inventory": inventory,
     }
-
 
 def github_jit_config(token: str, runner_name: str) -> tuple[str, int]:
     url = f"https://api.github.com/repos/{REPOSITORY}/actions/runners/generate-jitconfig"

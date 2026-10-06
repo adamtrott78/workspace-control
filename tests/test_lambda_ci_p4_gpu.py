@@ -40,7 +40,9 @@ def test_gpu_boundary_is_uuid_resolved_not_static_indexed():
     assert "DevicePolicy=closed" in SCRIPT
     assert "DeviceAllow=/dev/nvidiactl rw" in SCRIPT
     assert 'TARGET_GPU_UUID = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"' in SCRIPT
-    assert '"--query-gpu=uuid,minor_number"' in SCRIPT
+    assert 'pathlib.Path("/proc/driver/nvidia/gpus")' in SCRIPT
+    assert '"GPU UUID"' in SCRIPT
+    assert '"Device Minor"' in SCRIPT
     assert 'f"DeviceAllow={selected_device} rw"' in SCRIPT
     assert "DeviceAllow=/dev/nvidia0 rw" not in SCRIPT
     assert "DeviceAllow=/dev/nvidia1 rw" not in SCRIPT
@@ -137,3 +139,11 @@ def test_launcher_receipt_records_resolved_gpu_identity():
         '"gpu_inventory": gpu_assignment["inventory"]',
     ):
         assert token in SCRIPT
+
+
+def test_gpu_assignment_uses_driver_proc_metadata_not_nvidia_smi_query_fields():
+    assert "--query-gpu=uuid,minor_number" not in SCRIPT
+    assert "gpu_root.glob(\"*/information\")" in SCRIPT
+    assert 'fields.get("GPU UUID")' in SCRIPT
+    assert 'fields.get("Device Minor")' in SCRIPT
+    assert '"information_path": str(info_path)' in SCRIPT
