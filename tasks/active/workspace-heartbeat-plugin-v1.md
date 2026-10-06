@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
-- Status: BLOCKED_EVIDENCE
+- Status: VALIDATING
 - Capsule schema: v2
 
 ## Goal
@@ -29,19 +29,20 @@ Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel 
 
 ## Next safe action
 
-Do not change heartbeat source further. Wait for the owning research chat to restore a schema-valid research-engine-local-document-pipeline-v1 capsule on workspace-control main, then rerun PR #69 validation on the unchanged v0.3.3 head. Merge/deploy only after heartbeat validation actually runs and passes.
+Validate and deploy Workspace Heartbeat v0.4.0. The primary live test is now the in-chat surface: each heartbeat_update must render exactly one compact card containing only that newest heartbeat, with no replayed history/timeline; a fresh chat must start visually clean. Keep heartbeat_get as the optional history/sidebar surface. Separately, treat long reasoning after an already-resolved external dependency as an executor-stall/heartbeat-cadence issue rather than a UI transport issue.
 
 ## Remaining work
 
-- Wait for the owning research chat to restore schema-valid research-engine-local-document-pipeline-v1 state; do not mutate that concurrent task here.
-- Rerun PR #69 validation on unchanged heartbeat v0.3.3.
-- After a real heartbeat validation pass, merge and deploy panel-v6.html.
-- Verify mounted live refresh without close/reopen, idle quietness, and cross-task timeline continuity.
-- Close the task only after those live checks pass.
+- Validate the final Workspace Heartbeat v0.4.0 PR head.
+- Deploy the exact validated v0.4.0 head/canonical merge to the Lambda heartbeat runtime and recreate/refresh the plugin.
+- In a long-running research chat, verify each heartbeat_update creates one compact in-chat card containing only that heartbeat.
+- Start a fresh chat and verify new heartbeat cards do not replay prior chat heartbeat contents.
+- Use heartbeat_get only when explicit history/sidebar inspection is wanted; mounted sidebar live refresh is no longer the primary acceptance path.
+- Separately investigate executor stalls when an external dependency resolves but the model remains in a long reasoning loop without emitting a state-change heartbeat.
 
 ## Blockers / gates
 
-- PR #69 validation is blocked by an unrelated invalid research-engine-local-document-pipeline-v1 task capsule on current workspace-control main; CI exits during task-contract validation before heartbeat tests run.
+- None.
 
 ## Fresh-chat initialization
 
