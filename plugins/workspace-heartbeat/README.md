@@ -86,3 +86,14 @@ Task-local history remains authoritative for task APIs, while the mounted operat
 - The panel prefers `timeline` for display and shows task-boundary labels when ownership changes.
 - This avoids making a parent-to-child durable task handoff look like lost heartbeat history.
 - The panel remains event-driven only and does not reintroduce background polling.
+
+
+## v0.4.0 in-chat heartbeat cards
+
+The primary operator UX is now the in-chat heartbeat update itself.
+
+- `heartbeat_update` uses a dedicated UI resource and returns only the newest heartbeat object.
+- Each update therefore renders one compact in-chat card containing only that heartbeat; task history and conversation timeline are not replayed into every update card.
+- `heartbeat_get` retains the separate history/sidebar resource for explicit history inspection.
+- This intentionally decouples reliable in-chat progress delivery from the host sidebar's mounted live-refresh lifecycle.
+- The update card is stateless beyond the invoking heartbeat result, so a new chat does not inherit prior update-card contents.
