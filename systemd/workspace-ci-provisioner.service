@@ -1,0 +1,40 @@
+[Unit]
+Description=Workspace CI root provisioner
+Documentation=https://github.com/adamtrott78/workspace-control
+After=local-fs.target
+Before=workspace-ci-controller.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py --socket /run/workspace-ci/provisioner.sock --state-dir /var/lib/workspace-ci/provisioner --manifest /etc/workspace-ci/projects/research-engine.json --profiles /etc/workspace-ci/lambda-ci-systemd-profiles.v1.json --pins /etc/workspace-ci/lambda-ci-upstream-pins.v1.json
+Restart=on-failure
+RestartSec=2s
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER
+AmbientCapabilities=
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX
+ReadWritePaths=/run/workspace-ci /var/lib/workspace-ci/provisioner /srv/workspace-ci/research-engine/jobs /srv/workspace-ci/research-engine/staging-cache /srv/workspace-ci/research-engine/logs
+ReadOnlyPaths=/opt/workspace-ci/actions-runner /etc/workspace-ci /srv/workspace-ci/research-engine/home /srv/workspace-ci/research-engine/trusted-cache
+InaccessiblePaths=/home/atrott /var/run/docker.sock /run/docker.sock
+DevicePolicy=closed
+TasksMax=512
+MemoryMax=1G
+
+[Install]
+WantedBy=multi-user.target
