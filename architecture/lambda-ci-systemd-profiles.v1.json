@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "STATIC_CANDIDATE_NOT_ACTIVATED",
+  "status": "P5_GPU_SMALL_PROMOTION_CANDIDATE",
   "project_id": "research-engine",
   "common": {
     "User": "ci-research-engine",
@@ -69,15 +69,15 @@
       "MemoryHigh": "56G",
       "MemoryMax": "64G",
       "TasksMax": 8192,
-      "RuntimeMaxSec": "1h",
+      "RuntimeMaxSec": "20min",
       "DeviceAllow_candidate": [
         "/dev/nvidiactl rw",
         "/dev/nvidia-uvm rw",
         "/dev/nvidia-uvm-tools rw",
-        "/dev/nvidia0 rw"
+        "UUID-resolved GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea device node rw"
       ],
-      "CUDA_VISIBLE_DEVICES": "0",
-      "note": "DevicePolicy must be proven by a non-scientific CUDA allocation test before model execution. nvidia-modeset and /dev/nvidia-caps are added only if the CUDA runtime demonstrates a measured requirement."
+      "CUDA_VISIBLE_DEVICES": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+      "note": "P5 gpu-small resolves the accepted physical GPU by stable UUID at launch time, grants only its current device node plus nvidiactl/UVM compute-support nodes under DevicePolicy=closed, and explicitly denies all other physical GPU nodes."
     },
     "gpu-heavy": {
       "CPUQuota": "2400%",

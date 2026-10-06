@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -118,11 +119,43 @@ func TestProvisionerSocketReceivesJITButResponseDoesNotEchoIt(t *testing.T) {
 }
 
 func TestPilotConstantsAreFixed(t *testing.T) {
-	if defaultProjectID != "research-engine" || defaultProfile != "cpu-test" {
+	if defaultProjectID != "research-engine" || defaultProfile != "cpu-test" || gpuProfile != "gpu-small" {
 		t.Fatal("pilot authority changed")
 	}
-	if defaultScaleSetName != "lambda-research-engine" || maxRunners != 1 {
+	if defaultScaleSetName != "lambda-research-engine" || gpuScaleSetName != "lambda-research-engine-gpu" || maxRunners != 1 {
 		t.Fatal("pilot scale-set capacity changed")
+	}
+	if !controllerMappingAllowed(defaultScaleSetName, defaultProfile) {
+		t.Fatal("CPU controller mapping rejected")
+	}
+	if !controllerMappingAllowed(gpuScaleSetName, gpuProfile) {
+		t.Fatal("GPU controller mapping rejected")
+	}
+	if controllerMappingAllowed(defaultScaleSetName, gpuProfile) ||
+		controllerMappingAllowed(gpuScaleSetName, defaultProfile) ||
+		controllerMappingAllowed("lambda-research-engine-heavy", "gpu-heavy") {
+		t.Fatal("unexpected controller mapping accepted")
+	}
+}
+
+func TestRunnerNamesAreProfileScoped(t *testing.T) {
+	cpu, err := runnerName(defaultProfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(cpu, "lambda-research-engine-") || strings.HasPrefix(cpu, "lambda-research-engine-gpu-") {
+		t.Fatalf("unexpected CPU runner name %q", cpu)
+	}
+
+	gpu, err := runnerName(gpuProfile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(gpu, "lambda-research-engine-gpu-") {
+		t.Fatalf("unexpected GPU runner name %q", gpu)
+	}
+	if _, err := runnerName("gpu-heavy"); err == nil {
+		t.Fatal("gpu-heavy runner name accepted")
 	}
 }
 

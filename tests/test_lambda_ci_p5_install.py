@@ -6,6 +6,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PROVISIONER_UNIT = (ROOT / "systemd" / "workspace-ci-provisioner.service").read_text()
 CONTROLLER_UNIT = (ROOT / "systemd" / "workspace-ci-controller.service").read_text()
+GPU_CONTROLLER_UNIT = (ROOT / "systemd" / "workspace-ci-controller-gpu.service").read_text()
 BOOTSTRAP = (ROOT / "scripts" / "bootstrap_lambda_ci_p5.sh").read_text()
 GO_BOOTSTRAP = (ROOT / "scripts" / "bootstrap_lambda_ci_go_toolchain.sh").read_text()
 PINS = json.loads((ROOT / "architecture" / "lambda-ci-upstream-pins.v1.json").read_text())
@@ -72,6 +73,23 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         self.assertNotIn("User=root", CONTROLLER_UNIT)
         self.assertNotIn("sudo", CONTROLLER_UNIT)
 
+    def test_gpu_controller_unit_is_unprivileged_and_fixed_to_gpu_small(self):
+        self.assertIn("User=ci-controller", GPU_CONTROLLER_UNIT)
+        self.assertIn("Group=workspace-ci-controller", GPU_CONTROLLER_UNIT)
+        self.assertIn("Requires=workspace-ci-provisioner.service", GPU_CONTROLLER_UNIT)
+        self.assertIn(
+            "Environment=WORKSPACE_CI_SCALESET_NAME=lambda-research-engine-gpu",
+            GPU_CONTROLLER_UNIT,
+        )
+        self.assertIn("Environment=WORKSPACE_CI_PROFILE=gpu-small", GPU_CONTROLLER_UNIT)
+        self.assertIn(
+            "Environment=WORKSPACE_CI_PAT_FILE=/var/lib/workspace-ci/controller/github-token",
+            GPU_CONTROLLER_UNIT,
+        )
+        self.assertIn("RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6", GPU_CONTROLLER_UNIT)
+        self.assertIn("DevicePolicy=closed", GPU_CONTROLLER_UNIT)
+        self.assertNotIn("User=root", GPU_CONTROLLER_UNIT)
+
     def test_bootstrap_never_reads_or_accepts_token_material(self):
         self.assertIn("github_credential_handled_by_bootstrap", BOOTSTRAP)
         self.assertIn('"github_credential_handled_by_bootstrap": False', BOOTSTRAP)
@@ -101,6 +119,8 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         self.assertIn('GO_BIN=/opt/workspace-ci/go/1.26.3/bin/go', BOOTSTRAP)
         self.assertNotIn("command -v go", BOOTSTRAP)
         self.assertIn("IPAddressDeny=$LOCAL_SUBNET", BOOTSTRAP)
+        self.assertIn("workspace-ci-controller-gpu.service", BOOTSTRAP)
+        self.assertIn('"gpu_controller_state": gpu_controller_state', BOOTSTRAP)
 
 
     def test_go_toolchain_pin_is_exact_official_release(self):
@@ -151,6 +171,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         self.assertIn('"660"', BOOTSTRAP)
 
     def test_kill_switch_removes_stale_socket(self):
+        self.assertIn("systemctl stop workspace-ci-controller-gpu.service", KILL)
         self.assertIn("systemctl stop workspace-ci-controller.service", KILL)
         self.assertIn("systemctl stop workspace-ci-provisioner.socket workspace-ci-provisioner.service", KILL)
         self.assertIn("rm -f -- /run/workspace-ci/provisioner.sock", KILL)
@@ -162,6 +183,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
             "/opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py",
             "/etc/workspace-ci/projects/research-engine.json",
             "/etc/systemd/system/workspace-ci-controller.service",
+            "/etc/systemd/system/workspace-ci-controller-gpu.service",
             "/etc/systemd/system/workspace-ci-provisioner.service",
         ):
             self.assertIn(target, REMOVE)

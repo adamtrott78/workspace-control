@@ -58,6 +58,8 @@ TARGETS=(
   /etc/systemd/system/workspace-ci-provisioner.service
   /etc/systemd/system/workspace-ci-controller.service
   /etc/systemd/system/workspace-ci-controller.service.d/network.conf
+  /etc/systemd/system/workspace-ci-controller-gpu.service
+  /etc/systemd/system/workspace-ci-controller-gpu.service.d/network.conf
 )
 
 backup_target() {
@@ -75,6 +77,7 @@ backup_target() {
 rollback() {
   local rc=$?
   trap - ERR
+  systemctl stop workspace-ci-controller-gpu.service 2>/dev/null || true
   systemctl stop workspace-ci-controller.service 2>/dev/null || true
   systemctl stop workspace-ci-provisioner.service 2>/dev/null || true
   if [[ -f "$BACKUP/index.tsv" ]]; then
@@ -129,7 +132,9 @@ install -o root -g root -m 0644 "$REPO_ROOT/architecture/lambda-ci-upstream-pins
 
 install -o root -g root -m 0644 "$REPO_ROOT/systemd/workspace-ci-provisioner.service" /etc/systemd/system/workspace-ci-provisioner.service
 install -o root -g root -m 0644 "$REPO_ROOT/systemd/workspace-ci-controller.service" /etc/systemd/system/workspace-ci-controller.service
+install -o root -g root -m 0644 "$REPO_ROOT/systemd/workspace-ci-controller-gpu.service" /etc/systemd/system/workspace-ci-controller-gpu.service
 install -d -o root -g root -m 0755 /etc/systemd/system/workspace-ci-controller.service.d
+install -d -o root -g root -m 0755 /etc/systemd/system/workspace-ci-controller-gpu.service.d
 cat > /etc/systemd/system/workspace-ci-controller.service.d/network.conf <<EOF
 [Service]
 IPAddressDeny=$LOCAL_SUBNET
@@ -137,9 +142,17 @@ EOF
 chmod 0644 /etc/systemd/system/workspace-ci-controller.service.d/network.conf
 chown root:root /etc/systemd/system/workspace-ci-controller.service.d/network.conf
 
+cat > /etc/systemd/system/workspace-ci-controller-gpu.service.d/network.conf <<EOF
+[Service]
+IPAddressDeny=$LOCAL_SUBNET
+EOF
+chmod 0644 /etc/systemd/system/workspace-ci-controller-gpu.service.d/network.conf
+chown root:root /etc/systemd/system/workspace-ci-controller-gpu.service.d/network.conf
+
 systemd-analyze verify \
   /etc/systemd/system/workspace-ci-provisioner.service \
-  /etc/systemd/system/workspace-ci-controller.service
+  /etc/systemd/system/workspace-ci-controller.service \
+  /etc/systemd/system/workspace-ci-controller-gpu.service
 
 if [[ -e /var/lib/workspace-ci/controller/github-token ]]; then
   TOKEN_OWNER="$(stat -c '%U:%G' /var/lib/workspace-ci/controller/github-token)"
@@ -167,19 +180,24 @@ done
 
 if [[ "${WORKSPACE_CI_P5_ACTIVATE_CONTROLLER:-NO}" == "YES" ]]; then
   [[ "$CREDENTIAL_READY" == "true" ]] || die "CONTROLLER_CREDENTIAL_NOT_READY"
-  systemctl enable workspace-ci-controller.service
+  systemctl enable workspace-ci-controller.service workspace-ci-controller-gpu.service
   systemctl restart workspace-ci-controller.service
+  systemctl restart workspace-ci-controller-gpu.service
   systemctl is-active --quiet workspace-ci-controller.service || die "CONTROLLER_NOT_ACTIVE"
+  systemctl is-active --quiet workspace-ci-controller-gpu.service || die "GPU_CONTROLLER_NOT_ACTIVE"
   CONTROLLER_STATE=ACTIVE
+  GPU_CONTROLLER_STATE=ACTIVE
 else
   systemctl disable --now workspace-ci-controller.service 2>/dev/null || true
+  systemctl disable --now workspace-ci-controller-gpu.service 2>/dev/null || true
   CONTROLLER_STATE=INSTALLED_INACTIVE
+  GPU_CONTROLLER_STATE=INSTALLED_INACTIVE
 fi
 
-python3 - "$OUT/lambda-ci-p5-install.json" "$HEAD" "$GO_VERSION" "$LOCAL_SUBNET" "$CREDENTIAL_READY" "$CONTROLLER_STATE" <<'PY'
+python3 - "$OUT/lambda-ci-p5-install.json" "$HEAD" "$GO_VERSION" "$LOCAL_SUBNET" "$CREDENTIAL_READY" "$CONTROLLER_STATE" "$GPU_CONTROLLER_STATE" <<'PY'
 import json, pathlib, sys
 from datetime import datetime, timezone
-path, head, go_version, subnet, credential_ready, controller_state = sys.argv[1:]
+path, head, go_version, subnet, credential_ready, controller_state, gpu_controller_state = sys.argv[1:]
 payload = {
     "schema_version": 1,
     "phase": "P5-install",
@@ -190,6 +208,9 @@ payload = {
     "controller_binary": "/opt/workspace-ci/controller/lambda-ci-controller",
     "provisioner_service": "active",
     "controller_state": controller_state,
+    "gpu_controller_state": gpu_controller_state,
+    "cpu_scale_set": "lambda-research-engine",
+    "gpu_scale_set": "lambda-research-engine-gpu",
     "controller_credential_ready": credential_ready == "true",
     "provisioner_socket": "/run/workspace-ci/provisioner.sock",
     "provisioner_socket_owner": "root:workspace-ci-controller",

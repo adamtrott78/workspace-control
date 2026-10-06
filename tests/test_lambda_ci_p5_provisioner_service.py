@@ -105,14 +105,35 @@ def test_wrong_peer_uid_is_rejected_before_launch():
         assert calls == []
 
 
-def test_p5_pilot_rejects_gpu_profile_even_if_manifest_knows_it():
+def test_gpu_small_is_accepted_but_gpu_heavy_is_rejected():
+    calls = []
+    done = threading.Event()
+
+    def launcher(req, spec):
+        calls.append((req.profile, spec["profile"], spec["resources"].get("gpu_uuid")))
+        done.set()
+        return {"decision": "RUNNER_EXITED_CLEANLY"}
+
+    with tempfile.TemporaryDirectory() as tmp:
+        svc = build_service(tmp, launcher)
+        accepted = svc.handle_request(request("gpu-small"), peer_uid=12345)
+        assert accepted["status"] == "ACCEPTED"
+        assert done.wait(1)
+        assert calls == [
+            (
+                "gpu-small",
+                "gpu-small",
+                "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+            )
+        ]
+
     with tempfile.TemporaryDirectory() as tmp:
         svc = build_service(tmp, lambda req, spec: {})
         try:
-            svc.handle_request(request("gpu-small"), peer_uid=12345)
+            svc.handle_request(request("gpu-heavy"), peer_uid=12345)
         except service_mod.ServiceError:
             return
-    raise AssertionError("gpu-small was enabled before P5 CPU acceptance")
+    raise AssertionError("gpu-heavy was enabled without explicit authorization")
 
 
 def test_busy_request_is_not_claimed_and_can_be_retried():

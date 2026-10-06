@@ -149,6 +149,7 @@ def build_launch_spec(
             "tasks_max": project_profile["tasks_max"],
             "runtime_max_seconds": project_profile["runtime_max_seconds"],
             "gpu_indices": project_profile["gpu_indices"],
+            "gpu_uuid": project_profile.get("gpu_uuid"),
         },
         "systemd_common": profiles["common"],
         "systemd_profile": systemd_profile,

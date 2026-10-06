@@ -24,11 +24,13 @@ import (
 
 const (
 	defaultGitHubURL      = "https://github.com/adamtrott78/research-engine"
-	defaultScaleSetName   = "lambda-research-engine"
-	defaultProjectID      = "research-engine"
-	defaultProfile        = "cpu-test"
+	defaultScaleSetName    = "lambda-research-engine"
+	gpuScaleSetName        = "lambda-research-engine-gpu"
+	defaultProjectID       = "research-engine"
+	defaultProfile         = "cpu-test"
+	gpuProfile             = "gpu-small"
 	defaultProvisionerSock = "/run/workspace-ci/provisioner.sock"
-	maxRunners            = 1
+	maxRunners             = 1
 )
 
 type config struct {
@@ -79,6 +81,11 @@ func envOr(key, fallback string) string {
 	return fallback
 }
 
+func controllerMappingAllowed(scaleSetName, profile string) bool {
+	return (scaleSetName == defaultScaleSetName && profile == defaultProfile) ||
+		(scaleSetName == gpuScaleSetName && profile == gpuProfile)
+}
+
 func loadConfig() (config, error) {
 	cfg := config{
 		GitHubURL:       envOr("WORKSPACE_CI_GITHUB_URL", defaultGitHubURL),
@@ -102,11 +109,12 @@ func loadConfig() (config, error) {
 	if cfg.ProjectID != defaultProjectID {
 		return config{}, fmt.Errorf("P5 pilot project is fixed to %s", defaultProjectID)
 	}
-	if cfg.Profile != defaultProfile {
-		return config{}, fmt.Errorf("P5 pilot profile is fixed to %s", defaultProfile)
-	}
-	if cfg.ScaleSetName != defaultScaleSetName {
-		return config{}, fmt.Errorf("P5 pilot scale set is fixed to %s", defaultScaleSetName)
+	if !controllerMappingAllowed(cfg.ScaleSetName, cfg.Profile) {
+		return config{}, fmt.Errorf(
+			"P5 controller scale-set/profile mapping rejected: %s/%s",
+			cfg.ScaleSetName,
+			cfg.Profile,
+		)
 	}
 
 	hasApp := cfg.AppClientID != "" || cfg.AppInstallID != 0 || cfg.AppPrivateKey != ""
@@ -220,12 +228,21 @@ func randomID() (string, error) {
 	return fmt.Sprintf("%s-%s-%s-%s-%s", hexed[0:8], hexed[8:12], hexed[12:16], hexed[16:20], hexed[20:32]), nil
 }
 
-func runnerName() (string, error) {
+func runnerName(profile string) (string, error) {
+	var prefix string
+	switch profile {
+	case defaultProfile:
+		prefix = "lambda-research-engine-"
+	case gpuProfile:
+		prefix = "lambda-research-engine-gpu-"
+	default:
+		return "", fmt.Errorf("runner-name profile rejected: %s", profile)
+	}
 	var raw [6]byte
 	if _, err := rand.Read(raw[:]); err != nil {
 		return "", err
 	}
-	return "lambda-research-engine-" + hex.EncodeToString(raw[:]), nil
+	return prefix + hex.EncodeToString(raw[:]), nil
 }
 
 func sendProvisionRequest(ctx context.Context, socketPath string, request provisionRequest) (provisionResponse, error) {
@@ -301,7 +318,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 	}
 
 	for current < target {
-		name, err := runnerName()
+		name, err := runnerName(s.profile)
 		if err != nil {
 			return fmt.Errorf("runner name: %w", err)
 		}
@@ -330,14 +347,17 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			return err
 		}
 
-		s.mu.Lock()
 		if response.Status == "BUSY" {
-			// Max-capacity=1 means BUSY represents already-provisioned capacity
-			// during controller restart/recovery. Track a sentinel until stats fall.
-			s.active["__provisioner_busy__"] = requestID
-		} else {
-			s.active[name] = requestID
+			s.logger.Info(
+				"Provisioner busy; retrying on next listener statistic",
+				slog.String("request_id", requestID),
+				slog.String("runner_name", name),
+			)
+			return nil
 		}
+
+		s.mu.Lock()
+		s.active[name] = requestID
 		current = len(s.active)
 		s.mu.Unlock()
 
