@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/lambda-ci-controller-attestation.v2.schema.json",
+  "title": "Lambda CI Controller Attestation v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source",
+    "repository",
+    "scale_set_name",
+    "job_message_type",
+    "runner_request_id",
+    "workflow_run_id",
+    "job_id",
+    "job_workflow_ref",
+    "workflow_path",
+    "workflow_default_branch_commit_sha",
+    "workflow_blob_sha",
+    "event_name",
+    "job_display_name",
+    "actor_login",
+    "triggering_actor_login",
+    "pr_number",
+    "pr_state",
+    "pr_head_repository",
+    "candidate_sha",
+    "candidate_verification",
+    "verified_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 2
+    },
+    "source": {
+      "const": "github_scale_set_controller"
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[^/]+/[^/]+$"
+    },
+    "scale_set_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runner_request_id": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "workflow_run_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "job_id": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "job_workflow_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workflow_path": {
+      "type": "string",
+      "pattern": "^\\.github/workflows/[^/]+\\.ya?ml$"
+    },
+    "workflow_default_branch_commit_sha": {
+      "$ref": "#/$defs/gitsha"
+    },
+    "workflow_blob_sha": {
+      "$ref": "#/$defs/gitsha"
+    },
+    "event_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "job_display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "actor_login": {
+      "type": "string",
+      "minLength": 1
+    },
+    "triggering_actor_login": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pr_number": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "pr_head_repository": {
+      "type": "string",
+      "pattern": "^[^/]+/[^/]+$"
+    },
+    "candidate_sha": {
+      "$ref": "#/$defs/gitsha"
+    },
+    "candidate_verification": {
+      "const": "PR_HEAD_MATCH"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "pr_state": {
+      "const": "open"
+    },
+    "job_message_type": {
+      "enum": [
+        "JobAvailable",
+        "JobAssigned"
+      ]
+    }
+  },
+  "$defs": {
+    "gitsha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "job_message_type": {
+            "const": "JobAvailable"
+          }
+        },
+        "required": [
+          "job_message_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "runner_request_id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    }
+  ]
+}

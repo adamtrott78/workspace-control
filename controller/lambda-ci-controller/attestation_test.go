@@ -22,10 +22,11 @@ const (
 func assignedCPUJob() *scaleset.JobAssigned {
 	return &scaleset.JobAssigned{
 		JobMessageBase: scaleset.JobMessageBase{
-			RunnerRequestID: 12345,
+			JobMessageType:  scaleset.JobMessageType{MessageType: scaleset.MessageTypeJobAssigned},
+			RunnerRequestID: 0,
 			RepositoryName:  "research-engine",
 			OwnerName:       "adamtrott78",
-			JobID:           "job-123",
+			JobID:           "broker-job-123",
 			JobWorkflowRef: "adamtrott78/research-engine/.github/workflows/" +
 				"lambda-ci-p5-autonomous.yml@refs/heads/main",
 			JobDisplayName: "wc-admission-v1|workload=cpu-test|pr=101|" +
@@ -38,7 +39,11 @@ func assignedCPUJob() *scaleset.JobAssigned {
 
 func availableCPUJob() *scaleset.JobAvailable {
 	assigned := assignedCPUJob()
-	return &scaleset.JobAvailable{JobMessageBase: assigned.JobMessageBase}
+	base := assigned.JobMessageBase
+	base.MessageType = scaleset.MessageTypeJobAvailable
+	base.RunnerRequestID = 12345
+	base.JobID = ""
+	return &scaleset.JobAvailable{JobMessageBase: base}
 }
 
 func fakeGitHubAttestor(t *testing.T, mutatePull func(map[string]any)) *githubJobAttestor {
@@ -63,6 +68,18 @@ func fakeGitHubAttestor(t *testing.T, mutatePull func(map[string]any)) *githubJo
 				},
 				"repository": map[string]any{
 					"full_name": "adamtrott78/research-engine",
+				},
+			})
+		case r.URL.Path == "/repos/adamtrott78/research-engine/actions/runs/99/jobs":
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"total_count": 1,
+				"jobs": []map[string]any{
+					{
+						"id":     777,
+						"run_id": 99,
+						"name": "wc-admission-v1|workload=cpu-test|pr=101|" +
+							"request=/lambda-ci-p5 " + testCandidateSHA,
+					},
 				},
 			})
 		case r.URL.Path == "/repos/adamtrott78/research-engine/contents/.github/workflows/lambda-ci-p5-autonomous.yml":
@@ -141,7 +158,10 @@ func TestGitHubAttestorBindsRunBlobAndOpenPRHead(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if att.CandidateSHA != testCandidateSHA ||
+	if att.SchemaVersion != 2 ||
+		att.JobMessageType != string(scaleset.MessageTypeJobAvailable) ||
+		att.JobID != "777" ||
+		att.CandidateSHA != testCandidateSHA ||
 		att.WorkflowDefaultBranchCommitSHA != testWorkflowHead ||
 		att.WorkflowBlobSHA != testWorkflowBlob ||
 		att.PRState != "open" ||
@@ -197,26 +217,33 @@ func TestGitHubAttestorRejectsCandidateMismatch(t *testing.T) {
 }
 
 func TestDeterministicAdmissionIDsAreRecoveryStable(t *testing.T) {
-	att := controllerAttestation{
+	available := controllerAttestation{
 		Repository:      "adamtrott78/research-engine",
+		ScaleSetName:    "lambda-research-engine",
+		JobMessageType:  string(scaleset.MessageTypeJobAvailable),
 		RunnerRequestID: 12345,
 		WorkflowRunID:   99,
-		JobID:           "job-123",
-		CandidateSHA:    testCandidateSHA,
-		VerifiedAt:      "2026-10-06T20:30:00Z",
+		JobID:           "777",
+		JobDisplayName: "wc-admission-v1|workload=cpu-test|pr=101|" +
+			"request=/lambda-ci-p5 " + testCandidateSHA,
+		CandidateSHA: testCandidateSHA,
+		VerifiedAt:   "2026-10-06T20:30:00Z",
 	}
-	firstRequest, firstRunner, err := deterministicAdmissionExecutionIDs("cpu-test", att)
+	firstRequest, firstRunner, err := deterministicAdmissionExecutionIDs("cpu-test", available)
 	if err != nil {
 		t.Fatal(err)
 	}
-	att.VerifiedAt = "2026-10-06T20:31:00Z"
-	secondRequest, secondRunner, err := deterministicAdmissionExecutionIDs("cpu-test", att)
+	assigned := available
+	assigned.JobMessageType = string(scaleset.MessageTypeJobAssigned)
+	assigned.RunnerRequestID = 0
+	assigned.VerifiedAt = "2026-10-06T20:31:00Z"
+	secondRequest, secondRunner, err := deterministicAdmissionExecutionIDs("cpu-test", assigned)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if firstRequest != secondRequest || firstRunner != secondRunner {
 		t.Fatalf(
-			"recovery identity drift request=%q/%q runner=%q/%q",
+			"lifecycle recovery identity drift request=%q/%q runner=%q/%q",
 			firstRequest,
 			secondRequest,
 			firstRunner,
@@ -237,7 +264,7 @@ func TestProvisionRequestV2HasNoProfileAuthority(t *testing.T) {
 		RunnerName:    "lambda-research-engine-abcdef123456",
 		JITConfig:     "opaque",
 		Attestation: controllerAttestation{
-			SchemaVersion: 1,
+			SchemaVersion: 2,
 		},
 	}
 	raw, err := json.Marshal(req)
@@ -278,5 +305,23 @@ func TestTrustedWorkflowPathRejectsNonDefaultBranch(t *testing.T) {
 		"research-engine",
 	); err == nil {
 		t.Fatal("non-default-branch workflow ref was accepted")
+	}
+}
+
+func TestGitHubAttestorAcceptsAssignedRecoveryWithoutRunnerRequestID(t *testing.T) {
+	attestor := fakeGitHubAttestor(t, nil)
+	att, err := attestor.Attest(
+		context.Background(),
+		&assignedCPUJob().JobMessageBase,
+		"lambda-research-engine",
+		"cpu-test",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if att.JobMessageType != string(scaleset.MessageTypeJobAssigned) ||
+		att.RunnerRequestID != 0 ||
+		att.JobID != "777" {
+		t.Fatalf("unexpected recovery attestation: %#v", att)
 	}
 }

@@ -38,13 +38,14 @@ def good_attestation(workload="cpu-test"):
     trusted = route["trusted_workflow"]
     command = trusted["job_display_claim"]["command"]
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "source": "github_scale_set_controller",
         "repository": "adamtrott78/research-engine",
         "scale_set_name": route["scale_set_name"],
-        "runner_request_id": 12345,
+        "job_message_type": "JobAssigned",
+        "runner_request_id": 0,
         "workflow_run_id": 37422040174,
-        "job_id": "job-123",
+        "job_id": "777",
         "job_workflow_ref": trusted["job_workflow_ref"],
         "workflow_path": trusted["path"],
         "workflow_default_branch_commit_sha": WORKFLOW_HEAD,
@@ -212,11 +213,15 @@ class AdmissionContractTests(unittest.TestCase):
     def test_request_digest_ignores_recoverable_jit_transport_secret(self):
         manifest = enabled_manifest()
         first = good_request()
+        first["attestation"]["job_message_type"] = "JobAvailable"
+        first["attestation"]["runner_request_id"] = 12345
         second = copy.deepcopy(first)
         second["jit_config"] = "different-jit-secret"
         second["attestation"]["verified_at"] = (
             NOW + timedelta(seconds=5)
         ).isoformat().replace("+00:00", "Z")
+        second["attestation"]["job_message_type"] = "JobAssigned"
+        second["attestation"]["runner_request_id"] = 0
 
         a = mod.mint_admission(first, manifest, POLICY, now=NOW)
         b = mod.mint_admission(second, manifest, POLICY, now=NOW)
@@ -339,6 +344,19 @@ class AdmissionContractTests(unittest.TestCase):
                 POLICY,
                 now=NOW + timedelta(seconds=901),
             )
+
+    def test_lifecycle_identity_requires_available_handle_or_assigned_job(self):
+        request = good_request()
+        request["attestation"]["job_message_type"] = "JobAvailable"
+        request["attestation"]["runner_request_id"] = 0
+        with self.assertRaisesRegex(mod.AdmissionError, "JobAvailable runner_request_id"):
+            mod.mint_admission(request, enabled_manifest(), POLICY, now=NOW)
+
+        request = good_request()
+        request["attestation"]["job_message_type"] = "JobAssigned"
+        request["attestation"]["runner_request_id"] = 0
+        admission = mod.mint_admission(request, enabled_manifest(), POLICY, now=NOW)
+        self.assertEqual(admission["candidate_sha"], CANDIDATE)
 
 
 if __name__ == "__main__":

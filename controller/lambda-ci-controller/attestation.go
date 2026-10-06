@@ -29,6 +29,7 @@ type controllerAttestation struct {
 	Source                         string `json:"source"`
 	Repository                     string `json:"repository"`
 	ScaleSetName                   string `json:"scale_set_name"`
+	JobMessageType                 string `json:"job_message_type"`
 	RunnerRequestID                int64  `json:"runner_request_id"`
 	WorkflowRunID                  int64  `json:"workflow_run_id"`
 	JobID                          string `json:"job_id"`
@@ -355,8 +356,21 @@ func (a *githubJobAttestor) Attest(
 	if job.EventName != "issue_comment" {
 		return controllerAttestation{}, fmt.Errorf("job event is not issue_comment")
 	}
-	if job.RunnerRequestID <= 0 || job.WorkflowRunID <= 0 || job.JobID == "" {
-		return controllerAttestation{}, fmt.Errorf("job identity is incomplete")
+	if job.WorkflowRunID <= 0 {
+		return controllerAttestation{}, fmt.Errorf("workflow run identity is incomplete")
+	}
+	messageType := string(job.MessageType)
+	switch job.MessageType {
+	case scaleset.MessageTypeJobAvailable:
+		if job.RunnerRequestID <= 0 {
+			return controllerAttestation{}, fmt.Errorf("JobAvailable runner request identity is incomplete")
+		}
+	case scaleset.MessageTypeJobAssigned:
+		// GitHub may omit runnerRequestId from JobAssigned lifecycle/recovery
+		// messages. The canonical workflow-job identity is resolved below
+		// through the read-only Actions REST API instead of inventing an ID.
+	default:
+		return controllerAttestation{}, fmt.Errorf("unsupported job message type %q", messageType)
 	}
 
 	command, err := requestCommandForWorkload(workload)
@@ -402,6 +416,41 @@ func (a *githubJobAttestor) Attest(
 		run.Actor.Login == "" ||
 		run.Triggering.Login == "" {
 		return controllerAttestation{}, fmt.Errorf("workflow run attestation mismatch")
+	}
+
+	var jobs struct {
+		TotalCount int `json:"total_count"`
+		Jobs       []struct {
+			ID    int64  `json:"id"`
+			RunID int64  `json:"run_id"`
+			Name  string `json:"name"`
+		} `json:"jobs"`
+	}
+	jobsPath := fmt.Sprintf(
+		"/repos/%s/%s/actions/runs/%d/jobs?per_page=100",
+		url.PathEscape(a.owner),
+		url.PathEscape(a.repo),
+		job.WorkflowRunID,
+	)
+	if err := a.getJSON(ctx, jobsPath, &jobs); err != nil {
+		return controllerAttestation{}, err
+	}
+	var canonicalJobID int64
+	matches := 0
+	for _, runJob := range jobs.Jobs {
+		if runJob.Name == job.JobDisplayName {
+			if runJob.ID <= 0 || (runJob.RunID != 0 && runJob.RunID != job.WorkflowRunID) {
+				return controllerAttestation{}, fmt.Errorf("workflow job REST identity is invalid")
+			}
+			canonicalJobID = runJob.ID
+			matches++
+		}
+	}
+	if matches != 1 {
+		return controllerAttestation{}, fmt.Errorf(
+			"workflow job display claim matched %d REST jobs; require exactly one",
+			matches,
+		)
 	}
 
 	var content struct {
@@ -453,13 +502,14 @@ func (a *githubJobAttestor) Attest(
 	}
 
 	return controllerAttestation{
-		SchemaVersion:                  1,
+		SchemaVersion:                  2,
 		Source:                         "github_scale_set_controller",
 		Repository:                     a.owner + "/" + a.repo,
 		ScaleSetName:                   scaleSetName,
+		JobMessageType:                 messageType,
 		RunnerRequestID:                job.RunnerRequestID,
 		WorkflowRunID:                  job.WorkflowRunID,
-		JobID:                          job.JobID,
+		JobID:                          strconv.FormatInt(canonicalJobID, 10),
 		JobWorkflowRef:                 job.JobWorkflowRef,
 		WorkflowPath:                   workflowPath,
 		WorkflowDefaultBranchCommitSHA: run.HeadSHA,
@@ -491,12 +541,13 @@ func deterministicAdmissionExecutionIDs(
 		return "", "", fmt.Errorf("deterministic runner workload rejected: %s", workload)
 	}
 	material := fmt.Sprintf(
-		"%s|%s|%d|%d|%s|%s",
+		"%s|%s|%s|%d|%s|%s|%s",
 		att.Repository,
+		att.ScaleSetName,
 		workload,
-		att.RunnerRequestID,
 		att.WorkflowRunID,
 		att.JobID,
+		att.JobDisplayName,
 		att.CandidateSHA,
 	)
 	sum := sha256.Sum256([]byte(material))
