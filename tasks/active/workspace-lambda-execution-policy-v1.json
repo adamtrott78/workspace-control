@@ -57,10 +57,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "e77af13b3ad43b4252031d27f72773cfd8f232dd",
+      "base_sha": "d2326042f49ae1bd771c33b1ce56f49795827661",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "e77af13b3ad43b4252031d27f72773cfd8f232dd",
+        "checkpoint_sha": "d2326042f49ae1bd771c33b1ce56f49795827661",
         "verified": true
       },
       "local": null,
@@ -86,10 +86,10 @@
     {
       "name": "research-engine",
       "intent": "mutate",
-      "base_sha": "577764f4db10e4f4f894b1613518c358c6da7b95",
+      "base_sha": "12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "577764f4db10e4f4f894b1613518c358c6da7b95",
+        "checkpoint_sha": "12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d",
         "verified": true
       },
       "local": null,
@@ -173,7 +173,7 @@
       "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
-      "selected_surface": "github",
+      "selected_surface": "github+lambda-operator-gate",
       "inputs": [
         "validated policy contract",
         "accepted P5 controller/provisioner manifests and protocol"
@@ -185,7 +185,55 @@
         "replay/stale-admission rejection",
         "execution receipt identity binding"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Disabled root-owned admission v2 core",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control PR #103 merged as 35ecd8a767f9aac48c1e7e9758c4e682362b373a after Workspace Control Validation run 37524186602 PASS.",
+            "Root derives execution profile/resources/capability classes from local policy; v2 controller requests contain workload claims but no profile authority.",
+            "Canonical v2 remained disabled during this slice and model-scale/gpu-heavy classes could not be minted."
+          ]
+        },
+        {
+          "check": "Single-use replay, freshness, and receipt identity enforcement",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control PR #104 merged as 5265aebabc7bea791ea02aec9638237af30c3ca4 after Workspace Control Validation run 37525924040 PASS.",
+            "Root revalidates policy digest/epoch, project-profile digest, kill-switch epoch, live route, and expiry immediately before admission consumption.",
+            "Identical consumed terminal requests return durable admission/receipt identity without re-execution; same request ID with different authoritative digest is ReplayConflict.",
+            "Runtime receipts bind admission ID, request digest, candidate SHA, workload/profile/resource class, policy identity, trusted workflow identity, and consumed_at."
+          ]
+        },
+        {
+          "check": "Controller GitHub attestation and recovery-stable identity",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control PR #105 merged as e83d7ddd758a9c0c92da98738b18194ffa4bbc4c after Workspace Control Validation run 37527189615 PASS.",
+            "Unprivileged controller attests exact workflow run/path/blob, actor and triggering actor, open same-repository PR head, and exact candidate SHA using read-only GitHub REST; root remains GitHub-credential blind.",
+            "Deterministic request/runner identity is derived from trusted GitHub job identity. Ephemeral JIT material and attestation verified_at are excluded from durable request identity so controller recovery cannot mint a second grant."
+          ]
+        },
+        {
+          "check": "Trusted research-engine pre-provision job claims",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #105 merged as 12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d after normal GitHub-hosted CI run 37527656970 PASS.",
+            "CPU workflow blob is e0fc6f49f4638fc2609580899a66d980a80c7005 and GPU workflow blob is 0565cc736d76e4e67e641dce32c4276097ea2241.",
+            "Only job display-name claims were added; owner/association/command gates, exact PR-head verification, candidate checkout, P5 payloads, receipts, and cleanup logic remain unchanged."
+          ]
+        },
+        {
+          "check": "Static admission v2 activation for accepted P5 classes",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control PR #106 merged as d2326042f49ae1bd771c33b1ce56f49795827661 after Workspace Control Validation run 37528122889 PASS.",
+            "Project admission_v2 is enabled only for cpu-test and gpu-small and pins the exact merged research-engine CPU/GPU workflow blobs.",
+            "Both unprivileged controller units explicitly set WORKSPACE_CI_ADMISSION_V2_ENABLED=YES; root provisioner remains credential-blind and has no public network authority.",
+            "No Lambda host mutation has occurred yet. model-acquire, cache-promote, model-eval-single-gpu remain non-live and gpu-heavy remains denied."
+          ]
+        }
+      ],
       "resume_condition": "Candidate requests can only select previously authorized capabilities and unknown/mismatched/replayed admissions fail closed."
     },
     {
@@ -288,12 +336,13 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "e77af13b3ad43b4252031d27f72773cfd8f232dd",
+      "identity": "d2326042f49ae1bd771c33b1ce56f49795827661",
       "required_for_resume": true,
       "evidence": [
-        "Policy contract and schemas are canonical on workspace-control main at e77af13b3ad43b4252031d27f72773cfd8f232dd after PR #101 FULL_INTEGRATION PASS.",
-        "policy_contract_and_hydration is complete; first unfinished stage is admission_manifest_and_enforcement.",
-        "Live Lambda authority remains unchanged: cpu-test and gpu-small are the accepted substrate, model-scale classes are not live, and gpu-heavy remains denied."
+        "workspace-control admission-v2 static activation is canonical at d2326042f49ae1bd771c33b1ce56f49795827661 after PRs #103-#106 all passed required validation.",
+        "research-engine trusted pre-provision claim workflows are canonical at 12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d; CPU blob e0fc6f49f4638fc2609580899a66d980a80c7005 and GPU blob 0565cc736d76e4e67e641dce32c4276097ea2241.",
+        "admission_manifest_and_enforcement remains IN_PROGRESS only because the canonical static activation has not yet been installed and live-accepted on Lambda.",
+        "Model-scale classes remain non-live and gpu-heavy remains denied."
       ]
     }
   ],
@@ -358,6 +407,43 @@
       "evidence": [
         "Validated by PR #101 Workspace Control Validation run 37521301993."
       ]
+    },
+    {
+      "path": "scripts/lambda_ci_admission.py",
+      "state": "validated_static",
+      "role": "root-owned admission mint/freshness/single-use authority",
+      "origin": "workspace-control admission_manifest_and_enforcement",
+      "persistence": "git",
+      "regeneration": "reviewed code revision only",
+      "review_requirement": "FULL_INTEGRATION and live acceptance before stage validation",
+      "evidence": [
+        "PRs #103-#106 validated the admission core, replay/freshness semantics, attestation integration, and static activation."
+      ]
+    },
+    {
+      "path": "controller/lambda-ci-controller/attestation.go",
+      "state": "validated_static",
+      "role": "unprivileged read-only GitHub provenance attestor",
+      "origin": "workspace-control admission_manifest_and_enforcement",
+      "persistence": "git",
+      "regeneration": "reviewed code revision only",
+      "review_requirement": "pinned Go tests plus live acceptance",
+      "evidence": [
+        "PR #105 / validation run 37527189615 PASS; controller has GitHub credential authority but no root/resource-grant authority."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-project-research-engine.v1.json",
+      "state": "validated_static_activation",
+      "role": "root-owned research-engine admission route and profile binding",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": "reviewed manifest revision only",
+      "review_requirement": "FULL_INTEGRATION plus exact-SHA host install",
+      "evidence": [
+        "PR #106 / validation run 37528122889 PASS.",
+        "Live-enabled workload classes are exactly cpu-test and gpu-small; trusted workflow blobs are pinned to the merged research-engine claim workflows."
+      ]
     }
   ],
   "validation": [
@@ -378,18 +464,29 @@
         "Research-engine remains at the child-task baseline 577764f4db10e4f4f894b1613518c358c6da7b95.",
         "The next implementation stage may consume the canonical policy contract but must not widen authority beyond its declared classes."
       ]
+    },
+    {
+      "check": "Admission-v2 static implementation checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "workspace-control main verified at d2326042f49ae1bd771c33b1ce56f49795827661.",
+        "research-engine main verified at 12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d.",
+        "Static admission authority is complete for existing cpu-test/gpu-small lanes; live host remains on the prior accepted installation until the root bootstrap gate is executed."
+      ]
     }
   ],
-  "blockers": [],
+  "blockers": [
+    "Live admission-v2 activation requires reviewed sudo execution of the exact-SHA workspace-control bootstrap on Lambda. The accepted self-hosted runner and credential-blind provisioner intentionally cannot install or upgrade root services."
+  ],
   "remaining_work": [
-    "Implement root-owned admission enforcement without broadening the accepted P5 controller/provisioner authority.",
+    "Install canonical workspace-control d2326042f49ae1bd771c33b1ce56f49795827661 on Lambda through the exact-SHA root bootstrap and live-validate admission-v2 CPU and gpu-small receipts.",
     "Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.",
     "Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.",
     "Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.",
     "Decide separately whether gpu-heavy/dual-GPU should be accepted."
   ],
-  "next_safe_action": "Begin admission_manifest_and_enforcement from canonical workspace-control e77af13b3ad43b4252031d27f72773cfd8f232dd. Hydrate the accepted P5 controller/provisioner request protocol and implement root-owned validation against architecture/lambda-ci-workload-policy.v1.json plus the versioned admission and execution-receipt schemas: exact project/trusted-workflow/candidate-SHA binding, declared workload/profile/model/runtime/resource/capability binding, atomic single-use admission consumption, stale/replay/kill-switch rejection, and receipt identity binding. Preserve existing cpu-test/gpu-small authority, keep model-acquire/cache-promote/model-eval-single-gpu non-live until their enforcement gates pass, keep gpu-heavy denied, and do not mutate production research routing or run a model-scale workload in this stage.",
+  "next_safe_action": "On the Lambda host from the normal operator account, use the clean workspace-control checkout and fast-forward it to exact canonical main d2326042f49ae1bd771c33b1ce56f49795827661. Verify the checkout is clean and HEAD is exact, then run the canonical scripts/bootstrap_lambda_ci_p5.sh via sudo with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES and WORKSPACE_CI_P5_EXPECTED_SHA=d2326042f49ae1bd771c33b1ce56f49795827661. Preserve the generated install receipt under ~/adamArchives/Adam/workspace-control-tmp/. After live install PASS, create/choose a non-scientific research-engine candidate PR and trigger the existing trusted /lambda-ci-p5 <exact_sha> and /lambda-ci-p5-gpu <exact_sha> workflows. Require both GitHub jobs and root receipts to prove v2 admission identity, exact trusted workflow blob/candidate binding, unchanged cpu-test/gpu-small isolation, and residue-free cleanup before marking admission_manifest_and_enforcement VALIDATED. Do not enable any model-scale class or gpu-heavy in this stage.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-10-06: Created as a child of workspace-lambda-self-hosted-execution-v1 after autonomous CPU and gpu-small execution were accepted. The task is intentionally policy-first: substrate capability expansion is paused until admission/cache/resource governance is explicit and validated. Hydration deliberately reuses existing workspace-control trusted-cache primitives and research-engine model-prefetch/runtime-certification contracts rather than duplicating domain truth. Heartbeat mount state is chat-local; every fresh substantial chat must update then open one live card. 2026-10-06: PR #101 merged the validated policy contract as e77af13b3ad43b4252031d27f72773cfd8f232dd after FULL_INTEGRATION PASS. policy_contract_and_hydration is complete; admission_manifest_and_enforcement is now the first unfinished stage. No live Lambda/model-scale authority was widened."
+  "notes": "2026-10-06: Created as a child of workspace-lambda-self-hosted-execution-v1 after autonomous CPU and gpu-small execution were accepted. The task is intentionally policy-first: substrate capability expansion is paused until admission/cache/resource governance is explicit and validated. Hydration deliberately reuses existing workspace-control trusted-cache primitives and research-engine model-prefetch/runtime-certification contracts rather than duplicating domain truth. Heartbeat mount state is chat-local; every fresh substantial chat must update then open one live card. 2026-10-06: PR #101 merged the validated policy contract as e77af13b3ad43b4252031d27f72773cfd8f232dd after FULL_INTEGRATION PASS. policy_contract_and_hydration is complete; admission_manifest_and_enforcement is now the first unfinished stage. No live Lambda/model-scale authority was widened. 2026-10-06: Admission-v2 static implementation completed through workspace-control PRs #103-#106 and research-engine PR #105. Canonical workspace-control is d2326042f49ae1bd771c33b1ce56f49795827661; research-engine is 12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d. Static activation is limited to cpu-test/gpu-small and is not yet installed on Lambda. The only current gate is the intentional root-only exact-SHA bootstrap/live acceptance."
 }
