@@ -12,37 +12,54 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
 - Status: VALIDATING
-- Capsule schema: v2
+- Current stage: in_chat_single_update_cards
+- Exact v0.4 source: `cf1b9b645274dbc6945f0c2354694e554236edb1`
+- Branch: `heartbeat-v2-smoke-checkpoint`
+- PR: #69
 
-## Goal
+## Current v0.4 design
 
-Build and validate a minimal MCP heartbeat tool plus ChatGPT conversation-panel UI so long-running workspace-control tasks can publish natural-language progress through a real tool call into one continuously updating side panel.
+- `heartbeat_update` renders through a dedicated in-chat update-card resource.
+- Each update result contains only the newest `heartbeat`.
+- `heartbeat_get` remains the separate optional history/sidebar surface with heartbeat/history/timeline.
+- Update-card URI: `ui://workspace-heartbeat/update-card-v1.html`
+- History/sidebar URI: `ui://workspace-heartbeat/panel-v7.html`
+- The prior mounted-sidebar live-refresh problem is no longer the primary acceptance target.
 
-## Repositories
+## Validation state
 
-### workspace-control
-
-- Intent: mutate
-- Remote branch: heartbeat-v2-smoke-checkpoint
-- Remote checkpoint: fd615356972cbe1d306cca793c387badf2f7168a
-- Remote verified: true
+- Exact v0.4 source shape: PASS.
+- Repository-wide CI run `37396702037` did not reach heartbeat tests; it failed first on unrelated schema-invalid `research-engine-local-document-pipeline-v1.json`.
+- Live v0.4 update-card smoke: NOT_RUN.
 
 ## Next safe action
 
-Validate and deploy Workspace Heartbeat v0.4.0. The primary live test is now the in-chat surface: each heartbeat_update must render exactly one compact card containing only that newest heartbeat, with no replayed history/timeline; a fresh chat must start visually clean. Keep heartbeat_get as the optional history/sidebar surface. Separately, treat long reasoning after an already-resolved external dependency as an executor-stall/heartbeat-cadence issue rather than a UI transport issue.
+Deploy exact Workspace Heartbeat v0.4.0 head cf1b9b645274dbc6945f0c2354694e554236edb1 to the isolated Lambda runtime, run local tests, refresh the custom plugin, and perform the single-message in-chat card smoke. If each heartbeat_update shows only its newest message and a fresh chat starts visually clean, checkpoint/close heartbeat without reopening sidebar-live-refresh work, then transfer ownership to the Lambda/GitHub tooling optimization child task.
 
 ## Remaining work
 
-- Validate the final Workspace Heartbeat v0.4.0 PR head.
-- Deploy the exact validated v0.4.0 head/canonical merge to the Lambda heartbeat runtime and recreate/refresh the plugin.
-- In a long-running research chat, verify each heartbeat_update creates one compact in-chat card containing only that heartbeat.
-- Start a fresh chat and verify new heartbeat cards do not replay prior chat heartbeat contents.
-- Use heartbeat_get only when explicit history/sidebar inspection is wanted; mounted sidebar live refresh is no longer the primary acceptance path.
-- Separately investigate executor stalls when an external dependency resolves but the model remains in a long reasoning loop without emitting a state-change heartbeat.
+- Deploy exact heartbeat v0.4.0 head cf1b9b645274dbc6945f0c2354694e554236edb1 to the isolated Lambda heartbeat runtime and run local npm tests.
+- Refresh/recreate the custom Workspace Heartbeat plugin if needed so update-card-v1.html/panel-v7.html metadata is loaded.
+- During ordinary long-running work, verify each heartbeat_update renders one in-chat card containing only that newest message; prior heartbeat contents must not be replayed into the new card.
+- Verify a fresh chat starts with no inherited update-card history.
+- Keep heartbeat_get as optional history/sidebar; do not block acceptance on real-time mounted-sidebar refresh if update-card delivery is reliable.
+- After v0.4 live acceptance, checkpoint/close the heartbeat side project and transfer attention to tasks/active/workspace-lambda-github-tooling-optimization-v1.json.
 
-## Blockers / gates
+## Related post-heartbeat task
 
-- None.
+After heartbeat v0.4 is accepted, transfer attention to:
+
+`tasks/active/workspace-lambda-github-tooling-optimization-v1.json`
+
+Branch:
+
+`workspace-lambda-github-tooling-optimization-v1`
+
+Durable initialization head:
+
+`7c5afaa48f4b5b51b0594f6db49e0bb91da5d6a6`
+
+That optimization task is a child of the existing authoritative runner pilot `workspace-lambda-self-hosted-execution-v1`; it must rehydrate the parent P3/P4/P5 state before mutation.
 
 ## Fresh-chat initialization
 
@@ -51,9 +68,23 @@ Validate and deploy Workspace Heartbeat v0.4.0. The primary live test is now the
 https://github.com/adamtrott78/workspace-control
 
 Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-heartbeat-plugin-v1.json
+
+`tasks/active/workspace-heartbeat-plugin-v1.json`
 
 Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+
+Treat the authoritative JSON capsule, synchronized Markdown handoff, exact branch state, and live Lambda evidence as the complete handoff.
+
+First finish the v0.4 single-message in-chat card smoke. Do not reopen sidebar-live-refresh experimentation unless the v0.4 card path itself fails.
+
+After v0.4 is accepted and heartbeat is checkpointed/closed, transfer to:
+
+`tasks/active/workspace-lambda-github-tooling-optimization-v1.json`
+
+Before optimizing Lambda/GitHub tooling, also rehydrate:
+
+`tasks/active/workspace-lambda-self-hosted-execution-v1.json`
+
+because its P3/P4/P5 state may have advanced independently.
+
+Do not rely on prior chat prose.
