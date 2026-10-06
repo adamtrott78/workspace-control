@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4716726d7b705158f12005ee23daecb51b66e259
+- Remote checkpoint: 66856757d47788246a6fc5810542cffe522877cf
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Install and activate exact workspace-control 4716726d7b705158f12005ee23daecb51b66e259 on Lambda from a fresh detached clean worktree using the accepted P5 bootstrap with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=4716726d7b705158f12005ee23daecb51b66e259, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not restage the controller token and do not cancel active CPU run 37546267761 before activation. After activation, capture CPU/GPU NRestarts and active/running state, wait 8 seconds, and require zero restart delta. Then observe the existing CPU run 37546267761: the corrected controller must either recover ACCEPTED/terminal durable provision state without a second JIT/root grant, or remove only an orphaned exact-name/same-scale-set runner registration when root state is MISSING and regenerate JIT once. Require the run to reach actionable terminal evidence plus root receipt/cleanup before gpu-small acceptance. Use /lambda-ci-cancel <run_id> only if a new P5 failure makes cancellation necessary. Do not enable model-scale classes or gpu-heavy.
+Install and activate exact workspace-control 66856757d47788246a6fc5810542cffe522877cf on Lambda from a fresh detached clean worktree using the accepted P5 bootstrap with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=66856757d47788246a6fc5810542cffe522877cf, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not restage the controller token and do not cancel active CPU run 37546267761. After activation, require CPU/GPU controllers and provisioner active/running; capture CPU/GPU NRestarts, wait 8 seconds, and require zero restart delta. Inspect recent CPU/provisioner events for request fa97e66f-c71c-5e48-926a-129a7ecde8b3 / runner lambda-research-engine-8fb642f3900d: orphan cleanup may occur only when durable root state is MISSING, verified_at admission must no longer fail, and a provision request must either be accepted/recovered or produce a new explicit fail-closed error. Then inspect GitHub run 37546267761 for actionable terminal evidence; do not launch gpu-small until CPU receipt/cleanup are proven. Do not enable model-scale classes or gpu-heavy.
 
 ## Remaining work
 
-- Install and activate exact deterministic-JIT-recovery workspace-control 4716726d7b705158f12005ee23daecb51b66e259, allow active CPU run 37546267761 to recover through durable provision-state reconciliation, then validate terminal CPU receipt/cleanup before launching gpu-small acceptance.
+- Install and activate exact workspace-control 66856757d47788246a6fc5810542cffe522877cf, preserve active CPU run 37546267761, prove restart-delta stability and successful verified_at admission/JIT recovery, then validate terminal CPU receipt/cleanup before launching gpu-small acceptance.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,8 +48,8 @@ Install and activate exact workspace-control 4716726d7b705158f12005ee23daecb51b6
 
 ## Blockers / gates
 
-- Lambda still runs 4d4d14480f2cd6b573e33b10efc61a81a316327a and the CPU controller is crash-looping on deterministic JIT runner 409 for active run 37546267761. Install exact 4716726d7b705158f12005ee23daecb51b66e259 before further acceptance evaluation.
-- After exact 4716726d activation, prove CPU/GPU controllers remain active/running with zero restart delta while the existing run 37546267761 is allowed to recover; do not trigger another CPU run until this active run reaches actionable terminal evidence or is explicitly canceled for a P5 reason.
+- Exact verified_at-compatible workspace-control 66856757d47788246a6fc5810542cffe522877cf is validated but not installed on Lambda. CPU controller remains stopped; install/activate exact 66856757 before evaluating the preserved queued CPU run again.
+- After exact 66856757 activation, require CPU/GPU active/running with zero restart delta and allow existing run 37546267761 to recover through JIT-orphan reconciliation plus root admission; do not trigger another CPU run until this one reaches actionable terminal evidence or a new P5 failure requires cancellation.
 
 ## Fresh-chat initialization
 
