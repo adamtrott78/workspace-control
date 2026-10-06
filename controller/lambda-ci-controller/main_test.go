@@ -232,3 +232,17 @@ func TestAdmissionV2TargetRemainsBounded(t *testing.T) {
 		t.Fatalf("target exceeded maxRunners: %d", got)
 	}
 }
+
+func TestSparseJobAssignedRecoveryMetadataIsNonAuthoritative(t *testing.T) {
+	sparse := scaleset.JobMessageBase{
+		RunnerRequestID: 12345,
+	}
+	if recoveryMetadataComplete(&sparse) {
+		t.Fatal("sparse JobAssigned metadata was treated as sufficient for recovery attestation")
+	}
+
+	complete := assignedCPUJob().JobMessageBase
+	if !recoveryMetadataComplete(&complete) {
+		t.Fatal("complete JobAssigned metadata was rejected for recovery attestation")
+	}
+}
