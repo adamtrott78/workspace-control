@@ -30,17 +30,10 @@ getent group workspace-ci-controller >/dev/null || die "MISSING_GROUP:workspace-
 [[ "$(id -nG ci-controller)" == "workspace-ci-controller" ]] || die "CONTROLLER_GROUP_DRIFT"
 [[ "$(id -nG ci-research-engine)" == "ci-research-engine" ]] || die "PROJECT_GROUP_DRIFT"
 
-GO_BIN="$(command -v go || true)"
-[[ -n "$GO_BIN" ]] || die "GO_REQUIRED"
+GO_BIN=/opt/workspace-ci/go/1.26.3/bin/go
+[[ -x "$GO_BIN" ]] || die "ISOLATED_GO_TOOLCHAIN_REQUIRED:/opt/workspace-ci/go/1.26.3"
 GO_VERSION="$("$GO_BIN" env GOVERSION 2>/dev/null || true)"
-python3 - "$GO_VERSION" <<'PY' || exit $?
-import re, sys
-value=sys.argv[1]
-m=re.fullmatch(r"go(\d+)\.(\d+)\.(\d+)", value)
-if not m or tuple(map(int,m.groups())) < (1,26,3):
-    print(f"ERROR=GO_1_26_3_REQUIRED:{value}", file=sys.stderr)
-    raise SystemExit(70)
-PY
+[[ "$GO_VERSION" == "go1.26.3" ]] || die "ISOLATED_GO_VERSION_DRIFT:$GO_VERSION"
 
 PRIMARY_DEV="$(ip -4 route get 1.1.1.1 | awk '{for (i=1;i<=NF;i++) if ($i=="dev") {print $(i+1); exit}}')"
 LOCAL_SUBNET="$(ip -4 route show dev "$PRIMARY_DEV" proto kernel scope link | awk '$1 ~ /^[0-9]+\./ && $1 ~ /\// {print $1; exit}')"
