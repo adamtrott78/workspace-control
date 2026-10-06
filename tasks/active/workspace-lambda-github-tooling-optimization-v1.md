@@ -101,3 +101,25 @@ The inventory has been converted into a versioned design:
 The contract makes project/profile policy declarative and keeps one-job JIT lifecycle implementation generic. PostgreSQL/pgvector remains a research-engine dependency prerequisite, not global launcher behavior.
 
 The next implementation is deliberately parallel/non-default: add a generic profile loader/launcher plus executable P2-B/P3 equivalence tests. Legacy launchers and the parent P3/P4/P5 path remain untouched until equivalence passes.
+
+
+## 2026-10-06 refreshed parent boundary
+
+Workspace Heartbeat v0.4.3 is accepted and complete; it no longer blocks this optimization task.
+
+The authoritative parent task on workspace-control main has advanced beyond the older P3 snapshot captured when this child was created:
+
+- P3 CPU lane: accepted end-to-end on Lambda.
+- P4 GPU lane: accepted end-to-end using stable GPU UUID resolution, per-device-node isolation, CUDA initialization, and bounded VRAM allocation/free.
+- Parent current phase: P5 autonomous controller/provisioner work to remove the manual local sudo/PAT relay while preserving the P2-P4 privilege, provenance, cleanup, and denial boundaries.
+
+Therefore the optimization child must re-read the parent capsule from main before mutation and treat P3/P4 as accepted constraints, not open work.
+
+The child design remains unchanged:
+- one versioned execution-profile schema;
+- one generic profile-driven one-job JIT launcher;
+- project/profile-scoped dependency prerequisites;
+- executable equivalence/safety tests;
+- legacy launchers retained until equivalence PASS.
+
+Do not let this refactor interfere with the parent's active P5 controller/provisioner acceptance path.
