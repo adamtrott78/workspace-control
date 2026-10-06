@@ -53,16 +53,17 @@
     "Keep operator-facing temporary diagnostic/benchmark artifacts under ~/adamArchives/Adam/workspace-control-tmp/ or an explicit visible WORKSPACE_CONTROL_TMP_ROOT.",
     "Follow procedures/progress_heartbeat.md. New chats mount their own live Heartbeat card; never carry an already-mounted claim across chat handoff.",
     "Operator-facing shell instructions must preserve the interactive SSH/session on every validation or install failure. Never emit a top-level `exit`, `logout`, `exec`, shell-kill, or equivalent in a pasteable operator block. Put fail-fast checks inside an explicit child shell/subshell or otherwise return control to the operator prompt.",
-    "Any operator command that depends on a repository must enter that repository inside the same child shell/subshell, verify the exact git toplevel/cleanliness/HEAD before privileged execution, and print diagnostics on mismatch without terminating the parent SSH session."
+    "Any operator command that depends on a repository must enter that repository inside the same child shell/subshell, verify the exact git toplevel/cleanliness/HEAD before privileged execution, and print diagnostics on mismatch without terminating the parent SSH session.",
+    "Every substantial user-visible response for this task must emit heartbeat_update. A fresh chat must then heartbeat_open once early. If the user reports the card absent/unmounted or the card is otherwise demonstrably lost, perform a recovery heartbeat_open before continuing; never assume another turn/chat's visible mount persists."
   ],
   "repositories": [
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "7ad3f357e9ee75d9a01bb19a4bda062f0d59d801",
+      "base_sha": "4d9e48d4a48b5f0f89bffde15639904bff178168",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "7ad3f357e9ee75d9a01bb19a4bda062f0d59d801",
+        "checkpoint_sha": "4d9e48d4a48b5f0f89bffde15639904bff178168",
         "verified": true
       },
       "local": null,
@@ -243,6 +244,16 @@
             "Provisioner service is active on /run/workspace-ci/provisioner.sock with root:workspace-ci-controller ownership and mode 0660.",
             "CPU and GPU controllers are installed but intentionally inactive pending explicit activation; controller_credential_ready=true.",
             "Bootstrap reports production_services_modified=false and generated receipt /home/atrott/adamArchives/Adam/workspace-control-tmp/lambda-ci-p5-install-20261006T211418Z/lambda-ci-p5-install.json."
+          ]
+        },
+        {
+          "check": "Exact-SHA Lambda admission-v2 controller activation",
+          "result": "PASS",
+          "evidence": [
+            "Operator-provided activation receipt on 2026-10-06 reports decision=PASS for workspace-control d2326042f49ae1bd771c33b1ce56f49795827661.",
+            "CPU controller state=ACTIVE for lambda-research-engine and GPU controller state=ACTIVE for lambda-research-engine-gpu.",
+            "workspace-ci-provisioner.service, workspace-ci-controller.service, and workspace-ci-controller-gpu.service were independently shown active/running.",
+            "controller_credential_ready=true and production_services_modified=false."
           ]
         }
       ],
@@ -487,18 +498,16 @@
       ]
     }
   ],
-  "blockers": [
-    "Installed admission-v2 controllers require the explicit exact-SHA activation bootstrap before live CPU/GPU acceptance. Existing controller credential is already validated; do not restage/replace it."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Activate the already-installed canonical workspace-control d2326042f49ae1bd771c33b1ce56f49795827661 CPU/GPU controllers through the exact-SHA root bootstrap, then live-validate admission-v2 CPU and gpu-small receipts.",
+    "Run live non-scientific admission-v2 acceptance through same-repository research-engine candidate PR using trusted /lambda-ci-p5 <exact_sha> and /lambda-ci-p5-gpu <exact_sha>, then validate root receipts and residue-free cleanup.",
     "Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.",
     "Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.",
     "Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.",
     "Decide separately whether gpu-heavy/dual-GPU should be accepted."
   ],
-  "next_safe_action": "On the Lambda host from the normal operator account, rerun canonical workspace-control d2326042f49ae1bd771c33b1ce56f49795827661 through an explicit child bash and a fresh detached worktree, with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=d2326042f49ae1bd771c33b1ce56f49795827661, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not run stage-pat because the install receipt already proved controller_credential_ready=true; replacing that valid credential is unnecessary. The child shell must verify exact HEAD/cleanliness and return to the existing SSH prompt on any failure. Require the activation receipt to show both CPU and GPU controllers ACTIVE with production_services_modified=false. After activation PASS, create/choose a same-repository non-scientific research-engine candidate PR and trigger the existing trusted /lambda-ci-p5 <exact_sha> and /lambda-ci-p5-gpu <exact_sha> workflows. Require both GitHub jobs and root receipts to prove v2 admission identity, exact trusted workflow blob/candidate binding, unchanged cpu-test/gpu-small isolation, and residue-free cleanup before marking admission_manifest_and_enforcement VALIDATED. Do not enable any model-scale class or gpu-heavy in this stage.",
+  "next_safe_action": "Create a same-repository non-scientific research-engine candidate PR whose exact head SHA is safe to execute on the accepted P5 CPU/gpu-small lanes. Trigger the existing trusted /lambda-ci-p5 <exact_sha> and /lambda-ci-p5-gpu <exact_sha> issue_comment workflows on that PR. Require both GitHub jobs and root execution receipts to prove admission-v2 identity, exact trusted workflow blob/candidate binding, accepted cpu-test/gpu-small profile isolation, terminal status, and residue-free cleanup. If either lane fails, diagnose from GitHub/controller/provisioner evidence without widening authority. Do not enable model-acquire, cache-promote, model-eval-single-gpu, gpu-heavy, production routing, or scientific-state mutation in this stage.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-10-06: Created as a child of workspace-lambda-self-hosted-execution-v1 after autonomous CPU and gpu-small execution were accepted. The task is intentionally policy-first: substrate capability expansion is paused until admission/cache/resource governance is explicit and validated. Hydration deliberately reuses existing workspace-control trusted-cache primitives and research-engine model-prefetch/runtime-certification contracts rather than duplicating domain truth. Heartbeat mount state is chat-local; every fresh substantial chat must update then open one live card. 2026-10-06: PR #101 merged the validated policy contract as e77af13b3ad43b4252031d27f72773cfd8f232dd after FULL_INTEGRATION PASS. policy_contract_and_hydration is complete; admission_manifest_and_enforcement is now the first unfinished stage. No live Lambda/model-scale authority was widened. 2026-10-06: Admission-v2 static implementation completed through workspace-control PRs #103-#106 and research-engine PR #105. Canonical workspace-control is d2326042f49ae1bd771c33b1ce56f49795827661; research-engine is 12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d. Static activation is limited to cpu-test/gpu-small and is not yet installed on Lambda. The only current gate is the intentional root-only exact-SHA bootstrap/live acceptance. 2026-10-06 operator-safety correction: an earlier pasteable guard used top-level `exit 70`, which terminated the user's interactive SSH session after a repository-context failure from PADataset. This is now a durable invariant: operator snippets must preserve the parent SSH/session and must enter/verify the required repository inside a child shell before privileged execution. 2026-10-06 live-install checkpoint: operator exact-SHA bootstrap at d2326042f49ae1bd771c33b1ce56f49795827661 returned P5_INSTALL=PASS and INSTALL_BLOCK=PASS. Provisioner is active; CPU/GPU controllers are installed inactive; credential readiness is already true; production services were not modified. The bootstrap's generic stage-pat next-step text must not override the validated credential state, so next action is explicit controller activation without restaging the PAT."
+  "notes": "2026-10-06: Created as a child of workspace-lambda-self-hosted-execution-v1 after autonomous CPU and gpu-small execution were accepted. The task is intentionally policy-first: substrate capability expansion is paused until admission/cache/resource governance is explicit and validated. Hydration deliberately reuses existing workspace-control trusted-cache primitives and research-engine model-prefetch/runtime-certification contracts rather than duplicating domain truth. Heartbeat mount state is chat-local; every fresh substantial chat must update then open one live card. 2026-10-06: PR #101 merged the validated policy contract as e77af13b3ad43b4252031d27f72773cfd8f232dd after FULL_INTEGRATION PASS. policy_contract_and_hydration is complete; admission_manifest_and_enforcement is now the first unfinished stage. No live Lambda/model-scale authority was widened. 2026-10-06: Admission-v2 static implementation completed through workspace-control PRs #103-#106 and research-engine PR #105. Canonical workspace-control is d2326042f49ae1bd771c33b1ce56f49795827661; research-engine is 12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d. Static activation is limited to cpu-test/gpu-small and is not yet installed on Lambda. The only current gate is the intentional root-only exact-SHA bootstrap/live acceptance. 2026-10-06 operator-safety correction: an earlier pasteable guard used top-level `exit 70`, which terminated the user's interactive SSH session after a repository-context failure from PADataset. This is now a durable invariant: operator snippets must preserve the parent SSH/session and must enter/verify the required repository inside a child shell before privileged execution. 2026-10-06 live-install checkpoint: operator exact-SHA bootstrap at d2326042f49ae1bd771c33b1ce56f49795827661 returned P5_INSTALL=PASS and INSTALL_BLOCK=PASS. Provisioner is active; CPU/GPU controllers are installed inactive; credential readiness is already true; production services were not modified. The bootstrap's generic stage-pat next-step text must not override the validated credential state, so next action is explicit controller activation without restaging the PAT. 2026-10-06 live-activation checkpoint: exact-SHA bootstrap with WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES returned PASS. CPU and GPU controllers plus provisioner are active; existing controller credential remains ready; production services were not modified. User also requested an explicit durable Heartbeat visibility invariant after repeated UI mount loss, now recorded in constraints."
 }
