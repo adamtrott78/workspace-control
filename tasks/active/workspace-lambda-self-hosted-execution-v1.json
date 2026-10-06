@@ -289,6 +289,26 @@
             "P3-specific JIT launcher preserves accepted P2 sandbox/credential boundary and increases bounded outer runner lifetime to 2100 seconds.",
             "Trigger /lambda-ci-cpu ab36b358a0c7ac33d2887fa681f418033554eae0 posted on research-engine PR #95; GitHub run 37394877505 is queued waiting for matching Lambda runner."
           ]
+        },
+        {
+          "check": "P3 first Lambda CPU execution",
+          "result": "FAIL_CLOSED_ENVIRONMENT_GAP",
+          "evidence": [
+            "GitHub run 37394877505 executed on Lambda runner 22 and validated exact PR #95 SHA ab36b358a0c7ac33d2887fa681f418033554eae0.",
+            "Exact-SHA gate, checkout with persist-credentials:false, Python 3.12 setup, CPU isolation, production-Postgres denial, Docker denial, NVIDIA denial, artifact upload, and runner cleanup all worked.",
+            "Structured artifact 11382772001 failed at stage=postgres-discovery after resolving /usr/lib/postgresql/14/bin; pgvector_control was empty and install/compile/pytest were never reached.",
+            "This is a host dependency gap, not candidate-code failure evidence."
+          ]
+        },
+        {
+          "check": "P3 pgvector environment repair",
+          "result": "IMPLEMENTED_VALIDATED_PENDING_LAMBDA",
+          "evidence": [
+            "workspace-control PR #77 passed exact-head validation and merged as 04b2750bc71818b7ca5be970bda4bc541da4034e.",
+            "Repair uses temporary signed PGDG archive metadata, exact postgresql-14-pgvector 0.8.6 payload extraction, no package installation, no /etc/apt mutation, and only vector extension runtime-file promotion.",
+            "Repair records rollback destinations before first root copy, smoke-tests a fresh ci-research-engine-owned Unix-socket PostgreSQL cluster, and requires production PG14 master processes to remain unchanged.",
+            "research-engine PR #98 adds an exact pgvector 0.8.6 gate to the trusted P3 workflow; ordinary CI is pending."
+          ]
         }
       ],
       "resume_condition": "Research-engine branch validation can complete without human SSH and without production-state mutation."
@@ -346,16 +366,17 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "c2e2c1a6a1f75cca424e94041e39c1e375ce63ca",
+      "identity": "04b2750bc71818b7ca5be970bda4bc541da4034e",
       "required_for_resume": true,
       "evidence": [
         "P0 PASS",
         "P1 PASS",
         "P2 PASS",
-        "P3 workflow merged research-engine@4564283cf9d3e0fc9ccf7306a1ab398e2bd1a9d4",
-        "P3 launcher merged workspace-control@c2e2c1a6a1f75cca424e94041e39c1e375ce63ca",
-        "P3 run 37394877505 queued for exact PR #95 head ab36b358a0c7ac33d2887fa681f418033554eae0",
-        "next safe action=one local JIT token prompt + P3 launcher; production DB/Docker/GPU remain denied"
+        "P3 first real Lambda CPU run=controlled FAIL at postgres-discovery due missing pgvector",
+        "candidate install/compile/pytest not yet reached",
+        "bounded pgvector repair merged workspace-control@04b2750bc71818b7ca5be970bda4bc541da4034e",
+        "research-engine PR #98 exact-version workflow gate pending CI",
+        "P4 not authorized until full P3 PASS"
       ]
     }
   ],
@@ -380,17 +401,18 @@
     }
   ],
   "blockers": [
-    "P3 run 37394877505 requires one local short-lived research-engine Administration:write token to mint the one-job JIT runner because the autonomous scale-set controller is intentionally deferred until P5.",
-    "P3 may reveal host-specific PostgreSQL/pgvector or candidate-test failures; those should be diagnosed from the returned GitHub receipt/logs rather than bypassing isolation."
+    "research-engine PR #98 must pass ordinary CI and merge before the P3 retry is armed.",
+    "The merged pgvector repair must PASS on the real Lambda before a new P3 JIT runner is started.",
+    "The P3 retry must then reach and pass actual candidate install/compile/pytest before P4 may begin."
   ],
   "remaining_work": [
-    "Execute the reviewed P3 one-job JIT launcher on Lambda using a short-lived research-engine Administration:write token pasted only into the hidden local prompt.",
-    "Inspect GitHub run 37394877505 and lambda-ci-p3-receipt; if failure occurs, diagnose exact host/candidate incompatibility and iterate through a new exact SHA/run.",
-    "If P3 passes, checkpoint CPU validation and begin P4 bounded GPU validation with explicit device grant and post-job GPU/process cleanup.",
-    "P5: install/accept autonomous scale-set listener + narrow root provisioner and prove closed-loop fail-diagnose-fix-rerun-PASS with no human SSH/token relay.",
-    "P6: second-project isolation pilot under separate UID/root/cache."
+    "Wait for research-engine PR #98 ordinary CI; merge only on PASS.",
+    "Execute workspace-control pgvector repair from exact merged SHA 04b2750bc71818b7ca5be970bda4bc541da4034e and inspect its visible receipt.",
+    "Queue a fresh trusted /lambda-ci-cpu trigger against unchanged PR #95 head ab36b358a0c7ac33d2887fa681f418033554eae0 and launch one new JIT CPU runner.",
+    "Inspect the new P3 receipt/logs; if a new host/candidate incompatibility appears, repair only that demonstrated issue and rerun.",
+    "Only after full P3 PASS, begin P4 bounded GPU validation."
   ],
-  "next_safe_action": "On Lambda, create a clean detached workspace-control worktree exactly at `c2e2c1a6a1f75cca424e94041e39c1e375ce63ca`, then run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES`. Paste a short-lived fine-grained GitHub PAT scoped only to `adamtrott78/research-engine` with repository Administration:write into the hidden prompt. Do not put the token in chat, Git, argv, environment, or a file. The trusted P3 run is already queued as 37394877505. After launcher exit, return only the non-secret `lambda-ci-p3-launcher.json` receipt; ChatGPT will inspect the GitHub run/artifact directly.",
+  "next_safe_action": "Wait for research-engine PR #98 exact-head ordinary CI. If PASS, merge it, queue a fresh P3 CPU run for PR #95 exact head `ab36b358a0c7ac33d2887fa681f418033554eae0`, then execute the bounded pgvector dependency repair from workspace-control `04b2750bc71818b7ca5be970bda4bc541da4034e` before launching the new P3 JIT runner. Do not advance to P4 until install/compile/full pytest pass on Lambda.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
   "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation."
