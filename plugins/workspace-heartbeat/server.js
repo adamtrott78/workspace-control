@@ -11,7 +11,7 @@ import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
 const PANEL_URI = "ui://workspace-heartbeat/panel-v8.html";
-const LIVE_URI = "ui://workspace-heartbeat/live-v1.html";
+const LIVE_URI = "ui://workspace-heartbeat/live-v2.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
   "utf8",
@@ -24,6 +24,7 @@ const store = new HeartbeatStore({ historyLimit: 50 });
 
 const heartbeatSchema = z.object({
   task_id: z.string(),
+  turn_id: z.string(),
   message: z.string(),
   state: z.enum(["working", "waiting", "blocked", "done"]),
   sequence: z.number().int().nonnegative(),
@@ -34,9 +35,14 @@ const heartbeatUpdateOutputSchema = {
   heartbeat: heartbeatSchema,
 };
 
-const heartbeatLiveOutputSchema = {
+const heartbeatTurnOutputSchema = {
+  task_id: z.string(),
+  turn_id: z.string(),
   heartbeat: heartbeatSchema.nullable(),
   recent: z.array(heartbeatSchema).max(3),
+  active: z.boolean(),
+  superseded: z.boolean(),
+  completed: z.boolean(),
 };
 
 const heartbeatOutputSchema = {
@@ -60,12 +66,11 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.4.3",
+      version: "0.4.4",
     },
     {
       instructions:
-        "For substantial work, call heartbeat_update with natural concise progress about real findings, decisions, and next actions—not tool-operation telemetry. Call it on meaningful state changes and before the fourth non-heartbeat tool operation. After the first update, call heartbeat_open(task_id) once early for the owning task, then continue working and writing data-only updates. The mounted live card calls its own app-only heartbeat_snapshot tool via the MCP Apps bridge, updating the rolling last-three history without further model renders. Do not reopen a healthy card merely to refresh it. If the card is demonstrably absent, unmounted, failed, or lost after a chat/plugin reload, one recovery heartbeat_open(task_id) is allowed to restore the live surface. Do not call heartbeat_render (removed). Initial mounting is controlled by the host; the app controls refresh only after it mounts. Use heartbeat_get(task_id) only for explicitly requested full history or necessary recovery."
-
+        "For every substantial assistant response, FIRST call heartbeat_begin_turn(task_id, message, state). That single operation supersedes the prior heartbeat turn for this conversation/task, creates a new opaque turn_id, writes the first natural progress update, and mounts the current rolling-three card. Carry the returned turn_id explicitly on every later heartbeat_update for that assistant response. Call heartbeat_update on meaningful findings/decisions and before the fourth non-heartbeat tool operation. Never call heartbeat_snapshot directly; it is app-only. heartbeat_get is explicit task-history/debugging only. A stale/missing turn_id must fail closed. If this conversation does not expose heartbeat_begin_turn or heartbeat_update does not accept turn_id, its plugin contract is stale: do not use Heartbeat here; refresh the plugin and start a new conversation.",
     },
   );
 
@@ -80,11 +85,7 @@ function createHeartbeatServer() {
           uri: PANEL_URI,
           mimeType: RESOURCE_MIME_TYPE,
           text: panelHtml,
-          _meta: {
-            ui: {
-              prefersBorder: false,
-            },
-          },
+          _meta: { ui: { prefersBorder: false } },
         },
       ],
     }),
@@ -101,11 +102,7 @@ function createHeartbeatServer() {
           uri: LIVE_URI,
           mimeType: RESOURCE_MIME_TYPE,
           text: liveHtml,
-          _meta: {
-            ui: {
-              prefersBorder: false,
-            },
-          },
+          _meta: { ui: { prefersBorder: false } },
         },
       ],
     }),
@@ -113,13 +110,70 @@ function createHeartbeatServer() {
 
   registerAppTool(
     server,
-    "heartbeat_update",
+    "heartbeat_begin_turn",
     {
-      title: "Update operator heartbeat",
+      title: "Begin live heartbeat turn",
       description:
-        "Record natural, conversational operator progress focused on what materially changed, what you learned, or what you are doing next. Prefer findings and decisions over tool mechanics, avoid generic heartbeat numbering and boilerplate. Keep this call data-only. After the first update of a substantial turn, call heartbeat_open once early for this task; the mounted app handles its own later refreshes.",
+        "FIRST heartbeat operation for every substantial assistant response. Atomically supersedes the previous heartbeat turn for this task in the same ChatGPT conversation, creates a fresh server-generated turn_id, records this first natural progress message, and mounts one live rolling-three card for the new turn. Carry the returned turn_id on every heartbeat_update in this response.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
+        message: z.string().min(1).max(4000),
+        state: z.enum(["working", "waiting", "blocked", "done"]).default("working"),
+      },
+      outputSchema: heartbeatTurnOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        openWorldHint: false,
+        idempotentHint: false,
+      },
+      _meta: {
+        ui: {
+          resourceUri: LIVE_URI,
+          visibility: ["model", "app"],
+        },
+        "openai/toolInvocation/invoking": "Starting live progress…",
+        "openai/toolInvocation/invoked": "Live progress started",
+      },
+    },
+    async ({ task_id, message, state }, { _meta } = {}) => {
+      const snapshot = store.beginTurn({
+        sessionId: sessionIdFromMeta(_meta),
+        taskId: task_id.trim(),
+        message: message.trim(),
+        state,
+      });
+      return {
+        structuredContent: snapshot,
+        content: [
+          {
+            type: "text",
+            text:
+              snapshot.heartbeat.message +
+              "\n\n" +
+              snapshot.task_id +
+              " · turn " +
+              snapshot.turn_id +
+              " · update " +
+              snapshot.heartbeat.sequence +
+              " · " +
+              snapshot.heartbeat.state,
+          },
+        ],
+      };
+    },
+  );
+
+  registerAppTool(
+    server,
+    "heartbeat_update",
+    {
+      title: "Update current heartbeat turn",
+      description:
+        "Record a later natural progress update for the assistant response that was started by heartbeat_begin_turn. task_id and the exact returned turn_id are both required. Stale, superseded, missing, wrong-task, or cross-conversation turn IDs fail closed instead of writing history.",
+      inputSchema: {
+        task_id: z.string().min(1).max(160),
+        turn_id: z.string().min(1).max(160),
         message: z.string().min(1).max(4000),
         state: z.enum(["working", "waiting", "blocked", "done"]).default("working"),
       },
@@ -135,11 +189,11 @@ function createHeartbeatServer() {
         "openai/toolInvocation/invoked": "Progress updated",
       },
     },
-    async ({ task_id, message, state }, { _meta } = {}) => {
-      const sessionId = sessionIdFromMeta(_meta);
-      const heartbeat = store.update({
-        sessionId,
+    async ({ task_id, turn_id, message, state }, { _meta } = {}) => {
+      const heartbeat = store.updateTurn({
+        sessionId: sessionIdFromMeta(_meta),
         taskId: task_id.trim(),
+        turnId: turn_id.trim(),
         message: message.trim(),
         state,
       });
@@ -148,52 +202,16 @@ function createHeartbeatServer() {
         content: [
           {
             type: "text",
-            text: `${heartbeat.message}\n\n${heartbeat.task_id} · update ${heartbeat.sequence} · ${heartbeat.state}`,
-          },
-        ],
-      };
-    },
-  );
-
-  registerAppTool(
-    server,
-    "heartbeat_open",
-    {
-      title: "Open live task heartbeat",
-      description:
-        "Mount one live, task-scoped heartbeat card early in a substantial turn, after the first heartbeat_update. Do not call it again merely to refresh a healthy card: the mounted card independently fetches fresh state through heartbeat_snapshot. If the card is demonstrably absent, unmounted, failed, or lost after a chat/plugin reload, one recovery call is allowed to restore the surface. It shows only the latest three updates for this task; full history is available separately through heartbeat_get. Host-controlled iframe mounting may be delayed.",
-      inputSchema: {
-        task_id: z.string().min(1).max(160),
-      },
-      outputSchema: heartbeatLiveOutputSchema,
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        openWorldHint: false,
-        idempotentHint: true,
-      },
-      _meta: {
-        ui: {
-          resourceUri: LIVE_URI,
-          visibility: ["model", "app"],
-        },
-        "openai/toolInvocation/invoking": "Opening live progress…",
-        "openai/toolInvocation/invoked": "Live progress opened",
-      },
-    },
-    async ({ task_id }, { _meta } = {}) => {
-      const scoped = task_id.trim();
-      const snapshot = store.getSnapshot({
-        sessionId: sessionIdFromMeta(_meta),
-        taskId: scoped,
-      });
-      const recent = snapshot.history.slice(-3);
-      return {
-        structuredContent: { task_id: scoped, heartbeat: snapshot.heartbeat, recent },
-        content: [
-          {
-            type: "text",
-            text: "Live heartbeat card opened for " + scoped + ". It will fetch subsequent task-local updates itself.",
+            text:
+              heartbeat.message +
+              "\n\n" +
+              heartbeat.task_id +
+              " · turn " +
+              heartbeat.turn_id +
+              " · update " +
+              heartbeat.sequence +
+              " · " +
+              heartbeat.state,
           },
         ],
       };
@@ -204,13 +222,14 @@ function createHeartbeatServer() {
     server,
     "heartbeat_snapshot",
     {
-      title: "Read live task heartbeat snapshot",
+      title: "Read one heartbeat turn snapshot",
       description:
-        "App-only read-only helper: return the latest three updates for the explicit task_id. The mounted heartbeat card calls this through tools/call. This tool must not mount another UI resource.",
+        "App-only read-only helper for the live card. Returns only the rolling last three updates for the explicit task_id + turn_id and whether that turn is still active, superseded, or completed.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
+        turn_id: z.string().min(1).max(160),
       },
-      outputSchema: heartbeatLiveOutputSchema,
+      outputSchema: heartbeatTurnOutputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -218,27 +237,23 @@ function createHeartbeatServer() {
         idempotentHint: true,
       },
       _meta: {
-        ui: {
-          visibility: ["app"],
-        },
+        ui: { visibility: ["app"] },
         "openai/widgetAccessible": true,
       },
     },
-    async ({ task_id }, { _meta } = {}) => {
-      const scoped = task_id.trim();
-      const snapshot = store.getSnapshot({
-        sessionId: sessionIdFromMeta(_meta),
-        taskId: scoped,
+    async ({ task_id, turn_id }) => {
+      const snapshot = store.getTurnSnapshot({
+        taskId: task_id.trim(),
+        turnId: turn_id.trim(),
       });
-      const recent = snapshot.history.slice(-3);
+      if (!snapshot) {
+        throw new Error(
+          "HEARTBEAT_TURN_NOT_FOUND: This live card refers to an unknown heartbeat turn.",
+        );
+      }
       return {
-        structuredContent: { task_id: scoped, heartbeat: snapshot.heartbeat, recent },
-        content: [
-          {
-            type: "text",
-            text: "Task-local heartbeat snapshot for " + scoped + ".",
-          },
-        ],
+        structuredContent: snapshot,
+        content: [],
       };
     },
   );
@@ -247,9 +262,9 @@ function createHeartbeatServer() {
     server,
     "heartbeat_get",
     {
-      title: "Read operator heartbeat",
+      title: "Read heartbeat task history",
       description:
-        "Full task-history inspection only. Use this when the user explicitly asks to open/read heartbeat history or when recovery genuinely requires historical state. Pass task_id whenever it is known. Routine progress delivery uses heartbeat_update and a single early heartbeat_open, whose app refreshes itself through heartbeat_snapshot.",
+        "Explicit task-history/sidebar inspection only. Returns bounded task-level history across heartbeat turns. It is not the routine live-progress path.",
       inputSchema: {
         task_id: z.string().min(1).max(160).optional(),
       },
@@ -278,10 +293,7 @@ function createHeartbeatServer() {
         taskId: task_id?.trim(),
       });
       if (!snapshot.heartbeat) {
-        return resultFor(
-          snapshot,
-          "No heartbeat has been recorded for this task yet.",
-        );
+        return resultFor(snapshot, "No heartbeat has been recorded for this task yet.");
       }
       return resultFor(
         snapshot,

@@ -1,8 +1,24 @@
+import { randomUUID } from "node:crypto";
+
+function fail(code, message) {
+  const error = new Error(`${code}: ${message}`);
+  error.code = code;
+  throw error;
+}
+
 export class HeartbeatStore {
-  constructor({ historyLimit = 50, timelineLimit = 50 } = {}) {
+  constructor({
+    historyLimit = 50,
+    timelineLimit = 50,
+    turnHistoryLimit = 50,
+    turnIdFactory = () => randomUUID(),
+  } = {}) {
     this.historyLimit = historyLimit;
     this.timelineLimit = timelineLimit;
+    this.turnHistoryLimit = turnHistoryLimit;
+    this.turnIdFactory = turnIdFactory;
     this.tasks = new Map();
+    this.turns = new Map();
     this.latestTaskBySession = new Map();
     this.timelineBySession = new Map();
     this.latestTimelineByTask = new Map();
@@ -19,6 +35,26 @@ export class HeartbeatStore {
     return `timeline-${this.timelineCounter}`;
   }
 
+  _newTurnId() {
+    let id = this.turnIdFactory();
+    while (this.turns.has(id)) id = this.turnIdFactory();
+    return id;
+  }
+
+  _taskRecord(taskId) {
+    let record = this.tasks.get(taskId);
+    if (!record) {
+      record = {
+        heartbeat: null,
+        history: [],
+        activeTurnId: null,
+        ownerSessionId: null,
+      };
+      this.tasks.set(taskId, record);
+    }
+    return record;
+  }
+
   _timelineIdForUpdate({ sessionId, taskId }) {
     const sessionKey = this._sessionKey(sessionId);
     let timelineId = this.timelineBySession.get(sessionKey);
@@ -31,20 +67,21 @@ export class HeartbeatStore {
     return timelineId;
   }
 
-  update({ sessionId, taskId, message, state, now = new Date() }) {
-    const previous = this.tasks.get(taskId);
+  _appendHeartbeat({ sessionId, taskId, turn, message, state, now }) {
+    const task = this._taskRecord(taskId);
     const heartbeat = {
       task_id: taskId,
+      turn_id: turn.turnId,
       message,
       state,
-      sequence: (previous?.heartbeat?.sequence ?? 0) + 1,
+      sequence: (task.heartbeat?.sequence ?? 0) + 1,
       updated_at: now.toISOString(),
     };
 
-    const history = [...(previous?.history ?? []), heartbeat].slice(
-      -this.historyLimit,
-    );
-    this.tasks.set(taskId, { heartbeat, history });
+    task.heartbeat = heartbeat;
+    task.history = [...task.history, heartbeat].slice(-this.historyLimit);
+    turn.heartbeat = heartbeat;
+    turn.history = [...turn.history, heartbeat].slice(-this.turnHistoryLimit);
 
     const sessionKey = this._sessionKey(sessionId);
     this.latestTaskBySession.set(sessionKey, taskId);
@@ -57,6 +94,156 @@ export class HeartbeatStore {
     this.latestTimelineByTask.set(taskId, timelineId);
 
     return heartbeat;
+  }
+
+  beginTurn({
+    sessionId,
+    taskId,
+    message,
+    state = "working",
+    now = new Date(),
+  }) {
+    const sessionKey = this._sessionKey(sessionId);
+    const task = this._taskRecord(taskId);
+
+    if (task.ownerSessionId && task.ownerSessionId !== sessionKey) {
+      fail(
+        "HEARTBEAT_TASK_OWNED_BY_ANOTHER_CONVERSATION",
+        "This task already has an active heartbeat writer in another conversation.",
+      );
+    }
+
+    if (task.activeTurnId) {
+      const previous = this.turns.get(task.activeTurnId);
+      if (previous?.active) {
+        if (previous.sessionId !== sessionKey) {
+          fail(
+            "HEARTBEAT_TASK_OWNED_BY_ANOTHER_CONVERSATION",
+            "This task already has an active heartbeat writer in another conversation.",
+          );
+        }
+        previous.active = false;
+        previous.superseded = true;
+        previous.superseded_at = now.toISOString();
+      }
+    }
+
+    const turnId = this._newTurnId();
+    const turn = {
+      turnId,
+      taskId,
+      sessionId: sessionKey,
+      active: true,
+      superseded: false,
+      completed: false,
+      heartbeat: null,
+      history: [],
+      started_at: now.toISOString(),
+    };
+    this.turns.set(turnId, turn);
+    task.activeTurnId = turnId;
+    task.ownerSessionId = sessionKey;
+
+    this._appendHeartbeat({
+      sessionId: sessionKey,
+      taskId,
+      turn,
+      message,
+      state,
+      now,
+    });
+
+    if (state === "done") {
+      this._completeTurn({ task, turn, now });
+    }
+
+    return this.getTurnSnapshot({ taskId, turnId });
+  }
+
+  _completeTurn({ task, turn, now }) {
+    turn.active = false;
+    turn.completed = true;
+    turn.completed_at = now.toISOString();
+    if (task.activeTurnId === turn.turnId) {
+      task.activeTurnId = null;
+      task.ownerSessionId = null;
+    }
+  }
+
+  updateTurn({
+    sessionId,
+    taskId,
+    turnId,
+    message,
+    state = "working",
+    now = new Date(),
+  }) {
+    const sessionKey = this._sessionKey(sessionId);
+    const turn = this.turns.get(turnId);
+
+    if (!turn) {
+      fail(
+        "HEARTBEAT_TURN_NOT_FOUND",
+        "This heartbeat turn does not exist. Start the current assistant response with heartbeat_begin_turn.",
+      );
+    }
+    if (turn.taskId !== taskId) {
+      fail(
+        "HEARTBEAT_TURN_TASK_MISMATCH",
+        "The supplied turn_id does not belong to this task_id.",
+      );
+    }
+    if (turn.sessionId !== sessionKey) {
+      fail(
+        "HEARTBEAT_TURN_CONVERSATION_MISMATCH",
+        "The supplied turn_id belongs to another ChatGPT conversation.",
+      );
+    }
+    if (!turn.active) {
+      const reason = turn.superseded ? "superseded" : "completed";
+      fail(
+        "HEARTBEAT_TURN_STALE",
+        `This heartbeat turn is ${reason}. Start a new assistant turn with heartbeat_begin_turn.`,
+      );
+    }
+
+    const task = this._taskRecord(taskId);
+    if (task.activeTurnId !== turnId || task.ownerSessionId !== sessionKey) {
+      fail(
+        "HEARTBEAT_TURN_STALE",
+        "This is no longer the active heartbeat turn for the task.",
+      );
+    }
+
+    const heartbeat = this._appendHeartbeat({
+      sessionId: sessionKey,
+      taskId,
+      turn,
+      message,
+      state,
+      now,
+    });
+
+    if (state === "done") {
+      this._completeTurn({ task, turn, now });
+    }
+
+    return heartbeat;
+  }
+
+  getTurnSnapshot({ taskId, turnId }) {
+    const turn = this.turns.get(turnId);
+    if (!turn || turn.taskId !== taskId) return null;
+
+    return {
+      task_id: taskId,
+      turn_id: turnId,
+      heartbeat: turn.heartbeat,
+      recent: [...turn.history].slice(-3),
+      active: turn.active,
+      superseded: turn.superseded,
+      completed: turn.completed,
+    };
   }
 
   _resolveTaskId({ sessionId, taskId }) {

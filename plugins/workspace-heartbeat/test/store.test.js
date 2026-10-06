@@ -2,124 +2,100 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { HeartbeatStore } from "../src/store.js";
 
-test("sequence is monotonic per task across ChatGPT sessions", () => {
-  const store = new HeartbeatStore();
-  const first = store.update({
-    sessionId: "s1",
-    taskId: "task-a",
-    message: "First",
-    state: "working",
-    now: new Date("2026-10-05T04:00:00Z"),
-  });
-  const second = store.update({
-    sessionId: "s2",
-    taskId: "task-a",
-    message: "Second",
-    state: "waiting",
-    now: new Date("2026-10-05T04:00:01Z"),
-  });
+function makeStore(){
+  let n=0;
+  return new HeartbeatStore({turnIdFactory:()=>`turn-${++n}`});
+}
 
-  assert.equal(first.sequence, 1);
-  assert.equal(second.sequence, 2);
-  assert.equal(store.get({ sessionId: "s9", taskId: "task-a" }).message, "Second");
+test("beginTurn creates an explicit turn and first heartbeat",()=>{
+  const store=makeStore();
+  const turn=store.beginTurn({
+    sessionId:"chat-a",taskId:"task-a",message:"Starting",state:"working",
+    now:new Date("2026-10-06T10:00:00Z")
+  });
+  assert.equal(turn.turn_id,"turn-1");
+  assert.equal(turn.active,true);
+  assert.equal(turn.heartbeat.turn_id,"turn-1");
+  assert.deepEqual(turn.recent.map(x=>x.message),["Starting"]);
 });
 
-test("explicit task lookup works across session identity changes", () => {
-  const store = new HeartbeatStore();
-  store.update({
-    sessionId: "model-session",
-    taskId: "task-a",
-    message: "Visible to the task",
-    state: "working",
-  });
-
-  assert.equal(
-    store.get({ sessionId: "app-session", taskId: "task-a" }).message,
-    "Visible to the task",
-  );
+test("same conversation begins a new turn and supersedes the old one",()=>{
+  const store=makeStore();
+  const a=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"A1",state:"working"});
+  store.updateTurn({sessionId:"chat-a",taskId:"task-a",turnId:a.turn_id,message:"A2",state:"working"});
+  const b=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"B1",state:"working"});
+  assert.equal(store.getTurnSnapshot({taskId:"task-a",turnId:a.turn_id}).superseded,true);
+  assert.equal(store.getTurnSnapshot({taskId:"task-a",turnId:a.turn_id}).active,false);
+  assert.equal(b.turn_id,"turn-2");
+  assert.deepEqual(b.recent.map(x=>x.message),["B1"]);
+  assert.deepEqual(store.getSnapshot({sessionId:"chat-a",taskId:"task-a"}).history.map(x=>x.message),["A1","A2","B1"]);
 });
 
-test("omitted task id resolves the latest task for that session", () => {
-  const store = new HeartbeatStore();
-  store.update({ sessionId: "s1", taskId: "task-a", message: "A", state: "working" });
-  store.update({ sessionId: "s1", taskId: "task-b", message: "B", state: "blocked" });
-
-  assert.equal(store.get({ sessionId: "s1" }).task_id, "task-b");
+test("later updates require the exact active turn and conversation",()=>{
+  const store=makeStore();
+  const a=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"Start",state:"working"});
+  const hb=store.updateTurn({sessionId:"chat-a",taskId:"task-a",turnId:a.turn_id,message:"Next",state:"waiting"});
+  assert.equal(hb.turn_id,a.turn_id);
+  assert.throws(()=>store.updateTurn({
+    sessionId:"chat-b",taskId:"task-a",turnId:a.turn_id,message:"Wrong chat",state:"working"
+  }),/HEARTBEAT_TURN_CONVERSATION_MISMATCH/);
+  assert.throws(()=>store.updateTurn({
+    sessionId:"chat-a",taskId:"task-b",turnId:a.turn_id,message:"Wrong task",state:"working"
+  }),/HEARTBEAT_TURN_TASK_MISMATCH/);
 });
 
-test("snapshot keeps task history separate from cross-task timeline", () => {
-  const store = new HeartbeatStore();
-  store.update({
-    sessionId: "s1",
-    taskId: "parent",
-    message: "Parent one",
-    state: "working",
-    now: new Date("2026-10-05T04:00:00Z"),
-  });
-  store.update({
-    sessionId: "s1",
-    taskId: "parent",
-    message: "Parent two",
-    state: "working",
-    now: new Date("2026-10-05T04:00:01Z"),
-  });
-  store.update({
-    sessionId: "s1",
-    taskId: "child",
-    message: "Child one",
-    state: "working",
-    now: new Date("2026-10-05T04:00:02Z"),
-  });
-
-  const snapshot = store.getSnapshot({ sessionId: "different-app-session", taskId: "child" });
-
-  assert.deepEqual(snapshot.history.map((x) => x.message), ["Child one"]);
-  assert.deepEqual(
-    snapshot.timeline.map((x) => [x.task_id, x.message]),
-    [
-      ["parent", "Parent one"],
-      ["parent", "Parent two"],
-      ["child", "Child one"],
-    ],
-  );
+test("superseded turn IDs fail closed",()=>{
+  const store=makeStore();
+  const a=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"A",state:"working"});
+  store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"B",state:"working"});
+  assert.throws(()=>store.updateTurn({
+    sessionId:"chat-a",taskId:"task-a",turnId:a.turn_id,message:"Stale",state:"working"
+  }),/HEARTBEAT_TURN_STALE/);
 });
 
-test("same task recovers its timeline after session identity changes", () => {
-  const store = new HeartbeatStore();
-  store.update({
-    sessionId: "s1",
-    taskId: "task-a",
-    message: "One",
-    state: "working",
-    now: new Date("2026-10-05T04:00:00Z"),
-  });
-  store.update({
-    sessionId: "s2",
-    taskId: "task-a",
-    message: "Two",
-    state: "working",
-    now: new Date("2026-10-05T04:00:01Z"),
-  });
-
-  const snapshot = store.getSnapshot({ sessionId: "s3", taskId: "task-a" });
-  assert.deepEqual(snapshot.timeline.map((x) => x.message), ["One", "Two"]);
+test("active task ownership rejects a different conversation",()=>{
+  const store=makeStore();
+  store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"A",state:"working"});
+  assert.throws(()=>store.beginTurn({
+    sessionId:"chat-b",taskId:"task-a",message:"B",state:"working"
+  }),/HEARTBEAT_TASK_OWNED_BY_ANOTHER_CONVERSATION/);
 });
 
-test("timeline is bounded independently from task history", () => {
-  const store = new HeartbeatStore({ historyLimit: 3, timelineLimit: 2 });
-  store.update({ sessionId: "s1", taskId: "a", message: "One", state: "working" });
-  store.update({ sessionId: "s1", taskId: "b", message: "Two", state: "working" });
-  store.update({ sessionId: "s1", taskId: "c", message: "Three", state: "done" });
-
-  const snapshot = store.getSnapshot({ sessionId: "s1", taskId: "c" });
-  assert.deepEqual(snapshot.timeline.map((x) => x.message), ["Two", "Three"]);
+test("done closes the turn and releases task ownership",()=>{
+  const store=makeStore();
+  const a=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"A",state:"working"});
+  store.updateTurn({sessionId:"chat-a",taskId:"task-a",turnId:a.turn_id,message:"Done",state:"done"});
+  const closed=store.getTurnSnapshot({taskId:"task-a",turnId:a.turn_id});
+  assert.equal(closed.active,false);
+  assert.equal(closed.completed,true);
+  const b=store.beginTurn({sessionId:"chat-b",taskId:"task-a",message:"Reopened",state:"working"});
+  assert.equal(b.active,true);
 });
 
-test("missing heartbeat returns an empty snapshot", () => {
-  const store = new HeartbeatStore();
-  assert.deepEqual(store.getSnapshot({ sessionId: "s1" }), {
-    heartbeat: null,
-    history: [],
-    timeline: [],
+test("turn snapshot is rolling-three and never crosses turns",()=>{
+  const store=makeStore();
+  const a=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"A1",state:"working"});
+  for(let i=2;i<=5;i++) store.updateTurn({
+    sessionId:"chat-a",taskId:"task-a",turnId:a.turn_id,message:"A"+i,state:"working"
+  });
+  const b=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"B1",state:"working"});
+  assert.deepEqual(store.getTurnSnapshot({taskId:"task-a",turnId:a.turn_id}).recent.map(x=>x.message),["A3","A4","A5"]);
+  assert.deepEqual(store.getTurnSnapshot({taskId:"task-a",turnId:b.turn_id}).recent.map(x=>x.message),["B1"]);
+});
+
+test("task history remains available across turns",()=>{
+  const store=makeStore();
+  const a=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"A",state:"working"});
+  store.updateTurn({sessionId:"chat-a",taskId:"task-a",turnId:a.turn_id,message:"A2",state:"working"});
+  store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"B",state:"working"});
+  const snapshot=store.getSnapshot({sessionId:"different",taskId:"task-a"});
+  assert.deepEqual(snapshot.history.map(x=>x.message),["A","A2","B"]);
+  assert.ok(snapshot.history.every(x=>x.turn_id));
+});
+
+test("missing task still returns empty task-level snapshot",()=>{
+  const store=makeStore();
+  assert.deepEqual(store.getSnapshot({sessionId:"chat-a"}),{
+    heartbeat:null,history:[],timeline:[]
   });
 });
