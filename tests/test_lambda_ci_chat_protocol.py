@@ -1,4 +1,6 @@
 from pathlib import Path
+import json
+import re
 import runpy
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -164,3 +166,20 @@ def test_failed_run_requests_narrow_failure_evidence_ladder():
         "failing-job-log",
         "receipt",
     ]
+
+
+def test_run_handle_schema_regexes_decode_to_intended_patterns():
+    schema = json.loads(
+        (ROOT / "architecture" / "lambda-ci-chat-run.v1.schema.json").read_text()
+    )
+    repository_pattern = schema["properties"]["repository"]["pattern"]
+    workflow_pattern = schema["properties"]["workflow_path"]["pattern"]
+
+    assert repository_pattern == r"^[^/\s]+/[^/\s]+$"
+    assert re.fullmatch(repository_pattern, "adamtrott78/research-engine")
+    assert not re.fullmatch(repository_pattern, "bad owner/research-engine")
+
+    assert workflow_pattern == r"^\.github/workflows/[^/]+\.ya?ml$"
+    assert re.fullmatch(workflow_pattern, ".github/workflows/lambda-ci-p3-cpu.yml")
+    assert re.fullmatch(workflow_pattern, ".github/workflows/lambda-ci-p4-gpu.yaml")
+    assert not re.fullmatch(workflow_pattern, "xgithub/workflows/lambda-ci-p3-cpu.yml")

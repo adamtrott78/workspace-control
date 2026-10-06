@@ -24,7 +24,7 @@
     },
     "repository": {
       "type": "string",
-      "pattern": "^[^/\\\\s]+/[^/\\\\s]+$"
+      "pattern": "^[^/\\s]+/[^/\\s]+$"
     },
     "pr_number": {
       "type": "integer",
@@ -40,7 +40,7 @@
     },
     "workflow_path": {
       "type": "string",
-      "pattern": "^\\\\.github/workflows/[^/]+\\\\.ya?ml$"
+      "pattern": "^\\.github/workflows/[^/]+\\.ya?ml$"
     },
     "workflow_name": {
       "type": "string",
