@@ -11,41 +11,38 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-lambda-github-tooling-optimization-v1
 - Title: Workspace Lambda GitHub Tooling Optimization v1
-- Status: CHECKPOINTED
+- Status: VALIDATING
 - Capsule schema: v2
-- Parent owner: workspace-lambda-self-hosted-execution-v1
 
 ## Goal
 
 Generalize and optimize the reusable workspace-control tooling that connects ChatGPT/GitHub workflows to project-isolated Lambda self-hosted execution, reducing human-terminal mediation and repeated project-specific glue while preserving the accepted security, provenance, exact-SHA, cleanup, and rollback boundaries proven by the current research-engine pilot.
 
-## Exact initialization anchors
+## Repositories
 
-- workspace-control main: `bb0b234b79498c14f7e7bdee18a787a69a0c29a8`
-- optimization branch: `workspace-lambda-github-tooling-optimization-v1`
-- research-engine main observed: `62d91642a1df0ec52b778d8d4a4f3e743382e977`
-- authoritative runner task: `tasks/active/workspace-lambda-self-hosted-execution-v1.json`
-- P3 retry observed at initialization: run `37396492836` QUEUED
-- heartbeat side-project: `tasks/active/workspace-heartbeat-plugin-v1.json`
+### workspace-control
+
+- Intent: mutate
+- Remote branch: workspace-lambda-github-tooling-optimization-v1
+- Remote checkpoint: 1beb7d79ba12cf336c1d14645714f801e388a1f2
+- Remote verified: true
 
 ## Next safe action
 
-CHECKPOINTED. Finish or explicitly suspend Workspace Heartbeat v0.4.0 first. When the user transfers ownership to Lambda/GitHub tooling optimization, start from workspace-control root, rehydrate `tasks/active/workspace-lambda-self-hosted-execution-v1.json` and this child capsule, refresh exact Git heads and current P3/P4/P5 evidence, then perform a duplication/latency/operator-friction inventory before changing shared tooling.
+Consume the next PR #89 validation result immediately. If it fails, diagnose only the failing child-branch path and repair the demonstrated defect; if it passes, checkpoint the chat-orchestration protocol as validated. Do not mutate the parent P5 task, controller/provisioner implementation, research-engine Lambda workflows, or live Lambda state from this child.
 
 ## Remaining work
 
-- After ownership transfers, rehydrate the parent runner task and exact workspace-control/research-engine heads; do not trust the initialization-time queued P3 state if it has advanced.
-- Inventory duplicate project-specific launcher/bootstrap/receipt/cleanup logic created during P2/P3/P4/P5 and classify reusable versus project-domain-specific components.
-- Define a versioned project execution profile schema for repository/workflow identity, exact SHA, resource class, dependency prerequisites, artifact contract, cleanup, and denied capabilities.
-- Consolidate generic GitHub dispatch/JIT runner lifecycle/evidence-consumption logic behind workspace-control procedures/scripts/workflows while preserving repository-specific trusted workflow code where required.
-- Measure current end-to-end latency and human-intervention count, then validate improvements against the accepted research-engine pilot.
-- Demonstrate a second bounded project/profile without cross-project authority leakage.
-- Promote only validated reusable mechanics; leave research-engine scientific/production semantics in research-engine.
+- Validate PR #89 through the repository's full integration path and repair only demonstrated child-branch defects.
+- After the parent P5 path is accepted and stable, exercise the ChatGPT -> PR comment -> GitHub run -> compact receipt -> continuation loop without routine SSH or PAT relay.
+- Adopt the comment-ID run-name correlation convention only through the owning project workflow after P5 stabilization; do not modify research-engine workflow from this child while P5 is active.
+- Measure human terminal steps, trigger-to-bound-run tool calls, terminal-to-diagnosis tool calls, ambiguous correlation rate, successful-run log downloads, and post-terminal idle time.
+- Revisit generic execution-profile/launcher implementation only as a later explicitly authorized runtime-layer optimization after parent P5 acceptance.
 
 ## Blockers / gates
 
-- Do not begin broad optimization while heartbeat v0.4.0 is still the explicitly active side-project unless the user transfers ownership.
-- Before mutation, rehydrate workspace-lambda-self-hosted-execution-v1 because P3 retry/P4/P5 state can advance independently and is authoritative.
+- The parent P5 controller/provisioner implementation is active in a separate owning conversation; this child must remain read-only with respect to that task and live Lambda runtime.
+- Strong one-to-one issue-comment run correlation requires a later project-owned metadata-only workflow adaptation; current compatibility correlation remains fail-closed and provisional until then.
 
 ## Fresh-chat initialization
 
@@ -54,72 +51,9 @@ CHECKPOINTED. Finish or explicitly suspend Workspace Heartbeat v0.4.0 first. Whe
 https://github.com/adamtrott78/workspace-control
 
 Continue the durable workspace-control task defined by:
-
-`tasks/active/workspace-lambda-github-tooling-optimization-v1.json`
+Task capsule: tasks/active/workspace-lambda-github-tooling-optimization-v1.json
 
 Start from the normal workspace-control root route.
-
-Treat this capsule as the optimization child of `workspace-lambda-self-hosted-execution-v1`, not as a replacement for the active P3/P4/P5 acceptance task.
-
-Before mutation, rehydrate both task capsules and refresh exact workspace-control/research-engine Git state. Heartbeat v0.4 was intentionally treated as a side project; if it is not closed yet, finish or explicitly suspend it before starting broad Lambda/GitHub optimization.
-
-Do not rely on previous chat prose.
-
-
-## 2026-10-05 ownership transfer and inventory checkpoint
-
-Heartbeat v0.4.1 is accepted and closed. This child task is now active.
-
-Current refreshed state:
-
-- workspace-control main: `d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a`
-- research-engine main: `72e3e16ca118c4756c528392158738a39cb5d5aa`
-- parent P3 run `37398604653`: still queued on `cpu-test-v2`
-- parent remains at the human-only isolated-runtime bootstrap + one-job JIT gate
-
-Measured duplication:
-
-- `scripts/launch_lambda_ci_p2b_noop.py`: 427 lines
-- `scripts/launch_lambda_ci_p3_cpu.py`: 427 lines
-- 405 lines match at the same positions (94.8%)
-- identical function sets
-- only top-level constant difference: timeout 900 vs 2100 seconds
-- remaining differences are labels, phase names, authorization env names, runner/unit/job/output names, and receipt text
-
-This strongly supports one generic profile-driven JIT launcher rather than continuing phase-specific copies.
-
-The existing project manifest and systemd profile files already contain most resource/isolation policy. The next design step is to make one versioned execution-profile contract the single source of truth and keep dependency bootstrap project/profile-scoped.
-
-
-## Execution-profile design checkpoint
-
-The inventory has been converted into a versioned design:
-
-- `architecture/lambda-ci-execution-profile.v1.schema.json`
-- `architecture/lambda-ci-generic-launcher-design.v1.md`
-
-The contract makes project/profile policy declarative and keeps one-job JIT lifecycle implementation generic. PostgreSQL/pgvector remains a research-engine dependency prerequisite, not global launcher behavior.
-
-The next implementation is deliberately parallel/non-default: add a generic profile loader/launcher plus executable P2-B/P3 equivalence tests. Legacy launchers and the parent P3/P4/P5 path remain untouched until equivalence passes.
-
-
-## 2026-10-06 refreshed parent boundary
-
-Workspace Heartbeat v0.4.3 is accepted and complete; it no longer blocks this optimization task.
-
-The authoritative parent task on workspace-control main has advanced beyond the older P3 snapshot captured when this child was created:
-
-- P3 CPU lane: accepted end-to-end on Lambda.
-- P4 GPU lane: accepted end-to-end using stable GPU UUID resolution, per-device-node isolation, CUDA initialization, and bounded VRAM allocation/free.
-- Parent current phase: P5 autonomous controller/provisioner work to remove the manual local sudo/PAT relay while preserving the P2-P4 privilege, provenance, cleanup, and denial boundaries.
-
-Therefore the optimization child must re-read the parent capsule from main before mutation and treat P3/P4 as accepted constraints, not open work.
-
-The child design remains unchanged:
-- one versioned execution-profile schema;
-- one generic profile-driven one-job JIT launcher;
-- project/profile-scoped dependency prerequisites;
-- executable equivalence/safety tests;
-- legacy launchers retained until equivalence PASS.
-
-Do not let this refactor interfere with the parent's active P5 controller/provisioner acceptance path.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
