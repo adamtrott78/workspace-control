@@ -28,21 +28,20 @@ research_engine_pilot
 
 ## Next safe action
 
-Wait for research-engine PR #98 exact-head ordinary CI. If PASS, merge it, queue a fresh P3 CPU run for PR #95 exact head `ab36b358a0c7ac33d2887fa681f418033554eae0`, then execute the bounded pgvector dependency repair from workspace-control `04b2750bc71818b7ca5be970bda4bc541da4034e` before launching the new P3 JIT runner. Do not advance to P4 until install/compile/full pytest pass on Lambda.
+On Lambda, use one clean detached workspace-control tree exactly at `04b2750bc71818b7ca5be970bda4bc541da4034e`. First run `scripts/bootstrap_lambda_ci_p3_pgvector.sh` under sudo with `WORKSPACE_CI_P3_PGVECTOR_AUTHORIZED=YES` and `WORKSPACE_CI_P3_PGVECTOR_EXPECTED_SHA=04b2750bc71818b7ca5be970bda4bc541da4034e`. If and only if it reports PASS, run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES` and paste a short-lived research-engine Administration:write token only into its hidden prompt. The trusted P3 retry is already queued as run 37396492836 against unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0. Return the pgvector receipt and P3 launcher receipt, or compact failure output if the repair fails.
 
 ## Remaining work
 
-- Wait for research-engine PR #98 ordinary CI; merge only on PASS.
-- Execute workspace-control pgvector repair from exact merged SHA 04b2750bc71818b7ca5be970bda4bc541da4034e and inspect its visible receipt.
-- Queue a fresh trusted /lambda-ci-cpu trigger against unchanged PR #95 head ab36b358a0c7ac33d2887fa681f418033554eae0 and launch one new JIT CPU runner.
-- Inspect the new P3 receipt/logs; if a new host/candidate incompatibility appears, repair only that demonstrated issue and rerun.
-- Only after full P3 PASS, begin P4 bounded GPU validation.
+- Execute workspace-control pgvector repair from exact SHA 04b2750bc71818b7ca5be970bda4bc541da4034e; require its smoke test and production-master invariants to PASS.
+- Only after repair PASS, execute the P3 one-job JIT launcher from the same detached tree and service queued run 37396492836.
+- Inspect the new GitHub receipt/logs and local launcher receipt; repair only any newly demonstrated host/candidate issue.
+- Only after P3 full PASS, begin P4 bounded GPU validation.
 
 ## Blockers / gates
 
-- research-engine PR #98 must pass ordinary CI and merge before the P3 retry is armed.
-- The merged pgvector repair must PASS on the real Lambda before a new P3 JIT runner is started.
-- The P3 retry must then reach and pass actual candidate install/compile/pytest before P4 may begin.
+- The bounded pgvector dependency bootstrap must PASS on real Lambda before P3 retry #2 runner launch.
+- P3 retry #2 must reach and pass candidate install/compile/full pytest before P4 may begin.
+- Until P5 autonomous controller acceptance, the JIT runner still requires a short-lived local research-engine Administration:write token prompt.
 
 ## Fresh-chat initialization
 
