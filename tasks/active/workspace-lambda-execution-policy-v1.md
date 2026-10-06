@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 46af3b986cbd8e2d7dc879b9dcc325783d1f112d
+- Remote checkpoint: 7ad3f357e9ee75d9a01bb19a4bda062f0d59d801
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-On the Lambda host from the normal operator account, run the exact-SHA install from an explicit child bash so any validation failure exits only that child shell and NEVER the interactive SSH session. The child shell must cd to ~/adamArchives/Adam/workspace-control itself, verify that git rev-parse --show-toplevel equals that directory, verify a clean tree, fetch origin, detach exactly d2326042f49ae1bd771c33b1ce56f49795827661, re-verify clean HEAD, and only then invoke sudo env WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES WORKSPACE_CI_P5_EXPECTED_SHA=d2326042f49ae1bd771c33b1ce56f49795827661 ./scripts/bootstrap_lambda_ci_p5.sh. On any preflight failure, print pwd/git diagnostics and return to the existing SSH prompt. Preserve the generated install receipt under ~/adamArchives/Adam/workspace-control-tmp/. After live install PASS, create/choose a non-scientific research-engine candidate PR and trigger the existing trusted /lambda-ci-p5 <exact_sha> and /lambda-ci-p5-gpu <exact_sha> workflows. Require both GitHub jobs and root receipts to prove v2 admission identity, exact trusted workflow blob/candidate binding, unchanged cpu-test/gpu-small isolation, and residue-free cleanup before marking admission_manifest_and_enforcement VALIDATED. Do not enable any model-scale class or gpu-heavy in this stage.
+On the Lambda host from the normal operator account, rerun canonical workspace-control d2326042f49ae1bd771c33b1ce56f49795827661 through an explicit child bash and a fresh detached worktree, with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=d2326042f49ae1bd771c33b1ce56f49795827661, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not run stage-pat because the install receipt already proved controller_credential_ready=true; replacing that valid credential is unnecessary. The child shell must verify exact HEAD/cleanliness and return to the existing SSH prompt on any failure. Require the activation receipt to show both CPU and GPU controllers ACTIVE with production_services_modified=false. After activation PASS, create/choose a same-repository non-scientific research-engine candidate PR and trigger the existing trusted /lambda-ci-p5 <exact_sha> and /lambda-ci-p5-gpu <exact_sha> workflows. Require both GitHub jobs and root receipts to prove v2 admission identity, exact trusted workflow blob/candidate binding, unchanged cpu-test/gpu-small isolation, and residue-free cleanup before marking admission_manifest_and_enforcement VALIDATED. Do not enable any model-scale class or gpu-heavy in this stage.
 
 ## Remaining work
 
-- Install canonical workspace-control d2326042f49ae1bd771c33b1ce56f49795827661 on Lambda through the exact-SHA root bootstrap and live-validate admission-v2 CPU and gpu-small receipts.
+- Activate the already-installed canonical workspace-control d2326042f49ae1bd771c33b1ce56f49795827661 CPU/GPU controllers through the exact-SHA root bootstrap, then live-validate admission-v2 CPU and gpu-small receipts.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,7 +48,7 @@ On the Lambda host from the normal operator account, run the exact-SHA install f
 
 ## Blockers / gates
 
-- Live admission-v2 activation requires reviewed sudo execution of the exact-SHA workspace-control bootstrap on Lambda. The accepted self-hosted runner and credential-blind provisioner intentionally cannot install or upgrade root services.
+- Installed admission-v2 controllers require the explicit exact-SHA activation bootstrap before live CPU/GPU acceptance. Existing controller credential is already validated; do not restage/replace it.
 
 ## Fresh-chat initialization
 
