@@ -278,10 +278,12 @@
         "ephemeral project-local Python environment and PostgreSQL test cluster"
       ],
       "outputs": [
-        "P3 CPU candidate checkout/build/test receipt",
         "GitHub-visible logs/checks/artifacts",
         "proof candidate branch code executes on actual Lambda without production-state access",
-        "P4 GPU hardware-validation path"
+        "P4 GPU hardware-validation path",
+        "P3 CPU candidate checkout/build/test receipt PASS",
+        "GitHub run 37408781519 + artifact 11388222514",
+        "P4 bounded one-GPU validation path"
       ],
       "validation": [
         {
@@ -436,6 +438,19 @@
             "P3 launcher now streams runner output live to the operator terminal while simultaneously persisting runner-console.log.",
             "Fresh P3 run 37408781519 is queued on cpu-test-v2 for unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0."
           ]
+        },
+        {
+          "check": "P3 CPU candidate validation acceptance",
+          "result": "PASS",
+          "evidence": [
+            "GitHub run 37408781519 completed success on runner 25 lambda-research-engine-p3-4efa7bacc41f with labels self-hosted/lambda-research-engine/cpu-test-v2.",
+            "All workflow steps passed: exact-SHA gate, checkout, Python 3.12, isolated CPU validation, artifact upload, result enforcement, and cleanup.",
+            "Artifact 11388222514 digest sha256:12cf36d8e5346f8d1143ad873aa2df3dc75fdf99b13455a62de2731a528f9703 records decision=PASS.",
+            "Receipt exact/actual SHA=ab36b358a0c7ac33d2887fa681f418033554eae0, Python 3.12.15, PostgreSQL 14.24, pgvector 0.8.6, Unix-socket-only database, production_postgres_used=false, docker_used=false, nvidia_visible=false, checkout_credentials_persisted=false, database_cleanup=PASS.",
+            "Measured timings: pip install 8s, compile 0s, pytest 10s, total validation wall 21s.",
+            "PostgreSQL log shows isolated socket /tmp/p3pg-37408781519/.s.PGSQL.55432, clean ready/fast-shutdown lifecycle; statistics collector/autovacuum warnings under the sandbox did not prevent the complete candidate test suite from passing.",
+            "Local launcher receipt confirms runner_id=25, jit_config_persisted=false, project_uid_process_cleanup=true, runner_workspace_destroyed=true."
+          ]
         }
       ],
       "resume_condition": "Research-engine branch validation can complete without human SSH and without production-state mutation."
@@ -499,11 +514,9 @@
         "P0 PASS",
         "P1 PASS",
         "P2 PASS",
-        "P3 isolated PostgreSQL runtime PASS",
-        "P3 run 37407910754 failed at postgres-init due overlong Unix socket path, not long-running compute",
-        "short-socket workflow merged research-engine@de39b74c8f5e845c775547a19b16ca34765f5edc",
-        "live-output launcher merged workspace-control@fbd9a1b9a0f0d811641fd4091c9aed3528b5ab16",
-        "fresh P3 run 37408781519 queued on cpu-test-v2"
+        "P3 PASS GitHub run 37408781519 artifact 11388222514",
+        "P3 candidate exact SHA ab36b358a0c7ac33d2887fa681f418033554eae0 full install/compile/pytest PASS on real Lambda",
+        "current next stage=P4 bounded GPU validation"
       ]
     }
   ],
@@ -515,7 +528,10 @@
     "operator evidence: lambda-runner-host-probe-20261005T212938Z/lambda-runner-host-probe.json",
     "GitHub Actions run 37383893507: Lambda CI P2-B No-Op",
     "GitHub artifact 11380060652: lambda-ci-p2b-receipt; sha256:93e56b904a2ddc6bd6e3efecbd148cabbf0132c1d28586b10ad851281fa50b67",
-    "local receipt: lambda-ci-p2b-20261005T230606Z/lambda-ci-p2b-launcher.json"
+    "local receipt: lambda-ci-p2b-20261005T230606Z/lambda-ci-p2b-launcher.json",
+    "GitHub Actions run 37408781519: Lambda CI P3 CPU Validation PASS",
+    "GitHub artifact 11388222514: lambda-ci-p3-receipt; sha256:12cf36d8e5346f8d1143ad873aa2df3dc75fdf99b13455a62de2731a528f9703",
+    "local P3 launcher receipt: runner 25 lambda-research-engine-p3-4efa7bacc41f cleanup PASS"
   ],
   "validation": [
     {
@@ -528,19 +544,19 @@
     }
   ],
   "blockers": [
-    "Human-only JIT credential gate: launch fresh P3 run 37408781519 using the live-output launcher from exact workspace-control fbd9a1b9a0f0d811641fd4091c9aed3528b5ab16 or a later exact reviewed main containing the same launcher, with a newly-created short-lived research-engine Administration:write token.",
-    "The PAT previously pasted into chat is compromised and must remain revoked; never reuse it.",
-    "Heartbeat v4 plugin updates currently return Session terminated; this does not block execution because authoritative Git/task/GitHub state is durable."
+    "P4 must grant only GPU0 through real systemd DevicePolicy/DeviceAllow and prove GPU1 open/access is denied; CUDA_VISIBLE_DEVICES alone is not accepted as isolation evidence.",
+    "P4 must perform a real bounded CUDA allocation and prove no ci-research-engine GPU/process leakage after runner exit.",
+    "The PAT previously pasted into chat remains compromised and must never be reused; any P4 one-job JIT token must be newly created and short-lived."
   ],
   "remaining_work": [
-    "Ensure the exposed PAT is revoked/deleted; create a new short-lived research-engine Administration:write token only for the next one-job JIT launch.",
-    "Launch fresh run 37408781519 with the live-output P3 launcher; do not rebuild the isolated PostgreSQL runtime.",
-    "Watch live stage output in the terminal and immediately consume the GitHub run/artifacts when terminal.",
-    "Continue bounded repair/re-run until install/compile/pytest PASS.",
-    "Only after P3 full PASS begin P4 GPU validation."
+    "P4: implement and hosted-CI validate a trusted default-branch GPU validation workflow tied to an exact PR SHA.",
+    "P4: implement and validate a gpu-small-v1 one-job launcher with DevicePolicy=closed and explicit GPU0 device grants, bounded resources/timeouts, live output, and post-exit GPU/process cleanup evidence.",
+    "P4: execute one non-scientific CUDA context + bounded VRAM allocation on GPU0, prove GPU1 device access denied, and return a structured artifact.",
+    "After P4 PASS, begin P5 autonomous controller/provisioner acceptance so routine runs no longer require local PAT/SSH relay.",
+    "P6: second-project cross-project isolation pilot under separate UID/root/cache."
   ],
-  "next_safe_action": "Human-only credential gate: on Lambda use a clean detached workspace-control tree exactly at `fbd9a1b9a0f0d811641fd4091c9aed3528b5ab16` and run `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES`. Do not rebuild PostgreSQL/pgvector; the isolated runtime already passed and remains installed. Paste a newly-created short-lived research-engine Administration:write PAT only into the hidden prompt. The launcher will now stream runner output live while retaining the durable log. Fresh run 37408781519 is already queued on cpu-test-v2.",
+  "next_safe_action": "Begin P4 static implementation immediately: add a trusted research-engine GPU validation workflow and a workspace-control gpu-small-v1 JIT launcher. The workflow must exact-SHA gate the same research-engine PR, avoid scientific/model work, create a real CUDA Driver API context and bounded allocation on GPU0 without third-party Python packages, directly prove /dev/nvidia1 access is denied, and upload a receipt. The launcher must use DevicePolicy=closed with only the measured NVIDIA device set required for GPU0, retain the accepted network/home/Docker/production-service boundaries, stream live output, and prove zero leaked ci-research-engine/GPU processes after exit.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
-  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow.\n\n2026-10-06 P3 guard correction: production safety checks must measure stable service identity/boundaries, not volatile implementation details such as every PostgreSQL background-worker PID. The TCP 5432 listener identity is now the production invariant; runuser boundaries also start from `/` to avoid inherited private-cwd warnings.\n\n2026-10-06 P3 timeout correction: the previous regression actively blessed RuntimeMaxSec=15min even though the trusted workflow timeout was 30min. Timeout policy is now encoded as workflow(1800s) < systemd(2400s) < launcher watchdog(2520s), and tests execute the rendered systemd command."
+  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow.\n\n2026-10-06 P3 guard correction: production safety checks must measure stable service identity/boundaries, not volatile implementation details such as every PostgreSQL background-worker PID. The TCP 5432 listener identity is now the production invariant; runuser boundaries also start from `/` to avoid inherited private-cwd warnings.\n\n2026-10-06 P3 timeout correction: the previous regression actively blessed RuntimeMaxSec=15min even though the trusted workflow timeout was 30min. Timeout policy is now encoded as workflow(1800s) < systemd(2400s) < launcher watchdog(2520s), and tests execute the rendered systemd command.\n\n2026-10-06 P3 accepted: real candidate validation completed on Lambda in 21s once runner was assigned, using isolated PostgreSQL 14.24 + pgvector 0.8.6, Python 3.12.15, exact SHA checkout, and full pytest. P4 may now validate the explicit one-GPU hardware lane without scientific/model execution."
 }
