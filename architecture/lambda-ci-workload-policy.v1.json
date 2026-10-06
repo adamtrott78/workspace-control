@@ -286,8 +286,8 @@
       "filesystem_class": "TRUSTED_PROMOTION_FILESYSTEM",
       "cache_access_class": "TRUSTED_CACHE_PROMOTION_ONLY",
       "state_effect_class": "TRUSTED_CACHE_PROMOTION_ONLY",
-      "model_binding": "PROMOTION_RECEIPT_REQUIRED",
-      "runtime_binding": "PROMOTION_RECEIPT_REQUIRED",
+      "model_binding": "REQUIRED_QUARANTINE_EXACT",
+      "runtime_binding": "OPTIONAL_QUARANTINE_EXACT",
       "inference_forbidden": true
     },
     "model-eval-single-gpu": {

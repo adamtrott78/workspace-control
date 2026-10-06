@@ -152,8 +152,7 @@
         "gpu-small",
         "model-acquire",
         "cache-promote",
-        "model-eval-single-gpu",
-        "gpu-heavy"
+        "model-eval-single-gpu"
       ]
     },
     "execution_profile": {
@@ -238,9 +237,8 @@
           "model_id",
           "repository",
           "revision",
-          "cache_object",
-          "serialization_risk_class",
-          "complete_offline"
+          "required_serialization_policy",
+          "cache_object"
         ],
         "properties": {
           "model_id": {
@@ -254,113 +252,158 @@
           "revision": {
             "$ref": "#/$defs/gitsha"
           },
-          "cache_object": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "object_id",
-              "tree_sha256",
-              "manifest_sha256",
-              "promotion_receipt_sha256"
-            ],
-            "properties": {
-              "object_id": {
-                "type": "string",
-                "minLength": 1
-              },
-              "tree_sha256": {
-                "$ref": "#/$defs/sha256"
-              },
-              "manifest_sha256": {
-                "$ref": "#/$defs/sha256"
-              },
-              "promotion_receipt_sha256": {
-                "$ref": "#/$defs/sha256"
-              }
-            }
-          },
-          "serialization_risk_class": {
+          "required_serialization_policy": {
             "enum": [
-              "SAFE",
-              "UNSAFE_PICKLE",
-              "CUSTOM_EXECUTABLE_CODE",
-              "MIXED_OR_UNKNOWN"
+              "SAFE_ONLY",
+              "EXPLICIT_EXCEPTION_REQUIRED"
             ]
           },
-          "complete_offline": {
-            "type": "boolean"
+          "cache_object": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "object_state",
+                  "object_id",
+                  "tree_sha256",
+                  "manifest_sha256",
+                  "promotion_receipt_sha256",
+                  "complete_offline"
+                ],
+                "properties": {
+                  "object_state": {
+                    "enum": [
+                      "QUARANTINE",
+                      "PROMOTED"
+                    ]
+                  },
+                  "object_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "tree_sha256": {
+                    "$ref": "#/$defs/sha256"
+                  },
+                  "manifest_sha256": {
+                    "$ref": "#/$defs/sha256"
+                  },
+                  "promotion_receipt_sha256": {
+                    "oneOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "$ref": "#/$defs/sha256"
+                      }
+                    ]
+                  },
+                  "complete_offline": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            ]
           }
         }
       }
     },
     "runtime": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "properties": {
-        "runtime_id": {
-          "type": "string",
-          "minLength": 1
+      "oneOf": [
+        {
+          "type": "null"
         },
-        "cache_object": {
+        {
           "type": "object",
           "additionalProperties": false,
           "required": [
-            "object_id",
-            "tree_sha256",
-            "dependency_manifest_sha256",
-            "promotion_receipt_sha256"
+            "runtime_id",
+            "cache_object",
+            "owning_contracts"
           ],
           "properties": {
-            "object_id": {
+            "runtime_id": {
               "type": "string",
               "minLength": 1
             },
-            "tree_sha256": {
-              "$ref": "#/$defs/sha256"
+            "cache_object": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "object_state",
+                    "object_id",
+                    "tree_sha256",
+                    "dependency_manifest_sha256",
+                    "promotion_receipt_sha256"
+                  ],
+                  "properties": {
+                    "object_state": {
+                      "enum": [
+                        "QUARANTINE",
+                        "PROMOTED"
+                      ]
+                    },
+                    "object_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "tree_sha256": {
+                      "$ref": "#/$defs/sha256"
+                    },
+                    "dependency_manifest_sha256": {
+                      "$ref": "#/$defs/sha256"
+                    },
+                    "promotion_receipt_sha256": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "$ref": "#/$defs/sha256"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
             },
-            "dependency_manifest_sha256": {
-              "$ref": "#/$defs/sha256"
-            },
-            "promotion_receipt_sha256": {
-              "$ref": "#/$defs/sha256"
-            }
-          }
-        },
-        "owning_contracts": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "repository",
-              "path",
-              "commit_sha"
-            ],
-            "properties": {
-              "repository": {
-                "type": "string",
-                "pattern": "^[^/]+/[^/]+$"
-              },
-              "path": {
-                "type": "string",
-                "minLength": 1
-              },
-              "commit_sha": {
-                "$ref": "#/$defs/gitsha"
+            "owning_contracts": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "repository",
+                  "path",
+                  "commit_sha"
+                ],
+                "properties": {
+                  "repository": {
+                    "type": "string",
+                    "pattern": "^[^/]+/[^/]+$"
+                  },
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "commit_sha": {
+                    "$ref": "#/$defs/gitsha"
+                  }
+                }
               }
             }
           }
         }
-      },
-      "required": [
-        "runtime_id",
-        "cache_object",
-        "owning_contracts"
-      ],
-      "additionalProperties": false
+      ]
     },
     "exception_ids": {
       "type": "array",

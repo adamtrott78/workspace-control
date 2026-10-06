@@ -24,41 +24,31 @@ class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
 
     def test_contract_is_non_live_and_root_authoritative(self):
         self.assertEqual(self.policy["schema_version"], 1)
-        self.assertEqual(
-            self.policy["status"], "CONTRACT_ONLY_NOT_LIVE_ENFORCEMENT"
-        )
+        self.assertEqual(self.policy["status"], "CONTRACT_ONLY_NOT_LIVE_ENFORCEMENT")
         self.assertEqual(self.policy["authority"]["owner"], "workspace-control")
-        self.assertFalse(
-            self.policy["authority"]["live_lambda_mutation_authorized_by_this_contract"]
-        )
-        self.assertTrue(
-            self.policy["admission_semantics"]["root_issued_manifest_required"]
-        )
+        self.assertFalse(self.policy["authority"]["live_lambda_mutation_authorized_by_this_contract"])
+        self.assertTrue(self.policy["admission_semantics"]["root_issued_manifest_required"])
         self.assertTrue(self.policy["admission_semantics"]["single_use"])
 
     def test_exact_workload_taxonomy_and_gpu_heavy_denial(self):
         expected = {
-            "cpu-test",
-            "gpu-small",
-            "model-acquire",
-            "cache-promote",
-            "model-eval-single-gpu",
-            "gpu-heavy",
+            "cpu-test", "gpu-small", "model-acquire", "cache-promote",
+            "model-eval-single-gpu", "gpu-heavy",
         }
         self.assertEqual(set(self.policy["workload_classes"]), expected)
         heavy = self.policy["workload_classes"]["gpu-heavy"]
         self.assertEqual(heavy["policy_decision"], "DENY")
         self.assertFalse(heavy["admission_enabled_after_enforcement"])
         self.assertFalse(heavy["candidate_payload_allowed"])
+        admitted = self.admission_schema["properties"]["workload_class"]["enum"]
+        self.assertNotIn("gpu-heavy", admitted)
 
     def test_existing_p5_profiles_are_preserved_without_model_authority(self):
         for name in ("cpu-test", "gpu-small"):
             workload = self.policy["workload_classes"][name]
             self.assertEqual(workload["policy_decision"], "EXISTING_P5_CAPABILITY")
             self.assertEqual(workload["model_binding"], "FORBIDDEN")
-            self.assertEqual(
-                workload["cache_access_class"], "NO_PERSISTENT_CACHE_AUTHORITY"
-            )
+            self.assertEqual(workload["cache_access_class"], "NO_PERSISTENT_CACHE_AUTHORITY")
             self.assertEqual(workload["state_effect_class"], "CI_VALIDATION_ONLY")
 
     def test_acquisition_is_trusted_quarantine_only_and_no_inference(self):
@@ -66,40 +56,30 @@ class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
         self.assertEqual(acquire["execution_plane"], "trusted_acquisition")
         self.assertFalse(acquire["candidate_payload_allowed"])
         self.assertTrue(acquire["inference_forbidden"])
-        self.assertEqual(
-            acquire["payload_network_class"], "TRUSTED_ARTIFACT_ACQUISITION_ONLY"
-        )
-        self.assertEqual(
-            acquire["cache_access_class"], "QUARANTINE_WRITE_TRUSTED_ONLY"
-        )
+        self.assertEqual(acquire["payload_network_class"], "TRUSTED_ARTIFACT_ACQUISITION_ONLY")
+        self.assertEqual(acquire["cache_access_class"], "QUARANTINE_WRITE_TRUSTED_ONLY")
         self.assertEqual(acquire["state_effect_class"], "QUARANTINE_ARTIFACTS_ONLY")
+        model_cache_binding = self.admission_schema["properties"]["models"]["items"]["properties"]["cache_object"]
+        self.assertIn({"type": "null"}, model_cache_binding["oneOf"])
 
-    def test_promotion_is_candidate_inaccessible_and_offline(self):
+    def test_promotion_is_candidate_inaccessible_offline_and_quarantine_bound(self):
         promote = self.policy["workload_classes"]["cache-promote"]
         self.assertEqual(promote["execution_plane"], "trusted_cache_manager")
         self.assertFalse(promote["candidate_payload_allowed"])
         self.assertFalse(promote["candidate_invocable"])
         self.assertTrue(promote["inference_forbidden"])
         self.assertEqual(promote["payload_network_class"], "NO_NETWORK")
-        self.assertEqual(
-            promote["cache_access_class"], "TRUSTED_CACHE_PROMOTION_ONLY"
-        )
+        self.assertEqual(promote["cache_access_class"], "TRUSTED_CACHE_PROMOTION_ONLY")
+        self.assertEqual(promote["model_binding"], "REQUIRED_QUARANTINE_EXACT")
+        self.assertEqual(promote["runtime_binding"], "OPTIONAL_QUARANTINE_EXACT")
 
     def test_model_eval_is_offline_read_only_secret_free_and_single_gpu(self):
         model_eval = self.policy["workload_classes"]["model-eval-single-gpu"]
         self.assertEqual(model_eval["resource_class"], "model_eval_single_gpu_v1")
-        self.assertEqual(
-            model_eval["payload_network_class"],
-            "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE",
-        )
+        self.assertEqual(model_eval["payload_network_class"], "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE")
         self.assertTrue(model_eval["model_registry_credential_forbidden"])
-        self.assertEqual(
-            model_eval["filesystem_class"],
-            "EPHEMERAL_JOB_PLUS_TRUSTED_CACHE_READONLY",
-        )
-        self.assertEqual(
-            model_eval["cache_access_class"], "TRUSTED_MODEL_RUNTIME_READONLY"
-        )
+        self.assertEqual(model_eval["filesystem_class"], "EPHEMERAL_JOB_PLUS_TRUSTED_CACHE_READONLY")
+        self.assertEqual(model_eval["cache_access_class"], "TRUSTED_MODEL_RUNTIME_READONLY")
         resources = self.policy["resource_classes"]["model_eval_single_gpu_v1"]
         self.assertEqual(resources["execution_profile"], "gpu-small")
         self.assertEqual(resources["gpu_count"], 1)
@@ -134,91 +114,61 @@ class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
     def test_replay_and_cleanup_semantics_fail_closed(self):
         admission = self.policy["admission_semantics"]
         self.assertEqual(admission["request_id_conflict_behavior"], "REJECT")
-        self.assertEqual(
-            admission["identical_consumed_terminal_request_behavior"],
-            "RETURN_EXISTING_RECEIPT_NO_REEXECUTION",
-        )
-        self.assertEqual(
-            admission["consumed_without_terminal_receipt_behavior"],
-            "ABORT_INDETERMINATE_REQUIRE_FRESH_REQUEST",
-        )
+        self.assertEqual(admission["identical_consumed_terminal_request_behavior"], "RETURN_EXISTING_RECEIPT_NO_REEXECUTION")
+        self.assertEqual(admission["consumed_without_terminal_receipt_behavior"], "ABORT_INDETERMINATE_REQUIRE_FRESH_REQUEST")
         failure = self.policy["failure_semantics"]
         self.assertFalse(failure["automatic_retry_after_timeout"])
         self.assertFalse(failure["automatic_retry_after_cuda_oom"])
-        self.assertEqual(
-            failure["cleanup_failure_action"],
-            "QUARANTINE_LANE_AND_BLOCK_NEW_ADMISSIONS",
-        )
+        self.assertEqual(failure["cleanup_failure_action"], "QUARANTINE_LANE_AND_BLOCK_NEW_ADMISSIONS")
 
     def test_policy_schema_requires_all_capability_dimensions(self):
         required = set(self.policy_schema["required"])
         for key in (
-            "payload_network_classes",
-            "payload_secret_classes",
-            "filesystem_classes",
-            "cache_access_classes",
-            "state_effect_classes",
-            "serialization_policy",
-            "failure_semantics",
-            "resource_classes",
-            "workload_classes",
+            "payload_network_classes", "payload_secret_classes", "filesystem_classes",
+            "cache_access_classes", "state_effect_classes", "serialization_policy",
+            "failure_semantics", "resource_classes", "workload_classes",
         ):
             self.assertIn(key, required)
 
     def test_admission_schema_binds_exact_identity_and_capabilities(self):
         required = set(self.admission_schema["required"])
         for key in (
-            "request_digest_sha256",
-            "policy",
-            "trusted_workflow",
-            "candidate_sha",
-            "workload_class",
-            "execution_profile",
-            "resource_class",
-            "capability_classes",
-            "resource_ceiling",
-            "models",
-            "runtime",
-            "exception_ids",
+            "request_digest_sha256", "policy", "trusted_workflow", "candidate_sha",
+            "workload_class", "execution_profile", "resource_class", "capability_classes",
+            "resource_ceiling", "models", "runtime", "exception_ids",
         ):
             self.assertIn(key, required)
-        capability_required = set(
-            self.admission_schema["properties"]["capability_classes"]["required"]
-        )
+        capability_required = set(self.admission_schema["properties"]["capability_classes"]["required"])
         self.assertEqual(
             capability_required,
             {"payload_network", "payload_secrets", "filesystem", "cache_access", "state_effect"},
         )
-        self.assertEqual(
-            self.admission_schema["properties"]["lifecycle"]["properties"]["single_use"]["const"],
-            True,
-        )
+        self.assertTrue(self.admission_schema["properties"]["lifecycle"]["properties"]["single_use"]["const"])
 
-    def test_receipt_schema_requires_resource_state_and_cleanup_evidence(self):
+    def test_receipt_schema_supports_jit_and_trusted_executors(self):
+        executor = self.receipt_schema["properties"]["executor"]
+        self.assertEqual(len(executor["oneOf"]), 2)
+        jit = executor["oneOf"][0]["properties"]
+        trusted = executor["oneOf"][1]["properties"]
+        self.assertEqual(jit["kind"]["const"], "jit_runner")
+        self.assertTrue(jit["jit_single_job"]["const"])
+        self.assertEqual(set(trusted["kind"]["enum"]), {"trusted_acquisition", "trusted_cache_manager"})
+        self.assertFalse(trusted["jit_single_job"]["const"])
+
+    def test_receipt_schema_tracks_object_state_resource_state_and_cleanup(self):
         required = set(self.receipt_schema["required"])
         for key in (
-            "terminal_status",
-            "hardware",
-            "resource_usage",
-            "network_evidence",
-            "state_effect_evidence",
-            "cleanup",
-            "evidence",
+            "terminal_status", "executor", "hardware", "resource_usage",
+            "network_evidence", "state_effect_evidence", "cleanup", "evidence",
         ):
             self.assertIn(key, required)
-        cleanup_required = set(
-            self.receipt_schema["properties"]["cleanup"]["required"]
-        )
+        object_states = self.receipt_schema["properties"]["models"]["items"]["properties"]["object_state"]["enum"]
+        self.assertEqual(set(object_states), {"QUARANTINE", "PROMOTED"})
+        cleanup_required = set(self.receipt_schema["properties"]["cleanup"]["required"])
         for key in (
-            "cgroup_empty",
-            "project_uid_processes_zero",
-            "gpu_compute_processes_zero",
-            "model_servers_zero",
-            "job_workspace_removed",
-            "ephemeral_staging_removed",
-            "jit_config_absent",
-            "github_credential_absent",
-            "lane_quarantined",
+            "cgroup_empty", "project_uid_processes_zero", "gpu_compute_processes_zero",
+            "model_servers_zero", "job_workspace_removed", "ephemeral_staging_removed",
+            "jit_config_absent", "github_credential_absent", "lane_quarantined",
         ):
             self.assertIn(key, cleanup_required)
 
