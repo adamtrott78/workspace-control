@@ -28,20 +28,21 @@ research_engine_pilot
 
 ## Next safe action
 
-Human-only credential gate: first revoke the fine-grained PAT that was pasted into chat. Then, on Lambda, create/reuse a clean detached workspace-control tree exactly at `744e7f67e22fb5bd7de35ad8a0284a63f2b2cced` and run only `scripts/launch_lambda_ci_p3_cpu.py` under sudo with `WORKSPACE_CI_P3_AUTHORIZED=YES`. Do not rerun the PostgreSQL runtime bootstrap; the isolated PostgreSQL 14.24 + pgvector 0.8.6 runtime already passed and is installed read-only. Paste a newly-created short-lived research-engine Administration:write token only into the hidden prompt. Fresh run 37407910754 is already queued on cpu-test-v2.
+Continue consuming research-engine PR #100 exact-head CI. On PASS, merge PR #100, queue a fresh P3 CPU validation run against unchanged PR #95 head ab36b358a0c7ac33d2887fa681f418033554eae0, then use the newly merged live-output workspace-control launcher to service it with a new short-lived research-engine Administration:write token. Do not rerun PostgreSQL runtime bootstrap; it already passed and remains installed.
 
 ## Remaining work
 
-- Revoke/delete the fine-grained PAT that was pasted into chat; never reuse it.
-- On Lambda, execute scripts/launch_lambda_ci_p3_cpu.py from exact workspace-control 744e7f67e22fb5bd7de35ad8a0284a63f2b2cced. Do not rebuild PostgreSQL/pgvector; the isolated runtime already passed and remains installed.
-- Paste a newly-created short-lived research-engine Administration:write token only into the hidden local prompt to service queued run 37407910754.
-- Immediately consume run 37407910754 and its receipt when terminal; continue bounded repair/re-run without waiting if any new issue is demonstrated.
+- Consume research-engine PR #100 CI immediately when terminal; merge only on PASS or repair the demonstrated defect.
+- After PR #100 merges, queue a fresh /lambda-ci-cpu trigger against unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0.
+- Use the live-output P3 launcher from workspace-control fbd9a1b9a0f0d811641fd4091c9aed3528b5ab16 or newer exact merged main to launch one cpu-test-v2 JIT runner with a new short-lived PAT.
+- Immediately consume the fresh P3 run; continue bounded repair/re-run until install/compile/pytest PASS.
 - Only after P3 full PASS begin P4 GPU validation.
 
 ## Blockers / gates
 
-- Human-only JIT credential gate: run the fixed P3 launcher from exact workspace-control 744e7f67e22fb5bd7de35ad8a0284a63f2b2cced and paste a newly-created short-lived research-engine Administration:write token only into the hidden prompt. The previously pasted token is compromised and must be revoked.
-- Fresh P3 run 37407910754 must reach full candidate install/compile/pytest PASS before P4.
+- research-engine PR #100 ordinary CI must PASS and merge before a fresh P3 run is armed.
+- After PR #100 merges, a fresh P3 run and one short-lived research-engine Administration:write JIT token are required because run 37407910754 is terminal.
+- The PAT previously pasted into chat is compromised and must remain revoked; never reuse it.
 
 ## Fresh-chat initialization
 
