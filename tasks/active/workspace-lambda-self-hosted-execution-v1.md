@@ -28,21 +28,20 @@ research_engine_pilot
 
 ## Next safe action
 
-Human-only credential gate: on Lambda create/reuse a clean detached workspace-control tree exactly at `12a735c7fea085dc3221588245657c67ae048f7f` and run `scripts/launch_lambda_ci_p4_gpu.py` under sudo with `WORKSPACE_CI_P4_AUTHORIZED=YES`. Paste a newly-created short-lived fine-grained GitHub PAT scoped only to `adamtrott78/research-engine` with repository Administration:write into the hidden prompt. The launcher streams output live. Fresh P4 run 37410285336 is already queued on gpu-small-v1. Do not rebuild PostgreSQL or start model/scientific work.
+Human-only credential gate: on Lambda create/reuse a clean detached workspace-control tree exactly at `c2c69daa2b61d869dfaad3ff289e4b957201e564` and run `scripts/launch_lambda_ci_p4_gpu.py` under sudo with `WORKSPACE_CI_P4_AUTHORIZED=YES`. The launcher will resolve target UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea to the current NVIDIA minor/device node before creating the systemd unit, grant only that device + /dev/nvidiactl, and pass all other GPU device nodes as explicit denial targets. P4 retry #2 run 37411162940 is already queued on gpu-small-v1. A clean PAT used only in hidden prompts may be reused.
 
 ## Remaining work
 
-- Launch queued P4 run 37410285336 using scripts/launch_lambda_ci_p4_gpu.py from exact workspace-control 12a735c7fea085dc3221588245657c67ae048f7f.
-- Watch live runner output; immediately consume the GitHub P4 artifact and launcher receipt when terminal.
-- If a measured additional NVIDIA device node is required for basic CUDA Driver API allocation, add only that exact device and rerun; never grant GPU1 or broad NVIDIA wildcards without evidence.
-- After P4 PASS, begin P5 autonomous scale-set listener + narrow root provisioner acceptance so routine jobs no longer require human PAT/SSH relay.
+- Launch P4 retry #2 run 37411162940 using scripts/launch_lambda_ci_p4_gpu.py from exact workspace-control c2c69daa2b61d869dfaad3ff289e4b957201e564.
+- Watch live output; immediately consume the always-uploaded P4 PASS/FAIL receipt and launcher receipt when terminal.
+- If CUDA demonstrates a requirement for an additional exact NVIDIA support device node (for example UVM), add only that measured node and rerun; do not grant broad NVIDIA wildcards.
+- After P4 PASS, begin P5 autonomous controller/provisioner acceptance.
 - P6: second-project isolation pilot under separate UID/root/cache.
 
 ## Blockers / gates
 
-- Human-only JIT credential gate: launch P4 run 37410285336 with workspace-control 12a735c7fea085dc3221588245657c67ae048f7f and a newly-created short-lived research-engine Administration:write token pasted only into the hidden prompt.
-- P4 must return PASS for GPU0-only device boundary, real CUDA allocation, GPU1 denial, and post-exit project/GPU process cleanup before P5.
-- Any PAT previously pasted into chat is compromised and must remain revoked.
+- Human-only JIT credential gate: launch queued P4 retry #2 run 37411162940 using exact workspace-control c2c69daa2b61d869dfaad3ff289e4b957201e564. A clean PAT that has only ever been entered into the hidden Lambda prompt may be reused.
+- P4 retry #2 must pass UUID-resolved selected-device grant, all non-selected GPU device denials, one visible CUDA device with target UUID, real 256 MiB allocation/free, and post-exit process/GPU cleanup before P5.
 
 ## Fresh-chat initialization
 
