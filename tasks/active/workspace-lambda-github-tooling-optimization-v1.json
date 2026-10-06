@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-lambda-github-tooling-optimization-v1",
   "title": "Workspace Lambda GitHub Tooling Optimization v1",
-  "status": "VALIDATING",
+  "status": "CHECKPOINTED",
   "goal": "Generalize and optimize the reusable workspace-control tooling that connects ChatGPT/GitHub workflows to project-isolated Lambda self-hosted execution, reducing human-terminal mediation and repeated project-specific glue while preserving the accepted security, provenance, exact-SHA, cleanup, and rollback boundaries proven by the current research-engine pilot.",
   "execution_topology": "remote_only",
   "workflow": null,
@@ -43,7 +43,7 @@
       "base_sha": "d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a",
       "remote": {
         "branch": "workspace-lambda-github-tooling-optimization-v1",
-        "checkpoint_sha": "1beb7d79ba12cf336c1d14645714f801e388a1f2",
+        "checkpoint_sha": "1053885a71f84fa68a9475b7b17e17ebd7b0258b",
         "verified": true
       },
       "local": null,
@@ -190,7 +190,7 @@
     },
     {
       "id": "chat_orchestration_protocol",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -205,7 +205,8 @@
         "architecture/lambda-ci-chat-run.v1.schema.json",
         "scripts/lambda_ci_chat_protocol.py",
         "tests/test_lambda_ci_chat_protocol.py",
-        "draft PR #89"
+        "isolated validation branch workspace-lambda-chat-protocol-validation-v1",
+        "draft PR #91"
       ],
       "validation": [
         {
@@ -233,15 +234,17 @@
           ]
         },
         {
-          "check": "Draft PR #89 repository validation",
-          "result": "NOT_RUN",
+          "check": "Isolated PR #91 repository validation",
+          "result": "PASS",
           "evidence": [
-            "Initial run 37415235000 reached task-contract validation and failed only on pre-existing child capsule drift: composed topology without local state and invalid stage status CHECKPOINTED.",
-            "Protocol unit/full-integration tests did not execute in that run."
+            "PR #89 was closed as superseded after concurrent main/P5 movement contaminated its changed-path validation surface.",
+            "Validation branch workspace-lambda-chat-protocol-validation-v1 was cut from exact main fbb2ff1cd91f8f93d807594cc267bce080062dc3 and contains only the four chat-protocol files.",
+            "Schema regex escaping defect found by static review was repaired at 6df96d2aa41dd33f59dcdeaab1bf2f16570d2550 with executable regression coverage.",
+            "Workspace Control Validation run 37415972877 completed SUCCESS on PR #91."
           ]
         }
       ],
-      "resume_condition": "Validate the chat-facing protocol through PR #89 without mutating the parent P5 implementation; consume terminal CI immediately and repair only demonstrated child-branch defects."
+      "resume_condition": "Resume runtime integration only after the parent P5 controller/provisioner path has a durable accepted/stable checkpoint. Rehydrate current main and the parent first; do not infer P5 completion from this child."
     }
   ],
   "checkpoints": [
@@ -289,55 +292,75 @@
         "draft PR #89 opened against current main for validation",
         "parent P5 implementation and live Lambda state untouched"
       ]
+    },
+    {
+      "id": "chat-orchestration-protocol-validated",
+      "kind": "validation_checkpoint",
+      "identity": "git:6df96d2aa41dd33f59dcdeaab1bf2f16570d2550",
+      "required_for_resume": true,
+      "evidence": [
+        "isolated draft PR #91 contains only four chat-facing protocol files",
+        "Workspace Control Validation run 37415972877 PASS",
+        "base main=fbb2ff1cd91f8f93d807594cc267bce080062dc3",
+        "PR #91 intentionally remains unmerged while parent P5 is active"
+      ]
     }
   ],
   "artifacts": [
     {
       "path": "architecture/lambda-ci-chat-orchestration-protocol.v1.md",
-      "state": "DURABLE_BRANCH_CHECKPOINT",
+      "state": "VALIDATED_PARALLEL_PATH",
       "role": "policy-contract",
       "origin": "authored",
       "persistence": "Git-tracked",
       "regeneration": "manual-reviewed",
       "review_requirement": "automated-validation",
       "evidence": [
-        "workspace-control optimization branch commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4"
+        "source lineage workspace-control optimization commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4",
+        "isolated validation branch fix commit 6df96d2aa41dd33f59dcdeaab1bf2f16570d2550",
+        "draft PR #91 Workspace Control Validation run 37415972877 PASS"
       ]
     },
     {
       "path": "architecture/lambda-ci-chat-run.v1.schema.json",
-      "state": "DURABLE_BRANCH_CHECKPOINT",
+      "state": "VALIDATED_PARALLEL_PATH",
       "role": "schema",
       "origin": "authored",
       "persistence": "Git-tracked",
       "regeneration": "manual-reviewed",
       "review_requirement": "automated-validation",
       "evidence": [
-        "workspace-control optimization branch commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4"
+        "source lineage workspace-control optimization commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4",
+        "isolated validation branch fix commit 6df96d2aa41dd33f59dcdeaab1bf2f16570d2550",
+        "draft PR #91 Workspace Control Validation run 37415972877 PASS"
       ]
     },
     {
       "path": "scripts/lambda_ci_chat_protocol.py",
-      "state": "DURABLE_BRANCH_CHECKPOINT",
+      "state": "VALIDATED_PARALLEL_PATH",
       "role": "deterministic-control-helper",
       "origin": "authored",
       "persistence": "Git-tracked",
       "regeneration": "manual-reviewed",
       "review_requirement": "automated-validation",
       "evidence": [
-        "workspace-control optimization branch commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4"
+        "source lineage workspace-control optimization commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4",
+        "isolated validation branch fix commit 6df96d2aa41dd33f59dcdeaab1bf2f16570d2550",
+        "draft PR #91 Workspace Control Validation run 37415972877 PASS"
       ]
     },
     {
       "path": "tests/test_lambda_ci_chat_protocol.py",
-      "state": "DURABLE_BRANCH_CHECKPOINT",
+      "state": "VALIDATED_PARALLEL_PATH",
       "role": "regression-evidence",
       "origin": "authored",
       "persistence": "Git-tracked",
       "regeneration": "manual-reviewed",
       "review_requirement": "automated-validation",
       "evidence": [
-        "workspace-control optimization branch commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4"
+        "source lineage workspace-control optimization commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4",
+        "isolated validation branch fix commit 6df96d2aa41dd33f59dcdeaab1bf2f16570d2550",
+        "draft PR #91 Workspace Control Validation run 37415972877 PASS"
       ]
     }
   ],
@@ -357,21 +380,30 @@
         "User explicitly clarified that this child should optimize the chat-based protocol around P5, not implement or interfere with P5 itself.",
         "Generic-launcher implementation is deferred; parent P5 remains separately owned."
       ]
+    },
+    {
+      "check": "Chat orchestration protocol isolated validation",
+      "result": "PASS",
+      "evidence": [
+        "Draft PR #91 validated the protocol/schema/reducer/tests independently of parent P5 changes.",
+        "Workspace Control Validation run 37415972877 concluded success.",
+        "No parent task, P5 implementation, research-engine workflow, or live Lambda state was mutated to obtain this PASS."
+      ]
     }
   ],
   "blockers": [
-    "The parent P5 controller/provisioner implementation is active in a separate owning conversation; this child must remain read-only with respect to that task and live Lambda runtime.",
+    "The parent P5 controller/provisioner implementation is active in a separate owning conversation; this child must remain read-only with respect to that task and live Lambda runtime until P5 has a durable accepted/stable checkpoint.",
     "Strong one-to-one issue-comment run correlation requires a later project-owned metadata-only workflow adaptation; current compatibility correlation remains fail-closed and provisional until then."
   ],
   "remaining_work": [
-    "Validate PR #89 through the repository's full integration path and repair only demonstrated child-branch defects.",
-    "After the parent P5 path is accepted and stable, exercise the ChatGPT -> PR comment -> GitHub run -> compact receipt -> continuation loop without routine SSH or PAT relay.",
-    "Adopt the comment-ID run-name correlation convention only through the owning project workflow after P5 stabilization; do not modify research-engine workflow from this child while P5 is active.",
+    "Keep validated draft PR #91 unmerged while the parent P5 implementation is actively changing main; after P5 stabilizes, rehydrate current main and refresh/revalidate the isolated protocol branch before promotion.",
+    "After parent P5 acceptance, exercise the ChatGPT -> exact-SHA PR comment -> correlated GitHub run -> compact receipt -> immediate continuation loop with zero routine SSH/PAT relay.",
+    "Adopt the comment-ID run-name correlation convention only through the owning project workflow after P5 stabilization and validate exact correlation under concurrent run conditions.",
     "Measure human terminal steps, trigger-to-bound-run tool calls, terminal-to-diagnosis tool calls, ambiguous correlation rate, successful-run log downloads, and post-terminal idle time.",
     "Revisit generic execution-profile/launcher implementation only as a later explicitly authorized runtime-layer optimization after parent P5 acceptance."
   ],
-  "next_safe_action": "Consume the next PR #89 validation result immediately. If it fails, diagnose only the failing child-branch path and repair the demonstrated defect; if it passes, checkpoint the chat-orchestration protocol as validated. Do not mutate the parent P5 task, controller/provisioner implementation, research-engine Lambda workflows, or live Lambda state from this child.",
+  "next_safe_action": "CHECKPOINT_AND_STOP while the parent P5 implementation remains active elsewhere. Do not write Workspace Heartbeat from this child conversation and do not merge PR #91 or mutate parent/P5/research-engine runtime paths. Once P5 has a durable accepted/stable checkpoint, rehydrate current workspace-control main and the authoritative parent task, refresh PR #91 against that state, then run the first end-to-end ChatGPT-triggered Lambda validation through the accepted GitHub comment interface.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Initialized 2026-10-05 from the live Lambda self-hosted runner pilot. The user wants heartbeat treated as a side project; once heartbeat is accepted, resume the larger workspace-control optimization effort around GitHub tooling executing on the Lambda. Important live evidence at initialization: workspace-control main bb0b234b79498c14f7e7bdee18a787a69a0c29a8 includes the execution-loop correction after a terminal GitHub job completed but the chat remained in a thought/wait state; research-engine main 62d91642a1df0ec52b778d8d4a4f3e743382e977 includes exact pgvector 0.8.6 gating; parent task workspace-lambda-self-hosted-execution-v1 owns P3/P4/P5 and recorded P3 retry run 37396492836 as queued. The optimization target is not merely faster CI: it is a durable, low-friction ChatGPT↔GitHub↔Lambda control plane with exact provenance, bounded privileges, compact evidence, automatic terminal-result continuation, CPU/GPU profile support, and minimal routine SSH.\n\n2026-10-05 ownership transfer after heartbeat v0.4.1 acceptance: parent task was rehydrated from current main. workspace-control main=d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a; research-engine main=72e3e16ca118c4756c528392158738a39cb5d5aa; run 37398604653 remains queued. Inventory measured P2B/P3 launchers at 94.8% same-position identity (405/427 lines) with identical function sets, confirming a high-value generic-launcher refactor target.\n\n2026-10-05 design checkpoint: lambda-ci-execution-profile.v1.schema.json and lambda-ci-generic-launcher-design.v1.md define the policy/lifecycle split and executable regression matrix. This remains a parallel design path; parent P3 acceptance and legacy launchers are unchanged.\n\n2026-10-06 handoff refresh after Workspace Heartbeat v0.4.3 acceptance: heartbeat side-project is COMPLETE and no longer blocks optimization. Current authoritative parent state on workspace-control main has advanced materially beyond this child's older P3 notes: workspace-lambda-self-hosted-execution-v1 has accepted P3 CPU end-to-end and P4 UUID-resolved single-GPU isolation, including isolated PostgreSQL 14.24 + pgvector 0.8.6 for P3 and explicit GPU UUID/device-node isolation with UVM support for P4. Parent current stage is project_isolation_and_cache_validation with P5 active: static/recovery analysis for an autonomous unprivileged ci-controller plus narrow root provisioner, removing the manual sudo/PAT relay without weakening P2-P4 boundaries. Optimization work must remain compatible with that parent P5 direction and must not rewrite or bypass parent acceptance semantics. The child execution-profile design remains valid: one generic profile-driven one-job JIT launcher in parallel with legacy launchers, with project dependency prerequisites represented as profile/project policy rather than generic launcher behavior.\n\n2026-10-06 scope correction during concurrent P5 work: the user explicitly clarified that this child is to improve the ChatGPT↔GitHub↔Lambda operating protocol around P5, not implement P5 or compete with its owning chat. This conversation must not write Workspace Heartbeat while the concurrent implementation chat owns live progress. Commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4 adds only the chat-facing orchestration protocol/schema/reducer/tests. Draft PR #89 exposed pre-existing task-capsule drift before protocol tests ran; this checkpoint repairs that durable metadata and defers generic-launcher implementation until P5 is stable."
+  "notes": "Initialized 2026-10-05 from the live Lambda self-hosted runner pilot. The user wants heartbeat treated as a side project; once heartbeat is accepted, resume the larger workspace-control optimization effort around GitHub tooling executing on the Lambda. Important live evidence at initialization: workspace-control main bb0b234b79498c14f7e7bdee18a787a69a0c29a8 includes the execution-loop correction after a terminal GitHub job completed but the chat remained in a thought/wait state; research-engine main 62d91642a1df0ec52b778d8d4a4f3e743382e977 includes exact pgvector 0.8.6 gating; parent task workspace-lambda-self-hosted-execution-v1 owns P3/P4/P5 and recorded P3 retry run 37396492836 as queued. The optimization target is not merely faster CI: it is a durable, low-friction ChatGPT↔GitHub↔Lambda control plane with exact provenance, bounded privileges, compact evidence, automatic terminal-result continuation, CPU/GPU profile support, and minimal routine SSH.\n\n2026-10-05 ownership transfer after heartbeat v0.4.1 acceptance: parent task was rehydrated from current main. workspace-control main=d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a; research-engine main=72e3e16ca118c4756c528392158738a39cb5d5aa; run 37398604653 remains queued. Inventory measured P2B/P3 launchers at 94.8% same-position identity (405/427 lines) with identical function sets, confirming a high-value generic-launcher refactor target.\n\n2026-10-05 design checkpoint: lambda-ci-execution-profile.v1.schema.json and lambda-ci-generic-launcher-design.v1.md define the policy/lifecycle split and executable regression matrix. This remains a parallel design path; parent P3 acceptance and legacy launchers are unchanged.\n\n2026-10-06 handoff refresh after Workspace Heartbeat v0.4.3 acceptance: heartbeat side-project is COMPLETE and no longer blocks optimization. Current authoritative parent state on workspace-control main has advanced materially beyond this child's older P3 notes: workspace-lambda-self-hosted-execution-v1 has accepted P3 CPU end-to-end and P4 UUID-resolved single-GPU isolation, including isolated PostgreSQL 14.24 + pgvector 0.8.6 for P3 and explicit GPU UUID/device-node isolation with UVM support for P4. Parent current stage is project_isolation_and_cache_validation with P5 active: static/recovery analysis for an autonomous unprivileged ci-controller plus narrow root provisioner, removing the manual sudo/PAT relay without weakening P2-P4 boundaries. Optimization work must remain compatible with that parent P5 direction and must not rewrite or bypass parent acceptance semantics. The child execution-profile design remains valid: one generic profile-driven one-job JIT launcher in parallel with legacy launchers, with project dependency prerequisites represented as profile/project policy rather than generic launcher behavior.\n\n2026-10-06 scope correction during concurrent P5 work: the user explicitly clarified that this child is to improve the ChatGPT↔GitHub↔Lambda operating protocol around P5, not implement P5 or compete with its owning chat. This conversation must not write Workspace Heartbeat while the concurrent implementation chat owns live progress. Commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4 adds only the chat-facing orchestration protocol/schema/reducer/tests. Draft PR #89 exposed pre-existing task-capsule drift before protocol tests ran; this checkpoint repairs that durable metadata and defers generic-launcher implementation until P5 is stable.\n\n2026-10-06 isolated chat-protocol validation: long-lived draft PR #89 was closed because concurrent main/P5 movement caused its validation diff to include separately owned P5/task files. A clean validation branch, workspace-lambda-chat-protocol-validation-v1, was cut from main fbb2ff1cd91f8f93d807594cc267bce080062dc3 with only the four chat-protocol files. Static review caught and repaired double-escaped schema regexes; commit 6df96d2aa41dd33f59dcdeaab1bf2f16570d2550 added regression coverage. Draft PR #91 then passed Workspace Control Validation run 37415972877. The PR remains deliberately unmerged while P5 is active."
 }

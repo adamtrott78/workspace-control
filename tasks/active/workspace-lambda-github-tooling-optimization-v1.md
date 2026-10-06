@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-lambda-github-tooling-optimization-v1
 - Title: Workspace Lambda GitHub Tooling Optimization v1
-- Status: VALIDATING
+- Status: CHECKPOINTED
 - Capsule schema: v2
 
 ## Goal
@@ -24,24 +24,24 @@ Generalize and optimize the reusable workspace-control tooling that connects Cha
 
 - Intent: mutate
 - Remote branch: workspace-lambda-github-tooling-optimization-v1
-- Remote checkpoint: 1beb7d79ba12cf336c1d14645714f801e388a1f2
+- Remote checkpoint: 1053885a71f84fa68a9475b7b17e17ebd7b0258b
 - Remote verified: true
 
 ## Next safe action
 
-Consume the next PR #89 validation result immediately. If it fails, diagnose only the failing child-branch path and repair the demonstrated defect; if it passes, checkpoint the chat-orchestration protocol as validated. Do not mutate the parent P5 task, controller/provisioner implementation, research-engine Lambda workflows, or live Lambda state from this child.
+CHECKPOINT_AND_STOP while the parent P5 implementation remains active elsewhere. Do not write Workspace Heartbeat from this child conversation and do not merge PR #91 or mutate parent/P5/research-engine runtime paths. Once P5 has a durable accepted/stable checkpoint, rehydrate current workspace-control main and the authoritative parent task, refresh PR #91 against that state, then run the first end-to-end ChatGPT-triggered Lambda validation through the accepted GitHub comment interface.
 
 ## Remaining work
 
-- Validate PR #89 through the repository's full integration path and repair only demonstrated child-branch defects.
-- After the parent P5 path is accepted and stable, exercise the ChatGPT -> PR comment -> GitHub run -> compact receipt -> continuation loop without routine SSH or PAT relay.
-- Adopt the comment-ID run-name correlation convention only through the owning project workflow after P5 stabilization; do not modify research-engine workflow from this child while P5 is active.
+- Keep validated draft PR #91 unmerged while the parent P5 implementation is actively changing main; after P5 stabilizes, rehydrate current main and refresh/revalidate the isolated protocol branch before promotion.
+- After parent P5 acceptance, exercise the ChatGPT -> exact-SHA PR comment -> correlated GitHub run -> compact receipt -> immediate continuation loop with zero routine SSH/PAT relay.
+- Adopt the comment-ID run-name correlation convention only through the owning project workflow after P5 stabilization and validate exact correlation under concurrent run conditions.
 - Measure human terminal steps, trigger-to-bound-run tool calls, terminal-to-diagnosis tool calls, ambiguous correlation rate, successful-run log downloads, and post-terminal idle time.
 - Revisit generic execution-profile/launcher implementation only as a later explicitly authorized runtime-layer optimization after parent P5 acceptance.
 
 ## Blockers / gates
 
-- The parent P5 controller/provisioner implementation is active in a separate owning conversation; this child must remain read-only with respect to that task and live Lambda runtime.
+- The parent P5 controller/provisioner implementation is active in a separate owning conversation; this child must remain read-only with respect to that task and live Lambda runtime until P5 has a durable accepted/stable checkpoint.
 - Strong one-to-one issue-comment run correlation requires a later project-owned metadata-only workflow adaptation; current compatibility correlation remains fail-closed and provisional until then.
 
 ## Fresh-chat initialization
