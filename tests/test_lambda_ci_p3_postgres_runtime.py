@@ -1,6 +1,8 @@
 from pathlib import Path
 import json
 import subprocess
+import tempfile
+import os
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = (ROOT / "scripts" / "bootstrap_lambda_ci_p3_postgres_runtime.sh").read_text()
@@ -118,3 +120,62 @@ def test_failure_always_emits_compact_receipt_before_cleanup_returns():
     assert '"failure_stage": os.environ["P3_RUNTIME_STAGE"]' in SCRIPT
     assert '"exit_code": int(os.environ["P3_RUNTIME_RC"])' in SCRIPT
     assert '"partial_runtime_removed": os.environ["P3_RUNTIME_PARTIAL_REMOVED"] == "true"' in SCRIPT
+
+
+def test_multiline_child_shells_use_quoted_stdin_heredocs_not_bash_c_strings():
+    assert "bash -ceu '" not in SCRIPT
+    assert "bash -c '" not in SCRIPT
+    assert "bash -seu <<'BUILD_POSTGRES'" in SCRIPT
+    assert "bash -seu <<'BUILD_PGVECTOR'" in SCRIPT
+    assert "bash -seu <<'SMOKE_RUNTIME'" in SCRIPT
+
+
+def test_exact_smoke_child_shell_executes_under_set_u_with_fake_runtime():
+    marker = "bash -seu <<'SMOKE_RUNTIME'\n"
+    start = SCRIPT.index(marker) + len(marker)
+    end = SCRIPT.index("\nSMOKE_RUNTIME", start)
+    smoke = SCRIPT[start:end]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        prefix = root / "runtime"
+        bindir = prefix / "bin"
+        smoke_root = root / "smoke"
+        bindir.mkdir(parents=True)
+        smoke_root.mkdir()
+
+        programs = {
+            "initdb": "#!/usr/bin/env bash\nexit 0\n",
+            "pg_ctl": "#!/usr/bin/env bash\nexit 0\n",
+            "createdb": "#!/usr/bin/env bash\nexit 0\n",
+            "psql": """#!/usr/bin/env bash
+set -eu
+case "$*" in
+  *extversion*) printf '0.8.6\\n' ;;
+  *) printf 't\\n' ;;
+esac
+""",
+        }
+        for name, body in programs.items():
+            p = bindir / name
+            p.write_text(body)
+            p.chmod(0o755)
+
+        env = os.environ.copy()
+        env["PREFIX"] = str(prefix)
+        env["SMOKE_ROOT"] = str(smoke_root)
+        env["LD_LIBRARY_PATH"] = str(prefix / "lib")
+
+        subprocess.run(
+            ["bash", "-seu"],
+            input=smoke,
+            text=True,
+            env=env,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        conf = (smoke_root / "data" / "postgresql.conf").read_text()
+        assert f"unix_socket_directories = '{smoke_root / 'socket'}'" in conf
+        assert "listen_addresses = ''" in conf
