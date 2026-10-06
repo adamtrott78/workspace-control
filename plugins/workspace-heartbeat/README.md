@@ -1,5 +1,7 @@
 # Workspace Heartbeat plugin
 
+> **Runtime contract note:** the checked-in plugin source on this branch is historical and is not the accepted live ChatGPT delivery contract. The live Lambda service is Workspace Heartbeat v0.4.3. Executors must follow `procedures/progress_heartbeat.md` for the current operating contract. In particular, establish the live main-chat card with `heartbeat_open(task_id)`; if that card is later absent/unmounted/failed, a recovery `heartbeat_open(task_id)` is allowed.
+
 MCP plugin for operator-visible progress during long-running workspace-control tasks.
 
 ## What it does
