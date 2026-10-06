@@ -1,0 +1,225 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-lambda-github-tooling-optimization-v1",
+  "title": "Workspace Lambda GitHub Tooling Optimization v1",
+  "status": "IN_PROGRESS",
+  "goal": "Generalize and optimize the reusable workspace-control tooling that connects ChatGPT/GitHub workflows to project-isolated Lambda self-hosted execution, reducing human-terminal mediation and repeated project-specific glue while preserving the accepted security, provenance, exact-SHA, cleanup, and rollback boundaries proven by the current research-engine pilot.",
+  "execution_topology": "composed",
+  "workflow": null,
+  "parent_execution_owner": "workspace-lambda-self-hosted-execution-v1",
+  "current_stage": "duplication_latency_operator_friction_inventory",
+  "acceptance_criteria": [
+    "The task begins from the exact accepted/self-hosted-runner pilot evidence rather than redesigning the Lambda runner architecture from scratch.",
+    "The active P3/P4/P5 acceptance lineage owned by workspace-lambda-self-hosted-execution-v1 remains authoritative and is not silently rewritten by optimization work.",
+    "Repeated repository-specific launcher, JIT-runner, receipt, cleanup, and GitHub-follow-up logic is inventoried and separated into reusable workspace-control components where justified by evidence.",
+    "A reusable project/profile contract can express trusted workflow identity, exact candidate SHA, CPU/GPU/resource policy, permitted host dependencies, artifact/receipt requirements, timeout/cleanup behavior, and denied production surfaces.",
+    "ChatGPT can drive the normal loop branch/PR -> trusted default-branch workflow -> Lambda JIT runner -> artifacts/checks -> evidence consumption -> bounded repair/retry without routine SSH after the pilot is accepted.",
+    "Terminal GitHub results are consumed immediately; polling/waiting is used only while compute is actually active or a human-only credential/privilege gate remains.",
+    "CPU-only and GPU-aware validation lanes share one control-plane abstraction without weakening device, process, network, cache, or project isolation.",
+    "Host dependency bootstrap/preflight steps such as exact pgvector provisioning are declarative, bounded, idempotent, receipt-producing, and separated from candidate code execution.",
+    "Runner credentials remain short-lived/repository-scoped; no persistent personal Git/SSH/browser credentials or normal atrott-user authority are introduced.",
+    "One-job ephemeral/JIT semantics, exact candidate checkout, full cleanup, leaked-process detection, and artifact return remain fail-closed invariants.",
+    "Existing GitHub-hosted CI remains a known-good control and is not removed merely because the Lambda lane becomes faster or more capable.",
+    "Optimization produces measurable improvements in operator/tool-call latency, duplicated code, number of human terminal steps, runner spin-up/teardown overhead, and failure diagnosis quality before broader adoption.",
+    "At least one second repository/profile can be represented by the generalized contract without giving it access to research-engine-specific state, demonstrating project isolation.",
+    "All reusable changes live in workspace-control; research-engine-specific scientific/production truth remains in research-engine and its owning tasks."
+  ],
+  "constraints": [
+    "Heartbeat v0.4.0 remains the current side-project closure item; do not start broad Lambda tooling mutation merely because this child capsule exists unless the user explicitly transfers ownership.",
+    "Do not mutate the active workspace-lambda-self-hosted-execution-v1 P3/P4/P5 acceptance state from this child task; rehydrate it first and inherit terminal evidence.",
+    "Do not replace the existing Runner Scale Set Client / JIT / project-UID architecture without new evidence that the accepted topology is insufficient.",
+    "Do not weaken one-job runner destruction, no-sudo, no-Docker-socket, no-personal-credential, production-state denial, or exact-SHA execution boundaries for convenience.",
+    "Do not generalize research-engine-specific pgvector/PostgreSQL requirements into mandatory global behavior; model them as project/profile dependencies.",
+    "Do not introduce a persistent privileged runner service until the parent task explicitly accepts that stage.",
+    "Do not use the Lambda lane for untrusted forks or arbitrary pull_request code with secrets/write credentials.",
+    "Do not manufacture GPU/model workloads solely to benchmark orchestration; use naturally authorized validation work where possible.",
+    "Prefer batchable/durable GitHub evidence and compact receipts over giant logs or opaque long-running waits.",
+    "Treat the existing human SSH path as break-glass recovery, not the desired routine control plane."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a",
+      "remote": {
+        "branch": "workspace-lambda-github-tooling-optimization-v1",
+        "checkpoint_sha": "d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-lambda-github-tooling-optimization-v1.json",
+        "tasks/active/workspace-lambda-github-tooling-optimization-v1.md",
+        "architecture/**",
+        "procedures/**",
+        "workflows/**",
+        "templates/**",
+        "scripts/**",
+        "tests/**",
+        "policies/**",
+        "README.md"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "pilot_evidence_rehydration",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+lambda-evidence",
+      "inputs": [
+        "workspace-lambda-self-hosted-execution-v1 authoritative task capsule",
+        "workspace-control main@bb0b234b79498c14f7e7bdee18a787a69a0c29a8",
+        "research-engine main@62d91642a1df0ec52b778d8d4a4f3e743382e977",
+        "P2 trusted one-job JIT runner evidence",
+        "P3 CPU validation launcher/receipt evidence",
+        "bounded pgvector 0.8.6 bootstrap/rollback evidence",
+        "execution-loop correction requiring immediate continuation after terminal CI"
+      ],
+      "outputs": [
+        "optimization child task initialized without replacing parent acceptance task",
+        "known reusable surfaces identified: dispatch, JIT bootstrap, project UID sandbox, dependency preflight, exact-SHA checkout, receipts/artifacts, cleanup, terminal-result continuation"
+      ],
+      "validation": [
+        {
+          "check": "Authoritative parent task discovered",
+          "result": "PASS",
+          "evidence": [
+            "workspace-lambda-self-hosted-execution-v1 is the active owner of the Lambda runner pilot.",
+            "Parent current stage is research_engine_pilot and P3/P4/P5 remain acceptance-owned there."
+          ]
+        },
+        {
+          "check": "Current P3 retry state captured",
+          "result": "PASS",
+          "evidence": [
+            "research-engine run 37396492836 was still QUEUED when this child task was initialized.",
+            "Parent task next action requires bounded pgvector bootstrap PASS before servicing that queued P3 retry."
+          ]
+        },
+        {
+          "check": "Reusable optimization boundary identified",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control already contains generic runner architecture plus P3-specific launcher/bootstrap logic and terminal-CI continuation policy.",
+            "Optimization should generalize the proven mechanics rather than alter research-engine scientific logic."
+          ]
+        },
+        {
+          "check": "Current parent/head/run state refreshed after heartbeat closure",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control main refreshed to d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a.",
+            "research-engine main refreshed to 72e3e16ca118c4756c528392158738a39cb5d5aa.",
+            "Authoritative parent capsule rehydrated through stable production-Postgres listener guard and P3 human bootstrap/JIT gate.",
+            "Research-engine P3 run 37398604653 remains queued on cpu-test-v2."
+          ]
+        }
+      ],
+      "resume_condition": "Heartbeat v0.4 side-project is closed or the user explicitly transfers ownership to this optimization task, and the parent runner task is rehydrated to current terminal state."
+    },
+    {
+      "id": "duplication_latency_operator_friction_inventory",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "current workspace-control main launcher/bootstrap/provisioner/project-profile sources",
+        "current parent P3 acceptance lineage",
+        "heartbeat v0.4.1 closure"
+      ],
+      "outputs": [
+        "architecture/lambda-github-tooling-optimization-inventory.v1.md",
+        "measured P2B/P3 launcher duplication baseline",
+        "reusable-vs-project-specific boundary inventory"
+      ],
+      "validation": [
+        {
+          "check": "P2B/P3 launcher duplication measured",
+          "result": "PASS",
+          "evidence": [
+            "Both launchers are 427 lines.",
+            "405/427 lines match at the same positions (94.8%).",
+            "Both define the same nine functions: run, require_clean_identity, verify_host_foundation, primary_subnet, github_jit_config, chown_tree, systemd_command, collect_diag, main.",
+            "Only top-level constant difference is MAX_RUNTIME_SECONDS (900 vs 2100); remaining differences are phase/label/authorization/receipt strings."
+          ]
+        },
+        {
+          "check": "Existing project/profile contract coverage",
+          "result": "PASS",
+          "evidence": [
+            "lambda-ci-project-research-engine.v1.json already defines repository, runner identity, roots, CPU/GPU profiles, resource limits, cache policy, GitHub permissions, concurrency, and production-service denial.",
+            "lambda-ci-systemd-profiles.v1.json separately defines common sandbox/resource/device policy, creating a second policy source that the launchers currently duplicate.",
+            "lambda-ci-provisioner-protocol.v1.md already specifies a generic project_id/profile/runner_name/jit_config request boundary and forbids controller-supplied privilege details."
+          ]
+        }
+      ],
+      "resume_condition": "Inventory is durable and identifies a bounded reusable launcher/profile schema without altering parent P3/P4/P5 acceptance."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "optimization-branch-base",
+      "kind": "git_checkpoint",
+      "identity": "git:bb0b234b79498c14f7e7bdee18a787a69a0c29a8",
+      "required_for_resume": true,
+      "evidence": [
+        "workspace-control current main at child-task creation",
+        "includes execution-loop correction after observed post-CI thought-loop stall"
+      ]
+    },
+    {
+      "id": "parent-runner-pilot",
+      "kind": "task_checkpoint",
+      "identity": "task:workspace-lambda-self-hosted-execution-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "P0/P1/P2 accepted",
+        "P3 attempt #1 failed at pgvector discovery before candidate tests",
+        "bounded pgvector bootstrap merged in workspace-control",
+        "research-engine exact pgvector 0.8.6 workflow gate merged",
+        "P3 retry run 37396492836 queued at initialization",
+        "P4 blocked until P3 full PASS; P5 remains autonomous-controller acceptance"
+      ]
+    },
+    {
+      "id": "research-engine-tooling-evidence",
+      "kind": "git_checkpoint",
+      "identity": "git:62d91642a1df0ec52b778d8d4a4f3e743382e977",
+      "required_for_resume": true,
+      "evidence": [
+        "research-engine trusted P3 CPU workflow lineage",
+        "exact pgvector 0.8.6 gate merged after vector.control discovery failure"
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Task initialization",
+      "result": "PASS",
+      "evidence": [
+        "Created as a child of workspace-lambda-self-hosted-execution-v1 rather than duplicating or replacing the active pilot task.",
+        "Scoped to reusable workspace-control optimization after current heartbeat side-project closure / explicit ownership transfer."
+      ]
+    }
+  ],
+  "blockers": [
+    "Parent P3 remains at a human-only root/credential gate for the actual research-engine acceptance run; optimization work must not mutate or service that gate implicitly.",
+    "Do not change shared runtime behavior until the inventory/profile-contract design is reviewed against current main and executable regression coverage is defined."
+  ],
+  "remaining_work": [
+    "Finish the duplication/latency/operator-friction inventory with current launcher/bootstrap/provisioner/profile evidence.",
+    "Define a versioned generic execution-profile schema that owns runner labels, bounded runtime, resource class, roots, cache policy, denied capabilities, receipt metadata, and dependency prerequisites.",
+    "Refactor P2B/P3 launcher mechanics behind one profile-driven JIT launcher while preserving exact existing security invariants and adding executable regression coverage.",
+    "Model PostgreSQL/pgvector bootstrap as a project/profile dependency rather than global behavior.",
+    "Measure reduction in duplicate code, operator terminal steps, and runner spin-up/failure-diagnosis friction.",
+    "Demonstrate a second bounded project/profile without cross-project authority leakage."
+  ],
+  "next_safe_action": "Continue from the durable duplication inventory on current workspace-control main. Define the generic execution-profile contract and executable regression plan before modifying launcher/runtime behavior; do not service or rewrite the parent P3 human bootstrap/JIT gate from this child task.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Initialized 2026-10-05 from the live Lambda self-hosted runner pilot. The user wants heartbeat treated as a side project; once heartbeat is accepted, resume the larger workspace-control optimization effort around GitHub tooling executing on the Lambda. Important live evidence at initialization: workspace-control main bb0b234b79498c14f7e7bdee18a787a69a0c29a8 includes the execution-loop correction after a terminal GitHub job completed but the chat remained in a thought/wait state; research-engine main 62d91642a1df0ec52b778d8d4a4f3e743382e977 includes exact pgvector 0.8.6 gating; parent task workspace-lambda-self-hosted-execution-v1 owns P3/P4/P5 and recorded P3 retry run 37396492836 as queued. The optimization target is not merely faster CI: it is a durable, low-friction ChatGPT↔GitHub↔Lambda control plane with exact provenance, bounded privileges, compact evidence, automatic terminal-result continuation, CPU/GPU profile support, and minimal routine SSH.\n\n2026-10-05 ownership transfer after heartbeat v0.4.1 acceptance: parent task was rehydrated from current main. workspace-control main=d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a; research-engine main=72e3e16ca118c4756c528392158738a39cb5d5aa; run 37398604653 remains queued. Inventory measured P2B/P3 launchers at 94.8% same-position identity (405/427 lines) with identical function sets, confirming a high-value generic-launcher refactor target."
+}
