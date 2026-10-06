@@ -64,7 +64,7 @@ function createHeartbeatServer() {
     },
     {
       instructions:
-        "For substantial work, call heartbeat_update with natural concise progress about real findings, decisions, and next actions—not tool-operation telemetry. Call it on meaningful state changes and before the fourth non-heartbeat tool operation. After the first update, call heartbeat_open(task_id) ONCE EARLY for the owning task, then continue working and writing data-only updates. The mounted live card calls its own app-only heartbeat_snapshot tool via the MCP Apps bridge, updating the rolling last-three history without further model renders. Do not call heartbeat_open a second time for the same task/turn, and do not call heartbeat_render (removed). Initial mounting is controlled by the host; the app controls refresh only after it mounts. Use heartbeat_get(task_id) only for explicitly requested full history or necessary recovery."
+        "For substantial work, call heartbeat_update with natural concise progress about real findings, decisions, and next actions—not tool-operation telemetry. Call it on meaningful state changes and before the fourth non-heartbeat tool operation. After the first update, call heartbeat_open(task_id) once early for the owning task, then continue working and writing data-only updates. The mounted live card calls its own app-only heartbeat_snapshot tool via the MCP Apps bridge, updating the rolling last-three history without further model renders. Do not reopen a healthy card merely to refresh it. If the card is demonstrably absent, unmounted, failed, or lost after a chat/plugin reload, one recovery heartbeat_open(task_id) is allowed to restore the live surface. Do not call heartbeat_render (removed). Initial mounting is controlled by the host; the app controls refresh only after it mounts. Use heartbeat_get(task_id) only for explicitly requested full history or necessary recovery."
 
     },
   );
@@ -161,7 +161,7 @@ function createHeartbeatServer() {
     {
       title: "Open live task heartbeat",
       description:
-        "Mount ONE live, task-scoped heartbeat card EARLY in a substantial turn, after the first heartbeat_update. Do not call it again later: the mounted card independently fetches fresh state through heartbeat_snapshot. It shows only the latest three updates for this task; full history is available separately through heartbeat_get. Host-controlled iframe mounting may be delayed.",
+        "Mount one live, task-scoped heartbeat card early in a substantial turn, after the first heartbeat_update. Do not call it again merely to refresh a healthy card: the mounted card independently fetches fresh state through heartbeat_snapshot. If the card is demonstrably absent, unmounted, failed, or lost after a chat/plugin reload, one recovery call is allowed to restore the surface. It shows only the latest three updates for this task; full history is available separately through heartbeat_get. Host-controlled iframe mounting may be delayed.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
       },
