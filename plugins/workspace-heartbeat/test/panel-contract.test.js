@@ -6,8 +6,8 @@ const panel = readFileSync(
   new URL("../public/heartbeat-panel.html", import.meta.url),
   "utf8",
 );
-const summary = readFileSync(
-  new URL("../public/heartbeat-summary-card.html", import.meta.url),
+const live = readFileSync(
+  new URL("../public/heartbeat-live-card.html", import.meta.url),
   "utf8",
 );
 
@@ -33,12 +33,10 @@ test("history panel renders full task-local history instead of cross-task timeli
   assert.equal(panel.includes("latest.task_id"), true);
 });
 
-test("compact summary renders only the rolling task-local window", () => {
-  assert.equal(summary.includes("snapshot.recent.slice(-3)"), true);
-  assert.equal(summary.includes("latest.task_id"), true);
-  assert.equal(summary.includes("full history in heartbeat panel"), true);
-  assert.equal(summary.includes("timeline"), false);
-  assert.equal(summary.includes("setWidgetState"), false);
-  assert.equal(summary.includes("setInterval("), false);
-  assert.equal(summary.includes("setTimeout("), false);
+test("live card is scoped, rolling-three, and event-driven after a timed refresh", () => {
+  assert.equal(live.includes("payload.recent.slice(-3)"), true);
+  assert.equal(live.includes("item.task_id!==taskId"), true);
+  assert.equal(live.includes('name:"heartbeat_snapshot"'), true);
+  assert.equal(live.includes('footerEl.textContent="Showing last known progress'), true);
+  assert.equal(live.includes("setInterval("), false);
 });

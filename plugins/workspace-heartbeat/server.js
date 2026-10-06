@@ -11,13 +11,13 @@ import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
 const PANEL_URI = "ui://workspace-heartbeat/panel-v8.html";
-const SUMMARY_URI = "ui://workspace-heartbeat/summary-v1.html";
+const LIVE_URI = "ui://workspace-heartbeat/live-v1.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
   "utf8",
 );
-const summaryHtml = readFileSync(
-  new URL("./public/heartbeat-summary-card.html", import.meta.url),
+const liveHtml = readFileSync(
+  new URL("./public/heartbeat-live-card.html", import.meta.url),
   "utf8",
 );
 const store = new HeartbeatStore({ historyLimit: 50 });
@@ -34,7 +34,7 @@ const heartbeatUpdateOutputSchema = {
   heartbeat: heartbeatSchema,
 };
 
-const heartbeatSummaryOutputSchema = {
+const heartbeatLiveOutputSchema = {
   heartbeat: heartbeatSchema.nullable(),
   recent: z.array(heartbeatSchema).max(3),
 };
@@ -60,11 +60,12 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.4.2",
+      version: "0.4.3",
     },
     {
       instructions:
-        "For substantial long-running work, keep the operator informed through heartbeat_update. Heartbeat prose should sound like your normal conversational progress commentary: one or two natural sentences about what materially changed, what you learned, or what you are doing next. Prefer findings and decisions over narration of tool mechanics. Do not write status-report boilerplate, sequence numbers, task IDs, stage labels, or phrases like 'tool call completed' unless genuinely useful. Call heartbeat_update on meaningful state changes and before a fourth non-heartbeat tool operation occurs. Do not attach UI to routine heartbeat_update calls. Near the end of a substantial assistant turn, call heartbeat_render exactly once for the owning task so ChatGPT renders one compact task-scoped card containing only the three most recent updates. Use heartbeat_get only when the user explicitly requests full history/sidebar inspection or recovery genuinely requires it."
+        "For substantial work, call heartbeat_update with natural concise progress about real findings, decisions, and next actions—not tool-operation telemetry. Call it on meaningful state changes and before the fourth non-heartbeat tool operation. After the first update, call heartbeat_open(task_id) ONCE EARLY for the owning task, then continue working and writing data-only updates. The mounted live card calls its own app-only heartbeat_snapshot tool via the MCP Apps bridge, updating the rolling last-three history without further model renders. Do not call heartbeat_open a second time for the same task/turn, and do not call heartbeat_render (removed). Initial mounting is controlled by the host; the app controls refresh only after it mounts. Use heartbeat_get(task_id) only for explicitly requested full history or necessary recovery."
+
     },
   );
 
@@ -91,15 +92,15 @@ function createHeartbeatServer() {
 
   registerAppResource(
     server,
-    "workspace-heartbeat-summary",
-    SUMMARY_URI,
+    "workspace-heartbeat-live",
+    LIVE_URI,
     {},
     async () => ({
       contents: [
         {
-          uri: SUMMARY_URI,
+          uri: LIVE_URI,
           mimeType: RESOURCE_MIME_TYPE,
-          text: summaryHtml,
+          text: liveHtml,
           _meta: {
             ui: {
               prefersBorder: false,
@@ -116,7 +117,7 @@ function createHeartbeatServer() {
     {
       title: "Update operator heartbeat",
       description:
-        "Record a concise natural-language progress update for the owning task. Write it like normal ChatGPT commentary: one or two conversational sentences focused on a meaningful finding, decision, state change, or next action. Prefer 'The runner reached checkout, but dependency setup failed, so I am isolating that path next' over 'GitHub read completed'. Avoid headings, task IDs, sequence numbers, stage labels, and telemetry-style boilerplate. This tool is state-only and intentionally has no UI. Call heartbeat_render once near the end of the substantial turn to show the latest three updates in one compact card.",
+        "Record natural, conversational operator progress focused on what materially changed, what you learned, or what you are doing next. Prefer findings and decisions over tool mechanics, avoid generic heartbeat numbering and boilerplate. Keep this call data-only. After the first update of a substantial turn, call heartbeat_open once early for this task; the mounted app handles its own later refreshes.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
         message: z.string().min(1).max(4000),
@@ -156,15 +157,15 @@ function createHeartbeatServer() {
 
   registerAppTool(
     server,
-    "heartbeat_render",
+    "heartbeat_open",
     {
-      title: "Show recent task progress",
+      title: "Open live task heartbeat",
       description:
-        "Render one compact end-of-turn heartbeat card for exactly one task. Call this at most once near the end of a substantial assistant turn, after the final heartbeat_update. It shows only the three most recent heartbeats for the supplied task_id; it never mixes tasks and does not expose full history.",
+        "Mount ONE live, task-scoped heartbeat card EARLY in a substantial turn, after the first heartbeat_update. Do not call it again later: the mounted card independently fetches fresh state through heartbeat_snapshot. It shows only the latest three updates for this task; full history is available separately through heartbeat_get. Host-controlled iframe mounting may be delayed.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
       },
-      outputSchema: heartbeatSummaryOutputSchema,
+      outputSchema: heartbeatLiveOutputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -173,30 +174,69 @@ function createHeartbeatServer() {
       },
       _meta: {
         ui: {
-          resourceUri: SUMMARY_URI,
+          resourceUri: LIVE_URI,
           visibility: ["model", "app"],
         },
-        "openai/toolInvocation/invoking": "Preparing progress summary…",
-        "openai/toolInvocation/invoked": "Progress summary ready",
+        "openai/toolInvocation/invoking": "Opening live progress…",
+        "openai/toolInvocation/invoked": "Live progress opened",
       },
     },
     async ({ task_id }, { _meta } = {}) => {
+      const scoped = task_id.trim();
       const snapshot = store.getSnapshot({
         sessionId: sessionIdFromMeta(_meta),
-        taskId: task_id.trim(),
+        taskId: scoped,
       });
       const recent = snapshot.history.slice(-3);
       return {
-        structuredContent: {
-          heartbeat: snapshot.heartbeat,
-          recent,
-        },
+        structuredContent: { task_id: scoped, heartbeat: snapshot.heartbeat, recent },
         content: [
           {
             type: "text",
-            text: snapshot.heartbeat
-              ? `Recent progress for ${snapshot.heartbeat.task_id}: ${recent.map((item) => item.message).join(" | ")}`
-              : `No heartbeat has been recorded for ${task_id.trim()} yet.`,
+            text: "Live heartbeat card opened for " + scoped + ". It will fetch subsequent task-local updates itself.",
+          },
+        ],
+      };
+    },
+  );
+
+  registerAppTool(
+    server,
+    "heartbeat_snapshot",
+    {
+      title: "Read live task heartbeat snapshot",
+      description:
+        "App-only read-only helper: return the latest three updates for the explicit task_id. The mounted heartbeat card calls this through tools/call. This tool must not mount another UI resource.",
+      inputSchema: {
+        task_id: z.string().min(1).max(160),
+      },
+      outputSchema: heartbeatLiveOutputSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+        idempotentHint: true,
+      },
+      _meta: {
+        ui: {
+          visibility: ["app"],
+        },
+        "openai/widgetAccessible": true,
+      },
+    },
+    async ({ task_id }, { _meta } = {}) => {
+      const scoped = task_id.trim();
+      const snapshot = store.getSnapshot({
+        sessionId: sessionIdFromMeta(_meta),
+        taskId: scoped,
+      });
+      const recent = snapshot.history.slice(-3);
+      return {
+        structuredContent: { task_id: scoped, heartbeat: snapshot.heartbeat, recent },
+        content: [
+          {
+            type: "text",
+            text: "Task-local heartbeat snapshot for " + scoped + ".",
           },
         ],
       };
@@ -209,7 +249,7 @@ function createHeartbeatServer() {
     {
       title: "Read operator heartbeat",
       description:
-        "Full task-history inspection only. Use this when the user explicitly asks to open/read heartbeat history or when recovery genuinely requires historical state. Pass task_id whenever it is known. Routine progress delivery should use heartbeat_update during work and heartbeat_render once near the end of the turn.",
+        "Full task-history inspection only. Use this when the user explicitly asks to open/read heartbeat history or when recovery genuinely requires historical state. Pass task_id whenever it is known. Routine progress delivery uses heartbeat_update and a single early heartbeat_open, whose app refreshes itself through heartbeat_snapshot.",
       inputSchema: {
         task_id: z.string().min(1).max(160).optional(),
       },

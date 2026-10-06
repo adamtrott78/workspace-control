@@ -115,3 +115,19 @@ The revised delivery contract is:
 Heartbeat prose should sound like ordinary ChatGPT progress commentary: findings, decisions, meaningful state changes, and the next action. Avoid telemetry-style phrases such as “tool call completed,” sequence narration, repeated task IDs, or rigid status headings.
 
 The rolling-card window is intentionally 3 for initial acceptance and can be increased later if user field evidence justifies it.
+
+
+## v0.4.3 — live self-refreshing heartbeat candidate
+
+Operator field evidence invalidated v0.4.2 visual acceptance: the mid-turn card was delayed and never refreshed; a second render produced another snapshot at the end.
+
+The candidate architecture removes `heartbeat_render` entirely:
+- `heartbeat_update` remains data-only and natural-language.
+- `heartbeat_open(task_id)` is called once **early** after the first update, not at the end.
+- `heartbeat_snapshot(task_id)` is app-only and read-only and returns the latest three task-local updates.
+- The mounted iframe uses the MCP Apps JSON-RPC `tools/call` bridge to refresh its **existing** DOM; it pauses when hidden, backs off on errors, and stops when done.
+- `heartbeat_get(task_id)` remains the explicit full task-local history side panel.
+
+Host-controlled initial iframe placement remains unproven. Do not close/merge the task until a live ChatGPT smoke visibly shows the same card updating after multiple data-only heartbeats.
+
+Next: deploy this exact branch to Lambda only after `npm test` (including `node --check server.js` and VM-based app bridge tests) passes, refresh plugin, run long live acceptance.

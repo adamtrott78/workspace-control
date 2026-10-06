@@ -140,3 +140,20 @@ Avoid:
 Messages should normally be one or two conversational sentences focused on a meaningful finding, decision, state change, or next action. Structured metadata already carries task ID, state, sequence, and timestamp, so prose does not need to repeat them.
 
 The rolling-card window is three updates for v0.4.2. Full bounded task history remains available through the side panel.
+
+
+## v0.4.3 — one self-refreshing task card (candidate; host smoke pending)
+
+**Field evidence:** v0.4.2 `heartbeat_render` displayed late and produced a separate immutable snapshot on every call. A mid-turn render with updates 1–2 did not receive subsequent updates; a second end-turn render displayed only 5–7 in a separate card. Therefore `heartbeat_render` is removed.
+
+Updated responsibilities:
+
+1. `heartbeat_update(task_id, message, state)` remains data-only and records conversational semantic progress.
+2. After the first update, the model calls **`heartbeat_open(task_id)` once early** to mount a single task-scoped card. The host still controls when initial mounting occurs.
+3. The mounted app initializes the MCP Apps JSON-RPC bridge and calls an **app-only, read-only** `heartbeat_snapshot(task_id)` through `tools/call`.
+4. While visible and working, it refreshes after 1.5 seconds; waiting/blocked states use 3.5 seconds. Each reply replaces the same card's DOM, showing only the most recent **three task-local updates**. Failed requests back off without clearing the last known state; hidden widgets pause; done widgets stop.
+5. `heartbeat_get(task_id)` continues to show the bounded full history for that task through the separate explicit side panel.
+
+`heartbeat_snapshot` is declared `_meta.ui.visibility: ["app"]` and `readOnlyHint: true`. It never returns cross-task timeline data. UI scripts use MCP Apps `ui/initialize` / `ui/notifications/initialized` and `tools/call`, never direct HTTP from the iframe.
+
+This implementation does **not** guarantee ChatGPT will mount a resource immediately; host placement is outside the plugin's control. Acceptance requires a real long-running live UI smoke showing the first card mounts while meaningful work remains, then visibly changes **without another model render call**. Unit tests additionally emulate the host bridge and validate rolling window, isolation, hidden pause, and terminal-state stop.
