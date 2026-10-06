@@ -55,6 +55,7 @@ mkdir -p "$BACKUP"
 
 TARGETS=(
   /opt/workspace-ci/controller/lambda-ci-controller
+  /opt/workspace-ci/controller/stage-pat
   /opt/workspace-ci/provisioner/lambda_ci_provisioner.py
   /opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py
   /opt/workspace-ci/provisioner/lambda_ci_runtime.py
@@ -124,6 +125,7 @@ runuser -u ci-controller -- env \
   "$GO_BIN" -C "$BUILD_ROOT" build -mod=mod -trimpath -o "$BUILD_ROOT/lambda-ci-controller" .
 
 install -o root -g root -m 0755 "$BUILD_ROOT/lambda-ci-controller" /opt/workspace-ci/controller/lambda-ci-controller
+install -o root -g root -m 0755 "$REPO_ROOT/scripts/stage_lambda_ci_controller_pat.sh" /opt/workspace-ci/controller/stage-pat
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_provisioner.py" /opt/workspace-ci/provisioner/lambda_ci_provisioner.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_provisioner_service.py" /opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_runtime.py" /opt/workspace-ci/provisioner/lambda_ci_runtime.py
@@ -214,7 +216,7 @@ rm -rf "$BUILD_ROOT"
 echo "P5_INSTALL=PASS"
 echo "REPORT=$OUT/lambda-ci-p5-install.json"
 if [[ "$CONTROLLER_STATE" == "INSTALLED_INACTIVE" ]]; then
-  echo "NEXT=Stage /var/lib/workspace-ci/controller/github-token directly as ci-controller (0600), then rerun with WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES."
+  echo "NEXT=Run sudo -u ci-controller /opt/workspace-ci/controller/stage-pat, then rerun this bootstrap with WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES."
 else
   echo "NEXT=Run autonomous scale-set acceptance; no manual runner launch is required."
 fi
