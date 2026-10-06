@@ -4,9 +4,9 @@ import { readFileSync } from "node:fs";
 
 const server = readFileSync(new URL("../server.js", import.meta.url), "utf8");
 
-test("heartbeat_update and heartbeat_get use separate UI resources", () => {
+test("heartbeat_update is data-only while heartbeat_get owns the history UI", () => {
   assert.equal(server.includes('const PANEL_URI = "ui://workspace-heartbeat/panel-v7.html";'), true);
-  assert.equal(server.includes('const UPDATE_CARD_URI = "ui://workspace-heartbeat/update-card-v1.html";'), true);
+  assert.equal(server.includes("UPDATE_CARD_URI"), false);
 
   const updateStart = server.indexOf('"heartbeat_update"');
   const getStart = server.indexOf('"heartbeat_get"');
@@ -17,10 +17,9 @@ test("heartbeat_update and heartbeat_get use separate UI resources", () => {
   const updateBlock = server.slice(updateStart, getStart);
   const getBlock = server.slice(getStart);
 
-  assert.equal(updateBlock.includes("resourceUri: UPDATE_CARD_URI"), true);
-  assert.equal(updateBlock.includes("resourceUri: PANEL_URI"), false);
+  assert.equal(updateBlock.includes("resourceUri:"), false);
+  assert.equal(updateBlock.includes("heartbeat.message"), true);
   assert.equal(getBlock.includes("resourceUri: PANEL_URI"), true);
-  assert.equal(getBlock.includes("resourceUri: UPDATE_CARD_URI"), false);
 });
 
 test("only heartbeat_get advertises the thread entrypoint", () => {

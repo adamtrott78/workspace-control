@@ -97,3 +97,17 @@ The primary operator UX is now the in-chat heartbeat update itself.
 - `heartbeat_get` retains the separate history/sidebar resource for explicit history inspection.
 - This intentionally decouples reliable in-chat progress delivery from the host sidebar's mounted live-refresh lifecycle.
 - The update card is stateless beyond the invoking heartbeat result, so a new chat does not inherit prior update-card contents.
+
+
+## v0.4.1 chronology-first heartbeat delivery
+
+ChatGPT owns placement of inline MCP App surfaces. Current inline UI is host-positioned before the generated model response, so a custom heartbeat card cannot be forced to remain at the exact point where the model invoked the tool.
+
+To preserve operator chronology:
+
+- `heartbeat_update` is now a data-only MCP tool with no `_meta.ui.resourceUri`.
+- Its normal MCP `content` contains the heartbeat prose itself followed by task ID, sequence, and state.
+- This keeps the visible heartbeat attached to the ordinary tool-result transcript path rather than allowing a custom iframe to be hoisted to the end of the response block.
+- `heartbeat_get` remains the explicit rich history/sidebar surface at `ui://workspace-heartbeat/panel-v7.html`.
+- The v0.4.0 update-card resource remains historical source but is no longer bound to routine heartbeat updates.
+- No background polling, reconciliation timer, or duplicate render tool is introduced.

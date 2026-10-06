@@ -11,13 +11,8 @@ import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
 const PANEL_URI = "ui://workspace-heartbeat/panel-v7.html";
-const UPDATE_CARD_URI = "ui://workspace-heartbeat/update-card-v1.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
-  "utf8",
-);
-const updateCardHtml = readFileSync(
-  new URL("./public/heartbeat-update-card.html", import.meta.url),
   "utf8",
 );
 const store = new HeartbeatStore({ historyLimit: 50 });
@@ -55,7 +50,7 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.4.0",
+      version: "0.4.1",
     },
     {
       instructions:
@@ -74,27 +69,6 @@ function createHeartbeatServer() {
           uri: PANEL_URI,
           mimeType: RESOURCE_MIME_TYPE,
           text: panelHtml,
-          _meta: {
-            ui: {
-              prefersBorder: false,
-            },
-          },
-        },
-      ],
-    }),
-  );
-
-  registerAppResource(
-    server,
-    "workspace-heartbeat-update-card",
-    UPDATE_CARD_URI,
-    {},
-    async () => ({
-      contents: [
-        {
-          uri: UPDATE_CARD_URI,
-          mimeType: RESOURCE_MIME_TYPE,
-          text: updateCardHtml,
           _meta: {
             ui: {
               prefersBorder: false,
@@ -125,7 +99,6 @@ function createHeartbeatServer() {
         idempotentHint: false,
       },
       _meta: {
-        ui: { resourceUri: UPDATE_CARD_URI, visibility: ["model"] },
         "openai/toolInvocation/invoking": "Updating progress…",
         "openai/toolInvocation/invoked": "Progress updated",
       },
@@ -143,7 +116,7 @@ function createHeartbeatServer() {
         content: [
           {
             type: "text",
-            text: `Heartbeat updated for ${heartbeat.task_id} (sequence ${heartbeat.sequence}).`,
+            text: `${heartbeat.message}\n\n${heartbeat.task_id} · update ${heartbeat.sequence} · ${heartbeat.state}`,
           },
         ],
       };
