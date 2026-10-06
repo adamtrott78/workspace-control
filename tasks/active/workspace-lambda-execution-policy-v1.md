@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 10901ebef59983da2d499ebd57125667c21edddf
+- Remote checkpoint: 526e020a4d4ef429ceeac173b9f51fbd75912d99
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-On Lambda from the normal operator account, install and activate exact corrected workspace-control 10901ebef59983da2d499ebd57125667c21edddf using a fresh detached worktree inside an explicit child bash so failures return to the existing SSH prompt. Verify exact clean HEAD, then invoke the canonical scripts/bootstrap_lambda_ci_p5.sh via sudo with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=10901ebef59983da2d499ebd57125667c21edddf, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not restage the already-valid controller credential. Require the install receipt to show both controllers ACTIVE, provisioner active, controller_credential_ready=true, and production_services_modified=false. After that PASS, create a NEW trusted /lambda-ci-p5 <exact_sha> issue-comment run on the open same-repository non-scientific research-engine candidate (or an equivalent fresh candidate) and require it to complete; do not count pre-fix queued run 37533291290 as sole acceptance evidence. Then trigger a fresh /lambda-ci-p5-gpu <exact_sha> run and validate both root receipts and residue-free cleanup. Do not enable model-scale classes or gpu-heavy.
+First cancel stale research-engine CPU workflow runs 37533291290 and 37534646664 in GitHub Actions so no pre-fix assigned job remains eligible to consume a newly admitted runner. Then, on Lambda from the normal operator account, install and activate exact corrected workspace-control 526e020a4d4ef429ceeac173b9f51fbd75912d99 using a fresh detached worktree inside an explicit child bash. Verify exact clean HEAD and invoke scripts/bootstrap_lambda_ci_p5.sh via sudo with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=526e020a4d4ef429ceeac173b9f51fbd75912d99, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not restage the valid controller credential. Require both controllers ACTIVE, provisioner active, credential ready, production services unchanged, and CPU controller restart count stable after activation. Only then trigger a NEW /lambda-ci-p5 <exact_sha> run on the open non-scientific research-engine candidate; require it to complete before triggering fresh /lambda-ci-p5-gpu <exact_sha>. Do not count runs 37533291290 or 37534646664 as acceptance evidence and do not enable model-scale classes or gpu-heavy.
 
 ## Remaining work
 
-- Install and activate corrected workspace-control 10901ebef59983da2d499ebd57125667c21edddf on Lambda, then run fresh non-scientific admission-v2 CPU and gpu-small acceptance and validate root receipts plus residue-free cleanup.
+- Install and activate corrected workspace-control 526e020a4d4ef429ceeac173b9f51fbd75912d99 on Lambda, cancel stale CPU runs 37533291290 and 37534646664, then run fresh non-scientific admission-v2 CPU and gpu-small acceptance and validate root receipts plus residue-free cleanup.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,7 +48,8 @@ On Lambda from the normal operator account, install and activate exact corrected
 
 ## Blockers / gates
 
-- Lambda host still runs the earlier d2326042 admission-v2 controller. Exact corrected workspace-control 10901ebef59983da2d499ebd57125667c21edddf must be installed and activated through the reviewed sudo bootstrap before fresh CPU/GPU acceptance.
+- Lambda host still runs 10901ebef59983da2d499ebd57125667c21edddf and its CPU controller crash-loops on sparse JobAssigned recovery metadata. Exact corrected workspace-control 526e020a4d4ef429ceeac173b9f51fbd75912d99 must be installed and activated before acceptance resumes.
+- Stale CPU workflow runs 37533291290 and 37534646664 must be canceled before the next acceptance trigger so no old assigned job can consume a runner admitted for a fresh attestation.
 
 ## Fresh-chat initialization
 
