@@ -7,7 +7,7 @@
   "execution_topology": "composed",
   "workflow": null,
   "parent_execution_owner": "research-engine-local-extract-redesign-v1",
-  "current_stage": "research_engine_pilot",
+  "current_stage": "project_isolation_and_cache_validation",
   "acceptance_criteria": [
     "Current GitHub self-hosted runner capabilities, security guidance, ephemeral/JIT registration options, runner isolation boundaries, artifact/log handling, and billing implications are researched from current primary sources.",
     "The design explicitly distinguishes ordinary GitHub-hosted CI from heavyweight Lambda validation and does not replace the existing known-good CI path merely because a Lambda lane exists.",
@@ -26,7 +26,8 @@
     "No self-hosted runner is registered as a persistent privileged host service until the threat model, isolation design, and recovery/kill-switch plan are durably accepted.",
     "The executor may enter a waiting state only while external compute is actually in progress or a human-only credential/privilege action is required; once a job reaches a terminal state, its evidence must be consumed immediately and the next safe repair/re-run action must proceed without waiting for the user.",
     "Privileged bootstrap/orchestration code that crosses shell/process boundaries must have executable regression coverage for the exact child-shell control flow; static string assertions and bash -n alone are insufficient acceptance evidence.",
-    "P3/P4 runner timeout policy must be expressed as an ordered invariant rather than independent magic values: trusted workflow timeout < systemd runner lifetime < outer launcher watchdog, with executable regression coverage."
+    "P3/P4 runner timeout policy must be expressed as an ordered invariant rather than independent magic values: trusted workflow timeout < systemd runner lifetime < outer launcher watchdog, with executable regression coverage.",
+    "P5 acceptance removes routine human SSH/PAT relay while preserving the accepted P2-P4 boundaries: unprivileged network-facing controller credential separation, narrow root provisioner with no GitHub credential, one-job ephemeral project runner, exact trusted workflow authorization, and fail-closed cleanup/evidence."
   ],
   "constraints": [
     "Do not modify or disable the existing GitHub-hosted CI implementation during architecture research.",
@@ -266,7 +267,7 @@
     },
     {
       "id": "research_engine_pilot",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda-self-hosted-runner",
@@ -493,16 +494,31 @@
             "Regression coverage proves the UVM grants do not remove RestrictAddressFamilies or any accepted home/network/Docker boundaries.",
             "Fresh P4 retry #3 run 37412644570 is queued on gpu-small-v1 for unchanged candidate ab36b358a0c7ac33d2887fa681f418033554eae0."
           ]
+        },
+        {
+          "check": "P4 GPU hardware-aware validation acceptance",
+          "result": "PASS",
+          "evidence": [
+            "GitHub Actions run 37412644570 completed with conclusion=success on runner 28 lambda-research-engine-p4-83bbe0e05fe3.",
+            "Every trusted P4 workflow step passed: exact PR-head verification, exact candidate checkout, bounded selected-GPU validation, artifact upload, post-checkout cleanup, and complete job.",
+            "Artifact 11389971129 digest sha256:cfbc4cb17a26d503840b86f0d3a1f638e228f01f2ac5693e0c63021da2d1a59d records decision=PASS.",
+            "Hardware receipt exact/actual candidate SHA=ab36b358a0c7ac33d2887fa681f418033554eae0.",
+            "Exactly one CUDA-visible device was observed: NVIDIA RTX A4500 UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea on selected /dev/nvidia1.",
+            "Non-selected /dev/nvidia0 open was denied with errno=1 (EPERM).",
+            "CUDA Driver API initialized successfully (version 12080), a real 268435456-byte (256 MiB) device allocation succeeded, and free VRAM returned exactly to the pre-allocation value after free.",
+            "P4 kept production_postgres_used=false, docker_used=false, model_server_started=false, scientific_state_materialized=false, checkout_credentials_persisted=false.",
+            "Local launcher receipt for runner 28 records DevicePolicy-bounded grants /dev/nvidiactl, /dev/nvidia1, /dev/nvidia-uvm, /dev/nvidia-uvm-tools; /dev/nvidia0 remained denied; no leaked project/GPU processes; runner workspace destroyed."
+          ]
         }
       ],
       "resume_condition": "Research-engine branch validation can complete without human SSH and without production-state mutation."
     },
     {
       "id": "project_isolation_and_cache_validation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "hybrid",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "hybrid",
+      "selected_surface": "github+lambda-controller",
       "inputs": [
         "passing research-engine pilot"
       ],
@@ -557,10 +573,10 @@
         "P1 PASS",
         "P2 PASS",
         "P3 PASS run 37408781519 artifact 11388222514",
-        "P4 retry #2 proved UUID-resolved selected GPU open + non-selected GPU EPERM denial",
-        "P4 retry #2 failed only at cuInit rc=999",
-        "bounded UVM support-node repair merged workspace-control@550371aa7afba3de2af5fa6afe360ad4b21f0511",
-        "P4 retry #3 run 37412644570 queued on gpu-small-v1"
+        "P4 PASS run 37412644570 artifact 11389971129",
+        "P4 exact selected GPU UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea; non-selected /dev/nvidia0 denied EPERM",
+        "P4 real CUDA 256 MiB allocation/free PASS with exact VRAM restoration",
+        "current next phase=P5 autonomous controller/provisioner acceptance"
       ]
     }
   ],
@@ -575,7 +591,10 @@
     "local receipt: lambda-ci-p2b-20261005T230606Z/lambda-ci-p2b-launcher.json",
     "GitHub Actions run 37408781519: Lambda CI P3 CPU Validation PASS",
     "GitHub artifact 11388222514: lambda-ci-p3-receipt; sha256:12cf36d8e5346f8d1143ad873aa2df3dc75fdf99b13455a62de2731a528f9703",
-    "local P3 launcher receipt: runner 25 lambda-research-engine-p3-4efa7bacc41f cleanup PASS"
+    "local P3 launcher receipt: runner 25 lambda-research-engine-p3-4efa7bacc41f cleanup PASS",
+    "GitHub Actions run 37412644570: Lambda CI P4 GPU Validation PASS",
+    "GitHub artifact 11389971129: lambda-ci-p4-gpu-receipt; sha256:cfbc4cb17a26d503840b86f0d3a1f638e228f01f2ac5693e0c63021da2d1a59d",
+    "local P4 launcher receipt: runner 28 lambda-research-engine-p4-83bbe0e05fe3 cleanup PASS"
   ],
   "validation": [
     {
@@ -588,18 +607,18 @@
     }
   ],
   "blockers": [
-    "Human-only JIT credential gate: launch queued P4 retry #3 run 37412644570 using exact workspace-control 550371aa7afba3de2af5fa6afe360ad4b21f0511. A clean PAT used only in hidden prompts may be reused.",
-    "P4 retry #3 must pass CUDA initialization, exactly one visible target UUID, real 256 MiB allocation/free, explicit non-selected GPU denial, and post-exit project/GPU cleanup before P5."
+    "P5 controller/provisioner acceptance is not yet implemented on the live Lambda host; routine JIT execution still requires the operator's local sudo/PAT relay.",
+    "P5 must not persist a broad GitHub credential in root context or grant arbitrary command/device/path selection to the network-facing controller."
   ],
   "remaining_work": [
-    "Launch queued P4 retry #3 run 37412644570 using scripts/launch_lambda_ci_p4_gpu.py from exact workspace-control 550371aa7afba3de2af5fa6afe360ad4b21f0511.",
-    "Immediately consume the always-uploaded P4 PASS/FAIL hardware receipt and launcher receipt when terminal.",
-    "If CUDA still fails, use the receipt's exact failure stage/reason to add only the next measured support requirement; do not broaden physical GPU access.",
-    "After P4 PASS, begin P5 autonomous controller/provisioner acceptance.",
-    "P6: second-project isolation pilot under separate UID/root/cache."
+    "P5: re-read the accepted scale-set/controller/provisioner architecture and current implementation artifacts, then identify the smallest delta from the proven P2-P4 manual JIT launchers to an autonomous controller.",
+    "P5: implement hosted-CI validation for an unprivileged ci-controller listener using the pinned official actions/scaleset client (or accepted adapter) and a narrow local root provisioner with no GitHub credential.",
+    "P5: on Lambda, install/enable only the accepted controller/provisioner pieces and prove ChatGPT can trigger a deliberate bounded failure, consume evidence, repair, and rerun PASS without human SSH or PAT relay.",
+    "P5: prove controller restart/recovery, one-job cleanup, credential non-exposure, and kill-switch behavior.",
+    "P6: perform second-project isolation pilot under a distinct UID/root/cache and prove mutual denial."
   ],
-  "next_safe_action": "Human-only credential gate: on Lambda create/reuse a clean detached workspace-control tree exactly at `550371aa7afba3de2af5fa6afe360ad4b21f0511` and run `scripts/launch_lambda_ci_p4_gpu.py` under sudo with `WORKSPACE_CI_P4_AUTHORIZED=YES`. The launcher will grant only /dev/nvidiactl, the UUID-resolved selected physical GPU node, and the exact shared CUDA UVM support nodes /dev/nvidia-uvm plus /dev/nvidia-uvm-tools when present. P4 retry #3 run 37412644570 is already queued on gpu-small-v1. A clean PAT used only in hidden prompts may be reused.",
+  "next_safe_action": "Begin P5 static/recovery analysis from the accepted workspace-control architecture and current main: re-read `architecture/lambda-self-hosted-execution-v1.md`, `architecture/lambda-ci-controller-adapter.v1.md`, `architecture/lambda-ci-provisioner-protocol.v1.md`, `architecture/lambda-ci-systemd-profiles.v1.json`, and the current controller/provisioner scripts/tests. Compare those accepted contracts against the proven P2-P4 manual JIT launchers and identify the minimal implementation delta for an autonomous unprivileged `ci-controller` + narrow root provisioner. Do not mutate the live Lambda host until the P5 static implementation is CI-green.",
   "last_executor": "chatgpt",
   "last_surface": "github+web",
-  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow.\n\n2026-10-06 P3 guard correction: production safety checks must measure stable service identity/boundaries, not volatile implementation details such as every PostgreSQL background-worker PID. The TCP 5432 listener identity is now the production invariant; runuser boundaries also start from `/` to avoid inherited private-cwd warnings.\n\n2026-10-06 P3 timeout correction: the previous regression actively blessed RuntimeMaxSec=15min even though the trusted workflow timeout was 30min. Timeout policy is now encoded as workflow(1800s) < systemd(2400s) < launcher watchdog(2520s), and tests execute the rendered systemd command.\n\n2026-10-06 P3 accepted: real candidate validation completed on Lambda in 21s once runner was assigned, using isolated PostgreSQL 14.24 + pgvector 0.8.6, Python 3.12.15, exact SHA checkout, and full pytest. P4 may now validate the explicit one-GPU hardware lane without scientific/model execution.\n\n2026-10-06 P4 hardware identity correction: NVIDIA logical index/device-node assumptions are not durable identity. P4 now selects the intended physical GPU by stable UUID, resolves the current minor/device node at launch time, grants only that node under DevicePolicy=closed, and treats all other GPU nodes as explicit denial targets.\n\n2026-10-06 P4 CUDA support correction: after physical GPU selection/denial passed, CUDA Driver API initialization failed with rc=999 under the minimal /dev/nvidiactl + selected GPU grant. The gpu-small-v1 profile now adds only the shared UVM compute support nodes /dev/nvidia-uvm and /dev/nvidia-uvm-tools when present; modeset and broad NVIDIA wildcard access remain excluded."
+  "notes": "2026-10-05: GitHub-hosted runner allocation was directly observed as the wall-clock bottleneck: research-engine PR #95 succeeded once assigned a runner, while workspace-control PR #70 had two 15-minute cancellations with runner_id=0 and zero steps. This evidence motivated the Lambda lane but does not change existing GitHub-hosted CI.\n\n2026-10-05 evidence-first survey completed before host mutation. It materially refined the runner design around GitHub's official Runner Scale Set Client, three-tier privilege separation, trusted cache promotion, and host-specific device/network controls. P0 host probe supports the overall architecture but exposed follow-up compatibility probes that must pass before P2.\n\n2026-10-05 P1 validation correction: removed premature PADataset repository binding because PADataset is deferred to the post-pilot second-project isolation stage and therefore has no valid current checkpoint binding.\n\n2026-10-05 P1 completed. User explicitly authorized transition to P2. P2 root preflight is part of P2 and must fail closed before any host identity/service/runner mutation.\n\n2026-10-06 execution-loop correction: user demonstrated a completed P3 failure remained in an apparent wait/thought state after actionable evidence existed. Waiting is now explicitly restricted to active compute or human-only gates; terminal job results must be consumed and advanced immediately.\n\n2026-10-06 P3 orchestration lesson: the repeated failures were not in PostgreSQL/pgvector compilation but in bespoke shell glue and verification. Static textual tests and bash -n were insufficient. The control plane now forbids multi-line privileged bash -c strings and requires executable regression of representative child-shell control flow.\n\n2026-10-06 P3 guard correction: production safety checks must measure stable service identity/boundaries, not volatile implementation details such as every PostgreSQL background-worker PID. The TCP 5432 listener identity is now the production invariant; runuser boundaries also start from `/` to avoid inherited private-cwd warnings.\n\n2026-10-06 P3 timeout correction: the previous regression actively blessed RuntimeMaxSec=15min even though the trusted workflow timeout was 30min. Timeout policy is now encoded as workflow(1800s) < systemd(2400s) < launcher watchdog(2520s), and tests execute the rendered systemd command.\n\n2026-10-06 P3 accepted: real candidate validation completed on Lambda in 21s once runner was assigned, using isolated PostgreSQL 14.24 + pgvector 0.8.6, Python 3.12.15, exact SHA checkout, and full pytest. P4 may now validate the explicit one-GPU hardware lane without scientific/model execution.\n\n2026-10-06 P4 hardware identity correction: NVIDIA logical index/device-node assumptions are not durable identity. P4 now selects the intended physical GPU by stable UUID, resolves the current minor/device node at launch time, grants only that node under DevicePolicy=closed, and treats all other GPU nodes as explicit denial targets.\n\n2026-10-06 P4 CUDA support correction: after physical GPU selection/denial passed, CUDA Driver API initialization failed with rc=999 under the minimal /dev/nvidiactl + selected GPU grant. The gpu-small-v1 profile now adds only the shared UVM compute support nodes /dev/nvidia-uvm and /dev/nvidia-uvm-tools when present; modeset and broad NVIDIA wildcard access remain excluded.\n\n2026-10-06 P4 accepted: UUID-resolved gpu-small-v1 validation passed end-to-end on Lambda. The selected RTX A4500 was isolated as the only CUDA-visible GPU, the other physical GPU node was denied with EPERM, CUDA Driver API initialized, a real 256 MiB VRAM allocation/free completed with exact free-memory restoration, and no production/scientific state or GPU/project processes leaked. P5 may now remove the manual local sudo/PAT JIT relay without relaxing P2-P4 boundaries."
 }
