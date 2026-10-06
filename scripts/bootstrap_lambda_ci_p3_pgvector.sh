@@ -61,6 +61,7 @@ MASTER_BEFORE="$(
 printf '%s\n' "$MASTER_BEFORE" > "$OUT/postgres-master-before.txt"
 
 COPIED=0
+ROLLBACK_FILE="$WORK/rollback-files.txt"
 SMOKE_ROOT=""
 cleanup() {
   rc=$?
@@ -71,19 +72,12 @@ cleanup() {
   fi
 
   if [[ "$rc" -ne 0 && "$COPIED" == "1" ]]; then
-    if [[ -f "$MANIFEST" ]]; then
-      python3 - "$MANIFEST" <<'PY' >/tmp/workspace-ci-pgvector-rollback-paths.txt
-import json,sys
-p=json.load(open(sys.argv[1]))
-for item in p.get("installed_files", []):
-    print(item["path"])
-PY
+    if [[ -f "$ROLLBACK_FILE" ]]; then
       while IFS= read -r path; do
         [[ -n "$path" ]] && rm -f -- "$path"
-      done < /tmp/workspace-ci-pgvector-rollback-paths.txt
-      rm -f /tmp/workspace-ci-pgvector-rollback-paths.txt
-      rm -f -- "$MANIFEST"
+      done < "$ROLLBACK_FILE"
     fi
+    rm -f -- "$MANIFEST"
   fi
 
   rm -rf -- "$WORK"
@@ -159,14 +153,22 @@ EOF
   mapfile -t STAGED_SQL < <(find "$EXTRACTED$TARGET_EXT_DIR" -maxdepth 1 -type f -name 'vector--*.sql' -print | sort)
   [[ "${#STAGED_SQL[@]}" -gt 0 ]] || die "STAGED_VECTOR_SQL_MISSING"
 
+  INSTALLED_FILES=("$TARGET_SO" "$TARGET_CONTROL")
+  for sql in "${STAGED_SQL[@]}"; do
+    INSTALLED_FILES+=("$TARGET_EXT_DIR/$(basename "$sql")")
+  done
+
+  # Record every destination before the first root copy. The pre-existing-state
+  # gate above proves these paths do not exist, so any failure after COPIED=1
+  # may safely remove exactly this list without depending on the final manifest.
+  printf '%s\n' "${INSTALLED_FILES[@]}" > "$ROLLBACK_FILE"
+  COPIED=1
+
   install -o root -g root -m 0644 "$STAGED_SO" "$TARGET_SO"
   install -o root -g root -m 0644 "$STAGED_CONTROL" "$TARGET_CONTROL"
-
-  INSTALLED_FILES=("$TARGET_SO" "$TARGET_CONTROL")
   for sql in "${STAGED_SQL[@]}"; do
     dst="$TARGET_EXT_DIR/$(basename "$sql")"
     install -o root -g root -m 0644 "$sql" "$dst"
-    INSTALLED_FILES+=("$dst")
   done
 
   PACKAGE_SHA="$(awk '{print $1}' "$WORK/package.sha256")"
@@ -194,7 +196,6 @@ payload={
 pathlib.Path(manifest).write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n")
 PY
   chmod 0600 "$MANIFEST"
-  COPIED=1
 fi
 
 # Smoke-test only against a fresh ci-research-engine-owned cluster on a Unix
