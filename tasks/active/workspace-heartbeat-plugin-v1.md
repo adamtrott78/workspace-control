@@ -62,3 +62,49 @@ The heartbeat side project is complete. Resume:
 
 Do not reopen heartbeat design work absent a new functional regression or
 explicitly authorized runtime change.
+
+
+## 2026-10-06 v0.4.4 policy-research checkpoint — NOT IMPLEMENTATION APPROVAL
+
+Field evidence exposed a lifecycle problem rather than a v0.4.3 live-card
+implementation failure:
+
+- a card can self-refresh correctly while its iframe remains mounted;
+- later assistant turns may keep writing backend/task history while the prior
+  main-chat card is no longer the live current-turn surface;
+- old existing chats may retain stale plugin/tool/UI metadata after plugin
+  changes.
+
+The current best candidate is **assistant-turn-scoped Heartbeat**:
+
+1. `heartbeat_begin_turn(task_id, message, state)` is the single model-visible
+   turn-boundary operation.
+2. It atomically supersedes the prior active heartbeat turn for that
+   conversation/task, creates a server-generated immutable `turn_id`, writes
+   the first heartbeat, and mounts the new rolling-three card.
+3. Later `heartbeat_update(task_id, message, state)` writes resolve to the
+   current turn for that conversation/task.
+4. The mounted app calls app-only
+   `heartbeat_snapshot(task_id, turn_id)`; the immutable turn ID prevents old
+   cards from displaying a newer assistant turn.
+5. A superseded turn returns `active=false`/`superseded=true`; its old card
+   stops polling and remains historical/static.
+6. `heartbeat_get(task_id)` remains explicit task-level history/debugging and
+   may span turns.
+7. Policy still requires one active writer per durable task; turn isolation is
+   defense-in-depth, not permission for concurrent ownership.
+
+Candidate invariant:
+
+`exactly one active heartbeat turn per (conversation, task_id)`.
+
+The user explicitly does not need old-turn cards to stay live and prefers one
+current rolling card for the assistant response being generated now.
+
+**Do not implement yet.** Research current OpenAI/MCP Apps lifecycle contracts
+and similar implementations first. If a documented native assistant-turn
+identity or lifecycle exists, prefer it over inventing unnecessary state.
+Otherwise validate or improve the server-generated `turn_id` design.
+
+The accepted live v0.4.3 runtime remains the rollback/current production
+implementation during this research.
