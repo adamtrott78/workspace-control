@@ -29,7 +29,7 @@ Provide reliable operator-visible progress for each substantial ChatGPT assistan
 
 ## Next safe action
 
-Validate exact v0.4.5 candidate git:10226c1f87b05e479ee4f5e0115139dd7113aa8b in workspace-control CI. If green, run the exact Node 20 npm/isolated-startup gate on Lambda while keeping v0.4.4 live.
+Run the exact Lambda Node 20/npm and isolated-startup gate for v0.4.5 implementation git:10226c1f87b05e479ee4f5e0115139dd7113aa8b while leaving the live v0.4.4 runtime on port 8787 untouched.
 
 ## Remaining work
 
