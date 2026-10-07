@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
-- Status: VALIDATING
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -29,13 +29,11 @@ Provide reliable operator-visible progress for each substantial ChatGPT assistan
 
 ## Next safe action
 
-Refresh/recreate the custom Heartbeat plugin connection and fully refresh ChatGPT so live-v4 is loaded, then run one visual smoke: updates 1-5 must grow the card naturally and update 6+ must scroll within the measured five-entry height. After PASS, merge PR #139 and mark v0.4.5 COMPLETE.
+Workspace Heartbeat v0.4.5 is accepted and complete. Resume the separate owning workspace/Lambda task. Reopen Heartbeat only for a concrete functional regression or an explicitly authorized new feature.
 
 ## Remaining work
 
-- Refresh/recreate the custom Heartbeat plugin connection and fully refresh ChatGPT so the cache-busted live-v4 resource is loaded.
-- Run visual host acceptance: updates 1-5 grow naturally with no internal scrolling; update 6+ uses a five-entry-tall internal scroller; prior-turn isolation and supersession remain correct.
-- After live PASS, merge PR #139 and mark v0.4.5 accepted/COMPLETE.
+- None.
 
 ## Blockers / gates
 
