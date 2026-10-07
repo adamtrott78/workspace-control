@@ -1,6 +1,6 @@
 # Lambda CI Trusted Cache Policy v1
 
-Status: static P1 design.
+Status: v1 implementation in validation; live model-scale routes remain disabled.
 
 ## Objective
 
@@ -79,3 +79,36 @@ Never cache:
 - database credentials;
 - environment files containing secrets;
 - runner registration/configuration files.
+
+## Implemented v1 promotion boundary
+
+The implementation surface is `scripts/lambda_ci_trusted_cache.py`.
+
+Trusted operations are deliberately local and root-only:
+
+- `acquire-local` copies an already obtained source tree into a root-owned
+  quarantine under `/var/lib/workspace-ci/cache-manager/<project>/quarantine`;
+- acquisition rejects symlinks, non-regular files, common secret-bearing
+  filenames/markers, unsafe pickle-style suffixes, mutable model revisions,
+  unsafe deserialization declarations, and custom/remote executable model code;
+- every quarantined payload is represented by a sorted per-file SHA-256
+  manifest and a content tree digest;
+- `promote` re-hashes the quarantine before promotion, copies it into
+  `trusted-cache/objects/<kind>/sha256/<tree-digest>/`, emits a durable
+  non-secret promotion receipt, hardens the object to root-owned read-only
+  content, verifies the promoted object, then destroys quarantine;
+- duplicate content is idempotent only when the existing content digest and
+  descriptor digest both match; metadata/content collisions fail closed;
+- `verify` is intentionally non-privileged and recomputes the complete
+  manifest/digest offline so candidate jobs can prove a promoted object without
+  receiving acquisition or promotion authority.
+
+The descriptor and promotion-receipt contracts are versioned at:
+
+- `schemas/lambda-ci-trusted-cache-descriptor.v1.schema.json`
+- `schemas/lambda-ci-trusted-cache-promotion-receipt.v1.schema.json`
+
+The first live object must be a harmless test fixture. Model acquisition,
+cache-promotion, and model-eval workload classes remain non-live until the
+read-only consumer/adversarial gate passes from the accepted research-engine
+runner identity.

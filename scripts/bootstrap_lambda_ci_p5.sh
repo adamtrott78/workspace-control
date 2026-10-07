@@ -53,6 +53,7 @@ TARGETS=(
   /opt/workspace-ci/provisioner/lambda_ci_provisioner.py
   /opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py
   /opt/workspace-ci/provisioner/lambda_ci_runtime.py
+  /opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py
   /etc/workspace-ci/projects/research-engine.json
   /etc/workspace-ci/lambda-ci-systemd-profiles.v1.json
   /etc/workspace-ci/lambda-ci-upstream-pins.v1.json
@@ -105,7 +106,9 @@ for target in "${TARGETS[@]}"; do
   backup_target "$target"
 done
 
-install -d -o root -g root -m 0755 /opt/workspace-ci/controller /opt/workspace-ci/provisioner
+install -d -o root -g root -m 0755 /opt/workspace-ci/controller /opt/workspace-ci/provisioner /opt/workspace-ci/cache-manager
+install -d -o root -g root -m 0700 /var/lib/workspace-ci/cache-manager /var/lib/workspace-ci/cache-manager/research-engine
+install -d -o root -g root -m 0755 /srv/workspace-ci/research-engine/trusted-cache
 install -d -o root -g root -m 0755 /etc/workspace-ci /etc/workspace-ci/projects
 install -d -o root -g root -m 0700 /var/lib/workspace-ci/provisioner
 install -d -o root -g workspace-ci-controller -m 0750 /run/workspace-ci
@@ -128,6 +131,7 @@ install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_admission.py" /opt
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_provisioner.py" /opt/workspace-ci/provisioner/lambda_ci_provisioner.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_provisioner_service.py" /opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_runtime.py" /opt/workspace-ci/provisioner/lambda_ci_runtime.py
+install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_trusted_cache.py" /opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py
 
 install -o root -g root -m 0644 "$REPO_ROOT/architecture/lambda-ci-project-research-engine.v1.json" /etc/workspace-ci/projects/research-engine.json
 install -o root -g root -m 0644 "$REPO_ROOT/architecture/lambda-ci-systemd-profiles.v1.json" /etc/workspace-ci/lambda-ci-systemd-profiles.v1.json
