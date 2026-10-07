@@ -174,7 +174,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         )
         self.assertEqual(
             project["admission_v2"]["routes"]["cpu-test"]["trusted_workflow"]["blob_sha"],
-            "e0fc6f49f4638fc2609580899a66d980a80c7005",
+            "eca9f11373a591a34a2e19c0eafe31e9e171f785",
         )
         self.assertEqual(
             project["admission_v2"]["routes"]["gpu-small"]["trusted_workflow"]["blob_sha"],
