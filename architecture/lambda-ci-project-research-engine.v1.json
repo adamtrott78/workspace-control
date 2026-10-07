@@ -79,7 +79,7 @@
           "path": ".github/workflows/lambda-ci-p5-autonomous.yml",
           "ref": "refs/heads/main",
           "job_workflow_ref": "adamtrott78/research-engine/.github/workflows/lambda-ci-p5-autonomous.yml@refs/heads/main",
-          "blob_sha": "e0fc6f49f4638fc2609580899a66d980a80c7005",
+          "blob_sha": "eca9f11373a591a34a2e19c0eafe31e9e171f785",
           "event_name": "issue_comment",
           "allowed_actors": [
             "adamtrott78"
@@ -109,6 +109,6 @@
         }
       }
     },
-    "activation_note": "Admission v2 is statically enabled only for the already accepted cpu-test and gpu-small workload classes, pinned to the merged trusted workflow blobs from research-engine 12dd0f2f9510f682f0b62fe8fdc9a63494da8d6d. Live host activation still requires an exact-SHA workspace-control reinstall and acceptance; model-scale classes and gpu-heavy remain non-live."
+    "activation_note": "Admission v2 remains live only for cpu-test and gpu-small. cpu-test is repinned to the trusted-cache consumer canary workflow merged in research-engine 66361693ad2f8d0a345d420dabccbbd6042f5c59; gpu-small remains on its accepted trusted workflow. The cache canary adds read-only/adversarial validation only and does not enable model-acquire, cache-promote, model-eval-single-gpu, production/scientific state, or gpu-heavy."
   }
 }
