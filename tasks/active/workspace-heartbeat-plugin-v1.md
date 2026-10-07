@@ -29,7 +29,7 @@ Provide reliable operator-visible progress for each substantial ChatGPT assistan
 
 ## Next safe action
 
-Validate and deploy the live-v4 dynamic-size correction: natural growth through five Heartbeats with `ui/notifications/size-changed`, then scroll at the measured five-entry height from update six onward. Refresh ChatGPT and repeat the host smoke.
+Validate exact corrected live-v4 candidate with synchronous bridge-active `ui/notifications/size-changed` reporting (no resize timer). If npm tests pass on Lambda, restart the managed v0.4.5 runtime and refresh ChatGPT once for the five-update visual smoke.
 
 ## Remaining work
 

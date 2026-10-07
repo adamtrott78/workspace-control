@@ -93,7 +93,6 @@ test("one mounted card renders full history only for its immutable turn and requ
   assert.deepEqual(h.elems.get("history").children.map(x=>x.children[0].textContent),["One","Two","Three","Four","Five"]);
   assert.equal(h.elems.get("history").className,"history");
   assert.equal(h.elems.get("footer").textContent,"5 updates · current turn · live");
-  await h.runTimer();
   assert.ok(h.messages.some(x=>x.method==="ui/notifications/size-changed"&&x.params.height===180));
 });
 
