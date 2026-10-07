@@ -15,15 +15,26 @@ STATES = {
     "RECOVERING",
     "CLOSING",
 }
-MAX_TOOL_CALLS_PER_HEARTBEAT_LEASE = 3
+MAX_TOOL_CALLS_PER_HEARTBEAT_LEASE = 10
 
-TRIGGER_EVENTS = {
+KNOWN_EVENTS = {
     "OBJECTIVE_CHANGED",
     "DIAGNOSIS_CHANGED",
     "SCOPE_CHANGED",
     "FAILURE_DISCOVERED",
     "MILESTONE_STARTED",
     "MILESTONE_COMPLETED",
+    "EXTERNAL_WAIT_STARTED",
+    "EXTERNAL_WAIT_ENDED",
+    "CLOSURE_EVALUATED",
+    "POLL_UNCHANGED",
+}
+
+SEMANTIC_TRIGGER_EVENTS = {
+    "OBJECTIVE_CHANGED",
+    "DIAGNOSIS_CHANGED",
+    "SCOPE_CHANGED",
+    "FAILURE_DISCOVERED",
     "EXTERNAL_WAIT_STARTED",
     "EXTERNAL_WAIT_ENDED",
     "CLOSURE_EVALUATED",
@@ -142,7 +153,7 @@ def validate_snapshot(snapshot):
 
 def should_emit(*, event, tool_calls_since_update, elapsed_seconds,
                 meaningful_change):
-    if event is not None and event not in TRIGGER_EVENTS | {"POLL_UNCHANGED"}:
+    if event is not None and event not in KNOWN_EVENTS:
         raise ProgressHeartbeatError("event: unknown heartbeat event")
     calls = _nonnegative_int(tool_calls_since_update, "tool_calls_since_update")
     elapsed = _nonnegative_int(elapsed_seconds, "elapsed_seconds")
@@ -150,11 +161,9 @@ def should_emit(*, event, tool_calls_since_update, elapsed_seconds,
 
     if changed:
         return True
-    if event in TRIGGER_EVENTS:
+    if event in SEMANTIC_TRIGGER_EVENTS:
         return True
-    if calls >= 3:
-        return True
-    if elapsed >= 15:
+    if calls >= MAX_TOOL_CALLS_PER_HEARTBEAT_LEASE:
         return True
     return False
 
@@ -163,11 +172,12 @@ def tool_gate(*, event, tool_calls_since_heartbeat, elapsed_seconds,
               meaningful_change):
     """Return whether another tool operation is allowed before a heartbeat.
 
-    A heartbeat resets tool_calls_since_heartbeat to zero. Once three tool
-    operations have occurred, the lease is exhausted and the next tool call is
-    blocked until a human-readable heartbeat is emitted.
+    Semantic change is the primary trigger. A heartbeat resets
+    tool_calls_since_heartbeat to zero. The tool-count lease is only an
+    anti-silence backstop: after ten non-heartbeat operations, the next tool
+    call is blocked until a human-readable heartbeat is emitted.
     """
-    if event is not None and event not in TRIGGER_EVENTS | {"POLL_UNCHANGED"}:
+    if event is not None and event not in KNOWN_EVENTS:
         raise ProgressHeartbeatError("event: unknown heartbeat event")
     calls = _nonnegative_int(
         tool_calls_since_heartbeat,
@@ -176,11 +186,9 @@ def tool_gate(*, event, tool_calls_since_heartbeat, elapsed_seconds,
     elapsed = _nonnegative_int(elapsed_seconds, "elapsed_seconds")
     changed = _bool(meaningful_change, "meaningful_change")
 
-    if changed or event in TRIGGER_EVENTS:
+    if changed or event in SEMANTIC_TRIGGER_EVENTS:
         return "HEARTBEAT_REQUIRED"
     if calls >= MAX_TOOL_CALLS_PER_HEARTBEAT_LEASE:
-        return "HEARTBEAT_REQUIRED"
-    if elapsed >= 15:
         return "HEARTBEAT_REQUIRED"
     return "ALLOW_TOOL"
 

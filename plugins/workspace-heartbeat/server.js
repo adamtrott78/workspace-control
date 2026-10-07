@@ -10,24 +10,45 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
-const PANEL_URI = "ui://workspace-heartbeat/panel-v2.html";
+const PANEL_URI = "ui://workspace-heartbeat/panel-v8.html";
+const LIVE_URI = "ui://workspace-heartbeat/live-v2.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
+  "utf8",
+);
+const liveHtml = readFileSync(
+  new URL("./public/heartbeat-live-card.html", import.meta.url),
   "utf8",
 );
 const store = new HeartbeatStore({ historyLimit: 50 });
 
 const heartbeatSchema = z.object({
   task_id: z.string(),
+  turn_id: z.string(),
   message: z.string(),
   state: z.enum(["working", "waiting", "blocked", "done"]),
   sequence: z.number().int().nonnegative(),
   updated_at: z.string(),
 });
 
+const heartbeatUpdateOutputSchema = {
+  heartbeat: heartbeatSchema,
+};
+
+const heartbeatTurnOutputSchema = {
+  task_id: z.string(),
+  turn_id: z.string(),
+  heartbeat: heartbeatSchema.nullable(),
+  recent: z.array(heartbeatSchema).max(3),
+  active: z.boolean(),
+  superseded: z.boolean(),
+  completed: z.boolean(),
+};
+
 const heartbeatOutputSchema = {
   heartbeat: heartbeatSchema.nullable(),
   history: z.array(heartbeatSchema),
+  timeline: z.array(heartbeatSchema),
 };
 
 function sessionIdFromMeta(meta) {
@@ -45,11 +66,11 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.2.0",
+      version: "0.4.4",
     },
     {
       instructions:
-        "For substantial long-running work, keep the operator informed through heartbeat_update. Use natural conversational prose, not rigid status headings. Call heartbeat_update on meaningful state changes and before a fourth non-heartbeat tool operation occurs. Reuse the owning task_id across chat handoffs so the operator panel can keep a continuous bounded history.",
+        "For every substantial assistant response, FIRST call heartbeat_begin_turn(task_id, message, state). That single operation supersedes the prior heartbeat turn for this conversation/task, creates a new opaque turn_id, writes the first natural progress update, and mounts the current rolling-three card. Carry the returned turn_id explicitly on every later heartbeat_update for that assistant response. Call heartbeat_update on meaningful findings/decisions and before the fourth non-heartbeat tool operation. Never call heartbeat_snapshot directly; it is app-only. heartbeat_get is explicit task-history/debugging only. A stale/missing turn_id must fail closed. If this conversation does not expose heartbeat_begin_turn or heartbeat_update does not accept turn_id, its plugin contract is stale: do not use Heartbeat here; refresh the plugin and start a new conversation.",
     },
   );
 
@@ -64,11 +85,24 @@ function createHeartbeatServer() {
           uri: PANEL_URI,
           mimeType: RESOURCE_MIME_TYPE,
           text: panelHtml,
-          _meta: {
-            ui: {
-              prefersBorder: false,
-            },
-          },
+          _meta: { ui: { prefersBorder: false } },
+        },
+      ],
+    }),
+  );
+
+  registerAppResource(
+    server,
+    "workspace-heartbeat-live",
+    LIVE_URI,
+    {},
+    async () => ({
+      contents: [
+        {
+          uri: LIVE_URI,
+          mimeType: RESOURCE_MIME_TYPE,
+          text: liveHtml,
+          _meta: { ui: { prefersBorder: false } },
         },
       ],
     }),
@@ -76,17 +110,17 @@ function createHeartbeatServer() {
 
   registerAppTool(
     server,
-    "heartbeat_update",
+    "heartbeat_begin_turn",
     {
-      title: "Update operator heartbeat",
+      title: "Begin live heartbeat turn",
       description:
-        "Use this during substantial long-running work to append a concise natural-language progress heartbeat for the owning task. Call on meaningful state changes and before a fourth non-heartbeat tool operation.",
+        "FIRST heartbeat operation for every substantial assistant response. Atomically supersedes the previous heartbeat turn for this task in the same ChatGPT conversation, creates a fresh server-generated turn_id, records this first natural progress message, and mounts one live rolling-three card for the new turn. Carry the returned turn_id on every heartbeat_update in this response.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
         message: z.string().min(1).max(4000),
         state: z.enum(["working", "waiting", "blocked", "done"]).default("working"),
       },
-      outputSchema: heartbeatOutputSchema,
+      outputSchema: heartbeatTurnOutputSchema,
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -94,27 +128,133 @@ function createHeartbeatServer() {
         idempotentHint: false,
       },
       _meta: {
-        ui: { visibility: ["model"] },
-        "openai/toolInvocation/invoking": "Updating progress…",
-        "openai/toolInvocation/invoked": "Progress updated",
+        ui: {
+          resourceUri: LIVE_URI,
+          visibility: ["model", "app"],
+        },
+        "openai/toolInvocation/invoking": "Starting live progress…",
+        "openai/toolInvocation/invoked": "Live progress started",
       },
     },
     async ({ task_id, message, state }, { _meta } = {}) => {
-      const sessionId = sessionIdFromMeta(_meta);
-      const heartbeat = store.update({
-        sessionId,
+      const snapshot = store.beginTurn({
+        sessionId: sessionIdFromMeta(_meta),
         taskId: task_id.trim(),
         message: message.trim(),
         state,
       });
-      const snapshot = store.getSnapshot({
-        sessionId,
-        taskId: heartbeat.task_id,
+      return {
+        structuredContent: snapshot,
+        content: [
+          {
+            type: "text",
+            text:
+              snapshot.heartbeat.message +
+              "\n\n" +
+              snapshot.task_id +
+              " · turn " +
+              snapshot.turn_id +
+              " · update " +
+              snapshot.heartbeat.sequence +
+              " · " +
+              snapshot.heartbeat.state,
+          },
+        ],
+      };
+    },
+  );
+
+  registerAppTool(
+    server,
+    "heartbeat_update",
+    {
+      title: "Update current heartbeat turn",
+      description:
+        "Record a later natural progress update for the assistant response that was started by heartbeat_begin_turn. task_id and the exact returned turn_id are both required. Stale, superseded, missing, wrong-task, or cross-conversation turn IDs fail closed instead of writing history.",
+      inputSchema: {
+        task_id: z.string().min(1).max(160),
+        turn_id: z.string().min(1).max(160),
+        message: z.string().min(1).max(4000),
+        state: z.enum(["working", "waiting", "blocked", "done"]).default("working"),
+      },
+      outputSchema: heartbeatUpdateOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        openWorldHint: false,
+        idempotentHint: false,
+      },
+      _meta: {
+        "openai/toolInvocation/invoking": "Updating progress…",
+        "openai/toolInvocation/invoked": "Progress updated",
+      },
+    },
+    async ({ task_id, turn_id, message, state }, { _meta } = {}) => {
+      const heartbeat = store.updateTurn({
+        sessionId: sessionIdFromMeta(_meta),
+        taskId: task_id.trim(),
+        turnId: turn_id.trim(),
+        message: message.trim(),
+        state,
       });
-      return resultFor(
-        snapshot,
-        `Heartbeat updated for ${heartbeat.task_id} (sequence ${heartbeat.sequence}).`,
-      );
+      return {
+        structuredContent: { heartbeat },
+        content: [
+          {
+            type: "text",
+            text:
+              heartbeat.message +
+              "\n\n" +
+              heartbeat.task_id +
+              " · turn " +
+              heartbeat.turn_id +
+              " · update " +
+              heartbeat.sequence +
+              " · " +
+              heartbeat.state,
+          },
+        ],
+      };
+    },
+  );
+
+  registerAppTool(
+    server,
+    "heartbeat_snapshot",
+    {
+      title: "Read one heartbeat turn snapshot",
+      description:
+        "App-only read-only helper for the live card. Returns only the rolling last three updates for the explicit task_id + turn_id and whether that turn is still active, superseded, or completed.",
+      inputSchema: {
+        task_id: z.string().min(1).max(160),
+        turn_id: z.string().min(1).max(160),
+      },
+      outputSchema: heartbeatTurnOutputSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+        idempotentHint: true,
+      },
+      _meta: {
+        ui: { visibility: ["app"] },
+        "openai/widgetAccessible": true,
+      },
+    },
+    async ({ task_id, turn_id }) => {
+      const snapshot = store.getTurnSnapshot({
+        taskId: task_id.trim(),
+        turnId: turn_id.trim(),
+      });
+      if (!snapshot) {
+        throw new Error(
+          "HEARTBEAT_TURN_NOT_FOUND: This live card refers to an unknown heartbeat turn.",
+        );
+      }
+      return {
+        structuredContent: snapshot,
+        content: [],
+      };
     },
   );
 
@@ -122,9 +262,9 @@ function createHeartbeatServer() {
     server,
     "heartbeat_get",
     {
-      title: "Read operator heartbeat",
+      title: "Read heartbeat task history",
       description:
-        "Read the latest heartbeat and bounded history for a task. Pass task_id whenever it is known; this keeps the panel stable even when ChatGPT model and app calls use different session identities.",
+        "Explicit task-history/sidebar inspection only. Returns bounded task-level history across heartbeat turns. It is not the routine live-progress path.",
       inputSchema: {
         task_id: z.string().min(1).max(160).optional(),
       },
@@ -153,10 +293,7 @@ function createHeartbeatServer() {
         taskId: task_id?.trim(),
       });
       if (!snapshot.heartbeat) {
-        return resultFor(
-          snapshot,
-          "No heartbeat has been recorded for this task yet.",
-        );
+        return resultFor(snapshot, "No heartbeat has been recorded for this task yet.");
       }
       return resultFor(
         snapshot,
