@@ -11,7 +11,7 @@ import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
 const PANEL_URI = "ui://workspace-heartbeat/panel-v8.html";
-const LIVE_URI = "ui://workspace-heartbeat/live-v2.html";
+const LIVE_URI = "ui://workspace-heartbeat/live-v4.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
   "utf8",
@@ -40,6 +40,7 @@ const heartbeatTurnOutputSchema = {
   turn_id: z.string(),
   heartbeat: heartbeatSchema.nullable(),
   recent: z.array(heartbeatSchema).max(3),
+  turn_history: z.array(heartbeatSchema).max(50),
   active: z.boolean(),
   superseded: z.boolean(),
   completed: z.boolean(),
@@ -66,11 +67,11 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.4.4",
+      version: "0.4.5",
     },
     {
       instructions:
-        "For every substantial assistant response, FIRST call heartbeat_begin_turn(task_id, message, state). That single operation supersedes the prior heartbeat turn for this conversation/task, creates a new opaque turn_id, writes the first natural progress update, and mounts the current rolling-three card. Carry the returned turn_id explicitly on every later heartbeat_update for that assistant response. Call heartbeat_update on meaningful findings/decisions and before the fourth non-heartbeat tool operation. Never call heartbeat_snapshot directly; it is app-only. heartbeat_get is explicit task-history/debugging only. A stale/missing turn_id must fail closed. If this conversation does not expose heartbeat_begin_turn or heartbeat_update does not accept turn_id, its plugin contract is stale: do not use Heartbeat here; refresh the plugin and start a new conversation.",
+        "For every substantial assistant response, call heartbeat_begin_turn(task_id, message, state) exactly once at the first natural user-facing progress point. That operation supersedes the prior heartbeat turn for this conversation/task, creates a new opaque turn_id, records the first semantic progress update, and mounts the current-turn live card. Carry the returned turn_id explicitly on every later heartbeat_update for that assistant response and never call heartbeat_begin_turn again until a later assistant response. Emit heartbeat_update primarily on meaningful semantic changes: new evidence, changed diagnosis, resolved uncertainty, material decisions, validation results, blockers, changed next action, or before a long opaque phase. Commits, merges, checkpoints, phase changes, and routine tool calls are not by themselves reasons to emit. Tool count is only an anti-silence backstop: do not perform more than 10 non-heartbeat tool operations without a useful heartbeat update. Never call heartbeat_snapshot directly; it is app-only. heartbeat_get is explicit task-history/debugging only. A stale/missing turn_id must fail closed. If this conversation does not expose heartbeat_begin_turn or heartbeat_update does not accept turn_id, its plugin contract is stale: do not use Heartbeat here until the plugin surface is refreshed and verified.",
     },
   );
 
@@ -114,7 +115,7 @@ function createHeartbeatServer() {
     {
       title: "Begin live heartbeat turn",
       description:
-        "FIRST heartbeat operation for every substantial assistant response. Atomically supersedes the previous heartbeat turn for this task in the same ChatGPT conversation, creates a fresh server-generated turn_id, records this first natural progress message, and mounts one live rolling-three card for the new turn. Carry the returned turn_id on every heartbeat_update in this response.",
+        "Call exactly once per substantial assistant response, at the first natural user-facing progress point. Atomically supersedes the previous heartbeat turn for this task in the same ChatGPT conversation, creates a fresh server-generated turn_id, records this first semantic progress message, and mounts one live current-turn card. Carry the returned turn_id on every heartbeat_update in this response. Never call heartbeat_begin_turn again until a later assistant response.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
         message: z.string().min(1).max(4000),
@@ -170,7 +171,7 @@ function createHeartbeatServer() {
     {
       title: "Update current heartbeat turn",
       description:
-        "Record a later natural progress update for the assistant response that was started by heartbeat_begin_turn. task_id and the exact returned turn_id are both required. Stale, superseded, missing, wrong-task, or cross-conversation turn IDs fail closed instead of writing history.",
+        "Record a later semantic progress update for the assistant response started by heartbeat_begin_turn. Use this when new evidence, diagnosis, uncertainty, a material decision, validation result, blocker, next action, or a long opaque phase meaningfully changes what the operator should know. Do not emit merely for commits, merges, checkpoints, phase boundaries, or routine tool calls. If no semantic delta occurs, the anti-silence backstop is 10 non-heartbeat tool operations. task_id and the exact returned turn_id are required; stale, superseded, missing, wrong-task, or cross-conversation turn IDs fail closed.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
         turn_id: z.string().min(1).max(160),
@@ -224,7 +225,7 @@ function createHeartbeatServer() {
     {
       title: "Read one heartbeat turn snapshot",
       description:
-        "App-only read-only helper for the live card. Returns only the rolling last three updates for the explicit task_id + turn_id and whether that turn is still active, superseded, or completed.",
+        "App-only read-only helper for the live card. Returns bounded full history for the explicit current task_id + turn_id, plus the latest-three recent compatibility projection and whether that turn is active, superseded, or completed.",
       inputSchema: {
         task_id: z.string().min(1).max(160),
         turn_id: z.string().min(1).max(160),

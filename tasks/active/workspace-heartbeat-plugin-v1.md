@@ -16,20 +16,20 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 ## Goal
 
-Provide reliable operator-visible progress for each substantial ChatGPT assistant response through one atomic turn-begin operation, explicit turn-scoped updates, and one self-refreshing rolling-three card, while retaining task-level history separately.
+Provide reliable operator-visible progress for each substantial ChatGPT assistant response through one atomic turn-begin operation, explicit turn-scoped updates, semantic-delta-first cadence, and one self-refreshing card that preserves the full bounded current-turn semantic history while retaining task-level history separately.
 
 ## Repositories
 
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-heartbeat-turn-scoped-v044
-- Remote checkpoint: bbb4f09fac1864196b62a3126803a11b233d01f4
+- Remote branch: workspace-heartbeat-v045-full-turn-history-r2
+- Remote checkpoint: c91ee09f6594e1e76134159b211fe224a8409b6b
 - Remote verified: true
 
 ## Next safe action
 
-Heartbeat v0.4.4 is complete and accepted. Resume the separate owning workspace/Lambda task. OPTIONAL DEFERRED FEATURE: if the user explicitly asks to show all current-turn Heartbeat updates, reopen this task only for the implementation-ready full-turn scrollable-card follow-up documented in notes; otherwise leave Heartbeat unchanged.
+Workspace Heartbeat v0.4.5 is accepted and complete. Resume the separate owning workspace/Lambda task. Reopen Heartbeat only for a concrete functional regression or an explicitly authorized new feature.
 
 ## Remaining work
 
