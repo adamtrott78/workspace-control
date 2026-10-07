@@ -240,6 +240,7 @@ export class HeartbeatStore {
       turn_id: turnId,
       heartbeat: turn.heartbeat,
       recent: [...turn.history].slice(-3),
+      turn_history: [...turn.history],
       active: turn.active,
       superseded: turn.superseded,
       completed: turn.completed,

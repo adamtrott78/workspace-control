@@ -13,9 +13,9 @@ function toolBlock(name,next){
   return server.slice(start,end);
 }
 
-test("v0.4.4 backend and cache-busted live resource are explicit",()=>{
-  assert.ok(server.includes('version: "0.4.4"'));
-  assert.ok(server.includes('const LIVE_URI = "ui://workspace-heartbeat/live-v2.html"'));
+test("v0.4.5 backend and cache-busted live resource are explicit",()=>{
+  assert.ok(server.includes('version: "0.4.5"'));
+  assert.ok(server.includes('const LIVE_URI = "ui://workspace-heartbeat/live-v3.html"'));
 });
 
 test("heartbeat_begin_turn is the single mounted turn boundary",()=>{
@@ -33,11 +33,12 @@ test("heartbeat_update is data-only and requires explicit turn_id",()=>{
   assert.ok(block.includes("store.updateTurn"));
 });
 
-test("heartbeat_snapshot is app-only and turn-scoped",()=>{
+test("heartbeat_snapshot is app-only, turn-scoped, and exposes bounded full turn history",()=>{
   const block=toolBlock("heartbeat_snapshot","heartbeat_get");
   assert.ok(block.includes('visibility: ["app"]'));
   assert.ok(block.includes("turn_id: z.string().min(1).max(160)"));
   assert.ok(block.includes("store.getTurnSnapshot"));
+  assert.ok(server.includes("turn_history: z.array(heartbeatSchema).max(50)"));
   assert.ok(!block.includes("resourceUri:"));
 });
 
@@ -54,10 +55,12 @@ test("live card polls immutable task_id plus turn_id",()=>{
   assert.ok(live.includes('ui/resource-teardown'));
 });
 
-test("stale-contract and begin-turn guidance are explicit",()=>{
-  assert.ok(server.includes("FIRST call heartbeat_begin_turn"));
+test("semantic-delta, one-begin-turn, and 10-tool backstop guidance are explicit",()=>{
+  assert.ok(server.includes("exactly once at the first natural user-facing progress point"));
+  assert.ok(server.includes("never call heartbeat_begin_turn again until a later assistant response"));
+  assert.ok(server.includes("more than 10 non-heartbeat tool operations"));
+  assert.ok(server.includes("Commits, merges, checkpoints"));
   assert.ok(server.includes("its plugin contract is stale"));
-  assert.ok(server.includes("start a new conversation"));
 });
 
 test("task-level side panel remains separate",()=>{
