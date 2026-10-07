@@ -24,12 +24,12 @@ Provide reliable operator-visible progress for each substantial ChatGPT assistan
 
 - Intent: mutate
 - Remote branch: workspace-heartbeat-v045-full-turn-history-r2
-- Remote checkpoint: f7d079534fd1359bdbc103fc8a180a24b74ade89
+- Remote checkpoint: c91ee09f6594e1e76134159b211fe224a8409b6b
 - Remote verified: true
 
 ## Next safe action
 
-Validate exact corrected live-v4 candidate with synchronous bridge-active `ui/notifications/size-changed` reporting (no resize timer). If npm tests pass on Lambda, restart the managed v0.4.5 runtime and refresh ChatGPT once for the five-update visual smoke.
+Run exact Lambda npm test at git:c91ee09f6594e1e76134159b211fe224a8409b6b. Repository validation run 37690173953 is PASS. If all 26 plugin tests pass, restart the managed v0.4.5 runtime, verify local/public health, refresh the plugin/browser, and repeat the five-update visual smoke.
 
 ## Remaining work
 
