@@ -165,7 +165,7 @@ The candidate must preserve turn isolation: only updates matching the immutable
 turn-history limit (default 50), while `recent` remains a latest-three
 compatibility projection.
 
-The card must reserve enough vertical space to show multiple typical Heartbeats simultaneously (v0.4.5 target: 300px minimum, 40vh preferred height, 480px maximum) rather than collapsing to a one-entry scroll viewport. It should auto-follow new updates while the operator is already near the bottom, but must not force-scroll away from an earlier update the operator is actively reading.
+The card should grow naturally with the first five current-turn Heartbeats and report each rendered-size change to the host with `ui/notifications/size-changed`. Beginning with update six, the history region should stay at the measured height of the first five entries and scroll internally. It should auto-follow new updates while the operator is already near the bottom, but must not force-scroll away from an earlier update the operator is actively reading.
 
 The sidebar/task history remains an optional history/debug surface rather than
 the primary live UX. The semantic-delta emission policy is unchanged; showing

@@ -11,7 +11,7 @@ main{padding:13px 16px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
 .title{font-size:12px;font-weight:650;opacity:.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .state{border:1px solid color-mix(in srgb,CanvasText 20%,transparent);border-radius:999px;padding:3px 7px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;flex:none}
-.history{display:flex;flex-direction:column;min-height:300px;height:40vh;max-height:480px;overflow-y:auto;overscroll-behavior:contain;padding-right:3px}
+.history{display:flex;flex-direction:column;overflow:visible;padding-right:3px}\n.history.capped{max-height:var(--five-update-height,480px);overflow-y:auto;overscroll-behavior:contain}
 .entry{padding:9px 0;border-top:1px solid color-mix(in srgb,CanvasText 11%,transparent)}
 .entry:first-child{border-top:0;padding-top:0}
 .message{margin:0;font-size:13.5px;line-height:1.45;white-space:pre-wrap}
@@ -72,6 +72,22 @@ function stopLive(reason){
   clearScheduled();
   footerEl.textContent=reason;
 }
+function reportSize(){
+  setTimeout(()=>{
+    const height=Math.ceil(document.documentElement?.scrollHeight??document.body?.scrollHeight??0);
+    if(height>0)notify("ui/notifications/size-changed",{height});
+  },0);
+}
+function applyHistoryViewport(turnHistory){
+  historyEl.className=turnHistory.length>5?"history capped":"history";
+  if(turnHistory.length>5){
+    const entries=Array.from(historyEl.children).slice(0,5);
+    const top=historyEl.getBoundingClientRect?.().top??0;
+    const fifthBottom=entries.at(-1)?.getBoundingClientRect?.().bottom??0;
+    const measured=Math.ceil(fifthBottom-top);
+    if(measured>0)historyEl.style?.setProperty?.("--five-update-height",measured+"px");
+  }
+}
 function shouldFollowLatest(){
   if(lastKey==="")return true;
   const values=[historyEl.scrollHeight,historyEl.scrollTop,historyEl.clientHeight];
@@ -116,9 +132,11 @@ function renderSnapshot(payload){
       nodes.push(entry);
     }
     historyEl.replaceChildren(...nodes);
-    if(followLatest&&Number.isFinite(historyEl.scrollHeight)){
+    applyHistoryViewport(turnHistory);
+    if(followLatest&&turnHistory.length>5&&Number.isFinite(historyEl.scrollHeight)){
       historyEl.scrollTop=historyEl.scrollHeight;
     }
+    reportSize();
   }
 
   if(payload.superseded){
@@ -211,6 +229,7 @@ async function initializeBridge(){
     });
     notify("ui/notifications/initialized",{});
     bridgeActive=true;
+    reportSize();
     schedule(0);
   }catch{
     footerEl.textContent="Live refresh unavailable · showing last received progress";

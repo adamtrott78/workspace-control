@@ -29,7 +29,7 @@ Provide reliable operator-visible progress for each substantial ChatGPT assistan
 
 ## Next safe action
 
-Validate and deploy the v0.4.5 live-card viewport correction (300px minimum / 40vh target / 480px maximum, cache-busted live-v4), refresh ChatGPT metadata/UI, then repeat the five-update host smoke and require multiple updates to be simultaneously readable.
+Validate and deploy the live-v4 dynamic-size correction: natural growth through five Heartbeats with `ui/notifications/size-changed`, then scroll at the measured five-entry height from update six onward. Refresh ChatGPT and repeat the host smoke.
 
 ## Remaining work
 

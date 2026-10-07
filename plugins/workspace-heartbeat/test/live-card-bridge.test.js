@@ -17,12 +17,17 @@ function createHarness(){
       this.scrollTop=0;
       this.clientHeight=100;
       this.scrollHeight=100;
+      this.style={setProperty(){}};
+      this.top=0;
+      this.bottom=0;
     }
     append(...parts){this.children.push(...parts);}
     replaceChildren(...parts){
       this.children=parts;
+      this.children.forEach((child,i)=>{child.top=i*50;child.bottom=(i+1)*50;});
       this.scrollHeight=Math.max(100,parts.length*50);
     }
+    getBoundingClientRect(){return {top:this.top,bottom:this.bottom};}
   }
   const elems=new Map();
   for(const key of ["title","state","history","footer"])elems.set(key,new El());
@@ -32,7 +37,14 @@ function createHarness(){
   const first=snapshot(["First"]);
   const parent={postMessage(message){messages.push(message);}};
   const window={parent,openai:{toolInput:{task_id:"task-a"},toolOutput:{structuredContent:first}},addEventListener(name,fn){handlers.set("window:"+name,fn);}};
-  const document={get hidden(){return hidden;},getElementById(id){return elems.get(id);},createElement(){return new El();},addEventListener(name,fn){handlers.set("document:"+name,fn);}};
+  const document={
+    get hidden(){return hidden;},
+    documentElement:{scrollHeight:180},
+    body:{scrollHeight:180},
+    getElementById(id){return elems.get(id);},
+    createElement(){return new El();},
+    addEventListener(name,fn){handlers.set("document:"+name,fn);}
+  };
   function setTimeoutFake(fn,delay){const id=++seq;timers.push({id,fn,delay});return id;}
   function clearTimeoutFake(id){timers=timers.filter(t=>t.id!==id);}
   const context={window,document,Date,Error,Promise,Map,String,Array,Math,Number,setTimeout:setTimeoutFake,clearTimeout:clearTimeoutFake};
@@ -70,7 +82,7 @@ function snapshot(messages,{active=true,superseded=false,completed=false,include
   };
 }
 
-test("one mounted card renders full history only for its immutable turn",async()=>{
+test("one mounted card renders full history only for its immutable turn and requests host resize",async()=>{
   const h=createHarness();
   h.handleNext("ui/initialize",{});await h.flush();await h.runTimer();
   const call=h.handleNext("tools/call",{structuredContent:snapshot(["One","Two","Three","Four","Five"])});
@@ -79,7 +91,10 @@ test("one mounted card renders full history only for its immutable turn",async()
   assert.equal(call.params.arguments.turn_id,"turn-a");
   await h.flush();
   assert.deepEqual(h.elems.get("history").children.map(x=>x.children[0].textContent),["One","Two","Three","Four","Five"]);
+  assert.equal(h.elems.get("history").className,"history");
   assert.equal(h.elems.get("footer").textContent,"5 updates · current turn · live");
+  await h.runTimer();
+  assert.ok(h.messages.some(x=>x.method==="ui/notifications/size-changed"&&x.params.height===180));
 });
 
 test("live card falls back to latest-three when turn_history is absent",async()=>{
@@ -90,7 +105,7 @@ test("live card falls back to latest-three when turn_history is absent",async()=
   assert.deepEqual(h.elems.get("history").children.map(x=>x.children[0].textContent),["Three","Four","Five"]);
 });
 
-test("live card auto-follows at bottom but preserves deliberate upward scroll",async()=>{
+test("sixth update caps history at five-entry height and preserves deliberate upward scroll",async()=>{
   const h=createHarness();
   h.handleNext("ui/initialize",{});await h.flush();await h.runTimer();
   h.handleNext("tools/call",{structuredContent:snapshot(["One","Two","Three","Four","Five"])});
@@ -102,6 +117,7 @@ test("live card auto-follows at bottom but preserves deliberate upward scroll",a
   await h.runTimer();
   h.handleNext("tools/call",{structuredContent:snapshot(["One","Two","Three","Four","Five","Six"])});
   await h.flush();
+  assert.equal(history.className,"history capped");
   assert.equal(history.scrollTop,0);
 });
 

@@ -19,9 +19,10 @@ test("live card is turn-scoped full-history and self-refreshing",()=>{
   assert.ok(live.includes('name:"heartbeat_snapshot"'));
   assert.ok(live.includes("payload.superseded"));
   assert.ok(live.includes("Turn complete · no longer live"));
-  assert.ok(live.includes("min-height:300px"));
-  assert.ok(live.includes("height:40vh"));
-  assert.ok(live.includes("max-height:480px"));
+  assert.ok(live.includes(".history.capped"));
+  assert.ok(live.includes("turnHistory.length>5"));
+  assert.ok(live.includes('ui/notifications/size-changed'));
+  assert.ok(live.includes("--five-update-height"));
   assert.ok(live.includes("overflow-y:auto"));
   assert.ok(live.includes("shouldFollowLatest"));
   assert.equal(live.includes("setInterval("),false);
