@@ -24,30 +24,32 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: c28a37fcfc303587b7c11792733a5167d1bbe59e
+- Remote checkpoint: 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9b025b3b1092d1c4e0c1f98678472341d26ee354
+- Remote checkpoint: 66361693ad2f8d0a345d420dabccbbd6042f5c59
 - Remote verified: true
 
 ## Next safe action
 
-Start trusted_cache_promotion_and_provenance from the existing workspace-control trusted-cache policy and research-engine residual-model-prefetch/runtime-certification contracts. First hydrate the canonical cache/promotion designs and exact Qwen3.5-4B model/runtime identities, then implement the minimum root/trusted-authority acquisition-quarantine-promotion path plus read-only content-addressed cache verification needed for a non-scientific offline model-eval pilot. Do not enable model-acquire, cache-promote, or model-eval-single-gpu live routes until their implementation and adversarial cache-integrity/offline-completeness gates are validated. Keep gpu-heavy denied and do not mutate research-engine production/scientific state.
+Install and activate exact workspace-control 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a on Lambda from a fresh detached clean worktree using the accepted P5 bootstrap. Then, using only the installed root-owned /opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py, create a temporary harmless canary source containing exactly `workspace-ci-trusted-cache-canary-v1\n`, acquire it into the root-owned research-engine quarantine with a descriptor bound to recipe implementation_sha 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a, promote it, and require object id 5bf1fba5838c38e5ae8e3f69b108d4b3ca9b9090aad435214f55fa30a626c14d plus offline verify PASS. Preserve cpu/gpu controllers active and do not enable any model-scale route. After canary promotion, trigger a fresh `/lambda-ci-p5` against research-engine PR #106 candidate f5ba8278d7dfa22e63623ddf51896a6dec002813 and require the new trusted-cache canary assertions plus ordinary CPU/root cleanup acceptance to PASS.
 
 ## Remaining work
 
-- Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
+- Install exact workspace-control 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a, promote the fixed harmless cache canary through root quarantine, and run the adversarial cpu-test consumer gate.
+- Promote/verify the exact Qwen3.5-4B model/runtime object from existing pinned research-engine evidence without enabling model evaluation yet.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
 - Decide separately whether gpu-heavy/dual-GPU should be accepted.
 
 ## Blockers / gates
 
-- None.
+- Exact trusted-cache implementation 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a is validated but not yet installed on Lambda.
+- The harmless content-addressed cache canary must be promoted by the root-only manager and consumed successfully by the repinned cpu-test workflow before any real model/runtime object is promoted.
 
 ## Fresh-chat initialization
 
