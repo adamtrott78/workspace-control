@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
-- Status: VALIDATING
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -29,17 +29,11 @@ Provide reliable operator-visible progress for each substantial ChatGPT assistan
 
 ## Next safe action
 
-Plugin boundary refresh for live host acceptance: because v0.4.4 is a breaking Heartbeat tool-schema release and field evidence since v0.2 shows delete/recreate is the most reliable way to force a fresh custom MCP connection, delete the existing Heartbeat plugin connection, recreate it against https://kabob-retool-unstopped.ngrok-free.dev/mcp, then start a brand-new conversation and run the two-turn v0.4.4 acceptance. Existing chats are intentionally unsupported and cannot be upgraded in place.
+Heartbeat v0.4.4 and the semantic-delta commentary policy are accepted. Resume the separate owning workspace/Lambda task; reopen Heartbeat only for a concrete functional regression or an explicitly authorized new feature.
 
 ## Remaining work
 
-- Deploy exact tested v0.4.4 SHA bbb4f09fac1864196b62a3126803a11b233d01f4 to a dedicated active runtime without deleting workspace-heartbeat-runtime-v043.
-- Switch the managed heartbeat-up runtime target to v0.4.4 only after exact-startup verification; preserve a one-command rollback target to v0.4.3.
-- Delete/recreate the custom Heartbeat plugin connection against the same public MCP endpoint for this breaking schema release, then start a brand-new conversation.
-- Start a brand-new ChatGPT conversation so the v0.4.4 tool schema and live-v2 UI resource are loaded.
-- Run live two-turn acceptance: turn A begin_turn + rolling updates; user sends another message; turn B begin_turn; verify A becomes superseded/static and B rolls independently.
-- Verify stale turn_id rejection, cross-conversation writer denial, terminal done ownership release, sidebar task history, and no duplicate live cards.
-- Only after live PASS mark v0.4.4 accepted, update heartbeat-up as the canonical operator entrypoint, merge PR #110, and archive the v0.4.3 runtime as rollback.
+- None.
 
 ## Blockers / gates
 

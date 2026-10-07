@@ -77,8 +77,8 @@ class ProgressHeartbeatTests(unittest.TestCase):
             )
         )
 
-    def test_milestone_event_emits(self):
-        self.assertTrue(
+    def test_milestone_event_without_semantic_delta_suppresses(self):
+        self.assertFalse(
             heartbeat.should_emit(
                 event="MILESTONE_COMPLETED",
                 tool_calls_since_update=0,
@@ -87,8 +87,18 @@ class ProgressHeartbeatTests(unittest.TestCase):
             )
         )
 
-    def test_three_tool_calls_emit(self):
+    def test_milestone_event_with_semantic_delta_emits(self):
         self.assertTrue(
+            heartbeat.should_emit(
+                event="MILESTONE_COMPLETED",
+                tool_calls_since_update=0,
+                elapsed_seconds=0,
+                meaningful_change=True,
+            )
+        )
+
+    def test_three_tool_calls_do_not_force_emit(self):
+        self.assertFalse(
             heartbeat.should_emit(
                 event="POLL_UNCHANGED",
                 tool_calls_since_update=3,
@@ -97,22 +107,22 @@ class ProgressHeartbeatTests(unittest.TestCase):
             )
         )
 
-    def test_fourth_tool_is_blocked_after_three_call_lease(self):
+    def test_tenth_tool_exhausts_silence_backstop(self):
         self.assertEqual(
             heartbeat.tool_gate(
                 event="POLL_UNCHANGED",
-                tool_calls_since_heartbeat=3,
+                tool_calls_since_heartbeat=10,
                 elapsed_seconds=5,
                 meaningful_change=False,
             ),
             "HEARTBEAT_REQUIRED",
         )
 
-    def test_tool_allowed_before_lease_exhaustion(self):
+    def test_tool_allowed_before_silence_backstop(self):
         self.assertEqual(
             heartbeat.tool_gate(
                 event="POLL_UNCHANGED",
-                tool_calls_since_heartbeat=2,
+                tool_calls_since_heartbeat=9,
                 elapsed_seconds=5,
                 meaningful_change=False,
             ),
@@ -130,12 +140,12 @@ class ProgressHeartbeatTests(unittest.TestCase):
             "HEARTBEAT_REQUIRED",
         )
 
-    def test_fifteen_seconds_emit(self):
-        self.assertTrue(
+    def test_elapsed_time_alone_does_not_force_emit(self):
+        self.assertFalse(
             heartbeat.should_emit(
                 event="POLL_UNCHANGED",
                 tool_calls_since_update=1,
-                elapsed_seconds=15,
+                elapsed_seconds=600,
                 meaningful_change=False,
             )
         )
@@ -180,7 +190,7 @@ class ProgressHeartbeatTests(unittest.TestCase):
                 heartbeat.main([
                     "gate",
                     "--event", "POLL_UNCHANGED",
-                    "--tool-calls", "3",
+                    "--tool-calls", "10",
                     "--elapsed-seconds", "5",
                 ]),
                 0,
