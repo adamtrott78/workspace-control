@@ -72,15 +72,30 @@ test("done closes the turn and releases task ownership",()=>{
   assert.equal(b.active,true);
 });
 
-test("turn snapshot is rolling-three and never crosses turns",()=>{
+test("turn snapshot exposes full bounded history plus rolling-three without crossing turns",()=>{
   const store=makeStore();
   const a=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"A1",state:"working"});
   for(let i=2;i<=5;i++) store.updateTurn({
     sessionId:"chat-a",taskId:"task-a",turnId:a.turn_id,message:"A"+i,state:"working"
   });
   const b=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"B1",state:"working"});
-  assert.deepEqual(store.getTurnSnapshot({taskId:"task-a",turnId:a.turn_id}).recent.map(x=>x.message),["A3","A4","A5"]);
-  assert.deepEqual(store.getTurnSnapshot({taskId:"task-a",turnId:b.turn_id}).recent.map(x=>x.message),["B1"]);
+  const aSnapshot=store.getTurnSnapshot({taskId:"task-a",turnId:a.turn_id});
+  const bSnapshot=store.getTurnSnapshot({taskId:"task-a",turnId:b.turn_id});
+  assert.deepEqual(aSnapshot.turn_history.map(x=>x.message),["A1","A2","A3","A4","A5"]);
+  assert.deepEqual(aSnapshot.recent.map(x=>x.message),["A3","A4","A5"]);
+  assert.deepEqual(bSnapshot.turn_history.map(x=>x.message),["B1"]);
+  assert.deepEqual(bSnapshot.recent.map(x=>x.message),["B1"]);
+});
+
+test("turn history respects the configured bound",()=>{
+  const store=new HeartbeatStore({turnHistoryLimit:4,turnIdFactory:()=>"turn-bounded"});
+  const turn=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"A1",state:"working"});
+  for(let i=2;i<=6;i++) store.updateTurn({
+    sessionId:"chat-a",taskId:"task-a",turnId:turn.turn_id,message:"A"+i,state:"working"
+  });
+  const snapshot=store.getTurnSnapshot({taskId:"task-a",turnId:turn.turn_id});
+  assert.deepEqual(snapshot.turn_history.map(x=>x.message),["A3","A4","A5","A6"]);
+  assert.deepEqual(snapshot.recent.map(x=>x.message),["A4","A5","A6"]);
 });
 
 test("task history remains available across turns",()=>{

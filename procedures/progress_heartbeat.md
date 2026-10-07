@@ -156,17 +156,22 @@ immediately: emit the update before proceeding into additional opaque work.
 
 ## Live-card retention
 
-The accepted in-chat card shows the **latest three updates for the current
-assistant turn**.
+v0.4.4's accepted card shows the latest three updates for the current assistant
+turn. v0.4.5 is the authorized candidate to extend that presentation to the
+**full bounded current-turn semantic chain** in one scrollable card.
 
-Do not increase that number preemptively. Live experiments produced compact,
-nonredundant chains of two to four updates across turns ranging from under one
-minute to more than ten minutes. Latest-three remains the default until a real
-turn demonstrates that losing an earlier nonredundant update materially harms
-operator understanding.
+The candidate must preserve turn isolation: only updates matching the immutable
+`task_id + turn_id` may appear. The full history is bounded by the server's
+turn-history limit (default 50), while `recent` remains a latest-three
+compatibility projection.
 
-The sidebar/task history may retain older updates, but it is an optional
-history/debug surface rather than the primary live UX.
+The card should auto-follow new updates while the operator is already near the
+bottom, but must not force-scroll away from an earlier update the operator is
+actively reading.
+
+The sidebar/task history remains an optional history/debug surface rather than
+the primary live UX. The semantic-delta emission policy is unchanged; showing
+more retained updates must not encourage additional or lower-value Heartbeats.
 
 ## Plugin lifecycle after Heartbeat changes
 

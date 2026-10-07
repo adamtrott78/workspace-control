@@ -11,7 +11,7 @@ main{padding:13px 16px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
 .title{font-size:12px;font-weight:650;opacity:.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .state{border:1px solid color-mix(in srgb,CanvasText 20%,transparent);border-radius:999px;padding:3px 7px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;flex:none}
-.history{display:flex;flex-direction:column}
+.history{display:flex;flex-direction:column;max-height:min(50vh,480px);overflow-y:auto;overscroll-behavior:contain;padding-right:3px}
 .entry{padding:9px 0;border-top:1px solid color-mix(in srgb,CanvasText 11%,transparent)}
 .entry:first-child{border-top:0;padding-top:0}
 .message{margin:0;font-size:13.5px;line-height:1.45;white-space:pre-wrap}
@@ -72,6 +72,12 @@ function stopLive(reason){
   clearScheduled();
   footerEl.textContent=reason;
 }
+function shouldFollowLatest(){
+  if(lastKey==="")return true;
+  const values=[historyEl.scrollHeight,historyEl.scrollTop,historyEl.clientHeight];
+  if(values.some(value=>!Number.isFinite(value)))return true;
+  return historyEl.scrollHeight-historyEl.scrollTop-historyEl.clientHeight<=48;
+}
 function renderSnapshot(payload){
   if(!payload||typeof payload!=="object")return false;
   const scope=payload.task_id??payload.heartbeat?.task_id??null;
@@ -83,8 +89,10 @@ function renderSnapshot(payload){
   if(!turnId)turnId=turn;
 
   const recent=Array.isArray(payload.recent)?payload.recent.slice(-3):[];
+  const turnHistory=Array.isArray(payload.turn_history)?payload.turn_history:recent;
   if(recent.some(item=>!item||item.task_id!==taskId||item.turn_id!==turnId))return false;
-  const latest=payload.heartbeat??recent.at(-1)??null;
+  if(turnHistory.some(item=>!item||item.task_id!==taskId||item.turn_id!==turnId))return false;
+  const latest=payload.heartbeat??turnHistory.at(-1)??recent.at(-1)??null;
   if(latest&&(latest.task_id!==taskId||latest.turn_id!==turnId))return false;
 
   titleEl.textContent=taskId;
@@ -92,9 +100,10 @@ function renderSnapshot(payload){
 
   const key=String(latest.sequence)+":"+latest.updated_at;
   if(lastKey!==key){
+    const followLatest=shouldFollowLatest();
     lastKey=key;
     const nodes=[];
-    for(const item of recent){
+    for(const item of turnHistory){
       const entry=document.createElement("section");
       entry.className="entry";
       const msg=document.createElement("p");
@@ -107,6 +116,9 @@ function renderSnapshot(payload){
       nodes.push(entry);
     }
     historyEl.replaceChildren(...nodes);
+    if(followLatest&&Number.isFinite(historyEl.scrollHeight)){
+      historyEl.scrollTop=historyEl.scrollHeight;
+    }
   }
 
   if(payload.superseded){
@@ -118,7 +130,7 @@ function renderSnapshot(payload){
   }else{
     stateEl.textContent=latest.state;
     turnActive=payload.active!==false;
-    footerEl.textContent=recent.length+" recent update"+(recent.length===1?"":"s")+" · current turn · live";
+    footerEl.textContent=turnHistory.length+" update"+(turnHistory.length===1?"":"s")+" · current turn · live";
   }
   return true;
 }
@@ -193,7 +205,7 @@ document.addEventListener("visibilitychange",()=>{
 async function initializeBridge(){
   try{
     await request("ui/initialize",{
-      appInfo:{name:"workspace-heartbeat-live",version:"0.4.4"},
+      appInfo:{name:"workspace-heartbeat-live",version:"0.4.5"},
       appCapabilities:{},
       protocolVersion:"2026-01-26"
     });
