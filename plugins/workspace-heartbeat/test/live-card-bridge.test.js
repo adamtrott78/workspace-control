@@ -17,7 +17,7 @@ function createHarness(){
       this.scrollTop=0;
       this.clientHeight=100;
       this.scrollHeight=100;
-      this.style={setProperty(){}};
+      this.style={values:new Map(),setProperty(name,value){this.values.set(name,value);},getPropertyValue(name){return this.values.get(name)??"";}};
       this.top=0;
       this.bottom=0;
     }
@@ -110,13 +110,15 @@ test("sixth update caps history at five-entry height and preserves deliberate up
   h.handleNext("tools/call",{structuredContent:snapshot(["One","Two","Three","Four","Five"])});
   await h.flush();
   const history=h.elems.get("history");
-  assert.equal(history.scrollTop,history.scrollHeight);
+  assert.equal(history.className,"history");
+  assert.equal(history.scrollTop,0);
 
   history.scrollTop=0;
   await h.runTimer();
   h.handleNext("tools/call",{structuredContent:snapshot(["One","Two","Three","Four","Five","Six"])});
   await h.flush();
   assert.equal(history.className,"history capped");
+  assert.equal(history.style.getPropertyValue("--five-update-height"),"250px");
   assert.equal(history.scrollTop,0);
 });
 
