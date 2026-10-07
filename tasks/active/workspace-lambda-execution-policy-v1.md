@@ -47,7 +47,7 @@ Start trusted_cache_promotion_and_provenance from the existing workspace-control
 
 ## Blockers / gates
 
-- None. Admission enforcement is accepted for live cpu-test and gpu-small; the next stage remains deliberately non-live until trusted-cache/promotion gates are implemented.
+- None.
 
 ## Fresh-chat initialization
 
