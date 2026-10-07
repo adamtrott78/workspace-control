@@ -129,10 +129,10 @@ class ProgressHeartbeatTests(unittest.TestCase):
             "ALLOW_TOOL",
         )
 
-    def test_state_change_expires_lease_early(self):
+    def test_semantic_state_change_expires_lease_early(self):
         self.assertEqual(
             heartbeat.tool_gate(
-                event="MILESTONE_COMPLETED",
+                event="DIAGNOSIS_CHANGED",
                 tool_calls_since_heartbeat=1,
                 elapsed_seconds=2,
                 meaningful_change=False,
