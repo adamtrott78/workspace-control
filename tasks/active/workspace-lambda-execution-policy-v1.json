@@ -624,14 +624,15 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "6bf98adc977645f746d6e90c3efdfc76fd919a9f",
+      "identity": "918cf8816ec15948e4dd0ef62228a542f52403c8",
       "required_for_resume": true,
       "evidence": [
-        "Trusted-cache canary is fully accepted end-to-end including root cleanup.",
+        "Real Qwen3.5-4B trusted model promotion is accepted end-to-end without inference or production/scientific mutation.",
+        "Exact source split: 45 raw files / 9342911292 bytes, 31 `.cache` transport files / 3823 bytes, 14 durable payload files / 9342907469 bytes; both primary weight SHA-256 values match owning prefetch evidence.",
+        "Root quarantine fac43bf5-b0d9-4754-866b-83aad53f0cb5 promoted to immutable object 6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c with descriptor digest b6182b15ff0549d9b3b1d3780fdb655c6df7653ad7ec3a5d72336b5571b3fe74.",
+        "ci-research-engine verify PASS/read-only/offline-complete; candidate write denied; source unchanged and inode-distinct; temporary hardlink projection removed.",
         "Lambda runtime remains exact trusted-cache implementation 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a; do not install task-state-only newer workspace-control checkpoints.",
-        "Qwen raw local_dir preflight observed 45 files / 9342911292 bytes and failed closed before acquisition; durable owning prefetch payload identity is 14 files / 9342907469 bytes.",
-        "Owning prefetch helper excludes any file with `.cache` in its relative-path parts, so next gate is explicit raw/.cache/payload classification and payload-only promotion if exact durable identity matches.",
-        "No model-scale workload class is live and gpu-heavy remains denied."
+        "No model-scale workload class is live and gpu-heavy remains denied. Next gate is read-only classification of the existing qwen35-vllm-cu129-image-native-sampler-v3 venv before selecting a symlink-free promotable runtime/dependency representation."
       ]
     }
   ],
