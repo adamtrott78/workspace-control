@@ -29,7 +29,7 @@ Provide reliable operator-visible progress for each substantial ChatGPT assistan
 
 ## Next safe action
 
-Refresh/recreate the custom Heartbeat plugin connection and fully refresh ChatGPT, then verify the effective v0.4.5 tool/UI surface and run the 5+ semantic-update live host acceptance. The v0.4.5 backend is already live and v0.4.4 rollback is preserved.
+Validate and deploy the v0.4.5 live-card viewport correction (300px minimum / 40vh target / 480px maximum, cache-busted live-v4), refresh ChatGPT metadata/UI, then repeat the five-update host smoke and require multiple updates to be simultaneously readable.
 
 ## Remaining work
 

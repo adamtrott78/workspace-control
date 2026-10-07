@@ -39,7 +39,7 @@ card's immutable `task_id + turn_id`.
 
 ### Live-card behavior
 
-The current-turn history region is bounded and scrollable. New updates
+The current-turn history region is bounded and scrollable, with a real responsive viewport (300px minimum, 40vh target, 480px maximum) so multiple typical Heartbeats are readable at once rather than collapsing to a one-entry scroller. New updates
 auto-follow only while the operator is already near the bottom; if the operator
 has scrolled upward to read earlier updates, refreshes do not force the viewport
 back to the newest entry.
