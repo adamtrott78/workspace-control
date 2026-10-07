@@ -136,6 +136,18 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         self.assertIn("IPAddressDeny=$LOCAL_SUBNET", BOOTSTRAP)
         self.assertIn("workspace-ci-controller-gpu.service", BOOTSTRAP)
         self.assertIn('"gpu_controller_state": gpu_controller_state', BOOTSTRAP)
+        self.assertIn(
+            "/opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py",
+            BOOTSTRAP,
+        )
+        self.assertIn(
+            "install -d -o root -g root -m 0700 /var/lib/workspace-ci/cache-manager",
+            BOOTSTRAP,
+        )
+        self.assertIn(
+            "install -d -o root -g root -m 0755 /srv/workspace-ci/research-engine/trusted-cache",
+            BOOTSTRAP,
+        )
 
 
 
@@ -228,6 +240,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
             "/opt/workspace-ci/controller/stage-pat",
             "/opt/workspace-ci/provisioner/lambda_ci_admission.py",
             "/opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py",
+            "/opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py",
             "/etc/workspace-ci/projects/research-engine.json",
             "/etc/workspace-ci/lambda-ci-workload-policy.v1.json",
             "/etc/systemd/system/workspace-ci-controller.service",
