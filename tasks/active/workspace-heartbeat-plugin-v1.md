@@ -29,7 +29,7 @@ Provide reliable operator-visible progress for each substantial ChatGPT assistan
 
 ## Next safe action
 
-Heartbeat v0.4.4 and the semantic-delta commentary policy are accepted. Resume the separate owning workspace/Lambda task; reopen Heartbeat only for a concrete functional regression or an explicitly authorized new feature.
+Heartbeat v0.4.4 is complete and accepted. Resume the separate owning workspace/Lambda task. OPTIONAL DEFERRED FEATURE: if the user explicitly asks to show all current-turn Heartbeat updates, reopen this task only for the implementation-ready full-turn scrollable-card follow-up documented in notes; otherwise leave Heartbeat unchanged.
 
 ## Remaining work
 
