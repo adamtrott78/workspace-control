@@ -36,11 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Install and activate exact workspace-control 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a on Lambda from a fresh detached clean worktree using the accepted P5 bootstrap. Then, using only the installed root-owned /opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py, create a temporary harmless canary source containing exactly `workspace-ci-trusted-cache-canary-v1\n`, acquire it into the root-owned research-engine quarantine with a descriptor bound to recipe implementation_sha 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a, promote it, and require object id 5bf1fba5838c38e5ae8e3f69b108d4b3ca9b9090aad435214f55fa30a626c14d plus offline verify PASS. Preserve cpu/gpu controllers active and do not enable any model-scale route. After canary promotion, trigger a fresh `/lambda-ci-p5` against research-engine PR #106 candidate f5ba8278d7dfa22e63623ddf51896a6dec002813 and require the new trusted-cache canary assertions plus ordinary CPU/root cleanup acceptance to PASS.
+On Lambda, perform a narrow read-only root receipt/residue verification for trusted-cache canary CPU request 065b4d15-917f-5e67-92ee-6e2591f70138 after successful GitHub run 37560256841. Require the root runtime receipt to bind the same request/candidate/workload identity and report RUNNER_EXITED_CLEANLY with runner_exit_code=0, project UID cleanup=true, runner/staging workspace destroyed=true, GitHub credential absent, and JIT config not persisted. Independently require the exact job/staging directories to be absent and no ci-research-engine processes to remain. Do not mutate the promoted canary or production/scientific state. Only after this cleanup proof passes may the exact Qwen3.5-4B pinned model/runtime object be acquired/promoted through the trusted cache manager; model-scale workload routes remain non-live until their later gate.
 
 ## Remaining work
 
-- Install exact workspace-control 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a, promote the fixed harmless cache canary through root quarantine, and run the adversarial cpu-test consumer gate.
+- Verify the root runtime receipt and residue-free cleanup for canary CPU request 065b4d15-917f-5e67-92ee-6e2591f70138.
 - Promote/verify the exact Qwen3.5-4B model/runtime object from existing pinned research-engine evidence without enabling model evaluation yet.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,8 +48,7 @@ Install and activate exact workspace-control 42cf6a0bebbc79f4d5657486c7b259bfcc4
 
 ## Blockers / gates
 
-- Exact trusted-cache implementation 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a is validated but not yet installed on Lambda.
-- The harmless content-addressed cache canary must be promoted by the root-only manager and consumed successfully by the repinned cpu-test workflow before any real model/runtime object is promoted.
+- Root runtime receipt and residue-free cleanup for trusted-cache canary CPU request 065b4d15-917f-5e67-92ee-6e2591f70138 must pass before any real model/runtime object is promoted.
 
 ## Fresh-chat initialization
 
