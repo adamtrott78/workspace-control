@@ -29,14 +29,12 @@ Provide reliable operator-visible progress for each substantial ChatGPT assistan
 
 ## Next safe action
 
-Run exact Lambda npm test at git:c91ee09f6594e1e76134159b211fe224a8409b6b. Repository validation run 37690173953 is PASS. If all 26 plugin tests pass, restart the managed v0.4.5 runtime, verify local/public health, refresh the plugin/browser, and repeat the five-update visual smoke.
+Refresh/recreate the custom Heartbeat plugin connection and fully refresh ChatGPT so live-v4 is loaded, then run one visual smoke: updates 1-5 must grow the card naturally and update 6+ must scroll within the measured five-entry height. After PASS, merge PR #139 and mark v0.4.5 COMPLETE.
 
 ## Remaining work
 
-- Allow PR #139 Workspace Control Validation to complete on the fresh current-main release branch.
-- Refresh/recreate the custom Heartbeat plugin connection and perform a full browser refresh so ChatGPT loads the v0.4.5 tool metadata and live-v3 resource.
-- Verify the effective tool/output surface includes bounded turn_history and the semantic-delta/10-tool guidance rather than the stale rolling-three/pre-fourth-tool metadata.
-- Run live host acceptance with at least five semantic updates in one assistant response; verify all remain readable in one scrollable current-turn card, deliberate upward scroll is preserved, and the next assistant response supersedes/freezes the prior card.
+- Refresh/recreate the custom Heartbeat plugin connection and fully refresh ChatGPT so the cache-busted live-v4 resource is loaded.
+- Run visual host acceptance: updates 1-5 grow naturally with no internal scrolling; update 6+ uses a five-entry-tall internal scroller; prior-turn isolation and supersession remain correct.
 - After live PASS, merge PR #139 and mark v0.4.5 accepted/COMPLETE.
 
 ## Blockers / gates
