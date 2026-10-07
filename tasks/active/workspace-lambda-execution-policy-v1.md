@@ -48,7 +48,7 @@ On Lambda, promote the already-prefetched Qwen/Qwen3.5-4B snapshot from /home/at
 
 ## Blockers / gates
 
-- None. The canary promotion/consumer/cleanup gate is fully accepted; exact Qwen snapshot promotion may proceed while model-eval remains disabled.
+- None.
 
 ## Fresh-chat initialization
 
