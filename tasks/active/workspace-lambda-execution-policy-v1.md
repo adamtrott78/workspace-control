@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 66856757d47788246a6fc5810542cffe522877cf
+- Remote checkpoint: fd9213ab8a7cbd9525ebab78de4f64d03981e4b2
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Install and activate exact workspace-control 66856757d47788246a6fc5810542cffe522877cf on Lambda from a fresh detached clean worktree using the accepted P5 bootstrap with WORKSPACE_CI_P5_INSTALL_AUTHORIZED=YES, WORKSPACE_CI_P5_EXPECTED_SHA=66856757d47788246a6fc5810542cffe522877cf, and WORKSPACE_CI_P5_ACTIVATE_CONTROLLER=YES. Do not restage the controller token and do not cancel active CPU run 37546267761. After activation, require CPU/GPU controllers and provisioner active/running; capture CPU/GPU NRestarts, wait 8 seconds, and require zero restart delta. Inspect recent CPU/provisioner events for request fa97e66f-c71c-5e48-926a-129a7ecde8b3 / runner lambda-research-engine-8fb642f3900d: orphan cleanup may occur only when durable root state is MISSING, verified_at admission must no longer fail, and a provision request must either be accepted/recovered or produce a new explicit fail-closed error. Then inspect GitHub run 37546267761 for actionable terminal evidence; do not launch gpu-small until CPU receipt/cleanup are proven. Do not enable model-scale classes or gpu-heavy.
+On Lambda, perform a narrow read-only verification for request fa97e66f-c71c-5e48-926a-129a7ecde8b3 after successful GitHub run 37546267761: locate the root P5 runtime receipt/log naturally written for that request, print only its non-secret decision/admission identity/runner/profile/cleanup fields, and prove there is no remaining job directory, staging directory, runner process, or project-UID process for the completed CPU job. Do not add probes or mutate production/scientific state. If cleanup passes, record CPU acceptance and trigger a NEW `/lambda-ci-p5-gpu f5ba8278d7dfa22e63623ddf51896a6dec002813` on research-engine PR #106. Do not enable model-scale classes or gpu-heavy.
 
 ## Remaining work
 
-- Install and activate exact workspace-control 66856757d47788246a6fc5810542cffe522877cf, preserve active CPU run 37546267761, prove restart-delta stability and successful verified_at admission/JIT recovery, then validate terminal CPU receipt/cleanup before launching gpu-small acceptance.
+- Verify the root runtime receipt and residue-free cleanup for successful CPU run 37546267761; then launch fresh gpu-small admission-v2 acceptance and validate its exact GPU/receipt/cleanup evidence.
 - Implement trusted acquisition/quarantine/promotion and read-only content-addressed model/runtime cache semantics.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
@@ -48,8 +48,8 @@ Install and activate exact workspace-control 66856757d47788246a6fc5810542cffe522
 
 ## Blockers / gates
 
-- Exact verified_at-compatible workspace-control 66856757d47788246a6fc5810542cffe522877cf is validated but not installed on Lambda. CPU controller remains stopped; install/activate exact 66856757 before evaluating the preserved queued CPU run again.
-- After exact 66856757 activation, require CPU/GPU active/running with zero restart delta and allow existing run 37546267761 to recover through JIT-orphan reconciliation plus root admission; do not trigger another CPU run until this one reaches actionable terminal evidence or a new P5 failure requires cancellation.
+- CPU GitHub workflow acceptance passed, but root-owned runtime receipt and residue-free post-run cleanup have not yet been independently verified after run 37546267761. Verify that before gpu-small.
+- Do not launch gpu-small until the CPU root receipt binds request fa97e66f-c71c-5e48-926a-129a7ecde8b3 / runner lambda-research-engine-8fb642f3900d and proves runner/job/staging cleanup.
 
 ## Fresh-chat initialization
 
