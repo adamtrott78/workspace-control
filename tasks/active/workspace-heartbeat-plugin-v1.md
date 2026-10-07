@@ -23,37 +23,22 @@ Provide reliable operator-visible progress for each substantial ChatGPT assistan
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-heartbeat-v045-full-turn-history
-- Remote checkpoint: 10226c1f87b05e479ee4f5e0115139dd7113aa8b
+- Remote branch: workspace-heartbeat-v045-full-turn-history-r2
+- Remote checkpoint: f7d079534fd1359bdbc103fc8a180a24b74ade89
 - Remote verified: true
 
 ## Next safe action
 
-Run the exact Lambda Node 20/npm and isolated-startup gate for v0.4.5 implementation git:10226c1f87b05e479ee4f5e0115139dd7113aa8b while leaving the live v0.4.4 runtime on port 8787 untouched.
+Refresh/recreate the custom Heartbeat plugin connection and fully refresh ChatGPT, then verify the effective v0.4.5 tool/UI surface and run the 5+ semantic-update live host acceptance. The v0.4.5 backend is already live and v0.4.4 rollback is preserved.
 
 ## Remaining work
 
-- Run Workspace Control Validation for the exact v0.4.5 candidate head.
-- Run exact Node 20 npm test and isolated startup smoke on Lambda without disturbing the live v0.4.4 runtime.
-- Cut over the managed Heartbeat runtime only after the exact isolated gate passes, preserving v0.4.4 rollback.
-- Refresh/recreate the custom Heartbeat plugin connection as needed for the output-schema/UI resource change and verify the v0.4.5 tool surface.
-- Run live host acceptance with at least five semantic updates in one assistant response, verify the full scrollable current-turn chain, then verify next-turn supersession/isolation.
-- Only after live PASS merge the v0.4.5 release PR and mark this stage VALIDATED/COMPLETE.
+- Allow PR #139 Workspace Control Validation to complete on the fresh current-main release branch.
+- Refresh/recreate the custom Heartbeat plugin connection and perform a full browser refresh so ChatGPT loads the v0.4.5 tool metadata and live-v3 resource.
+- Verify the effective tool/output surface includes bounded turn_history and the semantic-delta/10-tool guidance rather than the stale rolling-three/pre-fourth-tool metadata.
+- Run live host acceptance with at least five semantic updates in one assistant response; verify all remain readable in one scrollable current-turn card, deliberate upward scroll is preserved, and the next assistant response supersedes/freezes the prior card.
+- After live PASS, merge PR #139 and mark v0.4.5 accepted/COMPLETE.
 
 ## Blockers / gates
 
 - None.
-
-## Fresh-chat initialization
-
-@GitHub
-
-https://github.com/adamtrott78/workspace-control
-
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-heartbeat-plugin-v1.json
-
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
