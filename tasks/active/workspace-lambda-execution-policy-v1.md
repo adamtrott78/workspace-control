@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 15a4feadadefc9bdaf710e6c624805d1370881f1
+- Remote checkpoint: 3eb87841018bf2d86ec4af04b610e086f0abc8da
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Continue adversarial_recovery_and_resource_validation without reopening the accepted immutable-runtime architecture. Next, validate recovery/replay semantics on the existing admitted execution substrate: (1) prove controller restart/recovery does not duplicate or re-execute a consumed request; (2) prove identical terminal request replay returns existing terminal state/receipt rather than launching a runner; (3) prove stale/expired admission is rejected. Reuse existing durable request/receipt state where possible and do not create a new GPU execution solely for replay measurement. After those pass, proceed to deliberate cleanup-failure/timeout/resource-pressure/cache-integrity/concurrency cases. Keep model weights and inference disabled.
+Install workspace-control exact SHA 3eb87841018bf2d86ec4af04b610e086f0abc8da on Lambda with the accepted exact-SHA bootstrap. Verify runtime blob 24d4457d55503bbdbbd5a768b4889070e348ed4a, provisioner-service blob 74e7838e44eebd3a73dde620a61d3b052d78e466, trusted-cache manager blob a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807, project manifest blob 2f019505d4ea7257d1067fb25b8d1d23f2e48ee1, and policy blob 5349572dd7982858c4526bafc16e53d7266cf8c8. Then run a root-only synthetic cleanup-quarantine canary against a temporary StateStore and fake launcher using the installed modules; do not submit a GitHub job or quarantine a live lane. Require RuntimeCleanupError to persist quarantine, block a second admission after service reconstruction, leave production lane state untouched, and clean the temporary canary directory.
 
 ## Remaining work
 
