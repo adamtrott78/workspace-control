@@ -29,6 +29,10 @@ class RuntimeCleanupError(RuntimeLaunchError):
     """Raised when post-execution cleanup or integrity verification fails."""
 
 
+class RuntimeTimeoutError(RuntimeLaunchError):
+    """Raised after a bounded runner exceeds the root wrapper timeout."""
+
+
 def run(argv: list[str], *, check: bool = True):
     proc = subprocess.run(
         argv,
@@ -668,6 +672,46 @@ def _pump(stream, log) -> None:
 
 
 
+def wait_for_transient_runner(
+    proc: subprocess.Popen,
+    unit_name: str,
+    timeout_seconds: int,
+) -> tuple[int | None, bool, bool]:
+    """Wait for systemd-run and fail closed if the wrapper itself exceeds its bound.
+
+    Returns (return_code, timed_out, timeout_cleanup_pass).
+    """
+    try:
+        return proc.wait(timeout=timeout_seconds), False, True
+    except subprocess.TimeoutExpired:
+        run(["systemctl", "stop", unit_name], check=False)
+
+        try:
+            rc = proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.terminate()
+            try:
+                rc = proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                try:
+                    rc = proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    rc = None
+
+        active = run(["systemctl", "is-active", unit_name], check=False)
+        state = active.stdout.strip()
+        unit_stopped = state not in {
+            "active",
+            "activating",
+            "deactivating",
+            "reloading",
+        }
+        wrapper_reaped = proc.poll() is not None
+        run(["systemctl", "reset-failed", unit_name], check=False)
+        return rc, True, bool(unit_stopped and wrapper_reaped)
+
+
 def cleanup_project_uid_processes(uid: int) -> tuple[bool, bool]:
     """Kill project-UID residue if present and verify the UID is empty afterward."""
     before = run(["pgrep", "-u", str(uid)], check=False)
@@ -763,7 +807,10 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     command = build_cpu_systemd_command(spec, runner_dir, staging_dir, subnet)
 
     result = "FAIL"
+    terminal_status = "FAILED"
     rc = None
+    timed_out = False
+    wrapper_cleanup_pass = True
     execution_error: Exception | None = None
     residue_detected = False
     cleanup_pass = False
@@ -789,12 +836,23 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             proc.stdin.flush()
             proc.stdin.close()
             jit = ""
-            rc = proc.wait(timeout=int(spec["resources"]["runtime_max_seconds"]) + 120)
+            rc, timed_out, wrapper_cleanup_pass = wait_for_transient_runner(
+                proc,
+                spec["unit_name"],
+                int(spec["resources"]["runtime_max_seconds"]) + 120,
+            )
             output_thread.join(timeout=10)
-        if rc != 0:
+        if timed_out:
+            terminal_status = "TIMED_OUT"
+            execution_error = RuntimeTimeoutError(
+                "runner exceeded root wrapper timeout "
+                f"unit={spec['unit_name']}"
+            )
+        elif rc != 0:
             execution_error = RuntimeLaunchError(f"runner/systemd unit exited rc={rc}")
         else:
             result = "RUNNER_EXITED_CLEANLY"
+            terminal_status = "SUCCEEDED"
     except Exception as exc:
         execution_error = exc
     finally:
@@ -826,6 +884,10 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "phase": "P5-provisioner-runtime",
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "decision": result,
+            "terminal_status": terminal_status,
+            "timed_out": timed_out,
+            "wrapper_timeout_cleanup": wrapper_cleanup_pass,
+            "automatic_retry_eligible": False,
             "request_id": request_id,
             "project_id": spec["project_id"],
             "profile": spec["profile"],
@@ -847,6 +909,8 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         )
 
     cleanup_failures = []
+    if not wrapper_cleanup_pass:
+        cleanup_failures.append("timed-out systemd wrapper/unit did not terminate cleanly")
     if not cleanup_pass:
         cleanup_failures.append("project UID processes remain or could not be verified")
     if not runner_workspace_destroyed:
@@ -923,7 +987,10 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     )
 
     result = "FAIL"
+    terminal_status = "FAILED"
     rc = None
+    timed_out = False
+    wrapper_cleanup_pass = True
     execution_error: Exception | None = None
     residue_detected = False
     cleanup_pass = False
@@ -955,12 +1022,23 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             proc.stdin.flush()
             proc.stdin.close()
             jit = ""
-            rc = proc.wait(timeout=int(spec["resources"]["runtime_max_seconds"]) + 120)
+            rc, timed_out, wrapper_cleanup_pass = wait_for_transient_runner(
+                proc,
+                spec["unit_name"],
+                int(spec["resources"]["runtime_max_seconds"]) + 120,
+            )
             output_thread.join(timeout=10)
-        if rc != 0:
+        if timed_out:
+            terminal_status = "TIMED_OUT"
+            execution_error = RuntimeTimeoutError(
+                "runner exceeded root wrapper timeout "
+                f"unit={spec['unit_name']}"
+            )
+        elif rc != 0:
             execution_error = RuntimeLaunchError(f"runner/systemd unit exited rc={rc}")
         else:
             result = "RUNNER_EXITED_CLEANLY"
+            terminal_status = "SUCCEEDED"
     except Exception as exc:
         execution_error = exc
     finally:
@@ -1012,6 +1090,10 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "phase": "P5-provisioner-runtime",
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "decision": result,
+            "terminal_status": terminal_status,
+            "timed_out": timed_out,
+            "wrapper_timeout_cleanup": wrapper_cleanup_pass,
+            "automatic_retry_eligible": False,
             "request_id": request_id,
             "project_id": spec["project_id"],
             "profile": spec["profile"],
@@ -1050,6 +1132,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         )
 
     cleanup_failures = []
+    if not wrapper_cleanup_pass:
+        cleanup_failures.append("timed-out systemd wrapper/unit did not terminate cleanly")
     if not cleanup_pass:
         cleanup_failures.append("project UID processes remain or could not be verified")
     if not gpu_cleanup_pass:
