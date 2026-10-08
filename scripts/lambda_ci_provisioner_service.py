@@ -46,6 +46,49 @@ class StateStore:
     def path(self, request_id: str) -> pathlib.Path:
         return self.root / f"{request_id}.json"
 
+    def lane_quarantine_path(self, profile: str) -> pathlib.Path:
+        if profile not in {"cpu-test", "gpu-small"}:
+            raise ServiceError(f"unsupported lane quarantine profile: {profile}")
+        return self.root / f"_lane-quarantine-{profile}.json"
+
+    def read_lane_quarantine(self, profile: str) -> dict[str, Any] | None:
+        path = self.lane_quarantine_path(profile)
+        if not path.exists():
+            return None
+        value = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(value, dict):
+            raise ServiceError("stored lane quarantine is not a JSON object")
+        return value
+
+    def quarantine_lane(
+        self,
+        profile: str,
+        *,
+        request_id: str,
+        error_type: str,
+        error: str,
+        quarantined_at: datetime,
+    ) -> dict[str, Any]:
+        self.ensure()
+        path = self.lane_quarantine_path(profile)
+        record = {
+            "schema_version": 1,
+            "profile": profile,
+            "status": "QUARANTINED",
+            "request_id": request_id,
+            "error_type": error_type,
+            "error": error,
+            "quarantined_at": quarantined_at.astimezone(timezone.utc).isoformat(),
+        }
+        tmp = self.root / f".{path.name}.{os.getpid()}.tmp"
+        tmp.write_text(
+            json.dumps(record, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, path)
+        return record
+
     def read(self, request_id: str) -> dict[str, Any] | None:
         path = self.path(request_id)
         if not path.exists():
@@ -143,17 +186,54 @@ class ProvisionerService:
         try:
             result = self.launcher(req, spec)
             record = self._nonsecret_record(req, "COMPLETED", result=result)
+        except runtime.RuntimeCleanupError as exc:
+            quarantine = self.state_store.quarantine_lane(
+                req.profile,
+                request_id=req.request_id,
+                error_type=type(exc).__name__,
+                error=str(exc),
+                quarantined_at=self.clock(),
+            )
+            record = self._nonsecret_record(
+                req,
+                "FAILED",
+                error_type=type(exc).__name__,
+                error=str(exc),
+                lane_quarantined=True,
+                lane_quarantine=quarantine,
+            )
         except Exception as exc:
             record = self._nonsecret_record(
                 req,
                 "FAILED",
                 error_type=type(exc).__name__,
                 error=str(exc),
+                lane_quarantined=False,
             )
         finally:
             with self._lock:
                 self._active.discard(req.request_id)
         self.state_store.update(req.request_id, record)
+
+    def _lane_quarantine_response(
+        self,
+        profile: str,
+        request_id: str,
+    ) -> dict[str, Any] | None:
+        quarantine = self.state_store.read_lane_quarantine(profile)
+        if quarantine is None:
+            return None
+        return {
+            "schema_version": 2,
+            "status": "REJECTED",
+            "request_id": request_id,
+            "error_type": "LaneQuarantined",
+            "error": (
+                f"{profile} is quarantined after cleanup failure; "
+                "root operator clearance is required"
+            ),
+            "lane_quarantine": quarantine,
+        }
 
     def _duplicate_v2_response(
         self,
@@ -266,6 +346,13 @@ class ProvisionerService:
                         "admission v2 currently enables only cpu-test and gpu-small"
                     )
 
+                quarantined = self._lane_quarantine_response(
+                    req.profile,
+                    req.request_id,
+                )
+                if quarantined is not None:
+                    return quarantined
+
                 concurrency = int(self.manifest["concurrency"])
                 if len(self._active) >= concurrency:
                     return {
@@ -310,6 +397,19 @@ class ProvisionerService:
         req = policy.validate_request(data, self.manifest)
         if req.profile not in {"cpu-test", "gpu-small"}:
             raise ServiceError("P5 provisioner enables only cpu-test and gpu-small")
+
+        quarantine = self.state_store.read_lane_quarantine(req.profile)
+        if quarantine is not None:
+            return {
+                "schema_version": 1,
+                "status": "REJECTED",
+                "request_id": req.request_id,
+                "error_type": "LaneQuarantined",
+                "error": (
+                    f"{req.profile} is quarantined after cleanup failure; "
+                    "root operator clearance is required"
+                ),
+            }
 
         spec = policy.build_launch_spec(req, self.manifest, self.profiles, self.pins)
         concurrency = int(self.manifest["concurrency"])
