@@ -31,12 +31,12 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8602c964b57fe961fea1368a5cc949aae4d578b4
+- Remote checkpoint: 893b38da5ec4eca0146b236579f16f28f04f3e7d
 - Remote verified: true
 
 ## Next safe action
 
-On Lambda, use exact research-engine commit 8602c964b57fe961fea1368a5cc949aae4d578b4 to build the qwen35-vllm-cu129-image-native-sampler-v3 wheel-only dependency bundle from the already-certified live runtime, writing only under ~/adamArchives/Adam/workspace-control-tmp/. Preserve the live runtime read-only; set an output-local PIP_CACHE_DIR; require the exact 196-line freeze SHA-256 198d90f866d032ea8f747dd9d28a1fe5f5ef18c02e5eb64b850124e77a2744d0; permit only wheel downloads from the declared PyPI/PyTorch indexes and exact certified vLLM release URL; require builder/verify PASS. Do not promote yet. Return the bundle-manifest.json and compact console result so the package-level license inventory, exact artifact count/bytes, vLLM hash, and any unsupported/unavailable requirement can be reviewed before root promotion. Do not reconstruct the full venv yet, run inference, alter the accepted model object, stop/start the production daemon, or widen model-eval/gpu-heavy authority.
+On Lambda, rerun the qwen35-vllm-cu129-image-native-sampler-v3 wheel-only dependency-bundle materialization using exact research-engine commit 893b38da5ec4eca0146b236579f16f28f04f3e7d. Preserve the certified live runtime read-only; write only under ~/adamArchives/Adam/workspace-control-tmp/ with output-local PIP_CACHE_DIR; require the exact 196-line freeze SHA-256 198d90f866d032ea8f747dd9d28a1fe5f5ef18c02e5eb64b850124e77a2744d0; permit only wheel downloads from the declared PyPI/PyTorch indexes plus the exact certified vLLM upstream release URL/hash; require builder and independent verify PASS. Do not promote yet. Return bundle-manifest.json and compact console evidence so the package-level license inventory, artifact count/bytes, vLLM hash, and any missing/unsupported artifact can be reviewed before root promotion. Do not reconstruct the full venv yet, run inference, alter the accepted model object, stop/start the production daemon, or widen model-eval/gpu-heavy authority.
 
 ## Remaining work
 
@@ -47,7 +47,7 @@ On Lambda, use exact research-engine commit 8602c964b57fe961fea1368a5cc949aae4d5
 
 ## Blockers / gates
 
-- The bundle builder is validated and merged, but no persistent runtime object exists yet. Build the exact wheel-only bundle on Lambda, inspect its artifact/license manifest, complete the required trusted package-set license/usage review, and only then perform root trusted-cache acquisition/promotion.
+- No persistent runtime object exists yet. The builder now correctly recognizes the exact certified local vLLM freeze provenance. Re-run the same bounded Lambda bundle materialization from research-engine@893b38da5ec4eca0146b236579f16f28f04f3e7d, inspect the artifact/license manifest, complete the required trusted package-set license/usage review, and only then perform root trusted-cache acquisition/promotion.
 
 ## Fresh-chat initialization
 
