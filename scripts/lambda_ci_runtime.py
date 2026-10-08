@@ -68,11 +68,11 @@ def expanded_runtime_tree_digest(root: pathlib.Path) -> str:
         mode = stat.S_IMODE(st.st_mode)
 
         if stat.S_ISDIR(st.st_mode):
-            tree_hash.update(f"D\\0{rel}\\0{mode:o}\\n".encode())
+            tree_hash.update(f"D\0{rel}\0{mode:o}\n".encode())
             continue
 
         if stat.S_ISLNK(st.st_mode):
-            tree_hash.update(f"L\\0{rel}\\0{os.readlink(path)}\\n".encode())
+            tree_hash.update(f"L\0{rel}\0{os.readlink(path)}\n".encode())
             continue
 
         if not stat.S_ISREG(st.st_mode):
@@ -87,8 +87,8 @@ def expanded_runtime_tree_digest(root: pathlib.Path) -> str:
                 digest.update(block)
         tree_hash.update(
             (
-                f"F\\0{rel}\\0{mode:o}\\0{st.st_size}\\0"
-                f"{digest.hexdigest()}\\n"
+                f"F\0{rel}\0{mode:o}\0{st.st_size}\0"
+                f"{digest.hexdigest()}\n"
             ).encode()
         )
     return tree_hash.hexdigest()
