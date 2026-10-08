@@ -31,12 +31,12 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 66361693ad2f8d0a345d420dabccbbd6042f5c59
+- Remote checkpoint: 8602c964b57fe961fea1368a5cc949aae4d578b4
 - Remote verified: true
 
 ## Next safe action
 
-Design and build a content-addressed Qwen runtime dependency bundle rather than promoting the raw venv. Use the exact 196-line freeze (SHA-256 198d90f866d032ea8f747dd9d28a1fe5f5ef18c02e5eb64b850124e77a2744d0) plus the owning runtime contract to construct a symlink-free trusted package payload containing exact wheel/source artifacts, hashes, indexes/source URLs, Python ABI/platform constraints, native-sampler environment semantics, and a deterministic offline reconstruction manifest. The bundle must be consumable with network disabled into an ephemeral per-job venv, after which the reconstructed environment must reproduce the exact vLLM/Torch/TorchVision/TorchCodec identities and prior multimodal/CUDA smoke without model inference. Do not mutate or promote the live venv, do not alter the accepted model object, do not enable model-eval, and do not widen gpu-small or gpu-heavy authority.
+On Lambda, use exact research-engine commit 8602c964b57fe961fea1368a5cc949aae4d578b4 to build the qwen35-vllm-cu129-image-native-sampler-v3 wheel-only dependency bundle from the already-certified live runtime, writing only under ~/adamArchives/Adam/workspace-control-tmp/. Preserve the live runtime read-only; set an output-local PIP_CACHE_DIR; require the exact 196-line freeze SHA-256 198d90f866d032ea8f747dd9d28a1fe5f5ef18c02e5eb64b850124e77a2744d0; permit only wheel downloads from the declared PyPI/PyTorch indexes and exact certified vLLM release URL; require builder/verify PASS. Do not promote yet. Return the bundle-manifest.json and compact console result so the package-level license inventory, exact artifact count/bytes, vLLM hash, and any unsupported/unavailable requirement can be reviewed before root promotion. Do not reconstruct the full venv yet, run inference, alter the accepted model object, stop/start the production daemon, or widen model-eval/gpu-heavy authority.
 
 ## Remaining work
 
@@ -47,7 +47,7 @@ Design and build a content-addressed Qwen runtime dependency bundle rather than 
 
 ## Blockers / gates
 
-- Raw qwen3.5 venv promotion is denied by observed structure: symlinks, cache-v1-forbidden suffixes, secret-name/marker hits, absolute shebangs, and extensive absolute-prefix coupling. The next design must promote immutable package/dependency inputs and an exact reconstruction manifest rather than the live venv tree.
+- The bundle builder is validated and merged, but no persistent runtime object exists yet. Build the exact wheel-only bundle on Lambda, inspect its artifact/license manifest, complete the required trusted package-set license/usage review, and only then perform root trusted-cache acquisition/promotion.
 
 ## Fresh-chat initialization
 
