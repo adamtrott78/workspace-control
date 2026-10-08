@@ -36,11 +36,10 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Promote the already-built, independently verified Qwen runtime bundle at ~/adamArchives/Adam/workspace-control-tmp/qwen35-runtime-bundle-build-20261008T022554Z/bundle through the installed lambda-ci-trusted-cache-v1 manager as artifact_kind=runtime for project research-engine. Bind the descriptor to runtime contract qwen35-vllm-cu129-image-native-sampler-v3, immutable bundle manifest identity f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74, trusted license review policies/lambda-ci-qwen35-runtime-license-review.v1.json, serialization format python-wheelhouse-offline-v1 with unsafe_deserialization=false/custom_code=false, and installed manager implementation SHA 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a. Root acquire into quarantine, verify exact 196-wheel payload identity, promote atomically, independently verify as ci-research-engine/read-only/offline-complete, prove candidate writes denied, and preserve the source bundle unchanged. Do not rebuild the bundle, reconstruct the venv, run inference, alter the accepted model object, control the daemon, or widen model-eval/gpu-heavy authority.
+Run the adversarial/offline reconstruction acceptance for the accepted runtime object 23a47f27bdb6bec63955b901080fc0926cffee8cf081d010195613789bc5bbf4 together with the already-accepted Qwen3.5-4B model object. Reconstruct an ephemeral per-job venv from the trusted runtime wheelhouse with network disabled and exact hash enforcement; verify Python/SOABI/platform, exact vLLM/Torch/TorchVision/TorchCodec identities, native-sampler semantics, multimodal import, and bounded CUDA allocation without model inference. Then exercise corruption/hash failure, replay/stale admission, interrupted reconstruction/cleanup, candidate write denial, process/GPU residue, disk/resource exhaustion behavior, and concurrent isolation as required by the owning acceptance contracts. Do not widen gpu-heavy/dual-GPU authority or alter production/scientific routing.
 
 ## Remaining work
 
-- Promote/build and pin the exact qwen35-vllm-cu129-image-native-sampler-v3 runtime/dependency object independently of model weights, suitable for read-only offline model-eval.
 - Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
 - Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
 - Decide separately whether gpu-heavy/dual-GPU should be accepted.
