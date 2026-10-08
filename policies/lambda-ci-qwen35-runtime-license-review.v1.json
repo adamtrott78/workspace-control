@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "review_id": "qwen35-runtime-license-review-v1",
+  "reviewed_at": "2026-10-08",
+  "project_id": "research-engine",
+  "artifact_kind": "runtime",
+  "runtime_contract_version": "qwen35-vllm-cu129-image-native-sampler-v3",
+  "bundle_identity": {
+    "manifest_identity_sha256": "f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74",
+    "artifact_count": 196,
+    "artifact_bytes": 5483297070,
+    "source_freeze_sha256": "198d90f866d032ea8f747dd9d28a1fe5f5ef18c02e5eb64b850124e77a2744d0",
+    "offline_requirements_sha256": "ef319f9a5c9370f16b66740ddf2833d0fa4aec676fe4ca91f5d61790075b8da4"
+  },
+  "review_scope": {
+    "allowed": "Internal research and CI use on NVIDIA GPU systems by the research-engine project.",
+    "not_reviewed_or_authorized": [
+      "redistribution of the trusted runtime bundle as a standalone product",
+      "sublicensing",
+      "commercial redistribution of CUDA developer tools",
+      "distribution of audio/video codec products or services requiring separate patent licenses"
+    ],
+    "notice_preservation": "Promoted runtime bundle remains byte-for-byte content-addressed and retains all bundled LICENSE/COPYING/NOTICE files."
+  },
+  "packages": [
+    {
+      "canonical_name": "humming-kernels",
+      "version": "0.1.12",
+      "wheel_sha256": "cd3ef712a93f3a9075ea99de2c72bcd3ec89dab3759b3a248d869f5507b60331",
+      "embedded_license": {
+        "id": "Apache-2.0",
+        "path": "humming_kernels-0.1.12.dist-info/licenses/LICENSE",
+        "sha256": "c95bae1d1ce0235ecccd3560b772ec1efb97f348a79f0fbe0a634f0c2ccefe2c"
+      },
+      "upstream": {
+        "repository": "https://github.com/vllm-project/humming",
+        "evidence": "LICENSE is Apache License 2.0; pyproject declares Apache-2.0."
+      },
+      "decision": "PASS"
+    },
+    {
+      "canonical_name": "openai-harmony",
+      "version": "0.0.8",
+      "wheel_sha256": "c007d277218a50db8839e599ed78e0fffe5130f614c3f6d93ae257f282071a29",
+      "embedded_license": {
+        "id": "Apache-2.0",
+        "path": "openai_harmony-0.0.8.dist-info/licenses/LICENSE",
+        "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd"
+      },
+      "upstream": {
+        "repository": "https://github.com/openai/harmony",
+        "evidence": "LICENSE is Apache License 2.0; package metadata identifies version 0.0.8 as Apache-2.0."
+      },
+      "decision": "PASS"
+    },
+    {
+      "canonical_name": "quack-kernels",
+      "version": "0.6.5",
+      "wheel_sha256": "df1ddd31366c82eb9692fe087c671209189dcbde53c909c81a865d4ee66b158d",
+      "embedded_license": {
+        "id": "Apache-2.0",
+        "path": "quack_kernels-0.6.5.dist-info/licenses/LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      },
+      "upstream": {
+        "repository": "https://github.com/Dao-AILab/quack",
+        "evidence": "Repository LICENSE is Apache License 2.0."
+      },
+      "decision": "PASS"
+    },
+    {
+      "canonical_name": "torchcodec",
+      "version": "0.16.0+cu129",
+      "wheel_sha256": "1d103c30631a2c04b2acd1602a56af7762d41051700d2077c2b6a964dbcf7f2c",
+      "embedded_license": {
+        "id": "BSD-3-Clause",
+        "path": "torchcodec-0.16.0+cu129.dist-info/licenses/LICENSE",
+        "sha256": "8ef78c2d6e787b103a0548e73ba2cfe68bc469b5b0e6f5e7db649f1312f4f2a6"
+      },
+      "third_party_notices": {
+        "preserved": true,
+        "includes_nvidia_cuda_eula": true,
+        "note": "Wheel also bundles license/notices for dav1d, libavif, libjpeg-turbo, libpng, libwebp, libyuv, zlib, and NVIDIA CUDA components."
+      },
+      "upstream": {
+        "repository": "https://github.com/meta-pytorch/torchcodec",
+        "evidence": "TorchCodec LICENSE is BSD 3-Clause; project documentation directs CUDA-enabled users to NVIDIA CUDA license terms."
+      },
+      "decision": "PASS"
+    },
+    {
+      "canonical_name": "cuda-toolkit",
+      "version": "12.9.1",
+      "wheel_sha256": "0c8636dfacbecfe9867a949a211864f080a805bc54023ce4a361aa4e1fd8738b",
+      "package_role": "NVIDIA-published 2.3 KB metapackage that contains no software and selects CUDA Toolkit component packages.",
+      "upstream": {
+        "pypi": "https://pypi.org/project/cuda-toolkit/12.9.1/",
+        "eula": "https://docs.nvidia.com/cuda/archive/12.9.1/pdf/EULA.pdf",
+        "evidence": [
+          "PyPI exact wheel filename/size/SHA-256 match the accepted bundle artifact.",
+          "CUDA 12.9.1 EULA grants installation and use of the SDK.",
+          "Developer tools not identified as distributable are for internal use.",
+          "CUDA Toolkit license scope is development of applications for NVIDIA GPU systems.",
+          "This review authorizes internal research/CI use only and does not authorize standalone redistribution."
+        ]
+      },
+      "decision": "PASS"
+    }
+  ],
+  "decision": "PASS",
+  "rationale": "The five packages missing wheel-level license metadata have exact artifact-bound or authoritative upstream terms compatible with internal, non-redistributed research/CI use. Apache-2.0 and BSD-3-Clause artifacts retain their bundled notices. NVIDIA CUDA 12.9.1 permits installation/use and internal developer-tool use on NVIDIA GPU systems; redistribution is explicitly outside this review."
+}
