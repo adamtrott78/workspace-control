@@ -236,6 +236,82 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
             self.assertFalse(root.exists())
 
 
+    def test_transient_unit_evidence_classifies_systemd_oom(self):
+        responses = [
+            SimpleNamespace(
+                returncode=0,
+                stdout=(
+                    "Result=oom-kill\n"
+                    "ExecMainCode=2\n"
+                    "ExecMainStatus=9\n"
+                ),
+                stderr="",
+            ),
+            SimpleNamespace(returncode=0, stdout="", stderr=""),
+        ]
+        commands = []
+        original = runtime.run
+
+        def fake_run(argv, check=True):
+            commands.append(argv)
+            return responses.pop(0)
+
+        runtime.run = fake_run
+        try:
+            evidence = runtime.transient_unit_terminal_evidence(
+                "workspace-ci-test.service"
+            )
+        finally:
+            runtime.run = original
+
+        self.assertTrue(evidence["available"])
+        self.assertEqual(evidence["result"], "oom-kill")
+        self.assertEqual(evidence["exec_main_code"], "2")
+        self.assertEqual(evidence["exec_main_status"], "9")
+        self.assertTrue(
+            runtime.systemd_proves_cpu_or_ram_exhaustion(evidence)
+        )
+        self.assertEqual(
+            commands[-1],
+            ["systemctl", "reset-failed", "workspace-ci-test.service"],
+        )
+
+    def test_non_oom_systemd_failure_is_not_resource_exhaustion(self):
+        evidence = {
+            "available": True,
+            "result": "exit-code",
+            "exec_main_code": "1",
+            "exec_main_status": "42",
+        }
+        self.assertFalse(
+            runtime.systemd_proves_cpu_or_ram_exhaustion(evidence)
+        )
+
+    def test_systemd_commands_preserve_failed_unit_for_terminal_evidence(self):
+        cpu = runtime.build_cpu_systemd_command(
+            {
+                **self.gpu_spec(),
+                "profile": "cpu-test",
+                "resources": {
+                    **self.gpu_spec()["resources"],
+                    "gpu_indices": [],
+                    "gpu_uuid": None,
+                },
+            },
+            pathlib.Path("/tmp/runner"),
+            pathlib.Path("/tmp/staging"),
+            "134.88.12.0/22",
+        )
+        gpu = runtime.build_gpu_systemd_command(
+            self.gpu_spec(),
+            pathlib.Path("/tmp/runner"),
+            pathlib.Path("/tmp/staging"),
+            "134.88.12.0/22",
+            self.assignment(),
+        )
+        self.assertNotIn("--collect", cpu)
+        self.assertNotIn("--collect", gpu)
+
     def test_wrapper_timeout_stops_unit_and_reaps_systemd_run(self):
         class FakeProc:
             def __init__(self):
