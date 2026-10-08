@@ -2,62 +2,53 @@
   "schema_version": 2,
   "task_id": "workspace-lambda-github-tooling-optimization-v1",
   "title": "Workspace Lambda GitHub Tooling Optimization v1",
-  "status": "CHECKPOINTED",
-  "goal": "Generalize and optimize the reusable workspace-control tooling that connects ChatGPT/GitHub workflows to project-isolated Lambda self-hosted execution, reducing human-terminal mediation and repeated project-specific glue while preserving the accepted security, provenance, exact-SHA, cleanup, and rollback boundaries proven by the current research-engine pilot.",
+  "status": "IN_PROGRESS",
+  "goal": "Minimize the model-visible ChatGPT/GitHub orchestration delay and interaction between a naturally required Lambda workflow becoming terminal and ChatGPT validating its compact exact-SHA evidence and beginning the next substantive owning-task action, while treating the execution-policy/P5 runtime as externally authoritative.",
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-lambda-self-hosted-execution-v1",
-  "current_stage": "chat_orchestration_protocol",
+  "current_stage": "control_loop_measurement",
   "acceptance_criteria": [
-    "The task begins from the exact accepted/self-hosted-runner pilot evidence rather than redesigning the Lambda runner architecture from scratch.",
-    "The active P3/P4/P5 acceptance lineage owned by workspace-lambda-self-hosted-execution-v1 remains authoritative and is not silently rewritten by optimization work.",
-    "Repeated repository-specific launcher, JIT-runner, receipt, cleanup, and GitHub-follow-up logic is inventoried and separated into reusable workspace-control components where justified by evidence.",
-    "A reusable project/profile contract can express trusted workflow identity, exact candidate SHA, CPU/GPU/resource policy, permitted host dependencies, artifact/receipt requirements, timeout/cleanup behavior, and denied production surfaces.",
-    "ChatGPT can drive the normal loop branch/PR -> trusted default-branch workflow -> Lambda JIT runner -> artifacts/checks -> evidence consumption -> bounded repair/retry without routine SSH after the pilot is accepted.",
-    "Terminal GitHub results are consumed immediately; polling/waiting is used only while compute is actually active or a human-only credential/privilege gate remains.",
-    "CPU-only and GPU-aware validation lanes share one control-plane abstraction without weakening device, process, network, cache, or project isolation.",
-    "Host dependency bootstrap/preflight steps such as exact pgvector provisioning are declarative, bounded, idempotent, receipt-producing, and separated from candidate code execution.",
-    "Runner credentials remain short-lived/repository-scoped; no persistent personal Git/SSH/browser credentials or normal atrott-user authority are introduced.",
-    "One-job ephemeral/JIT semantics, exact candidate checkout, full cleanup, leaked-process detection, and artifact return remain fail-closed invariants.",
-    "Existing GitHub-hosted CI remains a known-good control and is not removed merely because the Lambda lane becomes faster or more capable.",
-    "Optimization produces measurable improvements in operator/tool-call latency, duplicated code, number of human terminal steps, runner spin-up/teardown overhead, and failure diagnosis quality before broader adoption.",
-    "At least one second repository/profile can be represented by the generalized contract without giving it access to research-engine-specific state, demonstrating project isolation.",
-    "All reusable changes live in workspace-control; research-engine-specific scientific/production truth remains in research-engine and its owning tasks."
+    "The execution-policy/P5 task remains authoritative for workload choice, security boundaries, exact-SHA admission, required validation/acceptance evidence, host/runtime policy, trusted-cache policy, runner cleanup, and CPU/GPU/model workload decisions.",
+    "Optimization measurements count only assistant-visible GitHub connector/tool invocations; hidden REST/API requests inside a connector are not estimated.",
+    "Human relay is counted only when the user actually performs terminal, SSH, sudo, or credential work for the measured run.",
+    "Missing timestamps/facts remain null rather than being inferred.",
+    "Ordinary successful P5 CPU/gpu-small runs bind the exact request through workload + PR number + exact request SHA using existing job identity, then require compact receipt verification before acceptance.",
+    "Ordinary successful runs perform zero full-log reads unless terminal status or the compact receipt is insufficient or indicates failure.",
+    "Ordinary successful runs require zero routine human terminal/SSH/sudo/credential relay.",
+    "Required acceptance/recovery/cleanup evidence mandated by the owning task is explicitly classified and never optimized away merely because it adds reads or latency.",
+    "Terminal successful evidence is consumed immediately: terminal status -> compact receipt validation -> next substantive owning-task action with minimum model-visible delay.",
+    "No optimization implementation mutates or duplicates execution-policy/P5/runtime responsibilities."
   ],
   "constraints": [
-    "Heartbeat v0.4.0 remains the current side-project closure item; do not start broad Lambda tooling mutation merely because this child capsule exists unless the user explicitly transfers ownership.",
-    "Do not mutate the active workspace-lambda-self-hosted-execution-v1 P3/P4/P5 acceptance state from this child task; rehydrate it first and inherit terminal evidence.",
-    "Do not replace the existing Runner Scale Set Client / JIT / project-UID architecture without new evidence that the accepted topology is insufficient.",
-    "Do not weaken one-job runner destruction, no-sudo, no-Docker-socket, no-personal-credential, production-state denial, or exact-SHA execution boundaries for convenience.",
-    "Do not generalize research-engine-specific pgvector/PostgreSQL requirements into mandatory global behavior; model them as project/profile dependencies.",
-    "Do not introduce a persistent privileged runner service until the parent task explicitly accepts that stage.",
-    "Do not use the Lambda lane for untrusted forks or arbitrary pull_request code with secrets/write credentials.",
-    "Do not manufacture GPU/model workloads solely to benchmark orchestration; use naturally authorized validation work where possible.",
-    "Prefer batchable/durable GitHub evidence and compact receipts over giant logs or opaque long-running waits.",
-    "Treat the existing human SSH path as break-glass recovery, not the desired routine control plane."
+    "Observer/optimizer role only: do not mutate, reinterpret, weaken, or duplicate execution-policy/P5 workload, security, admission, validation, host/runtime, cache, cleanup, or workload-class policy.",
+    "Consume CONTROL_LOOP_OBSERVATION_V1 records only from naturally required successful CPU/gpu-small runs; do not request extra runs, probes, SSH sessions, logs, artifacts, or validation solely for measurement.",
+    "Count one GitHub read per assistant-visible connector/tool invocation used for run binding, status, job detail, logs, or artifact retrieval; ignore hidden connector-internal requests.",
+    "Preserve null for facts/timestamps not naturally observed.",
+    "Treat owning-task-required acceptance/recovery evidence as required evidence, not orchestration inefficiency.",
+    "Do not use run.head_sha as issue-comment candidate identity.",
+    "Prefer exact existing job identity plus compact receipt evidence over success-path full logs.",
+    "Keep proposed tooling changes owned by this child task and limited to connector sequencing, correlation ergonomics, compact evidence discovery, redundant-read elimination, human-relay reduction, and terminal-evidence handoff.",
+    "Do not modify research-engine workflows merely to collect optimization telemetry."
   ],
   "repositories": [
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a",
+      "base_sha": "8f6aa34f9cf06834f991bd6453c0b7057cfaf208",
       "remote": {
         "branch": "workspace-lambda-github-tooling-optimization-v1",
-        "checkpoint_sha": "1053885a71f84fa68a9475b7b17e17ebd7b0258b",
+        "checkpoint_sha": "a694e6c4fe226173e4117ffa515246efce9f51ad",
         "verified": true
       },
       "local": null,
       "allowed_mutation_scope": [
         "tasks/active/workspace-lambda-github-tooling-optimization-v1.json",
         "tasks/active/workspace-lambda-github-tooling-optimization-v1.md",
-        "architecture/**",
-        "procedures/**",
-        "workflows/**",
-        "templates/**",
-        "scripts/**",
-        "tests/**",
-        "policies/**",
-        "README.md"
+        "architecture/lambda-ci-chat-orchestration-protocol.v1.md",
+        "architecture/lambda-ci-chat-run.v1.schema.json",
+        "scripts/lambda_ci_chat_protocol.py",
+        "tests/test_lambda_ci_chat_protocol.py"
       ]
     }
   ],
@@ -245,6 +236,57 @@
         }
       ],
       "resume_condition": "Resume runtime integration only after the parent P5 controller/provisioner path has a durable accepted/stable checkpoint. Rehydrate current main and the parent first; do not infer P5 completion from this child."
+    },
+    {
+      "id": "control_loop_measurement",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-control",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "accepted autonomous P5 CPU/gpu-small substrate owned by workspace-lambda-self-hosted-execution-v1 / workspace-lambda-execution-policy-v1",
+        "clean gpu-small steady-state sample research-engine run 37554304796 / job 112576851182",
+        "user-defined CONTROL_LOOP_OBSERVATION_V1 model-visible counting semantics",
+        "current connected GitHub run/job/artifact tool surface"
+      ],
+      "outputs": [
+        "revised architecture/lambda-ci-chat-orchestration-protocol.v1.md",
+        "revised architecture/lambda-ci-chat-run.v1.schema.json",
+        "revised scripts/lambda_ci_chat_protocol.py",
+        "revised tests/test_lambda_ci_chat_protocol.py",
+        "ongoing model-visible control-loop measurements from naturally required runs"
+      ],
+      "validation": [
+        {
+          "check": "Clean steady-state gpu-small baseline",
+          "result": "PASS",
+          "evidence": [
+            "research-engine run 37554304796 / job 112576851182 completed SUCCESS for exact candidate f5ba8278d7dfa22e63623ddf51896a6dec002813 on PR #106.",
+            "GitHub run creation 2026-10-07T00:53:25Z -> job start 2026-10-07T00:53:33.6663257Z -> terminal success 2026-10-07T00:53:41Z: 16.000s end-to-end, 8.666s pre-job, 7.334s execution/finalization.",
+            "Receipt artifact 11453468013 recorded PASS; no repair/redeploy/controller restart/policy mutation/manual recovery occurred during the sample."
+          ]
+        },
+        {
+          "check": "Model-visible orchestration cost classification",
+          "result": "PASS",
+          "evidence": [
+            "The clean sample reported 3 run-status reads, 3 job-detail reads, 1 full-log read, and 1 artifact read.",
+            "The sample's one human terminal/SSH/sudo step was owning-task acceptance-only root receipt/residue verification, not a routine requirement to execute the autonomous GPU job.",
+            "No credential relay was required.",
+            "next_substantive_action_started_at was null and therefore terminal-to-next-action latency remains unmeasured for that sample."
+          ]
+        },
+        {
+          "check": "Exact existing job identity is sufficient for ordinary request correlation",
+          "result": "PASS",
+          "evidence": [
+            "Observed job name: wc-admission-v1|workload=gpu-small|pr=106|request=/lambda-ci-p5-gpu f5ba8278d7dfa22e63623ddf51896a6dec002813.",
+            "The revised reducer adds exact job correlation on workload + PR + trigger command + candidate SHA and fails closed on no match or duplicate exact matches.",
+            "Issue-comment run head_sha remains excluded from candidate identity."
+          ]
+        }
+      ],
+      "resume_condition": "Continue consuming naturally produced CONTROL_LOOP_OBSERVATION_V1 records until the ordinary successful path has exact correlation, zero full logs, zero human relay, and minimal terminal-to-continuation delay without removing owning-task-required evidence."
     }
   ],
   "checkpoints": [
@@ -391,19 +433,18 @@
       ]
     }
   ],
-  "blockers": [
-    "The parent P5 controller/provisioner implementation is active in a separate owning conversation; this child must remain read-only with respect to that task and live Lambda runtime until P5 has a durable accepted/stable checkpoint.",
-    "Strong one-to-one issue-comment run correlation requires a later project-owned metadata-only workflow adaptation; current compatibility correlation remains fail-closed and provisional until then."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Keep validated draft PR #91 unmerged while the parent P5 implementation is actively changing main; after P5 stabilizes, rehydrate current main and refresh/revalidate the isolated protocol branch before promotion.",
-    "After parent P5 acceptance, exercise the ChatGPT -> exact-SHA PR comment -> correlated GitHub run -> compact receipt -> immediate continuation loop with zero routine SSH/PAT relay.",
-    "Adopt the comment-ID run-name correlation convention only through the owning project workflow after P5 stabilization and validate exact correlation under concurrent run conditions.",
-    "Measure human terminal steps, trigger-to-bound-run tool calls, terminal-to-diagnosis tool calls, ambiguous correlation rate, successful-run log downloads, and post-terminal idle time.",
-    "Revisit generic execution-profile/launcher implementation only as a later explicitly authorized runtime-layer optimization after parent P5 acceptance."
+    "Consume future CONTROL_LOOP_OBSERVATION_V1 records from naturally required successful CPU/gpu-small owning-task runs without requesting extra measurement work.",
+    "Measure and reduce assistant-visible success-path reads: eliminate full logs, avoid redundant job/status reads, and count actual artifact discovery/download invocations on the current connector surface.",
+    "Measure terminal_evidence_first_available_at -> receipt_validated_at -> next_substantive_action_started_at when those timestamps are naturally observed; preserve null otherwise.",
+    "Validate zero routine human relay on ordinary successful runs while separately classifying any owning-task-required acceptance/recovery evidence.",
+    "Refresh the isolated chat-protocol validation branch from current main and revalidate the revised four-file protocol/reducer surface before any promotion.",
+    "Treat comment-ID run metadata as optional future ergonomics only if real duplicate-identical-trigger ambiguity occurs.",
+    "Keep generic launcher/runtime refactoring deferred outside the current observer-only orchestration scope unless the user explicitly reauthorizes it."
   ],
-  "next_safe_action": "CHECKPOINT_AND_STOP while the parent P5 implementation remains active elsewhere. Do not write Workspace Heartbeat from this child conversation and do not merge PR #91 or mutate parent/P5/research-engine runtime paths. Once P5 has a durable accepted/stable checkpoint, rehydrate current workspace-control main and the authoritative parent task, refresh PR #91 against that state, then run the first end-to-end ChatGPT-triggered Lambda validation through the accepted GitHub comment interface.",
+  "next_safe_action": "On the next naturally required successful CPU or gpu-small owning-task run, consume its CONTROL_LOOP_OBSERVATION_V1 exactly as produced. Evaluate only model-visible GitHub connector reads, exact workload+PR+request-SHA job correlation, compact receipt retrieval/verification, actual human relay, and terminal-to-next-action delay. Do not request an extra run/probe/log/SSH/artifact for optimization measurement and do not mutate execution-policy/P5/runtime responsibilities.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Initialized 2026-10-05 from the live Lambda self-hosted runner pilot. The user wants heartbeat treated as a side project; once heartbeat is accepted, resume the larger workspace-control optimization effort around GitHub tooling executing on the Lambda. Important live evidence at initialization: workspace-control main bb0b234b79498c14f7e7bdee18a787a69a0c29a8 includes the execution-loop correction after a terminal GitHub job completed but the chat remained in a thought/wait state; research-engine main 62d91642a1df0ec52b778d8d4a4f3e743382e977 includes exact pgvector 0.8.6 gating; parent task workspace-lambda-self-hosted-execution-v1 owns P3/P4/P5 and recorded P3 retry run 37396492836 as queued. The optimization target is not merely faster CI: it is a durable, low-friction ChatGPT↔GitHub↔Lambda control plane with exact provenance, bounded privileges, compact evidence, automatic terminal-result continuation, CPU/GPU profile support, and minimal routine SSH.\n\n2026-10-05 ownership transfer after heartbeat v0.4.1 acceptance: parent task was rehydrated from current main. workspace-control main=d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a; research-engine main=72e3e16ca118c4756c528392158738a39cb5d5aa; run 37398604653 remains queued. Inventory measured P2B/P3 launchers at 94.8% same-position identity (405/427 lines) with identical function sets, confirming a high-value generic-launcher refactor target.\n\n2026-10-05 design checkpoint: lambda-ci-execution-profile.v1.schema.json and lambda-ci-generic-launcher-design.v1.md define the policy/lifecycle split and executable regression matrix. This remains a parallel design path; parent P3 acceptance and legacy launchers are unchanged.\n\n2026-10-06 handoff refresh after Workspace Heartbeat v0.4.3 acceptance: heartbeat side-project is COMPLETE and no longer blocks optimization. Current authoritative parent state on workspace-control main has advanced materially beyond this child's older P3 notes: workspace-lambda-self-hosted-execution-v1 has accepted P3 CPU end-to-end and P4 UUID-resolved single-GPU isolation, including isolated PostgreSQL 14.24 + pgvector 0.8.6 for P3 and explicit GPU UUID/device-node isolation with UVM support for P4. Parent current stage is project_isolation_and_cache_validation with P5 active: static/recovery analysis for an autonomous unprivileged ci-controller plus narrow root provisioner, removing the manual sudo/PAT relay without weakening P2-P4 boundaries. Optimization work must remain compatible with that parent P5 direction and must not rewrite or bypass parent acceptance semantics. The child execution-profile design remains valid: one generic profile-driven one-job JIT launcher in parallel with legacy launchers, with project dependency prerequisites represented as profile/project policy rather than generic launcher behavior.\n\n2026-10-06 scope correction during concurrent P5 work: the user explicitly clarified that this child is to improve the ChatGPT↔GitHub↔Lambda operating protocol around P5, not implement P5 or compete with its owning chat. This conversation must not write Workspace Heartbeat while the concurrent implementation chat owns live progress. Commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4 adds only the chat-facing orchestration protocol/schema/reducer/tests. Draft PR #89 exposed pre-existing task-capsule drift before protocol tests ran; this checkpoint repairs that durable metadata and defers generic-launcher implementation until P5 is stable.\n\n2026-10-06 isolated chat-protocol validation: long-lived draft PR #89 was closed because concurrent main/P5 movement caused its validation diff to include separately owned P5/task files. A clean validation branch, workspace-lambda-chat-protocol-validation-v1, was cut from main fbb2ff1cd91f8f93d807594cc267bce080062dc3 with only the four chat-protocol files. Static review caught and repaired double-escaped schema regexes; commit 6df96d2aa41dd33f59dcdeaab1bf2f16570d2550 added regression coverage. Draft PR #91 then passed Workspace Control Validation run 37415972877. The PR remains deliberately unmerged while P5 is active."
+  "notes": "Initialized 2026-10-05 from the live Lambda self-hosted runner pilot. The user wants heartbeat treated as a side project; once heartbeat is accepted, resume the larger workspace-control optimization effort around GitHub tooling executing on the Lambda. Important live evidence at initialization: workspace-control main bb0b234b79498c14f7e7bdee18a787a69a0c29a8 includes the execution-loop correction after a terminal GitHub job completed but the chat remained in a thought/wait state; research-engine main 62d91642a1df0ec52b778d8d4a4f3e743382e977 includes exact pgvector 0.8.6 gating; parent task workspace-lambda-self-hosted-execution-v1 owns P3/P4/P5 and recorded P3 retry run 37396492836 as queued. The optimization target is not merely faster CI: it is a durable, low-friction ChatGPT↔GitHub↔Lambda control plane with exact provenance, bounded privileges, compact evidence, automatic terminal-result continuation, CPU/GPU profile support, and minimal routine SSH.\n\n2026-10-05 ownership transfer after heartbeat v0.4.1 acceptance: parent task was rehydrated from current main. workspace-control main=d6f1b02ddd8f611ab99b908123c0e5e5ef59d29a; research-engine main=72e3e16ca118c4756c528392158738a39cb5d5aa; run 37398604653 remains queued. Inventory measured P2B/P3 launchers at 94.8% same-position identity (405/427 lines) with identical function sets, confirming a high-value generic-launcher refactor target.\n\n2026-10-05 design checkpoint: lambda-ci-execution-profile.v1.schema.json and lambda-ci-generic-launcher-design.v1.md define the policy/lifecycle split and executable regression matrix. This remains a parallel design path; parent P3 acceptance and legacy launchers are unchanged.\n\n2026-10-06 handoff refresh after Workspace Heartbeat v0.4.3 acceptance: heartbeat side-project is COMPLETE and no longer blocks optimization. Current authoritative parent state on workspace-control main has advanced materially beyond this child's older P3 notes: workspace-lambda-self-hosted-execution-v1 has accepted P3 CPU end-to-end and P4 UUID-resolved single-GPU isolation, including isolated PostgreSQL 14.24 + pgvector 0.8.6 for P3 and explicit GPU UUID/device-node isolation with UVM support for P4. Parent current stage is project_isolation_and_cache_validation with P5 active: static/recovery analysis for an autonomous unprivileged ci-controller plus narrow root provisioner, removing the manual sudo/PAT relay without weakening P2-P4 boundaries. Optimization work must remain compatible with that parent P5 direction and must not rewrite or bypass parent acceptance semantics. The child execution-profile design remains valid: one generic profile-driven one-job JIT launcher in parallel with legacy launchers, with project dependency prerequisites represented as profile/project policy rather than generic launcher behavior.\n\n2026-10-06 scope correction during concurrent P5 work: the user explicitly clarified that this child is to improve the ChatGPT↔GitHub↔Lambda operating protocol around P5, not implement P5 or compete with its owning chat. This conversation must not write Workspace Heartbeat while the concurrent implementation chat owns live progress. Commit 668e738c9f67c767ce325d3a5fe5d9a71e4e94e4 adds only the chat-facing orchestration protocol/schema/reducer/tests. Draft PR #89 exposed pre-existing task-capsule drift before protocol tests ran; this checkpoint repairs that durable metadata and defers generic-launcher implementation until P5 is stable.\n\n2026-10-06 isolated chat-protocol validation: long-lived draft PR #89 was closed because concurrent main/P5 movement caused its validation diff to include separately owned P5/task files. A clean validation branch, workspace-lambda-chat-protocol-validation-v1, was cut from main fbb2ff1cd91f8f93d807594cc267bce080062dc3 with only the four chat-protocol files. Static review caught and repaired double-escaped schema regexes; commit 6df96d2aa41dd33f59dcdeaab1bf2f16570d2550 added regression coverage. Draft PR #91 then passed Workspace Control Validation run 37415972877. The PR remains deliberately unmerged while P5 is active.\n\n2026-10-07 control-loop scope promotion: accepted autonomous P5 CPU/gpu-small execution and the clean gpu-small sample shifted the optimization target from runner/runtime bring-up to model-visible ChatGPT/GitHub orchestration. User explicitly narrowed this child to observer/optimizer responsibilities only. Clean run 37554304796 completed in 16.000s end-to-end; its existing job name already binds workload + PR + exact request SHA. Model-visible measurement now counts connector invocations only, preserves nulls, separates owning-task-required acceptance/recovery evidence from inefficiency, and prioritizes terminal evidence -> compact receipt validation -> immediate owning-task continuation."
 }
