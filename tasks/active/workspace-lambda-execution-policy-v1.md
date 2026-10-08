@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 83ead40b347f55937235f14bc71a73397741cfcb
+- Remote checkpoint: 038e6224cbd1d7e5f2dce21708509c5f1c8f826d
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Install the validated workspace-control adversarial-runtime integration on Lambda from the exact current main produced by the task-only checkpoint following implementation merge 83ead40b347f55937235f14bc71a73397741cfcb. Use bootstrap_lambda_ci_p5.sh with exact-SHA guard and controllers active; first verify the existing expanded runtime path, durable receipt, and trusted-cache manager blob are present and unchanged. Then trigger exactly one naturally required gpu-small run through the trusted research-engine workflow at main dcb351a33710ad9cc6697987b0d5b2dd92513dd3 / workflow blob 427498aad2ab3fa57fd8035461b5817282e5d96b against an exact PR head SHA. Treat that run as the first live adversarial acceptance: require runtime mutation denial, exact runtime identity, bounded CUDA, post-run tree re-verification, zero project/GPU process residue, job/staging cleanup, and durable root receipt. Do not load model weights or perform inference. Do not create any extra run solely for measurement.
+Install workspace-control exact SHA 038e6224cbd1d7e5f2dce21708509c5f1c8f826d on Lambda using the accepted exact-SHA bootstrap path. This changes only the expanded-runtime tree-digest implementation/tests; trusted runtime object/receipt/tree digest, policy epoch, trusted workflow blob, trusted-cache manager, model authority, and gpu-heavy denial remain unchanged. Verify installed lambda_ci_runtime.py blob matches this SHA and that the root provisioner/controller services return active with zero unexpected restarts. Then cancel or otherwise terminalize the already-failed queued GitHub workflow run 37732928088 without re-executing it, and trigger one fresh adversarial gpu-small run from a new exact candidate PR head/comment so admission gets a new request/job identity. Require pre-execution verifier to match b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63 before candidate start. Do not load model weights or perform inference.
 
 ## Remaining work
 
