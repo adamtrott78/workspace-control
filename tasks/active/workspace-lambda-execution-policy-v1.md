@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-On Lambda, rerun the qwen35-vllm-cu129-image-native-sampler-v3 wheel-only dependency-bundle materialization using exact research-engine commit 2f8e88ecaa668d5adfc4728c2571e52c002774ab and builder blob 6902282fe1339622931c799df281fb8b8ce63673. Preserve the certified live runtime read-only; write only under ~/adamArchives/Adam/workspace-control-tmp/ with output-local PIP_CACHE_DIR; require exact freeze SHA-256 198d90f866d032ea8f747dd9d28a1fe5f5ef18c02e5eb64b850124e77a2744d0; permit only declared wheel sources plus exact certified vLLM upstream URL/hash; require builder and independent verify PASS. Do not promote yet. Return only compact console evidence plus bundle-manifest.json (or build-summary.json if PASS); do not send routine per-package download lines unless a failure names a package whose surrounding output is needed.
+Using the accepted bundle at ~/adamArchives/Adam/workspace-control-tmp/qwen35-runtime-bundle-build-20261008T022554Z/bundle, extract a compact license-review record only for cuda-toolkit, humming-kernels, openai-harmony, quack-kernels, and torchcodec: exact wheel filename/version/SHA-256 from bundle-manifest.json; root METADATA Home-page/Project-URL fields; and names/SHA-256 of bundled LICENSE/COPYING/NOTICE files without modifying the bundle. Use those exact identities to verify authoritative upstream license/usage terms. If all five are compatible with this internal research/CI use, record a trusted package-set license review and proceed to root trusted-cache acquisition/promotion of the already-verified bundle. Do not rebuild the bundle, reconstruct the full venv, run inference, alter the accepted model object, control the daemon, or widen model-eval/gpu-heavy authority.
 
 ## Remaining work
 
@@ -47,7 +47,7 @@ On Lambda, rerun the qwen35-vllm-cu129-image-native-sampler-v3 wheel-only depend
 
 ## Blockers / gates
 
-- No persistent runtime object exists yet. The wheel metadata parser now handles nested vendored dist-info correctly. Re-run the bounded Lambda bundle materialization from research-engine@2f8e88ecaa668d5adfc4728c2571e52c002774ab, inspect the resulting manifest/license inventory, complete trusted package-set license/usage review, then perform root promotion.
+- Runtime bundle materialization is accepted, but root promotion remains blocked on the package-set license/usage review. Only five exact wheel artifacts lack declared license metadata: cuda-toolkit, humming-kernels, openai-harmony, quack-kernels, torchcodec. Resolve their exact versions/upstream/license evidence from the built wheel contents and authoritative upstream sources, then complete the trusted review before promotion.
 
 ## Fresh-chat initialization
 
