@@ -43,13 +43,26 @@ class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
         admitted = self.admission_schema["properties"]["workload_class"]["enum"]
         self.assertNotIn("gpu-heavy", admitted)
 
-    def test_existing_p5_profiles_are_preserved_without_model_authority(self):
-        for name in ("cpu-test", "gpu-small"):
-            workload = self.policy["workload_classes"][name]
-            self.assertEqual(workload["policy_decision"], "EXISTING_P5_CAPABILITY")
-            self.assertEqual(workload["model_binding"], "FORBIDDEN")
-            self.assertEqual(workload["cache_access_class"], "NO_PERSISTENT_CACHE_AUTHORITY")
-            self.assertEqual(workload["state_effect_class"], "CI_VALIDATION_ONLY")
+    def test_existing_p5_profiles_preserve_model_denial_and_bounded_runtime_authority(self):
+        cpu = self.policy["workload_classes"]["cpu-test"]
+        self.assertEqual(cpu["policy_decision"], "EXISTING_P5_CAPABILITY")
+        self.assertEqual(cpu["model_binding"], "FORBIDDEN")
+        self.assertEqual(cpu["cache_access_class"], "NO_PERSISTENT_CACHE_AUTHORITY")
+        self.assertEqual(cpu["state_effect_class"], "CI_VALIDATION_ONLY")
+
+        gpu = self.policy["workload_classes"]["gpu-small"]
+        self.assertEqual(gpu["policy_decision"], "EXISTING_P5_CAPABILITY")
+        self.assertEqual(gpu["model_binding"], "FORBIDDEN")
+        self.assertEqual(gpu["cache_access_class"], "TRUSTED_RUNTIME_READONLY")
+        self.assertEqual(gpu["runtime_binding"], "REQUIRED_EXPANDED_RUNTIME_EXACT")
+        self.assertEqual(gpu["state_effect_class"], "CI_VALIDATION_ONLY")
+
+        runtime_cache = self.policy["cache_access_classes"]["TRUSTED_RUNTIME_READONLY"]
+        self.assertEqual(runtime_cache["trusted_runtime"], "read_only")
+        self.assertEqual(runtime_cache["trusted_model"], "none")
+        self.assertFalse(runtime_cache["candidate_persistent_write"])
+        self.assertTrue(runtime_cache["digest_verify_before_execution"])
+        self.assertTrue(runtime_cache["post_execution_digest_verify"])
 
     def test_acquisition_is_trusted_quarantine_only_and_no_inference(self):
         acquire = self.policy["workload_classes"]["model-acquire"]
