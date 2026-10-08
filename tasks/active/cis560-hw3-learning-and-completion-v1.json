@@ -1,0 +1,261 @@
+{
+  "schema_version": 2,
+  "task_id": "cis560-hw3-learning-and-completion-v1",
+  "title": "CIS 560 Homework 3 Learning and Pre-MILCOM Completion",
+  "status": "CHECKPOINTED",
+  "goal": "Complete CIS 560 Homework 3 correctly and preferably submit it before MILCOM travel on October 11, 2026, while using the assignment as high-value midterm preparation. Operate in LEARNING mode by default so Adam owns the key CFG, PDA, and CFL-pumping decisions; switch to explicit COMPLETION mode only if deadline/workload pressure requires it, without treating tutor-generated work as mastery.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "cis560-homework",
+  "current_stage": "execute_assignment_work",
+  "acceptance_criteria": [
+    "The exact Fall 2026 HW3 contract remains authoritative and all four problem blocks are completed against the current assignment, not historical 2019 answers.",
+    "Problem 3-4 is handled first in LEARNING mode: Adam selects legal uvxyz decompositions and can explain all three CFL-pumping conditions for the assigned strings.",
+    "Problem 3-1 is completed with Adam choosing and validating the CFG design strategy rather than merely copying a finished grammar.",
+    "Problem 3-3 reaches a correct nondeterministic PDA architecture, with Adam able to explain the OR-branch, stack strategy, and full-input acceptance behavior; a final JFLAP artifact is produced if required for submission.",
+    "Problem 3-2 is solved only after the exact current Sipser 2.26 wording is loaded; the removed historical full CNF-conversion exercise is not silently reintroduced.",
+    "Learning/completion evidence is persisted honestly in homework/hw03/LEARNING.md, distinguishing independent, guided, and tutor-generated work.",
+    "A correct word-processed HW3 submission artifact is produced and validated if the assignment requires one; Canvas submission itself remains a user action unless explicitly authorized by an available submission tool.",
+    "The assignment is completed/submission-ready before the Sunday October 11 MILCOM flight whenever reasonably possible, so substantive academic work is not carried into the conference.",
+    "HW3 work feeds the living midterm plan without conflating assignment completion with exam readiness."
+  ],
+  "constraints": [
+    "Current-semester instructor assignment/instructions override historical 2019 materials.",
+    "Historical HW3 and the old student cheat sheet may be used only as predictive/comparison evidence, not as an answer key or current-semester authority.",
+    "Default tutoring mode is LEARNING: diagnose narrowly, teach the smallest missing unit, and return control to Adam for substantive reasoning.",
+    "Do not reveal a full finished solution before a meaningful student attempt unless Adam explicitly switches to completion-oriented help.",
+    "If mode changes to COMPLETION because of MILCOM/deadline pressure, record the semantic consequence and do not promote mastery from tutor-generated work.",
+    "Problem order for tonight is 3-4 first, then 3-1, then 3-3 if focus remains, with 3-2 last.",
+    "Do not treat full CFG-to-CNF conversion as a midterm pillar; Xu explicitly excluded the full conversion procedure from the exam.",
+    "CYK remains required reading/course scope but is not part of current HW3 and should not distract this assignment session unless needed for a direct dependency.",
+    "Keep HW3 completion separate from the broader cheat-sheet build; update exam-prep evidence only at meaningful boundaries.",
+    "Do not rely on previous chat memory when the durable course repository and task capsule provide the needed state.",
+    "Use the CIS560 root route, then homework/README.md, homework/hw03/CONTEXT.md, and homework/hw03/LEARNING.md before substantive work.",
+    "The CIS560 repository consumes shared tutoring behavior from workspace-control checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; preserve that compatibility boundary."
+  ],
+  "repositories": [
+    {
+      "name": "CIS560-AdamTrott",
+      "intent": "mutate",
+      "base_sha": "8218dea36b9358dd841382bc6cd9976af7724fa1",
+      "remote": {
+        "branch": "tutor-framework",
+        "checkpoint_sha": "8218dea36b9358dd841382bc6cd9976af7724fa1",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "README.md",
+        "homework/README.md",
+        "homework/hw03/**",
+        "study/MASTERY.md",
+        "study/MASTERY_LOG.md",
+        "study/SKILL_MAP.md",
+        "study/exam1/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "load_assignment_owner",
+      "status": "VALIDATED",
+      "execution_owner": "cis560-homework",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+chat",
+      "inputs": [
+        "git:8218dea36b9358dd841382bc6cd9976af7724fa1",
+        "README.md",
+        "homework/README.md",
+        "homework/hw03/CONTEXT.md",
+        "homework/hw03/sources/ASSIGNMENT.md"
+      ],
+      "outputs": [
+        "Current HW3 contract routed and ingested.",
+        "Historical comparison boundary established."
+      ],
+      "validation": [
+        {
+          "check": "Current Homework 3 source and deadline are durably normalized",
+          "result": "PASS",
+          "evidence": [
+            "homework/hw03/CONTEXT.md records four current 2026 problem blocks, 10 total points, and due time 11:59 PM Thursday October 15, 2026.",
+            "homework/hw03/sources/ASSIGNMENT.md preserves a normalized routing copy of the user-provided 2026 assignment."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "recover_learning_completion_state",
+      "status": "VALIDATED",
+      "execution_owner": "cis560-homework",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+chat",
+      "inputs": [
+        "homework/hw03/CONTEXT.md",
+        "homework/hw03/LEARNING.md",
+        "study/exam1/STUDY_PLAN.md"
+      ],
+      "outputs": [
+        "HW3 completion state: not started.",
+        "HW3 learning evidence: initialized with no problem-specific mastery claims.",
+        "Default session mode: LEARNING."
+      ],
+      "validation": [
+        {
+          "check": "Completion and mastery are separated before solution work",
+          "result": "PASS",
+          "evidence": [
+            "homework/hw03/LEARNING.md explicitly states that assignment ingestion, historical reuse, tutor explanation, and tutor-generated work are not mastery evidence.",
+            "No HW3 solution was completed during task bootstrap."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "execute_assignment_work",
+      "status": "PLANNED",
+      "execution_owner": "cis560-homework",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+chat",
+      "inputs": [
+        "load_assignment_owner",
+        "recover_learning_completion_state",
+        "mode:LEARNING",
+        "priority:3-4 -> 3-1 -> 3-3 -> 3-2"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "Begin with Problem 3-4 using one targeted diagnostic and require Adam to propose the first substantive uvxyz split before revealing a finished decomposition."
+    },
+    {
+      "id": "build_required_artifacts",
+      "status": "PLANNED",
+      "execution_owner": "cis560-homework",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+document-tools",
+      "inputs": [
+        "execute_assignment_work"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "Begin only when enough problem content exists to build the required word-processed homework artifact and any JFLAP evidence."
+    },
+    {
+      "id": "persist_learning_state",
+      "status": "PLANNED",
+      "execution_owner": "cis560-homework",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "execute_assignment_work"
+      ],
+      "outputs": [
+        "homework/hw03/LEARNING.md"
+      ],
+      "validation": [],
+      "resume_condition": "Persist at meaningful problem/skill boundaries; do not commit every conversational exchange."
+    },
+    {
+      "id": "validate_assignment_state",
+      "status": "PLANNED",
+      "execution_owner": "cis560-homework",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+artifact-validation",
+      "inputs": [
+        "build_required_artifacts",
+        "persist_learning_state"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "Validate assignment requirements, artifacts, and learning state independently before declaring submission-ready."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "cis560-hw3-bootstrap",
+      "kind": "git_commit",
+      "identity": "8218dea36b9358dd841382bc6cd9976af7724fa1",
+      "required_for_resume": true,
+      "evidence": [
+        "CIS560-AdamTrott tutor-framework was remotely verified at 8218dea36b9358dd841382bc6cd9976af7724fa1 after HW3 context, normalized assignment source, learning record, historical comparison, study-plan revision, and root/homework routing were committed.",
+        "No HW3 problem solution work had begun at this checkpoint."
+      ]
+    },
+    {
+      "id": "workspace-control-course-assignment-compatibility",
+      "kind": "git_commit",
+      "identity": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "required_for_resume": false,
+      "evidence": [
+        "CIS560 README pins shared course-workflow behavior to this workspace-control compatibility checkpoint.",
+        "workflows/course-assignment-work.v1.json at this checkpoint has blob 8a0f596add333737e03c72a81e71a7eb075b53fc."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "homework/hw03/CONTEXT.md",
+      "state": "validated source/assignment owner",
+      "role": "current HW3 contract and problem map",
+      "origin": "current 2026 instructor assignment normalized from user-provided PDF/Markdown",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "reconcile only against current-semester instructor source",
+      "review_requirement": "current instructor evidence overrides historical material",
+      "evidence": [
+        "Present at the bootstrap checkpoint and contains no solved answers."
+      ]
+    },
+    {
+      "path": "homework/hw03/LEARNING.md",
+      "state": "initialized",
+      "role": "problem-specific behavioral learning record",
+      "origin": "task bootstrap",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "update from observed student behavior only",
+      "review_requirement": "preserve independent/guided/tutor-generated distinctions",
+      "evidence": [
+        "Initialized before substantive HW3 tutoring."
+      ]
+    },
+    {
+      "path": "study/exam1/STUDY_PLAN.md",
+      "state": "active living plan",
+      "role": "midterm-prep context for why HW3 is high leverage and why work is front-loaded before MILCOM",
+      "origin": "current-semester syllabus, lectures, HW1-HW3, MILCOM/MTH constraints",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "update only when new course/schedule evidence changes priorities",
+      "review_requirement": "HW3 session should support but not hijack the broader plan",
+      "evidence": [
+        "MILCOM/MTH-constrained plan is durable at the bootstrap checkpoint."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "HW3 task bootstrap is source-grounded and solution-free",
+      "result": "PASS",
+      "evidence": [
+        "Current assignment contract, problem order, learning record, and deadline constraints are durable.",
+        "Historical materials are explicitly separated from current authority.",
+        "No HW3 answer was produced during bootstrap."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Problem 3-4: tutor through all assigned CFL-pumpability decompositions and verify the three conditions.",
+    "Problem 3-1: design and validate both CFGs.",
+    "Problem 3-3: design, explain, and if required build/validate the JFLAP PDA.",
+    "Problem 3-2: load exact Sipser 2.26 wording, then solve it under current-semester scope.",
+    "Integrate polished solutions into the required word-processed HW3 artifact.",
+    "Validate completion independently from mastery.",
+    "Prefer completing/submitting HW3 before Sunday October 11 MILCOM travel.",
+    "Update midterm learning/mastery evidence only where student behavior justifies it."
+  ],
+  "next_safe_action": "Start a fresh CIS560 HW3 tutoring session from the normal repository root route. Read homework/hw03/CONTEXT.md and homework/hw03/LEARNING.md, preserve LEARNING mode, and begin Problem 3-4 with the smallest diagnostic: ask Adam to choose a candidate uvxyz split for the first assigned pumpable string and justify why it should remain in the language for every i>=0. Do not present a finished split before his attempt.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+chat",
+  "notes": "Intentions for this task: HW3 is both an assignment and deliberate midterm pillar practice. Tonight's order is 3-4 first because CFL pumping is 4/10 points and newly important; then 3-1 CFG design; then 3-3 PDA if focus remains; 3-2 CNF last. The user leaves for MILCOM Sunday night, presents Wednesday, returns Thursday night, and has MTH 602 Midterm 1 Monday Oct. 19 after reserving Oct. 16-18 for MTH. Therefore finish HW3 before MILCOM if possible and do not plan substantive HW3 work during the conference. The tutor should stay conversational and use one useful diagnostic at a time. Require Adam to make the key choices; teach only the smallest missing unit. Historical 2019 HW3 is strong predictive evidence but not a source of current answers. The 2026 assignment deliberately removed the old full CNF conversion and CYK homework blocks and increased current CFL-pumping mechanics, so respect that changed emphasis. If time pressure becomes real, an explicit COMPLETION switch is permitted, but completed-with-guidance/tutor-generated work must remain non-mastery evidence."
+}
