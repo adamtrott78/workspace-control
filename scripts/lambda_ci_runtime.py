@@ -966,23 +966,20 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     finally:
         jit = ""
 
+        try:
+            gpu_residue_detected = project_gpu_processes(uid)
+        except Exception as exc:
+            gpu_residue_detected = [{"inspection_error": str(exc)}]
+
         residue_detected, cleanup_pass = cleanup_project_uid_processes(uid)
 
         try:
-            gpu_residue_detected = project_gpu_processes(uid)
+            leaked_gpu_processes = project_gpu_processes(uid)
         except Exception as exc:
             leaked_gpu_processes = [{"inspection_error": str(exc)}]
             gpu_cleanup_pass = False
         else:
-            if gpu_residue_detected:
-                run(["pkill", "-KILL", "-u", str(uid)], check=False)
-            try:
-                leaked_gpu_processes = project_gpu_processes(uid)
-            except Exception as exc:
-                leaked_gpu_processes = [{"inspection_error": str(exc)}]
-                gpu_cleanup_pass = False
-            else:
-                gpu_cleanup_pass = not leaked_gpu_processes
+            gpu_cleanup_pass = not leaked_gpu_processes
 
         try:
             runtime_post = verify_expanded_runtime_binding(spec)
