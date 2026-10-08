@@ -524,6 +524,23 @@ def build_gpu_systemd_command(
 ) -> list[str]:
     resources = spec["resources"]
     paths = spec["paths"]
+    runtime_binding = spec.get("runtime_binding")
+    if not isinstance(runtime_binding, dict):
+        raise RuntimeLaunchError("gpu-small systemd command requires runtime binding")
+
+    runtime_path = pathlib.Path(runtime_binding["canonical_path"])
+    runtime_python = pathlib.Path(runtime_binding["python_path"])
+    job_home = staging_dir / "home"
+    xdg_cache = staging_dir / "xdg"
+    hf_home = staging_dir / "huggingface"
+    torch_home = staging_dir / "torch"
+    triton_cache = staging_dir / "triton"
+    inductor_cache = staging_dir / "inductor"
+    cuda_cache = staging_dir / "cuda"
+    vllm_config = staging_dir / "vllm-config"
+    vllm_cache = staging_dir / "vllm-cache"
+    pycache = staging_dir / "pycache"
+
     bash_script = r"""
         IFS= read -r jit
         [[ -n "$jit" ]]
@@ -571,9 +588,9 @@ def build_gpu_systemd_command(
         "-p", "UMask=0077",
         "-p", f"ReadWritePaths={paths['job_root']}",
         "-p", f"ReadWritePaths={staging_dir}",
-        "-p", f"ReadWritePaths={paths['home']}",
         "-p", f"ReadWritePaths={paths['logs']}",
         "-p", f"ReadOnlyPaths={paths['trusted_cache']}",
+        "-p", f"BindReadOnlyPaths={runtime_path}",
         "-p", "InaccessiblePaths=/var/run/docker.sock",
         "-p", "InaccessiblePaths=/run/docker.sock",
         "-p", "DevicePolicy=closed",
@@ -599,9 +616,28 @@ def build_gpu_systemd_command(
         "-p", "KillMode=control-group",
         "-p", "SendSIGKILL=yes",
         "-p", "TimeoutStopSec=20s",
-        "-p", f"Environment=HOME={paths['home']}",
-        "-p", f"Environment=XDG_CACHE_HOME={staging_dir}",
-        "-p", f"Environment=HF_HOME={staging_dir / 'huggingface'}",
+        "-p", f"Environment=HOME={job_home}",
+        "-p", f"Environment=XDG_CACHE_HOME={xdg_cache}",
+        "-p", f"Environment=HF_HOME={hf_home}",
+        "-p", f"Environment=TORCH_HOME={torch_home}",
+        "-p", f"Environment=TRITON_CACHE_DIR={triton_cache}",
+        "-p", f"Environment=TORCHINDUCTOR_CACHE_DIR={inductor_cache}",
+        "-p", f"Environment=CUDA_CACHE_PATH={cuda_cache}",
+        "-p", f"Environment=VLLM_CONFIG_ROOT={vllm_config}",
+        "-p", f"Environment=VLLM_CACHE_ROOT={vllm_cache}",
+        "-p", f"Environment=PYTHONPYCACHEPREFIX={pycache}",
+        "-p", "Environment=PYTHONDONTWRITEBYTECODE=1",
+        "-p", "Environment=VLLM_USE_FLASHINFER_SAMPLER=0",
+        "-p", f"Environment=P5_EXPANDED_RUNTIME={runtime_path}",
+        "-p", f"Environment=P5_EXPANDED_RUNTIME_PYTHON={runtime_python}",
+        "-p", (
+            "Environment=P5_EXPANDED_RUNTIME_TREE_SHA256="
+            f"{runtime_binding['tree_digest_sha256']}"
+        ),
+        "-p", (
+            "Environment=P5_EXPANDED_RUNTIME_MANIFEST_SHA256="
+            f"{runtime_binding['manifest_identity_sha256']}"
+        ),
         "-p", f"Environment=CUDA_VISIBLE_DEVICES={target_uuid}",
         "-p", f"Environment=P5_GPU_TARGET_UUID={target_uuid}",
         "-p", f"Environment=P5_GPU_SELECTED_DEVICE={selected_device}",
@@ -617,7 +653,6 @@ def build_gpu_systemd_command(
         command[insert_at:insert_at] = ["-p", f"DeviceAllow={support_device} rw"]
         insert_at += 2
     return command
-
 
 def _pump(stream, log) -> None:
     try:
@@ -796,6 +831,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     if target_uuid != "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea":
         raise RuntimeLaunchError("gpu-small target UUID drift")
 
+    runtime_pre = verify_expanded_runtime_binding(spec)
+
     runner_base, uid, gid = verify_foundation(spec)
     subnet = primary_subnet()
     assignment = resolve_gpu_assignment(target_uuid)
@@ -814,6 +851,20 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
 
     job_dir.mkdir(mode=0o700)
     staging_dir.mkdir(mode=0o700)
+    for name in (
+        "home",
+        "xdg",
+        "huggingface",
+        "torch",
+        "triton",
+        "inductor",
+        "cuda",
+        "vllm-config",
+        "vllm-cache",
+        "pycache",
+    ):
+        (staging_dir / name).mkdir(mode=0o700)
+
     shutil.copytree(runner_base, runner_dir, symlinks=True)
     chown_tree(job_dir, uid, gid)
     chown_tree(staging_dir, uid, gid)
@@ -833,6 +884,9 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     rc = None
     cleanup_pass = False
     gpu_cleanup_pass = False
+    runtime_post_verified = False
+    runtime_post_error: str | None = None
+    runtime_post: dict[str, Any] | None = None
     leaked_gpu_processes: list[dict[str, object]] = []
     jit = request.jit_config
 
@@ -881,6 +935,13 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             else:
                 gpu_cleanup_pass = True
 
+        try:
+            runtime_post = verify_expanded_runtime_binding(spec)
+        except Exception as exc:
+            runtime_post_error = f"{type(exc).__name__}: {exc}"
+        else:
+            runtime_post_verified = True
+
         journal = run(
             ["journalctl", "-u", spec["unit_name"], "--no-pager", "-n", "1000"],
             check=False,
@@ -901,7 +962,7 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         shutil.rmtree(staging_dir, ignore_errors=True)
 
         receipt = {
-            "schema_version": 1,
+            "schema_version": 2,
             "phase": "P5-provisioner-runtime",
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "decision": result,
@@ -926,6 +987,13 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "gpu_inventory": assignment["inventory"],
             "gpu_support_devices": assignment["support_devices"],
             "cuda_visible_devices": assignment["target_uuid"],
+            "expanded_runtime_preverified": True,
+            "expanded_runtime_postverified": runtime_post_verified,
+            "expanded_runtime_postverify_error": runtime_post_error,
+            "expanded_runtime": runtime_pre,
+            "expanded_runtime_post": runtime_post,
+            "mutable_state_root": str(staging_dir),
+            "persistent_project_home_writable": False,
         }
         receipt.update(admission_receipt_identity(spec))
         receipt_path.write_text(
@@ -933,13 +1001,18 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             encoding="utf-8",
         )
 
-    if result != "RUNNER_EXITED_CLEANLY" or not cleanup_pass or not gpu_cleanup_pass:
+    if (
+        result != "RUNNER_EXITED_CLEANLY"
+        or not cleanup_pass
+        or not gpu_cleanup_pass
+        or not runtime_post_verified
+    ):
         raise RuntimeLaunchError(
             "GPU runner did not complete cleanly "
-            f"result={result} cleanup={cleanup_pass} gpu_cleanup={gpu_cleanup_pass}"
+            f"result={result} cleanup={cleanup_pass} "
+            f"gpu_cleanup={gpu_cleanup_pass} runtime_post={runtime_post_verified}"
         )
     return receipt
-
 
 def launch_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     """Dispatch only the two explicitly accepted autonomous P5 profiles."""
