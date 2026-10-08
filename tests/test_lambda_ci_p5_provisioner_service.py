@@ -379,6 +379,103 @@ def test_v2_terminal_replay_survives_service_reconstruction():
 
 
 
+def test_cleanup_failure_quarantines_lane_across_service_reconstruction():
+    first_done = threading.Event()
+
+    def cleanup_failure_launcher(req, spec):
+        first_done.set()
+        raise service_mod.runtime.RuntimeCleanupError(
+            "synthetic cleanup verification failure"
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        manifest = enabled_v2_manifest()
+        first_req = v2_request("cpu-test")
+        first = build_service(
+            tmp,
+            cleanup_failure_launcher,
+            manifest=manifest,
+            clock=lambda: V2_NOW,
+        )
+        accepted = first.handle_request(first_req, peer_uid=12345)
+        assert accepted["status"] == "ACCEPTED"
+        assert first_done.wait(1)
+        wait_for(
+            lambda: json.loads(
+                first.state_store.path(first_req["request_id"]).read_text()
+            )["status"]
+            == "FAILED"
+        )
+
+        failed = json.loads(
+            first.state_store.path(first_req["request_id"]).read_text()
+        )
+        assert failed["error_type"] == "RuntimeCleanupError"
+        assert failed["lane_quarantined"] is True
+
+        quarantine = first.state_store.read_lane_quarantine("cpu-test")
+        assert quarantine is not None
+        assert quarantine["status"] == "QUARANTINED"
+        assert quarantine["request_id"] == first_req["request_id"]
+
+        second_calls = []
+
+        def forbidden_launcher(req, spec):
+            second_calls.append((req, spec))
+            raise AssertionError("quarantined lane launched new work")
+
+        restarted = build_service(
+            tmp,
+            forbidden_launcher,
+            manifest=manifest,
+            clock=lambda: V2_NOW + timedelta(seconds=1),
+        )
+        second_req = v2_request("cpu-test")
+        rejected = restarted.handle_request(second_req, peer_uid=12345)
+        assert rejected["status"] == "REJECTED"
+        assert rejected["error_type"] == "LaneQuarantined"
+        assert rejected["lane_quarantine"]["request_id"] == first_req["request_id"]
+        assert second_calls == []
+        assert not restarted.state_store.path(second_req["request_id"]).exists()
+
+        status = restarted.handle_request(
+            {
+                "schema_version": 2,
+                "operation": "STATUS",
+                "request_id": first_req["request_id"],
+            },
+            peer_uid=12345,
+        )
+        assert status["status"] == "FAILED"
+
+
+def test_payload_failure_does_not_quarantine_lane():
+    done = threading.Event()
+
+    def payload_failure_launcher(req, spec):
+        done.set()
+        raise service_mod.runtime.RuntimeLaunchError("synthetic payload failure")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        manifest = enabled_v2_manifest()
+        req = v2_request("cpu-test")
+        svc = build_service(
+            tmp,
+            payload_failure_launcher,
+            manifest=manifest,
+            clock=lambda: V2_NOW,
+        )
+        assert svc.handle_request(req, peer_uid=12345)["status"] == "ACCEPTED"
+        assert done.wait(1)
+        wait_for(
+            lambda: json.loads(
+                svc.state_store.path(req["request_id"]).read_text()
+            )["status"]
+            == "FAILED"
+        )
+        assert svc.state_store.read_lane_quarantine("cpu-test") is None
+
+
 def test_v2_same_request_id_different_digest_is_replay_conflict():
     done = threading.Event()
 
