@@ -321,12 +321,14 @@ def test_v2_gpu_request_cannot_widen_beyond_gpu_small():
     assert req.admission["runtime"]["runtime_id"] == (
         "qwen35-vllm-cu129-image-native-sampler-v3"
     )
-    assert req.admission["runtime"]["tree_digest_sha256"] == (
+    assert req.admission["runtime"]["cache_object"]["tree_sha256"] == (
         "b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63"
     )
     assert launch["runtime_binding"]["tree_digest_sha256"] == (
-        req.admission["runtime"]["tree_digest_sha256"]
+        req.admission["runtime"]["cache_object"]["tree_sha256"]
     )
+    assert req.admission["runtime"]["cache_object"]["object_state"] == "PROMOTED"
+    assert req.admission["runtime"]["owning_contracts"]
 
 
 def test_v2_runtime_binding_change_stales_admission():
