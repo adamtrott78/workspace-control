@@ -11,10 +11,10 @@
   },
   "baselines": {
     "workspace_control_sha": "94ad261fa61bb281c961f4418bd7683111306a6f",
-    "research_engine_sha": "577764f4db10e4f4f894b1613518c358c6da7b95",
+    "research_engine_sha": "dcb351a33710ad9cc6697987b0d5b2dd92513dd3",
     "project_manifest": {
       "path": "architecture/lambda-ci-project-research-engine.v1.json",
-      "blob_sha": "9212be8cfe7eb5e876e3ff8c81f7a8fd458fc018"
+      "blob_sha": "f1c0f852d04f4274e5ad8b45db92744e0b55d716"
     },
     "systemd_profiles": {
       "path": "architecture/lambda-ci-systemd-profiles.v1.json",
