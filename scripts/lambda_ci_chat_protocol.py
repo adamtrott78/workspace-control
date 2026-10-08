@@ -52,6 +52,7 @@ def validate_request(request: dict[str, Any]) -> None:
         "trigger_comment_id",
         "trigger_comment_created_at",
         "baseline_run_number",
+        "job_identity",
         "receipt_artifact",
     }
     missing = sorted(required - request.keys())
@@ -67,6 +68,15 @@ def validate_request(request: dict[str, Any]) -> None:
         raise ProtocolError("trigger_comment_id must be a positive integer")
     if not isinstance(request["baseline_run_number"], int) or request["baseline_run_number"] < 0:
         raise ProtocolError("baseline_run_number must be a non-negative integer")
+    job_identity = request["job_identity"]
+    if not isinstance(job_identity, dict):
+        raise ProtocolError("job_identity must be an object")
+    workload = job_identity.get("workload")
+    trigger_command = job_identity.get("trigger_command")
+    if not isinstance(workload, str) or not re.fullmatch(r"[A-Za-z0-9._-]+", workload):
+        raise ProtocolError("job_identity.workload is invalid")
+    if not isinstance(trigger_command, str) or not re.fullmatch(r"/[A-Za-z0-9._-]+", trigger_command):
+        raise ProtocolError("job_identity.trigger_command is invalid")
     _time(request["trigger_comment_created_at"])
 
 
@@ -122,29 +132,61 @@ def correlate_run(
             "candidate_run_ids": [run.get("id") for run in exact],
         }
 
-    compatible = [
-        run
-        for run in candidates
-        if run.get("display_title") == request["pr_title"]
-    ]
-    if len(compatible) == 1:
+    if len(candidates) == 1:
         return {
             "decision": "BOUND_RUN",
-            "correlation": "PROVISIONAL_COMPAT",
-            "run_id": compatible[0].get("id"),
-            "run_number": compatible[0].get("run_number"),
+            "correlation": "PROVISIONAL_TRIGGER_WINDOW",
+            "run_id": candidates[0].get("id"),
+            "run_number": candidates[0].get("run_number"),
         }
-    if not compatible:
+    if not candidates:
         return {
             "decision": "WAIT_FOR_RUN",
             "correlation": "NONE_YET",
         }
     return {
         "decision": "AMBIGUOUS",
-        "correlation": "MULTIPLE_COMPAT_CANDIDATES",
-        "candidate_run_ids": [run.get("id") for run in compatible],
+        "correlation": "MULTIPLE_TRIGGER_WINDOW_CANDIDATES",
+        "candidate_run_ids": [run.get("id") for run in candidates],
     }
 
+
+
+def expected_job_name(request: dict[str, Any]) -> str:
+    """Return the exact current P5 job identity for one requested candidate."""
+    validate_request(request)
+    identity = request["job_identity"]
+    return (
+        "wc-admission-v1|workload="
+        f"{identity['workload']}|pr={request['pr_number']}|request="
+        f"{identity['trigger_command']} {request['candidate_sha']}"
+    )
+
+
+def correlate_job(
+    request: dict[str, Any], jobs: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Confirm one provisional run through workload + PR + exact request SHA."""
+    expected = expected_job_name(request)
+    matches = [job for job in jobs if job.get("name") == expected]
+    if len(matches) == 1:
+        return {
+            "decision": "BOUND_JOB",
+            "correlation": "EXACT_REQUEST_IDENTITY",
+            "job_id": matches[0].get("id"),
+            "job_name": expected,
+        }
+    if not matches:
+        return {
+            "decision": "WAIT_FOR_JOB",
+            "correlation": "NO_EXACT_REQUEST_IDENTITY",
+            "expected_job_name": expected,
+        }
+    return {
+        "decision": "AMBIGUOUS",
+        "correlation": "MULTIPLE_EXACT_REQUEST_IDENTITIES",
+        "candidate_job_ids": [job.get("id") for job in matches],
+    }
 
 def verify_receipt(
     request: dict[str, Any], receipt: dict[str, Any]
@@ -245,6 +287,10 @@ def main() -> int:
     correlate.add_argument("--request", required=True)
     correlate.add_argument("--runs", required=True)
 
+    correlate_job_parser = sub.add_parser("correlate-job")
+    correlate_job_parser.add_argument("--request", required=True)
+    correlate_job_parser.add_argument("--jobs", required=True)
+
     nxt = sub.add_parser("next")
     nxt.add_argument("--request", required=True)
     nxt.add_argument("--run", required=True)
@@ -258,6 +304,13 @@ def main() -> int:
         if not isinstance(runs, list):
             raise ProtocolError("runs input must be a JSON array")
         _emit(correlate_run(request, runs))
+        return 0
+
+    if args.command == "correlate-job":
+        jobs = _load(args.jobs)
+        if not isinstance(jobs, list):
+            raise ProtocolError("jobs input must be a JSON array")
+        _emit(correlate_job(request, jobs))
         return 0
 
     run = _load(args.run)

@@ -1,11 +1,16 @@
 # Lambda CI Chat Orchestration Protocol v1
 
-Status: parallel optimization contract; does not change the accepted P2-P5 runtime path.
+Status: control-loop optimization contract; observer-only with respect to the accepted execution-policy/P5 runtime path.
 
 ## Purpose
 
 This contract defines how a ChatGPT executor should drive an opted-in GitHub Actions
-Lambda lane with the fewest safe tool calls and without routine SSH.
+Lambda lane with the fewest safe model-visible interactions and without routine human relay.
+
+The owning execution-policy/P5 task remains authoritative for workload selection,
+security boundaries, exact-SHA admission, validation/acceptance evidence, host/runtime
+policy, trusted-cache policy, runner cleanup, and CPU/GPU/model workload decisions.
+This protocol observes and optimizes only the ChatGPT/GitHub orchestration path.
 
 It sits above the self-hosted execution implementation:
 
@@ -88,46 +93,46 @@ Candidate mutation after step 3 invalidates the request. A changed PR head
 requires a new trigger bound to the new SHA; never silently rerun stale candidate
 work.
 
-## Strong correlation mode
+## Correlation model
 
-Issue-comment workflow runs report the repository default-branch SHA rather than
-the requested candidate SHA. The current run metadata also does not directly
-expose the triggering issue-comment ID.
+Issue-comment workflow runs expose the repository default-branch SHA rather than
+the requested candidate SHA. Therefore run.head_sha is not candidate identity.
 
-Opted-in project workflow adapters should therefore set run display metadata that
-contains the immutable GitHub issue-comment ID. A recommended run-name convention
-is:
+### Provisional run binding
 
-    <lane-name> PR #<issue-number> comment:<github.event.comment.id>
-
-ChatGPT already receives the created comment ID from the connector, so this gives
-an exact non-secret correlation key without changing the privilege boundary or
-candidate checkout contract.
-
-This optimization branch does not modify the research-engine workflow while P5
-is active. The metadata convention is a project-adapter follow-up after the
-parent path is stable.
-
-## Compatibility correlation mode
-
-Until a workflow exposes comment-ID metadata, fail closed.
-
-A run may be bound provisionally only when exactly one run satisfies all of:
+After one trusted exact-SHA trigger, a run may be bound provisionally when
+exactly one post-trigger run satisfies:
 
 - exact workflow path;
-- event is 'issue_comment';
+- event is issue_comment;
 - triggering actor matches;
 - run number is greater than the pre-trigger baseline;
-- run creation is not earlier than the trigger comment;
-- display title equals the PR title used by the trigger.
+- run creation is not earlier than the trigger comment.
 
-If zero runs match, the next state is WAIT_FOR_RUN.
+If zero runs match, wait for a run. If more than one matches, fail closed as
+AMBIGUOUS rather than selecting the newest run.
 
-If more than one run matches, the state is AMBIGUOUS. Do not guess based on
-newest-run ordering.
+### Exact P5 job-identity confirmation
 
-A provisionally correlated run is not terminal evidence. Its receipt must later
-prove the exact PR number and candidate SHA before success is accepted.
+For current P5 CPU/gpu-small workflows, the job name already binds the workload,
+PR number, trigger verb, and exact requested SHA:
+
+    wc-admission-v1|workload=<workload>|pr=<pr>|request=<trigger-command> <sha>
+
+One job-detail read can therefore upgrade a provisional run binding to exact
+model-visible request correlation when exactly one job name equals the expected
+identity. A mismatched workload, PR, trigger command, or SHA is not accepted.
+Multiple exact matches are ambiguous and must fail closed.
+
+This job identity is correlation evidence only. Terminal success still requires
+the compact receipt to prove PR number, expected SHA, actual SHA when present,
+and PASS.
+
+An immutable issue-comment ID embedded in run metadata remains a possible future
+ergonomic improvement for distinguishing duplicate identical trigger comments,
+but it is not a prerequisite for ordinary one-trigger-per-candidate P5
+orchestration. Do not modify a project workflow solely to collect optimization
+telemetry.
 
 ## Observation ladder
 
@@ -217,62 +222,83 @@ Do not copy giant logs into task state.
 
 ## Concurrent-chat and Heartbeat rule
 
-Workspace Heartbeat is a single-writer progress stream per task_id.
+Workspace Heartbeat v0.4.4 enforces task/conversation ownership in the backend.
+For a substantial assistant response, call heartbeat_begin_turn once for this
+optimization task, carry its opaque turn_id on later heartbeat_update calls, and
+never write the owning P5/execution-policy task's heartbeat stream.
 
-When two ChatGPT conversations are simultaneously active around the same durable
-task, exactly one conversation may own heartbeat_open / heartbeat_update for that
-task_id. Observer/adjacent optimization chats must not write to the same
-heartbeat stream.
+Distinct task IDs may progress concurrently. Cross-conversation writes to one
+active task fail closed. This separates progress-channel ownership from durable
+task authority and prevents the collision mode observed during the original P5
+bring-up.
 
-Writer ownership transfers explicitly at handoff. Merely opening another chat
-does not grant a second writer lease.
+## Model-visible control-loop target
 
-This prevents one conversation from overwriting, reordering, or semantically
-polluting another conversation's live progress card.
+Count one GitHub read for each assistant-visible GitHub connector/tool invocation
+used for run discovery/binding, status, job detail, logs, or artifact retrieval.
+Do not estimate or count hidden REST/API requests performed inside a connector.
 
-This rule does not prevent read-only observation of the parent task through
-GitHub. It separates progress-channel ownership from durable task authority.
+Count human relay only when the user actually performs a terminal, SSH, sudo, or
+credential action for that run. Preserve null for timestamps or facts that were
+not naturally observed.
 
-## Tool-call target
+For an ordinary successful P5 CPU/gpu-small run:
 
-For the common successful path after P5 acceptance, the target interaction is:
+1. bind the post-trigger run provisionally with the minimum necessary run read;
+2. confirm exact workload + PR + request SHA through the existing job identity;
+3. while nonterminal, perform only bounded status reads that can change the next
+   decision;
+4. once terminal success is observed, retrieve the compact receipt/artifact;
+5. verify exact candidate identity and PASS;
+6. immediately continue the owning task.
 
-- resolve PR + current SHA;
-- record pre-trigger workflow run baseline;
-- post one trusted trigger comment;
-- bind one run;
-- perform bounded run-state reads while compute is active;
-- on terminal success, fetch artifact metadata and the compact receipt;
-- continue immediately.
+Do not fetch full logs on the ordinary success path. Do not perform SSH/sudo or
+host-side inspection solely for optimization measurement.
 
-No SSH, sudo relay, PAT copy/paste, controller socket interaction, or broad log
-download belongs in the normal chat loop.
+If the owning task requires additional acceptance, recovery, cleanup, or safety
+evidence, classify those reads/actions as REQUIRED_ACCEPTANCE_RECOVERY_EVIDENCE.
+They are not orchestration inefficiency and must not be optimized away.
+
+Artifact discovery and artifact-byte retrieval may require more than one visible
+connector invocation on the current tool surface. Count the invocations actually
+used rather than pretending they are one abstract read.
 
 ## Acceptance metrics
 
-Measure at least:
+Measure from naturally required runs:
 
-- human terminal steps per Lambda run;
-- GitHub tool calls from trigger to bound run;
-- GitHub tool calls from terminal run to actionable diagnosis;
-- ambiguous-run correlation rate;
-- full-log downloads per successful run;
-- time spent waiting after a run was already terminal;
-- number of repeated trigger comments for one candidate SHA.
+- model-visible GitHub reads by category: run binding, status, job detail, full
+  logs, artifact;
+- human terminal/SSH/sudo/credential relay actually required for the run;
+- ambiguous correlation rate;
+- full-log downloads on successful runs;
+- terminal_evidence_first_available_at;
+- receipt_validated_at;
+- next_substantive_action_started_at.
 
-Target values after P5 plus strong correlation:
+The primary latency metric is:
 
-- zero routine human terminal steps;
-- zero ambiguous correlations;
-- zero full-log downloads on success;
-- immediate continuation after terminal receipt validation;
-- one trigger comment per candidate/lane attempt.
+    terminal GitHub evidence -> compact receipt validated -> next substantive action
+
+Targets for ordinary successful runs are:
+
+- exact job/request correlation without hidden head_sha assumptions;
+- zero routine human relay;
+- zero full-log reads;
+- one compact receipt validation path;
+- the minimum status reads needed for a 10-20 second Lambda run;
+- immediate continuation after terminal receipt validation.
+
+A null continuation timestamp remains null; do not infer latency from absent
+evidence.
 
 ## Migration rule
 
 Do not change the parent P5 controller/provisioner implementation from this
 protocol task.
 
-First validate this chat-facing state machine and correlation policy in
-workspace-control. Then, after the parent execution path is stable, project-owned
-workflow adapters may adopt the metadata-only comment-ID run-name convention.
+Keep implementation changes owned by this optimization task and limited to the
+chat-facing protocol/reducer/tooling. The accepted P5 runtime and project workflow
+remain externally authoritative. Adopt additional run metadata only if a real
+correlation ambiguity demonstrates that the existing exact job identity is
+insufficient.

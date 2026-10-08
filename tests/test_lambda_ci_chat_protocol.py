@@ -8,6 +8,8 @@ NS = runpy.run_path(
 )
 
 correlate_run = NS["correlate_run"]
+correlate_job = NS["correlate_job"]
+expected_job_name = NS["expected_job_name"]
 next_action = NS["next_action"]
 verify_receipt = NS["verify_receipt"]
 
@@ -16,23 +18,27 @@ def request():
     return {
         "schema_version": 1,
         "repository": "adamtrott78/research-engine",
-        "pr_number": 95,
-        "pr_title": "Define mostly-local EXTRACT redesign contract",
+        "pr_number": 106,
+        "pr_title": "Admission-v2 live acceptance marker",
         "candidate_sha": "a" * 40,
-        "workflow_path": ".github/workflows/lambda-ci-p3-cpu.yml",
-        "workflow_name": "Lambda CI P3 CPU Validation",
+        "workflow_path": ".github/workflows/lambda-ci-p5-gpu-autonomous.yml",
+        "workflow_name": "Lambda CI P5 Autonomous GPU Acceptance",
         "actor": "adamtrott78",
         "trigger_comment_id": 12345,
         "trigger_comment_created_at": "2026-10-06T03:23:50Z",
         "baseline_run_number": 4,
-        "receipt_artifact": "lambda-ci-p3-receipt",
+        "job_identity": {
+            "workload": "gpu-small",
+            "trigger_command": "/lambda-ci-p5-gpu",
+        },
+        "receipt_artifact": "lambda-ci-p5-gpu-autonomous-receipt",
     }
 
 
 def run(run_id, run_number, *, title=None, status="queued", conclusion=None):
     return {
         "id": run_id,
-        "path": ".github/workflows/lambda-ci-p3-cpu.yml",
+        "path": ".github/workflows/lambda-ci-p5-gpu-autonomous.yml",
         "event": "issue_comment",
         "triggering_actor": {"login": "adamtrott78"},
         "run_number": run_number,
@@ -40,7 +46,7 @@ def run(run_id, run_number, *, title=None, status="queued", conclusion=None):
         "display_title": (
             title
             if title is not None
-            else "Define mostly-local EXTRACT redesign contract"
+            else "Admission-v2 live acceptance marker"
         ),
         "status": status,
         "conclusion": conclusion,
@@ -54,7 +60,7 @@ def test_exact_comment_id_metadata_wins_over_compatibility_candidates():
     req = request()
     rows = [
         run(10, 5),
-        run(11, 6, title="Lambda CPU PR #95 comment:12345"),
+        run(11, 6, title="Lambda GPU PR #106 comment:12345"),
     ]
     result = correlate_run(req, rows)
     assert result == {
@@ -68,14 +74,14 @@ def test_exact_comment_id_metadata_wins_over_compatibility_candidates():
 def test_current_workflow_can_bind_provisionally_when_candidate_is_unique():
     result = correlate_run(request(), [run(10, 5)])
     assert result["decision"] == "BOUND_RUN"
-    assert result["correlation"] == "PROVISIONAL_COMPAT"
+    assert result["correlation"] == "PROVISIONAL_TRIGGER_WINDOW"
     assert result["run_id"] == 10
 
 
 def test_multiple_compatible_runs_fail_closed_instead_of_picking_newest():
     result = correlate_run(request(), [run(10, 5), run(11, 6)])
     assert result["decision"] == "AMBIGUOUS"
-    assert result["correlation"] == "MULTIPLE_COMPAT_CANDIDATES"
+    assert result["correlation"] == "MULTIPLE_TRIGGER_WINDOW_CANDIDATES"
     assert result["candidate_run_ids"] == [10, 11]
 
 
@@ -127,7 +133,7 @@ def test_receipt_identity_mismatch_is_rejected():
     req = request()
     receipt = {
         "decision": "PASS",
-        "pr_number": 95,
+        "pr_number": 106,
         "expected_sha": req["candidate_sha"],
         "actual_sha": "c" * 40,
     }
@@ -143,7 +149,7 @@ def test_matching_terminal_receipt_continues_immediately():
     req = request()
     receipt = {
         "decision": "PASS",
-        "pr_number": 95,
+        "pr_number": 106,
         "expected_sha": req["candidate_sha"],
         "actual_sha": req["candidate_sha"],
     }
@@ -164,3 +170,43 @@ def test_failed_run_requests_narrow_failure_evidence_ladder():
         "failing-job-log",
         "receipt",
     ]
+
+def job(job_id, *, name=None):
+    req = request()
+    return {
+        "id": job_id,
+        "name": name if name is not None else expected_job_name(req),
+        "status": "queued",
+        "conclusion": None,
+    }
+
+
+def test_unique_trigger_window_does_not_depend_on_pr_display_title():
+    row = run(10, 5, title="A display title that is not the PR title")
+    result = correlate_run(request(), [row])
+    assert result["decision"] == "BOUND_RUN"
+    assert result["correlation"] == "PROVISIONAL_TRIGGER_WINDOW"
+
+
+def test_exact_p5_job_identity_confirms_workload_pr_and_request_sha():
+    result = correlate_job(request(), [job(100)])
+    assert result["decision"] == "BOUND_JOB"
+    assert result["correlation"] == "EXACT_REQUEST_IDENTITY"
+    assert result["job_id"] == 100
+
+
+def test_wrong_sha_or_workload_job_identity_is_not_accepted():
+    req = request()
+    wrong_sha = expected_job_name(req).replace(req["candidate_sha"], "b" * 40)
+    wrong_workload = expected_job_name(req).replace("workload=gpu-small", "workload=cpu-test")
+    result = correlate_job(req, [job(100, name=wrong_sha), job(101, name=wrong_workload)])
+    assert result["decision"] == "WAIT_FOR_JOB"
+    assert result["correlation"] == "NO_EXACT_REQUEST_IDENTITY"
+
+
+def test_duplicate_exact_job_identities_fail_closed():
+    result = correlate_job(request(), [job(100), job(101)])
+    assert result["decision"] == "AMBIGUOUS"
+    assert result["correlation"] == "MULTIPLE_EXACT_REQUEST_IDENTITIES"
+    assert result["candidate_job_ids"] == [100, 101]
+

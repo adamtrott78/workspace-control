@@ -16,6 +16,7 @@
     "trigger_comment_id",
     "trigger_comment_created_at",
     "baseline_run_number",
+    "job_identity",
     "receipt_artifact"
   ],
   "properties": {
@@ -65,6 +66,24 @@
     "receipt_artifact": {
       "type": "string",
       "minLength": 1
+    },
+    "job_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workload",
+        "trigger_command"
+      ],
+      "properties": {
+        "workload": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
+        "trigger_command": {
+          "type": "string",
+          "pattern": "^/[A-Za-z0-9._-]+$"
+        }
+      }
     }
   }
 }
