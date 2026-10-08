@@ -33,6 +33,10 @@ class RuntimeTimeoutError(RuntimeLaunchError):
     """Raised after a bounded runner exceeds the root wrapper timeout."""
 
 
+class RuntimeResourceExhaustedError(RuntimeLaunchError):
+    """Raised when systemd proves CPU/RAM resource exhaustion."""
+
+
 def run(argv: list[str], *, check: bool = True):
     proc = subprocess.run(
         argv,
@@ -461,7 +465,6 @@ def build_cpu_systemd_command(
         "systemd-run",
         "--quiet",
         "--wait",
-        "--collect",
         "--pipe",
         f"--unit={spec['unit_name']}",
         "-p", "Type=exec",
@@ -569,7 +572,6 @@ def build_gpu_systemd_command(
         "systemd-run",
         "--quiet",
         "--wait",
-        "--collect",
         "--pipe",
         f"--unit={spec['unit_name']}",
         "-p", "Type=exec",
@@ -712,6 +714,46 @@ def wait_for_transient_runner(
         return rc, True, bool(unit_stopped and wrapper_reaped)
 
 
+def transient_unit_terminal_evidence(unit_name: str) -> dict[str, object]:
+    """Read root-owned systemd terminal state before clearing a failed transient unit."""
+    observed = run(
+        [
+            "systemctl",
+            "show",
+            unit_name,
+            "--property=Result",
+            "--property=ExecMainCode",
+            "--property=ExecMainStatus",
+            "--no-pager",
+        ],
+        check=False,
+    )
+    evidence: dict[str, object] = {
+        "available": observed.returncode == 0,
+        "result": None,
+        "exec_main_code": None,
+        "exec_main_status": None,
+    }
+    if observed.returncode == 0:
+        values = {}
+        for line in observed.stdout.splitlines():
+            if "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            values[key] = value
+        evidence["result"] = values.get("Result")
+        evidence["exec_main_code"] = values.get("ExecMainCode")
+        evidence["exec_main_status"] = values.get("ExecMainStatus")
+    run(["systemctl", "reset-failed", unit_name], check=False)
+    return evidence
+
+
+def systemd_proves_cpu_or_ram_exhaustion(
+    evidence: dict[str, object],
+) -> bool:
+    return evidence.get("result") == "oom-kill"
+
+
 def cleanup_project_uid_processes(uid: int) -> tuple[bool, bool]:
     """Kill project-UID residue if present and verify the UID is empty afterward."""
     before = run(["pgrep", "-u", str(uid)], check=False)
@@ -811,6 +853,13 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     rc = None
     timed_out = False
     wrapper_cleanup_pass = True
+    unit_terminal_evidence: dict[str, object] = {
+        "available": False,
+        "result": None,
+        "exec_main_code": None,
+        "exec_main_status": None,
+    }
+    resource_exhausted = False
     execution_error: Exception | None = None
     residue_detected = False
     cleanup_pass = False
@@ -858,6 +907,19 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     finally:
         jit = ""
 
+        if not timed_out and rc not in (None, 0):
+            unit_terminal_evidence = transient_unit_terminal_evidence(
+                spec["unit_name"]
+            )
+            if systemd_proves_cpu_or_ram_exhaustion(unit_terminal_evidence):
+                terminal_status = "CPU_OR_RAM_RESOURCE_EXHAUSTED"
+                resource_exhausted = True
+                execution_error = RuntimeResourceExhaustedError(
+                    "systemd reported CPU/RAM resource exhaustion "
+                    f"result={unit_terminal_evidence.get('result')} "
+                    f"unit={spec['unit_name']}"
+                )
+
         residue_detected, cleanup_pass = cleanup_project_uid_processes(uid)
 
         journal = run(
@@ -888,6 +950,8 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "timed_out": timed_out,
             "wrapper_timeout_cleanup": wrapper_cleanup_pass,
             "automatic_retry_eligible": False,
+            "resource_exhausted": resource_exhausted,
+            "systemd_terminal_evidence": unit_terminal_evidence,
             "request_id": request_id,
             "project_id": spec["project_id"],
             "profile": spec["profile"],
@@ -991,6 +1055,13 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     rc = None
     timed_out = False
     wrapper_cleanup_pass = True
+    unit_terminal_evidence: dict[str, object] = {
+        "available": False,
+        "result": None,
+        "exec_main_code": None,
+        "exec_main_status": None,
+    }
+    resource_exhausted = False
     execution_error: Exception | None = None
     residue_detected = False
     cleanup_pass = False
@@ -1044,6 +1115,19 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     finally:
         jit = ""
 
+        if not timed_out and rc not in (None, 0):
+            unit_terminal_evidence = transient_unit_terminal_evidence(
+                spec["unit_name"]
+            )
+            if systemd_proves_cpu_or_ram_exhaustion(unit_terminal_evidence):
+                terminal_status = "CPU_OR_RAM_RESOURCE_EXHAUSTED"
+                resource_exhausted = True
+                execution_error = RuntimeResourceExhaustedError(
+                    "systemd reported CPU/RAM resource exhaustion "
+                    f"result={unit_terminal_evidence.get('result')} "
+                    f"unit={spec['unit_name']}"
+                )
+
         try:
             gpu_residue_detected = project_gpu_processes(uid)
         except Exception as exc:
@@ -1094,6 +1178,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "timed_out": timed_out,
             "wrapper_timeout_cleanup": wrapper_cleanup_pass,
             "automatic_retry_eligible": False,
+            "resource_exhausted": resource_exhausted,
+            "systemd_terminal_evidence": unit_terminal_evidence,
             "request_id": request_id,
             "project_id": spec["project_id"],
             "profile": spec["profile"],
