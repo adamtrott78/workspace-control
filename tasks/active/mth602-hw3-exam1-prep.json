@@ -1,0 +1,257 @@
+{
+  "schema_version": 2,
+  "task_id": "mth602-hw3-exam1-prep",
+  "title": "MTH 602 HW3 + Exam 1 preparation",
+  "status": "IN_PROGRESS",
+  "goal": "Use the limited pre- and post-MILCOM study windows to bring MTH 602 course state current, ingest and complete Homework 3, determine the October 19 exam scope from authoritative evidence, identify high-priority weaknesses and likely tested skills, build a realistic study plan, and develop the permitted exam cheat sheet without inventing scope or rules.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/course-assessment-preparation.v1.json",
+    "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+    "content_sha": "a576677dc886bd70826789b37dcce2499190c2f1"
+  },
+  "parent_execution_owner": "mth602-exam1-prep",
+  "current_stage": "urgent_source_intake",
+  "acceptance_criteria": [
+    "Fresh execution starts from MTH602 README.md on hw3-exam1-prep at the exact branch checkpoint recorded in this capsule and follows the course tutor route rather than relying on prior chat state.",
+    "New course materials are ingested with source provenance and uncertainty preserved; exposure or ingestion does not promote mastery.",
+    "Homework 3 is ingested from the authoritative assignment artifact before solution work; due date, deliverables, grading, coding/handwritten rules, and referenced sources are not guessed.",
+    "HW3 is worked problem-by-problem under the existing tutoring protocol, with completion and mastery evidence persisted separately.",
+    "The October 19, 2026 MTH 602 exam scope is reconstructed from explicit instructor guidance, covered course material, homework correspondence, review material, and other contextual relevance evidence; uncertain scope remains labeled uncertain.",
+    "Exam relevance is kept separate from source authority: likely-tested topics are justified by evidence rather than assumed from generic course knowledge.",
+    "A prioritized study plan is built around the actual available windows before travel and after return, with blocking prerequisites and weak/high-relevance skills scheduled first.",
+    "The cheat sheet is developed only after its permitted format/rules are established from instructor evidence; content is prioritized by exam relevance, retrieval value, known traps, and current mastery gaps.",
+    "Readiness, homework completion, content coverage, and cheat-sheet completion remain separate states; no false readiness or mastery is claimed.",
+    "Final durable state is recoverable from the MTH602 repository and synchronized workspace-control task capsule without the originating conversation."
+  ],
+  "constraints": [
+    "Current date is 2026-10-08. The MTH 602 exam is Monday 2026-10-19.",
+    "The user leaves for MILCOM on Sunday 2026-10-11 and returns Thursday night 2026-10-15; treat 2026-10-11 through 2026-10-15 as unavailable for meaningful study.",
+    "Primary usable MTH602 preparation windows are 2026-10-08 through 2026-10-10 and 2026-10-16 through 2026-10-18.",
+    "The user also has a CIS 560 midterm on Thursday 2026-10-22, so MTH602 preparation must be efficient and should not create unnecessary post-exam cleanup.",
+    "Do not invent the HW3 due date, exam coverage, exam format, or cheat-sheet allowance/size/content rules. Resolve these from explicit instructor/course evidence.",
+    "Use the completed course-workflows v2 migration and exact compatibility checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9; do not silently migrate architecture during this task.",
+    "Start from the latest durable MTH602 course/HW2 checkpoint b297c524d505715fe93f9a266d7d45564cbbe47f, preserving prior coursework and mastery state.",
+    "All tracked project mutations stay on the isolated hw3-exam1-prep branch unless a later explicit task transition changes the branch plan.",
+    "Use direct visual interpretation for classroom photographs by default; use OCR/Mathpix only when it materially improves understanding.",
+    "Time pressure may change tutoring depth and artifact scope, but never authorizes fabricated source evidence, skipped provenance, or false mastery."
+  ],
+  "repositories": [
+    {
+      "name": "MTH602-AdamTrott",
+      "intent": "mutate",
+      "base_sha": "b297c524d505715fe93f9a266d7d45564cbbe47f",
+      "remote": {
+        "branch": "hw3-exam1-prep",
+        "checkpoint_sha": "b297c524d505715fe93f9a266d7d45564cbbe47f",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "classnotes/**",
+        "docs/course/**",
+        "docs/sources/**",
+        "homework/hw03/**",
+        "homework/README.md",
+        "study/**"
+      ]
+    },
+    {
+      "name": "workspace-control",
+      "intent": "read",
+      "base_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "baseline_recovery",
+      "status": "VALIDATED",
+      "execution_owner": "course-assessment-preparation",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "MTH602-AdamTrott:unit-ingestion-hw2@b297c524d505715fe93f9a266d7d45564cbbe47f",
+        "workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9"
+      ],
+      "outputs": [
+        "MTH602-AdamTrott:hw3-exam1-prep@b297c524d505715fe93f9a266d7d45564cbbe47f"
+      ],
+      "validation": [
+        {
+          "check": "Isolated HW3/exam-prep branch created from latest durable course checkpoint",
+          "result": "PASS",
+          "evidence": [
+            "Branch hw3-exam1-prep was created from b297c524d505715fe93f9a266d7d45564cbbe47f.",
+            "The starting checkpoint includes the preserved course state through HW2 required coding/results."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "urgent_source_intake",
+      "status": "IN_PROGRESS",
+      "execution_owner": "course-assessment-preparation",
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation-files+github",
+      "inputs": [
+        "baseline_recovery",
+        "user-provided new lecture/course materials",
+        "authoritative HW3 artifact",
+        "any explicit exam or cheat-sheet instructor guidance"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "course_material_ingestion",
+      "status": "PLANNED",
+      "execution_owner": "course-content-ingestion",
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation-vision+github",
+      "inputs": [
+        "urgent_source_intake"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "hw3_ingestion_and_work",
+      "status": "PLANNED",
+      "execution_owner": "course-study-session",
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation+github",
+      "inputs": [
+        "urgent_source_intake",
+        "course_material_ingestion"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "exam_scope_recovery",
+      "status": "PLANNED",
+      "execution_owner": "course-assessment-preparation",
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation+github",
+      "inputs": [
+        "course_material_ingestion",
+        "hw3_ingestion_and_work"
+      ],
+      "outputs": [
+        "durable exam-scope evidence map",
+        "topic/skill relevance assessment with uncertainty labels"
+      ],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "study_plan_and_cheat_sheet",
+      "status": "PLANNED",
+      "execution_owner": "course-assessment-preparation",
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation+github+artifact-runtime",
+      "inputs": [
+        "exam_scope_recovery",
+        "study/MASTERY.md",
+        "study/SKILL_MAP.md"
+      ],
+      "outputs": [
+        "prioritized study plan for remaining available windows",
+        "cheat-sheet content plan and final artifact if rules permit"
+      ],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "execute_and_validate_readiness",
+      "status": "PLANNED",
+      "execution_owner": "course-assessment-preparation",
+      "selected_executor": "chatgpt",
+      "selected_surface": "conversation+github",
+      "inputs": [
+        "study_plan_and_cheat_sheet"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": null
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "b297c524d505715fe93f9a266d7d45564cbbe47f",
+      "required_for_resume": true,
+      "evidence": [
+        "New branch hw3-exam1-prep starts from the latest durable MTH602 HW2/course checkpoint.",
+        "Next operation is source intake: new course material, HW3, and any exam/cheat-sheet guidance."
+      ]
+    },
+    {
+      "id": "workspace-control-assessment-prep-binding",
+      "kind": "git_commit",
+      "identity": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "required_for_resume": true,
+      "evidence": [
+        "workflows/course-assessment-preparation.v1.json blob a576677dc886bd70826789b37dcce2499190c2f1"
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "New HW3/exam-preparation task isolated from prior HW2 and presentation tasks",
+      "result": "PASS",
+      "evidence": [
+        "Dedicated MTH602 branch hw3-exam1-prep exists at the b297c524d505715fe93f9a266d7d45564cbbe47f baseline."
+      ]
+    },
+    {
+      "check": "Authoritative HW3 contract recovered",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Exam scope and cheat-sheet rules recovered with uncertainty explicit",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Study plan reflects actual travel-constrained availability",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Final readiness state validated before 2026-10-19 exam",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Ingest the new course materials the user provides, preserving provenance and updating course/topic/skill routing without promoting mastery.",
+    "Ingest the authoritative HW3 artifact and resolve its due date, exact deliverables, submission rules, and problem/source mappings.",
+    "Work HW3 efficiently under the tutoring protocol, using it as both assignment completion and exam-relevance evidence where justified.",
+    "Collect explicit and contextual evidence for the October 19 exam scope, format, and likely problem forms; keep uncertain topics labeled uncertain.",
+    "Map likely exam scope to current mastery, prerequisites, traps, and stale evidence.",
+    "Build a time-budgeted study plan centered on October 8-10 and October 16-18.",
+    "Resolve cheat-sheet rules and iteratively build the highest-value sheet content.",
+    "Run targeted study/retrieval practice, update readiness evidence, and finalize cheat sheet before the exam."
+  ],
+  "next_safe_action": "In the new chat, start from workspace-control and this task capsule, then read MTH602 README.md / COURSE_TUTOR.md only as routed. Ask the user to provide the new course materials and authoritative HW3 artifact if they are not already attached. Ingest those first. At the same time, recover any explicit exam date/scope/format/cheat-sheet guidance already present in the provided course material. Do not guess HW3 due date, exam scope, or cheat-sheet rules.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+conversation",
+  "notes": "Urgency is real but source discipline remains intact. The user cannot meaningfully study during MILCOM travel from Sunday 2026-10-11 through Thursday night 2026-10-15. The task should aggressively front-load source ingestion, HW3 triage, and exam-scope recovery before travel, then reserve 2026-10-16 through 2026-10-18 for targeted study, weak-skill repair, retrieval practice, and cheat-sheet finalization. A CIS 560 midterm follows on 2026-10-22, so avoid unnecessary MTH602 work after the October 19 exam."
+}
