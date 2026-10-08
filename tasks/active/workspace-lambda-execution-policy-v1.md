@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Using the accepted bundle at ~/adamArchives/Adam/workspace-control-tmp/qwen35-runtime-bundle-build-20261008T022554Z/bundle, extract a compact license-review record only for cuda-toolkit, humming-kernels, openai-harmony, quack-kernels, and torchcodec: exact wheel filename/version/SHA-256 from bundle-manifest.json; root METADATA Home-page/Project-URL fields; and names/SHA-256 of bundled LICENSE/COPYING/NOTICE files without modifying the bundle. Use those exact identities to verify authoritative upstream license/usage terms. If all five are compatible with this internal research/CI use, record a trusted package-set license review and proceed to root trusted-cache acquisition/promotion of the already-verified bundle. Do not rebuild the bundle, reconstruct the full venv, run inference, alter the accepted model object, control the daemon, or widen model-eval/gpu-heavy authority.
+Promote the already-built, independently verified Qwen runtime bundle at ~/adamArchives/Adam/workspace-control-tmp/qwen35-runtime-bundle-build-20261008T022554Z/bundle through the installed lambda-ci-trusted-cache-v1 manager as artifact_kind=runtime for project research-engine. Bind the descriptor to runtime contract qwen35-vllm-cu129-image-native-sampler-v3, immutable bundle manifest identity f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74, trusted license review policies/lambda-ci-qwen35-runtime-license-review.v1.json, serialization format python-wheelhouse-offline-v1 with unsafe_deserialization=false/custom_code=false, and installed manager implementation SHA 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a. Root acquire into quarantine, verify exact 196-wheel payload identity, promote atomically, independently verify as ci-research-engine/read-only/offline-complete, prove candidate writes denied, and preserve the source bundle unchanged. Do not rebuild the bundle, reconstruct the venv, run inference, alter the accepted model object, control the daemon, or widen model-eval/gpu-heavy authority.
 
 ## Remaining work
 
@@ -47,7 +47,7 @@ Using the accepted bundle at ~/adamArchives/Adam/workspace-control-tmp/qwen35-ru
 
 ## Blockers / gates
 
-- Runtime bundle materialization is accepted, but root promotion remains blocked on the package-set license/usage review. Only five exact wheel artifacts lack declared license metadata: cuda-toolkit, humming-kernels, openai-harmony, quack-kernels, torchcodec. Resolve their exact versions/upstream/license evidence from the built wheel contents and authoritative upstream sources, then complete the trusted review before promotion.
+- None.
 
 ## Fresh-chat initialization
 
