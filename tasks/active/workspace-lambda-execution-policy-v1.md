@@ -24,19 +24,19 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a
+- Remote checkpoint: 83ead40b347f55937235f14bc71a73397741cfcb
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 2f8e88ecaa668d5adfc4728c2571e52c002774ab
+- Remote checkpoint: dcb351a33710ad9cc6697987b0d5b2dd92513dd3
 - Remote verified: true
 
 ## Next safe action
 
-Integrate the accepted immutable expanded runtime path into the existing gpu-small provisioner/execution surface without enabling any new workload class or widening privileges. The provisioner must bind the exact expanded-runtime receipt/tree digest b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63 and canonical runtime path, mount it read-only (ro,nosuid,nodev) inside the job's private mount namespace, redirect all writable Python/Torch/vLLM/HF/tmp/cache state to the disposable job workspace, and refuse execution if the runtime receipt/tree identity or mount flags differ. Then run the adversarial/recovery acceptance matrix against that final path: candidate mutation/chmod/truncate/rename attempts, stale/corrupt receipt or tree rejection, replay/stale admission, interruption/timeout, cleanup failure, disk pressure, GPU/process residue, and concurrency/isolation. Keep model inference disabled during this phase; the first bounded real Qwen gpu-small canary remains a later separate stage.
+Install the validated workspace-control adversarial-runtime integration on Lambda from the exact current main produced by the task-only checkpoint following implementation merge 83ead40b347f55937235f14bc71a73397741cfcb. Use bootstrap_lambda_ci_p5.sh with exact-SHA guard and controllers active; first verify the existing expanded runtime path, durable receipt, and trusted-cache manager blob are present and unchanged. Then trigger exactly one naturally required gpu-small run through the trusted research-engine workflow at main dcb351a33710ad9cc6697987b0d5b2dd92513dd3 / workflow blob 427498aad2ab3fa57fd8035461b5817282e5d96b against an exact PR head SHA. Treat that run as the first live adversarial acceptance: require runtime mutation denial, exact runtime identity, bounded CUDA, post-run tree re-verification, zero project/GPU process residue, job/staging cleanup, and durable root receipt. Do not load model weights or perform inference. Do not create any extra run solely for measurement.
 
 ## Remaining work
 
