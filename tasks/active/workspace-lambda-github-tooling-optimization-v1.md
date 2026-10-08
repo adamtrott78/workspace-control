@@ -25,7 +25,7 @@ Minimize the model-visible ChatGPT/GitHub orchestration delay and interaction be
 
 - Intent: mutate
 - Remote branch: workspace-lambda-github-tooling-optimization-v1
-- Remote checkpoint: a694e6c4fe226173e4117ffa515246efce9f51ad
+- Remote checkpoint: 189c2cd35e48db2ba1838ad404fb2c55f0e723b6
 - Remote verified: true
 
 ## Next safe action
@@ -34,11 +34,11 @@ On the next naturally required successful CPU or gpu-small owning-task run, cons
 
 ## Remaining work
 
+- Keep validated draft PR #143 unmerged while accumulating ordinary-run control-loop observations; revise only if evidence demonstrates a protocol/tooling defect or measurable orchestration inefficiency.
 - Consume future CONTROL_LOOP_OBSERVATION_V1 records from naturally required successful CPU/gpu-small owning-task runs without requesting extra measurement work.
 - Measure and reduce assistant-visible success-path reads: eliminate full logs, avoid redundant job/status reads, and count actual artifact discovery/download invocations on the current connector surface.
 - Measure terminal_evidence_first_available_at -> receipt_validated_at -> next_substantive_action_started_at when those timestamps are naturally observed; preserve null otherwise.
 - Validate zero routine human relay on ordinary successful runs while separately classifying any owning-task-required acceptance/recovery evidence.
-- Refresh the isolated chat-protocol validation branch from current main and revalidate the revised four-file protocol/reducer surface before any promotion.
 - Treat comment-ID run metadata as optional future ergonomics only if real duplicate-identical-trigger ambiguity occurs.
 - Keep generic launcher/runtime refactoring deferred outside the current observer-only orchestration scope unless the user explicitly reauthorizes it.
 
