@@ -306,6 +306,79 @@ def test_v2_identical_replay_returns_original_admission_without_reexecution():
         assert state["result"]["admission_identity"]["admission_id"] == admission_id
 
 
+def test_v2_terminal_replay_survives_service_reconstruction():
+    first_calls = []
+    first_done = threading.Event()
+
+    def first_launcher(req, spec):
+        first_calls.append((req, spec))
+        first_done.set()
+        return {
+            "decision": "RUNNER_EXITED_CLEANLY",
+            "admission_identity": service_mod.runtime.admission_receipt_identity(spec).get(
+                "admission_identity"
+            ),
+        }
+
+    with tempfile.TemporaryDirectory() as tmp:
+        req = v2_request()
+        manifest = enabled_v2_manifest()
+
+        first = build_service(
+            tmp,
+            first_launcher,
+            manifest=manifest,
+            clock=lambda: V2_NOW,
+        )
+        accepted = first.handle_request(req, peer_uid=12345)
+        assert accepted["status"] == "ACCEPTED"
+        admission_id = accepted["admission_identity"]["admission_id"]
+        assert first_done.wait(1)
+        wait_for(
+            lambda: json.loads(first.state_store.path(req["request_id"]).read_text())[
+                "status"
+            ]
+            == "COMPLETED"
+        )
+        assert len(first_calls) == 1
+
+        second_calls = []
+
+        def second_launcher(req, spec):
+            second_calls.append((req, spec))
+            raise AssertionError("terminal replay relaunched after service reconstruction")
+
+        restarted = build_service(
+            tmp,
+            second_launcher,
+            manifest=manifest,
+            clock=lambda: V2_NOW + timedelta(seconds=2000),
+        )
+
+        status = restarted.handle_request(
+            {
+                "schema_version": 2,
+                "operation": "STATUS",
+                "request_id": req["request_id"],
+            },
+            peer_uid=12345,
+        )
+        assert status["status"] == "COMPLETED"
+        assert status["request_id"] == req["request_id"]
+        assert status["admission_id"] == admission_id
+
+        retry = copy.deepcopy(req)
+        retry["jit_config"] = base64.b64encode(
+            b'{"opaque":"regenerated-after-restart"}'
+        ).decode()
+        duplicate = restarted.handle_request(retry, peer_uid=12345)
+        assert duplicate["status"] == "DUPLICATE"
+        assert duplicate["receipt_status"] == "COMPLETED"
+        assert duplicate["admission_id"] == admission_id
+        assert second_calls == []
+
+
+
 def test_v2_same_request_id_different_digest_is_replay_conflict():
     done = threading.Event()
 
