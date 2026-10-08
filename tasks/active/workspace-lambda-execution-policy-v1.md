@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: c3e2eda06fbd1eac0ad13bb44a6b48067d43570c
+- Remote checkpoint: 21d90bc676198b64b79bab3c439e2d576c65cf00
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Run the kill-switch adversarial canary using only temporary manifest/state copies and the installed admission/provisioner modules. Prove admission_v2.enabled=false rejects a fresh v2 request before durable state claim/launcher invocation, and prove incrementing kill_switch_epoch invalidates an admission minted under the previous epoch before consumption. Do not edit /etc/workspace-ci, restart controllers, submit GitHub jobs, or touch GPU state. After PASS, checkpoint kill-switch enforcement and proceed to timeout/OOM/disk-pressure failure-receipt semantics.
+Begin timeout/OOM/disk-pressure failure-receipt validation without changing accepted runtime/model authority. First, audit and harden timeout handling in the root runtime launcher so a subprocess timeout explicitly terminates the transient systemd unit/systemd-run wrapper, records a deterministic failure classification/receipt, still performs project-UID/GPU/runtime/workspace cleanup verification, and never automatically retries. Validate with CPU-only regression tests before any live timeout canary. Then run one bounded cpu-test timeout canary if the implementation is fully validated; do not use gpu-small for timeout testing.
 
 ## Remaining work
 
