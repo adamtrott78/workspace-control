@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-On Lambda, perform a read-only structural and identity classification of ~/.research-engine/residual-runtimes/qwen3.5-4b-vllm-0.30.0 before any runtime acquisition. Record regular-file, symlink, directory, special-entry, and materialized-byte counts; enumerate every symlink target without following it; read and validate .workspace-control-ready.json against runtime contract qwen35-vllm-cu129-image-native-sampler-v3; verify vLLM distribution 0.30.0+cu129 and direct_url wheel SHA-256 e98cb69659bfcfc849cf11ce0781a7161d40b02b51a6c3636924a5909f2aabcc, torch 2.13.0+cu129 with CUDA 12.9, torchvision 0.28.0+cu129, torchcodec 0.16.0+cu129, and VLLM_USE_FLASHINFER_SAMPLER=0 semantics from owning evidence. Capture the current sorted pip freeze and identify whether the environment contains absolute-path shebangs, symlinks, or other relocation hazards. Because trusted-cache v1 forbids symlinks, do not call acquire-local on the raw venv unless the observed tree is policy-compatible. Do not rebuild/download packages, run model inference, stop/start the production daemon, mutate scientific state, or alter the accepted model object. Use the classification to choose the smallest exact runtime/dependency representation that can be promoted read-only and consumed offline on gpu-small.
+Design and build a content-addressed Qwen runtime dependency bundle rather than promoting the raw venv. Use the exact 196-line freeze (SHA-256 198d90f866d032ea8f747dd9d28a1fe5f5ef18c02e5eb64b850124e77a2744d0) plus the owning runtime contract to construct a symlink-free trusted package payload containing exact wheel/source artifacts, hashes, indexes/source URLs, Python ABI/platform constraints, native-sampler environment semantics, and a deterministic offline reconstruction manifest. The bundle must be consumable with network disabled into an ephemeral per-job venv, after which the reconstructed environment must reproduce the exact vLLM/Torch/TorchVision/TorchCodec identities and prior multimodal/CUDA smoke without model inference. Do not mutate or promote the live venv, do not alter the accepted model object, do not enable model-eval, and do not widen gpu-small or gpu-heavy authority.
 
 ## Remaining work
 
@@ -47,7 +47,7 @@ On Lambda, perform a read-only structural and identity classification of ~/.rese
 
 ## Blockers / gates
 
-- The exact Qwen model object is accepted. The next unresolved boundary is runtime packaging: the existing qwen35-vllm-cu129-image-native-sampler-v3 environment is a Python venv, while trusted-cache v1 rejects symlinks and non-regular payload entries. Observe the existing runtime tree and exact package identity before choosing a promotable, read-only offline representation; do not blindly promote the raw venv.
+- Raw qwen3.5 venv promotion is denied by observed structure: symlinks, cache-v1-forbidden suffixes, secret-name/marker hits, absolute shebangs, and extensive absolute-prefix coupling. The next design must promote immutable package/dependency inputs and an exact reconstruction manifest rather than the live venv tree.
 
 ## Fresh-chat initialization
 
