@@ -67,6 +67,47 @@ def test_gpu_small_launch_spec_carries_stable_uuid_and_bounded_runtime():
     assert launch["resources"]["gpu_uuid"] == "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
     assert launch["resources"]["runtime_max_seconds"] == 1200
     assert launch["allow_production_services"] is False
+    runtime_binding = launch["runtime_binding"]
+    assert runtime_binding["runtime_id"] == "qwen35-vllm-cu129-image-native-sampler-v3"
+    assert runtime_binding["tree_digest_sha256"] == (
+        "b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63"
+    )
+
+
+def test_gpu_small_systemd_command_binds_runtime_and_uses_job_local_state():
+    req = mod.validate_request(good_request("gpu-small"), MANIFEST)
+    launch = mod.build_launch_spec(req, MANIFEST, PROFILES, PINS)
+    staging = pathlib.Path(
+        "/srv/workspace-ci/research-engine/staging-cache/p5-test"
+    )
+    command = runtime.build_gpu_systemd_command(
+        launch,
+        pathlib.Path(
+            "/srv/workspace-ci/research-engine/jobs/p5-test/runner"
+        ),
+        staging,
+        "134.88.12.0/22",
+        {
+            "selected_device": "/dev/nvidia0",
+            "target_uuid": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+            "denied_devices": ["/dev/nvidia1"],
+            "support_devices": ["/dev/nvidia-uvm"],
+        },
+    )
+
+    binding = launch["runtime_binding"]
+    assert f"BindReadOnlyPaths={binding['canonical_path']}" in command
+    assert f"Environment=P5_EXPANDED_RUNTIME={binding['canonical_path']}" in command
+    assert f"Environment=P5_EXPANDED_RUNTIME_PYTHON={binding['python_path']}" in command
+    assert (
+        f"Environment=P5_EXPANDED_RUNTIME_TREE_SHA256="
+        f"{binding['tree_digest_sha256']}"
+    ) in command
+    assert f"Environment=HOME={staging / 'home'}" in command
+    assert f"Environment=XDG_CACHE_HOME={staging / 'xdg'}" in command
+    assert "ReadWritePaths=/srv/workspace-ci/research-engine/home" not in command
+    assert "Environment=PYTHONDONTWRITEBYTECODE=1" in command
+    assert "Environment=VLLM_USE_FLASHINFER_SAMPLER=0" in command
 
 
 def test_extra_command_key_is_rejected():
