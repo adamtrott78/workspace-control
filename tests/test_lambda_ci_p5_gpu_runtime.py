@@ -236,6 +236,108 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
             self.assertFalse(root.exists())
 
 
+    def test_wrapper_timeout_stops_unit_and_reaps_systemd_run(self):
+        class FakeProc:
+            def __init__(self):
+                self.returncode = None
+                self.wait_calls = []
+                self.terminate_called = False
+                self.kill_called = False
+
+            def wait(self, timeout=None):
+                self.wait_calls.append(timeout)
+                if len(self.wait_calls) == 1:
+                    raise runtime.subprocess.TimeoutExpired(
+                        cmd="systemd-run",
+                        timeout=timeout,
+                    )
+                self.returncode = 143
+                return self.returncode
+
+            def poll(self):
+                return self.returncode
+
+            def terminate(self):
+                self.terminate_called = True
+
+            def kill(self):
+                self.kill_called = True
+
+        proc = FakeProc()
+        commands = []
+        responses = [
+            SimpleNamespace(returncode=0, stdout="", stderr=""),
+            SimpleNamespace(returncode=3, stdout="inactive\n", stderr=""),
+            SimpleNamespace(returncode=0, stdout="", stderr=""),
+        ]
+        original = runtime.run
+
+        def fake_run(argv, check=True):
+            commands.append(argv)
+            return responses.pop(0)
+
+        runtime.run = fake_run
+        try:
+            rc, timed_out, cleanup_pass = runtime.wait_for_transient_runner(
+                proc,
+                "workspace-ci-test.service",
+                1,
+            )
+        finally:
+            runtime.run = original
+
+        self.assertEqual(rc, 143)
+        self.assertTrue(timed_out)
+        self.assertTrue(cleanup_pass)
+        self.assertFalse(proc.terminate_called)
+        self.assertFalse(proc.kill_called)
+        self.assertEqual(
+            commands,
+            [
+                ["systemctl", "stop", "workspace-ci-test.service"],
+                ["systemctl", "is-active", "workspace-ci-test.service"],
+                ["systemctl", "reset-failed", "workspace-ci-test.service"],
+            ],
+        )
+
+    def test_wrapper_timeout_cleanup_fails_if_wrapper_or_unit_survives(self):
+        class StuckProc:
+            def wait(self, timeout=None):
+                raise runtime.subprocess.TimeoutExpired(
+                    cmd="systemd-run",
+                    timeout=timeout,
+                )
+
+            def poll(self):
+                return None
+
+            def terminate(self):
+                pass
+
+            def kill(self):
+                pass
+
+        proc = StuckProc()
+        responses = [
+            SimpleNamespace(returncode=0, stdout="", stderr=""),
+            SimpleNamespace(returncode=0, stdout="active\n", stderr=""),
+            SimpleNamespace(returncode=0, stdout="", stderr=""),
+        ]
+        original = runtime.run
+        runtime.run = lambda argv, check=True: responses.pop(0)
+        try:
+            rc, timed_out, cleanup_pass = runtime.wait_for_transient_runner(
+                proc,
+                "workspace-ci-test.service",
+                1,
+            )
+        finally:
+            runtime.run = original
+
+        self.assertIsNone(rc)
+        self.assertTrue(timed_out)
+        self.assertFalse(cleanup_pass)
+
     def test_dispatch_rejects_gpu_heavy(self):
         class Req:
             pass
