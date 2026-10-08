@@ -741,10 +741,10 @@
         },
         {
           "check": "Cleanup-failure lane quarantine implementation",
-          "result": "VALIDATED",
+          "result": "NOT_RUN",
           "evidence": [
             "workspace-control 3eb87841018bf2d86ec4af04b610e086f0abc8da adds post-kill process rechecks, verified job/staging removal, distinct RuntimeCleanupError, persistent per-lane quarantine, and admission blocking across provisioner reconstruction.",
-            "Payload failures do not quarantine; cleanup verification failures do. CPU-only regression and full Workspace Control Validation passed.",
+            "Payload failures do not quarantine; cleanup verification failures do. CPU-only regression and full Workspace Control Validation passed for the implementation branch.",
             "Host deployment and synthetic cleanup-quarantine canary remain pending; no live lane has been deliberately quarantined."
           ]
         }
