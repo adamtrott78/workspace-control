@@ -1,0 +1,458 @@
+{
+  "schema_version": 2,
+  "task_id": "cis560-exam1-preparation-v1",
+  "title": "CIS 560 Exam 1 Preparation and Cheat-Sheet Build",
+  "status": "CHECKPOINTED",
+  "goal": "Prepare Adam for the CIS 560 midterm on Thursday, October 22, 2026 by using current-semester instructor authority, homework/class-example problem families, durable behavioral evidence, and the one-US-Letter-page double-sided cheat sheet. Optimize for Xu's announced exam architecture: broad Q1 True/False protection plus four short Q2-Q5 construction/proof problems. Respect the MILCOM and MTH 602 blackout windows, preserve uncertainty until remaining lectures/review are sourced, and require independent transfer before claiming exam readiness.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "cis560-exam1",
+  "current_stage": "pre_milcom_preservation",
+  "acceptance_criteria": [
+    "The October 8 direct instructor exam invariants remain the primary current-semester format authority until transcript/review evidence corrects them.",
+    "The full Q2-Q5 candidate-family pool named by Xu is preserved explicitly: simple DFA, simple NFA, regular-expression work, CFG design, PDA design, show RL pumping property, show CFL pumping property, prove not regular with pumping, and prove not context free with CFL pumping.",
+    "No future executor collapses the candidate-family pool into a claim that all named types will appear; there are only four Q2-Q5 slots and exact selection remains unknown.",
+    "Q1 preparation protects broad definitions, distinctions, theorem directionality, closure facts, machine-power comparisons, common traps, and explicit exclusions through rapid T/F-style practice.",
+    "Q2-Q5 preparation is driven by independent closed-book redos of homework/class examples plus nearby variants, written in compact 75-minute-exam form rather than homework-length exposition.",
+    "Pumping-property questions are practiced as partition plus three conditions; nonregular/non-CFL pumping proofs are practiced with p-dependent witness plus all legal split/placement cases plus contradiction.",
+    "The study plan does not rely on CIS 560 work during MILCOM October 11-15 or the MTH 602 study block October 16-19 morning.",
+    "HW3 completion is used as study context but not as automatic mastery evidence; guided HW3 skills receive fresh cold-transfer checks before promotion.",
+    "The cheat sheet remains a living two-sided US Letter artifact organized around Q1 T/F protection and Q2-Q5 execution recipes, with no long prose and no final density freeze before Xu's October 20 review.",
+    "CYK remains required/current-distributed material but is not labeled live-taught as of Lecture 11 unless transcript/future lecture evidence establishes that.",
+    "Current explicit exclusions remain protected: full CFG-to-CNF conversion procedure is not an exam requirement; proofs of Lemmas 2.21 and 2.27 are not required.",
+    "Historical 2019 syllabus/homework/student cheat-sheet evidence may predict stable problem families but never overrides current-semester Xu guidance.",
+    "Remaining source evidence (Lecture 11 transcript, October 15 Lecture 12 materials, October 20 review) is durably ingested into Git and used to reweight scope without erasing prior provenance.",
+    "By exam day, high-relevance pillar skills have delayed/fresh behavioral evidence sufficient for exam-ready claims, and unresolved secondary material is at least safely protected on the cheat sheet."
+  ],
+  "constraints": [
+    "Start from CIS560-AdamTrott root README.md and route through COURSE.md/study owners; do not depend on prior chat memory.",
+    "Project course truth lives in CIS560-AdamTrott. workspace-control owns only reusable tutoring/task mechanics.",
+    "CIS560 shared behavior remains pinned to workspace-control checkpoint 0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9.",
+    "Current-semester instructor statements, assignments, slides, handouts, and transcripts outrank historical 2019 predictive material.",
+    "Direct October 8 live statements are high-confidence but exact wording is provisional until the Lecture 11 transcript is ingested.",
+    "Do not infer exact Q2-Q5 selections, Q1 subpart count, point values, or CYK appearance from the current evidence.",
+    "Do not infer that a syllabus topic is dropped because live time is short; user reports Xu adheres closely to planned scope and tends to accelerate rather than omit. Explicit exclusions still control.",
+    "Do not treat slide presence or handout distribution as identical to spoken emphasis. Preserve source modality/provenance.",
+    "Do not use assignment completion as mastery evidence. Read homework/hw01/LEARNING.md, homework/hw02/LEARNING.md, and homework/hw03/LEARNING.md when prioritizing cold transfer.",
+    "Default mode for exam preparation is EXAM_READINESS / MASTERY_RECOVERY semantics: minimize scaffolding, use fresh or delayed variants, and demote/promote only from behavioral evidence.",
+    "No planned substantive academics during MILCOM Sunday night October 11 through Thursday night October 15; professor explicitly advised putting academics on hold for the conference.",
+    "Friday October 16 through Sunday October 18 are reserved for MTH 602; MTH 602 Midterm 1 is Monday October 19 at 11:00 AM.",
+    "CIS 560 intensive final preparation resumes after the MTH exam on October 19; October 20 is Xu's review; October 22 is the CIS 560 midterm.",
+    "User presents their MILCOM paper Wednesday during the conference; preserve conference-preparation bandwidth before travel.",
+    "The final cheat sheet is one US Letter page, double-sided.",
+    "Keep prose compact on the sheet: conditions, quantifier traps, construction recipes, proof skeletons, and T/F distinctions are preferred over solved-example exposition.",
+    "For exact diagrams/visuals whose binary originals are not in Git, use the durable source indexes and request/recover the original PDF/image instead of inventing details."
+  ],
+  "repositories": [
+    {
+      "name": "CIS560-AdamTrott",
+      "intent": "mutate",
+      "base_sha": "3e5906ca572f47272ac14a4d4ac2ed4ae9eb0122",
+      "remote": {
+        "branch": "tutor-framework",
+        "checkpoint_sha": "3e5906ca572f47272ac14a4d4ac2ed4ae9eb0122",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "README.md",
+        "COURSE.md",
+        "course/**",
+        "sources/**",
+        "study/**",
+        "homework/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "recover_exam_authority",
+      "status": "VALIDATED",
+      "execution_owner": "cis560-exam1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+chat",
+      "inputs": [
+        "git:3e5906ca572f47272ac14a4d4ac2ed4ae9eb0122",
+        "study/exam1/EXAM_INVARIANTS.md",
+        "sources/instructor/L11_LIVE_NOTES_2026-10-08_USER_PROVIDED.md",
+        "course/lectures/L11.md"
+      ],
+      "outputs": [
+        "Q1 True/False format captured.",
+        "Q2-Q5 short homework/class-example format captured.",
+        "Full named Q2-Q5 candidate-family pool captured.",
+        "75-minute/no-long-response guidance captured.",
+        "Pumping-property vs nonregular/non-CFL proof answer forms separated.",
+        "Independent homework/class-example redo readiness rule captured."
+      ],
+      "validation": [
+        {
+          "check": "October 8 exam blueprint is durable and source-separated",
+          "result": "PASS",
+          "evidence": [
+            "study/exam1/EXAM_INVARIANTS.md owns the high-confidence format invariants and explicitly marks exact wording provisional pending transcript.",
+            "The file now includes a current-semester concrete practice corpus under every named Q2-Q5 family.",
+            "sources/instructor/L11_LIVE_NOTES_2026-10-08_USER_PROVIDED.md preserves the contemporaneous source notes."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "recover_course_corpus",
+      "status": "VALIDATED",
+      "execution_owner": "cis560-exam1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+chat",
+      "inputs": [
+        "course/LECTURES.md",
+        "sources/instructor/SLIDE_DECK_INDEX.md",
+        "sources/instructor/MATERIAL_INVENTORY.md",
+        "sources/instructor/handouts/2026_HANDOUT_INDEX.md",
+        "study/exam1/TOPIC_INVENTORY.md",
+        "study/exam1/INSTRUCTOR_EMPHASIS.md",
+        "study/exam1/HISTORICAL_2019_COMPARISON.md"
+      ],
+      "outputs": [
+        "Slide coverage durable for L1-L10.",
+        "Transcript-backed reconstruction durable for L2-L10.",
+        "Lecture 11 live notes/board/physical CFL handout durable; transcript pending.",
+        "Current handout corpus durable with source hashes/provenance.",
+        "Historical 2019 comparison retained as predictive-only evidence."
+      ],
+      "validation": [
+        {
+          "check": "Source corpus is cold-start recoverable",
+          "result": "PASS",
+          "evidence": [
+            "L1 is slide-confirmed only; no transcript is falsely implied.",
+            "L2-L10 records distinguish slide/transcript/email/handout evidence.",
+            "CYK is current required/distributed material but not falsely marked as live-taught by Lecture 11.",
+            "Large binary originals are not falsely claimed durable; semantic routes and hashes identify when re-supply is needed."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "recover_behavioral_state",
+      "status": "VALIDATED",
+      "execution_owner": "cis560-exam1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+chat",
+      "inputs": [
+        "study/MASTERY.md",
+        "study/MASTERY_LOG.md",
+        "homework/hw01/LEARNING.md",
+        "homework/hw02/LEARNING.md",
+        "homework/hw03/LEARNING.md"
+      ],
+      "outputs": [
+        "HW1 shows independent DFA state design but several NFA/regex/complement construction skills remain guided.",
+        "HW2 shows substantial pumping/CFG work; witness selection and some proof construction required guidance and deserve fresh transfer.",
+        "HW3 is tutoring-complete/submission-integrated and artifact-validated; pumpability/CNF reasoning had strong independent evidence, while CFG equal-count design and full PDA mechanics required guidance."
+      ],
+      "validation": [
+        {
+          "check": "Completion/mastery firewall preserved",
+          "result": "PASS",
+          "evidence": [
+            "homework learning records explicitly separate independent, guided, and artifact-completion evidence.",
+            "No exam-ready claim is inferred merely from submitted/completed homework."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "pre_milcom_preservation",
+      "status": "PLANNED",
+      "execution_owner": "cis560-exam1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+chat",
+      "inputs": [
+        "study/exam1/STUDY_PLAN.md",
+        "study/exam1/EXAM_INVARIANTS.md",
+        "study/exam1/CHEATSHEET_CANDIDATES.md",
+        "behavioral learning records"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "Before Sunday travel, prioritize fresh independent transfer on guided/high-risk Q2-Q5 families, refine the Q1/Q2-Q5 cheat-sheet skeleton, and create a compact restart packet. Do not redo completed HW3 merely for completion."
+    },
+    {
+      "id": "milcom_academic_blackout",
+      "status": "PLANNED",
+      "execution_owner": "cis560-exam1",
+      "selected_executor": "human",
+      "selected_surface": "none",
+      "inputs": [
+        "schedule constraint October 11-15"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "No planned substantive CIS 560 study during MILCOM. At most save newly posted source material without studying it."
+    },
+    {
+      "id": "mth602_blackout",
+      "status": "PLANNED",
+      "execution_owner": "cis560-exam1",
+      "selected_executor": "human",
+      "selected_surface": "none",
+      "inputs": [
+        "schedule constraint October 16-19 morning"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "Resume CIS 560 only after the MTH 602 Midterm 1 on Monday October 19 at 11:00 AM."
+    },
+    {
+      "id": "ingest_remaining_scope",
+      "status": "PLANNED",
+      "execution_owner": "cis560-exam1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+chat",
+      "inputs": [
+        "Lecture 11 transcript when available",
+        "October 15 Lecture 12 slides/notes/transcript/handouts",
+        "current syllabus and existing source corpus"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "Reconcile remaining source material without overwriting live-note provenance; resolve CYK live-teaching status and any additional Section 2.3 examples/exclusions."
+    },
+    {
+      "id": "compressed_restart",
+      "status": "PLANNED",
+      "execution_owner": "cis560-exam1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+chat",
+      "inputs": [
+        "post-MTH October 19 window",
+        "restart packet",
+        "updated exam scope",
+        "behavioral evidence"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "Run a short cold pillar diagnostic after MTH, then prioritize only the highest-risk/highest-relevance gaps. Do not begin by rereading the entire course."
+    },
+    {
+      "id": "review_reweight",
+      "status": "PLANNED",
+      "execution_owner": "cis560-exam1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+chat",
+      "inputs": [
+        "October 20 Xu review lecture",
+        "EXAM_INVARIANTS.md",
+        "CHEATSHEET_CANDIDATES.md",
+        "QUESTION_BANK.md",
+        "INSTRUCTOR_EMPHASIS.md"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "Treat review as the strongest weighting/prioritization evidence: record all on/off-exam statements, revisited examples, question-format details, and importance cues; reallocate sheet space without discarding earlier scope evidence."
+    },
+    {
+      "id": "cheat_sheet_build",
+      "status": "PLANNED",
+      "execution_owner": "cis560-exam1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+artifact-tools",
+      "inputs": [
+        "one US Letter page double-sided constraint",
+        "Q1 T/F protection layer",
+        "Q2-Q5 recipe layer",
+        "review-reweighted priorities",
+        "current mastery gaps"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "Build/render/QA the final two-sided sheet after the October 20 review; keep exact conditions, traps, recipes, and proof skeletons; avoid long prose."
+    },
+    {
+      "id": "final_exam_readiness",
+      "status": "PLANNED",
+      "execution_owner": "cis560-exam1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+chat",
+      "inputs": [
+        "October 21 mixed timed practice",
+        "final cheat sheet",
+        "current mastery/learning evidence"
+      ],
+      "outputs": [],
+      "validation": [],
+      "resume_condition": "Use a timed mixed mini-midterm and fresh/delayed transfer. Promote to exam-ready only where the student independently selects and executes the method under minimal scaffolding."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "cis560-exam1-handoff-2026-10-08",
+      "kind": "git_commit",
+      "identity": "3e5906ca572f47272ac14a4d4ac2ed4ae9eb0122",
+      "required_for_resume": true,
+      "evidence": [
+        "CIS560-AdamTrott tutor-framework verified at 3e5906ca572f47272ac14a4d4ac2ed4ae9eb0122.",
+        "At this checkpoint EXAM_INVARIANTS contains the direct October 8 format guidance plus the full named Q2-Q5 candidate-family practice corpus.",
+        "STUDY_PLAN contains the MILCOM/MTH constrained plan and current October 8 checkpoint.",
+        "CHEATSHEET_CANDIDATES contains the Q1/Q2-Q5 architecture and named-family coverage matrix.",
+        "EXAM_TIMELINE is reconciled through completed Lecture 11 live evidence.",
+        "HW3 is tutoring-complete/submission-integrated and visually validated according to its learning record; submission remains user-owned."
+      ]
+    },
+    {
+      "id": "workspace-control-cis560-compatibility",
+      "kind": "git_commit",
+      "identity": "0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9",
+      "required_for_resume": false,
+      "evidence": [
+        "CIS560 root README pins shared behavior to this checkpoint.",
+        "course-assessment-preparation.v1.json is present at this checkpoint with blob a576677dc886bd70826789b37dcce2499190c2f1.",
+        "course-cheat-sheet-build.v1.json is present at this checkpoint with blob 14a13e820b5b106e55e7bbbcc252e67abcb47351."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "study/exam1/EXAM_INVARIANTS.md",
+      "state": "active authoritative exam-format planning record",
+      "role": "direct October 8 exam blueprint + named Q2-Q5 families + current concrete practice anchors",
+      "origin": "live Xu guidance captured contemporaneously; exact wording pending transcript",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "reconcile with Lecture 11 transcript and October 20 review; do not silently replace live-note provenance",
+      "review_requirement": "current-semester direct instructor authority",
+      "evidence": [
+        "Q1/Q2-Q5/75-minute/no-long-response/pumping-answer-format/readiness guidance durable."
+      ]
+    },
+    {
+      "path": "study/exam1/STUDY_PLAN.md",
+      "state": "active living plan",
+      "role": "MILCOM/MTH constrained exam-preparation schedule and behavioral readiness architecture",
+      "origin": "current course evidence + user schedule constraints",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "reweight after remaining lectures/review, not from historical material alone",
+      "review_requirement": "must remain realistic about academic blackout windows",
+      "evidence": [
+        "October 8 checkpoint marks HW3 complete and shifts pre-MILCOM work to cold transfer/restart preparation."
+      ]
+    },
+    {
+      "path": "study/exam1/CHEATSHEET_CANDIDATES.md",
+      "state": "active evolving content plan",
+      "role": "two-sided US Letter cheat-sheet selection/space owner",
+      "origin": "lecture/HW/instructor emphasis plus October 8 exam invariants",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "finalize after October 20 review",
+      "review_requirement": "Q1 protection + all named Q2-Q5 recipes must remain represented until evidence justifies demotion",
+      "evidence": [
+        "Named-family coverage matrix durable; no long-prose space allocation."
+      ]
+    },
+    {
+      "path": "study/exam1/QUESTION_BANK.md",
+      "state": "active",
+      "role": "problem-family practice corpus",
+      "origin": "current homework/class/handout evidence plus source-separated historical prediction",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "add new current-semester examples as sourced",
+      "review_requirement": "prefer current-semester examples for readiness work",
+      "evidence": [
+        "Lecture 11 handout non-CFL problems and HW3 archetypes are recorded."
+      ]
+    },
+    {
+      "path": "study/exam1/INSTRUCTOR_EMPHASIS.md",
+      "state": "active",
+      "role": "direct importance/exclusion/exam-signal ledger",
+      "origin": "lecture transcripts/live statements/instructor notes",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "update from sourced instructor evidence only",
+      "review_requirement": "quote only when source wording supports it",
+      "evidence": [
+        "October 8 format and pumping signals recorded."
+      ]
+    },
+    {
+      "path": "sources/instructor/SLIDE_DECK_INDEX.md",
+      "state": "validated through Lecture 10",
+      "role": "cold-start route to prepared instructor slide content",
+      "origin": "supplied PDFs + Mathpix Markdown",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "extend when later decks are supplied",
+      "review_requirement": "visual-only diagrams may require original PDF",
+      "evidence": [
+        "L1-L10 slide coverage indexed with hashes/page counts."
+      ]
+    },
+    {
+      "path": "sources/instructor/handouts/2026_HANDOUT_INDEX.md",
+      "state": "validated current handout inventory",
+      "role": "current Canvas/distributed handout source map",
+      "origin": "user-supplied PDF/Mathpix pairs plus current distribution provenance",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "extend as Xu distributes more handouts",
+      "review_requirement": "preserve embedded source dates separate from current distribution provenance",
+      "evidence": [
+        "RL pumping/GNFA/DFA/Myhill/CYK indexed; physical CFL handout routed separately."
+      ]
+    },
+    {
+      "path": "sources/instructor/L11_LIVE_NOTES_2026-10-08_USER_PROVIDED.md",
+      "state": "provisional source evidence",
+      "role": "contemporaneous live Lecture 11 evidence before transcript",
+      "origin": "user classroom notes",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "reconcile, never erase, when transcript arrives",
+      "review_requirement": "exact wording provisional",
+      "evidence": [
+        "Exam blueprint and CFL pumping examples/proof captured."
+      ]
+    },
+    {
+      "path": "sources/instructor/L11_CFL_PUMPING_HANDOUT_2026-10-08_USER_PROVIDED.md",
+      "state": "current-semester instructor handout transcription",
+      "role": "direct non-CFL proof-practice source",
+      "origin": "Fall 2026 physical handout photos",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "compare with Canvas copy when posted; preserve printed vs handwritten distinction",
+      "review_requirement": "strong Q2-Q5 practice evidence",
+      "evidence": [
+        "Problems `{a^i b^j c^k | 0<=i<=j<=k}` and `{ww}`."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Exam handoff includes direct format invariants, all named Q2-Q5 families, concrete practice anchors, schedule constraints, and uncertainty boundaries",
+      "result": "PASS",
+      "evidence": [
+        "EXAM_INVARIANTS and CHEATSHEET_CANDIDATES were updated immediately before this checkpoint.",
+        "EXAM_TIMELINE was reconciled so October 8 is no longer represented as future.",
+        "STUDY_PLAN now records HW3 completion and shifts pre-MILCOM work to independent transfer.",
+        "The task records CYK, CNF, historical-evidence, and mastery boundaries explicitly."
+      ]
+    }
+  ],
+  "blockers": [
+    "Lecture 11 YouTube transcript has not yet been supplied/ingested, so exact wording of October 8 live guidance remains provisional.",
+    "October 15 Lecture 12 has not occurred yet; it is expected to be the final new-content class under the user's course-practice model.",
+    "October 20 review has not occurred; final cheat-sheet space weighting should remain unfrozen until then."
+  ],
+  "remaining_work": [
+    "Before MILCOM: perform targeted cold transfer on guided/high-risk Q2-Q5 families and create/refine the restart packet and cheat-sheet skeleton.",
+    "Ingest and reconcile the Lecture 11 transcript when captions become available; resolve exact CYK mention and any wording differences without erasing contemporaneous notes.",
+    "Ingest October 15 Lecture 12 sources after MILCOM/travel; resolve final substantive scope.",
+    "After MTH 602 on October 19: run a fast cold diagnostic instead of rereading the entire course.",
+    "Capture and ingest the October 20 review as the strongest final weighting signal.",
+    "Build/render/QA the final one-page-double-sided US Letter cheat sheet after review.",
+    "Run a timed mixed mini-midterm on October 21 emphasizing the named Q2-Q5 family pool plus Q1 T/F breadth.",
+    "Update mastery/readiness only from independent fresh/delayed evidence."
+  ],
+  "next_safe_action": "In a fresh chat, recover the CIS560 root route and this task capsule, verify tutor-framework is at or descended from the checkpoint, then read study/exam1/EXAM_INVARIANTS.md, STUDY_PLAN.md, CHEATSHEET_CANDIDATES.md, and the HW1/HW2/HW3 LEARNING records. Do not re-ingest the whole course. Confirm the October 8 Q2-Q5 named-family pool is preserved, then continue the pre-MILCOM preparation phase with a targeted cold-transfer diagnostic selected from the highest-risk guided family, unless the user instead supplies the Lecture 11 transcript or asks for a different immediate action.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+chat",
+  "notes": "Hydrated handoff intent: This task owns Exam 1 preparation, not HW3 completion. The exam is Thursday October 22, 2026 and Xu stated live on October 8 that Q1 is True/False and Q2-Q5 are short homework/class-example-style problems. He named simple DFA, simple NFA, regex work, CFG design, PDA design, show RL pumping property, show CFL pumping property, use pumping lemma to prove not regular, and use CFL pumping lemma to prove not context free. Xu said the exam is 75 minutes, there are no longer-response questions, and students should redo HW/class examples independently without solutions; if they can do that, they should be able to do the exam. For pumping-property questions, partition + verification of the 3 conditions is enough; HW3-style explanatory prose is not needed. For nonregular/non-CFL pumping proofs, cover all legal splits/placements. Current concrete anchors include L7 `a(bb)*a` for RL pumpability; Lecture 11 equal-a/b `aabb`/`abab` for CFL pumpability; canonical `{0^n1^n}` and current RL handout for nonregularity; Lecture 11 `{a^n b^n c^n}` plus Fall-2026 handout `{a^i b^j c^k | 0<=i<=j<=k}` and `{ww}` for non-CFL proofs; HW3 CFG/PDA constructions; HW1 DFA/NFA/regex constructions. Q1 should protect exact distinctions such as DFA completeness, NFA existential acceptance, DFA=NFA power, DPDA<PDA, regular iff DFA/NFA/regex, CFL iff CFG/PDA, one-way pumping implications, 5 closure operations vs 3 named regular operations, epsilon/empty-set traps, ambiguity levels, CNF forms, failure-to-construct not being proof, and explicit exclusions. CYK is syllabus-listed, Lecture-10-required reading, and current Canvas-distributed, but user explicitly says Xu had not substantively taught it live by the end of Lecture 11; future transcript/L12/review must resolve weight. Full CNF conversion procedure is explicitly excluded; proofs of Lemmas 2.21 and 2.27 are excluded. The user has one US Letter page double-sided for the cheat sheet. Cheat-sheet architecture should be two functional regions: Q1 rapid T/F protection and Q2-Q5 compact execution recipes. MILCOM: fly Sunday night Oct 11, present Wednesday, return Thursday night Oct 15; professor told user to put academics on hold for MILCOM. MTH 602 gets Oct 16-18; midterm is Oct 19 at 11 AM. CIS resumes after that. Oct 20 is expected review; Oct 22 CIS midterm. HW3 is already tutoring-complete/submission-integrated and artifact-validated; use its learning record, do not redo it as unfinished work. Behavioral priority: fresh CFG design because equal-count CFG required guidance; fresh PDA mechanics because complete artifact required JFLAP/read-pop-push/bottom-marker guidance; regular pumping witness selection because HW2 exposed a weakness; fresh CFL non-CFL case analysis because it is new; and at least one DFA/NFA/regex transfer because Xu named those families and several HW1 skills remain guided. Historical 2019 material is useful predictive evidence only. Preserve source provenance rigorously. Quote only actual/near-verbatim transcript/source wording; paraphrases stay unquoted."
+}
