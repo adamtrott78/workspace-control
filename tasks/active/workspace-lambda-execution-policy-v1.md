@@ -18,9 +18,21 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Design, implement, and adversarially validate a fail-closed workload admission, trusted model/dependency cache, resource-governance, and execution-evidence layer on top of the accepted Lambda P5 CPU and gpu-small autonomous runner substrate so ChatGPT/GitHub-driven work can safely execute pinned model-scale workloads without granting candidate workflow code the ability to invent capabilities, persist mutable cross-job state, access production/scientific state, or widen host authority.
 
-## Current stage
+## Repositories
 
-trusted_cache_promotion_and_provenance
+### workspace-control
+
+- Intent: mutate
+- Remote branch: main
+- Remote checkpoint: 42cf6a0bebbc79f4d5657486c7b259bfcc4a5b7a
+- Remote verified: true
+
+### research-engine
+
+- Intent: mutate
+- Remote branch: main
+- Remote checkpoint: 66361693ad2f8d0a345d420dabccbbd6042f5c59
+- Remote verified: true
 
 ## Next safe action
 
