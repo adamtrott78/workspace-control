@@ -24,19 +24,19 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 038e6224cbd1d7e5f2dce21708509c5f1c8f826d
+- Remote checkpoint: 23331f45623c287ff69164813b3b35793f015092
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: dcb351a33710ad9cc6697987b0d5b2dd92513dd3
+- Remote checkpoint: fa0ff6f1a4a46fd0295e45df401aa8361d220c86
 - Remote verified: true
 
 ## Next safe action
 
-Install workspace-control exact SHA 038e6224cbd1d7e5f2dce21708509c5f1c8f826d on Lambda using the accepted exact-SHA bootstrap path. This changes only the expanded-runtime tree-digest implementation/tests; trusted runtime object/receipt/tree digest, policy epoch, trusted workflow blob, trusted-cache manager, model authority, and gpu-heavy denial remain unchanged. Verify installed lambda_ci_runtime.py blob matches this SHA and that the root provisioner/controller services return active with zero unexpected restarts. Then cancel or otherwise terminalize the already-failed queued GitHub workflow run 37732928088 without re-executing it, and trigger one fresh adversarial gpu-small run from a new exact candidate PR head/comment so admission gets a new request/job identity. Require pre-execution verifier to match b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63 before candidate start. Do not load model weights or perform inference.
+Install current workspace-control main on Lambda with the exact-SHA bootstrap. Verify project manifest workflow blob e02e35306ae82c4ba393631cbaa1521ca53a28b4, runtime verifier blob 7148df0806b7c033b9586ec59bf5da2575d25646, trusted-cache manager blob a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807, and expanded runtime tree b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63. Then create one fresh PR-head candidate commit on research-engine PR 114 and trigger one new gpu-small acceptance request. Do not reuse a terminal request.
 
 ## Remaining work
 
