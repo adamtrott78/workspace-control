@@ -8,6 +8,7 @@ workspace-control policy.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import pathlib
@@ -53,6 +54,174 @@ def project_identity(user: str) -> tuple[int, int]:
     if active.returncode not in (0, 1):
         raise RuntimeLaunchError(f"unable to inspect process state for {user}")
     return row.pw_uid, row.pw_gid
+
+
+def expanded_runtime_tree_digest(root: pathlib.Path) -> str:
+    """Hash the accepted expanded-runtime tree without following symlinks."""
+    tree_hash = hashlib.sha256()
+    for path in sorted(
+        root.rglob("*"),
+        key=lambda item: item.relative_to(root).as_posix(),
+    ):
+        rel = path.relative_to(root).as_posix()
+        st = path.lstat()
+        mode = stat.S_IMODE(st.st_mode)
+
+        if stat.S_ISDIR(st.st_mode):
+            tree_hash.update(f"D\\0{rel}\\0{mode:o}\\n".encode())
+            continue
+
+        if stat.S_ISLNK(st.st_mode):
+            tree_hash.update(f"L\\0{rel}\\0{os.readlink(path)}\\n".encode())
+            continue
+
+        if not stat.S_ISREG(st.st_mode):
+            raise RuntimeLaunchError(f"expanded runtime contains special file: {path}")
+
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            while True:
+                block = handle.read(8 * 1024 * 1024)
+                if not block:
+                    break
+                digest.update(block)
+        tree_hash.update(
+            (
+                f"F\\0{rel}\\0{mode:o}\\0{st.st_size}\\0"
+                f"{digest.hexdigest()}\\n"
+            ).encode()
+        )
+    return tree_hash.hexdigest()
+
+
+def verify_expanded_runtime_binding(spec: dict[str, Any]) -> dict[str, Any]:
+    """Verify the exact root-owned expanded runtime before/after gpu-small execution."""
+    binding = spec.get("runtime_binding")
+    if not isinstance(binding, dict):
+        raise RuntimeLaunchError("gpu-small requires exact expanded runtime binding")
+
+    required = {
+        "runtime_id",
+        "canonical_path",
+        "python_path",
+        "receipt_path",
+        "tree_digest_sha256",
+        "manifest_identity_sha256",
+        "source_trusted_runtime_object",
+        "required_controls",
+    }
+    if set(binding) != required:
+        raise RuntimeLaunchError("expanded runtime binding keys drift")
+
+    runtime = pathlib.Path(binding["canonical_path"])
+    python = pathlib.Path(binding["python_path"])
+    receipt_path = pathlib.Path(binding["receipt_path"])
+
+    if not runtime.is_absolute() or not receipt_path.is_absolute():
+        raise RuntimeLaunchError("expanded runtime paths must be absolute")
+    if python != runtime / "bin/python":
+        raise RuntimeLaunchError("expanded runtime python path drift")
+    if not runtime.is_dir() or not python.is_file():
+        raise RuntimeLaunchError("expanded runtime or Python executable missing")
+    if not receipt_path.is_file():
+        raise RuntimeLaunchError("expanded runtime receipt missing")
+
+    receipt_stat = receipt_path.stat()
+    if receipt_stat.st_uid != 0 or receipt_stat.st_gid != 0:
+        raise RuntimeLaunchError("expanded runtime receipt is not root-owned")
+    if stat.S_IMODE(receipt_stat.st_mode) & 0o222:
+        raise RuntimeLaunchError("expanded runtime receipt is writable")
+
+    try:
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise RuntimeLaunchError("expanded runtime receipt is invalid JSON") from exc
+
+    expected_receipt = {
+        "runtime_path": binding["canonical_path"],
+        "runtime_contract_version": binding["runtime_id"],
+        "source_manifest_identity_sha256": binding["manifest_identity_sha256"],
+        "source_trusted_runtime_object": binding["source_trusted_runtime_object"],
+        "tree_digest_sha256": binding["tree_digest_sha256"],
+        "read_only_hardened": True,
+        "receipt_committed_after_all_assertions": True,
+        "model_weights_loaded": False,
+        "model_inference_performed": False,
+    }
+    for key, expected in expected_receipt.items():
+        if receipt.get(key) != expected:
+            raise RuntimeLaunchError(
+                f"expanded runtime receipt mismatch for {key}: "
+                f"{receipt.get(key)!r} != {expected!r}"
+            )
+
+    allowed_external_symlinks = {
+        pathlib.Path("/usr/bin/python3"),
+        pathlib.Path("/usr/bin/python3.12"),
+    }
+    file_count = 0
+    directory_count = 1
+    symlink_count = 0
+
+    root_stat = runtime.lstat()
+    if root_stat.st_uid != 0 or root_stat.st_gid != 0:
+        raise RuntimeLaunchError("expanded runtime root ownership drift")
+    if stat.S_IMODE(root_stat.st_mode) & 0o222:
+        raise RuntimeLaunchError("expanded runtime root write bits drift")
+
+    for path in runtime.rglob("*"):
+        st = path.lstat()
+        if st.st_uid != 0 or st.st_gid != 0:
+            raise RuntimeLaunchError(f"expanded runtime ownership drift: {path}")
+
+        if stat.S_ISLNK(st.st_mode):
+            symlink_count += 1
+            resolved = path.resolve(strict=False)
+            try:
+                resolved.relative_to(runtime)
+            except ValueError:
+                if resolved not in allowed_external_symlinks:
+                    raise RuntimeLaunchError(
+                        f"expanded runtime external symlink drift: {path} -> {resolved}"
+                    )
+            continue
+
+        if stat.S_ISREG(st.st_mode):
+            file_count += 1
+        elif stat.S_ISDIR(st.st_mode):
+            directory_count += 1
+        else:
+            raise RuntimeLaunchError(f"expanded runtime special file detected: {path}")
+
+        if stat.S_IMODE(st.st_mode) & 0o222:
+            raise RuntimeLaunchError(f"expanded runtime writable inode detected: {path}")
+
+    if file_count != int(receipt.get("file_count", -1)):
+        raise RuntimeLaunchError("expanded runtime file count drift")
+    if directory_count != int(receipt.get("directory_count", -1)):
+        raise RuntimeLaunchError("expanded runtime directory count drift")
+    if symlink_count != int(receipt.get("symlink_count", -1)):
+        raise RuntimeLaunchError("expanded runtime symlink count drift")
+
+    actual_digest = expanded_runtime_tree_digest(runtime)
+    if actual_digest != binding["tree_digest_sha256"]:
+        raise RuntimeLaunchError(
+            f"expanded runtime tree digest mismatch: {actual_digest}"
+        )
+
+    return {
+        "runtime_id": binding["runtime_id"],
+        "runtime_path": str(runtime),
+        "python_path": str(python),
+        "receipt_path": str(receipt_path),
+        "tree_digest_sha256": actual_digest,
+        "manifest_identity_sha256": binding["manifest_identity_sha256"],
+        "file_count": file_count,
+        "directory_count": directory_count,
+        "symlink_count": symlink_count,
+        "read_only_hardened": True,
+        "receipt_verified": True,
+    }
 
 
 def primary_subnet() -> str:
@@ -355,6 +524,23 @@ def build_gpu_systemd_command(
 ) -> list[str]:
     resources = spec["resources"]
     paths = spec["paths"]
+    runtime_binding = spec.get("runtime_binding")
+    if not isinstance(runtime_binding, dict):
+        raise RuntimeLaunchError("gpu-small systemd command requires runtime binding")
+
+    runtime_path = pathlib.Path(runtime_binding["canonical_path"])
+    runtime_python = pathlib.Path(runtime_binding["python_path"])
+    job_home = staging_dir / "home"
+    xdg_cache = staging_dir / "xdg"
+    hf_home = staging_dir / "huggingface"
+    torch_home = staging_dir / "torch"
+    triton_cache = staging_dir / "triton"
+    inductor_cache = staging_dir / "inductor"
+    cuda_cache = staging_dir / "cuda"
+    vllm_config = staging_dir / "vllm-config"
+    vllm_cache = staging_dir / "vllm-cache"
+    pycache = staging_dir / "pycache"
+
     bash_script = r"""
         IFS= read -r jit
         [[ -n "$jit" ]]
@@ -402,9 +588,9 @@ def build_gpu_systemd_command(
         "-p", "UMask=0077",
         "-p", f"ReadWritePaths={paths['job_root']}",
         "-p", f"ReadWritePaths={staging_dir}",
-        "-p", f"ReadWritePaths={paths['home']}",
         "-p", f"ReadWritePaths={paths['logs']}",
         "-p", f"ReadOnlyPaths={paths['trusted_cache']}",
+        "-p", f"BindReadOnlyPaths={runtime_path}",
         "-p", "InaccessiblePaths=/var/run/docker.sock",
         "-p", "InaccessiblePaths=/run/docker.sock",
         "-p", "DevicePolicy=closed",
@@ -430,9 +616,28 @@ def build_gpu_systemd_command(
         "-p", "KillMode=control-group",
         "-p", "SendSIGKILL=yes",
         "-p", "TimeoutStopSec=20s",
-        "-p", f"Environment=HOME={paths['home']}",
-        "-p", f"Environment=XDG_CACHE_HOME={staging_dir}",
-        "-p", f"Environment=HF_HOME={staging_dir / 'huggingface'}",
+        "-p", f"Environment=HOME={job_home}",
+        "-p", f"Environment=XDG_CACHE_HOME={xdg_cache}",
+        "-p", f"Environment=HF_HOME={hf_home}",
+        "-p", f"Environment=TORCH_HOME={torch_home}",
+        "-p", f"Environment=TRITON_CACHE_DIR={triton_cache}",
+        "-p", f"Environment=TORCHINDUCTOR_CACHE_DIR={inductor_cache}",
+        "-p", f"Environment=CUDA_CACHE_PATH={cuda_cache}",
+        "-p", f"Environment=VLLM_CONFIG_ROOT={vllm_config}",
+        "-p", f"Environment=VLLM_CACHE_ROOT={vllm_cache}",
+        "-p", f"Environment=PYTHONPYCACHEPREFIX={pycache}",
+        "-p", "Environment=PYTHONDONTWRITEBYTECODE=1",
+        "-p", "Environment=VLLM_USE_FLASHINFER_SAMPLER=0",
+        "-p", f"Environment=P5_EXPANDED_RUNTIME={runtime_path}",
+        "-p", f"Environment=P5_EXPANDED_RUNTIME_PYTHON={runtime_python}",
+        "-p", (
+            "Environment=P5_EXPANDED_RUNTIME_TREE_SHA256="
+            f"{runtime_binding['tree_digest_sha256']}"
+        ),
+        "-p", (
+            "Environment=P5_EXPANDED_RUNTIME_MANIFEST_SHA256="
+            f"{runtime_binding['manifest_identity_sha256']}"
+        ),
         "-p", f"Environment=CUDA_VISIBLE_DEVICES={target_uuid}",
         "-p", f"Environment=P5_GPU_TARGET_UUID={target_uuid}",
         "-p", f"Environment=P5_GPU_SELECTED_DEVICE={selected_device}",
@@ -448,7 +653,6 @@ def build_gpu_systemd_command(
         command[insert_at:insert_at] = ["-p", f"DeviceAllow={support_device} rw"]
         insert_at += 2
     return command
-
 
 def _pump(stream, log) -> None:
     try:
@@ -627,6 +831,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     if target_uuid != "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea":
         raise RuntimeLaunchError("gpu-small target UUID drift")
 
+    runtime_pre = verify_expanded_runtime_binding(spec)
+
     runner_base, uid, gid = verify_foundation(spec)
     subnet = primary_subnet()
     assignment = resolve_gpu_assignment(target_uuid)
@@ -645,6 +851,20 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
 
     job_dir.mkdir(mode=0o700)
     staging_dir.mkdir(mode=0o700)
+    for name in (
+        "home",
+        "xdg",
+        "huggingface",
+        "torch",
+        "triton",
+        "inductor",
+        "cuda",
+        "vllm-config",
+        "vllm-cache",
+        "pycache",
+    ):
+        (staging_dir / name).mkdir(mode=0o700)
+
     shutil.copytree(runner_base, runner_dir, symlinks=True)
     chown_tree(job_dir, uid, gid)
     chown_tree(staging_dir, uid, gid)
@@ -664,6 +884,9 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     rc = None
     cleanup_pass = False
     gpu_cleanup_pass = False
+    runtime_post_verified = False
+    runtime_post_error: str | None = None
+    runtime_post: dict[str, Any] | None = None
     leaked_gpu_processes: list[dict[str, object]] = []
     jit = request.jit_config
 
@@ -712,6 +935,13 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             else:
                 gpu_cleanup_pass = True
 
+        try:
+            runtime_post = verify_expanded_runtime_binding(spec)
+        except Exception as exc:
+            runtime_post_error = f"{type(exc).__name__}: {exc}"
+        else:
+            runtime_post_verified = True
+
         journal = run(
             ["journalctl", "-u", spec["unit_name"], "--no-pager", "-n", "1000"],
             check=False,
@@ -732,7 +962,7 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         shutil.rmtree(staging_dir, ignore_errors=True)
 
         receipt = {
-            "schema_version": 1,
+            "schema_version": 2,
             "phase": "P5-provisioner-runtime",
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "decision": result,
@@ -757,6 +987,13 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "gpu_inventory": assignment["inventory"],
             "gpu_support_devices": assignment["support_devices"],
             "cuda_visible_devices": assignment["target_uuid"],
+            "expanded_runtime_preverified": True,
+            "expanded_runtime_postverified": runtime_post_verified,
+            "expanded_runtime_postverify_error": runtime_post_error,
+            "expanded_runtime": runtime_pre,
+            "expanded_runtime_post": runtime_post,
+            "mutable_state_root": str(staging_dir),
+            "persistent_project_home_writable": False,
         }
         receipt.update(admission_receipt_identity(spec))
         receipt_path.write_text(
@@ -764,13 +1001,18 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             encoding="utf-8",
         )
 
-    if result != "RUNNER_EXITED_CLEANLY" or not cleanup_pass or not gpu_cleanup_pass:
+    if (
+        result != "RUNNER_EXITED_CLEANLY"
+        or not cleanup_pass
+        or not gpu_cleanup_pass
+        or not runtime_post_verified
+    ):
         raise RuntimeLaunchError(
             "GPU runner did not complete cleanly "
-            f"result={result} cleanup={cleanup_pass} gpu_cleanup={gpu_cleanup_pass}"
+            f"result={result} cleanup={cleanup_pass} "
+            f"gpu_cleanup={gpu_cleanup_pass} runtime_post={runtime_post_verified}"
         )
     return receipt
-
 
 def launch_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     """Dispatch only the two explicitly accepted autonomous P5 profiles."""

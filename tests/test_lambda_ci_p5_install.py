@@ -178,7 +178,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         )
         self.assertEqual(
             project["admission_v2"]["routes"]["gpu-small"]["trusted_workflow"]["blob_sha"],
-            "0565cc736d76e4e67e641dce32c4276097ea2241",
+            "427498aad2ab3fa57fd8035461b5817282e5d96b",
         )
 
     def test_go_toolchain_pin_is_exact_official_release(self):

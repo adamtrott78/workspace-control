@@ -97,7 +97,7 @@
           "path": ".github/workflows/lambda-ci-p5-gpu-autonomous.yml",
           "ref": "refs/heads/main",
           "job_workflow_ref": "adamtrott78/research-engine/.github/workflows/lambda-ci-p5-gpu-autonomous.yml@refs/heads/main",
-          "blob_sha": "0565cc736d76e4e67e641dce32c4276097ea2241",
+          "blob_sha": "427498aad2ab3fa57fd8035461b5817282e5d96b",
           "event_name": "issue_comment",
           "allowed_actors": [
             "adamtrott78"
@@ -109,6 +109,26 @@
         }
       }
     },
-    "activation_note": "Admission v2 remains live only for cpu-test and gpu-small. cpu-test is repinned to the trusted-cache consumer canary workflow merged in research-engine 66361693ad2f8d0a345d420dabccbbd6042f5c59; gpu-small remains on its accepted trusted workflow. The cache canary adds read-only/adversarial validation only and does not enable model-acquire, cache-promote, model-eval-single-gpu, production/scientific state, or gpu-heavy."
+    "activation_note": "Admission v2 remains live only for cpu-test and gpu-small. gpu-small is pinned to the trusted adversarial immutable-runtime workflow on research-engine main and is extended only with the exact root-owned read-only expanded Qwen runtime binding; model weights and inference remain forbidden. cpu-test behavior is unchanged. model-acquire, cache-promote, model-eval-single-gpu, production/scientific state, and gpu-heavy remain non-live/denied."
+  },
+  "expanded_runtime_bindings": {
+    "gpu-small": {
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "canonical_path": "/srv/workspace-ci/research-engine/expanded-runtimes/qwen35-vllm-cu129-image-native-sampler-v3/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74",
+      "python_path": "/srv/workspace-ci/research-engine/expanded-runtimes/qwen35-vllm-cu129-image-native-sampler-v3/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74/bin/python",
+      "receipt_path": "/var/lib/workspace-ci/expanded-runtime-receipts/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74.json",
+      "tree_digest_sha256": "b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63",
+      "manifest_identity_sha256": "f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74",
+      "source_trusted_runtime_object": "/srv/workspace-ci/research-engine/trusted-cache/objects/runtime/sha256/23a47f27bdb6bec63955b901080fc0926cffee8cf081d010195613789bc5bbf4",
+      "required_controls": [
+        "root_owned_no_write_bits",
+        "private_systemd_mount_namespace",
+        "read_only_bind",
+        "no_new_privileges",
+        "restrict_suid_sgid",
+        "device_policy_closed",
+        "job_local_mutable_caches"
+      ]
+    }
   }
 }

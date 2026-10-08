@@ -307,10 +307,79 @@ def project_profile_digest(
             "repository": manifest["repository"],
             "profile": route["execution_profile"],
             "profile_contract": manifest["profiles"][route["execution_profile"]],
+            "expanded_runtime_binding": manifest.get(
+                "expanded_runtime_bindings", {}
+            ).get(route["execution_profile"]),
             "admission_route": route,
             "kill_switch_epoch": admission_cfg["kill_switch_epoch"],
         }
     )
+
+def expanded_runtime_admission_binding(
+    manifest: dict[str, Any],
+    route: dict[str, Any],
+    workload: dict[str, Any],
+    policy: dict[str, Any],
+) -> dict[str, Any] | None:
+    requirement = workload.get("runtime_binding")
+    if requirement in (None, "OPTIONAL_PROJECT_TEST_RUNTIME"):
+        return None
+    if requirement != "REQUIRED_EXPANDED_RUNTIME_EXACT":
+        raise AdmissionError(f"unsupported runtime binding requirement: {requirement}")
+
+    binding = manifest.get("expanded_runtime_bindings", {}).get(
+        route["execution_profile"]
+    )
+    if not isinstance(binding, dict):
+        raise AdmissionError("required expanded runtime binding is missing")
+
+    required = (
+        "runtime_id",
+        "tree_digest_sha256",
+        "manifest_identity_sha256",
+    )
+    if any(not isinstance(binding.get(key), str) or not binding[key] for key in required):
+        raise AdmissionError("required expanded runtime binding is incomplete")
+
+    project_binding = policy.get("project_bindings", {}).get(manifest["project_id"], {})
+    runtime_contract = None
+    for candidate in project_binding.get("allowed_runtimes", []):
+        if candidate.get("runtime_id") == binding["runtime_id"]:
+            runtime_contract = candidate
+            break
+    if not isinstance(runtime_contract, dict):
+        raise AdmissionError("expanded runtime is not allowed by project policy")
+
+    owning_paths = runtime_contract.get("owning_contracts", [])
+    research_engine_sha = policy.get("baselines", {}).get("research_engine_sha")
+    if (
+        not isinstance(research_engine_sha, str)
+        or len(research_engine_sha) != 40
+        or not owning_paths
+    ):
+        raise AdmissionError("expanded runtime owning-contract binding is incomplete")
+
+    owning_contracts = [
+        {
+            "repository": manifest["repository"],
+            "path": path,
+            "commit_sha": research_engine_sha,
+        }
+        for path in owning_paths
+    ]
+
+    return {
+        "runtime_id": binding["runtime_id"],
+        "cache_object": {
+            "object_state": "PROMOTED",
+            "object_id": binding["tree_digest_sha256"],
+            "tree_sha256": binding["tree_digest_sha256"],
+            "dependency_manifest_sha256": binding["manifest_identity_sha256"],
+            "promotion_receipt_sha256": None,
+        },
+        "owning_contracts": owning_contracts,
+    }
+
 
 def mint_admission(
     request: dict[str, Any],
@@ -395,6 +464,12 @@ def mint_admission(
     )
     issued_at = now
     expires_at = now + timedelta(seconds=ttl_seconds)
+    runtime_binding = expanded_runtime_admission_binding(
+        manifest,
+        route,
+        workload,
+        policy,
+    )
 
     return {
         "schema_version": 1,
@@ -444,7 +519,7 @@ def mint_admission(
             "gpu_uuids": list(resource_class.get("gpu_uuids", [])),
         },
         "models": [],
-        "runtime": None,
+        "runtime": runtime_binding,
         "exception_ids": [],
         "required_receipt_schema": "lambda-ci-execution-receipt-v1",
     }
@@ -528,6 +603,15 @@ def validate_admission_freshness(
         raise AdmissionError("admission execution profile is stale")
     if admission.get("resource_class") != workload.get("resource_class"):
         raise AdmissionError("admission resource class is stale")
+
+    current_runtime_binding = expanded_runtime_admission_binding(
+        manifest,
+        route,
+        workload,
+        policy,
+    )
+    if admission.get("runtime") != current_runtime_binding:
+        raise AdmissionError("admission expanded runtime binding is stale")
 
 
 def consume_admission(

@@ -3,7 +3,7 @@
   "policy_id": "lambda-ci-workload-policy-v1",
   "status": "CONTRACT_ONLY_NOT_LIVE_ENFORCEMENT",
   "owning_task": "workspace-lambda-execution-policy-v1",
-  "policy_epoch": 1,
+  "policy_epoch": 2,
   "authority": {
     "owner": "workspace-control",
     "principle": "workflow_or_candidate_input_is_a_claim_root_owned_policy_is_authority",
@@ -11,10 +11,10 @@
   },
   "baselines": {
     "workspace_control_sha": "94ad261fa61bb281c961f4418bd7683111306a6f",
-    "research_engine_sha": "577764f4db10e4f4f894b1613518c358c6da7b95",
+    "research_engine_sha": "dcb351a33710ad9cc6697987b0d5b2dd92513dd3",
     "project_manifest": {
       "path": "architecture/lambda-ci-project-research-engine.v1.json",
-      "blob_sha": "fd5517fab2715a142e1a3862295f91ab768d824c"
+      "blob_sha": "f1c0f852d04f4274e5ad8b45db92744e0b55d716"
     },
     "systemd_profiles": {
       "path": "architecture/lambda-ci-systemd-profiles.v1.json",
@@ -121,6 +121,14 @@
       "candidate_persistent_write": false,
       "completeness_verify_before_execution": true,
       "digest_verify_before_execution": true
+    },
+    "TRUSTED_RUNTIME_READONLY": {
+      "trusted_runtime": "read_only",
+      "trusted_model": "none",
+      "candidate_persistent_write": false,
+      "completeness_verify_before_execution": true,
+      "digest_verify_before_execution": true,
+      "post_execution_digest_verify": true
     }
   },
   "state_effect_classes": {
@@ -253,11 +261,12 @@
       "resource_class": "gpu_small_v1",
       "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
       "payload_secret_class": "CONTROL_PLANE_EPHEMERAL_ONLY",
-      "filesystem_class": "EPHEMERAL_JOB_ONLY",
-      "cache_access_class": "NO_PERSISTENT_CACHE_AUTHORITY",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_TRUSTED_CACHE_READONLY",
+      "cache_access_class": "TRUSTED_RUNTIME_READONLY",
       "state_effect_class": "CI_VALIDATION_ONLY",
       "model_binding": "FORBIDDEN",
-      "runtime_binding": "OPTIONAL_PROJECT_TEST_RUNTIME"
+      "runtime_binding": "REQUIRED_EXPANDED_RUNTIME_EXACT",
+      "runtime_binding_note": "Exact root-owned expanded Qwen runtime only for adversarial runtime-isolation acceptance; this does not authorize model weights or inference."
     },
     "model-acquire": {
       "policy_decision": "DESIGNED_NOT_LIVE",
@@ -350,7 +359,13 @@
             "benchmarks/document_intelligence/qwen35-runtime-certification-contract.v1.json",
             "benchmarks/document_intelligence/local-inference-service-contract.v1.json",
             "benchmarks/document_intelligence/qwen35-guarded-semantic-calibration-contract.v1.json"
-          ]
+          ],
+          "expanded_runtime": {
+            "manifest_identity_sha256": "f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74",
+            "tree_digest_sha256": "b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63",
+            "canonical_path": "/srv/workspace-ci/research-engine/expanded-runtimes/qwen35-vllm-cu129-image-native-sampler-v3/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74",
+            "receipt_path": "/var/lib/workspace-ci/expanded-runtime-receipts/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74.json"
+          }
         }
       ],
       "first_model_pilot": {

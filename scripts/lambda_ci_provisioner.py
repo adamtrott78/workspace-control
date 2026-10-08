@@ -198,6 +198,7 @@ def build_launch_spec(
 
     unit_name = f"workspace-ci-{request.project_id}-{request.request_id}.service"
     runner_release = pins["actions_runner"]
+    runtime_binding = manifest.get("expanded_runtime_bindings", {}).get(request.profile)
 
     # This is a declarative spec consumed only by the privileged launcher.
     # The only secret is jit_config_env_value; callers must not log/serialize it.
@@ -241,6 +242,7 @@ def build_launch_spec(
         "systemd_profile": systemd_profile,
         "forbidden_paths": manifest["forbidden_paths"],
         "allow_production_services": project_profile["allow_production_services"],
+        "runtime_binding": runtime_binding,
     }
 
 
