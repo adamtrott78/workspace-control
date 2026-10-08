@@ -8,6 +8,7 @@ workspace-control policy.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import pathlib
@@ -53,6 +54,174 @@ def project_identity(user: str) -> tuple[int, int]:
     if active.returncode not in (0, 1):
         raise RuntimeLaunchError(f"unable to inspect process state for {user}")
     return row.pw_uid, row.pw_gid
+
+
+def expanded_runtime_tree_digest(root: pathlib.Path) -> str:
+    """Hash the accepted expanded-runtime tree without following symlinks."""
+    tree_hash = hashlib.sha256()
+    for path in sorted(
+        root.rglob("*"),
+        key=lambda item: item.relative_to(root).as_posix(),
+    ):
+        rel = path.relative_to(root).as_posix()
+        st = path.lstat()
+        mode = stat.S_IMODE(st.st_mode)
+
+        if stat.S_ISDIR(st.st_mode):
+            tree_hash.update(f"D\\0{rel}\\0{mode:o}\\n".encode())
+            continue
+
+        if stat.S_ISLNK(st.st_mode):
+            tree_hash.update(f"L\\0{rel}\\0{os.readlink(path)}\\n".encode())
+            continue
+
+        if not stat.S_ISREG(st.st_mode):
+            raise RuntimeLaunchError(f"expanded runtime contains special file: {path}")
+
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            while True:
+                block = handle.read(8 * 1024 * 1024)
+                if not block:
+                    break
+                digest.update(block)
+        tree_hash.update(
+            (
+                f"F\\0{rel}\\0{mode:o}\\0{st.st_size}\\0"
+                f"{digest.hexdigest()}\\n"
+            ).encode()
+        )
+    return tree_hash.hexdigest()
+
+
+def verify_expanded_runtime_binding(spec: dict[str, Any]) -> dict[str, Any]:
+    """Verify the exact root-owned expanded runtime before/after gpu-small execution."""
+    binding = spec.get("runtime_binding")
+    if not isinstance(binding, dict):
+        raise RuntimeLaunchError("gpu-small requires exact expanded runtime binding")
+
+    required = {
+        "runtime_id",
+        "canonical_path",
+        "python_path",
+        "receipt_path",
+        "tree_digest_sha256",
+        "manifest_identity_sha256",
+        "source_trusted_runtime_object",
+        "required_controls",
+    }
+    if set(binding) != required:
+        raise RuntimeLaunchError("expanded runtime binding keys drift")
+
+    runtime = pathlib.Path(binding["canonical_path"])
+    python = pathlib.Path(binding["python_path"])
+    receipt_path = pathlib.Path(binding["receipt_path"])
+
+    if not runtime.is_absolute() or not receipt_path.is_absolute():
+        raise RuntimeLaunchError("expanded runtime paths must be absolute")
+    if python != runtime / "bin/python":
+        raise RuntimeLaunchError("expanded runtime python path drift")
+    if not runtime.is_dir() or not python.is_file():
+        raise RuntimeLaunchError("expanded runtime or Python executable missing")
+    if not receipt_path.is_file():
+        raise RuntimeLaunchError("expanded runtime receipt missing")
+
+    receipt_stat = receipt_path.stat()
+    if receipt_stat.st_uid != 0 or receipt_stat.st_gid != 0:
+        raise RuntimeLaunchError("expanded runtime receipt is not root-owned")
+    if stat.S_IMODE(receipt_stat.st_mode) & 0o222:
+        raise RuntimeLaunchError("expanded runtime receipt is writable")
+
+    try:
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise RuntimeLaunchError("expanded runtime receipt is invalid JSON") from exc
+
+    expected_receipt = {
+        "runtime_path": binding["canonical_path"],
+        "runtime_contract_version": binding["runtime_id"],
+        "source_manifest_identity_sha256": binding["manifest_identity_sha256"],
+        "source_trusted_runtime_object": binding["source_trusted_runtime_object"],
+        "tree_digest_sha256": binding["tree_digest_sha256"],
+        "read_only_hardened": True,
+        "receipt_committed_after_all_assertions": True,
+        "model_weights_loaded": False,
+        "model_inference_performed": False,
+    }
+    for key, expected in expected_receipt.items():
+        if receipt.get(key) != expected:
+            raise RuntimeLaunchError(
+                f"expanded runtime receipt mismatch for {key}: "
+                f"{receipt.get(key)!r} != {expected!r}"
+            )
+
+    allowed_external_symlinks = {
+        pathlib.Path("/usr/bin/python3"),
+        pathlib.Path("/usr/bin/python3.12"),
+    }
+    file_count = 0
+    directory_count = 1
+    symlink_count = 0
+
+    root_stat = runtime.lstat()
+    if root_stat.st_uid != 0 or root_stat.st_gid != 0:
+        raise RuntimeLaunchError("expanded runtime root ownership drift")
+    if stat.S_IMODE(root_stat.st_mode) & 0o222:
+        raise RuntimeLaunchError("expanded runtime root write bits drift")
+
+    for path in runtime.rglob("*"):
+        st = path.lstat()
+        if st.st_uid != 0 or st.st_gid != 0:
+            raise RuntimeLaunchError(f"expanded runtime ownership drift: {path}")
+
+        if stat.S_ISLNK(st.st_mode):
+            symlink_count += 1
+            resolved = path.resolve(strict=False)
+            try:
+                resolved.relative_to(runtime)
+            except ValueError:
+                if resolved not in allowed_external_symlinks:
+                    raise RuntimeLaunchError(
+                        f"expanded runtime external symlink drift: {path} -> {resolved}"
+                    )
+            continue
+
+        if stat.S_ISREG(st.st_mode):
+            file_count += 1
+        elif stat.S_ISDIR(st.st_mode):
+            directory_count += 1
+        else:
+            raise RuntimeLaunchError(f"expanded runtime special file detected: {path}")
+
+        if stat.S_IMODE(st.st_mode) & 0o222:
+            raise RuntimeLaunchError(f"expanded runtime writable inode detected: {path}")
+
+    if file_count != int(receipt.get("file_count", -1)):
+        raise RuntimeLaunchError("expanded runtime file count drift")
+    if directory_count != int(receipt.get("directory_count", -1)):
+        raise RuntimeLaunchError("expanded runtime directory count drift")
+    if symlink_count != int(receipt.get("symlink_count", -1)):
+        raise RuntimeLaunchError("expanded runtime symlink count drift")
+
+    actual_digest = expanded_runtime_tree_digest(runtime)
+    if actual_digest != binding["tree_digest_sha256"]:
+        raise RuntimeLaunchError(
+            f"expanded runtime tree digest mismatch: {actual_digest}"
+        )
+
+    return {
+        "runtime_id": binding["runtime_id"],
+        "runtime_path": str(runtime),
+        "python_path": str(python),
+        "receipt_path": str(receipt_path),
+        "tree_digest_sha256": actual_digest,
+        "manifest_identity_sha256": binding["manifest_identity_sha256"],
+        "file_count": file_count,
+        "directory_count": directory_count,
+        "symlink_count": symlink_count,
+        "read_only_hardened": True,
+        "receipt_verified": True,
+    }
 
 
 def primary_subnet() -> str:
