@@ -307,10 +307,45 @@ def project_profile_digest(
             "repository": manifest["repository"],
             "profile": route["execution_profile"],
             "profile_contract": manifest["profiles"][route["execution_profile"]],
+            "expanded_runtime_binding": manifest.get(
+                "expanded_runtime_bindings", {}
+            ).get(route["execution_profile"]),
             "admission_route": route,
             "kill_switch_epoch": admission_cfg["kill_switch_epoch"],
         }
     )
+
+def expanded_runtime_admission_binding(
+    manifest: dict[str, Any],
+    route: dict[str, Any],
+    workload: dict[str, Any],
+) -> dict[str, Any] | None:
+    requirement = workload.get("runtime_binding")
+    if requirement in (None, "OPTIONAL_PROJECT_TEST_RUNTIME"):
+        return None
+    if requirement != "REQUIRED_EXPANDED_RUNTIME_EXACT":
+        raise AdmissionError(f"unsupported runtime binding requirement: {requirement}")
+
+    binding = manifest.get("expanded_runtime_bindings", {}).get(
+        route["execution_profile"]
+    )
+    if not isinstance(binding, dict):
+        raise AdmissionError("required expanded runtime binding is missing")
+
+    required = (
+        "runtime_id",
+        "canonical_path",
+        "python_path",
+        "receipt_path",
+        "tree_digest_sha256",
+        "manifest_identity_sha256",
+        "source_trusted_runtime_object",
+    )
+    if any(not isinstance(binding.get(key), str) or not binding[key] for key in required):
+        raise AdmissionError("required expanded runtime binding is incomplete")
+
+    return {key: binding[key] for key in required}
+
 
 def mint_admission(
     request: dict[str, Any],
@@ -395,6 +430,11 @@ def mint_admission(
     )
     issued_at = now
     expires_at = now + timedelta(seconds=ttl_seconds)
+    runtime_binding = expanded_runtime_admission_binding(
+        manifest,
+        route,
+        workload,
+    )
 
     return {
         "schema_version": 1,
@@ -444,7 +484,7 @@ def mint_admission(
             "gpu_uuids": list(resource_class.get("gpu_uuids", [])),
         },
         "models": [],
-        "runtime": None,
+        "runtime": runtime_binding,
         "exception_ids": [],
         "required_receipt_schema": "lambda-ci-execution-receipt-v1",
     }
@@ -528,6 +568,14 @@ def validate_admission_freshness(
         raise AdmissionError("admission execution profile is stale")
     if admission.get("resource_class") != workload.get("resource_class"):
         raise AdmissionError("admission resource class is stale")
+
+    current_runtime_binding = expanded_runtime_admission_binding(
+        manifest,
+        route,
+        workload,
+    )
+    if admission.get("runtime") != current_runtime_binding:
+        raise AdmissionError("admission expanded runtime binding is stale")
 
 
 def consume_admission(
