@@ -1,6 +1,10 @@
+import hashlib
 import importlib.util
+import os
 import pathlib
+import stat
 import sys
+import tempfile
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -121,6 +125,65 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         self.assertIn("IPAddressDeny=10.0.0.0/8", command)
         self.assertIn("IPAddressDeny=134.88.12.0/22", command)
         self.assertIn("RuntimeMaxSec=1200s", command)
+
+    def test_expanded_runtime_tree_digest_uses_binary_separators(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            sub = root / "pkg"
+            sub.mkdir()
+            payload = sub / "module.py"
+            payload.write_bytes(b"print('ok')\n")
+            link = root / "python"
+            link.symlink_to("/usr/bin/python3.12")
+
+            os.chmod(root, 0o555)
+            os.chmod(sub, 0o555)
+            os.chmod(payload, 0o444)
+
+            expected = hashlib.sha256()
+
+            entries = sorted(
+                root.rglob("*"),
+                key=lambda item: item.relative_to(root).as_posix(),
+            )
+            for path in entries:
+                rel = path.relative_to(root).as_posix().encode()
+                st = path.lstat()
+                mode = format(stat.S_IMODE(st.st_mode), "o").encode()
+
+                if stat.S_ISDIR(st.st_mode):
+                    expected.update(b"D\x00" + rel + b"\x00" + mode + b"\n")
+                    continue
+
+                if stat.S_ISLNK(st.st_mode):
+                    expected.update(
+                        b"L\x00"
+                        + rel
+                        + b"\x00"
+                        + os.readlink(path).encode()
+                        + b"\n"
+                    )
+                    continue
+
+                self.assertTrue(stat.S_ISREG(st.st_mode))
+                digest = hashlib.sha256(path.read_bytes()).hexdigest().encode()
+                expected.update(
+                    b"F\x00"
+                    + rel
+                    + b"\x00"
+                    + mode
+                    + b"\x00"
+                    + str(st.st_size).encode()
+                    + b"\x00"
+                    + digest
+                    + b"\n"
+                )
+
+            self.assertEqual(
+                runtime.expanded_runtime_tree_digest(root),
+                expected.hexdigest(),
+            )
+
 
     def test_dispatch_rejects_gpu_heavy(self):
         class Req:
