@@ -319,6 +319,7 @@ def expanded_runtime_admission_binding(
     manifest: dict[str, Any],
     route: dict[str, Any],
     workload: dict[str, Any],
+    policy: dict[str, Any],
 ) -> dict[str, Any] | None:
     requirement = workload.get("runtime_binding")
     if requirement in (None, "OPTIONAL_PROJECT_TEST_RUNTIME"):
@@ -334,17 +335,50 @@ def expanded_runtime_admission_binding(
 
     required = (
         "runtime_id",
-        "canonical_path",
-        "python_path",
-        "receipt_path",
         "tree_digest_sha256",
         "manifest_identity_sha256",
-        "source_trusted_runtime_object",
     )
     if any(not isinstance(binding.get(key), str) or not binding[key] for key in required):
         raise AdmissionError("required expanded runtime binding is incomplete")
 
-    return {key: binding[key] for key in required}
+    project_binding = policy.get("project_bindings", {}).get(manifest["project_id"], {})
+    runtime_contract = None
+    for candidate in project_binding.get("allowed_runtimes", []):
+        if candidate.get("runtime_id") == binding["runtime_id"]:
+            runtime_contract = candidate
+            break
+    if not isinstance(runtime_contract, dict):
+        raise AdmissionError("expanded runtime is not allowed by project policy")
+
+    owning_paths = runtime_contract.get("owning_contracts", [])
+    research_engine_sha = policy.get("baselines", {}).get("research_engine_sha")
+    if (
+        not isinstance(research_engine_sha, str)
+        or len(research_engine_sha) != 40
+        or not owning_paths
+    ):
+        raise AdmissionError("expanded runtime owning-contract binding is incomplete")
+
+    owning_contracts = [
+        {
+            "repository": manifest["repository"],
+            "path": path,
+            "commit_sha": research_engine_sha,
+        }
+        for path in owning_paths
+    ]
+
+    return {
+        "runtime_id": binding["runtime_id"],
+        "cache_object": {
+            "object_state": "PROMOTED",
+            "object_id": binding["tree_digest_sha256"],
+            "tree_sha256": binding["tree_digest_sha256"],
+            "dependency_manifest_sha256": binding["manifest_identity_sha256"],
+            "promotion_receipt_sha256": None,
+        },
+        "owning_contracts": owning_contracts,
+    }
 
 
 def mint_admission(
@@ -434,6 +468,7 @@ def mint_admission(
         manifest,
         route,
         workload,
+        policy,
     )
 
     return {
@@ -573,6 +608,7 @@ def validate_admission_freshness(
         manifest,
         route,
         workload,
+        policy,
     )
     if admission.get("runtime") != current_runtime_binding:
         raise AdmissionError("admission expanded runtime binding is stale")
