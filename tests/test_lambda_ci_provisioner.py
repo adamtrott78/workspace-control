@@ -318,6 +318,42 @@ def test_v2_gpu_request_cannot_widen_beyond_gpu_small():
     assert req.admission["resource_ceiling"]["gpu_uuids"] == [
         "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
     ]
+    assert req.admission["runtime"]["runtime_id"] == (
+        "qwen35-vllm-cu129-image-native-sampler-v3"
+    )
+    assert req.admission["runtime"]["tree_digest_sha256"] == (
+        "b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63"
+    )
+    assert launch["runtime_binding"]["tree_digest_sha256"] == (
+        req.admission["runtime"]["tree_digest_sha256"]
+    )
+
+
+def test_v2_runtime_binding_change_stales_admission():
+    manifest = enabled_v2_manifest()
+    req = mod.validate_request_v2(
+        good_v2_request("gpu-small"),
+        manifest,
+        WORKLOAD_POLICY,
+        now=V2_NOW,
+    )
+    changed = copy.deepcopy(manifest)
+    changed["expanded_runtime_bindings"]["gpu-small"]["tree_digest_sha256"] = "f" * 64
+
+    try:
+        mod.admission_policy.validate_admission_freshness(
+            req.admission,
+            changed,
+            WORKLOAD_POLICY,
+            now=V2_NOW,
+        )
+    except mod.admission_policy.AdmissionError as exc:
+        assert (
+            "project/profile binding is stale" in str(exc)
+            or "expanded runtime binding is stale" in str(exc)
+        )
+    else:
+        raise AssertionError("runtime binding change did not stale admission")
 
 
 def test_v2_rejects_profile_or_command_injection_fields():
