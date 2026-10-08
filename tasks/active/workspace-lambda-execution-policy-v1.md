@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 23331f45623c287ff69164813b3b35793f015092
+- Remote checkpoint: 15a4feadadefc9bdaf710e6c624805d1370881f1
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Install current workspace-control main on Lambda with the exact-SHA bootstrap. Verify project manifest workflow blob e02e35306ae82c4ba393631cbaa1521ca53a28b4, runtime verifier blob 7148df0806b7c033b9586ec59bf5da2575d25646, trusted-cache manager blob a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807, and expanded runtime tree b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63. Then create one fresh PR-head candidate commit on research-engine PR 114 and trigger one new gpu-small acceptance request. Do not reuse a terminal request.
+Continue adversarial_recovery_and_resource_validation without reopening the accepted immutable-runtime architecture. Next, validate recovery/replay semantics on the existing admitted execution substrate: (1) prove controller restart/recovery does not duplicate or re-execute a consumed request; (2) prove identical terminal request replay returns existing terminal state/receipt rather than launching a runner; (3) prove stale/expired admission is rejected. Reuse existing durable request/receipt state where possible and do not create a new GPU execution solely for replay measurement. After those pass, proceed to deliberate cleanup-failure/timeout/resource-pressure/cache-integrity/concurrency cases. Keep model weights and inference disabled.
 
 ## Remaining work
 
