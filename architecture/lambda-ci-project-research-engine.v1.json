@@ -97,7 +97,7 @@
           "path": ".github/workflows/lambda-ci-p5-gpu-autonomous.yml",
           "ref": "refs/heads/main",
           "job_workflow_ref": "adamtrott78/research-engine/.github/workflows/lambda-ci-p5-gpu-autonomous.yml@refs/heads/main",
-          "blob_sha": "0565cc736d76e4e67e641dce32c4276097ea2241",
+          "blob_sha": "427498aad2ab3fa57fd8035461b5817282e5d96b",
           "event_name": "issue_comment",
           "allowed_actors": [
             "adamtrott78"
@@ -109,7 +109,7 @@
         }
       }
     },
-    "activation_note": "Admission v2 remains live only for cpu-test and gpu-small. gpu-small is being extended only with the exact root-owned immutable expanded Qwen runtime binding for adversarial runtime-isolation acceptance; model binding and model inference remain forbidden. cpu-test behavior is unchanged. model-acquire, cache-promote, model-eval-single-gpu, production/scientific state, and gpu-heavy remain non-live/denied."
+    "activation_note": "Admission v2 remains live only for cpu-test and gpu-small. gpu-small is pinned to the trusted adversarial immutable-runtime workflow on research-engine main and is extended only with the exact root-owned read-only expanded Qwen runtime binding; model weights and inference remain forbidden. cpu-test behavior is unchanged. model-acquire, cache-promote, model-eval-single-gpu, production/scientific state, and gpu-heavy remain non-live/denied."
   },
   "expanded_runtime_bindings": {
     "gpu-small": {
