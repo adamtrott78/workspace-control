@@ -6,6 +6,7 @@ import stat
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "scripts" / "lambda_ci_runtime.py"
@@ -183,6 +184,56 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
                 runtime.expanded_runtime_tree_digest(root),
                 expected.hexdigest(),
             )
+
+
+    def test_project_uid_cleanup_rechecks_after_kill(self):
+        calls = []
+        responses = [
+            SimpleNamespace(returncode=0, stdout="1234 python\n", stderr=""),
+            SimpleNamespace(returncode=0, stdout="", stderr=""),
+            SimpleNamespace(returncode=1, stdout="", stderr=""),
+        ]
+        original = runtime.run
+
+        def fake_run(argv, check=True):
+            calls.append(argv)
+            return responses.pop(0)
+
+        runtime.run = fake_run
+        try:
+            detected, clean = runtime.cleanup_project_uid_processes(997)
+        finally:
+            runtime.run = original
+
+        self.assertTrue(detected)
+        self.assertTrue(clean)
+        self.assertEqual(calls[0], ["pgrep", "-u", "997"])
+        self.assertEqual(calls[1], ["pkill", "-KILL", "-u", "997"])
+        self.assertEqual(calls[2], ["pgrep", "-u", "997"])
+
+    def test_project_uid_cleanup_fails_if_residue_survives_kill(self):
+        responses = [
+            SimpleNamespace(returncode=0, stdout="1234 python\n", stderr=""),
+            SimpleNamespace(returncode=0, stdout="", stderr=""),
+            SimpleNamespace(returncode=0, stdout="1234 python\n", stderr=""),
+        ]
+        original = runtime.run
+        runtime.run = lambda argv, check=True: responses.pop(0)
+        try:
+            detected, clean = runtime.cleanup_project_uid_processes(997)
+        finally:
+            runtime.run = original
+
+        self.assertTrue(detected)
+        self.assertFalse(clean)
+
+    def test_remove_tree_and_verify_reports_real_postcondition(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "job"
+            root.mkdir()
+            (root / "payload").write_text("x", encoding="utf-8")
+            self.assertTrue(runtime.remove_tree_and_verify(root))
+            self.assertFalse(root.exists())
 
 
     def test_dispatch_rejects_gpu_heavy(self):
