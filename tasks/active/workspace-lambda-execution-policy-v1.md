@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 21d90bc676198b64b79bab3c439e2d576c65cf00
+- Remote checkpoint: 26111a676af62b9f01066816746d461b9027e1c7
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Begin timeout/OOM/disk-pressure failure-receipt validation without changing accepted runtime/model authority. First, audit and harden timeout handling in the root runtime launcher so a subprocess timeout explicitly terminates the transient systemd unit/systemd-run wrapper, records a deterministic failure classification/receipt, still performs project-UID/GPU/runtime/workspace cleanup verification, and never automatically retries. Validate with CPU-only regression tests before any live timeout canary. Then run one bounded cpu-test timeout canary if the implementation is fully validated; do not use gpu-small for timeout testing.
+Proceed to CPU/RAM resource-exhaustion validation. Audit the root runtime launcher for deterministic CPU_OR_RAM_RESOURCE_EXHAUSTED classification before any live pressure test. Add fail-closed classification/receipt logic and CPU-only regression tests if needed. Then run one bounded temporary-state RAM-pressure canary using a real transient systemd unit with a small synthetic MemoryMax; do not submit a GitHub job or use GPU. Require no automatic retry, complete wrapper/project/workspace cleanup, no live lane quarantine on ordinary resource exhaustion, and no live control-plane mutation.
 
 ## Remaining work
 
