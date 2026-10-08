@@ -39,6 +39,43 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
                 "gpu_uuid": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
             },
             "allow_production_services": False,
+            "runtime_binding": {
+                "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+                "canonical_path": (
+                    "/srv/workspace-ci/research-engine/expanded-runtimes/"
+                    "qwen35-vllm-cu129-image-native-sampler-v3/"
+                    "f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74"
+                ),
+                "python_path": (
+                    "/srv/workspace-ci/research-engine/expanded-runtimes/"
+                    "qwen35-vllm-cu129-image-native-sampler-v3/"
+                    "f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74/"
+                    "bin/python"
+                ),
+                "receipt_path": (
+                    "/var/lib/workspace-ci/expanded-runtime-receipts/"
+                    "f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74.json"
+                ),
+                "tree_digest_sha256": (
+                    "b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63"
+                ),
+                "manifest_identity_sha256": (
+                    "f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74"
+                ),
+                "source_trusted_runtime_object": (
+                    "/srv/workspace-ci/research-engine/trusted-cache/objects/runtime/sha256/"
+                    "23a47f27bdb6bec63955b901080fc0926cffee8cf081d010195613789bc5bbf4"
+                ),
+                "required_controls": [
+                    "root_owned_no_write_bits",
+                    "private_systemd_mount_namespace",
+                    "read_only_bind",
+                    "no_new_privileges",
+                    "restrict_suid_sgid",
+                    "device_policy_closed",
+                    "job_local_mutable_caches",
+                ],
+            },
         }
 
     def assignment(self):
