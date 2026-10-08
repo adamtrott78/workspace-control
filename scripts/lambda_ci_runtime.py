@@ -25,6 +25,10 @@ class RuntimeLaunchError(RuntimeError):
     pass
 
 
+class RuntimeCleanupError(RuntimeLaunchError):
+    """Raised when post-execution cleanup or integrity verification fails."""
+
+
 def run(argv: list[str], *, check: bool = True):
     proc = subprocess.run(
         argv,
@@ -664,6 +668,33 @@ def _pump(stream, log) -> None:
 
 
 
+def cleanup_project_uid_processes(uid: int) -> tuple[bool, bool]:
+    """Kill project-UID residue if present and verify the UID is empty afterward."""
+    before = run(["pgrep", "-u", str(uid)], check=False)
+    if before.returncode not in (0, 1):
+        return False, False
+    residue_detected = before.returncode == 0 and bool(before.stdout.strip())
+    if residue_detected:
+        run(["pkill", "-KILL", "-u", str(uid)], check=False)
+
+    after = run(["pgrep", "-u", str(uid)], check=False)
+    if after.returncode not in (0, 1):
+        return residue_detected, False
+    clean = after.returncode == 1 or not after.stdout.strip()
+    return residue_detected, clean
+
+
+def remove_tree_and_verify(path: pathlib.Path) -> bool:
+    """Best-effort removal followed by an authoritative existence check."""
+    try:
+        shutil.rmtree(path)
+    except FileNotFoundError:
+        return True
+    except OSError:
+        pass
+    return not path.exists()
+
+
 def admission_receipt_identity(spec: dict[str, Any]) -> dict[str, Any]:
     admission = spec.get("admission")
     if not isinstance(admission, dict):
@@ -733,7 +764,11 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
 
     result = "FAIL"
     rc = None
+    execution_error: Exception | None = None
+    residue_detected = False
     cleanup_pass = False
+    runner_workspace_destroyed = False
+    staging_workspace_destroyed = False
     jit = request.jit_config
 
     try:
@@ -757,17 +792,15 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             rc = proc.wait(timeout=int(spec["resources"]["runtime_max_seconds"]) + 120)
             output_thread.join(timeout=10)
         if rc != 0:
-            raise RuntimeLaunchError(f"runner/systemd unit exited rc={rc}")
-        result = "RUNNER_EXITED_CLEANLY"
+            execution_error = RuntimeLaunchError(f"runner/systemd unit exited rc={rc}")
+        else:
+            result = "RUNNER_EXITED_CLEANLY"
+    except Exception as exc:
+        execution_error = exc
     finally:
         jit = ""
 
-        leaked = run(["pgrep", "-u", str(uid)], check=False)
-        if leaked.returncode == 0 and leaked.stdout.strip():
-            run(["pkill", "-KILL", "-u", str(uid)], check=False)
-            cleanup_pass = False
-        elif leaked.returncode in (0, 1):
-            cleanup_pass = True
+        residue_detected, cleanup_pass = cleanup_project_uid_processes(uid)
 
         journal = run(
             ["journalctl", "-u", spec["unit_name"], "--no-pager", "-n", "1000"],
@@ -785,11 +818,11 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
                 shutil.rmtree(target)
             shutil.copytree(diag, target, symlinks=True)
 
-        shutil.rmtree(job_dir, ignore_errors=True)
-        shutil.rmtree(staging_dir, ignore_errors=True)
+        runner_workspace_destroyed = remove_tree_and_verify(job_dir)
+        staging_workspace_destroyed = remove_tree_and_verify(staging_dir)
 
         receipt = {
-            "schema_version": 1,
+            "schema_version": 2,
             "phase": "P5-provisioner-runtime",
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "decision": result,
@@ -799,9 +832,10 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "runner_name": spec["runner_name"],
             "unit_name": spec["unit_name"],
             "runner_exit_code": rc,
+            "project_uid_process_residue_detected": residue_detected,
             "project_uid_process_cleanup": cleanup_pass,
-            "runner_workspace_destroyed": not job_dir.exists(),
-            "staging_workspace_destroyed": not staging_dir.exists(),
+            "runner_workspace_destroyed": runner_workspace_destroyed,
+            "staging_workspace_destroyed": staging_workspace_destroyed,
             "network_local_subnet_denied": subnet,
             "jit_config_persisted": False,
             "github_credential_present": False,
@@ -812,12 +846,20 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             encoding="utf-8",
         )
 
-    if result != "RUNNER_EXITED_CLEANLY" or not cleanup_pass:
-        raise RuntimeLaunchError(
-            f"runner did not complete cleanly result={result} cleanup={cleanup_pass}"
-        )
+    cleanup_failures = []
+    if not cleanup_pass:
+        cleanup_failures.append("project UID processes remain or could not be verified")
+    if not runner_workspace_destroyed:
+        cleanup_failures.append("runner workspace removal failed")
+    if not staging_workspace_destroyed:
+        cleanup_failures.append("staging workspace removal failed")
+    if cleanup_failures:
+        raise RuntimeCleanupError("; ".join(cleanup_failures))
+    if execution_error is not None:
+        raise execution_error
+    if result != "RUNNER_EXITED_CLEANLY":
+        raise RuntimeLaunchError(f"runner did not complete cleanly result={result}")
     return receipt
-
 
 def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     """Launch one accepted gpu-small runner and return a non-secret cleanup receipt."""
@@ -882,12 +924,17 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
 
     result = "FAIL"
     rc = None
+    execution_error: Exception | None = None
+    residue_detected = False
     cleanup_pass = False
+    gpu_residue_detected: list[dict[str, object]] = []
+    leaked_gpu_processes: list[dict[str, object]] = []
     gpu_cleanup_pass = False
     runtime_post_verified = False
     runtime_post_error: str | None = None
     runtime_post: dict[str, Any] | None = None
-    leaked_gpu_processes: list[dict[str, object]] = []
+    runner_workspace_destroyed = False
+    staging_workspace_destroyed = False
     jit = request.jit_config
 
     try:
@@ -911,29 +958,31 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             rc = proc.wait(timeout=int(spec["resources"]["runtime_max_seconds"]) + 120)
             output_thread.join(timeout=10)
         if rc != 0:
-            raise RuntimeLaunchError(f"runner/systemd unit exited rc={rc}")
-        result = "RUNNER_EXITED_CLEANLY"
+            execution_error = RuntimeLaunchError(f"runner/systemd unit exited rc={rc}")
+        else:
+            result = "RUNNER_EXITED_CLEANLY"
+    except Exception as exc:
+        execution_error = exc
     finally:
         jit = ""
 
-        leaked = run(["pgrep", "-u", str(uid)], check=False)
-        if leaked.returncode == 0 and leaked.stdout.strip():
-            run(["pkill", "-KILL", "-u", str(uid)], check=False)
-            cleanup_pass = False
-        elif leaked.returncode in (0, 1):
-            cleanup_pass = True
+        residue_detected, cleanup_pass = cleanup_project_uid_processes(uid)
 
         try:
-            leaked_gpu_processes = project_gpu_processes(uid)
+            gpu_residue_detected = project_gpu_processes(uid)
         except Exception as exc:
             leaked_gpu_processes = [{"inspection_error": str(exc)}]
             gpu_cleanup_pass = False
         else:
-            if leaked_gpu_processes:
+            if gpu_residue_detected:
                 run(["pkill", "-KILL", "-u", str(uid)], check=False)
+            try:
+                leaked_gpu_processes = project_gpu_processes(uid)
+            except Exception as exc:
+                leaked_gpu_processes = [{"inspection_error": str(exc)}]
                 gpu_cleanup_pass = False
             else:
-                gpu_cleanup_pass = True
+                gpu_cleanup_pass = not leaked_gpu_processes
 
         try:
             runtime_post = verify_expanded_runtime_binding(spec)
@@ -958,8 +1007,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
                 shutil.rmtree(target)
             shutil.copytree(diag, target, symlinks=True)
 
-        shutil.rmtree(job_dir, ignore_errors=True)
-        shutil.rmtree(staging_dir, ignore_errors=True)
+        runner_workspace_destroyed = remove_tree_and_verify(job_dir)
+        staging_workspace_destroyed = remove_tree_and_verify(staging_dir)
 
         receipt = {
             "schema_version": 2,
@@ -972,11 +1021,13 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "runner_name": spec["runner_name"],
             "unit_name": spec["unit_name"],
             "runner_exit_code": rc,
+            "project_uid_process_residue_detected": residue_detected,
             "project_uid_process_cleanup": cleanup_pass,
+            "project_uid_gpu_process_residue_detected": gpu_residue_detected,
             "project_uid_gpu_process_cleanup": gpu_cleanup_pass,
             "leaked_gpu_processes": leaked_gpu_processes,
-            "runner_workspace_destroyed": not job_dir.exists(),
-            "staging_workspace_destroyed": not staging_dir.exists(),
+            "runner_workspace_destroyed": runner_workspace_destroyed,
+            "staging_workspace_destroyed": staging_workspace_destroyed,
             "network_local_subnet_denied": subnet,
             "jit_config_persisted": False,
             "github_credential_present": False,
@@ -1001,17 +1052,23 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             encoding="utf-8",
         )
 
-    if (
-        result != "RUNNER_EXITED_CLEANLY"
-        or not cleanup_pass
-        or not gpu_cleanup_pass
-        or not runtime_post_verified
-    ):
-        raise RuntimeLaunchError(
-            "GPU runner did not complete cleanly "
-            f"result={result} cleanup={cleanup_pass} "
-            f"gpu_cleanup={gpu_cleanup_pass} runtime_post={runtime_post_verified}"
-        )
+    cleanup_failures = []
+    if not cleanup_pass:
+        cleanup_failures.append("project UID processes remain or could not be verified")
+    if not gpu_cleanup_pass:
+        cleanup_failures.append("GPU process residue remains or could not be verified")
+    if not runtime_post_verified:
+        cleanup_failures.append("expanded runtime post-verification failed")
+    if not runner_workspace_destroyed:
+        cleanup_failures.append("runner workspace removal failed")
+    if not staging_workspace_destroyed:
+        cleanup_failures.append("staging workspace removal failed")
+    if cleanup_failures:
+        raise RuntimeCleanupError("; ".join(cleanup_failures))
+    if execution_error is not None:
+        raise execution_error
+    if result != "RUNNER_EXITED_CLEANLY":
+        raise RuntimeLaunchError(f"GPU runner did not complete cleanly result={result}")
     return receipt
 
 def launch_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
