@@ -31,12 +31,12 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 893b38da5ec4eca0146b236579f16f28f04f3e7d
+- Remote checkpoint: 2f8e88ecaa668d5adfc4728c2571e52c002774ab
 - Remote verified: true
 
 ## Next safe action
 
-On Lambda, rerun the qwen35-vllm-cu129-image-native-sampler-v3 wheel-only dependency-bundle materialization using exact research-engine commit 893b38da5ec4eca0146b236579f16f28f04f3e7d. Preserve the certified live runtime read-only; write only under ~/adamArchives/Adam/workspace-control-tmp/ with output-local PIP_CACHE_DIR; require the exact 196-line freeze SHA-256 198d90f866d032ea8f747dd9d28a1fe5f5ef18c02e5eb64b850124e77a2744d0; permit only wheel downloads from the declared PyPI/PyTorch indexes plus the exact certified vLLM upstream release URL/hash; require builder and independent verify PASS. Do not promote yet. Return bundle-manifest.json and compact console evidence so the package-level license inventory, artifact count/bytes, vLLM hash, and any missing/unsupported artifact can be reviewed before root promotion. Do not reconstruct the full venv yet, run inference, alter the accepted model object, stop/start the production daemon, or widen model-eval/gpu-heavy authority.
+On Lambda, rerun the qwen35-vllm-cu129-image-native-sampler-v3 wheel-only dependency-bundle materialization using exact research-engine commit 2f8e88ecaa668d5adfc4728c2571e52c002774ab and builder blob 6902282fe1339622931c799df281fb8b8ce63673. Preserve the certified live runtime read-only; write only under ~/adamArchives/Adam/workspace-control-tmp/ with output-local PIP_CACHE_DIR; require exact freeze SHA-256 198d90f866d032ea8f747dd9d28a1fe5f5ef18c02e5eb64b850124e77a2744d0; permit only declared wheel sources plus exact certified vLLM upstream URL/hash; require builder and independent verify PASS. Do not promote yet. Return only compact console evidence plus bundle-manifest.json (or build-summary.json if PASS); do not send routine per-package download lines unless a failure names a package whose surrounding output is needed.
 
 ## Remaining work
 
@@ -47,7 +47,7 @@ On Lambda, rerun the qwen35-vllm-cu129-image-native-sampler-v3 wheel-only depend
 
 ## Blockers / gates
 
-- No persistent runtime object exists yet. The builder now correctly recognizes the exact certified local vLLM freeze provenance. Re-run the same bounded Lambda bundle materialization from research-engine@893b38da5ec4eca0146b236579f16f28f04f3e7d, inspect the artifact/license manifest, complete the required trusted package-set license/usage review, and only then perform root trusted-cache acquisition/promotion.
+- No persistent runtime object exists yet. The wheel metadata parser now handles nested vendored dist-info correctly. Re-run the bounded Lambda bundle materialization from research-engine@2f8e88ecaa668d5adfc4728c2571e52c002774ab, inspect the resulting manifest/license inventory, complete trusted package-set license/usage review, then perform root promotion.
 
 ## Fresh-chat initialization
 
