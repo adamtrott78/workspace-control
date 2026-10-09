@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 04058c34e6975832d6a44abd1274844889c80dbe
+- Remote checkpoint: 4f2cb9e9a3011123f8e50fc9557f6a534ab73c12
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Proceed to disk-pressure failure-envelope validation without filling the host filesystem. Audit/harden root runtime so a nonzero runner exit can be classified as DISK_PRESSURE only from root-owned filesystem evidence captured before cleanup (statvfs free blocks/inodes on request job/staging filesystems), never from candidate output. Add CPU-only regression tests. Then use a small root-mounted temporary tmpfs canary under /srv to provoke genuine ENOSPC through the provisioner path, keeping logs/state outside the full tmpfs. Require DISK_PRESSURE, no automatic retry, successful process/workspace cleanup, no live lane quarantine, and unmount/remove the canary filesystem afterward.
+Proceed to CUDA OOM failure-envelope validation on the already accepted gpu-small lane. First audit and harden root runtime so CUDA OOM can be classified deterministically without trusting candidate stdout/stderr. Prefer root-owned GPU/process/system evidence or a trusted canary-side structured signal that cannot be supplied by untrusted candidate payload. Add CPU-only/unit regression where possible and full Workspace Control Validation before any live GPU canary. Then run one bounded gpu-small CUDA OOM canary on the accepted A4500 only, without model weights or inference. Require CUDA_OOM, no automatic retry, complete GPU/project/workspace cleanup, unchanged expanded-runtime digest, no live lane quarantine, and no authority expansion.
 
 ## Remaining work
 
