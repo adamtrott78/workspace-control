@@ -40,9 +40,11 @@ Install exact workspace-control SHA effc5b2f39fe897f4b9dc9fe6767d2002ee81cdb on 
 
 ## Remaining work
 
-- Run adversarial recovery, replay, cleanup, resource-exhaustion, cache-integrity, and concurrency acceptance.
-- Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small.
-- Decide separately whether gpu-heavy/dual-GPU should be accepted.
+- Run one bounded root-authored gpu-small CUDA OOM host canary using only the installed trusted CUDA OOM probe on accepted GPU UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea. No GitHub job, candidate payload code, model weights, or inference.
+- After CUDA OOM PASS, checkpoint the failure envelope and run CPU/GPU contention and concurrency acceptance without expanding gpu-small authority.
+- Run cache poisoning and incomplete-snapshot rejection acceptance against the trusted-cache boundary.
+- After the adversarial recovery/resource/cache matrix is complete, run the first offline Qwen3.5-4B pinned-model pilot on gpu-small under the already-promoted model/runtime identities.
+- Decide separately whether gpu-heavy or dual-GPU should ever be accepted; they remain denied.
 
 ## Blockers / gates
 
