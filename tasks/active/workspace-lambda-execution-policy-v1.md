@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 26111a676af62b9f01066816746d461b9027e1c7
+- Remote checkpoint: 04058c34e6975832d6a44abd1274844889c80dbe
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Proceed to CPU/RAM resource-exhaustion validation. Audit the root runtime launcher for deterministic CPU_OR_RAM_RESOURCE_EXHAUSTED classification before any live pressure test. Add fail-closed classification/receipt logic and CPU-only regression tests if needed. Then run one bounded temporary-state RAM-pressure canary using a real transient systemd unit with a small synthetic MemoryMax; do not submit a GitHub job or use GPU. Require no automatic retry, complete wrapper/project/workspace cleanup, no live lane quarantine on ordinary resource exhaustion, and no live control-plane mutation.
+Proceed to disk-pressure failure-envelope validation without filling the host filesystem. Audit/harden root runtime so a nonzero runner exit can be classified as DISK_PRESSURE only from root-owned filesystem evidence captured before cleanup (statvfs free blocks/inodes on request job/staging filesystems), never from candidate output. Add CPU-only regression tests. Then use a small root-mounted temporary tmpfs canary under /srv to provoke genuine ENOSPC through the provisioner path, keeping logs/state outside the full tmpfs. Require DISK_PRESSURE, no automatic retry, successful process/workspace cleanup, no live lane quarantine, and unmount/remove the canary filesystem afterward.
 
 ## Remaining work
 
