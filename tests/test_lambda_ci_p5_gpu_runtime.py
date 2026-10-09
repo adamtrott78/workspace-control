@@ -18,6 +18,10 @@ spec.loader.exec_module(runtime)
 
 
 class LambdaCIP5GPURuntimeTests(unittest.TestCase):
+    def test_trusted_cuda_oom_probe_source_compiles_without_execution(self):
+        source = (ROOT / "scripts" / "lambda_ci_cuda_oom_probe.py").read_text()
+        compile(source, "lambda_ci_cuda_oom_probe.py", "exec")
+
     def gpu_spec(self):
         return {
             "unit_name": "workspace-ci-research-engine-test.service",
@@ -126,6 +130,142 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         self.assertIn("IPAddressDeny=10.0.0.0/8", command)
         self.assertIn("IPAddressDeny=134.88.12.0/22", command)
         self.assertIn("RuntimeMaxSec=1200s", command)
+
+    def test_trusted_cuda_oom_probe_binding_requires_exact_root_identity(self):
+        spec = self.gpu_spec()
+        spec["trusted_failure_probe"] = {
+            "kind": runtime.TRUSTED_CUDA_OOM_PROBE_KIND,
+            "authority": runtime.TRUSTED_CUDA_OOM_PROBE_AUTHORITY,
+            "path": str(runtime.TRUSTED_CUDA_OOM_PROBE_PATH),
+            "source_blob_sha": "a" * 40,
+            "expected_exit_code": runtime.TRUSTED_CUDA_OOM_PROBE_EXIT,
+        }
+
+        original = runtime.trusted_probe_file_identity
+        runtime.trusted_probe_file_identity = lambda path: {
+            "regular": True,
+            "uid": 0,
+            "gid": 0,
+            "mode": 0o555,
+            "source_blob_sha": "a" * 40,
+        }
+        try:
+            binding = runtime.verify_trusted_cuda_oom_probe_binding(spec)
+        finally:
+            runtime.trusted_probe_file_identity = original
+
+        self.assertIsNotNone(binding)
+        self.assertEqual(
+            binding["kind"],
+            runtime.TRUSTED_CUDA_OOM_PROBE_KIND,
+        )
+        self.assertEqual(binding["source_blob_sha"], "a" * 40)
+
+    def test_trusted_cuda_oom_probe_binding_rejects_non_root_probe(self):
+        spec = self.gpu_spec()
+        spec["trusted_failure_probe"] = {
+            "kind": runtime.TRUSTED_CUDA_OOM_PROBE_KIND,
+            "authority": runtime.TRUSTED_CUDA_OOM_PROBE_AUTHORITY,
+            "path": str(runtime.TRUSTED_CUDA_OOM_PROBE_PATH),
+            "source_blob_sha": "b" * 40,
+            "expected_exit_code": runtime.TRUSTED_CUDA_OOM_PROBE_EXIT,
+        }
+
+        original = runtime.trusted_probe_file_identity
+        runtime.trusted_probe_file_identity = lambda path: {
+            "regular": True,
+            "uid": 1000,
+            "gid": 1000,
+            "mode": 0o555,
+            "source_blob_sha": "b" * 40,
+        }
+        try:
+            with self.assertRaises(runtime.RuntimeLaunchError):
+                runtime.verify_trusted_cuda_oom_probe_binding(spec)
+        finally:
+            runtime.trusted_probe_file_identity = original
+
+    def test_trusted_cuda_oom_terminal_evidence_requires_exact_systemd_exit(self):
+        binding = {
+            "available": True,
+            "kind": runtime.TRUSTED_CUDA_OOM_PROBE_KIND,
+            "authority": runtime.TRUSTED_CUDA_OOM_PROBE_AUTHORITY,
+            "path": str(runtime.TRUSTED_CUDA_OOM_PROBE_PATH),
+            "source_blob_sha": "c" * 40,
+            "expected_exit_code": runtime.TRUSTED_CUDA_OOM_PROBE_EXIT,
+        }
+        matched = runtime.trusted_cuda_oom_probe_terminal_evidence(
+            binding,
+            {
+                "available": True,
+                "result": "exit-code",
+                "exec_main_code": "1",
+                "exec_main_status": str(runtime.TRUSTED_CUDA_OOM_PROBE_EXIT),
+            },
+        )
+        self.assertTrue(matched["matched"])
+
+        wrong_exit = runtime.trusted_cuda_oom_probe_terminal_evidence(
+            binding,
+            {
+                "available": True,
+                "result": "exit-code",
+                "exec_main_code": "1",
+                "exec_main_status": "87",
+            },
+        )
+        self.assertFalse(wrong_exit["matched"])
+
+        wrong_result = runtime.trusted_cuda_oom_probe_terminal_evidence(
+            binding,
+            {
+                "available": True,
+                "result": "oom-kill",
+                "exec_main_code": "2",
+                "exec_main_status": "9",
+            },
+        )
+        self.assertFalse(wrong_result["matched"])
+
+    def test_trusted_cuda_oom_probe_command_executes_only_root_bound_probe(self):
+        spec = self.gpu_spec()
+        spec["trusted_failure_probe"] = {
+            "kind": runtime.TRUSTED_CUDA_OOM_PROBE_KIND,
+            "authority": runtime.TRUSTED_CUDA_OOM_PROBE_AUTHORITY,
+            "path": str(runtime.TRUSTED_CUDA_OOM_PROBE_PATH),
+            "source_blob_sha": "d" * 40,
+            "expected_exit_code": runtime.TRUSTED_CUDA_OOM_PROBE_EXIT,
+        }
+        verified = {
+            "available": True,
+            **spec["trusted_failure_probe"],
+        }
+
+        original = runtime.verify_trusted_cuda_oom_probe_binding
+        runtime.verify_trusted_cuda_oom_probe_binding = lambda value: verified
+        try:
+            command = runtime.build_trusted_cuda_oom_probe_systemd_command(
+                spec,
+                pathlib.Path("/tmp/runner"),
+                pathlib.Path("/tmp/staging"),
+                "134.88.12.0/22",
+                self.assignment(),
+            )
+        finally:
+            runtime.verify_trusted_cuda_oom_probe_binding = original
+
+        self.assertEqual(
+            command[-2:],
+            [
+                spec["runtime_binding"]["python_path"],
+                str(runtime.TRUSTED_CUDA_OOM_PROBE_PATH),
+            ],
+        )
+        self.assertIn(
+            f"ReadOnlyPaths={runtime.TRUSTED_CUDA_OOM_PROBE_PATH}",
+            command,
+        )
+        self.assertNotIn("/bin/bash", command)
 
     def test_expanded_runtime_tree_digest_uses_binary_separators(self):
         with tempfile.TemporaryDirectory() as tmp:

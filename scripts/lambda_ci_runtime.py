@@ -41,6 +41,18 @@ class RuntimeDiskPressureError(RuntimeLaunchError):
     """Raised when root-owned filesystem evidence proves disk pressure."""
 
 
+class RuntimeCudaOomError(RuntimeLaunchError):
+    """Raised only when a root-bound trusted CUDA OOM probe proves CUDA OOM."""
+
+
+TRUSTED_CUDA_OOM_PROBE_PATH = pathlib.Path(
+    "/opt/workspace-ci/provisioner/trusted-probes/lambda_ci_cuda_oom_probe.py"
+)
+TRUSTED_CUDA_OOM_PROBE_KIND = "cuda_oom_acceptance_v1"
+TRUSTED_CUDA_OOM_PROBE_AUTHORITY = "ROOT_SYNTHETIC_CANARY_ONLY"
+TRUSTED_CUDA_OOM_PROBE_EXIT = 86
+
+
 def run(argv: list[str], *, check: bool = True):
     proc = subprocess.run(
         argv,
@@ -446,6 +458,125 @@ def project_gpu_processes(uid: int) -> list[dict[str, object]]:
     return rows
 
 
+def git_blob_sha(path: pathlib.Path) -> str:
+    data = path.read_bytes()
+    digest = hashlib.sha1()
+    digest.update(f"blob {len(data)}\0".encode())
+    digest.update(data)
+    return digest.hexdigest()
+
+
+def trusted_probe_file_identity(path: pathlib.Path) -> dict[str, object]:
+    st = path.stat()
+    return {
+        "regular": stat.S_ISREG(st.st_mode),
+        "uid": int(st.st_uid),
+        "gid": int(st.st_gid),
+        "mode": stat.S_IMODE(st.st_mode),
+        "source_blob_sha": git_blob_sha(path),
+    }
+
+
+def verify_trusted_cuda_oom_probe_binding(
+    spec: dict[str, Any],
+) -> dict[str, object] | None:
+    """Verify an explicit root-only CUDA OOM acceptance probe binding.
+
+    Normal admitted launch specs never contain this binding. It is intended
+    solely for a root-authored synthetic host canary and cannot be derived from
+    candidate request fields.
+    """
+    binding = spec.get("trusted_failure_probe")
+    if binding is None:
+        return None
+    if not isinstance(binding, dict):
+        raise RuntimeLaunchError("trusted failure probe binding is invalid")
+
+    required = {
+        "kind",
+        "authority",
+        "path",
+        "source_blob_sha",
+        "expected_exit_code",
+    }
+    if set(binding) != required:
+        raise RuntimeLaunchError("trusted failure probe binding keys drift")
+    if binding["kind"] != TRUSTED_CUDA_OOM_PROBE_KIND:
+        raise RuntimeLaunchError("trusted failure probe kind is not accepted")
+    if binding["authority"] != TRUSTED_CUDA_OOM_PROBE_AUTHORITY:
+        raise RuntimeLaunchError("trusted failure probe authority is not accepted")
+    if binding["expected_exit_code"] != TRUSTED_CUDA_OOM_PROBE_EXIT:
+        raise RuntimeLaunchError("trusted CUDA OOM probe exit code drift")
+
+    path = pathlib.Path(str(binding["path"]))
+    if path != TRUSTED_CUDA_OOM_PROBE_PATH:
+        raise RuntimeLaunchError("trusted CUDA OOM probe path drift")
+
+    source_blob_sha = str(binding["source_blob_sha"])
+    if len(source_blob_sha) != 40 or any(
+        ch not in "0123456789abcdef" for ch in source_blob_sha
+    ):
+        raise RuntimeLaunchError("trusted CUDA OOM probe source blob is invalid")
+
+    try:
+        identity = trusted_probe_file_identity(path)
+    except OSError as exc:
+        raise RuntimeLaunchError("trusted CUDA OOM probe is unavailable") from exc
+    if identity["regular"] is not True:
+        raise RuntimeLaunchError("trusted CUDA OOM probe is not a regular file")
+    if identity["uid"] != 0 or identity["gid"] != 0:
+        raise RuntimeLaunchError("trusted CUDA OOM probe is not root-owned")
+    if int(identity["mode"]) & 0o222:
+        raise RuntimeLaunchError("trusted CUDA OOM probe is writable")
+
+    actual_blob_sha = str(identity["source_blob_sha"])
+    if actual_blob_sha != source_blob_sha:
+        raise RuntimeLaunchError("trusted CUDA OOM probe source identity mismatch")
+
+    return {
+        "available": True,
+        "kind": TRUSTED_CUDA_OOM_PROBE_KIND,
+        "authority": TRUSTED_CUDA_OOM_PROBE_AUTHORITY,
+        "path": str(path),
+        "source_blob_sha": actual_blob_sha,
+        "expected_exit_code": TRUSTED_CUDA_OOM_PROBE_EXIT,
+    }
+
+
+def trusted_cuda_oom_probe_terminal_evidence(
+    binding: dict[str, object] | None,
+    unit_evidence: dict[str, object],
+) -> dict[str, object]:
+    evidence: dict[str, object] = {
+        "available": binding is not None,
+        "matched": False,
+        "kind": None,
+        "source_blob_sha": None,
+        "expected_exit_code": None,
+        "systemd_result": unit_evidence.get("result"),
+        "systemd_exec_main_code": unit_evidence.get("exec_main_code"),
+        "systemd_exec_main_status": unit_evidence.get("exec_main_status"),
+    }
+    if binding is None:
+        return evidence
+
+    expected = int(binding["expected_exit_code"])
+    evidence.update(
+        {
+            "kind": binding["kind"],
+            "source_blob_sha": binding["source_blob_sha"],
+            "expected_exit_code": expected,
+        }
+    )
+    evidence["matched"] = (
+        unit_evidence.get("available") is True
+        and unit_evidence.get("result") == "exit-code"
+        and str(unit_evidence.get("exec_main_code")) == "1"
+        and str(unit_evidence.get("exec_main_status")) == str(expected)
+    )
+    return evidence
+
+
 def build_cpu_systemd_command(
     spec: dict[str, Any],
     runner_dir: pathlib.Path,
@@ -667,6 +798,44 @@ def build_gpu_systemd_command(
         command[insert_at:insert_at] = ["-p", f"DeviceAllow={support_device} rw"]
         insert_at += 2
     return command
+
+def build_trusted_cuda_oom_probe_systemd_command(
+    spec: dict[str, Any],
+    runner_dir: pathlib.Path,
+    staging_dir: pathlib.Path,
+    subnet: str,
+    assignment: dict[str, object],
+) -> list[str]:
+    binding = verify_trusted_cuda_oom_probe_binding(spec)
+    if binding is None:
+        raise RuntimeLaunchError("trusted CUDA OOM probe binding is required")
+
+    command = build_gpu_systemd_command(
+        spec,
+        runner_dir,
+        staging_dir,
+        subnet,
+        assignment,
+    )
+    probe_path = pathlib.Path(str(binding["path"]))
+    runtime_python = pathlib.Path(spec["runtime_binding"]["python_path"])
+
+    try:
+        executable_index = command.index("/bin/bash")
+    except ValueError as exc:
+        raise RuntimeLaunchError("gpu-small command executable boundary drift") from exc
+
+    command[executable_index:executable_index] = [
+        "-p",
+        f"ReadOnlyPaths={probe_path}",
+    ]
+    executable_index += 2
+    command[executable_index:] = [
+        str(runtime_python),
+        str(probe_path),
+    ]
+    return command
+
 
 def _pump(stream, log) -> None:
     try:
@@ -1086,6 +1255,7 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         raise RuntimeLaunchError("gpu-small target UUID drift")
 
     runtime_pre = verify_expanded_runtime_binding(spec)
+    trusted_cuda_oom_probe = verify_trusted_cuda_oom_probe_binding(spec)
 
     runner_base, uid, gid = verify_foundation(spec)
     subnet = primary_subnet()
@@ -1126,13 +1296,22 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     console_log = logs_root / f"p5-{request_id}-runner.log"
     journal_log = logs_root / f"p5-{request_id}-journal.log"
     receipt_path = logs_root / f"p5-{request_id}-receipt.json"
-    command = build_gpu_systemd_command(
-        spec,
-        runner_dir,
-        staging_dir,
-        subnet,
-        assignment,
-    )
+    if trusted_cuda_oom_probe is None:
+        command = build_gpu_systemd_command(
+            spec,
+            runner_dir,
+            staging_dir,
+            subnet,
+            assignment,
+        )
+    else:
+        command = build_trusted_cuda_oom_probe_systemd_command(
+            spec,
+            runner_dir,
+            staging_dir,
+            subnet,
+            assignment,
+        )
 
     result = "FAIL"
     terminal_status = "FAILED"
@@ -1151,6 +1330,17 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         "available": False,
         "pressure": False,
         "filesystems": {},
+    }
+    cuda_oom = False
+    cuda_oom_evidence: dict[str, object] = {
+        "available": False,
+        "matched": False,
+        "kind": None,
+        "source_blob_sha": None,
+        "expected_exit_code": None,
+        "systemd_result": None,
+        "systemd_exec_main_code": None,
+        "systemd_exec_main_status": None,
     }
     execution_error: Exception | None = None
     residue_detected = False
@@ -1232,6 +1422,24 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
                         f"unit={spec['unit_name']}"
                     )
 
+        if (
+            not timed_out
+            and rc not in (None, 0)
+            and not resource_exhausted
+            and not disk_pressure
+        ):
+            cuda_oom_evidence = trusted_cuda_oom_probe_terminal_evidence(
+                trusted_cuda_oom_probe,
+                unit_terminal_evidence,
+            )
+            if cuda_oom_evidence.get("matched") is True:
+                terminal_status = "CUDA_OOM"
+                cuda_oom = True
+                execution_error = RuntimeCudaOomError(
+                    "root-bound trusted CUDA OOM probe reported allocation OOM "
+                    f"unit={spec['unit_name']}"
+                )
+
         try:
             gpu_residue_detected = project_gpu_processes(uid)
         except Exception as exc:
@@ -1286,6 +1494,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "systemd_terminal_evidence": unit_terminal_evidence,
             "disk_pressure": disk_pressure,
             "disk_pressure_evidence": disk_pressure_evidence,
+            "cuda_oom": cuda_oom,
+            "cuda_oom_evidence": cuda_oom_evidence,
             "request_id": request_id,
             "project_id": spec["project_id"],
             "profile": spec["profile"],

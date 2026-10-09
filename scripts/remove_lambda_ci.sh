@@ -27,6 +27,7 @@ for path in \
   /opt/workspace-ci/provisioner/lambda_ci_provisioner.py \
   /opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py \
   /opt/workspace-ci/provisioner/lambda_ci_runtime.py \
+  /opt/workspace-ci/provisioner/trusted-probes/lambda_ci_cuda_oom_probe.py \
   /opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py \
   /etc/workspace-ci/projects/research-engine.json \
   /etc/workspace-ci/lambda-ci-systemd-profiles.v1.json \

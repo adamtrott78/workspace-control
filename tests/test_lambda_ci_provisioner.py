@@ -67,6 +67,7 @@ def test_gpu_small_launch_spec_carries_stable_uuid_and_bounded_runtime():
     assert launch["resources"]["gpu_uuid"] == "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
     assert launch["resources"]["runtime_max_seconds"] == 1200
     assert launch["allow_production_services"] is False
+    assert "trusted_failure_probe" not in launch
     runtime_binding = launch["runtime_binding"]
     assert runtime_binding["runtime_id"] == "qwen35-vllm-cu129-image-native-sampler-v3"
     assert runtime_binding["tree_digest_sha256"] == (
@@ -126,6 +127,7 @@ def test_extra_path_or_environment_keys_are_rejected():
         ("environment", {"LD_PRELOAD": "/tmp/x.so"}),
         ("device", "/dev/nvidia1"),
         ("systemd_properties", {"BindReadOnlyPaths": "/home/atrott"}),
+        ("trusted_failure_probe", {"kind": "cuda_oom_acceptance_v1"}),
     ):
         req = good_request()
         req[key] = value
@@ -327,6 +329,7 @@ def test_v2_gpu_request_cannot_widen_beyond_gpu_small():
     assert launch["runtime_binding"]["tree_digest_sha256"] == (
         req.admission["runtime"]["cache_object"]["tree_sha256"]
     )
+    assert "trusted_failure_probe" not in launch
     assert req.admission["runtime"]["cache_object"]["object_state"] == "PROMOTED"
     assert req.admission["runtime"]["owning_contracts"]
 
