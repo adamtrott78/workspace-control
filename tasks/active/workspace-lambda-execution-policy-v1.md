@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4f2cb9e9a3011123f8e50fc9557f6a534ab73c12
+- Remote checkpoint: effc5b2f39fe897f4b9dc9fe6767d2002ee81cdb
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Proceed to CUDA OOM failure-envelope validation on the already accepted gpu-small lane. First audit and harden root runtime so CUDA OOM can be classified deterministically without trusting candidate stdout/stderr. Prefer root-owned GPU/process/system evidence or a trusted canary-side structured signal that cannot be supplied by untrusted candidate payload. Add CPU-only/unit regression where possible and full Workspace Control Validation before any live GPU canary. Then run one bounded gpu-small CUDA OOM canary on the accepted A4500 only, without model weights or inference. Require CUDA_OOM, no automatic retry, complete GPU/project/workspace cleanup, unchanged expanded-runtime digest, no live lane quarantine, and no authority expansion.
+Install exact workspace-control SHA effc5b2f39fe897f4b9dc9fe6767d2002ee81cdb on the Lambda host using the existing authorized P5 bootstrap and verify runtime blob 4615bcb7a06253186b61d31688f7720b45e760f0 plus installed trusted CUDA OOM probe blob 046f614508dd6b5f7cab981fc803a20ea33dcbf6 at /opt/workspace-ci/provisioner/trusted-probes/lambda_ci_cuda_oom_probe.py, root-owned and non-writable. Then run one root-authored synthetic gpu-small CUDA OOM host canary only on accepted GPU UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea. Do not submit a GitHub job; do not use candidate payload code; do not load model weights or perform inference. The synthetic launch spec may add trusted_failure_probe only after ordinary validated gpu-small spec construction, with kind=cuda_oom_acceptance_v1, authority=ROOT_SYNTHETIC_CANARY_ONLY, exact installed path, source_blob_sha=046f614508dd6b5f7cab981fc803a20ea33dcbf6, expected_exit_code=86. Require terminal FAILED with RuntimeCudaOomError, receipt terminal_status=CUDA_OOM/cuda_oom=true/automatic_retry_eligible=false, matched trusted-probe evidence with systemd Result=exit-code ExecMainCode=1 ExecMainStatus=86, exactly the accepted A4500 visible, other GPU denied, zero project/GPU process residue, runner/staging removed, expanded-runtime pre/post digest identical to b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63, JIT/credential absent, gpu-small live lane unquarantined, and no model weights/inference. After PASS, checkpoint CUDA OOM acceptance and proceed to CPU/GPU contention/concurrency proof, then cache poisoning/incomplete snapshot rejection.
 
 ## Remaining work
 
