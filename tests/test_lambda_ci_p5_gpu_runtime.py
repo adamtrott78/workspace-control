@@ -236,6 +236,103 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
             self.assertFalse(root.exists())
 
 
+    def test_filesystem_pressure_evidence_classifies_zero_available_blocks(self):
+        class FakeStat:
+            f_frsize = 4096
+            f_bsize = 4096
+            f_bavail = 0
+            f_favail = 100
+            f_files = 1000
+
+        original = runtime.os.statvfs
+        runtime.os.statvfs = lambda path: FakeStat()
+        try:
+            evidence = runtime.filesystem_pressure_evidence(
+                {
+                    "job": pathlib.Path("/tmp/job"),
+                    "staging": pathlib.Path("/tmp/staging"),
+                }
+            )
+        finally:
+            runtime.os.statvfs = original
+
+        self.assertTrue(evidence["available"])
+        self.assertTrue(evidence["pressure"])
+        self.assertTrue(
+            runtime.filesystem_proves_disk_pressure(evidence)
+        )
+        self.assertTrue(
+            evidence["filesystems"]["job"]["blocks_exhausted"]
+        )
+        self.assertEqual(
+            evidence["filesystems"]["job"]["available_bytes"],
+            0,
+        )
+
+    def test_filesystem_pressure_evidence_classifies_inode_exhaustion(self):
+        class FakeStat:
+            f_frsize = 4096
+            f_bsize = 4096
+            f_bavail = 1024
+            f_favail = 0
+            f_files = 1000
+
+        original = runtime.os.statvfs
+        runtime.os.statvfs = lambda path: FakeStat()
+        try:
+            evidence = runtime.filesystem_pressure_evidence(
+                {"job": pathlib.Path("/tmp/job")}
+            )
+        finally:
+            runtime.os.statvfs = original
+
+        self.assertTrue(evidence["pressure"])
+        self.assertTrue(
+            evidence["filesystems"]["job"]["inodes_exhausted"]
+        )
+
+    def test_filesystem_pressure_evidence_does_not_trust_low_but_nonzero_space(self):
+        class FakeStat:
+            f_frsize = 4096
+            f_bsize = 4096
+            f_bavail = 1
+            f_favail = 1
+            f_files = 1000
+
+        original = runtime.os.statvfs
+        runtime.os.statvfs = lambda path: FakeStat()
+        try:
+            evidence = runtime.filesystem_pressure_evidence(
+                {"job": pathlib.Path("/tmp/job")}
+            )
+        finally:
+            runtime.os.statvfs = original
+
+        self.assertFalse(evidence["pressure"])
+        self.assertFalse(
+            runtime.filesystem_proves_disk_pressure(evidence)
+        )
+
+    def test_filesystem_pressure_evidence_fails_closed_on_unavailable_path(self):
+        original = runtime.os.statvfs
+
+        def fake_statvfs(path):
+            raise OSError("synthetic statvfs failure")
+
+        runtime.os.statvfs = fake_statvfs
+        try:
+            evidence = runtime.filesystem_pressure_evidence(
+                {"job": pathlib.Path("/tmp/job")}
+            )
+        finally:
+            runtime.os.statvfs = original
+
+        self.assertFalse(evidence["available"])
+        self.assertFalse(evidence["pressure"])
+        self.assertFalse(
+            runtime.filesystem_proves_disk_pressure(evidence)
+        )
+
     def test_transient_unit_evidence_classifies_systemd_oom(self):
         responses = [
             SimpleNamespace(

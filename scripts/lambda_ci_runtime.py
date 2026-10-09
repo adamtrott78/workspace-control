@@ -37,6 +37,10 @@ class RuntimeResourceExhaustedError(RuntimeLaunchError):
     """Raised when systemd proves CPU/RAM resource exhaustion."""
 
 
+class RuntimeDiskPressureError(RuntimeLaunchError):
+    """Raised when root-owned filesystem evidence proves disk pressure."""
+
+
 def run(argv: list[str], *, check: bool = True):
     proc = subprocess.run(
         argv,
@@ -754,6 +758,63 @@ def systemd_proves_cpu_or_ram_exhaustion(
     return evidence.get("result") == "oom-kill"
 
 
+def filesystem_pressure_evidence(
+    paths: dict[str, pathlib.Path],
+) -> dict[str, object]:
+    """Capture root-owned terminal free-space/inode evidence before cleanup."""
+    entries: dict[str, dict[str, object]] = {}
+    pressure = False
+
+    for label, path in paths.items():
+        try:
+            statvfs = os.statvfs(path)
+        except OSError as exc:
+            entries[label] = {
+                "path": str(path),
+                "available": False,
+                "error": f"{type(exc).__name__}: {exc}",
+            }
+            continue
+
+        fragment = statvfs.f_frsize or statvfs.f_bsize
+        available_blocks = int(statvfs.f_bavail)
+        available_bytes = available_blocks * int(fragment)
+        available_inodes = int(statvfs.f_favail)
+        inode_accounting = int(statvfs.f_files) > 0
+        blocks_exhausted = available_blocks == 0
+        inodes_exhausted = inode_accounting and available_inodes == 0
+
+        if blocks_exhausted or inodes_exhausted:
+            pressure = True
+
+        entries[label] = {
+            "path": str(path),
+            "available": True,
+            "fragment_size": int(fragment),
+            "available_blocks": available_blocks,
+            "available_bytes": available_bytes,
+            "available_inodes": available_inodes,
+            "inode_accounting": inode_accounting,
+            "blocks_exhausted": blocks_exhausted,
+            "inodes_exhausted": inodes_exhausted,
+        }
+
+    return {
+        "available": all(
+            isinstance(value, dict) and value.get("available") is True
+            for value in entries.values()
+        ),
+        "pressure": pressure,
+        "filesystems": entries,
+    }
+
+
+def filesystem_proves_disk_pressure(
+    evidence: dict[str, object],
+) -> bool:
+    return evidence.get("pressure") is True
+
+
 def cleanup_project_uid_processes(uid: int) -> tuple[bool, bool]:
     """Kill project-UID residue if present and verify the UID is empty afterward."""
     before = run(["pgrep", "-u", str(uid)], check=False)
@@ -860,6 +921,12 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         "exec_main_status": None,
     }
     resource_exhausted = False
+    disk_pressure = False
+    disk_pressure_evidence: dict[str, object] = {
+        "available": False,
+        "pressure": False,
+        "filesystems": {},
+    }
     execution_error: Exception | None = None
     residue_detected = False
     cleanup_pass = False
@@ -920,6 +987,21 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
                     f"unit={spec['unit_name']}"
                 )
 
+            else:
+                disk_pressure_evidence = filesystem_pressure_evidence(
+                    {
+                        "job": job_dir,
+                        "staging": staging_dir,
+                    }
+                )
+                if filesystem_proves_disk_pressure(disk_pressure_evidence):
+                    terminal_status = "DISK_PRESSURE"
+                    disk_pressure = True
+                    execution_error = RuntimeDiskPressureError(
+                        "root-owned filesystem evidence reported disk pressure "
+                        f"unit={spec['unit_name']}"
+                    )
+
         residue_detected, cleanup_pass = cleanup_project_uid_processes(uid)
 
         journal = run(
@@ -952,6 +1034,8 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "automatic_retry_eligible": False,
             "resource_exhausted": resource_exhausted,
             "systemd_terminal_evidence": unit_terminal_evidence,
+            "disk_pressure": disk_pressure,
+            "disk_pressure_evidence": disk_pressure_evidence,
             "request_id": request_id,
             "project_id": spec["project_id"],
             "profile": spec["profile"],
@@ -1062,6 +1146,12 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         "exec_main_status": None,
     }
     resource_exhausted = False
+    disk_pressure = False
+    disk_pressure_evidence: dict[str, object] = {
+        "available": False,
+        "pressure": False,
+        "filesystems": {},
+    }
     execution_error: Exception | None = None
     residue_detected = False
     cleanup_pass = False
@@ -1127,6 +1217,20 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
                     f"result={unit_terminal_evidence.get('result')} "
                     f"unit={spec['unit_name']}"
                 )
+            else:
+                disk_pressure_evidence = filesystem_pressure_evidence(
+                    {
+                        "job": job_dir,
+                        "staging": staging_dir,
+                    }
+                )
+                if filesystem_proves_disk_pressure(disk_pressure_evidence):
+                    terminal_status = "DISK_PRESSURE"
+                    disk_pressure = True
+                    execution_error = RuntimeDiskPressureError(
+                        "root-owned filesystem evidence reported disk pressure "
+                        f"unit={spec['unit_name']}"
+                    )
 
         try:
             gpu_residue_detected = project_gpu_processes(uid)
@@ -1180,6 +1284,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "automatic_retry_eligible": False,
             "resource_exhausted": resource_exhausted,
             "systemd_terminal_evidence": unit_terminal_evidence,
+            "disk_pressure": disk_pressure,
+            "disk_pressure_evidence": disk_pressure_evidence,
             "request_id": request_id,
             "project_id": spec["project_id"],
             "profile": spec["profile"],
