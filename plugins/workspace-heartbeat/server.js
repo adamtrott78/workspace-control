@@ -11,7 +11,7 @@ import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
 const PANEL_URI = "ui://workspace-heartbeat/panel-v8.html";
-const LIVE_URI = "ui://workspace-heartbeat/live-v4.html";
+const LIVE_URI = "ui://workspace-heartbeat/live-v5.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
   "utf8",
@@ -67,7 +67,7 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.4.5",
+      version: "0.4.6",
     },
     {
       instructions:

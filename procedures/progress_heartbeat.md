@@ -1,6 +1,6 @@
 # Operator Progress Heartbeat
 
-Status: **Workspace Heartbeat v0.4.4 accepted**
+Status: **Workspace Heartbeat v0.4.5 accepted; v0.4.6 live candidate under final host validation**
 
 ## Purpose
 
@@ -31,7 +31,7 @@ Prefer causal language such as:
 
 Usually use one or two concise sentences.
 
-## Accepted ChatGPT Workspace Heartbeat delivery — v0.4.4
+## Accepted ChatGPT Workspace Heartbeat delivery — v0.4.5 lifecycle
 
 For each **substantial assistant response** using the connected Workspace
 Heartbeat MCP plugin:
@@ -50,13 +50,19 @@ Heartbeat MCP plugin:
    same task. The server supersedes the prior active turn, and the old in-chat
    card becomes static historical UI;
 6. the mounted current-turn card reads app-only
-   `heartbeat_snapshot(task_id, turn_id)` and displays the latest three
-   updates for that turn;
+   `heartbeat_snapshot(task_id, turn_id)` and displays the full bounded
+   current-turn `turn_history`; the compatibility `recent` field remains
+   latest-three only;
 7. use `heartbeat_get(task_id)` only for explicit task-history/sidebar
    inspection. It is not the routine live-progress path;
-8. when the owning task is actually complete, a terminal
-   `heartbeat_update(..., state="done")` may close the active turn and release
-   task ownership.
+8. a terminal `heartbeat_update(..., state="done")` closes the active
+   Heartbeat turn and releases the volatile task-writer lease. `done` is a
+   Heartbeat lifecycle state, not evidence that the durable workspace task is
+   `COMPLETE`;
+9. use that terminal `done` as the final Heartbeat operation when either the
+   durable task is actually complete **or** the current ChatGPT conversation is
+   intentionally handing the still-active durable task to another conversation
+   after its capsule/handoff state has been synchronized.
 
 Missing, stale, superseded, wrong-task, or cross-conversation `turn_id` values
 fail closed. `_meta["openai/session"]` is conversation-ownership evidence only;
@@ -82,6 +88,38 @@ Do not mentally equate any of the following with a new assistant response:
 A new `heartbeat_begin_turn` is permitted only after the assistant has
 actually sent its response to the user and a subsequent assistant response has
 begun.
+
+### Chat-to-chat durable task handoff
+
+Conversation ownership is volatile Heartbeat state. Durable task state lives in
+the task capsule and owning repository, so a normal new-chat handoff must
+explicitly bridge those two layers.
+
+When an outgoing conversation prepares a handoff because of chat length, an
+executor switch, or another intentional conversation boundary:
+
+1. complete every task mutation/validation that belongs to the outgoing
+   conversation;
+2. update the authoritative task capsule and regenerate its derived Markdown or
+   handoff surface before releasing Heartbeat ownership;
+3. using the exact active `turn_id`, emit one final
+   `heartbeat_update(..., state="done")` stating that the durable handoff is
+   ready;
+4. do not perform additional task mutations or open another Heartbeat turn in
+   the outgoing conversation after that release;
+5. provide the already-prepared handoff prompt to the operator;
+6. the receiving conversation uses the same real durable `task_id` and starts
+   its first substantial response with `heartbeat_begin_turn`.
+
+This release is mandatory for a planned handoff even though the durable task
+remains `VALIDATING`, `IN_PROGRESS`, `CHECKPOINTED`, or another nonterminal
+state. Heartbeat `done` means **this writer/turn is done**, not **the workspace
+task is done**.
+
+Do not add an automatic lease timeout or allow a new conversation to take over
+an active task merely because a handoff is expected. If the old conversation is
+still reachable, it owns the release. If it becomes unreachable before release,
+use the orphaned-owner recovery procedure below.
 
 ## Semantic-delta emission policy
 
@@ -148,24 +186,32 @@ opaque execution wall.
   the actual current understanding and next action.
 
 There is no fixed elapsed-time requirement. The previous 15-second forced
-cadence and three-tool hard lease are retired for ChatGPT v0.4.4 because live
-prompt experiments showed that they encourage redundant milestone narration.
+cadence and three-tool hard lease are retired. Live prompt experiments showed
+that they encourage redundant milestone narration.
 
 A meaningful semantic state change expires the current silence lease
 immediately: emit the update before proceeding into additional opaque work.
 
 ## Live-card retention
 
-v0.4.4's accepted card shows the latest three updates for the current assistant
-turn. v0.4.5 is the authorized candidate to extend that presentation to the
-**full bounded current-turn semantic chain** in one scrollable card.
+v0.4.5 accepts the **full bounded current-turn semantic chain** in one live card.
 
-The candidate must preserve turn isolation: only updates matching the immutable
+Turn isolation is mandatory: only updates matching the immutable
 `task_id + turn_id` may appear. The full history is bounded by the server's
 turn-history limit (default 50), while `recent` remains a latest-three
 compatibility projection.
 
-The card should grow naturally with the first five current-turn Heartbeats and report each rendered-size change to the host with `ui/notifications/size-changed`. Beginning with update six, the history region should stay at the measured height of the first five entries and scroll internally. It should auto-follow new updates while the operator is already near the bottom, but must not force-scroll away from an earlier update the operator is actively reading.
+The card grows naturally with the first five current-turn Heartbeats. Beginning
+with update six, the history region stays at the measured height of the first
+five entries and scrolls internally. It should auto-follow new updates while the
+operator is already near the bottom, but must not force-scroll away from an
+earlier update the operator is actively reading.
+
+v0.4.6 is a narrow sizing hotfix only. It preserves the v0.4.5 retention and
+scroll behavior but changes `ui/notifications/size-changed` to report the
+intrinsic rendered card height rather than the iframe/document viewport height.
+This prevents short one- or two-update cards from leaving a large blank
+transcript gap.
 
 The sidebar/task history remains an optional history/debug surface rather than
 the primary live UX. The semantic-delta emission policy is unchanged; showing
@@ -180,32 +226,96 @@ changing the MCP implementation.
 For a breaking MCP/tool/UI release:
 
 1. deploy and validate the new server/runtime;
-2. delete/recreate the custom Heartbeat plugin connection when needed to force
-   a clean custom-MCP boundary;
-3. perform a full browser refresh;
-4. verify the actual tool surface before trusting an existing conversation.
+2. before recreating/refreshing the plugin, close active Heartbeat turns with
+   `state="done"` where practical so task ownership is released cleanly;
+3. delete/recreate or refresh the custom Heartbeat plugin connection when
+   needed to force a clean custom-MCP boundary;
+4. perform a full browser refresh;
+5. verify the actual tool surface before trusting an existing conversation;
+6. resume each durable task using its real existing `task_id`. Never invent a
+   replacement Heartbeat task ID merely to bypass ownership.
+
+### Orphaned volatile-owner recovery
+
+A stale owner can be created either by plugin recreation/browser refresh or by an outgoing chat becoming unreachable before a planned handoff release.
+
+Plugin recreation/browser refresh can change the conversation/session identity
+presented through `_meta["openai/session"]`. If a pre-refresh Heartbeat turn
+was still active, the in-memory store may retain ownership under the old,
+unreachable session identity.
+
+The symptom is a valid existing task failing a new
+`heartbeat_begin_turn` with
+`HEARTBEAT_TASK_OWNED_BY_ANOTHER_CONVERSATION` immediately after a plugin
+refresh/recreation, even though the same ChatGPT thread owned the task before
+the refresh.
+
+Treat either case as a **volatile Heartbeat ownership lock**, not as corruption of the
+durable workspace-control task.
+
+Recovery order:
+
+1. if the old Heartbeat session is still reachable, close its active turn with
+   `state="done"`;
+2. otherwise, at a coordinated maintenance boundary, restart only the
+   Workspace Heartbeat server/runtime to clear its in-memory ownership/history;
+3. verify the Heartbeat endpoint is healthy;
+4. retry `heartbeat_begin_turn` from the resumed chat using the original
+   durable task ID;
+5. do not create a fake/new Heartbeat task ID and do not mutate the owning
+   workspace task merely to escape the stale lock.
+
+The server restart clears **all volatile Heartbeat ownership/history in that
+server process**, not only one task. It does not modify workspace-control task
+capsules, Git state, Lambda CI state, research-engine state, or any other
+durable task data. Coordinate the restart so another active chat is not relying
+on the old in-memory Heartbeat state.
+
+On the accepted Lambda deployment, the recovery operation is conceptually:
+
+```bash
+tmux kill-session -t workspace-heartbeat
+heartbeat-up
+```
+
+Use the normal terminal-safe wrapper and health checks rather than issuing a
+top-level shell `exit`.
 
 Existing conversations are not inherently unusable after an upgrade. Field
-evidence on v0.4.4 showed that an existing long-running chat acquired the new
-tool contract after plugin recreation/browser refresh and explicit tool-surface
-use.
+evidence since v0.4.4 shows that long-running chats can acquire the new tool
+contract after plugin recreation/browser refresh. Effective tool-surface
+verification, not chat age alone, determines compatibility.
 
-A conversation is v0.4.4-compatible only if its effective tool surface exposes:
+A compatible conversation must expose:
 
 - `heartbeat_begin_turn`;
 - `heartbeat_update` requiring `turn_id`;
 - `heartbeat_get`;
+- bounded `turn_history` on turn snapshots;
 
-and does **not** expose legacy `heartbeat_open`.
+and must not expose legacy `heartbeat_open` or `heartbeat_render`.
 
-If the tool surface is stale or ambiguous, use a fresh conversation.
+If the tool surface is stale or ambiguous after refresh, use a fresh
+conversation.
 
-## Accepted runtime
+## Runtime state
 
-The accepted Lambda runtime is:
+Accepted baseline/runtime rollback:
 
 ```text
-/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v044/plugins/workspace-heartbeat
+v0.4.5
+/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v045/plugins/workspace-heartbeat
+SHA c91ee09f6594e1e76134159b211fe224a8409b6b
+rollback launcher: /home/atrott/bin/heartbeat-up.v045.rollback
+```
+
+Current live candidate under final host validation:
+
+```text
+v0.4.6
+/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v046/plugins/workspace-heartbeat
+SHA b5eb013c1d8d169cc1652d4f9013ad5ae17a7482
+resource: ui://workspace-heartbeat/live-v5.html
 ```
 
 Operator runtime entrypoint:
@@ -214,13 +324,14 @@ Operator runtime entrypoint:
 heartbeat-up
 ```
 
-The accepted v0.4.4 implementation SHA is:
+v0.4.6 has passed exact Node v20.20.2 tests (26/26), intrinsic-resize source
+validation, isolated startup on port 8788, v0.4.5 pre-cutover/rollback checks,
+managed cutover on port 8787, and local/public endpoint health. It is not yet
+durably accepted until refreshed ChatGPT live-v5 visual acceptance confirms
+both short-turn intrinsic sizing and the preserved six-plus-update scroller.
 
-```text
-bbb4f09fac1864196b62a3126803a11b233d01f4
-```
-
-The v0.4.3 launcher/runtime is retained only as rollback history.
+Older v0.4.4/v0.4.3 runtimes are historical rollback/implementation evidence,
+not the current operating target.
 
 ## Shared representation
 
