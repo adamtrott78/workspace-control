@@ -466,6 +466,17 @@ def git_blob_sha(path: pathlib.Path) -> str:
     return digest.hexdigest()
 
 
+def trusted_probe_file_identity(path: pathlib.Path) -> dict[str, object]:
+    st = path.stat()
+    return {
+        "regular": stat.S_ISREG(st.st_mode),
+        "uid": int(st.st_uid),
+        "gid": int(st.st_gid),
+        "mode": stat.S_IMODE(st.st_mode),
+        "source_blob_sha": git_blob_sha(path),
+    }
+
+
 def verify_trusted_cuda_oom_probe_binding(
     spec: dict[str, Any],
 ) -> dict[str, object] | None:
@@ -508,17 +519,17 @@ def verify_trusted_cuda_oom_probe_binding(
         raise RuntimeLaunchError("trusted CUDA OOM probe source blob is invalid")
 
     try:
-        st = path.stat()
+        identity = trusted_probe_file_identity(path)
     except OSError as exc:
         raise RuntimeLaunchError("trusted CUDA OOM probe is unavailable") from exc
-    if not stat.S_ISREG(st.st_mode):
+    if identity["regular"] is not True:
         raise RuntimeLaunchError("trusted CUDA OOM probe is not a regular file")
-    if st.st_uid != 0 or st.st_gid != 0:
+    if identity["uid"] != 0 or identity["gid"] != 0:
         raise RuntimeLaunchError("trusted CUDA OOM probe is not root-owned")
-    if stat.S_IMODE(st.st_mode) & 0o222:
+    if int(identity["mode"]) & 0o222:
         raise RuntimeLaunchError("trusted CUDA OOM probe is writable")
 
-    actual_blob_sha = git_blob_sha(path)
+    actual_blob_sha = str(identity["source_blob_sha"])
     if actual_blob_sha != source_blob_sha:
         raise RuntimeLaunchError("trusted CUDA OOM probe source identity mismatch")
 
