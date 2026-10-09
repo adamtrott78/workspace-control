@@ -24,12 +24,12 @@ Preserve the accepted Workspace Heartbeat v0.4.5 lifecycle and semantic behavior
 
 - Intent: mutate
 - Remote branch: workspace-heartbeat-v046-intrinsic-resize
-- Remote checkpoint: e11754e4b969604940e1c509ecc47d8888c95356
+- Remote checkpoint: 3121953748acd42e792307c51f24e518c1443446
 - Remote verified: true
 
 ## Next safe action
 
-Require Workspace Control Validation PASS on the exact current-main Heartbeat policy candidate. No Heartbeat runtime redeploy is required because this correction changes procedure/README/task policy only and the existing store implementation/test already prove done releases ownership across conversations. After repository PASS, finish live-v5 short-turn and 6+ visual host acceptance, then perform one planned chat-to-chat handoff where the outgoing chat sends terminal done after synchronizing its durable handoff and the receiving chat begins the same real task_id without restarting Heartbeat. Only then merge/complete v0.4.6.
+Finish the remaining live-host gates. First confirm the short live-v5 card hugs one/two updates with no blank transcript gap. Then run the six-plus-update regression for grow-through-five/scroll-from-six. Finally perform one planned chat-to-chat handoff: synchronize durable task state, make terminal heartbeat_update(..., state="done") the outgoing chat's final Heartbeat operation, and prove a fresh receiving chat can call heartbeat_begin_turn on the same real task_id without a server restart. If all three host gates pass, record evidence, mark the v0.4.6 stage VALIDATED/task COMPLETE, merge PR #155, verify post-merge main, preserve the v0.4.5 rollback, and stop.
 
 ## Remaining work
 
