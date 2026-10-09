@@ -60,8 +60,6 @@ Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-lambda-execution-policy-v1.json
 
 Start from the normal workspace-control root route.
-Treat the task capsule, synchronized Markdown handoff, exact durable Git/runtime state, and referenced evidence as the complete handoff.
-Do not rely on previous conversation state or another chat's prose summary.
-Use the connected Workspace Heartbeat plugin according to procedures/progress_heartbeat.md.
-Follow the capsule's next_safe_action exactly.
-Do not redesign or broaden CUDA-OOM authority: the accepted implementation is already merged and the next operation is the bounded root-authored gpu-small host canary only.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
