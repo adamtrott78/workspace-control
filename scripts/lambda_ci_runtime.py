@@ -810,22 +810,13 @@ def build_trusted_cuda_oom_probe_systemd_command(
     if binding is None:
         raise RuntimeLaunchError("trusted CUDA OOM probe binding is required")
 
-    if trusted_cuda_oom_probe is None:
-        command = build_gpu_systemd_command(
-            spec,
-            runner_dir,
-            staging_dir,
-            subnet,
-            assignment,
-        )
-    else:
-        command = build_trusted_cuda_oom_probe_systemd_command(
-            spec,
-            runner_dir,
-            staging_dir,
-            subnet,
-            assignment,
-        )
+    command = build_gpu_systemd_command(
+        spec,
+        runner_dir,
+        staging_dir,
+        subnet,
+        assignment,
+    )
     probe_path = pathlib.Path(str(binding["path"]))
     runtime_python = pathlib.Path(spec["runtime_binding"]["python_path"])
 
@@ -1305,13 +1296,22 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     console_log = logs_root / f"p5-{request_id}-runner.log"
     journal_log = logs_root / f"p5-{request_id}-journal.log"
     receipt_path = logs_root / f"p5-{request_id}-receipt.json"
-    command = build_gpu_systemd_command(
-        spec,
-        runner_dir,
-        staging_dir,
-        subnet,
-        assignment,
-    )
+    if trusted_cuda_oom_probe is None:
+        command = build_gpu_systemd_command(
+            spec,
+            runner_dir,
+            staging_dir,
+            subnet,
+            assignment,
+        )
+    else:
+        command = build_trusted_cuda_oom_probe_systemd_command(
+            spec,
+            runner_dir,
+            staging_dir,
+            subnet,
+            assignment,
+        )
 
     result = "FAIL"
     terminal_status = "FAILED"
