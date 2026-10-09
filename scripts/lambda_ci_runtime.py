@@ -1002,21 +1002,6 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
                         f"unit={spec['unit_name']}"
                     )
 
-            else:
-                disk_pressure_evidence = filesystem_pressure_evidence(
-                    {
-                        "job": job_dir,
-                        "staging": staging_dir,
-                    }
-                )
-                if filesystem_proves_disk_pressure(disk_pressure_evidence):
-                    terminal_status = "DISK_PRESSURE"
-                    disk_pressure = True
-                    execution_error = RuntimeDiskPressureError(
-                        "root-owned filesystem evidence reported disk pressure "
-                        f"unit={spec['unit_name']}"
-                    )
-
         residue_detected, cleanup_pass = cleanup_project_uid_processes(uid)
 
         journal = run(
@@ -1232,6 +1217,20 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
                     f"result={unit_terminal_evidence.get('result')} "
                     f"unit={spec['unit_name']}"
                 )
+            else:
+                disk_pressure_evidence = filesystem_pressure_evidence(
+                    {
+                        "job": job_dir,
+                        "staging": staging_dir,
+                    }
+                )
+                if filesystem_proves_disk_pressure(disk_pressure_evidence):
+                    terminal_status = "DISK_PRESSURE"
+                    disk_pressure = True
+                    execution_error = RuntimeDiskPressureError(
+                        "root-owned filesystem evidence reported disk pressure "
+                        f"unit={spec['unit_name']}"
+                    )
 
         try:
             gpu_residue_detected = project_gpu_processes(uid)
