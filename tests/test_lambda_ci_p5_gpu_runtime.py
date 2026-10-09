@@ -18,6 +18,10 @@ spec.loader.exec_module(runtime)
 
 
 class LambdaCIP5GPURuntimeTests(unittest.TestCase):
+    def test_trusted_cuda_oom_probe_source_compiles_without_execution(self):
+        source = (ROOT / "scripts" / "lambda_ci_cuda_oom_probe.py").read_text()
+        compile(source, "lambda_ci_cuda_oom_probe.py", "exec")
+
     def gpu_spec(self):
         return {
             "unit_name": "workspace-ci-research-engine-test.service",
