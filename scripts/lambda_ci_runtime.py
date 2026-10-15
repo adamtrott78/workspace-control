@@ -305,6 +305,9 @@ def verify_promoted_model_binding(spec: dict[str, Any]) -> dict[str, Any] | None
         raise RuntimeLaunchError("promoted model object path identity drift")
     if not object_path.is_dir():
         raise RuntimeLaunchError("promoted model object is missing")
+    payload_path = object_path / "payload"
+    if not payload_path.is_dir():
+        raise RuntimeLaunchError("promoted model payload is missing")
 
     manager = TRUSTED_CACHE_MANAGER_PATH
     if not manager.is_file():
@@ -369,6 +372,7 @@ def verify_promoted_model_binding(spec: dict[str, Any]) -> dict[str, Any] | None
         "repository": binding["repository"],
         "revision": binding["revision"],
         "object_path": str(object_path),
+        "payload_path": str(payload_path),
         "object_id": binding["object_id"],
         "tree_sha256": binding["tree_sha256"],
         "manifest_sha256": binding["manifest_sha256"],
@@ -923,14 +927,16 @@ def build_gpu_systemd_command(
 
     model_binding = spec.get("model_binding")
     if model_binding is not None:
-        model_path = pathlib.Path(model_binding["object_path"])
+        model_object_root = pathlib.Path(model_binding["object_path"])
+        model_path = model_object_root / "payload"
         executable_index = command.index("/bin/bash")
         model_properties = [
-            "-p", f"ReadOnlyPaths={model_path}",
+            "-p", f"ReadOnlyPaths={model_object_root}",
             "-p", f"Environment=P5_MODEL_ID={model_binding['model_id']}",
             "-p", f"Environment=P5_MODEL_REPOSITORY={model_binding['repository']}",
             "-p", f"Environment=P5_MODEL_REVISION={model_binding['revision']}",
             "-p", f"Environment=P5_MODEL_OBJECT_ID={model_binding['object_id']}",
+            "-p", f"Environment=P5_MODEL_OBJECT_ROOT={model_object_root}",
             "-p", f"Environment=P5_MODEL_PATH={model_path}",
             "-p", "Environment=HF_HUB_OFFLINE=1",
             "-p", "Environment=TRANSFORMERS_OFFLINE=1",
