@@ -83,9 +83,17 @@ class AdmissionContractTests(unittest.TestCase):
         self.assertTrue(admission["enabled"])
         self.assertEqual(
             admission["live_enabled_workload_classes"],
-            ["cpu-test", "gpu-small"],
+            ["cpu-test", "gpu-small", "model-eval-single-gpu"],
         )
         self.assertNotIn("gpu-heavy", admission["live_enabled_workload_classes"])
+        self.assertEqual(
+            admission["routes"]["model-eval-single-gpu"]["execution_profile"],
+            "gpu-small",
+        )
+        self.assertEqual(
+            admission["routes"]["model-eval-single-gpu"]["model_binding_id"],
+            "qwen3.5-4b",
+        )
 
     def test_disabled_v2_fails_closed(self):
         disabled = copy.deepcopy(MANIFEST)
@@ -128,34 +136,52 @@ class AdmissionContractTests(unittest.TestCase):
             ["GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"],
         )
 
-    def test_model_and_gpu_heavy_cannot_be_minted_in_current_policy(self):
+    def test_model_eval_requires_exact_binding_and_gpu_heavy_remains_denied(self):
         manifest = enabled_manifest()
-        manifest["admission_v2"]["live_enabled_workload_classes"].extend(
-            ["model-eval-single-gpu", "gpu-heavy"]
-        )
-        manifest["admission_v2"]["routes"]["model-eval-single-gpu"] = copy.deepcopy(
-            manifest["admission_v2"]["routes"]["gpu-small"]
-        )
-        manifest["admission_v2"]["routes"]["gpu-heavy"] = copy.deepcopy(
-            manifest["admission_v2"]["routes"]["gpu-small"]
-        )
 
-        request = good_request("gpu-small")
-        request["workload_class"] = "model-eval-single-gpu"
-        request["attestation"]["job_display_name"] = (
-            f"wc-admission-v1|workload=model-eval-single-gpu|pr=101"
-            f"|request=/lambda-ci-p5-gpu {CANDIDATE}"
+        admission = mod.mint_admission(
+            good_request("model-eval-single-gpu"),
+            manifest,
+            POLICY,
+            now=NOW,
         )
-        with self.assertRaisesRegex(mod.AdmissionError, "not an accepted live capability"):
-            mod.mint_admission(request, manifest, POLICY, now=NOW)
+        self.assertEqual(admission["workload_class"], "model-eval-single-gpu")
+        self.assertEqual(admission["execution_profile"], "gpu-small")
+        self.assertEqual(len(admission["models"]), 1)
+        self.assertEqual(admission["models"][0]["model_id"], "qwen3.5-4b")
+        self.assertTrue(admission["models"][0]["complete_offline"])
 
-        request["workload_class"] = "gpu-heavy"
-        request["attestation"]["job_display_name"] = (
+        missing_binding = copy.deepcopy(manifest)
+        del missing_binding["admission_v2"]["routes"]["model-eval-single-gpu"][
+            "model_binding_id"
+        ]
+        with self.assertRaisesRegex(
+            mod.AdmissionError,
+            "promoted model binding id is missing",
+        ):
+            mod.mint_admission(
+                good_request("model-eval-single-gpu"),
+                missing_binding,
+                POLICY,
+                now=NOW,
+            )
+
+        denied = copy.deepcopy(manifest)
+        denied["admission_v2"]["live_enabled_workload_classes"].append("gpu-heavy")
+        denied["admission_v2"]["routes"]["gpu-heavy"] = copy.deepcopy(
+            denied["admission_v2"]["routes"]["gpu-small"]
+        )
+        denied_request = good_request("gpu-small")
+        denied_request["workload_class"] = "gpu-heavy"
+        denied_request["attestation"]["job_display_name"] = (
             f"wc-admission-v1|workload=gpu-heavy|pr=101"
             f"|request=/lambda-ci-p5-gpu {CANDIDATE}"
         )
-        with self.assertRaisesRegex(mod.AdmissionError, "not an accepted live capability"):
-            mod.mint_admission(request, manifest, POLICY, now=NOW)
+        with self.assertRaisesRegex(
+            mod.AdmissionError,
+            "not an accepted live capability",
+        ):
+            mod.mint_admission(denied_request, denied, POLICY, now=NOW)
 
     def test_trusted_workflow_identity_mismatch_fails_closed(self):
         for key, value in (
