@@ -51,6 +51,10 @@ TRUSTED_CUDA_OOM_PROBE_PATH = pathlib.Path(
 TRUSTED_CUDA_OOM_PROBE_KIND = "cuda_oom_acceptance_v1"
 TRUSTED_CUDA_OOM_PROBE_AUTHORITY = "ROOT_SYNTHETIC_CANARY_ONLY"
 TRUSTED_CUDA_OOM_PROBE_EXIT = 86
+TRUSTED_CACHE_MANAGER_PATH = pathlib.Path(
+    "/opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py"
+)
+TRUSTED_CACHE_MANAGER_BLOB = "a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807"
 
 
 def run(argv: list[str], *, check: bool = True):
@@ -249,6 +253,130 @@ def verify_expanded_runtime_binding(spec: dict[str, Any]) -> dict[str, Any]:
         "symlink_count": symlink_count,
         "read_only_hardened": True,
         "receipt_verified": True,
+    }
+
+
+def verify_promoted_model_binding(spec: dict[str, Any]) -> dict[str, Any] | None:
+    """Verify the exact promoted model object before/after model-eval execution."""
+    binding = spec.get("model_binding")
+    workload_class = spec.get("workload_class")
+    if binding is None:
+        if workload_class == "model-eval-single-gpu":
+            raise RuntimeLaunchError("model-eval-single-gpu requires promoted model binding")
+        return None
+    if workload_class != "model-eval-single-gpu":
+        raise RuntimeLaunchError("promoted model binding is forbidden for this workload")
+    if not isinstance(binding, dict):
+        raise RuntimeLaunchError("promoted model binding must be an object")
+
+    required = {
+        "model_id",
+        "repository",
+        "revision",
+        "object_path",
+        "object_id",
+        "tree_sha256",
+        "manifest_sha256",
+        "descriptor_sha256",
+        "promotion_receipt_sha256",
+        "serialization_risk_class",
+        "complete_offline",
+    }
+    if set(binding) != required:
+        raise RuntimeLaunchError("promoted model binding keys drift")
+    if binding["serialization_risk_class"] != "SAFE":
+        raise RuntimeLaunchError("promoted model serialization risk is not SAFE")
+    if binding["complete_offline"] is not True:
+        raise RuntimeLaunchError("promoted model is not complete offline")
+    if binding["object_id"] != binding["tree_sha256"]:
+        raise RuntimeLaunchError("promoted model object/tree identity mismatch")
+    if binding["manifest_sha256"] != binding["tree_sha256"]:
+        raise RuntimeLaunchError("promoted model manifest/tree identity mismatch")
+
+    object_path = pathlib.Path(binding["object_path"])
+    trusted_root = pathlib.Path(spec["paths"]["trusted_cache"])
+    if not object_path.is_absolute() or not trusted_root.is_absolute():
+        raise RuntimeLaunchError("promoted model paths must be absolute")
+    try:
+        object_path.resolve().relative_to(trusted_root.resolve())
+    except ValueError as exc:
+        raise RuntimeLaunchError("promoted model path escapes trusted cache") from exc
+    if object_path.name != binding["object_id"]:
+        raise RuntimeLaunchError("promoted model object path identity drift")
+    if not object_path.is_dir():
+        raise RuntimeLaunchError("promoted model object is missing")
+
+    manager = TRUSTED_CACHE_MANAGER_PATH
+    if not manager.is_file():
+        raise RuntimeLaunchError("trusted cache manager is missing")
+    st = manager.stat()
+    if st.st_uid != 0 or st.st_gid != 0:
+        raise RuntimeLaunchError("trusted cache manager is not root-owned")
+    if stat.S_IMODE(st.st_mode) & 0o222:
+        raise RuntimeLaunchError("trusted cache manager is writable")
+    manager_blob = run(["git", "hash-object", str(manager)]).stdout.strip()
+    if manager_blob != TRUSTED_CACHE_MANAGER_BLOB:
+        raise RuntimeLaunchError("trusted cache manager blob drift")
+
+    verified = run(
+        [
+            str(manager),
+            "verify",
+            "--object",
+            str(object_path),
+        ]
+    )
+    try:
+        result = json.loads(verified.stdout)
+    except Exception as exc:
+        raise RuntimeLaunchError("trusted model verifier returned invalid JSON") from exc
+
+    expected = {
+        "decision": "PASS",
+        "object_id": binding["object_id"],
+        "project_id": spec["project_id"],
+        "artifact_kind": "model",
+        "tree_digest_sha256": binding["tree_sha256"],
+        "descriptor_sha256": binding["descriptor_sha256"],
+        "offline_complete": True,
+        "read_only": True,
+    }
+    for key, value in expected.items():
+        if result.get(key) != value:
+            raise RuntimeLaunchError(
+                f"promoted model verification mismatch for {key}: "
+                f"{result.get(key)!r} != {value!r}"
+            )
+
+    source = result.get("source")
+    if not isinstance(source, dict):
+        raise RuntimeLaunchError("promoted model verifier source identity is missing")
+    if source.get("identifier") != binding["repository"]:
+        raise RuntimeLaunchError("promoted model repository identity drift")
+    if source.get("immutable_revision") != binding["revision"]:
+        raise RuntimeLaunchError("promoted model revision identity drift")
+
+    serialization = result.get("serialization")
+    if not isinstance(serialization, dict):
+        raise RuntimeLaunchError("promoted model serialization identity is missing")
+    if serialization.get("unsafe_deserialization") is not False:
+        raise RuntimeLaunchError("promoted model unsafe deserialization drift")
+    if serialization.get("custom_code") is not False:
+        raise RuntimeLaunchError("promoted model custom-code drift")
+
+    return {
+        "model_id": binding["model_id"],
+        "repository": binding["repository"],
+        "revision": binding["revision"],
+        "object_path": str(object_path),
+        "object_id": binding["object_id"],
+        "tree_sha256": binding["tree_sha256"],
+        "manifest_sha256": binding["manifest_sha256"],
+        "descriptor_sha256": binding["descriptor_sha256"],
+        "serialization_risk_class": binding["serialization_risk_class"],
+        "complete_offline": True,
+        "read_only": True,
+        "cache_manager_blob": manager_blob,
     }
 
 
@@ -793,6 +921,25 @@ def build_gpu_systemd_command(
         bash_script,
     ]
 
+    model_binding = spec.get("model_binding")
+    if model_binding is not None:
+        model_path = pathlib.Path(model_binding["object_path"])
+        executable_index = command.index("/bin/bash")
+        model_properties = [
+            "-p", f"ReadOnlyPaths={model_path}",
+            "-p", f"Environment=P5_MODEL_ID={model_binding['model_id']}",
+            "-p", f"Environment=P5_MODEL_REPOSITORY={model_binding['repository']}",
+            "-p", f"Environment=P5_MODEL_REVISION={model_binding['revision']}",
+            "-p", f"Environment=P5_MODEL_OBJECT_ID={model_binding['object_id']}",
+            "-p", f"Environment=P5_MODEL_PATH={model_path}",
+            "-p", "Environment=HF_HUB_OFFLINE=1",
+            "-p", "Environment=TRANSFORMERS_OFFLINE=1",
+            "-p", "Environment=HF_HUB_DISABLE_TELEMETRY=1",
+            "-p", "Environment=VLLM_NO_USAGE_STATS=1",
+            "-p", "Environment=VLLM_MEDIA_URL_ALLOW_REDIRECTS=0",
+        ]
+        command[executable_index:executable_index] = model_properties
+
     insert_at = command.index("-p", command.index(f"DeviceAllow={selected_device} rw") + 1)
     for support_device in support_devices:
         command[insert_at:insert_at] = ["-p", f"DeviceAllow={support_device} rw"]
@@ -1255,6 +1402,7 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         raise RuntimeLaunchError("gpu-small target UUID drift")
 
     runtime_pre = verify_expanded_runtime_binding(spec)
+    model_pre = verify_promoted_model_binding(spec)
     trusted_cuda_oom_probe = verify_trusted_cuda_oom_probe_binding(spec)
 
     runner_base, uid, gid = verify_foundation(spec)
@@ -1351,6 +1499,9 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     runtime_post_verified = False
     runtime_post_error: str | None = None
     runtime_post: dict[str, Any] | None = None
+    model_post_verified = model_pre is None
+    model_post_error: str | None = None
+    model_post: dict[str, Any] | None = None
     runner_workspace_destroyed = False
     staging_workspace_destroyed = False
     jit = request.jit_config
@@ -1462,6 +1613,15 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         else:
             runtime_post_verified = True
 
+        if model_pre is not None:
+            try:
+                model_post = verify_promoted_model_binding(spec)
+            except Exception as exc:
+                model_post_error = f"{type(exc).__name__}: {exc}"
+                model_post_verified = False
+            else:
+                model_post_verified = True
+
         journal = run(
             ["journalctl", "-u", spec["unit_name"], "--no-pager", "-n", "1000"],
             check=False,
@@ -1524,6 +1684,21 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "expanded_runtime_postverify_error": runtime_post_error,
             "expanded_runtime": runtime_pre,
             "expanded_runtime_post": runtime_post,
+            "promoted_model_preverified": model_pre is not None,
+            "promoted_model_postverified": model_post_verified,
+            "promoted_model_postverify_error": model_post_error,
+            "promoted_model": model_pre,
+            "promoted_model_post": model_post,
+            "models": (
+                spec["admission"].get("models", [])
+                if isinstance(spec.get("admission"), dict)
+                else []
+            ),
+            "runtime": (
+                spec["admission"].get("runtime")
+                if isinstance(spec.get("admission"), dict)
+                else None
+            ),
             "mutable_state_root": str(staging_dir),
             "persistent_project_home_writable": False,
         }
@@ -1542,6 +1717,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         cleanup_failures.append("GPU process residue remains or could not be verified")
     if not runtime_post_verified:
         cleanup_failures.append("expanded runtime post-verification failed")
+    if model_pre is not None and not model_post_verified:
+        cleanup_failures.append("promoted model post-verification failed")
     if not runner_workspace_destroyed:
         cleanup_failures.append("runner workspace removal failed")
     if not staging_workspace_destroyed:
