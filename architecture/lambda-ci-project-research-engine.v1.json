@@ -117,7 +117,7 @@
           "path": ".github/workflows/lambda-ci-qwen35-offline-pilot.yml",
           "ref": "refs/heads/main",
           "job_workflow_ref": "adamtrott78/research-engine/.github/workflows/lambda-ci-qwen35-offline-pilot.yml@refs/heads/main",
-          "blob_sha": "33373b6c9f73adf17b65adf37ceed82df5ade6bb",
+          "blob_sha": "f492ed046b3d05e8406dead2c8bf2bb6af2468d2",
           "event_name": "issue_comment",
           "allowed_actors": [
             "adamtrott78"
