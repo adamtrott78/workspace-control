@@ -167,6 +167,30 @@ func TestAdmissionDisplayClaimIsExact(t *testing.T) {
 	}
 }
 
+func TestModelEvalAdmissionCommandAndClaimAreExact(t *testing.T) {
+	command, err := requestCommandForWorkload(modelEvalWorkload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if command != "/lambda-ci-qwen35-pilot" {
+		t.Fatalf("unexpected model-eval command %q", command)
+	}
+
+	display := "wc-admission-v1|workload=model-eval-single-gpu|pr=101|" +
+		"request=/lambda-ci-qwen35-pilot " + testCandidateSHA
+	pr, sha, err := parseAdmissionDisplayClaim(
+		display,
+		modelEvalWorkload,
+		command,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pr != 101 || sha != testCandidateSHA {
+		t.Fatalf("unexpected model-eval claim pr=%d sha=%s", pr, sha)
+	}
+}
+
 func TestGitHubAttestorBindsRunBlobAndOpenPRHead(t *testing.T) {
 	attestor := fakeGitHubAttestor(t, nil)
 	att, err := attestor.Attest(
@@ -315,6 +339,28 @@ func TestDeterministicAdmissionIDsAreRecoveryStable(t *testing.T) {
 	}
 	if !strings.HasPrefix(firstRunner, "lambda-research-engine-") {
 		t.Fatalf("unexpected deterministic runner %q", firstRunner)
+	}
+}
+
+func TestModelEvalDeterministicRunnerUsesGpuPrefix(t *testing.T) {
+	att := controllerAttestation{
+		Repository:      "adamtrott78/research-engine",
+		ScaleSetName:    "lambda-research-engine-gpu",
+		JobMessageType:  string(scaleset.MessageTypeJobAvailable),
+		RunnerRequestID: 12345,
+		WorkflowRunID:   99,
+		JobID:           "778",
+		JobDisplayName: "wc-admission-v1|workload=model-eval-single-gpu|pr=101|" +
+			"request=/lambda-ci-qwen35-pilot " + testCandidateSHA,
+		CandidateSHA: testCandidateSHA,
+		VerifiedAt:   "2026-10-06T20:30:00Z",
+	}
+	_, runner, err := deterministicAdmissionExecutionIDs(modelEvalWorkload, att)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(runner, "lambda-research-engine-gpu-") {
+		t.Fatalf("unexpected model-eval runner %q", runner)
 	}
 }
 
