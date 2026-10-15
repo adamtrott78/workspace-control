@@ -36,12 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Run one bounded root-authored disposable trusted-cache integrity canary using the exact installed manager blob a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807. Use only temporary state/trusted roots under the operator-visible workspace-control-tmp directory and a fresh test-fixture descriptor/source. First acquire/promote/verify the untouched disposable object PASS. Then make independent writable copies of that disposable promoted object and prove fail-closed verification for: (1) payload content tamper, (2) receipt descriptor/descriptor-digest inconsistency, and (3) incomplete snapshot by removing one payload file. Confirm the untouched disposable original still verifies PASS/read_only=true/offline_complete=true afterward, temporary quarantine is destroyed, no real /var/lib/workspace-ci/cache-manager or /srv/workspace-ci/research-engine/trusted-cache object is modified, no candidate payload or GitHub job runs, and no model weights/inference occur. After PASS, checkpoint adversarial_recovery_and_resource_validation as VALIDATED and proceed to the first offline pinned Qwen3.5-4B gpu-small model pilot.
+Audit the already-promoted Qwen3.5-4B model object 6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c, promoted runtime object 23a47f27bdb6bec63955b901080fc0926cffee8cf081d010195613789bc5bbf4, expanded runtime receipt/tree digest b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63, and current gpu-small admission/workflow policy to determine the minimum bounded offline model-eval pilot. Do not enable gpu-heavy or dual-GPU. Keep exact Qwen revision 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a, exact single accepted GPU UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea, no public model acquisition, no production/scientific-state mutation, no persistent model server, and complete post-run cleanup/evidence. If a model-eval workload class remains non-live, implement and validate only the minimal root-owned policy/workflow expansion needed for this single offline pilot before any model load.
 
 ## Remaining work
 
-- Run cache poisoning and incomplete-snapshot rejection acceptance against the trusted-cache boundary.
-- After the adversarial recovery/resource/cache matrix is complete, run the first offline Qwen3.5-4B pinned-model pilot on gpu-small under the already-promoted model/runtime identities.
+- Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small under the already-promoted model/runtime identities.
 - Decide separately whether gpu-heavy or dual-GPU should ever be accepted; they remain denied.
 
 ## Blockers / gates
