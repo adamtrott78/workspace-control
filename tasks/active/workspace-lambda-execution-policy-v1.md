@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: effc5b2f39fe897f4b9dc9fe6767d2002ee81cdb
+- Remote checkpoint: d5e6fe24b7def6211aba4f7f1729a8de75fd1781
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Validate and merge the bounded model-eval-single-gpu policy/runtime implementation on workspace-control branch qwen35-model-eval-pilot. The final dedicated research-engine default-branch pilot workflow is merged at 8a74d1f0061a687b7a7e30bbd9f846919424b79e with workflow blob f492ed046b3d05e8406dead2c8bf2bb6af2468d2 after normal CI PASS; it points vLLM at the promoted object's read-only payload directory while root verification remains bound to the object root. The workspace-control change must prove exact promoted-model admission freshness, exact single-A4500 resource binding, ordinary gpu-small model-forbidden separation, root verification of promoted model object 6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c via trusted-cache manager blob a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807, and exact expanded runtime binding. After static validation/merge, install only the exact merged workspace-control SHA on Lambda, verify all bound identities, create one harmless open research-engine pilot candidate PR, invoke /lambda-ci-qwen35-pilot <exact PR head>, and accept only one synthetic non-scientific image+text inference with complete cleanup/evidence. gpu-heavy and dual-GPU remain denied.
+Install exact workspace-control implementation SHA d5e6fe24b7def6211aba4f7f1729a8de75fd1781 on Lambda with the existing authorized P5 bootstrap and activate the existing CPU/GPU controllers using the already-restaged controller credential. Before any model load, verify installed admission blob 19e10ded65eea4924673bf7a9efa3c7f27767c4d, provisioner blob f8a0e1ddd6a770d46cb6c2fb017f58e3baa86260, provisioner-service blob 74e7838e44eebd3a73dde620a61d3b052d78e466, runtime blob e09aa9d6961615a259c825d436f95adce668441f, trusted-cache manager blob a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807, project-manifest blob b41bba55dd8f5fcef594b00289e14c2409a2e081, and workload-policy blob 5e44397963dbe660600d0e8dab9645d5d13d456f. Reverify promoted Qwen object 6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c with descriptor b6182b15ff0549d9b3b1d3780fdb655c6df7653ad7ec3a5d72336b5571b3fe74 and exact revision 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a using the installed trusted-cache manager, and reverify expanded runtime tree b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63 using the installed runtime verifier. Require provisioner/CPU-controller/GPU-controller active after install and no project/GPU residue. Do not trigger /lambda-ci-qwen35-pilot or load model weights until this installation/identity gate passes.
 
 ## Remaining work
 
