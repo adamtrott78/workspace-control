@@ -386,7 +386,11 @@ def test_v2_model_eval_binds_exact_promoted_model_and_runtime():
     assert f"Environment=P5_MODEL_REPOSITORY={binding['repository']}" in command
     assert f"Environment=P5_MODEL_REVISION={binding['revision']}" in command
     assert f"Environment=P5_MODEL_OBJECT_ID={binding['object_id']}" in command
-    assert f"Environment=P5_MODEL_PATH={binding['object_path']}" in command
+    assert f"Environment=P5_MODEL_OBJECT_ROOT={binding['object_path']}" in command
+    assert (
+        f"Environment=P5_MODEL_PATH={binding['object_path']}/payload"
+        in command
+    )
     assert "Environment=HF_HUB_OFFLINE=1" in command
     assert "Environment=TRANSFORMERS_OFFLINE=1" in command
     assert f"ReadOnlyPaths={binding['object_path']}" in command
