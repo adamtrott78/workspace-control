@@ -312,11 +312,7 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_binding": "REQUIRED_PROMOTED_EXACT",
       "runtime_binding": "REQUIRED_EXPANDED_RUNTIME_EXACT",
-      "model_registry_credential_forbidden": true,
-      "pilot_scope": "FIRST_QWEN35_NON_SCIENTIFIC_SYNTHETIC_CANARY_ONLY",
-      "trusted_workflow_path": ".github/workflows/lambda-ci-qwen35-offline-pilot.yml",
-      "public_model_acquisition_forbidden": true,
-      "persistent_model_server_forbidden": true
+      "model_registry_credential_forbidden": true
     },
     "gpu-heavy": {
       "policy_decision": "DENY",
