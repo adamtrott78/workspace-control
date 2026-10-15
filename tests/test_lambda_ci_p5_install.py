@@ -178,7 +178,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         self.assertTrue(project["admission_v2"]["enabled"])
         self.assertEqual(
             project["admission_v2"]["live_enabled_workload_classes"],
-            ["cpu-test", "gpu-small"],
+            ["cpu-test", "gpu-small", "model-eval-single-gpu"],
         )
         self.assertEqual(
             project["admission_v2"]["routes"]["cpu-test"]["trusted_workflow"]["blob_sha"],
@@ -188,6 +188,19 @@ class LambdaCIP5InstallTests(unittest.TestCase):
             project["admission_v2"]["routes"]["gpu-small"]["trusted_workflow"]["blob_sha"],
             "e02e35306ae82c4ba393631cbaa1521ca53a28b4",
         )
+        self.assertEqual(
+            project["admission_v2"]["routes"]["model-eval-single-gpu"][
+                "trusted_workflow"
+            ]["blob_sha"],
+            "f492ed046b3d05e8406dead2c8bf2bb6af2468d2",
+        )
+        self.assertEqual(
+            project["admission_v2"]["routes"]["model-eval-single-gpu"][
+                "model_binding_id"
+            ],
+            "qwen3.5-4b",
+        )
+        self.assertNotIn("gpu-heavy", project["admission_v2"]["live_enabled_workload_classes"])
 
     def test_go_toolchain_pin_is_exact_official_release(self):
         pin = PINS["go_toolchain"]

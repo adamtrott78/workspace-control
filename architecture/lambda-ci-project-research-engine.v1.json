@@ -69,7 +69,8 @@
     "kill_switch_epoch": 0,
     "live_enabled_workload_classes": [
       "cpu-test",
-      "gpu-small"
+      "gpu-small",
+      "model-eval-single-gpu"
     ],
     "routes": {
       "cpu-test": {
@@ -107,9 +108,28 @@
             "command": "/lambda-ci-p5-gpu"
           }
         }
+      },
+      "model-eval-single-gpu": {
+        "scale_set_name": "lambda-research-engine-gpu",
+        "execution_profile": "gpu-small",
+        "model_binding_id": "qwen3.5-4b",
+        "trusted_workflow": {
+          "path": ".github/workflows/lambda-ci-qwen35-offline-pilot.yml",
+          "ref": "refs/heads/main",
+          "job_workflow_ref": "adamtrott78/research-engine/.github/workflows/lambda-ci-qwen35-offline-pilot.yml@refs/heads/main",
+          "blob_sha": "f492ed046b3d05e8406dead2c8bf2bb6af2468d2",
+          "event_name": "issue_comment",
+          "allowed_actors": [
+            "adamtrott78"
+          ],
+          "job_display_claim": {
+            "version": "wc-admission-v1",
+            "command": "/lambda-ci-qwen35-pilot"
+          }
+        }
       }
     },
-    "activation_note": "Admission v2 remains live only for cpu-test and gpu-small. gpu-small is pinned to the trusted adversarial immutable-runtime workflow on research-engine main fa0ff6f1a4a46fd0295e45df401aa8361d220c86 / workflow blob e02e35306ae82c4ba393631cbaa1521ca53a28b4 and is extended only with the exact root-owned read-only expanded Qwen runtime binding; model weights and inference remain forbidden. cpu-test behavior is unchanged. model-acquire, cache-promote, model-eval-single-gpu, production/scientific state, and gpu-heavy remain non-live/denied."
+    "activation_note": "Admission v2 is live for cpu-test, gpu-small, and the first bounded model-eval-single-gpu pilot only. gpu-small retains the immutable expanded Qwen runtime binding but model weights/inference remain forbidden there. model-eval-single-gpu uses the same single accepted A4500 and exact expanded runtime, plus a root-owned exact promoted Qwen3.5-4B binding and dedicated default-branch trusted workflow. model-acquire, cache-promote, production/scientific state, and gpu-heavy remain non-live/denied."
   },
   "expanded_runtime_bindings": {
     "gpu-small": {
@@ -129,6 +149,21 @@
         "device_policy_closed",
         "job_local_mutable_caches"
       ]
+    }
+  },
+  "promoted_model_bindings": {
+    "qwen3.5-4b": {
+      "model_id": "qwen3.5-4b",
+      "repository": "Qwen/Qwen3.5-4B",
+      "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+      "object_path": "/srv/workspace-ci/research-engine/trusted-cache/objects/model/sha256/6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c",
+      "object_id": "6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c",
+      "tree_sha256": "6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c",
+      "manifest_sha256": "6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c",
+      "descriptor_sha256": "b6182b15ff0549d9b3b1d3780fdb655c6df7653ad7ec3a5d72336b5571b3fe74",
+      "promotion_receipt_sha256": null,
+      "serialization_risk_class": "SAFE",
+      "complete_offline": true
     }
   }
 }

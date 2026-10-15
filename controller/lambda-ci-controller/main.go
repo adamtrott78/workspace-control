@@ -29,6 +29,7 @@ const (
 	defaultProjectID       = "research-engine"
 	defaultProfile         = "cpu-test"
 	gpuProfile             = "gpu-small"
+	modelEvalWorkload      = "model-eval-single-gpu"
 	defaultProvisionerSock = "/run/workspace-ci/provisioner.sock"
 	maxRunners             = 1
 )
@@ -104,6 +105,7 @@ type runnerJITClient interface {
 type pendingAdmissionJob struct {
 	Metadata    scaleset.JobMessageBase
 	Attestation controllerAttestation
+	Workload    string
 	RunnerName  string
 }
 
@@ -133,6 +135,31 @@ func envOr(key, fallback string) string {
 func controllerMappingAllowed(scaleSetName, profile string) bool {
 	return (scaleSetName == defaultScaleSetName && profile == defaultProfile) ||
 		(scaleSetName == gpuScaleSetName && profile == gpuProfile)
+}
+
+func workloadForDisplayClaim(profile, displayName string) (string, error) {
+	const prefix = "wc-admission-v1|workload="
+	if !strings.HasPrefix(displayName, prefix) {
+		return "", fmt.Errorf("job display claim has no admission workload")
+	}
+	rest := strings.TrimPrefix(displayName, prefix)
+	workload, _, ok := strings.Cut(rest, "|")
+	if !ok || workload == "" {
+		return "", fmt.Errorf("job display claim workload is incomplete")
+	}
+	switch profile {
+	case defaultProfile:
+		if workload != defaultProfile {
+			return "", fmt.Errorf("CPU controller workload rejected: %s", workload)
+		}
+	case gpuProfile:
+		if workload != gpuProfile && workload != modelEvalWorkload {
+			return "", fmt.Errorf("GPU controller workload rejected: %s", workload)
+		}
+	default:
+		return "", fmt.Errorf("controller profile rejected: %s", profile)
+	}
+	return workload, nil
 }
 
 func loadConfig() (config, error) {
@@ -496,11 +523,18 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				if capacity <= 0 {
 					break
 				}
+				workload, err := workloadForDisplayClaim(
+					s.profile,
+					job.JobDisplayName,
+				)
+				if err != nil {
+					return fmt.Errorf("derive available workload: %w", err)
+				}
 				attestation, err := s.attestor.Attest(
 					ctx,
 					&job.JobMessageBase,
 					s.scaleSetName,
-					s.profile,
+					workload,
 				)
 				if err != nil {
 					if errors.Is(err, errTerminalWorkflowJob) {
@@ -520,6 +554,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 					s.pending[jobKey] = pendingAdmissionJob{
 						Metadata:    job.JobMessageBase,
 						Attestation: attestation,
+						Workload:    workload,
 					}
 					stagedKeys = append(stagedKeys, jobKey)
 					requestIDs = append(requestIDs, job.RunnerRequestID)
@@ -569,11 +604,18 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				)
 				continue
 			}
+			workload, err := workloadForDisplayClaim(
+				s.profile,
+				assigned.JobDisplayName,
+			)
+			if err != nil {
+				return fmt.Errorf("derive assigned workload: %w", err)
+			}
 			attestation, err := s.attestor.Attest(
 				ctx,
 				&assigned.JobMessageBase,
 				s.scaleSetName,
-				s.profile,
+				workload,
 			)
 			if err != nil {
 				if errors.Is(err, errTerminalWorkflowJob) {
@@ -593,6 +635,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				s.pending[jobKey] = pendingAdmissionJob{
 					Metadata:    assigned.JobMessageBase,
 					Attestation: attestation,
+					Workload:    workload,
 				}
 			}
 			s.mu.Unlock()
@@ -633,6 +676,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		var (
 			name        string
 			requestID   string
+			workload    string
 			attestation controllerAttestation
 			pendingKey  string
 			pendingJob  pendingAdmissionJob
@@ -647,8 +691,12 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				return nil
 			}
 			attestation = pendingJob.Attestation
+			workload = pendingJob.Workload
+			if workload == "" {
+				return fmt.Errorf("pending admission workload is missing")
+			}
 			requestID, name, err = deterministicAdmissionExecutionIDs(
-				s.profile,
+				workload,
 				attestation,
 			)
 			if err != nil {
@@ -755,7 +803,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				SchemaVersion: 2,
 				RequestID:     requestID,
 				ProjectID:     s.projectID,
-				WorkloadClass: s.profile,
+				WorkloadClass: workload,
 				RunnerName:    name,
 				JITConfig:     jit.EncodedJITConfig,
 				Attestation:   attestation,

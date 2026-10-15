@@ -31,12 +31,12 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: fa0ff6f1a4a46fd0295e45df401aa8361d220c86
+- Remote checkpoint: 8a74d1f0061a687b7a7e30bbd9f846919424b79e
 - Remote verified: true
 
 ## Next safe action
 
-Audit the already-promoted Qwen3.5-4B model object 6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c, promoted runtime object 23a47f27bdb6bec63955b901080fc0926cffee8cf081d010195613789bc5bbf4, expanded runtime receipt/tree digest b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63, and current gpu-small admission/workflow policy to determine the minimum bounded offline model-eval pilot. Do not enable gpu-heavy or dual-GPU. Keep exact Qwen revision 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a, exact single accepted GPU UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea, no public model acquisition, no production/scientific-state mutation, no persistent model server, and complete post-run cleanup/evidence. If a model-eval workload class remains non-live, implement and validate only the minimal root-owned policy/workflow expansion needed for this single offline pilot before any model load.
+Validate and merge the bounded model-eval-single-gpu policy/runtime implementation on workspace-control branch qwen35-model-eval-pilot. The final dedicated research-engine default-branch pilot workflow is merged at 8a74d1f0061a687b7a7e30bbd9f846919424b79e with workflow blob f492ed046b3d05e8406dead2c8bf2bb6af2468d2 after normal CI PASS; it points vLLM at the promoted object's read-only payload directory while root verification remains bound to the object root. The workspace-control change must prove exact promoted-model admission freshness, exact single-A4500 resource binding, ordinary gpu-small model-forbidden separation, root verification of promoted model object 6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c via trusted-cache manager blob a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807, and exact expanded runtime binding. After static validation/merge, install only the exact merged workspace-control SHA on Lambda, verify all bound identities, create one harmless open research-engine pilot candidate PR, invoke /lambda-ci-qwen35-pilot <exact PR head>, and accept only one synthetic non-scientific image+text inference with complete cleanup/evidence. gpu-heavy and dual-GPU remain denied.
 
 ## Remaining work
 

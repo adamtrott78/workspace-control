@@ -3,7 +3,7 @@
   "policy_id": "lambda-ci-workload-policy-v1",
   "status": "CONTRACT_ONLY_NOT_LIVE_ENFORCEMENT",
   "owning_task": "workspace-lambda-execution-policy-v1",
-  "policy_epoch": 2,
+  "policy_epoch": 3,
   "authority": {
     "owner": "workspace-control",
     "principle": "workflow_or_candidate_input_is_a_claim_root_owned_policy_is_authority",
@@ -11,10 +11,10 @@
   },
   "baselines": {
     "workspace_control_sha": "94ad261fa61bb281c961f4418bd7683111306a6f",
-    "research_engine_sha": "dcb351a33710ad9cc6697987b0d5b2dd92513dd3",
+    "research_engine_sha": "8a74d1f0061a687b7a7e30bbd9f846919424b79e",
     "project_manifest": {
       "path": "architecture/lambda-ci-project-research-engine.v1.json",
-      "blob_sha": "f1c0f852d04f4274e5ad8b45db92744e0b55d716"
+      "blob_sha": "b41bba55dd8f5fcef594b00289e14c2409a2e081"
     },
     "systemd_profiles": {
       "path": "architecture/lambda-ci-systemd-profiles.v1.json",
@@ -300,7 +300,7 @@
       "inference_forbidden": true
     },
     "model-eval-single-gpu": {
-      "policy_decision": "DESIGNED_NOT_LIVE",
+      "policy_decision": "EXISTING_P5_CAPABILITY",
       "admission_enabled_after_enforcement": true,
       "execution_plane": "jit_runner",
       "candidate_payload_allowed": true,
@@ -311,7 +311,7 @@
       "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_binding": "REQUIRED_PROMOTED_EXACT",
-      "runtime_binding": "REQUIRED_PROMOTED_EXACT",
+      "runtime_binding": "REQUIRED_EXPANDED_RUNTIME_EXACT",
       "model_registry_credential_forbidden": true
     },
     "gpu-heavy": {

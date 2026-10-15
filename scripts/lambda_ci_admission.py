@@ -310,6 +310,9 @@ def project_profile_digest(
             "expanded_runtime_binding": manifest.get(
                 "expanded_runtime_bindings", {}
             ).get(route["execution_profile"]),
+            "promoted_model_binding": manifest.get(
+                "promoted_model_bindings", {}
+            ).get(route.get("model_binding_id")),
             "admission_route": route,
             "kill_switch_epoch": admission_cfg["kill_switch_epoch"],
         }
@@ -379,6 +382,110 @@ def expanded_runtime_admission_binding(
         },
         "owning_contracts": owning_contracts,
     }
+
+
+def promoted_model_admission_bindings(
+    manifest: dict[str, Any],
+    route: dict[str, Any],
+    workload: dict[str, Any],
+    policy: dict[str, Any],
+) -> list[dict[str, Any]]:
+    requirement = workload.get("model_binding")
+    if requirement in (None, "FORBIDDEN"):
+        return []
+    if requirement != "REQUIRED_PROMOTED_EXACT":
+        raise AdmissionError(f"unsupported model binding requirement: {requirement}")
+
+    binding_id = route.get("model_binding_id")
+    if not isinstance(binding_id, str) or not binding_id:
+        raise AdmissionError("required promoted model binding id is missing")
+
+    binding = manifest.get("promoted_model_bindings", {}).get(binding_id)
+    if not isinstance(binding, dict):
+        raise AdmissionError("required promoted model binding is missing")
+
+    required = (
+        "model_id",
+        "repository",
+        "revision",
+        "object_path",
+        "object_id",
+        "tree_sha256",
+        "manifest_sha256",
+        "descriptor_sha256",
+        "promotion_receipt_sha256",
+        "serialization_risk_class",
+        "complete_offline",
+    )
+    if any(key not in binding for key in required):
+        raise AdmissionError("required promoted model binding is incomplete")
+
+    for key in (
+        "object_id",
+        "tree_sha256",
+        "manifest_sha256",
+        "descriptor_sha256",
+    ):
+        if not isinstance(binding.get(key), str) or _HEX64.fullmatch(binding[key]) is None:
+            raise AdmissionError(f"promoted model {key} must be 64 lowercase hex")
+
+    if binding["object_id"] != binding["tree_sha256"]:
+        raise AdmissionError("promoted model object/tree identity mismatch")
+    if binding["manifest_sha256"] != binding["tree_sha256"]:
+        raise AdmissionError("promoted model manifest/tree identity mismatch")
+    if binding["serialization_risk_class"] != "SAFE":
+        raise AdmissionError("promoted model serialization risk is not SAFE")
+    if binding["complete_offline"] is not True:
+        raise AdmissionError("promoted model is not complete offline")
+    if binding["promotion_receipt_sha256"] is not None:
+        value = binding["promotion_receipt_sha256"]
+        if not isinstance(value, str) or _HEX64.fullmatch(value) is None:
+            raise AdmissionError("promoted model receipt digest is invalid")
+
+    revision = _require_hex40(binding.get("revision"), "promoted model revision")
+
+    project_binding = policy.get("project_bindings", {}).get(manifest["project_id"], {})
+    model_contract = None
+    for candidate in project_binding.get("allowed_models", []):
+        if candidate.get("model_id") == binding["model_id"]:
+            model_contract = candidate
+            break
+    if not isinstance(model_contract, dict):
+        raise AdmissionError("promoted model is not allowed by project policy")
+
+    if model_contract.get("repository") != binding["repository"]:
+        raise AdmissionError("promoted model repository does not match project policy")
+    if model_contract.get("revision") != revision:
+        raise AdmissionError("promoted model revision does not match project policy")
+    if model_contract.get("serialization_requirement") != "SAFE_ONLY":
+        raise AdmissionError("promoted model policy does not require safe serialization")
+    if model_contract.get("promotion_required_before_eval") is not True:
+        raise AdmissionError("promoted model policy does not require promotion")
+
+    trusted_root = manifest.get("roots", {}).get("trusted_cache")
+    object_path = binding.get("object_path")
+    expected_prefix = f"{trusted_root}/objects/model/sha256/"
+    if (
+        not isinstance(object_path, str)
+        or not object_path.startswith(expected_prefix)
+        or object_path != expected_prefix + binding["object_id"]
+    ):
+        raise AdmissionError("promoted model object path is outside trusted model cache")
+
+    return [
+        {
+            "model_id": binding["model_id"],
+            "repository": binding["repository"],
+            "revision": revision,
+            "object_state": "PROMOTED",
+            "object_id": binding["object_id"],
+            "tree_sha256": binding["tree_sha256"],
+            "manifest_sha256": binding["manifest_sha256"],
+            "promotion_receipt_sha256": binding["promotion_receipt_sha256"],
+            "serialization_risk_class": binding["serialization_risk_class"],
+            "complete_offline": True,
+        }
+    ]
 
 
 def mint_admission(
@@ -470,6 +577,12 @@ def mint_admission(
         workload,
         policy,
     )
+    model_bindings = promoted_model_admission_bindings(
+        manifest,
+        route,
+        workload,
+        policy,
+    )
 
     return {
         "schema_version": 1,
@@ -518,7 +631,7 @@ def mint_admission(
             "staging_max_bytes": int(resource_class["staging_max_bytes"]),
             "gpu_uuids": list(resource_class.get("gpu_uuids", [])),
         },
-        "models": [],
+        "models": model_bindings,
         "runtime": runtime_binding,
         "exception_ids": [],
         "required_receipt_schema": "lambda-ci-execution-receipt-v1",
@@ -612,6 +725,15 @@ def validate_admission_freshness(
     )
     if admission.get("runtime") != current_runtime_binding:
         raise AdmissionError("admission expanded runtime binding is stale")
+
+    current_model_bindings = promoted_model_admission_bindings(
+        manifest,
+        route,
+        workload,
+        policy,
+    )
+    if admission.get("models") != current_model_bindings:
+        raise AdmissionError("admission promoted model binding is stale")
 
 
 def consume_admission(

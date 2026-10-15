@@ -334,6 +334,109 @@ def test_v2_gpu_request_cannot_widen_beyond_gpu_small():
     assert req.admission["runtime"]["owning_contracts"]
 
 
+
+def test_v2_model_eval_binds_exact_promoted_model_and_runtime():
+    request = good_v2_request("model-eval-single-gpu")
+    manifest = enabled_v2_manifest()
+    req = mod.validate_request_v2(
+        request,
+        manifest,
+        WORKLOAD_POLICY,
+        now=V2_NOW,
+    )
+    assert req.profile == "gpu-small"
+    assert req.workload_class == "model-eval-single-gpu"
+    assert len(req.admission["models"]) == 1
+    model = req.admission["models"][0]
+    assert model["model_id"] == "qwen3.5-4b"
+    assert model["repository"] == "Qwen/Qwen3.5-4B"
+    assert model["revision"] == "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
+    assert model["object_state"] == "PROMOTED"
+    assert model["object_id"] == (
+        "6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c"
+    )
+    assert model["serialization_risk_class"] == "SAFE"
+    assert model["complete_offline"] is True
+    assert req.admission["runtime"]["runtime_id"] == (
+        "qwen35-vllm-cu129-image-native-sampler-v3"
+    )
+
+    launch = mod.build_launch_spec(req, manifest, PROFILES, PINS)
+    binding = launch["model_binding"]
+    assert binding["model_id"] == "qwen3.5-4b"
+    assert binding["object_id"] == model["object_id"]
+    assert launch["resources"]["gpu_indices"] == [0]
+    assert launch["resources"]["gpu_uuid"] == (
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+    )
+
+    command = runtime.build_gpu_systemd_command(
+        launch,
+        pathlib.Path("/srv/workspace-ci/research-engine/jobs/p5-test/runner"),
+        pathlib.Path("/srv/workspace-ci/research-engine/staging-cache/p5-test"),
+        "134.88.12.0/22",
+        {
+            "selected_device": "/dev/nvidia0",
+            "target_uuid": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+            "denied_devices": ["/dev/nvidia1"],
+            "support_devices": ["/dev/nvidia-uvm"],
+        },
+    )
+    assert f"Environment=P5_MODEL_ID={binding['model_id']}" in command
+    assert f"Environment=P5_MODEL_REPOSITORY={binding['repository']}" in command
+    assert f"Environment=P5_MODEL_REVISION={binding['revision']}" in command
+    assert f"Environment=P5_MODEL_OBJECT_ID={binding['object_id']}" in command
+    assert f"Environment=P5_MODEL_OBJECT_ROOT={binding['object_path']}" in command
+    assert (
+        f"Environment=P5_MODEL_PATH={binding['object_path']}/payload"
+        in command
+    )
+    assert "Environment=HF_HUB_OFFLINE=1" in command
+    assert "Environment=TRANSFORMERS_OFFLINE=1" in command
+    assert f"ReadOnlyPaths={binding['object_path']}" in command
+
+
+def test_v2_gpu_small_remains_model_forbidden():
+    request = good_v2_request("gpu-small")
+    manifest = enabled_v2_manifest()
+    req = mod.validate_request_v2(
+        request,
+        manifest,
+        WORKLOAD_POLICY,
+        now=V2_NOW,
+    )
+    launch = mod.build_launch_spec(req, manifest, PROFILES, PINS)
+    assert req.admission["models"] == []
+    assert launch["model_binding"] is None
+
+
+def test_v2_model_binding_change_stales_admission():
+    manifest = enabled_v2_manifest()
+    req = mod.validate_request_v2(
+        good_v2_request("model-eval-single-gpu"),
+        manifest,
+        WORKLOAD_POLICY,
+        now=V2_NOW,
+    )
+    changed = copy.deepcopy(manifest)
+    changed["promoted_model_bindings"]["qwen3.5-4b"]["descriptor_sha256"] = "f" * 64
+
+    try:
+        mod.admission_policy.validate_admission_freshness(
+            req.admission,
+            changed,
+            WORKLOAD_POLICY,
+            now=V2_NOW,
+        )
+    except mod.admission_policy.AdmissionError as exc:
+        assert (
+            "project/profile binding is stale" in str(exc)
+            or "promoted model binding is stale" in str(exc)
+        )
+    else:
+        raise AssertionError("model binding change did not stale admission")
+
+
 def test_v2_runtime_binding_change_stales_admission():
     manifest = enabled_v2_manifest()
     req = mod.validate_request_v2(

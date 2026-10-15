@@ -152,7 +152,7 @@ func TestProvisionerSocketReceivesJITButResponseDoesNotEchoIt(t *testing.T) {
 }
 
 func TestPilotConstantsAreFixed(t *testing.T) {
-	if defaultProjectID != "research-engine" || defaultProfile != "cpu-test" || gpuProfile != "gpu-small" {
+	if defaultProjectID != "research-engine" || defaultProfile != "cpu-test" || gpuProfile != "gpu-small" || modelEvalWorkload != "model-eval-single-gpu" {
 		t.Fatal("pilot authority changed")
 	}
 	if defaultScaleSetName != "lambda-research-engine" || gpuScaleSetName != "lambda-research-engine-gpu" || maxRunners != 1 {
@@ -168,6 +168,33 @@ func TestPilotConstantsAreFixed(t *testing.T) {
 		controllerMappingAllowed(gpuScaleSetName, defaultProfile) ||
 		controllerMappingAllowed("lambda-research-engine-heavy", "gpu-heavy") {
 		t.Fatal("unexpected controller mapping accepted")
+	}
+}
+
+func TestWorkloadSelectionStaysWithinControllerProfile(t *testing.T) {
+	cpuClaim := "wc-admission-v1|workload=cpu-test|pr=101|request=/lambda-ci-p5 " + strings.Repeat("a", 40)
+	got, err := workloadForDisplayClaim(defaultProfile, cpuClaim)
+	if err != nil || got != defaultProfile {
+		t.Fatalf("CPU workload selection failed got=%q err=%v", got, err)
+	}
+
+	gpuClaim := "wc-admission-v1|workload=gpu-small|pr=101|request=/lambda-ci-p5-gpu " + strings.Repeat("a", 40)
+	got, err = workloadForDisplayClaim(gpuProfile, gpuClaim)
+	if err != nil || got != gpuProfile {
+		t.Fatalf("GPU workload selection failed got=%q err=%v", got, err)
+	}
+
+	modelClaim := "wc-admission-v1|workload=model-eval-single-gpu|pr=101|request=/lambda-ci-qwen35-pilot " + strings.Repeat("a", 40)
+	got, err = workloadForDisplayClaim(gpuProfile, modelClaim)
+	if err != nil || got != modelEvalWorkload {
+		t.Fatalf("model-eval workload selection failed got=%q err=%v", got, err)
+	}
+
+	if _, err := workloadForDisplayClaim(defaultProfile, modelClaim); err == nil {
+		t.Fatal("CPU controller accepted model-eval workload")
+	}
+	if _, err := workloadForDisplayClaim(gpuProfile, "wc-admission-v1|workload=gpu-heavy|pr=101|request=x "+strings.Repeat("a", 40)); err == nil {
+		t.Fatal("GPU controller accepted gpu-heavy workload")
 	}
 }
 

@@ -199,6 +199,17 @@ def build_launch_spec(
     unit_name = f"workspace-ci-{request.project_id}-{request.request_id}.service"
     runner_release = pins["actions_runner"]
     runtime_binding = manifest.get("expanded_runtime_bindings", {}).get(request.profile)
+    model_binding = None
+    if request.admission is not None and request.workload_class:
+        route = manifest.get("admission_v2", {}).get("routes", {}).get(
+            request.workload_class,
+            {},
+        )
+        binding_id = route.get("model_binding_id") if isinstance(route, dict) else None
+        if binding_id is not None:
+            model_binding = manifest.get("promoted_model_bindings", {}).get(binding_id)
+            if not isinstance(model_binding, dict):
+                raise PolicyError("admitted workload promoted model binding is missing")
 
     # This is a declarative spec consumed only by the privileged launcher.
     # The only secret is jit_config_env_value; callers must not log/serialize it.
@@ -243,6 +254,7 @@ def build_launch_spec(
         "forbidden_paths": manifest["forbidden_paths"],
         "allow_production_services": project_profile["allow_production_services"],
         "runtime_binding": runtime_binding,
+        "model_binding": model_binding,
     }
 
 
