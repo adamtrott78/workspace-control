@@ -911,7 +911,7 @@
         },
         {
           "check": "First host install/identity gate fail-closed",
-          "result": "FAIL_CLOSED",
+          "result": "FAIL",
           "evidence": [
             "Exact workspace-control implementation d5e6fe24b7def6211aba4f7f1729a8de75fd1781 installed successfully on Lambda with P5_INSTALL=PASS; controller credential ready; provisioner, CPU controller, and GPU controller active.",
             "Installed admission/provisioner/service/runtime/cache-manager/project-manifest/workload-policy content blobs all matched their expected exact identities, and root policy binding passed: model-eval-single-gpu enabled, ordinary gpu-small model-forbidden, gpu-heavy denied.",
