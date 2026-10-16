@@ -31,12 +31,12 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8a74d1f0061a687b7a7e30bbd9f846919424b79e
+- Remote checkpoint: 89191de6821ed29c4f8494834e7c006e4725d8f9
 - Remote verified: true
 
 ## Next safe action
 
-Create one harmless open research-engine pilot candidate PR whose change is explicitly non-scientific and has no production/scientific-state effect. Record its exact PR head SHA. Then, from that PR, issue exactly one /lambda-ci-qwen35-pilot <exact-head-sha> comment so the trusted default-branch workflow submits one model-eval-single-gpu request through the accepted GPU controller. Accept only the exact promoted Qwen3.5-4B object 6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c at revision 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a on exact expanded runtime tree b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63 and accepted GPU UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea. The pilot may perform exactly one bounded synthetic image+text inference, with no scientific input, no production routing change, no public model acquisition, no persistent model server, and complete post-run project/GPU cleanup. After the run, inspect the GitHub job, uploaded pilot receipt, provisioner/root execution receipt, runtime pre/post model+runtime verification, terminal status, and residue. Mark qwen35_model_eval_pilot VALIDATED only if all acceptance evidence is PASS; otherwise fail closed and diagnose without retrying blindly.
+Validate and merge workspace-control branch qwen35-pilot-workflow-repin. It must repin the model-eval-single-gpu trusted workflow to corrected research-engine main 89191de6821ed29c4f8494834e7c006e4725d8f9 / workflow blob fe83ad7d5e5e08335f4ad6e1acccceceaf4cafd5, project-manifest blob fe81231bf600cd37fc74dcbfc6ff72f20bfe965b, and workload-policy blob b5c0c502003b071e47e3da7724b6cb4b72538fe0, without changing model/runtime/GPU authority. After FULL_INTEGRATION PASS and merge, reinstall only that exact merged workspace-control SHA on Lambda with the accepted P5 bootstrap, verify the corrected manifest/policy identities plus existing trusted-cache/model/runtime/control-plane identities and zero residue, then confirm PR #118 remains open at exact head dd8d15bdb61509f76e92a47cab2d937a8d45069b. Only then issue exactly one second /lambda-ci-qwen35-pilot dd8d15bdb61509f76e92a47cab2d937a8d45069b comment and accept the pilot only if one synthetic image+text inference completes with exact pre/post identities and complete cleanup. Do not enable gpu-heavy before the single-GPU pilot is VALIDATED; gpu-heavy audit/design may proceed in parallel but activation remains gated.
 
 ## Remaining work
 
