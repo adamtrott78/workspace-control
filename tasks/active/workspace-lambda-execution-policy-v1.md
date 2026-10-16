@@ -36,12 +36,12 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Reinstall exact workspace-control implementation d43ad9a27ad5c4769f63519787612c3f549be13d on Lambda using the existing authorized P5 bootstrap. Require corrected bootstrap blob fbd33b8d73c8a6e94dbe13b29e656e26973c814b and installed trusted-cache manager content blob a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807 with stat root:root regular file mode 555 before promoted-model verification. Then rerun the host installation/identity gate: verify exact admission 19e10ded65eea4924673bf7a9efa3c7f27767c4d, provisioner f8a0e1ddd6a770d46cb6c2fb017f58e3baa86260, provisioner-service 74e7838e44eebd3a73dde620a61d3b052d78e466, runtime e09aa9d6961615a259c825d436f95adce668441f, project manifest b41bba55dd8f5fcef594b00289e14c2409a2e081, workload policy 5e44397963dbe660600d0e8dab9645d5d13d456f, promoted Qwen object 6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c / descriptor b6182b15ff0549d9b3b1d3780fdb655c6df7653ad7ec3a5d72336b5571b3fe74 / revision 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a, expanded runtime tree b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63, active provisioner/CPU/GPU controllers, and zero project/GPU residue. Do not trigger /lambda-ci-qwen35-pilot or load/infer Qwen until this corrected identity gate passes.
+Create one harmless open research-engine pilot candidate PR whose change is explicitly non-scientific and has no production/scientific-state effect. Record its exact PR head SHA. Then, from that PR, issue exactly one /lambda-ci-qwen35-pilot <exact-head-sha> comment so the trusted default-branch workflow submits one model-eval-single-gpu request through the accepted GPU controller. Accept only the exact promoted Qwen3.5-4B object 6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c at revision 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a on exact expanded runtime tree b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63 and accepted GPU UUID GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea. The pilot may perform exactly one bounded synthetic image+text inference, with no scientific input, no production routing change, no public model acquisition, no persistent model server, and complete post-run project/GPU cleanup. After the run, inspect the GitHub job, uploaded pilot receipt, provisioner/root execution receipt, runtime pre/post model+runtime verification, terminal status, and residue. Mark qwen35_model_eval_pilot VALIDATED only if all acceptance evidence is PASS; otherwise fail closed and diagnose without retrying blindly.
 
 ## Remaining work
 
-- Run the first offline Qwen3.5-4B pinned-model pilot on gpu-small under the already-promoted model/runtime identities.
-- Decide separately whether gpu-heavy or dual-GPU should ever be accepted; they remain denied.
+- Run and accept the first offline Qwen3.5-4B pinned-model pilot on gpu-small using one synthetic non-scientific image+text inference.
+- After the pilot is accepted, decide separately whether gpu-heavy or dual-GPU should ever be accepted; they remain denied.
 
 ## Blockers / gates
 
