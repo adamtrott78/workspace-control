@@ -134,7 +134,7 @@ install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_provisioner.py" /o
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_provisioner_service.py" /opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_runtime.py" /opt/workspace-ci/provisioner/lambda_ci_runtime.py
 install -o root -g root -m 0555 "$REPO_ROOT/scripts/lambda_ci_cuda_oom_probe.py" /opt/workspace-ci/provisioner/trusted-probes/lambda_ci_cuda_oom_probe.py
-install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_trusted_cache.py" /opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py
+install -o root -g root -m 0555 "$REPO_ROOT/scripts/lambda_ci_trusted_cache.py" /opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py
 
 install -o root -g root -m 0644 "$REPO_ROOT/architecture/lambda-ci-project-research-engine.v1.json" /etc/workspace-ci/projects/research-engine.json
 install -o root -g root -m 0644 "$REPO_ROOT/architecture/lambda-ci-systemd-profiles.v1.json" /etc/workspace-ci/lambda-ci-systemd-profiles.v1.json
