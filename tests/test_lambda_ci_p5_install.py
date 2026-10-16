@@ -149,6 +149,14 @@ class LambdaCIP5InstallTests(unittest.TestCase):
             BOOTSTRAP,
         )
         self.assertIn(
+            'install -o root -g root -m 0555 "$REPO_ROOT/scripts/lambda_ci_trusted_cache.py"',
+            BOOTSTRAP,
+        )
+        self.assertNotIn(
+            'install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_trusted_cache.py"',
+            BOOTSTRAP,
+        )
+        self.assertIn(
             "install -d -o root -g root -m 0700 /var/lib/workspace-ci/cache-manager",
             BOOTSTRAP,
         )
