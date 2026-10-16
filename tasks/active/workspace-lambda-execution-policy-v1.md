@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d43ad9a27ad5c4769f63519787612c3f549be13d
+- Remote checkpoint: 1edb253a1525018aa28652519c56c22edea0fb92
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Validate and merge workspace-control branch qwen35-pilot-workflow-repin. It must repin the model-eval-single-gpu trusted workflow to corrected research-engine main 89191de6821ed29c4f8494834e7c006e4725d8f9 / workflow blob fe83ad7d5e5e08335f4ad6e1acccceceaf4cafd5, project-manifest blob fe81231bf600cd37fc74dcbfc6ff72f20bfe965b, and workload-policy blob b5c0c502003b071e47e3da7724b6cb4b72538fe0, without changing model/runtime/GPU authority. After FULL_INTEGRATION PASS and merge, reinstall only that exact merged workspace-control SHA on Lambda with the accepted P5 bootstrap, verify the corrected manifest/policy identities plus existing trusted-cache/model/runtime/control-plane identities and zero residue, then confirm PR #118 remains open at exact head dd8d15bdb61509f76e92a47cab2d937a8d45069b. Only then issue exactly one second /lambda-ci-qwen35-pilot dd8d15bdb61509f76e92a47cab2d937a8d45069b comment and accept the pilot only if one synthetic image+text inference completes with exact pre/post identities and complete cleanup. Do not enable gpu-heavy before the single-GPU pilot is VALIDATED; gpu-heavy audit/design may proceed in parallel but activation remains gated.
+Install exact workspace-control SHA 1edb253a1525018aa28652519c56c22edea0fb92 on Lambda using the accepted P5 bootstrap. This is an identity-only repin: bootstrap fbd33b8d73c8a6e94dbe13b29e656e26973c814b, admission 19e10ded65eea4924673bf7a9efa3c7f27767c4d, provisioner f8a0e1ddd6a770d46cb6c2fb017f58e3baa86260, provisioner-service 74e7838e44eebd3a73dde620a61d3b052d78e466, runtime e09aa9d6961615a259c825d436f95adce668441f, and trusted-cache manager a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807 must remain unchanged; only project-manifest blob fe81231bf600cd37fc74dcbfc6ff72f20bfe965b and workload-policy blob b5c0c502003b071e47e3da7724b6cb4b72538fe0 should change. Require trusted-cache manager root:root mode 555, corrected workflow blob fe83ad7d5e5e08335f4ad6e1acccceceaf4cafd5 bound in model-eval-single-gpu, promoted Qwen object and expanded runtime verify PASS, all three control-plane services active with NRestarts=0, and zero project/GPU residue/quarantine. Then verify candidate PR #118 is still open at exact head dd8d15bdb61509f76e92a47cab2d937a8d45069b. Only after that host gate passes, issue exactly one second /lambda-ci-qwen35-pilot dd8d15bdb61509f76e92a47cab2d937a8d45069b comment. Do not create a new candidate SHA or issue another retry if the second attempt fails; diagnose first. gpu-heavy remains activation-gated until the single-GPU pilot is VALIDATED.
 
 ## Remaining work
 
