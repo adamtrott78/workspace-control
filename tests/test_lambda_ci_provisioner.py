@@ -394,6 +394,9 @@ def test_v2_model_eval_binds_exact_promoted_model_and_runtime():
     assert "Environment=HF_HUB_OFFLINE=1" in command
     assert "Environment=TRANSFORMERS_OFFLINE=1" in command
     assert f"ReadOnlyPaths={binding['object_path']}" in command
+    assert "ProtectProc=invisible" in command
+    assert "ProcSubset=all" in command
+    assert "ProcSubset=pid" not in command
 
 
 def test_v2_gpu_small_remains_model_forbidden():
@@ -408,6 +411,22 @@ def test_v2_gpu_small_remains_model_forbidden():
     launch = mod.build_launch_spec(req, manifest, PROFILES, PINS)
     assert req.admission["models"] == []
     assert launch["model_binding"] is None
+
+    command = runtime.build_gpu_systemd_command(
+        launch,
+        pathlib.Path("/srv/workspace-ci/research-engine/jobs/p5-test/runner"),
+        pathlib.Path("/srv/workspace-ci/research-engine/staging-cache/p5-test"),
+        "134.88.12.0/22",
+        {
+            "selected_device": "/dev/nvidia0",
+            "target_uuid": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+            "denied_devices": ["/dev/nvidia1"],
+            "support_devices": ["/dev/nvidia-uvm"],
+        },
+    )
+    assert "ProtectProc=invisible" in command
+    assert "ProcSubset=pid" in command
+    assert "ProcSubset=all" not in command
 
 
 def test_v2_model_binding_change_stales_admission():
