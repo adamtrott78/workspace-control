@@ -932,6 +932,13 @@ def build_gpu_systemd_command(
         # for process privacy, but expose the normal non-process procfs subset
         # only for the exact promoted-model workload.
         command[command.index("ProcSubset=pid")] = "ProcSubset=all"
+        # Gloo resolves GLOO_SOCKET_IFNAME via getifaddrs(3). On Linux,
+        # getifaddrs uses AF_NETLINK to enumerate interface addresses. Keep
+        # the base AF_UNIX/AF_INET/AF_INET6 restriction for ordinary GPU jobs,
+        # and add AF_NETLINK only for the exact promoted-model workload.
+        command[
+            command.index("RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6")
+        ] = "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK"
 
         model_object_root = pathlib.Path(model_binding["object_path"])
         model_path = model_object_root / "payload"
