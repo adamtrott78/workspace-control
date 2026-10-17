@@ -397,6 +397,11 @@ def test_v2_model_eval_binds_exact_promoted_model_and_runtime():
     assert "ProtectProc=invisible" in command
     assert "ProcSubset=all" in command
     assert "ProcSubset=pid" not in command
+    assert (
+        "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK"
+        in command
+    )
+    assert "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6" not in command
     assert "IPAddressAllow=127.0.0.1/32" in command
     assert "IPAddressAllow=::1/128" in command
     assert "Environment=GLOO_SOCKET_IFNAME=lo" in command
@@ -435,6 +440,11 @@ def test_v2_gpu_small_remains_model_forbidden():
     assert "ProtectProc=invisible" in command
     assert "ProcSubset=pid" in command
     assert "ProcSubset=all" not in command
+    assert "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6" in command
+    assert (
+        "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK"
+        not in command
+    )
     assert "IPAddressAllow=127.0.0.1/32" not in command
     assert "IPAddressAllow=::1/128" not in command
     assert "Environment=GLOO_SOCKET_IFNAME=lo" not in command
