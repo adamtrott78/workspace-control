@@ -927,6 +927,12 @@ def build_gpu_systemd_command(
 
     model_binding = spec.get("model_binding")
     if model_binding is not None:
+        # vLLM/psutil require read access to non-process procfs files such as
+        # /proc/meminfo during engine initialization. Keep ProtectProc=invisible
+        # for process privacy, but expose the normal non-process procfs subset
+        # only for the exact promoted-model workload.
+        command[command.index("ProcSubset=pid")] = "ProcSubset=all"
+
         model_object_root = pathlib.Path(model_binding["object_path"])
         model_path = model_object_root / "payload"
         executable_index = command.index("/bin/bash")
