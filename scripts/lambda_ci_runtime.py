@@ -949,6 +949,13 @@ def build_gpu_systemd_command(
             "-p", "Environment=HF_HUB_DISABLE_TELEMETRY=1",
             "-p", "Environment=VLLM_NO_USAGE_STATS=1",
             "-p", "Environment=VLLM_MEDIA_URL_ALLOW_REDIRECTS=0",
+            # vLLM creates world-size-1 Gloo/NCCL process groups even for one
+            # GPU. Pin their bootstrap traffic to loopback and allow only the
+            # loopback endpoints through the existing IPAddressDeny policy.
+            "-p", "IPAddressAllow=127.0.0.1/32",
+            "-p", "IPAddressAllow=::1/128",
+            "-p", "Environment=GLOO_SOCKET_IFNAME=lo",
+            "-p", "Environment=NCCL_SOCKET_IFNAME=lo",
         ]
         command[executable_index:executable_index] = model_properties
 
