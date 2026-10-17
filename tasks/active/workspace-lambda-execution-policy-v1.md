@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9eeb86be492761875bcd62703199d0fb8e8c986c
+- Remote checkpoint: 166b42763d20c465c7f136efc6a97191362431fb
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Validate and merge workspace-control branch qwen35-spawn-workflow-repin. This is an identity-only repin to research-engine main b345091924bf175777ac52c5549b10c387cbdf14 / trusted Qwen pilot workflow blob 9d2f845f4182d0610692376ac3d812112f421172, producing project-manifest blob 693aea12063394f22c11ce80096f153093d17657 and workload-policy blob 929a600f7e9dbe45e407ac0ea07b5cfa58b59d0d. Executable workspace-control P5 code must remain unchanged from accepted 9eeb86be492761875bcd62703199d0fb8e8c986c, including runtime blob 18fccff990b5ec46e538e160df4f25879721cfa8. After canonical validation/merge, reinstall only the exact merged workspace-control SHA on Lambda using the accepted P5 bootstrap, verify the new manifest/policy/workflow pin plus unchanged bootstrap/admission/provisioner/service/runtime/trusted-cache/model/runtime/control-plane identities and zero residue. Confirm PR #118 remains open at exact head dd8d15bdb61509f76e92a47cab2d937a8d45069b. Only then issue exactly one next /lambda-ci-qwen35-pilot comment. If that attempt fails, diagnose from the uploaded receipt before any further retry. gpu-heavy activation remains gated until single-GPU pilot VALIDATED.
+Install exact workspace-control SHA 166b42763d20c465c7f136efc6a97191362431fb on Lambda using the accepted P5 bootstrap. This is an identity-only repin: verify unchanged bootstrap fbd33b8d73c8a6e94dbe13b29e656e26973c814b, admission 19e10ded65eea4924673bf7a9efa3c7f27767c4d, provisioner f8a0e1ddd6a770d46cb6c2fb017f58e3baa86260, provisioner-service 74e7838e44eebd3a73dde620a61d3b052d78e466, runtime 18fccff990b5ec46e538e160df4f25879721cfa8, trusted-cache manager a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807, corrected project manifest 693aea12063394f22c11ce80096f153093d17657, and workload policy 929a600f7e9dbe45e407ac0ea07b5cfa58b59d0d. Require trusted-cache manager root:root mode 555; trusted model-eval workflow blob 9d2f845f4182d0610692376ac3d812112f421172; research-engine baseline b345091924bf175777ac52c5549b10c387cbdf14; model-eval ProtectProc=invisible + ProcSubset=all; ordinary gpu-small ProtectProc=invisible + ProcSubset=pid; promoted Qwen object/expanded runtime verify PASS; all three control-plane services active with NRestarts=0; zero project/GPU residue/quarantine. Confirm candidate PR #118 remains open at exact head dd8d15bdb61509f76e92a47cab2d937a8d45069b. Only then issue exactly one next /lambda-ci-qwen35-pilot dd8d15bdb61509f76e92a47cab2d937a8d45069b comment. gpu-heavy remains activation-gated until single-GPU pilot VALIDATED.
 
 ## Remaining work
 
