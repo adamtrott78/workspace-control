@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 166b42763d20c465c7f136efc6a97191362431fb
+- Remote checkpoint: 33470cceb6b3b3f63b2b0e8adfee940dc89b1329
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Validate and merge workspace-control branch qwen35-loopback-distributed-fix. Because scripts/lambda_ci_runtime.py changes, require Python regression, pinned Go/controller validation, and FULL_INTEGRATION. The change must remain model-bound only: model-eval keeps ProtectProc=invisible + ProcSubset=all, gains only IPAddressAllow=127.0.0.1/32 and ::1/128 plus GLOO_SOCKET_IFNAME=lo and NCCL_SOCKET_IFNAME=lo, while all existing IPAddressDeny entries remain and ordinary gpu-small stays ProtectProc=invisible + ProcSubset=pid with no loopback exception/interface overrides. After merge, install the exact merged SHA on Lambda and before any model run perform a root synthetic loopback canary using the same model-eval network sandbox properties: prove an AF_INET TCP listener/client can communicate on 127.0.0.1, prove a Gloo single-process group can initialize on lo using the exact expanded runtime, and prove a representative denied private address remains blocked. Reverify exact model/runtime/control-plane/zero-residue identities. Only after that canary passes, issue exactly one next /lambda-ci-qwen35-pilot comment on unchanged PR #118 head dd8d15bdb61509f76e92a47cab2d937a8d45069b. gpu-heavy remains activation-gated until single-GPU pilot VALIDATED.
+Install exact workspace-control SHA 33470cceb6b3b3f63b2b0e8adfee940dc89b1329 on Lambda using the accepted P5 bootstrap. Verify installed runtime blob cadf56575fb2973f59be330a1814598e9ee9346d and unchanged bootstrap/admission/provisioner/service/trusted-cache/manifest/policy identities. Before any model run, execute one root synthetic loopback distributed-bootstrap canary under the same network sandbox boundary as model-eval: Require ProtectProc=invisible, ProcSubset=all, RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6, all existing IPAddressDeny entries, only IPAddressAllow=127.0.0.1/32 and ::1/128 in addition to the existing DNS exception, and GLOO_SOCKET_IFNAME=lo/NCCL_SOCKET_IFNAME=lo. Prove (1) a local AF_INET TCP listener/client succeeds on 127.0.0.1, (2) torch.distributed single-process Gloo initialization and destroy_process_group succeed using the exact expanded-runtime Python, and (3) a representative private-address connection remains denied. Then reverify promoted Qwen object/expanded runtime/control-plane/zero residue/quarantine. Confirm candidate PR #118 remains open at exact head dd8d15bdb61509f76e92a47cab2d937a8d45069b. Only after this canary/identity gate passes, issue exactly one next /lambda-ci-qwen35-pilot comment. gpu-heavy remains activation-gated until single-GPU pilot VALIDATED.
 
 ## Remaining work
 
