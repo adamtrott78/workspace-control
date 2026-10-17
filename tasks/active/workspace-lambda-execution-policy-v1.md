@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: bdb2addadbe8a90eb917dee1b026ad4576933b1f
+- Remote checkpoint: b1217e296ca939e344b619db474822f9ce611b82
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Validate and merge workspace-control branch qwen35-cold-start-workflow-repin. This is an identity-only repin to research-engine main ba3df4238902a382df9e807889ff048b98750012 / trusted Qwen pilot workflow blob 31d77703d434b248aa50adf93568f9a13b89dc07, producing project-manifest blob 88694079e7c1c069533894f07c153f273601fd17 and workload-policy blob a21096e2b69e3c77c979d5e34b57d29fa1d77308. Executable workspace-control P5 code must remain unchanged from accepted bdb2addadbe8a90eb917dee1b026ad4576933b1f, including runtime blob c7e0521d3270c2d1171ad3c4786bcf3de39781c4. After canonical validation/merge, reinstall only the exact merged workspace-control SHA on Lambda, verify new manifest/policy/workflow identities plus unchanged bootstrap/admission/provisioner/service/runtime/trusted-cache/model/runtime/control-plane/zero-residue identities, and confirm PR #118 remains open at exact head dd8d15bdb61509f76e92a47cab2d937a8d45069b. Then issue exactly one next /lambda-ci-qwen35-pilot comment and accept only if one synthetic image+text inference completes with all post-run receipts/cleanup PASS. gpu-heavy remains activation-gated until single-GPU pilot VALIDATED.
+Install exact workspace-control SHA b1217e296ca939e344b619db474822f9ce611b82 on Lambda using the accepted P5 bootstrap. This is an identity-only repin: verify unchanged bootstrap/admission/provisioner/service/runtime/trusted-cache blobs, and verify new project manifest 88694079e7c1c069533894f07c153f273601fd17 plus workload policy a21096e2b69e3c77c979d5e34b57d29fa1d77308 bind research-engine main ba3df4238902a382df9e807889ff048b98750012 / workflow blob 31d77703d434b248aa50adf93568f9a13b89dc07. Do not rerun already-accepted AF_NETLINK/getifaddrs/Gloo canary solely for reassurance because executable runtime c7e0521d3270c2d1171ad3c4786bcf3de39781c4 is unchanged and already host-accepted. Reverify promoted Qwen object/expanded runtime/control-plane/zero residue/quarantine and confirm candidate PR #118 remains open at exact head dd8d15bdb61509f76e92a47cab2d937a8d45069b. Then issue exactly one next /lambda-ci-qwen35-pilot comment. Accept only if one synthetic image+text inference completes with model_weights_loaded=true, model_inference_performed=true, inference_calls=1, scientific_input_used=false, scientific_state_materialized=false, production_routing_changed=false, public_model_acquisition=false, no persistent model server, exact accepted GPU UUID, and complete cleanup. gpu-heavy remains activation-gated until the single-GPU pilot is VALIDATED.
 
 ## Remaining work
 
