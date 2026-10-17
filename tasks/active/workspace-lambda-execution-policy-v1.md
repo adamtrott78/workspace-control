@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 33470cceb6b3b3f63b2b0e8adfee940dc89b1329
+- Remote checkpoint: bdb2addadbe8a90eb917dee1b026ad4576933b1f
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Validate and merge workspace-control branch qwen35-netlink-interface-enumeration-fix. Because scripts/lambda_ci_runtime.py changes, require Python regression, pinned Go/controller validation, and FULL_INTEGRATION. The change must be model-bound only: model-eval RestrictAddressFamilies becomes AF_UNIX AF_INET AF_INET6 AF_NETLINK while ordinary gpu-small remains AF_UNIX AF_INET AF_INET6; ProtectProc/procfs, loopback allow exceptions, GLOO/NCCL lo pinning, and all IPAddressDeny rules remain unchanged. After merge, install the exact merged SHA on Lambda and run a no-model canary under the exact model network sandbox including AF_NETLINK. Require direct proof that getifaddrs()/interface enumeration succeeds for lo, 127.0.0.1 TCP succeeds, a known-live 127.0.0.2 endpoint remains blocked, and exact expanded-runtime torch.distributed Gloo world_size=1 init/barrier/destroy succeeds. Then reverify promoted Qwen object/expanded runtime/control-plane/zero residue/quarantine. Only after PASS issue one next /lambda-ci-qwen35-pilot comment on unchanged PR #118 head dd8d15bdb61509f76e92a47cab2d937a8d45069b. gpu-heavy remains activation-gated until the single-GPU pilot is VALIDATED.
+Install exact workspace-control SHA bdb2addadbe8a90eb917dee1b026ad4576933b1f on Lambda using the accepted P5 bootstrap. Verify installed runtime blob c7e0521d3270c2d1171ad3c4786bcf3de39781c4 and unchanged bootstrap/admission/provisioner/service/trusted-cache/manifest/policy identities. Before any model run, execute one no-model canary under the exact model-eval network sandbox including RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK, existing loopback/private IP policy, GLOO_SOCKET_IFNAME=lo, and NCCL_SOCKET_IFNAME=lo. Directly prove Linux interface enumeration for lo succeeds, 127.0.0.1 TCP succeeds, a known-live 127.0.0.2 endpoint remains blocked, and exact expanded-runtime torch.distributed Gloo world_size=1 init/barrier/destroy succeeds. Then reverify promoted Qwen object/expanded runtime/control-plane/zero residue/quarantine. Confirm candidate PR #118 remains open at exact head dd8d15bdb61509f76e92a47cab2d937a8d45069b. Only after PASS issue exactly one next /lambda-ci-qwen35-pilot comment. gpu-heavy remains activation-gated until the single-GPU pilot is VALIDATED.
 
 ## Remaining work
 
