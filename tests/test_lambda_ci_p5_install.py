@@ -200,7 +200,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
             project["admission_v2"]["routes"]["model-eval-single-gpu"][
                 "trusted_workflow"
             ]["blob_sha"],
-            "9d2f845f4182d0610692376ac3d812112f421172",
+            "31d77703d434b248aa50adf93568f9a13b89dc07",
         )
         self.assertEqual(
             project["admission_v2"]["routes"]["model-eval-single-gpu"][

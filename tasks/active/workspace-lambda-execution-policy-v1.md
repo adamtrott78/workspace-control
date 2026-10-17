@@ -31,12 +31,12 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: b345091924bf175777ac52c5549b10c387cbdf14
+- Remote checkpoint: ba3df4238902a382df9e807889ff048b98750012
 - Remote verified: true
 
 ## Next safe action
 
-Validate and merge research-engine branch qwen35-pilot-cold-start-budget-fix. The only functional change must be the workflow-local model initialization ceiling from 120s to 240s; preserve the 60s synthetic inference ceiling, max_tokens=32, exactly one inference call, exact promoted-model/runtime/GPU binding, and all sandbox/security controls. After normal research-engine CI PASS/merge, repin the exact new research-engine main/workflow blob into workspace-control project manifest/workload policy/tests, run canonical workspace-control validation, merge, and install only the exact merged identity repin on Lambda. Reverify the trusted workflow pin plus unchanged runtime c7e0521d3270c2d1171ad3c4786bcf3de39781c4, promoted Qwen object, expanded runtime, control plane, and zero residue. Confirm PR #118 is still open at exact head dd8d15bdb61509f76e92a47cab2d937a8d45069b, then issue exactly one next pilot trigger. Accept only if the one synthetic image+text inference completes and all post-run receipts/cleanup are PASS. gpu-heavy remains activation-gated until the single-GPU pilot is VALIDATED.
+Validate and merge workspace-control branch qwen35-cold-start-workflow-repin. This is an identity-only repin to research-engine main ba3df4238902a382df9e807889ff048b98750012 / trusted Qwen pilot workflow blob 31d77703d434b248aa50adf93568f9a13b89dc07, producing project-manifest blob 88694079e7c1c069533894f07c153f273601fd17 and workload-policy blob a21096e2b69e3c77c979d5e34b57d29fa1d77308. Executable workspace-control P5 code must remain unchanged from accepted bdb2addadbe8a90eb917dee1b026ad4576933b1f, including runtime blob c7e0521d3270c2d1171ad3c4786bcf3de39781c4. After canonical validation/merge, reinstall only the exact merged workspace-control SHA on Lambda, verify new manifest/policy/workflow identities plus unchanged bootstrap/admission/provisioner/service/runtime/trusted-cache/model/runtime/control-plane/zero-residue identities, and confirm PR #118 remains open at exact head dd8d15bdb61509f76e92a47cab2d937a8d45069b. Then issue exactly one next /lambda-ci-qwen35-pilot comment and accept only if one synthetic image+text inference completes with all post-run receipts/cleanup PASS. gpu-heavy remains activation-gated until single-GPU pilot VALIDATED.
 
 ## Remaining work
 
