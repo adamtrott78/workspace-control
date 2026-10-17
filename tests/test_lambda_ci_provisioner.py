@@ -397,6 +397,14 @@ def test_v2_model_eval_binds_exact_promoted_model_and_runtime():
     assert "ProtectProc=invisible" in command
     assert "ProcSubset=all" in command
     assert "ProcSubset=pid" not in command
+    assert "IPAddressAllow=127.0.0.1/32" in command
+    assert "IPAddressAllow=::1/128" in command
+    assert "Environment=GLOO_SOCKET_IFNAME=lo" in command
+    assert "Environment=NCCL_SOCKET_IFNAME=lo" in command
+    assert "IPAddressDeny=127.0.0.0/8" in command
+    assert "IPAddressDeny=::1/128" in command
+    assert "IPAddressDeny=10.0.0.0/8" in command
+    assert "IPAddressDeny=192.168.0.0/16" in command
 
 
 def test_v2_gpu_small_remains_model_forbidden():
@@ -427,6 +435,12 @@ def test_v2_gpu_small_remains_model_forbidden():
     assert "ProtectProc=invisible" in command
     assert "ProcSubset=pid" in command
     assert "ProcSubset=all" not in command
+    assert "IPAddressAllow=127.0.0.1/32" not in command
+    assert "IPAddressAllow=::1/128" not in command
+    assert "Environment=GLOO_SOCKET_IFNAME=lo" not in command
+    assert "Environment=NCCL_SOCKET_IFNAME=lo" not in command
+    assert "IPAddressDeny=127.0.0.0/8" in command
+    assert "IPAddressDeny=::1/128" in command
 
 
 def test_v2_model_binding_change_stales_admission():
