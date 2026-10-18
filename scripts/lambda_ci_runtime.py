@@ -451,8 +451,8 @@ def verify_foundation(spec: dict[str, Any]) -> tuple[pathlib.Path, int, int]:
     return runner_base, uid, gid
 
 
-def resolve_gpu_assignment(target_uuid: str) -> dict[str, object]:
-    """Resolve a stable NVIDIA GPU UUID to its current device node."""
+def nvidia_gpu_inventory() -> list[dict[str, object]]:
+    """Resolve the root-observed NVIDIA UUID/device inventory."""
     gpu_root = pathlib.Path("/proc/driver/nvidia/gpus")
     if not gpu_root.is_dir():
         raise RuntimeLaunchError("NVIDIA driver GPU metadata directory is missing")
@@ -497,31 +497,69 @@ def resolve_gpu_assignment(target_uuid: str) -> dict[str, object]:
     if not inventory:
         raise RuntimeLaunchError("NVIDIA driver reported no GPUs")
 
-    selected = [row for row in inventory if str(row["uuid"]).lower() == target_uuid.lower()]
-    if len(selected) != 1:
-        raise RuntimeLaunchError(
-            f"expected exactly one GPU matching {target_uuid}, found {len(selected)}"
-        )
-
-    selected_row = selected[0]
-    denied_devices = [
-        str(row["device"])
-        for row in inventory
-        if str(row["uuid"]).lower() != target_uuid.lower()
-    ]
-    if not denied_devices:
-        raise RuntimeLaunchError("gpu-small requires at least one non-selected GPU denial target")
-
     nvidiactl = pathlib.Path("/dev/nvidiactl")
     if not nvidiactl.exists() or not stat.S_ISCHR(nvidiactl.stat().st_mode):
         raise RuntimeLaunchError("/dev/nvidiactl missing or not a character device")
 
+    return inventory
+
+
+def resolve_gpu_assignments(target_uuids: list[str]) -> dict[str, object]:
+    """Resolve an exact ordered UUID set to current NVIDIA device nodes."""
+    if not isinstance(target_uuids, list) or not target_uuids:
+        raise RuntimeLaunchError("GPU target UUID set must be a non-empty list")
+    if any(not isinstance(value, str) or not value for value in target_uuids):
+        raise RuntimeLaunchError("GPU target UUID set contains an invalid UUID")
+    normalized = [value.lower() for value in target_uuids]
+    if len(set(normalized)) != len(normalized):
+        raise RuntimeLaunchError("GPU target UUID set contains duplicates")
+
+    inventory = nvidia_gpu_inventory()
+    selected_rows: list[dict[str, object]] = []
+    for target_uuid in target_uuids:
+        matches = [
+            row
+            for row in inventory
+            if str(row["uuid"]).lower() == target_uuid.lower()
+        ]
+        if len(matches) != 1:
+            raise RuntimeLaunchError(
+                f"expected exactly one GPU matching {target_uuid}, found {len(matches)}"
+            )
+        selected_rows.append(matches[0])
+
+    selected_uuid_set = {value.lower() for value in target_uuids}
+    denied_devices = [
+        str(row["device"])
+        for row in inventory
+        if str(row["uuid"]).lower() not in selected_uuid_set
+    ]
+
     return {
-        "target_uuid": target_uuid,
-        "selected_device": str(selected_row["device"]),
-        "selected_minor": int(selected_row["minor"]),
+        "target_uuids": list(target_uuids),
+        "selected_devices": [str(row["device"]) for row in selected_rows],
+        "selected_minors": [int(row["minor"]) for row in selected_rows],
         "denied_devices": denied_devices,
         "inventory": inventory,
+    }
+
+
+def resolve_gpu_assignment(target_uuid: str) -> dict[str, object]:
+    """Resolve the accepted single GPU while preserving the P5 receipt contract."""
+    assignment = resolve_gpu_assignments([target_uuid])
+    denied_devices = list(assignment["denied_devices"])
+    if not denied_devices:
+        raise RuntimeLaunchError("gpu-small requires at least one non-selected GPU denial target")
+
+    return {
+        "target_uuid": target_uuid,
+        "selected_device": assignment["selected_devices"][0],
+        "selected_minor": assignment["selected_minors"][0],
+        "denied_devices": denied_devices,
+        "inventory": assignment["inventory"],
+        "target_uuids": assignment["target_uuids"],
+        "selected_devices": assignment["selected_devices"],
+        "selected_minors": assignment["selected_minors"],
     }
 
 
