@@ -173,6 +173,41 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         self.assertEqual(assignment["target_uuid"], first_uuid)
         self.assertEqual(assignment["selected_device"], "/dev/nvidia1")
 
+    def test_dual_gpu_idle_gate_rejects_preexisting_compute_use(self):
+        uuids = [
+            "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+            "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+        ]
+        original = runtime.gpu_processes_on_uuids
+        runtime.gpu_processes_on_uuids = lambda values: [
+            {
+                "pid": 4242,
+                "gpu_uuid": uuids[1],
+                "used_memory_mib": 128,
+                "owner_uid": 1000,
+            }
+        ]
+        try:
+            with self.assertRaisesRegex(
+                runtime.RuntimeLaunchError,
+                "pre-existing compute processes",
+            ):
+                runtime.verify_gpu_targets_idle(uuids)
+        finally:
+            runtime.gpu_processes_on_uuids = original
+
+    def test_dual_gpu_idle_gate_accepts_zero_compute_processes(self):
+        uuids = [
+            "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+            "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+        ]
+        original = runtime.gpu_processes_on_uuids
+        runtime.gpu_processes_on_uuids = lambda values: []
+        try:
+            self.assertEqual(runtime.verify_gpu_targets_idle(uuids), [])
+        finally:
+            runtime.gpu_processes_on_uuids = original
+
     def test_dual_gpu_command_renders_exact_two_device_uuid_set(self):
         first_uuid = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
         second_uuid = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
