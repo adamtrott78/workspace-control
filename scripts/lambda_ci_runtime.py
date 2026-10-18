@@ -271,11 +271,17 @@ def verify_promoted_model_binding(spec: dict[str, Any]) -> dict[str, Any] | None
     """Verify the exact promoted model object before/after model-eval execution."""
     binding = spec.get("model_binding")
     workload_class = spec.get("workload_class")
+    model_eval_workloads = {
+        "model-eval-single-gpu",
+        "model-eval-dual-gpu",
+    }
     if binding is None:
-        if workload_class == "model-eval-single-gpu":
-            raise RuntimeLaunchError("model-eval-single-gpu requires promoted model binding")
+        if workload_class in model_eval_workloads:
+            raise RuntimeLaunchError(
+                f"{workload_class} requires promoted model binding"
+            )
         return None
-    if workload_class != "model-eval-single-gpu":
+    if workload_class not in model_eval_workloads:
         raise RuntimeLaunchError("promoted model binding is forbidden for this workload")
     if not isinstance(binding, dict):
         raise RuntimeLaunchError("promoted model binding must be an object")
