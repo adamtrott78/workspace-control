@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: cab67e1f5afa231b9cde59adb808ffe98cd1c8cf
+- Remote checkpoint: d537027e51adb46652d140cd259904a361ad71ee
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Validate final workspace-control PR #188 head with FULL_INTEGRATION. Canonical model-eval-dual-gpu must remain DESIGNED_NOT_LIVE and absent from live_enabled_workload_classes; generic gpu-heavy remains DENY. Require exact two-UUID binding and inverted-minor mapping, dual-only controller/service/runtime dispatch, plural root receipts, and the prelaunch idle gate: any existing process on either selected UUID fails closed before launch, while project-owned ci-research-engine GPU residue raises RuntimeCleanupError so the gpu-heavy lane quarantines. If validation passes, merge but do not activate. Install the exact merged non-live code on Lambda and run root-authored two-GPU host acceptance canaries for identity, exact device mapping, two-device systemd ACL, two-GPU CUDA/NCCL operation, wrong/missing UUID denial, unrelated busy-GPU denial, project-owned residue quarantine, timeout/cancel cleanup, and exact post-run residue/receipt checks. Dual CUDA-OOM classification remains a separate gate before live activation.
+Install exact workspace-control implementation SHA d537027e51adb46652d140cd259904a361ad71ee on Lambda with the accepted P5 bootstrap, but do not activate model-eval-dual-gpu. Verify installed executable blobs and dormant policy/manifest identities: project manifest 1a6fe41dcba1ec868a9fa64984df7b788d51bbf8, workload policy 416981fcc5429dd5b5a57440503b17bad9d38e53, systemd profiles 7461bb658c3c587570ef5fe0353ba89c9c5cf3d1. Run root-authored host acceptance without model weights: exact UUID->device/minor resolver, wrong/missing/reversed UUID denial, generic gpu-heavy dispatch denial, selected-GPU idle proof, controlled unrelated-busy denial, controlled project-owned-residue RuntimeCleanupError classification with cleanup, and an exact two-GPU systemd CUDA/NCCL all-reduce canary under DevicePolicy=closed, both exact device ACLs, UUID-ordered CUDA_VISIBLE_DEVICES, ProtectProc=invisible/ProcSubset=all, AF_NETLINK plus loopback-only distributed bootstrap, and existing private-network denies. Require zero process/GPU residue, no lane quarantine, and healthy controllers afterward. Do not run Qwen or activate dual admission yet; dual timeout/cancel and CUDA-OOM gates remain before activation.
 
 ## Remaining work
 
