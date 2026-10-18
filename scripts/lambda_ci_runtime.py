@@ -865,8 +865,28 @@ def build_gpu_systemd_command(
         exec ./run.sh
     """
 
-    selected_device = str(assignment["selected_device"])
-    target_uuid = str(assignment["target_uuid"])
+    raw_target_uuids = assignment.get("target_uuids")
+    if raw_target_uuids is None:
+        target_uuids = [str(assignment["target_uuid"])]
+    else:
+        target_uuids = [str(value) for value in raw_target_uuids]
+    raw_selected_devices = assignment.get("selected_devices")
+    if raw_selected_devices is None:
+        selected_devices = [str(assignment["selected_device"])]
+    else:
+        selected_devices = [str(value) for value in raw_selected_devices]
+
+    if not target_uuids or len(target_uuids) != len(selected_devices):
+        raise RuntimeLaunchError("GPU UUID/device assignment cardinality mismatch")
+    if len({value.lower() for value in target_uuids}) != len(target_uuids):
+        raise RuntimeLaunchError("GPU UUID/device assignment contains duplicate UUIDs")
+    if len(set(selected_devices)) != len(selected_devices):
+        raise RuntimeLaunchError("GPU UUID/device assignment contains duplicate devices")
+
+    selected_device = selected_devices[0]
+    target_uuid = target_uuids[0]
+    target_uuid_csv = ",".join(target_uuids)
+    selected_device_csv = ",".join(selected_devices)
     denied_devices = ",".join(str(path) for path in assignment["denied_devices"])
     support_devices = [str(path) for path in assignment["support_devices"]]
 
@@ -953,9 +973,11 @@ def build_gpu_systemd_command(
             "Environment=P5_EXPANDED_RUNTIME_MANIFEST_SHA256="
             f"{runtime_binding['manifest_identity_sha256']}"
         ),
-        "-p", f"Environment=CUDA_VISIBLE_DEVICES={target_uuid}",
+        "-p", f"Environment=CUDA_VISIBLE_DEVICES={target_uuid_csv}",
         "-p", f"Environment=P5_GPU_TARGET_UUID={target_uuid}",
+        "-p", f"Environment=P5_GPU_TARGET_UUIDS={target_uuid_csv}",
         "-p", f"Environment=P5_GPU_SELECTED_DEVICE={selected_device}",
+        "-p", f"Environment=P5_GPU_SELECTED_DEVICES={selected_device_csv}",
         "-p", f"Environment=P5_GPU_DENIED_DEVICES={denied_devices}",
         "-p", f"Environment=P5_GPU_SUPPORT_DEVICES={','.join(support_devices)}",
         "/bin/bash",
@@ -1005,6 +1027,9 @@ def build_gpu_systemd_command(
         command[executable_index:executable_index] = model_properties
 
     insert_at = command.index("-p", command.index(f"DeviceAllow={selected_device} rw") + 1)
+    for extra_device in selected_devices[1:]:
+        command[insert_at:insert_at] = ["-p", f"DeviceAllow={extra_device} rw"]
+        insert_at += 2
     for support_device in support_devices:
         command[insert_at:insert_at] = ["-p", f"DeviceAllow={support_device} rw"]
         insert_at += 2
