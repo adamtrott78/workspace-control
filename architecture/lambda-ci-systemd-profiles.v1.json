@@ -92,8 +92,12 @@
         "/dev/nvidia0 rw",
         "/dev/nvidia1 rw"
       ],
-      "CUDA_VISIBLE_DEVICES": "0,1",
-      "requires_explicit_task_authorization": true
+      "CUDA_VISIBLE_DEVICES": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea,GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+      "requires_explicit_task_authorization": true,
+      "gpu_uuids": [
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+        "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
+      ]
     }
   },
   "unresolved_before_activation": [
