@@ -196,6 +196,32 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         finally:
             runtime.gpu_processes_on_uuids = original
 
+    def test_dual_gpu_idle_gate_quarantines_project_owned_residue(self):
+        uuids = [
+            "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+            "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+        ]
+        original = runtime.gpu_processes_on_uuids
+        runtime.gpu_processes_on_uuids = lambda values: [
+            {
+                "pid": 4343,
+                "gpu_uuid": uuids[0],
+                "used_memory_mib": 256,
+                "owner_uid": 997,
+            }
+        ]
+        try:
+            with self.assertRaisesRegex(
+                runtime.RuntimeCleanupError,
+                "project-owned compute residue",
+            ):
+                runtime.verify_gpu_targets_idle(
+                    uuids,
+                    project_uid=997,
+                )
+        finally:
+            runtime.gpu_processes_on_uuids = original
+
     def test_dual_gpu_idle_gate_accepts_zero_compute_processes(self):
         uuids = [
             "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
