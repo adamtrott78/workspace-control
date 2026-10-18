@@ -535,10 +535,15 @@ def resolve_gpu_assignments(target_uuids: list[str]) -> dict[str, object]:
         if str(row["uuid"]).lower() not in selected_uuid_set
     ]
 
+    selected_devices = [str(row["device"]) for row in selected_rows]
+    selected_minors = [int(row["minor"]) for row in selected_rows]
     return {
+        "target_uuid": target_uuids[0],
+        "selected_device": selected_devices[0],
+        "selected_minor": selected_minors[0],
         "target_uuids": list(target_uuids),
-        "selected_devices": [str(row["device"]) for row in selected_rows],
-        "selected_minors": [int(row["minor"]) for row in selected_rows],
+        "selected_devices": selected_devices,
+        "selected_minors": selected_minors,
         "denied_devices": denied_devices,
         "inventory": inventory,
     }
@@ -579,6 +584,78 @@ def resolve_cuda_support_devices() -> list[str]:
     if "/dev/nvidia-uvm" not in resolved:
         raise RuntimeLaunchError("CUDA UVM device /dev/nvidia-uvm is missing")
     return resolved
+
+
+def gpu_processes_on_uuids(target_uuids: list[str]) -> list[dict[str, object]]:
+    """Return all NVIDIA compute processes on the exact target UUID set."""
+    normalized = {value.lower() for value in target_uuids}
+    proc = run(
+        [
+            "nvidia-smi",
+            "--query-compute-apps=pid,gpu_uuid,used_memory",
+            "--format=csv,noheader,nounits",
+        ],
+        check=False,
+    )
+    if proc.returncode != 0:
+        raise RuntimeLaunchError(
+            "unable to inspect selected-GPU compute processes: "
+            + proc.stderr.strip()
+        )
+
+    rows: list[dict[str, object]] = []
+    for line in proc.stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        parts = [part.strip() for part in line.split(",")]
+        if len(parts) != 3 or parts[1].lower() not in normalized:
+            continue
+        try:
+            pid = int(parts[0])
+        except ValueError:
+            continue
+        try:
+            owner_uid: int | None = os.stat(f"/proc/{pid}").st_uid
+        except FileNotFoundError:
+            owner_uid = None
+        try:
+            used_memory: int | None = int(parts[2])
+        except ValueError:
+            used_memory = None
+        rows.append(
+            {
+                "pid": pid,
+                "gpu_uuid": parts[1],
+                "used_memory_mib": used_memory,
+                "owner_uid": owner_uid,
+            }
+        )
+    return rows
+
+
+def verify_gpu_targets_idle(
+    target_uuids: list[str],
+    *,
+    project_uid: int | None = None,
+) -> list[dict[str, object]]:
+    """Fail closed on busy targets; quarantine project-owned stale residue."""
+    processes = gpu_processes_on_uuids(target_uuids)
+    if not processes:
+        return processes
+
+    if project_uid is not None and any(
+        row.get("owner_uid") == project_uid for row in processes
+    ):
+        raise RuntimeCleanupError(
+            "dual-GPU target has pre-existing project-owned compute residue: "
+            + json.dumps(processes, sort_keys=True)
+        )
+
+    raise RuntimeLaunchError(
+        "dual-GPU target has pre-existing compute processes: "
+        + json.dumps(processes, sort_keys=True)
+    )
 
 
 def project_gpu_processes(uid: int) -> list[dict[str, object]]:
@@ -1479,24 +1556,68 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     return receipt
 
 def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
-    """Launch one accepted gpu-small runner and return a non-secret cleanup receipt."""
-    if spec["profile"] != "gpu-small":
-        raise RuntimeLaunchError("GPU runtime accepts gpu-small only")
+    """Launch only the explicitly bounded accepted GPU workload/profile pair."""
+    profile = spec["profile"]
+    workload = spec.get("workload_class")
+    resources = spec["resources"]
+    prelaunch_gpu_processes: list[dict[str, object]] = []
+    prelaunch_gpu_idle_verified = False
+
     if spec["allow_production_services"]:
         raise RuntimeLaunchError("production-service access is forbidden")
-    if spec["resources"]["gpu_indices"] != [0]:
-        raise RuntimeLaunchError("gpu-small authority must remain exactly one GPU")
-    target_uuid = spec["resources"].get("gpu_uuid")
-    if target_uuid != "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea":
-        raise RuntimeLaunchError("gpu-small target UUID drift")
+
+    if profile == "gpu-small":
+        if resources["gpu_indices"] != [0]:
+            raise RuntimeLaunchError("gpu-small authority must remain exactly one GPU")
+        target_uuid = resources.get("gpu_uuid")
+        if target_uuid != "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea":
+            raise RuntimeLaunchError("gpu-small target UUID drift")
+        target_uuids = resources.get("gpu_uuids", [target_uuid])
+        if target_uuids != [target_uuid]:
+            raise RuntimeLaunchError("gpu-small UUID set drift")
+        assignment = resolve_gpu_assignment(target_uuid)
+    elif profile == "gpu-heavy":
+        if workload != "model-eval-dual-gpu":
+            raise RuntimeLaunchError(
+                "gpu-heavy is accepted only for model-eval-dual-gpu"
+            )
+        if spec.get("model_binding") is None:
+            raise RuntimeLaunchError("dual-GPU model eval requires promoted model binding")
+        if resources["gpu_indices"] != [0, 1]:
+            raise RuntimeLaunchError("dual-GPU authority requires exactly two GPU slots")
+        expected_uuids = [
+            "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+            "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+        ]
+        target_uuids = resources.get("gpu_uuids")
+        if target_uuids != expected_uuids:
+            raise RuntimeLaunchError("dual-GPU target UUID set drift")
+        if resources.get("gpu_uuid") not in (None, ""):
+            raise RuntimeLaunchError("dual-GPU profile must not use singular GPU authority")
+        assignment = resolve_gpu_assignments(target_uuids)
+        if len(assignment["inventory"]) != 2 or assignment["denied_devices"]:
+            raise RuntimeLaunchError(
+                "dual-GPU host inventory must be exactly the two accepted GPUs"
+            )
+        project_uid, _ = project_identity(spec["run_as"]["user"])
+        prelaunch_gpu_processes = verify_gpu_targets_idle(
+            target_uuids,
+            project_uid=project_uid,
+        )
+        prelaunch_gpu_idle_verified = True
+    else:
+        raise RuntimeLaunchError(f"GPU runtime profile rejected: {profile}")
 
     runtime_pre = verify_expanded_runtime_binding(spec)
     model_pre = verify_promoted_model_binding(spec)
     trusted_cuda_oom_probe = verify_trusted_cuda_oom_probe_binding(spec)
+    if profile == "gpu-heavy" and trusted_cuda_oom_probe is not None:
+        raise RuntimeLaunchError(
+            "dual-GPU CUDA OOM probe requires separate acceptance"
+        )
 
     runner_base, uid, gid = verify_foundation(spec)
     subnet = primary_subnet()
-    assignment = resolve_gpu_assignment(target_uuid)
     assignment["support_devices"] = resolve_cuda_support_devices()
     request_id = request.request_id
 
@@ -1762,12 +1883,17 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "jit_config_persisted": False,
             "github_credential_present": False,
             "gpu_target_uuid": assignment["target_uuid"],
+            "gpu_target_uuids": assignment["target_uuids"],
             "gpu_selected_device": assignment["selected_device"],
+            "gpu_selected_devices": assignment["selected_devices"],
             "gpu_selected_minor": assignment["selected_minor"],
+            "gpu_selected_minors": assignment["selected_minors"],
             "gpu_denied_devices": assignment["denied_devices"],
             "gpu_inventory": assignment["inventory"],
             "gpu_support_devices": assignment["support_devices"],
-            "cuda_visible_devices": assignment["target_uuid"],
+            "gpu_prelaunch_idle_verified": prelaunch_gpu_idle_verified,
+            "gpu_prelaunch_processes": prelaunch_gpu_processes,
+            "cuda_visible_devices": ",".join(assignment["target_uuids"]),
             "expanded_runtime_preverified": True,
             "expanded_runtime_postverified": runtime_post_verified,
             "expanded_runtime_postverify_error": runtime_post_error,
@@ -1821,10 +1947,12 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     return receipt
 
 def launch_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
-    """Dispatch only the two explicitly accepted autonomous P5 profiles."""
+    """Dispatch only explicitly bounded autonomous P5 workload/profile pairs."""
     profile = spec["profile"]
     if profile == "cpu-test":
         return launch_cpu_runner(request, spec)
     if profile == "gpu-small":
+        return launch_gpu_runner(request, spec)
+    if profile == "gpu-heavy" and spec.get("workload_class") == "model-eval-dual-gpu":
         return launch_gpu_runner(request, spec)
     raise RuntimeLaunchError(f"autonomous profile rejected: {profile}")

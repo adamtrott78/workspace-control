@@ -31,12 +31,12 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ba3df4238902a382df9e807889ff048b98750012
+- Remote checkpoint: e5a9b4c361ac790562fac5cf2f35f5a54f2bf58d
 - Remote verified: true
 
 ## Next safe action
 
-Implement the exact dual-GPU authority using UUID order [GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea, GPU-cfed3394-a935-63aa-9325-c4cae7b568b6]. Create a separate research-engine trusted workflow for workload model-eval-dual-gpu using command /lambda-ci-qwen35-dual-pilot and tensor_parallel_size=2, recording per-GPU memory/use and requiring both UUIDs. In workspace-control, add controller recognition for that exact workload/command, a DESIGNED_NOT_LIVE model_eval_dual_gpu_v1 resource class bound to execution_profile gpu-heavy and the two exact UUIDs, a non-live manifest route with model binding qwen3.5-4b and the same immutable expanded runtime under a gpu-heavy binding, and root runtime support that accepts gpu-heavy only when workload_class=model-eval-dual-gpu with the exact UUID pair. Generic gpu-heavy remains DENY/model-forbidden and model-eval-dual-gpu remains not live-enabled until host acceptance gates pass. Require FULL_INTEGRATION before host install.
+Validate final workspace-control PR #188 head with FULL_INTEGRATION. Canonical model-eval-dual-gpu must remain DESIGNED_NOT_LIVE and absent from live_enabled_workload_classes; generic gpu-heavy remains DENY. Require exact two-UUID binding and inverted-minor mapping, dual-only controller/service/runtime dispatch, plural root receipts, and the prelaunch idle gate: any existing process on either selected UUID fails closed before launch, while project-owned ci-research-engine GPU residue raises RuntimeCleanupError so the gpu-heavy lane quarantines. If validation passes, merge but do not activate. Install the exact merged non-live code on Lambda and run root-authored two-GPU host acceptance canaries for identity, exact device mapping, two-device systemd ACL, two-GPU CUDA/NCCL operation, wrong/missing UUID denial, unrelated busy-GPU denial, project-owned residue quarantine, timeout/cancel cleanup, and exact post-run residue/receipt checks. Dual CUDA-OOM classification remains a separate gate before live activation.
 
 ## Remaining work
 

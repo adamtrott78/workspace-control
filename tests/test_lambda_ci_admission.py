@@ -86,12 +86,24 @@ class AdmissionContractTests(unittest.TestCase):
             ["cpu-test", "gpu-small", "model-eval-single-gpu"],
         )
         self.assertNotIn("gpu-heavy", admission["live_enabled_workload_classes"])
+        self.assertNotIn(
+            "model-eval-dual-gpu",
+            admission["live_enabled_workload_classes"],
+        )
         self.assertEqual(
             admission["routes"]["model-eval-single-gpu"]["execution_profile"],
             "gpu-small",
         )
         self.assertEqual(
             admission["routes"]["model-eval-single-gpu"]["model_binding_id"],
+            "qwen3.5-4b",
+        )
+        self.assertEqual(
+            admission["routes"]["model-eval-dual-gpu"]["execution_profile"],
+            "gpu-heavy",
+        )
+        self.assertEqual(
+            admission["routes"]["model-eval-dual-gpu"]["model_binding_id"],
             "qwen3.5-4b",
         )
 
@@ -182,6 +194,65 @@ class AdmissionContractTests(unittest.TestCase):
             "not an accepted live capability",
         ):
             mod.mint_admission(denied_request, denied, POLICY, now=NOW)
+
+    def test_dual_model_eval_mints_exact_two_uuid_binding_only_when_activated(self):
+        manifest = enabled_manifest()
+        policy = copy.deepcopy(POLICY)
+
+        with self.assertRaisesRegex(mod.AdmissionError, "not live-enabled"):
+            mod.mint_admission(
+                good_request("model-eval-dual-gpu"),
+                manifest,
+                policy,
+                now=NOW,
+            )
+
+        manifest["admission_v2"]["live_enabled_workload_classes"].append(
+            "model-eval-dual-gpu"
+        )
+        policy["workload_classes"]["model-eval-dual-gpu"][
+            "policy_decision"
+        ] = "EXISTING_P5_CAPABILITY"
+        policy["workload_classes"]["model-eval-dual-gpu"][
+            "admission_enabled_after_enforcement"
+        ] = True
+
+        admission = mod.mint_admission(
+            good_request("model-eval-dual-gpu"),
+            manifest,
+            policy,
+            now=NOW,
+        )
+        self.assertEqual(admission["execution_profile"], "gpu-heavy")
+        self.assertEqual(admission["resource_class"], "model_eval_dual_gpu_v1")
+        self.assertEqual(
+            admission["resource_ceiling"]["gpu_uuids"],
+            [
+                "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+                "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+            ],
+        )
+        self.assertEqual(len(admission["models"]), 1)
+        self.assertEqual(admission["models"][0]["model_id"], "qwen3.5-4b")
+        self.assertEqual(
+            admission["runtime"]["runtime_id"],
+            "qwen35-vllm-cu129-image-native-sampler-v3",
+        )
+
+        drifted = copy.deepcopy(manifest)
+        drifted["profiles"]["gpu-heavy"]["gpu_uuids"] = list(
+            reversed(drifted["profiles"]["gpu-heavy"]["gpu_uuids"])
+        )
+        with self.assertRaisesRegex(
+            mod.AdmissionError,
+            "GPU UUIDs do not match",
+        ):
+            mod.mint_admission(
+                good_request("model-eval-dual-gpu"),
+                drifted,
+                policy,
+                now=NOW,
+            )
 
     def test_trusted_workflow_identity_mismatch_fails_closed(self):
         for key, value in (

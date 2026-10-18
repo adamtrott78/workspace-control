@@ -131,9 +131,112 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         self.assertIn("IPAddressDeny=134.88.12.0/22", command)
         self.assertIn("RuntimeMaxSec=1200s", command)
 
+    def test_exact_uuid_order_resolves_inverted_device_minors(self):
+        first_uuid = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+        second_uuid = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
+        inventory = [
+            {
+                "uuid": second_uuid,
+                "minor": 0,
+                "device": "/dev/nvidia0",
+                "bus_location": "0000:41:00.0",
+                "model": "NVIDIA RTX A4500",
+            },
+            {
+                "uuid": first_uuid,
+                "minor": 1,
+                "device": "/dev/nvidia1",
+                "bus_location": "0000:2d:00.0",
+                "model": "NVIDIA RTX A4500",
+            },
+        ]
+
+        original = runtime.nvidia_gpu_inventory
+        runtime.nvidia_gpu_inventory = lambda: inventory
+        try:
+            assignment = runtime.resolve_gpu_assignments(
+                [first_uuid, second_uuid]
+            )
+        finally:
+            runtime.nvidia_gpu_inventory = original
+
+        self.assertEqual(
+            assignment["target_uuids"],
+            [first_uuid, second_uuid],
+        )
+        self.assertEqual(
+            assignment["selected_devices"],
+            ["/dev/nvidia1", "/dev/nvidia0"],
+        )
+        self.assertEqual(assignment["selected_minors"], [1, 0])
+        self.assertEqual(assignment["denied_devices"], [])
+        self.assertEqual(assignment["target_uuid"], first_uuid)
+        self.assertEqual(assignment["selected_device"], "/dev/nvidia1")
+
+    def test_dual_gpu_idle_gate_rejects_preexisting_compute_use(self):
+        uuids = [
+            "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+            "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+        ]
+        original = runtime.gpu_processes_on_uuids
+        runtime.gpu_processes_on_uuids = lambda values: [
+            {
+                "pid": 4242,
+                "gpu_uuid": uuids[1],
+                "used_memory_mib": 128,
+                "owner_uid": 1000,
+            }
+        ]
+        try:
+            with self.assertRaisesRegex(
+                runtime.RuntimeLaunchError,
+                "pre-existing compute processes",
+            ):
+                runtime.verify_gpu_targets_idle(uuids)
+        finally:
+            runtime.gpu_processes_on_uuids = original
+
+    def test_dual_gpu_idle_gate_quarantines_project_owned_residue(self):
+        uuids = [
+            "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+            "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+        ]
+        original = runtime.gpu_processes_on_uuids
+        runtime.gpu_processes_on_uuids = lambda values: [
+            {
+                "pid": 4343,
+                "gpu_uuid": uuids[0],
+                "used_memory_mib": 256,
+                "owner_uid": 997,
+            }
+        ]
+        try:
+            with self.assertRaisesRegex(
+                runtime.RuntimeCleanupError,
+                "project-owned compute residue",
+            ):
+                runtime.verify_gpu_targets_idle(
+                    uuids,
+                    project_uid=997,
+                )
+        finally:
+            runtime.gpu_processes_on_uuids = original
+
+    def test_dual_gpu_idle_gate_accepts_zero_compute_processes(self):
+        uuids = [
+            "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+            "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+        ]
+        original = runtime.gpu_processes_on_uuids
+        runtime.gpu_processes_on_uuids = lambda values: []
+        try:
+            self.assertEqual(runtime.verify_gpu_targets_idle(uuids), [])
+        finally:
+            runtime.gpu_processes_on_uuids = original
+
     def test_dual_gpu_command_renders_exact_two_device_uuid_set(self):
         first_uuid = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
-        second_uuid = "GPU-22222222-3333-4444-5555-666666666666"
+        second_uuid = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
 
         spec = self.gpu_spec()
         spec["profile"] = "gpu-heavy"
@@ -142,6 +245,9 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         spec["resources"]["gpu_uuids"] = [first_uuid, second_uuid]
 
         assignment = {
+            "target_uuid": first_uuid,
+            "selected_device": "/dev/nvidia1",
+            "selected_minor": 1,
             "target_uuids": [first_uuid, second_uuid],
             "selected_devices": ["/dev/nvidia1", "/dev/nvidia0"],
             "selected_minors": [1, 0],
@@ -184,12 +290,45 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         )
         self.assertIn("Environment=P5_GPU_DENIED_DEVICES=", command)
 
-    def test_gpu_heavy_dispatch_remains_rejected_while_nonlive(self):
+    def test_gpu_heavy_dispatch_remains_rejected_without_exact_dual_workload(self):
         with self.assertRaisesRegex(
             runtime.RuntimeLaunchError,
             "autonomous profile rejected: gpu-heavy",
         ):
             runtime.launch_runner(None, {"profile": "gpu-heavy"})
+
+        with self.assertRaisesRegex(
+            runtime.RuntimeLaunchError,
+            "autonomous profile rejected: gpu-heavy",
+        ):
+            runtime.launch_runner(
+                None,
+                {
+                    "profile": "gpu-heavy",
+                    "workload_class": "gpu-heavy",
+                },
+            )
+
+    def test_exact_dual_workload_dispatches_to_gpu_launcher(self):
+        original = runtime.launch_gpu_runner
+        calls = []
+
+        def fake_launch(request, spec):
+            calls.append((request, spec))
+            return {"decision": "TEST"}
+
+        runtime.launch_gpu_runner = fake_launch
+        spec = {
+            "profile": "gpu-heavy",
+            "workload_class": "model-eval-dual-gpu",
+        }
+        try:
+            result = runtime.launch_runner("request", spec)
+        finally:
+            runtime.launch_gpu_runner = original
+
+        self.assertEqual(result, {"decision": "TEST"})
+        self.assertEqual(calls, [("request", spec)])
 
 
     def test_trusted_cuda_oom_probe_binding_requires_exact_root_identity(self):

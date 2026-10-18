@@ -11,14 +11,14 @@
   },
   "baselines": {
     "workspace_control_sha": "94ad261fa61bb281c961f4418bd7683111306a6f",
-    "research_engine_sha": "ba3df4238902a382df9e807889ff048b98750012",
+    "research_engine_sha": "e5a9b4c361ac790562fac5cf2f35f5a54f2bf58d",
     "project_manifest": {
       "path": "architecture/lambda-ci-project-research-engine.v1.json",
-      "blob_sha": "88694079e7c1c069533894f07c153f273601fd17"
+      "blob_sha": "1a6fe41dcba1ec868a9fa64984df7b788d51bbf8"
     },
     "systemd_profiles": {
       "path": "architecture/lambda-ci-systemd-profiles.v1.json",
-      "blob_sha": "e3e5ffc15e4e73b4c8d71c2851c772f0b2989245"
+      "blob_sha": "7461bb658c3c587570ef5fe0353ba89c9c5cf3d1"
     },
     "trusted_cache_policy": "architecture/lambda-ci-trusted-cache-policy.v1.md"
   },
@@ -236,6 +236,17 @@
       "gpu_uuids": [
         "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
       ]
+    },
+    "model_eval_dual_gpu_v1": {
+      "execution_profile": "gpu-heavy",
+      "max_runtime_seconds": 1800,
+      "scratch_max_bytes": 34359738368,
+      "staging_max_bytes": 0,
+      "gpu_count": 2,
+      "gpu_uuids": [
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+        "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
+      ]
     }
   },
   "workload_classes": {
@@ -321,6 +332,22 @@
       "candidate_payload_allowed": false,
       "underlying_profile": "gpu-heavy",
       "denial_reason": "dual-GPU authority requires a separate post-pilot acceptance gate"
+    },
+    "model-eval-dual-gpu": {
+      "policy_decision": "DESIGNED_NOT_LIVE",
+      "admission_enabled_after_enforcement": false,
+      "execution_plane": "jit_runner",
+      "candidate_payload_allowed": true,
+      "resource_class": "model_eval_dual_gpu_v1",
+      "payload_network_class": "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE",
+      "payload_secret_class": "CONTROL_PLANE_EPHEMERAL_ONLY",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_TRUSTED_CACHE_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_binding": "REQUIRED_PROMOTED_EXACT",
+      "runtime_binding": "REQUIRED_EXPANDED_RUNTIME_EXACT",
+      "model_registry_credential_forbidden": true,
+      "activation_gate": "EXACT_TWO_GPU_HOST_ACCEPTANCE_REQUIRED"
     }
   },
   "project_bindings": {
@@ -331,7 +358,8 @@
         "gpu-small",
         "model-acquire",
         "cache-promote",
-        "model-eval-single-gpu"
+        "model-eval-single-gpu",
+        "model-eval-dual-gpu"
       ],
       "denied_workload_classes": [
         "gpu-heavy"
@@ -375,6 +403,20 @@
         "scientific": false,
         "production_routing_change": false,
         "canary_contract": "benchmarks/document_intelligence/qwen35-runtime-certification-contract.v1.json"
+      },
+      "dual_gpu_model_eval": {
+        "workload_class": "model-eval-dual-gpu",
+        "resource_class": "model_eval_dual_gpu_v1",
+        "model_id": "qwen3.5-4b",
+        "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+        "gpu_uuids": [
+          "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+          "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
+        ],
+        "tensor_parallel_size": 2,
+        "scientific": false,
+        "production_routing_change": false,
+        "activation_status": "DESIGNED_NOT_LIVE"
       }
     }
   },

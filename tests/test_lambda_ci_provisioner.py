@@ -418,46 +418,47 @@ def test_v2_model_eval_binds_exact_promoted_model_and_runtime():
 def test_v2_exact_dual_uuid_set_can_be_carried_only_when_root_policy_and_profile_match():
     manifest = enabled_v2_manifest()
     policy = copy.deepcopy(WORKLOAD_POLICY)
-
-    second_uuid = "GPU-22222222-3333-4444-5555-666666666666"
     dual_uuids = [
         "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
-        second_uuid,
+        "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
     ]
 
-    manifest["profiles"]["gpu-heavy"]["gpu_uuids"] = dual_uuids
-    manifest["expanded_runtime_bindings"]["gpu-heavy"] = copy.deepcopy(
-        manifest["expanded_runtime_bindings"]["gpu-small"]
+    assert "model-eval-dual-gpu" not in (
+        manifest["admission_v2"]["live_enabled_workload_classes"]
     )
-    manifest["admission_v2"]["routes"]["model-eval-single-gpu"][
-        "execution_profile"
-    ] = "gpu-heavy"
+    assert policy["workload_classes"]["model-eval-dual-gpu"][
+        "policy_decision"
+    ] == "DESIGNED_NOT_LIVE"
 
-    policy["resource_classes"]["dual_gpu_test_v1"] = {
-        "execution_profile": "gpu-heavy",
-        "max_runtime_seconds": 1200,
-        "scratch_max_bytes": 17179869184,
-        "staging_max_bytes": 0,
-        "gpu_count": 2,
-        "gpu_uuids": dual_uuids,
-    }
-    policy["workload_classes"]["model-eval-single-gpu"][
-        "resource_class"
-    ] = "dual_gpu_test_v1"
+    manifest["admission_v2"]["live_enabled_workload_classes"].append(
+        "model-eval-dual-gpu"
+    )
+    policy["workload_classes"]["model-eval-dual-gpu"][
+        "policy_decision"
+    ] = "EXISTING_P5_CAPABILITY"
+    policy["workload_classes"]["model-eval-dual-gpu"][
+        "admission_enabled_after_enforcement"
+    ] = True
 
     req = mod.validate_request_v2(
-        good_v2_request("model-eval-single-gpu"),
+        good_v2_request("model-eval-dual-gpu"),
         manifest,
         policy,
         now=V2_NOW,
     )
     assert req.profile == "gpu-heavy"
+    assert req.workload_class == "model-eval-dual-gpu"
+    assert req.admission["resource_class"] == "model_eval_dual_gpu_v1"
     assert req.admission["resource_ceiling"]["gpu_uuids"] == dual_uuids
 
     launch = mod.build_launch_spec(req, manifest, PROFILES, PINS)
     assert launch["resources"]["gpu_indices"] == [0, 1]
     assert launch["resources"]["gpu_uuid"] is None
     assert launch["resources"]["gpu_uuids"] == dual_uuids
+    assert launch["model_binding"]["model_id"] == "qwen3.5-4b"
+    assert launch["runtime_binding"]["runtime_id"] == (
+        "qwen35-vllm-cu129-image-native-sampler-v3"
+    )
 
 
 def test_v2_gpu_small_remains_model_forbidden():

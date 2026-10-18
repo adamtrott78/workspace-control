@@ -179,7 +179,8 @@
         "gpu_small_v1",
         "model_acquire_v1",
         "cache_promote_v1",
-        "model_eval_single_gpu_v1"
+        "model_eval_single_gpu_v1",
+        "model_eval_dual_gpu_v1"
       ],
       "additionalProperties": {
         "type": "object",
@@ -230,6 +231,7 @@
         "model-acquire",
         "cache-promote",
         "model-eval-single-gpu",
+        "model-eval-dual-gpu",
         "gpu-heavy"
       ],
       "properties": {
@@ -280,6 +282,9 @@
               "minLength": 1
             }
           }
+        },
+        "model-eval-dual-gpu": {
+          "$ref": "#/$defs/workloadClass"
         }
       }
     },
