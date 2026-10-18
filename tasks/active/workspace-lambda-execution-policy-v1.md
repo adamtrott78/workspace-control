@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d537027e51adb46652d140cd259904a361ad71ee
+- Remote checkpoint: 56e35d53eb086ab9ec8a5be49e070376b9baa5a3
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Complete the two remaining dual-GPU pre-activation failure gates without enabling dual admission or running Qwen. First validate timeout/cancel cleanup on exact gpu-heavy/model-eval-dual-gpu root-authored specs: force a bounded long-running two-GPU CUDA/NCCL workload through the production runtime path with a short runtime ceiling, require terminal timeout/cancel classification, wrapper/unit termination, both project CPU/GPU cleanup, workspace destruction, runtime/model postverify, zero residue/quarantine after accepted cleanup, and healthy controllers. Second implement/validate a trusted root-only dual-GPU CUDA OOM probe binding that cannot be candidate-derived, allocates on both exact UUIDs, produces durable dual-device OOM evidence, remains non-retryable, and exercises the production gpu-heavy cleanup/receipt path. Generic gpu-heavy remains DENY and model-eval-dual-gpu remains DESIGNED_NOT_LIVE throughout. Require FULL_INTEGRATION for any executable-code change and a host gate before activation.
+Install exact workspace-control SHA 56e35d53eb086ab9ec8a5be49e070376b9baa5a3 on Lambda. Verify exact installed runtime d8454f082c822a4ef4e347e3e66714bcbc324f1f and trusted dual probes root:root 0555 with blobs 3d420d39924b4cd932b70c7303a80eaf8c098c36 and 8330b3621f80dbe78e413234deec4b4f433e2ce7; dormant manifest/policy/profiles must remain 1a6fe41dcba1ec868a9fa64984df7b788d51bbf8 / 416981fcc5429dd5b5a57440503b17bad9d38e53 / 7461bb658c3c587570ef5fe0353ba89c9c5cf3d1, with model-eval-dual-gpu not live and generic gpu-heavy denied. Then execute two root-authored production launch_gpu_runner canaries without admission/Qwen: (1) dual timeout probe with gpu-heavy/model-eval-dual-gpu exact UUID pair and short RuntimeMaxSec, require RuntimeTimeoutError plus receipt TIMED_OUT, timed_out=true, systemd Result=timeout, both CPU/GPU cleanup, workspaces destroyed, runtime/model postverify, non-retryable; (2) dual CUDA OOM probe with same exact authority, require RuntimeCudaOomError plus CUDA_OOM receipt, cuda_oom=true, trusted exit-86 evidence, both CPU/GPU cleanup, workspaces destroyed, runtime/model postverify, non-retryable. Finish with both GPUs idle, no project processes/quarantine, controllers healthy. Do not enable dual admission or run Qwen until both PASS.
 
 ## Remaining work
 
