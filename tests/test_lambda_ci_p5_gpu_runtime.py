@@ -383,6 +383,25 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         self.assertEqual(calls, [("request", spec)])
 
 
+    def test_dual_model_eval_requires_promoted_model_binding(self):
+        spec = self.dual_gpu_spec()
+        spec["model_binding"] = None
+        with self.assertRaisesRegex(
+            runtime.RuntimeLaunchError,
+            "model-eval-dual-gpu requires promoted model binding",
+        ):
+            runtime.verify_promoted_model_binding(spec)
+
+    def test_dual_model_eval_is_permitted_to_enter_exact_model_verification(self):
+        spec = self.dual_gpu_spec()
+        spec["model_binding"] = {"model_id": "qwen3.5-4b"}
+        with self.assertRaisesRegex(
+            runtime.RuntimeLaunchError,
+            "promoted model binding keys drift",
+        ):
+            runtime.verify_promoted_model_binding(spec)
+
+
     def test_trusted_cuda_oom_probe_binding_requires_exact_root_identity(self):
         spec = self.gpu_spec()
         spec["trusted_failure_probe"] = {
