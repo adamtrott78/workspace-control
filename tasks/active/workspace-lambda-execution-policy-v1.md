@@ -31,12 +31,12 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ba3df4238902a382df9e807889ff048b98750012
+- Remote checkpoint: e5a9b4c361ac790562fac5cf2f35f5a54f2bf58d
 - Remote verified: true
 
 ## Next safe action
 
-Implement the exact dual-GPU authority using UUID order [GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea, GPU-cfed3394-a935-63aa-9325-c4cae7b568b6]. Create a separate research-engine trusted workflow for workload model-eval-dual-gpu using command /lambda-ci-qwen35-dual-pilot and tensor_parallel_size=2, recording per-GPU memory/use and requiring both UUIDs. In workspace-control, add controller recognition for that exact workload/command, a DESIGNED_NOT_LIVE model_eval_dual_gpu_v1 resource class bound to execution_profile gpu-heavy and the two exact UUIDs, a non-live manifest route with model binding qwen3.5-4b and the same immutable expanded runtime under a gpu-heavy binding, and root runtime support that accepts gpu-heavy only when workload_class=model-eval-dual-gpu with the exact UUID pair. Generic gpu-heavy remains DENY/model-forbidden and model-eval-dual-gpu remains not live-enabled until host acceptance gates pass. Require FULL_INTEGRATION before host install.
+Validate workspace-control branch dual-gpu-bounded-authority with FULL_INTEGRATION. The branch must remain non-live: canonical admission_v2.live_enabled_workload_classes stays [cpu-test,gpu-small,model-eval-single-gpu]; model-eval-dual-gpu policy_decision stays DESIGNED_NOT_LIVE with admission_enabled_after_enforcement=false; generic gpu-heavy remains DENY. Require controller claim/command exactness, exact resource class model_eval_dual_gpu_v1 bound to UUID order [GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea,GPU-cfed3394-a935-63aa-9325-c4cae7b568b6], root service gpu-heavy lane limited to model-eval-dual-gpu, runtime launcher rejection of all other gpu-heavy workloads, correct UUID-to-device mapping /dev/nvidia1,/dev/nvidia0, plural receipt identity, schemas/tests, and research-engine workflow blob a961158615269797837e036fb4cc4a3358f60189 pinned to research main e5a9b4c361ac790562fac5cf2f35f5a54f2bf58d. If FULL_INTEGRATION passes, merge but do not activate live admission. Then install the exact merged non-live code on Lambda and run root-authored two-GPU host acceptance canaries before any policy activation.
 
 ## Remaining work
 
