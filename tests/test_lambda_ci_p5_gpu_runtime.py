@@ -142,6 +142,9 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         spec["resources"]["gpu_uuids"] = [first_uuid, second_uuid]
 
         assignment = {
+            "target_uuid": first_uuid,
+            "selected_device": "/dev/nvidia1",
+            "selected_minor": 1,
             "target_uuids": [first_uuid, second_uuid],
             "selected_devices": ["/dev/nvidia1", "/dev/nvidia0"],
             "selected_minors": [1, 0],
@@ -184,12 +187,45 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         )
         self.assertIn("Environment=P5_GPU_DENIED_DEVICES=", command)
 
-    def test_gpu_heavy_dispatch_remains_rejected_while_nonlive(self):
+    def test_gpu_heavy_dispatch_remains_rejected_without_exact_dual_workload(self):
         with self.assertRaisesRegex(
             runtime.RuntimeLaunchError,
             "autonomous profile rejected: gpu-heavy",
         ):
             runtime.launch_runner(None, {"profile": "gpu-heavy"})
+
+        with self.assertRaisesRegex(
+            runtime.RuntimeLaunchError,
+            "autonomous profile rejected: gpu-heavy",
+        ):
+            runtime.launch_runner(
+                None,
+                {
+                    "profile": "gpu-heavy",
+                    "workload_class": "gpu-heavy",
+                },
+            )
+
+    def test_exact_dual_workload_dispatches_to_gpu_launcher(self):
+        original = runtime.launch_gpu_runner
+        calls = []
+
+        def fake_launch(request, spec):
+            calls.append((request, spec))
+            return {"decision": "TEST"}
+
+        runtime.launch_gpu_runner = fake_launch
+        spec = {
+            "profile": "gpu-heavy",
+            "workload_class": "model-eval-dual-gpu",
+        }
+        try:
+            result = runtime.launch_runner("request", spec)
+        finally:
+            runtime.launch_gpu_runner = original
+
+        self.assertEqual(result, {"decision": "TEST"})
+        self.assertEqual(calls, [("request", spec)])
 
 
     def test_trusted_cuda_oom_probe_binding_requires_exact_root_identity(self):
