@@ -30,6 +30,7 @@ const (
 	defaultProfile         = "cpu-test"
 	gpuProfile             = "gpu-small"
 	modelEvalWorkload      = "model-eval-single-gpu"
+	dualModelEvalWorkload  = "model-eval-dual-gpu"
 	defaultProvisionerSock = "/run/workspace-ci/provisioner.sock"
 	maxRunners             = 1
 )
@@ -153,7 +154,7 @@ func workloadForDisplayClaim(profile, displayName string) (string, error) {
 			return "", fmt.Errorf("CPU controller workload rejected: %s", workload)
 		}
 	case gpuProfile:
-		if workload != gpuProfile && workload != modelEvalWorkload {
+		if workload != gpuProfile && workload != modelEvalWorkload && workload != dualModelEvalWorkload {
 			return "", fmt.Errorf("GPU controller workload rejected: %s", workload)
 		}
 	default:
