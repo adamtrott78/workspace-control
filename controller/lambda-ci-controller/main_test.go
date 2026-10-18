@@ -152,7 +152,11 @@ func TestProvisionerSocketReceivesJITButResponseDoesNotEchoIt(t *testing.T) {
 }
 
 func TestPilotConstantsAreFixed(t *testing.T) {
-	if defaultProjectID != "research-engine" || defaultProfile != "cpu-test" || gpuProfile != "gpu-small" || modelEvalWorkload != "model-eval-single-gpu" {
+	if defaultProjectID != "research-engine" ||
+		defaultProfile != "cpu-test" ||
+		gpuProfile != "gpu-small" ||
+		modelEvalWorkload != "model-eval-single-gpu" ||
+		dualModelEvalWorkload != "model-eval-dual-gpu" {
 		t.Fatal("pilot authority changed")
 	}
 	if defaultScaleSetName != "lambda-research-engine" || gpuScaleSetName != "lambda-research-engine-gpu" || maxRunners != 1 {
@@ -188,6 +192,12 @@ func TestWorkloadSelectionStaysWithinControllerProfile(t *testing.T) {
 	got, err = workloadForDisplayClaim(gpuProfile, modelClaim)
 	if err != nil || got != modelEvalWorkload {
 		t.Fatalf("model-eval workload selection failed got=%q err=%v", got, err)
+	}
+
+	dualModelClaim := "wc-admission-v1|workload=model-eval-dual-gpu|pr=101|request=/lambda-ci-qwen35-dual-pilot " + strings.Repeat("a", 40)
+	got, err = workloadForDisplayClaim(gpuProfile, dualModelClaim)
+	if err != nil || got != dualModelEvalWorkload {
+		t.Fatalf("dual model-eval workload selection failed got=%q err=%v", got, err)
 	}
 
 	if _, err := workloadForDisplayClaim(defaultProfile, modelClaim); err == nil {
