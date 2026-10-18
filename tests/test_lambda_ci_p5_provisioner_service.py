@@ -200,6 +200,80 @@ def test_gpu_small_is_accepted_but_gpu_heavy_is_rejected():
     raise AssertionError("gpu-heavy was enabled without explicit authorization")
 
 
+def test_v2_dual_model_eval_can_use_gpu_heavy_only_when_root_policy_is_activated():
+    calls = []
+    done = threading.Event()
+
+    def launcher(req, spec):
+        calls.append(
+            (
+                req.profile,
+                req.workload_class,
+                spec["resources"]["gpu_uuids"],
+            )
+        )
+        done.set()
+        return {"decision": "RUNNER_EXITED_CLEANLY"}
+
+    manifest = enabled_v2_manifest()
+    policy_copy = copy.deepcopy(WORKLOAD_POLICY)
+
+    # The repository contract is intentionally DESIGNED_NOT_LIVE. This test
+    # activates only local copies to prove the provisioner-service boundary.
+    manifest["admission_v2"]["live_enabled_workload_classes"].append(
+        "model-eval-dual-gpu"
+    )
+    policy_copy["workload_classes"]["model-eval-dual-gpu"][
+        "policy_decision"
+    ] = "EXISTING_P5_CAPABILITY"
+    policy_copy["workload_classes"]["model-eval-dual-gpu"][
+        "admission_enabled_after_enforcement"
+    ] = True
+
+    with tempfile.TemporaryDirectory() as tmp:
+        svc = build_service(
+            tmp,
+            launcher,
+            manifest=manifest,
+            workload_policy=policy_copy,
+            clock=lambda: V2_NOW,
+        )
+        req = v2_request("model-eval-dual-gpu")
+        accepted = svc.handle_request(req, peer_uid=12345)
+        assert accepted["status"] == "ACCEPTED"
+        assert done.wait(1)
+        assert calls == [
+            (
+                "gpu-heavy",
+                "model-eval-dual-gpu",
+                [
+                    "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+                    "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+                ],
+            )
+        ]
+        assert svc.state_store.lane_quarantine_path("gpu-heavy").name == (
+            "_lane-quarantine-gpu-heavy.json"
+        )
+
+
+def test_v2_dual_model_eval_is_rejected_while_designed_not_live():
+    with tempfile.TemporaryDirectory() as tmp:
+        svc = build_service(
+            tmp,
+            lambda req, spec: {},
+            manifest=enabled_v2_manifest(),
+            clock=lambda: V2_NOW,
+        )
+        req = v2_request("model-eval-dual-gpu")
+        try:
+            svc.handle_request(req, peer_uid=12345)
+        except policy.PolicyError as exc:
+            assert "not live-enabled" in str(exc)
+        else:
+            raise AssertionError("designed-not-live dual workload unexpectedly accepted")
+
+
 def test_busy_request_is_not_claimed_and_can_be_retried():
     entered = threading.Event()
     release = threading.Event()
