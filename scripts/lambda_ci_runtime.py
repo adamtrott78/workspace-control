@@ -634,15 +634,28 @@ def gpu_processes_on_uuids(target_uuids: list[str]) -> list[dict[str, object]]:
     return rows
 
 
-def verify_gpu_targets_idle(target_uuids: list[str]) -> list[dict[str, object]]:
-    """Fail closed if any accepted dual-GPU target is already in compute use."""
+def verify_gpu_targets_idle(
+    target_uuids: list[str],
+    *,
+    project_uid: int | None = None,
+) -> list[dict[str, object]]:
+    """Fail closed on busy targets; quarantine project-owned stale residue."""
     processes = gpu_processes_on_uuids(target_uuids)
-    if processes:
-        raise RuntimeLaunchError(
-            "dual-GPU target has pre-existing compute processes: "
+    if not processes:
+        return processes
+
+    if project_uid is not None and any(
+        row.get("owner_uid") == project_uid for row in processes
+    ):
+        raise RuntimeCleanupError(
+            "dual-GPU target has pre-existing project-owned compute residue: "
             + json.dumps(processes, sort_keys=True)
         )
-    return processes
+
+    raise RuntimeLaunchError(
+        "dual-GPU target has pre-existing compute processes: "
+        + json.dumps(processes, sort_keys=True)
+    )
 
 
 def project_gpu_processes(uid: int) -> list[dict[str, object]]:
@@ -1586,7 +1599,11 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             raise RuntimeLaunchError(
                 "dual-GPU host inventory must be exactly the two accepted GPUs"
             )
-        prelaunch_gpu_processes = verify_gpu_targets_idle(target_uuids)
+        project_uid, _ = project_identity(spec["run_as"]["user"])
+        prelaunch_gpu_processes = verify_gpu_targets_idle(
+            target_uuids,
+            project_uid=project_uid,
+        )
         prelaunch_gpu_idle_verified = True
     else:
         raise RuntimeLaunchError(f"GPU runtime profile rejected: {profile}")
