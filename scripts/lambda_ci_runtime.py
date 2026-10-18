@@ -586,6 +586,65 @@ def resolve_cuda_support_devices() -> list[str]:
     return resolved
 
 
+def gpu_processes_on_uuids(target_uuids: list[str]) -> list[dict[str, object]]:
+    """Return all NVIDIA compute processes on the exact target UUID set."""
+    normalized = {value.lower() for value in target_uuids}
+    proc = run(
+        [
+            "nvidia-smi",
+            "--query-compute-apps=pid,gpu_uuid,used_memory",
+            "--format=csv,noheader,nounits",
+        ],
+        check=False,
+    )
+    if proc.returncode != 0:
+        raise RuntimeLaunchError(
+            "unable to inspect selected-GPU compute processes: "
+            + proc.stderr.strip()
+        )
+
+    rows: list[dict[str, object]] = []
+    for line in proc.stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        parts = [part.strip() for part in line.split(",")]
+        if len(parts) != 3 or parts[1].lower() not in normalized:
+            continue
+        try:
+            pid = int(parts[0])
+        except ValueError:
+            continue
+        try:
+            owner_uid: int | None = os.stat(f"/proc/{pid}").st_uid
+        except FileNotFoundError:
+            owner_uid = None
+        try:
+            used_memory: int | None = int(parts[2])
+        except ValueError:
+            used_memory = None
+        rows.append(
+            {
+                "pid": pid,
+                "gpu_uuid": parts[1],
+                "used_memory_mib": used_memory,
+                "owner_uid": owner_uid,
+            }
+        )
+    return rows
+
+
+def verify_gpu_targets_idle(target_uuids: list[str]) -> list[dict[str, object]]:
+    """Fail closed if any accepted dual-GPU target is already in compute use."""
+    processes = gpu_processes_on_uuids(target_uuids)
+    if processes:
+        raise RuntimeLaunchError(
+            "dual-GPU target has pre-existing compute processes: "
+            + json.dumps(processes, sort_keys=True)
+        )
+    return processes
+
+
 def project_gpu_processes(uid: int) -> list[dict[str, object]]:
     """Return active NVIDIA compute processes owned by the project UID."""
     proc = run(
@@ -1488,6 +1547,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     profile = spec["profile"]
     workload = spec.get("workload_class")
     resources = spec["resources"]
+    prelaunch_gpu_processes: list[dict[str, object]] = []
+    prelaunch_gpu_idle_verified = False
 
     if spec["allow_production_services"]:
         raise RuntimeLaunchError("production-service access is forbidden")
@@ -1525,6 +1586,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             raise RuntimeLaunchError(
                 "dual-GPU host inventory must be exactly the two accepted GPUs"
             )
+        prelaunch_gpu_processes = verify_gpu_targets_idle(target_uuids)
+        prelaunch_gpu_idle_verified = True
     else:
         raise RuntimeLaunchError(f"GPU runtime profile rejected: {profile}")
 
@@ -1811,6 +1874,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "gpu_denied_devices": assignment["denied_devices"],
             "gpu_inventory": assignment["inventory"],
             "gpu_support_devices": assignment["support_devices"],
+            "gpu_prelaunch_idle_verified": prelaunch_gpu_idle_verified,
+            "gpu_prelaunch_processes": prelaunch_gpu_processes,
             "cuda_visible_devices": ",".join(assignment["target_uuids"]),
             "expanded_runtime_preverified": True,
             "expanded_runtime_postverified": runtime_post_verified,
