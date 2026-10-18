@@ -208,6 +208,29 @@ class LambdaCIP5InstallTests(unittest.TestCase):
             ],
             "qwen3.5-4b",
         )
+        self.assertEqual(
+            project["admission_v2"]["routes"]["model-eval-dual-gpu"][
+                "trusted_workflow"
+            ]["blob_sha"],
+            "a961158615269797837e036fb4cc4a3358f60189",
+        )
+        self.assertEqual(
+            project["admission_v2"]["routes"]["model-eval-dual-gpu"][
+                "model_binding_id"
+            ],
+            "qwen3.5-4b",
+        )
+        self.assertEqual(
+            project["profiles"]["gpu-heavy"]["gpu_uuids"],
+            [
+                "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+                "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+            ],
+        )
+        self.assertNotIn(
+            "model-eval-dual-gpu",
+            project["admission_v2"]["live_enabled_workload_classes"],
+        )
         self.assertNotIn("gpu-heavy", project["admission_v2"]["live_enabled_workload_classes"])
 
     def test_go_toolchain_pin_is_exact_official_release(self):
