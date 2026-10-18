@@ -83,10 +83,15 @@ class AdmissionContractTests(unittest.TestCase):
         self.assertTrue(admission["enabled"])
         self.assertEqual(
             admission["live_enabled_workload_classes"],
-            ["cpu-test", "gpu-small", "model-eval-single-gpu"],
+            [
+                "cpu-test",
+                "gpu-small",
+                "model-eval-single-gpu",
+                "model-eval-dual-gpu",
+            ],
         )
         self.assertNotIn("gpu-heavy", admission["live_enabled_workload_classes"])
-        self.assertNotIn(
+        self.assertIn(
             "model-eval-dual-gpu",
             admission["live_enabled_workload_classes"],
         )
@@ -199,23 +204,19 @@ class AdmissionContractTests(unittest.TestCase):
         manifest = enabled_manifest()
         policy = copy.deepcopy(POLICY)
 
-        with self.assertRaisesRegex(mod.AdmissionError, "not live-enabled"):
-            mod.mint_admission(
-                good_request("model-eval-dual-gpu"),
-                manifest,
-                policy,
-                now=NOW,
-            )
-
-        manifest["admission_v2"]["live_enabled_workload_classes"].append(
-            "model-eval-dual-gpu"
+        self.assertIn(
+            "model-eval-dual-gpu",
+            manifest["admission_v2"]["live_enabled_workload_classes"],
         )
-        policy["workload_classes"]["model-eval-dual-gpu"][
-            "policy_decision"
-        ] = "EXISTING_P5_CAPABILITY"
-        policy["workload_classes"]["model-eval-dual-gpu"][
-            "admission_enabled_after_enforcement"
-        ] = True
+        self.assertEqual(
+            policy["workload_classes"]["model-eval-dual-gpu"]["policy_decision"],
+            "EXISTING_P5_CAPABILITY",
+        )
+        self.assertTrue(
+            policy["workload_classes"]["model-eval-dual-gpu"][
+                "admission_enabled_after_enforcement"
+            ]
+        )
 
         admission = mod.mint_admission(
             good_request("model-eval-dual-gpu"),
