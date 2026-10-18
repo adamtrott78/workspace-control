@@ -47,7 +47,7 @@ class StateStore:
         return self.root / f"{request_id}.json"
 
     def lane_quarantine_path(self, profile: str) -> pathlib.Path:
-        if profile not in {"cpu-test", "gpu-small"}:
+        if profile not in {"cpu-test", "gpu-small", "gpu-heavy"}:
             raise ServiceError(f"unsupported lane quarantine profile: {profile}")
         return self.root / f"_lane-quarantine-{profile}.json"
 
@@ -341,9 +341,16 @@ class ProvisionerService:
                     now=self.clock(),
                     policy_sha256=self.policy_sha256,
                 )
-                if req.profile not in {"cpu-test", "gpu-small"}:
+                if req.profile not in {"cpu-test", "gpu-small", "gpu-heavy"}:
                     raise ServiceError(
-                        "admission v2 currently enables only cpu-test and gpu-small"
+                        "admission v2 execution profile is not supported"
+                    )
+                if (
+                    req.profile == "gpu-heavy"
+                    and req.workload_class != "model-eval-dual-gpu"
+                ):
+                    raise ServiceError(
+                        "gpu-heavy admission is limited to model-eval-dual-gpu"
                     )
 
                 quarantined = self._lane_quarantine_response(
