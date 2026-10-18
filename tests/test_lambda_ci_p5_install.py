@@ -149,6 +149,22 @@ class LambdaCIP5InstallTests(unittest.TestCase):
             BOOTSTRAP,
         )
         self.assertIn(
+            "/opt/workspace-ci/provisioner/trusted-probes/lambda_ci_dual_timeout_probe.py",
+            BOOTSTRAP,
+        )
+        self.assertIn(
+            "/opt/workspace-ci/provisioner/trusted-probes/lambda_ci_dual_cuda_oom_probe.py",
+            BOOTSTRAP,
+        )
+        self.assertIn(
+            'install -o root -g root -m 0555 "$REPO_ROOT/scripts/lambda_ci_dual_timeout_probe.py"',
+            BOOTSTRAP,
+        )
+        self.assertIn(
+            'install -o root -g root -m 0555 "$REPO_ROOT/scripts/lambda_ci_dual_cuda_oom_probe.py"',
+            BOOTSTRAP,
+        )
+        self.assertIn(
             'install -o root -g root -m 0555 "$REPO_ROOT/scripts/lambda_ci_trusted_cache.py"',
             BOOTSTRAP,
         )
