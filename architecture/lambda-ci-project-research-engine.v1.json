@@ -52,7 +52,11 @@
       ],
       "allow_public_egress": true,
       "allow_production_services": false,
-      "requires_explicit_task_authorization": true
+      "requires_explicit_task_authorization": true,
+      "gpu_uuids": [
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+        "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
+      ]
     }
   },
   "github_job_permissions": {
@@ -127,12 +131,49 @@
             "command": "/lambda-ci-qwen35-pilot"
           }
         }
+      },
+      "model-eval-dual-gpu": {
+        "scale_set_name": "lambda-research-engine-gpu",
+        "execution_profile": "gpu-heavy",
+        "model_binding_id": "qwen3.5-4b",
+        "trusted_workflow": {
+          "path": ".github/workflows/lambda-ci-qwen35-dual-offline-pilot.yml",
+          "ref": "refs/heads/main",
+          "job_workflow_ref": "adamtrott78/research-engine/.github/workflows/lambda-ci-qwen35-dual-offline-pilot.yml@refs/heads/main",
+          "blob_sha": "a961158615269797837e036fb4cc4a3358f60189",
+          "event_name": "issue_comment",
+          "allowed_actors": [
+            "adamtrott78"
+          ],
+          "job_display_claim": {
+            "version": "wc-admission-v1",
+            "command": "/lambda-ci-qwen35-dual-pilot"
+          }
+        }
       }
     },
-    "activation_note": "Admission v2 is live for cpu-test, gpu-small, and the first bounded model-eval-single-gpu pilot only. gpu-small retains the immutable expanded Qwen runtime binding but model weights/inference remain forbidden there. model-eval-single-gpu uses the same single accepted A4500 and exact expanded runtime, plus a root-owned exact promoted Qwen3.5-4B binding and dedicated default-branch trusted workflow. model-acquire, cache-promote, production/scientific state, and gpu-heavy remain non-live/denied."
+    "activation_note": "Admission v2 remains live only for cpu-test, gpu-small, and model-eval-single-gpu. model-eval-dual-gpu is designed but not live: it is pinned to the exact promoted Qwen3.5-4B, the same immutable expanded runtime, execution profile gpu-heavy, and the exact two-A4500 UUID set. Generic gpu-heavy remains denied and the dual route is absent from live_enabled_workload_classes until host acceptance."
   },
   "expanded_runtime_bindings": {
     "gpu-small": {
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "canonical_path": "/srv/workspace-ci/research-engine/expanded-runtimes/qwen35-vllm-cu129-image-native-sampler-v3/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74",
+      "python_path": "/srv/workspace-ci/research-engine/expanded-runtimes/qwen35-vllm-cu129-image-native-sampler-v3/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74/bin/python",
+      "receipt_path": "/var/lib/workspace-ci/expanded-runtime-receipts/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74.json",
+      "tree_digest_sha256": "b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63",
+      "manifest_identity_sha256": "f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74",
+      "source_trusted_runtime_object": "/srv/workspace-ci/research-engine/trusted-cache/objects/runtime/sha256/23a47f27bdb6bec63955b901080fc0926cffee8cf081d010195613789bc5bbf4",
+      "required_controls": [
+        "root_owned_no_write_bits",
+        "private_systemd_mount_namespace",
+        "read_only_bind",
+        "no_new_privileges",
+        "restrict_suid_sgid",
+        "device_policy_closed",
+        "job_local_mutable_caches"
+      ]
+    },
+    "gpu-heavy": {
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
       "canonical_path": "/srv/workspace-ci/research-engine/expanded-runtimes/qwen35-vllm-cu129-image-native-sampler-v3/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74",
       "python_path": "/srv/workspace-ci/research-engine/expanded-runtimes/qwen35-vllm-cu129-image-native-sampler-v3/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74/bin/python",
