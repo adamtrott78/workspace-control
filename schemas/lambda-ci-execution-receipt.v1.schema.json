@@ -95,7 +95,8 @@
         "gpu-small",
         "model-acquire",
         "cache-promote",
-        "model-eval-single-gpu"
+        "model-eval-single-gpu",
+        "model-eval-dual-gpu"
       ]
     },
     "execution_profile": {
