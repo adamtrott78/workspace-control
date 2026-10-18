@@ -22,6 +22,14 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         source = (ROOT / "scripts" / "lambda_ci_cuda_oom_probe.py").read_text()
         compile(source, "lambda_ci_cuda_oom_probe.py", "exec")
 
+    def test_trusted_dual_failure_probe_sources_compile_without_execution(self):
+        for name in (
+            "lambda_ci_dual_timeout_probe.py",
+            "lambda_ci_dual_cuda_oom_probe.py",
+        ):
+            source = (ROOT / "scripts" / name).read_text()
+            compile(source, name, "exec")
+
     def gpu_spec(self):
         return {
             "unit_name": "workspace-ci-research-engine-test.service",
@@ -85,6 +93,50 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
                     "job_local_mutable_caches",
                 ],
             },
+        }
+
+    def dual_gpu_spec(self):
+        spec = self.gpu_spec()
+        spec["profile"] = "gpu-heavy"
+        spec["workload_class"] = "model-eval-dual-gpu"
+        spec["resources"] = {
+            **spec["resources"],
+            "cpu_quota_percent": 2400,
+            "memory_max_bytes": 206158430208,
+            "tasks_max": 16384,
+            "runtime_max_seconds": 5,
+            "gpu_indices": [0, 1],
+            "gpu_uuid": None,
+            "gpu_uuids": [
+                "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+                "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+            ],
+        }
+        spec["model_binding"] = {
+            "model_id": "qwen3.5-4b",
+            "repository": "Qwen/Qwen3.5-4B",
+            "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+            "object_id": "6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c",
+            "object_path": (
+                "/srv/workspace-ci/research-engine/trusted-cache/objects/model/sha256/"
+                "6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c"
+            ),
+        }
+        return spec
+
+    def dual_assignment(self):
+        first = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+        second = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
+        return {
+            "target_uuid": first,
+            "selected_device": "/dev/nvidia1",
+            "selected_minor": 1,
+            "target_uuids": [first, second],
+            "selected_devices": ["/dev/nvidia1", "/dev/nvidia0"],
+            "selected_minors": [1, 0],
+            "denied_devices": [],
+            "support_devices": ["/dev/nvidia-uvm", "/dev/nvidia-uvm-tools"],
+            "inventory": [],
         }
 
     def assignment(self):
@@ -466,6 +518,123 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
             command,
         )
         self.assertNotIn("/bin/bash", command)
+
+    def test_dual_timeout_probe_binding_is_gpu_heavy_root_only(self):
+        spec = self.dual_gpu_spec()
+        spec["trusted_failure_probe"] = {
+            "kind": runtime.TRUSTED_DUAL_TIMEOUT_PROBE_KIND,
+            "authority": runtime.TRUSTED_FAILURE_PROBE_AUTHORITY,
+            "path": str(runtime.TRUSTED_DUAL_TIMEOUT_PROBE_PATH),
+            "source_blob_sha": "e" * 40,
+            "expected_exit_code": runtime.TRUSTED_DUAL_TIMEOUT_PROBE_EXIT,
+        }
+
+        original = runtime.trusted_probe_file_identity
+        runtime.trusted_probe_file_identity = lambda path: {
+            "regular": True,
+            "uid": 0,
+            "gid": 0,
+            "mode": 0o555,
+            "source_blob_sha": "e" * 40,
+        }
+        try:
+            binding = runtime.verify_trusted_failure_probe_binding(spec)
+            self.assertEqual(
+                binding["kind"],
+                runtime.TRUSTED_DUAL_TIMEOUT_PROBE_KIND,
+            )
+
+            single = self.gpu_spec()
+            single["trusted_failure_probe"] = dict(spec["trusted_failure_probe"])
+            with self.assertRaisesRegex(
+                runtime.RuntimeLaunchError,
+                "not accepted for profile gpu-small",
+            ):
+                runtime.verify_trusted_failure_probe_binding(single)
+        finally:
+            runtime.trusted_probe_file_identity = original
+
+    def test_dual_cuda_oom_probe_terminal_evidence_requires_exit_86(self):
+        binding = {
+            "available": True,
+            "kind": runtime.TRUSTED_DUAL_CUDA_OOM_PROBE_KIND,
+            "authority": runtime.TRUSTED_FAILURE_PROBE_AUTHORITY,
+            "path": str(runtime.TRUSTED_DUAL_CUDA_OOM_PROBE_PATH),
+            "source_blob_sha": "f" * 40,
+            "expected_exit_code": runtime.TRUSTED_DUAL_CUDA_OOM_PROBE_EXIT,
+        }
+        evidence = runtime.trusted_cuda_oom_probe_terminal_evidence(
+            binding,
+            {
+                "available": True,
+                "result": "exit-code",
+                "exec_main_code": "1",
+                "exec_main_status": "86",
+            },
+        )
+        self.assertTrue(evidence["matched"])
+
+    def test_dual_failure_probe_command_keeps_exact_two_gpu_boundary(self):
+        spec = self.dual_gpu_spec()
+        binding = {
+            "available": True,
+            "kind": runtime.TRUSTED_DUAL_TIMEOUT_PROBE_KIND,
+            "authority": runtime.TRUSTED_FAILURE_PROBE_AUTHORITY,
+            "path": str(runtime.TRUSTED_DUAL_TIMEOUT_PROBE_PATH),
+            "source_blob_sha": "a" * 40,
+            "expected_exit_code": runtime.TRUSTED_DUAL_TIMEOUT_PROBE_EXIT,
+        }
+        command = runtime.build_trusted_failure_probe_systemd_command(
+            spec,
+            pathlib.Path("/tmp/runner"),
+            pathlib.Path("/tmp/staging"),
+            "134.88.12.0/22",
+            self.dual_assignment(),
+            binding,
+        )
+
+        self.assertIn("DeviceAllow=/dev/nvidia1 rw", command)
+        self.assertIn("DeviceAllow=/dev/nvidia0 rw", command)
+        self.assertIn(
+            "Environment=CUDA_VISIBLE_DEVICES="
+            "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea,"
+            "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+            command,
+        )
+        self.assertIn("ProcSubset=all", command)
+        self.assertIn(
+            "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK",
+            command,
+        )
+        self.assertEqual(
+            command[-2:],
+            [
+                spec["runtime_binding"]["python_path"],
+                str(runtime.TRUSTED_DUAL_TIMEOUT_PROBE_PATH),
+            ],
+        )
+
+    def test_systemd_runtime_timeout_classifier(self):
+        self.assertTrue(
+            runtime.systemd_proves_runtime_timeout(
+                {
+                    "available": True,
+                    "result": "timeout",
+                    "exec_main_code": "2",
+                    "exec_main_status": "9",
+                }
+            )
+        )
+        self.assertFalse(
+            runtime.systemd_proves_runtime_timeout(
+                {
+                    "available": True,
+                    "result": "exit-code",
+                    "exec_main_code": "1",
+                    "exec_main_status": "86",
+                }
+            )
+        )
 
     def test_expanded_runtime_tree_digest_uses_binary_separators(self):
         with tempfile.TemporaryDirectory() as tmp:
