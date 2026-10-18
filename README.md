@@ -39,7 +39,8 @@ For workspace-level work:
 2. read `architecture/control-plane-v2.md` for v2 architecture work;
 3. read `policies/PORTABILITY_CONTRACT.md`;
 4. read `policies/OPERATOR_WORKFLOW.md` when execution, mutation, Git, runtime,
-   artifact validation, or task-transition routing is involved;
+   artifact validation, or task-transition routing is involved, and always
+   before emitting or requesting execution of a `HUMAN_TERMINAL` shell block;
 5. read `policies/TUTORING_CONTRACT.md` when building or operating a
    repository-backed course tutor;
 6. inspect `repos.json`;

@@ -337,30 +337,61 @@ perform it.
 Commands intended for a user to paste into an **existing interactive shell or SSH
 session MUST NOT change failure-control options in that parent shell**.
 
-In particular, do not emit a block whose first operation is:
+For substantial or fail-capable `HUMAN_TERMINAL` operations, the canonical
+assistant-generated copy/paste form is a heredoc-fed child Bash:
 
 ```bash
-set -e
-set -euo pipefail
-```
+if bash <<'BASH'
+set -Eeuo pipefail
+umask 077
 
-when the block is expected to run directly in the user's current interactive
-shell. A later noncritical command failure can terminate that shell and, over
-SSH, disconnect the session.
-
-For bounded fail-fast execution, run the body in a child shell instead:
-
-```bash
-bash -lc '
-set -euo pipefail
 # bounded commands
-'
-rc=$?
-echo "COMMAND_BLOCK_RC=$rc"
+BASH
+then
+  echo "COMMAND_BLOCK=PASS"
+else
+  rc=$?
+  echo "COMMAND_BLOCK=FAILED rc=$rc"
+fi
 ```
 
-or use an equivalent subshell/function whose shell options do not leak into the
-parent interactive session.
+This is a structural safety boundary:
+
+- strict mode belongs inside the child Bash, not the parent login shell;
+- ordinary child failure returns control to the parent shell;
+- top-level `exit`, `logout`, or `exec` MUST NOT be emitted outside the
+  child execution context;
+- an `exit` used intentionally inside the child is allowed because it cannot
+  terminate the parent SSH session;
+- the child result SHOULD be surfaced through its return code and a concise
+  operation-specific PASS/FAILED marker.
+
+Session preservation is implicit in this structure. A literal
+`echo "SSH_SESSION=PRESERVED"` marker is **not required** and SHOULD NOT be
+emitted merely as a convention.
+
+For repository-dependent operations, establish and verify repository context
+inside the same child shell before privileged execution. As applicable, verify
+the exact repository root, expected ref/SHA, cleanliness or reviewed dirty state,
+and intended mutation scope before crossing a `sudo` boundary.
+
+When a bounded operation requires privileged commands:
+
+- use narrowly scoped `sudo <command>` / `sudo env ... <command>` rather than
+  an unnecessary persistent root shell;
+- when password refresh may be needed, perform `sudo -v` before the critical
+  section;
+- cleanup traps that run after authentication SHOULD use `sudo -n` so cleanup
+  cannot unexpectedly block for interactive credential input;
+- do not assume a tracked shell script is executable: when the tracked mode is
+  non-executable (for example `100644`), invoke it explicitly with
+  `bash path/to/script.sh`.
+
+A quote-dense `bash -lc '...'` child or an explicit subshell can still be valid
+when required by a specific owning procedure, but generated human-terminal
+blocks SHOULD prefer the heredoc form above because it keeps multiline commands,
+quotes, embedded Python, and nested here-documents intact without leaking shell
+options into the parent.
 
 Rules:
 
@@ -370,11 +401,10 @@ Rules:
   MUST NOT erase evidence of the successful mutation;
 - after any failure, inspect durable state before retrying a mutation;
 - when the child exits nonzero, print/return the exit status and relevant
-  evidence instead of relying on the SSH session disappearing as a failure
-  signal.
+  evidence instead of relying on shell/session termination as a failure signal.
 
 Noninteractive scripts executed as their own process MAY use
-`set -euo pipefail` normally because their exit does not terminate the user's
+`set -Eeuo pipefail` normally because their exit does not terminate the user's
 parent interactive shell.
 
 ## Scratch and human-transfer artifacts
@@ -385,7 +415,7 @@ need to locate, upload, inspect, or carry across executor boundaries.
 When an operation will produce a file the user must access, prefer the shared
 workspace scratch root:
 
-`~/adamArchives/Adam/.workspace-control/tmp`
+`~/adamArchives/Adam/workspace-control-tmp`
 
 Executors SHOULD honor `WORKSPACE_CONTROL_SCRATCH_ROOT` when set; otherwise the
 workspace path above is the default for this environment.
@@ -410,8 +440,7 @@ If a command is supplied for human execution:
 - every shell line must visibly remain inside one code fence;
 - embedded Markdown fences must not terminate the outer command block;
 - the user should not reconstruct a broken command from prose;
-- large strict-mode operations should run inside a child `bash`, subshell, or
-  tracked script.
+- substantial strict-mode operations SHOULD use the canonical `if bash <<'BASH' ... BASH` child-shell wrapper above, or a tracked script when the operation is reusable.
 
 Do not enable `set -e` or `set -euo pipefail` directly in a long-lived SSH
 login shell for a large assistant-supplied operation.

@@ -7,7 +7,9 @@ For workspace-control tasks:
 1. Start with `README.md`.
 2. Read `policies/PORTABILITY_CONTRACT.md`.
 3. Read `policies/OPERATOR_WORKFLOW.md` when execution, mutation, Git,
-   runtime, validation, or task-transition routing is involved.
+   runtime, validation, or task-transition routing is involved. This read is
+   mandatory before emitting or requesting execution of any `HUMAN_TERMINAL`
+   shell block.
 4. Inspect `repos.json`.
 5. Read only the relevant procedure under `procedures/`.
 6. When durable task state is involved, read `procedures/task_capsule.md`
