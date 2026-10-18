@@ -172,10 +172,32 @@ def _validated_route(
     profile_gpu_indices = profile.get("gpu_indices", [])
     if gpu_count != len(profile_gpu_indices):
         raise AdmissionError("workload GPU count does not match the project profile")
-    if gpu_count:
-        resource_uuids = resource_class.get("gpu_uuids", [])
-        if resource_uuids != [profile.get("gpu_uuid")]:
-            raise AdmissionError("workload GPU UUID does not match the project profile")
+
+    resource_uuids = resource_class.get("gpu_uuids", [])
+    if not isinstance(resource_uuids, list):
+        raise AdmissionError("workload GPU UUID binding must be a list")
+    if any(not isinstance(value, str) or not value for value in resource_uuids):
+        raise AdmissionError("workload GPU UUID binding contains an invalid UUID")
+    if len({value.lower() for value in resource_uuids}) != len(resource_uuids):
+        raise AdmissionError("workload GPU UUID binding contains duplicates")
+
+    profile_uuids = profile.get("gpu_uuids")
+    if profile_uuids is None:
+        single_uuid = profile.get("gpu_uuid")
+        profile_uuids = [single_uuid] if single_uuid is not None else []
+    if not isinstance(profile_uuids, list):
+        raise AdmissionError("project profile GPU UUID binding must be a list")
+    if any(not isinstance(value, str) or not value for value in profile_uuids):
+        raise AdmissionError("project profile GPU UUID binding contains an invalid UUID")
+    if len({value.lower() for value in profile_uuids}) != len(profile_uuids):
+        raise AdmissionError("project profile GPU UUID binding contains duplicates")
+
+    if len(resource_uuids) != gpu_count:
+        raise AdmissionError("workload GPU UUID count does not match resource class")
+    if len(profile_uuids) != gpu_count:
+        raise AdmissionError("project profile GPU UUID count does not match GPU count")
+    if resource_uuids != profile_uuids:
+        raise AdmissionError("workload GPU UUIDs do not match the project profile")
 
     return admission_cfg, route, workload
 

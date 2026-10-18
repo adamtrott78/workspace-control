@@ -65,6 +65,9 @@ def test_gpu_small_launch_spec_carries_stable_uuid_and_bounded_runtime():
     assert launch["profile"] == "gpu-small"
     assert launch["resources"]["gpu_indices"] == [0]
     assert launch["resources"]["gpu_uuid"] == "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+    assert launch["resources"]["gpu_uuids"] == [
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+    ]
     assert launch["resources"]["runtime_max_seconds"] == 1200
     assert launch["allow_production_services"] is False
     assert "trusted_failure_probe" not in launch
@@ -410,6 +413,51 @@ def test_v2_model_eval_binds_exact_promoted_model_and_runtime():
     assert "IPAddressDeny=::1/128" in command
     assert "IPAddressDeny=10.0.0.0/8" in command
     assert "IPAddressDeny=192.168.0.0/16" in command
+
+
+def test_v2_exact_dual_uuid_set_can_be_carried_only_when_root_policy_and_profile_match():
+    manifest = enabled_v2_manifest()
+    policy = copy.deepcopy(WORKLOAD_POLICY)
+
+    second_uuid = "GPU-22222222-3333-4444-5555-666666666666"
+    dual_uuids = [
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+        second_uuid,
+    ]
+
+    manifest["profiles"]["gpu-heavy"]["gpu_uuids"] = dual_uuids
+    manifest["expanded_runtime_bindings"]["gpu-heavy"] = copy.deepcopy(
+        manifest["expanded_runtime_bindings"]["gpu-small"]
+    )
+    manifest["admission_v2"]["routes"]["model-eval-single-gpu"][
+        "execution_profile"
+    ] = "gpu-heavy"
+
+    policy["resource_classes"]["dual_gpu_test_v1"] = {
+        "execution_profile": "gpu-heavy",
+        "max_runtime_seconds": 1200,
+        "scratch_max_bytes": 17179869184,
+        "staging_max_bytes": 0,
+        "gpu_count": 2,
+        "gpu_uuids": dual_uuids,
+    }
+    policy["workload_classes"]["model-eval-single-gpu"][
+        "resource_class"
+    ] = "dual_gpu_test_v1"
+
+    req = mod.validate_request_v2(
+        good_v2_request("model-eval-single-gpu"),
+        manifest,
+        policy,
+        now=V2_NOW,
+    )
+    assert req.profile == "gpu-heavy"
+    assert req.admission["resource_ceiling"]["gpu_uuids"] == dual_uuids
+
+    launch = mod.build_launch_spec(req, manifest, PROFILES, PINS)
+    assert launch["resources"]["gpu_indices"] == [0, 1]
+    assert launch["resources"]["gpu_uuid"] is None
+    assert launch["resources"]["gpu_uuids"] == dual_uuids
 
 
 def test_v2_gpu_small_remains_model_forbidden():

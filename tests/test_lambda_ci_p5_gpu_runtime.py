@@ -131,6 +131,67 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         self.assertIn("IPAddressDeny=134.88.12.0/22", command)
         self.assertIn("RuntimeMaxSec=1200s", command)
 
+    def test_dual_gpu_command_renders_exact_two_device_uuid_set(self):
+        first_uuid = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+        second_uuid = "GPU-22222222-3333-4444-5555-666666666666"
+
+        spec = self.gpu_spec()
+        spec["profile"] = "gpu-heavy"
+        spec["resources"]["gpu_indices"] = [0, 1]
+        spec["resources"]["gpu_uuid"] = None
+        spec["resources"]["gpu_uuids"] = [first_uuid, second_uuid]
+
+        assignment = {
+            "target_uuids": [first_uuid, second_uuid],
+            "selected_devices": ["/dev/nvidia1", "/dev/nvidia0"],
+            "selected_minors": [1, 0],
+            "denied_devices": [],
+            "support_devices": ["/dev/nvidia-uvm", "/dev/nvidia-uvm-tools"],
+            "inventory": [],
+        }
+
+        command = runtime.build_gpu_systemd_command(
+            spec,
+            pathlib.Path("/srv/workspace-ci/research-engine/jobs/p5-dual/runner"),
+            pathlib.Path(
+                "/srv/workspace-ci/research-engine/staging-cache/p5-dual"
+            ),
+            "134.88.12.0/22",
+            assignment,
+        )
+
+        self.assertIn("DeviceAllow=/dev/nvidia1 rw", command)
+        self.assertIn("DeviceAllow=/dev/nvidia0 rw", command)
+        self.assertEqual(
+            command.count("DeviceAllow=/dev/nvidia1 rw"),
+            1,
+        )
+        self.assertEqual(
+            command.count("DeviceAllow=/dev/nvidia0 rw"),
+            1,
+        )
+        self.assertIn(
+            f"Environment=CUDA_VISIBLE_DEVICES={first_uuid},{second_uuid}",
+            command,
+        )
+        self.assertIn(
+            f"Environment=P5_GPU_TARGET_UUIDS={first_uuid},{second_uuid}",
+            command,
+        )
+        self.assertIn(
+            "Environment=P5_GPU_SELECTED_DEVICES=/dev/nvidia1,/dev/nvidia0",
+            command,
+        )
+        self.assertIn("Environment=P5_GPU_DENIED_DEVICES=", command)
+
+    def test_gpu_heavy_dispatch_remains_rejected_while_nonlive(self):
+        with self.assertRaisesRegex(
+            runtime.RuntimeLaunchError,
+            "autonomous profile rejected: gpu-heavy",
+        ):
+            runtime.launch_runner(None, {"profile": "gpu-heavy"})
+
+
     def test_trusted_cuda_oom_probe_binding_requires_exact_root_identity(self):
         spec = self.gpu_spec()
         spec["trusted_failure_probe"] = {
