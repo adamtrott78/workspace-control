@@ -133,7 +133,7 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
 
     def test_dual_gpu_command_renders_exact_two_device_uuid_set(self):
         first_uuid = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
-        second_uuid = "GPU-22222222-3333-4444-5555-666666666666"
+        second_uuid = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
 
         spec = self.gpu_spec()
         spec["profile"] = "gpu-heavy"
