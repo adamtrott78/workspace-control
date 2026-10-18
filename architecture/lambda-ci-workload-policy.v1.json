@@ -334,8 +334,8 @@
       "denial_reason": "dual-GPU authority requires a separate post-pilot acceptance gate"
     },
     "model-eval-dual-gpu": {
-      "policy_decision": "DESIGNED_NOT_LIVE",
-      "admission_enabled_after_enforcement": false,
+      "policy_decision": "EXISTING_P5_CAPABILITY",
+      "admission_enabled_after_enforcement": true,
       "execution_plane": "jit_runner",
       "candidate_payload_allowed": true,
       "resource_class": "model_eval_dual_gpu_v1",
@@ -347,7 +347,7 @@
       "model_binding": "REQUIRED_PROMOTED_EXACT",
       "runtime_binding": "REQUIRED_EXPANDED_RUNTIME_EXACT",
       "model_registry_credential_forbidden": true,
-      "activation_gate": "EXACT_TWO_GPU_HOST_ACCEPTANCE_REQUIRED"
+      "activation_gate": "DUAL_HOST_FAILURE_GATES_REQUIRED_BEFORE_MERGE"
     }
   },
   "project_bindings": {
