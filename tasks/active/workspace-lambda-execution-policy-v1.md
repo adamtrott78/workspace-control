@@ -36,12 +36,16 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Resume final root acceptance for successful single-GPU Qwen request df8739fd-f7fa-5c34-8606-793099116668 from the admission-identity assertion only; do not rerun the model, reinstall, or repeat already-passed root receipt checks. The prior acceptance harness reached line 86 after all earlier root receipt assertions passed and failed only because it incorrectly expected admission_identity.resource_class == 'gpu-small'. Canonical workload policy binds model-eval-single-gpu to resource_class 'model_eval_single_gpu_v1' while execution_profile remains 'gpu-small'. Validate remaining receipt admission identity with resource_class=model_eval_single_gpu_v1, then validate durable provisioner state/result, absent job/staging directories, no ci-research-engine CPU/GPU residue, no lane quarantine, and provisioner/CPU/GPU controllers active with NRestarts=0. If all PASS, mark qwen35_model_eval_pilot VALIDATED, close the inert candidate PR #118 if appropriate, and move immediately to explicit gpu-heavy/dual-GPU design and acceptance without rerunning the accepted single-GPU pilot.
+Begin dual-GPU implementation while live gpu-heavy remains DENY. First capture the exact host inventory for both RTX A4500 devices (index, UUID, name, memory, PCI bus ID) so the second GPU can be bound by UUID rather than index. In parallel, implement non-live two-GPU support on a workspace-control branch: define a dual-GPU resource class and separate model-eval-dual-gpu workload/claim; generalize root GPU assignment/DeviceAllow/CUDA_VISIBLE_DEVICES/receipt code from one exact UUID to an exact ordered/set-validated two-UUID allocation; preserve existing gpu-small/model-eval-single-gpu behavior byte-for-byte semantically; keep generic gpu-heavy model_binding forbidden and admission disabled until acceptance. Require FULL_INTEGRATION before any host install. No single-GPU pilot rerun is authorized.
 
 ## Remaining work
 
-- Run and accept the first offline Qwen3.5-4B pinned-model pilot on gpu-small using one synthetic non-scientific image+text inference.
-- After the pilot is accepted, decide separately whether gpu-heavy or dual-GPU should ever be accepted; they remain denied.
+- Bind the exact second RTX A4500 UUID and freeze the two-GPU hardware identity set; do not use GPU indices alone as authority.
+- Implement dual-GPU admission/provisioner/runtime support behind a new exact resource class while keeping current gpu-heavy DENY live policy unchanged.
+- Keep generic gpu-heavy model access forbidden; introduce a separate model-eval-dual-gpu authority for promoted-model tensor-parallel work.
+- Validate two-device allocation, wrong/missing UUID denial, preexisting residue denial/quarantine, timeout/cancel cleanup, CUDA OOM behavior, runtime/model identity failure, and exact pre/post receipts.
+- Run one bounded non-scientific Qwen tensor_parallel_size=2 image+text canary proving both A4500s are actually used and fully cleaned up.
+- Only after all dual-GPU acceptance gates pass, decide whether to activate bounded gpu-heavy/model-eval-dual-gpu authority.
 
 ## Blockers / gates
 
