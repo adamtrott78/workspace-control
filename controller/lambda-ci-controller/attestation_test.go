@@ -191,6 +191,30 @@ func TestModelEvalAdmissionCommandAndClaimAreExact(t *testing.T) {
 	}
 }
 
+func TestDualModelEvalAdmissionCommandAndClaimAreExact(t *testing.T) {
+	command, err := requestCommandForWorkload(dualModelEvalWorkload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if command != "/lambda-ci-qwen35-dual-pilot" {
+		t.Fatalf("unexpected dual model-eval command %q", command)
+	}
+
+	display := "wc-admission-v1|workload=model-eval-dual-gpu|pr=101|" +
+		"request=/lambda-ci-qwen35-dual-pilot " + testCandidateSHA
+	pr, sha, err := parseAdmissionDisplayClaim(
+		display,
+		dualModelEvalWorkload,
+		command,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pr != 101 || sha != testCandidateSHA {
+		t.Fatalf("unexpected dual model-eval claim pr=%d sha=%s", pr, sha)
+	}
+}
+
 func TestGitHubAttestorBindsRunBlobAndOpenPRHead(t *testing.T) {
 	attestor := fakeGitHubAttestor(t, nil)
 	att, err := attestor.Attest(
