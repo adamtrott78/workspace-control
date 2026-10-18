@@ -24,7 +24,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: b1217e296ca939e344b619db474822f9ce611b82
+- Remote checkpoint: cab67e1f5afa231b9cde59adb808ffe98cd1c8cf
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Begin dual-GPU implementation while live gpu-heavy remains DENY. First capture the exact host inventory for both RTX A4500 devices (index, UUID, name, memory, PCI bus ID) so the second GPU can be bound by UUID rather than index. In parallel, implement non-live two-GPU support on a workspace-control branch: define a dual-GPU resource class and separate model-eval-dual-gpu workload/claim; generalize root GPU assignment/DeviceAllow/CUDA_VISIBLE_DEVICES/receipt code from one exact UUID to an exact ordered/set-validated two-UUID allocation; preserve existing gpu-small/model-eval-single-gpu behavior byte-for-byte semantically; keep generic gpu-heavy model_binding forbidden and admission disabled until acceptance. Require FULL_INTEGRATION before any host install. No single-GPU pilot rerun is authorized.
+Capture the exact two-GPU host inventory read-only before any further policy implementation: nvidia-smi index, UUID, name, memory.total, pci.bus_id plus root NVIDIA information/device-minor mapping for both devices. The already accepted single GPU UUID is GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea; bind the second A4500 by exact UUID and verify the two UUIDs map one-to-one to the two /dev/nvidia minors. Do not install cab67e1f5afa231b9cde59adb808ffe98cd1c8cf on the host solely for inventory discovery and do not enable gpu-heavy. Once the second UUID is known, implement a separate model_eval_dual_gpu_v1 resource/workload and trusted dual-GPU workflow/claim on top of the validated non-live plumbing, while generic gpu-heavy remains model-forbidden/denied until its own acceptance decision. Then require FULL_INTEGRATION before any host install.
 
 ## Remaining work
 
