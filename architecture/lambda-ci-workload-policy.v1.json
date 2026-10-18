@@ -416,7 +416,7 @@
         "tensor_parallel_size": 2,
         "scientific": false,
         "production_routing_change": false,
-        "activation_status": "DESIGNED_NOT_LIVE"
+        "activation_status": "LIVE_BOUNDED_AFTER_HOST_ACCEPTANCE"
       }
     }
   },
