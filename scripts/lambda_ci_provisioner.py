@@ -211,6 +211,11 @@ def build_launch_spec(
             if not isinstance(model_binding, dict):
                 raise PolicyError("admitted workload promoted model binding is missing")
 
+    profile_gpu_uuids = project_profile.get("gpu_uuids")
+    if profile_gpu_uuids is None:
+        single_gpu_uuid = project_profile.get("gpu_uuid")
+        profile_gpu_uuids = [single_gpu_uuid] if single_gpu_uuid is not None else []
+
     # This is a declarative spec consumed only by the privileged launcher.
     # The only secret is jit_config_env_value; callers must not log/serialize it.
     return {
@@ -248,6 +253,7 @@ def build_launch_spec(
             "runtime_max_seconds": project_profile["runtime_max_seconds"],
             "gpu_indices": project_profile["gpu_indices"],
             "gpu_uuid": project_profile.get("gpu_uuid"),
+            "gpu_uuids": list(profile_gpu_uuids),
         },
         "systemd_common": profiles["common"],
         "systemd_profile": systemd_profile,
