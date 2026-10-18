@@ -12,6 +12,7 @@ RECEIPT_SCHEMA_PATH = ROOT / "schemas" / "lambda-ci-execution-receipt.v1.schema.
 QWEN_REVISION = "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
 QWEN_RUNTIME = "qwen35-vllm-cu129-image-native-sampler-v3"
 GPU_UUID = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+GPU_UUID_2 = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
 
 
 class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
@@ -33,7 +34,7 @@ class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
     def test_exact_workload_taxonomy_and_gpu_heavy_denial(self):
         expected = {
             "cpu-test", "gpu-small", "model-acquire", "cache-promote",
-            "model-eval-single-gpu", "gpu-heavy",
+            "model-eval-single-gpu", "model-eval-dual-gpu", "gpu-heavy",
         }
         self.assertEqual(set(self.policy["workload_classes"]), expected)
         heavy = self.policy["workload_classes"]["gpu-heavy"]
@@ -98,6 +99,34 @@ class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
         self.assertEqual(resources["gpu_count"], 1)
         self.assertEqual(resources["gpu_uuids"], [GPU_UUID])
         self.assertEqual(resources["staging_max_bytes"], 0)
+
+    def test_dual_model_eval_is_exact_two_gpu_and_designed_not_live(self):
+        dual = self.policy["workload_classes"]["model-eval-dual-gpu"]
+        self.assertEqual(dual["policy_decision"], "DESIGNED_NOT_LIVE")
+        self.assertFalse(dual["admission_enabled_after_enforcement"])
+        self.assertEqual(dual["resource_class"], "model_eval_dual_gpu_v1")
+        self.assertEqual(dual["model_binding"], "REQUIRED_PROMOTED_EXACT")
+        self.assertEqual(dual["runtime_binding"], "REQUIRED_EXPANDED_RUNTIME_EXACT")
+        self.assertTrue(dual["model_registry_credential_forbidden"])
+
+        resources = self.policy["resource_classes"]["model_eval_dual_gpu_v1"]
+        self.assertEqual(resources["execution_profile"], "gpu-heavy")
+        self.assertEqual(resources["gpu_count"], 2)
+        self.assertEqual(resources["gpu_uuids"], [GPU_UUID, GPU_UUID_2])
+        self.assertEqual(resources["max_runtime_seconds"], 1800)
+
+        binding = self.policy["project_bindings"]["research-engine"]
+        self.assertIn("model-eval-dual-gpu", binding["allowed_workload_classes"])
+        self.assertEqual(binding["denied_workload_classes"], ["gpu-heavy"])
+        self.assertEqual(
+            binding["dual_gpu_model_eval"]["gpu_uuids"],
+            [GPU_UUID, GPU_UUID_2],
+        )
+        self.assertEqual(binding["dual_gpu_model_eval"]["tensor_parallel_size"], 2)
+        self.assertEqual(
+            binding["dual_gpu_model_eval"]["activation_status"],
+            "DESIGNED_NOT_LIVE",
+        )
 
     def test_qwen_first_pilot_is_exact_and_non_scientific(self):
         binding = self.policy["project_bindings"]["research-engine"]
