@@ -51,6 +51,17 @@ TRUSTED_CUDA_OOM_PROBE_PATH = pathlib.Path(
 TRUSTED_CUDA_OOM_PROBE_KIND = "cuda_oom_acceptance_v1"
 TRUSTED_CUDA_OOM_PROBE_AUTHORITY = "ROOT_SYNTHETIC_CANARY_ONLY"
 TRUSTED_CUDA_OOM_PROBE_EXIT = 86
+TRUSTED_DUAL_TIMEOUT_PROBE_PATH = pathlib.Path(
+    "/opt/workspace-ci/provisioner/trusted-probes/lambda_ci_dual_timeout_probe.py"
+)
+TRUSTED_DUAL_TIMEOUT_PROBE_KIND = "dual_gpu_timeout_acceptance_v1"
+TRUSTED_DUAL_TIMEOUT_PROBE_EXIT = 0
+TRUSTED_DUAL_CUDA_OOM_PROBE_PATH = pathlib.Path(
+    "/opt/workspace-ci/provisioner/trusted-probes/lambda_ci_dual_cuda_oom_probe.py"
+)
+TRUSTED_DUAL_CUDA_OOM_PROBE_KIND = "dual_gpu_cuda_oom_acceptance_v1"
+TRUSTED_DUAL_CUDA_OOM_PROBE_EXIT = 86
+TRUSTED_FAILURE_PROBE_AUTHORITY = "ROOT_SYNTHETIC_CANARY_ONLY"
 TRUSTED_CACHE_MANAGER_PATH = pathlib.Path(
     "/opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py"
 )
@@ -724,15 +735,30 @@ def trusted_probe_file_identity(path: pathlib.Path) -> dict[str, object]:
     }
 
 
-def verify_trusted_cuda_oom_probe_binding(
+def trusted_failure_probe_contracts() -> dict[str, dict[str, object]]:
+    return {
+        TRUSTED_CUDA_OOM_PROBE_KIND: {
+            "path": TRUSTED_CUDA_OOM_PROBE_PATH,
+            "expected_exit_code": TRUSTED_CUDA_OOM_PROBE_EXIT,
+            "profiles": {"gpu-small"},
+        },
+        TRUSTED_DUAL_TIMEOUT_PROBE_KIND: {
+            "path": TRUSTED_DUAL_TIMEOUT_PROBE_PATH,
+            "expected_exit_code": TRUSTED_DUAL_TIMEOUT_PROBE_EXIT,
+            "profiles": {"gpu-heavy"},
+        },
+        TRUSTED_DUAL_CUDA_OOM_PROBE_KIND: {
+            "path": TRUSTED_DUAL_CUDA_OOM_PROBE_PATH,
+            "expected_exit_code": TRUSTED_DUAL_CUDA_OOM_PROBE_EXIT,
+            "profiles": {"gpu-heavy"},
+        },
+    }
+
+
+def verify_trusted_failure_probe_binding(
     spec: dict[str, Any],
 ) -> dict[str, object] | None:
-    """Verify an explicit root-only CUDA OOM acceptance probe binding.
-
-    Normal admitted launch specs never contain this binding. It is intended
-    solely for a root-authored synthetic host canary and cannot be derived from
-    candidate request fields.
-    """
+    """Verify a root-authored immutable synthetic failure probe binding."""
     binding = spec.get("trusted_failure_probe")
     if binding is None:
         return None
@@ -748,47 +774,69 @@ def verify_trusted_cuda_oom_probe_binding(
     }
     if set(binding) != required:
         raise RuntimeLaunchError("trusted failure probe binding keys drift")
-    if binding["kind"] != TRUSTED_CUDA_OOM_PROBE_KIND:
+
+    kind = str(binding.get("kind"))
+    contract = trusted_failure_probe_contracts().get(kind)
+    if contract is None:
         raise RuntimeLaunchError("trusted failure probe kind is not accepted")
-    if binding["authority"] != TRUSTED_CUDA_OOM_PROBE_AUTHORITY:
+    if binding["authority"] != TRUSTED_FAILURE_PROBE_AUTHORITY:
         raise RuntimeLaunchError("trusted failure probe authority is not accepted")
-    if binding["expected_exit_code"] != TRUSTED_CUDA_OOM_PROBE_EXIT:
-        raise RuntimeLaunchError("trusted CUDA OOM probe exit code drift")
+
+    expected_exit = int(contract["expected_exit_code"])
+    if binding["expected_exit_code"] != expected_exit:
+        raise RuntimeLaunchError("trusted failure probe exit code drift")
+
+    profile = str(spec.get("profile"))
+    if profile not in contract["profiles"]:
+        raise RuntimeLaunchError(
+            f"trusted failure probe kind {kind} is not accepted for profile {profile}"
+        )
 
     path = pathlib.Path(str(binding["path"]))
-    if path != TRUSTED_CUDA_OOM_PROBE_PATH:
-        raise RuntimeLaunchError("trusted CUDA OOM probe path drift")
+    if path != contract["path"]:
+        raise RuntimeLaunchError("trusted failure probe path drift")
 
     source_blob_sha = str(binding["source_blob_sha"])
     if len(source_blob_sha) != 40 or any(
         ch not in "0123456789abcdef" for ch in source_blob_sha
     ):
-        raise RuntimeLaunchError("trusted CUDA OOM probe source blob is invalid")
+        raise RuntimeLaunchError("trusted failure probe source blob is invalid")
 
     try:
         identity = trusted_probe_file_identity(path)
     except OSError as exc:
-        raise RuntimeLaunchError("trusted CUDA OOM probe is unavailable") from exc
+        raise RuntimeLaunchError("trusted failure probe is unavailable") from exc
     if identity["regular"] is not True:
-        raise RuntimeLaunchError("trusted CUDA OOM probe is not a regular file")
+        raise RuntimeLaunchError("trusted failure probe is not a regular file")
     if identity["uid"] != 0 or identity["gid"] != 0:
-        raise RuntimeLaunchError("trusted CUDA OOM probe is not root-owned")
+        raise RuntimeLaunchError("trusted failure probe is not root-owned")
     if int(identity["mode"]) & 0o222:
-        raise RuntimeLaunchError("trusted CUDA OOM probe is writable")
+        raise RuntimeLaunchError("trusted failure probe is writable")
 
     actual_blob_sha = str(identity["source_blob_sha"])
     if actual_blob_sha != source_blob_sha:
-        raise RuntimeLaunchError("trusted CUDA OOM probe source identity mismatch")
+        raise RuntimeLaunchError("trusted failure probe source identity mismatch")
 
     return {
         "available": True,
-        "kind": TRUSTED_CUDA_OOM_PROBE_KIND,
-        "authority": TRUSTED_CUDA_OOM_PROBE_AUTHORITY,
+        "kind": kind,
+        "authority": TRUSTED_FAILURE_PROBE_AUTHORITY,
         "path": str(path),
         "source_blob_sha": actual_blob_sha,
-        "expected_exit_code": TRUSTED_CUDA_OOM_PROBE_EXIT,
+        "expected_exit_code": expected_exit,
     }
 
+
+def verify_trusted_cuda_oom_probe_binding(
+    spec: dict[str, Any],
+) -> dict[str, object] | None:
+    """Backward-compatible single-GPU trusted CUDA OOM verifier."""
+    binding = verify_trusted_failure_probe_binding(spec)
+    if binding is None:
+        return None
+    if binding["kind"] != TRUSTED_CUDA_OOM_PROBE_KIND:
+        raise RuntimeLaunchError("trusted CUDA OOM probe kind is not accepted")
+    return binding
 
 def trusted_cuda_oom_probe_terminal_evidence(
     binding: dict[str, object] | None,
@@ -1112,17 +1160,14 @@ def build_gpu_systemd_command(
         insert_at += 2
     return command
 
-def build_trusted_cuda_oom_probe_systemd_command(
+def build_trusted_failure_probe_systemd_command(
     spec: dict[str, Any],
     runner_dir: pathlib.Path,
     staging_dir: pathlib.Path,
     subnet: str,
     assignment: dict[str, object],
+    binding: dict[str, object],
 ) -> list[str]:
-    binding = verify_trusted_cuda_oom_probe_binding(spec)
-    if binding is None:
-        raise RuntimeLaunchError("trusted CUDA OOM probe binding is required")
-
     command = build_gpu_systemd_command(
         spec,
         runner_dir,
@@ -1136,7 +1181,7 @@ def build_trusted_cuda_oom_probe_systemd_command(
     try:
         executable_index = command.index("/bin/bash")
     except ValueError as exc:
-        raise RuntimeLaunchError("gpu-small command executable boundary drift") from exc
+        raise RuntimeLaunchError("GPU command executable boundary drift") from exc
 
     command[executable_index:executable_index] = [
         "-p",
@@ -1149,6 +1194,25 @@ def build_trusted_cuda_oom_probe_systemd_command(
     ]
     return command
 
+
+def build_trusted_cuda_oom_probe_systemd_command(
+    spec: dict[str, Any],
+    runner_dir: pathlib.Path,
+    staging_dir: pathlib.Path,
+    subnet: str,
+    assignment: dict[str, object],
+) -> list[str]:
+    binding = verify_trusted_cuda_oom_probe_binding(spec)
+    if binding is None:
+        raise RuntimeLaunchError("trusted CUDA OOM probe binding is required")
+    return build_trusted_failure_probe_systemd_command(
+        spec,
+        runner_dir,
+        staging_dir,
+        subnet,
+        assignment,
+        binding,
+    )
 
 def _pump(stream, log) -> None:
     try:
@@ -1232,6 +1296,12 @@ def transient_unit_terminal_evidence(unit_name: str) -> dict[str, object]:
         evidence["exec_main_status"] = values.get("ExecMainStatus")
     run(["systemctl", "reset-failed", unit_name], check=False)
     return evidence
+
+
+def systemd_proves_runtime_timeout(
+    evidence: dict[str, object],
+) -> bool:
+    return evidence.get("result") == "timeout"
 
 
 def systemd_proves_cpu_or_ram_exhaustion(
@@ -1460,7 +1530,14 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             unit_terminal_evidence = transient_unit_terminal_evidence(
                 spec["unit_name"]
             )
-            if systemd_proves_cpu_or_ram_exhaustion(unit_terminal_evidence):
+            if systemd_proves_runtime_timeout(unit_terminal_evidence):
+                terminal_status = "TIMED_OUT"
+                timed_out = True
+                execution_error = RuntimeTimeoutError(
+                    "systemd reported bounded runtime timeout "
+                    f"unit={spec['unit_name']}"
+                )
+            elif systemd_proves_cpu_or_ram_exhaustion(unit_terminal_evidence):
                 terminal_status = "CPU_OR_RAM_RESOURCE_EXHAUSTED"
                 resource_exhausted = True
                 execution_error = RuntimeResourceExhaustedError(
@@ -1610,11 +1687,23 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
 
     runtime_pre = verify_expanded_runtime_binding(spec)
     model_pre = verify_promoted_model_binding(spec)
-    trusted_cuda_oom_probe = verify_trusted_cuda_oom_probe_binding(spec)
-    if profile == "gpu-heavy" and trusted_cuda_oom_probe is not None:
-        raise RuntimeLaunchError(
-            "dual-GPU CUDA OOM probe requires separate acceptance"
-        )
+    trusted_failure_probe = verify_trusted_failure_probe_binding(spec)
+    trusted_cuda_oom_probe = None
+    if trusted_failure_probe is not None:
+        probe_kind = trusted_failure_probe["kind"]
+        if probe_kind in {
+            TRUSTED_CUDA_OOM_PROBE_KIND,
+            TRUSTED_DUAL_CUDA_OOM_PROBE_KIND,
+        }:
+            trusted_cuda_oom_probe = trusted_failure_probe
+
+        if profile == "gpu-small" and probe_kind != TRUSTED_CUDA_OOM_PROBE_KIND:
+            raise RuntimeLaunchError("single-GPU profile received a dual failure probe")
+        if profile == "gpu-heavy" and probe_kind not in {
+            TRUSTED_DUAL_TIMEOUT_PROBE_KIND,
+            TRUSTED_DUAL_CUDA_OOM_PROBE_KIND,
+        }:
+            raise RuntimeLaunchError("dual-GPU profile received an unaccepted failure probe")
 
     runner_base, uid, gid = verify_foundation(spec)
     subnet = primary_subnet()
@@ -1654,7 +1743,7 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     console_log = logs_root / f"p5-{request_id}-runner.log"
     journal_log = logs_root / f"p5-{request_id}-journal.log"
     receipt_path = logs_root / f"p5-{request_id}-receipt.json"
-    if trusted_cuda_oom_probe is None:
+    if trusted_failure_probe is None:
         command = build_gpu_systemd_command(
             spec,
             runner_dir,
@@ -1663,12 +1752,13 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             assignment,
         )
     else:
-        command = build_trusted_cuda_oom_probe_systemd_command(
+        command = build_trusted_failure_probe_systemd_command(
             spec,
             runner_dir,
             staging_dir,
             subnet,
             assignment,
+            trusted_failure_probe,
         )
 
     result = "FAIL"
@@ -1760,7 +1850,14 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             unit_terminal_evidence = transient_unit_terminal_evidence(
                 spec["unit_name"]
             )
-            if systemd_proves_cpu_or_ram_exhaustion(unit_terminal_evidence):
+            if systemd_proves_runtime_timeout(unit_terminal_evidence):
+                terminal_status = "TIMED_OUT"
+                timed_out = True
+                execution_error = RuntimeTimeoutError(
+                    "systemd reported bounded runtime timeout "
+                    f"unit={spec['unit_name']}"
+                )
+            elif systemd_proves_cpu_or_ram_exhaustion(unit_terminal_evidence):
                 terminal_status = "CPU_OR_RAM_RESOURCE_EXHAUSTED"
                 resource_exhausted = True
                 execution_error = RuntimeResourceExhaustedError(
