@@ -131,6 +131,48 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         self.assertIn("IPAddressDeny=134.88.12.0/22", command)
         self.assertIn("RuntimeMaxSec=1200s", command)
 
+    def test_exact_uuid_order_resolves_inverted_device_minors(self):
+        first_uuid = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+        second_uuid = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
+        inventory = [
+            {
+                "uuid": second_uuid,
+                "minor": 0,
+                "device": "/dev/nvidia0",
+                "bus_location": "0000:41:00.0",
+                "model": "NVIDIA RTX A4500",
+            },
+            {
+                "uuid": first_uuid,
+                "minor": 1,
+                "device": "/dev/nvidia1",
+                "bus_location": "0000:2d:00.0",
+                "model": "NVIDIA RTX A4500",
+            },
+        ]
+
+        original = runtime.nvidia_gpu_inventory
+        runtime.nvidia_gpu_inventory = lambda: inventory
+        try:
+            assignment = runtime.resolve_gpu_assignments(
+                [first_uuid, second_uuid]
+            )
+        finally:
+            runtime.nvidia_gpu_inventory = original
+
+        self.assertEqual(
+            assignment["target_uuids"],
+            [first_uuid, second_uuid],
+        )
+        self.assertEqual(
+            assignment["selected_devices"],
+            ["/dev/nvidia1", "/dev/nvidia0"],
+        )
+        self.assertEqual(assignment["selected_minors"], [1, 0])
+        self.assertEqual(assignment["denied_devices"], [])
+        self.assertEqual(assignment["target_uuid"], first_uuid)
+        self.assertEqual(assignment["selected_device"], "/dev/nvidia1")
+
     def test_dual_gpu_command_renders_exact_two_device_uuid_set(self):
         first_uuid = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
         second_uuid = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
