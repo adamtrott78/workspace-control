@@ -202,7 +202,12 @@ class LambdaCIP5InstallTests(unittest.TestCase):
         self.assertTrue(project["admission_v2"]["enabled"])
         self.assertEqual(
             project["admission_v2"]["live_enabled_workload_classes"],
-            ["cpu-test", "gpu-small", "model-eval-single-gpu"],
+            [
+                "cpu-test",
+                "gpu-small",
+                "model-eval-single-gpu",
+                "model-eval-dual-gpu",
+            ],
         )
         self.assertEqual(
             project["admission_v2"]["routes"]["cpu-test"]["trusted_workflow"]["blob_sha"],
@@ -243,7 +248,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
                 "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
             ],
         )
-        self.assertNotIn(
+        self.assertIn(
             "model-eval-dual-gpu",
             project["admission_v2"]["live_enabled_workload_classes"],
         )
