@@ -296,6 +296,8 @@ func requestCommandForWorkload(workload string) (string, error) {
 		return "/lambda-ci-qwen35-pilot", nil
 	case dualModelEvalWorkload:
 		return "/lambda-ci-qwen35-dual-pilot", nil
+	case localExtractWave1Workload:
+		return "/lambda-ci-local-extract-wave1", nil
 	default:
 		return "", fmt.Errorf("admission v2 workload command rejected: %s", workload)
 	}
@@ -566,7 +568,7 @@ func deterministicAdmissionExecutionIDs(
 	switch workload {
 	case defaultProfile:
 		prefix = "lambda-research-engine-"
-	case gpuProfile, modelEvalWorkload, dualModelEvalWorkload:
+	case gpuProfile, modelEvalWorkload, dualModelEvalWorkload, localExtractWave1Workload:
 		prefix = "lambda-research-engine-gpu-"
 	default:
 		return "", "", fmt.Errorf("deterministic runner workload rejected: %s", workload)
