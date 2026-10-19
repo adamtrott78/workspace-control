@@ -6,6 +6,7 @@ import stat
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 SCRIPTS = pathlib.Path(__file__).parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
@@ -83,21 +84,41 @@ class RuntimeTreeRepairTests(unittest.TestCase):
             gid = os.getgid()
             pre = digest(fx["live"])
 
-            result = repair.apply_repair(
-                live_root=fx["live"],
-                candidate_path=fx["evidence"],
-                quarantine_root=fx["quarantine"],
-                expected_files=fx["expected_files"],
-                expected_directories=fx["expected_directories"],
-                expected_symlinks=fx["expected_symlinks"],
-                expected_bytes=fx["expected_bytes"],
-                expected_digest=fx["expected_digest"],
-                expected_extra_files=1,
-                expected_extra_directories=1,
-                expected_extra_symlinks=0,
-                required_uid=uid,
-                required_gid=gid,
-            )
+            real_rename = os.rename
+
+            def privileged_rename(src, dst):
+                src_parent = pathlib.Path(src).parent
+                dst_parent = pathlib.Path(dst).parent
+                src_mode = stat.S_IMODE(src_parent.stat().st_mode)
+                dst_mode = stat.S_IMODE(dst_parent.stat().st_mode)
+                os.chmod(src_parent, src_mode | stat.S_IWUSR)
+                os.chmod(dst_parent, dst_mode | stat.S_IWUSR)
+                try:
+                    real_rename(src, dst)
+                finally:
+                    os.chmod(src_parent, src_mode)
+                    os.chmod(dst_parent, dst_mode)
+
+            with mock.patch.object(
+                repair.os,
+                "rename",
+                side_effect=privileged_rename,
+            ):
+                result = repair.apply_repair(
+                    live_root=fx["live"],
+                    candidate_path=fx["evidence"],
+                    quarantine_root=fx["quarantine"],
+                    expected_files=fx["expected_files"],
+                    expected_directories=fx["expected_directories"],
+                    expected_symlinks=fx["expected_symlinks"],
+                    expected_bytes=fx["expected_bytes"],
+                    expected_digest=fx["expected_digest"],
+                    expected_extra_files=1,
+                    expected_extra_directories=1,
+                    expected_extra_symlinks=0,
+                    required_uid=uid,
+                    required_gid=gid,
+                )
 
             self.assertEqual(result["decision"], "PASS")
             self.assertEqual(
@@ -111,11 +132,16 @@ class RuntimeTreeRepairTests(unittest.TestCase):
                 (fx["quarantine"] / "payload/pkg/__pycache__/later").is_dir()
             )
 
-            rolled = repair.rollback_repair(
-                manifest_path=pathlib.Path(result["manifest_path"]),
-                required_uid=uid,
-                required_gid=gid,
-            )
+            with mock.patch.object(
+                repair.os,
+                "rename",
+                side_effect=privileged_rename,
+            ):
+                rolled = repair.rollback_repair(
+                    manifest_path=pathlib.Path(result["manifest_path"]),
+                    required_uid=uid,
+                    required_gid=gid,
+                )
             self.assertEqual(rolled["decision"], "PASS")
             self.assertEqual(digest(fx["live"]), pre)
             self.assertTrue(
