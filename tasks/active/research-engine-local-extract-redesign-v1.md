@@ -18,44 +18,35 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Return to first principles on research-engine EXTRACT and identify, benchmark, and if justified implement a provenance-preserving mostly-local extraction architecture that makes STANDARD Codex a rare ambiguity/failure fallback rather than the default, while reusing accepted local document/VERIFY infrastructure and not repeating approaches already invalidated by durable evidence.
 
-## Workflow
-
-- Repository: workspace-control
-- Path: workflows/evidence-first-solution-research.v1.json
-- Checkpoint: a9041372c50bf1258daea2236a3e62542a115117
-
 ## Repositories
 
 ### workspace-control
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 453f5aa3f1386f87dcb3a256de6f31496c5346a9
+- Remote checkpoint: df142ab7829e364087dbbb7453cdc2779e9d7206
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4ffd429086c76da9759de2a34bdf0bc0de21d522
+- Remote checkpoint: 366f9585145ab539dc43c3c974dcb8625489a3e3
 - Remote verified: true
 
 ## Next safe action
 
-HANDOFF_SAFE Wave-1 boundary. Do not redo architecture/retrieval implementation and do not trigger Lambda yet. Authoritative research-engine main is 4ffd429086c76da9759de2a34bdf0bc0de21d522 (PR #128 merged); exact frozen Wave-1 trigger candidate is OPEN PR #129 head 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d with CI PASS, module blob 4dac18c4ac0b7754d604a60c46948bc2cc8f6772, workflow path .github/workflows/lambda-ci-local-extract-wave1.yml and workflow blob a5be693f750c481db21d86d239a505083aae40aa. PR #127 is closed/superseded and must not be merged. First audit workspace-control admission/provisioner contracts for the smallest new workload class model-eval-local-extract-wave1: preserve the already-validated gpu-heavy/model_eval_dual_gpu_v1 exact two-A4500 resource binding, promoted qwen3.5-4b model binding, expanded-runtime exact binding, read-only trusted model/runtime cache, non-scientific state effect, and generic gpu-heavy DENY. Unlike model-eval-dual-gpu, the exact trusted Wave-1 workflow deliberately downloads a pinned pypdf wheel and exact-SHA historical arXiv PDFs, so explicitly design/test the narrow public-payload network authority required instead of copying the dual lane's payload-offline network class. Bind admission to the exact workflow path/blob and `/lambda-ci-local-extract-wave1` command. Merge only green workspace-control changes, install/verify the exact resulting SHA on Lambda, then issue exactly one `/lambda-ci-local-extract-wave1 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d` comment on PR #129. Follow that run through report plus final root cleanup receipt and stop Wave 1 on PROMISING/PARTIAL/REJECT; no production routing change, larger-model search, generic gpu-heavy enablement, or repeated tuning loop.
+Install and verify exact workspace-control route merge df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda. Require installed manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402 and workload-policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d, exact unchanged bootstrap/model/runtime/controller identities, model-eval-local-extract-wave1 live with workflow blob a5be693f750c481db21d86d239a505083aae40aa and public-payload capability, generic gpu-heavy DENY, all three services active NRestarts=0, and zero project CPU/GPU residue. Only after PASS, trigger PR #130 head 28d8379dfb650bfa63ea9e7ac9476b8be0f55b10 exactly once.
 
 ## Remaining work
 
-- Wave 1 admission — add the smallest separately reviewed model-eval-local-extract-wave1 manifest/policy route for exact workflow blob a5be693f750c481db21d86d239a505083aae40aa and command /lambda-ci-local-extract-wave1, reusing the validated dual-GPU resource/model/runtime binding while explicitly reviewing the bounded public-payload network requirement. Do not enable generic gpu-heavy.
-- Wave 1 host activation — merge green workspace-control admission, install the exact resulting workspace-control SHA on Lambda through the accepted bootstrap/install path, and verify only the intended workload class becomes live with control-plane health and zero residue.
-- Wave 1 execution — while PR #129 remains at exact head 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d, issue exactly one `/lambda-ci-local-extract-wave1 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d` comment and follow only the resulting dedicated workflow. Do not rerun blindly after any partial/ambiguous execution.
-- Wave 1 decision — read the report/artifact and final root receipt, evaluate all 9 papers / 71 historical evidence objects under the one fixed configuration, and stop this wave with PROMISING, PARTIAL, or REJECT. Do not change production EXTRACT/VERIFY routing, download/test a larger model, broaden gpu-heavy, or begin an open-ended prompt/hyperparameter search in this wave.
-- After the Wave-1 decision only, decide whether measured residuals justify Phase 4 component/model escalation, teacher adaptation, VERIFY-boundary analysis, or eventual production integration.
+- Wave 1 host activation — install exact workspace-control df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda and verify manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402, policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d, model-eval-local-extract-wave1 live, generic gpu-heavy DENY, accepted model/runtime identity, healthy services, and zero residue.
+- Wave 1 execution — issue exactly one `/lambda-ci-local-extract-wave1 28d8379dfb650bfa63ea9e7ac9476b8be0f55b10` comment on research-engine PR #130 and follow only that dedicated run.
+- Wave 1 decision — inspect the nine-paper report plus final root receipt and stop with PROMISING, PARTIAL, or REJECT. No production EXTRACT/VERIFY routing change, larger-model search, generic gpu-heavy enablement, or tuning loop.
 
 ## Blockers / gates
 
-- Lambda admission gap: workspace-control live_enabled_workload_classes currently has cpu-test, gpu-small, model-eval-single-gpu, and model-eval-dual-gpu only. No manifest route or workload-policy entry exists for model-eval-local-extract-wave1, so PR #129 must not be triggered yet.
-- Admission-design constraint: Wave-1 workflow blob a5be693f750c481db21d86d239a505083aae40aa intentionally performs bounded public payload acquisition (pinned pypdf wheel plus exact-SHA historical arXiv PDFs). It therefore cannot blindly clone model-eval-dual-gpu's GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE network class. The smallest reviewed route must preserve exact promoted model/runtime/two-GPU authority while explicitly and fail-closedly authorizing only the public-payload behavior required by this trusted workflow. Generic gpu-heavy must remain DENY.
+- Host activation pending: exact workspace-control route merge df142ab7829e364087dbbb7453cdc2779e9d7206 is green/merged but its manifest/policy have not yet been installed and verified on Lambda. Do not trigger PR #130 before that exact install passes.
 
 ## Fresh-chat initialization
 
