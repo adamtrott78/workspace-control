@@ -28,5 +28,7 @@ as globally superior.
    appropriate.
 6. Validate coverage, artifact completion, and mastery/readiness separately.
 
+For assessments with enough evidence to model recurring question families or instructor structure, route predictive simulation and representative-practice selection through `procedures/course_exam_ensemble.md`. Keep predictive exam weights separate from student mastery weights.
+
 Time pressure may change tutoring mode or artifact scope but never authorizes
 false mastery claims or fabricated source evidence.
