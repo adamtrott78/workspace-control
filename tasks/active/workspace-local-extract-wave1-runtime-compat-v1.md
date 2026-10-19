@@ -23,8 +23,8 @@ Allow the already-authorized Local EXTRACT Wave 1 workload through the final pri
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: wave1-runtime-compat-v1
-- Remote checkpoint: 246465494256ca7e2080c442c5a8e314e445c464
+- Remote branch: main
+- Remote checkpoint: 70d5668599de767647603ddec55815b9523d1bb8
 - Remote verified: true
 
 ### research-engine
@@ -36,15 +36,15 @@ Allow the already-authorized Local EXTRACT Wave 1 workload through the final pri
 
 ## Next safe action
 
-Open and validate the narrow runtime compatibility PR from wave1-runtime-compat-v1. Require exact GPU runtime regression and full Workspace Control validation before merge; do not issue another Wave-1 trigger.
+At the genuine root-control-plane boundary, install exact workspace-control merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged scripts/bootstrap_lambda_ci_p5.sh. Then resume ChatGPT/GitHub control and recover the existing Wave-1 execution without issuing another trigger.
 
 ## Remaining work
 
-- Open a narrow PR and require task contracts, unit regression, GPU runtime tests, controller validation, and full integration contracts to pass.
-- Inspect the exact validated diff and merge only if scope remains limited to privileged runtime/test + task-state files.
-- Install exact merged privileged runtime through unchanged P5 bootstrap.
-- Resolve the existing failed request/run recovery path without a second GitHub trigger.
-- Return ownership upward once the existing Wave-1 execution is running or a new exact terminal blocker is identified.
+- Install exact runtime compatibility merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged root-owned P5 bootstrap.
+- Verify manifest/policy/provisioner/controller identities remain accepted and all control-plane services are active.
+- Resolve the terminal failed request state safely and recover the existing Wave-1 execution without another GitHub trigger.
+- Follow run 39200075204/job 117891019967 through artifact and final root receipt.
+- Return ownership upward after successful execution acceptance.
 
 ## Blockers / gates
 

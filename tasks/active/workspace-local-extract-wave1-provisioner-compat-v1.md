@@ -24,7 +24,7 @@ Allow the already-live and already-triggered Local EXTRACT Wave 1 workload throu
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 7544190ff9e87e7defcd1148550e57a637a19e34
+- Remote checkpoint: 70d5668599de767647603ddec55815b9523d1bb8
 - Remote verified: true
 
 ### research-engine
@@ -36,17 +36,17 @@ Allow the already-live and already-triggered Local EXTRACT Wave 1 workload throu
 
 ## Next safe action
 
-Do not retrigger. Allow workspace-local-extract-wave1-runtime-compat-v1 to validate/merge/install the final privileged runtime compatibility patch, then recover existing run 39200075204.
+Do not retrigger. Install exact privileged runtime merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap, then recover existing run 39200075204.
 
 ## Remaining work
 
-- Complete workspace-local-extract-wave1-runtime-compat-v1 and install exact merged privileged runtime.
-- Resolve the existing failed deterministic request/run without a second trigger.
-- After successful runner launch/claim, mark this provisioner child COMPLETE and return ownership upward.
+- Install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap.
+- Recover the existing Wave-1 execution without a second trigger.
+- After successful runner launch/claim, close the runtime/provisioner/controller support chain and return ownership upward.
 
 ## Blockers / gates
 
-- Downstream privileged runtime compatibility blocker: provisioner activation and request acceptance passed, but request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 failed before runner creation with RuntimeLaunchError `autonomous profile rejected: gpu-heavy`. Bounded child workspace-local-extract-wave1-runtime-compat-v1 owns the final runtime gates; do not retrigger.
+- Root runtime install gate only: runtime compatibility PR #225 is validated/merged, but installed privileged runtime must be updated before the existing Wave-1 execution can be recovered. Do not retrigger.
 
 ## Fresh-chat initialization
 

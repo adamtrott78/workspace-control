@@ -32,7 +32,7 @@
       "base_sha": "6437ee9745468401f7c0d5daa40ea72e3be46257",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "7544190ff9e87e7defcd1148550e57a637a19e34",
+        "checkpoint_sha": "70d5668599de767647603ddec55815b9523d1bb8",
         "verified": true
       },
       "allowed_mutation_scope": [
@@ -198,14 +198,14 @@
     }
   ],
   "blockers": [
-    "Downstream privileged runtime compatibility blocker: provisioner activation and request acceptance passed, but request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 failed before runner creation with RuntimeLaunchError `autonomous profile rejected: gpu-heavy`. Bounded child workspace-local-extract-wave1-runtime-compat-v1 owns the final runtime gates; do not retrigger."
+    "Root runtime install gate only: runtime compatibility PR #225 is validated/merged, but installed privileged runtime must be updated before the existing Wave-1 execution can be recovered. Do not retrigger."
   ],
   "remaining_work": [
-    "Complete workspace-local-extract-wave1-runtime-compat-v1 and install exact merged privileged runtime.",
-    "Resolve the existing failed deterministic request/run without a second trigger.",
-    "After successful runner launch/claim, mark this provisioner child COMPLETE and return ownership upward."
+    "Install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap.",
+    "Recover the existing Wave-1 execution without a second trigger.",
+    "After successful runner launch/claim, close the runtime/provisioner/controller support chain and return ownership upward."
   ],
-  "next_safe_action": "Do not retrigger. Allow workspace-local-extract-wave1-runtime-compat-v1 to validate/merge/install the final privileged runtime compatibility patch, then recover existing run 39200075204.",
+  "next_safe_action": "Do not retrigger. Install exact privileged runtime merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap, then recover existing run 39200075204.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Created after exact controller activation proved the controller compatibility fix works. The remaining failure is a stale root provisioner compatibility guard; benchmark execution has not started.\n2026-10-19 implementation checkpoint: stale gpu-heavy service guard is patched with an exact two-workload allowlist and focused Wave-1 service regression. No manifest/policy/runtime/workflow changes were made; validation is next.\nPR #222 validation run 39332333745 PASS and provisioner compatibility merged as 9393dd2ad27c30d3a0db5d8e0f537a311f015d96. Only exact root install + existing-run recovery remain.\n2026-10-19 post-install checkpoint: exact provisioner activation PASS and same deterministic request ACCEPTED. GitHub still shows the job queued/no runner, so the next operation is read-only durable worker-state inspection."

@@ -24,7 +24,7 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 7544190ff9e87e7defcd1148550e57a637a19e34
+- Remote checkpoint: 70d5668599de767647603ddec55815b9523d1bb8
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,18 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 ## Next safe action
 
-Do not issue another Wave-1 trigger. Complete bounded child workspace-local-extract-wave1-runtime-compat-v1: patch the three stale privileged runtime exact-workload gates, validate/merge/install exact runtime, then recover existing Wave-1 execution.
+Do not issue another Wave-1 trigger. Install exact runtime compatibility merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap, then recover existing run 39200075204/job 117891019967.
 
 ## Remaining work
 
-- Complete workspace-local-extract-wave1-runtime-compat-v1 and install exact merged privileged runtime; preserve accepted manifest/policy/model/runtime/GPU identities and generic gpu-heavy DENY.
-- Resolve/recover existing run 39200075204/job 117891019967 without another trigger.
+- Install exact merged privileged runtime 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap.
+- Recover the existing Wave-1 execution without another trigger.
 - Read Wave-1 report artifact and final root receipt; require exact model/runtime/two-GPU identity, non-scientific state, cleanup/postverify PASS, no residue/quarantine, then classify PROMISING/PARTIAL/REJECT.
-- Checkpoint the result into research-engine-local-extract-redesign-v1 and archive support tasks.
+- Checkpoint result into research-engine-local-extract-redesign-v1 and archive support tasks.
 
 ## Blockers / gates
 
-- Privileged runtime compatibility blocker: scripts/lambda_ci_runtime.py has three stale exact-workload gates that omit model-eval-local-extract-wave1. Existing request is terminal FAILED before runner creation; no benchmark execution occurred.
+- Root privileged-runtime install gate only: runtime compatibility PR #225 validated and merged as 70d5668599de767647603ddec55815b9523d1bb8. Existing Wave-1 run remains sole authorized execution; no retrigger.
 
 ## Fresh-chat initialization
 
