@@ -51,7 +51,7 @@
       "base_sha": "3e5906ca572f47272ac14a4d4ac2ed4ae9eb0122",
       "remote": {
         "branch": "tutor-framework",
-        "checkpoint_sha": "d40ac944899aca84cff8beb68563f5f5014ea19c",
+        "checkpoint_sha": "3ae8f4fbfafd9daa08a8ab70c464641b1076957e",
         "verified": true
       },
       "local": null,
@@ -364,6 +364,18 @@
         "Lecture 12 transcript adds exact non-CFL witness/case-analysis examples, REG⊊CFL, DFA/NFA→PDA mechanics, and closure directionality.",
         "Fresh CFG/PDA/regular-pumping/CFL-non-CFL diagnostics remain persisted in study/MASTERY_LOG.md."
       ]
+    },
+    {
+      "id": "cis560-exam1-2024-exam-ingested",
+      "kind": "git_commit",
+      "identity": "3ae8f4fbfafd9daa08a8ab70c464641b1076957e",
+      "required_for_resume": true,
+      "evidence": [
+        "Complete four-page October 24, 2024 CIS 560 midterm was supplied and semantically ingested.",
+        "2024 format exactly matches the 2026 announced top-level architecture: Q1 True/False plus Q2-Q5 short problems.",
+        "Historical comparison records that a single numbered question can bundle multiple skill families.",
+        "Strong historical/current convergence identified for NFA/regex/DFA/complement, RL pumping, CFL pumpability, closure, and T/F breadth."
+      ]
     }
   ],
   "artifacts": [
@@ -492,14 +504,13 @@
     "October 20 review has not occurred; final cheat-sheet density/weighting remains intentionally unfrozen."
   ],
   "remaining_work": [
-    "Ingest the 2024 Exam 1 as historical predictive evidence and compare its exact format/problem families against Fall 2026 authority.",
-    "Run at least one fresh NFA/regex construction transfer check; HW1 evidence remains more guided there than current CFG/PDA evidence.",
+    "Run one fresh NFA/regex/DFA cluster transfer check; this is now the highest-value unresolved behavioral gap given both HW1 evidence and the 2024 exam.",
     "Capture and ingest the October 20 review as the strongest final weighting signal.",
     "Build/render/QA the final one-page-double-sided US Letter cheat sheet after review.",
     "Run a timed mixed mini-midterm on October 21 and update readiness only from independent fresh/delayed evidence."
   ],
-  "next_safe_action": "Continue compressed restart from CIS560-AdamTrott tutor-framework at d40ac944899aca84cff8beb68563f5f5014ea19c. Lecture 11 and Lecture 12 are both transcript-reconciled; substantive scope is complete through Section 2.3 and Section 2.4 is explicitly excluded. Next ingest the user's 2024 Exam 1 as historical predictive evidence if supplied; otherwise run one fresh NFA/regex transfer diagnostic. Preserve October 20 review as the final weighting event before cheat-sheet build.",
+  "next_safe_action": "Continue compressed restart from CIS560-AdamTrott tutor-framework at 3ae8f4fbfafd9daa08a8ab70c464641b1076957e. The 2024 Exam 1 is now ingested as predictive-only evidence. Its strongest actionable signal is a bundled NFA->language->regex->DFA->complement problem family, which aligns with the main remaining HW1 behavioral gap. Run one fresh cold NFA/regex/DFA cluster diagnostic next unless the user wants to inspect another historical source. Then ingest the October 20 review before final cheat-sheet allocation.",
   "last_executor": "chatgpt",
   "last_surface": "github+chat",
-  "notes": "Post-MTH October 19 state: Lecture 11 is fully transcript-reconciled. CYK is required/conceptually in scope, but Xu explicitly says the complete CYK procedure will not be tested. Lecture 12 instructor notes close new-content scope at Section 2.3 and explicitly exclude Section 2.4. Lecture 12 re-emphasizes the non-CFL pumping proof recipe (choose an in-language p-dependent witness of length >=p; defeat every legal five-part split), REG ⊊ CFL, DFA/NFA→PDA, and regular closure. The earlier attachment supplied with the L12 notes was SHA-256 8048a3ba5b06ef66c8ed8f054ed470b36f16254f79cbe794197eaaa3287002e4, identical to L11 and remains excluded. A genuine L12 transcript was subsequently supplied (SHA-256 5dee87e3d2eafa6692239356f36e5bdb4de473dd3e42394d9d16515aff8f8902) and is now fully reconciled. Behavioral diagnostics completed in the post-MTH restart: independent CFG transfer across count-decomposition and palindrome/outside-in families; independent simple PDA phase/stack mechanics; independent regular-pumping tight-boundary witness selection; strong CFL non-CFL witness/case analysis with tutor compression of presentation. Remaining construction risk is relatively higher in NFA/regex/HW1-derived material. The October 20 review remains the strongest final weighting source. Historical 2024 Exam 1, when supplied, may inform predictions but never override Fall 2026 Xu authority."
+  "notes": "Post-MTH October 19 state: Lecture 11 is fully transcript-reconciled. CYK is required/conceptually in scope, but Xu explicitly says the complete CYK procedure will not be tested. Lecture 12 instructor notes close new-content scope at Section 2.3 and explicitly exclude Section 2.4. Lecture 12 re-emphasizes the non-CFL pumping proof recipe (choose an in-language p-dependent witness of length >=p; defeat every legal five-part split), REG ⊊ CFL, DFA/NFA→PDA, and regular closure. The earlier attachment supplied with the L12 notes was SHA-256 8048a3ba5b06ef66c8ed8f054ed470b36f16254f79cbe794197eaaa3287002e4, identical to L11 and remains excluded. A genuine L12 transcript was subsequently supplied (SHA-256 5dee87e3d2eafa6692239356f36e5bdb4de473dd3e42394d9d16515aff8f8902) and is now fully reconciled. Behavioral diagnostics completed in the post-MTH restart: independent CFG transfer across count-decomposition and palindrome/outside-in families; independent simple PDA phase/stack mechanics; independent regular-pumping tight-boundary witness selection; strong CFL non-CFL witness/case analysis with tutor compression of presentation. Remaining construction risk is relatively higher in NFA/regex/HW1-derived material. The October 20 review remains the strongest final weighting source. Historical 2024 Exam 1, when supplied, may inform predictions but never override Fall 2026 Xu authority. Historical 2024 Exam 1 is now fully ingested from all four photographed pages. It was 25 points: Q1 five T/F items and Q2-Q5 four five-point short problems. Q2 bundled NFA interpretation, regex, DFA, and complement; Q3 was scaffolded RL pumping nonregularity; Q4 was CFL show-pumpability by filling uvxyz; Q5 bundled DFA, DFA->CFG, and intersection. This strongly supports format continuity and the current two-layer cheat-sheet architecture, but remains subordinate to Fall 2026 authority."
 }
