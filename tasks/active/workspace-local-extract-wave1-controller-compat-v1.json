@@ -4,7 +4,7 @@
   "title": "Local EXTRACT Wave 1 controller compatibility",
   "status": "VALIDATING",
   "goal": "Make the already-authorized and already-triggered Local EXTRACT Wave 1 job claimable by the existing Lambda GPU scale-set controller with the smallest fail-closed controller compatibility fix, then activate that exact controller and recover existing workflow run 39200075204 without issuing another benchmark trigger.",
-  "execution_topology": "composed",
+  "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-local-extract-wave1-execution-v1",
   "current_stage": "controller_compatibility_patch",
   "acceptance_criteria": [
@@ -60,7 +60,7 @@
   "stages": [
     {
       "id": "controller_compatibility_patch",
-      "status": "VALIDATING",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-local-extract-wave1-controller-compat-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -184,5 +184,5 @@
   "next_safe_action": "Open and validate the narrow controller compatibility PR from wave1-controller-compat-v1. Require controller unit/regression tests and Workspace Control validation to pass; inspect the diff before merge. Do not issue another Wave-1 trigger.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created after host activation and the one authorized Wave-1 trigger both passed. This child exists only because the root-owned GPU controller binary predates the new explicit Wave-1 workload string. The queued workflow run is durable evidence to resume, not permission to trigger again.\n2026-10-19 implementation checkpoint: minimal controller compatibility patch is committed on wave1-controller-compat-v1. No manifest/policy/runtime/model/workflow/research-engine changes were made; validation is the next gate."
+  "notes": "Created after host activation and the one authorized Wave-1 trigger both passed. This child exists only because the root-owned GPU controller binary predates the new explicit Wave-1 workload string. The queued workflow run is durable evidence to resume, not permission to trigger again.\n2026-10-19 implementation checkpoint: minimal controller compatibility patch is committed on wave1-controller-compat-v1. No manifest/policy/runtime/model/workflow/research-engine changes were made; validation is the next gate.\nPR #219 validation run 39328693772 stopped at task-contract validation before Go tests because the new child was incorrectly declared composed without local state and used unsupported stage status VALIDATING. Corrected to remote_only + IN_PROGRESS; no controller code change was needed for this validation failure."
 }
