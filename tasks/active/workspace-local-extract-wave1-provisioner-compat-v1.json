@@ -1,0 +1,184 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-local-extract-wave1-provisioner-compat-v1",
+  "title": "Local EXTRACT Wave 1 provisioner compatibility",
+  "status": "IN_PROGRESS",
+  "goal": "Allow the already-live and already-triggered Local EXTRACT Wave 1 workload through the final root provisioner gpu-heavy compatibility guard with the smallest fail-closed change, then install that exact provisioner and recover the existing queued benchmark run without issuing another trigger.",
+  "execution_topology": "remote_only",
+  "parent_execution_owner": "workspace-local-extract-wave1-controller-compat-v1",
+  "current_stage": "provisioner_guard_patch",
+  "acceptance_criteria": [
+    "Root provisioner permits gpu-heavy only for the explicitly authorized workload classes model-eval-dual-gpu and model-eval-local-extract-wave1.",
+    "Generic gpu-heavy remains denied by root workload policy and cannot become an admitted workload class through this change.",
+    "Existing model-eval-dual-gpu behavior remains unchanged.",
+    "A focused provisioner-service regression proves model-eval-local-extract-wave1 resolves to gpu-heavy, exact model_eval_dual_gpu_v1 resources, and the two accepted GPU UUIDs.",
+    "No manifest, workload-policy, model binding, runtime binding, GPU UUID, workflow, or research-engine scientific code changes occur.",
+    "Workspace Control validation passes before merge.",
+    "Exact merged root provisioner is installed through the unchanged P5 bootstrap and the existing deterministic Wave-1 request is accepted without another GitHub trigger."
+  ],
+  "constraints": [
+    "Do not modify research-engine or PR #131.",
+    "Do not issue another /lambda-ci-local-extract-wave1 trigger; existing run 39200075204 / job 117891019967 is the sole authorized benchmark request.",
+    "Do not enable generic gpu-heavy.",
+    "Do not change architecture/lambda-ci-project-research-engine.v1.json or architecture/lambda-ci-workload-policy.v1.json.",
+    "Do not alter promoted qwen3.5-4b, expanded runtime, two-GPU UUIDs, network authority, or production routing.",
+    "Do not generalize the provisioner into arbitrary gpu-heavy workload admission; use an exact finite allowlist for the two already-authorized dual-GPU workload classes.",
+    "Do not modify unrelated provisioner behavior or cleanup semantics."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "6437ee9745468401f7c0d5daa40ea72e3be46257",
+      "remote": {
+        "branch": "wave1-provisioner-compat-v1",
+        "checkpoint_sha": "f838bb35bdad72f733f0480067f52bda4f9bab7a",
+        "verified": true
+      },
+      "allowed_mutation_scope": [
+        "scripts/lambda_ci_provisioner_service.py",
+        "tests/test_lambda_ci_p5_provisioner_service.py",
+        "tasks/active/workspace-local-extract-wave1-provisioner-compat-v1.json",
+        "tasks/active/workspace-local-extract-wave1-provisioner-compat-v1.md",
+        "tasks/active/workspace-local-extract-wave1-controller-compat-v1.json",
+        "tasks/active/workspace-local-extract-wave1-controller-compat-v1.md",
+        "tasks/active/workspace-local-extract-wave1-execution-v1.json",
+        "tasks/active/workspace-local-extract-wave1-execution-v1.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "366f9585145ab539dc43c3c974dcb8625489a3e3",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "366f9585145ab539dc43c3c974dcb8625489a3e3",
+        "verified": true
+      },
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "provisioner_guard_patch",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-local-extract-wave1-provisioner-compat-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Exact controller compatibility merge a895daaee6c744c569b45d44d72e2ea3d38df15d is installed.",
+        "Existing deterministic Wave-1 request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 repeatedly reaches the root provisioner.",
+        "scripts/lambda_ci_provisioner_service.py rejects gpu-heavy unless workload_class equals model-eval-dual-gpu."
+      ],
+      "outputs": [
+        "Minimal exact gpu-heavy workload allowlist correction.",
+        "Focused provisioner-service regression for Wave 1 and preservation of denial boundaries."
+      ],
+      "validation": [],
+      "resume_condition": "Patch only the stale root provisioner guard and focused service tests, then run repository validation."
+    },
+    {
+      "id": "provisioner_activation_and_run_recovery",
+      "status": "PLANNED",
+      "execution_owner": "workspace-local-extract-wave1-provisioner-compat-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+lambda",
+      "inputs": [
+        "Validated exact provisioner compatibility merge.",
+        "Existing run 39200075204 / job 117891019967."
+      ],
+      "outputs": [
+        "Exact merged root provisioner installed.",
+        "GPU controller stable after prior crash loop.",
+        "Existing deterministic Wave-1 request accepted and job claimed without retrigger."
+      ],
+      "validation": [],
+      "resume_condition": "Begin only after the exact provisioner compatibility patch is merged."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "existing-wave1-run",
+      "kind": "github_workflow_run",
+      "identity": "39200075204",
+      "required_for_resume": true,
+      "evidence": [
+        "workflow_job_id=117891019967",
+        "candidate_sha=522430a6e9bfdd2977dd8517c5af9db4d1bdbf06",
+        "exact trigger already issued once; do not retrigger"
+      ]
+    },
+    {
+      "id": "controller-replay-request",
+      "kind": "runtime_request",
+      "identity": "fd30c4c6-6756-55d1-a12d-e3cb16f50d20",
+      "required_for_resume": true,
+      "evidence": [
+        "runner_name=lambda-research-engine-gpu-bcdc71549cf1",
+        "controller replay reaches root provisioner",
+        "provisioner rejection is gpu-heavy admission is limited to model-eval-dual-gpu"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "scripts/lambda_ci_provisioner_service.py",
+      "state": "existing_provisioner_source",
+      "role": "final fail-closed gpu-heavy workload compatibility guard",
+      "origin": "workspace-control",
+      "persistence": "git+installed root provisioner service",
+      "regeneration": "install through unchanged scripts/bootstrap_lambda_ci_p5.sh",
+      "review_requirement": "allow only model-eval-dual-gpu and model-eval-local-extract-wave1 under gpu-heavy",
+      "evidence": []
+    },
+    {
+      "path": "tests/test_lambda_ci_p5_provisioner_service.py",
+      "state": "regression_target",
+      "role": "provisioner-service compatibility and denial-boundary regression coverage",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": "normal source control",
+      "review_requirement": "prove Wave 1 exact resources while preserving existing gpu-heavy denial boundaries",
+      "evidence": []
+    }
+  ],
+  "validation": [
+    {
+      "check": "Provisioner compatibility root cause",
+      "result": "PASS",
+      "evidence": [
+        "Runtime journal repeatedly shows provisioner rejected request: ServiceError: gpu-heavy admission is limited to model-eval-dual-gpu.",
+        "The same deterministic request_id fd30c4c6-6756-55d1-a12d-e3cb16f50d20 and runner lambda-research-engine-gpu-bcdc71549cf1 are replayed after controller restart.",
+        "scripts/lambda_ci_provisioner_service.py lines 348-354 hard-code req.workload_class != model-eval-dual-gpu as a ServiceError.",
+        "Root manifest/policy already live-enable model-eval-local-extract-wave1 with gpu-heavy/model_eval_dual_gpu_v1; generic gpu-heavy policy remains DENY."
+      ]
+    },
+    {
+      "check": "Provisioner compatibility patch",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Exact provisioner activation",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Existing Wave-1 request acceptance",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Patch only scripts/lambda_ci_provisioner_service.py exact gpu-heavy workload allowlist and focused provisioner-service tests.",
+    "Run Workspace Control validation, inspect exact diff, and merge only after PASS.",
+    "Install exact merged root provisioner through unchanged P5 bootstrap; verify accepted manifest/policy identities remain unchanged.",
+    "Verify GPU controller stability and that existing request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 is accepted, then follow run 39200075204 without retriggering.",
+    "Return ownership to workspace-local-extract-wave1-controller-compat-v1 after existing job claim."
+  ],
+  "next_safe_action": "Implement the smallest fail-closed provisioner patch on wave1-provisioner-compat-v1: permit gpu-heavy only when workload_class is model-eval-dual-gpu or model-eval-local-extract-wave1, and add focused service regression proving Wave 1 uses the exact existing two-GPU envelope. Preserve generic gpu-heavy DENY and all root manifest/policy identities.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Created after exact controller activation proved the controller compatibility fix works. The remaining failure is a stale root provisioner compatibility guard; benchmark execution has not started."
+}
