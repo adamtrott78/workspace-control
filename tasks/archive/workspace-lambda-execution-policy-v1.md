@@ -3,7 +3,7 @@
 
 Derived human-readable view.
 
-Authoritative capsule: tasks/active/workspace-lambda-execution-policy-v1.json
+Authoritative capsule: tasks/archive/workspace-lambda-execution-policy-v1.json
 
 If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
 
@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-lambda-execution-policy-v1
 - Title: Workspace Lambda Execution Policy and Model Workload Governance v1
-- Status: IN_PROGRESS
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -36,12 +36,11 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Do NOT rerun the dual-Qwen pilot. Workflow run 39188851843 is PASS and its model canary criteria are satisfied. Read only the final root-owned provisioner receipt /srv/workspace-ci/research-engine/logs/p5-b9e5d518-22e4-541b-9882-1969103be357-receipt.json and current host state. Require decision=RUNNER_EXITED_CLEANLY, terminal_status=SUCCEEDED, runner_exit_code=0, exact candidate/workload/profile/resource/workflow identity, exact two UUID/device binding, expanded_runtime_preverified/postverified=true with accepted b0cbb4ef... tree, promoted_model_preverified/postverified=true with exact Qwen object, project UID CPU/GPU cleanup true with no leaked GPU processes, runner/staging workspaces destroyed, no gpu-heavy lane quarantine, all three control-plane services active NRestarts=0, and no project CPU/GPU residue. If any final root condition fails, stop without rerunning the pilot.
+Task complete. Bounded model-eval-dual-gpu authority is VALIDATED and live on Lambda with exact two-A4500, promoted-Qwen, immutable-runtime, fail-closed cleanup/resource policy. Generic gpu-heavy remains DENY/admission disabled. Any future generic heavy-workload authority or materially broader dual-GPU scope must start as a separate reviewed workspace-control task and must not replay the accepted gates from this task.
 
 ## Remaining work
 
-- Read the final root-owned dual pilot provisioner receipt and require terminal success, exact workflow/candidate/model/runtime/two-UUID identity, runtime/model postverify, zero project CPU/GPU residue/quarantine, and destroyed job/staging workspaces.
-- If all gates pass, mark bounded model-eval-dual-gpu authority VALIDATED. Keep generic gpu-heavy DENY unless a separate generic heavy-workload policy is explicitly designed and accepted.
+- None.
 
 ## Blockers / gates
 
@@ -54,7 +53,7 @@ Do NOT rerun the dual-Qwen pilot. Workflow run 39188851843 is PASS and its model
 https://github.com/adamtrott78/workspace-control
 
 Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-lambda-execution-policy-v1.json
+Task capsule: tasks/archive/workspace-lambda-execution-policy-v1.json
 
 Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.

@@ -230,3 +230,16 @@ Run evidence:
 
 This incident is closed as VALIDATED. Resume the owning dual-GPU failure gates
 without replaying the accepted dormant NCCL gate.
+
+## Incident closure
+
+This runtime-drift incident is historical and resolved.
+
+- exact accepted runtime was restored and authoritatively verified;
+- dual timeout and dual CUDA-OOM physical gates later passed;
+- bounded dual activation installed successfully;
+- dual-Qwen tensor-parallel pilot passed;
+- final root-owned receipt/cleanup acceptance passed;
+- no lane quarantine or project CPU/GPU residue remained.
+
+Do not use this document as active recovery authority after task completion.
