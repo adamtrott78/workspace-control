@@ -161,3 +161,14 @@ The first required outcome is evidence answering:
 
 Until the answer is unequivocally YES, make zero further mutations to the
 canonical expanded runtime.
+
+## Validated projection helper
+
+Use only `scripts/runtime_tree_projection.py` from workspace-control commit
+`7d6a7e46557342fdf085e1202970ff200016f547` (blob `0974a03d46c487b32801e88647cba489f363a64d`).
+
+PR #196 passed Workspace Control Validation run `39182798953` before merge.
+The helper is read-only with respect to both input trees and records evidence
+outside the runtime. It uses the disposable reference only as a path/type oracle;
+all projected bytes, modes, ownership checks, sizes, symlink targets, and the
+final digest come from the existing live canonical tree.
