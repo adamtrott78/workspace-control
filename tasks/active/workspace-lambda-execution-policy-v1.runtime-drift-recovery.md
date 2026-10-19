@@ -207,3 +207,26 @@ PR #198 passed Workspace Control Validation run `39184369750` before merge.
 The helper revalidates the exact projection before action, moves only minimal
 candidate roots to same-filesystem quarantine, verifies the resulting tree
 against the accepted digest, and retains a manifest for rollback.
+
+## Authoritative restoration PASS
+
+The reversible path-only correction completed successfully.
+
+- candidate roots quarantined: 172
+- quarantine: `/srv/workspace-ci/research-engine/runtime-recovery-quarantine/f67ff9a-20261019T012703Z`
+- repair manifest SHA-256: `32f71d395f7dfe7acb87061a905e94429d3e08e876c9c0c7c895d8b327e6e37b`
+- authoritative file count: 53583
+- authoritative directory count: 6069
+- authoritative symlink count: 4
+- authoritative tree digest: `b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63`
+- read-only hardened: true
+- receipt verified: true
+- all three control-plane services active with NRestarts=0
+- project CPU/GPU residue: zero
+- timeout/OOM gates were not run during recovery
+
+Run evidence:
+`/home/atrott/adamArchives/Adam/workspace-control-tmp/runtime-drift-repair-20261019T012703Z`
+
+This incident is closed as VALIDATED. Resume the owning dual-GPU failure gates
+without replaying the accepted dormant NCCL gate.
