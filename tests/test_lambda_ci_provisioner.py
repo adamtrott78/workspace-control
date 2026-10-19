@@ -458,6 +458,38 @@ def test_v2_exact_dual_uuid_set_can_be_carried_only_when_root_policy_and_profile
     )
 
 
+def test_v2_local_extract_wave1_reuses_exact_dual_qwen_envelope():
+    manifest = enabled_v2_manifest()
+    req = mod.validate_request_v2(
+        good_v2_request("model-eval-local-extract-wave1"),
+        manifest,
+        WORKLOAD_POLICY,
+        now=V2_NOW,
+    )
+
+    assert req.profile == "gpu-heavy"
+    assert req.workload_class == "model-eval-local-extract-wave1"
+    assert req.admission["resource_class"] == "model_eval_dual_gpu_v1"
+    assert req.admission["capability_classes"]["payload_network"] == (
+        "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD"
+    )
+
+    launch = mod.build_launch_spec(req, manifest, PROFILES, PINS)
+    assert launch["resources"]["gpu_indices"] == [0, 1]
+    assert launch["resources"]["gpu_uuid"] is None
+    assert launch["resources"]["gpu_uuids"] == [
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+        "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+    ]
+    assert launch["model_binding"]["model_id"] == "qwen3.5-4b"
+    assert launch["runtime_binding"]["runtime_id"] == (
+        "qwen35-vllm-cu129-image-native-sampler-v3"
+    )
+    assert WORKLOAD_POLICY["workload_classes"]["gpu-heavy"][
+        "policy_decision"
+    ] == "DENY"
+
+
 def test_v2_gpu_small_remains_model_forbidden():
     request = good_v2_request("gpu-small")
     manifest = enabled_v2_manifest()
