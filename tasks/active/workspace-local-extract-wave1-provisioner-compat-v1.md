@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-local-extract-wave1-provisioner-compat-v1
 - Title: Local EXTRACT Wave 1 provisioner compatibility
-- Status: IN_PROGRESS
+- Status: VALIDATING
 - Capsule schema: v2
 
 ## Goal
@@ -36,15 +36,15 @@ Allow the already-live and already-triggered Local EXTRACT Wave 1 workload throu
 
 ## Next safe action
 
-Implement the smallest fail-closed provisioner patch on wave1-provisioner-compat-v1: permit gpu-heavy only when workload_class is model-eval-dual-gpu or model-eval-local-extract-wave1, and add focused service regression proving Wave 1 uses the exact existing two-GPU envelope. Preserve generic gpu-heavy DENY and all root manifest/policy identities.
+Open and validate the narrow provisioner compatibility PR from wave1-provisioner-compat-v1. Require task contracts, provisioner-service regression, unit/full integration validation, and exact diff review before merge. Do not issue another Wave-1 trigger.
 
 ## Remaining work
 
-- Patch only scripts/lambda_ci_provisioner_service.py exact gpu-heavy workload allowlist and focused provisioner-service tests.
-- Run Workspace Control validation, inspect exact diff, and merge only after PASS.
-- Install exact merged root provisioner through unchanged P5 bootstrap; verify accepted manifest/policy identities remain unchanged.
-- Verify GPU controller stability and that existing request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 is accepted, then follow run 39200075204 without retriggering.
-- Return ownership to workspace-local-extract-wave1-controller-compat-v1 after existing job claim.
+- Open a narrow PR and require task contracts, unit regression, provisioner/service tests, and full Workspace Control validation to pass.
+- Inspect exact validated diff and merge only if manifest/policy/model/runtime/workflow identities remain untouched.
+- Install exact merged root provisioner through unchanged P5 bootstrap, then verify service/controller stability.
+- Recover existing request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 / run 39200075204 without retriggering.
+- Return ownership to workspace-local-extract-wave1-controller-compat-v1 after the existing job is claimed.
 
 ## Blockers / gates
 
