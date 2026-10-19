@@ -36,18 +36,17 @@ Allow the already-live and already-triggered Local EXTRACT Wave 1 workload throu
 
 ## Next safe action
 
-Read the durable root provisioner state/receipt for request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 without mutating or restarting anything. GitHub still shows run 39200075204/job 117891019967 queued; do not retrigger.
+Do not retrigger. Allow workspace-local-extract-wave1-runtime-compat-v1 to validate/merge/install the final privileged runtime compatibility patch, then recover existing run 39200075204.
 
 ## Remaining work
 
-- Read /var/lib/workspace-ci/provisioner/fd30c4c6-6756-55d1-a12d-e3cb16f50d20.json and, if present, /srv/workspace-ci/research-engine/logs/p5-fd30c4c6-6756-55d1-a12d-e3cb16f50d20-receipt.json plus runner/journal logs.
-- If worker is terminal FAILED, diagnose only that exact runtime failure before any new execution decision; do not retrigger.
-- If worker is active, continue following existing GitHub run 39200075204 until assignment/completion.
-- After job claim/completion, close this child and return ownership upward.
+- Complete workspace-local-extract-wave1-runtime-compat-v1 and install exact merged privileged runtime.
+- Resolve the existing failed deterministic request/run without a second trigger.
+- After successful runner launch/claim, mark this provisioner child COMPLETE and return ownership upward.
 
 ## Blockers / gates
 
-- Post-acceptance worker diagnostic: GitHub run 39200075204/job 117891019967 remains queued with no runner_name after the root provisioner returned ACCEPTED. Need durable request state and runtime receipt to determine whether the asynchronous runner worker is still active or failed before connecting.
+- Downstream privileged runtime compatibility blocker: provisioner activation and request acceptance passed, but request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 failed before runner creation with RuntimeLaunchError `autonomous profile rejected: gpu-heavy`. Bounded child workspace-local-extract-wave1-runtime-compat-v1 owns the final runtime gates; do not retrigger.
 
 ## Fresh-chat initialization
 
