@@ -42,7 +42,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
 - Local HEAD: 5f6eec7b629b4746117f2f0a74d4531c642f8025
-- Local clean: true
+- Local clean: True
 
 ## Next safe action
 
