@@ -1,0 +1,65 @@
+<!-- workspace-control:derived-task-handoff -->
+# Workspace Control Task Handoff
+
+Derived human-readable view.
+
+Authoritative capsule: tasks/active/workspace-local-extract-wave1-runtime-compat-v1.json
+
+If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
+
+## Task
+
+- ID: workspace-local-extract-wave1-runtime-compat-v1
+- Title: Local EXTRACT Wave 1 runtime compatibility
+- Status: VALIDATING
+- Capsule schema: v2
+
+## Goal
+
+Allow the already-authorized Local EXTRACT Wave 1 workload through the final privileged runtime workload gates without broadening gpu-heavy authority, then install the exact runtime fix and recover the existing benchmark request without issuing another trigger.
+
+## Repositories
+
+### workspace-control
+
+- Intent: mutate
+- Remote branch: wave1-runtime-compat-v1
+- Remote checkpoint: 246465494256ca7e2080c442c5a8e314e445c464
+- Remote verified: true
+
+### research-engine
+
+- Intent: read
+- Remote branch: main
+- Remote checkpoint: 366f9585145ab539dc43c3c974dcb8625489a3e3
+- Remote verified: true
+
+## Next safe action
+
+Open and validate the narrow runtime compatibility PR from wave1-runtime-compat-v1. Require exact GPU runtime regression and full Workspace Control validation before merge; do not issue another Wave-1 trigger.
+
+## Remaining work
+
+- Open a narrow PR and require task contracts, unit regression, GPU runtime tests, controller validation, and full integration contracts to pass.
+- Inspect the exact validated diff and merge only if scope remains limited to privileged runtime/test + task-state files.
+- Install exact merged privileged runtime through unchanged P5 bootstrap.
+- Resolve the existing failed request/run recovery path without a second GitHub trigger.
+- Return ownership upward once the existing Wave-1 execution is running or a new exact terminal blocker is identified.
+
+## Blockers / gates
+
+- None.
+
+## Fresh-chat initialization
+
+@GitHub
+
+https://github.com/adamtrott78/workspace-control
+
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-local-extract-wave1-runtime-compat-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.

@@ -361,7 +361,7 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
                 },
             )
 
-    def test_exact_dual_workload_dispatches_to_gpu_launcher(self):
+    def test_exact_dual_gpu_workloads_dispatch_to_gpu_launcher(self):
         original = runtime.launch_gpu_runner
         calls = []
 
@@ -370,36 +370,48 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
             return {"decision": "TEST"}
 
         runtime.launch_gpu_runner = fake_launch
-        spec = {
-            "profile": "gpu-heavy",
-            "workload_class": "model-eval-dual-gpu",
-        }
         try:
-            result = runtime.launch_runner("request", spec)
+            for workload in (
+                "model-eval-dual-gpu",
+                "model-eval-local-extract-wave1",
+            ):
+                spec = {
+                    "profile": "gpu-heavy",
+                    "workload_class": workload,
+                }
+                result = runtime.launch_runner("request", spec)
+                self.assertEqual(result, {"decision": "TEST"})
+                self.assertEqual(calls[-1], ("request", spec))
         finally:
             runtime.launch_gpu_runner = original
 
-        self.assertEqual(result, {"decision": "TEST"})
-        self.assertEqual(calls, [("request", spec)])
-
-
-    def test_dual_model_eval_requires_promoted_model_binding(self):
-        spec = self.dual_gpu_spec()
-        spec["model_binding"] = None
-        with self.assertRaisesRegex(
-            runtime.RuntimeLaunchError,
-            "model-eval-dual-gpu requires promoted model binding",
+    def test_dual_gpu_model_eval_workloads_require_promoted_model_binding(self):
+        for workload in (
+            "model-eval-dual-gpu",
+            "model-eval-local-extract-wave1",
         ):
-            runtime.verify_promoted_model_binding(spec)
+            spec = self.dual_gpu_spec()
+            spec["workload_class"] = workload
+            spec["model_binding"] = None
+            with self.assertRaisesRegex(
+                runtime.RuntimeLaunchError,
+                f"{workload} requires promoted model binding",
+            ):
+                runtime.verify_promoted_model_binding(spec)
 
-    def test_dual_model_eval_is_permitted_to_enter_exact_model_verification(self):
-        spec = self.dual_gpu_spec()
-        spec["model_binding"] = {"model_id": "qwen3.5-4b"}
-        with self.assertRaisesRegex(
-            runtime.RuntimeLaunchError,
-            "promoted model binding keys drift",
+    def test_dual_gpu_model_eval_workloads_enter_exact_model_verification(self):
+        for workload in (
+            "model-eval-dual-gpu",
+            "model-eval-local-extract-wave1",
         ):
-            runtime.verify_promoted_model_binding(spec)
+            spec = self.dual_gpu_spec()
+            spec["workload_class"] = workload
+            spec["model_binding"] = {"model_id": "qwen3.5-4b"}
+            with self.assertRaisesRegex(
+                runtime.RuntimeLaunchError,
+                "promoted model binding keys drift",
+            ):
+                runtime.verify_promoted_model_binding(spec)
 
 
     def test_trusted_cuda_oom_probe_binding_requires_exact_root_identity(self):

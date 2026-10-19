@@ -150,16 +150,17 @@
         },
         {
           "check": "Wave 1 job claim by Lambda GPU controller",
-          "result": "NOT_RUN",
+          "result": "FAIL",
           "evidence": [
-            "Controller compatibility PR #219 and provisioner compatibility PR #222 are merged and installed.",
-            "Exact provisioner activation PASS; accepted manifest/policy identities unchanged.",
-            "Existing deterministic request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 was ACCEPTED for runner lambda-research-engine-gpu-bcdc71549cf1 at 2026-10-19T18:12:42-04:00.",
-            "GitHub run 39200075204/job 117891019967 still reports queued with no runner_name, so asynchronous worker state must be resolved before calling the job claimed."
+            "Exactly one authorized trigger remains in force for run 39200075204/job 117891019967.",
+            "Controller compatibility and provisioner compatibility fixes are merged/installed; provisioner accepted deterministic request fd30c4c6-6756-55d1-a12d-e3cb16f50d20.",
+            "Durable request state then transitioned to FAILED with RuntimeLaunchError `autonomous profile rejected: gpu-heavy` before transient runner creation.",
+            "No root runtime receipt, runner log, transient unit, CPU/GPU process residue, or lane quarantine exists.",
+            "Static runtime audit found three stale exact-workload gates; bounded child workspace-local-extract-wave1-runtime-compat-v1 owns them."
           ]
         }
       ],
-      "resume_condition": "Read durable accepted-request worker state/receipt. If worker is healthy, follow existing run; if terminal failed, resolve exact runtime failure without retriggering."
+      "resume_condition": "Complete and install bounded privileged runtime compatibility fix, then recover the existing authorized Wave-1 execution without a second trigger."
     }
   ],
   "checkpoints": [
@@ -253,16 +254,16 @@
     }
   ],
   "blockers": [
-    "Post-acceptance worker state unresolved: root provisioner accepted the sole authorized Wave-1 request, but GitHub still shows job 117891019967 queued/no runner. Durable request state/receipt is required before any further execution decision."
+    "Privileged runtime compatibility blocker: scripts/lambda_ci_runtime.py has three stale exact-workload gates that omit model-eval-local-extract-wave1. Existing request is terminal FAILED before runner creation; no benchmark execution occurred."
   ],
   "remaining_work": [
-    "Read durable root provisioner state and runtime receipt for request fd30c4c6-6756-55d1-a12d-e3cb16f50d20.",
-    "Follow existing run 39200075204/job 117891019967 after worker state is resolved; do not trigger a second run.",
+    "Complete workspace-local-extract-wave1-runtime-compat-v1 and install exact merged privileged runtime; preserve accepted manifest/policy/model/runtime/GPU identities and generic gpu-heavy DENY.",
+    "Resolve/recover existing run 39200075204/job 117891019967 without another trigger.",
     "Read Wave-1 report artifact and final root receipt; require exact model/runtime/two-GPU identity, non-scientific state, cleanup/postverify PASS, no residue/quarantine, then classify PROMISING/PARTIAL/REJECT.",
     "Checkpoint the result into research-engine-local-extract-redesign-v1 and archive support tasks."
   ],
-  "next_safe_action": "Do not issue another Wave-1 trigger. Read durable state/receipt for accepted request fd30c4c6-6756-55d1-a12d-e3cb16f50d20; GitHub run 39200075204/job 117891019967 remains queued with no assigned runner.",
+  "next_safe_action": "Do not issue another Wave-1 trigger. Complete bounded child workspace-local-extract-wave1-runtime-compat-v1: patch the three stale privileged runtime exact-workload gates, validate/merge/install exact runtime, then recover existing Wave-1 execution.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
-  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed.\n2026-10-19 handoff hydration: PR #214 already completed the route design and merge while the parent research task was being hydrated. Validation run 39197297919 PASS; route merge df142ab7829e364087dbbb7453cdc2779e9d7206. Exact manifest/policy blobs 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Dedicated inert trigger PR #131 is open at 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 with CI run 39197393554 PASS. Next operation is exact host install/verification, not policy design and not benchmark trigger.\n2026-10-19 execution checkpoint: exact Lambda host activation completed PASS, one authorized PR #131 trigger was issued, and dedicated run 39200075204/job 117891019967 was created. The run remains queued because the root-owned GPU controller executable does not yet recognize model-eval-local-extract-wave1 in three compatibility mappings. A narrow controller-compatibility child task is authorized; do not retrigger the benchmark.\n2026-10-19 runtime recovery update: controller compatibility and exact root controller activation passed. Existing job replay now reaches the provisioner but is rejected by a stale gpu-heavy guard that only names model-eval-dual-gpu. No benchmark runner has launched; no retrigger is authorized.\n2026-10-19 provisioner activation checkpoint: exact provisioner fix installed PASS and deterministic request ACCEPTED. GitHub remains queued/no runner, so durable asynchronous worker state is the next required evidence."
+  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed.\n2026-10-19 handoff hydration: PR #214 already completed the route design and merge while the parent research task was being hydrated. Validation run 39197297919 PASS; route merge df142ab7829e364087dbbb7453cdc2779e9d7206. Exact manifest/policy blobs 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Dedicated inert trigger PR #131 is open at 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 with CI run 39197393554 PASS. Next operation is exact host install/verification, not policy design and not benchmark trigger.\n2026-10-19 execution checkpoint: exact Lambda host activation completed PASS, one authorized PR #131 trigger was issued, and dedicated run 39200075204/job 117891019967 was created. The run remains queued because the root-owned GPU controller executable does not yet recognize model-eval-local-extract-wave1 in three compatibility mappings. A narrow controller-compatibility child task is authorized; do not retrigger the benchmark.\n2026-10-19 runtime recovery update: controller compatibility and exact root controller activation passed. Existing job replay now reaches the provisioner but is rejected by a stale gpu-heavy guard that only names model-eval-dual-gpu. No benchmark runner has launched; no retrigger is authorized.\n2026-10-19 provisioner activation checkpoint: exact provisioner fix installed PASS and deterministic request ACCEPTED. GitHub remains queued/no runner, so durable asynchronous worker state is the next required evidence.\n2026-10-19 worker diagnostic: accepted request is durably FAILED before runner creation with RuntimeLaunchError `autonomous profile rejected: gpu-heavy`. No receipt/unit/log/residue/quarantine. Static audit found three runtime workload gates omitting Wave 1; a bounded runtime child now owns the final compatibility fix."
 }

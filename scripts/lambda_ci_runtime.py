@@ -67,6 +67,16 @@ TRUSTED_CACHE_MANAGER_PATH = pathlib.Path(
 )
 TRUSTED_CACHE_MANAGER_BLOB = "a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807"
 
+MODEL_EVAL_WORKLOADS = frozenset({
+    "model-eval-single-gpu",
+    "model-eval-dual-gpu",
+    "model-eval-local-extract-wave1",
+})
+DUAL_GPU_MODEL_EVAL_WORKLOADS = frozenset({
+    "model-eval-dual-gpu",
+    "model-eval-local-extract-wave1",
+})
+
 
 def run(argv: list[str], *, check: bool = True):
     proc = subprocess.run(
@@ -271,17 +281,13 @@ def verify_promoted_model_binding(spec: dict[str, Any]) -> dict[str, Any] | None
     """Verify the exact promoted model object before/after model-eval execution."""
     binding = spec.get("model_binding")
     workload_class = spec.get("workload_class")
-    model_eval_workloads = {
-        "model-eval-single-gpu",
-        "model-eval-dual-gpu",
-    }
     if binding is None:
-        if workload_class in model_eval_workloads:
+        if workload_class in MODEL_EVAL_WORKLOADS:
             raise RuntimeLaunchError(
                 f"{workload_class} requires promoted model binding"
             )
         return None
-    if workload_class not in model_eval_workloads:
+    if workload_class not in MODEL_EVAL_WORKLOADS:
         raise RuntimeLaunchError("promoted model binding is forbidden for this workload")
     if not isinstance(binding, dict):
         raise RuntimeLaunchError("promoted model binding must be an object")
@@ -1660,9 +1666,10 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             raise RuntimeLaunchError("gpu-small UUID set drift")
         assignment = resolve_gpu_assignment(target_uuid)
     elif profile == "gpu-heavy":
-        if workload != "model-eval-dual-gpu":
+        if workload not in DUAL_GPU_MODEL_EVAL_WORKLOADS:
             raise RuntimeLaunchError(
-                "gpu-heavy is accepted only for model-eval-dual-gpu"
+                "gpu-heavy is accepted only for explicitly authorized "
+                "dual-GPU model-eval workloads"
             )
         if spec.get("model_binding") is None:
             raise RuntimeLaunchError("dual-GPU model eval requires promoted model binding")
@@ -2056,6 +2063,9 @@ def launch_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         return launch_cpu_runner(request, spec)
     if profile == "gpu-small":
         return launch_gpu_runner(request, spec)
-    if profile == "gpu-heavy" and spec.get("workload_class") == "model-eval-dual-gpu":
+    if (
+        profile == "gpu-heavy"
+        and spec.get("workload_class") in DUAL_GPU_MODEL_EVAL_WORKLOADS
+    ):
         return launch_gpu_runner(request, spec)
     raise RuntimeLaunchError(f"autonomous profile rejected: {profile}")

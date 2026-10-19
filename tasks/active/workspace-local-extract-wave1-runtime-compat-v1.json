@@ -1,0 +1,190 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-local-extract-wave1-runtime-compat-v1",
+  "title": "Local EXTRACT Wave 1 runtime compatibility",
+  "status": "VALIDATING",
+  "goal": "Allow the already-authorized Local EXTRACT Wave 1 workload through the final privileged runtime workload gates without broadening gpu-heavy authority, then install the exact runtime fix and recover the existing benchmark request without issuing another trigger.",
+  "execution_topology": "remote_only",
+  "parent_execution_owner": "workspace-local-extract-wave1-provisioner-compat-v1",
+  "current_stage": "runtime_guard_patch",
+  "acceptance_criteria": [
+    "Privileged runtime dispatches gpu-heavy only for model-eval-dual-gpu or model-eval-local-extract-wave1.",
+    "Privileged GPU runtime accepts model-eval-local-extract-wave1 as an exact dual-GPU model-eval workload while generic gpu-heavy remains rejected.",
+    "Promoted-model verification recognizes model-eval-local-extract-wave1 as requiring the exact promoted model binding.",
+    "Focused runtime regression covers generic gpu-heavy rejection, exact Wave-1 dispatch, and exact promoted-model requirement.",
+    "No manifest, workload-policy, workflow, model object, expanded runtime, GPU UUID, or research-engine scientific code changes occur.",
+    "Workspace Control validation passes before merge and exact merged privileged runtime is installed through unchanged P5 bootstrap.",
+    "Existing benchmark request/run is recovered without a second GitHub trigger."
+  ],
+  "constraints": [
+    "Do not issue another /lambda-ci-local-extract-wave1 trigger.",
+    "Do not enable generic gpu-heavy.",
+    "Do not modify research-engine or PR #131.",
+    "Do not change architecture/lambda-ci-project-research-engine.v1.json or architecture/lambda-ci-workload-policy.v1.json.",
+    "Do not alter qwen3.5-4b object/revision, expanded runtime identity, GPU UUIDs, network authority, or production routing.",
+    "Do not generalize gpu-heavy to arbitrary workloads; use a finite exact dual-GPU model-eval workload set."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "246465494256ca7e2080c442c5a8e314e445c464",
+      "remote": {
+        "branch": "wave1-runtime-compat-v1",
+        "checkpoint_sha": "246465494256ca7e2080c442c5a8e314e445c464",
+        "verified": true
+      },
+      "allowed_mutation_scope": [
+        "scripts/lambda_ci_runtime.py",
+        "tests/test_lambda_ci_p5_gpu_runtime.py",
+        "tasks/active/workspace-local-extract-wave1-runtime-compat-v1.json",
+        "tasks/active/workspace-local-extract-wave1-runtime-compat-v1.md",
+        "tasks/active/workspace-local-extract-wave1-provisioner-compat-v1.json",
+        "tasks/active/workspace-local-extract-wave1-provisioner-compat-v1.md",
+        "tasks/active/workspace-local-extract-wave1-execution-v1.json",
+        "tasks/active/workspace-local-extract-wave1-execution-v1.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "366f9585145ab539dc43c3c974dcb8625489a3e3",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "366f9585145ab539dc43c3c974dcb8625489a3e3",
+        "verified": true
+      },
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "runtime_guard_patch",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-local-extract-wave1-runtime-compat-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Existing deterministic request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 is durably FAILED before runner creation.",
+        "Durable failure is RuntimeLaunchError: autonomous profile rejected: gpu-heavy.",
+        "scripts/lambda_ci_runtime.py contains three stale workload gates: promoted-model workload set, gpu-heavy launch_gpu_runner guard, and launch_runner dispatch."
+      ],
+      "outputs": [
+        "Minimal exact runtime workload-set correction.",
+        "Focused runtime regression preserving generic gpu-heavy rejection."
+      ],
+      "validation": [],
+      "resume_condition": "Patch only the three stale runtime gates and focused tests, then run repository validation."
+    },
+    {
+      "id": "runtime_activation_and_existing_run_recovery",
+      "status": "PLANNED",
+      "execution_owner": "workspace-local-extract-wave1-runtime-compat-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+lambda",
+      "inputs": [
+        "Validated exact runtime compatibility merge.",
+        "Existing Wave-1 run 39200075204/job 117891019967 and failed request fd30c4c6-6756-55d1-a12d-e3cb16f50d20."
+      ],
+      "outputs": [
+        "Exact merged privileged runtime installed.",
+        "Existing Wave-1 execution recovered without a second trigger."
+      ],
+      "validation": [],
+      "resume_condition": "Begin only after exact runtime compatibility patch is merged."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "existing-wave1-run",
+      "kind": "github_workflow_run",
+      "identity": "39200075204",
+      "required_for_resume": true,
+      "evidence": [
+        "workflow_job_id=117891019967",
+        "candidate_sha=522430a6e9bfdd2977dd8517c5af9db4d1bdbf06",
+        "exact trigger already issued once; do not retrigger"
+      ]
+    },
+    {
+      "id": "failed-wave1-runtime-request",
+      "kind": "runtime_request",
+      "identity": "fd30c4c6-6756-55d1-a12d-e3cb16f50d20",
+      "required_for_resume": true,
+      "evidence": [
+        "status=FAILED",
+        "error_type=RuntimeLaunchError",
+        "error=autonomous profile rejected: gpu-heavy",
+        "no runtime receipt, no transient unit, no CPU/GPU residue, no lane quarantine"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "scripts/lambda_ci_runtime.py",
+      "state": "existing_privileged_runtime_source",
+      "role": "final exact model-eval/gpu-heavy runtime workload gates",
+      "origin": "workspace-control",
+      "persistence": "git+installed root provisioner runtime",
+      "regeneration": "install through unchanged scripts/bootstrap_lambda_ci_p5.sh",
+      "review_requirement": "finite explicit Wave-1 addition only; preserve generic gpu-heavy rejection",
+      "evidence": []
+    },
+    {
+      "path": "tests/test_lambda_ci_p5_gpu_runtime.py",
+      "state": "regression_target",
+      "role": "privileged GPU runtime workload-boundary regression coverage",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": "normal source control",
+      "review_requirement": "prove exact Wave-1 dispatch/model requirement and generic gpu-heavy rejection",
+      "evidence": []
+    }
+  ],
+  "validation": [
+    {
+      "check": "Runtime compatibility root cause",
+      "result": "PASS",
+      "evidence": [
+        "Durable provisioner state reports status FAILED, error_type RuntimeLaunchError, error autonomous profile rejected: gpu-heavy.",
+        "No root runtime receipt, transient unit, runner log, CPU process, GPU process, or lane quarantine was created.",
+        "scripts/lambda_ci_runtime.py promoted-model workload set omits model-eval-local-extract-wave1.",
+        "scripts/lambda_ci_runtime.py launch_gpu_runner allows gpu-heavy only for model-eval-dual-gpu.",
+        "scripts/lambda_ci_runtime.py launch_runner dispatches gpu-heavy only for model-eval-dual-gpu."
+      ]
+    },
+    {
+      "check": "Runtime compatibility patch",
+      "result": "NOT_RUN",
+      "evidence": [
+        "Implementation committed on wave1-runtime-compat-v1.",
+        "scripts/lambda_ci_runtime.py defines exact finite MODEL_EVAL_WORKLOADS and DUAL_GPU_MODEL_EVAL_WORKLOADS including model-eval-local-extract-wave1.",
+        "The promoted-model verification, gpu-heavy launch_gpu_runner guard, and launch_runner dispatcher all use the explicit workload sets.",
+        "tests/test_lambda_ci_p5_gpu_runtime.py now proves both authorized dual-GPU workloads dispatch, both require promoted model binding, and generic gpu-heavy remains rejected.",
+        "No manifest, workload-policy, workflow, model object, expanded runtime, GPU UUID, or research-engine changes were made."
+      ]
+    },
+    {
+      "check": "Exact privileged runtime activation",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Existing Wave-1 execution recovery",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Open a narrow PR and require task contracts, unit regression, GPU runtime tests, controller validation, and full integration contracts to pass.",
+    "Inspect the exact validated diff and merge only if scope remains limited to privileged runtime/test + task-state files.",
+    "Install exact merged privileged runtime through unchanged P5 bootstrap.",
+    "Resolve the existing failed request/run recovery path without a second GitHub trigger.",
+    "Return ownership upward once the existing Wave-1 execution is running or a new exact terminal blocker is identified."
+  ],
+  "next_safe_action": "Open and validate the narrow runtime compatibility PR from wave1-runtime-compat-v1. Require exact GPU runtime regression and full Workspace Control validation before merge; do not issue another Wave-1 trigger.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Created after exact controller and provisioner compatibility fixes were installed successfully. The existing request then failed inside privileged runtime before runner creation, exposing three final stale exact-workload guards.\n2026-10-19 implementation checkpoint: all three stale privileged runtime workload gates are patched with explicit finite workload sets; focused tests cover Wave 1 dispatch/model binding while generic gpu-heavy remains rejected."
+}

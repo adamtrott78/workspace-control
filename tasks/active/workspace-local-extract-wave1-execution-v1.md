@@ -36,18 +36,18 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 ## Next safe action
 
-Do not issue another Wave-1 trigger. Read durable state/receipt for accepted request fd30c4c6-6756-55d1-a12d-e3cb16f50d20; GitHub run 39200075204/job 117891019967 remains queued with no assigned runner.
+Do not issue another Wave-1 trigger. Complete bounded child workspace-local-extract-wave1-runtime-compat-v1: patch the three stale privileged runtime exact-workload gates, validate/merge/install exact runtime, then recover existing Wave-1 execution.
 
 ## Remaining work
 
-- Read durable root provisioner state and runtime receipt for request fd30c4c6-6756-55d1-a12d-e3cb16f50d20.
-- Follow existing run 39200075204/job 117891019967 after worker state is resolved; do not trigger a second run.
+- Complete workspace-local-extract-wave1-runtime-compat-v1 and install exact merged privileged runtime; preserve accepted manifest/policy/model/runtime/GPU identities and generic gpu-heavy DENY.
+- Resolve/recover existing run 39200075204/job 117891019967 without another trigger.
 - Read Wave-1 report artifact and final root receipt; require exact model/runtime/two-GPU identity, non-scientific state, cleanup/postverify PASS, no residue/quarantine, then classify PROMISING/PARTIAL/REJECT.
 - Checkpoint the result into research-engine-local-extract-redesign-v1 and archive support tasks.
 
 ## Blockers / gates
 
-- Post-acceptance worker state unresolved: root provisioner accepted the sole authorized Wave-1 request, but GitHub still shows job 117891019967 queued/no runner. Durable request state/receipt is required before any further execution decision.
+- Privileged runtime compatibility blocker: scripts/lambda_ci_runtime.py has three stale exact-workload gates that omit model-eval-local-extract-wave1. Existing request is terminal FAILED before runner creation; no benchmark execution occurred.
 
 ## Fresh-chat initialization
 
