@@ -172,3 +172,27 @@ The helper is read-only with respect to both input trees and records evidence
 outside the runtime. It uses the disposable reference only as a path/type oracle;
 all projected bytes, modes, ownership checks, sizes, symlink targets, and the
 final digest come from the existing live canonical tree.
+
+## Projection PASS evidence
+
+Read-only projection completed successfully on 2026-10-19.
+
+- candidate extras: 868 files / 172 directories / 0 symlinks
+- reference-only paths: 0
+- type mismatches: 0
+- non-__pycache__ extras: 0
+- projected tree: 53583 files / 6069 directories / 4 symlinks
+- projected materialized bytes: 11067818797
+- projected digest: `b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63`
+- retained non-root-owned paths: 0
+- retained writable paths: 0
+- live runtime mutated: false
+
+Evidence directory:
+`/home/atrott/adamArchives/Adam/workspace-control-tmp/runtime-drift-projection-20261019T010548Z`
+
+Evidence SHA-256:
+
+- live tree: `0425192015698c4440395cc1b011137fd8f03662e8c10f84b9c563b16e9c020d`
+- candidate difference: `4aedbbc374255ba17d21a82a13be6e3d719f25a864e3b88ba44384d0c4f12ad5`
+- projection summary: `b70cf7b8d03a3f26acfec04117a1d30b80b7b695439e4e1b54320504a9120eda`
