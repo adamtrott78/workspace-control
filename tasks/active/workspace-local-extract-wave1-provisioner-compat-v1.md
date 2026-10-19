@@ -23,8 +23,8 @@ Allow the already-live and already-triggered Local EXTRACT Wave 1 workload throu
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: wave1-provisioner-compat-v1
-- Remote checkpoint: f838bb35bdad72f733f0480067f52bda4f9bab7a
+- Remote branch: main
+- Remote checkpoint: 9393dd2ad27c30d3a0db5d8e0f537a311f015d96
 - Remote verified: true
 
 ### research-engine
@@ -36,15 +36,15 @@ Allow the already-live and already-triggered Local EXTRACT Wave 1 workload throu
 
 ## Next safe action
 
-Open and validate the narrow provisioner compatibility PR from wave1-provisioner-compat-v1. Require task contracts, provisioner-service regression, unit/full integration validation, and exact diff review before merge. Do not issue another Wave-1 trigger.
+At the genuine root-control-plane boundary, install exact workspace-control merge 9393dd2ad27c30d3a0db5d8e0f537a311f015d96 through unchanged scripts/bootstrap_lambda_ci_p5.sh. Verify manifest/policy identities remain unchanged and the GPU controller has zero restart delta after activation. Then resume ChatGPT/GitHub control on existing run 39200075204; do not retrigger.
 
 ## Remaining work
 
-- Open a narrow PR and require task contracts, unit regression, provisioner/service tests, and full Workspace Control validation to pass.
-- Inspect exact validated diff and merge only if manifest/policy/model/runtime/workflow identities remain untouched.
-- Install exact merged root provisioner through unchanged P5 bootstrap, then verify service/controller stability.
-- Recover existing request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 / run 39200075204 without retriggering.
-- Return ownership to workspace-local-extract-wave1-controller-compat-v1 after the existing job is claimed.
+- Install exact provisioner compatibility merge 9393dd2ad27c30d3a0db5d8e0f537a311f015d96 through the unchanged root-owned P5 bootstrap; no autonomous privileged deploy workflow exists.
+- Verify accepted manifest/policy blobs are unchanged and all three control-plane services are active.
+- Verify GPU-controller restart count is stable after activation and the stale provisioner rejection no longer recurs.
+- Confirm existing deterministic request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 is accepted and run 39200075204 / job 117891019967 is claimed without retriggering.
+- Return ownership to workspace-local-extract-wave1-controller-compat-v1 after job claim.
 
 ## Blockers / gates
 
