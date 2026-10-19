@@ -28,6 +28,7 @@ OOM_PROBE_BLOB = "8330b3621f80dbe78e413234deec4b4f433e2ce7"
 MANIFEST = pathlib.Path("/etc/workspace-ci/projects/research-engine.json")
 PROFILES = pathlib.Path("/etc/workspace-ci/lambda-ci-systemd-profiles.v1.json")
 PINS = pathlib.Path("/etc/workspace-ci/lambda-ci-upstream-pins.v1.json")
+POLICY = pathlib.Path("/etc/workspace-ci/lambda-ci-workload-policy.v1.json")
 INSTALLED_MODULES = pathlib.Path("/opt/workspace-ci/provisioner")
 
 
@@ -37,6 +38,26 @@ def load(path: pathlib.Path):
 
 def receipt_path(spec, request_id: str) -> pathlib.Path:
     return pathlib.Path(spec["paths"]["logs"]) / f"p5-{request_id}-receipt.json"
+
+
+def assert_dormant_policy(manifest: dict, policy: dict) -> None:
+    live = manifest["admission_v2"]["live_enabled_workload_classes"]
+    assert "model-eval-dual-gpu" not in live
+    assert "gpu-heavy" not in live
+
+    route = manifest["admission_v2"]["routes"]["model-eval-dual-gpu"]
+    assert route["execution_profile"] == "gpu-heavy"
+    assert route["model_binding_id"] == "qwen3.5-4b"
+
+    dual = policy["workload_classes"]["model-eval-dual-gpu"]
+    assert dual["policy_decision"] == "DESIGNED_NOT_LIVE"
+    assert dual["admission_enabled_after_enforcement"] is False
+    assert dual["resource_class"] == "model_eval_dual_gpu_v1"
+    assert dual["activation_gate"] == "EXACT_TWO_GPU_HOST_ACCEPTANCE_REQUIRED"
+
+    generic = policy["workload_classes"]["gpu-heavy"]
+    assert generic["policy_decision"] == "DENY"
+    assert generic["admission_enabled_after_enforcement"] is False
 
 
 def assert_common(receipt: dict) -> None:
@@ -197,12 +218,9 @@ def main() -> int:
     manifest = load(MANIFEST)
     profiles = load(PROFILES)
     pins = load(PINS)
+    policy = load(POLICY)
 
-    live = manifest["admission_v2"]["live_enabled_workload_classes"]
-    assert "model-eval-dual-gpu" not in live
-    assert "gpu-heavy" not in live
-    route = manifest["admission_v2"]["routes"]["model-eval-dual-gpu"]
-    assert route["admission_enabled_after_enforcement"] is False
+    assert_dormant_policy(manifest, policy)
 
     timeout_path, timeout_receipt, timeout_error = run_gate(
         provisioner, runtime, manifest, profiles, pins, "timeout"

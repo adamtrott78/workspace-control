@@ -117,6 +117,45 @@ class DualFailureAcceptanceReceiptTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             acceptance.assert_oom_receipt(value)
 
+    def test_dormant_policy_reads_activation_from_workload_policy(self):
+        manifest = {
+            "admission_v2": {
+                "live_enabled_workload_classes": [
+                    "cpu-test",
+                    "gpu-small",
+                    "model-eval-single-gpu",
+                ],
+                "routes": {
+                    "model-eval-dual-gpu": {
+                        "execution_profile": "gpu-heavy",
+                        "model_binding_id": "qwen3.5-4b",
+                    },
+                },
+            },
+        }
+        policy = {
+            "workload_classes": {
+                "model-eval-dual-gpu": {
+                    "policy_decision": "DESIGNED_NOT_LIVE",
+                    "admission_enabled_after_enforcement": False,
+                    "resource_class": "model_eval_dual_gpu_v1",
+                    "activation_gate": "EXACT_TWO_GPU_HOST_ACCEPTANCE_REQUIRED",
+                },
+                "gpu-heavy": {
+                    "policy_decision": "DENY",
+                    "admission_enabled_after_enforcement": False,
+                },
+            },
+        }
+
+        acceptance.assert_dormant_policy(manifest, policy)
+
+        policy["workload_classes"]["model-eval-dual-gpu"][
+            "admission_enabled_after_enforcement"
+        ] = True
+        with self.assertRaises(AssertionError):
+            acceptance.assert_dormant_policy(manifest, policy)
+
 
 if __name__ == "__main__":
     unittest.main()
