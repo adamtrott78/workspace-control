@@ -18,9 +18,11 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Return to first principles on research-engine EXTRACT and identify, benchmark, and if justified implement a provenance-preserving mostly-local extraction architecture that makes STANDARD Codex a rare ambiguity/failure fallback rather than the default, while reusing accepted local document/VERIFY infrastructure and not repeating approaches already invalidated by durable evidence.
 
-## Parent execution owner
+## Workflow
 
-research-engine-local-document-pipeline-v1
+- Repository: workspace-control
+- Path: workflows/evidence-first-solution-research.v1.json
+- Checkpoint: a9041372c50bf1258daea2236a3e62542a115117
 
 ## Repositories
 
@@ -28,32 +30,26 @@ research-engine-local-document-pipeline-v1
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 796dd9fb9c5fd25009d756a4fd42d53b85a5ac3d
+- Remote checkpoint: a9041372c50bf1258daea2236a3e62542a115117
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 5f6eec7b629b4746117f2f0a74d4531c642f8025
+- Remote checkpoint: 2de0fb0c0049499507661ae5d3e4bea0f5c41720
 - Remote verified: true
 - Local path: /home/atrott/adamArchives/Adam/research-engine
 - Local branch: main
 - Local HEAD: 5f6eec7b629b4746117f2f0a74d4531c642f8025
-- Local clean: true
-
-## Current stage
-
-architecture_selection_and_benchmark_contract
+- Local clean: True
 
 ## Next safe action
 
-Wait only for the two already-running contract validations: research-engine PR #95 and workspace-control PR #70. If both pass, merge them, verify the resulting canonical SHAs, bind this task to the exact merged `workflows/evidence-first-solution-research.v1.json` identity, mark `architecture_selection_and_benchmark_contract` VALIDATED, and begin Phase 1 of `bounded_local_extract_prototype`: an offline zero-materialization preserved-EXTRACT dataset adapter plus deterministic lexical/section retrieval baseline and exact teacher-quote/page recall measurement. Do not download any new heavyweight model and do not change production VERIFY during Phase 1.
+Implement Phase 1 on research-engine main 2de0fb0c0049499507661ae5d3e4bea0f5c41720: add a zero-materialization preserved-EXTRACT dataset adapter over the existing nine-paper run, plus a deterministic lexical/section retrieval baseline that ranks exact source regions and measures teacher quote/page recall. Reuse PaperPackageABPlanner/ResearchContextHydrator and current provenance contracts; do not call SemanticResultMaterializer, do not change production routing/VERIFY, and do not download or invoke a new model. Land unit tests and a read-only benchmark entrypoint first. After CI passes, run the benchmark against the preserved Lambda dataset through an already-authorized bounded execution path or add the smallest separately reviewed execution route required; do not widen generic gpu-heavy.
 
 ## Remaining work
 
-- Land and pin the reusable workspace-control evidence-first-solution-research workflow (PR #70) so future project/chat architecture decisions can invoke the same method before implementation.
-- Land the research-engine Local Evidence Agent v1 contract (PR #95). Its first CI attempt was cancelled before runner assignment with zero steps; the unchanged job has been retried.
 - Phase 1 — offline substrate/retrieval: build a zero-materialization adapter over preserved EXTRACT jobs, measure deterministic lexical/section retrieval and exact teacher-quote/page recall before adding any model.
 - Phase 2 — first-wave local evidence path: add exact candidate-span handling, use the existing certified Qwen3.5-4B only for bounded quote-to-atomic-claim normalization, and add an independent local scientific verifier/completeness audit. Do not download a new heavyweight model yet.
 - Phase 3 — measure the combined system: claim precision/coverage, grounding/page/type agreement, unsupported-claim rate, job-local completion fraction, Codex fallback fraction, latency/VRAM/RAM, and remote token suppression.
@@ -64,8 +60,7 @@ Wait only for the two already-running contract validations: research-engine PR #
 
 ## Blockers / gates
 
-- research-engine PR #95 contract CI retry is pending after the first attempt was cancelled in queue with runner_id=0 and zero executed steps; this is an external CI scheduling boundary, not a code/test failure.
-- workspace-control PR #70 full-integration validation is pending before the shared evidence-first workflow can be pinned by this task.
+- None.
 
 ## Fresh-chat initialization
 
@@ -77,6 +72,6 @@ Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/research-engine-local-extract-redesign-v1.json
 
 Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the complete handoff.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
