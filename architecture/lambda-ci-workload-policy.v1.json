@@ -348,6 +348,22 @@
       "runtime_binding": "REQUIRED_EXPANDED_RUNTIME_EXACT",
       "model_registry_credential_forbidden": true,
       "activation_gate": "DUAL_HOST_FAILURE_GATES_REQUIRED_BEFORE_MERGE"
+    },
+    "model-eval-local-extract-wave1": {
+      "policy_decision": "EXISTING_P5_CAPABILITY",
+      "admission_enabled_after_enforcement": true,
+      "execution_plane": "jit_runner",
+      "candidate_payload_allowed": true,
+      "resource_class": "model_eval_dual_gpu_v1",
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "payload_secret_class": "CONTROL_PLANE_EPHEMERAL_ONLY",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_TRUSTED_CACHE_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_binding": "REQUIRED_PROMOTED_EXACT",
+      "runtime_binding": "REQUIRED_EXPANDED_RUNTIME_EXACT",
+      "model_registry_credential_forbidden": true,
+      "activation_gate": "EXACT_LOCAL_EXTRACT_WAVE1_WORKFLOW_ONLY"
     }
   },
   "project_bindings": {
@@ -359,7 +375,8 @@
         "model-acquire",
         "cache-promote",
         "model-eval-single-gpu",
-        "model-eval-dual-gpu"
+        "model-eval-dual-gpu",
+        "model-eval-local-extract-wave1"
       ],
       "denied_workload_classes": [
         "gpu-heavy"
@@ -417,6 +434,18 @@
         "scientific": false,
         "production_routing_change": false,
         "activation_status": "LIVE_BOUNDED_AFTER_HOST_ACCEPTANCE"
+      },
+      "local_extract_wave1": {
+        "workload_class": "model-eval-local-extract-wave1",
+        "resource_class": "model_eval_dual_gpu_v1",
+        "model_id": "qwen3.5-4b",
+        "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+        "workflow_path": ".github/workflows/lambda-ci-local-extract-wave1.yml",
+        "workflow_blob_sha": "a5be693f750c481db21d86d239a505083aae40aa",
+        "source_corpus": "rf-open-world-corpus-expansion-v1",
+        "scientific_state_materialized": false,
+        "production_routing_change": false,
+        "activation_status": "LIVE_ONLY_AFTER_EXACT_HOST_INSTALL"
       }
     }
   },
