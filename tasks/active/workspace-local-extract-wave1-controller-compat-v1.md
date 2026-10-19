@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-local-extract-wave1-controller-compat-v1
 - Title: Local EXTRACT Wave 1 controller compatibility
-- Status: SUSPENDED
+- Status: VALIDATING
 - Capsule schema: v2
 
 ## Goal
@@ -24,7 +24,7 @@ Make the already-authorized and already-triggered Local EXTRACT Wave 1 job claim
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a895daaee6c744c569b45d44d72e2ea3d38df15d
+- Remote checkpoint: 6437ee9745468401f7c0d5daa40ea72e3be46257
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,18 @@ Make the already-authorized and already-triggered Local EXTRACT Wave 1 job claim
 
 ## Next safe action
 
-Resume only after one bounded HUMAN_TERMINAL root install of exact controller merge a895daaee6c744c569b45d44d72e2ea3d38df15d using unchanged scripts/bootstrap_lambda_ci_p5.sh. The user should return the exact install output; then ChatGPT must immediately follow existing run 39200075204 / job 117891019967 through GitHub. Do not issue another Wave-1 trigger.
+Execute bounded child task workspace-local-extract-wave1-provisioner-compat-v1. Patch only the stale root provisioner gpu-heavy workload guard and focused service tests so the already-authorized model-eval-local-extract-wave1 may use the existing gpu-heavy/two-GPU envelope; generic gpu-heavy remains DENY. Do not issue another Wave-1 trigger.
 
 ## Remaining work
 
-- At the genuine root-control-plane boundary, perform one bounded HUMAN_TERMINAL sudo bootstrap from exact workspace-control controller merge a895daaee6c744c569b45d44d72e2ea3d38df15d; do not use or normalize the user's dirty canonical checkout.
-- Verify P5_INSTALL=PASS, exact accepted manifest/policy blobs unchanged, all three control-plane services active, and controller NRestarts/ExecMainStatus healthy.
-- Resume ChatGPT/GitHub control immediately after that root install; recover existing run 39200075204 / job 117891019967 without retriggering.
-- Once the existing job is claimed, mark this child COMPLETE and return ownership to workspace-local-extract-wave1-execution-v1.
+- Complete bounded child task workspace-local-extract-wave1-provisioner-compat-v1: permit only the already-authorized model-eval-local-extract-wave1 alongside model-eval-dual-gpu in the root provisioner gpu-heavy guard, with fail-closed regression coverage.
+- Validate/merge the provisioner compatibility fix and install the exact merged root-owned provisioner through the unchanged P5 bootstrap path.
+- Verify the GPU controller stops crash-looping, the deterministic existing request is accepted, and existing run 39200075204 / job 117891019967 is claimed without retriggering.
+- Then mark this controller child COMPLETE and return ownership to workspace-local-extract-wave1-execution-v1.
 
 ## Blockers / gates
 
-- Root-controller install gate: workspace-control exposes only .github/workflows/workspace-control-validation.yml; there is no authorized GitHub deployment workflow for replacing the root-owned Lambda controller binary. The project runner/provisioner privilege split intentionally does not permit arbitrary root code installation. One bounded HUMAN_TERMINAL sudo bootstrap of exact controller merge a895daaee6c744c569b45d44d72e2ea3d38df15d is required before the existing queued Wave-1 run can be recovered.
+- Provisioner compatibility blocker: scripts/lambda_ci_provisioner_service.py hard-codes gpu-heavy admission to model-eval-dual-gpu only. The exact Wave-1 workload is already live-enabled by root manifest/policy and reaches the provisioner correctly, but is rejected before runner launch. A bounded provisioner compatibility child task is required; do not retrigger.
 
 ## Fresh-chat initialization
 

@@ -347,10 +347,15 @@ class ProvisionerService:
                     )
                 if (
                     req.profile == "gpu-heavy"
-                    and req.workload_class != "model-eval-dual-gpu"
+                    and req.workload_class
+                    not in {
+                        "model-eval-dual-gpu",
+                        "model-eval-local-extract-wave1",
+                    }
                 ):
                     raise ServiceError(
-                        "gpu-heavy admission is limited to model-eval-dual-gpu"
+                        "gpu-heavy admission is limited to explicitly "
+                        "authorized dual-GPU workloads"
                     )
 
                 quarantined = self._lane_quarantine_response(
