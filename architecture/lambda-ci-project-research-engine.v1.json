@@ -75,7 +75,8 @@
       "cpu-test",
       "gpu-small",
       "model-eval-single-gpu",
-      "model-eval-dual-gpu"
+      "model-eval-dual-gpu",
+      "model-eval-local-extract-wave1"
     ],
     "routes": {
       "cpu-test": {
@@ -151,9 +152,28 @@
             "command": "/lambda-ci-qwen35-dual-pilot"
           }
         }
+      },
+      "model-eval-local-extract-wave1": {
+        "scale_set_name": "lambda-research-engine-gpu",
+        "execution_profile": "gpu-heavy",
+        "model_binding_id": "qwen3.5-4b",
+        "trusted_workflow": {
+          "path": ".github/workflows/lambda-ci-local-extract-wave1.yml",
+          "ref": "refs/heads/main",
+          "job_workflow_ref": "adamtrott78/research-engine/.github/workflows/lambda-ci-local-extract-wave1.yml@refs/heads/main",
+          "blob_sha": "a5be693f750c481db21d86d239a505083aae40aa",
+          "event_name": "issue_comment",
+          "allowed_actors": [
+            "adamtrott78"
+          ],
+          "job_display_claim": {
+            "version": "wc-admission-v1",
+            "command": "/lambda-ci-local-extract-wave1"
+          }
+        }
       }
     },
-    "activation_note": "Staged post-host-gate activation: cpu-test, gpu-small, model-eval-single-gpu, and the exact model-eval-dual-gpu route are live-enabled by this candidate manifest. Generic gpu-heavy remains denied; this branch must not merge or install until dual timeout/cancel and dual CUDA-OOM root acceptance both PASS."
+    "activation_note": "Live accepted P5 classes include cpu-test, gpu-small, bounded single/dual Qwen model evaluation, and the exact-workflow Local EXTRACT Wave 1 benchmark route. The Wave 1 route is pinned to research-engine workflow blob a5be693f750c481db21d86d239a505083aae40aa, uses the already-accepted two-GPU/model/runtime envelope, may fetch only public benchmark payloads inside that envelope, and may not materialize scientific state or change production routing. Generic gpu-heavy remains denied."
   },
   "expanded_runtime_bindings": {
     "gpu-small": {
