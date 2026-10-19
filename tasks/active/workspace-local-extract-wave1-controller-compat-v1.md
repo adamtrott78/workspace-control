@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-local-extract-wave1-controller-compat-v1
 - Title: Local EXTRACT Wave 1 controller compatibility
-- Status: VALIDATING
+- Status: SUSPENDED
 - Capsule schema: v2
 
 ## Goal
@@ -36,18 +36,18 @@ Make the already-authorized and already-triggered Local EXTRACT Wave 1 job claim
 
 ## Next safe action
 
-Inspect existing workspace-control deployment/control-plane routes for an authorized autonomous way to install exact merge a895daaee6c744c569b45d44d72e2ea3d38df15d as the root-owned Lambda controller. Prefer an existing trusted route; do not invent a new privilege path and do not issue another Wave-1 trigger.
+Resume only after one bounded HUMAN_TERMINAL root install of exact controller merge a895daaee6c744c569b45d44d72e2ea3d38df15d using unchanged scripts/bootstrap_lambda_ci_p5.sh. The user should return the exact install output; then ChatGPT must immediately follow existing run 39200075204 / job 117891019967 through GitHub. Do not issue another Wave-1 trigger.
 
 ## Remaining work
 
-- Discover whether workspace-control already has an authorized autonomous deployment/control-plane route that can install the exact merged root-owned controller a895daaee6c744c569b45d44d72e2ea3d38df15d.
-- If such a route exists, use it and verify exact installed controller identity/service health; otherwise stop at the genuine root-control-plane human gate rather than asking the user to execute the research workload.
-- Recover existing research-engine run 39200075204 / job 117891019967 after controller activation without retriggering.
-- Once the existing job is claimed, return ownership to workspace-local-extract-wave1-execution-v1.
+- At the genuine root-control-plane boundary, perform one bounded HUMAN_TERMINAL sudo bootstrap from exact workspace-control controller merge a895daaee6c744c569b45d44d72e2ea3d38df15d; do not use or normalize the user's dirty canonical checkout.
+- Verify P5_INSTALL=PASS, exact accepted manifest/policy blobs unchanged, all three control-plane services active, and controller NRestarts/ExecMainStatus healthy.
+- Resume ChatGPT/GitHub control immediately after that root install; recover existing run 39200075204 / job 117891019967 without retriggering.
+- Once the existing job is claimed, mark this child COMPLETE and return ownership to workspace-local-extract-wave1-execution-v1.
 
 ## Blockers / gates
 
-- None.
+- Root-controller install gate: workspace-control exposes only .github/workflows/workspace-control-validation.yml; there is no authorized GitHub deployment workflow for replacing the root-owned Lambda controller binary. The project runner/provisioner privilege split intentionally does not permit arbitrary root code installation. One bounded HUMAN_TERMINAL sudo bootstrap of exact controller merge a895daaee6c744c569b45d44d72e2ea3d38df15d is required before the existing queued Wave-1 run can be recovered.
 
 ## Fresh-chat initialization
 
