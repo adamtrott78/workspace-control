@@ -4,7 +4,7 @@
   "title": "Research Engine Mostly-Local EXTRACT Redesign v1",
   "status": "IN_PROGRESS",
   "goal": "Return to first principles on research-engine EXTRACT and identify, benchmark, and if justified implement a provenance-preserving mostly-local extraction architecture that makes STANDARD Codex a rare ambiguity/failure fallback rather than the default, while reusing accepted local document/VERIFY infrastructure and not repeating approaches already invalidated by durable evidence.",
-  "execution_topology": "composed",
+  "execution_topology": "remote_only",
   "workflow": {
     "repository": "workspace-control",
     "path": "workflows/evidence-first-solution-research.v1.json",
@@ -47,7 +47,7 @@
       "base_sha": "796dd9fb9c5fd25009d756a4fd42d53b85a5ac3d",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "a9041372c50bf1258daea2236a3e62542a115117",
+        "checkpoint_sha": "453f5aa3f1386f87dcb3a256de6f31496c5346a9",
         "verified": true
       },
       "local": null,
@@ -62,15 +62,10 @@
       "base_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "2de0fb0c0049499507661ae5d3e4bea0f5c41720",
+        "checkpoint_sha": "4ffd429086c76da9759de2a34bdf0bc0de21d522",
         "verified": true
       },
-      "local": {
-        "checkout_path": "/home/atrott/adamArchives/Adam/research-engine",
-        "branch": "main",
-        "head_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
-        "clean": true
-      },
+      "local": null,
       "allowed_mutation_scope": [
         "benchmarks/**",
         "src/research_engine/**",
@@ -241,7 +236,47 @@
         "local scientific verifier/completeness interfaces",
         "Codex residual fallback decision record"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Deterministic retrieval diversification",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #126 merged as 1ff47e708c7ad6dd002930e63e1100fc6532932a.",
+            "FACET_INTERLEAVED_BM25_V1 adds fixed method/dataset/evaluation/robustness retrieval facets, deterministic deduplication, named retrieval channels, and recall/source-character frontiers.",
+            "No model call, scientific-state materialization, production routing change, or new execution authority was introduced."
+          ]
+        },
+        {
+          "check": "Bounded Qwen EXTRACT Wave 1 implementation",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #128 CI PASS and merged as 4ffd429086c76da9759de2a34bdf0bc0de21d522.",
+            "Wave 1 fixture contains the preserved 9-paper / 71-evidence-object historical oracle.",
+            "Implementation uses exact-SHA ephemeral arXiv acquisition, FACET_INTERLEAVED_BM25_V1, fixed top-12 exact source regions per paper, and one fixed Qwen3.5-4B configuration with tensor_parallel_size=2 and 9 model calls total.",
+            "Qwen is restricted to candidate_id/type/normalized_form/confidence; raw_source_form/page/offset/source layer are copied deterministically from authoritative PDF regions.",
+            "Decision logic is hard-bounded to PROMISING/PARTIAL/REJECT; scientific_state_materialized=false and production_routing_changed=false.",
+            "Dedicated workflow .github/workflows/lambda-ci-local-extract-wave1.yml blob a5be693f750c481db21d86d239a505083aae40aa exists but has not run on Lambda because its workload class is not yet admitted."
+          ]
+        },
+        {
+          "check": "Wave 1 parser parity candidate",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #129 is OPEN and CI PASS at exact head 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d.",
+            "Its only change is PdfReader(str(path), strict=True) -> PdfReader(str(path)), matching production ResearchContextHydrator parser behavior.",
+            "Candidate Wave-1 module blob is 4dac18c4ac0b7754d604a60c46948bc2cc8f6772.",
+            "PR #129 is intentionally left open to serve as the exact issue_comment trigger candidate after admission is installed; do not mutate its head before the first authorized Wave-1 run."
+          ]
+        },
+        {
+          "check": "Parallel atomic-normalizer branch closure",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #127 was closed unmerged as superseded by PR #128's integrated fail-closed claim guard.",
+            "Do not revive or merge PR #127 unless a later measured Wave-1 residual creates a new explicit need."
+          ]
+        }
+      ],
       "resume_condition": "First-wave decomposition can execute offline and quantify where retrieval, normalization, local verification, or completeness still requires escalation."
     },
     {
@@ -324,14 +359,20 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "2de0fb0c0049499507661ae5d3e4bea0f5c41720",
+      "identity": "929e04bc171789f7bf3eaf2c1f37d4b801de6a9d",
       "required_for_resume": true,
       "evidence": [
         "stage=bounded_local_extract_prototype",
-        "evidence-first workflow merged workspace-control a9041372c50bf1258daea2236a3e62542a115117 / blob 4ec7a2294d97c94834b04aba227a1f61bceac3fd",
-        "Local Evidence Agent v1 contract merged research-engine 2de0fb0c0049499507661ae5d3e4bea0f5c41720 / blob cb28281d2acd4a9603b472e844c1652ea7dc3716",
-        "production EXTRACT remains STANDARD Codex; accepted Qwen VERIFY remains unchanged",
-        "next=zero-materialization preserved-job adapter + deterministic retrieval/teacher-quote recall baseline; no new model download"
+        "research-engine main=4ffd429086c76da9759de2a34bdf0bc0de21d522 (PR #128 merged Wave-1 implementation)",
+        "retrieval diversification PR #126 merged=1ff47e708c7ad6dd002930e63e1100fc6532932a",
+        "exact frozen candidate=PR #129 head 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d; CI PASS; parser parity only",
+        "candidate Wave-1 module blob=4dac18c4ac0b7754d604a60c46948bc2cc8f6772",
+        "trusted workflow path=.github/workflows/lambda-ci-local-extract-wave1.yml",
+        "trusted workflow blob=a5be693f750c481db21d86d239a505083aae40aa",
+        "model-eval-local-extract-wave1 absent from live manifest/policy; do not trigger yet",
+        "workflow requires bounded public payload acquisition for pinned pypdf + exact-SHA arXiv PDFs; admission network authority must be explicitly reviewed",
+        "PR #127 closed unmerged as superseded",
+        "hard stop after one fixed nine-paper run with PROMISING/PARTIAL/REJECT"
       ]
     }
   ],
@@ -347,18 +388,19 @@
       ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Phase 1 — offline substrate/retrieval: build a zero-materialization adapter over preserved EXTRACT jobs, measure deterministic lexical/section retrieval and exact teacher-quote/page recall before adding any model.",
-    "Phase 2 — first-wave local evidence path: add exact candidate-span handling, use the existing certified Qwen3.5-4B only for bounded quote-to-atomic-claim normalization, and add an independent local scientific verifier/completeness audit. Do not download a new heavyweight model yet.",
-    "Phase 3 — measure the combined system: claim precision/coverage, grounding/page/type agreement, unsupported-claim rate, job-local completion fraction, Codex fallback fraction, latency/VRAM/RAM, and remote token suppression.",
-    "Phase 4 — residual-only escalation: add GLiNER2.5 / compact reranker / scientific verifier components only where measured first-wave residuals justify them; open NuExtract3, Lift 9B, or Qwen3.6-35B-A3B one at a time only if lighter decomposition cannot meet gates.",
-    "Phase 5 — teacher adaptation: retain verified Codex fallback cases as versioned training/evaluation data with paper-level holdouts; use them to reduce fallback frequency without contaminating evaluation.",
-    "Phase 6 — VERIFY impact measurement: after EXTRACT meets promotion gates, compare the new pre-materialization local verifier with current post-materialization page-scoped Qwen VERIFY. Preserve current VERIFY unchanged until evidence shows whether it should stay independent, narrow to residual/sample audit, or be separately redesigned.",
-    "Phase 7 — production integration only after passing gates: local-first EXTRACT with Codex STANDARD as rare fallback, empirical fallback telemetry, accepted VERIFY behavior, and separate Lambda acceptance."
+  "blockers": [
+    "Lambda admission gap: workspace-control live_enabled_workload_classes currently has cpu-test, gpu-small, model-eval-single-gpu, and model-eval-dual-gpu only. No manifest route or workload-policy entry exists for model-eval-local-extract-wave1, so PR #129 must not be triggered yet.",
+    "Admission-design constraint: Wave-1 workflow blob a5be693f750c481db21d86d239a505083aae40aa intentionally performs bounded public payload acquisition (pinned pypdf wheel plus exact-SHA historical arXiv PDFs). It therefore cannot blindly clone model-eval-dual-gpu's GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE network class. The smallest reviewed route must preserve exact promoted model/runtime/two-GPU authority while explicitly and fail-closedly authorizing only the public-payload behavior required by this trusted workflow. Generic gpu-heavy must remain DENY."
   ],
-  "next_safe_action": "Implement Phase 1 on research-engine main 2de0fb0c0049499507661ae5d3e4bea0f5c41720: add a zero-materialization preserved-EXTRACT dataset adapter over the existing nine-paper run, plus a deterministic lexical/section retrieval baseline that ranks exact source regions and measures teacher quote/page recall. Reuse PaperPackageABPlanner/ResearchContextHydrator and current provenance contracts; do not call SemanticResultMaterializer, do not change production routing/VERIFY, and do not download or invoke a new model. Land unit tests and a read-only benchmark entrypoint first. After CI passes, run the benchmark against the preserved Lambda dataset through an already-authorized bounded execution path or add the smallest separately reviewed execution route required; do not widen generic gpu-heavy.",
+  "remaining_work": [
+    "Wave 1 admission — add the smallest separately reviewed model-eval-local-extract-wave1 manifest/policy route for exact workflow blob a5be693f750c481db21d86d239a505083aae40aa and command /lambda-ci-local-extract-wave1, reusing the validated dual-GPU resource/model/runtime binding while explicitly reviewing the bounded public-payload network requirement. Do not enable generic gpu-heavy.",
+    "Wave 1 host activation — merge green workspace-control admission, install the exact resulting workspace-control SHA on Lambda through the accepted bootstrap/install path, and verify only the intended workload class becomes live with control-plane health and zero residue.",
+    "Wave 1 execution — while PR #129 remains at exact head 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d, issue exactly one `/lambda-ci-local-extract-wave1 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d` comment and follow only the resulting dedicated workflow. Do not rerun blindly after any partial/ambiguous execution.",
+    "Wave 1 decision — read the report/artifact and final root receipt, evaluate all 9 papers / 71 historical evidence objects under the one fixed configuration, and stop this wave with PROMISING, PARTIAL, or REJECT. Do not change production EXTRACT/VERIFY routing, download/test a larger model, broaden gpu-heavy, or begin an open-ended prompt/hyperparameter search in this wave.",
+    "After the Wave-1 decision only, decide whether measured residuals justify Phase 4 component/model escalation, teacher adaptation, VERIFY-boundary analysis, or eventual production integration."
+  ],
+  "next_safe_action": "HANDOFF_SAFE Wave-1 boundary. Do not redo architecture/retrieval implementation and do not trigger Lambda yet. Authoritative research-engine main is 4ffd429086c76da9759de2a34bdf0bc0de21d522 (PR #128 merged); exact frozen Wave-1 trigger candidate is OPEN PR #129 head 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d with CI PASS, module blob 4dac18c4ac0b7754d604a60c46948bc2cc8f6772, workflow path .github/workflows/lambda-ci-local-extract-wave1.yml and workflow blob a5be693f750c481db21d86d239a505083aae40aa. PR #127 is closed/superseded and must not be merged. First audit workspace-control admission/provisioner contracts for the smallest new workload class model-eval-local-extract-wave1: preserve the already-validated gpu-heavy/model_eval_dual_gpu_v1 exact two-A4500 resource binding, promoted qwen3.5-4b model binding, expanded-runtime exact binding, read-only trusted model/runtime cache, non-scientific state effect, and generic gpu-heavy DENY. Unlike model-eval-dual-gpu, the exact trusted Wave-1 workflow deliberately downloads a pinned pypdf wheel and exact-SHA historical arXiv PDFs, so explicitly design/test the narrow public-payload network authority required instead of copying the dual lane's payload-offline network class. Bind admission to the exact workflow path/blob and `/lambda-ci-local-extract-wave1` command. Merge only green workspace-control changes, install/verify the exact resulting SHA on Lambda, then issue exactly one `/lambda-ci-local-extract-wave1 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d` comment on PR #129. Follow that run through report plus final root cleanup receipt and stop Wave 1 on PROMISING/PARTIAL/REJECT; no production routing change, larger-model search, generic gpu-heavy enablement, or repeated tuning loop.",
   "last_executor": "chatgpt",
   "last_surface": "github+web+scholar",
-  "notes": "This child task intentionally branches from the accepted local-document/Qwen-VERIFY production checkpoint. It does not invalidate or reopen the parent task's production acceptance.\n\n2026-10-05 consolidated plan: EXTRACT redesign proceeds as a hierarchical evidence agent with current VERIFY preserved as an independent safety layer. The new workspace-level evidence-first solution-research workflow is being promoted in parallel so future chats can perform architecture research before implementation selection.\n2026-10-19 resumed after bounded dual-GPU substrate completion. Evidence-first workflow dependency restaged/merged as workspace-control a9041372c50bf1258daea2236a3e62542a115117, workflow blob 4ec7a2294d97c94834b04aba227a1f61bceac3fd. EXTRACT redesign contract restaged on current research-engine and merged as 2de0fb0c0049499507661ae5d3e4bea0f5c41720, blob cb28281d2acd4a9603b472e844c1652ea7dc3716. Architecture selection is closed VALIDATED; Phase 1 prototype is active."
+  "notes": "This child task intentionally branches from the accepted local-document/Qwen-VERIFY production checkpoint. It does not invalidate or reopen the parent task's production acceptance.\n\n2026-10-05 consolidated plan: EXTRACT redesign proceeds as a hierarchical evidence agent with current VERIFY preserved as an independent safety layer. The new workspace-level evidence-first solution-research workflow is being promoted in parallel so future chats can perform architecture research before implementation selection.\n2026-10-19 resumed after bounded dual-GPU substrate completion. Evidence-first workflow dependency restaged/merged as workspace-control a9041372c50bf1258daea2236a3e62542a115117, workflow blob 4ec7a2294d97c94834b04aba227a1f61bceac3fd. EXTRACT redesign contract restaged on current research-engine and merged as 2de0fb0c0049499507661ae5d3e4bea0f5c41720, blob cb28281d2acd4a9603b472e844c1652ea7dc3716. Architecture selection is closed VALIDATED; Phase 1 prototype is active.\n2026-10-19 Wave-1 handoff hydration after chat-limit interruption: research-engine PR #126 merged 1ff47e708c7ad6dd002930e63e1100fc6532932a (facet-interleaved retrieval); PR #128 CI PASS and merged 4ffd429086c76da9759de2a34bdf0bc0de21d522 (complete bounded nine-paper Qwen EXTRACT Wave 1); PR #129 remains OPEN/green at 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d with one-line pypdf parser parity fix and is frozen as the trigger candidate; workflow blob a5be693f750c481db21d86d239a505083aae40aa. PR #127 closed unmerged as superseded. Current workspace-control has no model-eval-local-extract-wave1 route/policy. Critical policy nuance: Wave 1 requires bounded public payload downloads (pinned pypdf wheel + exact-SHA historical arXiv PDFs), so do not clone the dual model-eval payload-offline network class blindly. Generic gpu-heavy remains DENY. Next operation is the smallest reviewed admission/install, then exactly one PR #129 trigger and a hard stop at PROMISING/PARTIAL/REJECT."
 }
