@@ -257,6 +257,55 @@ def test_v2_dual_model_eval_can_use_gpu_heavy_only_when_root_policy_is_activated
         )
 
 
+def test_v2_local_extract_wave1_can_use_existing_gpu_heavy_envelope():
+    calls = []
+    done = threading.Event()
+
+    def launcher(req, spec):
+        calls.append(
+            (
+                req.profile,
+                req.workload_class,
+                spec["resources"]["gpu_uuids"],
+                spec["model_binding"]["model_id"],
+                spec["runtime_binding"]["runtime_id"],
+            )
+        )
+        done.set()
+        return {"decision": "RUNNER_EXITED_CLEANLY"}
+
+    with tempfile.TemporaryDirectory() as tmp:
+        svc = build_service(
+            tmp,
+            launcher,
+            manifest=enabled_v2_manifest(),
+            workload_policy=WORKLOAD_POLICY,
+            clock=lambda: V2_NOW,
+        )
+        req = v2_request("model-eval-local-extract-wave1")
+        accepted = svc.handle_request(req, peer_uid=12345)
+        assert accepted["status"] == "ACCEPTED"
+        assert done.wait(1)
+        assert calls == [
+            (
+                "gpu-heavy",
+                "model-eval-local-extract-wave1",
+                [
+                    "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+                    "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+                ],
+                "qwen3.5-4b",
+                "qwen35-vllm-cu129-image-native-sampler-v3",
+            )
+        ]
+        assert WORKLOAD_POLICY["workload_classes"]["gpu-heavy"][
+            "policy_decision"
+        ] == "DENY"
+        assert WORKLOAD_POLICY["workload_classes"]["gpu-heavy"][
+            "admission_enabled_after_enforcement"
+        ] is False
+
+
 def test_v2_dual_model_eval_is_rejected_while_designed_not_live():
     with tempfile.TemporaryDirectory() as tmp:
         svc = build_service(
