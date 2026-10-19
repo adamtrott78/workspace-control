@@ -14,7 +14,7 @@ If this Markdown disagrees with the JSON capsule or verified Git/project evidenc
 - ID: `cis560-exam1-preparation-v1`
 - Title: CIS 560 Exam 1 Preparation and Cheat-Sheet Build
 - Status: `CHECKPOINTED`
-- Current stage: `compressed_restart`
+- Current stage: `practice_test_factory`
 - Exam: **Thursday, October 22, 2026**
 - Cheat sheet: **one US Letter page, double-sided**
 
@@ -122,3 +122,36 @@ Then:
 1. ingest October 20 review;
 2. reweight/finalize cheat sheet;
 3. run timed mixed mini-midterm October 21.
+
+
+## Practice-test factory
+
+Durable factory root:
+
+`study/exam1/practice_factory/`
+
+Files:
+- `README.md` — usage/modes;
+- `FACTORY_SPEC.md` — format, authority, freshness, validation, grading/adaptation;
+- `BLUEPRINTS.md` — Xu-style Q1 and Q2–Q5 families;
+- `FACTORY_STATE.json` — current mastery weights and generated-variant ledger;
+- `TEST_TEMPLATE.md` — 25-point / 75-minute shell.
+
+Default:
+- Q1 = five True/False items;
+- Q2–Q5 = four 5-point short problems;
+- questions may bundle multiple related skills;
+- current-semester authority wins over 2024 historical evidence;
+- validate every generated item;
+- do not expose answer keys before the student's attempt.
+
+Current weakness reweight:
+- emphasize fresh NFA/regex/conversion transfer until independently demonstrated.
+
+After each test:
+- grade by subpart;
+- update meaningful mastery evidence;
+- reweight factory state;
+- avoid reused variant IDs.
+
+October 20 review remains the final weighting event.
