@@ -95,7 +95,7 @@ class RuntimeTreeProjectionTests(unittest.TestCase):
             stderr=subprocess.PIPE,
         )
 
-    def test_exact_projection_passes_without_mutation(self):
+    def test_exact_projection_matches_digest_without_mutation(self):
         with tempfile.TemporaryDirectory() as tmp:
             accepted, live, reference, evidence = self.prepare(pathlib.Path(tmp))
             extra_dir = live / "pkg" / "__pycache__" / "later"
@@ -106,8 +106,17 @@ class RuntimeTreeProjectionTests(unittest.TestCase):
             before = extra.read_bytes()
             proc = self.run_projection(live, reference, evidence, accepted)
 
-            self.assertEqual(proc.returncode, 0, proc.stderr)
-            self.assertIn("RECOVERY_PROJECTION=PASS", proc.stdout)
+            # CI fixtures are intentionally not root-owned, so the production
+            # CLI must reject final acceptance even when the projected tree
+            # identity itself is exact.
+            self.assertEqual(proc.returncode, 10, proc.stderr)
+            self.assertIn(
+                "PROJECTED_TREE_DIGEST=" + tree_digest(accepted),
+                proc.stdout,
+            )
+            self.assertIn("NON_ROOT_OWNED_RETAINED=", proc.stdout)
+            self.assertNotIn("NON_ROOT_OWNED_RETAINED=0", proc.stdout)
+            self.assertIn("RECOVERY_PROJECTION=REJECT", proc.stdout)
             self.assertIn("LIVE_RUNTIME_MUTATED=false", proc.stdout)
             self.assertTrue(extra.exists())
             self.assertEqual(extra.read_bytes(), before)
