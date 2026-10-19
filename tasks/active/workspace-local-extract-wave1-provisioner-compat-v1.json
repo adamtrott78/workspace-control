@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-local-extract-wave1-provisioner-compat-v1",
   "title": "Local EXTRACT Wave 1 provisioner compatibility",
-  "status": "IN_PROGRESS",
+  "status": "VALIDATING",
   "goal": "Allow the already-live and already-triggered Local EXTRACT Wave 1 workload through the final root provisioner gpu-heavy compatibility guard with the smallest fail-closed change, then install that exact provisioner and recover the existing queued benchmark run without issuing another trigger.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-local-extract-wave1-controller-compat-v1",
@@ -156,7 +156,13 @@
     {
       "check": "Provisioner compatibility patch",
       "result": "NOT_RUN",
-      "evidence": []
+      "evidence": [
+        "Implementation is committed on branch wave1-provisioner-compat-v1.",
+        "scripts/lambda_ci_provisioner_service.py now permits gpu-heavy only for model-eval-dual-gpu or model-eval-local-extract-wave1.",
+        "tests/test_lambda_ci_p5_provisioner_service.py adds exact Wave-1 service regression for two GPU UUIDs, qwen3.5-4b, and qwen35-vllm-cu129-image-native-sampler-v3.",
+        "Regression also asserts generic gpu-heavy policy remains DENY/admission-disabled.",
+        "Diff from 6437ee9745468401f7c0d5daa40ea72e3be46257 changes only the provisioner guard, focused service test, and authorized task-state files."
+      ]
     },
     {
       "check": "Exact provisioner activation",
@@ -171,14 +177,14 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Patch only scripts/lambda_ci_provisioner_service.py exact gpu-heavy workload allowlist and focused provisioner-service tests.",
-    "Run Workspace Control validation, inspect exact diff, and merge only after PASS.",
-    "Install exact merged root provisioner through unchanged P5 bootstrap; verify accepted manifest/policy identities remain unchanged.",
-    "Verify GPU controller stability and that existing request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 is accepted, then follow run 39200075204 without retriggering.",
-    "Return ownership to workspace-local-extract-wave1-controller-compat-v1 after existing job claim."
+    "Open a narrow PR and require task contracts, unit regression, provisioner/service tests, and full Workspace Control validation to pass.",
+    "Inspect exact validated diff and merge only if manifest/policy/model/runtime/workflow identities remain untouched.",
+    "Install exact merged root provisioner through unchanged P5 bootstrap, then verify service/controller stability.",
+    "Recover existing request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 / run 39200075204 without retriggering.",
+    "Return ownership to workspace-local-extract-wave1-controller-compat-v1 after the existing job is claimed."
   ],
-  "next_safe_action": "Implement the smallest fail-closed provisioner patch on wave1-provisioner-compat-v1: permit gpu-heavy only when workload_class is model-eval-dual-gpu or model-eval-local-extract-wave1, and add focused service regression proving Wave 1 uses the exact existing two-GPU envelope. Preserve generic gpu-heavy DENY and all root manifest/policy identities.",
+  "next_safe_action": "Open and validate the narrow provisioner compatibility PR from wave1-provisioner-compat-v1. Require task contracts, provisioner-service regression, unit/full integration validation, and exact diff review before merge. Do not issue another Wave-1 trigger.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created after exact controller activation proved the controller compatibility fix works. The remaining failure is a stale root provisioner compatibility guard; benchmark execution has not started."
+  "notes": "Created after exact controller activation proved the controller compatibility fix works. The remaining failure is a stale root provisioner compatibility guard; benchmark execution has not started.\n2026-10-19 implementation checkpoint: stale gpu-heavy service guard is patched with an exact two-workload allowlist and focused Wave-1 service regression. No manifest/policy/runtime/workflow changes were made; validation is next."
 }
