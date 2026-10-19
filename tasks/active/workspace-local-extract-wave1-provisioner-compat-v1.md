@@ -24,7 +24,7 @@ Allow the already-live and already-triggered Local EXTRACT Wave 1 workload throu
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9393dd2ad27c30d3a0db5d8e0f537a311f015d96
+- Remote checkpoint: 7544190ff9e87e7defcd1148550e57a637a19e34
 - Remote verified: true
 
 ### research-engine
@@ -36,19 +36,18 @@ Allow the already-live and already-triggered Local EXTRACT Wave 1 workload throu
 
 ## Next safe action
 
-At the genuine root-control-plane boundary, install exact workspace-control merge 9393dd2ad27c30d3a0db5d8e0f537a311f015d96 through unchanged scripts/bootstrap_lambda_ci_p5.sh. Verify manifest/policy identities remain unchanged and the GPU controller has zero restart delta after activation. Then resume ChatGPT/GitHub control on existing run 39200075204; do not retrigger.
+Read the durable root provisioner state/receipt for request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 without mutating or restarting anything. GitHub still shows run 39200075204/job 117891019967 queued; do not retrigger.
 
 ## Remaining work
 
-- Install exact provisioner compatibility merge 9393dd2ad27c30d3a0db5d8e0f537a311f015d96 through the unchanged root-owned P5 bootstrap; no autonomous privileged deploy workflow exists.
-- Verify accepted manifest/policy blobs are unchanged and all three control-plane services are active.
-- Verify GPU-controller restart count is stable after activation and the stale provisioner rejection no longer recurs.
-- Confirm existing deterministic request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 is accepted and run 39200075204 / job 117891019967 is claimed without retriggering.
-- Return ownership to workspace-local-extract-wave1-controller-compat-v1 after job claim.
+- Read /var/lib/workspace-ci/provisioner/fd30c4c6-6756-55d1-a12d-e3cb16f50d20.json and, if present, /srv/workspace-ci/research-engine/logs/p5-fd30c4c6-6756-55d1-a12d-e3cb16f50d20-receipt.json plus runner/journal logs.
+- If worker is terminal FAILED, diagnose only that exact runtime failure before any new execution decision; do not retrigger.
+- If worker is active, continue following existing GitHub run 39200075204 until assignment/completion.
+- After job claim/completion, close this child and return ownership upward.
 
 ## Blockers / gates
 
-- None.
+- Post-acceptance worker diagnostic: GitHub run 39200075204/job 117891019967 remains queued with no runner_name after the root provisioner returned ACCEPTED. Need durable request state and runtime receipt to determine whether the asynchronous runner worker is still active or failed before connecting.
 
 ## Fresh-chat initialization
 
