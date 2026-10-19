@@ -215,6 +215,38 @@ func TestDualModelEvalAdmissionCommandAndClaimAreExact(t *testing.T) {
 	}
 }
 
+func TestLocalExtractWave1AdmissionCommandAndClaimAreExact(t *testing.T) {
+	command, err := requestCommandForWorkload(localExtractWave1Workload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if command != "/lambda-ci-local-extract-wave1" {
+		t.Fatalf("unexpected Wave 1 command %q", command)
+	}
+
+	display := "wc-admission-v1|workload=model-eval-local-extract-wave1|pr=101|" +
+		"request=/lambda-ci-local-extract-wave1 " + testCandidateSHA
+	pr, sha, err := parseAdmissionDisplayClaim(
+		display,
+		localExtractWave1Workload,
+		command,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pr != 101 || sha != testCandidateSHA {
+		t.Fatalf("unexpected Wave 1 claim pr=%d sha=%s", pr, sha)
+	}
+
+	if _, _, err := parseAdmissionDisplayClaim(
+		display,
+		localExtractWave1Workload,
+		"/lambda-ci-qwen35-dual-pilot",
+	); err == nil {
+		t.Fatal("Wave 1 claim accepted wrong command")
+	}
+}
+
 func TestGitHubAttestorBindsRunBlobAndOpenPRHead(t *testing.T) {
 	attestor := fakeGitHubAttestor(t, nil)
 	att, err := attestor.Attest(
@@ -385,6 +417,28 @@ func TestModelEvalDeterministicRunnerUsesGpuPrefix(t *testing.T) {
 	}
 	if !strings.HasPrefix(runner, "lambda-research-engine-gpu-") {
 		t.Fatalf("unexpected model-eval runner %q", runner)
+	}
+}
+
+func TestLocalExtractWave1DeterministicRunnerUsesGpuPrefix(t *testing.T) {
+	att := controllerAttestation{
+		Repository:      "adamtrott78/research-engine",
+		ScaleSetName:    "lambda-research-engine-gpu",
+		JobMessageType:  string(scaleset.MessageTypeJobAvailable),
+		RunnerRequestID: 12345,
+		WorkflowRunID:   99,
+		JobID:           "779",
+		JobDisplayName: "wc-admission-v1|workload=model-eval-local-extract-wave1|pr=101|" +
+			"request=/lambda-ci-local-extract-wave1 " + testCandidateSHA,
+		CandidateSHA: testCandidateSHA,
+		VerifiedAt:   "2026-10-19T04:33:33Z",
+	}
+	_, runner, err := deterministicAdmissionExecutionIDs(localExtractWave1Workload, att)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(runner, "lambda-research-engine-gpu-") {
+		t.Fatalf("unexpected Wave 1 runner %q", runner)
 	}
 }
 
