@@ -63,7 +63,7 @@
   "stages": [
     {
       "id": "trusted_workflow_activation",
-      "status": "VALIDATING",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-local-extract-wave1-execution-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
