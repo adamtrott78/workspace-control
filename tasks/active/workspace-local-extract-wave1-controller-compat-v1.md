@@ -36,14 +36,14 @@ Make the already-authorized and already-triggered Local EXTRACT Wave 1 job claim
 
 ## Next safe action
 
-Open and validate the narrow controller compatibility PR from wave1-controller-compat-v1. Require controller unit/regression tests and Workspace Control validation to pass; inspect the diff before merge. Do not issue another Wave-1 trigger.
+Merge PR #219 at exact validated head 1599c7bae6cb2864e1628c2e3ca581875e04fbcc, then inspect existing workspace-control deployment/control-plane routes for an authorized autonomous way to install the exact merged root-owned controller. Do not issue another Wave-1 trigger.
 
 ## Remaining work
 
-- Open a narrow pull request and require Workspace Control validation / controller Go tests to pass.
-- Inspect the validated diff and merge only if the exact controller compatibility boundary remains unchanged.
-- Determine whether an already-authorized autonomous root-controller deployment route exists; use it if available, otherwise stop at the genuine root-control-plane human gate.
-- Install/verify exact merged controller and recover run 39200075204 / job 117891019967 without retriggering.
+- Merge clean PR #219 at exact validated head 1599c7bae6cb2864e1628c2e3ca581875e04fbcc.
+- Discover and use an already-authorized autonomous root-controller deployment route if one exists; do not ask the user to run the research workload.
+- Install/verify the exact merged controller while preserving the accepted manifest/policy/model/runtime/GPU identities and generic gpu-heavy denial.
+- Recover existing run 39200075204 / job 117891019967 without retriggering and prove the job is claimed.
 - Return ownership to workspace-local-extract-wave1-execution-v1 once the existing job is claimed.
 
 ## Blockers / gates
