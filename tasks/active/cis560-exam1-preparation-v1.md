@@ -37,7 +37,7 @@ Shared tutoring/workflow behavior remains pinned to:
 - CYK is conceptually exam-relevant/required reading;
 - **complete CYK procedure is explicitly not tested**.
 
-### Lecture 12 — instructor-note confirmed
+### Lecture 12 — transcript reconciled
 Durable:
 - `sources/instructor/L12_NOTES_2026-10-15_USER_PROVIDED.md`
 - `course/lectures/L12.md`
@@ -51,7 +51,7 @@ Key authority:
 - regular closure properties;
 - next class = quick midterm review.
 
-The transcript file supplied with the L12 notes was byte-identical to L11 (SHA-256 `8048a3ba5b06ef66c8ed8f054ed470b36f16254f79cbe794197eaaa3287002e4`). Do **not** treat it as L12 evidence.
+Raw genuine transcript: `sources/lectures/L12_TRANSCRIPT_RAW.md` (SHA-256 `5dee87e3d2eafa6692239356f36e5bdb4de473dd3e42394d9d16515aff8f8902`). The earlier duplicate-L11 attachment remains excluded from L12 provenance.
 
 ## Exam architecture
 
