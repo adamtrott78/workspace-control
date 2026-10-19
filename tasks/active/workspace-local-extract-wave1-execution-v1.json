@@ -23,7 +23,8 @@
     "Do not modify production EXTRACT or VERIFY routing.",
     "Do not expose production PostgreSQL or production service sockets to the candidate runner.",
     "Do not rerun the benchmark after an ambiguous/terminal execution without first resolving durable request state.",
-    "Any workflow-content change requires a new exact workflow blob and revalidation before host installation."
+    "Any workflow-content change requires a new exact workflow blob and revalidation before host installation.",
+    "The proven prelaunch FAILED deterministic request may be re-armed once without a new GitHub trigger only after exact failure evidence is preserved and absence of runner/runtime execution material, residue, and quarantine is re-verified."
   ],
   "repositories": [
     {
@@ -32,7 +33,7 @@
       "base_sha": "453f5aa3f1386f87dcb3a256de6f31496c5346a9",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "70d5668599de767647603ddec55815b9523d1bb8",
+        "checkpoint_sha": "958d6f8ed0989b2846d04b3bd3eb2ace41f5372c",
         "verified": true
       },
       "allowed_mutation_scope": [
@@ -197,6 +198,18 @@
         "candidate_sha=522430a6e9bfdd2977dd8517c5af9db4d1bdbf06",
         "Do not trigger again; resume this existing queued run."
       ]
+    },
+    {
+      "id": "wave1-prelaunch-rearm",
+      "kind": "runtime_recovery_authorization",
+      "identity": "fd30c4c6-6756-55d1-a12d-e3cb16f50d20",
+      "required_for_resume": true,
+      "evidence": [
+        "FAILED before runner creation: RuntimeLaunchError autonomous profile rejected: gpu-heavy.",
+        "No receipt/log/unit/CPU/GPU residue/quarantine.",
+        "Runtime compatibility PR #225 merged as 70d5668599de767647603ddec55815b9523d1bb8.",
+        "Recovery preserves the same GitHub run/job and deterministic request identity; no second trigger."
+      ]
     }
   ],
   "artifacts": [
@@ -254,16 +267,16 @@
     }
   ],
   "blockers": [
-    "Root privileged-runtime install gate only: runtime compatibility PR #225 validated and merged as 70d5668599de767647603ddec55815b9523d1bb8. Existing Wave-1 run remains sole authorized execution; no retrigger."
+    "Root install + prelaunch recovery gate: install merged runtime 70d5668599de767647603ddec55815b9523d1bb8, preserve the exact failed request record as evidence, retire only that active request entry after re-verifying zero execution material/residue/quarantine, and restart the GPU controller to recover the same assigned job. No second GitHub trigger."
   ],
   "remaining_work": [
-    "Install exact merged privileged runtime 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap.",
-    "Recover the existing Wave-1 execution without another trigger.",
+    "Perform exact runtime install and one evidence-preserving recovery of deterministic request fd30c4c6-6756-55d1-a12d-e3cb16f50d20.",
+    "Follow existing run 39200075204/job 117891019967 after same-job recovery; do not post another trigger.",
     "Read Wave-1 report artifact and final root receipt; require exact model/runtime/two-GPU identity, non-scientific state, cleanup/postverify PASS, no residue/quarantine, then classify PROMISING/PARTIAL/REJECT.",
     "Checkpoint result into research-engine-local-extract-redesign-v1 and archive support tasks."
   ],
-  "next_safe_action": "Do not issue another Wave-1 trigger. Install exact runtime compatibility merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap, then recover existing run 39200075204/job 117891019967.",
+  "next_safe_action": "Do not issue another Wave-1 trigger. Install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8 and perform the single evidence-preserving prelaunch recovery of fd30c4c6-6756-55d1-a12d-e3cb16f50d20, then resume existing run 39200075204/job 117891019967.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
-  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed.\n2026-10-19 handoff hydration: PR #214 already completed the route design and merge while the parent research task was being hydrated. Validation run 39197297919 PASS; route merge df142ab7829e364087dbbb7453cdc2779e9d7206. Exact manifest/policy blobs 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Dedicated inert trigger PR #131 is open at 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 with CI run 39197393554 PASS. Next operation is exact host install/verification, not policy design and not benchmark trigger.\n2026-10-19 execution checkpoint: exact Lambda host activation completed PASS, one authorized PR #131 trigger was issued, and dedicated run 39200075204/job 117891019967 was created. The run remains queued because the root-owned GPU controller executable does not yet recognize model-eval-local-extract-wave1 in three compatibility mappings. A narrow controller-compatibility child task is authorized; do not retrigger the benchmark.\n2026-10-19 runtime recovery update: controller compatibility and exact root controller activation passed. Existing job replay now reaches the provisioner but is rejected by a stale gpu-heavy guard that only names model-eval-dual-gpu. No benchmark runner has launched; no retrigger is authorized.\n2026-10-19 provisioner activation checkpoint: exact provisioner fix installed PASS and deterministic request ACCEPTED. GitHub remains queued/no runner, so durable asynchronous worker state is the next required evidence.\n2026-10-19 worker diagnostic: accepted request is durably FAILED before runner creation with RuntimeLaunchError `autonomous profile rejected: gpu-heavy`. No receipt/unit/log/residue/quarantine. Static audit found three runtime workload gates omitting Wave 1; a bounded runtime child now owns the final compatibility fix.\n2026-10-19 runtime compatibility update: PR #225 validation PASS and merge 70d5668599de767647603ddec55815b9523d1bb8. Only root install and existing-run recovery remain; no retrigger."
+  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed.\n2026-10-19 handoff hydration: PR #214 already completed the route design and merge while the parent research task was being hydrated. Validation run 39197297919 PASS; route merge df142ab7829e364087dbbb7453cdc2779e9d7206. Exact manifest/policy blobs 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Dedicated inert trigger PR #131 is open at 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 with CI run 39197393554 PASS. Next operation is exact host install/verification, not policy design and not benchmark trigger.\n2026-10-19 execution checkpoint: exact Lambda host activation completed PASS, one authorized PR #131 trigger was issued, and dedicated run 39200075204/job 117891019967 was created. The run remains queued because the root-owned GPU controller executable does not yet recognize model-eval-local-extract-wave1 in three compatibility mappings. A narrow controller-compatibility child task is authorized; do not retrigger the benchmark.\n2026-10-19 runtime recovery update: controller compatibility and exact root controller activation passed. Existing job replay now reaches the provisioner but is rejected by a stale gpu-heavy guard that only names model-eval-dual-gpu. No benchmark runner has launched; no retrigger is authorized.\n2026-10-19 provisioner activation checkpoint: exact provisioner fix installed PASS and deterministic request ACCEPTED. GitHub remains queued/no runner, so durable asynchronous worker state is the next required evidence.\n2026-10-19 worker diagnostic: accepted request is durably FAILED before runner creation with RuntimeLaunchError `autonomous profile rejected: gpu-heavy`. No receipt/unit/log/residue/quarantine. Static audit found three runtime workload gates omitting Wave 1; a bounded runtime child now owns the final compatibility fix.\n2026-10-19 runtime compatibility update: PR #225 validation PASS and merge 70d5668599de767647603ddec55815b9523d1bb8. Only root install and existing-run recovery remain; no retrigger.\n2026-10-19 recovery authorization: first request is proven terminal only at prelaunch runtime policy, with zero execution material/residue. One same-request recovery is authorized after exact runtime install, preserving failed-state evidence and the single-trigger invariant."
 }
