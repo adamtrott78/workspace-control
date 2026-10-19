@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-local-extract-wave1-runtime-compat-v1
 - Title: Local EXTRACT Wave 1 runtime compatibility
-- Status: IN_PROGRESS
+- Status: VALIDATING
 - Capsule schema: v2
 
 ## Goal
@@ -36,15 +36,15 @@ Allow the already-authorized Local EXTRACT Wave 1 workload through the final pri
 
 ## Next safe action
 
-Implement the minimal runtime compatibility patch on wave1-runtime-compat-v1: define/use an exact finite dual-GPU model-eval workload set containing model-eval-dual-gpu and model-eval-local-extract-wave1; include Wave 1 in promoted-model workloads; preserve generic gpu-heavy rejection; add focused regression tests.
+Open and validate the narrow runtime compatibility PR from wave1-runtime-compat-v1. Require exact GPU runtime regression and full Workspace Control validation before merge; do not issue another Wave-1 trigger.
 
 ## Remaining work
 
-- Patch the three stale exact runtime workload gates and focused GPU runtime tests.
-- Run Workspace Control validation and merge only after exact diff review.
+- Open a narrow PR and require task contracts, unit regression, GPU runtime tests, controller validation, and full integration contracts to pass.
+- Inspect the exact validated diff and merge only if scope remains limited to privileged runtime/test + task-state files.
 - Install exact merged privileged runtime through unchanged P5 bootstrap.
-- Resolve durable failed request state safely and recover existing Wave-1 run without another trigger.
-- Return ownership upward after existing job executes or a new exact terminal blocker is identified.
+- Resolve the existing failed request/run recovery path without a second GitHub trigger.
+- Return ownership upward once the existing Wave-1 execution is running or a new exact terminal blocker is identified.
 
 ## Blockers / gates
 
