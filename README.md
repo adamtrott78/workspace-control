@@ -121,14 +121,29 @@ For new course-tutor projects:
 - keep the shared contracts in this repository rather than copying them into each
   course repository.
 
-## Reusable course and document workflows
+## Reusable course, document, and solution-research workflows
 
-Reusable executor-neutral course/document mechanics live in `workflows/` and
-route to shared owners under `procedures/`.
+Reusable executor-neutral mechanics live in `workflows/` and route to shared
+owners under `procedures/`.
 
-The initial set covers course bootstrap/migration, content ingestion, assessment
+The set covers course bootstrap/migration, content ingestion, assessment
 preparation, study sessions, assignment work, cheat-sheet build, communications
-ingestion, and generic document-artifact build/QA.
+ingestion, generic document-artifact build/QA, and evidence-first solution
+research.
+
+For a materially uncertain architecture/model/library/service decision, route to
+`procedures/evidence_first_solution_research.md` and
+`workflows/evidence-first-solution-research.v1.json` **before** beginning a
+broad implementation or heavyweight bakeoff. This workflow is intended for
+decisions where current external evidence could materially change the design; it
+is not required for trivial fixes or already-specified implementation work.
+
+The evidence-first workflow requires the executor to recover the project's
+known-good baseline and prior failed approaches, research comparable solutions,
+synthesize architecture families, review adjacent pipeline impacts, define a
+bounded shortlist, and declare benchmark/promotion gates before expensive
+implementation. Project repositories retain all domain truth and final
+promotion authority.
 
 These descriptors use workflow-descriptor v1 and are bound by exact Git identity
 when a concrete v2 task depends on them. A v2 task still binds **at most one**
