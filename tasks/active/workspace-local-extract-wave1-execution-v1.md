@@ -24,7 +24,7 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: df142ab7829e364087dbbb7453cdc2779e9d7206
+- Remote checkpoint: d68c08d55a6f616667be3a7661fbd08ad54599d2
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,19 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 ## Next safe action
 
-Route design/merge is complete; do not redesign admission and do not trigger PR #131 yet. Install exact workspace-control merge df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda through the accepted exact-SHA bootstrap/install path and verify installed manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402 plus workload-policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d. Require model-eval-local-extract-wave1 live with exact trusted workflow blob a5be693f750c481db21d86d239a505083aae40aa, GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD, model_eval_dual_gpu_v1, promoted qwen3.5-4b, exact expanded runtime, and NON_SCIENTIFIC_MODEL_EVAL_ONLY; generic gpu-heavy must remain DENY. Require all control-plane services healthy and zero project CPU/GPU residue. Only after installed identity PASS, issue exactly one `/lambda-ci-local-extract-wave1 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06` comment on OPEN PR #131, follow only that run, and inspect report plus final root receipt. Do not rerun blindly.
+Do not issue another Wave-1 trigger. Execute bounded child task workspace-local-extract-wave1-controller-compat-v1: patch only the GPU controller compatibility surfaces required for workload model-eval-local-extract-wave1 (workload selection, exact /lambda-ci-local-extract-wave1 command attestation, deterministic GPU runner identity), add fail-closed regression coverage preserving generic gpu-heavy DENY, validate/merge/install the exact controller, then recover existing run 39200075204 / job 117891019967.
 
 ## Remaining work
 
-- Install and verify exact workspace-control route merge df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda without changing model/runtime binaries; require installed manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402, workload-policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d, model-eval-local-extract-wave1 live, generic gpu-heavy still DENY, healthy services, and zero project residue.
-- After exact host activation PASS, issue exactly one `/lambda-ci-local-extract-wave1 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06` comment on research-engine PR #131 and follow only that dedicated run.
-- Read the Wave-1 report artifact and final root-owned provisioner receipt; require non-scientific state, exact model/runtime/two-GPU identity, cleanup/postverify PASS, and no residue/quarantine.
-- Checkpoint the execution result for parent research task research-engine-local-extract-redesign-v1, then archive this support task. Generic gpu-heavy remains denied.
+- Create and complete bounded child task workspace-local-extract-wave1-controller-compat-v1 to add only the missing controller workload/command/runner mappings plus regression tests; generic gpu-heavy must remain denied.
+- Validate and merge the controller compatibility patch, install the exact merged root-owned controller through the accepted P5 deployment path, and verify controller health.
+- Recover existing queued Wave 1 run 39200075204 / job 117891019967 after controller activation; do not post another trigger.
+- Read the Wave-1 report artifact and final root-owned provisioner receipt; require exact model/runtime/two-GPU identity, non-scientific state, cleanup/postverify PASS, no residue/quarantine, then classify PROMISING/PARTIAL/REJECT.
+- Checkpoint the execution result for parent research task research-engine-local-extract-redesign-v1 and archive this support task after acceptance.
 
 ## Blockers / gates
 
-- None.
+- Controller compatibility blocker: workspace-ci-controller-gpu is missing explicit model-eval-local-extract-wave1 handling in workload selection, command attestation, and deterministic GPU runner identity. Existing workflow run 39200075204 / job 117891019967 is queued and must be resumed after the bounded fix; do not retrigger.
 
 ## Fresh-chat initialization
 
