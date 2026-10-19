@@ -5,7 +5,7 @@
   "status": "VALIDATING",
   "goal": "Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the already-accepted two-A4500 Qwen3.5 execution envelope, install that exact route on Lambda, execute one bounded nine-paper benchmark, and retire the route owner after final receipt/cleanup evidence. This task does not own EXTRACT scientific design or production routing.",
   "execution_topology": "remote_only",
-  "current_stage": "trusted_workflow_activation",
+  "current_stage": "wave1_execution_acceptance",
   "acceptance_criteria": [
     "research-engine workflow .github/workflows/lambda-ci-local-extract-wave1.yml is bound by exact Git blob a5be693f750c481db21d86d239a505083aae40aa",
     "new workload class model-eval-local-extract-wave1 mints only the existing gpu-heavy two-UUID resource envelope with exact promoted qwen3.5-4b and expanded runtime bindings",
@@ -32,7 +32,7 @@
       "base_sha": "453f5aa3f1386f87dcb3a256de6f31496c5346a9",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "df142ab7829e364087dbbb7453cdc2779e9d7206",
+        "checkpoint_sha": "d68c08d55a6f616667be3a7661fbd08ad54599d2",
         "verified": true
       },
       "allowed_mutation_scope": [
@@ -63,7 +63,7 @@
   "stages": [
     {
       "id": "trusted_workflow_activation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-local-extract-wave1-execution-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
@@ -108,13 +108,24 @@
             "PR #131 CI run 39197393554 PASS.",
             "PR #131 changes only an inert benchmark trigger marker; keep its head immutable and PR open until the one authorized Wave-1 trigger completes."
           ]
+        },
+        {
+          "check": "Exact Lambda host activation",
+          "result": "PASS",
+          "evidence": [
+            "P5_INSTALL=PASS for workspace-control SHA df142ab7829e364087dbbb7453cdc2779e9d7206.",
+            "Installed manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402 and workload-policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d verified.",
+            "Exact promoted qwen3.5-4b object 6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c and expanded runtime tree b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63 verified read-only.",
+            "workspace-ci-provisioner.service, workspace-ci-controller.service, and workspace-ci-controller-gpu.service active with NRestarts=0; zero project CPU/GPU residue.",
+            "Host-activation evidence path: /home/atrott/adamArchives/Adam/workspace-control-tmp/local-extract-wave1-host-activation-20261019T043136Z."
+          ]
         }
       ],
-      "resume_condition": "Workspace Control Validation must pass and the exact route merge must be installed and verified on Lambda before benchmark trigger."
+      "resume_condition": "PASS: exact route merge df142ab7829e364087dbbb7453cdc2779e9d7206 was installed and verified on Lambda before the benchmark trigger."
     },
     {
       "id": "wave1_execution_acceptance",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-local-extract-wave1-execution-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
@@ -126,8 +137,28 @@
         "dedicated Wave 1 GitHub run and artifact",
         "final root-owned cleanup/postverify receipt"
       ],
-      "validation": [],
-      "resume_condition": "Trigger exactly once after installed route identity and control-plane health pass."
+      "validation": [
+        {
+          "check": "Single authorized Wave 1 trigger",
+          "result": "PASS",
+          "evidence": [
+            "Exactly one PR #131 issue comment was issued: /lambda-ci-local-extract-wave1 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06.",
+            "GitHub issue-comment ID 6259723626.",
+            "Dedicated workflow run 39200075204 and job 117891019967 were created.",
+            "PR #131 remains OPEN/unmerged at exact head 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06."
+          ]
+        },
+        {
+          "check": "Wave 1 job claim by Lambda GPU controller",
+          "result": "FAIL",
+          "evidence": [
+            "Run 39200075204 remains queued; job 117891019967 has not been claimed.",
+            "Root cause is a controller compatibility omission: model-eval-local-extract-wave1 is authorized in installed manifest/policy but absent from GPU-controller workload selection, workload-to-command attestation mapping, and deterministic GPU runner identity mapping.",
+            "Existing queued run must be recovered after the controller fix; do not issue another trigger."
+          ]
+        }
+      ],
+      "resume_condition": "Install and validate the narrow controller compatibility fix, then recover existing queued run 39200075204 / job 117891019967 without retriggering."
     }
   ],
   "checkpoints": [
@@ -139,6 +170,30 @@
       "evidence": [
         "path=.github/workflows/lambda-ci-local-extract-wave1.yml",
         "research-engine merge=4ffd429086c76da9759de2a34bdf0bc0de21d522"
+      ]
+    },
+    {
+      "id": "wave1-host-activation",
+      "kind": "runtime_acceptance",
+      "identity": "df142ab7829e364087dbbb7453cdc2779e9d7206",
+      "required_for_resume": true,
+      "evidence": [
+        "P5_INSTALL=PASS.",
+        "WAVE1_HOST_ACTIVATION=PASS.",
+        "COMMAND_BLOCK=PASS.",
+        "Installed manifest/workload-policy exact blobs and model/runtime/two-GPU envelope verified."
+      ]
+    },
+    {
+      "id": "wave1-single-trigger",
+      "kind": "github_workflow_run",
+      "identity": "39200075204",
+      "required_for_resume": true,
+      "evidence": [
+        "issue_comment_id=6259723626",
+        "workflow_job_id=117891019967",
+        "candidate_sha=522430a6e9bfdd2977dd8517c5af9db4d1bdbf06",
+        "Do not trigger again; resume this existing queued run."
       ]
     }
   ],
@@ -175,13 +230,20 @@
     },
     {
       "check": "workspace-control route validation",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "workspace-control PR #214 validation run 39197297919 PASS.",
+        "Route merge df142ab7829e364087dbbb7453cdc2779e9d7206.",
+        "Manifest/policy blobs 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d."
+      ]
     },
     {
       "check": "installed Lambda route",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "P5_INSTALL=PASS and WAVE1_HOST_ACTIVATION=PASS.",
+        "Exact trusted workflow/model/runtime/two-GPU identities verified; generic gpu-heavy remains DENY; zero project residue."
+      ]
     },
     {
       "check": "Wave 1 final root acceptance",
@@ -189,15 +251,18 @@
       "evidence": []
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Install and verify exact workspace-control route merge df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda without changing model/runtime binaries; require installed manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402, workload-policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d, model-eval-local-extract-wave1 live, generic gpu-heavy still DENY, healthy services, and zero project residue.",
-    "After exact host activation PASS, issue exactly one `/lambda-ci-local-extract-wave1 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06` comment on research-engine PR #131 and follow only that dedicated run.",
-    "Read the Wave-1 report artifact and final root-owned provisioner receipt; require non-scientific state, exact model/runtime/two-GPU identity, cleanup/postverify PASS, and no residue/quarantine.",
-    "Checkpoint the execution result for parent research task research-engine-local-extract-redesign-v1, then archive this support task. Generic gpu-heavy remains denied."
+  "blockers": [
+    "Controller compatibility blocker: workspace-ci-controller-gpu is missing explicit model-eval-local-extract-wave1 handling in workload selection, command attestation, and deterministic GPU runner identity. Existing workflow run 39200075204 / job 117891019967 is queued and must be resumed after the bounded fix; do not retrigger."
   ],
-  "next_safe_action": "Route design/merge is complete; do not redesign admission and do not trigger PR #131 yet. Install exact workspace-control merge df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda through the accepted exact-SHA bootstrap/install path and verify installed manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402 plus workload-policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d. Require model-eval-local-extract-wave1 live with exact trusted workflow blob a5be693f750c481db21d86d239a505083aae40aa, GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD, model_eval_dual_gpu_v1, promoted qwen3.5-4b, exact expanded runtime, and NON_SCIENTIFIC_MODEL_EVAL_ONLY; generic gpu-heavy must remain DENY. Require all control-plane services healthy and zero project CPU/GPU residue. Only after installed identity PASS, issue exactly one `/lambda-ci-local-extract-wave1 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06` comment on OPEN PR #131, follow only that run, and inspect report plus final root receipt. Do not rerun blindly.",
+  "remaining_work": [
+    "Create and complete bounded child task workspace-local-extract-wave1-controller-compat-v1 to add only the missing controller workload/command/runner mappings plus regression tests; generic gpu-heavy must remain denied.",
+    "Validate and merge the controller compatibility patch, install the exact merged root-owned controller through the accepted P5 deployment path, and verify controller health.",
+    "Recover existing queued Wave 1 run 39200075204 / job 117891019967 after controller activation; do not post another trigger.",
+    "Read the Wave-1 report artifact and final root-owned provisioner receipt; require exact model/runtime/two-GPU identity, non-scientific state, cleanup/postverify PASS, no residue/quarantine, then classify PROMISING/PARTIAL/REJECT.",
+    "Checkpoint the execution result for parent research task research-engine-local-extract-redesign-v1 and archive this support task after acceptance."
+  ],
+  "next_safe_action": "Do not issue another Wave-1 trigger. Execute bounded child task workspace-local-extract-wave1-controller-compat-v1: patch only the GPU controller compatibility surfaces required for workload model-eval-local-extract-wave1 (workload selection, exact /lambda-ci-local-extract-wave1 command attestation, deterministic GPU runner identity), add fail-closed regression coverage preserving generic gpu-heavy DENY, validate/merge/install the exact controller, then recover existing run 39200075204 / job 117891019967.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
-  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed.\n2026-10-19 handoff hydration: PR #214 already completed the route design and merge while the parent research task was being hydrated. Validation run 39197297919 PASS; route merge df142ab7829e364087dbbb7453cdc2779e9d7206. Exact manifest/policy blobs 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Dedicated inert trigger PR #131 is open at 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 with CI run 39197393554 PASS. Next operation is exact host install/verification, not policy design and not benchmark trigger."
+  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed.\n2026-10-19 handoff hydration: PR #214 already completed the route design and merge while the parent research task was being hydrated. Validation run 39197297919 PASS; route merge df142ab7829e364087dbbb7453cdc2779e9d7206. Exact manifest/policy blobs 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Dedicated inert trigger PR #131 is open at 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 with CI run 39197393554 PASS. Next operation is exact host install/verification, not policy design and not benchmark trigger.\n2026-10-19 execution checkpoint: exact Lambda host activation completed PASS, one authorized PR #131 trigger was issued, and dedicated run 39200075204/job 117891019967 was created. The run remains queued because the root-owned GPU controller executable does not yet recognize model-eval-local-extract-wave1 in three compatibility mappings. A narrow controller-compatibility child task is authorized; do not retrigger the benchmark."
 }
