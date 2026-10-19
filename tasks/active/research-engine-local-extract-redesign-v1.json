@@ -47,7 +47,7 @@
       "base_sha": "796dd9fb9c5fd25009d756a4fd42d53b85a5ac3d",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "453f5aa3f1386f87dcb3a256de6f31496c5346a9",
+        "checkpoint_sha": "df142ab7829e364087dbbb7453cdc2779e9d7206",
         "verified": true
       },
       "local": null,
@@ -62,7 +62,7 @@
       "base_sha": "5f6eec7b629b4746117f2f0a74d4531c642f8025",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "4ffd429086c76da9759de2a34bdf0bc0de21d522",
+        "checkpoint_sha": "366f9585145ab539dc43c3c974dcb8625489a3e3",
         "verified": true
       },
       "local": null,
@@ -275,6 +275,17 @@
             "research-engine PR #127 was closed unmerged as superseded by PR #128's integrated fail-closed claim guard.",
             "Do not revive or merge PR #127 unless a later measured Wave-1 residual creates a new explicit need."
           ]
+        },
+        {
+          "check": "Wave 1 parser parity and trusted execution route",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #129 CI PASS and merged as 366f9585145ab539dc43c3c974dcb8625489a3e3; Wave 1 now matches production PdfPageTextExtractor default pypdf parsing behavior.",
+            "research-engine PR #130 is the inert run candidate, OPEN at exact head 28d8379dfb650bfa63ea9e7ac9476b8be0f55b10 with CI run 39197371900 PASS.",
+            "workspace-control PR #214 Workspace Control Validation run 39197297919 PASS and merged as df142ab7829e364087dbbb7453cdc2779e9d7206.",
+            "Merged manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402 and policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d bind model-eval-local-extract-wave1 to exact workflow blob a5be693f750c481db21d86d239a505083aae40aa.",
+            "Generic gpu-heavy remains DENY; the new route reuses only the accepted model_eval_dual_gpu_v1/Qwen/runtime envelope with bounded public payload egress."
+          ]
         }
       ],
       "resume_condition": "First-wave decomposition can execute offline and quantify where retrieval, normalization, local verification, or completeness still requires escalation."
@@ -359,20 +370,18 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "929e04bc171789f7bf3eaf2c1f37d4b801de6a9d",
+      "identity": "28d8379dfb650bfa63ea9e7ac9476b8be0f55b10",
       "required_for_resume": true,
       "evidence": [
         "stage=bounded_local_extract_prototype",
-        "research-engine main=4ffd429086c76da9759de2a34bdf0bc0de21d522 (PR #128 merged Wave-1 implementation)",
-        "retrieval diversification PR #126 merged=1ff47e708c7ad6dd002930e63e1100fc6532932a",
-        "exact frozen candidate=PR #129 head 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d; CI PASS; parser parity only",
-        "candidate Wave-1 module blob=4dac18c4ac0b7754d604a60c46948bc2cc8f6772",
-        "trusted workflow path=.github/workflows/lambda-ci-local-extract-wave1.yml",
+        "research-engine main=366f9585145ab539dc43c3c974dcb8625489a3e3",
+        "inert trigger candidate=PR #130 head 28d8379dfb650bfa63ea9e7ac9476b8be0f55b10; CI PASS",
         "trusted workflow blob=a5be693f750c481db21d86d239a505083aae40aa",
-        "model-eval-local-extract-wave1 absent from live manifest/policy; do not trigger yet",
-        "workflow requires bounded public payload acquisition for pinned pypdf + exact-SHA arXiv PDFs; admission network authority must be explicitly reviewed",
-        "PR #127 closed unmerged as superseded",
-        "hard stop after one fixed nine-paper run with PROMISING/PARTIAL/REJECT"
+        "workspace-control exact route merge=df142ab7829e364087dbbb7453cdc2779e9d7206",
+        "route manifest blob=844fe790e1af968bf87d37a8eb9ce7677cdea402",
+        "route policy blob=71bd0bb9c63436964462b1f9b889686ac328ee1d",
+        "route not yet installed on Lambda; do not trigger PR #130 yet",
+        "hard stop after one run with PROMISING/PARTIAL/REJECT"
       ]
     }
   ],
@@ -389,18 +398,15 @@
     }
   ],
   "blockers": [
-    "Lambda admission gap: workspace-control live_enabled_workload_classes currently has cpu-test, gpu-small, model-eval-single-gpu, and model-eval-dual-gpu only. No manifest route or workload-policy entry exists for model-eval-local-extract-wave1, so PR #129 must not be triggered yet.",
-    "Admission-design constraint: Wave-1 workflow blob a5be693f750c481db21d86d239a505083aae40aa intentionally performs bounded public payload acquisition (pinned pypdf wheel plus exact-SHA historical arXiv PDFs). It therefore cannot blindly clone model-eval-dual-gpu's GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE network class. The smallest reviewed route must preserve exact promoted model/runtime/two-GPU authority while explicitly and fail-closedly authorizing only the public-payload behavior required by this trusted workflow. Generic gpu-heavy must remain DENY."
+    "Host activation pending: exact workspace-control route merge df142ab7829e364087dbbb7453cdc2779e9d7206 is green/merged but its manifest/policy have not yet been installed and verified on Lambda. Do not trigger PR #130 before that exact install passes."
   ],
   "remaining_work": [
-    "Wave 1 admission — add the smallest separately reviewed model-eval-local-extract-wave1 manifest/policy route for exact workflow blob a5be693f750c481db21d86d239a505083aae40aa and command /lambda-ci-local-extract-wave1, reusing the validated dual-GPU resource/model/runtime binding while explicitly reviewing the bounded public-payload network requirement. Do not enable generic gpu-heavy.",
-    "Wave 1 host activation — merge green workspace-control admission, install the exact resulting workspace-control SHA on Lambda through the accepted bootstrap/install path, and verify only the intended workload class becomes live with control-plane health and zero residue.",
-    "Wave 1 execution — while PR #129 remains at exact head 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d, issue exactly one `/lambda-ci-local-extract-wave1 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d` comment and follow only the resulting dedicated workflow. Do not rerun blindly after any partial/ambiguous execution.",
-    "Wave 1 decision — read the report/artifact and final root receipt, evaluate all 9 papers / 71 historical evidence objects under the one fixed configuration, and stop this wave with PROMISING, PARTIAL, or REJECT. Do not change production EXTRACT/VERIFY routing, download/test a larger model, broaden gpu-heavy, or begin an open-ended prompt/hyperparameter search in this wave.",
-    "After the Wave-1 decision only, decide whether measured residuals justify Phase 4 component/model escalation, teacher adaptation, VERIFY-boundary analysis, or eventual production integration."
+    "Wave 1 host activation — install exact workspace-control df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda and verify manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402, policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d, model-eval-local-extract-wave1 live, generic gpu-heavy DENY, accepted model/runtime identity, healthy services, and zero residue.",
+    "Wave 1 execution — issue exactly one `/lambda-ci-local-extract-wave1 28d8379dfb650bfa63ea9e7ac9476b8be0f55b10` comment on research-engine PR #130 and follow only that dedicated run.",
+    "Wave 1 decision — inspect the nine-paper report plus final root receipt and stop with PROMISING, PARTIAL, or REJECT. No production EXTRACT/VERIFY routing change, larger-model search, generic gpu-heavy enablement, or tuning loop."
   ],
-  "next_safe_action": "HANDOFF_SAFE Wave-1 boundary. Do not redo architecture/retrieval implementation and do not trigger Lambda yet. Authoritative research-engine main is 4ffd429086c76da9759de2a34bdf0bc0de21d522 (PR #128 merged); exact frozen Wave-1 trigger candidate is OPEN PR #129 head 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d with CI PASS, module blob 4dac18c4ac0b7754d604a60c46948bc2cc8f6772, workflow path .github/workflows/lambda-ci-local-extract-wave1.yml and workflow blob a5be693f750c481db21d86d239a505083aae40aa. PR #127 is closed/superseded and must not be merged. First audit workspace-control admission/provisioner contracts for the smallest new workload class model-eval-local-extract-wave1: preserve the already-validated gpu-heavy/model_eval_dual_gpu_v1 exact two-A4500 resource binding, promoted qwen3.5-4b model binding, expanded-runtime exact binding, read-only trusted model/runtime cache, non-scientific state effect, and generic gpu-heavy DENY. Unlike model-eval-dual-gpu, the exact trusted Wave-1 workflow deliberately downloads a pinned pypdf wheel and exact-SHA historical arXiv PDFs, so explicitly design/test the narrow public-payload network authority required instead of copying the dual lane's payload-offline network class. Bind admission to the exact workflow path/blob and `/lambda-ci-local-extract-wave1` command. Merge only green workspace-control changes, install/verify the exact resulting SHA on Lambda, then issue exactly one `/lambda-ci-local-extract-wave1 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d` comment on PR #129. Follow that run through report plus final root cleanup receipt and stop Wave 1 on PROMISING/PARTIAL/REJECT; no production routing change, larger-model search, generic gpu-heavy enablement, or repeated tuning loop.",
+  "next_safe_action": "Install and verify exact workspace-control route merge df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda. Require installed manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402 and workload-policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d, exact unchanged bootstrap/model/runtime/controller identities, model-eval-local-extract-wave1 live with workflow blob a5be693f750c481db21d86d239a505083aae40aa and public-payload capability, generic gpu-heavy DENY, all three services active NRestarts=0, and zero project CPU/GPU residue. Only after PASS, trigger PR #130 head 28d8379dfb650bfa63ea9e7ac9476b8be0f55b10 exactly once.",
   "last_executor": "chatgpt",
   "last_surface": "github+web+scholar",
-  "notes": "This child task intentionally branches from the accepted local-document/Qwen-VERIFY production checkpoint. It does not invalidate or reopen the parent task's production acceptance.\n\n2026-10-05 consolidated plan: EXTRACT redesign proceeds as a hierarchical evidence agent with current VERIFY preserved as an independent safety layer. The new workspace-level evidence-first solution-research workflow is being promoted in parallel so future chats can perform architecture research before implementation selection.\n2026-10-19 resumed after bounded dual-GPU substrate completion. Evidence-first workflow dependency restaged/merged as workspace-control a9041372c50bf1258daea2236a3e62542a115117, workflow blob 4ec7a2294d97c94834b04aba227a1f61bceac3fd. EXTRACT redesign contract restaged on current research-engine and merged as 2de0fb0c0049499507661ae5d3e4bea0f5c41720, blob cb28281d2acd4a9603b472e844c1652ea7dc3716. Architecture selection is closed VALIDATED; Phase 1 prototype is active.\n2026-10-19 Wave-1 handoff hydration after chat-limit interruption: research-engine PR #126 merged 1ff47e708c7ad6dd002930e63e1100fc6532932a (facet-interleaved retrieval); PR #128 CI PASS and merged 4ffd429086c76da9759de2a34bdf0bc0de21d522 (complete bounded nine-paper Qwen EXTRACT Wave 1); PR #129 remains OPEN/green at 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d with one-line pypdf parser parity fix and is frozen as the trigger candidate; workflow blob a5be693f750c481db21d86d239a505083aae40aa. PR #127 closed unmerged as superseded. Current workspace-control has no model-eval-local-extract-wave1 route/policy. Critical policy nuance: Wave 1 requires bounded public payload downloads (pinned pypdf wheel + exact-SHA historical arXiv PDFs), so do not clone the dual model-eval payload-offline network class blindly. Generic gpu-heavy remains DENY. Next operation is the smallest reviewed admission/install, then exactly one PR #129 trigger and a hard stop at PROMISING/PARTIAL/REJECT."
+  "notes": "This child task intentionally branches from the accepted local-document/Qwen-VERIFY production checkpoint. It does not invalidate or reopen the parent task's production acceptance.\n\n2026-10-05 consolidated plan: EXTRACT redesign proceeds as a hierarchical evidence agent with current VERIFY preserved as an independent safety layer. The new workspace-level evidence-first solution-research workflow is being promoted in parallel so future chats can perform architecture research before implementation selection.\n2026-10-19 resumed after bounded dual-GPU substrate completion. Evidence-first workflow dependency restaged/merged as workspace-control a9041372c50bf1258daea2236a3e62542a115117, workflow blob 4ec7a2294d97c94834b04aba227a1f61bceac3fd. EXTRACT redesign contract restaged on current research-engine and merged as 2de0fb0c0049499507661ae5d3e4bea0f5c41720, blob cb28281d2acd4a9603b472e844c1652ea7dc3716. Architecture selection is closed VALIDATED; Phase 1 prototype is active.\n2026-10-19 Wave-1 handoff hydration after chat-limit interruption: research-engine PR #126 merged 1ff47e708c7ad6dd002930e63e1100fc6532932a (facet-interleaved retrieval); PR #128 CI PASS and merged 4ffd429086c76da9759de2a34bdf0bc0de21d522 (complete bounded nine-paper Qwen EXTRACT Wave 1); PR #129 remains OPEN/green at 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d with one-line pypdf parser parity fix and is frozen as the trigger candidate; workflow blob a5be693f750c481db21d86d239a505083aae40aa. PR #127 closed unmerged as superseded. Current workspace-control has no model-eval-local-extract-wave1 route/policy. Critical policy nuance: Wave 1 requires bounded public payload downloads (pinned pypdf wheel + exact-SHA historical arXiv PDFs), so do not clone the dual model-eval payload-offline network class blindly. Generic gpu-heavy remains DENY. Next operation is the smallest reviewed admission/install, then exactly one PR #129 trigger and a hard stop at PROMISING/PARTIAL/REJECT.\n2026-10-19 Wave-1 route ready for host activation: parser parity PR #129 merged research-engine 366f9585145ab539dc43c3c974dcb8625489a3e3; inert run candidate is PR #130 head 28d8379dfb650bfa63ea9e7ac9476b8be0f55b10 with CI PASS. Workspace-control PR #214 validation PASS and merged df142ab7829e364087dbbb7453cdc2779e9d7206, manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402, policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d. Corrects stale prior handoff that described PR #129 as the trigger candidate; PR #129 is merged and PR #130 is the only authorized candidate."
 }
