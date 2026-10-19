@@ -1,0 +1,182 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-local-extract-wave1-execution-v1",
+  "title": "Trusted Lambda route for Local EXTRACT Wave 1",
+  "status": "VALIDATING",
+  "goal": "Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the already-accepted two-A4500 Qwen3.5 execution envelope, install that exact route on Lambda, execute one bounded nine-paper benchmark, and retire the route owner after final receipt/cleanup evidence. This task does not own EXTRACT scientific design or production routing.",
+  "execution_topology": "remote_only",
+  "current_stage": "trusted_workflow_activation",
+  "acceptance_criteria": [
+    "research-engine workflow .github/workflows/lambda-ci-local-extract-wave1.yml is bound by exact Git blob a5be693f750c481db21d86d239a505083aae40aa",
+    "new workload class model-eval-local-extract-wave1 mints only the existing gpu-heavy two-UUID resource envelope with exact promoted qwen3.5-4b and expanded runtime bindings",
+    "payload network authority is public-payload egress only; private/local/production services remain denied by the existing runner sandbox",
+    "scientific state materialization and production routing changes remain false",
+    "generic gpu-heavy remains DENY and admission disabled",
+    "workspace-control validation passes before merge and exact merged manifest/policy are installed on Lambda before triggering the benchmark",
+    "exactly one authorized Wave 1 benchmark trigger is issued for one exact candidate SHA",
+    "final root receipt shows terminal success, runtime/model postverification, zero project CPU/GPU residue/quarantine, and destroyed runner/staging workspaces"
+  ],
+  "constraints": [
+    "Do not modify research-engine scientific implementation from this task; research-engine is read-only authority here.",
+    "Do not enable generic gpu-heavy.",
+    "Do not alter accepted model/runtime/GPU UUID bindings.",
+    "Do not modify production EXTRACT or VERIFY routing.",
+    "Do not expose production PostgreSQL or production service sockets to the candidate runner.",
+    "Do not rerun the benchmark after an ambiguous/terminal execution without first resolving durable request state.",
+    "Any workflow-content change requires a new exact workflow blob and revalidation before host installation."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "453f5aa3f1386f87dcb3a256de6f31496c5346a9",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "453f5aa3f1386f87dcb3a256de6f31496c5346a9",
+        "verified": true
+      },
+      "allowed_mutation_scope": [
+        "architecture/lambda-ci-project-research-engine.v1.json",
+        "architecture/lambda-ci-workload-policy.v1.json",
+        "schemas/lambda-ci-workload-policy.v1.schema.json",
+        "schemas/lambda-ci-admission-manifest.v1.schema.json",
+        "tests/test_lambda_ci_admission.py",
+        "tests/test_lambda_ci_policy_contract.py",
+        "tests/test_lambda_ci_provisioner.py",
+        "tests/test_lambda_ci_p5_install.py",
+        "tasks/active/workspace-local-extract-wave1-execution-v1.json",
+        "tasks/active/workspace-local-extract-wave1-execution-v1.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "4ffd429086c76da9759de2a34bdf0bc0de21d522",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "4ffd429086c76da9759de2a34bdf0bc0de21d522",
+        "verified": true
+      },
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "trusted_workflow_activation",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-local-extract-wave1-execution-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+lambda",
+      "inputs": [
+        "research-engine Wave 1 workflow merged at 4ffd429086c76da9759de2a34bdf0bc0de21d522",
+        "trusted workflow blob a5be693f750c481db21d86d239a505083aae40aa",
+        "accepted model_eval_dual_gpu_v1 resource class",
+        "accepted qwen3.5-4b promoted model and expanded runtime"
+      ],
+      "outputs": [
+        "exact manifest/policy route model-eval-local-extract-wave1",
+        "schema/test coverage for route identity and generic gpu-heavy denial"
+      ],
+      "validation": [
+        {
+          "check": "research-engine Wave 1 implementation and workflow CI",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #128 CI run 39196388058 PASS",
+            "PR #128 merged as 4ffd429086c76da9759de2a34bdf0bc0de21d522",
+            "merged workflow blob a5be693f750c481db21d86d239a505083aae40aa"
+          ]
+        }
+      ],
+      "resume_condition": "Workspace Control Validation must pass and the exact route merge must be installed and verified on Lambda before benchmark trigger."
+    },
+    {
+      "id": "wave1_execution_acceptance",
+      "status": "PLANNED",
+      "execution_owner": "workspace-local-extract-wave1-execution-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+lambda",
+      "inputs": [
+        "installed exact Local EXTRACT Wave 1 route",
+        "one exact research-engine candidate SHA"
+      ],
+      "outputs": [
+        "dedicated Wave 1 GitHub run and artifact",
+        "final root-owned cleanup/postverify receipt"
+      ],
+      "validation": [],
+      "resume_condition": "Trigger exactly once after installed route identity and control-plane health pass."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "wave1-workflow-binding",
+      "kind": "git_blob",
+      "identity": "a5be693f750c481db21d86d239a505083aae40aa",
+      "required_for_resume": true,
+      "evidence": [
+        "path=.github/workflows/lambda-ci-local-extract-wave1.yml",
+        "research-engine merge=4ffd429086c76da9759de2a34bdf0bc0de21d522"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "architecture/lambda-ci-project-research-engine.v1.json",
+      "state": "candidate_route",
+      "role": "root-owned project admission manifest",
+      "origin": "workspace-control",
+      "persistence": "git+installed /etc/workspace-ci/projects/research-engine.json",
+      "regeneration": "from validated workspace-control exact merge only",
+      "review_requirement": "exact workflow/model/runtime/two-GPU binding must remain unchanged",
+      "evidence": []
+    },
+    {
+      "path": "architecture/lambda-ci-workload-policy.v1.json",
+      "state": "candidate_route",
+      "role": "root-owned workload policy",
+      "origin": "workspace-control",
+      "persistence": "git+installed /etc/workspace-ci/lambda-ci-workload-policy.v1.json",
+      "regeneration": "from validated workspace-control exact merge only",
+      "review_requirement": "generic gpu-heavy must remain DENY",
+      "evidence": []
+    }
+  ],
+  "validation": [
+    {
+      "check": "Wave 1 trusted workflow source",
+      "result": "PASS",
+      "evidence": [
+        "research-engine PR #128 full CI PASS before merge",
+        "workflow blob a5be693f750c481db21d86d239a505083aae40aa"
+      ]
+    },
+    {
+      "check": "workspace-control route validation",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "installed Lambda route",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Wave 1 final root acceptance",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Pass Workspace Control Validation for the exact new route and merge it.",
+    "Install and verify the exact merged manifest/policy on Lambda without changing model/runtime binaries.",
+    "Trigger exactly one Local EXTRACT Wave 1 candidate and follow only its dedicated run.",
+    "Read the final root-owned receipt and require cleanup/postverification PASS.",
+    "Archive this support task after acceptance; generic gpu-heavy remains denied."
+  ],
+  "next_safe_action": "Run Workspace Control Validation on the exact route branch. If green, merge it and prepare one bounded exact-SHA Lambda install/verification operation. Do not trigger the Wave 1 workflow before installed manifest/policy identities match the merge.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+lambda",
+  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed."
+}
