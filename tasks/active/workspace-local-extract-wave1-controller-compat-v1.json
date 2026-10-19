@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-local-extract-wave1-controller-compat-v1",
   "title": "Local EXTRACT Wave 1 controller compatibility",
-  "status": "IN_PROGRESS",
+  "status": "VALIDATING",
   "goal": "Make the already-authorized and already-triggered Local EXTRACT Wave 1 job claimable by the existing Lambda GPU scale-set controller with the smallest fail-closed controller compatibility fix, then activate that exact controller and recover existing workflow run 39200075204 without issuing another benchmark trigger.",
   "execution_topology": "composed",
   "parent_execution_owner": "workspace-local-extract-wave1-execution-v1",
@@ -60,7 +60,7 @@
   "stages": [
     {
       "id": "controller_compatibility_patch",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATING",
       "execution_owner": "workspace-local-extract-wave1-controller-compat-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -154,7 +154,13 @@
     {
       "check": "Controller compatibility patch",
       "result": "NOT_RUN",
-      "evidence": []
+      "evidence": [
+        "Implementation is committed on branch wave1-controller-compat-v1.",
+        "main.go adds exact localExtractWave1Workload and permits it only under the existing GPU controller profile.",
+        "attestation.go maps the workload only to /lambda-ci-local-extract-wave1 and the existing lambda-research-engine-gpu-* deterministic runner namespace.",
+        "main_test.go and attestation_test.go add exact acceptance, CPU rejection, wrong-command rejection, GPU-prefix, and generic gpu-heavy denial coverage.",
+        "Diff from d68c08d55a6f616667be3a7661fbd08ad54599d2 changes only the four authorized controller/test files plus task-state files."
+      ]
     },
     {
       "check": "Exact controller activation",
@@ -169,14 +175,14 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Patch exact Wave-1 workload acceptance, command attestation, deterministic GPU runner mapping, and focused tests.",
-    "Run Workspace Control validation, inspect diff, open/merge a narrow PR only after PASS.",
-    "Determine whether an already-authorized autonomous root-controller deployment route exists; use it if available, otherwise stop at the genuine root-control-plane human gate rather than asking the user to run the research workload.",
+    "Open a narrow pull request and require Workspace Control validation / controller Go tests to pass.",
+    "Inspect the validated diff and merge only if the exact controller compatibility boundary remains unchanged.",
+    "Determine whether an already-authorized autonomous root-controller deployment route exists; use it if available, otherwise stop at the genuine root-control-plane human gate.",
     "Install/verify exact merged controller and recover run 39200075204 / job 117891019967 without retriggering.",
     "Return ownership to workspace-local-extract-wave1-execution-v1 once the existing job is claimed."
   ],
-  "next_safe_action": "Implement the smallest fail-closed controller patch on branch wave1-controller-compat-v1: add exact model-eval-local-extract-wave1 handling to GPU workload selection, /lambda-ci-local-extract-wave1 attestation command mapping, and deterministic GPU runner identity, with regression tests preserving CPU rejection and generic gpu-heavy DENY. Do not modify research-engine or issue another trigger.",
+  "next_safe_action": "Open and validate the narrow controller compatibility PR from wave1-controller-compat-v1. Require controller unit/regression tests and Workspace Control validation to pass; inspect the diff before merge. Do not issue another Wave-1 trigger.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created after host activation and the one authorized Wave-1 trigger both passed. This child exists only because the root-owned GPU controller binary predates the new explicit Wave-1 workload string. The queued workflow run is durable evidence to resume, not permission to trigger again."
+  "notes": "Created after host activation and the one authorized Wave-1 trigger both passed. This child exists only because the root-owned GPU controller binary predates the new explicit Wave-1 workload string. The queued workflow run is durable evidence to resume, not permission to trigger again.\n2026-10-19 implementation checkpoint: minimal controller compatibility patch is committed on wave1-controller-compat-v1. No manifest/policy/runtime/model/workflow/research-engine changes were made; validation is the next gate."
 }
