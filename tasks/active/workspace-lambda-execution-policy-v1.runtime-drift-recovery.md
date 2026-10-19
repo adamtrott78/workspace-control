@@ -196,3 +196,14 @@ Evidence SHA-256:
 - live tree: `0425192015698c4440395cc1b011137fd8f03662e8c10f84b9c563b16e9c020d`
 - candidate difference: `4aedbbc374255ba17d21a82a13be6e3d719f25a864e3b88ba44384d0c4f12ad5`
 - projection summary: `b70cf7b8d03a3f26acfec04117a1d30b80b7b695439e4e1b54320504a9120eda`
+
+## Validated reversible correction helper
+
+Use only `scripts/runtime_tree_repair.py` from workspace-control commit
+`d479db58a0edd71f458894590536ea83791e8104`
+(blob `82d1743567d5f0e0c18de315594d95f3908c4afe`).
+
+PR #198 passed Workspace Control Validation run `39184369750` before merge.
+The helper revalidates the exact projection before action, moves only minimal
+candidate roots to same-filesystem quarantine, verifies the resulting tree
+against the accepted digest, and retains a manifest for rollback.
