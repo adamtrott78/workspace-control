@@ -31,14 +31,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 - Intent: mutate
 - Remote branch: main
 - Remote checkpoint: 453f5aa3f1386f87dcb3a256de6f31496c5346a9
-- Remote verified: True
+- Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
 - Remote checkpoint: 4ffd429086c76da9759de2a34bdf0bc0de21d522
-- Remote verified: True
+- Remote verified: true
 
 ## Next safe action
 
