@@ -156,7 +156,8 @@ func TestPilotConstantsAreFixed(t *testing.T) {
 		defaultProfile != "cpu-test" ||
 		gpuProfile != "gpu-small" ||
 		modelEvalWorkload != "model-eval-single-gpu" ||
-		dualModelEvalWorkload != "model-eval-dual-gpu" {
+		dualModelEvalWorkload != "model-eval-dual-gpu" ||
+		localExtractWave1Workload != "model-eval-local-extract-wave1" {
 		t.Fatal("pilot authority changed")
 	}
 	if defaultScaleSetName != "lambda-research-engine" || gpuScaleSetName != "lambda-research-engine-gpu" || maxRunners != 1 {
@@ -200,8 +201,17 @@ func TestWorkloadSelectionStaysWithinControllerProfile(t *testing.T) {
 		t.Fatalf("dual model-eval workload selection failed got=%q err=%v", got, err)
 	}
 
+	wave1Claim := "wc-admission-v1|workload=model-eval-local-extract-wave1|pr=101|request=/lambda-ci-local-extract-wave1 " + strings.Repeat("a", 40)
+	got, err = workloadForDisplayClaim(gpuProfile, wave1Claim)
+	if err != nil || got != localExtractWave1Workload {
+		t.Fatalf("Wave 1 workload selection failed got=%q err=%v", got, err)
+	}
+
 	if _, err := workloadForDisplayClaim(defaultProfile, modelClaim); err == nil {
 		t.Fatal("CPU controller accepted model-eval workload")
+	}
+	if _, err := workloadForDisplayClaim(defaultProfile, wave1Claim); err == nil {
+		t.Fatal("CPU controller accepted Wave 1 workload")
 	}
 	if _, err := workloadForDisplayClaim(gpuProfile, "wc-admission-v1|workload=gpu-heavy|pr=101|request=x "+strings.Repeat("a", 40)); err == nil {
 		t.Fatal("GPU controller accepted gpu-heavy workload")
