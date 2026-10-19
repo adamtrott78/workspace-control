@@ -34,7 +34,8 @@ class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
     def test_exact_workload_taxonomy_and_gpu_heavy_denial(self):
         expected = {
             "cpu-test", "gpu-small", "model-acquire", "cache-promote",
-            "model-eval-single-gpu", "model-eval-dual-gpu", "gpu-heavy",
+            "model-eval-single-gpu", "model-eval-dual-gpu",
+            "model-eval-local-extract-wave1", "gpu-heavy",
         }
         self.assertEqual(set(self.policy["workload_classes"]), expected)
         heavy = self.policy["workload_classes"]["gpu-heavy"]
