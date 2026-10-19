@@ -51,7 +51,7 @@
       "base_sha": "3e5906ca572f47272ac14a4d4ac2ed4ae9eb0122",
       "remote": {
         "branch": "tutor-framework",
-        "checkpoint_sha": "091ba96a013d313c9ae67aada6448e883bf5b77b",
+        "checkpoint_sha": "d40ac944899aca84cff8beb68563f5f5014ea19c",
         "verified": true
       },
       "local": null,
@@ -225,7 +225,7 @@
     },
     {
       "id": "ingest_remaining_scope",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "cis560-exam1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+chat",
@@ -235,15 +235,25 @@
         "current syllabus and existing source corpus"
       ],
       "outputs": [
-        "Lecture 11 raw transcript ingested and reconciled.",
-        "Lecture 11 instructor Section 2.3 note ingested.",
-        "Lecture 12 instructor notes ingested and scope reconciled.",
+        "Lecture 11 raw transcript and instructor Section 2.3 note ingested/reconciled.",
+        "Lecture 12 instructor notes and genuine transcript ingested/reconciled.",
         "CYK resolved as conceptual exam scope with complete procedure explicitly excluded.",
-        "Section 2.4 explicitly excluded by Lecture 12 notes.",
-        "Lecture 12 re-emphasis captured: non-CFL pumping, REG proper-subset CFL, DFA/NFA-to-PDA, regular closure."
+        "Section 2.4 explicitly excluded.",
+        "Lecture 12 exact examples recovered: ordered-inequality non-CFL proof, ww witness-selection work, separator-based case compression, REG⊊CFL, DFA/NFA→PDA, and closure directionality."
       ],
-      "validation": [],
-      "resume_condition": "If a genuine Lecture 12 transcript becomes available, reconcile exact examples/notation. The supplied Oct. 19 transcript attachment was byte-identical to Lecture 11 and must not be treated as Lecture 12 evidence."
+      "validation": [
+        {
+          "check": "Remaining substantive pre-review scope is durably source-reconciled",
+          "result": "PASS",
+          "evidence": [
+            "course/lectures/L11.md is transcript reconciled.",
+            "course/lectures/L12.md is transcript reconciled.",
+            "sources/lectures/L12_TRANSCRIPT_RAW.md preserves the genuine Oct. 15 raw transcript.",
+            "Section 2.4 exclusion remains sourced from the Lecture 12 instructor note."
+          ]
+        }
+      ],
+      "resume_condition": null
     },
     {
       "id": "compressed_restart",
@@ -346,14 +356,13 @@
     {
       "id": "cis560-exam1-post-mth-2026-10-19",
       "kind": "git_commit",
-      "identity": "091ba96a013d313c9ae67aada6448e883bf5b77b",
+      "identity": "d40ac944899aca84cff8beb68563f5f5014ea19c",
       "required_for_resume": true,
       "evidence": [
-        "Lecture 11 transcript fully ingested/reconciled.",
-        "Lecture 12 instructor notes ingested; Section 2.4 explicitly excluded.",
-        "CYK conceptual scope resolved; complete procedure explicitly not tested.",
-        "Fresh CFG/PDA/regular-pumping/CFL-non-CFL diagnostics persisted in study/MASTERY_LOG.md.",
-        "Cheat-sheet, timeline, study plan, instructor emphasis, and exam invariants updated for the final pre-review window."
+        "Lecture 11 and Lecture 12 are both transcript reconciled.",
+        "Lecture 12 notes explicitly exclude Section 2.4.",
+        "Lecture 12 transcript adds exact non-CFL witness/case-analysis examples, REG⊊CFL, DFA/NFA→PDA mechanics, and closure directionality.",
+        "Fresh CFG/PDA/regular-pumping/CFL-non-CFL diagnostics remain persisted in study/MASTERY_LOG.md."
       ]
     }
   ],
@@ -480,19 +489,17 @@
     }
   ],
   "blockers": [
-    "The uploaded file presented with Lecture 12 notes on October 19 is byte-identical to the Lecture 11 transcript, so exact Lecture 12 spoken examples/notation remain unavailable unless the genuine transcript is supplied.",
     "October 20 review has not occurred; final cheat-sheet density/weighting remains intentionally unfrozen."
   ],
   "remaining_work": [
-    "Ingest the 2024 Exam 1 as historical predictive evidence and compare its exact format/problem families against Fall 2026 current-semester authority.",
-    "If available, ingest the genuine Lecture 12 transcript; do not block final preparation on it because the instructor notes already close scope through Section 2.3 and exclude Section 2.4.",
+    "Ingest the 2024 Exam 1 as historical predictive evidence and compare its exact format/problem families against Fall 2026 authority.",
     "Run at least one fresh NFA/regex construction transfer check; HW1 evidence remains more guided there than current CFG/PDA evidence.",
     "Capture and ingest the October 20 review as the strongest final weighting signal.",
     "Build/render/QA the final one-page-double-sided US Letter cheat sheet after review.",
     "Run a timed mixed mini-midterm on October 21 and update readiness only from independent fresh/delayed evidence."
   ],
-  "next_safe_action": "Continue the post-MTH compressed restart from CIS560-AdamTrott tutor-framework at checkpoint 091ba96a013d313c9ae67aada6448e883bf5b77b. Lecture 11 is transcript-reconciled; Lecture 12 instructor notes close substantive scope through Section 2.3 and explicitly exclude Section 2.4. The supplied Lecture 12 transcript attachment was an exact duplicate of Lecture 11, so do not ingest it as L12. Next, ingest the user's 2024 Exam 1 as historical predictive evidence if supplied; otherwise run one fresh NFA/regex transfer diagnostic. Preserve October 20 review as the final weighting event before cheat-sheet build.",
+  "next_safe_action": "Continue compressed restart from CIS560-AdamTrott tutor-framework at d40ac944899aca84cff8beb68563f5f5014ea19c. Lecture 11 and Lecture 12 are both transcript-reconciled; substantive scope is complete through Section 2.3 and Section 2.4 is explicitly excluded. Next ingest the user's 2024 Exam 1 as historical predictive evidence if supplied; otherwise run one fresh NFA/regex transfer diagnostic. Preserve October 20 review as the final weighting event before cheat-sheet build.",
   "last_executor": "chatgpt",
   "last_surface": "github+chat",
-  "notes": "Post-MTH October 19 state: Lecture 11 is fully transcript-reconciled. CYK is required/conceptually in scope, but Xu explicitly says the complete CYK procedure will not be tested. Lecture 12 instructor notes close new-content scope at Section 2.3 and explicitly exclude Section 2.4. Lecture 12 re-emphasizes the non-CFL pumping proof recipe (choose an in-language p-dependent witness of length >=p; defeat every legal five-part split), REG ⊊ CFL, DFA/NFA→PDA, and regular closure. The attached file supplied with the L12 notes was SHA-256 8048a3ba5b06ef66c8ed8f054ed470b36f16254f79cbe794197eaaa3287002e4, identical to the already-ingested L11 transcript, so L12 spoken detail remains unsourced. Behavioral diagnostics completed in the post-MTH restart: independent CFG transfer across count-decomposition and palindrome/outside-in families; independent simple PDA phase/stack mechanics; independent regular-pumping tight-boundary witness selection; strong CFL non-CFL witness/case analysis with tutor compression of presentation. Remaining construction risk is relatively higher in NFA/regex/HW1-derived material. The October 20 review remains the strongest final weighting source. Historical 2024 Exam 1, when supplied, may inform predictions but never override Fall 2026 Xu authority."
+  "notes": "Post-MTH October 19 state: Lecture 11 is fully transcript-reconciled. CYK is required/conceptually in scope, but Xu explicitly says the complete CYK procedure will not be tested. Lecture 12 instructor notes close new-content scope at Section 2.3 and explicitly exclude Section 2.4. Lecture 12 re-emphasizes the non-CFL pumping proof recipe (choose an in-language p-dependent witness of length >=p; defeat every legal five-part split), REG ⊊ CFL, DFA/NFA→PDA, and regular closure. The earlier attachment supplied with the L12 notes was SHA-256 8048a3ba5b06ef66c8ed8f054ed470b36f16254f79cbe794197eaaa3287002e4, identical to L11 and remains excluded. A genuine L12 transcript was subsequently supplied (SHA-256 5dee87e3d2eafa6692239356f36e5bdb4de473dd3e42394d9d16515aff8f8902) and is now fully reconciled. Behavioral diagnostics completed in the post-MTH restart: independent CFG transfer across count-decomposition and palindrome/outside-in families; independent simple PDA phase/stack mechanics; independent regular-pumping tight-boundary witness selection; strong CFL non-CFL witness/case analysis with tutor compression of presentation. Remaining construction risk is relatively higher in NFA/regex/HW1-derived material. The October 20 review remains the strongest final weighting source. Historical 2024 Exam 1, when supplied, may inform predictions but never override Fall 2026 Xu authority."
 }
