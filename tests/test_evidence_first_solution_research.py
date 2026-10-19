@@ -23,6 +23,10 @@ spec.loader.exec_module(workspace_control)
 REPOS = json.loads((ROOT / "repos.json").read_text())["repositories"]
 
 
+def normalized_text(path: Path) -> str:
+    return " ".join(path.read_text(encoding="utf-8").split())
+
+
 class EvidenceFirstSolutionResearchTests(unittest.TestCase):
     def setUp(self):
         self.payload = json.loads(WORKFLOW.read_text(encoding="utf-8"))
@@ -70,7 +74,7 @@ class EvidenceFirstSolutionResearchTests(unittest.TestCase):
         )
 
     def test_system_boundary_review_protects_accepted_validation_layers(self):
-        procedure = PROCEDURE.read_text(encoding="utf-8")
+        procedure = normalized_text(PROCEDURE)
         self.assertIn("Review system-boundary impact", procedure)
         self.assertIn(
             "preserve it as the known working baseline",
@@ -82,7 +86,7 @@ class EvidenceFirstSolutionResearchTests(unittest.TestCase):
         )
 
     def test_root_route_makes_workflow_discoverable_without_forcing_trivial_work(self):
-        readme = README.read_text(encoding="utf-8")
+        readme = normalized_text(README)
         self.assertIn(
             "procedures/evidence_first_solution_research.md",
             readme,
