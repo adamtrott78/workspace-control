@@ -6,7 +6,7 @@
   "goal": "Allow the already-authorized Local EXTRACT Wave 1 workload through the final privileged runtime workload gates without broadening gpu-heavy authority, then install the exact runtime fix and recover the existing benchmark request without issuing another trigger.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-local-extract-wave1-provisioner-compat-v1",
-  "current_stage": "runtime_guard_patch",
+  "current_stage": "runtime_activation_and_existing_run_recovery",
   "acceptance_criteria": [
     "Privileged runtime dispatches gpu-heavy only for model-eval-dual-gpu or model-eval-local-extract-wave1.",
     "Privileged GPU runtime accepts model-eval-local-extract-wave1 as an exact dual-GPU model-eval workload while generic gpu-heavy remains rejected.",
@@ -30,8 +30,8 @@
       "intent": "mutate",
       "base_sha": "246465494256ca7e2080c442c5a8e314e445c464",
       "remote": {
-        "branch": "wave1-runtime-compat-v1",
-        "checkpoint_sha": "246465494256ca7e2080c442c5a8e314e445c464",
+        "branch": "main",
+        "checkpoint_sha": "70d5668599de767647603ddec55815b9523d1bb8",
         "verified": true
       },
       "allowed_mutation_scope": [
@@ -60,7 +60,7 @@
   "stages": [
     {
       "id": "runtime_guard_patch",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-local-extract-wave1-runtime-compat-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -73,12 +73,24 @@
         "Minimal exact runtime workload-set correction.",
         "Focused runtime regression preserving generic gpu-heavy rejection."
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "PR #225 Workspace Control validation",
+          "result": "PASS",
+          "evidence": [
+            "run_id=39339905007",
+            "task contracts PASS",
+            "unit regression PASS",
+            "pinned Lambda controller validation PASS",
+            "full integration contracts PASS"
+          ]
+        }
+      ],
       "resume_condition": "Patch only the three stale runtime gates and focused tests, then run repository validation."
     },
     {
       "id": "runtime_activation_and_existing_run_recovery",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-local-extract-wave1-runtime-compat-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
@@ -155,13 +167,12 @@
     },
     {
       "check": "Runtime compatibility patch",
-      "result": "NOT_RUN",
+      "result": "PASS",
       "evidence": [
-        "Implementation committed on wave1-runtime-compat-v1.",
-        "scripts/lambda_ci_runtime.py defines exact finite MODEL_EVAL_WORKLOADS and DUAL_GPU_MODEL_EVAL_WORKLOADS including model-eval-local-extract-wave1.",
-        "The promoted-model verification, gpu-heavy launch_gpu_runner guard, and launch_runner dispatcher all use the explicit workload sets.",
-        "tests/test_lambda_ci_p5_gpu_runtime.py now proves both authorized dual-GPU workloads dispatch, both require promoted model binding, and generic gpu-heavy remains rejected.",
-        "No manifest, workload-policy, workflow, model object, expanded runtime, GPU UUID, or research-engine changes were made."
+        "workspace-control PR #225 validation run 39339905007 PASS.",
+        "PR #225 merged as 70d5668599de767647603ddec55815b9523d1bb8.",
+        "Patch is limited to scripts/lambda_ci_runtime.py, focused GPU runtime regression, and task-state files.",
+        "Runtime now uses explicit finite MODEL_EVAL_WORKLOADS and DUAL_GPU_MODEL_EVAL_WORKLOADS including model-eval-local-extract-wave1 while generic gpu-heavy remains rejected."
       ]
     },
     {
@@ -177,14 +188,14 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Open a narrow PR and require task contracts, unit regression, GPU runtime tests, controller validation, and full integration contracts to pass.",
-    "Inspect the exact validated diff and merge only if scope remains limited to privileged runtime/test + task-state files.",
-    "Install exact merged privileged runtime through unchanged P5 bootstrap.",
-    "Resolve the existing failed request/run recovery path without a second GitHub trigger.",
-    "Return ownership upward once the existing Wave-1 execution is running or a new exact terminal blocker is identified."
+    "Install exact runtime compatibility merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged root-owned P5 bootstrap.",
+    "Verify manifest/policy/provisioner/controller identities remain accepted and all control-plane services are active.",
+    "Resolve the terminal failed request state safely and recover the existing Wave-1 execution without another GitHub trigger.",
+    "Follow run 39200075204/job 117891019967 through artifact and final root receipt.",
+    "Return ownership upward after successful execution acceptance."
   ],
-  "next_safe_action": "Open and validate the narrow runtime compatibility PR from wave1-runtime-compat-v1. Require exact GPU runtime regression and full Workspace Control validation before merge; do not issue another Wave-1 trigger.",
+  "next_safe_action": "At the genuine root-control-plane boundary, install exact workspace-control merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged scripts/bootstrap_lambda_ci_p5.sh. Then resume ChatGPT/GitHub control and recover the existing Wave-1 execution without issuing another trigger.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created after exact controller and provisioner compatibility fixes were installed successfully. The existing request then failed inside privileged runtime before runner creation, exposing three final stale exact-workload guards.\n2026-10-19 implementation checkpoint: all three stale privileged runtime workload gates are patched with explicit finite workload sets; focused tests cover Wave 1 dispatch/model binding while generic gpu-heavy remains rejected."
+  "notes": "Created after exact controller and provisioner compatibility fixes were installed successfully. The existing request then failed inside privileged runtime before runner creation, exposing three final stale exact-workload guards.\n2026-10-19 implementation checkpoint: all three stale privileged runtime workload gates are patched with explicit finite workload sets; focused tests cover Wave 1 dispatch/model binding while generic gpu-heavy remains rejected.\nPR #225 validation run 39339905007 PASS; privileged runtime compatibility merged as 70d5668599de767647603ddec55815b9523d1bb8. Only exact root install and existing-run recovery remain."
 }
