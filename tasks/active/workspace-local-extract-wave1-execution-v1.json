@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-local-extract-wave1-execution-v1",
   "title": "Trusted Lambda route for Local EXTRACT Wave 1",
-  "status": "VALIDATING",
+  "status": "IN_PROGRESS",
   "goal": "Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the already-accepted two-A4500 Qwen3.5 execution envelope, install that exact route on Lambda, execute one bounded nine-paper benchmark, and retire the route owner after final receipt/cleanup evidence. This task does not own EXTRACT scientific design or production routing.",
   "execution_topology": "remote_only",
   "current_stage": "trusted_workflow_activation",
@@ -32,7 +32,7 @@
       "base_sha": "453f5aa3f1386f87dcb3a256de6f31496c5346a9",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "453f5aa3f1386f87dcb3a256de6f31496c5346a9",
+        "checkpoint_sha": "df142ab7829e364087dbbb7453cdc2779e9d7206",
         "verified": true
       },
       "allowed_mutation_scope": [
@@ -54,7 +54,7 @@
       "base_sha": "4ffd429086c76da9759de2a34bdf0bc0de21d522",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "4ffd429086c76da9759de2a34bdf0bc0de21d522",
+        "checkpoint_sha": "366f9585145ab539dc43c3c974dcb8625489a3e3",
         "verified": true
       },
       "allowed_mutation_scope": []
@@ -75,7 +75,10 @@
       ],
       "outputs": [
         "exact manifest/policy route model-eval-local-extract-wave1",
-        "schema/test coverage for route identity and generic gpu-heavy denial"
+        "schema/test coverage for route identity and generic gpu-heavy denial",
+        "workspace-control route merge df142ab7829e364087dbbb7453cdc2779e9d7206",
+        "manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402",
+        "policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d"
       ],
       "validation": [
         {
@@ -86,9 +89,18 @@
             "PR #128 merged as 4ffd429086c76da9759de2a34bdf0bc0de21d522",
             "merged workflow blob a5be693f750c481db21d86d239a505083aae40aa"
           ]
+        },
+        {
+          "check": "Workspace Control Validation and route merge",
+          "result": "PASS",
+          "evidence": [
+            "PR #214 validation run 39197297919 PASS.",
+            "PR #214 merged as df142ab7829e364087dbbb7453cdc2779e9d7206.",
+            "Merged manifest/policy blobs are 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d."
+          ]
         }
       ],
-      "resume_condition": "Workspace Control Validation must pass and the exact route merge must be installed and verified on Lambda before benchmark trigger."
+      "resume_condition": "Install exact route merge on Lambda and verify installed identity before trigger."
     },
     {
       "id": "wave1_execution_acceptance",
@@ -153,8 +165,11 @@
     },
     {
       "check": "workspace-control route validation",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "PR #214 Workspace Control Validation run 39197297919 PASS",
+        "merged route df142ab7829e364087dbbb7453cdc2779e9d7206"
+      ]
     },
     {
       "check": "installed Lambda route",
@@ -167,16 +182,16 @@
       "evidence": []
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Pass Workspace Control Validation for the exact new route and merge it.",
-    "Install and verify the exact merged manifest/policy on Lambda without changing model/runtime binaries.",
-    "Trigger exactly one Local EXTRACT Wave 1 candidate and follow only its dedicated run.",
-    "Read the final root-owned receipt and require cleanup/postverification PASS.",
-    "Archive this support task after acceptance; generic gpu-heavy remains denied."
+  "blockers": [
+    "Exact route merge df142ab7829e364087dbbb7453cdc2779e9d7206 is not yet installed on Lambda."
   ],
-  "next_safe_action": "Run Workspace Control Validation on the exact route branch. If green, merge it and prepare one bounded exact-SHA Lambda install/verification operation. Do not trigger the Wave 1 workflow before installed manifest/policy identities match the merge.",
+  "remaining_work": [
+    "Install and verify exact route merge df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda.",
+    "Trigger exactly one PR #130 Wave 1 run at candidate 28d8379dfb650bfa63ea9e7ac9476b8be0f55b10.",
+    "Require final root receipt cleanup/postverify PASS, then archive this support task."
+  ],
+  "next_safe_action": "Install exact workspace-control df142ab7829e364087dbbb7453cdc2779e9d7206 via the accepted bootstrap path. Verify installed manifest/policy exact blobs, model-eval-local-extract-wave1 exact workflow/model/runtime/two-GPU/public-payload authority, generic gpu-heavy DENY, service health, and zero residue. Do not trigger research-engine PR #130 until PASS.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
-  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed."
+  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed. Route PR #214 validated and merged as df142ab7829e364087dbbb7453cdc2779e9d7206; exact host installation remains the only blocker before the one authorized Wave-1 run."
 }
