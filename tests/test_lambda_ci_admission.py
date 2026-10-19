@@ -88,6 +88,7 @@ class AdmissionContractTests(unittest.TestCase):
                 "gpu-small",
                 "model-eval-single-gpu",
                 "model-eval-dual-gpu",
+                "model-eval-local-extract-wave1",
             ],
         )
         self.assertNotIn("gpu-heavy", admission["live_enabled_workload_classes"])
@@ -254,6 +255,56 @@ class AdmissionContractTests(unittest.TestCase):
                 policy,
                 now=NOW,
             )
+
+    def test_local_extract_wave1_is_exact_dual_model_eval_with_public_payload(self):
+        manifest = enabled_manifest()
+        policy = copy.deepcopy(POLICY)
+
+        admission = mod.mint_admission(
+            good_request("model-eval-local-extract-wave1"),
+            manifest,
+            policy,
+            now=NOW,
+        )
+
+        self.assertEqual(
+            admission["workload_class"],
+            "model-eval-local-extract-wave1",
+        )
+        self.assertEqual(admission["execution_profile"], "gpu-heavy")
+        self.assertEqual(
+            admission["resource_class"],
+            "model_eval_dual_gpu_v1",
+        )
+        self.assertEqual(
+            admission["capability_classes"]["payload_network"],
+            "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+        )
+        self.assertEqual(
+            admission["resource_ceiling"]["gpu_uuids"],
+            [
+                "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+                "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+            ],
+        )
+        self.assertEqual(admission["models"][0]["model_id"], "qwen3.5-4b")
+        self.assertEqual(
+            admission["trusted_workflow"]["path"],
+            ".github/workflows/lambda-ci-local-extract-wave1.yml",
+        )
+        self.assertEqual(
+            admission["trusted_workflow"]["workflow_blob_sha"],
+            "a5be693f750c481db21d86d239a505083aae40aa",
+        )
+        self.assertEqual(
+            policy["workload_classes"]["gpu-heavy"]["policy_decision"],
+            "DENY",
+        )
+        self.assertFalse(
+            policy["workload_classes"]["gpu-heavy"][
+                "admission_enabled_after_enforcement"
+            ]
+        )
 
     def test_trusted_workflow_identity_mismatch_fails_closed(self):
         for key, value in (

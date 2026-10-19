@@ -34,7 +34,8 @@ class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
     def test_exact_workload_taxonomy_and_gpu_heavy_denial(self):
         expected = {
             "cpu-test", "gpu-small", "model-acquire", "cache-promote",
-            "model-eval-single-gpu", "model-eval-dual-gpu", "gpu-heavy",
+            "model-eval-single-gpu", "model-eval-dual-gpu",
+            "model-eval-local-extract-wave1", "gpu-heavy",
         }
         self.assertEqual(set(self.policy["workload_classes"]), expected)
         heavy = self.policy["workload_classes"]["gpu-heavy"]
@@ -126,6 +127,55 @@ class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
         self.assertEqual(
             binding["dual_gpu_model_eval"]["activation_status"],
             "LIVE_BOUNDED_AFTER_HOST_ACCEPTANCE",
+        )
+
+    def test_local_extract_wave1_is_exact_public_payload_model_eval(self):
+        wave1 = self.policy["workload_classes"][
+            "model-eval-local-extract-wave1"
+        ]
+        self.assertEqual(
+            wave1["policy_decision"],
+            "EXISTING_P5_CAPABILITY",
+        )
+        self.assertTrue(wave1["admission_enabled_after_enforcement"])
+        self.assertEqual(wave1["resource_class"], "model_eval_dual_gpu_v1")
+        self.assertEqual(
+            wave1["payload_network_class"],
+            "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+        )
+        self.assertEqual(
+            wave1["model_binding"],
+            "REQUIRED_PROMOTED_EXACT",
+        )
+        self.assertEqual(
+            wave1["runtime_binding"],
+            "REQUIRED_EXPANDED_RUNTIME_EXACT",
+        )
+        self.assertEqual(
+            wave1["activation_gate"],
+            "EXACT_LOCAL_EXTRACT_WAVE1_WORKFLOW_ONLY",
+        )
+
+        binding = self.policy["project_bindings"]["research-engine"]
+        self.assertIn(
+            "model-eval-local-extract-wave1",
+            binding["allowed_workload_classes"],
+        )
+        self.assertEqual(
+            binding["local_extract_wave1"]["workflow_blob_sha"],
+            "a5be693f750c481db21d86d239a505083aae40aa",
+        )
+        self.assertFalse(
+            binding["local_extract_wave1"][
+                "scientific_state_materialized"
+            ]
+        )
+        self.assertFalse(
+            binding["local_extract_wave1"]["production_routing_change"]
+        )
+        self.assertEqual(
+            binding["denied_workload_classes"],
+            ["gpu-heavy"],
         )
 
     def test_qwen_first_pilot_is_exact_and_non_scientific(self):

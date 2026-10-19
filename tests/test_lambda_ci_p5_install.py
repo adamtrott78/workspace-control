@@ -207,6 +207,7 @@ class LambdaCIP5InstallTests(unittest.TestCase):
                 "gpu-small",
                 "model-eval-single-gpu",
                 "model-eval-dual-gpu",
+                "model-eval-local-extract-wave1",
             ],
         )
         self.assertEqual(
@@ -240,6 +241,24 @@ class LambdaCIP5InstallTests(unittest.TestCase):
                 "model_binding_id"
             ],
             "qwen3.5-4b",
+        )
+        self.assertEqual(
+            project["admission_v2"]["routes"]["model-eval-local-extract-wave1"][
+                "trusted_workflow"
+            ]["blob_sha"],
+            "a5be693f750c481db21d86d239a505083aae40aa",
+        )
+        self.assertEqual(
+            project["admission_v2"]["routes"]["model-eval-local-extract-wave1"][
+                "model_binding_id"
+            ],
+            "qwen3.5-4b",
+        )
+        self.assertEqual(
+            project["admission_v2"]["routes"]["model-eval-local-extract-wave1"][
+                "execution_profile"
+            ],
+            "gpu-heavy",
         )
         self.assertEqual(
             project["profiles"]["gpu-heavy"]["gpu_uuids"],

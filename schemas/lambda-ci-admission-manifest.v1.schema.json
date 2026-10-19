@@ -153,7 +153,8 @@
         "model-acquire",
         "cache-promote",
         "model-eval-single-gpu",
-        "model-eval-dual-gpu"
+        "model-eval-dual-gpu",
+        "model-eval-local-extract-wave1"
       ]
     },
     "execution_profile": {

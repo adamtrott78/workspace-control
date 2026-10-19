@@ -232,6 +232,7 @@
         "cache-promote",
         "model-eval-single-gpu",
         "model-eval-dual-gpu",
+        "model-eval-local-extract-wave1",
         "gpu-heavy"
       ],
       "properties": {
@@ -284,6 +285,9 @@
           }
         },
         "model-eval-dual-gpu": {
+          "$ref": "#/$defs/workloadClass"
+        },
+        "model-eval-local-extract-wave1": {
           "$ref": "#/$defs/workloadClass"
         }
       }
