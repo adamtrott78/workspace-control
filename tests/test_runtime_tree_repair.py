@@ -87,17 +87,34 @@ class RuntimeTreeRepairTests(unittest.TestCase):
             real_rename = os.rename
 
             def privileged_rename(src, dst):
-                src_parent = pathlib.Path(src).parent
-                dst_parent = pathlib.Path(dst).parent
-                src_mode = stat.S_IMODE(src_parent.stat().st_mode)
-                dst_mode = stat.S_IMODE(dst_parent.stat().st_mode)
-                os.chmod(src_parent, src_mode | stat.S_IWUSR)
-                os.chmod(dst_parent, dst_mode | stat.S_IWUSR)
+                src_path = pathlib.Path(src)
+                dst_path = pathlib.Path(dst)
+                src_parent = src_path.parent
+                dst_parent = dst_path.parent
+                src_parent_mode = stat.S_IMODE(src_parent.stat().st_mode)
+                dst_parent_mode = stat.S_IMODE(dst_parent.stat().st_mode)
+                src_mode = (
+                    stat.S_IMODE(src_path.stat().st_mode)
+                    if src_path.is_dir()
+                    else None
+                )
+                os.chmod(
+                    src_parent,
+                    src_parent_mode | stat.S_IWUSR,
+                )
+                os.chmod(
+                    dst_parent,
+                    dst_parent_mode | stat.S_IWUSR,
+                )
+                if src_mode is not None:
+                    os.chmod(src_path, src_mode | stat.S_IWUSR)
                 try:
                     real_rename(src, dst)
                 finally:
-                    os.chmod(src_parent, src_mode)
-                    os.chmod(dst_parent, dst_mode)
+                    os.chmod(src_parent, src_parent_mode)
+                    os.chmod(dst_parent, dst_parent_mode)
+                    if src_mode is not None:
+                        os.chmod(dst_path, src_mode)
 
             with mock.patch.object(
                 repair.os,
