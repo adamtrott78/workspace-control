@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-local-extract-wave1-controller-compat-v1
 - Title: Local EXTRACT Wave 1 controller compatibility
-- Status: IN_PROGRESS
+- Status: VALIDATING
 - Capsule schema: v2
 
 ## Goal
@@ -36,13 +36,13 @@ Make the already-authorized and already-triggered Local EXTRACT Wave 1 job claim
 
 ## Next safe action
 
-Implement the smallest fail-closed controller patch on branch wave1-controller-compat-v1: add exact model-eval-local-extract-wave1 handling to GPU workload selection, /lambda-ci-local-extract-wave1 attestation command mapping, and deterministic GPU runner identity, with regression tests preserving CPU rejection and generic gpu-heavy DENY. Do not modify research-engine or issue another trigger.
+Open and validate the narrow controller compatibility PR from wave1-controller-compat-v1. Require controller unit/regression tests and Workspace Control validation to pass; inspect the diff before merge. Do not issue another Wave-1 trigger.
 
 ## Remaining work
 
-- Patch exact Wave-1 workload acceptance, command attestation, deterministic GPU runner mapping, and focused tests.
-- Run Workspace Control validation, inspect diff, open/merge a narrow PR only after PASS.
-- Determine whether an already-authorized autonomous root-controller deployment route exists; use it if available, otherwise stop at the genuine root-control-plane human gate rather than asking the user to run the research workload.
+- Open a narrow pull request and require Workspace Control validation / controller Go tests to pass.
+- Inspect the validated diff and merge only if the exact controller compatibility boundary remains unchanged.
+- Determine whether an already-authorized autonomous root-controller deployment route exists; use it if available, otherwise stop at the genuine root-control-plane human gate.
 - Install/verify exact merged controller and recover run 39200075204 / job 117891019967 without retriggering.
 - Return ownership to workspace-local-extract-wave1-execution-v1 once the existing job is claimed.
 
