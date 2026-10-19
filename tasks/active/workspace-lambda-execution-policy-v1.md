@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-lambda-execution-policy-v1
 - Title: Workspace Lambda Execution Policy and Model Workload Governance v1
-- Status: BLOCKED_EVIDENCE
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -36,11 +36,10 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Use only scripts/runtime_tree_repair.py from exact workspace-control d479db58a0edd71f458894590536ea83791e8104 (blob 82d1743567d5f0e0c18de315594d95f3908c4afe) for the reversible runtime correction. Use candidate evidence /home/atrott/adamArchives/Adam/workspace-control-tmp/runtime-drift-projection-20261019T010548Z/evidence/candidate-path-difference.json and first reverify its SHA-256 is 4aedbbc374255ba17d21a82a13be6e3d719f25a864e3b88ba44384d0c4f12ad5. During maintenance isolation, require the helper's pre-mutation proof to reproduce the accepted 53583 files / 6069 directories / 4 symlinks / 11067818797 bytes / b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63 and exact extra set 868 files / 172 directories / 0 symlinks. Atomically quarantine only minimal candidate roots to a same-filesystem path outside the canonical runtime. Then run the authoritative installed production expanded-runtime verifier. If it fails, immediately rollback using the retained repair manifest and require restoration of the pre-repair drifted identity. If it passes, keep quarantine evidence, restore all three control-plane services active with NRestarts=0 and zero project CPU/GPU residue. Do not run timeout/OOM in the same operation.
+Expanded-runtime recovery is VALIDATED and no longer blocks the owning task. Resume gpu_heavy_policy_decision from the first unfinished stage: reverify (do not reinstall unless drift is found) the installed exact workspace-control 0f8375a889863c673fb79f76d83c7b94977a9252 implementation and immutable dual timeout/CUDA-OOM probe identities, then run the root-authored dual timeout acceptance followed by the trusted dual CUDA-OOM acceptance. Do not rerun the already-accepted dormant two-GPU NCCL gate. Timeout must raise RuntimeTimeoutError with terminal_status=TIMED_OUT, timed_out=true, systemd Result=timeout, retry=false, exact two-UUID binding, runtime/model pre+post verification, CPU/GPU cleanup, and destroyed runner/staging workspaces. OOM must raise RuntimeCudaOomError with terminal_status=CUDA_OOM, cuda_oom=true, trusted exit-86 evidence matched, systemd Result=exit-code / ExecMainStatus=86, the same exact UUID/runtime/model postverify and cleanup guarantees. Keep model-eval-dual-gpu non-live and generic gpu-heavy DENY until both PASS.
 
 ## Remaining work
 
-- Restore the accepted expanded Qwen runtime through the incident recovery contract: first obtain an exact non-mutating projection PASS; only then perform a separate reversible quarantine/write-bit repair with immediate authoritative production verification and rollback on any mismatch.
 - After exact runtime restoration, reverify installed workspace-control implementation 0f8375a889863c673fb79f76d83c7b94977a9252 and immutable dual timeout/CUDA-OOM probe identities without reinstalling or rerunning already-accepted gates unless identity has actually drifted.
 - Run root-authored dual timeout acceptance and checkpoint the exact P5 root receipt: RuntimeTimeoutError, terminal_status=TIMED_OUT, timed_out=true, systemd Result=timeout, no retry, exact two-UUID binding, runtime/model pre+post verify, CPU/GPU cleanup, workspaces destroyed.
 - Run root-authored dual CUDA-OOM acceptance and checkpoint trusted exit-86 evidence: RuntimeCudaOomError, terminal_status=CUDA_OOM, cuda_oom=true, evidence matched on exact probe identity, exact two-UUID binding, runtime/model pre+post verify, CPU/GPU cleanup, workspaces destroyed.
@@ -52,7 +51,7 @@ Use only scripts/runtime_tree_repair.py from exact workspace-control d479db58a0e
 
 ## Blockers / gates
 
-- Expanded Qwen runtime drift blocks the dual timeout/OOM gates: the canonical runtime currently has 54451 files / 6241 directories / 4 symlinks instead of the accepted 53583 / 6069 / 4, and exact accepted-tree restoration has not yet been proven. Read tasks/active/workspace-lambda-execution-policy-v1.runtime-drift-recovery.md before any further host action.
+- None.
 
 ## Fresh-chat initialization
 
