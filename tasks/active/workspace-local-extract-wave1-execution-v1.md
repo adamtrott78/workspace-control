@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-local-extract-wave1-execution-v1
 - Title: Trusted Lambda route for Local EXTRACT Wave 1
-- Status: VALIDATING
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -24,31 +24,29 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 453f5aa3f1386f87dcb3a256de6f31496c5346a9
+- Remote checkpoint: df142ab7829e364087dbbb7453cdc2779e9d7206
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: 4ffd429086c76da9759de2a34bdf0bc0de21d522
+- Remote checkpoint: 366f9585145ab539dc43c3c974dcb8625489a3e3
 - Remote verified: true
 
 ## Next safe action
 
-Run Workspace Control Validation on the exact route branch. If green, merge it and prepare one bounded exact-SHA Lambda install/verification operation. Do not trigger the Wave 1 workflow before installed manifest/policy identities match the merge.
+Install exact workspace-control df142ab7829e364087dbbb7453cdc2779e9d7206 via the accepted bootstrap path. Verify installed manifest/policy exact blobs, model-eval-local-extract-wave1 exact workflow/model/runtime/two-GPU/public-payload authority, generic gpu-heavy DENY, service health, and zero residue. Do not trigger research-engine PR #130 until PASS.
 
 ## Remaining work
 
-- Pass Workspace Control Validation for the exact new route and merge it.
-- Install and verify the exact merged manifest/policy on Lambda without changing model/runtime binaries.
-- Trigger exactly one Local EXTRACT Wave 1 candidate and follow only its dedicated run.
-- Read the final root-owned receipt and require cleanup/postverification PASS.
-- Archive this support task after acceptance; generic gpu-heavy remains denied.
+- Install and verify exact route merge df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda.
+- Trigger exactly one PR #130 Wave 1 run at candidate 28d8379dfb650bfa63ea9e7ac9476b8be0f55b10.
+- Require final root receipt cleanup/postverify PASS, then archive this support task.
 
 ## Blockers / gates
 
-- None.
+- Exact route merge df142ab7829e364087dbbb7453cdc2779e9d7206 is not yet installed on Lambda.
 
 ## Fresh-chat initialization
 
