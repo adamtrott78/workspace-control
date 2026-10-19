@@ -36,12 +36,10 @@ Design, implement, and adversarially validate a fail-closed workload admission, 
 
 ## Next safe action
 
-Installed bounded dual activation is VALIDATED PASS on Lambda. Verify research-engine PR #123 is still OPEN at exact head 98f49e957073756411065a315514451fefd08ee6 with its previously accepted inert/non-scientific candidate and dedicated dual workflow identity. Then issue exactly one comment `/lambda-ci-qwen35-dual-pilot 98f49e957073756411065a315514451fefd08ee6` on PR #123 and follow only the dedicated resulting workflow run. Accept only if exact two-UUID binding, tensor_parallel_size=2, >1 GiB peak model memory on each UUID, exactly one synthetic image+text inference, no scientific/public-acquisition/production-routing/persistent-server effect, final root provisioner receipt terminal success, runtime/model postverify, zero residue/quarantine, and destroyed runner/staging workspaces.
+Do NOT rerun the dual-Qwen pilot. Workflow run 39188851843 is PASS and its model canary criteria are satisfied. Read only the final root-owned provisioner receipt /srv/workspace-ci/research-engine/logs/p5-b9e5d518-22e4-541b-9882-1969103be357-receipt.json and current host state. Require decision=RUNNER_EXITED_CLEANLY, terminal_status=SUCCEEDED, runner_exit_code=0, exact candidate/workload/profile/resource/workflow identity, exact two UUID/device binding, expanded_runtime_preverified/postverified=true with accepted b0cbb4ef... tree, promoted_model_preverified/postverified=true with exact Qwen object, project UID CPU/GPU cleanup true with no leaked GPU processes, runner/staging workspaces destroyed, no gpu-heavy lane quarantine, all three control-plane services active NRestarts=0, and no project CPU/GPU residue. If any final root condition fails, stop without rerunning the pilot.
 
 ## Remaining work
 
-- Issue exactly one `/lambda-ci-qwen35-dual-pilot 98f49e957073756411065a315514451fefd08ee6` comment on research-engine PR #123 and follow only that dedicated run.
-- Accept the tensor-parallel pilot only if exact two-UUID binding holds, tensor_parallel_size=2, both UUIDs show >1 GiB peak model memory, exactly one synthetic image+text inference completes, and no scientific input/state, public acquisition, production-routing change, or persistent model server occurs.
 - Read the final root-owned dual pilot provisioner receipt and require terminal success, exact workflow/candidate/model/runtime/two-UUID identity, runtime/model postverify, zero project CPU/GPU residue/quarantine, and destroyed job/staging workspaces.
 - If all gates pass, mark bounded model-eval-dual-gpu authority VALIDATED. Keep generic gpu-heavy DENY unless a separate generic heavy-workload policy is explicitly designed and accepted.
 
