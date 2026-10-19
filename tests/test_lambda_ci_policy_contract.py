@@ -100,10 +100,10 @@ class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
         self.assertEqual(resources["gpu_uuids"], [GPU_UUID])
         self.assertEqual(resources["staging_max_bytes"], 0)
 
-    def test_dual_model_eval_is_exact_two_gpu_and_designed_not_live(self):
+    def test_dual_model_eval_is_exact_two_gpu_and_bounded_live(self):
         dual = self.policy["workload_classes"]["model-eval-dual-gpu"]
-        self.assertEqual(dual["policy_decision"], "DESIGNED_NOT_LIVE")
-        self.assertFalse(dual["admission_enabled_after_enforcement"])
+        self.assertEqual(dual["policy_decision"], "EXISTING_P5_CAPABILITY")
+        self.assertTrue(dual["admission_enabled_after_enforcement"])
         self.assertEqual(dual["resource_class"], "model_eval_dual_gpu_v1")
         self.assertEqual(dual["model_binding"], "REQUIRED_PROMOTED_EXACT")
         self.assertEqual(dual["runtime_binding"], "REQUIRED_EXPANDED_RUNTIME_EXACT")
@@ -125,7 +125,7 @@ class LambdaCIWorkloadPolicyContractTests(unittest.TestCase):
         self.assertEqual(binding["dual_gpu_model_eval"]["tensor_parallel_size"], 2)
         self.assertEqual(
             binding["dual_gpu_model_eval"]["activation_status"],
-            "DESIGNED_NOT_LIVE",
+            "LIVE_BOUNDED_AFTER_HOST_ACCEPTANCE",
         )
 
     def test_qwen_first_pilot_is_exact_and_non_scientific(self):

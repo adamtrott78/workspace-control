@@ -423,22 +423,19 @@ def test_v2_exact_dual_uuid_set_can_be_carried_only_when_root_policy_and_profile
         "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
     ]
 
-    assert "model-eval-dual-gpu" not in (
+    assert "model-eval-dual-gpu" in (
         manifest["admission_v2"]["live_enabled_workload_classes"]
     )
     assert policy["workload_classes"]["model-eval-dual-gpu"][
         "policy_decision"
-    ] == "DESIGNED_NOT_LIVE"
-
-    manifest["admission_v2"]["live_enabled_workload_classes"].append(
-        "model-eval-dual-gpu"
-    )
-    policy["workload_classes"]["model-eval-dual-gpu"][
-        "policy_decision"
-    ] = "EXISTING_P5_CAPABILITY"
-    policy["workload_classes"]["model-eval-dual-gpu"][
+    ] == "EXISTING_P5_CAPABILITY"
+    assert policy["workload_classes"]["model-eval-dual-gpu"][
         "admission_enabled_after_enforcement"
-    ] = True
+    ] is True
+    assert policy["workload_classes"]["gpu-heavy"]["policy_decision"] == "DENY"
+    assert policy["workload_classes"]["gpu-heavy"][
+        "admission_enabled_after_enforcement"
+    ] is False
 
     req = mod.validate_request_v2(
         good_v2_request("model-eval-dual-gpu"),

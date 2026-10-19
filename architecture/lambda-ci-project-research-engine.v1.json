@@ -74,7 +74,8 @@
     "live_enabled_workload_classes": [
       "cpu-test",
       "gpu-small",
-      "model-eval-single-gpu"
+      "model-eval-single-gpu",
+      "model-eval-dual-gpu"
     ],
     "routes": {
       "cpu-test": {
@@ -152,7 +153,7 @@
         }
       }
     },
-    "activation_note": "Admission v2 remains live only for cpu-test, gpu-small, and model-eval-single-gpu. model-eval-dual-gpu is designed but not live: it is pinned to the exact promoted Qwen3.5-4B, the same immutable expanded runtime, execution profile gpu-heavy, and the exact two-A4500 UUID set. Generic gpu-heavy remains denied and the dual route is absent from live_enabled_workload_classes until host acceptance."
+    "activation_note": "Staged post-host-gate activation: cpu-test, gpu-small, model-eval-single-gpu, and the exact model-eval-dual-gpu route are live-enabled by this candidate manifest. Generic gpu-heavy remains denied; this branch must not merge or install until dual timeout/cancel and dual CUDA-OOM root acceptance both PASS."
   },
   "expanded_runtime_bindings": {
     "gpu-small": {
