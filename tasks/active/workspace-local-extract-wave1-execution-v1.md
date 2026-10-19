@@ -24,7 +24,7 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 70d5668599de767647603ddec55815b9523d1bb8
+- Remote checkpoint: 958d6f8ed0989b2846d04b3bd3eb2ace41f5372c
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,18 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 ## Next safe action
 
-Do not issue another Wave-1 trigger. Install exact runtime compatibility merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap, then recover existing run 39200075204/job 117891019967.
+Do not issue another Wave-1 trigger. Install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8 and perform the single evidence-preserving prelaunch recovery of fd30c4c6-6756-55d1-a12d-e3cb16f50d20, then resume existing run 39200075204/job 117891019967.
 
 ## Remaining work
 
-- Install exact merged privileged runtime 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap.
-- Recover the existing Wave-1 execution without another trigger.
+- Perform exact runtime install and one evidence-preserving recovery of deterministic request fd30c4c6-6756-55d1-a12d-e3cb16f50d20.
+- Follow existing run 39200075204/job 117891019967 after same-job recovery; do not post another trigger.
 - Read Wave-1 report artifact and final root receipt; require exact model/runtime/two-GPU identity, non-scientific state, cleanup/postverify PASS, no residue/quarantine, then classify PROMISING/PARTIAL/REJECT.
 - Checkpoint result into research-engine-local-extract-redesign-v1 and archive support tasks.
 
 ## Blockers / gates
 
-- Root privileged-runtime install gate only: runtime compatibility PR #225 validated and merged as 70d5668599de767647603ddec55815b9523d1bb8. Existing Wave-1 run remains sole authorized execution; no retrigger.
+- Root install + prelaunch recovery gate: install merged runtime 70d5668599de767647603ddec55815b9523d1bb8, preserve the exact failed request record as evidence, retire only that active request entry after re-verifying zero execution material/residue/quarantine, and restart the GPU controller to recover the same assigned job. No second GitHub trigger.
 
 ## Fresh-chat initialization
 

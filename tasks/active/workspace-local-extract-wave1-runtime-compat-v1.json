@@ -14,7 +14,8 @@
     "Focused runtime regression covers generic gpu-heavy rejection, exact Wave-1 dispatch, and exact promoted-model requirement.",
     "No manifest, workload-policy, workflow, model object, expanded runtime, GPU UUID, or research-engine scientific code changes occur.",
     "Workspace Control validation passes before merge and exact merged privileged runtime is installed through unchanged P5 bootstrap.",
-    "Existing benchmark request/run is recovered without a second GitHub trigger."
+    "Existing benchmark request/run is recovered without a second GitHub trigger.",
+    "After exact runtime install, the previously FAILED prelaunch request may be re-armed only by archiving its exact durable state as evidence and removing that single active state entry after proving there was no runner unit, runtime receipt, runner log, CPU/GPU process residue, or lane quarantine."
   ],
   "constraints": [
     "Do not issue another /lambda-ci-local-extract-wave1 trigger.",
@@ -22,7 +23,9 @@
     "Do not modify research-engine or PR #131.",
     "Do not change architecture/lambda-ci-project-research-engine.v1.json or architecture/lambda-ci-workload-policy.v1.json.",
     "Do not alter qwen3.5-4b object/revision, expanded runtime identity, GPU UUIDs, network authority, or production routing.",
-    "Do not generalize gpu-heavy to arbitrary workloads; use a finite exact dual-GPU model-eval workload set."
+    "Do not generalize gpu-heavy to arbitrary workloads; use a finite exact dual-GPU model-eval workload set.",
+    "Do not discard terminal failure evidence: preserve the exact failed request JSON under a root-owned recovery-evidence path and record its SHA256 before clearing the active request state.",
+    "Do not create a new GitHub trigger/run for recovery. Re-arm only the same deterministic request/job through controller JobAssigned recovery after the exact active state entry is cleared."
   ],
   "repositories": [
     {
@@ -31,7 +34,7 @@
       "base_sha": "246465494256ca7e2080c442c5a8e314e445c464",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "70d5668599de767647603ddec55815b9523d1bb8",
+        "checkpoint_sha": "958d6f8ed0989b2846d04b3bd3eb2ace41f5372c",
         "verified": true
       },
       "allowed_mutation_scope": [
@@ -129,6 +132,18 @@
         "error=autonomous profile rejected: gpu-heavy",
         "no runtime receipt, no transient unit, no CPU/GPU residue, no lane quarantine"
       ]
+    },
+    {
+      "id": "prelaunch-rearm-authority",
+      "kind": "runtime_recovery_authorization",
+      "identity": "fd30c4c6-6756-55d1-a12d-e3cb16f50d20",
+      "required_for_resume": true,
+      "evidence": [
+        "Durable state status=FAILED with RuntimeLaunchError `autonomous profile rejected: gpu-heavy`.",
+        "No root runtime receipt, runner log, journal capture, transient unit, project CPU/GPU process residue, or lane quarantine existed after failure.",
+        "Failure occurred before any benchmark payload or runner process executed.",
+        "Controller recovery code treats MISSING durable state as authority to reconcile orphan JIT registration and regenerate the same deterministic request; terminal FAILED state intentionally prevents re-execution."
+      ]
     }
   ],
   "artifacts": [
@@ -186,16 +201,18 @@
       "evidence": []
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Install exact runtime compatibility merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged root-owned P5 bootstrap.",
-    "Verify manifest/policy/provisioner/controller identities remain accepted and all control-plane services are active.",
-    "Resolve the terminal failed request state safely and recover the existing Wave-1 execution without another GitHub trigger.",
-    "Follow run 39200075204/job 117891019967 through artifact and final root receipt.",
-    "Return ownership upward after successful execution acceptance."
+  "blockers": [
+    "Genuine root-control-plane operation required: install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8, then perform the narrowly authorized prelaunch re-arm of request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 by archiving the exact FAILED state and clearing only its active state file before restarting the GPU controller."
   ],
-  "next_safe_action": "At the genuine root-control-plane boundary, install exact workspace-control merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged scripts/bootstrap_lambda_ci_p5.sh. Then resume ChatGPT/GitHub control and recover the existing Wave-1 execution without issuing another trigger.",
+  "remaining_work": [
+    "Install exact runtime compatibility merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap.",
+    "Before re-arm, re-prove the exact FAILED state/error and absence of receipt/log/unit/process/GPU/quarantine execution evidence.",
+    "Archive the root-owned failed state with SHA256 under /var/lib/workspace-ci/provisioner/recovery-evidence and remove only the active state file for fd30c4c6-6756-55d1-a12d-e3cb16f50d20.",
+    "Restart only workspace-ci-controller-gpu.service and allow JobAssigned recovery to reconcile orphan JIT state and regenerate the same deterministic request; do not post another trigger.",
+    "Resume ChatGPT/GitHub following of run 39200075204/job 117891019967 and validate runtime/artifact/final receipt."
+  ],
+  "next_safe_action": "At the root HUMAN_TERMINAL boundary, install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8. Then, only if request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 still exactly matches the proven prelaunch FAILED state and still has zero execution material/residue/quarantine, archive that state with SHA256, remove only its active state file, restart workspace-ci-controller-gpu.service, and let the same GitHub job recover. Do not trigger another run.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created after exact controller and provisioner compatibility fixes were installed successfully. The existing request then failed inside privileged runtime before runner creation, exposing three final stale exact-workload guards.\n2026-10-19 implementation checkpoint: all three stale privileged runtime workload gates are patched with explicit finite workload sets; focused tests cover Wave 1 dispatch/model binding while generic gpu-heavy remains rejected.\nPR #225 validation run 39339905007 PASS; privileged runtime compatibility merged as 70d5668599de767647603ddec55815b9523d1bb8. Only exact root install and existing-run recovery remain."
+  "notes": "Created after exact controller and provisioner compatibility fixes were installed successfully. The existing request then failed inside privileged runtime before runner creation, exposing three final stale exact-workload guards.\n2026-10-19 implementation checkpoint: all three stale privileged runtime workload gates are patched with explicit finite workload sets; focused tests cover Wave 1 dispatch/model binding while generic gpu-heavy remains rejected.\nPR #225 validation run 39339905007 PASS; privileged runtime compatibility merged as 70d5668599de767647603ddec55815b9523d1bb8. Only exact root install and existing-run recovery remain.\n2026-10-19 recovery design: terminal replay protection correctly blocks same-request re-execution after FAILED. Because this failure is proven prelaunch with zero execution material, the task now authorizes one evidence-preserving re-arm of the same deterministic request: archive failed state, clear only active request entry, restart GPU controller, recover same JobAssigned metadata. No second GitHub trigger/run."
 }

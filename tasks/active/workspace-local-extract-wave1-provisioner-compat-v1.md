@@ -24,7 +24,7 @@ Allow the already-live and already-triggered Local EXTRACT Wave 1 workload throu
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 70d5668599de767647603ddec55815b9523d1bb8
+- Remote checkpoint: 958d6f8ed0989b2846d04b3bd3eb2ace41f5372c
 - Remote verified: true
 
 ### research-engine
@@ -36,17 +36,16 @@ Allow the already-live and already-triggered Local EXTRACT Wave 1 workload throu
 
 ## Next safe action
 
-Do not retrigger. Install exact privileged runtime merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap, then recover existing run 39200075204.
+Do not retrigger. Execute the runtime child's authorized root install + prelaunch re-arm for request fd30c4c6-6756-55d1-a12d-e3cb16f50d20, preserving failed-state evidence.
 
 ## Remaining work
 
-- Install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap.
-- Recover the existing Wave-1 execution without a second trigger.
-- After successful runner launch/claim, close the runtime/provisioner/controller support chain and return ownership upward.
+- Allow runtime child to install 70d5668599de767647603ddec55815b9523d1bb8 and perform the one authorized prelaunch state re-arm.
+- After same job is successfully re-provisioned, mark this provisioner child COMPLETE and return ownership upward.
 
 ## Blockers / gates
 
-- Root runtime install gate only: runtime compatibility PR #225 is validated/merged, but installed privileged runtime must be updated before the existing Wave-1 execution can be recovered. Do not retrigger.
+- Root runtime install + evidence-preserving prelaunch re-arm gate. Runtime fix is merged; same deterministic request is terminal FAILED only because of the old prelaunch runtime guard. Recovery must archive failure state before clearing the single active request entry; no new trigger.
 
 ## Fresh-chat initialization
 
