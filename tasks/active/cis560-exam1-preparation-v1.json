@@ -51,7 +51,7 @@
       "base_sha": "3e5906ca572f47272ac14a4d4ac2ed4ae9eb0122",
       "remote": {
         "branch": "tutor-framework",
-        "checkpoint_sha": "3c9fa3a5315ab283211a379698b640c10f7e38e1",
+        "checkpoint_sha": "f6b0c3ccf43068c2add3b2a3151275aea50082dd",
         "verified": true
       },
       "local": null,
@@ -295,7 +295,11 @@
         "study/exam1/practice_factory/FACTORY_SPEC.md",
         "study/exam1/practice_factory/BLUEPRINTS.md",
         "study/exam1/practice_factory/FACTORY_STATE.json",
-        "study/exam1/practice_factory/TEST_TEMPLATE.md"
+        "study/exam1/practice_factory/TEST_TEMPLATE.md",
+        "study/exam1/practice_factory/ENSEMBLE_SPEC.md",
+        "study/exam1/practice_factory/PREDICTIVE_PRIORS.json",
+        "study/exam1/practice_factory/simulate_ensemble.py",
+        "study/exam1/practice_factory/ENSEMBLE_PRE_REVIEW_10K.md"
       ],
       "validation": [
         {
@@ -306,6 +310,16 @@
             "Section 2.4/full CNF conversion/full CYK procedure remain excluded.",
             "Historical 2024 evidence is format/prediction only.",
             "Answer-key firewall and semantic validation are explicit."
+          ]
+        },
+        {
+          "check": "Predictive exam ensemble is separated from mastery weighting and reproducibly sampled",
+          "result": "PASS",
+          "evidence": [
+            "PREDICTIVE_PRIORS.json contains evidence-only pre-review priors.",
+            "ENSEMBLE_SPEC.md defines scenario mixing, coverage constraints, and interpretation limits.",
+            "simulate_ensemble.py provides deterministic large-N blueprint sampling.",
+            "ENSEMBLE_PRE_REVIEW_10K.md records the first 10,000-blueprint run with seed 5602026."
           ]
         }
       ],
@@ -409,6 +423,18 @@
         "2024 format exactly matches the 2026 announced top-level architecture: Q1 True/False plus Q2-Q5 short problems.",
         "Historical comparison records that a single numbered question can bundle multiple skill families.",
         "Strong historical/current convergence identified for NFA/regex/DFA/complement, RL pumping, CFL pumpability, closure, and T/F breadth."
+      ]
+    },
+    {
+      "id": "cis560-exam1-predictive-ensemble-v1",
+      "kind": "git_commit",
+      "identity": "f6b0c3ccf43068c2add3b2a3151275aea50082dd",
+      "required_for_resume": true,
+      "evidence": [
+        "Predictive and mastery priors are now explicitly separated.",
+        "First reproducible 10,000-blueprint pre-review ensemble completed.",
+        "High-density recurrence profile and coverage concentration persisted.",
+        "October 20 review is designated to produce a post-review posterior and rerun."
       ]
     }
   ],
@@ -538,14 +564,14 @@
     "October 20 review has not occurred; final cheat-sheet density/weighting remains intentionally unfrozen."
   ],
   "remaining_work": [
-    "Generate and administer fresh Xu-style practice tests from the durable factory; begin with a balanced or weakness-weighted test.",
-    "After each attempt, grade by subpart and update mastery/factory weights from meaningful independent evidence.",
-    "Capture and ingest the October 20 review as the strongest final weighting signal and reweight the factory/cheat sheet.",
+    "Use the predictive ensemble to materialize fresh Xu-style practice tests across central, random, tail, and coverage modes; keep answer keys hidden until attempts.",
+    "Capture and ingest the October 20 review, update predictive priors, and rerun the 10,000-blueprint ensemble as the final posterior.",
+    "After each materialized practice attempt, grade by subpart and update mastery weights separately from predictive priors.",
     "Build/render/QA the final one-page-double-sided US Letter cheat sheet after review.",
-    "Run at least one timed full mock on October 21 under realistic conditions."
+    "Complete enough full and partial practice to cover the high-density ensemble without wasting time on redundant identical skill mixes."
   ],
-  "next_safe_action": "Continue from CIS560-AdamTrott tutor-framework at 3c9fa3a5315ab283211a379698b640c10f7e38e1. The adaptive practice-test factory is ready at study/exam1/practice_factory/. If the user asks for a test, generate it using FACTORY_SPEC.md + BLUEPRINTS.md + FACTORY_STATE.json, validate every problem, show no answer key before the attempt, and record variant IDs/results afterward. Default first test can be balanced; weakness mode should emphasize the unresolved NFA/regex/conversion cluster. The October 20 review remains the final authority for reweighting.",
+  "next_safe_action": "Continue from CIS560-AdamTrott tutor-framework at f6b0c3ccf43068c2add3b2a3151275aea50082dd. The practice factory now has a predictive Monte-Carlo layer and first 10,000-blueprint pre-review ensemble. Keep predictive priors separate from mastery weights. If the user wants practice, materialize either an ensemble-central, ensemble-random, ensemble-tail, or ensemble-coverage test; do not expose solutions before the attempt. After the Oct. 20 review, revise priors and rerun the ensemble before final practice/cheat-sheet allocation.",
   "last_executor": "chatgpt",
   "last_surface": "github+chat",
-  "notes": "Post-MTH October 19 state: Lecture 11 is fully transcript-reconciled. CYK is required/conceptually in scope, but Xu explicitly says the complete CYK procedure will not be tested. Lecture 12 instructor notes close new-content scope at Section 2.3 and explicitly exclude Section 2.4. Lecture 12 re-emphasizes the non-CFL pumping proof recipe (choose an in-language p-dependent witness of length >=p; defeat every legal five-part split), REG ⊊ CFL, DFA/NFA→PDA, and regular closure. The earlier attachment supplied with the L12 notes was SHA-256 8048a3ba5b06ef66c8ed8f054ed470b36f16254f79cbe794197eaaa3287002e4, identical to L11 and remains excluded. A genuine L12 transcript was subsequently supplied (SHA-256 5dee87e3d2eafa6692239356f36e5bdb4de473dd3e42394d9d16515aff8f8902) and is now fully reconciled. Behavioral diagnostics completed in the post-MTH restart: independent CFG transfer across count-decomposition and palindrome/outside-in families; independent simple PDA phase/stack mechanics; independent regular-pumping tight-boundary witness selection; strong CFL non-CFL witness/case analysis with tutor compression of presentation. Remaining construction risk is relatively higher in NFA/regex/HW1-derived material. The October 20 review remains the strongest final weighting source. Historical 2024 Exam 1, when supplied, may inform predictions but never override Fall 2026 Xu authority. Historical 2024 Exam 1 is now fully ingested from all four photographed pages. It was 25 points: Q1 five T/F items and Q2-Q5 four five-point short problems. Q2 bundled NFA interpretation, regex, DFA, and complement; Q3 was scaffolded RL pumping nonregularity; Q4 was CFL show-pumpability by filling uvxyz; Q5 bundled DFA, DFA->CFG, and intersection. This strongly supports format continuity and the current two-layer cheat-sheet architecture, but remains subordinate to Fall 2026 authority. A durable adaptive practice-test factory was created on Oct. 19. It uses the 2026 exam invariants and Lecture 1-12 scope as authority, the 2024 exam only as structural/predictive evidence, generates 25-point/75-minute Xu-style tests, enforces freshness and mathematical validation, hides answer keys until attempts, and reweights future tests from mastery evidence."
+  "notes": "Post-MTH October 19 state: Lecture 11 is fully transcript-reconciled. CYK is required/conceptually in scope, but Xu explicitly says the complete CYK procedure will not be tested. Lecture 12 instructor notes close new-content scope at Section 2.3 and explicitly exclude Section 2.4. Lecture 12 re-emphasizes the non-CFL pumping proof recipe (choose an in-language p-dependent witness of length >=p; defeat every legal five-part split), REG ⊊ CFL, DFA/NFA→PDA, and regular closure. The earlier attachment supplied with the L12 notes was SHA-256 8048a3ba5b06ef66c8ed8f054ed470b36f16254f79cbe794197eaaa3287002e4, identical to L11 and remains excluded. A genuine L12 transcript was subsequently supplied (SHA-256 5dee87e3d2eafa6692239356f36e5bdb4de473dd3e42394d9d16515aff8f8902) and is now fully reconciled. Behavioral diagnostics completed in the post-MTH restart: independent CFG transfer across count-decomposition and palindrome/outside-in families; independent simple PDA phase/stack mechanics; independent regular-pumping tight-boundary witness selection; strong CFL non-CFL witness/case analysis with tutor compression of presentation. Remaining construction risk is relatively higher in NFA/regex/HW1-derived material. The October 20 review remains the strongest final weighting source. Historical 2024 Exam 1, when supplied, may inform predictions but never override Fall 2026 Xu authority. Historical 2024 Exam 1 is now fully ingested from all four photographed pages. It was 25 points: Q1 five T/F items and Q2-Q5 four five-point short problems. Q2 bundled NFA interpretation, regex, DFA, and complement; Q3 was scaffolded RL pumping nonregularity; Q4 was CFL show-pumpability by filling uvxyz; Q5 bundled DFA, DFA->CFG, and intersection. This strongly supports format continuity and the current two-layer cheat-sheet architecture, but remains subordinate to Fall 2026 authority. A durable adaptive practice-test factory was created on Oct. 19. It uses the 2026 exam invariants and Lecture 1-12 scope as authority, the 2024 exam only as structural/predictive evidence, generates 25-point/75-minute Xu-style tests, enforces freshness and mathematical validation, hides answer keys until attempts, and reweights future tests from mastery evidence. On Oct. 19 the practice-test factory was upgraded to a predictive ensemble. A 10,000-blueprint pre-review simulation (seed 5602026) was run from evidence-only priors. This does not create new evidence; it averages the implications of the current evidence model. Predictive priors are now strictly separate from mastery/remediation weights."
 }
