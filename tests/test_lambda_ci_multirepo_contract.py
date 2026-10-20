@@ -28,10 +28,18 @@ def derived(project_id):
 
 
 class LambdaCIMultiRepoContractTests(unittest.TestCase):
-    def test_run1_contracts_are_design_only(self):
-        self.assertEqual(REGISTRY["status"], "CONTRACT_ONLY_NOT_INSTALLED")
+    def test_run3_activates_research_engine_only(self):
+        self.assertEqual(REGISTRY["status"], "ACTIVE")
         self.assertEqual(CONTRACTS["status"], "CONTRACT_ONLY_NOT_INSTALLED")
-        self.assertNotEqual(RESEARCH["status"], "ACTIVE")
+        self.assertEqual(RESEARCH["status"], "ACTIVE")
+        self.assertEqual(
+            REGISTRY["projects"]["research-engine"]["activation_state"],
+            "ACTIVE",
+        )
+        self.assertEqual(
+            REGISTRY["projects"]["padataset"]["activation_state"],
+            "P6_PILOT_PLANNED_NOT_INSTALLED",
+        )
         self.assertNotEqual(PAD["status"], "ACTIVE")
 
     def test_registry_is_root_owned_and_candidate_cannot_reconcile(self):
