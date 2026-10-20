@@ -570,7 +570,12 @@ def apply_reconciliation(
         existing = json.loads(receipt_path.read_text(encoding="utf-8"))
         if existing.get("identity") != identity:
             raise ReconcileError("request_id replay digest mismatch")
-        return existing
+        if existing.get("status") in {"COMPLETED", "DRY_RUN"}:
+            return existing
+        if existing.get("status") != "IN_PROGRESS":
+            raise ReconcileError("stored reconciliation receipt status is invalid")
+        # Interrupted APPLY resumes idempotently from root-owned desired state.
+        # V1 operations are add/update only; removal remains forbidden.
 
     plan = validated["plan"]
     if request["dry_run"]:
