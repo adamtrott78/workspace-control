@@ -144,16 +144,15 @@ func fakeGitHubAttestor(t *testing.T, mutatePull func(map[string]any)) *githubJo
 }
 
 func TestAdmissionDisplayClaimIsExact(t *testing.T) {
-	pr, sha, err := parseAdmissionDisplayClaim(
+	pr, command, sha, err := parseAdmissionDisplayClaim(
 		"wc-admission-v1|workload=cpu-test|pr=101|request=/lambda-ci-p5 "+testCandidateSHA,
 		"cpu-test",
-		"/lambda-ci-p5",
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if pr != 101 || sha != testCandidateSHA {
-		t.Fatalf("unexpected claim pr=%d sha=%s", pr, sha)
+	if pr != 101 || command != "/lambda-ci-p5" || sha != testCandidateSHA {
+		t.Fatalf("unexpected claim pr=%d command=%s sha=%s", pr, command, sha)
 	}
 
 	for _, invalid := range []string{
