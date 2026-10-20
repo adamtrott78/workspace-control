@@ -388,6 +388,47 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
                 "_lane-quarantine-padataset-gpu-small.json",
             )
 
+    def test_generic_provisioner_reloads_registry_manifests_without_restart(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            registry_path = root / "registry.json"
+            manifest_dir = root / "projects"
+            manifest_dir.mkdir()
+            registry = copy.deepcopy(REGISTRY)
+            research = copy.deepcopy(RESEARCH)
+            padataset = copy.deepcopy(PAD)
+            registry_path.write_text(json.dumps(registry))
+            (manifest_dir / "research-engine.json").write_text(json.dumps(research))
+            (manifest_dir / "padataset.json").write_text(json.dumps(padataset))
+            service = provisioner_service.ProvisionerService(
+                manifest=None,
+                profiles=PROFILES,
+                pins=PINS,
+                workload_policy=WORKLOAD,
+                state_store=provisioner_service.StateStore(root / "state"),
+                controller_uid=1000,
+                registry=registry,
+                project_manifests={
+                    "research-engine": research,
+                    "padataset": padataset,
+                },
+                execution_contracts=CONTRACTS,
+                registry_path=registry_path,
+                manifest_dir=manifest_dir,
+            )
+            first = service._manifest_for_request({"project_id": "padataset"})
+            self.assertEqual(first["status"], "P6_PILOT_PLANNED_NOT_INSTALLED")
+            padataset["status"] = "ACTIVE"
+            registry["projects"]["padataset"]["activation_state"] = "ACTIVE"
+            registry_path.write_text(json.dumps(registry))
+            (manifest_dir / "padataset.json").write_text(json.dumps(padataset))
+            second = service._manifest_for_request({"project_id": "padataset"})
+            self.assertEqual(second["status"], "ACTIVE")
+            self.assertEqual(
+                service.registry["projects"]["padataset"]["activation_state"],
+                "ACTIVE",
+            )
+
     def test_generic_provisioner_service_resolves_registry_project(self):
         with tempfile.TemporaryDirectory() as tmp:
             service = provisioner_service.ProvisionerService(
