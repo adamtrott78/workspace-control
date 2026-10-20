@@ -12,7 +12,7 @@
     "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
   },
   "parent_execution_owner": "research-engine-local-document-pipeline-v1",
-  "current_stage": "bounded_local_extract_prototype",
+  "current_stage": "preserved_job_benchmark_and_fallback_measurement",
   "acceptance_criteria": [
     "A current literature and implementation survey identifies how comparable local scientific-document, structured-information-extraction, evidence-grounding, claim-extraction, and high-precision fallback systems solve the same or adjacent problem.",
     "Previously failed approaches are explicitly excluded from reconsideration unless new evidence changes the failed premise; in particular, the already-tested Qwen3.5-4B grounded-candidate EXTRACT architecture is not simply rerun with cosmetic prompt changes.",
@@ -47,7 +47,7 @@
       "base_sha": "796dd9fb9c5fd25009d756a4fd42d53b85a5ac3d",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "392ce507a24fbd2d957d82d51630e00242787893",
+        "checkpoint_sha": "4d580661a27f151e70f778111a88579e54de1c71",
         "verified": true
       },
       "local": null,
@@ -218,7 +218,7 @@
     },
     {
       "id": "bounded_local_extract_prototype",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
@@ -286,13 +286,25 @@
             "PR #131 changes only benchmarks/document_intelligence/local-extract-wave1-trigger-candidate.v1.json and has no scientific/runtime/routing effect.",
             "Keep PR #131 open and its head immutable until the authorized Wave-1 issue_comment trigger has completed."
           ]
+        },
+        {
+          "check": "Local EXTRACT Wave 1 Lambda benchmark",
+          "result": "PASS",
+          "evidence": [
+            "Workflow run 39200075204 attempt 2 / job 118381589409 completed SUCCESS on the accepted dual-A4500 Lambda runner path.",
+            "Artifact local-extract-wave1-report id=12231293963, report SHA256=5954e2de2fd1d23c770f7f687c5282b8e2f43e68c9b29ece6374fed5442f98dc.",
+            "wave1_decision=REJECT under the predeclared benchmark rule because job_local_completion_fraction=3/9=0.3333333333333333 < 0.50.",
+            "historical_evidence_page_recall_at_12=0.7441860465116279 and projected_remote_input_token_reduction=0.9175094731750141.",
+            "Hard safety passed: deterministic source/page provenance, exact quote locatability, zero fabricated/unlocatable quote references, scientific_state_materialized=false, production_routing_changed=false.",
+            "Final root receipt request 7cdcb708-9ba9-511f-a689-13d8469db1da is SUCCEEDED/RUNNER_EXITED_CLEANLY with exact model/runtime postverify, destroyed runner/staging workspaces, zero CPU/GPU residue, and no quarantine."
+          ]
         }
       ],
-      "resume_condition": "First-wave decomposition can execute offline and quantify where retrieval, normalization, local verification, or completeness still requires escalation."
+      "resume_condition": "Wave 1 is scientifically REJECTED but infrastructure-valid. Move to measured residual analysis and materially different EXTRACT architecture iteration; do not repeat the same Qwen3.5 grounded-candidate architecture with cosmetic tuning."
     },
     {
       "id": "preserved_job_benchmark_and_fallback_measurement",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "hybrid",
       "selected_executor": null,
       "selected_surface": null,
@@ -310,7 +322,18 @@
         "resource/latency/token-suppression metrics",
         "teacher-data capture set with paper-level holdout separation"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Wave 1 disposition establishes next architecture boundary",
+          "result": "PASS",
+          "evidence": [
+            "Infrastructure/runtime/provenance safety are not the failure mode.",
+            "Retrieval retained 74.4% historical evidence-page recall@12 with 91.75% projected remote-input token reduction.",
+            "Only 3/9 papers survived local normalization/guard completion and teacher-subset precision/coverage were both 0.0.",
+            "Next iteration must target semantic extraction/normalization/completeness, not runner/runtime recovery or generic parser changes."
+          ]
+        }
+      ],
       "resume_condition": "Evidence shows whether the candidate can make Codex a rare fallback without unacceptable semantic regression."
     },
     {
@@ -401,13 +424,14 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Wave 1 host activation — continue child support task workspace-local-extract-wave1-execution-v1. Install and verify exact workspace-control route merge df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda; require installed manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402, workload-policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d, model-eval-local-extract-wave1 live, exact workflow blob a5be693f750c481db21d86d239a505083aae40aa, GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD, model_eval_dual_gpu_v1, promoted qwen3.5-4b, exact expanded runtime, generic gpu-heavy still DENY, healthy services, and zero project residue.",
-    "Wave 1 execution — only after host activation PASS, keep dedicated inert PR #131 open and immutable at exact head 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06; issue exactly one `/lambda-ci-local-extract-wave1 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06` comment and follow only that dedicated workflow. Do not rerun blindly after any partial or ambiguous execution.",
-    "Wave 1 decision — read the report artifact and final root-owned provisioner receipt, evaluate all 9 papers / 71 historical evidence objects under the fixed configuration, and stop this wave with PROMISING, PARTIAL, or REJECT. Require non-scientific state, exact model/runtime/two-GPU identity, cleanup/postverify PASS, and no residue/quarantine.",
-    "After the Wave-1 decision only, decide whether measured residuals justify Phase 4 component/model escalation, teacher adaptation, VERIFY-boundary analysis, or eventual production integration."
+    "Analyze the six Wave-1 paper failures and teacher-subset disagreement to localize failure among candidate retrieval, atomic claim normalization, type assignment, confidence/guard thresholds, and completeness.",
+    "Implement a materially different EXTRACT iteration under the accepted Local Evidence Agent architecture rather than cosmetic prompt tuning of the rejected Wave-1 normalizer.",
+    "Use the reusable Lambda Git runner for bounded candidate-commit CPU/GPU execution; do not reopen runner infrastructure unless the execution contract itself changes.",
+    "Measure local completion, claim-level agreement, provenance safety, fallback fraction, latency/resource use, and remote-token suppression against the preserved nine-paper baseline.",
+    "Only after a candidate passes the semantic-quality gate consider VERIFY-boundary analysis or production integration."
   ],
-  "next_safe_action": "HANDOFF_SAFE at host-activation boundary. Do not redesign admission, retrieval, parser behavior, or Wave-1 model logic; those are already merged and validated. Continue the narrow child support task `workspace-local-extract-wave1-execution-v1`. Workspace-control PR #214 validation run 39197297919 PASS and route merge df142ab7829e364087dbbb7453cdc2779e9d7206 is already merged; current manifest/policy blobs are 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Research-engine main is 366f9585145ab539dc43c3c974dcb8625489a3e3; trusted Wave-1 workflow blob is a5be693f750c481db21d86d239a505083aae40aa; exact inert trigger is OPEN PR #131 head 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 and must remain immutable/unmerged until the one authorized run. Next operation is exact Lambda host install/verification of the merged route, not policy design and not benchmark trigger. Only after installed identity/control-plane/residue PASS may the executor issue exactly one `/lambda-ci-local-extract-wave1 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06` comment, follow only that run, read report plus final root receipt, and stop Wave 1 at PROMISING/PARTIAL/REJECT. Generic gpu-heavy remains DENY; no production routing change, larger-model search, or repeated tuning loop.",
+  "next_safe_action": "Resume actual EXTRACT development from the Wave-1 REJECT evidence. Inspect per-paper failures in artifact 12231293963/report SHA256 5954e2de2fd1d23c770f7f687c5282b8e2f43e68c9b29ece6374fed5442f98dc, select the smallest materially different Local Evidence Agent iteration, implement it in research-engine, and execute it through the accepted Git/Lambda runner. Do not spend further work on the completed Wave-1 infrastructure support chain.",
   "last_executor": "chatgpt",
   "last_surface": "github+web+scholar",
-  "notes": "This child task intentionally branches from the accepted local-document/Qwen-VERIFY production checkpoint. It does not invalidate or reopen the parent task's production acceptance.\n\n2026-10-05 consolidated plan: EXTRACT redesign proceeds as a hierarchical evidence agent with current VERIFY preserved as an independent safety layer. The new workspace-level evidence-first solution-research workflow is being promoted in parallel so future chats can perform architecture research before implementation selection.\n2026-10-19 resumed after bounded dual-GPU substrate completion. Evidence-first workflow dependency restaged/merged as workspace-control a9041372c50bf1258daea2236a3e62542a115117, workflow blob 4ec7a2294d97c94834b04aba227a1f61bceac3fd. EXTRACT redesign contract restaged on current research-engine and merged as 2de0fb0c0049499507661ae5d3e4bea0f5c41720, blob cb28281d2acd4a9603b472e844c1652ea7dc3716. Architecture selection is closed VALIDATED; Phase 1 prototype is active.\n2026-10-19 Wave-1 handoff hydration after chat-limit interruption: research-engine PR #126 merged 1ff47e708c7ad6dd002930e63e1100fc6532932a (facet-interleaved retrieval); PR #128 CI PASS and merged 4ffd429086c76da9759de2a34bdf0bc0de21d522 (complete bounded nine-paper Qwen EXTRACT Wave 1); PR #129 remains OPEN/green at 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d with one-line pypdf parser parity fix and is frozen as the trigger candidate; workflow blob a5be693f750c481db21d86d239a505083aae40aa. PR #127 closed unmerged as superseded. Current workspace-control has no model-eval-local-extract-wave1 route/policy. Critical policy nuance: Wave 1 requires bounded public payload downloads (pinned pypdf wheel + exact-SHA historical arXiv PDFs), so do not clone the dual model-eval payload-offline network class blindly. Generic gpu-heavy remains DENY. Next operation is the smallest reviewed admission/install, then exactly one PR #129 trigger and a hard stop at PROMISING/PARTIAL/REJECT.\n2026-10-19 handoff race correction: PR #129 merged after the first hydration pass, advancing research-engine main to 366f9585145ab539dc43c3c974dcb8625489a3e3. A dedicated inert trigger PR #131 was therefore created from that main; exact head 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06. #131 exists only to provide a stable open issue_comment target and must remain immutable/unmerged until the first authorized Wave-1 run. Do not trigger closed PR #129. Admission remains absent.\n2026-10-19 final handoff correction: workspace-control route design is no longer a blocker. PR #214 validation run 39197297919 PASS and merged as df142ab7829e364087dbbb7453cdc2779e9d7206; current main 392ce507a24fbd2d957d82d51630e00242787893 contains hydrated child support task workspace-local-extract-wave1-execution-v1. Exact route manifest/policy blobs are 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Parent next action is host install/verification through the child support task, then exactly one PR #131 trigger and PROMISING/PARTIAL/REJECT stop. Do not redo admission design."
+  "notes": "This child task intentionally branches from the accepted local-document/Qwen-VERIFY production checkpoint. It does not invalidate or reopen the parent task's production acceptance.\n\n2026-10-05 consolidated plan: EXTRACT redesign proceeds as a hierarchical evidence agent with current VERIFY preserved as an independent safety layer. The new workspace-level evidence-first solution-research workflow is being promoted in parallel so future chats can perform architecture research before implementation selection.\n2026-10-19 resumed after bounded dual-GPU substrate completion. Evidence-first workflow dependency restaged/merged as workspace-control a9041372c50bf1258daea2236a3e62542a115117, workflow blob 4ec7a2294d97c94834b04aba227a1f61bceac3fd. EXTRACT redesign contract restaged on current research-engine and merged as 2de0fb0c0049499507661ae5d3e4bea0f5c41720, blob cb28281d2acd4a9603b472e844c1652ea7dc3716. Architecture selection is closed VALIDATED; Phase 1 prototype is active.\n2026-10-19 Wave-1 handoff hydration after chat-limit interruption: research-engine PR #126 merged 1ff47e708c7ad6dd002930e63e1100fc6532932a (facet-interleaved retrieval); PR #128 CI PASS and merged 4ffd429086c76da9759de2a34bdf0bc0de21d522 (complete bounded nine-paper Qwen EXTRACT Wave 1); PR #129 remains OPEN/green at 929e04bc171789f7bf3eaf2c1f37d4b801de6a9d with one-line pypdf parser parity fix and is frozen as the trigger candidate; workflow blob a5be693f750c481db21d86d239a505083aae40aa. PR #127 closed unmerged as superseded. Current workspace-control has no model-eval-local-extract-wave1 route/policy. Critical policy nuance: Wave 1 requires bounded public payload downloads (pinned pypdf wheel + exact-SHA historical arXiv PDFs), so do not clone the dual model-eval payload-offline network class blindly. Generic gpu-heavy remains DENY. Next operation is the smallest reviewed admission/install, then exactly one PR #129 trigger and a hard stop at PROMISING/PARTIAL/REJECT.\n2026-10-19 handoff race correction: PR #129 merged after the first hydration pass, advancing research-engine main to 366f9585145ab539dc43c3c974dcb8625489a3e3. A dedicated inert trigger PR #131 was therefore created from that main; exact head 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06. #131 exists only to provide a stable open issue_comment target and must remain immutable/unmerged until the first authorized Wave-1 run. Do not trigger closed PR #129. Admission remains absent.\n2026-10-19 final handoff correction: workspace-control route design is no longer a blocker. PR #214 validation run 39197297919 PASS and merged as df142ab7829e364087dbbb7453cdc2779e9d7206; current main 392ce507a24fbd2d957d82d51630e00242787893 contains hydrated child support task workspace-local-extract-wave1-execution-v1. Exact route manifest/policy blobs are 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Parent next action is host install/verification through the child support task, then exactly one PR #131 trigger and PROMISING/PARTIAL/REJECT stop. Do not redo admission design.\n2026-10-20 Wave-1 closure: Lambda execution and final root cleanup acceptance PASS, but scientific decision REJECT. 3/9 local completion is the hard failure despite 74.4% evidence-page recall and 91.75% projected remote-token reduction. Infrastructure/provenance are accepted; subsequent work must change EXTRACT semantics/decomposition rather than rerun the same architecture."
 }
