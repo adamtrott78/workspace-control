@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "cis560-exam1",
-  "current_stage": "practice_test_factory",
+  "current_stage": "cheat_sheet_build",
   "acceptance_criteria": [
     "The October 8 direct instructor exam invariants remain the primary current-semester format authority until transcript/review evidence corrects them.",
     "The full Q2-Q5 candidate-family pool named by Xu is preserved explicitly: simple DFA, simple NFA, regular-expression work, CFG design, PDA design, show RL pumping property, show CFL pumping property, prove not regular with pumping, and prove not context free with CFL pumping.",
@@ -22,7 +22,9 @@
     "Current explicit exclusions remain protected: full CFG-to-CNF conversion procedure is not an exam requirement; proofs of Lemmas 2.21 and 2.27 are not required; Lecture 12 explicitly excludes Section 2.4.",
     "Historical 2019 syllabus/homework/student cheat-sheet evidence may predict stable problem families but never overrides current-semester Xu guidance.",
     "Lecture 11 transcript and Lecture 12 instructor notes are durably ingested and have reweighted scope; a genuine Lecture 12 transcript remains optional source recovery if available, and the October 20 review remains the strongest final weighting event.",
-    "By exam day, high-relevance pillar skills have delayed/fresh behavioral evidence sufficient for exam-ready claims, and unresolved secondary material is at least safely protected on the cheat sheet."
+    "By exam day, high-relevance pillar skills have delayed/fresh behavioral evidence sufficient for exam-ready claims, and unresolved secondary material is at least safely protected on the cheat sheet.",
+    "October 20 final review is now ingested as the strongest current-semester weighting event; GNFA procedure, inherent/language ambiguity, and full CYK execution remain excluded.",
+    "Final practice selection uses the post-review predictive posterior while mastery weights remain separate."
   ],
   "constraints": [
     "Start from CIS560-AdamTrott root README.md and route through COURSE.md/study owners; do not depend on prior chat memory.",
@@ -42,7 +44,10 @@
     "The final cheat sheet is one US Letter page, double-sided.",
     "Keep prose compact on the sheet: conditions, quantifier traps, construction recipes, proof skeletons, and T/F distinctions are preferred over solved-example exposition.",
     "For exact diagrams/visuals whose binary originals are not in Git, use the durable source indexes and request/recover the original PDF/image instead of inventing details.",
-    "Lecture 12 explicitly states Section 2.4 is not required; do not spend exam-prep or cheat-sheet space on it unless the October 20 review explicitly reverses that exclusion."
+    "Lecture 12 explicitly states Section 2.4 is not required; do not spend exam-prep or cheat-sheet space on it unless the October 20 review explicitly reverses that exclusion.",
+    "October 20 review explicitly excludes GNFA exam procedures and inherent/language ambiguity; do not reintroduce them into final practice or cheat-sheet procedure space.",
+    "CYK remains concept-only; no full table execution.",
+    "Formal NFA-to-DFA subset-construction procedure is not itself an exam target, although equivalent-DFA design from a supplied NFA remains in scope."
   ],
   "repositories": [
     {
@@ -51,7 +56,7 @@
       "base_sha": "3e5906ca572f47272ac14a4d4ac2ed4ae9eb0122",
       "remote": {
         "branch": "tutor-framework",
-        "checkpoint_sha": "f6b0c3ccf43068c2add3b2a3151275aea50082dd",
+        "checkpoint_sha": "784cdf9625257dee88ce70d832b0109578c4f248",
         "verified": true
       },
       "local": null,
@@ -257,7 +262,7 @@
     },
     {
       "id": "compressed_restart",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "cis560-exam1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+chat",
@@ -268,18 +273,16 @@
         "behavioral evidence"
       ],
       "outputs": [
-        "Post-MTH restart began with active problem solving rather than broad rereading.",
-        "CFG: fresh independent transfer across two distinct families.",
-        "PDA: independent simple phase-structured design transfer.",
-        "Regular pumping: independent tight-boundary witness selection.",
-        "CFL non-CFL: witness and exhaustive placement families student-derived; compact proof compression guided."
+        "Post-MTH restart completed with fresh automata/regex, closure, CFG, PDA, regular-pumping, CFL-pumping, CNF, ambiguity, and hierarchy practice.",
+        "Fresh NFA/regex diagnostic exposed and then partially remediated NFA path semantics, arbitrary-string regex notation, and DFA state-invariant discipline.",
+        "CFL closure pattern, CNF recognition, PDA design, and nonregular/non-CFL pumping received fresh transfer."
       ],
       "validation": [],
-      "resume_condition": "Continue targeted final-window work: ingest the 2024 Exam 1 as historical predictive evidence, complete at least one fresh NFA/regex transfer check, then prepare for the October 20 review and cheat-sheet reweight."
+      "resume_condition": null
     },
     {
       "id": "practice_test_factory",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "cis560-exam1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+chat",
@@ -299,7 +302,9 @@
         "study/exam1/practice_factory/ENSEMBLE_SPEC.md",
         "study/exam1/practice_factory/PREDICTIVE_PRIORS.json",
         "study/exam1/practice_factory/simulate_ensemble.py",
-        "study/exam1/practice_factory/ENSEMBLE_PRE_REVIEW_10K.md"
+        "study/exam1/practice_factory/ENSEMBLE_PRE_REVIEW_10K.md",
+        "study/exam1/practice_factory/PREDICTIVE_PRIORS_POST_REVIEW.json",
+        "study/exam1/practice_factory/ENSEMBLE_POST_REVIEW_10K.md"
       ],
       "validation": [
         {
@@ -321,13 +326,22 @@
             "simulate_ensemble.py provides deterministic large-N blueprint sampling.",
             "ENSEMBLE_PRE_REVIEW_10K.md records the first 10,000-blueprint run with seed 5602026."
           ]
+        },
+        {
+          "check": "October 20 posterior reweight and 10,000-blueprint rerun completed",
+          "result": "PASS",
+          "evidence": [
+            "Final review is treated as the strongest current-semester weighting event.",
+            "GNFA procedure and inherent/language ambiguity are excluded by explicit review guidance.",
+            "Post-review model elevates regex->NFA, RL pumpability/minimum-p, and grammar ambiguity/CNF while preserving current-semester named families."
+          ]
         }
       ],
-      "resume_condition": "Generate fresh validated Xu-style tests on demand, hide keys until attempt, grade by subpart, and reweight FACTORY_STATE.json from behavioral evidence. Reweight global priors after the October 20 review."
+      "resume_condition": null
     },
     {
       "id": "review_reweight",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "cis560-exam1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+chat",
@@ -338,26 +352,46 @@
         "QUESTION_BANK.md",
         "INSTRUCTOR_EMPHASIS.md"
       ],
-      "outputs": [],
-      "validation": [],
-      "resume_condition": "Treat review as the strongest weighting/prioritization evidence: record all on/off-exam statements, revisited examples, question-format details, and importance cues; reallocate sheet space without discarding earlier scope evidence."
+      "outputs": [
+        "sources/instructor/L13_MIDTERM_REVIEW_2026-10-20_USER_PROVIDED.md",
+        "study/exam1/EXAM_INVARIANTS.md final-review section",
+        "study/exam1/INSTRUCTOR_EMPHASIS.md final-review section",
+        "study/exam1/practice_factory/PREDICTIVE_PRIORS_POST_REVIEW.json",
+        "study/exam1/practice_factory/ENSEMBLE_POST_REVIEW_10K.md",
+        "study/exam1/CHEATSHEET_CANDIDATES.md final-review allocation lock"
+      ],
+      "validation": [
+        {
+          "check": "Final review captured, source-separated, and applied without guessing unresolved notes",
+          "result": "PASS",
+          "evidence": [
+            "GNFA procedure explicitly excluded.",
+            "CYK concept-only confirmed.",
+            "Inherent/language ambiguity explicitly excluded while grammar/string ambiguity remains.",
+            "Regex->NFA, DFA/NFA interpretation/design, closure, pumping, CFG/CNF, and PDA were explicitly reinforced.",
+            "Unclear CFG undecidability remark preserved as unresolved rather than inferred."
+          ]
+        }
+      ],
+      "resume_condition": null
     },
     {
       "id": "cheat_sheet_build",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "cis560-exam1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+artifact-tools",
       "inputs": [
         "one US Letter page double-sided constraint",
-        "Q1 T/F protection layer",
-        "Q2-Q5 recipe layer",
-        "review-reweighted priorities",
-        "current mastery gaps"
+        "October 20 final-review allocation lock",
+        "post-review predictive posterior",
+        "current behavioral mastery gaps"
       ],
-      "outputs": [],
+      "outputs": [
+        "study/exam1/CHEATSHEET_CANDIDATES.md final-review allocation is locked; physical rendered artifact still pending."
+      ],
       "validation": [],
-      "resume_condition": "Build/render/QA the final two-sided sheet after the October 20 review; keep exact conditions, traps, recipes, and proof skeletons; avoid long prose."
+      "resume_condition": "Build, render, and visually QA the final two-sided sheet using post-review priorities; then print-test margins before exam day."
     },
     {
       "id": "final_exam_readiness",
@@ -435,6 +469,18 @@
         "First reproducible 10,000-blueprint pre-review ensemble completed.",
         "High-density recurrence profile and coverage concentration persisted.",
         "October 20 review is designated to produce a post-review posterior and rerun."
+      ]
+    },
+    {
+      "id": "cis560-exam1-post-review-2026-10-20",
+      "kind": "git_commit",
+      "identity": "784cdf9625257dee88ce70d832b0109578c4f248",
+      "required_for_resume": true,
+      "evidence": [
+        "October 20 live review notes preserved at sources/instructor/L13_MIDTERM_REVIEW_2026-10-20_USER_PROVIDED.md.",
+        "Final-review scope/exclusions are reconciled in EXAM_INVARIANTS and INSTRUCTOR_EMPHASIS.",
+        "Post-review predictive prior and reproducible 10,000-blueprint posterior are durable.",
+        "CHEATSHEET_CANDIDATES and STUDY_PLAN are reweighted for final Oct. 20-21 preparation."
       ]
     }
   ],
@@ -546,6 +592,30 @@
       "evidence": [
         "Problems `{a^i b^j c^k | 0<=i<=j<=k}` and `{ww}`."
       ]
+    },
+    {
+      "path": "sources/instructor/L13_MIDTERM_REVIEW_2026-10-20_USER_PROVIDED.md",
+      "state": "final-review source evidence",
+      "role": "strongest final pre-exam instructor weighting source",
+      "origin": "user-provided contemporaneous Oct. 20 class notes",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "preserve raw note provenance; reconcile only with stronger transcript evidence",
+      "review_requirement": "do not infer the unresolved CFG undecidability remark",
+      "evidence": [
+        "Explicit GNFA/CYK/ambiguity exclusions and reinforced automata/regex/pumping/CFG/PDA scope."
+      ]
+    },
+    {
+      "path": "study/exam1/practice_factory/ENSEMBLE_POST_REVIEW_10K.md",
+      "state": "active final predictive posterior report",
+      "role": "post-review exam-family weighting for final practice selection",
+      "origin": "October 20 review-reweighted priors; seed 5602026",
+      "persistence": "tracked on tutor-framework",
+      "regeneration": "rerun only if materially stronger instructor evidence appears",
+      "review_requirement": "interpret frequencies as model-implied, not literal probabilities",
+      "evidence": [
+        "10,000 accepted blueprints after 14,518 candidate draws."
+      ]
     }
   ],
   "validation": [
@@ -564,13 +634,12 @@
     "October 20 review has not occurred; final cheat-sheet density/weighting remains intentionally unfrozen."
   ],
   "remaining_work": [
-    "Tonight: run one cold bundled NFA/regex/DFA/complement diagnostic, then a short high-yield Q1 T/F sweep; remediate only observed gaps.",
-    "Prepare a compact review-capture checklist for Oct. 20 so exact instructor inclusions, exclusions, and weighting cues are recorded.",
-    "Capture and ingest the October 20 review, update predictive priors, and rerun the 10,000-blueprint ensemble as the final posterior.",
-    "After review, materialize representative central/random/coverage practice from the posterior and update mastery separately.",
-    "Build/render/QA the final one-page-double-sided US Letter cheat sheet after review."
+    "Build/render/QA the final one-page-double-sided US Letter cheat sheet using the October 20 allocation lock.",
+    "Run posterior-guided hybrid practice: automata/regex bundle, regular pumping triad, CFL show-pumpability, then one fresh CFG/PDA mixed check as needed.",
+    "Keep one non-CFL proof refresh for coverage without overinvesting relative to review-emphasized regular-side work.",
+    "Complete final timed readiness check before the October 22 exam."
   ],
-  "next_safe_action": "Pre-review information-gain session on Oct. 19: do not spend the evening on repeated full mocks or final cheat-sheet layout. First run one cold Xu-style bundled NFA->language->regex->DFA/complement diagnostic (highest unresolved behavioral risk and high predictive recurrence). Then run a short Q1 T/F sweep across closure/directionality, pumping/minimum length, automata semantics, PDA/REG⊊CFL, and CYK purpose. If either exposes a real gap, remediate only that gap with one fresh transfer. End by preparing an Oct. 20 review-capture checklist and leaving final predictive priors/cheat-sheet allocation unfrozen until the review is ingested.",
+  "next_safe_action": "Build the final cheat sheet from the post-review allocation lock, then run a short hybrid posterior-guided practice set focused first on NFA/DFA/regex/complement and regular pumping (show property, minimum p, prove nonregular). Do not spend time on GNFA elimination, full CYK, full CNF conversion, inherent ambiguity, Section 2.4, or formal NFA->DFA subset-construction memorization.",
   "last_executor": "chatgpt",
   "last_surface": "github+chat",
   "notes": "Post-MTH October 19 state: Lecture 11 is fully transcript-reconciled. CYK is required/conceptually in scope, but Xu explicitly says the complete CYK procedure will not be tested. Lecture 12 instructor notes close new-content scope at Section 2.3 and explicitly exclude Section 2.4. Lecture 12 re-emphasizes the non-CFL pumping proof recipe (choose an in-language p-dependent witness of length >=p; defeat every legal five-part split), REG ⊊ CFL, DFA/NFA→PDA, and regular closure. The earlier attachment supplied with the L12 notes was SHA-256 8048a3ba5b06ef66c8ed8f054ed470b36f16254f79cbe794197eaaa3287002e4, identical to L11 and remains excluded. A genuine L12 transcript was subsequently supplied (SHA-256 5dee87e3d2eafa6692239356f36e5bdb4de473dd3e42394d9d16515aff8f8902) and is now fully reconciled. Behavioral diagnostics completed in the post-MTH restart: independent CFG transfer across count-decomposition and palindrome/outside-in families; independent simple PDA phase/stack mechanics; independent regular-pumping tight-boundary witness selection; strong CFL non-CFL witness/case analysis with tutor compression of presentation. Remaining construction risk is relatively higher in NFA/regex/HW1-derived material. The October 20 review remains the strongest final weighting source. Historical 2024 Exam 1, when supplied, may inform predictions but never override Fall 2026 Xu authority. Historical 2024 Exam 1 is now fully ingested from all four photographed pages. It was 25 points: Q1 five T/F items and Q2-Q5 four five-point short problems. Q2 bundled NFA interpretation, regex, DFA, and complement; Q3 was scaffolded RL pumping nonregularity; Q4 was CFL show-pumpability by filling uvxyz; Q5 bundled DFA, DFA->CFG, and intersection. This strongly supports format continuity and the current two-layer cheat-sheet architecture, but remains subordinate to Fall 2026 authority. A durable adaptive practice-test factory was created on Oct. 19. It uses the 2026 exam invariants and Lecture 1-12 scope as authority, the 2024 exam only as structural/predictive evidence, generates 25-point/75-minute Xu-style tests, enforces freshness and mathematical validation, hides answer keys until attempts, and reweights future tests from mastery evidence. On Oct. 19 the practice-test factory was upgraded to a predictive ensemble. A 10,000-blueprint pre-review simulation (seed 5602026) was run from evidence-only priors. This does not create new evidence; it averages the implications of the current evidence model. Predictive priors are now strictly separate from mastery/remediation weights."
