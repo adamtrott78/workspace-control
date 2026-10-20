@@ -157,22 +157,128 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             REGISTRY,
             {"research-engine": RESEARCH, "padataset": PAD},
         )
-        self.assertEqual(plan["mode"], "DRY_RUN_ONLY_RUN2")
-        self.assertEqual(plan["project_count"], 2)
+        self.assertEqual(plan["mode"], "APPLY_READY_V1")
+        self.assertEqual(plan["active_projects"], [])
+        self.assertEqual(
+            plan["planned_projects_skipped"],
+            ["padataset", "research-engine"],
+        )
         serialized = json.dumps(plan, sort_keys=True)
         self.assertNotIn("shell", serialized)
         self.assertNotIn("argv", serialized)
-        kinds = {a["kind"] for a in plan["actions"]}
+        self.assertEqual(plan["actions"], [])
+
+    def test_reconciler_plans_only_active_projects(self):
+        registry = copy.deepcopy(REGISTRY)
+        manifests = {
+            "research-engine": copy.deepcopy(RESEARCH),
+            "padataset": copy.deepcopy(PAD),
+        }
+        registry["status"] = "ACTIVE"
+        registry["projects"]["research-engine"]["activation_state"] = "ACTIVE"
+        manifests["research-engine"]["status"] = "ACTIVE"
+        plan = reconciler.plan_reconciliation(registry, manifests)
+        self.assertEqual(plan["active_projects"], ["research-engine"])
+        self.assertEqual(plan["planned_projects_skipped"], ["padataset"])
+        serialized = json.dumps(plan, sort_keys=True)
+        self.assertNotIn("ci-padataset", serialized)
+        self.assertNotIn("/srv/workspace-ci/padataset", serialized)
+        services = [
+            action["service_instance"]
+            for action in plan["actions"]
+            if action["kind"] == "install_controller_instance_config"
+        ]
         self.assertEqual(
-            kinds,
-            {
-                "ensure_group",
-                "ensure_user",
-                "ensure_project_root",
-                "install_project_manifest",
-                "install_controller_instance_config",
-            },
+            services,
+            [
+                "workspace-ci-controller@research-engine-cpu.service",
+                "workspace-ci-controller@research-engine-gpu.service",
+            ],
         )
+
+    def test_reconciliation_request_rejects_untrusted_workflow_and_removal(self):
+        registry = copy.deepcopy(REGISTRY)
+        manifests = {
+            "research-engine": copy.deepcopy(RESEARCH),
+            "padataset": copy.deepcopy(PAD),
+        }
+        registry["status"] = "ACTIVE"
+        registry["projects"]["research-engine"]["activation_state"] = "ACTIVE"
+        manifests["research-engine"]["status"] = "ACTIVE"
+        ceiling = {
+            "source_repository": "adamtrott78/workspace-control",
+            "source_default_branch": "main",
+            "trusted_workflow_path": ".github/workflows/lambda-ci-project-reconcile.yml",
+            "trusted_workflow_blob_sha": "b" * 40,
+            "allowed_actor_logins": ["adamtrott78"],
+        }
+        request = {
+            "schema_version": 1,
+            "request_id": "01234567-89ab-5cde-8fab-0123456789ab",
+            "operation": "APPLY_PROJECT_REGISTRY",
+            "source_attestation": {
+                "repository": "adamtrott78/workspace-control",
+                "default_branch": "main",
+                "commit_sha": "a" * 40,
+                "workflow_path": ".github/workflows/lambda-ci-project-reconcile.yml",
+                "workflow_blob_sha": "b" * 40,
+                "actor_login": "adamtrott78",
+                "verified_at": "2026-10-20T00:00:00Z",
+            },
+            "registry": {
+                "sha256": multi.sha256_json(registry),
+                "document": registry,
+            },
+            "project_manifests": [
+                {
+                    "project_id": project_id,
+                    "sha256": multi.sha256_json(manifest),
+                    "document": manifest,
+                }
+                for project_id, manifest in sorted(manifests.items())
+            ],
+            "dry_run": True,
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            installed = Path(tmp) / "registry.json"
+            validated = reconciler.validate_reconciliation_request(
+                request,
+                ceiling=ceiling,
+                execution_contracts=CONTRACTS,
+                installed_registry_path=installed,
+            )
+            self.assertEqual(
+                validated["plan"]["active_projects"],
+                ["research-engine"],
+            )
+            bad = copy.deepcopy(request)
+            bad["source_attestation"]["workflow_blob_sha"] = "c" * 40
+            with self.assertRaisesRegex(reconciler.ReconcileError, "workflow blob"):
+                reconciler.validate_reconciliation_request(
+                    bad,
+                    ceiling=ceiling,
+                    execution_contracts=CONTRACTS,
+                    installed_registry_path=installed,
+                )
+
+            installed.write_text(json.dumps(registry))
+            removed = copy.deepcopy(request)
+            del removed["registry"]["document"]["padataset"]
+            removed["registry"]["sha256"] = multi.sha256_json(
+                removed["registry"]["document"]
+            )
+            removed["project_manifests"] = [
+                item
+                for item in removed["project_manifests"]
+                if item["project_id"] != "padataset"
+            ]
+            with self.assertRaisesRegex(reconciler.ReconcileError, "removal"):
+                reconciler.validate_reconciliation_request(
+                    removed,
+                    ceiling=ceiling,
+                    execution_contracts=CONTRACTS,
+                    installed_registry_path=installed,
+                )
 
     def test_legacy_admission_semantics_are_derived_without_route_name(self):
         admission = {
