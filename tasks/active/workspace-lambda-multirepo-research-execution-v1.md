@@ -23,8 +23,8 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 2b22af474791ff59cc9cb100f4bf3b939266fec2
+- Remote branch: lambda-multirepo-run2-implementation-v1
+- Remote checkpoint: 8570b82207f3d327189d091cabb36eda3ba45c69
 - Remote verified: true
 
 ### research-engine
@@ -43,16 +43,17 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-Run 2 implementation only. Starting from the validated Run-1 architecture, remove research-engine/project/workload privilege constants from the generic controller/provisioner/runtime path: controller becomes required project+lane configuration with a generic strict display-claim parser; provisioner resolves project_id through the root registry and validates derived runner identity; privileged runtime enforces resolved execution-contract semantics rather than route names. Add focused migration, third-project, PADataset-public-boundary and negative tests. Also implement the reconciliation plane in disabled/non-live form. Do not install or restart Lambda services and do not mutate PADataset in Run 2.
+Run 3 activation gate only. Starting from the exact Run-2 implementation that passed validation at 8570b82207f3d327189d091cabb36eda3ba45c69, prepare the bounded one-time root migration/install package and rollback plan for the generic multi-project substrate. Before any host mutation, bind exact source/blob digests and installation targets, prove the migration does not widen resource/network/secret authority, and define research-engine regression receipts. Do not onboard or execute PADataset yet.
 
 ## Remaining work
 
-- Run 2: implement the frozen generic controller/provisioner/runtime changes and focused migration/adversarial tests; no live install yet.
-- Run 2: implement the bounded reconciler/controller templates in disabled/non-live form and validate replay, derivation and privilege ceilings.
-- Run 3: perform one bounded root migration/install of the generic substrate and prove all existing research-engine routes/regression identities remain accepted.
-- Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard via registry/manifest reconciliation only, and run non-scientific CPU/GPU canaries.
-- Run 4: prove reciprocal project-root/process/cache denial, zero residue/quarantine, and no controller/provisioner/runtime source changes during PADataset onboarding.
-- Final: freeze the reusable operating contract and demonstrate a synthetic/real third project needs only registry + manifest + thin launcher bindings.
+- Run 3: design and execute one bounded root migration/install of the validated generic controller/provisioner/runtime/reconciliation substrate on Lambda.
+- Run 3: preserve rollback to the accepted research-engine-specific installed state and prove controller/provisioner service health plus exact installed source/blob identities.
+- Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
+- Run 3: activate and prove the trusted Git-driven project reconciliation controller/root path; only after that may git_driven_project_reconciliation become VALIDATED.
+- Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
+- Run 4: prove reciprocal research-engine/PADataset filesystem/process/cache isolation and verify zero controller/provisioner/runtime source changes during PADataset onboarding.
+- Final: prove a third approved repository requires only registry + manifest + thin launcher binding and freeze the reusable operating contract.
 
 ## Blockers / gates
 

@@ -286,42 +286,17 @@ func (a *githubJobAttestor) getJSON(
 	return nil
 }
 
-func requestCommandForWorkload(workload string) (string, error) {
-	switch workload {
-	case defaultProfile:
-		return "/lambda-ci-p5", nil
-	case gpuProfile:
-		return "/lambda-ci-p5-gpu", nil
-	case modelEvalWorkload:
-		return "/lambda-ci-qwen35-pilot", nil
-	case dualModelEvalWorkload:
-		return "/lambda-ci-qwen35-dual-pilot", nil
-	case localExtractWave1Workload:
-		return "/lambda-ci-local-extract-wave1", nil
-	default:
-		return "", fmt.Errorf("admission v2 workload command rejected: %s", workload)
-	}
-}
-
-func parseAdmissionDisplayClaim(
-	displayName string,
-	workload string,
-	command string,
-) (int, string, error) {
+func parseAdmissionDisplayClaim(displayName, workload string) (int, string, string, error) {
 	pattern := regexp.MustCompile(
 		`^wc-admission-v1\|workload=` + regexp.QuoteMeta(workload) +
-			`\|pr=([1-9][0-9]*)\|request=` + regexp.QuoteMeta(command) +
+			`\|pr=([1-9][0-9]*)\|request=(/[a-z0-9][a-z0-9-]{2,63})` +
 			` ([0-9a-f]{40})$`,
 	)
 	match := pattern.FindStringSubmatch(displayName)
-	if match == nil {
-		return 0, "", fmt.Errorf("job display claim does not match admission grammar")
-	}
+	if match == nil { return 0, "", "", fmt.Errorf("job display claim does not match admission grammar") }
 	prNumber, err := strconv.Atoi(match[1])
-	if err != nil || prNumber <= 0 {
-		return 0, "", fmt.Errorf("job display claim PR number is invalid")
-	}
-	return prNumber, match[2], nil
+	if err != nil || prNumber <= 0 { return 0, "", "", fmt.Errorf("job display claim PR number is invalid") }
+	return prNumber, match[2], match[3], nil
 }
 
 func trustedWorkflowPath(
@@ -386,15 +361,7 @@ func (a *githubJobAttestor) Attest(
 		return controllerAttestation{}, fmt.Errorf("unsupported job message type %q", messageType)
 	}
 
-	command, err := requestCommandForWorkload(workload)
-	if err != nil {
-		return controllerAttestation{}, err
-	}
-	prNumber, candidateSHA, err := parseAdmissionDisplayClaim(
-		job.JobDisplayName,
-		workload,
-		command,
-	)
+	prNumber, _, candidateSHA, err := parseAdmissionDisplayClaim(job.JobDisplayName, workload)
 	if err != nil {
 		return controllerAttestation{}, err
 	}
@@ -561,16 +528,14 @@ func (a *githubJobAttestor) Attest(
 }
 
 func deterministicAdmissionExecutionIDs(
+	runnerPrefix string,
 	workload string,
 	att controllerAttestation,
 ) (string, string, error) {
-	var prefix string
-	switch workload {
-	case defaultProfile:
-		prefix = "lambda-research-engine-"
-	case gpuProfile, modelEvalWorkload, dualModelEvalWorkload, localExtractWave1Workload:
-		prefix = "lambda-research-engine-gpu-"
-	default:
+	if !strings.HasPrefix(runnerPrefix, "lambda-") || !strings.HasSuffix(runnerPrefix, "-") {
+		return "", "", fmt.Errorf("deterministic runner prefix rejected: %s", runnerPrefix)
+	}
+	if !routeIDPattern.MatchString(workload) {
 		return "", "", fmt.Errorf("deterministic runner workload rejected: %s", workload)
 	}
 	material := fmt.Sprintf(
@@ -597,6 +562,6 @@ func deterministicAdmissionExecutionIDs(
 		h[16:20],
 		h[20:32],
 	)
-	runnerName := prefix + hex.EncodeToString(sum[16:22])
+	runnerName := runnerPrefix + hex.EncodeToString(sum[16:22])
 	return requestID, runnerName, nil
 }

@@ -163,19 +163,34 @@
         "model_id": "qwen3.5-4b",
         "repository": "Qwen/Qwen3.5-4B",
         "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+        "object_path": "/srv/workspace-ci/research-engine/trusted-cache/objects/model/sha256/6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c",
         "object_id": "6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c",
         "tree_sha256": "6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c",
+        "manifest_sha256": "6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c",
+        "descriptor_sha256": "b6182b15ff0549d9b3b1d3780fdb655c6df7653ad7ec3a5d72336b5571b3fe74",
+        "promotion_receipt_sha256": null,
         "serialization_risk_class": "SAFE",
-        "complete_offline": true,
-        "migration_source_path": "/srv/workspace-ci/research-engine/trusted-cache/objects/model/sha256/6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c"
+        "complete_offline": true
       }
     },
     "runtimes": {
       "qwen35-vllm-cu129-image-native-sampler-v3": {
         "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+        "canonical_path": "/srv/workspace-ci/research-engine/expanded-runtimes/qwen35-vllm-cu129-image-native-sampler-v3/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74",
+        "python_path": "/srv/workspace-ci/research-engine/expanded-runtimes/qwen35-vllm-cu129-image-native-sampler-v3/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74/bin/python",
+        "receipt_path": "/var/lib/workspace-ci/expanded-runtime-receipts/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74.json",
         "tree_digest_sha256": "b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63",
         "manifest_identity_sha256": "f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74",
-        "migration_source_path": "/srv/workspace-ci/research-engine/expanded-runtimes/qwen35-vllm-cu129-image-native-sampler-v3/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74"
+        "source_trusted_runtime_object": "/srv/workspace-ci/research-engine/trusted-cache/objects/runtime/sha256/23a47f27bdb6bec63955b901080fc0926cffee8cf081d010195613789bc5bbf4",
+        "required_controls": [
+          "root_owned_no_write_bits",
+          "private_systemd_mount_namespace",
+          "read_only_bind",
+          "no_new_privileges",
+          "restrict_suid_sgid",
+          "device_policy_closed",
+          "job_local_mutable_caches"
+        ]
       }
     }
   },

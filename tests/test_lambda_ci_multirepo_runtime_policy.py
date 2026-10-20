@@ -1,0 +1,329 @@
+import copy
+import json
+import sys
+import tempfile
+import unittest
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = ROOT / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
+import lambda_ci_multirepo as multi
+import lambda_ci_provisioner as provisioner
+import lambda_ci_provisioner_service as provisioner_service
+import lambda_ci_reconciler as reconciler
+
+REGISTRY = json.loads((ROOT / "architecture/lambda-ci-project-registry.v1.json").read_text())
+CONTRACTS = json.loads((ROOT / "architecture/lambda-ci-execution-contracts.v1.json").read_text())
+WORKLOAD = json.loads((ROOT / "architecture/lambda-ci-workload-policy.v1.json").read_text())
+PROFILES = json.loads((ROOT / "architecture/lambda-ci-systemd-profiles.v1.json").read_text())
+PINS = json.loads((ROOT / "architecture/lambda-ci-upstream-pins.v1.json").read_text())
+RESEARCH = json.loads((ROOT / "architecture/lambda-ci-project-research-engine.v2.json").read_text())
+PAD = json.loads((ROOT / "architecture/lambda-ci-project-padataset.v1.json").read_text())
+SHA = "a" * 40
+
+
+def request_for(manifest, route_id, *, runner_suffix="abcdef123456"):
+    route = manifest["routes"][route_id]
+    lane = manifest["derived_identity"]["lanes"][route["lane"]]
+    trusted = route["trusted_workflow"]
+    trigger = route["trigger"]
+    return {
+        "schema_version": 2,
+        "request_id": "01234567-89ab-5cde-8fab-0123456789ab",
+        "project_id": manifest["project_id"],
+        "workload_class": route_id,
+        "runner_name": lane["runner_prefix"] + runner_suffix,
+        "jit_config": "b3BhcXVl",
+        "attestation": {
+            "schema_version": 2,
+            "source": "github_scale_set_controller",
+            "repository": manifest["repository"],
+            "scale_set_name": lane["scale_set_name"],
+            "job_message_type": "JobAvailable",
+            "runner_request_id": 123,
+            "workflow_run_id": 456,
+            "job_id": "789",
+            "job_workflow_ref": (
+                f"{manifest['repository']}/{trusted['path']}@refs/heads/{trusted['default_branch']}"
+            ),
+            "workflow_path": trusted["path"],
+            "workflow_default_branch_commit_sha": SHA,
+            "workflow_blob_sha": trusted["blob_sha"],
+            "event_name": trigger["event_name"],
+            "job_display_name": (
+                f"wc-admission-v1|workload={route_id}|pr=17|request="
+                f"{trigger['command']} {SHA}"
+            ),
+            "actor_login": "adamtrott78",
+            "triggering_actor_login": "adamtrott78",
+            "pr_number": 17,
+            "pr_state": "open",
+            "pr_head_repository": manifest["repository"],
+            "candidate_sha": SHA,
+            "candidate_verification": "PR_HEAD_MATCH",
+            "verified_at": "2026-10-20T00:00:00Z",
+        },
+    }
+
+
+class MultiRepoGenericAdmissionTests(unittest.TestCase):
+    def test_registry_resolves_distinct_projects(self):
+        manifests = {"research-engine": RESEARCH, "padataset": PAD}
+        self.assertEqual(
+            multi.resolve_project_manifest(REGISTRY, manifests, "research-engine")["repository"],
+            "adamtrott78/research-engine",
+        )
+        self.assertEqual(
+            multi.resolve_project_manifest(REGISTRY, manifests, "padataset")["repository"],
+            "adamtrott78/PADataset",
+        )
+        with self.assertRaises(multi.MultiRepoPolicyError):
+            multi.resolve_project_manifest(REGISTRY, manifests, "unregistered")
+
+    def test_padataset_unbound_route_fails_closed(self):
+        req = request_for(PAD, "cpu-ci")
+        with self.assertRaisesRegex(multi.MultiRepoPolicyError, "route is not active"):
+            multi.mint_admission(req, PAD, CONTRACTS, WORKLOAD)
+
+    def test_research_route_resolves_semantic_contract_not_route_name(self):
+        req = request_for(RESEARCH, "cpu-test")
+        admission = multi.mint_admission(
+            req,
+            RESEARCH,
+            CONTRACTS,
+            WORKLOAD,
+            now=datetime(2026, 10, 20, tzinfo=timezone.utc),
+        )
+        self.assertEqual(admission["workload_class"], "cpu-test")
+        self.assertEqual(admission["execution_profile"], "cpu-test")
+        self.assertEqual(
+            admission["_generic"]["execution_contract_id"],
+            "cpu-public-ci-v1",
+        )
+        semantic = multi.execution_semantics_from_admission(admission)
+        self.assertEqual(semantic["execution_profile"], "cpu-test")
+        self.assertEqual(semantic["gpu_count"], 0)
+        self.assertEqual(semantic["model_binding_mode"], "FORBIDDEN")
+
+    def test_arbitrary_route_can_reuse_existing_contract_without_source_enum(self):
+        manifest = copy.deepcopy(RESEARCH)
+        route = copy.deepcopy(manifest["routes"]["cpu-test"])
+        route["trusted_workflow"]["path"] = ".github/workflows/new-benchmark.yml"
+        route["trusted_workflow"]["blob_sha"] = "b" * 40
+        route["trigger"]["command"] = "/lambda-ci-new-benchmark"
+        manifest["routes"]["new-benchmark-17"] = route
+        req = request_for(manifest, "new-benchmark-17")
+        admission = multi.mint_admission(req, manifest, CONTRACTS, WORKLOAD)
+        self.assertEqual(admission["workload_class"], "new-benchmark-17")
+        self.assertEqual(
+            admission["_generic"]["execution_contract_id"], "cpu-public-ci-v1"
+        )
+
+    def test_public_repo_fork_head_is_rejected_even_for_allowed_actor(self):
+        manifest = copy.deepcopy(PAD)
+        route = manifest["routes"]["cpu-ci"]
+        route["activation_state"] = "ACTIVE"
+        route["trusted_workflow"]["blob_sha"] = "c" * 40
+        req = request_for(manifest, "cpu-ci")
+        req["attestation"]["pr_head_repository"] = "someone/fork"
+        with self.assertRaisesRegex(multi.MultiRepoPolicyError, "fork or foreign"):
+            multi.mint_admission(req, manifest, CONTRACTS, WORKLOAD)
+
+    def test_cross_project_scale_set_is_rejected(self):
+        req = request_for(RESEARCH, "cpu-test")
+        req["attestation"]["scale_set_name"] = "lambda-padataset"
+        with self.assertRaisesRegex(multi.MultiRepoPolicyError, "scale-set"):
+            multi.mint_admission(req, RESEARCH, CONTRACTS, WORKLOAD)
+
+    def test_generic_heavy_contract_is_still_disabled(self):
+        manifest = copy.deepcopy(RESEARCH)
+        route = copy.deepcopy(manifest["routes"]["cpu-test"])
+        route["lane"] = "gpu"
+        route["execution_contract_id"] = "gpu-dual-public-ci-v1"
+        route["trusted_workflow"]["path"] = ".github/workflows/heavy.yml"
+        route["trusted_workflow"]["blob_sha"] = "d" * 40
+        route["trigger"]["command"] = "/lambda-ci-heavy"
+        manifest["routes"]["heavy"] = route
+        req = request_for(manifest, "heavy")
+        with self.assertRaisesRegex(multi.MultiRepoPolicyError, "not admission-enabled"):
+            multi.mint_admission(req, manifest, CONTRACTS, WORKLOAD)
+
+    def test_reconciler_is_deterministic_dry_run_and_has_no_commands(self):
+        plan = reconciler.plan_reconciliation(
+            REGISTRY,
+            {"research-engine": RESEARCH, "padataset": PAD},
+        )
+        self.assertEqual(plan["mode"], "DRY_RUN_ONLY_RUN2")
+        self.assertEqual(plan["project_count"], 2)
+        serialized = json.dumps(plan, sort_keys=True)
+        self.assertNotIn("shell", serialized)
+        self.assertNotIn("argv", serialized)
+        kinds = {a["kind"] for a in plan["actions"]}
+        self.assertEqual(
+            kinds,
+            {
+                "ensure_group",
+                "ensure_user",
+                "ensure_project_root",
+                "install_project_manifest",
+                "install_controller_instance_config",
+            },
+        )
+
+    def test_legacy_admission_semantics_are_derived_without_route_name(self):
+        admission = {
+            "execution_profile": "gpu-heavy",
+            "resource_class": "model_eval_dual_gpu_v1",
+            "capability_classes": {
+                "payload_network": "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE",
+                "payload_secrets": "CONTROL_PLANE_EPHEMERAL_ONLY",
+                "filesystem": "EPHEMERAL_JOB_PLUS_TRUSTED_CACHE_READONLY",
+                "cache_access": "TRUSTED_MODEL_RUNTIME_READONLY",
+                "state_effect": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+            },
+            "resource_ceiling": {"gpu_uuids": ["g1", "g2"]},
+            "models": [{"model_id": "x"}],
+            "runtime": {"runtime_id": "y"},
+        }
+        semantics = multi.execution_semantics_from_admission(admission)
+        self.assertEqual(semantics["gpu_count"], 2)
+        self.assertEqual(semantics["model_binding_mode"], "REQUIRED_PROMOTED_EXACT")
+        self.assertEqual(
+            semantics["execution_contract_id"], "legacy-admission-derived-v1"
+        )
+
+
+    def test_request_digest_is_stable_across_github_lifecycle_metadata(self):
+        available = request_for(RESEARCH, "cpu-test")
+        assigned = copy.deepcopy(available)
+        assigned["jit_config"] = "different-ephemeral-jit"
+        assigned["attestation"]["verified_at"] = "2026-10-20T00:01:00Z"
+        assigned["attestation"]["job_message_type"] = "JobAssigned"
+        assigned["attestation"]["runner_request_id"] = 0
+        self.assertEqual(
+            multi.request_digest(available),
+            multi.request_digest(assigned),
+        )
+
+    def test_generic_launch_spec_derives_project_identity_and_paths(self):
+        req_data = request_for(RESEARCH, "cpu-test")
+        req = provisioner.validate_request_v2_generic(
+            req_data,
+            RESEARCH,
+            CONTRACTS,
+            WORKLOAD,
+            now=datetime(2026, 10, 20, tzinfo=timezone.utc),
+        )
+        spec = provisioner.build_launch_spec(req, RESEARCH, PROFILES, PINS)
+        self.assertEqual(spec["run_as"]["user"], "ci-research-engine")
+        self.assertEqual(spec["run_as"]["group"], "ci-research-engine")
+        self.assertEqual(
+            spec["paths"]["job_root"],
+            "/srv/workspace-ci/research-engine/jobs",
+        )
+        self.assertEqual(
+            spec["execution_contract"]["execution_contract_id"],
+            "cpu-public-ci-v1",
+        )
+        self.assertEqual(spec["resources"]["gpu_uuids"], [])
+        self.assertIsNone(spec["model_binding"])
+        self.assertIsNone(spec["runtime_binding"])
+
+    def test_padataset_gpu_canary_contract_needs_no_runtime_or_model_binding(self):
+        manifest = copy.deepcopy(PAD)
+        route = manifest["routes"]["gpu-ci"]
+        route["activation_state"] = "ACTIVE"
+        route["trusted_workflow"]["blob_sha"] = "c" * 40
+        req_data = request_for(manifest, "gpu-ci")
+        req = provisioner.validate_request_v2_generic(
+            req_data,
+            manifest,
+            CONTRACTS,
+            WORKLOAD,
+            now=datetime(2026, 10, 20, tzinfo=timezone.utc),
+        )
+        spec = provisioner.build_launch_spec(req, manifest, PROFILES, PINS)
+        self.assertEqual(spec["run_as"]["user"], "ci-padataset")
+        self.assertEqual(spec["profile"], "gpu-small")
+        self.assertEqual(
+            spec["resources"]["gpu_uuids"],
+            ["GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"],
+        )
+        self.assertIsNone(spec["model_binding"])
+        self.assertIsNone(spec["runtime_binding"])
+        self.assertEqual(
+            spec["execution_contract"]["execution_contract_id"],
+            "gpu-single-public-ci-v1",
+        )
+
+    def test_lane_quarantine_is_project_scoped_in_generic_mode(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = provisioner_service.StateStore(Path(tmp))
+            research = store.lane_quarantine_path(
+                "gpu-small", project_id="research-engine"
+            )
+            padataset = store.lane_quarantine_path(
+                "gpu-small", project_id="padataset"
+            )
+            legacy = store.lane_quarantine_path("gpu-small")
+            self.assertNotEqual(research, padataset)
+            self.assertNotEqual(research, legacy)
+            self.assertEqual(
+                research.name,
+                "_lane-quarantine-research-engine-gpu-small.json",
+            )
+            self.assertEqual(
+                padataset.name,
+                "_lane-quarantine-padataset-gpu-small.json",
+            )
+
+    def test_generic_provisioner_service_resolves_registry_project(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            service = provisioner_service.ProvisionerService(
+                manifest=None,
+                profiles=PROFILES,
+                pins=PINS,
+                workload_policy=WORKLOAD,
+                state_store=provisioner_service.StateStore(Path(tmp)),
+                controller_uid=1000,
+                registry=REGISTRY,
+                project_manifests={
+                    "research-engine": RESEARCH,
+                    "padataset": PAD,
+                },
+                execution_contracts=CONTRACTS,
+            )
+            self.assertEqual(
+                service._manifest_for_request({"project_id": "padataset"})[
+                    "repository"
+                ],
+                "adamtrott78/PADataset",
+            )
+            with self.assertRaises(provisioner.PolicyError):
+                service._manifest_for_request({"project_id": "unknown"})
+
+    def test_reconciler_renders_deterministic_non_secret_controller_env(self):
+        cpu = reconciler.render_controller_env(PAD, "cpu")
+        gpu = reconciler.render_controller_env(PAD, "gpu")
+        self.assertIn("WORKSPACE_CI_PROJECT_ID=padataset\n", cpu)
+        self.assertIn("WORKSPACE_CI_LANE=cpu\n", cpu)
+        self.assertIn("WORKSPACE_CI_SCALESET_NAME=lambda-padataset\n", cpu)
+        self.assertIn("WORKSPACE_CI_LANE=gpu\n", gpu)
+        self.assertIn(
+            "WORKSPACE_CI_SCALESET_NAME=lambda-padataset-gpu\n",
+            gpu,
+        )
+        for forbidden in ("TOKEN=", "PRIVATE_KEY=", "PASSWORD=", "sudo", "ExecStart"):
+            self.assertNotIn(forbidden, cpu + gpu)
+        self.assertEqual(
+            reconciler.controller_env_sha256(PAD, "cpu"),
+            reconciler.controller_env_sha256(PAD, "cpu"),
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

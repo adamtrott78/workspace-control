@@ -20,6 +20,8 @@ import threading
 from datetime import datetime, timezone
 from typing import Any
 
+import lambda_ci_multirepo as multirepo_policy
+
 
 class RuntimeLaunchError(RuntimeError):
     pass
@@ -67,17 +69,6 @@ TRUSTED_CACHE_MANAGER_PATH = pathlib.Path(
 )
 TRUSTED_CACHE_MANAGER_BLOB = "a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807"
 
-MODEL_EVAL_WORKLOADS = frozenset({
-    "model-eval-single-gpu",
-    "model-eval-dual-gpu",
-    "model-eval-local-extract-wave1",
-})
-DUAL_GPU_MODEL_EVAL_WORKLOADS = frozenset({
-    "model-eval-dual-gpu",
-    "model-eval-local-extract-wave1",
-})
-
-
 def run(argv: list[str], *, check: bool = True):
     proc = subprocess.run(
         argv,
@@ -91,6 +82,72 @@ def run(argv: list[str], *, check: bool = True):
             f"command failed rc={proc.returncode}: {argv[0]}: {proc.stderr.strip()}"
         )
     return proc
+
+
+
+def execution_semantics(spec: dict[str, Any]) -> dict[str, Any]:
+    """Resolve root-granted execution semantics without consulting route names."""
+    explicit = spec.get("execution_contract")
+    if isinstance(explicit, dict):
+        semantics = dict(explicit)
+    else:
+        admission = spec.get("admission")
+        if isinstance(admission, dict):
+            try:
+                semantics = multirepo_policy.execution_semantics_from_admission(
+                    admission
+                )
+            except multirepo_policy.MultiRepoPolicyError as exc:
+                raise RuntimeLaunchError(
+                    f"execution semantics are invalid: {exc}"
+                ) from exc
+        else:
+            profile = spec.get("profile")
+            resources = spec.get("resources", {})
+            gpu_uuids = list(resources.get("gpu_uuids") or [])
+            semantics = {
+                "execution_contract_id": "legacy-p5-spec-derived-v1",
+                "execution_profile": profile,
+                "resource_class": "legacy-p5",
+                "gpu_count": len(gpu_uuids),
+                "model_binding_mode": (
+                    "REQUIRED_PROMOTED_EXACT"
+                    if spec.get("model_binding") is not None
+                    else "FORBIDDEN"
+                ),
+                "runtime_binding_mode": (
+                    "REQUIRED_EXPANDED_RUNTIME_EXACT"
+                    if spec.get("runtime_binding") is not None
+                    else "OPTIONAL_EXACT_IF_ROUTE_BINDS"
+                ),
+                "admission_enabled_after_generic_activation": True,
+            }
+
+    profile = semantics.get("execution_profile")
+    if profile not in {"cpu-test", "gpu-small", "gpu-heavy"}:
+        raise RuntimeLaunchError("execution contract profile is unsupported")
+    gpu_count = semantics.get("gpu_count")
+    if not isinstance(gpu_count, int) or gpu_count < 0 or gpu_count > 2:
+        raise RuntimeLaunchError("execution contract GPU count is invalid")
+    return semantics
+
+
+def authorized_gpu_uuids(spec: dict[str, Any]) -> list[str]:
+    admission = spec.get("admission")
+    if isinstance(admission, dict):
+        ceiling = admission.get("resource_ceiling")
+        if not isinstance(ceiling, dict):
+            raise RuntimeLaunchError("admission resource ceiling is missing")
+        values = ceiling.get("gpu_uuids")
+    else:
+        values = spec.get("resources", {}).get("gpu_uuids", [])
+    if not isinstance(values, list) or any(
+        not isinstance(value, str) or not value for value in values
+    ):
+        raise RuntimeLaunchError("authorized GPU UUID set is invalid")
+    if len({value.lower() for value in values}) != len(values):
+        raise RuntimeLaunchError("authorized GPU UUID set contains duplicates")
+    return list(values)
 
 
 def project_identity(user: str) -> tuple[int, int]:
@@ -147,11 +204,24 @@ def expanded_runtime_tree_digest(root: pathlib.Path) -> str:
     return tree_hash.hexdigest()
 
 
-def verify_expanded_runtime_binding(spec: dict[str, Any]) -> dict[str, Any]:
-    """Verify the exact root-owned expanded runtime before/after gpu-small execution."""
+def verify_expanded_runtime_binding(
+    spec: dict[str, Any],
+) -> dict[str, Any] | None:
+    """Verify an exact runtime when required/bound by the semantic contract."""
+    semantics = execution_semantics(spec)
+    mode = semantics.get("runtime_binding_mode")
     binding = spec.get("runtime_binding")
+    if binding is None:
+        if mode == "OPTIONAL_EXACT_IF_ROUTE_BINDS":
+            return None
+        raise RuntimeLaunchError("execution contract requires exact expanded runtime binding")
+    if mode not in {
+        "OPTIONAL_EXACT_IF_ROUTE_BINDS",
+        "REQUIRED_EXPANDED_RUNTIME_EXACT",
+    }:
+        raise RuntimeLaunchError("execution contract runtime-binding mode is invalid")
     if not isinstance(binding, dict):
-        raise RuntimeLaunchError("gpu-small requires exact expanded runtime binding")
+        raise RuntimeLaunchError("expanded runtime binding must be an object")
 
     required = {
         "runtime_id",
@@ -279,16 +349,20 @@ def verify_expanded_runtime_binding(spec: dict[str, Any]) -> dict[str, Any]:
 
 def verify_promoted_model_binding(spec: dict[str, Any]) -> dict[str, Any] | None:
     """Verify the exact promoted model object before/after model-eval execution."""
+    semantics = execution_semantics(spec)
+    mode = semantics.get("model_binding_mode")
     binding = spec.get("model_binding")
-    workload_class = spec.get("workload_class")
     if binding is None:
-        if workload_class in MODEL_EVAL_WORKLOADS:
-            raise RuntimeLaunchError(
-                f"{workload_class} requires promoted model binding"
-            )
-        return None
-    if workload_class not in MODEL_EVAL_WORKLOADS:
-        raise RuntimeLaunchError("promoted model binding is forbidden for this workload")
+        if mode in {"FORBIDDEN", "OPTIONAL_EXACT_IF_ROUTE_BINDS"}:
+            return None
+        raise RuntimeLaunchError("execution contract requires promoted model binding")
+    if mode == "FORBIDDEN":
+        raise RuntimeLaunchError("execution contract forbids promoted model binding")
+    if mode not in {
+        "OPTIONAL_EXACT_IF_ROUTE_BINDS",
+        "REQUIRED_PROMOTED_EXACT",
+    }:
+        raise RuntimeLaunchError("execution contract model-binding mode is invalid")
     if not isinstance(binding, dict):
         raise RuntimeLaunchError("promoted model binding must be an object")
 
@@ -978,11 +1052,13 @@ def build_gpu_systemd_command(
     resources = spec["resources"]
     paths = spec["paths"]
     runtime_binding = spec.get("runtime_binding")
-    if not isinstance(runtime_binding, dict):
-        raise RuntimeLaunchError("gpu-small systemd command requires runtime binding")
-
-    runtime_path = pathlib.Path(runtime_binding["canonical_path"])
-    runtime_python = pathlib.Path(runtime_binding["python_path"])
+    runtime_path = None
+    runtime_python = None
+    if runtime_binding is not None:
+        if not isinstance(runtime_binding, dict):
+            raise RuntimeLaunchError("runtime binding must be an object")
+        runtime_path = pathlib.Path(runtime_binding["canonical_path"])
+        runtime_python = pathlib.Path(runtime_binding["python_path"])
     job_home = staging_dir / "home"
     xdg_cache = staging_dir / "xdg"
     hf_home = staging_dir / "huggingface"
@@ -1062,7 +1138,6 @@ def build_gpu_systemd_command(
         "-p", f"ReadWritePaths={staging_dir}",
         "-p", f"ReadWritePaths={paths['logs']}",
         "-p", f"ReadOnlyPaths={paths['trusted_cache']}",
-        "-p", f"BindReadOnlyPaths={runtime_path}",
         "-p", "InaccessiblePaths=/var/run/docker.sock",
         "-p", "InaccessiblePaths=/run/docker.sock",
         "-p", "DevicePolicy=closed",
@@ -1100,16 +1175,6 @@ def build_gpu_systemd_command(
         "-p", f"Environment=PYTHONPYCACHEPREFIX={pycache}",
         "-p", "Environment=PYTHONDONTWRITEBYTECODE=1",
         "-p", "Environment=VLLM_USE_FLASHINFER_SAMPLER=0",
-        "-p", f"Environment=P5_EXPANDED_RUNTIME={runtime_path}",
-        "-p", f"Environment=P5_EXPANDED_RUNTIME_PYTHON={runtime_python}",
-        "-p", (
-            "Environment=P5_EXPANDED_RUNTIME_TREE_SHA256="
-            f"{runtime_binding['tree_digest_sha256']}"
-        ),
-        "-p", (
-            "Environment=P5_EXPANDED_RUNTIME_MANIFEST_SHA256="
-            f"{runtime_binding['manifest_identity_sha256']}"
-        ),
         "-p", f"Environment=CUDA_VISIBLE_DEVICES={target_uuid_csv}",
         "-p", f"Environment=P5_GPU_TARGET_UUID={target_uuid}",
         "-p", f"Environment=P5_GPU_TARGET_UUIDS={target_uuid_csv}",
@@ -1121,6 +1186,23 @@ def build_gpu_systemd_command(
         "-ceu",
         bash_script,
     ]
+
+    if runtime_binding is not None:
+        executable_index = command.index("/bin/bash")
+        runtime_properties = [
+            "-p", f"BindReadOnlyPaths={runtime_path}",
+            "-p", f"Environment=P5_EXPANDED_RUNTIME={runtime_path}",
+            "-p", f"Environment=P5_EXPANDED_RUNTIME_PYTHON={runtime_python}",
+            "-p", (
+                "Environment=P5_EXPANDED_RUNTIME_TREE_SHA256="
+                f"{runtime_binding['tree_digest_sha256']}"
+            ),
+            "-p", (
+                "Environment=P5_EXPANDED_RUNTIME_MANIFEST_SHA256="
+                f"{runtime_binding['manifest_identity_sha256']}"
+            ),
+        ]
+        command[executable_index:executable_index] = runtime_properties
 
     model_binding = spec.get("model_binding")
     if model_binding is not None:
@@ -1440,11 +1522,12 @@ def admission_receipt_identity(spec: dict[str, Any]) -> dict[str, Any]:
     }
 
 def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
-    """Launch one accepted CPU runner and return a non-secret cleanup receipt."""
-    if spec["profile"] != "cpu-test":
-        raise RuntimeLaunchError("P5 pilot runtime accepts cpu-test only")
-    if spec["resources"]["gpu_indices"]:
-        raise RuntimeLaunchError("cpu-test spec unexpectedly contains GPU authority")
+    """Launch one semantically authorized CPU runner and return a cleanup receipt."""
+    semantics = execution_semantics(spec)
+    if spec["profile"] != "cpu-test" or semantics["execution_profile"] != "cpu-test":
+        raise RuntimeLaunchError("CPU runtime requires cpu-test semantic contract")
+    if semantics["gpu_count"] != 0 or spec["resources"]["gpu_indices"]:
+        raise RuntimeLaunchError("CPU semantic contract unexpectedly contains GPU authority")
     if spec["allow_production_services"]:
         raise RuntimeLaunchError("production-service access is forbidden")
 
@@ -1645,43 +1728,37 @@ def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     return receipt
 
 def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
-    """Launch only the explicitly bounded accepted GPU workload/profile pair."""
+    """Launch only the GPU authority resolved by the root semantic contract."""
     profile = spec["profile"]
-    workload = spec.get("workload_class")
     resources = spec["resources"]
+    semantics = execution_semantics(spec)
     prelaunch_gpu_processes: list[dict[str, object]] = []
     prelaunch_gpu_idle_verified = False
 
     if spec["allow_production_services"]:
         raise RuntimeLaunchError("production-service access is forbidden")
+    if semantics["execution_profile"] != profile:
+        raise RuntimeLaunchError("GPU execution profile differs from semantic contract")
+
+    target_uuids = resources.get("gpu_uuids", [])
+    authorized_uuids = authorized_gpu_uuids(spec)
+    if target_uuids != authorized_uuids:
+        raise RuntimeLaunchError("GPU target UUIDs differ from root admission")
+    if len(target_uuids) != semantics["gpu_count"]:
+        raise RuntimeLaunchError("GPU target count differs from semantic contract")
 
     if profile == "gpu-small":
-        if resources["gpu_indices"] != [0]:
-            raise RuntimeLaunchError("gpu-small authority must remain exactly one GPU")
+        if semantics["gpu_count"] != 1 or resources["gpu_indices"] != [0]:
+            raise RuntimeLaunchError("gpu-small semantic authority must be exactly one GPU")
         target_uuid = resources.get("gpu_uuid")
-        if target_uuid != "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea":
-            raise RuntimeLaunchError("gpu-small target UUID drift")
-        target_uuids = resources.get("gpu_uuids", [target_uuid])
         if target_uuids != [target_uuid]:
             raise RuntimeLaunchError("gpu-small UUID set drift")
         assignment = resolve_gpu_assignment(target_uuid)
     elif profile == "gpu-heavy":
-        if workload not in DUAL_GPU_MODEL_EVAL_WORKLOADS:
-            raise RuntimeLaunchError(
-                "gpu-heavy is accepted only for explicitly authorized "
-                "dual-GPU model-eval workloads"
-            )
-        if spec.get("model_binding") is None:
-            raise RuntimeLaunchError("dual-GPU model eval requires promoted model binding")
+        if semantics["gpu_count"] != 2:
+            raise RuntimeLaunchError("gpu-heavy semantic authority must be exactly two GPUs")
         if resources["gpu_indices"] != [0, 1]:
             raise RuntimeLaunchError("dual-GPU authority requires exactly two GPU slots")
-        expected_uuids = [
-            "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
-            "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
-        ]
-        target_uuids = resources.get("gpu_uuids")
-        if target_uuids != expected_uuids:
-            raise RuntimeLaunchError("dual-GPU target UUID set drift")
         if resources.get("gpu_uuid") not in (None, ""):
             raise RuntimeLaunchError("dual-GPU profile must not use singular GPU authority")
         assignment = resolve_gpu_assignments(target_uuids)
@@ -1809,7 +1886,7 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     gpu_residue_detected: list[dict[str, object]] = []
     leaked_gpu_processes: list[dict[str, object]] = []
     gpu_cleanup_pass = False
-    runtime_post_verified = False
+    runtime_post_verified = runtime_pre is None
     runtime_post_error: str | None = None
     runtime_post: dict[str, Any] | None = None
     model_post_verified = model_pre is None
@@ -1926,12 +2003,14 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         else:
             gpu_cleanup_pass = not leaked_gpu_processes
 
-        try:
-            runtime_post = verify_expanded_runtime_binding(spec)
-        except Exception as exc:
-            runtime_post_error = f"{type(exc).__name__}: {exc}"
-        else:
-            runtime_post_verified = True
+        if runtime_pre is not None:
+            try:
+                runtime_post = verify_expanded_runtime_binding(spec)
+            except Exception as exc:
+                runtime_post_error = f"{type(exc).__name__}: {exc}"
+                runtime_post_verified = False
+            else:
+                runtime_post_verified = True
 
         if model_pre is not None:
             try:
@@ -2004,7 +2083,7 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "gpu_prelaunch_idle_verified": prelaunch_gpu_idle_verified,
             "gpu_prelaunch_processes": prelaunch_gpu_processes,
             "cuda_visible_devices": ",".join(assignment["target_uuids"]),
-            "expanded_runtime_preverified": True,
+            "expanded_runtime_preverified": runtime_pre is not None,
             "expanded_runtime_postverified": runtime_post_verified,
             "expanded_runtime_postverify_error": runtime_post_error,
             "expanded_runtime": runtime_pre,
@@ -2057,15 +2136,22 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     return receipt
 
 def launch_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
-    """Dispatch only explicitly bounded autonomous P5 workload/profile pairs."""
+    """Dispatch only the execution profile granted by root semantic policy."""
     profile = spec["profile"]
+    semantics = execution_semantics(spec)
+    if semantics["execution_profile"] != profile:
+        raise RuntimeLaunchError("launch profile differs from semantic contract")
     if profile == "cpu-test":
         return launch_cpu_runner(request, spec)
     if profile == "gpu-small":
         return launch_gpu_runner(request, spec)
-    if (
-        profile == "gpu-heavy"
-        and spec.get("workload_class") in DUAL_GPU_MODEL_EVAL_WORKLOADS
-    ):
+    if profile == "gpu-heavy":
+        if (
+            semantics.get("gpu_count") != 2
+            or semantics.get("admission_enabled_after_generic_activation") is not True
+        ):
+            raise RuntimeLaunchError(
+                "autonomous profile rejected: gpu-heavy without accepted two-GPU semantic contract"
+            )
         return launch_gpu_runner(request, spec)
     raise RuntimeLaunchError(f"autonomous profile rejected: {profile}")

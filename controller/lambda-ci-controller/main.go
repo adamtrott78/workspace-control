@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -23,23 +24,21 @@ import (
 )
 
 const (
-	defaultGitHubURL      = "https://github.com/adamtrott78/research-engine"
-	defaultScaleSetName    = "lambda-research-engine"
-	gpuScaleSetName        = "lambda-research-engine-gpu"
-	defaultProjectID       = "research-engine"
-	defaultProfile         = "cpu-test"
-	gpuProfile             = "gpu-small"
-	modelEvalWorkload        = "model-eval-single-gpu"
-	dualModelEvalWorkload    = "model-eval-dual-gpu"
-	localExtractWave1Workload = "model-eval-local-extract-wave1"
-	defaultProvisionerSock   = "/run/workspace-ci/provisioner.sock"
+	defaultProvisionerSock = "/run/workspace-ci/provisioner.sock"
 	maxRunners             = 1
+)
+
+var (
+	projectIDPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{1,20}$`)
+	routeIDPattern   = regexp.MustCompile(`^[a-z][a-z0-9-]{0,63}$`)
 )
 
 type config struct {
 	GitHubURL       string
 	ScaleSetName    string
 	ProjectID       string
+	Lane            string
+	RunnerPrefix    string
 	Profile         string
 	ProvisionerSock string
 	PATFile         string
@@ -120,6 +119,7 @@ type scaler struct {
 	projectID       string
 	profile         string
 	scaleSetName    string
+	runnerPrefix    string
 	provisionerSock string
 	admissionV2     bool
 	attestor        jobAttestor
@@ -134,95 +134,92 @@ func envOr(key, fallback string) string {
 	return fallback
 }
 
-func controllerMappingAllowed(scaleSetName, profile string) bool {
-	return (scaleSetName == defaultScaleSetName && profile == defaultProfile) ||
-		(scaleSetName == gpuScaleSetName && profile == gpuProfile)
+func requiredEnv(key string) (string, error) {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return "", fmt.Errorf("%s is required", key)
+	}
+	return value, nil
 }
 
-func workloadForDisplayClaim(profile, displayName string) (string, error) {
+func derivedControllerIdentity(projectID, lane string) (string, string, string, error) {
+	if !projectIDPattern.MatchString(projectID) {
+		return "", "", "", fmt.Errorf("project id rejected: %s", projectID)
+	}
+	switch lane {
+	case "cpu":
+		return "lambda-" + projectID, "lambda-" + projectID + "-", "cpu-test", nil
+	case "gpu":
+		return "lambda-" + projectID + "-gpu", "lambda-" + projectID + "-gpu-", "gpu-small", nil
+	default:
+		return "", "", "", fmt.Errorf("controller lane rejected: %s", lane)
+	}
+}
+
+func workloadForDisplayClaim(displayName string) (string, error) {
 	const prefix = "wc-admission-v1|workload="
 	if !strings.HasPrefix(displayName, prefix) {
 		return "", fmt.Errorf("job display claim has no admission workload")
 	}
 	rest := strings.TrimPrefix(displayName, prefix)
 	workload, _, ok := strings.Cut(rest, "|")
-	if !ok || workload == "" {
-		return "", fmt.Errorf("job display claim workload is incomplete")
-	}
-	switch profile {
-	case defaultProfile:
-		if workload != defaultProfile {
-			return "", fmt.Errorf("CPU controller workload rejected: %s", workload)
-		}
-	case gpuProfile:
-		if workload != gpuProfile &&
-			workload != modelEvalWorkload &&
-			workload != dualModelEvalWorkload &&
-			workload != localExtractWave1Workload {
-			return "", fmt.Errorf("GPU controller workload rejected: %s", workload)
-		}
-	default:
-		return "", fmt.Errorf("controller profile rejected: %s", profile)
+	if !ok || !routeIDPattern.MatchString(workload) {
+		return "", fmt.Errorf("job display claim workload is invalid")
 	}
 	return workload, nil
 }
 
 func loadConfig() (config, error) {
-	cfg := config{
-		GitHubURL:       envOr("WORKSPACE_CI_GITHUB_URL", defaultGitHubURL),
-		ScaleSetName:    envOr("WORKSPACE_CI_SCALESET_NAME", defaultScaleSetName),
-		ProjectID:       envOr("WORKSPACE_CI_PROJECT_ID", defaultProjectID),
-		Profile:         envOr("WORKSPACE_CI_PROFILE", defaultProfile),
-		ProvisionerSock: envOr("WORKSPACE_CI_PROVISIONER_SOCKET", defaultProvisionerSock),
-		PATFile:         strings.TrimSpace(os.Getenv("WORKSPACE_CI_PAT_FILE")),
-		AppClientID:     strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_CLIENT_ID")),
-		AppPrivateKey:   strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_PRIVATE_KEY_FILE")),
+	githubURL, err := requiredEnv("WORKSPACE_CI_GITHUB_URL")
+	if err != nil { return config{}, err }
+	scaleSetName, err := requiredEnv("WORKSPACE_CI_SCALESET_NAME")
+	if err != nil { return config{}, err }
+	projectID, err := requiredEnv("WORKSPACE_CI_PROJECT_ID")
+	if err != nil { return config{}, err }
+	lane, err := requiredEnv("WORKSPACE_CI_LANE")
+	if err != nil { return config{}, err }
+	runnerPrefix, err := requiredEnv("WORKSPACE_CI_RUNNER_PREFIX")
+	if err != nil { return config{}, err }
+
+	expectedScaleSet, expectedPrefix, profile, err := derivedControllerIdentity(projectID, lane)
+	if err != nil { return config{}, err }
+	if scaleSetName != expectedScaleSet {
+		return config{}, fmt.Errorf("controller scale-set does not match derived project/lane identity: got %s want %s", scaleSetName, expectedScaleSet)
+	}
+	if runnerPrefix != expectedPrefix {
+		return config{}, fmt.Errorf("controller runner prefix does not match derived project/lane identity: got %s want %s", runnerPrefix, expectedPrefix)
 	}
 
+	cfg := config{
+		GitHubURL: githubURL, ScaleSetName: scaleSetName, ProjectID: projectID,
+		Lane: lane, RunnerPrefix: runnerPrefix, Profile: profile,
+		ProvisionerSock: envOr("WORKSPACE_CI_PROVISIONER_SOCKET", defaultProvisionerSock),
+		PATFile: strings.TrimSpace(os.Getenv("WORKSPACE_CI_PAT_FILE")),
+		AppClientID: strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_CLIENT_ID")),
+		AppPrivateKey: strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_PRIVATE_KEY_FILE")),
+	}
 	if raw := strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_INSTALLATION_ID")); raw != "" {
 		value, err := strconv.ParseInt(raw, 10, 64)
-		if err != nil || value <= 0 {
-			return config{}, fmt.Errorf("invalid WORKSPACE_CI_APP_INSTALLATION_ID")
-		}
+		if err != nil || value <= 0 { return config{}, fmt.Errorf("invalid WORKSPACE_CI_APP_INSTALLATION_ID") }
 		cfg.AppInstallID = value
 	}
-
 	switch raw := strings.TrimSpace(os.Getenv("WORKSPACE_CI_ADMISSION_V2_ENABLED")); raw {
-	case "", "NO":
-		cfg.AdmissionV2 = false
-	case "YES":
-		cfg.AdmissionV2 = true
-	default:
-		return config{}, fmt.Errorf(
-			"WORKSPACE_CI_ADMISSION_V2_ENABLED must be YES or NO",
-		)
+	case "", "NO": cfg.AdmissionV2 = false
+	case "YES": cfg.AdmissionV2 = true
+	default: return config{}, fmt.Errorf("WORKSPACE_CI_ADMISSION_V2_ENABLED must be YES or NO")
 	}
-
-	if cfg.ProjectID != defaultProjectID {
-		return config{}, fmt.Errorf("P5 pilot project is fixed to %s", defaultProjectID)
-	}
-	if !controllerMappingAllowed(cfg.ScaleSetName, cfg.Profile) {
-		return config{}, fmt.Errorf(
-			"P5 controller scale-set/profile mapping rejected: %s/%s",
-			cfg.ScaleSetName,
-			cfg.Profile,
-		)
-	}
-
 	hasApp := cfg.AppClientID != "" || cfg.AppInstallID != 0 || cfg.AppPrivateKey != ""
 	if hasApp {
 		if cfg.AppClientID == "" || cfg.AppInstallID == 0 || cfg.AppPrivateKey == "" {
 			return config{}, fmt.Errorf("GitHub App credential configuration is incomplete")
 		}
-		if cfg.PATFile != "" {
-			return config{}, fmt.Errorf("configure either GitHub App or PAT, not both")
-		}
+		if cfg.PATFile != "" { return config{}, fmt.Errorf("configure either GitHub App or PAT, not both") }
 	} else if cfg.PATFile == "" {
 		return config{}, fmt.Errorf("controller credential file is required")
 	}
-
 	return cfg, nil
 }
+
 
 func readSecretFile(path string) (string, error) {
 	info, err := os.Stat(path)
@@ -320,20 +317,12 @@ func randomID() (string, error) {
 	return fmt.Sprintf("%s-%s-%s-%s-%s", hexed[0:8], hexed[8:12], hexed[12:16], hexed[16:20], hexed[20:32]), nil
 }
 
-func runnerName(profile string) (string, error) {
-	var prefix string
-	switch profile {
-	case defaultProfile:
-		prefix = "lambda-research-engine-"
-	case gpuProfile:
-		prefix = "lambda-research-engine-gpu-"
-	default:
-		return "", fmt.Errorf("runner-name profile rejected: %s", profile)
+func runnerName(prefix string) (string, error) {
+	if !strings.HasPrefix(prefix, "lambda-") || !strings.HasSuffix(prefix, "-") {
+		return "", fmt.Errorf("runner-name prefix rejected: %s", prefix)
 	}
 	var raw [6]byte
-	if _, err := rand.Read(raw[:]); err != nil {
-		return "", err
-	}
+	if _, err := rand.Read(raw[:]); err != nil { return "", err }
 	return prefix + hex.EncodeToString(raw[:]), nil
 }
 
@@ -528,10 +517,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				if capacity <= 0 {
 					break
 				}
-				workload, err := workloadForDisplayClaim(
-					s.profile,
-					job.JobDisplayName,
-				)
+				workload, err := workloadForDisplayClaim(job.JobDisplayName)
 				if err != nil {
 					return fmt.Errorf("derive available workload: %w", err)
 				}
@@ -609,10 +595,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				)
 				continue
 			}
-			workload, err := workloadForDisplayClaim(
-				s.profile,
-				assigned.JobDisplayName,
-			)
+			workload, err := workloadForDisplayClaim(assigned.JobDisplayName)
 			if err != nil {
 				return fmt.Errorf("derive assigned workload: %w", err)
 			}
@@ -701,6 +684,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				return fmt.Errorf("pending admission workload is missing")
 			}
 			requestID, name, err = deterministicAdmissionExecutionIDs(
+				s.runnerPrefix,
 				workload,
 				attestation,
 			)
@@ -708,7 +692,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				return fmt.Errorf("derive deterministic admission identity: %w", err)
 			}
 		} else {
-			name, err = runnerName(s.profile)
+			name, err = runnerName(s.runnerPrefix)
 			if err != nil {
 				return fmt.Errorf("runner name: %w", err)
 			}
@@ -933,6 +917,7 @@ func runController(ctx context.Context, cfg config, logger *slog.Logger) error {
 		projectID:       cfg.ProjectID,
 		profile:         cfg.Profile,
 		scaleSetName:    cfg.ScaleSetName,
+		runnerPrefix:    cfg.RunnerPrefix,
 		provisionerSock: cfg.ProvisionerSock,
 		admissionV2:     cfg.AdmissionV2,
 		attestor:        attestor,
