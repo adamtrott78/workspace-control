@@ -43,8 +43,8 @@
       "intent": "mutate",
       "base_sha": "4d580661a27f151e70f778111a88579e54de1c71",
       "remote": {
-        "branch": "lambda-multirepo-run1-architecture-v1",
-        "checkpoint_sha": "34a981b5dd4634906111dc8bbe612b86198ef813",
+        "branch": "main",
+        "checkpoint_sha": "2b22af474791ff59cc9cb100f4bf3b939266fec2",
         "verified": true
       },
       "local": null,
@@ -159,13 +159,14 @@
           "check": "Run-1 architecture contract and repository validation",
           "result": "PASS",
           "evidence": [
-            "workspace-control PR #231 head 34a981b5dd4634906111dc8bbe612b86198ef813.",
-            "Workspace Control Validation run 39351745034 PASS.",
+            "workspace-control PR #231 final head f50e6455ac71e0dde4d3385391043a8dd0b45d58.",
+            "Final Workspace Control Validation run 39351970987 PASS.",
             "Changed task/static validation PASS.",
             "Python unit regression PASS including tests/test_lambda_ci_multirepo_contract.py.",
             "Pinned Go 1.26.3 Lambda scale-set controller validation PASS.",
             "Full integration contracts PASS.",
-            "PR #231 changes design/schema/test files only; no controller, provisioner, privileged runtime, bootstrap, systemd, Lambda host, or PADataset repository behavior is changed."
+            "PR #231 merged as 2b22af474791ff59cc9cb100f4bf3b939266fec2.",
+            "PR #231 changes design/schema/test/task files only; no controller, provisioner, privileged runtime, bootstrap, systemd, Lambda host, or PADataset repository behavior is changed."
           ]
         },
         {
@@ -414,8 +415,9 @@
       "check": "Run 1 multi-repository architecture freeze",
       "result": "PASS",
       "evidence": [
-        "PR #231 design head 34a981b5dd4634906111dc8bbe612b86198ef813.",
-        "Workspace Control Validation run 39351745034 PASS across task/static, Python, pinned Go controller and full integration tiers.",
+        "PR #231 final head f50e6455ac71e0dde4d3385391043a8dd0b45d58.",
+        "Final Workspace Control Validation run 39351970987 PASS across task/static, Python, pinned Go controller and full integration tiers.",
+        "PR #231 merged as 2b22af474791ff59cc9cb100f4bf3b939266fec2.",
         "No live Lambda mutation or PADataset execution occurred.",
         "Run 2 implementation is bounded by architecture/lambda-ci-multirepo-execution.v1.md."
       ]
@@ -433,5 +435,5 @@
   "next_safe_action": "Run 2 implementation only. Starting from the validated Run-1 architecture, remove research-engine/project/workload privilege constants from the generic controller/provisioner/runtime path: controller becomes required project+lane configuration with a generic strict display-claim parser; provisioner resolves project_id through the root registry and validates derived runner identity; privileged runtime enforces resolved execution-contract semantics rather than route names. Add focused migration, third-project, PADataset-public-boundary and negative tests. Also implement the reconciliation plane in disabled/non-live form. Do not install or restart Lambda services and do not mutate PADataset in Run 2.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created after research-engine Wave-1 proved the complete GitHub-to-Lambda path and final cleanup receipt. This task deliberately broadens the objective from one project's model-eval route to a reusable research compute control plane. PADataset is the first real second-project acceptance test, not another special-case workload.\n2026-10-20 Run 1 architecture freeze: PR #231 design head 34a981b5dd4634906111dc8bbe612b86198ef813 validated PASS in run 39351745034. Frozen design introduces root project registry, deterministic project identity derivation, route-name/non-authority separation, reusable semantic execution contracts, research-engine v2 migration manifest, public-repo-hardened PADataset P6 manifest, bounded Git-driven reconciliation protocol, and synthetic third-project manifest-only proof. No executable control-plane or live host change occurred. Next stage is Run 2 generic implementation with no Lambda install."
+  "notes": "Created after research-engine Wave-1 proved the complete GitHub-to-Lambda path and final cleanup receipt. This task deliberately broadens the objective from one project's model-eval route to a reusable research compute control plane. PADataset is the first real second-project acceptance test, not another special-case workload.\n2026-10-20 Run 1 architecture freeze: PR #231 design head 34a981b5dd4634906111dc8bbe612b86198ef813 validated PASS in run 39351745034. Frozen design introduces root project registry, deterministic project identity derivation, route-name/non-authority separation, reusable semantic execution contracts, research-engine v2 migration manifest, public-repo-hardened PADataset P6 manifest, bounded Git-driven reconciliation protocol, and synthetic third-project manifest-only proof. No executable control-plane or live host change occurred. Next stage is Run 2 generic implementation with no Lambda install.\n2026-10-20 Run 1 canonical closeout: PR #231 final validation run 39351970987 PASS and squash merge 2b22af474791ff59cc9cb100f4bf3b939266fec2. workspace-control recovery checkpoint returns to canonical main at that merge. Run 2 may begin implementation only; live Lambda remains unchanged."
 }

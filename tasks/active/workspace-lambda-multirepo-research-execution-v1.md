@@ -23,8 +23,8 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: lambda-multirepo-run1-architecture-v1
-- Remote checkpoint: 34a981b5dd4634906111dc8bbe612b86198ef813
+- Remote branch: main
+- Remote checkpoint: 2b22af474791ff59cc9cb100f4bf3b939266fec2
 - Remote verified: true
 
 ### research-engine
