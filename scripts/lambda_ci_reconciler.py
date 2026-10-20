@@ -505,6 +505,35 @@ def _ensure_project_roots(manifest: dict[str, Any]) -> None:
     )
 
 
+def primary_local_subnet() -> str:
+    route = _run(["ip", "-4", "route", "get", "1.1.1.1"])
+    fields = route.stdout.split()
+    try:
+        dev = fields[fields.index("dev") + 1]
+    except (ValueError, IndexError) as exc:
+        raise ReconcileError("unable to resolve primary network device") from exc
+    routes = _run(["ip", "-4", "route", "show", "dev", dev, "proto", "kernel", "scope", "link"])
+    for line in routes.stdout.splitlines():
+        parts = line.split()
+        first = parts[0] if parts else ""
+        if "/" in first and first[:1].isdigit():
+            return first
+    raise ReconcileError("unable to resolve primary local subnet")
+
+
+def controller_network_dropin(project_id: str, lane: str, subnet: str) -> tuple[pathlib.Path, bytes]:
+    multi.derive_project_identity(project_id)
+    if lane not in {"cpu", "gpu"}:
+        raise ReconcileError("controller lane is invalid")
+    if not subnet or "/" not in subnet:
+        raise ReconcileError("local subnet is invalid")
+    path = pathlib.Path(
+        f"/etc/systemd/system/workspace-ci-controller@{project_id}-{lane}.service.d/network.conf"
+    )
+    body = f"[Service]\nIPAddressDeny={subnet}\n".encode("utf-8")
+    return path, body
+
+
 def _service_active(name: str) -> bool:
     proc = _run(["systemctl", "is-active", "--quiet", name], check=False)
     return proc.returncode == 0
@@ -587,6 +616,7 @@ def apply_reconciliation(
     os.chown(controllers_dir, 0, 0)
     os.chmod(controllers_dir, 0o755)
     controller_services: list[str] = []
+    local_subnet = primary_local_subnet()
     for project_id in active_projects:
         manifest = manifests[project_id]
         for lane in registry["projects"][project_id]["lanes"]:
@@ -596,6 +626,12 @@ def apply_reconciliation(
                 render_controller_env(manifest, lane).encode("utf-8"),
                 mode=0o644,
             )
+            dropin_path, dropin_body = controller_network_dropin(
+                project_id,
+                lane,
+                local_subnet,
+            )
+            _atomic_write(dropin_path, dropin_body, mode=0o644)
             controller_services.append(
                 f"workspace-ci-controller@{project_id}-{lane}.service"
             )
@@ -616,6 +652,7 @@ def apply_reconciliation(
         "mutation_performed": True,
         "active_controller_services": controller_services,
         "planned_projects_skipped": plan["planned_projects_skipped"],
+        "controller_local_subnet_denied": local_subnet,
         "installed_registry_sha256": _canonical_sha256(registry),
         "installed_manifest_sha256": {
             project_id: _canonical_sha256(manifests[project_id])
