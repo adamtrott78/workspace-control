@@ -24,6 +24,7 @@ from datetime import datetime, timezone
 from typing import Any, Callable
 
 import lambda_ci_provisioner as policy
+import lambda_ci_multirepo as multirepo_policy
 import lambda_ci_runtime as runtime
 
 DEFAULT_SOCKET = pathlib.Path("/run/workspace-ci/provisioner.sock")
@@ -46,13 +47,31 @@ class StateStore:
     def path(self, request_id: str) -> pathlib.Path:
         return self.root / f"{request_id}.json"
 
-    def lane_quarantine_path(self, profile: str) -> pathlib.Path:
+    def lane_quarantine_path(
+        self,
+        profile: str,
+        *,
+        project_id: str | None = None,
+    ) -> pathlib.Path:
         if profile not in {"cpu-test", "gpu-small", "gpu-heavy"}:
             raise ServiceError(f"unsupported lane quarantine profile: {profile}")
-        return self.root / f"_lane-quarantine-{profile}.json"
+        if project_id is None:
+            suffix = profile
+        else:
+            try:
+                multirepo_policy.derive_project_identity(project_id)
+            except multirepo_policy.MultiRepoPolicyError as exc:
+                raise ServiceError(f"invalid quarantine project id: {exc}") from exc
+            suffix = f"{project_id}-{profile}"
+        return self.root / f"_lane-quarantine-{suffix}.json"
 
-    def read_lane_quarantine(self, profile: str) -> dict[str, Any] | None:
-        path = self.lane_quarantine_path(profile)
+    def read_lane_quarantine(
+        self,
+        profile: str,
+        *,
+        project_id: str | None = None,
+    ) -> dict[str, Any] | None:
+        path = self.lane_quarantine_path(profile, project_id=project_id)
         if not path.exists():
             return None
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -68,12 +87,14 @@ class StateStore:
         error_type: str,
         error: str,
         quarantined_at: datetime,
+        project_id: str | None = None,
     ) -> dict[str, Any]:
         self.ensure()
-        path = self.lane_quarantine_path(profile)
+        path = self.lane_quarantine_path(profile, project_id=project_id)
         record = {
             "schema_version": 1,
             "profile": profile,
+            "project_id": project_id,
             "status": "QUARANTINED",
             "request_id": request_id,
             "error_type": error_type,
@@ -128,7 +149,7 @@ class ProvisionerService:
     def __init__(
         self,
         *,
-        manifest: dict[str, Any],
+        manifest: dict[str, Any] | None,
         profiles: dict[str, Any],
         pins: dict[str, Any],
         workload_policy: dict[str, Any],
@@ -136,12 +157,37 @@ class ProvisionerService:
         controller_uid: int,
         launcher: Callable[[Any, dict[str, Any]], dict[str, Any]] = runtime.launch_runner,
         clock: Callable[[], datetime] | None = None,
+        registry: dict[str, Any] | None = None,
+        project_manifests: dict[str, dict[str, Any]] | None = None,
+        execution_contracts: dict[str, Any] | None = None,
     ):
         self.manifest = manifest
         self.profiles = profiles
         self.pins = pins
         self.workload_policy = workload_policy
         self.policy_sha256 = policy.admission_policy.sha256_json(workload_policy)
+        self.registry = registry
+        self.project_manifests = project_manifests or {}
+        self.execution_contracts = execution_contracts
+        self.generic_policy_sha256 = (
+            multirepo_policy.sha256_json(
+                {
+                    "workload_policy": workload_policy,
+                    "execution_contracts": execution_contracts,
+                }
+            )
+            if registry is not None and execution_contracts is not None
+            else None
+        )
+        if registry is not None:
+            if manifest is not None:
+                raise ServiceError("generic registry mode cannot also use a fixed manifest")
+            if execution_contracts is None:
+                raise ServiceError("generic registry mode requires execution contracts")
+            if not self.project_manifests:
+                raise ServiceError("generic registry mode requires project manifests")
+        elif manifest is None:
+            raise ServiceError("legacy provisioner mode requires a manifest")
         self.state_store = state_store
         self.controller_uid = controller_uid
         self.launcher = launcher
@@ -149,11 +195,25 @@ class ProvisionerService:
         self._lock = threading.Lock()
         self._active: set[str] = set()
 
+    def _manifest_for_request(self, data: dict[str, Any]) -> dict[str, Any]:
+        if self.registry is None:
+            if self.manifest is None:
+                raise ServiceError("fixed project manifest is unavailable")
+            return self.manifest
+        try:
+            return multirepo_policy.resolve_project_manifest(
+                self.registry,
+                self.project_manifests,
+                str(data.get("project_id", "")),
+            )
+        except multirepo_policy.MultiRepoPolicyError as exc:
+            raise policy.PolicyError(f"project registry resolution failed: {exc}") from exc
+
     def _admission_identity(self, req) -> dict[str, Any] | None:
         admission = getattr(req, "admission", None)
         if not isinstance(admission, dict):
             return None
-        return {
+        identity = {
             "admission_id": admission["admission_id"],
             "request_digest_sha256": admission["request_digest_sha256"],
             "candidate_sha": admission["candidate_sha"],
@@ -164,6 +224,10 @@ class ProvisionerService:
             "trusted_workflow": admission["trusted_workflow"],
             "consumed_at": admission["lifecycle"]["consumed_at"],
         }
+        generic = admission.get("_generic")
+        if isinstance(generic, dict):
+            identity["execution_contract_id"] = generic.get("execution_contract_id")
+        return identity
 
     def _nonsecret_record(self, req, status: str, **extra: Any) -> dict[str, Any]:
         record = {
@@ -187,12 +251,17 @@ class ProvisionerService:
             result = self.launcher(req, spec)
             record = self._nonsecret_record(req, "COMPLETED", result=result)
         except runtime.RuntimeCleanupError as exc:
+            generic = (
+                isinstance(getattr(req, "admission", None), dict)
+                and isinstance(req.admission.get("_generic"), dict)
+            )
             quarantine = self.state_store.quarantine_lane(
                 req.profile,
                 request_id=req.request_id,
                 error_type=type(exc).__name__,
                 error=str(exc),
                 quarantined_at=self.clock(),
+                project_id=req.project_id if generic else None,
             )
             record = self._nonsecret_record(
                 req,
@@ -219,8 +288,13 @@ class ProvisionerService:
         self,
         profile: str,
         request_id: str,
+        *,
+        project_id: str | None = None,
     ) -> dict[str, Any] | None:
-        quarantine = self.state_store.read_lane_quarantine(profile)
+        quarantine = self.state_store.read_lane_quarantine(
+            profile,
+            project_id=project_id,
+        )
         if quarantine is None:
             return None
         return {
@@ -334,38 +408,56 @@ class ProvisionerService:
                         response["admission_id"] = identity["admission_id"]
                     return response
 
-                req = policy.validate_request_v2(
-                    data,
-                    self.manifest,
-                    self.workload_policy,
-                    now=self.clock(),
-                    policy_sha256=self.policy_sha256,
-                )
+                manifest = self._manifest_for_request(data)
+                generic_mode = manifest.get("schema_version") == 2
+                if generic_mode:
+                    if self.execution_contracts is None or self.generic_policy_sha256 is None:
+                        raise ServiceError("generic policy inputs are unavailable")
+                    req = policy.validate_request_v2_generic(
+                        data,
+                        manifest,
+                        self.execution_contracts,
+                        self.workload_policy,
+                        now=self.clock(),
+                        policy_sha256=self.generic_policy_sha256,
+                    )
+                else:
+                    req = policy.validate_request_v2(
+                        data,
+                        manifest,
+                        self.workload_policy,
+                        now=self.clock(),
+                        policy_sha256=self.policy_sha256,
+                    )
+
                 if req.profile not in {"cpu-test", "gpu-small", "gpu-heavy"}:
                     raise ServiceError(
                         "admission v2 execution profile is not supported"
                     )
-                if (
-                    req.profile == "gpu-heavy"
-                    and req.workload_class
-                    not in {
-                        "model-eval-dual-gpu",
-                        "model-eval-local-extract-wave1",
-                    }
-                ):
-                    raise ServiceError(
-                        "gpu-heavy admission is limited to explicitly "
-                        "authorized dual-GPU workloads"
-                    )
+                semantics = multirepo_policy.execution_semantics_from_admission(
+                    req.admission
+                )
+                if semantics.get("execution_profile") != req.profile:
+                    raise ServiceError("admission execution semantics/profile mismatch")
+                if req.profile == "gpu-heavy":
+                    if int(semantics.get("gpu_count", -1)) != 2:
+                        raise ServiceError(
+                            "gpu-heavy admission requires an accepted two-GPU semantic contract"
+                        )
+                    if semantics.get("admission_enabled_after_generic_activation") is not True:
+                        raise ServiceError(
+                            "gpu-heavy semantic contract is not admission-enabled"
+                        )
 
                 quarantined = self._lane_quarantine_response(
                     req.profile,
                     req.request_id,
+                    project_id=req.project_id if generic_mode else None,
                 )
                 if quarantined is not None:
                     return quarantined
 
-                concurrency = int(self.manifest["concurrency"])
+                concurrency = int(manifest["concurrency"])
                 if len(self._active) >= concurrency:
                     return {
                         "schema_version": 2,
@@ -373,17 +465,28 @@ class ProvisionerService:
                         "request_id": req.request_id,
                     }
 
-                consumed = policy.admission_policy.consume_admission(
-                    req.admission,
-                    self.manifest,
-                    self.workload_policy,
-                    now=self.clock(),
-                    policy_sha256=self.policy_sha256,
-                )
+                if generic_mode:
+                    consumed = multirepo_policy.consume_admission(
+                        req.admission,
+                        data,
+                        manifest,
+                        self.execution_contracts,
+                        self.workload_policy,
+                        now=self.clock(),
+                        policy_sha256=self.generic_policy_sha256,
+                    )
+                else:
+                    consumed = policy.admission_policy.consume_admission(
+                        req.admission,
+                        manifest,
+                        self.workload_policy,
+                        now=self.clock(),
+                        policy_sha256=self.policy_sha256,
+                    )
                 req = dataclasses.replace(req, admission=consumed)
                 spec = policy.build_launch_spec(
                     req,
-                    self.manifest,
+                    manifest,
                     self.profiles,
                     self.pins,
                 )
@@ -406,6 +509,8 @@ class ProvisionerService:
             return accepted
 
         # Accepted P5 v1 compatibility path. Keep its behavior unchanged.
+        if self.registry is not None or self.manifest is None:
+            raise ServiceError("schema v1 is unavailable in generic multi-project mode")
         req = policy.validate_request(data, self.manifest)
         if req.profile not in {"cpu-test", "gpu-small"}:
             raise ServiceError("P5 provisioner enables only cpu-test and gpu-small")
@@ -534,6 +639,13 @@ def main() -> int:
         type=pathlib.Path,
         default=policy.DEFAULT_WORKLOAD_POLICY,
     )
+    parser.add_argument("--registry", type=pathlib.Path)
+    parser.add_argument("--manifest-dir", type=pathlib.Path)
+    parser.add_argument(
+        "--execution-contracts",
+        type=pathlib.Path,
+        default=policy.DEFAULT_EXECUTION_CONTRACTS,
+    )
     args = parser.parse_args()
 
     if os.geteuid() != 0:
@@ -541,13 +653,34 @@ def main() -> int:
 
     controller = pwd.getpwnam("ci-controller")
     store = StateStore(args.state_dir)
+    registry = None
+    project_manifests = None
+    execution_contracts = None
+    manifest = None
+    if args.registry is not None:
+        if args.manifest_dir is None:
+            raise ServiceError("--registry requires --manifest-dir")
+        registry = policy._load(args.registry)
+        project_manifests = {}
+        for project_id in registry.get("projects", {}):
+            path = args.manifest_dir / f"{project_id}.json"
+            if not path.is_file():
+                raise ServiceError(f"registered project manifest missing: {path}")
+            project_manifests[project_id] = policy._load(path)
+        execution_contracts = policy._load(args.execution_contracts)
+    else:
+        manifest = policy._load(args.manifest)
+
     service = ProvisionerService(
-        manifest=policy._load(args.manifest),
+        manifest=manifest,
         profiles=policy._load(args.profiles),
         pins=policy._load(args.pins),
         workload_policy=policy._load(args.workload_policy),
         state_store=store,
         controller_uid=controller.pw_uid,
+        registry=registry,
+        project_manifests=project_manifests,
+        execution_contracts=execution_contracts,
     )
     serve(service, socket_path=args.socket)
     return 0
