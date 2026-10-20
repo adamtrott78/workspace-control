@@ -29,58 +29,8 @@ const (
 )
 
 var (
-	projectIDPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{1,20}package main
-
-import (
-	"context"
-	"crypto/rand"
-	"encoding/hex"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"log/slog"
-	"net"
-	"os"
-	"os/signal"
-	"path/filepath"
-	"regexp"
-	"strconv"
-	"strings"
-	"sync"
-	"syscall"
-	"time"
-
-	"github.com/actions/scaleset"
-	"github.com/actions/scaleset/listener"
-)
-
-)
-	routeIDPattern   = regexp.MustCompile(`^[a-z][a-z0-9-]{0,63}package main
-
-import (
-	"context"
-	"crypto/rand"
-	"encoding/hex"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"log/slog"
-	"net"
-	"os"
-	"os/signal"
-	"path/filepath"
-	"regexp"
-	"strconv"
-	"strings"
-	"sync"
-	"syscall"
-	"time"
-
-	"github.com/actions/scaleset"
-	"github.com/actions/scaleset/listener"
-)
-
-)
+	projectIDPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{1,20}$`)
+	routeIDPattern   = regexp.MustCompile(`^[a-z][a-z0-9-]{0,63}$`)
 )
 
 type config struct {
@@ -221,88 +171,52 @@ func workloadForDisplayClaim(displayName string) (string, error) {
 
 func loadConfig() (config, error) {
 	githubURL, err := requiredEnv("WORKSPACE_CI_GITHUB_URL")
-	if err != nil {
-		return config{}, err
-	}
+	if err != nil { return config{}, err }
 	scaleSetName, err := requiredEnv("WORKSPACE_CI_SCALESET_NAME")
-	if err != nil {
-		return config{}, err
-	}
+	if err != nil { return config{}, err }
 	projectID, err := requiredEnv("WORKSPACE_CI_PROJECT_ID")
-	if err != nil {
-		return config{}, err
-	}
+	if err != nil { return config{}, err }
 	lane, err := requiredEnv("WORKSPACE_CI_LANE")
-	if err != nil {
-		return config{}, err
-	}
+	if err != nil { return config{}, err }
 	runnerPrefix, err := requiredEnv("WORKSPACE_CI_RUNNER_PREFIX")
-	if err != nil {
-		return config{}, err
-	}
+	if err != nil { return config{}, err }
+
 	expectedScaleSet, expectedPrefix, profile, err := derivedControllerIdentity(projectID, lane)
-	if err != nil {
-		return config{}, err
-	}
+	if err != nil { return config{}, err }
 	if scaleSetName != expectedScaleSet {
-		return config{}, fmt.Errorf(
-			"controller scale-set does not match derived project/lane identity: got %s want %s",
-			scaleSetName,
-			expectedScaleSet,
-		)
+		return config{}, fmt.Errorf("controller scale-set does not match derived project/lane identity: got %s want %s", scaleSetName, expectedScaleSet)
 	}
 	if runnerPrefix != expectedPrefix {
-		return config{}, fmt.Errorf(
-			"controller runner prefix does not match derived project/lane identity: got %s want %s",
-			runnerPrefix,
-			expectedPrefix,
-		)
+		return config{}, fmt.Errorf("controller runner prefix does not match derived project/lane identity: got %s want %s", runnerPrefix, expectedPrefix)
 	}
 
 	cfg := config{
-		GitHubURL:       githubURL,
-		ScaleSetName:    scaleSetName,
-		ProjectID:       projectID,
-		Lane:            lane,
-		RunnerPrefix:    runnerPrefix,
-		Profile:         profile,
+		GitHubURL: githubURL, ScaleSetName: scaleSetName, ProjectID: projectID,
+		Lane: lane, RunnerPrefix: runnerPrefix, Profile: profile,
 		ProvisionerSock: envOr("WORKSPACE_CI_PROVISIONER_SOCKET", defaultProvisionerSock),
-		PATFile:         strings.TrimSpace(os.Getenv("WORKSPACE_CI_PAT_FILE")),
-		AppClientID:     strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_CLIENT_ID")),
-		AppPrivateKey:   strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_PRIVATE_KEY_FILE")),
+		PATFile: strings.TrimSpace(os.Getenv("WORKSPACE_CI_PAT_FILE")),
+		AppClientID: strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_CLIENT_ID")),
+		AppPrivateKey: strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_PRIVATE_KEY_FILE")),
 	}
-
 	if raw := strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_INSTALLATION_ID")); raw != "" {
 		value, err := strconv.ParseInt(raw, 10, 64)
-		if err != nil || value <= 0 {
-			return config{}, fmt.Errorf("invalid WORKSPACE_CI_APP_INSTALLATION_ID")
-		}
+		if err != nil || value <= 0 { return config{}, fmt.Errorf("invalid WORKSPACE_CI_APP_INSTALLATION_ID") }
 		cfg.AppInstallID = value
 	}
-
 	switch raw := strings.TrimSpace(os.Getenv("WORKSPACE_CI_ADMISSION_V2_ENABLED")); raw {
-	case "", "NO":
-		cfg.AdmissionV2 = false
-	case "YES":
-		cfg.AdmissionV2 = true
-	default:
-		return config{}, fmt.Errorf(
-			"WORKSPACE_CI_ADMISSION_V2_ENABLED must be YES or NO",
-		)
+	case "", "NO": cfg.AdmissionV2 = false
+	case "YES": cfg.AdmissionV2 = true
+	default: return config{}, fmt.Errorf("WORKSPACE_CI_ADMISSION_V2_ENABLED must be YES or NO")
 	}
-
 	hasApp := cfg.AppClientID != "" || cfg.AppInstallID != 0 || cfg.AppPrivateKey != ""
 	if hasApp {
 		if cfg.AppClientID == "" || cfg.AppInstallID == 0 || cfg.AppPrivateKey == "" {
 			return config{}, fmt.Errorf("GitHub App credential configuration is incomplete")
 		}
-		if cfg.PATFile != "" {
-			return config{}, fmt.Errorf("configure either GitHub App or PAT, not both")
-		}
+		if cfg.PATFile != "" { return config{}, fmt.Errorf("configure either GitHub App or PAT, not both") }
 	} else if cfg.PATFile == "" {
 		return config{}, fmt.Errorf("controller credential file is required")
 	}
-
 	return cfg, nil
 }
 
@@ -408,9 +322,7 @@ func runnerName(prefix string) (string, error) {
 		return "", fmt.Errorf("runner-name prefix rejected: %s", prefix)
 	}
 	var raw [6]byte
-	if _, err := rand.Read(raw[:]); err != nil {
-		return "", err
-	}
+	if _, err := rand.Read(raw[:]); err != nil { return "", err }
 	return prefix + hex.EncodeToString(raw[:]), nil
 }
 

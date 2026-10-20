@@ -152,79 +152,45 @@ func TestProvisionerSocketReceivesJITButResponseDoesNotEchoIt(t *testing.T) {
 }
 
 func TestControllerIdentityIsDerivedFromProjectAndLane(t *testing.T) {
-	cases := []struct {
-		project, lane, scaleSet, prefix, profile string
-	}{
-		{"research-engine", "cpu", "lambda-research-engine", "lambda-research-engine-", "cpu-test"},
-		{"research-engine", "gpu", "lambda-research-engine-gpu", "lambda-research-engine-gpu-", "gpu-small"},
-		{"padataset", "cpu", "lambda-padataset", "lambda-padataset-", "cpu-test"},
-		{"padataset", "gpu", "lambda-padataset-gpu", "lambda-padataset-gpu-", "gpu-small"},
-		{"future-research", "gpu", "lambda-future-research-gpu", "lambda-future-research-gpu-", "gpu-small"},
+	cases := []struct { project, lane, scaleSet, prefix, profile string }{
+		{"research-engine","cpu","lambda-research-engine","lambda-research-engine-","cpu-test"},
+		{"research-engine","gpu","lambda-research-engine-gpu","lambda-research-engine-gpu-","gpu-small"},
+		{"padataset","cpu","lambda-padataset","lambda-padataset-","cpu-test"},
+		{"padataset","gpu","lambda-padataset-gpu","lambda-padataset-gpu-","gpu-small"},
+		{"future-research","gpu","lambda-future-research-gpu","lambda-future-research-gpu-","gpu-small"},
 	}
 	for _, tc := range cases {
-		scale, prefix, profile, err := derivedControllerIdentity(tc.project, tc.lane)
-		if err != nil {
-			t.Fatalf("%s/%s rejected: %v", tc.project, tc.lane, err)
-		}
-		if scale != tc.scaleSet || prefix != tc.prefix || profile != tc.profile {
-			t.Fatalf("%s/%s identity drift scale=%q prefix=%q profile=%q", tc.project, tc.lane, scale, prefix, profile)
+		scale,prefix,profile,err := derivedControllerIdentity(tc.project,tc.lane)
+		if err != nil || scale != tc.scaleSet || prefix != tc.prefix || profile != tc.profile {
+			t.Fatalf("identity drift %#v scale=%q prefix=%q profile=%q err=%v",tc,scale,prefix,profile,err)
 		}
 	}
-	for _, bad := range []struct{ project, lane string }{
-		{"ResearchEngine", "cpu"},
-		{"x", "cpu"},
-		{"research_engine", "cpu"},
-		{"research-engine", "heavy"},
-	} {
-		if _, _, _, err := derivedControllerIdentity(bad.project, bad.lane); err == nil {
-			t.Fatalf("invalid project/lane accepted: %#v", bad)
-		}
+	for _, bad := range []struct{project,lane string}{{"ResearchEngine","cpu"},{"x","cpu"},{"research_engine","cpu"},{"research-engine","heavy"}} {
+		if _,_,_,err := derivedControllerIdentity(bad.project,bad.lane); err == nil { t.Fatalf("invalid accepted %#v",bad) }
 	}
 }
 
 func TestWorkloadSelectionIsGenericStrictRouteParsing(t *testing.T) {
-	for _, route := range []string{
-		"cpu-test",
-		"gpu-small",
-		"model-eval-local-extract-wave1",
-		"padataset-rf-benchmark-7",
-	} {
-		claim := "wc-admission-v1|workload=" + route +
-			"|pr=101|request=/lambda-ci-example " + strings.Repeat("a", 40)
-		got, err := workloadForDisplayClaim(claim)
-		if err != nil || got != route {
-			t.Fatalf("route parse failed route=%q got=%q err=%v", route, got, err)
-		}
+	for _, route := range []string{"cpu-test","gpu-small","model-eval-local-extract-wave1","padataset-rf-benchmark-7"} {
+		claim := "wc-admission-v1|workload="+route+"|pr=101|request=/lambda-ci-example "+strings.Repeat("a",40)
+		got,err := workloadForDisplayClaim(claim)
+		if err != nil || got != route { t.Fatalf("route parse failed %q got=%q err=%v",route,got,err) }
 	}
 	for _, invalid := range []string{
-		"wc-admission-v1|workload=BAD|pr=101|request=/lambda-ci-example " + strings.Repeat("a", 40),
-		"wc-admission-v1|workload=../../root|pr=101|request=/lambda-ci-example " + strings.Repeat("a", 40),
+		"wc-admission-v1|workload=BAD|pr=101|request=/lambda-ci-example "+strings.Repeat("a",40),
+		"wc-admission-v1|workload=../../root|pr=101|request=/lambda-ci-example "+strings.Repeat("a",40),
 		"not-an-admission-claim",
 	} {
-		if _, err := workloadForDisplayClaim(invalid); err == nil {
-			t.Fatalf("invalid route claim accepted: %q", invalid)
-		}
+		if _,err := workloadForDisplayClaim(invalid); err == nil { t.Fatalf("invalid claim accepted %q",invalid) }
 	}
 }
 
 func TestRunnerNamesUseConfiguredDerivedPrefix(t *testing.T) {
-	for _, prefix := range []string{
-		"lambda-research-engine-",
-		"lambda-research-engine-gpu-",
-		"lambda-padataset-",
-		"lambda-padataset-gpu-",
-	} {
-		name, err := runnerName(prefix)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !strings.HasPrefix(name, prefix) {
-			t.Fatalf("runner %q does not use prefix %q", name, prefix)
-		}
+	for _, prefix := range []string{"lambda-research-engine-","lambda-research-engine-gpu-","lambda-padataset-","lambda-padataset-gpu-"} {
+		name,err := runnerName(prefix)
+		if err != nil || !strings.HasPrefix(name,prefix) { t.Fatalf("runner prefix failed %q name=%q err=%v",prefix,name,err) }
 	}
-	if _, err := runnerName("arbitrary"); err == nil {
-		t.Fatal("invalid runner prefix accepted")
-	}
+	if _,err := runnerName("arbitrary"); err == nil { t.Fatal("invalid runner prefix accepted") }
 }
 
 func contains(haystack, needle string) bool {
@@ -241,60 +207,39 @@ func contains(haystack, needle string) bool {
 
 
 func setGenericControllerEnv(t *testing.T, projectID, lane string) {
-	scale, prefix, _, err := derivedControllerIdentity(projectID, lane)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Setenv("WORKSPACE_CI_GITHUB_URL", "https://github.com/adamtrott78/"+projectID)
-	t.Setenv("WORKSPACE_CI_SCALESET_NAME", scale)
-	t.Setenv("WORKSPACE_CI_PROJECT_ID", projectID)
-	t.Setenv("WORKSPACE_CI_LANE", lane)
-	t.Setenv("WORKSPACE_CI_RUNNER_PREFIX", prefix)
-	t.Setenv("WORKSPACE_CI_PROVISIONER_SOCKET", "")
-	t.Setenv("WORKSPACE_CI_APP_CLIENT_ID", "")
-	t.Setenv("WORKSPACE_CI_APP_INSTALLATION_ID", "")
-	t.Setenv("WORKSPACE_CI_APP_PRIVATE_KEY_FILE", "")
-	t.Setenv("WORKSPACE_CI_PAT_FILE", "/tmp/controller-token-for-config-test")
+	scale,prefix,_,err := derivedControllerIdentity(projectID,lane)
+	if err != nil { t.Fatal(err) }
+	t.Setenv("WORKSPACE_CI_GITHUB_URL","https://github.com/adamtrott78/"+projectID)
+	t.Setenv("WORKSPACE_CI_SCALESET_NAME",scale)
+	t.Setenv("WORKSPACE_CI_PROJECT_ID",projectID)
+	t.Setenv("WORKSPACE_CI_LANE",lane)
+	t.Setenv("WORKSPACE_CI_RUNNER_PREFIX",prefix)
+	t.Setenv("WORKSPACE_CI_PROVISIONER_SOCKET","")
+	t.Setenv("WORKSPACE_CI_APP_CLIENT_ID","")
+	t.Setenv("WORKSPACE_CI_APP_INSTALLATION_ID","")
+	t.Setenv("WORKSPACE_CI_APP_PRIVATE_KEY_FILE","")
+	t.Setenv("WORKSPACE_CI_PAT_FILE","/tmp/controller-token-for-config-test")
 }
 
 func TestAdmissionV2RequiresExplicitYesAndGenericProjectConfig(t *testing.T) {
-	setGenericControllerEnv(t, "padataset", "gpu")
-	t.Setenv("WORKSPACE_CI_ADMISSION_V2_ENABLED", "")
-	cfg, err := loadConfig()
-	if err != nil {
-		t.Fatal(err)
+	setGenericControllerEnv(t,"padataset","gpu")
+	t.Setenv("WORKSPACE_CI_ADMISSION_V2_ENABLED","")
+	cfg,err := loadConfig()
+	if err != nil { t.Fatal(err) }
+	if cfg.AdmissionV2 || cfg.ProjectID!="padataset" || cfg.Lane!="gpu" || cfg.ScaleSetName!="lambda-padataset-gpu" || cfg.RunnerPrefix!="lambda-padataset-gpu-" || cfg.Profile!="gpu-small" {
+		t.Fatalf("generic config drift %#v",cfg)
 	}
-	if cfg.AdmissionV2 {
-		t.Fatal("admission v2 enabled without explicit YES")
-	}
-	if cfg.ProjectID != "padataset" || cfg.Lane != "gpu" ||
-		cfg.ScaleSetName != "lambda-padataset-gpu" ||
-		cfg.RunnerPrefix != "lambda-padataset-gpu-" ||
-		cfg.Profile != "gpu-small" {
-		t.Fatalf("generic controller config drift: %#v", cfg)
-	}
-
-	t.Setenv("WORKSPACE_CI_ADMISSION_V2_ENABLED", "YES")
-	cfg, err = loadConfig()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !cfg.AdmissionV2 {
-		t.Fatal("explicit admission v2 YES was ignored")
-	}
-
-	t.Setenv("WORKSPACE_CI_SCALESET_NAME", "lambda-research-engine-gpu")
-	if _, err := loadConfig(); err == nil {
-		t.Fatal("cross-project scale-set identity accepted")
-	}
+	t.Setenv("WORKSPACE_CI_ADMISSION_V2_ENABLED","YES")
+	cfg,err=loadConfig()
+	if err != nil || !cfg.AdmissionV2 { t.Fatalf("v2 YES failed %#v err=%v",cfg,err) }
+	t.Setenv("WORKSPACE_CI_SCALESET_NAME","lambda-research-engine-gpu")
+	if _,err:=loadConfig(); err==nil { t.Fatal("cross-project scale-set accepted") }
 }
 
 func TestControllerRequiresExplicitProjectIdentity(t *testing.T) {
-	setGenericControllerEnv(t, "research-engine", "cpu")
-	t.Setenv("WORKSPACE_CI_PROJECT_ID", "")
-	if _, err := loadConfig(); err == nil {
-		t.Fatal("missing project id accepted")
-	}
+	setGenericControllerEnv(t,"research-engine","cpu")
+	t.Setenv("WORKSPACE_CI_PROJECT_ID","")
+	if _,err:=loadConfig(); err==nil { t.Fatal("missing project id accepted") }
 }
 
 func TestAdmissionV2CanProvisionFromPreAttestedJobAvailable(t *testing.T) {
