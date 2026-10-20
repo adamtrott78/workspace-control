@@ -14,8 +14,6 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - Status: IN_PROGRESS
 - Capsule schema: v2
 
-- Current stage: git_driven_project_reconciliation
-
 ## Goal
 
 Generalize the accepted GitHub-to-Lambda execution substrate from a research-engine-specific pilot into a reusable, fail-closed, manifest-driven research compute control plane that can execute bounded candidate code from research-engine, PADataset, and future explicitly authorized research repositories without per-task controller/provisioner/runtime patches or routine human SSH/sudo intervention.
