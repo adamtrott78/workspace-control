@@ -158,15 +158,16 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             {"research-engine": RESEARCH, "padataset": PAD},
         )
         self.assertEqual(plan["mode"], "APPLY_READY_V1")
-        self.assertEqual(plan["active_projects"], [])
+        self.assertEqual(plan["active_projects"], ["research-engine"])
         self.assertEqual(
             plan["planned_projects_skipped"],
-            ["padataset", "research-engine"],
+            ["padataset"],
         )
         serialized = json.dumps(plan, sort_keys=True)
         self.assertNotIn("shell", serialized)
         self.assertNotIn("argv", serialized)
-        self.assertEqual(plan["actions"], [])
+        self.assertNotIn("ci-padataset", serialized)
+        self.assertNotIn("/srv/workspace-ci/padataset", serialized)
 
     def test_reconciler_plans_only_active_projects(self):
         registry = copy.deepcopy(REGISTRY)
@@ -263,7 +264,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
 
             installed.write_text(json.dumps(registry))
             removed = copy.deepcopy(request)
-            del removed["registry"]["document"]["padataset"]
+            del removed["registry"]["document"]["projects"]["padataset"]
             removed["registry"]["sha256"] = multi.sha256_json(
                 removed["registry"]["document"]
             )
