@@ -293,7 +293,7 @@
     },
     {
       "id": "git_driven_project_reconciliation",
-      "status": "VALIDATING",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
