@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "install_id": "lambda-ci-multirepo-run3-v1",
+  "status": "RUN3_VALIDATED_INSTALL_INPUT",
+  "authority": "workspace-control",
+  "migration_scope": "GENERIC_SUBSTRATE_RESEARCH_ENGINE_ONLY",
+  "padataset_activation_allowed": false,
+  "source_blobs": [
+    {
+      "path": "controller/lambda-ci-controller/attestation.go",
+      "git_blob_sha": "9866c66aaa76a662eb500664e9f4b7345cc7f570"
+    },
+    {
+      "path": "controller/lambda-ci-controller/main.go",
+      "git_blob_sha": "a1f05f3c69a8168fb6cbeeb981ed7d28299d9324"
+    },
+    {
+      "path": "controller/lambda-ci-controller/go.mod",
+      "git_blob_sha": "c0a743bec472b0ab0996679a9d86dc409db79104"
+    },
+    {
+      "path": "scripts/lambda_ci_admission.py",
+      "git_blob_sha": "721e7872d9eddaa074a0c68dbc95b4658e69e6c2"
+    },
+    {
+      "path": "scripts/lambda_ci_multirepo.py",
+      "git_blob_sha": "cf534343119ebde2a338ea592369ce36374a88b3"
+    },
+    {
+      "path": "scripts/lambda_ci_provisioner.py",
+      "git_blob_sha": "afa7b476d0a237e6cb5f3d7ea2aeb1ee783d8ce4"
+    },
+    {
+      "path": "scripts/lambda_ci_provisioner_service.py",
+      "git_blob_sha": "85a341527fa951ac6a88a4e8e15141d54f728f5a"
+    },
+    {
+      "path": "scripts/lambda_ci_runtime.py",
+      "git_blob_sha": "89cdc45f7f96129a315e0c00253d547a23fb17fb"
+    },
+    {
+      "path": "scripts/lambda_ci_reconciler.py",
+      "git_blob_sha": "0d189505d7ddb42522e261dff9f2c1e5193fa882"
+    },
+    {
+      "path": "scripts/lambda_ci_reconcile_controller.py",
+      "git_blob_sha": "79268b5ed3716935269eafb4f57ecee519b6137f"
+    },
+    {
+      "path": "scripts/stage_lambda_ci_reconciler_pat.sh",
+      "git_blob_sha": "8333c93d74e939c9ddbb72a01de4b599b9817e41"
+    },
+    {
+      "path": "scripts/migrate_lambda_ci_multirepo_v1.sh",
+      "git_blob_sha": "9b2c731d9066f49b446d99c5d06f2f06c70edac2"
+    },
+    {
+      "path": "scripts/activate_lambda_ci_reconcile_controller.sh",
+      "git_blob_sha": "eae5fc251bb20f8aac2daad9b901eb84a3d0bed4"
+    },
+    {
+      "path": "templates/lambda-ci/workspace-ci-controller@.service.in",
+      "git_blob_sha": "0124023c22575ebb94c79a71f4589af6e562db96"
+    },
+    {
+      "path": "templates/lambda-ci/workspace-ci-provisioner-multirepo.service.in",
+      "git_blob_sha": "baf99b17026a2b2090bdbe52ea0c5566d44efe28"
+    },
+    {
+      "path": "systemd/workspace-ci-reconciler.service",
+      "git_blob_sha": "b4a5808b8bbf4629c6c14d2280b2bb002e92a03e"
+    },
+    {
+      "path": "systemd/workspace-ci-reconcile-controller.service",
+      "git_blob_sha": "6eb129e568502faea397f6b1b296a7d75a4e86e3"
+    },
+    {
+      "path": "architecture/lambda-ci-project-registry.v1.json",
+      "git_blob_sha": "2de2c2b9b970102d506456a7c43c92a9f0492574"
+    },
+    {
+      "path": "architecture/lambda-ci-execution-contracts.v1.json",
+      "git_blob_sha": "9eeb0ef9223821f1768350e24891eeb3bc72a940"
+    },
+    {
+      "path": "architecture/lambda-ci-reconciliation-ceiling.v1.json",
+      "git_blob_sha": "b22be2d12de0a1ea948c1224c20f27396ca0f4c8"
+    },
+    {
+      "path": "architecture/lambda-ci-project-research-engine.v2.json",
+      "git_blob_sha": "ceb8a0677fc820f80dcb7ded00064003c082ecaf"
+    },
+    {
+      "path": "architecture/lambda-ci-project-padataset.v1.json",
+      "git_blob_sha": "63ba5e54e0489426efda3a05259792f22c95f85f"
+    },
+    {
+      "path": "architecture/lambda-ci-systemd-profiles.v1.json",
+      "git_blob_sha": "7461bb658c3c587570ef5fe0353ba89c9c5cf3d1"
+    },
+    {
+      "path": "architecture/lambda-ci-upstream-pins.v1.json",
+      "git_blob_sha": "02311d1c7591ec673c8ddce12f8b22df13aa7adf"
+    },
+    {
+      "path": "architecture/lambda-ci-workload-policy.v1.json",
+      "git_blob_sha": "71bd0bb9c63436964462b1f9b889686ac328ee1d"
+    },
+    {
+      "path": ".github/workflows/lambda-ci-project-reconcile.yml",
+      "git_blob_sha": "c8b8baef1955ad2a8bd409756298f0703b85f270"
+    }
+  ],
+  "live_transition": {
+    "replace_services": [
+      "workspace-ci-provisioner.service"
+    ],
+    "stop_disable_legacy_services": [
+      "workspace-ci-controller.service",
+      "workspace-ci-controller-gpu.service"
+    ],
+    "enable_services": [
+      "workspace-ci-provisioner.service",
+      "workspace-ci-reconciler.service",
+      "workspace-ci-controller@research-engine-cpu.service",
+      "workspace-ci-controller@research-engine-gpu.service"
+    ],
+    "credential_gated_services": [
+      "workspace-ci-reconcile-controller.service"
+    ],
+    "required_regression_routes": [
+      "cpu-test",
+      "gpu-small",
+      "model-eval-single-gpu"
+    ]
+  },
+  "rollback_required": true,
+  "production_routing_changed": false,
+  "scientific_state_materialized": false
+}
