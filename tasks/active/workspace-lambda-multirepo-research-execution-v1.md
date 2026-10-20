@@ -23,8 +23,8 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: lambda-multirepo-research-execution-v1
-- Remote checkpoint: 4d580661a27f151e70f778111a88579e54de1c71
+- Remote branch: lambda-multirepo-run1-architecture-v1
+- Remote checkpoint: 34a981b5dd4634906111dc8bbe612b86198ef813
 - Remote verified: true
 
 ### research-engine
@@ -43,16 +43,16 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-Design the P6 multi-project contract before implementation. Replace fixed research-engine project/repository/scale-set/runner assumptions with a root-owned project registry; replace experiment-specific privileged workload-name gates with semantic resource/capability validation; design a trusted Git-driven reconciliation path so subsequent approved repository onboarding requires no routine human terminal. PADataset is the first second-project pilot and must onboard without controller/provisioner/runtime source changes.
+Run 2 implementation only. Starting from the validated Run-1 architecture, remove research-engine/project/workload privilege constants from the generic controller/provisioner/runtime path: controller becomes required project+lane configuration with a generic strict display-claim parser; provisioner resolves project_id through the root registry and validates derived runner identity; privileged runtime enforces resolved execution-contract semantics rather than route names. Add focused migration, third-project, PADataset-public-boundary and negative tests. Also implement the reconciliation plane in disabled/non-live form. Do not install or restart Lambda services and do not mutate PADataset in Run 2.
 
 ## Remaining work
 
-- Design the root-owned project registry, generic controller instance model, semantic runtime authorization, and Git-driven reconciliation mechanism.
-- Implement and validate generic controller/provisioner/runtime behavior without changing existing research-engine scientific routing.
-- Activate the generic control-plane implementation through one bounded root migration gate.
-- Onboard PADataset through manifests/workflows only; no controller/provisioner/runtime source edits.
-- Run PADataset CPU and GPU canaries and prove mutual research-engine/PADataset isolation.
-- Freeze the reusable operating contract so future approved repositories/tasks need only project configuration and candidate code, not infrastructure surgery.
+- Run 2: implement the frozen generic controller/provisioner/runtime changes and focused migration/adversarial tests; no live install yet.
+- Run 2: implement the bounded reconciler/controller templates in disabled/non-live form and validate replay, derivation and privilege ceilings.
+- Run 3: perform one bounded root migration/install of the generic substrate and prove all existing research-engine routes/regression identities remain accepted.
+- Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard via registry/manifest reconciliation only, and run non-scientific CPU/GPU canaries.
+- Run 4: prove reciprocal project-root/process/cache denial, zero residue/quarantine, and no controller/provisioner/runtime source changes during PADataset onboarding.
+- Final: freeze the reusable operating contract and demonstrate a synthetic/real third project needs only registry + manifest + thin launcher bindings.
 
 ## Blockers / gates
 

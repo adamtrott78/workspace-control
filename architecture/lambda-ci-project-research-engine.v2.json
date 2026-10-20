@@ -1,0 +1,189 @@
+{
+  "schema_version": 2,
+  "status": "MIGRATION_CANDIDATE_NOT_INSTALLED",
+  "project_id": "research-engine",
+  "repository": "adamtrott78/research-engine",
+  "repository_visibility": "private",
+  "derived_identity": {
+    "runner_user": "ci-research-engine",
+    "runner_group": "ci-research-engine",
+    "project_root": "/srv/workspace-ci/research-engine",
+    "lanes": {
+      "cpu": {
+        "scale_set_name": "lambda-research-engine",
+        "runner_prefix": "lambda-research-engine-"
+      },
+      "gpu": {
+        "scale_set_name": "lambda-research-engine-gpu",
+        "runner_prefix": "lambda-research-engine-gpu-"
+      }
+    }
+  },
+  "roots": {
+    "jobs": "/srv/workspace-ci/research-engine/jobs",
+    "staging_cache": "/srv/workspace-ci/research-engine/staging-cache",
+    "trusted_cache": "/srv/workspace-ci/research-engine/trusted-cache",
+    "logs": "/srv/workspace-ci/research-engine/logs",
+    "home": "/srv/workspace-ci/research-engine/home"
+  },
+  "forbidden_paths": [
+    "/home/atrott",
+    "/var/run/docker.sock",
+    "/run/docker.sock",
+    "/srv/workspace-ci/padataset",
+    "/var/lib/workspace-ci/provisioner",
+    "/run/workspace-ci"
+  ],
+  "concurrency": 1,
+  "routes": {
+    "cpu-test": {
+      "activation_state": "MIGRATION_LIVE_EQUIVALENT",
+      "lane": "cpu",
+      "execution_contract_id": "cpu-public-ci-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-p5-autonomous.yml",
+        "default_branch": "main",
+        "blob_sha": "eca9f11373a591a34a2e19c0eafe31e9e171f785"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-ci-p5",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": null,
+        "runtime_id": null
+      }
+    },
+    "gpu-small": {
+      "activation_state": "MIGRATION_LIVE_EQUIVALENT",
+      "lane": "gpu",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-p5-gpu-autonomous.yml",
+        "default_branch": "main",
+        "blob_sha": "e02e35306ae82c4ba393631cbaa1521ca53a28b4"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-ci-p5-gpu",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": null,
+        "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
+      }
+    },
+    "model-eval-single-gpu": {
+      "activation_state": "MIGRATION_LIVE_EQUIVALENT",
+      "lane": "gpu",
+      "execution_contract_id": "model-single-offline-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-qwen35-offline-pilot.yml",
+        "default_branch": "main",
+        "blob_sha": "31d77703d434b248aa50adf93568f9a13b89dc07"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-ci-qwen35-pilot",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": "qwen3.5-4b",
+        "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
+      }
+    },
+    "model-eval-dual-gpu": {
+      "activation_state": "MIGRATION_LIVE_EQUIVALENT",
+      "lane": "gpu",
+      "execution_contract_id": "model-dual-offline-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-qwen35-dual-offline-pilot.yml",
+        "default_branch": "main",
+        "blob_sha": "a961158615269797837e036fb4cc4a3358f60189"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-ci-qwen35-dual-pilot",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": "qwen3.5-4b",
+        "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
+      }
+    },
+    "model-eval-local-extract-wave1": {
+      "activation_state": "MIGRATION_LIVE_EQUIVALENT",
+      "lane": "gpu",
+      "execution_contract_id": "model-dual-public-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-local-extract-wave1.yml",
+        "default_branch": "main",
+        "blob_sha": "a5be693f750c481db21d86d239a505083aae40aa"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-ci-local-extract-wave1",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": "qwen3.5-4b",
+        "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
+      }
+    }
+  },
+  "bindings": {
+    "models": {
+      "qwen3.5-4b": {
+        "model_id": "qwen3.5-4b",
+        "repository": "Qwen/Qwen3.5-4B",
+        "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+        "object_id": "6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c",
+        "tree_sha256": "6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c",
+        "serialization_risk_class": "SAFE",
+        "complete_offline": true,
+        "migration_source_path": "/srv/workspace-ci/research-engine/trusted-cache/objects/model/sha256/6e28e2560c07e7dabab92c55dbfb6941d5a7a75c8068bdc7a98115d8dc62072c"
+      }
+    },
+    "runtimes": {
+      "qwen35-vllm-cu129-image-native-sampler-v3": {
+        "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+        "tree_digest_sha256": "b0cbb4efbe8673bdb421bad8036d29864bffe0687a9a654bbd95f54544659e63",
+        "manifest_identity_sha256": "f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74",
+        "migration_source_path": "/srv/workspace-ci/research-engine/expanded-runtimes/qwen35-vllm-cu129-image-native-sampler-v3/f67ff9a26690c55930232c915e59e826e3cca2dd89012de9e35a852032b38f74"
+      }
+    }
+  },
+  "isolation": {
+    "unique_project_uid_required": true,
+    "sibling_project_roots_inaccessible": true,
+    "control_plane_state_inaccessible": true,
+    "global_trusted_object_store_inaccessible_by_default": true,
+    "only_exact_authorized_trusted_objects_may_be_mounted_readonly": true
+  }
+}

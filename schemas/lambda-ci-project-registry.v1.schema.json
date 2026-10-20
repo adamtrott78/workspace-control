@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/lambda-ci-project-registry.v1.schema.json",
+  "title": "Lambda CI Project Registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "registry_id",
+    "status",
+    "registry_epoch",
+    "authority",
+    "derivation",
+    "reconciliation",
+    "projects"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "registry_id": {
+      "const": "lambda-ci-project-registry-v1"
+    },
+    "status": {
+      "enum": [
+        "CONTRACT_ONLY_NOT_INSTALLED",
+        "ACTIVE"
+      ]
+    },
+    "registry_epoch": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "allowed_repository_owners",
+        "target_repository_policy_authority",
+        "candidate_invocable_reconciliation",
+        "max_projects"
+      ],
+      "properties": {
+        "owner": {
+          "const": "workspace-control"
+        },
+        "allowed_repository_owners": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "target_repository_policy_authority": {
+          "const": false
+        },
+        "candidate_invocable_reconciliation": {
+          "const": false
+        },
+        "max_projects": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        }
+      }
+    },
+    "derivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project_id_pattern",
+        "runner_user_template",
+        "runner_group_template",
+        "project_root_template",
+        "manifest_install_template",
+        "controller_config_root",
+        "cpu_scale_set_template",
+        "gpu_scale_set_template",
+        "cpu_runner_prefix_template",
+        "gpu_runner_prefix_template",
+        "transient_unit_template"
+      ],
+      "properties": {
+        "project_id_pattern": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runner_user_template": {
+          "const": "ci-{project_id}"
+        },
+        "runner_group_template": {
+          "const": "ci-{project_id}"
+        },
+        "project_root_template": {
+          "const": "/srv/workspace-ci/{project_id}"
+        },
+        "manifest_install_template": {
+          "const": "/etc/workspace-ci/projects/{project_id}.json"
+        },
+        "controller_config_root": {
+          "const": "/etc/workspace-ci/controllers"
+        },
+        "cpu_scale_set_template": {
+          "const": "lambda-{project_id}"
+        },
+        "gpu_scale_set_template": {
+          "const": "lambda-{project_id}-gpu"
+        },
+        "cpu_runner_prefix_template": {
+          "const": "lambda-{project_id}-"
+        },
+        "gpu_runner_prefix_template": {
+          "const": "lambda-{project_id}-gpu-"
+        },
+        "transient_unit_template": {
+          "const": "workspace-ci-{project_id}-{request_id}.service"
+        }
+      }
+    },
+    "reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_repository",
+        "source_default_branch",
+        "trusted_workflow_path",
+        "allowed_actor_logins",
+        "operation",
+        "project_removal_requires_operator",
+        "target_repository_candidate_invocable",
+        "root_socket_group",
+        "arbitrary_commands_allowed",
+        "arbitrary_paths_allowed",
+        "arbitrary_systemd_properties_allowed"
+      ],
+      "properties": {
+        "source_repository": {
+          "const": "adamtrott78/workspace-control"
+        },
+        "source_default_branch": {
+          "const": "main"
+        },
+        "trusted_workflow_path": {
+          "const": ".github/workflows/lambda-ci-project-reconcile.yml"
+        },
+        "allowed_actor_logins": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "operation": {
+          "const": "ADD_OR_UPDATE_ONLY_V1"
+        },
+        "project_removal_requires_operator": {
+          "const": true
+        },
+        "target_repository_candidate_invocable": {
+          "const": false
+        },
+        "root_socket_group": {
+          "const": "workspace-ci-reconciler"
+        },
+        "arbitrary_commands_allowed": {
+          "const": false
+        },
+        "arbitrary_paths_allowed": {
+          "const": false
+        },
+        "arbitrary_systemd_properties_allowed": {
+          "const": false
+        }
+      }
+    },
+    "projects": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 64,
+      "patternProperties": {
+        "^[a-z][a-z0-9-]{1,20}$": {
+          "$ref": "#/$defs/project"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "repository_visibility",
+        "manifest_source_path",
+        "activation_state",
+        "lanes"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "repository_visibility": {
+          "enum": [
+            "private",
+            "public"
+          ]
+        },
+        "manifest_source_path": {
+          "type": "string",
+          "pattern": "^architecture/lambda-ci-project-[a-z0-9-]+\\.v[0-9]+\\.json$"
+        },
+        "activation_state": {
+          "enum": [
+            "MIGRATION_CANDIDATE_NOT_INSTALLED",
+            "P6_PILOT_PLANNED_NOT_INSTALLED",
+            "ACTIVE"
+          ]
+        },
+        "lanes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "cpu",
+              "gpu"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

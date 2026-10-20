@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/lambda-ci-reconciliation-request.v1.schema.json",
+  "title": "Lambda CI Project Reconciliation Request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "operation",
+    "source_attestation",
+    "registry",
+    "project_manifests",
+    "dry_run"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "operation": {
+      "const": "APPLY_PROJECT_REGISTRY"
+    },
+    "source_attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "default_branch",
+        "commit_sha",
+        "workflow_path",
+        "workflow_blob_sha",
+        "actor_login",
+        "verified_at"
+      ],
+      "properties": {
+        "repository": {
+          "const": "adamtrott78/workspace-control"
+        },
+        "default_branch": {
+          "const": "main"
+        },
+        "commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "workflow_path": {
+          "const": ".github/workflows/lambda-ci-project-reconcile.yml"
+        },
+        "workflow_blob_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "actor_login": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sha256",
+        "document"
+      ],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "document": {
+          "type": "object"
+        }
+      }
+    },
+    "project_manifests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project_id",
+          "sha256",
+          "document"
+        ],
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,20}$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "document": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "dry_run": {
+      "type": "boolean"
+    }
+  }
+}

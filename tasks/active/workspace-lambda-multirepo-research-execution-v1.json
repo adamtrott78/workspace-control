@@ -6,7 +6,7 @@
   "goal": "Generalize the accepted GitHub-to-Lambda execution substrate from a research-engine-specific pilot into a reusable, fail-closed, manifest-driven research compute control plane that can execute bounded candidate code from research-engine, PADataset, and future explicitly authorized research repositories without per-task controller/provisioner/runtime patches or routine human SSH/sudo intervention.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-lambda-self-hosted-execution-v1",
-  "current_stage": "project_registry_and_semantic_admission_design",
+  "current_stage": "controller_provisioner_runtime_generalization",
   "acceptance_criteria": [
     "The accepted one-job JIT execution model, root/unprivileged privilege split, exact candidate/workflow attestation, resource bounding, private/local-network denial, trusted-cache immutability, durable receipts, cleanup, and quarantine semantics remain intact.",
     "Controller configuration is project-parameterized: repository, project_id, scale-set names, runner namespaces, and project-specific workflow claims are derived from root-owned/project configuration rather than fixed research-engine constants.",
@@ -43,8 +43,8 @@
       "intent": "mutate",
       "base_sha": "4d580661a27f151e70f778111a88579e54de1c71",
       "remote": {
-        "branch": "lambda-multirepo-research-execution-v1",
-        "checkpoint_sha": "4d580661a27f151e70f778111a88579e54de1c71",
+        "branch": "lambda-multirepo-run1-architecture-v1",
+        "checkpoint_sha": "34a981b5dd4634906111dc8bbe612b86198ef813",
         "verified": true
       },
       "local": null,
@@ -135,7 +135,7 @@
     },
     {
       "id": "project_registry_and_semantic_admission_design",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github+web",
@@ -145,23 +145,82 @@
         "current GitHub scale-set/JIT semantics"
       ],
       "outputs": [
-        "root-owned multi-project registry schema and project manifest selection contract",
-        "generic controller instance/configuration model",
-        "semantic privileged-runtime authorization contract replacing workload-name gates",
-        "Git-driven trusted project-reconciliation design",
-        "migration plan preserving current research-engine route while enabling PADataset"
+        "architecture/lambda-ci-multirepo-execution.v1.md — frozen authority, controller, provisioner, runtime, isolation, migration, PADataset and run-boundary design",
+        "architecture/lambda-ci-project-registry.v1.json + schemas/lambda-ci-project-registry.v1.schema.json",
+        "architecture/lambda-ci-execution-contracts.v1.json + schemas/lambda-ci-execution-contracts.v1.schema.json",
+        "architecture/lambda-ci-project-research-engine.v2.json — migration-equivalent candidate preserving exact accepted route/workflow identities",
+        "architecture/lambda-ci-project-padataset.v1.json — public-repository-hardened P6 pilot candidate",
+        "architecture/lambda-ci-reconciliation-protocol.v1.md + schemas/lambda-ci-reconciliation-request.v1.schema.json",
+        "schemas/lambda-ci-project-manifest.v2.schema.json",
+        "tests/test_lambda_ci_multirepo_contract.py — project derivation, semantic-route authority, PADataset fork denial, heavy denial, migration and synthetic third-project tests"
       ],
-      "validation": [],
-      "resume_condition": "Design proves that repository expansion and experiment expansion are data/config changes under root policy, not source-code allowlist edits."
+      "validation": [
+        {
+          "check": "Run-1 architecture contract and repository validation",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control PR #231 head 34a981b5dd4634906111dc8bbe612b86198ef813.",
+            "Workspace Control Validation run 39351745034 PASS.",
+            "Changed task/static validation PASS.",
+            "Python unit regression PASS including tests/test_lambda_ci_multirepo_contract.py.",
+            "Pinned Go 1.26.3 Lambda scale-set controller validation PASS.",
+            "Full integration contracts PASS.",
+            "PR #231 changes design/schema/test files only; no controller, provisioner, privileged runtime, bootstrap, systemd, Lambda host, or PADataset repository behavior is changed."
+          ]
+        },
+        {
+          "check": "Route names separated from privileged authority",
+          "result": "PASS",
+          "evidence": [
+            "Execution-contract authority sets route_id_is_privilege=false.",
+            "Privileged runtime dispatch key is frozen as resolved_execution_contract.",
+            "Unknown routes and unknown execution contracts fail closed.",
+            "A route reusing an accepted execution contract is defined as data/config and requires no generic source-code change."
+          ]
+        },
+        {
+          "check": "Project identity and onboarding are manifest-driven",
+          "result": "PASS",
+          "evidence": [
+            "Project ID deterministically derives system user/group, project root, CPU/GPU scale-set names, runner prefixes and transient-unit namespace.",
+            "Project registry schemas do not enumerate research-engine/PADataset as the only legal project IDs.",
+            "Synthetic future-research contract test proves a third project can use existing CPU/GPU contracts structurally without controller/provisioner/runtime source edits.",
+            "Target repositories have no policy authority and cannot invoke reconciliation."
+          ]
+        },
+        {
+          "check": "PADataset public-repository pilot boundary",
+          "result": "PASS",
+          "evidence": [
+            "PADataset is represented as project_id=padataset with distinct ci-padataset identity, /srv/workspace-ci/padataset root and lambda-padataset[-gpu] scale sets.",
+            "Initial routes are only cpu-ci and gpu-ci and remain PLANNED_NOT_BOUND with null workflow blobs.",
+            "Every PADataset route requires allowed actor adamtrott78, an open same-repository PR head, and fork_pr_execution_allowed=false.",
+            "PADataset scientific datasets/results/experiments/paper claims are outside the Run-1 mutation surface."
+          ]
+        },
+        {
+          "check": "Git-driven root reconciliation bounded",
+          "result": "PASS",
+          "evidence": [
+            "Reconciliation source is fixed to adamtrott78/workspace-control main and a dedicated trusted workflow path.",
+            "Root request accepts registry/manifests JSON plus digests only; arbitrary commands, paths and systemd properties are forbidden.",
+            "Root reconciliation derives users/paths/scale sets from project IDs and uses root-owned templates.",
+            "V1 reconciliation is add/update only; project removal remains an operator boundary."
+          ]
+        }
+      ],
+      "resume_condition": "PASS: repository/project expansion and experiment-route expansion are declarative under root-owned policy; generic implementation may begin without reopening architecture."
     },
     {
       "id": "controller_provisioner_runtime_generalization",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "validated multi-project design"
+        "validated Run-1 architecture at workspace-control PR #231 / 34a981b5dd4634906111dc8bbe612b86198ef813",
+        "project registry/execution-contract/project-manifest/reconciliation schemas",
+        "accepted research-engine runtime behavior as regression oracle"
       ],
       "outputs": [
         "parameterized controller and attestation runner namespace",
@@ -170,7 +229,7 @@
         "regression/adversarial tests"
       ],
       "validation": [],
-      "resume_condition": "All unit/integration/adversarial tests pass with research-engine regression and synthetic third-project fixtures."
+      "resume_condition": "Implement only the frozen genericization: parameterized controller instances, registry-resolved provisioner, semantic runtime enforcement and focused regressions. Do not install on Lambda during this stage."
     },
     {
       "id": "git_driven_project_reconciliation",
@@ -258,43 +317,88 @@
   "artifacts": [
     {
       "path": "architecture/lambda-ci-project-registry.v1.json",
-      "state": "planned",
+      "state": "validated_design_candidate",
       "role": "root-owned multi-project allowlist and manifest registry",
       "origin": "workspace-control",
       "persistence": "git+root-installed configuration",
       "regeneration": "validated workspace-control control-plane reconciliation only",
       "review_requirement": "explicit repository/project identities; no target-repo policy authority",
-      "evidence": []
+      "evidence": [
+        "PR #231 validation run 39351745034 PASS.",
+        "Registry contains research-engine migration entry plus PADataset P6 planned entry and deterministic derivation rules."
+      ]
     },
     {
       "path": "controller/lambda-ci-controller/**",
-      "state": "generalization_target",
+      "state": "implementation_target_after_design_freeze",
       "role": "project-parameterized GitHub scale-set control plane",
       "origin": "workspace-control",
       "persistence": "git+root-installed controller binary",
       "regeneration": "validated workspace-control release/install",
       "review_requirement": "no fixed research-engine project/repository/scale-set/runner namespace after migration",
-      "evidence": []
+      "evidence": [
+        "Run-1 design freezes controller as project/lane-configured with no project/workload privilege constants."
+      ]
     },
     {
       "path": "scripts/lambda_ci_provisioner*.py",
-      "state": "generalization_target",
+      "state": "implementation_target_after_design_freeze",
       "role": "project-registry-aware root admission and reconciliation",
       "origin": "workspace-control",
       "persistence": "git+root-installed provisioner",
       "regeneration": "validated workspace-control release/install",
       "review_requirement": "root policy remains fail-closed and GitHub-credential blind",
-      "evidence": []
+      "evidence": [
+        "Run-1 design freezes registry -> manifest -> route -> execution-contract root resolution."
+      ]
     },
     {
       "path": "scripts/lambda_ci_runtime.py",
-      "state": "generalization_target",
+      "state": "implementation_target_after_design_freeze",
       "role": "semantic resource/capability enforcement",
       "origin": "workspace-control",
       "persistence": "git+root-installed privileged runtime",
       "regeneration": "validated workspace-control release/install",
       "review_requirement": "privileged authorization must not depend on experiment-specific workload strings",
-      "evidence": []
+      "evidence": [
+        "Run-1 design freezes resolved_execution_contract as privileged dispatch key; route/workload strings become non-authoritative."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-execution-contracts.v1.json",
+      "state": "validated_design_candidate",
+      "role": "generic semantic execution envelopes independent of experiment route names",
+      "origin": "workspace-control",
+      "persistence": "git; not installed in Run 1",
+      "regeneration": "reviewed workspace-control policy change only",
+      "review_requirement": "new route using an existing contract must require zero generic source changes",
+      "evidence": [
+        "PR #231 validation run 39351745034 PASS."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-project-padataset.v1.json",
+      "state": "validated_p6_pilot_design",
+      "role": "first second-project manifest candidate",
+      "origin": "workspace-control",
+      "persistence": "git; not installed and not active in Run 1",
+      "regeneration": "workspace-control root policy only",
+      "review_requirement": "onboarding after genericization must not change controller/provisioner/runtime source",
+      "evidence": [
+        "PADataset public-repo trigger hardening and distinct project identity validated by contract tests."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-reconciliation-protocol.v1.md",
+      "state": "validated_design_candidate",
+      "role": "bounded Git-driven project reconciliation contract",
+      "origin": "workspace-control",
+      "persistence": "git; root reconciler not installed in Run 1",
+      "regeneration": "reviewed architecture change only",
+      "review_requirement": "candidate repositories cannot invoke; request accepts no arbitrary root behavior",
+      "evidence": [
+        "PR #231 validation run 39351745034 PASS."
+      ]
     }
   ],
   "validation": [
@@ -305,19 +409,29 @@
         "User explicitly requires the Lambda Git runner as a general research execution tool, including PADataset and future research repositories.",
         "Accepted research-engine substrate satisfies the prior policy task's prerequisite for expanding to a second repository/project identity."
       ]
+    },
+    {
+      "check": "Run 1 multi-repository architecture freeze",
+      "result": "PASS",
+      "evidence": [
+        "PR #231 design head 34a981b5dd4634906111dc8bbe612b86198ef813.",
+        "Workspace Control Validation run 39351745034 PASS across task/static, Python, pinned Go controller and full integration tiers.",
+        "No live Lambda mutation or PADataset execution occurred.",
+        "Run 2 implementation is bounded by architecture/lambda-ci-multirepo-execution.v1.md."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Design the root-owned project registry, generic controller instance model, semantic runtime authorization, and Git-driven reconciliation mechanism.",
-    "Implement and validate generic controller/provisioner/runtime behavior without changing existing research-engine scientific routing.",
-    "Activate the generic control-plane implementation through one bounded root migration gate.",
-    "Onboard PADataset through manifests/workflows only; no controller/provisioner/runtime source edits.",
-    "Run PADataset CPU and GPU canaries and prove mutual research-engine/PADataset isolation.",
-    "Freeze the reusable operating contract so future approved repositories/tasks need only project configuration and candidate code, not infrastructure surgery."
+    "Run 2: implement the frozen generic controller/provisioner/runtime changes and focused migration/adversarial tests; no live install yet.",
+    "Run 2: implement the bounded reconciler/controller templates in disabled/non-live form and validate replay, derivation and privilege ceilings.",
+    "Run 3: perform one bounded root migration/install of the generic substrate and prove all existing research-engine routes/regression identities remain accepted.",
+    "Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard via registry/manifest reconciliation only, and run non-scientific CPU/GPU canaries.",
+    "Run 4: prove reciprocal project-root/process/cache denial, zero residue/quarantine, and no controller/provisioner/runtime source changes during PADataset onboarding.",
+    "Final: freeze the reusable operating contract and demonstrate a synthetic/real third project needs only registry + manifest + thin launcher bindings."
   ],
-  "next_safe_action": "Design the P6 multi-project contract before implementation. Replace fixed research-engine project/repository/scale-set/runner assumptions with a root-owned project registry; replace experiment-specific privileged workload-name gates with semantic resource/capability validation; design a trusted Git-driven reconciliation path so subsequent approved repository onboarding requires no routine human terminal. PADataset is the first second-project pilot and must onboard without controller/provisioner/runtime source changes.",
+  "next_safe_action": "Run 2 implementation only. Starting from the validated Run-1 architecture, remove research-engine/project/workload privilege constants from the generic controller/provisioner/runtime path: controller becomes required project+lane configuration with a generic strict display-claim parser; provisioner resolves project_id through the root registry and validates derived runner identity; privileged runtime enforces resolved execution-contract semantics rather than route names. Add focused migration, third-project, PADataset-public-boundary and negative tests. Also implement the reconciliation plane in disabled/non-live form. Do not install or restart Lambda services and do not mutate PADataset in Run 2.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created after research-engine Wave-1 proved the complete GitHub-to-Lambda path and final cleanup receipt. This task deliberately broadens the objective from one project's model-eval route to a reusable research compute control plane. PADataset is the first real second-project acceptance test, not another special-case workload."
+  "notes": "Created after research-engine Wave-1 proved the complete GitHub-to-Lambda path and final cleanup receipt. This task deliberately broadens the objective from one project's model-eval route to a reusable research compute control plane. PADataset is the first real second-project acceptance test, not another special-case workload.\n2026-10-20 Run 1 architecture freeze: PR #231 design head 34a981b5dd4634906111dc8bbe612b86198ef813 validated PASS in run 39351745034. Frozen design introduces root project registry, deterministic project identity derivation, route-name/non-authority separation, reusable semantic execution contracts, research-engine v2 migration manifest, public-repo-hardened PADataset P6 manifest, bounded Git-driven reconciliation protocol, and synthetic third-project manifest-only proof. No executable control-plane or live host change occurred. Next stage is Run 2 generic implementation with no Lambda install."
 }

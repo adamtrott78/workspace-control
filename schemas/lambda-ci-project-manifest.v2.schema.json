@@ -1,0 +1,365 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/lambda-ci-project-manifest.v2.schema.json",
+  "title": "Lambda CI Project Manifest v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "project_id",
+    "repository",
+    "repository_visibility",
+    "derived_identity",
+    "roots",
+    "forbidden_paths",
+    "concurrency",
+    "routes",
+    "bindings",
+    "isolation"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 2
+    },
+    "status": {
+      "enum": [
+        "MIGRATION_CANDIDATE_NOT_INSTALLED",
+        "P6_PILOT_PLANNED_NOT_INSTALLED",
+        "ACTIVE"
+      ]
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,20}$"
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+    },
+    "repository_visibility": {
+      "enum": [
+        "private",
+        "public"
+      ]
+    },
+    "derived_identity": {
+      "$ref": "#/$defs/derivedIdentity"
+    },
+    "roots": {
+      "$ref": "#/$defs/roots"
+    },
+    "forbidden_paths": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^/"
+      }
+    },
+    "concurrency": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4
+    },
+    "routes": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z][a-z0-9-]{0,63}$": {
+          "$ref": "#/$defs/route"
+        }
+      },
+      "additionalProperties": false
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "models",
+        "runtimes"
+      ],
+      "properties": {
+        "models": {
+          "type": "object"
+        },
+        "runtimes": {
+          "type": "object"
+        }
+      }
+    },
+    "isolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unique_project_uid_required",
+        "sibling_project_roots_inaccessible",
+        "control_plane_state_inaccessible",
+        "global_trusted_object_store_inaccessible_by_default",
+        "only_exact_authorized_trusted_objects_may_be_mounted_readonly"
+      ],
+      "properties": {
+        "unique_project_uid_required": {
+          "const": true
+        },
+        "sibling_project_roots_inaccessible": {
+          "const": true
+        },
+        "control_plane_state_inaccessible": {
+          "const": true
+        },
+        "global_trusted_object_store_inaccessible_by_default": {
+          "const": true
+        },
+        "only_exact_authorized_trusted_objects_may_be_mounted_readonly": {
+          "const": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "gitsha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "derivedIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runner_user",
+        "runner_group",
+        "project_root",
+        "lanes"
+      ],
+      "properties": {
+        "runner_user": {
+          "type": "string",
+          "pattern": "^ci-[a-z][a-z0-9-]{1,20}$"
+        },
+        "runner_group": {
+          "type": "string",
+          "pattern": "^ci-[a-z][a-z0-9-]{1,20}$"
+        },
+        "project_root": {
+          "type": "string",
+          "pattern": "^/srv/workspace-ci/[a-z][a-z0-9-]{1,20}$"
+        },
+        "lanes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cpu",
+            "gpu"
+          ],
+          "properties": {
+            "cpu": {
+              "$ref": "#/$defs/lane"
+            },
+            "gpu": {
+              "$ref": "#/$defs/lane"
+            }
+          }
+        }
+      }
+    },
+    "lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scale_set_name",
+        "runner_prefix"
+      ],
+      "properties": {
+        "scale_set_name": {
+          "type": "string",
+          "pattern": "^lambda-[a-z][a-z0-9-]{1,24}(-gpu)?$"
+        },
+        "runner_prefix": {
+          "type": "string",
+          "pattern": "^lambda-[a-z][a-z0-9-]{1,24}(-gpu)?-$"
+        }
+      }
+    },
+    "roots": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "jobs",
+        "staging_cache",
+        "trusted_cache",
+        "logs",
+        "home"
+      ],
+      "properties": {
+        "jobs": {
+          "type": "string",
+          "pattern": "^/srv/workspace-ci/"
+        },
+        "staging_cache": {
+          "type": "string",
+          "pattern": "^/srv/workspace-ci/"
+        },
+        "trusted_cache": {
+          "type": "string",
+          "pattern": "^/srv/workspace-ci/"
+        },
+        "logs": {
+          "type": "string",
+          "pattern": "^/srv/workspace-ci/"
+        },
+        "home": {
+          "type": "string",
+          "pattern": "^/srv/workspace-ci/"
+        }
+      }
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activation_state",
+        "lane",
+        "execution_contract_id",
+        "trusted_workflow",
+        "trigger",
+        "bindings"
+      ],
+      "properties": {
+        "activation_state": {
+          "enum": [
+            "MIGRATION_LIVE_EQUIVALENT",
+            "PLANNED_NOT_BOUND",
+            "ACTIVE"
+          ]
+        },
+        "lane": {
+          "enum": [
+            "cpu",
+            "gpu"
+          ]
+        },
+        "execution_contract_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,63}$"
+        },
+        "trusted_workflow": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "default_branch",
+            "blob_sha"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "pattern": "^\\.github/workflows/[^/]+\\.ya?ml$"
+            },
+            "default_branch": {
+              "const": "main"
+            },
+            "blob_sha": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/gitsha"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "trigger": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "event_name",
+            "command",
+            "claim_version",
+            "allowed_actor_logins",
+            "require_open_same_repository_pr_head",
+            "fork_pr_execution_allowed"
+          ],
+          "properties": {
+            "event_name": {
+              "const": "issue_comment"
+            },
+            "command": {
+              "type": "string",
+              "pattern": "^/[a-z0-9][a-z0-9-]{2,63}$"
+            },
+            "claim_version": {
+              "const": "wc-admission-v1"
+            },
+            "allowed_actor_logins": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "require_open_same_repository_pr_head": {
+              "const": true
+            },
+            "fork_pr_execution_allowed": {
+              "const": false
+            }
+          }
+        },
+        "bindings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "model_id",
+            "runtime_id"
+          ],
+          "properties": {
+            "model_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "runtime_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "activation_state": {
+                "enum": [
+                  "MIGRATION_LIVE_EQUIVALENT",
+                  "ACTIVE"
+                ]
+              }
+            },
+            "required": [
+              "activation_state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "trusted_workflow": {
+                "properties": {
+                  "blob_sha": {
+                    "$ref": "#/$defs/gitsha"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
