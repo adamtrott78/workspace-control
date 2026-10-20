@@ -2143,6 +2143,15 @@ def launch_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         raise RuntimeLaunchError("launch profile differs from semantic contract")
     if profile == "cpu-test":
         return launch_cpu_runner(request, spec)
-    if profile in {"gpu-small", "gpu-heavy"}:
+    if profile == "gpu-small":
+        return launch_gpu_runner(request, spec)
+    if profile == "gpu-heavy":
+        if (
+            semantics.get("gpu_count") != 2
+            or semantics.get("admission_enabled_after_generic_activation") is not True
+        ):
+            raise RuntimeLaunchError(
+                "autonomous profile rejected: gpu-heavy without accepted two-GPU semantic contract"
+            )
         return launch_gpu_runner(request, spec)
     raise RuntimeLaunchError(f"autonomous profile rejected: {profile}")
