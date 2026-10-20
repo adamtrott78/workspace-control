@@ -43,8 +43,8 @@
       "intent": "mutate",
       "base_sha": "4d580661a27f151e70f778111a88579e54de1c71",
       "remote": {
-        "branch": "lambda-multirepo-run2-implementation-v1",
-        "checkpoint_sha": "8570b82207f3d327189d091cabb36eda3ba45c69",
+        "branch": "main",
+        "checkpoint_sha": "3c95bde8fac98f5713d8ff43e16e1c8e333d678a",
         "verified": true
       },
       "local": null,
@@ -237,12 +237,13 @@
           "check": "Exact Run-2 implementation head",
           "result": "PASS",
           "evidence": [
-            "workspace-control implementation head 8570b82207f3d327189d091cabb36eda3ba45c69.",
-            "Workspace Control Validation run 39355083062 completed SUCCESS.",
+            "workspace-control PR #233 final head bf62af1d54b90523e5ac55e542166687d8582113.",
+            "Final Workspace Control Validation run 39355279238 completed SUCCESS.",
             "Task/static validation PASS.",
             "Python unit regression PASS, including generic multi-repository policy/provisioner/reconciler/runtime tests.",
             "Pinned Go 1.26.3 Lambda scale-set controller validation PASS.",
-            "Full integration contracts PASS."
+            "Full integration contracts PASS.",
+            "PR #233 squash-merged to canonical main as 3c95bde8fac98f5713d8ff43e16e1c8e333d678a."
           ]
         },
         {
@@ -520,8 +521,9 @@
       "check": "Run 2 generic multi-repository implementation",
       "result": "PASS",
       "evidence": [
-        "PR #233 exact implementation checkpoint 8570b82207f3d327189d091cabb36eda3ba45c69 passed Workspace Control Validation run 39355083062.",
+        "PR #233 final head bf62af1d54b90523e5ac55e542166687d8582113 passed final Workspace Control Validation run 39355279238.",
         "Python, pinned Go controller and full integration validation all PASS.",
+        "PR #233 squash-merged as 3c95bde8fac98f5713d8ff43e16e1c8e333d678a.",
         "No live Lambda/root mutation and no PADataset repository mutation/execution occurred.",
         "Generic source authorization is project/manifest/semantic-contract driven; experiment route names are non-authoritative."
       ]
@@ -540,5 +542,5 @@
   "next_safe_action": "Run 3 activation gate only. Starting from the exact Run-2 implementation that passed validation at 8570b82207f3d327189d091cabb36eda3ba45c69, prepare the bounded one-time root migration/install package and rollback plan for the generic multi-project substrate. Before any host mutation, bind exact source/blob digests and installation targets, prove the migration does not widen resource/network/secret authority, and define research-engine regression receipts. Do not onboard or execute PADataset yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created after research-engine Wave-1 proved the complete GitHub-to-Lambda path and final cleanup receipt. This task deliberately broadens the objective from one project's model-eval route to a reusable research compute control plane. PADataset is the first real second-project acceptance test, not another special-case workload.\n2026-10-20 Run 1 architecture freeze: PR #231 design head 34a981b5dd4634906111dc8bbe612b86198ef813 validated PASS in run 39351745034. Frozen design introduces root project registry, deterministic project identity derivation, route-name/non-authority separation, reusable semantic execution contracts, research-engine v2 migration manifest, public-repo-hardened PADataset P6 manifest, bounded Git-driven reconciliation protocol, and synthetic third-project manifest-only proof. No executable control-plane or live host change occurred. Next stage is Run 2 generic implementation with no Lambda install.\n2026-10-20 Run 1 canonical closeout: PR #231 final validation run 39351970987 PASS and squash merge 2b22af474791ff59cc9cb100f4bf3b939266fec2. workspace-control recovery checkpoint returns to canonical main at that merge. Run 2 may begin implementation only; live Lambda remains unchanged.\n2026-10-20 Run 2 implementation PASS: exact checkpoint 8570b82207f3d327189d091cabb36eda3ba45c69 validated in Workspace Control Validation run 39355083062 (task/static, Python unit, pinned Go controller, full integration all PASS). Controller project/lane identity is generic; root v2 admission resolves registry -> project manifest -> route -> semantic execution contract; privileged runtime no longer grants authority by experiment workload string; generic dual-GPU public compute remains denied; reconciler remains dry-run/non-live. No Lambda or PADataset mutation occurred. Next gate is Run 3 one-time root migration/install with research-engine non-regression."
+  "notes": "Created after research-engine Wave-1 proved the complete GitHub-to-Lambda path and final cleanup receipt. This task deliberately broadens the objective from one project's model-eval route to a reusable research compute control plane. PADataset is the first real second-project acceptance test, not another special-case workload.\n2026-10-20 Run 1 architecture freeze: PR #231 design head 34a981b5dd4634906111dc8bbe612b86198ef813 validated PASS in run 39351745034. Frozen design introduces root project registry, deterministic project identity derivation, route-name/non-authority separation, reusable semantic execution contracts, research-engine v2 migration manifest, public-repo-hardened PADataset P6 manifest, bounded Git-driven reconciliation protocol, and synthetic third-project manifest-only proof. No executable control-plane or live host change occurred. Next stage is Run 2 generic implementation with no Lambda install.\n2026-10-20 Run 1 canonical closeout: PR #231 final validation run 39351970987 PASS and squash merge 2b22af474791ff59cc9cb100f4bf3b939266fec2. workspace-control recovery checkpoint returns to canonical main at that merge. Run 2 may begin implementation only; live Lambda remains unchanged.\n2026-10-20 Run 2 implementation PASS: exact checkpoint 8570b82207f3d327189d091cabb36eda3ba45c69 validated in Workspace Control Validation run 39355083062 (task/static, Python unit, pinned Go controller, full integration all PASS). Controller project/lane identity is generic; root v2 admission resolves registry -> project manifest -> route -> semantic execution contract; privileged runtime no longer grants authority by experiment workload string; generic dual-GPU public compute remains denied; reconciler remains dry-run/non-live. No Lambda or PADataset mutation occurred. Next gate is Run 3 one-time root migration/install with research-engine non-regression.\n2026-10-20 Run 2 canonical closeout: PR #233 final head bf62af1d54b90523e5ac55e542166687d8582113 passed validation run 39355279238 and squash-merged as 3c95bde8fac98f5713d8ff43e16e1c8e333d678a. workspace-control recovery checkpoint returns to canonical main. Run 3 is the next gate; live Lambda remains on the previously accepted research-engine-specific install until that bounded migration is explicitly executed."
 }
