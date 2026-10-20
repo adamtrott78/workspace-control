@@ -34,7 +34,7 @@
       "base_sha": "453f5aa3f1386f87dcb3a256de6f31496c5346a9",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "c595d442689a4ddb4061c01a923ff0297c34bddd",
+        "checkpoint_sha": "d5bc8bf6bc772547f4b2edb50f7595cc7e6edaac",
         "verified": true
       },
       "allowed_mutation_scope": [
@@ -152,17 +152,32 @@
         },
         {
           "check": "Wave 1 job claim by Lambda GPU controller",
-          "result": "FAIL",
+          "result": "PASS",
           "evidence": [
-            "Exactly one authorized trigger remains in force for run 39200075204/job 117891019967.",
-            "Controller compatibility and provisioner compatibility fixes are merged/installed; provisioner accepted deterministic request fd30c4c6-6756-55d1-a12d-e3cb16f50d20.",
-            "Durable request state then transitioned to FAILED with RuntimeLaunchError `autonomous profile rejected: gpu-heavy` before transient runner creation.",
-            "No root runtime receipt, runner log, transient unit, CPU/GPU process residue, or lane quarantine exists.",
-            "Static runtime audit found three stale exact-workload gates; bounded child workspace-local-extract-wave1-runtime-compat-v1 owns them."
+            "Attempt 1 of workflow run 39200075204 was cancelled after proven prelaunch-only failure; no second issue-comment trigger was posted.",
+            "GitHub rerun-job action succeeded for original job 117891019967, creating workflow run attempt 2 with fresh job 118381589409.",
+            "Attempt 2 was claimed by runner lambda-research-engine-gpu-cdadc73b9943 with deterministic request/workspace identity 7cdcb708-9ba9-511f-a689-13d8469db1da.",
+            "Exact PR-head, model/runtime/two-GPU binding, checkout, dependency install, nine-paper benchmark, report upload, and post-checkout steps all completed SUCCESS.",
+            "Workflow run 39200075204 attempt 2 concluded success."
+          ]
+        },
+        {
+          "check": "Wave 1 benchmark report",
+          "result": "PASS",
+          "evidence": [
+            "GitHub Actions artifact id=12231293963 name=local-extract-wave1-report.",
+            "Report JSON sha256=5954e2de2fd1d23c770f7f687c5282b8e2f43e68c9b29ece6374fed5442f98dc.",
+            "wave1_decision=REJECT.",
+            "hard_safety all PASS: exact quote locatability, zero fabricated/unlocatable quotes, page provenance coverage, scientific_state_materialized=false, production_routing_changed=false.",
+            "historical_evidence_page_recall_at_12=0.7441860465116279.",
+            "job_local_completion_fraction=0.3333333333333333 (3/9 papers), below the 0.50 hard decision floor.",
+            "projected_remote_input_token_reduction=0.9175094731750141.",
+            "teacher-subset precision/coverage at F1>=0.5 were both 0.0; preserved normalized teacher control covers 6/71 historical claims.",
+            "accepted_claim_count=30; peak GPU memory MiB was 12350 and 13281 on the two accepted GPU UUIDs."
           ]
         }
       ],
-      "resume_condition": "Complete and install bounded privileged runtime compatibility fix, then recover the existing authorized Wave-1 execution without a second trigger."
+      "resume_condition": "Verify the final root-owned receipt and cleanup/postverify for deterministic request 7cdcb708-9ba9-511f-a689-13d8469db1da. Then record final root acceptance, propagate REJECT to parent research task, and archive support tasks."
     }
   ],
   "checkpoints": [
@@ -276,20 +291,22 @@
     {
       "check": "Wave 1 final root acceptance",
       "result": "NOT_RUN",
-      "evidence": []
+      "evidence": [
+        "Attempt-2 GitHub execution and report are complete; final root-owned provisioner receipt/cleanup evidence is still required."
+      ]
     }
   ],
   "blockers": [
-    "Existing run 39200075204 must be cancelled so its stuck prelaunch attempt becomes terminal; connector lacks cancel permission/action in this chat. After cancellation, ChatGPT can rerun the same workflow job through the connected GitHub action."
+    "Final root receipt gate only: verify /srv/workspace-ci/research-engine/logs/p5-7cdcb708-9ba9-511f-a689-13d8469db1da-receipt.json, terminal provisioner state, destroyed runner/staging workspaces, zero ci-research-engine CPU/GPU residue, and no gpu-heavy quarantine."
   ],
   "remaining_work": [
-    "User cancels workflow run 39200075204 only.",
-    "ChatGPT verifies cancelled terminal state and re-runs job 117891019967 as attempt 2 of the same workflow run.",
-    "Follow attempt 2 through actual nine-paper benchmark, artifact, root receipt, cleanup, and PROMISING/PARTIAL/REJECT classification.",
-    "Checkpoint result into research-engine-local-extract-redesign-v1 and archive support tasks."
+    "Read and verify the final root receipt and durable provisioner state for request 7cdcb708-9ba9-511f-a689-13d8469db1da.",
+    "Require terminal success, exact model/runtime/two-GPU postverification, cleanup/postverify PASS, destroyed job/staging workspaces, zero project CPU/GPU residue, and no lane quarantine.",
+    "Record final scientific disposition REJECT in research-engine-local-extract-redesign-v1 with the exact benchmark evidence.",
+    "Archive runtime/provisioner/controller compatibility support tasks and this execution task after final acceptance."
   ],
-  "next_safe_action": "Cancel workflow run 39200075204 in GitHub. Once cancelled, ChatGPT will rerun job 117891019967 using the GitHub Actions rerun-job endpoint. Do not add another PR #131 issue comment or create a new workflow run.",
+  "next_safe_action": "Read-only final host acceptance for request 7cdcb708-9ba9-511f-a689-13d8469db1da: inspect durable state + root receipt, verify zero residue/quarantine and destroyed runner/staging paths. Do not rerun the benchmark; Wave 1 scientific decision is already REJECT.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
-  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed.\n2026-10-19 handoff hydration: PR #214 already completed the route design and merge while the parent research task was being hydrated. Validation run 39197297919 PASS; route merge df142ab7829e364087dbbb7453cdc2779e9d7206. Exact manifest/policy blobs 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Dedicated inert trigger PR #131 is open at 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 with CI run 39197393554 PASS. Next operation is exact host install/verification, not policy design and not benchmark trigger.\n2026-10-19 execution checkpoint: exact Lambda host activation completed PASS, one authorized PR #131 trigger was issued, and dedicated run 39200075204/job 117891019967 was created. The run remains queued because the root-owned GPU controller executable does not yet recognize model-eval-local-extract-wave1 in three compatibility mappings. A narrow controller-compatibility child task is authorized; do not retrigger the benchmark.\n2026-10-19 runtime recovery update: controller compatibility and exact root controller activation passed. Existing job replay now reaches the provisioner but is rejected by a stale gpu-heavy guard that only names model-eval-dual-gpu. No benchmark runner has launched; no retrigger is authorized.\n2026-10-19 provisioner activation checkpoint: exact provisioner fix installed PASS and deterministic request ACCEPTED. GitHub remains queued/no runner, so durable asynchronous worker state is the next required evidence.\n2026-10-19 worker diagnostic: accepted request is durably FAILED before runner creation with RuntimeLaunchError `autonomous profile rejected: gpu-heavy`. No receipt/unit/log/residue/quarantine. Static audit found three runtime workload gates omitting Wave 1; a bounded runtime child now owns the final compatibility fix.\n2026-10-19 runtime compatibility update: PR #225 validation PASS and merge 70d5668599de767647603ddec55815b9523d1bb8. Only root install and existing-run recovery remain; no retrigger.\n2026-10-19 recovery authorization: first request is proven terminal only at prelaunch runtime policy, with zero execution material/residue. One same-request recovery is authorized after exact runtime install, preserving failed-state evidence and the single-trigger invariant.\n2026-10-19 retry authority: runtime install/re-arm PASS through evidence preservation, but scale-set restart cannot reconstruct lost JobAssigned metadata. Attempt 1 remains queued yet has zero scientific execution. One GitHub-native attempt-2 rerun of the same run/job is authorized after attempt 1 is cancelled; no second issue-comment trigger."
+  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed.\n2026-10-19 handoff hydration: PR #214 already completed the route design and merge while the parent research task was being hydrated. Validation run 39197297919 PASS; route merge df142ab7829e364087dbbb7453cdc2779e9d7206. Exact manifest/policy blobs 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Dedicated inert trigger PR #131 is open at 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 with CI run 39197393554 PASS. Next operation is exact host install/verification, not policy design and not benchmark trigger.\n2026-10-19 execution checkpoint: exact Lambda host activation completed PASS, one authorized PR #131 trigger was issued, and dedicated run 39200075204/job 117891019967 was created. The run remains queued because the root-owned GPU controller executable does not yet recognize model-eval-local-extract-wave1 in three compatibility mappings. A narrow controller-compatibility child task is authorized; do not retrigger the benchmark.\n2026-10-19 runtime recovery update: controller compatibility and exact root controller activation passed. Existing job replay now reaches the provisioner but is rejected by a stale gpu-heavy guard that only names model-eval-dual-gpu. No benchmark runner has launched; no retrigger is authorized.\n2026-10-19 provisioner activation checkpoint: exact provisioner fix installed PASS and deterministic request ACCEPTED. GitHub remains queued/no runner, so durable asynchronous worker state is the next required evidence.\n2026-10-19 worker diagnostic: accepted request is durably FAILED before runner creation with RuntimeLaunchError `autonomous profile rejected: gpu-heavy`. No receipt/unit/log/residue/quarantine. Static audit found three runtime workload gates omitting Wave 1; a bounded runtime child now owns the final compatibility fix.\n2026-10-19 runtime compatibility update: PR #225 validation PASS and merge 70d5668599de767647603ddec55815b9523d1bb8. Only root install and existing-run recovery remain; no retrigger.\n2026-10-19 recovery authorization: first request is proven terminal only at prelaunch runtime policy, with zero execution material/residue. One same-request recovery is authorized after exact runtime install, preserving failed-state evidence and the single-trigger invariant.\n2026-10-19 retry authority: runtime install/re-arm PASS through evidence preservation, but scale-set restart cannot reconstruct lost JobAssigned metadata. Attempt 1 remains queued yet has zero scientific execution. One GitHub-native attempt-2 rerun of the same run/job is authorized after attempt 1 is cancelled; no second issue-comment trigger.\n2026-10-20 attempt-2 result: same workflow run 39200075204 rerun attempt 2 succeeded as job 118381589409 on runner lambda-research-engine-gpu-cdadc73b9943 / request 7cdcb708-9ba9-511f-a689-13d8469db1da. Artifact 12231293963 report SHA256 5954e2de2fd1d23c770f7f687c5282b8e2f43e68c9b29ece6374fed5442f98dc. Scientific Wave-1 decision=REJECT because job_local_completion_fraction=3/9=0.3333 below 0.50 hard floor; hard safety PASS and projected token reduction 91.75%. Final root receipt/cleanup remains the only gate."
 }
