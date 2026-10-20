@@ -169,6 +169,13 @@ rollback() {
 }
 trap rollback ERR
 
+# Freeze new GitHub job claims before any installed binary/config changes.
+systemctl stop workspace-ci-controller.service workspace-ci-controller-gpu.service
+if pgrep -u ci-research-engine >/dev/null 2>&1; then
+  pgrep -a -u ci-research-engine >&2 || true
+  die "RESEARCH_ENGINE_PROCESS_APPEARED_AFTER_CONTROLLER_FREEZE"
+fi
+
 if [[ "$OLD_RECON_GROUP" == "false" ]]; then
   groupadd --system workspace-ci-reconciler
 fi
@@ -238,7 +245,6 @@ chmod 0644 /etc/systemd/system/workspace-ci-reconcile-controller.service.d/netwo
 
 systemd-analyze verify   /etc/systemd/system/workspace-ci-provisioner.service   /etc/systemd/system/workspace-ci-controller@.service   /etc/systemd/system/workspace-ci-reconciler.service   /etc/systemd/system/workspace-ci-reconcile-controller.service
 
-systemctl stop workspace-ci-controller.service workspace-ci-controller-gpu.service
 systemctl disable workspace-ci-controller.service workspace-ci-controller-gpu.service 2>/dev/null || true
 systemctl stop workspace-ci-provisioner.service
 systemctl daemon-reload
