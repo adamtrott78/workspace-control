@@ -24,7 +24,7 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: c595d442689a4ddb4061c01a923ff0297c34bddd
+- Remote checkpoint: d5bc8bf6bc772547f4b2edb50f7595cc7e6edaac
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,18 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 ## Next safe action
 
-Cancel workflow run 39200075204 in GitHub. Once cancelled, ChatGPT will rerun job 117891019967 using the GitHub Actions rerun-job endpoint. Do not add another PR #131 issue comment or create a new workflow run.
+Read-only final host acceptance for request 7cdcb708-9ba9-511f-a689-13d8469db1da: inspect durable state + root receipt, verify zero residue/quarantine and destroyed runner/staging paths. Do not rerun the benchmark; Wave 1 scientific decision is already REJECT.
 
 ## Remaining work
 
-- User cancels workflow run 39200075204 only.
-- ChatGPT verifies cancelled terminal state and re-runs job 117891019967 as attempt 2 of the same workflow run.
-- Follow attempt 2 through actual nine-paper benchmark, artifact, root receipt, cleanup, and PROMISING/PARTIAL/REJECT classification.
-- Checkpoint result into research-engine-local-extract-redesign-v1 and archive support tasks.
+- Read and verify the final root receipt and durable provisioner state for request 7cdcb708-9ba9-511f-a689-13d8469db1da.
+- Require terminal success, exact model/runtime/two-GPU postverification, cleanup/postverify PASS, destroyed job/staging workspaces, zero project CPU/GPU residue, and no lane quarantine.
+- Record final scientific disposition REJECT in research-engine-local-extract-redesign-v1 with the exact benchmark evidence.
+- Archive runtime/provisioner/controller compatibility support tasks and this execution task after final acceptance.
 
 ## Blockers / gates
 
-- Existing run 39200075204 must be cancelled so its stuck prelaunch attempt becomes terminal; connector lacks cancel permission/action in this chat. After cancellation, ChatGPT can rerun the same workflow job through the connected GitHub action.
+- Final root receipt gate only: verify /srv/workspace-ci/research-engine/logs/p5-7cdcb708-9ba9-511f-a689-13d8469db1da-receipt.json, terminal provisioner state, destroyed runner/staging workspaces, zero ci-research-engine CPU/GPU residue, and no gpu-heavy quarantine.
 
 ## Fresh-chat initialization
 
