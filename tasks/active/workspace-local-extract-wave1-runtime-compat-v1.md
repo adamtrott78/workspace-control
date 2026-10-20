@@ -24,7 +24,7 @@ Allow the already-authorized Local EXTRACT Wave 1 workload through the final pri
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 958d6f8ed0989b2846d04b3bd3eb2ace41f5372c
+- Remote checkpoint: c595d442689a4ddb4061c01a923ff0297c34bddd
 - Remote verified: true
 
 ### research-engine
@@ -36,19 +36,18 @@ Allow the already-authorized Local EXTRACT Wave 1 workload through the final pri
 
 ## Next safe action
 
-At the root HUMAN_TERMINAL boundary, install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8. Then, only if request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 still exactly matches the proven prelaunch FAILED state and still has zero execution material/residue/quarantine, archive that state with SHA256, remove only its active state file, restart workspace-ci-controller-gpu.service, and let the same GitHub job recover. Do not trigger another run.
+Have the user cancel only workflow run 39200075204. After it reaches completed/cancelled, ChatGPT must call the GitHub re-run-job action for job 117891019967, creating attempt 2 of the same workflow run. Do not post another /lambda-ci-local-extract-wave1 comment.
 
 ## Remaining work
 
-- Install exact runtime compatibility merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap.
-- Before re-arm, re-prove the exact FAILED state/error and absence of receipt/log/unit/process/GPU/quarantine execution evidence.
-- Archive the root-owned failed state with SHA256 under /var/lib/workspace-ci/provisioner/recovery-evidence and remove only the active state file for fd30c4c6-6756-55d1-a12d-e3cb16f50d20.
-- Restart only workspace-ci-controller-gpu.service and allow JobAssigned recovery to reconcile orphan JIT state and regenerate the same deterministic request; do not post another trigger.
-- Resume ChatGPT/GitHub following of run 39200075204/job 117891019967 and validate runtime/artifact/final receipt.
+- Cancel existing workflow run 39200075204 in GitHub; do not create a new workflow trigger/comment.
+- After GitHub reports attempt 1 cancelled, use the GitHub Actions re-run-job API on job 117891019967 to create attempt 2 of the same workflow run.
+- Follow the attempt-2 job through controller/provisioner/runtime execution and collect artifact/final root receipt.
+- Close runtime/provisioner/controller children after successful execution acceptance.
 
 ## Blockers / gates
 
-- Genuine root-control-plane operation required: install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8, then perform the narrowly authorized prelaunch re-arm of request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 by archiving the exact FAILED state and clearing only its active state file before restarting the GPU controller.
+- GitHub attempt-1 cancellation gate: current run 39200075204/job 117891019967 remains queued/assigned with no recoverable JobAssigned metadata. The connector can re-run a completed/cancelled job but cannot cancel this queued run, so one user cancellation of the existing run is required.
 
 ## Fresh-chat initialization
 

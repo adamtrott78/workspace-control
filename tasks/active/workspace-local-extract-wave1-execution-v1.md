@@ -24,7 +24,7 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 958d6f8ed0989b2846d04b3bd3eb2ace41f5372c
+- Remote checkpoint: c595d442689a4ddb4061c01a923ff0297c34bddd
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,18 @@ Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the a
 
 ## Next safe action
 
-Do not issue another Wave-1 trigger. Install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8 and perform the single evidence-preserving prelaunch recovery of fd30c4c6-6756-55d1-a12d-e3cb16f50d20, then resume existing run 39200075204/job 117891019967.
+Cancel workflow run 39200075204 in GitHub. Once cancelled, ChatGPT will rerun job 117891019967 using the GitHub Actions rerun-job endpoint. Do not add another PR #131 issue comment or create a new workflow run.
 
 ## Remaining work
 
-- Perform exact runtime install and one evidence-preserving recovery of deterministic request fd30c4c6-6756-55d1-a12d-e3cb16f50d20.
-- Follow existing run 39200075204/job 117891019967 after same-job recovery; do not post another trigger.
-- Read Wave-1 report artifact and final root receipt; require exact model/runtime/two-GPU identity, non-scientific state, cleanup/postverify PASS, no residue/quarantine, then classify PROMISING/PARTIAL/REJECT.
+- User cancels workflow run 39200075204 only.
+- ChatGPT verifies cancelled terminal state and re-runs job 117891019967 as attempt 2 of the same workflow run.
+- Follow attempt 2 through actual nine-paper benchmark, artifact, root receipt, cleanup, and PROMISING/PARTIAL/REJECT classification.
 - Checkpoint result into research-engine-local-extract-redesign-v1 and archive support tasks.
 
 ## Blockers / gates
 
-- Root install + prelaunch recovery gate: install merged runtime 70d5668599de767647603ddec55815b9523d1bb8, preserve the exact failed request record as evidence, retire only that active request entry after re-verifying zero execution material/residue/quarantine, and restart the GPU controller to recover the same assigned job. No second GitHub trigger.
+- Existing run 39200075204 must be cancelled so its stuck prelaunch attempt becomes terminal; connector lacks cancel permission/action in this chat. After cancellation, ChatGPT can rerun the same workflow job through the connected GitHub action.
 
 ## Fresh-chat initialization
 
