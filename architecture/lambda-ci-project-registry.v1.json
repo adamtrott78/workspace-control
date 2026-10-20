@@ -2,7 +2,7 @@
   "schema_version": 1,
   "registry_id": "lambda-ci-project-registry-v1",
   "status": "ACTIVE",
-  "registry_epoch": 2,
+  "registry_epoch": 3,
   "authority": {
     "owner": "workspace-control",
     "allowed_repository_owners": [
