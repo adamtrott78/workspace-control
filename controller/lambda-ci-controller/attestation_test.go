@@ -161,89 +161,37 @@ func TestAdmissionDisplayClaimIsExact(t *testing.T) {
 		"wc-admission-v1|workload=cpu-test|pr=101|request=/lambda-ci-p5 " + testCandidateSHA + " extra",
 		"wc-admission-v1|workload=cpu-test|pr=101|request=/lambda-ci-p5 zzz",
 	} {
-		if _, _, err := parseAdmissionDisplayClaim(invalid, "cpu-test", "/lambda-ci-p5"); err == nil {
+		if _, _, err := parseAdmissionDisplayClaim(invalid, "cpu-test"); err == nil {
 			t.Fatalf("invalid claim accepted: %q", invalid)
 		}
 	}
 }
 
-func TestModelEvalAdmissionCommandAndClaimAreExact(t *testing.T) {
-	command, err := requestCommandForWorkload(modelEvalWorkload)
-	if err != nil {
-		t.Fatal(err)
+func TestAdmissionClaimParserCarriesGenericRouteCommandWithoutGrantingAuthority(t *testing.T) {
+	for _, tc := range []struct {
+		route, command string
+	}{
+		{"cpu-test", "/lambda-ci-p5"},
+		{"model-eval-local-extract-wave1", "/lambda-ci-local-extract-wave1"},
+		{"padataset-rf-benchmark-7", "/lambda-ci-rf-benchmark"},
+	} {
+		display := "wc-admission-v1|workload=" + tc.route + "|pr=101|request=" +
+			tc.command + " " + testCandidateSHA
+		pr, command, sha, err := parseAdmissionDisplayClaim(display, tc.route)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if pr != 101 || command != tc.command || sha != testCandidateSHA {
+			t.Fatalf("generic claim drift pr=%d command=%q sha=%q", pr, command, sha)
+		}
 	}
-	if command != "/lambda-ci-qwen35-pilot" {
-		t.Fatalf("unexpected model-eval command %q", command)
-	}
-
-	display := "wc-admission-v1|workload=model-eval-single-gpu|pr=101|" +
-		"request=/lambda-ci-qwen35-pilot " + testCandidateSHA
-	pr, sha, err := parseAdmissionDisplayClaim(
-		display,
-		modelEvalWorkload,
-		command,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if pr != 101 || sha != testCandidateSHA {
-		t.Fatalf("unexpected model-eval claim pr=%d sha=%s", pr, sha)
-	}
-}
-
-func TestDualModelEvalAdmissionCommandAndClaimAreExact(t *testing.T) {
-	command, err := requestCommandForWorkload(dualModelEvalWorkload)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if command != "/lambda-ci-qwen35-dual-pilot" {
-		t.Fatalf("unexpected dual model-eval command %q", command)
-	}
-
-	display := "wc-admission-v1|workload=model-eval-dual-gpu|pr=101|" +
-		"request=/lambda-ci-qwen35-dual-pilot " + testCandidateSHA
-	pr, sha, err := parseAdmissionDisplayClaim(
-		display,
-		dualModelEvalWorkload,
-		command,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if pr != 101 || sha != testCandidateSHA {
-		t.Fatalf("unexpected dual model-eval claim pr=%d sha=%s", pr, sha)
-	}
-}
-
-func TestLocalExtractWave1AdmissionCommandAndClaimAreExact(t *testing.T) {
-	command, err := requestCommandForWorkload(localExtractWave1Workload)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if command != "/lambda-ci-local-extract-wave1" {
-		t.Fatalf("unexpected Wave 1 command %q", command)
-	}
-
-	display := "wc-admission-v1|workload=model-eval-local-extract-wave1|pr=101|" +
-		"request=/lambda-ci-local-extract-wave1 " + testCandidateSHA
-	pr, sha, err := parseAdmissionDisplayClaim(
-		display,
-		localExtractWave1Workload,
-		command,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if pr != 101 || sha != testCandidateSHA {
-		t.Fatalf("unexpected Wave 1 claim pr=%d sha=%s", pr, sha)
-	}
-
-	if _, _, err := parseAdmissionDisplayClaim(
-		display,
-		localExtractWave1Workload,
-		"/lambda-ci-qwen35-dual-pilot",
-	); err == nil {
-		t.Fatal("Wave 1 claim accepted wrong command")
+	for _, invalid := range []string{
+		"wc-admission-v1|workload=cpu-test|pr=101|request=not-a-command " + testCandidateSHA,
+		"wc-admission-v1|workload=cpu-test|pr=101|request=/X " + testCandidateSHA,
+	} {
+		if _, _, _, err := parseAdmissionDisplayClaim(invalid, "cpu-test"); err == nil {
+			t.Fatalf("invalid generic claim accepted: %q", invalid)
+		}
 	}
 }
 
@@ -372,7 +320,7 @@ func TestDeterministicAdmissionIDsAreRecoveryStable(t *testing.T) {
 		CandidateSHA: testCandidateSHA,
 		VerifiedAt:   "2026-10-06T20:30:00Z",
 	}
-	firstRequest, firstRunner, err := deterministicAdmissionExecutionIDs("cpu-test", available)
+	firstRequest, firstRunner, err := deterministicAdmissionExecutionIDs("lambda-research-engine-", "cpu-test", available)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -380,7 +328,7 @@ func TestDeterministicAdmissionIDsAreRecoveryStable(t *testing.T) {
 	assigned.JobMessageType = string(scaleset.MessageTypeJobAssigned)
 	assigned.RunnerRequestID = 0
 	assigned.VerifiedAt = "2026-10-06T20:31:00Z"
-	secondRequest, secondRunner, err := deterministicAdmissionExecutionIDs("cpu-test", assigned)
+	secondRequest, secondRunner, err := deterministicAdmissionExecutionIDs("lambda-research-engine-", "cpu-test", assigned)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -411,7 +359,7 @@ func TestModelEvalDeterministicRunnerUsesGpuPrefix(t *testing.T) {
 		CandidateSHA: testCandidateSHA,
 		VerifiedAt:   "2026-10-06T20:30:00Z",
 	}
-	_, runner, err := deterministicAdmissionExecutionIDs(modelEvalWorkload, att)
+	_, runner, err := deterministicAdmissionExecutionIDs("lambda-research-engine-gpu-", "model-eval-single-gpu", att)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -433,7 +381,7 @@ func TestLocalExtractWave1DeterministicRunnerUsesGpuPrefix(t *testing.T) {
 		CandidateSHA: testCandidateSHA,
 		VerifiedAt:   "2026-10-19T04:33:33Z",
 	}
-	_, runner, err := deterministicAdmissionExecutionIDs(localExtractWave1Workload, att)
+	_, runner, err := deterministicAdmissionExecutionIDs("lambda-research-engine-gpu-", "model-eval-local-extract-wave1", att)
 	if err != nil {
 		t.Fatal(err)
 	}
