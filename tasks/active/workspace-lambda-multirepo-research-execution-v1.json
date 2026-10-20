@@ -43,8 +43,8 @@
       "intent": "mutate",
       "base_sha": "4d580661a27f151e70f778111a88579e54de1c71",
       "remote": {
-        "branch": "main",
-        "checkpoint_sha": "3c95bde8fac98f5713d8ff43e16e1c8e333d678a",
+        "branch": "lambda-multirepo-run3-live-migration-v1",
+        "checkpoint_sha": "61b350699882453a089ad2b73b9a5da2ed1574c3",
         "verified": true
       },
       "local": null,
@@ -293,7 +293,7 @@
     },
     {
       "id": "git_driven_project_reconciliation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATING",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
@@ -303,9 +303,16 @@
         "Run-1 reconciliation protocol and request schema"
       ],
       "outputs": [
-        "Run-2 dry-run deterministic reconciliation planner",
-        "non-live multi-project controller systemd template",
-        "non-live multi-project provisioner systemd template"
+        "scripts/lambda_ci_reconciler.py — root-only, schema-bounded ADD_OR_UPDATE reconciliation over a dedicated Unix socket; direct CLI apply forbidden.",
+        "scripts/lambda_ci_reconcile_controller.py — dedicated unprivileged workspace-control GitHub poller; no shell/subprocess execution and no target-repository authority.",
+        ".github/workflows/lambda-ci-project-reconcile.yml pinned by exact Git blob in the installed reconciliation ceiling.",
+        "architecture/lambda-ci-reconciliation-ceiling.v1.json with exact source repository/default branch/workflow blob/actor ceiling.",
+        "Generic provisioner live reload of root-installed registry/project manifests so approved project add/update needs no provisioner restart.",
+        "Research-engine registry/manifest ACTIVE transition while PADataset remains P6_PILOT_PLANNED_NOT_INSTALLED.",
+        "scripts/migrate_lambda_ci_multirepo_v1.sh — rollback-capable one-time root migration that freezes old controllers before installed-code mutation and leaves the reconciliation controller credential-gated/inactive.",
+        "scripts/activate_lambda_ci_reconcile_controller.sh + stage_lambda_ci_reconciler_pat.sh — separate credential staging and activation proof.",
+        "architecture/lambda-ci-multirepo-install.v1.json — exact 26 Git-blob install input manifest.",
+        "Run-3 static/adversarial tests for reconciliation envelope, exact workflow blob, interrupted recovery, project-scoped activation, dynamic policy reload, shell syntax, and exact install blobs."
       ],
       "validation": [
         {
@@ -316,9 +323,25 @@
             "Controller environment rendering is deterministic and contains no embedded token/private-key/password material.",
             "Apply mode remains explicitly disabled pending Run-3 bounded root activation."
           ]
+        },
+        {
+          "check": "Run 3 pre-mutation package",
+          "result": "PASS",
+          "evidence": [
+            "Exact implementation head 61b350699882453a089ad2b73b9a5da2ed1574c3.",
+            "Workspace Control Validation run 39358070312 completed SUCCESS.",
+            "Task/static validation PASS.",
+            "Python unit regression PASS including reconciliation controller/root reconciler/dynamic provisioner reload/migration exact-blob tests.",
+            "Pinned Go 1.26.3 generic Lambda scale-set controller validation PASS.",
+            "Full integration contracts PASS.",
+            "architecture/lambda-ci-multirepo-install.v1.json blob f7b93112c6960fd4e0479742071b3a9e1f0785c1 binds 26 exact install-input Git blobs.",
+            "Trusted reconciliation workflow blob is c8b8baef1955ad2a8bd409756298f0703b85f270 and is pinned in the root ceiling.",
+            "Migration keeps PADataset activation disabled and asserts no ci-padataset user/group, /srv/workspace-ci/padataset root, or padataset controller config exists after install.",
+            "No Lambda host mutation or PADataset repository mutation/execution has occurred at this checkpoint."
+          ]
         }
       ],
-      "resume_condition": "Run 3 must install/activate the generic substrate through one bounded root migration, prove research-engine non-regression, and establish the trusted reconciliation controller/root path before this stage can be VALIDATED."
+      "resume_condition": "Pre-mutation package PASS. Merge the exact validated package, return the durable checkpoint to canonical main, then execute the one-time root migration from that exact main SHA. Accept the install receipt before staging/activating the reconciliation credential. After reconciliation-plane proof, run research-engine CPU, gpu-small, and model-eval-single-gpu regressions."
     },
     {
       "id": "padataset_second_project_pilot",
@@ -530,7 +553,9 @@
       ]
     }
   ],
-  "blockers": [],
+  "blockers": [
+    "Human-only Run-3 root gate after merge: execute the exact one-time migration script on Lambda via sudo from the canonical merged workspace-control checkout. No authorized connector can substitute for this root host mutation."
+  ],
   "remaining_work": [
     "Run 3: design and execute one bounded root migration/install of the validated generic controller/provisioner/runtime/reconciliation substrate on Lambda.",
     "Run 3: preserve rollback to the accepted research-engine-specific installed state and prove controller/provisioner service health plus exact installed source/blob identities.",
@@ -540,8 +565,8 @@
     "Run 4: prove reciprocal research-engine/PADataset filesystem/process/cache isolation and verify zero controller/provisioner/runtime source changes during PADataset onboarding.",
     "Final: prove a third approved repository requires only registry + manifest + thin launcher binding and freeze the reusable operating contract."
   ],
-  "next_safe_action": "Run 3 activation gate only. Starting from the exact Run-2 implementation that passed validation at 8570b82207f3d327189d091cabb36eda3ba45c69, prepare the bounded one-time root migration/install package and rollback plan for the generic multi-project substrate. Before any host mutation, bind exact source/blob digests and installation targets, prove the migration does not widen resource/network/secret authority, and define research-engine regression receipts. Do not onboard or execute PADataset yet.",
+  "next_safe_action": "Merge the exact validated Run-3 pre-mutation package (head 61b350699882453a089ad2b73b9a5da2ed1574c3), checkpoint the resulting canonical main SHA, then run only `WORKSPACE_CI_MULTIREPO_EXPECTED_SHA=<canonical-main-sha> sudo -E scripts/migrate_lambda_ci_multirepo_v1.sh` from that exact clean Lambda workspace-control checkout. Return the complete install receipt/output for inspection. Do not stage the ci-reconciler token, activate workspace-ci-reconcile-controller.service, trigger research-engine regressions, or touch PADataset until the migration receipt is accepted.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created after research-engine Wave-1 proved the complete GitHub-to-Lambda path and final cleanup receipt. This task deliberately broadens the objective from one project's model-eval route to a reusable research compute control plane. PADataset is the first real second-project acceptance test, not another special-case workload.\n2026-10-20 Run 1 architecture freeze: PR #231 design head 34a981b5dd4634906111dc8bbe612b86198ef813 validated PASS in run 39351745034. Frozen design introduces root project registry, deterministic project identity derivation, route-name/non-authority separation, reusable semantic execution contracts, research-engine v2 migration manifest, public-repo-hardened PADataset P6 manifest, bounded Git-driven reconciliation protocol, and synthetic third-project manifest-only proof. No executable control-plane or live host change occurred. Next stage is Run 2 generic implementation with no Lambda install.\n2026-10-20 Run 1 canonical closeout: PR #231 final validation run 39351970987 PASS and squash merge 2b22af474791ff59cc9cb100f4bf3b939266fec2. workspace-control recovery checkpoint returns to canonical main at that merge. Run 2 may begin implementation only; live Lambda remains unchanged.\n2026-10-20 Run 2 implementation PASS: exact checkpoint 8570b82207f3d327189d091cabb36eda3ba45c69 validated in Workspace Control Validation run 39355083062 (task/static, Python unit, pinned Go controller, full integration all PASS). Controller project/lane identity is generic; root v2 admission resolves registry -> project manifest -> route -> semantic execution contract; privileged runtime no longer grants authority by experiment workload string; generic dual-GPU public compute remains denied; reconciler remains dry-run/non-live. No Lambda or PADataset mutation occurred. Next gate is Run 3 one-time root migration/install with research-engine non-regression.\n2026-10-20 Run 2 canonical closeout: PR #233 final head bf62af1d54b90523e5ac55e542166687d8582113 passed validation run 39355279238 and squash-merged as 3c95bde8fac98f5713d8ff43e16e1c8e333d678a. workspace-control recovery checkpoint returns to canonical main. Run 3 is the next gate; live Lambda remains on the previously accepted research-engine-specific install until that bounded migration is explicitly executed.\n2026-10-20 Run 3 scope normalization: architecture Run 1 already froze `.github/workflows/lambda-ci-project-reconcile.yml` as the dedicated reconciliation trust anchor, but the workspace-control mutation allowlist omitted that exact path. The task allowlist is amended only for that single workflow path; no broader `.github/workflows/**` authority is added. Current stage advances to `git_driven_project_reconciliation`. PADataset repository remains untouched until Run 4."
+  "notes": "Created after research-engine Wave-1 proved the complete GitHub-to-Lambda path and final cleanup receipt. This task deliberately broadens the objective from one project's model-eval route to a reusable research compute control plane. PADataset is the first real second-project acceptance test, not another special-case workload.\n2026-10-20 Run 1 architecture freeze: PR #231 design head 34a981b5dd4634906111dc8bbe612b86198ef813 validated PASS in run 39351745034. Frozen design introduces root project registry, deterministic project identity derivation, route-name/non-authority separation, reusable semantic execution contracts, research-engine v2 migration manifest, public-repo-hardened PADataset P6 manifest, bounded Git-driven reconciliation protocol, and synthetic third-project manifest-only proof. No executable control-plane or live host change occurred. Next stage is Run 2 generic implementation with no Lambda install.\n2026-10-20 Run 1 canonical closeout: PR #231 final validation run 39351970987 PASS and squash merge 2b22af474791ff59cc9cb100f4bf3b939266fec2. workspace-control recovery checkpoint returns to canonical main at that merge. Run 2 may begin implementation only; live Lambda remains unchanged.\n2026-10-20 Run 2 implementation PASS: exact checkpoint 8570b82207f3d327189d091cabb36eda3ba45c69 validated in Workspace Control Validation run 39355083062 (task/static, Python unit, pinned Go controller, full integration all PASS). Controller project/lane identity is generic; root v2 admission resolves registry -> project manifest -> route -> semantic execution contract; privileged runtime no longer grants authority by experiment workload string; generic dual-GPU public compute remains denied; reconciler remains dry-run/non-live. No Lambda or PADataset mutation occurred. Next gate is Run 3 one-time root migration/install with research-engine non-regression.\n2026-10-20 Run 2 canonical closeout: PR #233 final head bf62af1d54b90523e5ac55e542166687d8582113 passed validation run 39355279238 and squash-merged as 3c95bde8fac98f5713d8ff43e16e1c8e333d678a. workspace-control recovery checkpoint returns to canonical main. Run 3 is the next gate; live Lambda remains on the previously accepted research-engine-specific install until that bounded migration is explicitly executed.\n2026-10-20 Run 3 scope normalization: architecture Run 1 already froze `.github/workflows/lambda-ci-project-reconcile.yml` as the dedicated reconciliation trust anchor, but the workspace-control mutation allowlist omitted that exact path. The task allowlist is amended only for that single workflow path; no broader `.github/workflows/**` authority is added. Current stage advances to `git_driven_project_reconciliation`. PADataset repository remains untouched until Run 4.\n2026-10-20 Run 3 pre-mutation gate PASS: exact head 61b350699882453a089ad2b73b9a5da2ed1574c3 passed Workspace Control Validation 39358070312. The package adds the root reconciliation socket, dedicated unprivileged workspace-control reconciliation poller, exact trusted workflow/blob ceiling, dynamic provisioner policy reload, ACTIVE research-engine/inert PADataset state, exact 26-blob install manifest, rollback-capable migration, and credential-gated activation. No host mutation occurred. Human sudo is now required for the one-time live migration; this is intentionally the last planned routine root installation boundary."
 }
