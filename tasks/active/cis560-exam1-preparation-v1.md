@@ -14,7 +14,7 @@ If this Markdown disagrees with the JSON capsule or verified Git/project evidenc
 - ID: `cis560-exam1-preparation-v1`
 - Title: CIS 560 Exam 1 Preparation and Cheat-Sheet Build
 - Status: `CHECKPOINTED`
-- Current stage: `practice_test_factory`
+- Current stage: `cheat_sheet_build`
 - Exam: **Thursday, October 22, 2026**
 - Cheat sheet: **one US Letter page, double-sided**
 
@@ -22,136 +22,123 @@ If this Markdown disagrees with the JSON capsule or verified Git/project evidenc
 
 Repository: `adamtrott78/CIS560-AdamTrott`  
 Branch: `tutor-framework`  
-Checkpoint: `091ba96a013d313c9ae67aada6448e883bf5b77b`
+Checkpoint: `784cdf9625257dee88ce70d832b0109578c4f248`
 
 Shared tutoring/workflow behavior remains pinned to:
 
 `workspace-control@0bb8705e7a416bb064f3cd6c877e9d3fe559c8b9`
 
-## Source state
+## October 20 final review — ingested
 
-### Lecture 11 — resolved
-- raw transcript is durable at `sources/lectures/L11_TRANSCRIPT_RAW.md`;
-- live notes, board-photo record, CFL pumping handout, and instructor Section 2.3 note remain source-separated;
-- Q1/Q2-Q5/75-minute format guidance is transcript-confirmed;
-- CYK is conceptually exam-relevant/required reading;
-- **complete CYK procedure is explicitly not tested**.
+Authoritative live-note source:
 
-### Lecture 12 — transcript reconciled
-Durable:
-- `sources/instructor/L12_NOTES_2026-10-15_USER_PROVIDED.md`
-- `course/lectures/L12.md`
+`sources/instructor/L13_MIDTERM_REVIEW_2026-10-20_USER_PROVIDED.md`
 
-Key authority:
-- finish Section 2.3;
-- **Section 2.4 is not required**;
-- non-CFL pumping proof is explicitly re-emphasized;
-- `REG ⊊ CFL`;
-- DFA/NFA→PDA;
-- regular closure properties;
-- next class = quick midterm review.
+This is now the strongest final pre-exam weighting event.
 
-Raw genuine transcript: `sources/lectures/L12_TRANSCRIPT_RAW.md` (SHA-256 `5dee87e3d2eafa6692239356f36e5bdb4de473dd3e42394d9d16515aff8f8902`). The earlier duplicate-L11 attachment remains excluded from L12 provenance.
+### Explicitly reinforced
+- DFA/NFA definitions, semantics, equivalence, simple design.
+- Given NFA: understand its language and design an equivalent DFA.
+- machine -> English description -> regex -> DFA -> complement workflow.
+- DFA complement by swapping accepting/nonaccepting states; not directly for NFA.
+- regex/automata equivalence; **regex -> NFA required**.
+- regular closure and one-way directionality.
+- RL pumping directionality, pumpability, minimum/sufficient pumping length, nonregular proofs.
+- CFG/string ambiguity; CNF recognition.
+- CYK concept = membership.
+- CFL pumpability using exact `s=uvxyz`.
+- PDA design; nondeterministic OR branching.
+- NFA as zero-stack PDA; DPDA < NPDA.
 
-## Exam architecture
+### Explicitly excluded / de-emphasized
+- **GNFA procedure/state elimination: no exam question.**
+- **full CYK execution/table: not on exam.**
+- **inherent/language ambiguity: not on exam.**
+- full CFG -> CNF conversion remains excluded.
+- Section 2.4 remains excluded.
+- formal NFA -> DFA subset-construction procedure is not itself required, although equivalent-DFA design remains required.
 
-- Q1 = True/False.
-- Q2–Q5 = four short homework/class-example-style problems.
-- Named candidate family remains broader than four slots:
-  DFA, NFA, regex, CFG, PDA, RL show-pumping, CFL show-pumping, prove nonregular, prove non-CFL.
-- Do not claim all named families appear.
-- 75 minutes; compact correctness over long prose.
+One CFG undecidability comment in the live notes was incomplete; the exact decision problem is deliberately left unresolved rather than inferred.
 
-## High-value current rules
+## Post-review predictive posterior
 
-### Pumping property
-- RL: one legal `xyz` partition + conditions.
-- CFL: one legal `uvxyz` partition + conditions.
-- HW-length explanatory prose is not needed on the exam.
+Files:
+- `study/exam1/practice_factory/PREDICTIVE_PRIORS_POST_REVIEW.json`
+- `study/exam1/practice_factory/ENSEMBLE_POST_REVIEW_10K.md`
 
-### Prove not regular / not CFL
-- arbitrary pumping length `p`;
-- choose a p-dependent witness in the language with length >= p;
-- cover every legal split/placement;
-- one bad partition is never enough;
-- choose pump direction strategically;
-- contradiction.
+Simulation:
+- 10,000 accepted blueprints
+- seed `5602026`
+- 14,518 candidate draws
 
-### Lecture 12 non-CFL shorthand
-1. Find the correct counterexample/witness.
-2. Show it cannot be pumped **no matter how it is divided into five parts**.
+Highest modeled Q2–Q5 families:
+1. CFL show-pumpability — 44.49%
+2. NFA -> language -> regex -> DFA -> complement — 38.97%
+3. RL pumping prove nonregular — 36.04%
+4. DFA/NFA -> CFG mixed — 33.46%
+5. RL pumpability / minimum pumping length — 33.08%
+6. regex -> NFA — 30.99%
+7. prove non-CFL — 29.01%
 
-## Behavioral evidence from restart
+Largest post-review shifts:
+- regex -> NFA: **up**
+- RL pumpability/minimum p: **up**
+- grammar ambiguity/CNF: **up**
+- non-CFL proof: **down but still live**
+- GNFA/Myhill bundled secondary: **near-zero**
 
-Persisted in `study/MASTERY_LOG.md`:
-- CFG ordered-count transfer: independent;
-- CFG palindrome/outside-in transfer: independent;
-- PDA phase/stack mechanics: independent on a simple family;
-- regular pumping witness selection: independent;
-- CFL non-CFL proof: witness + exhaustive placement structure student-derived; compact presentation guided.
+Interpret frequencies as model-implied recurrence, not literal probabilities.
 
-Remaining comparatively higher-risk construction family:
-- NFA/regex/HW1-derived conversion work.
+## Behavioral state
 
-## Cheat-sheet reweighting
+Persisted in `study/MASTERY_LOG.md`.
 
-Protect heavily:
-- Q1 distinction/trap box;
-- all short-problem recipes;
-- non-CFL pumping proof skeleton;
-- regular closure;
-- `REG ⊊ CFL`;
-- DFA/NFA→PDA;
-- CYK concept only.
+Strong/recent:
+- CFG ordered-count and outside-in/palindrome patterns.
+- PDA push/switch/pop design on fresh families.
+- regular nonregular pumping witness selection.
+- non-CFL witness + five placement-family structure.
+- CFL closure facts stabilized after repeated drills.
+- CNF recognition.
+- NFA/regex notation improved on fresh transfer.
 
-Exclude:
-- Section 2.4;
-- full CFG→CNF conversion procedure;
-- proofs of Lemmas 2.21 and 2.27;
-- complete CYK table procedure.
+Remaining execution risk:
+- precise DFA state invariants under fresh automata conversion tasks;
+- regular pumping **show-property / minimum-p** quantifiers need continued short transfer;
+- regex -> NFA deserves explicit fresh practice because Xu named it in final review.
 
-Do not freeze final space until after the October 20 review.
+## Final cheat-sheet allocation
+
+Owner:
+`study/exam1/CHEATSHEET_CANDIDATES.md`
+
+Must protect:
+- DFA/NFA semantics and construction.
+- NFA acceptance: exists accepting path.
+- DFA complement guard.
+- regex equivalence + regex -> NFA recipe.
+- `(a|b)*` vs `(ab)*`.
+- regular closure + directionality.
+- RL pumping: one-way lemma, show-property vs nonregular proof, minimum p.
+- CFG/string ambiguity.
+- CNF forms.
+- CYK membership concept only.
+- CFL `uvxyz` pumpability conditions.
+- PDA design + nondeterministic OR.
+- reusable CFG patterns such as `T->0T|1T|epsilon`.
+
+Do **not** allocate procedure space to:
+GNFA elimination, full CYK, full CNF conversion, inherent ambiguity, Section 2.4, or formal subset-construction memorization.
 
 ## Next safe action
 
-If the user supplies the **2024 Exam 1**, ingest it next as historical predictive evidence and compare it against current Fall 2026 authority.
+1. Build/render/visually QA the final two-sided cheat sheet.
+2. Then run a short **hybrid posterior-guided** practice set:
+   - NFA/DFA/regex/complement;
+   - regex -> NFA;
+   - RL show-pumpability / minimum p / nonregular proof;
+   - CFL show-pumpability;
+   - one CFG/PDA mixed check if needed.
+3. Keep one non-CFL proof refresh for coverage without overinvesting.
+4. Finish with a timed readiness check on October 21.
 
-If not, run one fresh **NFA/regex** transfer diagnostic.
-
-Then:
-1. ingest October 20 review;
-2. reweight/finalize cheat sheet;
-3. run timed mixed mini-midterm October 21.
-
-
-## Practice-test factory
-
-Durable factory root:
-
-`study/exam1/practice_factory/`
-
-Files:
-- `README.md` — usage/modes;
-- `FACTORY_SPEC.md` — format, authority, freshness, validation, grading/adaptation;
-- `BLUEPRINTS.md` — Xu-style Q1 and Q2–Q5 families;
-- `FACTORY_STATE.json` — current mastery weights and generated-variant ledger;
-- `TEST_TEMPLATE.md` — 25-point / 75-minute shell.
-
-Default:
-- Q1 = five True/False items;
-- Q2–Q5 = four 5-point short problems;
-- questions may bundle multiple related skills;
-- current-semester authority wins over 2024 historical evidence;
-- validate every generated item;
-- do not expose answer keys before the student's attempt.
-
-Current weakness reweight:
-- emphasize fresh NFA/regex/conversion transfer until independently demonstrated.
-
-After each test:
-- grade by subpart;
-- update meaningful mastery evidence;
-- reweight factory state;
-- avoid reused variant IDs.
-
-October 20 review remains the final weighting event.
