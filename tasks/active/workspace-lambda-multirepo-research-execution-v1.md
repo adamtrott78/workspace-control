@@ -23,8 +23,8 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: lambda-multirepo-run3-live-migration-v1
-- Remote checkpoint: 61b350699882453a089ad2b73b9a5da2ed1574c3
+- Remote branch: main
+- Remote checkpoint: 8a01cd0fc7e373c5745782916eadc2de57d9f3f8
 - Remote verified: true
 
 ### research-engine
@@ -43,7 +43,7 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-Merge the exact validated Run-3 pre-mutation package (head 61b350699882453a089ad2b73b9a5da2ed1574c3), checkpoint the resulting canonical main SHA, then run only `WORKSPACE_CI_MULTIREPO_EXPECTED_SHA=<canonical-main-sha> sudo -E scripts/migrate_lambda_ci_multirepo_v1.sh` from that exact clean Lambda workspace-control checkout. Return the complete install receipt/output for inspection. Do not stage the ci-reconciler token, activate workspace-ci-reconcile-controller.service, trigger research-engine regressions, or touch PADataset until the migration receipt is accepted.
+After this state-only closeout is merged, use its resulting canonical workspace-control main SHA as WORKSPACE_CI_MULTIREPO_EXPECTED_SHA and execute only `sudo -E scripts/migrate_lambda_ci_multirepo_v1.sh` from that exact clean Lambda checkout. Return the complete install output/receipt for inspection. Do not stage the ci-reconciler token, activate workspace-ci-reconcile-controller.service, trigger research-engine regressions, or touch PADataset until the migration receipt is accepted.
 
 ## Remaining work
 
@@ -57,7 +57,7 @@ Merge the exact validated Run-3 pre-mutation package (head 61b350699882453a089ad
 
 ## Blockers / gates
 
-- Human-only Run-3 root gate after merge: execute the exact one-time migration script on Lambda via sudo from the canonical merged workspace-control checkout. No authorized connector can substitute for this root host mutation.
+- Human-only Run-3 root gate: execute the exact one-time migration script on Lambda via sudo from the clean canonical workspace-control main checkout produced by this closeout. No authorized connector can substitute for this root host mutation.
 
 ## Fresh-chat initialization
 
