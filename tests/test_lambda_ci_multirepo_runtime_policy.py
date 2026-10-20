@@ -37,7 +37,7 @@ def request_for(manifest, route_id, *, runner_suffix="abcdef123456"):
         "project_id": manifest["project_id"],
         "workload_class": route_id,
         "runner_name": lane["runner_prefix"] + runner_suffix,
-        "jit_config": "opaque",
+        "jit_config": "b3BhcXVl",
         "attestation": {
             "schema_version": 2,
             "source": "github_scale_set_controller",
