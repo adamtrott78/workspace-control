@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-local-extract-wave1-execution-v1",
   "title": "Trusted Lambda route for Local EXTRACT Wave 1",
-  "status": "VALIDATING",
+  "status": "COMPLETE",
   "goal": "Expose exactly the merged research-engine Local EXTRACT Wave 1 workflow to the already-accepted two-A4500 Qwen3.5 execution envelope, install that exact route on Lambda, execute one bounded nine-paper benchmark, and retire the route owner after final receipt/cleanup evidence. This task does not own EXTRACT scientific design or production routing.",
   "execution_topology": "remote_only",
   "current_stage": "wave1_execution_acceptance",
@@ -34,7 +34,7 @@
       "base_sha": "453f5aa3f1386f87dcb3a256de6f31496c5346a9",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "d5bc8bf6bc772547f4b2edb50f7595cc7e6edaac",
+        "checkpoint_sha": "4d580661a27f151e70f778111a88579e54de1c71",
         "verified": true
       },
       "allowed_mutation_scope": [
@@ -127,7 +127,7 @@
     },
     {
       "id": "wave1_execution_acceptance",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-local-extract-wave1-execution-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
@@ -177,7 +177,7 @@
           ]
         }
       ],
-      "resume_condition": "Verify the final root-owned receipt and cleanup/postverify for deterministic request 7cdcb708-9ba9-511f-a689-13d8469db1da. Then record final root acceptance, propagate REJECT to parent research task, and archive support tasks."
+      "resume_condition": null
     }
   ],
   "checkpoints": [
@@ -290,23 +290,21 @@
     },
     {
       "check": "Wave 1 final root acceptance",
-      "result": "NOT_RUN",
+      "result": "PASS",
       "evidence": [
-        "Attempt-2 GitHub execution and report are complete; final root-owned provisioner receipt/cleanup evidence is still required."
+        "Durable provisioner state for request 7cdcb708-9ba9-511f-a689-13d8469db1da is COMPLETED with decision RUNNER_EXITED_CLEANLY and terminal_status SUCCEEDED.",
+        "Final root receipt SHA256=4c00199872879050bf625e69516db4f387fd7bf7119bd944cccaf06dbcfa7d2d.",
+        "Exact promoted qwen3.5-4b and expanded runtime identities pre/post verified; runner exit code 0; no CUDA OOM, disk pressure, timeout, or resource exhaustion.",
+        "runner_workspace_destroyed=true and staging_workspace_destroyed=true; both job and staging paths are absent.",
+        "Project UID CPU residue=none and GPU residue=none; gpu-heavy quarantine=none.",
+        "workspace-ci-provisioner.service, workspace-ci-controller.service, and workspace-ci-controller-gpu.service all active with NRestarts=0 and ExecMainStatus=0."
       ]
     }
   ],
-  "blockers": [
-    "Final root receipt gate only: verify /srv/workspace-ci/research-engine/logs/p5-7cdcb708-9ba9-511f-a689-13d8469db1da-receipt.json, terminal provisioner state, destroyed runner/staging workspaces, zero ci-research-engine CPU/GPU residue, and no gpu-heavy quarantine."
-  ],
-  "remaining_work": [
-    "Read and verify the final root receipt and durable provisioner state for request 7cdcb708-9ba9-511f-a689-13d8469db1da.",
-    "Require terminal success, exact model/runtime/two-GPU postverification, cleanup/postverify PASS, destroyed job/staging workspaces, zero project CPU/GPU residue, and no lane quarantine.",
-    "Record final scientific disposition REJECT in research-engine-local-extract-redesign-v1 with the exact benchmark evidence.",
-    "Archive runtime/provisioner/controller compatibility support tasks and this execution task after final acceptance."
-  ],
-  "next_safe_action": "Read-only final host acceptance for request 7cdcb708-9ba9-511f-a689-13d8469db1da: inspect durable state + root receipt, verify zero residue/quarantine and destroyed runner/staging paths. Do not rerun the benchmark; Wave 1 scientific decision is already REJECT.",
+  "blockers": [],
+  "remaining_work": [],
+  "next_safe_action": "Task complete. Return scientific ownership to research-engine-local-extract-redesign-v1. Do not rerun Wave 1; its fixed scientific decision is REJECT and the reusable Lambda execution path is accepted.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
-  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed.\n2026-10-19 handoff hydration: PR #214 already completed the route design and merge while the parent research task was being hydrated. Validation run 39197297919 PASS; route merge df142ab7829e364087dbbb7453cdc2779e9d7206. Exact manifest/policy blobs 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Dedicated inert trigger PR #131 is open at 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 with CI run 39197393554 PASS. Next operation is exact host install/verification, not policy design and not benchmark trigger.\n2026-10-19 execution checkpoint: exact Lambda host activation completed PASS, one authorized PR #131 trigger was issued, and dedicated run 39200075204/job 117891019967 was created. The run remains queued because the root-owned GPU controller executable does not yet recognize model-eval-local-extract-wave1 in three compatibility mappings. A narrow controller-compatibility child task is authorized; do not retrigger the benchmark.\n2026-10-19 runtime recovery update: controller compatibility and exact root controller activation passed. Existing job replay now reaches the provisioner but is rejected by a stale gpu-heavy guard that only names model-eval-dual-gpu. No benchmark runner has launched; no retrigger is authorized.\n2026-10-19 provisioner activation checkpoint: exact provisioner fix installed PASS and deterministic request ACCEPTED. GitHub remains queued/no runner, so durable asynchronous worker state is the next required evidence.\n2026-10-19 worker diagnostic: accepted request is durably FAILED before runner creation with RuntimeLaunchError `autonomous profile rejected: gpu-heavy`. No receipt/unit/log/residue/quarantine. Static audit found three runtime workload gates omitting Wave 1; a bounded runtime child now owns the final compatibility fix.\n2026-10-19 runtime compatibility update: PR #225 validation PASS and merge 70d5668599de767647603ddec55815b9523d1bb8. Only root install and existing-run recovery remain; no retrigger.\n2026-10-19 recovery authorization: first request is proven terminal only at prelaunch runtime policy, with zero execution material/residue. One same-request recovery is authorized after exact runtime install, preserving failed-state evidence and the single-trigger invariant.\n2026-10-19 retry authority: runtime install/re-arm PASS through evidence preservation, but scale-set restart cannot reconstruct lost JobAssigned metadata. Attempt 1 remains queued yet has zero scientific execution. One GitHub-native attempt-2 rerun of the same run/job is authorized after attempt 1 is cancelled; no second issue-comment trigger.\n2026-10-20 attempt-2 result: same workflow run 39200075204 rerun attempt 2 succeeded as job 118381589409 on runner lambda-research-engine-gpu-cdadc73b9943 / request 7cdcb708-9ba9-511f-a689-13d8469db1da. Artifact 12231293963 report SHA256 5954e2de2fd1d23c770f7f687c5282b8e2f43e68c9b29ece6374fed5442f98dc. Scientific Wave-1 decision=REJECT because job_local_completion_fraction=3/9=0.3333 below 0.50 hard floor; hard safety PASS and projected token reduction 91.75%. Final root receipt/cleanup remains the only gate."
+  "notes": "Created as a narrow infrastructure child/support task for research-engine-local-extract-redesign-v1 so the research task does not acquire authority over workspace-control admission policy. No production scientific route is changed.\n2026-10-19 handoff hydration: PR #214 already completed the route design and merge while the parent research task was being hydrated. Validation run 39197297919 PASS; route merge df142ab7829e364087dbbb7453cdc2779e9d7206. Exact manifest/policy blobs 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Dedicated inert trigger PR #131 is open at 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 with CI run 39197393554 PASS. Next operation is exact host install/verification, not policy design and not benchmark trigger.\n2026-10-19 execution checkpoint: exact Lambda host activation completed PASS, one authorized PR #131 trigger was issued, and dedicated run 39200075204/job 117891019967 was created. The run remains queued because the root-owned GPU controller executable does not yet recognize model-eval-local-extract-wave1 in three compatibility mappings. A narrow controller-compatibility child task is authorized; do not retrigger the benchmark.\n2026-10-19 runtime recovery update: controller compatibility and exact root controller activation passed. Existing job replay now reaches the provisioner but is rejected by a stale gpu-heavy guard that only names model-eval-dual-gpu. No benchmark runner has launched; no retrigger is authorized.\n2026-10-19 provisioner activation checkpoint: exact provisioner fix installed PASS and deterministic request ACCEPTED. GitHub remains queued/no runner, so durable asynchronous worker state is the next required evidence.\n2026-10-19 worker diagnostic: accepted request is durably FAILED before runner creation with RuntimeLaunchError `autonomous profile rejected: gpu-heavy`. No receipt/unit/log/residue/quarantine. Static audit found three runtime workload gates omitting Wave 1; a bounded runtime child now owns the final compatibility fix.\n2026-10-19 runtime compatibility update: PR #225 validation PASS and merge 70d5668599de767647603ddec55815b9523d1bb8. Only root install and existing-run recovery remain; no retrigger.\n2026-10-19 recovery authorization: first request is proven terminal only at prelaunch runtime policy, with zero execution material/residue. One same-request recovery is authorized after exact runtime install, preserving failed-state evidence and the single-trigger invariant.\n2026-10-19 retry authority: runtime install/re-arm PASS through evidence preservation, but scale-set restart cannot reconstruct lost JobAssigned metadata. Attempt 1 remains queued yet has zero scientific execution. One GitHub-native attempt-2 rerun of the same run/job is authorized after attempt 1 is cancelled; no second issue-comment trigger.\n2026-10-20 attempt-2 result: same workflow run 39200075204 rerun attempt 2 succeeded as job 118381589409 on runner lambda-research-engine-gpu-cdadc73b9943 / request 7cdcb708-9ba9-511f-a689-13d8469db1da. Artifact 12231293963 report SHA256 5954e2de2fd1d23c770f7f687c5282b8e2f43e68c9b29ece6374fed5442f98dc. Scientific Wave-1 decision=REJECT because job_local_completion_fraction=3/9=0.3333 below 0.50 hard floor; hard safety PASS and projected token reduction 91.75%. Final root receipt/cleanup remains the only gate.\n2026-10-20 final root acceptance PASS: request 7cdcb708-9ba9-511f-a689-13d8469db1da COMPLETED/RUNNER_EXITED_CLEANLY, receipt SHA256 4c00199872879050bf625e69516db4f387fd7bf7119bd944cccaf06dbcfa7d2d, exact model/runtime postverify PASS, runner+staging destroyed, zero CPU/GPU residue, no quarantine, and all control-plane services healthy. Infrastructure support task is complete."
 }

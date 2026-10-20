@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 392ce507a24fbd2d957d82d51630e00242787893
+- Remote checkpoint: 4d580661a27f151e70f778111a88579e54de1c71
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-HANDOFF_SAFE at host-activation boundary. Do not redesign admission, retrieval, parser behavior, or Wave-1 model logic; those are already merged and validated. Continue the narrow child support task `workspace-local-extract-wave1-execution-v1`. Workspace-control PR #214 validation run 39197297919 PASS and route merge df142ab7829e364087dbbb7453cdc2779e9d7206 is already merged; current manifest/policy blobs are 844fe790e1af968bf87d37a8eb9ce7677cdea402 / 71bd0bb9c63436964462b1f9b889686ac328ee1d. Research-engine main is 366f9585145ab539dc43c3c974dcb8625489a3e3; trusted Wave-1 workflow blob is a5be693f750c481db21d86d239a505083aae40aa; exact inert trigger is OPEN PR #131 head 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06 and must remain immutable/unmerged until the one authorized run. Next operation is exact Lambda host install/verification of the merged route, not policy design and not benchmark trigger. Only after installed identity/control-plane/residue PASS may the executor issue exactly one `/lambda-ci-local-extract-wave1 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06` comment, follow only that run, read report plus final root receipt, and stop Wave 1 at PROMISING/PARTIAL/REJECT. Generic gpu-heavy remains DENY; no production routing change, larger-model search, or repeated tuning loop.
+Resume actual EXTRACT development from the Wave-1 REJECT evidence. Inspect per-paper failures in artifact 12231293963/report SHA256 5954e2de2fd1d23c770f7f687c5282b8e2f43e68c9b29ece6374fed5442f98dc, select the smallest materially different Local Evidence Agent iteration, implement it in research-engine, and execute it through the accepted Git/Lambda runner. Do not spend further work on the completed Wave-1 infrastructure support chain.
 
 ## Remaining work
 
-- Wave 1 host activation — continue child support task workspace-local-extract-wave1-execution-v1. Install and verify exact workspace-control route merge df142ab7829e364087dbbb7453cdc2779e9d7206 on Lambda; require installed manifest blob 844fe790e1af968bf87d37a8eb9ce7677cdea402, workload-policy blob 71bd0bb9c63436964462b1f9b889686ac328ee1d, model-eval-local-extract-wave1 live, exact workflow blob a5be693f750c481db21d86d239a505083aae40aa, GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD, model_eval_dual_gpu_v1, promoted qwen3.5-4b, exact expanded runtime, generic gpu-heavy still DENY, healthy services, and zero project residue.
-- Wave 1 execution — only after host activation PASS, keep dedicated inert PR #131 open and immutable at exact head 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06; issue exactly one `/lambda-ci-local-extract-wave1 522430a6e9bfdd2977dd8517c5af9db4d1bdbf06` comment and follow only that dedicated workflow. Do not rerun blindly after any partial or ambiguous execution.
-- Wave 1 decision — read the report artifact and final root-owned provisioner receipt, evaluate all 9 papers / 71 historical evidence objects under the fixed configuration, and stop this wave with PROMISING, PARTIAL, or REJECT. Require non-scientific state, exact model/runtime/two-GPU identity, cleanup/postverify PASS, and no residue/quarantine.
-- After the Wave-1 decision only, decide whether measured residuals justify Phase 4 component/model escalation, teacher adaptation, VERIFY-boundary analysis, or eventual production integration.
+- Analyze the six Wave-1 paper failures and teacher-subset disagreement to localize failure among candidate retrieval, atomic claim normalization, type assignment, confidence/guard thresholds, and completeness.
+- Implement a materially different EXTRACT iteration under the accepted Local Evidence Agent architecture rather than cosmetic prompt tuning of the rejected Wave-1 normalizer.
+- Use the reusable Lambda Git runner for bounded candidate-commit CPU/GPU execution; do not reopen runner infrastructure unless the execution contract itself changes.
+- Measure local completion, claim-level agreement, provenance safety, fallback fraction, latency/resource use, and remote-token suppression against the preserved nine-paper baseline.
+- Only after a candidate passes the semantic-quality gate consider VERIFY-boundary analysis or production integration.
 
 ## Blockers / gates
 
