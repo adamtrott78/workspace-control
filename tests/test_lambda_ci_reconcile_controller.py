@@ -122,17 +122,26 @@ class ReconcileControllerTests(unittest.TestCase):
             [item["project_id"] for item in request["project_manifests"]],
             ["padataset", "research-engine"],
         )
-        serialized = json.dumps(request, sort_keys=True)
+        # Route documents legitimately contain reviewed trigger commands.
+        # What must remain impossible is arbitrary executable/root authority in
+        # the reconciliation envelope itself.
         for forbidden in (
-            '"command"',
-            '"argv"',
-            '"systemd_properties"',
-            '"uid"',
-            '"gid"',
-            '"token"',
-            '"environment"',
+            "command",
+            "argv",
+            "systemd_properties",
+            "uid",
+            "gid",
+            "token",
+            "environment",
         ):
-            self.assertNotIn(forbidden, serialized)
+            self.assertNotIn(forbidden, request)
+            self.assertNotIn(forbidden, request["source_attestation"])
+            self.assertNotIn(forbidden, request["registry"])
+        for item in request["project_manifests"]:
+            self.assertEqual(
+                set(item),
+                {"project_id", "sha256", "document"},
+            )
 
     def test_reconciliation_workflow_is_main_only_not_candidate_triggered(self):
         workflow = (ROOT / controller.WORKFLOW_PATH).read_text()
