@@ -160,6 +160,8 @@ class ProvisionerService:
         registry: dict[str, Any] | None = None,
         project_manifests: dict[str, dict[str, Any]] | None = None,
         execution_contracts: dict[str, Any] | None = None,
+        registry_path: pathlib.Path | None = None,
+        manifest_dir: pathlib.Path | None = None,
     ):
         self.manifest = manifest
         self.profiles = profiles
@@ -169,6 +171,8 @@ class ProvisionerService:
         self.registry = registry
         self.project_manifests = project_manifests or {}
         self.execution_contracts = execution_contracts
+        self.registry_path = registry_path
+        self.manifest_dir = manifest_dir
         self.generic_policy_sha256 = (
             multirepo_policy.sha256_json(
                 {
@@ -195,11 +199,25 @@ class ProvisionerService:
         self._lock = threading.Lock()
         self._active: set[str] = set()
 
+    def _reload_generic_project_state(self) -> None:
+        if self.registry_path is None or self.manifest_dir is None:
+            return
+        registry = policy._load(self.registry_path)
+        manifests: dict[str, dict[str, Any]] = {}
+        for project_id in registry.get("projects", {}):
+            path = self.manifest_dir / f"{project_id}.json"
+            if not path.is_file():
+                raise ServiceError(f"registered project manifest missing: {path}")
+            manifests[project_id] = policy._load(path)
+        self.registry = registry
+        self.project_manifests = manifests
+
     def _manifest_for_request(self, data: dict[str, Any]) -> dict[str, Any]:
         if self.registry is None:
             if self.manifest is None:
                 raise ServiceError("fixed project manifest is unavailable")
             return self.manifest
+        self._reload_generic_project_state()
         try:
             return multirepo_policy.resolve_project_manifest(
                 self.registry,
@@ -681,6 +699,8 @@ def main() -> int:
         registry=registry,
         project_manifests=project_manifests,
         execution_contracts=execution_contracts,
+        registry_path=args.registry,
+        manifest_dir=args.manifest_dir,
     )
     serve(service, socket_path=args.socket)
     return 0

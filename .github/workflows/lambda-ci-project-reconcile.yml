@@ -1,0 +1,45 @@
+name: Lambda CI Project Reconcile
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "architecture/lambda-ci-project-registry.v1.json"
+      - "architecture/lambda-ci-project-*.json"
+      - "architecture/lambda-ci-execution-contracts.v1.json"
+      - ".github/workflows/lambda-ci-project-reconcile.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-reconciliation-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact main commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Validate reviewed reconciliation state
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          python3 -m unittest             tests.test_lambda_ci_multirepo_contract             tests.test_lambda_ci_multirepo_runtime_policy
+          python3 scripts/lambda_ci_reconciler.py             --registry architecture/lambda-ci-project-registry.v1.json             --manifest architecture/lambda-ci-project-research-engine.v2.json             --manifest architecture/lambda-ci-project-padataset.v1.json             >/tmp/lambda-ci-reconcile-plan.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path("/tmp/lambda-ci-reconcile-plan.json").read_text())
+          assert p["schema_version"] == 1
+          assert p["mode"] == "APPLY_READY_V1"
+          print(json.dumps({
+              "registry_sha256": p["registry_sha256"],
+              "active_projects": p["active_projects"],
+              "planned_projects_skipped": p["planned_projects_skipped"],
+          }, sort_keys=True))
+          PY

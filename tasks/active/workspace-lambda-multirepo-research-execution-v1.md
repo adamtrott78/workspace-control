@@ -23,8 +23,8 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 3c95bde8fac98f5713d8ff43e16e1c8e333d678a
+- Remote branch: lambda-multirepo-run3-live-migration-v1
+- Remote checkpoint: 61b350699882453a089ad2b73b9a5da2ed1574c3
 - Remote verified: true
 
 ### research-engine
@@ -43,7 +43,7 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-Run 3 activation gate only. Starting from the exact Run-2 implementation that passed validation at 8570b82207f3d327189d091cabb36eda3ba45c69, prepare the bounded one-time root migration/install package and rollback plan for the generic multi-project substrate. Before any host mutation, bind exact source/blob digests and installation targets, prove the migration does not widen resource/network/secret authority, and define research-engine regression receipts. Do not onboard or execute PADataset yet.
+Merge the exact validated Run-3 pre-mutation package (head 61b350699882453a089ad2b73b9a5da2ed1574c3), checkpoint the resulting canonical main SHA, then run only `WORKSPACE_CI_MULTIREPO_EXPECTED_SHA=<canonical-main-sha> sudo -E scripts/migrate_lambda_ci_multirepo_v1.sh` from that exact clean Lambda workspace-control checkout. Return the complete install receipt/output for inspection. Do not stage the ci-reconciler token, activate workspace-ci-reconcile-controller.service, trigger research-engine regressions, or touch PADataset until the migration receipt is accepted.
 
 ## Remaining work
 
@@ -57,7 +57,7 @@ Run 3 activation gate only. Starting from the exact Run-2 implementation that pa
 
 ## Blockers / gates
 
-- None.
+- Human-only Run-3 root gate after merge: execute the exact one-time migration script on Lambda via sudo from the canonical merged workspace-control checkout. No authorized connector can substitute for this root host mutation.
 
 ## Fresh-chat initialization
 

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "registry_id": "lambda-ci-project-registry-v1",
-  "status": "CONTRACT_ONLY_NOT_INSTALLED",
-  "registry_epoch": 1,
+  "status": "ACTIVE",
+  "registry_epoch": 2,
   "authority": {
     "owner": "workspace-control",
     "allowed_repository_owners": [
@@ -45,7 +45,7 @@
       "repository": "adamtrott78/research-engine",
       "repository_visibility": "private",
       "manifest_source_path": "architecture/lambda-ci-project-research-engine.v2.json",
-      "activation_state": "MIGRATION_CANDIDATE_NOT_INSTALLED",
+      "activation_state": "ACTIVE",
       "lanes": [
         "cpu",
         "gpu"
