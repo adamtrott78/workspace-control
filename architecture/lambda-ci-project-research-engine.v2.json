@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "status": "MIGRATION_CANDIDATE_NOT_INSTALLED",
+  "status": "ACTIVE",
   "project_id": "research-engine",
   "repository": "adamtrott78/research-engine",
   "repository_visibility": "private",

@@ -1,0 +1,45 @@
+[Unit]
+Description=Workspace CI root project reconciler
+Documentation=https://github.com/adamtrott78/workspace-control
+After=local-fs.target
+Before=workspace-ci-reconcile-controller.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/opt/workspace-ci/reconciler/lambda_ci_reconciler.py --serve
+Restart=on-failure
+RestartSec=2s
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER CAP_SETUID CAP_SETGID
+AmbientCapabilities=
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_NETLINK
+ReadWritePaths=/run/workspace-ci
+ReadWritePaths=/var/lib/workspace-ci/reconciler
+ReadWritePaths=/etc/workspace-ci
+ReadWritePaths=/etc/passwd /etc/group /etc/shadow /etc/gshadow
+ReadWritePaths=/etc/systemd/system
+ReadWritePaths=/srv/workspace-ci
+ReadOnlyPaths=/opt/workspace-ci /usr /bin /lib /lib64
+InaccessiblePaths=/home/atrott /var/run/docker.sock /run/docker.sock
+DevicePolicy=closed
+TasksMax=128
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target

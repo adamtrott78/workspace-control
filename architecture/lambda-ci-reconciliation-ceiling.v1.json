@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "status": "ACTIVE",
+  "source_repository": "adamtrott78/workspace-control",
+  "source_default_branch": "main",
+  "trusted_workflow_path": ".github/workflows/lambda-ci-project-reconcile.yml",
+  "trusted_workflow_blob_sha": "83312632370cdef6423124028bd0c94f3da4c03b",
+  "allowed_actor_logins": [
+    "adamtrott78"
+  ],
+  "root_socket": "/run/workspace-ci/reconciler.sock",
+  "root_socket_group": "workspace-ci-reconciler",
+  "target_repository_candidate_invocable": false,
+  "arbitrary_commands_allowed": false,
+  "arbitrary_paths_allowed": false,
+  "arbitrary_systemd_properties_allowed": false
+}
