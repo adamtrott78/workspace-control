@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import pathlib
 from typing import Any
@@ -13,6 +14,32 @@ import lambda_ci_multirepo as multi
 
 class ReconcileError(RuntimeError):
     pass
+
+
+
+def render_controller_env(
+    manifest: dict[str, Any],
+    lane: str,
+) -> str:
+    multi.validate_project_manifest_derivations(manifest)
+    lane_cfg = manifest["derived_identity"]["lanes"].get(lane)
+    if lane_cfg is None:
+        raise ReconcileError(f"unsupported project lane: {lane}")
+    values = {
+        "WORKSPACE_CI_GITHUB_URL": f"https://github.com/{manifest['repository']}",
+        "WORKSPACE_CI_SCALESET_NAME": lane_cfg["scale_set_name"],
+        "WORKSPACE_CI_PROJECT_ID": manifest["project_id"],
+        "WORKSPACE_CI_LANE": lane,
+        "WORKSPACE_CI_RUNNER_PREFIX": lane_cfg["runner_prefix"],
+        "WORKSPACE_CI_ADMISSION_V2_ENABLED": "YES",
+        "WORKSPACE_CI_PROVISIONER_SOCKET": "/run/workspace-ci/provisioner.sock",
+        "WORKSPACE_CI_PAT_FILE": "/var/lib/workspace-ci/controller/github-token",
+    }
+    return "".join(f"{key}={values[key]}\n" for key in sorted(values))
+
+
+def controller_env_sha256(manifest: dict[str, Any], lane: str) -> str:
+    return hashlib.sha256(render_controller_env(manifest, lane).encode("utf-8")).hexdigest()
 
 
 def plan_reconciliation(
@@ -49,6 +76,8 @@ def plan_reconciliation(
                     "scale_set_name": lane_cfg["scale_set_name"],
                     "runner_prefix": lane_cfg["runner_prefix"],
                     "destination": f"/etc/workspace-ci/controllers/{project_id}-{lane}.env",
+                    "content_sha256": controller_env_sha256(manifest, lane),
+                    "service_instance": f"workspace-ci-controller@{project_id}-{lane}.service",
                 }
             )
     return {
