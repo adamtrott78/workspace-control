@@ -4,7 +4,7 @@
   "source_repository": "adamtrott78/workspace-control",
   "source_default_branch": "main",
   "trusted_workflow_path": ".github/workflows/lambda-ci-project-reconcile.yml",
-  "trusted_workflow_blob_sha": "83312632370cdef6423124028bd0c94f3da4c03b",
+  "trusted_workflow_blob_sha": "c8b8baef1955ad2a8bd409756298f0703b85f270",
   "allowed_actor_logins": [
     "adamtrott78"
   ],
