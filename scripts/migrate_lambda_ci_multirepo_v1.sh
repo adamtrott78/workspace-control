@@ -74,10 +74,12 @@ chmod 0700 "$OUT" "$BACKUP"
 
 TARGETS=(
   /opt/workspace-ci/controller/lambda-ci-controller
+  /opt/workspace-ci/provisioner/lambda_ci_admission.py
   /opt/workspace-ci/provisioner/lambda_ci_multirepo.py
   /opt/workspace-ci/provisioner/lambda_ci_provisioner.py
   /opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py
   /opt/workspace-ci/provisioner/lambda_ci_runtime.py
+  /opt/workspace-ci/reconciler/lambda_ci_multirepo.py
   /opt/workspace-ci/reconciler/lambda_ci_reconciler.py
   /opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py
   /opt/workspace-ci/reconcile-controller/stage-pat
@@ -187,10 +189,12 @@ runuser -u ci-controller -- env   HOME=/var/lib/workspace-ci/controller   GOCACH
 install -o root -g root -m 0755 "$BUILD_ROOT/lambda-ci-controller" /opt/workspace-ci/controller/lambda-ci-controller
 rm -rf "$BUILD_ROOT"
 
+install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_admission.py" /opt/workspace-ci/provisioner/lambda_ci_admission.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_multirepo.py" /opt/workspace-ci/provisioner/lambda_ci_multirepo.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_provisioner.py" /opt/workspace-ci/provisioner/lambda_ci_provisioner.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_provisioner_service.py" /opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_runtime.py" /opt/workspace-ci/provisioner/lambda_ci_runtime.py
+install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_multirepo.py" /opt/workspace-ci/reconciler/lambda_ci_multirepo.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_reconciler.py" /opt/workspace-ci/reconciler/lambda_ci_reconciler.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/lambda_ci_reconcile_controller.py" /opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py
 install -o root -g root -m 0755 "$REPO_ROOT/scripts/stage_lambda_ci_reconciler_pat.sh" /opt/workspace-ci/reconcile-controller/stage-pat
@@ -270,10 +274,12 @@ out=pathlib.Path(sys.argv[1]); head=sys.argv[2]; subnet=sys.argv[3]
 install_manifest=json.loads(pathlib.Path(sys.argv[4]).read_text())
 installed_paths=[
  "/opt/workspace-ci/controller/lambda-ci-controller",
+ "/opt/workspace-ci/provisioner/lambda_ci_admission.py",
  "/opt/workspace-ci/provisioner/lambda_ci_multirepo.py",
  "/opt/workspace-ci/provisioner/lambda_ci_provisioner.py",
  "/opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py",
  "/opt/workspace-ci/provisioner/lambda_ci_runtime.py",
+ "/opt/workspace-ci/reconciler/lambda_ci_multirepo.py",
  "/opt/workspace-ci/reconciler/lambda_ci_reconciler.py",
  "/opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py",
  "/etc/workspace-ci/lambda-ci-project-registry.v1.json",
