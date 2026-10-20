@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/lambda-ci-execution-contracts.v1.schema.json",
+  "title": "Lambda CI Execution Contracts v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contracts_id",
+    "status",
+    "authority",
+    "contracts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "contracts_id": {
+      "const": "lambda-ci-execution-contracts-v1"
+    },
+    "status": {
+      "enum": [
+        "CONTRACT_ONLY_NOT_INSTALLED",
+        "ACTIVE"
+      ]
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "route_id_is_privilege",
+        "privileged_runtime_dispatch_key",
+        "unknown_execution_contract_action",
+        "unknown_route_action",
+        "experiment_specific_route_names_allowed",
+        "source_code_change_required_for_new_route_using_existing_contract"
+      ],
+      "properties": {
+        "owner": {
+          "const": "workspace-control"
+        },
+        "route_id_is_privilege": {
+          "const": false
+        },
+        "privileged_runtime_dispatch_key": {
+          "const": "resolved_execution_contract"
+        },
+        "unknown_execution_contract_action": {
+          "const": "REJECT"
+        },
+        "unknown_route_action": {
+          "const": "REJECT"
+        },
+        "experiment_specific_route_names_allowed": {
+          "const": true
+        },
+        "source_code_change_required_for_new_route_using_existing_contract": {
+          "const": false
+        }
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z][a-z0-9-]{1,63}$": {
+          "$ref": "#/$defs/contract"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lifecycle",
+        "execution_plane",
+        "execution_profile",
+        "resource_class",
+        "payload_network_class",
+        "payload_secret_class",
+        "filesystem_class",
+        "cache_access_class",
+        "state_effect_class",
+        "candidate_payload_allowed",
+        "model_binding_mode",
+        "runtime_binding_mode",
+        "gpu_count",
+        "admission_enabled_after_generic_activation"
+      ],
+      "properties": {
+        "lifecycle": {
+          "enum": [
+            "ACCEPTED_MIGRATION_EQUIVALENT",
+            "MIGRATION_PLUS_P6_VALIDATION_REQUIRED",
+            "PLANNED_NOT_ACCEPTED"
+          ]
+        },
+        "execution_plane": {
+          "const": "jit_runner"
+        },
+        "execution_profile": {
+          "enum": [
+            "cpu-test",
+            "gpu-small",
+            "gpu-heavy"
+          ]
+        },
+        "resource_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payload_network_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payload_secret_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "filesystem_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cache_access_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state_effect_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_payload_allowed": {
+          "type": "boolean"
+        },
+        "model_binding_mode": {
+          "enum": [
+            "FORBIDDEN",
+            "OPTIONAL_EXACT_IF_ROUTE_BINDS",
+            "REQUIRED_PROMOTED_EXACT"
+          ]
+        },
+        "runtime_binding_mode": {
+          "enum": [
+            "OPTIONAL_EXACT_IF_ROUTE_BINDS",
+            "REQUIRED_EXPANDED_RUNTIME_EXACT"
+          ]
+        },
+        "gpu_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "admission_enabled_after_generic_activation": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
