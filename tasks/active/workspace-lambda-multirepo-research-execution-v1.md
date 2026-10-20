@@ -43,21 +43,19 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-After this state-only closeout is merged, use its resulting canonical workspace-control main SHA as WORKSPACE_CI_MULTIREPO_EXPECTED_SHA and execute only `sudo -E scripts/migrate_lambda_ci_multirepo_v1.sh` from that exact clean Lambda checkout. Return the complete install output/receipt for inspection. Do not stage the ci-reconciler token, activate workspace-ci-reconcile-controller.service, trigger research-engine regressions, or touch PADataset until the migration receipt is accepted.
+Merge this migration-PASS checkpoint. The registry epoch-only bump intentionally triggers `.github/workflows/lambda-ci-project-reconcile.yml` on the resulting workspace-control/main head without changing execution authority. Require that trusted workflow to PASS. Then, from a clean checkout at that exact resulting main SHA, stage the dedicated workspace-control read/actions token by running the installed `/opt/workspace-ci/reconcile-controller/stage-pat` as `ci-reconciler`, and execute `scripts/activate_lambda_ci_reconcile_controller.sh` via sudo with WORKSPACE_CI_MULTIREPO_EXPECTED_SHA bound to that main SHA. Return the complete activation/root-reconciliation receipt before triggering research-engine regressions. PADataset remains untouched.
 
 ## Remaining work
 
-- Run 3: design and execute one bounded root migration/install of the validated generic controller/provisioner/runtime/reconciliation substrate on Lambda.
-- Run 3: preserve rollback to the accepted research-engine-specific installed state and prove controller/provisioner service health plus exact installed source/blob identities.
+- Run 3: activate and prove the dedicated Git-driven reconciliation controller/root path against the trusted current-main reconciliation workflow; then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
-- Run 3: activate and prove the trusted Git-driven project reconciliation controller/root path; only after that may git_driven_project_reconciliation become VALIDATED.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
 - Run 4: prove reciprocal research-engine/PADataset filesystem/process/cache isolation and verify zero controller/provisioner/runtime source changes during PADataset onboarding.
 - Final: prove a third approved repository requires only registry + manifest + thin launcher binding and freeze the reusable operating contract.
 
 ## Blockers / gates
 
-- Human-only Run-3 root gate: execute the exact one-time migration script on Lambda via sudo from the clean canonical workspace-control main checkout produced by this closeout. No authorized connector can substitute for this root host mutation.
+- One-time reconciliation credential/activation gate: stage a dedicated workspace-control read/actions token as ci-reconciler and activate workspace-ci-reconcile-controller.service after the trusted reconciliation workflow passes on the current main head.
 
 ## Fresh-chat initialization
 
