@@ -34,7 +34,7 @@
       "base_sha": "246465494256ca7e2080c442c5a8e314e445c464",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "958d6f8ed0989b2846d04b3bd3eb2ace41f5372c",
+        "checkpoint_sha": "c595d442689a4ddb4061c01a923ff0297c34bddd",
         "verified": true
       },
       "allowed_mutation_scope": [
@@ -144,6 +144,18 @@
         "Failure occurred before any benchmark payload or runner process executed.",
         "Controller recovery code treats MISSING durable state as authority to reconcile orphan JIT registration and regenerate the same deterministic request; terminal FAILED state intentionally prevents re-execution."
       ]
+    },
+    {
+      "id": "same-run-attempt2-recovery",
+      "kind": "github_workflow_retry",
+      "identity": "39200075204",
+      "required_for_resume": true,
+      "evidence": [
+        "Attempt 1 never launched a transient runner or benchmark payload; failed prelaunch and its exact state was archived.",
+        "Exact runtime fix 70d5668599de767647603ddec55815b9523d1bb8 is installed.",
+        "Controller restart cannot reconstruct the already-assigned job because pinned scale-set initial session statistics contain no JobAssigned metadata.",
+        "Recovery therefore must cancel the stuck queued attempt 1 and re-run the same workflow job/run, producing attempt 2 without posting another issue_comment trigger."
+      ]
     }
   ],
   "artifacts": [
@@ -202,17 +214,16 @@
     }
   ],
   "blockers": [
-    "Genuine root-control-plane operation required: install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8, then perform the narrowly authorized prelaunch re-arm of request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 by archiving the exact FAILED state and clearing only its active state file before restarting the GPU controller."
+    "GitHub attempt-1 cancellation gate: current run 39200075204/job 117891019967 remains queued/assigned with no recoverable JobAssigned metadata. The connector can re-run a completed/cancelled job but cannot cancel this queued run, so one user cancellation of the existing run is required."
   ],
   "remaining_work": [
-    "Install exact runtime compatibility merge 70d5668599de767647603ddec55815b9523d1bb8 through unchanged P5 bootstrap.",
-    "Before re-arm, re-prove the exact FAILED state/error and absence of receipt/log/unit/process/GPU/quarantine execution evidence.",
-    "Archive the root-owned failed state with SHA256 under /var/lib/workspace-ci/provisioner/recovery-evidence and remove only the active state file for fd30c4c6-6756-55d1-a12d-e3cb16f50d20.",
-    "Restart only workspace-ci-controller-gpu.service and allow JobAssigned recovery to reconcile orphan JIT state and regenerate the same deterministic request; do not post another trigger.",
-    "Resume ChatGPT/GitHub following of run 39200075204/job 117891019967 and validate runtime/artifact/final receipt."
+    "Cancel existing workflow run 39200075204 in GitHub; do not create a new workflow trigger/comment.",
+    "After GitHub reports attempt 1 cancelled, use the GitHub Actions re-run-job API on job 117891019967 to create attempt 2 of the same workflow run.",
+    "Follow the attempt-2 job through controller/provisioner/runtime execution and collect artifact/final root receipt.",
+    "Close runtime/provisioner/controller children after successful execution acceptance."
   ],
-  "next_safe_action": "At the root HUMAN_TERMINAL boundary, install exact runtime merge 70d5668599de767647603ddec55815b9523d1bb8. Then, only if request fd30c4c6-6756-55d1-a12d-e3cb16f50d20 still exactly matches the proven prelaunch FAILED state and still has zero execution material/residue/quarantine, archive that state with SHA256, remove only its active state file, restart workspace-ci-controller-gpu.service, and let the same GitHub job recover. Do not trigger another run.",
+  "next_safe_action": "Have the user cancel only workflow run 39200075204. After it reaches completed/cancelled, ChatGPT must call the GitHub re-run-job action for job 117891019967, creating attempt 2 of the same workflow run. Do not post another /lambda-ci-local-extract-wave1 comment.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created after exact controller and provisioner compatibility fixes were installed successfully. The existing request then failed inside privileged runtime before runner creation, exposing three final stale exact-workload guards.\n2026-10-19 implementation checkpoint: all three stale privileged runtime workload gates are patched with explicit finite workload sets; focused tests cover Wave 1 dispatch/model binding while generic gpu-heavy remains rejected.\nPR #225 validation run 39339905007 PASS; privileged runtime compatibility merged as 70d5668599de767647603ddec55815b9523d1bb8. Only exact root install and existing-run recovery remain.\n2026-10-19 recovery design: terminal replay protection correctly blocks same-request re-execution after FAILED. Because this failure is proven prelaunch with zero execution material, the task now authorizes one evidence-preserving re-arm of the same deterministic request: archive failed state, clear only active request entry, restart GPU controller, recover same JobAssigned metadata. No second GitHub trigger/run."
+  "notes": "Created after exact controller and provisioner compatibility fixes were installed successfully. The existing request then failed inside privileged runtime before runner creation, exposing three final stale exact-workload guards.\n2026-10-19 implementation checkpoint: all three stale privileged runtime workload gates are patched with explicit finite workload sets; focused tests cover Wave 1 dispatch/model binding while generic gpu-heavy remains rejected.\nPR #225 validation run 39339905007 PASS; privileged runtime compatibility merged as 70d5668599de767647603ddec55815b9523d1bb8. Only exact root install and existing-run recovery remain.\n2026-10-19 recovery design: terminal replay protection correctly blocks same-request re-execution after FAILED. Because this failure is proven prelaunch with zero execution material, the task now authorizes one evidence-preserving re-arm of the same deterministic request: archive failed state, clear only active request entry, restart GPU controller, recover same JobAssigned metadata. No second GitHub trigger/run.\n2026-10-19 same-run recovery decision: pinned scale-set listener initial-session statistics intentionally contain no job messages; the previously acquired JobAssigned metadata is no longer replayable after restart. Attempt 1 is proven prelaunch-only and archived. Use GitHub-native cancel + rerun of the same workflow run/job, not a new issue-comment trigger."
 }
