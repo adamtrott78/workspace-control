@@ -37,9 +37,20 @@ def sha256_json(value: Any) -> str:
 
 
 def request_digest(request: dict[str, Any]) -> str:
-    redacted = copy.deepcopy(request)
-    redacted["jit_config"] = "<REDACTED>"
-    return sha256_json(redacted)
+    """Hash replay-stable authority, excluding ephemeral GitHub lifecycle data."""
+    nonsecret = copy.deepcopy(
+        {
+            key: value
+            for key, value in request.items()
+            if key != "jit_config"
+        }
+    )
+    attestation = nonsecret.get("attestation")
+    if isinstance(attestation, dict):
+        attestation.pop("verified_at", None)
+        attestation.pop("job_message_type", None)
+        attestation.pop("runner_request_id", None)
+    return sha256_json(nonsecret)
 
 
 def _iso(value: datetime) -> str:
