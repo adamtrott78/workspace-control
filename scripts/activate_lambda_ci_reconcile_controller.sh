@@ -13,9 +13,13 @@ die() {
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-HEAD="$(git -c "safe.directory=$REPO_ROOT" -C "$REPO_ROOT" rev-parse HEAD)"
+git_as_invoker() {
+  runuser -u "$SUDO_USER" -- env GIT_OPTIONAL_LOCKS=0 git -C "$REPO_ROOT" "$@"
+}
+HEAD="$(git_as_invoker rev-parse HEAD)" || die "WORKSPACE_CONTROL_HEAD_READ_FAILED"
 [[ "$HEAD" == "$WORKSPACE_CI_MULTIREPO_EXPECTED_SHA" ]] || die "UNEXPECTED_WORKSPACE_CONTROL_SHA:$HEAD"
-[[ -z "$(git -c "safe.directory=$REPO_ROOT" -C "$REPO_ROOT" status --porcelain)" ]] || die "WORKSPACE_CONTROL_DIRTY"
+STATUS="$(git_as_invoker status --porcelain)" || die "WORKSPACE_CONTROL_STATUS_FAILED"
+[[ -z "$STATUS" ]] || die "WORKSPACE_CONTROL_DIRTY"
 
 TOKEN=/var/lib/workspace-ci/reconcile-controller/github-token
 [[ -f "$TOKEN" ]] || die "RECONCILIATION_TOKEN_MISSING"
