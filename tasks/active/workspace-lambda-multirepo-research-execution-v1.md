@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-BOOT RECOVERY REACHED SOCKET-ISOLATION PASS BUT RECONCILIATION RECEIPT IS MISSING. Keep all affected services disabled/contained. Run the bounded read-only post-attempt diagnostic that prints last-success.json and last-rejected.json if present, recent workspace-ci-reconcile-controller.service and workspace-ci-reconciler.service journals covering the attempt, and current service states/restart counts. Do not rerun the boot-recovery helper, manually create /run/workspace-ci, change policy, bump registry_epoch, restage the token, or onboard PADataset.
+VALIDATE RESPONSE-LIVENESS REPAIR FIRST. Review/validate branch fix-reconcile-response-liveness-run3: 120s root-response budget, in-process TRANSIENT_ERROR retry semantics, nonfatal root BrokenPipe/ConnectionReset handling after receipt persistence, recovery-helper promotion of the new controller blob, widened bounded receipt wait, exact-source manifest updates, and focused regression tests. Require full repository validation PASS before any host mutation. Keep all affected services disabled/contained. Do not rerun prior helpers, delete the existing root COMPLETED receipt, change policy, bump registry_epoch, restage the token, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: read persistent reconciliation state and journals from the failed boot-recovery attempt while services remain disabled. Inspect last-success.json, last-rejected.json, reconciliation-controller journal, root-reconciler journal, and final systemd states. Determine whether root rejected the request or the unprivileged controller failed before/after submission; do not rerun recovery until that cause is proven.
+- Run 3 immediate: validate and merge the reconciliation response-liveness repair. Require task contracts, Python regression, pinned Go controller validation, and full integration PASS. Only then rerun the exact bounded boot-recovery helper from the new validated merge; root should replay the existing COMPLETED receipt without reapplying.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ BOOT RECOVERY REACHED SOCKET-ISOLATION PASS BUT RECONCILIATION RECEIPT IS MISSIN
 
 ## Blockers / gates
 
-- Boot/runtime recovery itself reached PASS through socket isolation, but reconciliation-controller acceptance still produced no success receipt. Rollback completed and left affected services disabled. Diagnose persistent last-rejected/last-success state and the reconciliation-controller/root-reconciler journals from this attempt before any rerun.
+- Root reconciliation correctness is already proven by the persistent COMPLETED receipt, but controller acknowledgement/liveness is not yet validated. Response-liveness repair is staged on fix-reconcile-response-liveness-run3 and must pass the full repository validation tier before live recovery is retried.
 
 ## Fresh-chat initialization
 
