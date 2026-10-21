@@ -69,6 +69,12 @@ class Run3BootRecoveryHotfixTests(unittest.TestCase):
         self.assertIn("CONTROLLER_CAN_WRITE_RECONCILER_SOCKET", source)
         self.assertIn("GIT_OPTIONAL_LOCKS=0", source)
         self.assertIn('runuser -u "$SUDO_USER"', source)
+        self.assertIn(
+            '"$REPO_ROOT/scripts/lambda_ci_reconcile_controller.py"',
+            source,
+        )
+        self.assertIn("INSTALLED_RECONCILE_CONTROLLER_BLOB_DRIFT", source)
+        self.assertIn("seq 1 150", source)
 
         for forbidden in (
             "registry_epoch",
@@ -82,11 +88,16 @@ class Run3BootRecoveryHotfixTests(unittest.TestCase):
 
     def test_recovery_uses_only_accepted_predecessor_blobs(self):
         predecessors = MANIFEST["accepted_predecessor_blobs"]
-        self.assertEqual(
-            predecessors[
-                "/opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py"
-            ],
-            ["8469569ea0864e24d1c219fc3fea438367a8efc8"],
+        poller_predecessors = predecessors[
+            "/opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py"
+        ]
+        self.assertIn(
+            "8469569ea0864e24d1c219fc3fea438367a8efc8",
+            poller_predecessors,
+        )
+        self.assertIn(
+            "1229a29c40a08a100dcdda2a4e276e616b27d219",
+            poller_predecessors,
         )
         self.assertIn(
             "85a341527fa951ac6a88a4e8e15141d54f728f5a",
