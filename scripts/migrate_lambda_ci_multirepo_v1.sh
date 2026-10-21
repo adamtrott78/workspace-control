@@ -13,16 +13,19 @@ die() {
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-GIT=(git -c "safe.directory=$REPO_ROOT" -C "$REPO_ROOT")
-HEAD="$("${GIT[@]}" rev-parse HEAD)"
+git_as_invoker() {
+  runuser -u "$SUDO_USER" -- env GIT_OPTIONAL_LOCKS=0 git -C "$REPO_ROOT" "$@"
+}
+HEAD="$(git_as_invoker rev-parse HEAD)" || die "WORKSPACE_CONTROL_HEAD_READ_FAILED"
 [[ "$HEAD" == "$WORKSPACE_CI_MULTIREPO_EXPECTED_SHA" ]] || die "UNEXPECTED_WORKSPACE_CONTROL_SHA:$HEAD"
-[[ -z "$("${GIT[@]}" status --porcelain)" ]] || die "WORKSPACE_CONTROL_DIRTY"
+STATUS="$(git_as_invoker status --porcelain)" || die "WORKSPACE_CONTROL_STATUS_FAILED"
+[[ -z "$STATUS" ]] || die "WORKSPACE_CONTROL_DIRTY"
 
 INSTALL_MANIFEST="$REPO_ROOT/architecture/lambda-ci-multirepo-install.v1.json"
 [[ -f "$INSTALL_MANIFEST" ]] || die "INSTALL_MANIFEST_MISSING"
 
 python3 - "$REPO_ROOT" "$INSTALL_MANIFEST" <<'PY'
-import json, pathlib, subprocess, sys
+import hashlib, json, pathlib, sys
 root=pathlib.Path(sys.argv[1])
 manifest=json.loads(pathlib.Path(sys.argv[2]).read_text())
 if manifest.get("schema_version") != 1 or manifest.get("status") != "RUN3_VALIDATED_INSTALL_INPUT":
@@ -30,10 +33,11 @@ if manifest.get("schema_version") != 1 or manifest.get("status") != "RUN3_VALIDA
 for item in manifest.get("source_blobs", []):
     path=item["path"]
     expected=item["git_blob_sha"]
-    actual=subprocess.check_output(
-        ["git","-c",f"safe.directory={root}","-C",str(root),"hash-object",path],
-        text=True,
-    ).strip()
+    data=(root/path).read_bytes()
+    h=hashlib.sha1()
+    h.update(f"blob {len(data)}\0".encode())
+    h.update(data)
+    actual=h.hexdigest()
     if actual != expected:
         raise SystemExit(f"ERROR=SOURCE_BLOB_DRIFT:{path}:{actual}:{expected}")
 print("SOURCE_BLOB_PREFLIGHT=PASS")
@@ -97,6 +101,7 @@ TARGETS=(
   /etc/systemd/system/workspace-ci-reconciler.service
   /etc/systemd/system/workspace-ci-reconcile-controller.service
   /etc/systemd/system/workspace-ci-reconcile-controller.service.d/network.conf
+  /etc/tmpfiles.d/workspace-ci.conf
 )
 
 backup_target() {
@@ -222,6 +227,11 @@ install -o root -g root -m 0644 "$REPO_ROOT/templates/lambda-ci/workspace-ci-pro
 install -o root -g root -m 0644 "$REPO_ROOT/templates/lambda-ci/workspace-ci-controller@.service.in" /etc/systemd/system/workspace-ci-controller@.service
 install -o root -g root -m 0644 "$REPO_ROOT/systemd/workspace-ci-reconciler.service" /etc/systemd/system/workspace-ci-reconciler.service
 install -o root -g root -m 0644 "$REPO_ROOT/systemd/workspace-ci-reconcile-controller.service" /etc/systemd/system/workspace-ci-reconcile-controller.service
+install -d -o root -g root -m 0755 /etc/tmpfiles.d
+install -o root -g root -m 0644 "$REPO_ROOT/systemd/workspace-ci-tmpfiles.conf" /etc/tmpfiles.d/workspace-ci.conf
+systemd-tmpfiles --create /etc/tmpfiles.d/workspace-ci.conf
+[[ "$(stat -c '%U:%G' /run/workspace-ci)" == "root:root" ]] || die "SOCKET_PARENT_OWNER_DRIFT_AFTER_TMPFILES"
+[[ "$(stat -c '%a' /run/workspace-ci)" == "711" ]] || die "SOCKET_PARENT_MODE_DRIFT_AFTER_TMPFILES"
 
 PYTHONPATH="$REPO_ROOT/scripts" python3 - "$REPO_ROOT/architecture/lambda-ci-project-research-engine.v2.json" /tmp/research-engine-cpu.env /tmp/research-engine-gpu.env <<'PY'
 import json, pathlib, sys
@@ -259,8 +269,13 @@ systemctl enable workspace-ci-controller@research-engine-cpu.service workspace-c
 systemctl restart workspace-ci-controller@research-engine-cpu.service
 systemctl restart workspace-ci-controller@research-engine-gpu.service
 
-for service in   workspace-ci-provisioner.service   workspace-ci-reconciler.service   workspace-ci-controller@research-engine-cpu.service   workspace-ci-controller@research-engine-gpu.service
+for service in \
+  workspace-ci-provisioner.service \
+  workspace-ci-reconciler.service \
+  workspace-ci-controller@research-engine-cpu.service \
+  workspace-ci-controller@research-engine-gpu.service
 do
+  systemctl is-enabled --quiet "$service" || die "POSTMIGRATION_SERVICE_NOT_ENABLED:$service"
   systemctl is-active --quiet "$service" || die "POSTMIGRATION_SERVICE_NOT_ACTIVE:$service"
 done
 
@@ -300,6 +315,7 @@ installed_paths=[
  "/etc/workspace-ci/lambda-ci-reconciliation-ceiling.v1.json",
  "/etc/workspace-ci/projects/research-engine.json",
  "/etc/workspace-ci/projects/padataset.json",
+ "/etc/tmpfiles.d/workspace-ci.conf",
 ]
 def sha(path):
  h=hashlib.sha256()
