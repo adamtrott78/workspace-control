@@ -417,9 +417,13 @@
         "full review transcript reconciliation",
         "current behavioral mastery evidence"
       ],
-      "outputs": [],
+      "outputs": [
+        "study/exam1/practice_factory/PRACTICE_SERIES_FINAL.md",
+        "study/exam1/practice_factory/tests/PT1_POST_REVIEW_CENTROID.md",
+        "Practice Test 1 is ready: 25 points, 75 minutes, final v1.0 cheat sheet allowed, no hints/key until submission."
+      ],
       "validation": [],
-      "resume_condition": "Run full 25-point/75-minute cheat-sheet-allowed practice tests from the final posterior; grade by subpart; remediate only demonstrated gaps; finish with one final timed simulation."
+      "resume_condition": "Student should take PT1 under full-test conditions with v1.0 cheat sheet, submit complete work, then grade by subpart and select/remediate adaptively."
     }
   ],
   "checkpoints": [
@@ -516,6 +520,18 @@
         "v0.98 manifest records dense layout and added CFG/machine/regex decision aids.",
         "Working PDF is 2 US Letter pages and passed preflight plus visual QA.",
         "Tomorrow transcript pass is delta-only."
+      ]
+    },
+    {
+      "id": "cis560-exam1-final-transcript-and-pt1",
+      "kind": "git_commit",
+      "identity": "c42a467c6c3c6f8885a2df6b51871be50cc6f501",
+      "required_for_resume": true,
+      "evidence": [
+        "Full review transcript reconciled with no material scope reversal.",
+        "Final cheat sheet v1.0 frozen.",
+        "Six-test final series designed.",
+        "PT1 post-review centroid materialized with no answer key exposed."
       ]
     }
   ],
@@ -669,12 +685,12 @@
     "October 20 review has not occurred; final cheat-sheet density/weighting remains intentionally unfrozen."
   ],
   "remaining_work": [
-    "Take posterior-guided full practice tests with the final v1.0 cheat sheet under 75-minute conditions.",
-    "Grade each test by subpart and update mastery only from demonstrated behavior.",
-    "Between tests, remediate only observed gaps with one fresh transfer.",
-    "Finish with one final timed simulation before the Oct. 22 exam."
+    "Complete Practice Test 1 with final v1.0 cheat sheet.",
+    "Grade PT1 by subpart and remediate only demonstrated gaps.",
+    "Continue through adaptive full-test series until performance stabilizes.",
+    "Finish with final timed simulation before Oct. 22 exam."
   ],
-  "next_safe_action": "Begin Practice Test 1 (post-review centroid) with the final v1.0 cheat sheet allowed. Use full-test conditions: 25 points, 75 minutes, no hints/answer key until submission. Grade afterward and select the next test adaptively.",
+  "next_safe_action": "Take PT1_POST_REVIEW_CENTROID under 75-minute conditions using only the final v1.0 cheat sheet. Do not provide hints or answer key until the complete test is submitted. Then grade by subpart, record meaningful mastery deltas, remediate only real gaps, and select PT2 adaptively.",
   "last_executor": "chatgpt",
   "last_surface": "github+chat",
   "notes": "Post-MTH October 19 state: Lecture 11 is fully transcript-reconciled. CYK is required/conceptually in scope, but Xu explicitly says the complete CYK procedure will not be tested. Lecture 12 instructor notes close new-content scope at Section 2.3 and explicitly exclude Section 2.4. Lecture 12 re-emphasizes the non-CFL pumping proof recipe (choose an in-language p-dependent witness of length >=p; defeat every legal five-part split), REG ⊊ CFL, DFA/NFA→PDA, and regular closure. The earlier attachment supplied with the L12 notes was SHA-256 8048a3ba5b06ef66c8ed8f054ed470b36f16254f79cbe794197eaaa3287002e4, identical to L11 and remains excluded. A genuine L12 transcript was subsequently supplied (SHA-256 5dee87e3d2eafa6692239356f36e5bdb4de473dd3e42394d9d16515aff8f8902) and is now fully reconciled. Behavioral diagnostics completed in the post-MTH restart: independent CFG transfer across count-decomposition and palindrome/outside-in families; independent simple PDA phase/stack mechanics; independent regular-pumping tight-boundary witness selection; strong CFL non-CFL witness/case analysis with tutor compression of presentation. Remaining construction risk is relatively higher in NFA/regex/HW1-derived material. The October 20 review remains the strongest final weighting source. Historical 2024 Exam 1, when supplied, may inform predictions but never override Fall 2026 Xu authority. Historical 2024 Exam 1 is now fully ingested from all four photographed pages. It was 25 points: Q1 five T/F items and Q2-Q5 four five-point short problems. Q2 bundled NFA interpretation, regex, DFA, and complement; Q3 was scaffolded RL pumping nonregularity; Q4 was CFL show-pumpability by filling uvxyz; Q5 bundled DFA, DFA->CFG, and intersection. This strongly supports format continuity and the current two-layer cheat-sheet architecture, but remains subordinate to Fall 2026 authority. A durable adaptive practice-test factory was created on Oct. 19. It uses the 2026 exam invariants and Lecture 1-12 scope as authority, the 2024 exam only as structural/predictive evidence, generates 25-point/75-minute Xu-style tests, enforces freshness and mathematical validation, hides answer keys until attempts, and reweights future tests from mastery evidence. On Oct. 19 the practice-test factory was upgraded to a predictive ensemble. A 10,000-blueprint pre-review simulation (seed 5602026) was run from evidence-only priors. This does not create new evidence; it averages the implications of the current evidence model. Predictive priors are now strictly separate from mastery/remediation weights."
