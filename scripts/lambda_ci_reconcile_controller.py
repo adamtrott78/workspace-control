@@ -111,17 +111,80 @@ def _load_token(path: pathlib.Path) -> str:
     return token
 
 
-def _select_current_successful_run(
-    client: GitHubClient,
-    allowed_actors: set[str],
-) -> dict[str, Any] | None:
+def _current_main_sha(client: GitHubClient) -> str:
     branch = client.get_json(
         f"/repos/{SOURCE_REPOSITORY}/branches/{SOURCE_BRANCH}"
     )
     current_sha = branch.get("commit", {}).get("sha") if isinstance(branch, dict) else None
     if not isinstance(current_sha, str) or len(current_sha) != 40:
         raise ReconcileControllerError("unable to resolve current workspace-control main")
+    return current_sha
 
+
+def _is_ancestor(client: GitHubClient, base_sha: str, head_sha: str) -> bool:
+    if base_sha == head_sha:
+        return True
+    compare = client.get_json(
+        f"/repos/{SOURCE_REPOSITORY}/compare/{base_sha}...{head_sha}"
+    )
+    if not isinstance(compare, dict):
+        raise ReconcileControllerError("GitHub compare response is invalid")
+    return compare.get("status") == "ahead"
+
+
+def _reconciliation_input_blobs(
+    client: GitHubClient,
+    sha: str,
+) -> dict[str, str]:
+    paths = [
+        WORKFLOW_PATH,
+        "architecture/lambda-ci-project-registry.v1.json",
+        "architecture/lambda-ci-execution-contracts.v1.json",
+    ]
+    result: dict[str, str] = {}
+    registry_raw: bytes | None = None
+    for path in paths:
+        raw, blob_sha = client.content_at(path, sha)
+        result[path] = blob_sha
+        if path == "architecture/lambda-ci-project-registry.v1.json":
+            registry_raw = raw
+    if registry_raw is None:
+        raise ReconcileControllerError("project registry input is unavailable")
+    try:
+        registry = json.loads(registry_raw)
+    except json.JSONDecodeError as exc:
+        raise ReconcileControllerError("project registry input is invalid JSON") from exc
+    if not isinstance(registry, dict):
+        raise ReconcileControllerError("project registry input must be object")
+    projects = registry.get("projects")
+    if not isinstance(projects, dict):
+        raise ReconcileControllerError("project registry projects are invalid")
+    for project_id, entry in sorted(projects.items()):
+        if not isinstance(entry, dict):
+            raise ReconcileControllerError(f"registry project invalid: {project_id}")
+        path = entry.get("manifest_source_path")
+        if not isinstance(path, str):
+            raise ReconcileControllerError(f"manifest path missing: {project_id}")
+        _, blob_sha = client.content_at(path, sha)
+        result[path] = blob_sha
+    return result
+
+
+def _reconciliation_inputs_equivalent(
+    client: GitHubClient,
+    approved_sha: str,
+    current_sha: str,
+) -> bool:
+    return _reconciliation_input_blobs(
+        client, approved_sha
+    ) == _reconciliation_input_blobs(client, current_sha)
+
+
+def _select_current_successful_run(
+    client: GitHubClient,
+    allowed_actors: set[str],
+) -> dict[str, Any] | None:
+    current_sha = _current_main_sha(client)
     workflow_id = urllib.parse.quote(WORKFLOW_ID, safe="")
     runs = client.get_json(
         f"/repos/{SOURCE_REPOSITORY}/actions/workflows/{workflow_id}/runs"
@@ -135,7 +198,10 @@ def _select_current_successful_run(
             continue
         if run.get("status") != "completed" or run.get("conclusion") != "success":
             continue
-        if run.get("head_branch") != SOURCE_BRANCH or run.get("head_sha") != current_sha:
+        if run.get("head_branch") != SOURCE_BRANCH:
+            continue
+        approved_sha = run.get("head_sha")
+        if not isinstance(approved_sha, str) or len(approved_sha) != 40:
             continue
         if run.get("event") not in {"push", "workflow_dispatch"}:
             continue
@@ -143,7 +209,16 @@ def _select_current_successful_run(
         triggering = run.get("triggering_actor", {}).get("login", actor)
         if actor not in allowed_actors or triggering not in allowed_actors:
             continue
-        return run
+        if not _is_ancestor(client, approved_sha, current_sha):
+            continue
+        if not _reconciliation_inputs_equivalent(
+            client, approved_sha, current_sha
+        ):
+            continue
+        selected = dict(run)
+        selected["_observed_main_sha"] = current_sha
+        selected["_policy_equivalent_to_main"] = True
+        return selected
     return None
 
 
@@ -287,12 +362,17 @@ def run_once(
         if (
             prior.get("commit_sha") == request["source_attestation"]["commit_sha"]
             and prior.get("request_id") == request["request_id"]
+            and prior.get("response", {}).get("status") == "PASS"
         ):
-            return {
-                "status": "ALREADY_RECONCILED",
-                "commit_sha": prior["commit_sha"],
-                "request_id": prior["request_id"],
-            }
+            refreshed = dict(prior)
+            refreshed["timestamp_utc"] = _utc_now()
+            refreshed["approved_policy_sha"] = request["source_attestation"]["commit_sha"]
+            refreshed["observed_main_sha"] = run.get("_observed_main_sha")
+            refreshed["policy_equivalent_to_observed_main"] = (
+                run.get("_policy_equivalent_to_main") is True
+            )
+            _atomic_state(success_path, refreshed)
+            return {"status": "ALREADY_RECONCILED", **refreshed}
     if rejected_path.is_file():
         prior = json.loads(rejected_path.read_text(encoding="utf-8"))
         if (
@@ -309,6 +389,11 @@ def run_once(
     state = {
         "timestamp_utc": _utc_now(),
         "commit_sha": request["source_attestation"]["commit_sha"],
+        "approved_policy_sha": request["source_attestation"]["commit_sha"],
+        "observed_main_sha": run.get("_observed_main_sha"),
+        "policy_equivalent_to_observed_main": (
+            run.get("_policy_equivalent_to_main") is True
+        ),
         "request_id": request["request_id"],
         "workflow_run_id": run.get("id"),
         "response": response,

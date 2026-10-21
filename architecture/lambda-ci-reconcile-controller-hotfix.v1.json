@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "status": "VALIDATED_HOTFIX_INPUT",
+  "hotfix_id": "lambda-ci-reconcile-controller-unrelated-main-race-v1",
+  "source_blobs": [
+    {
+      "path": "scripts/lambda_ci_reconcile_controller.py",
+      "git_blob_sha": "8469569ea0864e24d1c219fc3fea438367a8efc8",
+      "destination": "/opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py",
+      "mode": "0755",
+      "owner": "root:root"
+    }
+  ],
+  "mutation_scope": [
+    "/opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py",
+    "workspace-ci-reconcile-controller.service restart"
+  ],
+  "explicit_non_scope": [
+    "root reconciler",
+    "provisioner",
+    "runtime",
+    "research-engine project policy",
+    "PADataset identity/root/controllers",
+    "execution contracts"
+  ]
+}
