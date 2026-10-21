@@ -44,7 +44,8 @@
     },
     {
       "path": "scripts/lambda_ci_reconcile_controller.py",
-      "git_blob_sha": "79268b5ed3716935269eafb4f57ecee519b6137f"
+      "git_blob_sha": "8469569ea0864e24d1c219fc3fea438367a8efc8",
+      "note": "Run-3 post-install unrelated-main race correction; live promotion remains scoped by architecture/lambda-ci-reconcile-controller-hotfix.v1.json."
     },
     {
       "path": "scripts/stage_lambda_ci_reconciler_pat.sh",
