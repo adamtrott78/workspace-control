@@ -280,6 +280,31 @@ class ReconcileControllerTests(unittest.TestCase):
                 refreshed["policy_equivalent_to_observed_main"]
             )
 
+    def test_root_response_liveness_exceeds_observed_apply_window(self):
+        self.assertGreaterEqual(controller.ROOT_RESPONSE_TIMEOUT_SECONDS, 120)
+        source = (ROOT / "scripts/lambda_ci_reconcile_controller.py").read_text()
+        self.assertIn("except socket.timeout as exc:", source)
+        self.assertIn('"status": "TRANSIENT_ERROR"', source)
+        self.assertIn("root reconciler response timed out after", source)
+
+    def test_request_identity_is_stable_across_equivalent_main_advance(self):
+        approved = "a" * 40
+        first = FakeGitHub(approved_sha=approved, current_sha="b" * 40)
+        second = FakeGitHub(approved_sha=approved, current_sha="c" * 40)
+        first_run = controller._select_current_successful_run(first, {"adamtrott78"})
+        second_run = controller._select_current_successful_run(second, {"adamtrott78"})
+        first_request = controller.build_request(
+            first, run=first_run, allowed_actors={"adamtrott78"}
+        )
+        second_request = controller.build_request(
+            second, run=second_run, allowed_actors={"adamtrott78"}
+        )
+        self.assertEqual(first_request["request_id"], second_request["request_id"])
+        self.assertEqual(
+            first_request["source_attestation"]["commit_sha"],
+            second_request["source_attestation"]["commit_sha"],
+        )
+
     def test_reconciliation_workflow_is_main_only_not_candidate_triggered(self):
         workflow = (ROOT / controller.WORKFLOW_PATH).read_text()
         self.assertIn("branches:", workflow)
