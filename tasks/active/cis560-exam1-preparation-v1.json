@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "cis560-exam1",
-  "current_stage": "cheat_sheet_build",
+  "current_stage": "final_exam_readiness",
   "acceptance_criteria": [
     "The October 8 direct instructor exam invariants remain the primary current-semester format authority until transcript/review evidence corrects them.",
     "The full Q2-Q5 candidate-family pool named by Xu is preserved explicitly: simple DFA, simple NFA, regular-expression work, CFG design, PDA design, show RL pumping property, show CFL pumping property, prove not regular with pumping, and prove not context free with CFL pumping.",
@@ -377,7 +377,7 @@
     },
     {
       "id": "cheat_sheet_build",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "cis560-exam1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+artifact-tools",
@@ -388,39 +388,38 @@
         "current behavioral mastery gaps"
       ],
       "outputs": [
-        "study/exam1/CHEATSHEET_CANDIDATES.md final-review allocation lock.",
-        "study/exam1/artifacts/CIS560_EXAM1_CHEATSHEET_V0_9_MANIFEST.md (updated to v0.98 working-sheet architecture).",
-        "Rendered working PDF in originating chat: CIS560_Exam1_Cheat_Sheet_v0_98.pdf; exactly two US Letter pages; visually QA'd."
+        "Final rendered cheat sheet: CIS560_Exam1_Cheat_Sheet_v1_0.pdf in originating chat.",
+        "study/exam1/artifacts/CIS560_EXAM1_CHEATSHEET_V0_9_MANIFEST.md updated as v1.0 final regeneration manifest.",
+        "study/exam1/FINAL_REVIEW_TRANSCRIPT_RECONCILIATION_2026-10-21.md."
       ],
       "validation": [
         {
-          "check": "v0.98 dense working cheat sheet rendered and visually QA'd",
+          "check": "Full review transcript delta applied and final sheet frozen",
           "result": "PASS",
           "evidence": [
-            "Exactly 2 US Letter pages, portrait, three columns.",
-            "Preflight openable/non-encrypted/non-scanned.",
-            "No clipping or overlaps in 200-DPI inspection.",
-            "Recovered unused space is now used for machine-design patterns, regex phrasebook, closure-proof recipe, NFA->DFA fallback, expanded CFG recognition/design, PDA micro-patterns, and CFL proof-route selection.",
-            "Small transcript-delta reserve remains for Oct. 21."
+            "Transcript produced no material scope reversal.",
+            "v1.0 adds only pumping-length nuance and resolved CFG-equivalence background note.",
+            "PDF remains exactly two US Letter pages and passed render/preflight inspection."
           ]
         }
       ],
-      "resume_condition": "On Oct. 21 ingest the full Oct. 20 review transcript and delta-check v0.98 only. Patch exact material scope/emphasis changes, rerender/QA, then freeze and print-test."
+      "resume_condition": null
     },
     {
       "id": "final_exam_readiness",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "cis560-exam1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+chat",
       "inputs": [
-        "October 21 mixed timed practice",
-        "final cheat sheet",
-        "current mastery/learning evidence"
+        "final v1.0 cheat sheet",
+        "post-review predictive posterior",
+        "full review transcript reconciliation",
+        "current behavioral mastery evidence"
       ],
       "outputs": [],
       "validation": [],
-      "resume_condition": "Use a timed mixed mini-midterm and fresh/delayed transfer. Promote to exam-ready only where the student independently selects and executes the method under minimal scaffolding."
+      "resume_condition": "Run full 25-point/75-minute cheat-sheet-allowed practice tests from the final posterior; grade by subpart; remediate only demonstrated gaps; finish with one final timed simulation."
     }
   ],
   "checkpoints": [
@@ -670,12 +669,12 @@
     "October 20 review has not occurred; final cheat-sheet density/weighting remains intentionally unfrozen."
   ],
   "remaining_work": [
-    "Oct. 21 transcript-delta review of the rendered v0.9 cheat sheet; freeze final after rerender/QA and physical print check.",
-    "Run posterior-guided hybrid practice: automata/regex bundle, regex->NFA, regular pumping triad, CFL show-pumpability, and one CFG/PDA mixed check as needed.",
-    "Keep one non-CFL proof refresh for coverage without overinvesting.",
-    "Complete final timed readiness check before the October 22 exam."
+    "Take posterior-guided full practice tests with the final v1.0 cheat sheet under 75-minute conditions.",
+    "Grade each test by subpart and update mastery only from demonstrated behavior.",
+    "Between tests, remediate only observed gaps with one fresh transfer.",
+    "Finish with one final timed simulation before the Oct. 22 exam."
   ],
-  "next_safe_action": "Oct. 21: compare the full review transcript against the live-note model and v0.98 working cheat sheet. Apply only material deltas, rerender/QA, freeze, and print-test. Do not revert to the sparse v0.9 layout.",
+  "next_safe_action": "Begin Practice Test 1 (post-review centroid) with the final v1.0 cheat sheet allowed. Use full-test conditions: 25 points, 75 minutes, no hints/answer key until submission. Grade afterward and select the next test adaptively.",
   "last_executor": "chatgpt",
   "last_surface": "github+chat",
   "notes": "Post-MTH October 19 state: Lecture 11 is fully transcript-reconciled. CYK is required/conceptually in scope, but Xu explicitly says the complete CYK procedure will not be tested. Lecture 12 instructor notes close new-content scope at Section 2.3 and explicitly exclude Section 2.4. Lecture 12 re-emphasizes the non-CFL pumping proof recipe (choose an in-language p-dependent witness of length >=p; defeat every legal five-part split), REG ⊊ CFL, DFA/NFA→PDA, and regular closure. The earlier attachment supplied with the L12 notes was SHA-256 8048a3ba5b06ef66c8ed8f054ed470b36f16254f79cbe794197eaaa3287002e4, identical to L11 and remains excluded. A genuine L12 transcript was subsequently supplied (SHA-256 5dee87e3d2eafa6692239356f36e5bdb4de473dd3e42394d9d16515aff8f8902) and is now fully reconciled. Behavioral diagnostics completed in the post-MTH restart: independent CFG transfer across count-decomposition and palindrome/outside-in families; independent simple PDA phase/stack mechanics; independent regular-pumping tight-boundary witness selection; strong CFL non-CFL witness/case analysis with tutor compression of presentation. Remaining construction risk is relatively higher in NFA/regex/HW1-derived material. The October 20 review remains the strongest final weighting source. Historical 2024 Exam 1, when supplied, may inform predictions but never override Fall 2026 Xu authority. Historical 2024 Exam 1 is now fully ingested from all four photographed pages. It was 25 points: Q1 five T/F items and Q2-Q5 four five-point short problems. Q2 bundled NFA interpretation, regex, DFA, and complement; Q3 was scaffolded RL pumping nonregularity; Q4 was CFL show-pumpability by filling uvxyz; Q5 bundled DFA, DFA->CFG, and intersection. This strongly supports format continuity and the current two-layer cheat-sheet architecture, but remains subordinate to Fall 2026 authority. A durable adaptive practice-test factory was created on Oct. 19. It uses the 2026 exam invariants and Lecture 1-12 scope as authority, the 2024 exam only as structural/predictive evidence, generates 25-point/75-minute Xu-style tests, enforces freshness and mathematical validation, hides answer keys until attempts, and reweights future tests from mastery evidence. On Oct. 19 the practice-test factory was upgraded to a predictive ensemble. A 10,000-blueprint pre-review simulation (seed 5602026) was run from evidence-only priors. This does not create new evidence; it averages the implications of the current evidence model. Predictive priors are now strictly separate from mastery/remediation weights."
