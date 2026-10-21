@@ -24,7 +24,7 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9018d947202915ff6bed3762e0e0827a5482979e
+- Remote checkpoint: f924f2bf45fbf05aa3f0dc2ea036354143834246
 - Remote verified: true
 
 ### research-engine
@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-VALIDATE RESPONSE-LIVENESS REPAIR FIRST. Review/validate branch fix-reconcile-response-liveness-run3: 120s root-response budget, in-process TRANSIENT_ERROR retry semantics, nonfatal root BrokenPipe/ConnectionReset handling after receipt persistence, recovery-helper promotion of the new controller blob, widened bounded receipt wait, exact-source manifest updates, and focused regression tests. Require full repository validation PASS before any host mutation. Keep all affected services disabled/contained. Do not rerun prior helpers, delete the existing root COMPLETED receipt, change policy, bump registry_epoch, restage the token, or onboard PADataset.
+VALIDATED RESPONSE-LIVENESS RECOVERY READY. Keep the existing root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e intact. Create/reuse a fresh clean detached workspace-control worktree at exact SHA f924f2bf45fbf05aa3f0dc2ea036354143834246 and execute `scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh` via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. The helper now promotes the 120s/in-process retry controller and nonfatal-disconnect root reconciler, restores the validated boot/socket contract, and should obtain controller last-success by idempotently replaying the already-COMPLETED request without reapplying. Require RUN3_BOOT_RECOVERY=PASS and RUN3_RECONCILIATION_PLANE=PASS with zero restart-count increase. Do not delete root receipts, run older helpers, change policy, bump registry_epoch, restage the token, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: validate and merge the reconciliation response-liveness repair. Require task contracts, Python regression, pinned Go controller validation, and full integration PASS. Only then rerun the exact bounded boot-recovery helper from the new validated merge; root should replay the existing COMPLETED receipt without reapplying.
+- Run 3 immediate: from a fresh clean detached worktree at exact validated SHA f924f2bf45fbf05aa3f0dc2ea036354143834246, rerun scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. Require source+installed-state preflights, boot socket isolation PASS, controller/root liveness with zero restart increase, terminal last-success PASS replaying the existing root COMPLETED receipt, and RUN3_RECONCILIATION_PLANE=PASS.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ VALIDATE RESPONSE-LIVENESS REPAIR FIRST. Review/validate branch fix-reconcile-re
 
 ## Blockers / gates
 
-- Root reconciliation correctness is already proven by the persistent COMPLETED receipt, but controller acknowledgement/liveness is not yet validated. Response-liveness repair is staged on fix-reconcile-response-liveness-run3 and must pass the full repository validation tier before live recovery is retried.
+- Validated response-liveness recovery is ready but not yet applied live. Services remain contained/disabled from the previous rollback. Preserve root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e for idempotent replay.
 
 ## Fresh-chat initialization
 
