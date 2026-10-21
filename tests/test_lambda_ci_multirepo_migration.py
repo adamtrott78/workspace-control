@@ -42,6 +42,7 @@ class MultiRepoRun3MigrationTests(unittest.TestCase):
             "scripts/activate_lambda_ci_reconcile_controller.sh",
             "scripts/hotfix_lambda_ci_reconcile_controller_race.sh",
             "scripts/lambda_ci_reconciliation_socket_hotfix_v1.sh",
+            "scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh",
             "scripts/stage_lambda_ci_reconciler_pat.sh",
         ):
             result = subprocess.run(
@@ -62,6 +63,20 @@ class MultiRepoRun3MigrationTests(unittest.TestCase):
         self.assertIn("SOCKET_PARENT_OWNER_DRIFT", migration)
         self.assertIn("SOCKET_PARENT_MODE_DRIFT", migration)
         self.assertIn("RECONCILER_SOCKET_PARENT_NOT_TRAVERSABLE", migration)
+
+    def test_run3_boot_runtime_directory_is_persistent_and_services_enableable(self):
+        tmpfiles = (ROOT / "systemd" / "workspace-ci-tmpfiles.conf").read_text()
+        self.assertIn("d /run/workspace-ci 0711 root root - -", tmpfiles)
+
+        provisioner = (
+            ROOT / "templates/lambda-ci/workspace-ci-provisioner-multirepo.service.in"
+        ).read_text()
+        controller = (
+            ROOT / "templates/lambda-ci/workspace-ci-controller@.service.in"
+        ).read_text()
+        for unit in (provisioner, controller):
+            self.assertIn("[Install]", unit)
+            self.assertIn("WantedBy=multi-user.target", unit)
 
     def test_root_reconciler_is_network_closed(self):
         unit = (ROOT / "systemd/workspace-ci-reconciler.service").read_text()
