@@ -61,11 +61,11 @@
     },
     {
       "path": "templates/lambda-ci/workspace-ci-controller@.service.in",
-      "git_blob_sha": "5372c87747e54a4a6cf213eb86f10ccd6fb1b56c"
+      "git_blob_sha": "03ee9278bfcc8d9a455ecdacefd7bee5bd4a50b7"
     },
     {
       "path": "templates/lambda-ci/workspace-ci-provisioner-multirepo.service.in",
-      "git_blob_sha": "ca8d59ea9afbbb5f9ecefb6c33d788f479d35a0c"
+      "git_blob_sha": "acdadf5ce6f152d7f1d04e5308657d35e0585d4f"
     },
     {
       "path": "systemd/workspace-ci-reconciler.service",
