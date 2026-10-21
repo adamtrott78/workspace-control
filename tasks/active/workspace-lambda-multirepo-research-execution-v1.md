@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-CREDENTIAL DEFECT IS PROVEN; keep workspace-ci-reconcile-controller.service stopped. Create/replace only the dedicated fine-grained GitHub reconciliation token for repository adamtrott78/workspace-control with repository permissions Contents=Read-only and Actions=Read-only (no write permissions). Restage it using `sudo -u ci-reconciler /opt/workspace-ci/reconcile-controller/stage-pat`, then rerun the non-secret GitHub capability probe. Require authenticated_user, workspace_control_metadata, contents_branch_main, contents_registry, and actions_workflow_runs to return HTTP_200 before restarting the controller or rerunning the validated PR #239 hotfix acceptance. Do not change reconciliation policy, bump registry_epoch, rerun the full migration, or onboard PADataset.
+REPOSITORY-SELECTION DEFECT IS PROVEN; keep workspace-ci-reconcile-controller.service stopped. Recreate the fine-grained GitHub PAT with resource owner `adamtrott78`, repository access `Only select repositories` -> `workspace-control`, and repository permissions `Contents: Read-only` plus `Actions: Read-only` only. Restage it with `sudo -u ci-reconciler /opt/workspace-ci/reconcile-controller/stage-pat`. Before restarting anything, rerun the repository-visibility diagnostic and require `authenticated_login=adamtrott78`, `workspace_control_visible_to_token=YES`, then rerun the five-endpoint capability probe and require five HTTP_200 results. Do not change reconciliation policy, bump registry_epoch, rerun the full migration, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: replace the dedicated reconciliation credential with a fine-grained token scoped only to adamtrott78/workspace-control and minimum repository read authority (Contents read + Actions read), restage it through the existing ci-reconciler stage-pat helper, rerun the non-secret capability probe requiring private repo/branch/content/workflow-run access, then rerun the validated reconciliation-plane acceptance without a registry bump.
+- Run 3 immediate: recreate the dedicated fine-grained reconciliation token with resource owner adamtrott78, explicit repository access to workspace-control, and only Contents read + Actions read; restage it, require workspace_control_visible_to_token=YES plus all five capability probes HTTP_200, then rerun the validated reconciliation-plane acceptance without a registry bump.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ CREDENTIAL DEFECT IS PROVEN; keep workspace-ci-reconcile-controller.service stop
 
 ## Blockers / gates
 
-- The dedicated reconciliation GitHub credential authenticates but cannot access the private adamtrott78/workspace-control repository (repo metadata/branch/content/Actions probes all HTTP 404). The reconciliation controller is intentionally stopped until that credential is replaced and re-proven; do not bump the registry, rerun root migration, or touch PADataset.
+- The freshly staged reconciliation token authenticates as adamtrott78 but `workspace-control` is not in its accessible private-repository set (`workspace_control_visible_to_token=NO`). The reconciliation controller remains intentionally stopped. Recreate the fine-grained PAT with resource owner adamtrott78 and explicit repository selection `workspace-control`; do not bump the registry, rerun root migration, or touch PADataset.
 
 ## Fresh-chat initialization
 
