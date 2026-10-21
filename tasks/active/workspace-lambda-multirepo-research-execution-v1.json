@@ -369,7 +369,7 @@
         },
         {
           "check": "Initial reconciliation-controller activation attempts",
-          "result": "FAIL_CLOSED_EXPECTED",
+          "result": "FAIL",
           "evidence": [
             "Activation against 429b1d8b362ab74c09e51b75b0a27053abfa36b2 enabled the service but did not produce a matching terminal reconciliation receipt before current main advanced.",
             "Recovery epoch checkpoint 7fedc5d288aa5a9558877dd8b42763505e9199eb had trusted reconciliation workflow run 39519424039 PASS.",
@@ -379,7 +379,7 @@
         },
         {
           "check": "Unrelated-main reconciliation race root cause and code hotfix",
-          "result": "PASS_CODE_VALIDATED_NOT_YET_LIVE",
+          "result": "PASS",
           "evidence": [
             "Root cause: the original poller required successful reconciliation workflow head_sha to equal current workspace-control/main exactly; unrelated monorepo commits could advance main without changing reconciliation policy, causing perpetual `NO_CURRENT_SUCCESSFUL_RECONCILIATION_RUN` / missing last-success.",
             "PR #239 `Fix reconciliation race on unrelated main commits` merged as f95696ecc00110754b2479d4efe5e265379ed5a3.",
