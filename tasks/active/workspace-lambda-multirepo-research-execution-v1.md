@@ -24,7 +24,7 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8adfe21f553d4cf5c2d4ff3299d2ced611ec4fa1
+- Remote checkpoint: 9018d947202915ff6bed3762e0e0827a5482979e
 - Remote verified: true
 
 ### research-engine
@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-VALIDATE REBOOT RECOVERY SOURCE FIRST. Review/validate branch fix-run3-reboot-runtime-contract-v1: systemd tmpfiles bootstrap for /run/workspace-ci root:root 0711, boot-enableable generic provisioner/controller templates, tmpfiles ordering for root services, migration boot assertions, exact accepted-predecessor hotfix manifest, bounded rollback-capable boot recovery helper, and focused tests. Require the repository's full validation tier to PASS before any live host mutation. Keep workspace-ci-provisioner.service and workspace-ci-reconciler.service stopped/contained meanwhile. Do not manually mkdir /run/workspace-ci, rerun the old socket helper, change policy, bump registry_epoch, restage the token, or onboard PADataset.
+VALIDATED RUN-3 BOOT RECOVERY READY. Keep the broken root services contained until execution. Create/reuse a fresh clean detached workspace-control worktree at exact SHA 9018d947202915ff6bed3762e0e0827a5482979e, then run `scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh` via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. The helper must prove exact source and accepted installed-state preflights, install the tmpfiles boot contract, recover /run/workspace-ci as root:root 0711, enable+activate provisioner/reconciler/research-engine CPU+GPU controllers, preserve cross-socket denial, obtain the terminal reconciliation PASS with policy equivalence and PADataset skipped, and show zero restart-count increase across its stability window. Do not manually mkdir /run/workspace-ci, run older hotfix helpers, change policy, bump registry_epoch, restage the token, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: validate and merge the reboot/runtime-directory repair. Require task contracts, Python regression, pinned Go controller validation, and full integration PASS. Only then run the exact validated boot-recovery helper from a fresh detached worktree.
+- Run 3 immediate: from a fresh clean detached worktree at exact validated repair SHA 9018d947202915ff6bed3762e0e0827a5482979e, execute scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. Require source+installed-state preflights, boot socket isolation PASS, all intended services enabled+active+stable, terminal reconciliation receipt PASS, and RUN3_RECONCILIATION_PLANE=PASS.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ VALIDATE REBOOT RECOVERY SOURCE FIRST. Review/validate branch fix-run3-reboot-ru
 
 ## Blockers / gates
 
-- The reboot/runtime-directory and service-enablement defects are diagnosed and a bounded source repair is staged on branch fix-run3-reboot-runtime-contract-v1, but it is not yet validated or live. Keep the crash-looping root services contained; do not manually create /run/workspace-ci or rerun prior helpers.
+- Validated reboot recovery is ready but not yet applied to Lambda. Root provisioner/reconciler should remain stopped/contained until the exact-SHA recovery helper is run.
 
 ## Fresh-chat initialization
 
