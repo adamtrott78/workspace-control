@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-SECOND VALIDATED RESPONSE-LIVENESS REPLAY FAILED CLOSED AFTER RUN3_BOOT_SOCKET_ISOLATION=PASS. Keep all affected services disabled/contained and preserve root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e. Run the bounded read-only post-attempt diagnostic for the latest attempt: current service states/restart counts, controller last-success.json and last-rejected.json, root receipt inventory and selected receipt content, and controller/root journals beginning at 2026-10-21 18:30 local time. Use the repaired controller's journal status lines to distinguish TRANSIENT_ERROR, NO_CURRENT_SUCCESSFUL_RECONCILIATION_RUN, root socket response, state-write failure, or another exception. Do not rerun recovery, delete receipts, change policy, bump registry_epoch, restage the token, or onboard PADataset.
+LATEST ATTEMPT STATE/JOURNAL DIAGNOSTIC COMPLETE: root receipt is intact, rollback restored accepted predecessor blobs, services are contained, but unit-scoped journals are empty. Do not rerun recovery yet. Run the bounded read-only broad-journal diagnostic across the current boot/system manager: journalctl -b since 18:30 filtered for workspace-ci, lambda_ci_reconcile_controller.py, lambda_ci_reconciler.py, Python tracebacks, systemd start/stop/failure messages; show journal boots/timezone/storage metadata and any relevant syslog forwarding. If this still yields no execution evidence, the next source change should be observability-only phase markers validated before a new live attempt. Do not delete receipts, change policy, bump registry_epoch, restage the token, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: perform a bounded read-only post-second-attempt diagnostic. Inspect controller last-success/last-rejected state, root receipt inventory/mtime, workspace-ci-reconcile-controller.service journal, workspace-ci-reconciler.service journal, and current service states from the response-liveness attempt. Classify whether the repaired controller reached root, emitted TRANSIENT_ERROR, selected no current successful run, received PASS but failed state persistence, or hit another transport boundary.
+- Run 3 immediate: perform one broader read-only journal/manager diagnostic for the current boot. Query all journal entries matching workspace-ci service names, reconciliation executable names, systemd start/stop/failure messages, Python tracebacks, and the 18:30 onward window without relying only on `journalctl -u`; also print journald storage/timezone/boot metadata. If still no evidence, add validated phase-level controller observability before another live attempt rather than blind rerunning.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ SECOND VALIDATED RESPONSE-LIVENESS REPLAY FAILED CLOSED AFTER RUN3_BOOT_SOCKET_I
 
 ## Blockers / gates
 
-- Exact validated response-liveness recovery still produced no controller last-success despite source/installed-state/socket-isolation PASS. Rollback completed and services are disabled/contained. Do not rerun or patch again until second-attempt controller/root journals and persistent state prove the remaining failure mode.
+- Second replay post-attempt state is contained and the authoritative root receipt remains valid, but unit-scoped journald returned no entries for the latest attempt. Before another mutation, broaden read-only observability to the entire current boot/systemd manager and executable identifiers to determine whether service starts/logs were recorded outside the `journalctl -u` view.
 
 ## Fresh-chat initialization
 
