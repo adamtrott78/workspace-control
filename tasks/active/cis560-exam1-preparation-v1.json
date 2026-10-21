@@ -56,7 +56,7 @@
       "base_sha": "3e5906ca572f47272ac14a4d4ac2ed4ae9eb0122",
       "remote": {
         "branch": "tutor-framework",
-        "checkpoint_sha": "1c8f5500e4cb0427e71172996e0c5806e049565d",
+        "checkpoint_sha": "5712f65d096504db66f22dbd83d61ac10bd538ad",
         "verified": true
       },
       "local": null,
@@ -389,23 +389,23 @@
       ],
       "outputs": [
         "study/exam1/CHEATSHEET_CANDIDATES.md final-review allocation lock.",
-        "study/exam1/artifacts/CIS560_EXAM1_CHEATSHEET_V0_9_MANIFEST.md.",
-        "Rendered v0.9 PDF in originating chat: cis560_cheat_sheet_v0_9.pdf; exactly two US Letter pages; visually QA'd."
+        "study/exam1/artifacts/CIS560_EXAM1_CHEATSHEET_V0_9_MANIFEST.md (updated to v0.98 working-sheet architecture).",
+        "Rendered working PDF in originating chat: CIS560_Exam1_Cheat_Sheet_v0_98.pdf; exactly two US Letter pages; visually QA'd."
       ],
       "validation": [
         {
-          "check": "v0.9 physical cheat sheet rendered and visually QA'd",
+          "check": "v0.98 dense working cheat sheet rendered and visually QA'd",
           "result": "PASS",
           "evidence": [
-            "Exactly 2 US Letter pages.",
-            "Three-column portrait layout with conservative top/left printer margins.",
-            "No clipping or overlaps in 180-DPI rendered inspection.",
-            "No overfull LaTeX boxes after final correction.",
-            "Small transcript-delta space intentionally reserved for Oct. 21."
+            "Exactly 2 US Letter pages, portrait, three columns.",
+            "Preflight openable/non-encrypted/non-scanned.",
+            "No clipping or overlaps in 200-DPI inspection.",
+            "Recovered unused space is now used for machine-design patterns, regex phrasebook, closure-proof recipe, NFA->DFA fallback, expanded CFG recognition/design, PDA micro-patterns, and CFL proof-route selection.",
+            "Small transcript-delta reserve remains for Oct. 21."
           ]
         }
       ],
-      "resume_condition": "On Oct. 21, ingest full Oct. 20 review transcript and perform a delta-only update. If no material scope/content change, freeze v0.9 as final after print test; otherwise patch the reserved transcript-delta space, rerender, visually QA, and freeze."
+      "resume_condition": "On Oct. 21 ingest the full Oct. 20 review transcript and delta-check v0.98 only. Patch exact material scope/emphasis changes, rerender/QA, then freeze and print-test."
     },
     {
       "id": "final_exam_readiness",
@@ -506,6 +506,17 @@
         "Regeneration manifest records exact two-sided layout/content architecture and QA state.",
         "Originating-chat PDF is two US Letter pages and passed visual render inspection.",
         "Oct. 21 transcript update is explicitly delta-only unless stronger evidence requires structural change."
+      ]
+    },
+    {
+      "id": "cis560-exam1-cheatsheet-v0-98",
+      "kind": "git_commit",
+      "identity": "5712f65d096504db66f22dbd83d61ac10bd538ad",
+      "required_for_resume": true,
+      "evidence": [
+        "v0.98 manifest records dense layout and added CFG/machine/regex decision aids.",
+        "Working PDF is 2 US Letter pages and passed preflight plus visual QA.",
+        "Tomorrow transcript pass is delta-only."
       ]
     }
   ],
@@ -664,7 +675,7 @@
     "Keep one non-CFL proof refresh for coverage without overinvesting.",
     "Complete final timed readiness check before the October 22 exam."
   ],
-  "next_safe_action": "Oct. 21: ingest the full Oct. 20 review transcript and compare it against the live-note authority. Apply only material deltas to the v0.9 cheat sheet using study/exam1/artifacts/CIS560_EXAM1_CHEATSHEET_V0_9_MANIFEST.md, rerender/QA, then freeze and print-test. After that, use posterior-guided practice rather than further sheet redesign.",
+  "next_safe_action": "Oct. 21: compare the full review transcript against the live-note model and v0.98 working cheat sheet. Apply only material deltas, rerender/QA, freeze, and print-test. Do not revert to the sparse v0.9 layout.",
   "last_executor": "chatgpt",
   "last_surface": "github+chat",
   "notes": "Post-MTH October 19 state: Lecture 11 is fully transcript-reconciled. CYK is required/conceptually in scope, but Xu explicitly says the complete CYK procedure will not be tested. Lecture 12 instructor notes close new-content scope at Section 2.3 and explicitly exclude Section 2.4. Lecture 12 re-emphasizes the non-CFL pumping proof recipe (choose an in-language p-dependent witness of length >=p; defeat every legal five-part split), REG ⊊ CFL, DFA/NFA→PDA, and regular closure. The earlier attachment supplied with the L12 notes was SHA-256 8048a3ba5b06ef66c8ed8f054ed470b36f16254f79cbe794197eaaa3287002e4, identical to L11 and remains excluded. A genuine L12 transcript was subsequently supplied (SHA-256 5dee87e3d2eafa6692239356f36e5bdb4de473dd3e42394d9d16515aff8f8902) and is now fully reconciled. Behavioral diagnostics completed in the post-MTH restart: independent CFG transfer across count-decomposition and palindrome/outside-in families; independent simple PDA phase/stack mechanics; independent regular-pumping tight-boundary witness selection; strong CFL non-CFL witness/case analysis with tutor compression of presentation. Remaining construction risk is relatively higher in NFA/regex/HW1-derived material. The October 20 review remains the strongest final weighting source. Historical 2024 Exam 1, when supplied, may inform predictions but never override Fall 2026 Xu authority. Historical 2024 Exam 1 is now fully ingested from all four photographed pages. It was 25 points: Q1 five T/F items and Q2-Q5 four five-point short problems. Q2 bundled NFA interpretation, regex, DFA, and complement; Q3 was scaffolded RL pumping nonregularity; Q4 was CFL show-pumpability by filling uvxyz; Q5 bundled DFA, DFA->CFG, and intersection. This strongly supports format continuity and the current two-layer cheat-sheet architecture, but remains subordinate to Fall 2026 authority. A durable adaptive practice-test factory was created on Oct. 19. It uses the 2026 exam invariants and Lecture 1-12 scope as authority, the 2024 exam only as structural/predictive evidence, generates 25-point/75-minute Xu-style tests, enforces freshness and mathematical validation, hides answer keys until attempts, and reweights future tests from mastery evidence. On Oct. 19 the practice-test factory was upgraded to a predictive ensemble. A 10,000-blueprint pre-review simulation (seed 5602026) was run from evidence-only priors. This does not create new evidence; it averages the implications of the current evidence model. Predictive priors are now strictly separate from mastery/remediation weights."
