@@ -5,7 +5,7 @@
   "source_blobs": [
     {
       "path": "scripts/lambda_ci_reconcile_controller.py",
-      "git_blob_sha": "8469569ea0864e24d1c219fc3fea438367a8efc8",
+      "git_blob_sha": "1229a29c40a08a100dcdda2a4e276e616b27d219",
       "destination": "/opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py",
       "mode": "0755",
       "owner": "root:root"
@@ -23,5 +23,6 @@
     "PADataset identity/root/controllers",
     "execution contracts"
   ],
-  "operator_git_preflight": "Run Git reads as SUDO_USER with GIT_OPTIONAL_LOCKS=0 so root activation cannot rewrite the operator-owned worktree index."
+  "operator_git_preflight": "Run Git reads as SUDO_USER with GIT_OPTIONAL_LOCKS=0 so root activation cannot rewrite the operator-owned worktree index.",
+  "response_liveness": "Controller now uses a bounded 120s root response timeout and keeps transport/GitHub failures in-process as TRANSIENT_ERROR instead of systemd crash looping."
 }
