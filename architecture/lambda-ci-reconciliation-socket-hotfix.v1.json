@@ -18,7 +18,7 @@
     },
     {
       "path": "scripts/migrate_lambda_ci_multirepo_v1.sh",
-      "git_blob_sha": "248f57dd188268950d626adccf46877cbb23e6d2"
+      "git_blob_sha": "a55e5b92579f41acba47b73450450b571d5a9840"
     },
     {
       "path": "scripts/activate_lambda_ci_reconcile_controller.sh",
@@ -63,5 +63,6 @@
     "planned_projects_skipped=[padataset]",
     "mutation_performed=true",
     "PADataset host state absent"
-  ]
+  ],
+  "superseded_for_reboot_recovery_by": "architecture/lambda-ci-run3-boot-recovery-hotfix.v1.json"
 }
