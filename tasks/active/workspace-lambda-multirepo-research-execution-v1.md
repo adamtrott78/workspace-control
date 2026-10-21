@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-REPOSITORY VISIBILITY IS FIXED; keep workspace-ci-reconcile-controller.service stopped. Run the five-endpoint GitHub capability probe against the currently staged token and require HTTP_200 for authenticated_user, workspace_control_metadata, contents_branch_main, contents_registry, and actions_workflow_runs. If all five pass, restart only the reconciliation controller and rerun the already-validated PR #239 reconciliation-plane acceptance. Do not restage the token again, change reconciliation policy, bump registry_epoch, rerun the full migration, or onboard PADataset.
+CREDENTIAL CAPABILITY GATE PASS. From a clean detached workspace-control worktree at exact validated hotfix SHA f95696ecc00110754b2479d4efe5e265379ed5a3, run the validated `scripts/hotfix_lambda_ci_reconcile_controller_race.sh` helper with WORKSPACE_CI_RECONCILE_HOTFIX_EXPECTED_SHA set to that SHA. This is now the bounded reconciliation-plane acceptance: it may reinstall the identical validated poller blob and restart only workspace-ci-reconcile-controller.service, then must prove policy_equivalent_to_observed_main=true, active_projects=[research-engine], planned_projects_skipped=[padataset], mutation_performed=true, PADataset host state still absent, and print RUN3_RECONCILIATION_PLANE=PASS. Do not change policy, bump registry_epoch, rerun the full migration, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: with the existing staged token now seeing workspace-control, run the five-endpoint capability probe and require five HTTP_200 results; only then restart the controller and rerun the validated reconciliation-plane acceptance without a registry bump.
+- Run 3 immediate: restart only workspace-ci-reconcile-controller.service through the validated PR #239 acceptance path and require RUN3_RECONCILIATION_PLANE=PASS with policy equivalence, active research-engine only, PADataset skipped, and mutation_performed=true.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ REPOSITORY VISIBILITY IS FIXED; keep workspace-ci-reconcile-controller.service s
 
 ## Blockers / gates
 
-- Repository selection is fixed, but the reconciliation controller remains intentionally stopped until the staged token proves all required GitHub read capabilities: authenticated user, workspace-control metadata, main branch, registry content, and reconciliation workflow-runs must each return HTTP_200.
+- Credential capability gate is PASS. The reconciliation controller remains intentionally stopped pending one bounded restart/acceptance operation that must produce a terminal PASS receipt with policy_equivalent_to_observed_main=true, active_projects=[research-engine], planned_projects_skipped=[padataset], and mutation_performed=true.
 
 ## Fresh-chat initialization
 
