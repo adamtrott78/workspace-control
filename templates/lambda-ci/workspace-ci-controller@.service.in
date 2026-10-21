@@ -49,3 +49,6 @@ DevicePolicy=closed
 TasksMax=256
 MemoryMax=512M
 CPUQuota=200%
+
+[Install]
+WantedBy=multi-user.target
