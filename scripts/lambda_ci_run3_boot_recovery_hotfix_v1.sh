@@ -292,7 +292,8 @@ import sys
 path = sys.argv[1]
 before = int(sys.argv[2])
 p = json.load(open(path))
-fresh = int(os.stat(path).st_mtime) >= before
+mtime = int(os.stat(path).st_mtime)
+fresh = before == 0 or mtime > before
 ok = (
     fresh
     and p.get("response", {}).get("status") == "PASS"
