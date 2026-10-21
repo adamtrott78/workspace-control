@@ -12,7 +12,7 @@
   "source_blobs": [
     {
       "path": "scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh",
-      "git_blob_sha": "a24cc103b7e2e9f439a36ff2ce1c72767ec9ad26"
+      "git_blob_sha": "f533f6ba3575b11d3465eb82d45a62339c9235d1"
     },
     {
       "path": "scripts/lambda_ci_provisioner_service.py",
