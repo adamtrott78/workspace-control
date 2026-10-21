@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-CREDENTIAL CAPABILITY GATE PASS. From a clean detached workspace-control worktree at exact validated hotfix SHA f95696ecc00110754b2479d4efe5e265379ed5a3, run the validated `scripts/hotfix_lambda_ci_reconcile_controller_race.sh` helper with WORKSPACE_CI_RECONCILE_HOTFIX_EXPECTED_SHA set to that SHA. This is now the bounded reconciliation-plane acceptance: it may reinstall the identical validated poller blob and restart only workspace-ci-reconcile-controller.service, then must prove policy_equivalent_to_observed_main=true, active_projects=[research-engine], planned_projects_skipped=[padataset], mutation_performed=true, PADataset host state still absent, and print RUN3_RECONCILIATION_PLANE=PASS. Do not change policy, bump registry_epoch, rerun the full migration, or onboard PADataset.
+ACCEPTANCE ATTEMPT FAILED CLOSED; do not rerun the hotfix helper yet. First run the bounded read-only diagnostic block that checks workspace-ci-reconcile-controller.service state, workspace-ci-reconciler.service state, last-success.json/last-rejected.json, recent journals for both services, installed poller and pre-hotfix backup hashes, and ownership/mode of the detached hotfix worktree metadata including `.git/worktrees/run3-reconcile-hotfix-f95696ecc001/index`. The wrapper's previous clean-worktree check is known defective because it masked a failing `git status`; do not reuse that check. Do not change policy, bump registry_epoch, rerun the full migration, restage the token, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: restart only workspace-ci-reconcile-controller.service through the validated PR #239 acceptance path and require RUN3_RECONCILIATION_PLANE=PASS with policy equivalence, active research-engine only, PADataset skipped, and mutation_performed=true.
+- Run 3 immediate: perform read-only diagnostics for the failed reconciliation-plane acceptance: verify controller stopped state/restart count, inspect last-success/last-rejected, controller and root-reconciler journals, installed poller and backup hashes, and worktree metadata/index ownership. Repair only the proven worktree/control-plane defect, then revalidate before any acceptance rerun.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ CREDENTIAL CAPABILITY GATE PASS. From a clean detached workspace-control worktre
 
 ## Blockers / gates
 
-- Credential capability gate is PASS. The reconciliation controller remains intentionally stopped pending one bounded restart/acceptance operation that must produce a terminal PASS receipt with policy_equivalent_to_observed_main=true, active_projects=[research-engine], planned_projects_skipped=[padataset], and mutation_performed=true.
+- Run-3 reconciliation-plane acceptance failed closed after credential PASS. Two issues require read-only diagnosis before any rerun: operator worktree metadata index permission drift caused `git status` to fail (and the wrapper masked it), and the controller produced no last-success receipt after HOTFIX_SOURCE_BLOB_PREFLIGHT=PASS. Inspect controller/root-reconciler journals, last-success/last-rejected state, installed poller/backup hashes, and exact worktree metadata ownership. Do not rerun activation yet.
 
 ## Fresh-chat initialization
 
