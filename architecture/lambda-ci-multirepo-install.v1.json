@@ -53,7 +53,7 @@
     },
     {
       "path": "scripts/migrate_lambda_ci_multirepo_v1.sh",
-      "git_blob_sha": "248f57dd188268950d626adccf46877cbb23e6d2"
+      "git_blob_sha": "a55e5b92579f41acba47b73450450b571d5a9840"
     },
     {
       "path": "scripts/activate_lambda_ci_reconcile_controller.sh",
@@ -61,15 +61,15 @@
     },
     {
       "path": "templates/lambda-ci/workspace-ci-controller@.service.in",
-      "git_blob_sha": "0124023c22575ebb94c79a71f4589af6e562db96"
+      "git_blob_sha": "5372c87747e54a4a6cf213eb86f10ccd6fb1b56c"
     },
     {
       "path": "templates/lambda-ci/workspace-ci-provisioner-multirepo.service.in",
-      "git_blob_sha": "baf99b17026a2b2090bdbe52ea0c5566d44efe28"
+      "git_blob_sha": "ca8d59ea9afbbb5f9ecefb6c33d788f479d35a0c"
     },
     {
       "path": "systemd/workspace-ci-reconciler.service",
-      "git_blob_sha": "b4a5808b8bbf4629c6c14d2280b2bb002e92a03e"
+      "git_blob_sha": "a81b758dd2f735fbe72085e3ae3c7529e10152a1"
     },
     {
       "path": "systemd/workspace-ci-reconcile-controller.service",
@@ -110,6 +110,10 @@
     {
       "path": ".github/workflows/lambda-ci-project-reconcile.yml",
       "git_blob_sha": "c8b8baef1955ad2a8bd409756298f0703b85f270"
+    },
+    {
+      "path": "systemd/workspace-ci-tmpfiles.conf",
+      "git_blob_sha": "eb6ddec43bdeead39c7af91f052c3f1a2602ebf2"
     }
   ],
   "live_transition": {
@@ -144,5 +148,21 @@
     "mode": "0711",
     "authorization": "socket-level distinct 0660 groups",
     "hotfix_manifest": "architecture/lambda-ci-reconciliation-socket-hotfix.v1.json"
+  },
+  "run3_boot_contract": {
+    "runtime_directory": {
+      "source": "systemd/workspace-ci-tmpfiles.conf",
+      "installed_path": "/etc/tmpfiles.d/workspace-ci.conf",
+      "owner": "root",
+      "group": "root",
+      "mode": "0711"
+    },
+    "boot_enabled_services": [
+      "workspace-ci-provisioner.service",
+      "workspace-ci-reconciler.service",
+      "workspace-ci-controller@research-engine-cpu.service",
+      "workspace-ci-controller@research-engine-gpu.service"
+    ],
+    "rationale": "/run is volatile; systemd sandbox ReadWritePaths requires the socket parent to exist before service namespace setup."
   }
 }
