@@ -1,7 +1,7 @@
 # RUN-2 TEMPLATE ONLY — not installed or enabled.
 [Unit]
 Description=Workspace CI multi-project root provisioner
-After=local-fs.target
+After=local-fs.target systemd-tmpfiles-setup.service
 
 [Service]
 Type=simple
@@ -37,3 +37,6 @@ DeviceAllow=/dev/nvidia0 rw
 DeviceAllow=/dev/nvidia1 rw
 TasksMax=512
 MemoryMax=1G
+
+[Install]
+WantedBy=multi-user.target
