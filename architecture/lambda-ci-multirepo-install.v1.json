@@ -77,7 +77,7 @@
     },
     {
       "path": "architecture/lambda-ci-project-registry.v1.json",
-      "git_blob_sha": "2de2c2b9b970102d506456a7c43c92a9f0492574"
+      "git_blob_sha": "762805a1d33bbd7e666377b13680116d1051b4ab"
     },
     {
       "path": "architecture/lambda-ci-execution-contracts.v1.json",
