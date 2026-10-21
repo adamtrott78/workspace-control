@@ -40,12 +40,12 @@
     },
     {
       "path": "scripts/lambda_ci_reconciler.py",
-      "git_blob_sha": "360d6b25599b09ccb727e4aacf23374d3529c787"
+      "git_blob_sha": "b2edc8b0168024ffb61aa54d96859353738b79cf"
     },
     {
       "path": "scripts/lambda_ci_reconcile_controller.py",
-      "git_blob_sha": "8469569ea0864e24d1c219fc3fea438367a8efc8",
-      "note": "Run-3 post-install unrelated-main race correction; live promotion remains scoped by architecture/lambda-ci-reconcile-controller-hotfix.v1.json."
+      "git_blob_sha": "1229a29c40a08a100dcdda2a4e276e616b27d219",
+      "note": "Run-3 controller includes unrelated-main policy equivalence plus bounded 120s root-response liveness and transport retry hardening; live promotion remains bounded by the Run-3 recovery manifest."
     },
     {
       "path": "scripts/stage_lambda_ci_reconciler_pat.sh",
@@ -164,5 +164,11 @@
       "workspace-ci-controller@research-engine-gpu.service"
     ],
     "rationale": "/run is volatile; systemd sandbox ReadWritePaths requires the socket parent to exist before service namespace setup."
+  },
+  "run3_reconciliation_response_contract": {
+    "root_response_timeout_seconds": 120,
+    "root_receipt_authoritative": true,
+    "disconnected_client_does_not_invalidate_receipt": true,
+    "controller_transport_errors_restart_service": false
   }
 }

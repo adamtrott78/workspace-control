@@ -60,6 +60,18 @@ class ReconciliationSocketHotfixTests(unittest.TestCase):
             helper,
         )
 
+    def test_root_reconciler_survives_client_disconnect_after_receipt(self):
+        source = (ROOT / "scripts" / "lambda_ci_reconciler.py").read_text()
+        self.assertIn(
+            "except (BrokenPipeError, ConnectionResetError):",
+            source,
+        )
+        self.assertIn("CLIENT_DISCONNECTED_BEFORE_RESPONSE", source)
+        self.assertIn(
+            "The root receipt is authoritative and is persisted before",
+            source,
+        )
+
     def test_root_activation_git_preflights_cannot_rewrite_operator_index(self):
         for name in (
             "scripts/activate_lambda_ci_reconcile_controller.sh",

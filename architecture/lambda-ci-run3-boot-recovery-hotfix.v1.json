@@ -7,12 +7,13 @@
     "runtime_directory_failure": "/run/workspace-ci is volatile and was absent after reboot; systemd sandbox setup for ReadWritePaths failed before ExecStart with status 226/NAMESPACE.",
     "restart_storm": "workspace-ci-provisioner.service and workspace-ci-reconciler.service reached about 30,830 automatic restarts each.",
     "controller_boot_failure": "research-engine CPU/GPU controller instances were static/inactive after reboot because the installed generic controller template lacked an [Install] section.",
-    "source_integrity": "installed provisioner service code remained exactly on the accepted pre-hotfix blob."
+    "source_integrity": "installed provisioner service code remained exactly on the accepted pre-hotfix blob.",
+    "response_liveness_failure": "Root persisted a COMPLETED reconciliation receipt with mutation_performed=true, but the GitHub-facing controller's 30s Unix-socket response timeout expired roughly two seconds before root attempted to send the response; root then crashed on BrokenPipeError. Subsequent transport failures produced controller/root restart churn without invalidating the persisted root receipt."
   },
   "source_blobs": [
     {
       "path": "scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh",
-      "git_blob_sha": "f533f6ba3575b11d3465eb82d45a62339c9235d1"
+      "git_blob_sha": "095ee0940a59824fba4e5500b179e1f807f780be"
     },
     {
       "path": "scripts/lambda_ci_provisioner_service.py",
@@ -20,7 +21,7 @@
     },
     {
       "path": "scripts/lambda_ci_reconciler.py",
-      "git_blob_sha": "360d6b25599b09ccb727e4aacf23374d3529c787"
+      "git_blob_sha": "b2edc8b0168024ffb61aa54d96859353738b79cf"
     },
     {
       "path": "scripts/migrate_lambda_ci_multirepo_v1.sh",
@@ -41,6 +42,10 @@
     {
       "path": "systemd/workspace-ci-tmpfiles.conf",
       "git_blob_sha": "eb6ddec43bdeead39c7af91f052c3f1a2602ebf2"
+    },
+    {
+      "path": "scripts/lambda_ci_reconcile_controller.py",
+      "git_blob_sha": "1229a29c40a08a100dcdda2a4e276e616b27d219"
     }
   ],
   "accepted_predecessor_blobs": {
@@ -50,10 +55,12 @@
     ],
     "/opt/workspace-ci/reconciler/lambda_ci_reconciler.py": [
       "0d189505d7ddb42522e261dff9f2c1e5193fa882",
-      "360d6b25599b09ccb727e4aacf23374d3529c787"
+      "360d6b25599b09ccb727e4aacf23374d3529c787",
+      "b2edc8b0168024ffb61aa54d96859353738b79cf"
     ],
     "/opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py": [
-      "8469569ea0864e24d1c219fc3fea438367a8efc8"
+      "8469569ea0864e24d1c219fc3fea438367a8efc8",
+      "1229a29c40a08a100dcdda2a4e276e616b27d219"
     ],
     "/etc/systemd/system/workspace-ci-provisioner.service": [
       "baf99b17026a2b2090bdbe52ea0c5566d44efe28",
@@ -77,6 +84,7 @@
     "/run/workspace-ci -> root:root mode 0711 via systemd-tmpfiles",
     "/opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py",
     "/opt/workspace-ci/reconciler/lambda_ci_reconciler.py",
+    "/opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py",
     "/etc/systemd/system/workspace-ci-provisioner.service",
     "/etc/systemd/system/workspace-ci-reconciler.service",
     "/etc/systemd/system/workspace-ci-controller@.service",
@@ -109,7 +117,16 @@
     "planned_projects_skipped=[padataset]",
     "mutation_performed=true",
     "all five control-plane services show no restart-count increase across stability window",
-    "PADataset host state remains absent"
+    "PADataset host state remains absent",
+    "root COMPLETED receipt can be replayed without reapplying after a client timeout",
+    "client disconnect after root receipt persistence does not restart the root reconciler"
   ],
-  "rollback": "restore prior files, stop and disable all affected services, remove newly created runtime parent when it was absent before recovery; never return to the observed restart storm automatically"
+  "rollback": "restore prior files, stop and disable all affected services, remove newly created runtime parent when it was absent before recovery; never return to the observed restart storm automatically",
+  "response_liveness": {
+    "root_response_timeout_seconds": 120,
+    "controller_persistent_transport_behavior": "log TRANSIENT_ERROR and retry in-process",
+    "root_client_disconnect_behavior": "preserve receipt and continue serving",
+    "receipt_wait_iterations": 150,
+    "receipt_wait_sleep_seconds": 2
+  }
 }

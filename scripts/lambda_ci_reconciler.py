@@ -758,9 +758,24 @@ def serve(
                         "error_type": type(exc).__name__,
                         "error": str(exc),
                     }
-                conn.sendall(
-                    (json.dumps(response, sort_keys=True) + "\n").encode("utf-8")
-                )
+                try:
+                    conn.sendall(
+                        (json.dumps(response, sort_keys=True) + "\n").encode("utf-8")
+                    )
+                except (BrokenPipeError, ConnectionResetError):
+                    # The root receipt is authoritative and is persisted before
+                    # a successful response is sent. A disconnected client must
+                    # not crash the root reconciler or invalidate that receipt.
+                    print(
+                        json.dumps(
+                            {
+                                "status": "CLIENT_DISCONNECTED_BEFORE_RESPONSE",
+                                "request_id": response.get("request_id"),
+                            },
+                            sort_keys=True,
+                        ),
+                        flush=True,
+                    )
     finally:
         server.close()
         if socket_path.exists():

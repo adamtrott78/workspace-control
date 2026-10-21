@@ -100,7 +100,8 @@ accepted_blob "$RECON_PY" \
   0d189505d7ddb42522e261dff9f2c1e5193fa882 \
   360d6b25599b09ccb727e4aacf23374d3529c787
 accepted_blob "$POLL_PY" \
-  8469569ea0864e24d1c219fc3fea438367a8efc8
+  8469569ea0864e24d1c219fc3fea438367a8efc8 \
+  1229a29c40a08a100dcdda2a4e276e616b27d219
 accepted_blob "$PROV_UNIT" \
   baf99b17026a2b2090bdbe52ea0c5566d44efe28 \
   acdadf5ce6f152d7f1d04e5308657d35e0585d4f
@@ -136,6 +137,7 @@ backup_target() {
 for target in \
   "$PROV_PY" \
   "$RECON_PY" \
+  "$POLL_PY" \
   "$PROV_UNIT" \
   "$RECON_UNIT" \
   "$CTRL_UNIT" \
@@ -198,6 +200,9 @@ install -o root -g root -m 0755 \
 install -o root -g root -m 0755 \
   "$REPO_ROOT/scripts/lambda_ci_reconciler.py" \
   "$RECON_PY"
+install -o root -g root -m 0755 \
+  "$REPO_ROOT/scripts/lambda_ci_reconcile_controller.py" \
+  "$POLL_PY"
 install -o root -g root -m 0644 \
   "$REPO_ROOT/templates/lambda-ci/workspace-ci-provisioner-multirepo.service.in" \
   "$PROV_UNIT"
@@ -283,7 +288,7 @@ fi
 systemctl enable workspace-ci-reconcile-controller.service
 systemctl restart workspace-ci-reconcile-controller.service
 
-for _ in $(seq 1 60); do
+for _ in $(seq 1 150); do
   if [[ -f "$SUCCESS" ]] && python3 - "$SUCCESS" "$BEFORE_SUCCESS_MTIME" <<'PY'
 import json
 import os
@@ -378,6 +383,7 @@ systemd-tmpfiles --create "$TMPFILES"
 
 [[ "$(git hash-object "$PROV_PY")" == "$(git hash-object "$REPO_ROOT/scripts/lambda_ci_provisioner_service.py")" ]] || die "INSTALLED_PROVISIONER_SERVICE_BLOB_DRIFT"
 [[ "$(git hash-object "$RECON_PY")" == "$(git hash-object "$REPO_ROOT/scripts/lambda_ci_reconciler.py")" ]] || die "INSTALLED_RECONCILER_BLOB_DRIFT"
+[[ "$(git hash-object "$POLL_PY")" == "$(git hash-object "$REPO_ROOT/scripts/lambda_ci_reconcile_controller.py")" ]] || die "INSTALLED_RECONCILE_CONTROLLER_BLOB_DRIFT"
 [[ "$(git hash-object "$PROV_UNIT")" == "$(git hash-object "$REPO_ROOT/templates/lambda-ci/workspace-ci-provisioner-multirepo.service.in")" ]] || die "INSTALLED_PROVISIONER_UNIT_BLOB_DRIFT"
 [[ "$(git hash-object "$RECON_UNIT")" == "$(git hash-object "$REPO_ROOT/systemd/workspace-ci-reconciler.service")" ]] || die "INSTALLED_RECONCILER_UNIT_BLOB_DRIFT"
 [[ "$(git hash-object "$CTRL_UNIT")" == "$(git hash-object "$REPO_ROOT/templates/lambda-ci/workspace-ci-controller@.service.in")" ]] || die "INSTALLED_CONTROLLER_UNIT_BLOB_DRIFT"
