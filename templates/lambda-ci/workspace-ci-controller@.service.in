@@ -1,4 +1,4 @@
-# RUN-2 TEMPLATE ONLY — not installed or enabled.
+# RUN-3 INSTALLED GENERIC SERVICE TEMPLATE.
 [Unit]
 Description=Workspace CI project/lane scale-set controller %i
 Requires=workspace-ci-provisioner.service
@@ -49,3 +49,6 @@ DevicePolicy=closed
 TasksMax=256
 MemoryMax=512M
 CPUQuota=200%
+
+[Install]
+WantedBy=multi-user.target

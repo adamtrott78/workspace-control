@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-SOCKET HOTFIX PRECHECK FAILED CLOSED; do not rerun it yet. Run the bounded read-only provisioner/control-plane diagnostic: capture workspace-ci-provisioner.service ActiveState/SubState/Result/ExecMainStatus/NRestarts/start+exit timestamps and recent journal; inspect /run/workspace-ci and provisioner.sock ownership/mode/type; hash the installed provisioner service script; capture workspace-ci-reconciler.service and research-engine CPU/GPU controller states; confirm workspace-ci-reconcile-controller.service remains stopped. Do not start/restart services, mutate /run/workspace-ci, rerun the socket hotfix, change policy, bump registry_epoch, restage the token, or onboard PADataset.
+VALIDATE REBOOT RECOVERY SOURCE FIRST. Review/validate branch fix-run3-reboot-runtime-contract-v1: systemd tmpfiles bootstrap for /run/workspace-ci root:root 0711, boot-enableable generic provisioner/controller templates, tmpfiles ordering for root services, migration boot assertions, exact accepted-predecessor hotfix manifest, bounded rollback-capable boot recovery helper, and focused tests. Require the repository's full validation tier to PASS before any live host mutation. Keep workspace-ci-provisioner.service and workspace-ci-reconciler.service stopped/contained meanwhile. Do not manually mkdir /run/workspace-ci, rerun the old socket helper, change policy, bump registry_epoch, restage the token, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: perform read-only diagnostics of workspace-ci-provisioner.service and the required generic control-plane services, including systemd state/result/restart timestamps, provisioner journal, /run/workspace-ci parent and provisioner.sock state, installed provisioner blob, and research-engine CPU/GPU controller states. Do not start/restart anything until the cause of provisioner inactivity is known.
+- Run 3 immediate: validate and merge the reboot/runtime-directory repair. Require task contracts, Python regression, pinned Go controller validation, and full integration PASS. Only then run the exact validated boot-recovery helper from a fresh detached worktree.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ SOCKET HOTFIX PRECHECK FAILED CLOSED; do not rerun it yet. Run the bounded read-
 
 ## Blockers / gates
 
-- The validated socket hotfix remains unapplied because its pre-mutation prerequisite check found workspace-ci-provisioner.service inactive. Diagnose the provisioner and the other required generic control-plane services read-only before any restart or hotfix rerun.
+- The reboot/runtime-directory and service-enablement defects are diagnosed and a bounded source repair is staged on branch fix-run3-reboot-runtime-contract-v1, but it is not yet validated or live. Keep the crash-looping root services contained; do not manually create /run/workspace-ci or rerun prior helpers.
 
 ## Fresh-chat initialization
 

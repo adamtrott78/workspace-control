@@ -1,7 +1,7 @@
 [Unit]
 Description=Workspace CI root project reconciler
 Documentation=https://github.com/adamtrott78/workspace-control
-After=local-fs.target
+After=local-fs.target systemd-tmpfiles-setup.service
 Before=workspace-ci-reconcile-controller.service
 
 [Service]
