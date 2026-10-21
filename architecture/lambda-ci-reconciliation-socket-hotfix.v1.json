@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "hotfix_id": "run3-reconciliation-socket-parent-v1",
+  "status": "VALIDATED_HOTFIX_INPUT",
+  "diagnosis": {
+    "observed_failure": "ci-reconciler received EACCES connecting to /run/workspace-ci/reconciler.sock before root request submission",
+    "root_cause": "shared /run/workspace-ci parent was root:workspace-ci-controller mode 0750, so ci-reconciler could not traverse to its root:workspace-ci-reconciler mode 0660 socket",
+    "operator_git_defect": "root-run activation helpers executed git status in an operator-owned worktree, allowing Git to rewrite the worktree index as root"
+  },
+  "source_blobs": [
+    {
+      "path": "scripts/lambda_ci_reconciler.py",
+      "git_blob_sha": "360d6b25599b09ccb727e4aacf23374d3529c787"
+    },
+    {
+      "path": "scripts/lambda_ci_provisioner_service.py",
+      "git_blob_sha": "d728c5d26f56694507a23623ccf10d8f71eb05a0"
+    },
+    {
+      "path": "scripts/migrate_lambda_ci_multirepo_v1.sh",
+      "git_blob_sha": "248f57dd188268950d626adccf46877cbb23e6d2"
+    },
+    {
+      "path": "scripts/activate_lambda_ci_reconcile_controller.sh",
+      "git_blob_sha": "7525bac27399903867cb02f30428486dcb233a5f"
+    },
+    {
+      "path": "scripts/hotfix_lambda_ci_reconcile_controller_race.sh",
+      "git_blob_sha": "8bf68c0322c3af015d67edbf60dacdbab9c02ae9"
+    },
+    {
+      "path": "scripts/lambda_ci_reconciliation_socket_hotfix_v1.sh",
+      "git_blob_sha": "84997a45298ec1a1beeeac7fc916cc310fccd810"
+    }
+  ],
+  "live_mutation_scope": [
+    "/run/workspace-ci ownership/mode -> root:root 0711",
+    "/opt/workspace-ci/reconciler/lambda_ci_reconciler.py",
+    "/opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py",
+    "restart workspace-ci-reconciler.service",
+    "start/restart workspace-ci-reconcile-controller.service"
+  ],
+  "preserved_boundaries": [
+    "provisioner.sock remains root:workspace-ci-controller mode 0660",
+    "reconciler.sock remains root:workspace-ci-reconciler mode 0660",
+    "ci-reconciler is not added to workspace-ci-controller",
+    "ci-controller is not added to workspace-ci-reconciler",
+    "workspace-ci-provisioner.service is not restarted by the hotfix",
+    "research-engine CPU/GPU controllers are not restarted by the hotfix",
+    "PADataset remains planned/skipped and is not created",
+    "no registry epoch or policy authority changes"
+  ],
+  "acceptance": [
+    "source blob preflight PASS",
+    "shared socket parent root:root mode 0711",
+    "both intended socket clients can traverse parent and write only their authorized socket",
+    "cross-socket write checks denied",
+    "root reconciler active",
+    "reconciliation controller stable without restart-count increase",
+    "terminal reconciliation response PASS",
+    "policy_equivalent_to_observed_main=true",
+    "active_projects=[research-engine]",
+    "planned_projects_skipped=[padataset]",
+    "mutation_performed=true",
+    "PADataset host state absent"
+  ]
+}
