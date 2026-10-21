@@ -29,6 +29,7 @@ WORKFLOW_ID = "lambda-ci-project-reconcile.yml"
 API_ROOT = "https://api.github.com"
 USER_AGENT = "workspace-control-lambda-ci-reconcile-controller/1"
 UUID_NAMESPACE = uuid.UUID("ab97f0b3-3a35-5a48-8c95-119d9f48e7d1")
+ROOT_RESPONSE_TIMEOUT_SECONDS = 120
 
 
 class ReconcileControllerError(RuntimeError):
@@ -314,12 +315,21 @@ def build_request(
 def submit_request(socket_path: pathlib.Path, request: dict[str, Any]) -> dict[str, Any]:
     payload = (json.dumps(request, sort_keys=True) + "\n").encode("utf-8")
     conn = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    conn.settimeout(30)
+    conn.settimeout(ROOT_RESPONSE_TIMEOUT_SECONDS)
     try:
         conn.connect(str(socket_path))
         conn.sendall(payload)
         handle = conn.makefile("rb")
         line = handle.readline(2 * 1024 * 1024)
+    except socket.timeout as exc:
+        raise ReconcileControllerError(
+            "root reconciler response timed out after "
+            f"{ROOT_RESPONSE_TIMEOUT_SECONDS}s"
+        ) from exc
+    except OSError as exc:
+        raise ReconcileControllerError(
+            f"root reconciler socket unavailable: {exc}"
+        ) from exc
     finally:
         conn.close()
     if not line:
@@ -433,15 +443,26 @@ def main() -> int:
         raise ReconcileControllerError("actor allowlist is empty")
 
     while True:
-        result = run_once(
-            token_file=args.token_file,
-            socket_path=args.socket,
-            state_dir=args.state_dir,
-            allowed_actors=allowed,
-        )
-        print(json.dumps(result, sort_keys=True), flush=True)
-        if args.once:
-            return 0 if result["status"] not in {"REJECTED"} else 70
+        try:
+            result = run_once(
+                token_file=args.token_file,
+                socket_path=args.socket,
+                state_dir=args.state_dir,
+                allowed_actors=allowed,
+            )
+        except ReconcileControllerError as exc:
+            result = {
+                "status": "TRANSIENT_ERROR",
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+            }
+            print(json.dumps(result, sort_keys=True), flush=True)
+            if args.once:
+                return 70
+        else:
+            print(json.dumps(result, sort_keys=True), flush=True)
+            if args.once:
+                return 0 if result["status"] not in {"REJECTED"} else 70
         time.sleep(max(5, args.poll_seconds))
 
 
