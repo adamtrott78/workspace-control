@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-VALIDATED RUN-3 BOOT RECOVERY READY. Keep the broken root services contained until execution. Create/reuse a fresh clean detached workspace-control worktree at exact SHA 9018d947202915ff6bed3762e0e0827a5482979e, then run `scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh` via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. The helper must prove exact source and accepted installed-state preflights, install the tmpfiles boot contract, recover /run/workspace-ci as root:root 0711, enable+activate provisioner/reconciler/research-engine CPU+GPU controllers, preserve cross-socket denial, obtain the terminal reconciliation PASS with policy equivalence and PADataset skipped, and show zero restart-count increase across its stability window. Do not manually mkdir /run/workspace-ci, run older hotfix helpers, change policy, bump registry_epoch, restage the token, or onboard PADataset.
+BOOT RECOVERY REACHED SOCKET-ISOLATION PASS BUT RECONCILIATION RECEIPT IS MISSING. Keep all affected services disabled/contained. Run the bounded read-only post-attempt diagnostic that prints last-success.json and last-rejected.json if present, recent workspace-ci-reconcile-controller.service and workspace-ci-reconciler.service journals covering the attempt, and current service states/restart counts. Do not rerun the boot-recovery helper, manually create /run/workspace-ci, change policy, bump registry_epoch, restage the token, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: from a fresh clean detached worktree at exact validated repair SHA 9018d947202915ff6bed3762e0e0827a5482979e, execute scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. Require source+installed-state preflights, boot socket isolation PASS, all intended services enabled+active+stable, terminal reconciliation receipt PASS, and RUN3_RECONCILIATION_PLANE=PASS.
+- Run 3 immediate: read persistent reconciliation state and journals from the failed boot-recovery attempt while services remain disabled. Inspect last-success.json, last-rejected.json, reconciliation-controller journal, root-reconciler journal, and final systemd states. Determine whether root rejected the request or the unprivileged controller failed before/after submission; do not rerun recovery until that cause is proven.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ VALIDATED RUN-3 BOOT RECOVERY READY. Keep the broken root services contained unt
 
 ## Blockers / gates
 
-- Validated reboot recovery is ready but not yet applied to Lambda. Root provisioner/reconciler should remain stopped/contained until the exact-SHA recovery helper is run.
+- Boot/runtime recovery itself reached PASS through socket isolation, but reconciliation-controller acceptance still produced no success receipt. Rollback completed and left affected services disabled. Diagnose persistent last-rejected/last-success state and the reconciliation-controller/root-reconciler journals from this attempt before any rerun.
 
 ## Fresh-chat initialization
 
