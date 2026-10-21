@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-ACCEPTANCE ATTEMPT FAILED CLOSED; do not rerun the hotfix helper yet. First run the bounded read-only diagnostic block that checks workspace-ci-reconcile-controller.service state, workspace-ci-reconciler.service state, last-success.json/last-rejected.json, recent journals for both services, installed poller and pre-hotfix backup hashes, and ownership/mode of the detached hotfix worktree metadata including `.git/worktrees/run3-reconcile-hotfix-f95696ecc001/index`. The wrapper's previous clean-worktree check is known defective because it masked a failing `git status`; do not reuse that check. Do not change policy, bump registry_epoch, rerun the full migration, restage the token, or onboard PADataset.
+VALIDATE SOURCE REPAIR FIRST. Open/validate the fix-reconcile-socket-parent-run3 changes: shared /run/workspace-ci parent root:root 0711 with per-socket 0660 groups, durable service-side parent normalization, migration assertions, non-mutating SUDO_USER Git preflights, exact socket-hotfix manifest/helper, and focused tests. Require the repository's selected validation tier to PASS before any live host repair. Do not rerun the old hotfix helper, change policy, bump registry_epoch, rerun the full migration, restage the token, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: perform read-only diagnostics for the failed reconciliation-plane acceptance: verify controller stopped state/restart count, inspect last-success/last-rejected, controller and root-reconciler journals, installed poller and backup hashes, and worktree metadata/index ownership. Repair only the proven worktree/control-plane defect, then revalidate before any acceptance rerun.
+- Run 3 immediate: validate and merge the socket-parent/operator-Git repair, then from an exact clean detached worktree apply only the validated reconciliation socket hotfix. Before the helper, repair the one proven root-owned stale worktree index or use a fresh worktree; require socket parent/group isolation PASS and terminal RUN3_RECONCILIATION_PLANE=PASS.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ ACCEPTANCE ATTEMPT FAILED CLOSED; do not rerun the hotfix helper yet. First run 
 
 ## Blockers / gates
 
-- Run-3 reconciliation-plane acceptance failed closed after credential PASS. Two issues require read-only diagnosis before any rerun: operator worktree metadata index permission drift caused `git status` to fail (and the wrapper masked it), and the controller produced no last-success receipt after HOTFIX_SOURCE_BLOB_PREFLIGHT=PASS. Inspect controller/root-reconciler journals, last-success/last-rejected state, installed poller/backup hashes, and exact worktree metadata ownership. Do not rerun activation yet.
+- Source-level root cause is diagnosed and a bounded repair is staged on branch fix-reconcile-socket-parent-run3, but it is not yet validated or live. Do not mutate /run/workspace-ci, installed root services, or restart the reconciliation controller until the repair PR passes required repository validation.
 
 ## Fresh-chat initialization
 
