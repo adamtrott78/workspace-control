@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-VALIDATED RESPONSE-LIVENESS RECOVERY READY. Keep the existing root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e intact. Create/reuse a fresh clean detached workspace-control worktree at exact SHA f924f2bf45fbf05aa3f0dc2ea036354143834246 and execute `scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh` via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. The helper now promotes the 120s/in-process retry controller and nonfatal-disconnect root reconciler, restores the validated boot/socket contract, and should obtain controller last-success by idempotently replaying the already-COMPLETED request without reapplying. Require RUN3_BOOT_RECOVERY=PASS and RUN3_RECONCILIATION_PLANE=PASS with zero restart-count increase. Do not delete root receipts, run older helpers, change policy, bump registry_epoch, restage the token, or onboard PADataset.
+SECOND VALIDATED RESPONSE-LIVENESS REPLAY FAILED CLOSED AFTER RUN3_BOOT_SOCKET_ISOLATION=PASS. Keep all affected services disabled/contained and preserve root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e. Run the bounded read-only post-attempt diagnostic for the latest attempt: current service states/restart counts, controller last-success.json and last-rejected.json, root receipt inventory and selected receipt content, and controller/root journals beginning at 2026-10-21 18:30 local time. Use the repaired controller's journal status lines to distinguish TRANSIENT_ERROR, NO_CURRENT_SUCCESSFUL_RECONCILIATION_RUN, root socket response, state-write failure, or another exception. Do not rerun recovery, delete receipts, change policy, bump registry_epoch, restage the token, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: from a fresh clean detached worktree at exact validated SHA f924f2bf45fbf05aa3f0dc2ea036354143834246, rerun scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. Require source+installed-state preflights, boot socket isolation PASS, controller/root liveness with zero restart increase, terminal last-success PASS replaying the existing root COMPLETED receipt, and RUN3_RECONCILIATION_PLANE=PASS.
+- Run 3 immediate: perform a bounded read-only post-second-attempt diagnostic. Inspect controller last-success/last-rejected state, root receipt inventory/mtime, workspace-ci-reconcile-controller.service journal, workspace-ci-reconciler.service journal, and current service states from the response-liveness attempt. Classify whether the repaired controller reached root, emitted TRANSIENT_ERROR, selected no current successful run, received PASS but failed state persistence, or hit another transport boundary.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ VALIDATED RESPONSE-LIVENESS RECOVERY READY. Keep the existing root receipt 463f3
 
 ## Blockers / gates
 
-- Validated response-liveness recovery is ready but not yet applied live. Services remain contained/disabled from the previous rollback. Preserve root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e for idempotent replay.
+- Exact validated response-liveness recovery still produced no controller last-success despite source/installed-state/socket-isolation PASS. Rollback completed and services are disabled/contained. Do not rerun or patch again until second-attempt controller/root journals and persistent state prove the remaining failure mode.
 
 ## Fresh-chat initialization
 
