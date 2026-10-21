@@ -22,5 +22,6 @@
     "research-engine project policy",
     "PADataset identity/root/controllers",
     "execution contracts"
-  ]
+  ],
+  "operator_git_preflight": "Run Git reads as SUDO_USER with GIT_OPTIONAL_LOCKS=0 so root activation cannot rewrite the operator-owned worktree index."
 }

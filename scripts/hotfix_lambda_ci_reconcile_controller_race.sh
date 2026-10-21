@@ -10,10 +10,13 @@ die() { echo "ERROR=$*" >&2; exit 70; }
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-GIT=(git -c "safe.directory=$REPO_ROOT" -C "$REPO_ROOT")
-HEAD="$("${GIT[@]}" rev-parse HEAD)"
+git_as_invoker() {
+  runuser -u "$SUDO_USER" -- env GIT_OPTIONAL_LOCKS=0 git -C "$REPO_ROOT" "$@"
+}
+HEAD="$(git_as_invoker rev-parse HEAD)" || die "WORKSPACE_CONTROL_HEAD_READ_FAILED"
 [[ "$HEAD" == "$WORKSPACE_CI_RECONCILE_HOTFIX_EXPECTED_SHA" ]] || die "UNEXPECTED_WORKSPACE_CONTROL_SHA:$HEAD"
-[[ -z "$("${GIT[@]}" status --porcelain)" ]] || die "WORKSPACE_CONTROL_DIRTY"
+STATUS="$(git_as_invoker status --porcelain)" || die "WORKSPACE_CONTROL_STATUS_FAILED"
+[[ -z "$STATUS" ]] || die "WORKSPACE_CONTROL_DIRTY"
 
 MANIFEST="$REPO_ROOT/architecture/lambda-ci-reconcile-controller-hotfix.v1.json"
 python3 - "$REPO_ROOT" "$MANIFEST" <<'PY'

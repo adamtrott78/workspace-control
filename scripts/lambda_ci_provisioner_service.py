@@ -609,7 +609,13 @@ def serve(
     socket_path: pathlib.Path = DEFAULT_SOCKET,
     socket_group: str = "workspace-ci-controller",
 ) -> None:
+    # The provisioner and reconciler use distinct socket groups under one
+    # shared runtime directory. Keep the parent searchable but not listable;
+    # each socket's 0660 owner/group remains the authorization boundary.
     socket_path.parent.mkdir(parents=True, exist_ok=True)
+    if os.geteuid() == 0:
+        os.chown(socket_path.parent, 0, 0)
+    os.chmod(socket_path.parent, 0o711)
     if socket_path.exists():
         socket_path.unlink()
 

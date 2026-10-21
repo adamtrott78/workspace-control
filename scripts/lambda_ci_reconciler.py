@@ -709,7 +709,13 @@ def serve(
     ceiling = json.loads(ceiling_path.read_text(encoding="utf-8"))
     contracts = json.loads(contracts_path.read_text(encoding="utf-8"))
     group = grp.getgrnam(socket_group)
+    # The reconciler and provisioner use distinct socket groups under one
+    # shared runtime directory. Keep the parent searchable but not listable;
+    # each socket's 0660 owner/group remains the authorization boundary.
     socket_path.parent.mkdir(parents=True, exist_ok=True)
+    if os.geteuid() == 0:
+        os.chown(socket_path.parent, 0, 0)
+    os.chmod(socket_path.parent, 0o711)
     if socket_path.exists():
         socket_path.unlink()
     server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)

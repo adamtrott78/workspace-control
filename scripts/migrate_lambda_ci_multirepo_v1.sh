@@ -187,7 +187,10 @@ fi
 install -d -o root -g root -m 0755   /opt/workspace-ci/controller   /opt/workspace-ci/provisioner   /opt/workspace-ci/reconciler   /opt/workspace-ci/reconcile-controller   /etc/workspace-ci   /etc/workspace-ci/projects   /etc/workspace-ci/controllers
 install -d -o root -g root -m 0700 /var/lib/workspace-ci/reconciler
 install -d -o ci-reconciler -g workspace-ci-reconciler -m 0700 /var/lib/workspace-ci/reconcile-controller
-install -d -o root -g workspace-ci-controller -m 0750 /run/workspace-ci
+# Shared parent must be traversable by both unprivileged socket clients.
+# Authorization stays on each 0660 socket's distinct group; 0711 prevents
+# directory listing while allowing traversal to a known socket pathname.
+install -d -o root -g root -m 0711 /run/workspace-ci
 
 BUILD_ROOT="$(mktemp -d)"
 cp -a "$REPO_ROOT/controller/lambda-ci-controller/." "$BUILD_ROOT/"
@@ -267,6 +270,10 @@ done
 [[ -S /run/workspace-ci/reconciler.sock ]] || die "RECONCILER_SOCKET_MISSING"
 [[ "$(stat -c '%U:%G' /run/workspace-ci/reconciler.sock)" == "root:workspace-ci-reconciler" ]] || die "RECONCILER_SOCKET_OWNER_DRIFT"
 [[ "$(stat -c '%a' /run/workspace-ci/reconciler.sock)" == "660" ]] || die "RECONCILER_SOCKET_MODE_DRIFT"
+[[ "$(stat -c '%U:%G' /run/workspace-ci)" == "root:root" ]] || die "SOCKET_PARENT_OWNER_DRIFT"
+[[ "$(stat -c '%a' /run/workspace-ci)" == "711" ]] || die "SOCKET_PARENT_MODE_DRIFT"
+runuser -u ci-controller -- test -x /run/workspace-ci || die "CONTROLLER_SOCKET_PARENT_NOT_TRAVERSABLE"
+runuser -u ci-reconciler -- test -x /run/workspace-ci || die "RECONCILER_SOCKET_PARENT_NOT_TRAVERSABLE"
 
 getent passwd ci-padataset >/dev/null && die "PADATASET_USER_PREMATURELY_CREATED"
 getent group ci-padataset >/dev/null && die "PADATASET_GROUP_PREMATURELY_CREATED"

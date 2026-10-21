@@ -32,7 +32,7 @@
     },
     {
       "path": "scripts/lambda_ci_provisioner_service.py",
-      "git_blob_sha": "85a341527fa951ac6a88a4e8e15141d54f728f5a"
+      "git_blob_sha": "d728c5d26f56694507a23623ccf10d8f71eb05a0"
     },
     {
       "path": "scripts/lambda_ci_runtime.py",
@@ -40,7 +40,7 @@
     },
     {
       "path": "scripts/lambda_ci_reconciler.py",
-      "git_blob_sha": "0d189505d7ddb42522e261dff9f2c1e5193fa882"
+      "git_blob_sha": "360d6b25599b09ccb727e4aacf23374d3529c787"
     },
     {
       "path": "scripts/lambda_ci_reconcile_controller.py",
@@ -53,11 +53,11 @@
     },
     {
       "path": "scripts/migrate_lambda_ci_multirepo_v1.sh",
-      "git_blob_sha": "9b2c731d9066f49b446d99c5d06f2f06c70edac2"
+      "git_blob_sha": "248f57dd188268950d626adccf46877cbb23e6d2"
     },
     {
       "path": "scripts/activate_lambda_ci_reconcile_controller.sh",
-      "git_blob_sha": "eae5fc251bb20f8aac2daad9b901eb84a3d0bed4"
+      "git_blob_sha": "7525bac27399903867cb02f30428486dcb233a5f"
     },
     {
       "path": "templates/lambda-ci/workspace-ci-controller@.service.in",
@@ -137,5 +137,12 @@
   },
   "rollback_required": true,
   "production_routing_changed": false,
-  "scientific_state_materialized": false
+  "scientific_state_materialized": false,
+  "run3_socket_parent_contract": {
+    "owner": "root",
+    "group": "root",
+    "mode": "0711",
+    "authorization": "socket-level distinct 0660 groups",
+    "hotfix_manifest": "architecture/lambda-ci-reconciliation-socket-hotfix.v1.json"
+  }
 }

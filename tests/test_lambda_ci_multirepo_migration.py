@@ -40,6 +40,8 @@ class MultiRepoRun3MigrationTests(unittest.TestCase):
         for name in (
             "scripts/migrate_lambda_ci_multirepo_v1.sh",
             "scripts/activate_lambda_ci_reconcile_controller.sh",
+            "scripts/hotfix_lambda_ci_reconcile_controller_race.sh",
+            "scripts/lambda_ci_reconciliation_socket_hotfix_v1.sh",
             "scripts/stage_lambda_ci_reconciler_pat.sh",
         ):
             result = subprocess.run(
@@ -50,6 +52,16 @@ class MultiRepoRun3MigrationTests(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(result.returncode, 0, f"{name}: {result.stderr}")
+
+    def test_shared_runtime_socket_parent_is_cross_group_traversable(self):
+        migration = (ROOT / "scripts" / "migrate_lambda_ci_multirepo_v1.sh").read_text()
+        self.assertIn(
+            "install -d -o root -g root -m 0711 /run/workspace-ci",
+            migration,
+        )
+        self.assertIn("SOCKET_PARENT_OWNER_DRIFT", migration)
+        self.assertIn("SOCKET_PARENT_MODE_DRIFT", migration)
+        self.assertIn("RECONCILER_SOCKET_PARENT_NOT_TRAVERSABLE", migration)
 
     def test_root_reconciler_is_network_closed(self):
         unit = (ROOT / "systemd/workspace-ci-reconciler.service").read_text()
