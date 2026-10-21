@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "hotfix_id": "run3-reboot-runtime-recovery-v1",
+  "status": "VALIDATED_HOTFIX_INPUT",
+  "diagnosis": {
+    "host_boot_time": "2026-10-20 21:21:57 EDT",
+    "runtime_directory_failure": "/run/workspace-ci is volatile and was absent after reboot; systemd sandbox setup for ReadWritePaths failed before ExecStart with status 226/NAMESPACE.",
+    "restart_storm": "workspace-ci-provisioner.service and workspace-ci-reconciler.service reached about 30,830 automatic restarts each.",
+    "controller_boot_failure": "research-engine CPU/GPU controller instances were static/inactive after reboot because the installed generic controller template lacked an [Install] section.",
+    "source_integrity": "installed provisioner service code remained exactly on the accepted pre-hotfix blob."
+  },
+  "source_blobs": [
+    {
+      "path": "scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh",
+      "git_blob_sha": "a24cc103b7e2e9f439a36ff2ce1c72767ec9ad26"
+    },
+    {
+      "path": "scripts/lambda_ci_provisioner_service.py",
+      "git_blob_sha": "d728c5d26f56694507a23623ccf10d8f71eb05a0"
+    },
+    {
+      "path": "scripts/lambda_ci_reconciler.py",
+      "git_blob_sha": "360d6b25599b09ccb727e4aacf23374d3529c787"
+    },
+    {
+      "path": "scripts/migrate_lambda_ci_multirepo_v1.sh",
+      "git_blob_sha": "a55e5b92579f41acba47b73450450b571d5a9840"
+    },
+    {
+      "path": "templates/lambda-ci/workspace-ci-provisioner-multirepo.service.in",
+      "git_blob_sha": "acdadf5ce6f152d7f1d04e5308657d35e0585d4f"
+    },
+    {
+      "path": "templates/lambda-ci/workspace-ci-controller@.service.in",
+      "git_blob_sha": "03ee9278bfcc8d9a455ecdacefd7bee5bd4a50b7"
+    },
+    {
+      "path": "systemd/workspace-ci-reconciler.service",
+      "git_blob_sha": "a81b758dd2f735fbe72085e3ae3c7529e10152a1"
+    },
+    {
+      "path": "systemd/workspace-ci-tmpfiles.conf",
+      "git_blob_sha": "eb6ddec43bdeead39c7af91f052c3f1a2602ebf2"
+    }
+  ],
+  "accepted_predecessor_blobs": {
+    "/opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py": [
+      "85a341527fa951ac6a88a4e8e15141d54f728f5a",
+      "d728c5d26f56694507a23623ccf10d8f71eb05a0"
+    ],
+    "/opt/workspace-ci/reconciler/lambda_ci_reconciler.py": [
+      "0d189505d7ddb42522e261dff9f2c1e5193fa882",
+      "360d6b25599b09ccb727e4aacf23374d3529c787"
+    ],
+    "/opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py": [
+      "8469569ea0864e24d1c219fc3fea438367a8efc8"
+    ],
+    "/etc/systemd/system/workspace-ci-provisioner.service": [
+      "baf99b17026a2b2090bdbe52ea0c5566d44efe28",
+      "acdadf5ce6f152d7f1d04e5308657d35e0585d4f"
+    ],
+    "/etc/systemd/system/workspace-ci-reconciler.service": [
+      "b4a5808b8bbf4629c6c14d2280b2bb002e92a03e",
+      "a81b758dd2f735fbe72085e3ae3c7529e10152a1"
+    ],
+    "/etc/systemd/system/workspace-ci-controller@.service": [
+      "0124023c22575ebb94c79a71f4589af6e562db96",
+      "03ee9278bfcc8d9a455ecdacefd7bee5bd4a50b7"
+    ],
+    "/etc/tmpfiles.d/workspace-ci.conf": [
+      "ABSENT",
+      "eb6ddec43bdeead39c7af91f052c3f1a2602ebf2"
+    ]
+  },
+  "live_mutation_scope": [
+    "/etc/tmpfiles.d/workspace-ci.conf",
+    "/run/workspace-ci -> root:root mode 0711 via systemd-tmpfiles",
+    "/opt/workspace-ci/provisioner/lambda_ci_provisioner_service.py",
+    "/opt/workspace-ci/reconciler/lambda_ci_reconciler.py",
+    "/etc/systemd/system/workspace-ci-provisioner.service",
+    "/etc/systemd/system/workspace-ci-reconciler.service",
+    "/etc/systemd/system/workspace-ci-controller@.service",
+    "enable/restart workspace-ci-provisioner.service",
+    "enable/restart workspace-ci-reconciler.service",
+    "enable/restart research-engine CPU/GPU controller instances",
+    "enable/restart workspace-ci-reconcile-controller.service"
+  ],
+  "preserved_boundaries": [
+    "no registry epoch change",
+    "no project manifest or reconciliation policy authority change",
+    "no credential restage",
+    "no PADataset identity/root/controller creation",
+    "provisioner.sock stays root:workspace-ci-controller mode 0660",
+    "reconciler.sock stays root:workspace-ci-reconciler mode 0660",
+    "ci-controller and ci-reconciler are not cross-added to socket groups",
+    "candidate execution remains blocked if any active research-engine job/process exists before recovery"
+  ],
+  "acceptance": [
+    "exact source and accepted installed-state preflights PASS",
+    "tmpfiles boot contract installed at /etc/tmpfiles.d/workspace-ci.conf",
+    "/run/workspace-ci root:root mode 0711",
+    "provisioner and reconciler active with their correct 0660 sockets",
+    "cross-socket writes denied",
+    "research-engine CPU/GPU controller instances enabled and active",
+    "reconciliation controller enabled and stable",
+    "terminal reconciliation response PASS",
+    "policy_equivalent_to_observed_main=true",
+    "active_projects=[research-engine]",
+    "planned_projects_skipped=[padataset]",
+    "mutation_performed=true",
+    "all five control-plane services show no restart-count increase across stability window",
+    "PADataset host state remains absent"
+  ],
+  "rollback": "restore prior files, stop and disable all affected services, remove newly created runtime parent when it was absent before recovery; never return to the observed restart storm automatically"
+}
