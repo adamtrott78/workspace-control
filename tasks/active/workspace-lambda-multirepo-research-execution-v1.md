@@ -43,18 +43,18 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-RUN 3 RECONCILIATION PLANE ACCEPTED. Execute research-engine non-regression in order: CPU generic path, gpu-small generic path, then at least one already-accepted model-eval route through the generic installed path. Bind each run to exact GitHub workflow/job identity and inspect terminal receipt/artifacts/logs for clean completion, zero residue, and no quarantine. Do not onboard or execute PADataset until all three research-engine regressions are accepted and checkpointed.
+RUN 3 GITHUB REGRESSIONS PASS; HOST CLEANLINESS GATE ONLY. Execute one bounded read-only Lambda host acceptance block that selects the most recent provisioner records for candidate/workload tuples (f5ba827.../cpu-test, f5ba827.../gpu-small, 522430a.../model-eval-local-extract-wave1), requires COMPLETED plus clean nested runtime receipts, verifies zero research-engine process/workspace/transient-unit residue and no lane quarantine, proves all five control-plane services active without restart-count growth across a short stability window, and proves PADataset remains absent. Do not onboard PADataset until this gate is PASS.
 
 ## Remaining work
 
-- Run 3 regression gate: execute research-engine CPU, gpu-small, and at least one already-accepted model-eval through the generic installed path; require clean terminal receipts, destroyed runner/staging workspaces, zero CPU/GPU residue, no project/lane quarantine, and stable control-plane services.
+- Run 3 final regression gate: run the bounded read-only host acceptance block over the three just-completed research-engine executions. Require matching COMPLETED provisioner records, nested runtime result RUNNER_EXITED_CLEANLY / terminal_status SUCCEEDED, cleanup invariants, no p5-* job/staging directories, no ci-research-engine processes or transient units, no research-engine lane quarantine, all five control-plane services active with stable restart counts, and PADataset still absent.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
 - Run 4: prove reciprocal research-engine/PADataset filesystem/process/cache isolation and verify zero controller/provisioner/runtime source changes during PADataset onboarding.
 - Final: prove a third approved repository requires only registry + manifest + thin launcher binding and freeze the reusable operating contract.
 
 ## Blockers / gates
 
-- None.
+- Run-3 research-engine GitHub/job-layer regressions are all PASS. Final Run-3 regression acceptance is gated only on one read-only Lambda host proof of terminal root receipts, zero residue/quarantine, stable services, and continued PADataset absence.
 
 ## Fresh-chat initialization
 
