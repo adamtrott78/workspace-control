@@ -43,7 +43,7 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-RUN 4 CONTROLLER CREDENTIAL CAPABILITY GATE: stop padataset CPU/GPU controller services to end restart churn, then use the existing staged /var/lib/workspace-ci/controller/github-token without printing it to A/B POST the GitHub runner registration-token endpoint for adamtrott78/research-engine and adamtrott78/PADataset. Record only HTTP status and response message. If research-engine=201 and PADataset=403, update the existing fine-grained PAT repository selection to include PADataset; do not rotate the token or change controller/runtime source. Re-probe until both endpoints return 201, then restart only the two PADataset controllers and require active/stable before canaries.
+RUN 4 CPU ROOT CLEANUP GATE: inspect the most recent padataset provisioner record for candidate abb797dc480bdb8764b0f377d4f4d5b8fce13f3f and workload cpu-ci; require COMPLETED, RUNNER_EXITED_CLEANLY/SUCCEEDED, runner/staging workspaces destroyed, project UID cleanup true, no timeout/resource/disk pressure, and matching root runtime receipt. Also require no remaining padataset p5-* job/staging directories, no ci-padataset process residue, no padataset lane quarantine, and stable padataset CPU/GPU controllers. Only after PASS trigger gpu-ci on the same immutable PR #2 head.
 
 ## Remaining work
 
@@ -53,7 +53,7 @@ RUN 4 CONTROLLER CREDENTIAL CAPABILITY GATE: stop padataset CPU/GPU controller s
 
 ## Blockers / gates
 
-- PADataset is declaratively/root-onboarded, but both PADataset scale-set controllers must remain contained until the existing staged controller token can obtain a runner registration token for adamtrott78/PADataset. No canary may run before this credential gate passes.
+- PADataset credential scope and CPU workflow are accepted. GPU canary is gated only on read-only root cleanup acceptance for CPU request/workload cpu-ci at exact candidate abb797dc480bdb8764b0f377d4f4d5b8fce13f3f.
 
 ## Fresh-chat initialization
 
