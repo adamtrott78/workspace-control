@@ -43,20 +43,18 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-VALIDATED TRANSPORT-FRAMING RECOVERY READY. Preserve root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e. Create/reuse a fresh clean detached workspace-control worktree at exact SHA 5179ebf43c67960254d8542ad4ce1a03c72480ed and execute `scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh` via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. The helper now promotes controller shutdown(SHUT_WR) request framing plus the root 5s request-read bound while retaining exact-one-object validation. Require immediate idempotent replay of the existing COMPLETED root receipt, controller last-success PASS, zero restart increase, RUN3_BOOT_RECOVERY=PASS, and RUN3_RECONCILIATION_PLANE=PASS. Do not delete receipts, run older helpers, change policy, bump registry_epoch, restage the token, or onboard PADataset.
+RUN 3 RECONCILIATION PLANE ACCEPTED. Execute research-engine non-regression in order: CPU generic path, gpu-small generic path, then at least one already-accepted model-eval route through the generic installed path. Bind each run to exact GitHub workflow/job identity and inspect terminal receipt/artifacts/logs for clean completion, zero residue, and no quarantine. Do not onboard or execute PADataset until all three research-engine regressions are accepted and checkpointed.
 
 ## Remaining work
 
-- Run 3 immediate: from a fresh clean detached worktree at exact validated SHA 5179ebf43c67960254d8542ad4ce1a03c72480ed, rerun scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. Require source+installed-state preflights, boot socket isolation PASS, controller last-success PASS replaying the existing root COMPLETED receipt without a 120s stall, zero restart-count increase across stability window, and RUN3_RECONCILIATION_PLANE=PASS.
-- Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
-- Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
+- Run 3 regression gate: execute research-engine CPU, gpu-small, and at least one already-accepted model-eval through the generic installed path; require clean terminal receipts, destroyed runner/staging workspaces, zero CPU/GPU residue, no project/lane quarantine, and stable control-plane services.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
 - Run 4: prove reciprocal research-engine/PADataset filesystem/process/cache isolation and verify zero controller/provisioner/runtime source changes during PADataset onboarding.
 - Final: prove a third approved repository requires only registry + manifest + thin launcher binding and freeze the reusable operating contract.
 
 ## Blockers / gates
 
-- Validated transport-framing recovery is ready but not yet applied live. Services remain contained/disabled from the previous rollback. Preserve root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e for idempotent replay.
+- None.
 
 ## Fresh-chat initialization
 
