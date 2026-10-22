@@ -8,7 +8,8 @@
     "restart_storm": "workspace-ci-provisioner.service and workspace-ci-reconciler.service reached about 30,830 automatic restarts each.",
     "controller_boot_failure": "research-engine CPU/GPU controller instances were static/inactive after reboot because the installed generic controller template lacked an [Install] section.",
     "source_integrity": "installed provisioner service code remained exactly on the accepted pre-hotfix blob.",
-    "response_liveness_failure": "Root persisted a COMPLETED reconciliation receipt with mutation_performed=true, but the GitHub-facing controller's 30s Unix-socket response timeout expired roughly two seconds before root attempted to send the response; root then crashed on BrokenPipeError. Subsequent transport failures produced controller/root restart churn without invalidating the persisted root receipt."
+    "response_liveness_failure": "Root persisted a COMPLETED reconciliation receipt with mutation_performed=true, but the GitHub-facing controller's 30s Unix-socket response timeout expired roughly two seconds before root attempted to send the response; root then crashed on BrokenPipeError. Subsequent transport failures produced controller/root restart churn without invalidating the persisted root receipt.",
+    "transport_framing_deadlock": "Controller sent one JSON line and waited for a response without half-closing its write side; root read that line and then blocked on a second readline(2) while enforcing exactly one object. The block lasted exactly until the controller response timeout, after which root observed EOF, replayed the existing COMPLETED receipt, and tried to answer a disconnected client."
   },
   "source_blobs": [
     {
@@ -21,7 +22,7 @@
     },
     {
       "path": "scripts/lambda_ci_reconciler.py",
-      "git_blob_sha": "b2edc8b0168024ffb61aa54d96859353738b79cf"
+      "git_blob_sha": "e58d0ccd3e11df99dc22b9069d16b1a03c4d3a2d"
     },
     {
       "path": "scripts/migrate_lambda_ci_multirepo_v1.sh",
@@ -45,7 +46,7 @@
     },
     {
       "path": "scripts/lambda_ci_reconcile_controller.py",
-      "git_blob_sha": "1229a29c40a08a100dcdda2a4e276e616b27d219"
+      "git_blob_sha": "cdb38af360676abb053c1d171cc4dc3ef39e977a"
     }
   ],
   "accepted_predecessor_blobs": {
@@ -56,11 +57,13 @@
     "/opt/workspace-ci/reconciler/lambda_ci_reconciler.py": [
       "0d189505d7ddb42522e261dff9f2c1e5193fa882",
       "360d6b25599b09ccb727e4aacf23374d3529c787",
-      "b2edc8b0168024ffb61aa54d96859353738b79cf"
+      "b2edc8b0168024ffb61aa54d96859353738b79cf",
+      "e58d0ccd3e11df99dc22b9069d16b1a03c4d3a2d"
     ],
     "/opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py": [
       "8469569ea0864e24d1c219fc3fea438367a8efc8",
-      "1229a29c40a08a100dcdda2a4e276e616b27d219"
+      "1229a29c40a08a100dcdda2a4e276e616b27d219",
+      "cdb38af360676abb053c1d171cc4dc3ef39e977a"
     ],
     "/etc/systemd/system/workspace-ci-provisioner.service": [
       "baf99b17026a2b2090bdbe52ea0c5566d44efe28",
@@ -119,7 +122,8 @@
     "all five control-plane services show no restart-count increase across stability window",
     "PADataset host state remains absent",
     "root COMPLETED receipt can be replayed without reapplying after a client timeout",
-    "client disconnect after root receipt persistence does not restart the root reconciler"
+    "client disconnect after root receipt persistence does not restart the root reconciler",
+    "one-request framing half-close prevents root EOF deadlock"
   ],
   "rollback": "restore prior files, stop and disable all affected services, remove newly created runtime parent when it was absent before recovery; never return to the observed restart storm automatically",
   "response_liveness": {
@@ -127,6 +131,7 @@
     "controller_persistent_transport_behavior": "log TRANSIENT_ERROR and retry in-process",
     "root_client_disconnect_behavior": "preserve receipt and continue serving",
     "receipt_wait_iterations": 150,
-    "receipt_wait_sleep_seconds": 2
+    "receipt_wait_sleep_seconds": 2,
+    "transport_framing": "Controller now calls shutdown(SHUT_WR) immediately after sendall; root keeps the exact-one-object EOF check and bounds request reads to 5 seconds."
   }
 }
