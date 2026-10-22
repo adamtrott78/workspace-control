@@ -42,7 +42,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Bind the exact merged Wave-2 workflow blob `cb7fd59bcb6f857bd6148ecbc7e2eb320dc9a1fb` to `model-eval-local-extract-wave2` through the already-accepted `model-dual-public-v1` execution contract. Validate and merge only the declarative manifest/test delta, require trusted reconciliation of that exact state, then trigger exactly one bounded Wave-2 benchmark. Do not modify controller/provisioner/runtime/reconciler code.
+Bind the exact merged Wave-2 workflow blob cb7fd59bcb6f857bd6148ecbc7e2eb320dc9a1fb to a new research-engine route model-eval-local-extract-wave2 using the already-accepted model-dual-public-v1 contract, with exact qwen3.5-4b/runtime bindings and the existing same-repository PR/actor gates. Validate and merge only the declarative manifest/test delta, require the trusted reconciliation path to accept/install that exact state, then trigger exactly one bounded Wave-2 benchmark. Do not modify controller/provisioner/runtime/reconciler code.
 
 ## Remaining work
 
@@ -71,12 +71,3 @@ Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
-
-
-## Current Wave-2 checkpoint
-
-- research-engine PR #132 full CI: PASS.
-- research-engine merged checkpoint: `d1f240d51dbb348c0525acfc4ca58118a2d0f8e7`.
-- exact merged Wave-2 workflow blob: `cb7fd59bcb6f857bd6148ecbc7e2eb320dc9a1fb`.
-- execution authority: existing `model-dual-public-v1`; no new privileged authority or GitRunner substrate change.
-- workspace-control route-binding branch changes only the owning capsule/handoff, `architecture/lambda-ci-project-research-engine.v2.json`, and the exact route-blob regression test.
