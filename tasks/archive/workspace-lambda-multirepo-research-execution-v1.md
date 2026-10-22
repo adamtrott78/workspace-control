@@ -3,7 +3,7 @@
 
 Derived human-readable view.
 
-Authoritative capsule: tasks/active/workspace-lambda-multirepo-research-execution-v1.json
+Authoritative capsule: tasks/archive/workspace-lambda-multirepo-research-execution-v1.json
 
 If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
 
@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-lambda-multirepo-research-execution-v1
 - Title: Workspace Lambda Multi-Repository Research Execution v1
-- Status: IN_PROGRESS
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-FINAL REUSE PROOF: prove a synthetic third approved repository can be represented only by a registry entry + schema-v2 project manifest + thin launcher bindings using existing cpu-public-ci-v1 and gpu-single-public-ci-v1 contracts; validate deterministic identity/root/scale-set derivation, reconciliation planning, admission minting, public-repository fork denial, and zero generic controller/provisioner/runtime/reconciliation source changes. Freeze the reusable research-compute operating contract and close the durable task if full repository validation passes.
+Task complete. The reusable GitHub-to-Lambda multi-repository research-compute control plane is accepted for research-engine and PADataset, with live reciprocal isolation and clean CPU/GPU receipts. A third-project executable proof confirms that ordinary future project onboarding requires only thin launcher workflows, exact workflow-blob binding, a registry entry, a schema-v2 project manifest, existing accepted execution contracts, trusted reconciliation, and bounded canary acceptance. Do not reopen controller/provisioner/runtime authority for ordinary onboarding. Any new capability not covered by an accepted execution contract, project removal, credential-authority redesign, or broader privileged surface must start as a separate reviewed workspace-control task.
 
 ## Remaining work
 
-- Final: prove a third approved repository requires only registry + manifest + thin launcher binding and freeze the reusable operating contract.
+- None.
 
 ## Blockers / gates
 
@@ -60,7 +60,7 @@ FINAL REUSE PROOF: prove a synthetic third approved repository can be represente
 https://github.com/adamtrott78/workspace-control
 
 Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-lambda-multirepo-research-execution-v1.json
+Task capsule: tasks/archive/workspace-lambda-multirepo-research-execution-v1.json
 
 Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
