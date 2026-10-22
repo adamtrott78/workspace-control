@@ -38,12 +38,12 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a4a5e1a2afc004b484542d5a71746e6472154fdb
+- Remote checkpoint: 35e6f451fe36f039b5f6461f7469f0eed1e79e43
 - Remote verified: true
 
 ## Next safe action
 
-RUN 4 START: inspect PADataset current main and existing GitHub workflows against architecture/lambda-ci-project-padataset.v1.json. Bind only thin non-scientific cpu-ci and gpu-ci launcher workflows to exact default-branch Git blobs, update PADataset manifest/registry activation declaratively, validate with full workspace-control CI, then allow the accepted Git-driven reconciler to onboard PADataset. Do not modify generic controller/provisioner/runtime source. Do not run scientific PADataset datasets/experiments.
+RUN 4 DECLARATIVE ACTIVATION CANDIDATE: validate the workspace-control activation PR that sets PADataset project + cpu-ci/gpu-ci routes ACTIVE, binds exact launcher blobs 5e6a1d4... and 3e0c79dc..., and increments registry_epoch to 5. Require full task/Python/Go/integration PASS and prove no generic controller/provisioner/runtime source changes. After merge, require a fresh successful trusted reconciliation workflow for the policy-changing commit and allow the installed reconciliation controller/root reconciler to create ci-padataset, /srv/workspace-ci/padataset, and CPU/GPU controller instances. Do not trigger PADataset canaries before reconciliation acceptance.
 
 ## Remaining work
 

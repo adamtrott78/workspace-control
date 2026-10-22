@@ -2,7 +2,7 @@
   "schema_version": 1,
   "registry_id": "lambda-ci-project-registry-v1",
   "status": "ACTIVE",
-  "registry_epoch": 4,
+  "registry_epoch": 5,
   "authority": {
     "owner": "workspace-control",
     "allowed_repository_owners": [
@@ -55,7 +55,7 @@
       "repository": "adamtrott78/PADataset",
       "repository_visibility": "public",
       "manifest_source_path": "architecture/lambda-ci-project-padataset.v1.json",
-      "activation_state": "P6_PILOT_PLANNED_NOT_INSTALLED",
+      "activation_state": "ACTIVE",
       "lanes": [
         "cpu",
         "gpu"

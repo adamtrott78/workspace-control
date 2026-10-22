@@ -28,19 +28,20 @@ def derived(project_id):
 
 
 class LambdaCIMultiRepoContractTests(unittest.TestCase):
-    def test_run3_activates_research_engine_only(self):
+    def test_run4_activates_padataset_after_run3_acceptance(self):
         self.assertEqual(REGISTRY["status"], "ACTIVE")
+        self.assertEqual(REGISTRY["registry_epoch"], 5)
         self.assertEqual(CONTRACTS["status"], "CONTRACT_ONLY_NOT_INSTALLED")
         self.assertEqual(RESEARCH["status"], "ACTIVE")
+        self.assertEqual(PAD["status"], "ACTIVE")
         self.assertEqual(
             REGISTRY["projects"]["research-engine"]["activation_state"],
             "ACTIVE",
         )
         self.assertEqual(
             REGISTRY["projects"]["padataset"]["activation_state"],
-            "P6_PILOT_PLANNED_NOT_INSTALLED",
+            "ACTIVE",
         )
-        self.assertNotEqual(PAD["status"], "ACTIVE")
 
     def test_registry_is_root_owned_and_candidate_cannot_reconcile(self):
         authority = REGISTRY["authority"]
@@ -102,13 +103,21 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
 
     def test_padataset_public_repo_gate_is_fail_closed(self):
         self.assertEqual(PAD["repository_visibility"], "public")
-        for route in PAD["routes"].values():
+        expected_blobs = {
+            "cpu-ci": "5e6a1d4a47ecdfa8b40d3bea23fa8739cc12cd9e",
+            "gpu-ci": "3e0c79dc1b8bed7b1480cc745c478c190a3c7da4",
+        }
+        self.assertEqual(set(PAD["routes"]), set(expected_blobs))
+        for route_id, route in PAD["routes"].items():
             trigger = route["trigger"]
             self.assertEqual(trigger["allowed_actor_logins"], ["adamtrott78"])
             self.assertTrue(trigger["require_open_same_repository_pr_head"])
             self.assertFalse(trigger["fork_pr_execution_allowed"])
-            self.assertIsNone(route["trusted_workflow"]["blob_sha"])
-            self.assertEqual(route["activation_state"], "PLANNED_NOT_BOUND")
+            self.assertEqual(
+                route["trusted_workflow"]["blob_sha"],
+                expected_blobs[route_id],
+            )
+            self.assertEqual(route["activation_state"], "ACTIVE")
 
     def test_generic_dual_gpu_compute_remains_unaccepted(self):
         generic_heavy = CONTRACTS["contracts"]["gpu-dual-public-ci-v1"]

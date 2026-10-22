@@ -288,9 +288,12 @@ Initial routes are intentionally small:
 - `cpu-ci` -> `cpu-public-ci-v1`;
 - `gpu-ci` -> `gpu-single-public-ci-v1`.
 
-Their workflow blob fields remain null until the pilot launcher workflows are created and merged. A null blob can never activate a route.
+Run-4 activation binds the merged default-branch launcher blobs exactly:
 
-The first PADataset jobs are non-scientific canaries only. They must not change datasets, results, experiments or paper claims.
+- `cpu-ci`: `.github/workflows/lambda-ci-cpu.yml` -> `5e6a1d4a47ecdfa8b40d3bea23fa8739cc12cd9e`;
+- `gpu-ci`: `.github/workflows/lambda-ci-gpu.yml` -> `3e0c79dc1b8bed7b1480cc745c478c190a3c7da4`.
+
+Both routes remain actor-gated, same-repository-open-PR-only, and fork-denied. The first PADataset jobs are non-scientific canaries only. They must not change datasets, results, experiments or paper claims.
 
 ## 13. Third-project proof
 

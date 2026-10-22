@@ -85,9 +85,12 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             multi.resolve_project_manifest(REGISTRY, manifests, "unregistered")
 
     def test_padataset_unbound_route_fails_closed(self):
-        req = request_for(PAD, "cpu-ci")
+        manifest = copy.deepcopy(PAD)
+        manifest["routes"]["cpu-ci"]["activation_state"] = "PLANNED_NOT_BOUND"
+        manifest["routes"]["cpu-ci"]["trusted_workflow"]["blob_sha"] = None
+        req = request_for(manifest, "cpu-ci")
         with self.assertRaisesRegex(multi.MultiRepoPolicyError, "route is not active"):
-            multi.mint_admission(req, PAD, CONTRACTS, WORKLOAD)
+            multi.mint_admission(req, manifest, CONTRACTS, WORKLOAD)
 
     def test_research_route_resolves_semantic_contract_not_route_name(self):
         req = request_for(RESEARCH, "cpu-test")
@@ -152,22 +155,22 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(multi.MultiRepoPolicyError, "not admission-enabled"):
             multi.mint_admission(req, manifest, CONTRACTS, WORKLOAD)
 
-    def test_reconciler_is_deterministic_dry_run_and_has_no_commands(self):
+    def test_reconciler_is_deterministic_for_active_projects_and_has_no_commands(self):
         plan = reconciler.plan_reconciliation(
             REGISTRY,
             {"research-engine": RESEARCH, "padataset": PAD},
         )
         self.assertEqual(plan["mode"], "APPLY_READY_V1")
-        self.assertEqual(plan["active_projects"], ["research-engine"])
         self.assertEqual(
-            plan["planned_projects_skipped"],
-            ["padataset"],
+            plan["active_projects"],
+            ["padataset", "research-engine"],
         )
+        self.assertEqual(plan["planned_projects_skipped"], [])
         serialized = json.dumps(plan, sort_keys=True)
         self.assertNotIn("shell", serialized)
         self.assertNotIn("argv", serialized)
-        self.assertNotIn("ci-padataset", serialized)
-        self.assertNotIn("/srv/workspace-ci/padataset", serialized)
+        self.assertIn("ci-padataset", serialized)
+        self.assertIn("/srv/workspace-ci/padataset", serialized)
 
     def test_reconciler_plans_only_active_projects(self):
         registry = copy.deepcopy(REGISTRY)
@@ -178,6 +181,13 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         registry["status"] = "ACTIVE"
         registry["projects"]["research-engine"]["activation_state"] = "ACTIVE"
         manifests["research-engine"]["status"] = "ACTIVE"
+        registry["projects"]["padataset"]["activation_state"] = (
+            "P6_PILOT_PLANNED_NOT_INSTALLED"
+        )
+        manifests["padataset"]["status"] = "P6_PILOT_PLANNED_NOT_INSTALLED"
+        for route in manifests["padataset"]["routes"].values():
+            route["activation_state"] = "PLANNED_NOT_BOUND"
+            route["trusted_workflow"]["blob_sha"] = None
         plan = reconciler.plan_reconciliation(registry, manifests)
         self.assertEqual(plan["active_projects"], ["research-engine"])
         self.assertEqual(plan["planned_projects_skipped"], ["padataset"])
@@ -250,7 +260,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             )
             self.assertEqual(
                 validated["plan"]["active_projects"],
-                ["research-engine"],
+                ["padataset", "research-engine"],
             )
             bad = copy.deepcopy(request)
             bad["source_attestation"]["workflow_blob_sha"] = "c" * 40
@@ -397,6 +407,13 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             registry = copy.deepcopy(REGISTRY)
             research = copy.deepcopy(RESEARCH)
             padataset = copy.deepcopy(PAD)
+            registry["projects"]["padataset"]["activation_state"] = (
+                "P6_PILOT_PLANNED_NOT_INSTALLED"
+            )
+            padataset["status"] = "P6_PILOT_PLANNED_NOT_INSTALLED"
+            for route in padataset["routes"].values():
+                route["activation_state"] = "PLANNED_NOT_BOUND"
+                route["trusted_workflow"]["blob_sha"] = None
             registry_path.write_text(json.dumps(registry))
             (manifest_dir / "research-engine.json").write_text(json.dumps(research))
             (manifest_dir / "padataset.json").write_text(json.dumps(padataset))

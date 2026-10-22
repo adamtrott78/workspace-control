@@ -21,16 +21,34 @@ class MultiRepoRun3MigrationTests(unittest.TestCase):
     def test_install_manifest_binds_exact_source_blobs(self):
         self.assertEqual(INSTALL["status"], "RUN3_VALIDATED_INSTALL_INPUT")
         self.assertFalse(INSTALL["padataset_activation_allowed"])
+        frozen_run3_policy = {
+            "architecture/lambda-ci-project-registry.v1.json":
+                "762805a1d33bbd7e666377b13680116d1051b4ab",
+            "architecture/lambda-ci-project-padataset.v1.json":
+                "63ba5e54e0489426efda3a05259792f22c95f85f",
+        }
         seen = set()
         for item in INSTALL["source_blobs"]:
             path = item["path"]
             self.assertNotIn(path, seen)
             seen.add(path)
-            self.assertEqual(
-                item["git_blob_sha"],
-                git_blob_sha((ROOT / path).read_bytes()),
-                path,
-            )
+            if path in frozen_run3_policy:
+                self.assertEqual(
+                    item["git_blob_sha"],
+                    frozen_run3_policy[path],
+                    path,
+                )
+                self.assertNotEqual(
+                    item["git_blob_sha"],
+                    git_blob_sha((ROOT / path).read_bytes()),
+                    f"{path} must evolve only through reconciliation after Run 3",
+                )
+            else:
+                self.assertEqual(
+                    item["git_blob_sha"],
+                    git_blob_sha((ROOT / path).read_bytes()),
+                    path,
+                )
         self.assertEqual(
             INSTALL["live_transition"]["required_regression_routes"],
             ["cpu-test", "gpu-small", "model-eval-single-gpu"],
