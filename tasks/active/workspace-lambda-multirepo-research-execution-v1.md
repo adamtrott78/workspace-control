@@ -53,7 +53,7 @@ RUN 4 LIVE RECONCILIATION READBACK ONLY: read the reconciliation-controller last
 
 ## Blockers / gates
 
-- Run-4 repository/policy activation is accepted. Live PADataset canaries remain gated on one read-only Lambda host reconciliation readback proving automatic root onboarding completed cleanly.
+- Live PADataset canaries remain gated on the read-only Lambda host reconciliation acceptance. Candidate PR #2 / abb797dc480bdb8764b0f377d4f4d5b8fce13f3f is prepared but untriggered.
 
 ## Fresh-chat initialization
 
