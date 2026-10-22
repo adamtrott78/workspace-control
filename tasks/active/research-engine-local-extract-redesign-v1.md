@@ -42,7 +42,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Resume EXTRACT design from the Wave-1 REJECT by analyzing claim proposal/atomicization/guard interaction first. The smallest materially different iteration should prevent one bad/overfull region from invalidating an otherwise useful paper, enforce deterministic per-region/per-paper budgeting before final acceptance, and preserve exact quote copying and fail-closed unknown-candidate handling. Treat retrieval as a secondary residual: preserve the accepted FACET_INTERLEAVED_BM25_V1 baseline initially, then improve retrieval only against the measured lower-recall papers if needed. Implement the chosen iteration in research-engine and run it through the already-accepted Git/Lambda runner. Do not rerun Wave 1 unchanged, do not reopen completed GitRunner infrastructure, do not change production routing, and do not modify the accepted page-scoped Qwen VERIFY boundary.
+Bind the exact merged Wave-2 workflow blob `cb7fd59bcb6f857bd6148ecbc7e2eb320dc9a1fb` to `model-eval-local-extract-wave2` through the already-accepted `model-dual-public-v1` execution contract. Validate and merge only the declarative manifest/test delta, require trusted reconciliation of that exact state, then trigger exactly one bounded Wave-2 benchmark. Do not modify controller/provisioner/runtime/reconciler code.
 
 ## Remaining work
 
@@ -71,3 +71,12 @@ Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
+
+
+## Current Wave-2 checkpoint
+
+- research-engine PR #132 full CI: PASS.
+- research-engine merged checkpoint: `d1f240d51dbb348c0525acfc4ca58118a2d0f8e7`.
+- exact merged Wave-2 workflow blob: `cb7fd59bcb6f857bd6148ecbc7e2eb320dc9a1fb`.
+- execution authority: existing `model-dual-public-v1`; no new privileged authority or GitRunner substrate change.
+- workspace-control route-binding branch changes only the owning capsule/handoff, `architecture/lambda-ci-project-research-engine.v2.json`, and the exact route-blob regression test.
