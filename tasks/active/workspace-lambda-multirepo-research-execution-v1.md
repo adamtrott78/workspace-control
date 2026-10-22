@@ -24,7 +24,7 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: f924f2bf45fbf05aa3f0dc2ea036354143834246
+- Remote checkpoint: 5179ebf43c67960254d8542ad4ce1a03c72480ed
 - Remote verified: true
 
 ### research-engine
@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-VALIDATE TRANSPORT-FRAMING REPAIR FIRST. Review/validate branch fix-reconcile-socket-framing-run3: controller shutdown(SHUT_WR) after one newline-delimited JSON request, root 5s request-read bound while preserving the exact-one-object EOF check, exact-source/accepted-predecessor manifest refresh, and regression tests including a real Unix-socket framing exchange. Require full repository validation PASS before host mutation. Keep services contained and preserve root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e. Do not rerun older helpers, delete receipts, change policy, bump registry_epoch, restage the token, or onboard PADataset.
+VALIDATED TRANSPORT-FRAMING RECOVERY READY. Preserve root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e. Create/reuse a fresh clean detached workspace-control worktree at exact SHA 5179ebf43c67960254d8542ad4ce1a03c72480ed and execute `scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh` via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. The helper now promotes controller shutdown(SHUT_WR) request framing plus the root 5s request-read bound while retaining exact-one-object validation. Require immediate idempotent replay of the existing COMPLETED root receipt, controller last-success PASS, zero restart increase, RUN3_BOOT_RECOVERY=PASS, and RUN3_RECONCILIATION_PLANE=PASS. Do not delete receipts, run older helpers, change policy, bump registry_epoch, restage the token, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: validate and merge the reconciliation transport-framing repair. Require task contracts, Python regression including real AF_UNIX framing test, pinned Go controller validation, and full integration PASS. Only then run the exact bounded recovery helper from the validated merge; existing root COMPLETED receipt must be preserved for immediate idempotent replay.
+- Run 3 immediate: from a fresh clean detached worktree at exact validated SHA 5179ebf43c67960254d8542ad4ce1a03c72480ed, rerun scripts/lambda_ci_run3_boot_recovery_hotfix_v1.sh via sudo with WORKSPACE_CI_RUN3_BOOT_RECOVERY_EXPECTED_SHA set to that SHA. Require source+installed-state preflights, boot socket isolation PASS, controller last-success PASS replaying the existing root COMPLETED receipt without a 120s stall, zero restart-count increase across stability window, and RUN3_RECONCILIATION_PLANE=PASS.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ VALIDATE TRANSPORT-FRAMING REPAIR FIRST. Review/validate branch fix-reconcile-so
 
 ## Blockers / gates
 
-- The remaining Run-3 failure is diagnosed as a Unix-stream request-framing deadlock, not reconciliation correctness or root replay semantics. Framing repair is staged on fix-reconcile-socket-framing-run3 and must pass the full validation tier before another live recovery attempt.
+- Validated transport-framing recovery is ready but not yet applied live. Services remain contained/disabled from the previous rollback. Preserve root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e for idempotent replay.
 
 ## Fresh-chat initialization
 
