@@ -1,6 +1,10 @@
 import hashlib
 import json
+import socket
 import sys
+import tempfile
+import threading
+import time
 import unittest
 from pathlib import Path
 
@@ -279,6 +283,47 @@ class ReconcileControllerTests(unittest.TestCase):
             self.assertTrue(
                 refreshed["policy_equivalent_to_observed_main"]
             )
+
+    def test_submit_request_half_closes_write_side_for_root_framing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            socket_path = Path(tmp) / "reconciler.sock"
+            ready = threading.Event()
+            observed = {}
+
+            def root_peer():
+                server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                server.bind(str(socket_path))
+                server.listen(1)
+                ready.set()
+                try:
+                    conn, _ = server.accept()
+                    with conn:
+                        handle = conn.makefile("rb")
+                        observed["first"] = handle.readline()
+                        observed["second"] = handle.readline(2)
+                        conn.sendall(
+                            b'{"schema_version":1,"status":"PASS","request_id":"x","receipt":{}}\n'
+                        )
+                finally:
+                    server.close()
+
+            thread = threading.Thread(target=root_peer, daemon=True)
+            thread.start()
+            self.assertTrue(ready.wait(timeout=1))
+
+            started = time.monotonic()
+            response = controller.submit_request(
+                socket_path,
+                {"schema_version": 1, "request_id": "x"},
+            )
+            elapsed = time.monotonic() - started
+            thread.join(timeout=1)
+
+            self.assertFalse(thread.is_alive())
+            self.assertLess(elapsed, 1.0)
+            self.assertTrue(observed["first"].endswith(b"\n"))
+            self.assertEqual(observed["second"], b"")
+            self.assertEqual(response["status"], "PASS")
 
     def test_root_response_liveness_exceeds_observed_apply_window(self):
         self.assertGreaterEqual(controller.ROOT_RESPONSE_TIMEOUT_SECONDS, 120)
