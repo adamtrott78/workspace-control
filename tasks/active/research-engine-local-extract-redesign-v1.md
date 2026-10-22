@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4d580661a27f151e70f778111a88579e54de1c71
+- Remote checkpoint: 87e736740169985ff17c8225d1c83b615a3b62dc
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,16 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Resume actual EXTRACT development from the Wave-1 REJECT evidence. Inspect per-paper failures in artifact 12231293963/report SHA256 5954e2de2fd1d23c770f7f687c5282b8e2f43e68c9b29ece6374fed5442f98dc, select the smallest materially different Local Evidence Agent iteration, implement it in research-engine, and execute it through the accepted Git/Lambda runner. Do not spend further work on the completed Wave-1 infrastructure support chain.
+Resume EXTRACT design from the Wave-1 REJECT by analyzing claim proposal/atomicization/guard interaction first. The smallest materially different iteration should prevent one bad/overfull region from invalidating an otherwise useful paper, enforce deterministic per-region/per-paper budgeting before final acceptance, and preserve exact quote copying and fail-closed unknown-candidate handling. Treat retrieval as a secondary residual: preserve the accepted FACET_INTERLEAVED_BM25_V1 baseline initially, then improve retrieval only against the measured lower-recall papers if needed. Implement the chosen iteration in research-engine and run it through the already-accepted Git/Lambda runner. Do not rerun Wave 1 unchanged, do not reopen completed GitRunner infrastructure, do not change production routing, and do not modify the accepted page-scoped Qwen VERIFY boundary.
 
 ## Remaining work
 
-- Analyze the six Wave-1 paper failures and teacher-subset disagreement to localize failure among candidate retrieval, atomic claim normalization, type assignment, confidence/guard thresholds, and completeness.
-- Implement a materially different EXTRACT iteration under the accepted Local Evidence Agent architecture rather than cosmetic prompt tuning of the rejected Wave-1 normalizer.
-- Use the reusable Lambda Git runner for bounded candidate-commit CPU/GPU execution; do not reopen runner infrastructure unless the execution contract itself changes.
-- Measure local completion, claim-level agreement, provenance safety, fallback fraction, latency/resource use, and remote-token suppression against the preserved nine-paper baseline.
+- Localize Wave-1 failure into claim proposal/atomicization/guard semantics versus retrieval residuals using the recovered per-paper artifact evidence.
+- Design the smallest materially different Local Evidence Agent iteration that avoids whole-paper rejection from local region fanout while preserving exact grounding, bounded claim counts, type semantics, and fail-closed unknown candidate IDs.
+- Keep FACET_INTERLEAVED_BM25_V1 fixed for the first semantic iteration so claim-generation effects are separable; only open retrieval changes against measured low-recall papers after semantic failure modes are isolated.
+- Implement the new EXTRACT iteration in research-engine with no production routing change and no scientific materialization during benchmarking.
+- Execute through the accepted reusable Git/Lambda runner and compare against the preserved nine-paper / 71-evidence-object Wave-1 baseline.
+- Measure local completion, claim-level teacher agreement on the preserved teacher subset, provenance safety, fallback fraction, latency/resource use, and projected remote-token suppression.
 - Only after a candidate passes the semantic-quality gate consider VERIFY-boundary analysis or production integration.
 
 ## Blockers / gates
