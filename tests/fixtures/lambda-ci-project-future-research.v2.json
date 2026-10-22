@@ -1,0 +1,100 @@
+{
+  "schema_version": 2,
+  "status": "ACTIVE",
+  "project_id": "future-research",
+  "repository": "adamtrott78/future-research",
+  "repository_visibility": "public",
+  "derived_identity": {
+    "runner_user": "ci-future-research",
+    "runner_group": "ci-future-research",
+    "project_root": "/srv/workspace-ci/future-research",
+    "lanes": {
+      "cpu": {
+        "scale_set_name": "lambda-future-research",
+        "runner_prefix": "lambda-future-research-"
+      },
+      "gpu": {
+        "scale_set_name": "lambda-future-research-gpu",
+        "runner_prefix": "lambda-future-research-gpu-"
+      }
+    }
+  },
+  "roots": {
+    "jobs": "/srv/workspace-ci/future-research/jobs",
+    "staging_cache": "/srv/workspace-ci/future-research/staging-cache",
+    "trusted_cache": "/srv/workspace-ci/future-research/trusted-cache",
+    "logs": "/srv/workspace-ci/future-research/logs",
+    "home": "/srv/workspace-ci/future-research/home"
+  },
+  "forbidden_paths": [
+    "/home/atrott",
+    "/var/run/docker.sock",
+    "/run/docker.sock",
+    "/srv/workspace-ci/research-engine",
+    "/srv/workspace-ci/padataset",
+    "/var/lib/workspace-ci/provisioner",
+    "/run/workspace-ci"
+  ],
+  "concurrency": 1,
+  "routes": {
+    "cpu-ci": {
+      "activation_state": "ACTIVE",
+      "lane": "cpu",
+      "execution_contract_id": "cpu-public-ci-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-cpu.yml",
+        "default_branch": "main",
+        "blob_sha": "1111111111111111111111111111111111111111"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-ci-cpu",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": null,
+        "runtime_id": null
+      }
+    },
+    "gpu-ci": {
+      "activation_state": "ACTIVE",
+      "lane": "gpu",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-gpu.yml",
+        "default_branch": "main",
+        "blob_sha": "2222222222222222222222222222222222222222"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-ci-gpu",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": null,
+        "runtime_id": null
+      }
+    }
+  },
+  "bindings": {
+    "models": {},
+    "runtimes": {}
+  },
+  "isolation": {
+    "unique_project_uid_required": true,
+    "sibling_project_roots_inaccessible": true,
+    "control_plane_state_inaccessible": true,
+    "global_trusted_object_store_inaccessible_by_default": true,
+    "only_exact_authorized_trusted_objects_may_be_mounted_readonly": true
+  }
+}
