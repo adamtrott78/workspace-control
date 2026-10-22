@@ -43,7 +43,7 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-RUN 4 LIVE RECONCILIATION READBACK ONLY: read the reconciliation-controller last-success state and matching root receipt for fresh policy SHA 4151a152409f5912ec561350ad1080bb9d5c63fa (or a later policy-equivalent task-only main), require active_projects=[padataset,research-engine], planned_projects_skipped=[], mutation_performed=true, and terminal COMPLETED. Verify ci-padataset user/group, /srv/workspace-ci/padataset root/standard subroots, installed registry epoch 5 + ACTIVE PADataset manifest with exact workflow blobs, padataset CPU/GPU controller envs and enabled/active services, research-engine non-regression, zero pre-canary PADataset workspace/process/quarantine residue, and unchanged generic installed provisioner/runtime/reconciler blobs. Do not trigger PADataset CPU/GPU canaries until this host readback passes.
+RUN 4 CONTROLLER CREDENTIAL CAPABILITY GATE: stop padataset CPU/GPU controller services to end restart churn, then use the existing staged /var/lib/workspace-ci/controller/github-token without printing it to A/B POST the GitHub runner registration-token endpoint for adamtrott78/research-engine and adamtrott78/PADataset. Record only HTTP status and response message. If research-engine=201 and PADataset=403, update the existing fine-grained PAT repository selection to include PADataset; do not rotate the token or change controller/runtime source. Re-probe until both endpoints return 201, then restart only the two PADataset controllers and require active/stable before canaries.
 
 ## Remaining work
 
@@ -53,7 +53,7 @@ RUN 4 LIVE RECONCILIATION READBACK ONLY: read the reconciliation-controller last
 
 ## Blockers / gates
 
-- Live PADataset canaries remain gated on the read-only Lambda host reconciliation acceptance. Candidate PR #2 / abb797dc480bdb8764b0f377d4f4d5b8fce13f3f is prepared but untriggered.
+- PADataset is declaratively/root-onboarded, but both PADataset scale-set controllers must remain contained until the existing staged controller token can obtain a runner registration token for adamtrott78/PADataset. No canary may run before this credential gate passes.
 
 ## Fresh-chat initialization
 
