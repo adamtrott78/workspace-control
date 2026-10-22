@@ -43,7 +43,7 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-RUN 4 DECLARATIVE ACTIVATION CANDIDATE: validate the workspace-control activation PR that sets PADataset project + cpu-ci/gpu-ci routes ACTIVE, binds exact launcher blobs 5e6a1d4... and 3e0c79dc..., and increments registry_epoch to 5. Require full task/Python/Go/integration PASS and prove no generic controller/provisioner/runtime source changes. After merge, require a fresh successful trusted reconciliation workflow for the policy-changing commit and allow the installed reconciliation controller/root reconciler to create ci-padataset, /srv/workspace-ci/padataset, and CPU/GPU controller instances. Do not trigger PADataset canaries before reconciliation acceptance.
+RUN 4 LIVE RECONCILIATION READBACK ONLY: read the reconciliation-controller last-success state and matching root receipt for fresh policy SHA 4151a152409f5912ec561350ad1080bb9d5c63fa (or a later policy-equivalent task-only main), require active_projects=[padataset,research-engine], planned_projects_skipped=[], mutation_performed=true, and terminal COMPLETED. Verify ci-padataset user/group, /srv/workspace-ci/padataset root/standard subroots, installed registry epoch 5 + ACTIVE PADataset manifest with exact workflow blobs, padataset CPU/GPU controller envs and enabled/active services, research-engine non-regression, zero pre-canary PADataset workspace/process/quarantine residue, and unchanged generic installed provisioner/runtime/reconciler blobs. Do not trigger PADataset CPU/GPU canaries until this host readback passes.
 
 ## Remaining work
 
@@ -53,7 +53,7 @@ RUN 4 DECLARATIVE ACTIVATION CANDIDATE: validate the workspace-control activatio
 
 ## Blockers / gates
 
-- None.
+- Run-4 repository/policy activation is accepted. Live PADataset canaries remain gated on one read-only Lambda host reconciliation readback proving automatic root onboarding completed cleanly.
 
 ## Fresh-chat initialization
 
