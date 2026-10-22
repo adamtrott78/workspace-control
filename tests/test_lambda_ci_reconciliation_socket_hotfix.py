@@ -60,6 +60,15 @@ class ReconciliationSocketHotfixTests(unittest.TestCase):
             helper,
         )
 
+    def test_root_request_read_is_bounded_if_peer_withholds_eof(self):
+        source = (ROOT / "scripts" / "lambda_ci_reconciler.py").read_text()
+        self.assertIn("REQUEST_READ_TIMEOUT_SECONDS = 5", source)
+        self.assertIn(
+            "conn.settimeout(REQUEST_READ_TIMEOUT_SECONDS)",
+            source,
+        )
+        self.assertIn("exactly one reconciliation JSON object is allowed", source)
+
     def test_root_reconciler_survives_client_disconnect_after_receipt(self):
         source = (ROOT / "scripts" / "lambda_ci_reconciler.py").read_text()
         self.assertIn(
