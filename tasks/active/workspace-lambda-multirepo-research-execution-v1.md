@@ -43,7 +43,7 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-RUN 4 CONTROLLER CREDENTIAL CAPABILITY GATE: stop padataset CPU/GPU controller services to end restart churn, then use the existing staged /var/lib/workspace-ci/controller/github-token without printing it to A/B POST the GitHub runner registration-token endpoint for adamtrott78/research-engine and adamtrott78/PADataset. Record only HTTP status and response message. If research-engine=201 and PADataset=403, update the existing fine-grained PAT repository selection to include PADataset; do not rotate the token or change controller/runtime source. Re-probe until both endpoints return 201, then restart only the two PADataset controllers and require active/stable before canaries.
+EDIT EXISTING CONTROLLER FINE-GRAINED PAT REPOSITORY SCOPE ONLY. In GitHub token settings, modify the same token currently staged at /var/lib/workspace-ci/controller/github-token so its selected repositories include adamtrott78/PADataset while preserving research-engine and existing permissions. Do not generate/rotate/restage a token if GitHub allows editing repository selection in place. Then rerun the bounded A/B registration-token probe; require research-engine=201 and PADataset=201. Only after both pass, start padataset CPU/GPU controllers and require active state with stable NRestarts before triggering canaries.
 
 ## Remaining work
 
@@ -53,7 +53,7 @@ RUN 4 CONTROLLER CREDENTIAL CAPABILITY GATE: stop padataset CPU/GPU controller s
 
 ## Blockers / gates
 
-- PADataset is declaratively/root-onboarded, but both PADataset scale-set controllers must remain contained until the existing staged controller token can obtain a runner registration token for adamtrott78/PADataset. No canary may run before this credential gate passes.
+- PADataset controller credential capability is proven sufficient, but the existing fine-grained PAT repository selection must be edited to include adamtrott78/PADataset. Controllers remain stopped until a re-probe returns 201 for both research-engine and PADataset.
 
 ## Fresh-chat initialization
 
