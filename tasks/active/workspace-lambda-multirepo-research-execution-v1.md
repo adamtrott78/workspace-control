@@ -43,7 +43,7 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-RUN 4 CPU ROOT CLEANUP GATE: inspect the most recent padataset provisioner record for candidate abb797dc480bdb8764b0f377d4f4d5b8fce13f3f and workload cpu-ci; require COMPLETED, RUNNER_EXITED_CLEANLY/SUCCEEDED, runner/staging workspaces destroyed, project UID cleanup true, no timeout/resource/disk pressure, and matching root runtime receipt. Also require no remaining padataset p5-* job/staging directories, no ci-padataset process residue, no padataset lane quarantine, and stable padataset CPU/GPU controllers. Only after PASS trigger gpu-ci on the same immutable PR #2 head.
+RUN 4 FINAL HOST ACCEPTANCE: inspect the most recent padataset provisioner record for exact candidate abb797dc480bdb8764b0f377d4f4d5b8fce13f3f and workload gpu-ci; require COMPLETED, RUNNER_EXITED_CLEANLY/SUCCEEDED, runner/staging workspaces destroyed, CPU/GPU process cleanup true, no CUDA OOM/resource/disk pressure, and matching root runtime receipt. Require no padataset p5-* workspace residue, no ci-padataset processes, no padataset quarantine, stable padataset CPU/GPU controllers, and reciprocal filesystem denial between ci-padataset and /srv/workspace-ci/research-engine plus ci-research-engine and /srv/workspace-ci/padataset. Re-verify installed generic source blobs unchanged. If PASS, close padataset_second_project_pilot and proceed to third-project declarative proof/freeze.
 
 ## Remaining work
 
@@ -53,7 +53,7 @@ RUN 4 CPU ROOT CLEANUP GATE: inspect the most recent padataset provisioner recor
 
 ## Blockers / gates
 
-- PADataset credential scope and CPU workflow are accepted. GPU canary is gated only on read-only root cleanup acceptance for CPU request/workload cpu-ci at exact candidate abb797dc480bdb8764b0f377d4f4d5b8fce13f3f.
+- PADataset CPU and GPU canaries are workflow PASS and CPU root cleanup is PASS. Final Run-4 acceptance is gated only on GPU root cleanup + reciprocal project isolation + zero residue/quarantine + controller stability.
 
 ## Fresh-chat initialization
 
