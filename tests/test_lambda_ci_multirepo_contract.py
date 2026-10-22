@@ -96,6 +96,7 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
             "model-eval-single-gpu": "31d77703d434b248aa50adf93568f9a13b89dc07",
             "model-eval-dual-gpu": "a961158615269797837e036fb4cc4a3358f60189",
             "model-eval-local-extract-wave1": "a5be693f750c481db21d86d239a505083aae40aa",
+            "model-eval-local-extract-wave2": "cb7fd59bcb6f857bd6148ecbc7e2eb320dc9a1fb",
         }
         self.assertEqual(set(RESEARCH["routes"]), set(expected))
         for route_id, sha in expected.items():
