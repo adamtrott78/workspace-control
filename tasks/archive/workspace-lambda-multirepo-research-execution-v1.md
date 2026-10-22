@@ -1,7 +1,7 @@
 <!-- workspace-control:derived-task-handoff -->
 # Workspace Control Task Handoff
 
-Derived human-readable archived view.
+Derived human-readable view.
 
 Authoritative capsule: tasks/archive/workspace-lambda-multirepo-research-execution-v1.json
 
@@ -13,15 +13,10 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - Title: Workspace Lambda Multi-Repository Research Execution v1
 - Status: COMPLETE
 - Capsule schema: v2
-- Final stage: cross_project_isolation_and_reuse_acceptance
 
 ## Goal
 
 Generalize the accepted GitHub-to-Lambda execution substrate from a research-engine-specific pilot into a reusable, fail-closed, manifest-driven research compute control plane that can execute bounded candidate code from research-engine, PADataset, and future explicitly authorized research repositories without per-task controller/provisioner/runtime patches or routine human SSH/sudo intervention.
-
-## Final disposition
-
-Task complete. The reusable GitHub-to-Lambda multi-repository research-compute control plane is accepted for research-engine and PADataset, with live reciprocal isolation and clean CPU/GPU receipts. A third-project executable proof confirms that ordinary future project onboarding requires only thin launcher workflows, exact workflow-blob binding, a registry entry, a schema-v2 project manifest, existing accepted execution contracts, trusted reconciliation, and bounded canary acceptance. Do not reopen controller/provisioner/runtime authority for ordinary onboarding. Any new capability not covered by an accepted execution contract, project removal, credential-authority redesign, or broader privileged surface must start as a separate reviewed workspace-control task.
 
 ## Repositories
 
@@ -46,6 +41,10 @@ Task complete. The reusable GitHub-to-Lambda multi-repository research-compute c
 - Remote checkpoint: 35e6f451fe36f039b5f6461f7469f0eed1e79e43
 - Remote verified: true
 
+## Next safe action
+
+Task complete. The reusable GitHub-to-Lambda multi-repository research-compute control plane is accepted for research-engine and PADataset, with live reciprocal isolation and clean CPU/GPU receipts. A third-project executable proof confirms that ordinary future project onboarding requires only thin launcher workflows, exact workflow-blob binding, a registry entry, a schema-v2 project manifest, existing accepted execution contracts, trusted reconciliation, and bounded canary acceptance. Do not reopen controller/provisioner/runtime authority for ordinary onboarding. Any new capability not covered by an accepted execution contract, project removal, credential-authority redesign, or broader privileged surface must start as a separate reviewed workspace-control task.
+
 ## Remaining work
 
 - None.
@@ -54,6 +53,16 @@ Task complete. The reusable GitHub-to-Lambda multi-repository research-compute c
 
 - None.
 
-## Archived task
+## Fresh-chat initialization
 
-This durable task is complete. Future ordinary project onboarding should follow `architecture/lambda-ci-reusable-research-compute-contract.v1.md` and should not replay this task's accepted migration or runtime gates.
+@GitHub
+
+https://github.com/adamtrott78/workspace-control
+
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/archive/workspace-lambda-multirepo-research-execution-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
