@@ -43,17 +43,15 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-RUN 4 FINAL HOST ACCEPTANCE: inspect the most recent padataset provisioner record for exact candidate abb797dc480bdb8764b0f377d4f4d5b8fce13f3f and workload gpu-ci; require COMPLETED, RUNNER_EXITED_CLEANLY/SUCCEEDED, runner/staging workspaces destroyed, CPU/GPU process cleanup true, no CUDA OOM/resource/disk pressure, and matching root runtime receipt. Require no padataset p5-* workspace residue, no ci-padataset processes, no padataset quarantine, stable padataset CPU/GPU controllers, and reciprocal filesystem denial between ci-padataset and /srv/workspace-ci/research-engine plus ci-research-engine and /srv/workspace-ci/padataset. Re-verify installed generic source blobs unchanged. If PASS, close padataset_second_project_pilot and proceed to third-project declarative proof/freeze.
+FINAL REUSE PROOF: prove a synthetic third approved repository can be represented only by a registry entry + schema-v2 project manifest + thin launcher bindings using existing cpu-public-ci-v1 and gpu-single-public-ci-v1 contracts; validate deterministic identity/root/scale-set derivation, reconciliation planning, admission minting, public-repository fork denial, and zero generic controller/provisioner/runtime/reconciliation source changes. Freeze the reusable research-compute operating contract and close the durable task if full repository validation passes.
 
 ## Remaining work
 
-- Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
-- Run 4: prove reciprocal research-engine/PADataset filesystem/process/cache isolation and verify zero controller/provisioner/runtime source changes during PADataset onboarding.
 - Final: prove a third approved repository requires only registry + manifest + thin launcher binding and freeze the reusable operating contract.
 
 ## Blockers / gates
 
-- PADataset CPU and GPU canaries are workflow PASS and CPU root cleanup is PASS. Final Run-4 acceptance is gated only on GPU root cleanup + reciprocal project isolation + zero residue/quarantine + controller stability.
+- None.
 
 ## Fresh-chat initialization
 
