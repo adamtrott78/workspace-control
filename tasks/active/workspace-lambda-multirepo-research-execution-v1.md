@@ -43,11 +43,11 @@ Generalize the accepted GitHub-to-Lambda execution substrate from a research-eng
 
 ## Next safe action
 
-LATEST ATTEMPT STATE/JOURNAL DIAGNOSTIC COMPLETE: root receipt is intact, rollback restored accepted predecessor blobs, services are contained, but unit-scoped journals are empty. Do not rerun recovery yet. Run the bounded read-only broad-journal diagnostic across the current boot/system manager: journalctl -b since 18:30 filtered for workspace-ci, lambda_ci_reconcile_controller.py, lambda_ci_reconciler.py, Python tracebacks, systemd start/stop/failure messages; show journal boots/timezone/storage metadata and any relevant syslog forwarding. If this still yields no execution evidence, the next source change should be observability-only phase markers validated before a new live attempt. Do not delete receipts, change policy, bump registry_epoch, restage the token, or onboard PADataset.
+VALIDATE TRANSPORT-FRAMING REPAIR FIRST. Review/validate branch fix-reconcile-socket-framing-run3: controller shutdown(SHUT_WR) after one newline-delimited JSON request, root 5s request-read bound while preserving the exact-one-object EOF check, exact-source/accepted-predecessor manifest refresh, and regression tests including a real Unix-socket framing exchange. Require full repository validation PASS before host mutation. Keep services contained and preserve root receipt 463f3e92-087e-5c68-9fec-c4098df8ab7e. Do not rerun older helpers, delete receipts, change policy, bump registry_epoch, restage the token, or onboard PADataset.
 
 ## Remaining work
 
-- Run 3 immediate: perform one broader read-only journal/manager diagnostic for the current boot. Query all journal entries matching workspace-ci service names, reconciliation executable names, systemd start/stop/failure messages, Python tracebacks, and the 18:30 onward window without relying only on `journalctl -u`; also print journald storage/timezone/boot metadata. If still no evidence, add validated phase-level controller observability before another live attempt rather than blind rerunning.
+- Run 3 immediate: validate and merge the reconciliation transport-framing repair. Require task contracts, Python regression including real AF_UNIX framing test, pinned Go controller validation, and full integration PASS. Only then run the exact bounded recovery helper from the validated merge; existing root COMPLETED receipt must be preserved for immediate idempotent replay.
 - Run 3: checkpoint the accepted Git-driven reconciliation controller/root path; only then mark git_driven_project_reconciliation VALIDATED.
 - Run 3: run research-engine CPU, gpu-small and at least one already-accepted model-eval regression through the generic installed path, with clean terminal receipts and zero residue/quarantine.
 - Run 4: bind PADataset CPU/GPU launcher workflow blobs, onboard PADataset by registry/manifest reconciliation only, then execute non-scientific CPU/GPU canaries.
@@ -56,7 +56,7 @@ LATEST ATTEMPT STATE/JOURNAL DIAGNOSTIC COMPLETE: root receipt is intact, rollba
 
 ## Blockers / gates
 
-- Second replay post-attempt state is contained and the authoritative root receipt remains valid, but unit-scoped journald returned no entries for the latest attempt. Before another mutation, broaden read-only observability to the entire current boot/systemd manager and executable identifiers to determine whether service starts/logs were recorded outside the `journalctl -u` view.
+- The remaining Run-3 failure is diagnosed as a Unix-stream request-framing deadlock, not reconciliation correctness or root replay semantics. Framing repair is staged on fix-reconcile-socket-framing-run3 and must pass the full validation tier before another live recovery attempt.
 
 ## Fresh-chat initialization
 

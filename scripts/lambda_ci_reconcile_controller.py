@@ -319,6 +319,10 @@ def submit_request(socket_path: pathlib.Path, request: dict[str, Any]) -> dict[s
     try:
         conn.connect(str(socket_path))
         conn.sendall(payload)
+        # The reconciliation transport is exactly one newline-delimited JSON
+        # request per connection. Half-close the write side so root can prove
+        # EOF/no second object without waiting for our response timeout.
+        conn.shutdown(socket.SHUT_WR)
         handle = conn.makefile("rb")
         line = handle.readline(2 * 1024 * 1024)
     except socket.timeout as exc:

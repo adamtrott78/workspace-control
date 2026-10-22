@@ -10,7 +10,7 @@
   "source_blobs": [
     {
       "path": "scripts/lambda_ci_reconciler.py",
-      "git_blob_sha": "b2edc8b0168024ffb61aa54d96859353738b79cf"
+      "git_blob_sha": "e58d0ccd3e11df99dc22b9069d16b1a03c4d3a2d"
     },
     {
       "path": "scripts/lambda_ci_provisioner_service.py",
@@ -65,5 +65,6 @@
     "PADataset host state absent"
   ],
   "superseded_for_reboot_recovery_by": "architecture/lambda-ci-run3-boot-recovery-hotfix.v1.json",
-  "superseded_for_response_liveness_by": "architecture/lambda-ci-run3-boot-recovery-hotfix.v1.json"
+  "superseded_for_response_liveness_by": "architecture/lambda-ci-run3-boot-recovery-hotfix.v1.json",
+  "superseded_for_transport_framing_by": "architecture/lambda-ci-run3-boot-recovery-hotfix.v1.json"
 }

@@ -40,11 +40,11 @@
     },
     {
       "path": "scripts/lambda_ci_reconciler.py",
-      "git_blob_sha": "b2edc8b0168024ffb61aa54d96859353738b79cf"
+      "git_blob_sha": "e58d0ccd3e11df99dc22b9069d16b1a03c4d3a2d"
     },
     {
       "path": "scripts/lambda_ci_reconcile_controller.py",
-      "git_blob_sha": "1229a29c40a08a100dcdda2a4e276e616b27d219",
+      "git_blob_sha": "cdb38af360676abb053c1d171cc4dc3ef39e977a",
       "note": "Run-3 controller includes unrelated-main policy equivalence plus bounded 120s root-response liveness and transport retry hardening; live promotion remains bounded by the Run-3 recovery manifest."
     },
     {
@@ -170,5 +170,11 @@
     "root_receipt_authoritative": true,
     "disconnected_client_does_not_invalidate_receipt": true,
     "controller_transport_errors_restart_service": false
+  },
+  "run3_reconciliation_transport_contract": {
+    "framing": "one newline-delimited JSON request per Unix-stream connection",
+    "client_write_half_close_required": true,
+    "root_request_read_timeout_seconds": 5,
+    "reason": "Root's exact-one-object EOF check must not wait for the client's response timeout."
   }
 }

@@ -28,6 +28,7 @@ from typing import Any
 import lambda_ci_multirepo as multi
 
 MAX_REQUEST_BYTES = 2 * 1024 * 1024
+REQUEST_READ_TIMEOUT_SECONDS = 5
 ACTIVE_PROJECT_STATE = "ACTIVE"
 ACTIVE_ROUTE_STATES = {"ACTIVE", "MIGRATION_LIVE_EQUIVALENT"}
 
@@ -727,6 +728,10 @@ def serve(
         while True:
             conn, _ = server.accept()
             with conn:
+                # A peer with socket access must not be able to pin the
+                # single-threaded root reconciler by withholding EOF after the
+                # one framed request line.
+                conn.settimeout(REQUEST_READ_TIMEOUT_SECONDS)
                 try:
                     uid = peer_uid(conn)
                     if uid != controller_uid:
