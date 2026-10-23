@@ -46,6 +46,8 @@ const heartbeatTurnOutputSchema = {
   completed: z.boolean(),
   last_executor_touch_at: z.string().nullable(),
   last_ui_seen_at: z.string().nullable(),
+  executor_touch_age_seconds: z.number().nonnegative().nullable(),
+  ui_seen_age_seconds: z.number().nonnegative().nullable(),
 };
 
 const heartbeatOutputSchema = {
