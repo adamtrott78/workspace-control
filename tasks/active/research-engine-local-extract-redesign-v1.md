@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4de5698601df304fbf7d30e7e7d3e38da2d10d7d
+- Remote checkpoint: 076a5abb02e5f7ee922c7e7854a6d0f60549940b
 - Remote verified: true
 
 ### research-engine
@@ -42,11 +42,10 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-After closing inert trigger PR #201 unmerged, begin a separate evidence-first EXTRACT design phase from the durable ALIGNMENT_AUGMENT_FEASIBLE result at research-engine@9566532288bf500db8997b9befcc339788609184. The new phase may generalize the validated direct proposition redundancy certificate semantically, but must compare materially distinct teacher-blind mechanisms (including semantic-tuple coverage versus a separately validated paraphrase/entailment certificate) before any implementation or model download. Do not tune the accepted 0.40 lexical certificate post hoc, treat FEASIBLE as production promotion, promote fixed 20/4, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate ontology/semantic-control mechanisms.
+Begin a separate evidence-first EXTRACT design phase from the durable ALIGNMENT_AUGMENT_FEASIBLE result at research-engine@9566532288bf500db8997b9befcc339788609184. Generalize the validated direct proposition redundancy certificate semantically only after comparing materially distinct teacher-blind mechanisms, including semantic-tuple coverage versus a separately validated paraphrase/entailment certificate. Do not tune the accepted 0.40 lexical certificate post hoc, treat FEASIBLE as production promotion, promote fixed 20/4, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate ontology/semantic-control mechanisms.
 
 ## Remaining work
 
-- Close inert research-engine trigger PR #201 unmerged after this result checkpoint is durable.
 - Begin a separate evidence-first design for semantic generalization of the validated direct redundancy certificate. Compare at least semantic-tuple coverage and a separately validated learned paraphrase/entailment certificate before choosing an implementation.
 - Preserve DYNAMIC_SAME_PAGE_ALIGNMENT_SWAP_V1 and ALIGNMENT_AUGMENT_FEASIBLE as accepted scientific evidence; do not tune the 0.40 threshold post hoc.
 - Do not treat FEASIBLE as production promotion, promote the fixed 20/4 quota, execute the rejected intent-utility/Qwen gap-judge path, train/download a classifier without a new contract, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
