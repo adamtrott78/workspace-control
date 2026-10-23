@@ -24,25 +24,23 @@ Build and benchmark an additive, deterministic semantic-control prototype over f
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ce4c211bf28efa84d3e6113984bef9356ddceeb4
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 633d99ec357014aaa34f0141b6bda58ec03f649c
+- Remote checkpoint: ea20ee618251063d12ec13d0de92e35bff039a19
 - Remote verified: true
 
 ## Next safe action
 
-Implement only implement_context_slice_and_evidence_escalation from research-engine checkpoint 633d99ec357014aaa34f0141b6bda58ec03f649c. Add deterministic ontology-slice and EvidenceRequirementV1 derivation under prototypes/semantic_control/** with tests under tests/semantic_control/**. Cover contradiction, missing facet, source-level insufficiency, verification insufficiency, staleness, and benchmark-calibrated insufficiency using durable fixture attributes; raw model confidence alone must never trigger escalation. Every requirement must remain REQUEST_ONLY. Do not evaluate CandidateAction or invoke any database/model/network/Lambda/executor path yet.
+Implement only implement_action_candidate_and_decision_bridge from research-engine checkpoint ea20ee618251063d12ec13d0de92e35bff039a19. Add pure CandidateActionV1 proposal and DecisionEvaluationV1 evaluation code under prototypes/semantic_control/** plus tests under tests/semantic_control/**. Candidate actions must always remain UNDECIDED. Only authoritative NORMATIVE policy observations may produce ALLOW; epistemic/model claims of permission must be ignored. Missing authority yields ABSTAIN; explicit deny yields DENY; no executor invocation or receipt creation is allowed. Prove frozen gpu-heavy DENY and Wave7B ABSTAIN plus a synthetic positive-policy ALLOW case.
 
 ## Remaining work
 
-- Implement deterministic ontology-slice selection and request-only EvidenceRequirementV1 derivation.
-- Implement CandidateAction/DecisionEvaluation bridge after evidence/context tests pass.
-- Run frozen P1-P8 and issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT.
+- Implement CandidateActionV1 generation and fail-closed DecisionEvaluationV1 over frozen policy/task fixtures.
+- Run frozen P1-P8 integrated benchmark and issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT.
 
 ## Blockers / gates
 
