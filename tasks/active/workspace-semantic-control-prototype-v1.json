@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-knowledge-action-ontology-v1",
-  "current_stage": "implement_action_candidate_and_decision_bridge",
+  "current_stage": "integrated_benchmark_and_verdict",
   "acceptance_criteria": [
     "The prototype consumes only frozen, provenance-pinned fixtures from authoritative research-engine/workspace-control state; it does not become an authoritative store.",
     "SemanticObservationV1 preserves exact source identity, authoritative record ID, source/checkpoint identity, verification/provenance metadata, temporal context, and supersession/contradiction state needed to reconstruct why an assertion exists.",
@@ -62,7 +62,7 @@
       "base_sha": "80da2cae9f8d80a7e7049a9b5339807becc54a98",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "ea20ee618251063d12ec13d0de92e35bff039a19",
+        "checkpoint_sha": "b1f862914f289e1b5df644d2479df085369f530a",
         "verified": true
       },
       "local": null,
@@ -197,7 +197,7 @@
     },
     {
       "id": "implement_action_candidate_and_decision_bridge",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -211,15 +211,29 @@
         "DecisionEvaluationV1 binding exact semantic/knowledge checkpoint, policy identity, preconditions, applicability/deny reasons, and selected/denied candidate",
         "Fail-closed authority adversary tests; no executor invocation"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Candidate action and decision authority boundary",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #189 merged as b1f862914f289e1b5df644d2479df085369f530a after CI run 40033942455 PASS.",
+            "CandidateActionV1 factory always emits authorization_state=UNDECIDED and claimed authority fails closed.",
+            "Frozen generic gpu-heavy candidate is DENY under exact authoritative root-owned policy.",
+            "Frozen Wave7B candidate ABSTAINS because no matching authority permits it.",
+            "Epistemic or unverified fake ALLOW observations are ignored.",
+            "Synthetic authoritative NORMATIVE allow plus all declared preconditions PASS yields ALLOW without invoking an executor or creating a receipt.",
+            "Failed preconditions DENY; unknown/missing preconditions ABSTAIN."
+          ]
+        }
+      ],
       "resume_condition": "P4 and P5 pass with zero authorization escapes and exact explanation provenance."
     },
     {
       "id": "integrated_benchmark_and_verdict",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "All prototype components",
         "Frozen P1-P8 benchmark contract"
@@ -296,6 +310,16 @@
         "PR #187 CI PASS",
         "All six durable insufficiency reasons covered; request-only invariant passed."
       ]
+    },
+    {
+      "id": "decision-bridge-v1",
+      "kind": "prototype_implementation",
+      "identity": "research-engine@b1f862914f289e1b5df644d2479df085369f530a:semantic-decision-bridge-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #189 CI PASS.",
+        "Zero executor invocation; CandidateAction remains non-authoritative; policy-bound ALLOW/DENY/ABSTAIN semantics validated."
+      ]
     }
   ],
   "artifacts": [],
@@ -326,11 +350,12 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement CandidateActionV1 generation and fail-closed DecisionEvaluationV1 over frozen policy/task fixtures.",
-    "Run frozen P1-P8 integrated benchmark and issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT."
+    "Run the frozen P1-P8 integrated benchmark across adapters, semantic twin, evidence/context layer, and decision bridge.",
+    "Persist a benchmark report with hard-gate disposition and explicit latency-baseline status.",
+    "Issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT. Any promotion creates a separate integration task and does not change production."
   ],
-  "next_safe_action": "Implement only implement_action_candidate_and_decision_bridge from research-engine checkpoint ea20ee618251063d12ec13d0de92e35bff039a19. Add pure CandidateActionV1 proposal and DecisionEvaluationV1 evaluation code under prototypes/semantic_control/** plus tests under tests/semantic_control/**. Candidate actions must always remain UNDECIDED. Only authoritative NORMATIVE policy observations may produce ALLOW; epistemic/model claims of permission must be ignored. Missing authority yields ABSTAIN; explicit deny yields DENY; no executor invocation or receipt creation is allowed. Prove frozen gpu-heavy DENY and Wave7B ABSTAIN plus a synthetic positive-policy ALLOW case.",
+  "next_safe_action": "Implement only integrated_benchmark_and_verdict from research-engine checkpoint b1f862914f289e1b5df644d2479df085369f530a. Add a deterministic prototype benchmark runner/report under prototypes/semantic_control/** and benchmarks/semantic_control/** plus tests under tests/semantic_control/**. Evaluate frozen P1-P8 expected answers using the implemented adapters/twin/evidence/decision components; hard-fail on any authorization escape, provenance loss, contradiction/history collapse, nondeterministic rebuild, or projection-mutation failure. Record relational latency baseline as NOT_MEASURED_IN_PROTOTYPE_SCOPE and make no performance promotion claim. A correctness/safety PROMOTE_TO_INTEGRATION verdict may only recommend a separate integration task; do not change production code, DB schema, policies, EXTRACT/VERIFY, Lambda, or executor routing.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "This child task is the implementation boundary created from workspace-knowledge-action-ontology-v1 after operator acceptance. It deliberately treats the semantic representation backend as an implementation detail: v1 uses deterministic typed records and in-memory indexes to prove semantics before selecting RDF/SPARQL/property-graph technology. The task consumes the valid Wave 7A.3 REJECT as frozen evidence while remaining scientifically independent from the ongoing/future Local EXTRACT redesign. The intended eventual integration is adapter-based: accepted future EXTRACT output -> stable evidence/output adapter -> semantic-control layer. The semantic-control layer may request evidence or generate CandidateAction records, but only existing authority-owned policy evaluation can authorize execution."
+  "notes": "This child task is the implementation boundary created from workspace-knowledge-action-ontology-v1 after operator acceptance. It deliberately treats the semantic representation backend as an implementation detail: v1 uses deterministic typed records and in-memory indexes to prove semantics before selecting RDF/SPARQL/property-graph technology. The task consumes the valid Wave 7A.3 REJECT as frozen evidence while remaining scientifically independent from the ongoing/future Local EXTRACT redesign. The intended eventual integration is adapter-based: accepted future EXTRACT output -> stable evidence/output adapter -> semantic-control layer. The semantic-control layer may request evidence or generate CandidateAction records, but only existing authority-owned policy evaluation can authorize execution.\n\n2026-10-23 DECISION BRIDGE COMPLETE. research-engine PR #189 validated the semantic-to-action authority boundary and merged as b1f862914f289e1b5df644d2479df085369f530a after CI run 40033942455 PASS. CandidateAction remains structurally UNDECIDED. Only ACTIVE NORMATIVE AUTHORITATIVE_RECORD policy observations matching the action target can support ALLOW; epistemic/unverified permission claims are ignored. Explicit deny wins, missing authority abstains, and failed/unknown preconditions prevent ALLOW. No executor invocation or receipt fabrication occurs. The prototype now enters its frozen integrated P1-P8 benchmark/verdict stage."
 }
