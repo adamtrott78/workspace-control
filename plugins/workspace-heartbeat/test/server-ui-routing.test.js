@@ -66,6 +66,14 @@ test("semantic-delta, one-begin-turn, and 10-tool backstop guidance are explicit
   assert.ok(server.includes("its plugin contract is stale"));
 });
 
+test("executor touch cadence is explicit and does not mask semantic silence",()=>{
+  const block=toolBlock("heartbeat_touch","heartbeat_snapshot");
+  assert.ok(server.includes("at most three non-Heartbeat tool operations"));
+  assert.ok(server.includes("touch before a fourth operation"));
+  assert.ok(server.includes("Touches do not reset the separate 10-non-Heartbeat-tool semantic-silence backstop"));
+  assert.ok(block.includes("does not reset the semantic-silence backstop"));
+});
+
 test("task-level side panel remains separate",()=>{
   assert.ok(panel.includes("snapshot.history"));
   assert.ok(server.includes("resourceUri: PANEL_URI"));
