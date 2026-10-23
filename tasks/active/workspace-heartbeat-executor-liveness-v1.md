@@ -29,16 +29,16 @@ Give the operator, inside the existing Heartbeat card and without opening a new 
 
 ## Next safe action
 
-Finish Workspace Heartbeat v0.4.6 PR #155 host acceptance first. Use the already-live v0.4.6 candidate to confirm (1) short one/two-update cards hug intrinsic content with no giant blank gap, (2) six same-turn semantic updates preserve grow-through-five/scroll-from-six, and (3) one planned chat-to-chat handoff releases with terminal done and lets a receiving chat begin the same task ID without server restart. After PR #155 is merged, implement the observation-only same-card liveness layer: model-only heartbeat_touch, last_executor_touch_at, last_ui_seen_at, and a live-card status row. Do not enable automatic takeover or claim exact executor death.
+Finish the fresh v0.4.6 restage validation in PR #280, then perform the final planned chat-to-chat handoff gate. The outgoing conversation must leave this liveness task durably synchronized and make terminal heartbeat_update(..., state="done") its final Heartbeat operation. A fresh receiving chat must begin this same task_id without a Heartbeat-server restart. If that succeeds, record the handoff PASS in the v0.4.6 release task, mark/merge the fresh v0.4.6 restage, then implement observation-only same-card liveness instrumentation: heartbeat_touch, last_executor_touch_at, last_ui_seen_at, and executor freshness status. Do not enable automatic takeover yet.
 
 ## Remaining work
 
-- Finish the three remaining v0.4.6 live-host gates and merge PR #155 without changing the liveness feature.
-- On top of accepted v0.4.6, implement heartbeat_touch and independent executor/UI timestamps without changing semantic Heartbeat history.
-- Add the same-card status row showing server/card connectivity, executor last-seen age/status, and semantic-progress age.
-- Test that heartbeat_touch is cross-conversation/turn fenced, does not increment semantic sequence/history, and does not create/resize transcript UI.
-- Run a deliberate frontend-interruption observation to measure how long executor touches continue after the website reports connection interruption.
-- Only after measurement choose a lease TTL and consider stale-owner takeover.
+- Finish full validation of fresh current-main v0.4.6 restage PR #280.
+- Perform the final planned chat-to-chat handoff gate using this same real task ID and terminal Heartbeat done without a server restart.
+- Record v0.4.6 acceptance, merge the fresh restage, and preserve v0.4.5 rollback.
+- Implement observation-only same-card liveness: heartbeat_touch, last_executor_touch_at, last_ui_seen_at, and an executor freshness/status row.
+- Run a deliberate frontend-interruption observation and measure executor-touch behavior before choosing any lease TTL.
+- Only after measurement consider expired-owner takeover.
 
 ## Blockers / gates
 
