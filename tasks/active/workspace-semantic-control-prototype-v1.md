@@ -31,17 +31,18 @@ Build and benchmark an additive, deterministic semantic-control prototype over f
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ea20ee618251063d12ec13d0de92e35bff039a19
+- Remote checkpoint: b1f862914f289e1b5df644d2479df085369f530a
 - Remote verified: true
 
 ## Next safe action
 
-Implement only implement_action_candidate_and_decision_bridge from research-engine checkpoint ea20ee618251063d12ec13d0de92e35bff039a19. Add pure CandidateActionV1 proposal and DecisionEvaluationV1 evaluation code under prototypes/semantic_control/** plus tests under tests/semantic_control/**. Candidate actions must always remain UNDECIDED. Only authoritative NORMATIVE policy observations may produce ALLOW; epistemic/model claims of permission must be ignored. Missing authority yields ABSTAIN; explicit deny yields DENY; no executor invocation or receipt creation is allowed. Prove frozen gpu-heavy DENY and Wave7B ABSTAIN plus a synthetic positive-policy ALLOW case.
+Implement only integrated_benchmark_and_verdict from research-engine checkpoint b1f862914f289e1b5df644d2479df085369f530a. Add a deterministic prototype benchmark runner/report under prototypes/semantic_control/** and benchmarks/semantic_control/** plus tests under tests/semantic_control/**. Evaluate frozen P1-P8 expected answers using the implemented adapters/twin/evidence/decision components; hard-fail on any authorization escape, provenance loss, contradiction/history collapse, nondeterministic rebuild, or projection-mutation failure. Record relational latency baseline as NOT_MEASURED_IN_PROTOTYPE_SCOPE and make no performance promotion claim. A correctness/safety PROMOTE_TO_INTEGRATION verdict may only recommend a separate integration task; do not change production code, DB schema, policies, EXTRACT/VERIFY, Lambda, or executor routing.
 
 ## Remaining work
 
-- Implement CandidateActionV1 generation and fail-closed DecisionEvaluationV1 over frozen policy/task fixtures.
-- Run frozen P1-P8 integrated benchmark and issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT.
+- Run the frozen P1-P8 integrated benchmark across adapters, semantic twin, evidence/context layer, and decision bridge.
+- Persist a benchmark report with hard-gate disposition and explicit latency-baseline status.
+- Issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT. Any promotion creates a separate integration task and does not change production.
 
 ## Blockers / gates
 
