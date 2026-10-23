@@ -30,27 +30,29 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 831aff16cf2a44bbd834c93ecbb7e7fb99a6af20
+- Remote checkpoint: b004931b8ccc7e4eb9977ba4ba080cab90d36532
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a08d41b5de1721ef0a5427294ed8c06a8335120a
+- Remote checkpoint: ba9d09abf77af7280fdc5f5890dee1cb7a05ff67
 - Remote verified: true
 
 ## Next safe action
 
-STOP after Wave 7A. Scientific verdict is WAVE7A_REJECT, but the oracle-query hypothesis remains supported. The source-aware generator preserved the full coarse page-recall ceiling; failure is intent coverage and atomicity. Resume only with an explicitly bounded coverage-guided hierarchical intent-decomposition design/experiment. Do not start Wave 7B, change production EXTRACT/VERIFY, train a reranker, or change generation-model family.
+STOP after valid Wave 7A.2. Scientific verdict is WAVE7A2_REJECT, while the oracle-query hypothesis remains supported. Evidence-conditioned answerability preserved page coverage but regressed because it allocated intents to background/definition/citation facts rather than high-salience scientific contributions. Resume with targeted research/design for scientific salience/contribution-aware intent generation; do not start Wave 7B, change production EXTRACT/VERIFY, train a reranker, or change generation-model family.
 
 ## Remaining work
 
-- STOP after the Wave 7A WAVE7A_REJECT checkpoint; do not start Wave 7B automatically.
-- Design a bounded coverage-guided hierarchical intent-decomposition phase that forces separate atomic questions for explicit scientific subslots instead of asking one Qwen pass to discover all intents freely.
-- Preserve the existing coarse page route, authoritative proposition pool, BM25/BGE retrieval stack, Qwen3.5 model/runtime, production STANDARD Codex EXTRACT fallback, and accepted Qwen VERIFY while testing the new decomposition.
-- Evaluate whether coverage-guided decomposition recovers the teacher atoms missed by Wave 7A: source-label classifier training, target-domain testing, negative-pair construction, scalability future work, and persistent-misclassification future work.
-- Do not train a custom reranker or change generation-model family unless the coverage-guided decomposition experiment fails under a frozen gate.
+- STOP after the valid Wave 7A.2 WAVE7A2_REJECT checkpoint; do not start Wave 7B automatically.
+- Before another experiment, research methods for scientific salience/contribution modeling: contribution-sentence identification, scientific discourse/rhetorical-role classification, argument/claim mining, novelty/result/limitation prioritization, and salience-aware question generation.
+- Design the next bounded experiment around allocating intent budget to high-salience contribution/evaluation evidence rather than to every answerable proposition; evidence answerability alone is now a rejected objective.
+- Preserve the existing coarse page route, authoritative proposition pool, BM25/BGE retrieval stack, Qwen3.5 model/runtime, top-24 budget, production STANDARD Codex EXTRACT fallback, and accepted Qwen VERIFY during the first salience-aware experiment.
+- Keep BM25 as a first-class cheap retriever: the repaired one-shot source-aware control reached 7/13 teacher atoms with BM25 and recovered all three historical hard misses.
+- Do not train a custom reranker or change generation-model family unless a salience-aware intent architecture is tested under a frozen gate and still fails.
+- Treat semantic intent deduplication and coverage of high-salience atomic facts as secondary design requirements; do not solve them by unrestricted query proliferation.
 
 ## Blockers / gates
 
