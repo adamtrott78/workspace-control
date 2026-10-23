@@ -42,13 +42,11 @@ Determine whether a provenance-preserving typed ontology/knowledge-graph substra
 
 ## Next safe action
 
-Review the Luti-derived semantic-control-loop synthesis together with the existing frozen benchmark. The strongest implementation candidate is now a six-primitive additive prototype: (1) federated semantic projection over existing authoritative stores, (2) provenance-bearing semantic observation packets that point back to raw evidence, (3) ontology-slice retrieval for bounded model context, (4) confidence/evidence-sufficiency-driven targeted escalation, (5) a shared semantic twin for cross-agent/task state, and (6) an auditable DecisionEvaluation/action-candidate bridge whose authority still comes only from root-owned policy. If the operator accepts this scope, create a separate implementation task and run only frozen fixtures; keep Local EXTRACT and production behavior unchanged.
+Continue implementation only through the separate child task workspace-semantic-control-prototype-v1. This architecture task has completed its implementation handoff; preserve its frozen architecture/benchmark decisions as parent evidence. Keep Local EXTRACT independent.
 
 ## Remaining work
 
-- Operator review of the checkpointed C+B projection recommendation, frozen benchmark contract, and the newly recovered Malik Luti semantic-control-loop pattern.
-- If accepted, spin off a separate implementation task for an additive, rebuildable prototype containing six bounded primitives: federated semantic projection, provenance-bearing semantic observation packets, ontology-slice retrieval, confidence-aware evidence escalation, shared semantic twin, and DecisionEvaluation/action-candidate bridge.
-- Prototype escalation must use calibrated evidence sufficiency/verification signals rather than trusting raw model self-confidence; low confidence may request more evidence or human review but may not authorize execution.
+- Execute the separate child task workspace-semantic-control-prototype-v1; do not implement prototype code in this architecture task.
 - When the MILCOM 2026 proceedings become public, independently bind the operator-provided title/affiliation to the published bibliographic record; this is provenance completion, not an architecture blocker.
 
 ## Blockers / gates
