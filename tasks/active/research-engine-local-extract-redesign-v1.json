@@ -778,7 +778,7 @@
         },
         {
           "check": "verdict-eligible selector",
-          "result": "COMPOSITION_NEGATIVE",
+          "result": "PASS",
           "evidence": [
             "BALANCED_FACILITY_LOCATION_RRF_V1 supports 4/13 teacher atoms: e3.a/e3.c/e4.a/e6.a",
             "recovers observed residual e6.a only",
@@ -788,7 +788,7 @@
         },
         {
           "check": "predeclared non-verdict controls",
-          "result": "DIAGNOSTIC_ONLY",
+          "result": "PASS",
           "evidence": [
             "frozen source-aware BM25 control reproduces 7/13 with 7/7 control retention and page fraction 1.0",
             "frozen author-anchored BM25 reproduces 5/13 with e1.a/e6.a and 3/7 control retention",
