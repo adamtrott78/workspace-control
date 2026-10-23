@@ -42,14 +42,13 @@ Determine whether a provenance-preserving typed ontology/knowledge-graph substra
 
 ## Next safe action
 
-Review the checkpointed architecture recommendation and benchmark contract. The selected direction is an additive rebuildable typed semantic projection over existing authoritative PostgreSQL/CAS/task/policy/receipt stores, with hard epistemic-vs-normative-vs-execution boundaries and a separate fail-closed policy decision function. If the operator accepts this direction, create a separate implementation task for the bounded projection prototype and run only the frozen benchmark fixtures before considering any production integration. Keep Local EXTRACT unchanged. Before a new substantial Heartbeat-backed turn, release/recover the stale volatile Heartbeat owner using the canonical procedure and the same real task ID.
+Review the checkpointed architecture recommendation and benchmark contract with the MILCOM ontology lead now resolved as Malik Luti. The selected direction remains an additive rebuildable typed semantic projection over existing authoritative PostgreSQL/CAS/task/policy/receipt stores, with hard epistemic-vs-normative-vs-execution boundaries and a separate fail-closed policy decision function. If the operator accepts this direction, create a separate implementation task for the bounded projection prototype and run only the frozen benchmark fixtures before considering any production integration. Keep Local EXTRACT unchanged.
 
 ## Remaining work
 
 - Operator review of the checkpointed C+B projection recommendation and frozen benchmark contract.
 - If accepted, spin off a separate implementation task for an additive, rebuildable projection prototype using frozen fixtures; do not change production authority or scientific-state behavior during the prototype.
-- Continue the MILCOM 2026 identity/paper search only as a non-blocking targeted evidence follow-up unless new public evidence appears.
-- Before the next substantial chat uses Workspace Heartbeat, release the prior conversation's volatile writer with state=done if reachable; otherwise use the canonical coordinated Heartbeat-server-only orphan recovery procedure. Never invent a replacement task ID.
+- When the MILCOM 2026 proceedings become public, independently bind the operator-provided title/affiliation to the published bibliographic record; this is a provenance-completion follow-up, not an architecture blocker.
 
 ## Blockers / gates
 
