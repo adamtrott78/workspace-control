@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 const server=readFileSync(new URL("../server.js",import.meta.url),"utf8");
 const live=readFileSync(new URL("../public/heartbeat-live-card.html",import.meta.url),"utf8");
 const panel=readFileSync(new URL("../public/heartbeat-panel.html",import.meta.url),"utf8");
+const store=readFileSync(new URL("../src/store.js",import.meta.url),"utf8");
 
 function toolBlock(name,next){
   const start=server.indexOf('"'+name+'"');
@@ -38,7 +39,7 @@ test("heartbeat_snapshot is app-only, turn-scoped, and exposes bounded full turn
   assert.ok(block.includes('visibility: ["app"]'));
   assert.ok(block.includes("turn_id: z.string().min(1).max(160)"));
   assert.ok(block.includes("store.observeUi"));
-  assert.ok(server.includes("observeUi({ taskId, turnId, now = new Date() })"));
+  assert.ok(store.includes("observeUi({ taskId, turnId, now = new Date() })"));
   assert.ok(server.includes("last_ui_seen_at: z.string().nullable()"));
   assert.ok(server.includes("turn_history: z.array(heartbeatSchema).max(50)"));
   assert.ok(!block.includes("resourceUri:"));
