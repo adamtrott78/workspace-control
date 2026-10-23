@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ad4f788890473add0ca86bbcd5ca9de678dba75f
+- Remote checkpoint: 6d306ab4798c0542be0cd620103c642ff079ee60
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8329f160a154d86f8178bb094e9b53a8274193b5
+- Remote checkpoint: ccf01e7afa40f16a724f4bfe0b94e32acf2a5410
 - Remote verified: true
 
 ## Next safe action
 
-Monitor exactly one active reranker bakeoff run 39983057391 from inert research-engine PR #159 at exact head 8329f160a154d86f8178bb094e9b53a8274193b5. Do not trigger another run while it is queued/running. If it reaches scientific scoring, recover and checkpoint the report, classify only under the frozen PROMISING/NEGATIVE rule, close PR #159 unmerged, and STOP before Wave 7. If it fails before producing any proposition score, classify the pre-scoring failure and fix only that runtime boundary before any retry.
+STOP after the oracle-query diagnostic. The predeclared verdict is QUERY_REPRESENTATION_CONFIRMED: precise answer-free evidence intents make the existing generic rankers recover the preserved teacher evidence. Do not start Wave 7 or change production EXTRACT/VERIFY. Resume only with an explicit bounded design phase for local evidence-intent/query decomposition that attempts to approach the oracle ceiling without teacher leakage.
 
 ## Remaining work
 
-- Monitor run 39983057391 only; no duplicate trigger while it is queued or running.
-- If the run produces valid arm rankings, recover the artifact and classify under the frozen PROMISING/NEGATIVE gate; do not retune queries, top_k, candidate pool, hybrid weights, support oracle, or thresholds after seeing results.
-- If the run fails before any proposition score is produced, record that the scientific gate remains unconsumed and fix only the narrow pre-scoring runtime fault.
-- After a valid result, checkpoint the report, close inert PR #159 unmerged, and stop before Wave 7 or any production EXTRACT/VERIFY change.
-- Heartbeat executor-touch liveness remains an independent workspace-heartbeat task; v0.4.7 exposes heartbeat_touch but the canonical procedures/progress_heartbeat.md still lacks a touch-emission cadence/rule.
+- STOP after the QUERY_REPRESENTATION_CONFIRMED oracle result; do not start Wave 7 automatically.
+- If the redesign resumes, first design a bounded local evidence-intent/query-decomposition layer that generates specific answer-free scientific questions without teacher leakage, then compare those generated intents against the frozen oracle ceiling on the same proposition pool.
+- Keep coarse page routing, authoritative PDF/proposition provenance, the existing rankers, Qwen3.5-4B normalizer, production STANDARD Codex EXTRACT fallback, and accepted Qwen VERIFY fixed during the first query-decomposition experiment.
+- Defer supervised/domain-adapted proposition ranking until generated-intent retrieval is measured; the oracle result shows the current generic rankers have sufficient capacity when the information need is represented precisely.
+- Treat historical Wave-6 CLAIM_SCHEMA rejects as a separate structured-output engineering cleanup.
 
 ## Blockers / gates
 
