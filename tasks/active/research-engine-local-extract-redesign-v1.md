@@ -42,19 +42,19 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Exactly one Wave 7A.3 run is authorized from exact research-engine SHA 8e3481c4ad00ffe26cd175d0e6c6275081d70ab0 after trusted route reconciliation PASS run 40021083789. Create an inert open same-repository trigger PR at that exact head, issue one `/lambda-ci-local-extract-wave7a3 8e3481c4ad00ffe26cd175d0e6c6275081d70ab0` comment, then hard-stop at the frozen WAVE7A3_PROMISING/PARTIAL/REJECT verdict. Do not retune the contract, start Wave 7B, or change production EXTRACT/VERIFY.
+Do not trigger Wave 7A.3 again. Unique run 40021544696 is already in flight from inert research-engine PR #175 at exact head 8e3481c4ad00ffe26cd175d0e6c6275081d70ab0 (trigger comment id 6374372304). Inspect that run until terminal, recover its artifact/report, apply the frozen WAVE7A3 verdict gates without retuning, checkpoint the result, close PR #175 unmerged, and stop before Wave 7B.
 
 ## Remaining work
 
-- Trigger exactly one Wave 7A.3 run from exact research-engine SHA 8e3481c4ad00ffe26cd175d0e6c6275081d70ab0 using the trusted /lambda-ci-local-extract-wave7a3 route.
-- Apply only the frozen WAVE7A3_PROMISING / WAVE7A3_PARTIAL / WAVE7A3_REJECT gates, including explicit recovery of the six source-aware-BM25 residual teacher atoms and retention of prior supported atoms.
-- Persist the exact run/artifact/report identities and scientific disposition in research-engine, close the inert trigger PR unmerged, and checkpoint workspace-control.
+- Observe the unique in-flight Wave 7A.3 run 40021544696; do not issue another trigger.
+- When it completes, recover the artifact/report and apply only the frozen WAVE7A3_PROMISING / WAVE7A3_PARTIAL / WAVE7A3_REJECT gates.
+- Persist the exact run/artifact/report identities and scientific disposition in research-engine, close inert trigger PR #175 unmerged, and checkpoint workspace-control.
 - Hard-stop before Wave 7B or production EXTRACT/VERIFY changes.
-- Only if Wave 7A.3 rejects, reopen targeted design research for a trained scientific contribution/discourse classifier as a new independent variable; do not add it to the current experiment after seeing results.
+- Only if Wave 7A.3 rejects, reopen targeted design research for a trained scientific contribution/discourse classifier as a new independent variable.
 
 ## Blockers / gates
 
-- None.
+- Wave 7A.3 run 40021544696 is the unique in-flight scientific benchmark. Do not issue any second /lambda-ci-local-extract-wave7a3 trigger while it is queued or running.
 
 ## Fresh-chat initialization
 
