@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-semantic-control-prototype-v1",
   "title": "Semantic Control Plane Prototype v1",
-  "status": "IN_PROGRESS",
+  "status": "COMPLETE",
   "goal": "Build and benchmark an additive, deterministic semantic-control prototype over frozen research-engine and workspace-control evidence that proves provenance-preserving semantic observations, cross-store semantic federation, contradiction/time handling, targeted evidence escalation, bounded ontology/schema context retrieval, shared semantic-twin queries, and fail-closed action-candidate/DecisionEvaluation semantics without changing production scientific truth, EXTRACT/VERIFY behavior, policy authority, or execution.",
   "execution_topology": "remote_only",
   "workflow": null,
@@ -62,7 +62,7 @@
       "base_sha": "80da2cae9f8d80a7e7049a9b5339807becc54a98",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "b1f862914f289e1b5df644d2479df085369f530a",
+        "checkpoint_sha": "4317830c4f3779cebb8a5cf0d7eeec369b85d5ea",
         "verified": true
       },
       "local": null,
@@ -230,7 +230,7 @@
     },
     {
       "id": "integrated_benchmark_and_verdict",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -244,7 +244,22 @@
         "PROMOTE_TO_INTEGRATION, REVISE, or REJECT verdict",
         "If promoted, exact interface/migration boundary for a separate production-integration task"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Frozen integrated P1-P8 benchmark and verdict",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #191 combined-tree CI run 40034825080 PASS and merged as 4317830c4f3779cebb8a5cf0d7eeec369b85d5ea.",
+            "Persisted benchmarks/semantic_control/semantic-control-prototype-result.v1.json exactly matches the deterministic benchmark runner.",
+            "All frozen P1-P8 expected-answer cases pass.",
+            "All hard gates pass: zero authorization escapes, complete fixture provenance, contradiction preservation, history replay, deterministic adapter/twin rebuild, expected-answer agreement, projection failure isolation, request-only evidence escalation, non-authoritative CandidateAction semantics, and positive authoritative-policy control.",
+            "authorization_escape_count=0.",
+            "Persisted verdict=PROMOTE_TO_INTEGRATION.",
+            "latency_baseline.status=NOT_MEASURED_IN_PROTOTYPE_SCOPE and performance_promotion_claim=false.",
+            "production_integration_authorized=false; DB schema, EXTRACT, VERIFY, policies, and executor routing remain unchanged."
+          ]
+        }
+      ],
       "resume_condition": "All hard gates are evaluated and a bounded verdict is durably checkpointed."
     }
   ],
@@ -320,9 +335,36 @@
         "PR #189 CI PASS.",
         "Zero executor invocation; CandidateAction remains non-authoritative; policy-bound ALLOW/DENY/ABSTAIN semantics validated."
       ]
+    },
+    {
+      "id": "integrated-benchmark-verdict-v1",
+      "kind": "prototype_verdict",
+      "identity": "research-engine@4317830c4f3779cebb8a5cf0d7eeec369b85d5ea:semantic-control-prototype-result-v1:PROMOTE_TO_INTEGRATION",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #191 CI run 40034825080 PASS.",
+        "All P1-P8 and hard gates pass with authorization_escape_count=0.",
+        "No production integration is authorized by this verdict.",
+        "Relational/live latency baseline remains intentionally unmeasured and must be addressed in a separate integration task."
+      ]
     }
   ],
-  "artifacts": [],
+  "artifacts": [
+    {
+      "path": "benchmarks/semantic_control/semantic-control-prototype-result.v1.json",
+      "state": "FROZEN",
+      "role": "Machine-readable final prototype verdict and hard-gate report",
+      "origin": "research-engine@4317830c4f3779cebb8a5cf0d7eeec369b85d5ea",
+      "persistence": "git",
+      "regeneration": "Run the frozen integrated benchmark against the exact pinned prototype fixture/contract set.",
+      "review_requirement": "Any contract or benchmark change requires a new version and rebenchmark.",
+      "evidence": [
+        "PR #191",
+        "CI run 40034825080 PASS",
+        "verdict PROMOTE_TO_INTEGRATION"
+      ]
+    }
+  ],
   "validation": [
     {
       "check": "Explicit operator authorization",
@@ -349,13 +391,9 @@
     }
   ],
   "blockers": [],
-  "remaining_work": [
-    "Run the frozen P1-P8 integrated benchmark across adapters, semantic twin, evidence/context layer, and decision bridge.",
-    "Persist a benchmark report with hard-gate disposition and explicit latency-baseline status.",
-    "Issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT. Any promotion creates a separate integration task and does not change production."
-  ],
-  "next_safe_action": "Implement only integrated_benchmark_and_verdict from research-engine checkpoint b1f862914f289e1b5df644d2479df085369f530a. Add a deterministic prototype benchmark runner/report under prototypes/semantic_control/** and benchmarks/semantic_control/** plus tests under tests/semantic_control/**. Evaluate frozen P1-P8 expected answers using the implemented adapters/twin/evidence/decision components; hard-fail on any authorization escape, provenance loss, contradiction/history collapse, nondeterministic rebuild, or projection-mutation failure. Record relational latency baseline as NOT_MEASURED_IN_PROTOTYPE_SCOPE and make no performance promotion claim. A correctness/safety PROMOTE_TO_INTEGRATION verdict may only recommend a separate integration task; do not change production code, DB schema, policies, EXTRACT/VERIFY, Lambda, or executor routing.",
+  "remaining_work": [],
+  "next_safe_action": "Prototype v1 is complete. Do not add production behavior here. Continue only through a separate semantic-control integration task that consumes research-engine@4317830c4f3779cebb8a5cf0d7eeec369b85d5ea and this frozen verdict, measures the missing live relational/query baseline, preserves adapter-based isolation from the evolving Local EXTRACT architecture, and requires separate promotion gates before any production mutation.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "This child task is the implementation boundary created from workspace-knowledge-action-ontology-v1 after operator acceptance. It deliberately treats the semantic representation backend as an implementation detail: v1 uses deterministic typed records and in-memory indexes to prove semantics before selecting RDF/SPARQL/property-graph technology. The task consumes the valid Wave 7A.3 REJECT as frozen evidence while remaining scientifically independent from the ongoing/future Local EXTRACT redesign. The intended eventual integration is adapter-based: accepted future EXTRACT output -> stable evidence/output adapter -> semantic-control layer. The semantic-control layer may request evidence or generate CandidateAction records, but only existing authority-owned policy evaluation can authorize execution.\n\n2026-10-23 DECISION BRIDGE COMPLETE. research-engine PR #189 validated the semantic-to-action authority boundary and merged as b1f862914f289e1b5df644d2479df085369f530a after CI run 40033942455 PASS. CandidateAction remains structurally UNDECIDED. Only ACTIVE NORMATIVE AUTHORITATIVE_RECORD policy observations matching the action target can support ALLOW; epistemic/unverified permission claims are ignored. Explicit deny wins, missing authority abstains, and failed/unknown preconditions prevent ALLOW. No executor invocation or receipt fabrication occurs. The prototype now enters its frozen integrated P1-P8 benchmark/verdict stage."
+  "notes": "This child task is the implementation boundary created from workspace-knowledge-action-ontology-v1 after operator acceptance. It deliberately treats the semantic representation backend as an implementation detail: v1 uses deterministic typed records and in-memory indexes to prove semantics before selecting RDF/SPARQL/property-graph technology. The task consumes the valid Wave 7A.3 REJECT as frozen evidence while remaining scientifically independent from the ongoing/future Local EXTRACT redesign. The intended eventual integration is adapter-based: accepted future EXTRACT output -> stable evidence/output adapter -> semantic-control layer. The semantic-control layer may request evidence or generate CandidateAction records, but only existing authority-owned policy evaluation can authorize execution.\n\n2026-10-23 DECISION BRIDGE COMPLETE. research-engine PR #189 validated the semantic-to-action authority boundary and merged as b1f862914f289e1b5df644d2479df085369f530a after CI run 40033942455 PASS. CandidateAction remains structurally UNDECIDED. Only ACTIVE NORMATIVE AUTHORITATIVE_RECORD policy observations matching the action target can support ALLOW; epistemic/unverified permission claims are ignored. Explicit deny wins, missing authority abstains, and failed/unknown preconditions prevent ALLOW. No executor invocation or receipt fabrication occurs. The prototype now enters its frozen integrated P1-P8 benchmark/verdict stage.\n\n2026-10-23 PROTOTYPE COMPLETE. Final research-engine PR #191 passed combined-tree CI run 40034825080 and merged as 4317830c4f3779cebb8a5cf0d7eeec369b85d5ea. The persisted integrated result is PROMOTE_TO_INTEGRATION with all frozen P1-P8 cases and hard gates passing, authorization_escape_count=0, and exact runner/result equality. The verdict is correctness/safety-only: latency/live relational baseline is NOT_MEASURED_IN_PROTOTYPE_SCOPE; performance_promotion_claim=false; production_integration_authorized=false. Production EXTRACT/VERIFY, DB schema, root policy, Lambda, and executor routing remain unchanged. Prototype v1 is now COMPLETE."
 }

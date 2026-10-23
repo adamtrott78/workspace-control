@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-semantic-control-prototype-v1
 - Title: Semantic Control Plane Prototype v1
-- Status: IN_PROGRESS
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -31,18 +31,16 @@ Build and benchmark an additive, deterministic semantic-control prototype over f
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: b1f862914f289e1b5df644d2479df085369f530a
+- Remote checkpoint: 4317830c4f3779cebb8a5cf0d7eeec369b85d5ea
 - Remote verified: true
 
 ## Next safe action
 
-Implement only integrated_benchmark_and_verdict from research-engine checkpoint b1f862914f289e1b5df644d2479df085369f530a. Add a deterministic prototype benchmark runner/report under prototypes/semantic_control/** and benchmarks/semantic_control/** plus tests under tests/semantic_control/**. Evaluate frozen P1-P8 expected answers using the implemented adapters/twin/evidence/decision components; hard-fail on any authorization escape, provenance loss, contradiction/history collapse, nondeterministic rebuild, or projection-mutation failure. Record relational latency baseline as NOT_MEASURED_IN_PROTOTYPE_SCOPE and make no performance promotion claim. A correctness/safety PROMOTE_TO_INTEGRATION verdict may only recommend a separate integration task; do not change production code, DB schema, policies, EXTRACT/VERIFY, Lambda, or executor routing.
+Prototype v1 is complete. Do not add production behavior here. Continue only through a separate semantic-control integration task that consumes research-engine@4317830c4f3779cebb8a5cf0d7eeec369b85d5ea and this frozen verdict, measures the missing live relational/query baseline, preserves adapter-based isolation from the evolving Local EXTRACT architecture, and requires separate promotion gates before any production mutation.
 
 ## Remaining work
 
-- Run the frozen P1-P8 integrated benchmark across adapters, semantic twin, evidence/context layer, and decision bridge.
-- Persist a benchmark report with hard-gate disposition and explicit latency-baseline status.
-- Issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT. Any promotion creates a separate integration task and does not change production.
+- None.
 
 ## Blockers / gates
 
