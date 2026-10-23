@@ -31,19 +31,19 @@ Build and benchmark an additive, deterministic semantic-control prototype over f
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 80da2cae9f8d80a7e7049a9b5339807becc54a98
+- Remote checkpoint: 007d88b37f34554e8be8e8ad9c976e3724a82521
 - Remote verified: true
 
 ## Next safe action
 
-Create the research-engine prototype branch from exact checkpoint 80da2cae9f8d80a7e7049a9b5339807becc54a98 and perform only stage freeze_contract_and_fixtures: inspect the exact authoritative fixture candidates, write a provenance-pinned fixture manifest and V1 interface contracts under benchmarks/semantic_control/**, and add contract/fixture tests under tests/semantic_control/**. Do not implement the semantic engine until those contracts and expected-answer fixtures are frozen.
+Implement only build_semantic_twin_and_query_layer from research-engine checkpoint 007d88b37f34554e8be8e8ad9c976e3724a82521. Add in-memory deterministic projection/query code under prototypes/semantic_control/** and tests under tests/semantic_control/**. Prove provenance traversal, contradiction preservation, temporal/supersession replay, deterministic rebuild, and the frozen P6 multi-hop task/scientific-state query. No evidence escalation, CandidateAction evaluation, database/model/network/Lambda/executor calls, or production imports yet.
 
 ## Remaining work
 
-- Freeze the exact fixture manifest and V1 interface schemas before writing semantic-engine code.
-- Implement deterministic adapters and canonical semantic-manifest hashing only after fixture/contract freeze.
-- Implement/query the in-memory semantic twin, then evidence escalation/context slicing, then action-candidate/DecisionEvaluation in that order.
-- Run the frozen P1-P8 benchmark and issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT without touching production paths.
+- Build the in-memory semantic twin and deterministic multi-hop query layer over adapter output.
+- Implement evidence escalation/context slicing after semantic-twin P1/P2/P3/P6/P7 tests pass.
+- Implement CandidateAction/DecisionEvaluation bridge after the evidence layer passes.
+- Run frozen P1-P8 and issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT.
 
 ## Blockers / gates
 
