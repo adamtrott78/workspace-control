@@ -89,7 +89,7 @@
     },
     {
       "path": "architecture/lambda-ci-project-research-engine.v2.json",
-      "git_blob_sha": "035521d68b626da677bc3ead687c8cb7850eb778"
+      "git_blob_sha": "cf2adbc557bd3d3ba02bc08e9b44e37e5d071496"
     },
     {
       "path": "architecture/lambda-ci-project-padataset.v1.json",
