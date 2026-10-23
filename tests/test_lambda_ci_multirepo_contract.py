@@ -100,6 +100,7 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
             "model-eval-local-extract-wave3": "db45f163e9e8b342d78c04540f0ace10fcba5906",
             "model-eval-local-extract-wave4": "71641ec390a514c5f6f046a1cb00eed9e43f839e",
             "model-eval-local-extract-wave5": "2ef10f5b0940ff3c2238f74c0f0efbaf5bd61d6d",
+            "model-eval-local-extract-wave6": "c81e7cbb31f1731ada483a9b1f9256a4e6d78312",
         }
         self.assertEqual(set(RESEARCH["routes"]), set(expected))
         for route_id, sha in expected.items():
