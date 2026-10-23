@@ -30,25 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 2f5b950c557171318e5cb764add35fc3c95a97fc
+- Remote checkpoint: cc91a3a355a0f206a0c5734bd1d5eaeadc3450d0
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 80da2cae9f8d80a7e7049a9b5339807becc54a98
+- Remote checkpoint: 983fe308a2e74841bdf3d4c1bff0200ffd0f4eea
 - Remote verified: true
 
 ## Next safe action
 
-STOP at the valid Wave 7A.3 scientific checkpoint. Run 40027366528 is implementation-valid and WAVE7A3_REJECT; the scientific gate is consumed, PR #178 is closed unmerged, and Wave 7B is not authorized. Do not issue another Wave 7A.3/Wave 7B trigger or tune the frozen experiment. If the user explicitly resumes local EXTRACT research, begin a new evidence-first design phase for a materially different intent-generation architecture using benchmarks/document_intelligence/local-extract-wave7a3-author-anchored-result.v1.json as exclusion evidence.
+Implement the frozen zero-generation MULTIVIEW_SUBMODULAR_COVERAGE_DIAGNOSTIC_V1 from benchmarks/document_intelligence/local-extract-post-wave7a3-coverage-design.v1.json at research-engine@983fe308a2e74841bdf3d4c1bff0200ffd0f4eea. The implementation must reuse the exact valid Wave 7A.3 generated intents as fixed diagnostic inputs, recompute BM25 per-intent rankings over the unchanged selected-page proposition pool, apply BALANCED_FACILITY_LOCATION_RRF_V1 with the frozen 0.5/0.5 branch weighting and top-24 budget, add focused tests/CI, then route and issue exactly one zero-generation diagnostic. Do not train/download a contribution classifier, start Wave 7B, change production STANDARD Codex EXTRACT/Qwen VERIFY, or introduce ontology/semantic-control mechanisms.
 
 ## Remaining work
 
-- No current experiment or Wave 7B execution is authorized after the valid WAVE7A3_REJECT.
-- If the user explicitly resumes the local EXTRACT redesign, start a new evidence-first research/design phase that treats author-anchored obligations as rejected-as-implemented and requires a materially different intent-generation architecture before any new run.
-- Preserve production STANDARD Codex EXTRACT and accepted page-scoped Qwen VERIFY unless a separate future task explicitly reopens those production boundaries.
+- Implement MULTIVIEW_SUBMODULAR_COVERAGE_DIAGNOSTIC_V1 exactly as frozen in research-engine@983fe308a2e74841bdf3d4c1bff0200ffd0f4eea; reuse the exact valid Wave 7A.3 generated intents, BM25, selected-page proposition pool, per-intent depth 12, and final budget 24.
+- Add focused deterministic tests for BALANCED_FACILITY_LOCATION_RRF_V1 and the frozen COMPOSITION_CONFIRMED/PARTIAL/NEGATIVE gates; run normal research-engine CI.
+- Route the zero-generation diagnostic through existing bounded execution authority without changing GitRunner/controller/provisioner authority, then issue exactly one diagnostic run and checkpoint its result.
+- Only if COMPOSITION_CONFIRMED may a separate evidence-first contract open training/domain-transfer evaluation for a compact contribution/discourse residual detector; do not download/train it preemptively.
+- Keep workspace-knowledge-action-ontology-v1 downstream-only. Preserve a clean deterministic provenance-bearing EXTRACT output contract for any future external adapter, but do not optimize EXTRACT for ontology/RDF/semantic-control structures.
+- Preserve production STANDARD Codex EXTRACT and accepted page-scoped Qwen VERIFY; do not start Wave 7B.
 
 ## Blockers / gates
 
