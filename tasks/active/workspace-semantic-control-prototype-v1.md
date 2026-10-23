@@ -24,6 +24,7 @@ Build and benchmark an additive, deterministic semantic-control prototype over f
 
 - Intent: mutate
 - Remote branch: main
+- Remote checkpoint: ce4c211bf28efa84d3e6113984bef9356ddceeb4
 - Remote verified: true
 
 ### research-engine
