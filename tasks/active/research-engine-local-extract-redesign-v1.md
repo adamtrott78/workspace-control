@@ -30,33 +30,46 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 87e736740169985ff17c8225d1c83b615a3b62dc
+- Remote checkpoint: 4ad9d31dfd5297c176b99d5c67b7d795aa26cc09
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 366f9585145ab539dc43c3c974dcb8625489a3e3
+- Remote checkpoint: 7d2b7b9b131881de9b2d0c31640110fd7b0df348
 - Remote verified: true
+
+## Current scientific state
+
+- Wave 2: structural guard/atomicization fix succeeded; 9/9 local completion and 70 accepted claims, but teacher coverage remained 0/6.
+- Wave 3: soft-terminal-region hypothesis was negative; do not retain that source-region change.
+- Wave 4: exact proposition enumeration was useful, but Qwen proposition selection was the primary residual. Available proposition mean teacher-source F1 was ~0.319, Qwen-selected ~0.215, final normalized agreement ~0.178.
+- Offline deterministic BM25 proposition selection recovered ~0.303 mean teacher-source F1.
+- Wave-5 branch `local-extract-wave5-deterministic-proposal-ranking` exists and currently contains only the durable Wave-4 decision artifact; Wave-5 implementation has not begun.
 
 ## Next safe action
 
-Bind the exact merged Wave-2 workflow blob cb7fd59bcb6f857bd6148ecbc7e2eb320dc9a1fb to a new research-engine route model-eval-local-extract-wave2 using the already-accepted model-dual-public-v1 contract, with exact qwen3.5-4b/runtime bindings and the existing same-repository PR/actor gates. Validate and merge only the declarative manifest/test delta, require the trusted reconciliation path to accept/install that exact state, then trigger exactly one bounded Wave-2 benchmark. Do not modify controller/provisioner/runtime/reconciler code.
+Resume from research-engine branch local-extract-wave5-deterministic-proposal-ranking, which is currently exactly one commit ahead of research-engine main 7d2b7b9b131881de9b2d0c31640110fd7b0df348 and contains only benchmarks/document_intelligence/local-extract-wave4-decision.v1.json. First commit a frozen Wave-5 contract. Then implement WAVE5_DETERMINISTIC_PROPOSITION_RANKING_THEN_NORMALIZATION_V1: keep Wave-2 region construction and top-12 FACET_INTERLEAVED_BM25_V1 retrieval; retain exact proposition enumeration; replace only the Qwen proposal selector with deterministic per-region BM25 proposition ranking; keep the existing Qwen normalization prompt/schema and strict guard unchanged; retain the preserved teacher scorer/F1 threshold and all provenance/production boundaries. Validate in research-engine, merge exact implementation, add only a declarative model-dual-public-v1 route binding for its exact launcher blob in workspace-control, require successful trusted reconciliation, and execute exactly one bounded Wave-5 benchmark. Do not rerun Wave 4 and do not modify controller/provisioner/runtime/reconciler code.
 
 ## Remaining work
 
-- Localize Wave-1 failure into claim proposal/atomicization/guard semantics versus retrieval residuals using the recovered per-paper artifact evidence.
-- Design the smallest materially different Local Evidence Agent iteration that avoids whole-paper rejection from local region fanout while preserving exact grounding, bounded claim counts, type semantics, and fail-closed unknown candidate IDs.
-- Keep FACET_INTERLEAVED_BM25_V1 fixed for the first semantic iteration so claim-generation effects are separable; only open retrieval changes against measured low-recall papers after semantic failure modes are isolated.
-- Implement the new EXTRACT iteration in research-engine with no production routing change and no scientific materialization during benchmarking.
-- Execute through the accepted reusable Git/Lambda runner and compare against the preserved nine-paper / 71-evidence-object Wave-1 baseline.
-- Measure local completion, claim-level teacher agreement on the preserved teacher subset, provenance safety, fallback fraction, latency/resource use, and projected remote-token suppression.
+- Freeze a Wave-5 benchmark contract before implementation. Hold Wave-2 region construction, FACET_INTERLEAVED_BM25_V1 top-12 retrieval, exact proposition enumeration, Qwen normalization prompt/schema, strict guards, teacher scorer/F1 threshold, model/runtime/GPU topology, provenance rules, and production boundaries fixed.
+- On research-engine branch local-extract-wave5-deterministic-proposal-ranking, replace only the Qwen proposition-selection call with deterministic per-region proposition ranking using the already-observed BM25 selector; preserve at most one selected proposition per region.
+- Add diagnostics that separately report available-proposition ceiling, deterministic-selected proposition alignment, and final normalized teacher agreement so normalization can be adjudicated independently.
+- Correct the Wave-5 launcher receipt assertions so they match Wave-5 metrics; do not rerun Wave 4 solely to repair its post-benchmark receipt assertion.
+- Pass normal research-engine CI, merge the exact Wave-5 implementation, bind its exact launcher blob through the existing model-dual-public-v1 declarative route without GitRunner substrate changes, and require successful trusted reconciliation.
+- Create one inert open same-repository trigger PR and execute exactly one bounded Wave-5 Lambda benchmark.
+- At the Wave-5 result, immediately checkpoint exact run/artifact/report hashes, scientific decision, residual localization, and the next experiment before beginning any further wave.
 - Only after a candidate passes the semantic-quality gate consider VERIFY-boundary analysis or production integration.
 
 ## Blockers / gates
 
 - None.
+
+## Durability rule
+
+Checkpoint the authoritative capsule immediately after each implementation merge, benchmark result/artifact, scientific disposition/residual localization, and next-experiment selection. Do not wait for an end-of-chat handoff.
 
 ## Fresh-chat initialization
 
