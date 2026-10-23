@@ -30,26 +30,26 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8430baf2e6ec29296e812b6dbb4559b725154543
+- Remote checkpoint: 4de5698601df304fbf7d30e7e7d3e38da2d10d7d
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: f3d5dc4f8cc5007d3159b232ae00317620a59de6
+- Remote checkpoint: 9566532288bf500db8997b9befcc339788609184
 - Remote verified: true
 
 ## Next safe action
 
-Create exactly one inert research-engine trigger PR from isolated implementation head 0abf32f0fa106c2b22a6f080341b0dadc4794f96, then issue exactly one `/local-extract-proposition-alignment-preservation <exact-trigger-head-sha>` comment. Observe the unique zero-generation run, evaluate only frozen ALIGNMENT_AUGMENT_STRONG/FEASIBLE/NEGATIVE, checkpoint exact artifact/report hashes and disposition, and close the trigger PR unmerged.
+After closing inert trigger PR #201 unmerged, begin a separate evidence-first EXTRACT design phase from the durable ALIGNMENT_AUGMENT_FEASIBLE result at research-engine@9566532288bf500db8997b9befcc339788609184. The new phase may generalize the validated direct proposition redundancy certificate semantically, but must compare materially distinct teacher-blind mechanisms (including semantic-tuple coverage versus a separately validated paraphrase/entailment certificate) before any implementation or model download. Do not tune the accepted 0.40 lexical certificate post hoc, treat FEASIBLE as production promotion, promote fixed 20/4, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate ontology/semantic-control mechanisms.
 
 ## Remaining work
 
-- Create one inert research-engine trigger PR from exact isolated implementation head 0abf32f0fa106c2b22a6f080341b0dadc4794f96 with only a non-semantic marker.
-- Issue exactly one `/local-extract-proposition-alignment-preservation <exact-trigger-head-sha>` comment and do not issue a second trigger.
-- Evaluate only frozen ALIGNMENT_AUGMENT_STRONG/FEASIBLE/NEGATIVE, checkpoint run/artifact/report hashes immediately, and close trigger unmerged.
-- Do not tune threshold/gates after result, promote fixed quota, execute rejected Qwen gap judge, train/download classifier, start Wave 7B, change production EXTRACT/VERIFY, or add ontology/semantic-control.
+- Close inert research-engine trigger PR #201 unmerged after this result checkpoint is durable.
+- Begin a separate evidence-first design for semantic generalization of the validated direct redundancy certificate. Compare at least semantic-tuple coverage and a separately validated learned paraphrase/entailment certificate before choosing an implementation.
+- Preserve DYNAMIC_SAME_PAGE_ALIGNMENT_SWAP_V1 and ALIGNMENT_AUGMENT_FEASIBLE as accepted scientific evidence; do not tune the 0.40 threshold post hoc.
+- Do not treat FEASIBLE as production promotion, promote the fixed 20/4 quota, execute the rejected intent-utility/Qwen gap-judge path, train/download a classifier without a new contract, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
 
 ## Blockers / gates
 
