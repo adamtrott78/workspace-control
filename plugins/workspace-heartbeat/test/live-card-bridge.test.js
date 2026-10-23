@@ -20,6 +20,7 @@ function createHarness(){
       this.style={values:new Map(),setProperty(name,value){this.values.set(name,value);},getPropertyValue(name){return this.values.get(name)??"";}};
       this.top=0;
       this.bottom=0;
+      this.height=180;
     }
     append(...parts){this.children.push(...parts);}
     replaceChildren(...parts){
@@ -27,10 +28,10 @@ function createHarness(){
       this.children.forEach((child,i)=>{child.top=i*50;child.bottom=(i+1)*50;});
       this.scrollHeight=Math.max(100,parts.length*50);
     }
-    getBoundingClientRect(){return {top:this.top,bottom:this.bottom};}
+    getBoundingClientRect(){return {top:this.top,bottom:this.bottom,height:this.height};}
   }
   const elems=new Map();
-  for(const key of ["title","state","history","footer"])elems.set(key,new El());
+  for(const key of ["app","title","state","history","footer"])elems.set(key,new El());
   const handlers=new Map();
   const messages=[];
   let timers=[],seq=0,hidden=false;
@@ -39,8 +40,8 @@ function createHarness(){
   const window={parent,openai:{toolInput:{task_id:"task-a"},toolOutput:{structuredContent:first}},addEventListener(name,fn){handlers.set("window:"+name,fn);}};
   const document={
     get hidden(){return hidden;},
-    documentElement:{scrollHeight:180},
-    body:{scrollHeight:180},
+    documentElement:{scrollHeight:900},
+    body:{scrollHeight:900},
     getElementById(id){return elems.get(id);},
     createElement(){return new El();},
     addEventListener(name,fn){handlers.set("document:"+name,fn);}
@@ -82,7 +83,7 @@ function snapshot(messages,{active=true,superseded=false,completed=false,include
   };
 }
 
-test("one mounted card renders full history only for its immutable turn and requests host resize",async()=>{
+test("one mounted card renders full history and reports intrinsic card height, not iframe viewport height",async()=>{
   const h=createHarness();
   h.handleNext("ui/initialize",{});await h.flush();await h.runTimer();
   const call=h.handleNext("tools/call",{structuredContent:snapshot(["One","Two","Three","Four","Five"])});
@@ -94,6 +95,7 @@ test("one mounted card renders full history only for its immutable turn and requ
   assert.equal(h.elems.get("history").className,"history");
   assert.equal(h.elems.get("footer").textContent,"5 updates · current turn · live");
   assert.ok(h.messages.some(x=>x.method==="ui/notifications/size-changed"&&x.params.height===180));
+  assert.equal(h.messages.some(x=>x.method==="ui/notifications/size-changed"&&x.params.height===900),false);
 });
 
 test("live card falls back to latest-three when turn_history is absent",async()=>{
