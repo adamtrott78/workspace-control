@@ -269,6 +269,8 @@ export class HeartbeatStore {
       completed: turn.completed,
       last_executor_touch_at: turn.last_executor_touch_at ?? null,
       last_ui_seen_at: turn.last_ui_seen_at ?? null,
+      executor_touch_age_seconds: turn.last_executor_touch_at ? Math.max(0, (Date.now() - Date.parse(turn.last_executor_touch_at)) / 1000) : null,
+      ui_seen_age_seconds: turn.last_ui_seen_at ? Math.max(0, (Date.now() - Date.parse(turn.last_ui_seen_at)) / 1000) : null,
     };
   }
 
