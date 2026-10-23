@@ -37,12 +37,12 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 7d2b7b9b131881de9b2d0c31640110fd7b0df348
+- Remote checkpoint: 54d347c248c7f9a8b9de9242abf01d082feb0bb5
 - Remote verified: true
 
 ## Next safe action
 
-Resume from research-engine branch local-extract-wave5-deterministic-proposal-ranking, which is currently exactly one commit ahead of research-engine main 7d2b7b9b131881de9b2d0c31640110fd7b0df348 and contains only benchmarks/document_intelligence/local-extract-wave4-decision.v1.json. First commit a frozen Wave-5 contract. Then implement WAVE5_DETERMINISTIC_PROPOSITION_RANKING_THEN_NORMALIZATION_V1: keep Wave-2 region construction and top-12 FACET_INTERLEAVED_BM25_V1 retrieval; retain exact proposition enumeration; replace only the Qwen proposal selector with deterministic per-region BM25 proposition ranking; keep the existing Qwen normalization prompt/schema and strict guard unchanged; retain the preserved teacher scorer/F1 threshold and all provenance/production boundaries. Validate in research-engine, merge exact implementation, add only a declarative model-dual-public-v1 route binding for its exact launcher blob in workspace-control, require successful trusted reconciliation, and execute exactly one bounded Wave-5 benchmark. Do not rerun Wave 4 and do not modify controller/provisioner/runtime/reconciler code.
+Wave 5 implementation is merged in research-engine at 54d347c248c7f9a8b9de9242abf01d082feb0bb5 with workflow blob 2ef10f5b0940ff3c2238f74c0f0efbaf5bd61d6d. Install the already-reviewed Wave-5 declarative route using the existing accepted reusable execution contract, validate and reconcile it, then create one inert open trigger PR and run exactly one bounded Wave-5 benchmark. No reusable runner substrate changes are authorized.
 
 ## Remaining work
 
