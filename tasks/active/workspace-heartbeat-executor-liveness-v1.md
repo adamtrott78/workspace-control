@@ -29,7 +29,7 @@ Give the operator, inside the existing Heartbeat card and without opening a new 
 
 ## Next safe action
 
-Finish the fresh v0.4.6 restage validation in PR #280, then perform the final planned chat-to-chat handoff gate. The outgoing conversation must leave this liveness task durably synchronized and make terminal heartbeat_update(..., state="done") its final Heartbeat operation. A fresh receiving chat must begin this same task_id without a Heartbeat-server restart. If that succeeds, record the handoff PASS in the v0.4.6 release task, mark/merge the fresh v0.4.6 restage, then implement observation-only same-card liveness instrumentation: heartbeat_touch, last_executor_touch_at, last_ui_seen_at, and executor freshness status. Do not enable automatic takeover yet.
+Validate the isolated observation-only v0.4.7 candidate with CI; no live deployment or automatic stale-owner takeover. Collect interruption touch-gap evidence before choosing any TTL.
 
 ## Remaining work
 
@@ -57,3 +57,7 @@ Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
+
+## 2026-10-23 receiving-chat checkpoint
+
+Planned cross-chat handoff PASS using the same task ID without server restart. v0.4.6 was merged through fresh restage PR #280 at `cd396157d7e3e5c3f955c15e41bebba501057693`. Observation-only liveness work is separately staged as v0.4.7; automatic takeover remains disabled.
