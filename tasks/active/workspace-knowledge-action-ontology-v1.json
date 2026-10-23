@@ -46,7 +46,7 @@
       "base_sha": "dbce355969e6378eef9effa2914393cc8add2e4c",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "dbce355969e6378eef9effa2914393cc8add2e4c",
+        "checkpoint_sha": "f370bdc7afc8037dbb5f87a0228abfc011011329",
         "verified": true
       },
       "local": null,
@@ -193,10 +193,10 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "dbce355969e6378eef9effa2914393cc8add2e4c",
+      "identity": "f370bdc7afc8037dbb5f87a0228abfc011011329",
       "required_for_resume": true,
       "evidence": [
-        "workspace-control main=dbce355969e6378eef9effa2914393cc8add2e4c",
+        "workspace-control task creation merged at f370bdc7afc8037dbb5f87a0228abfc011011329",
         "research-engine main=ba9d09abf77af7280fdc5f5890dee1cb7a05ff67",
         "task is research-first; only its own capsule/handoff may mutate before an implementation gate",
         "next action=recover actual current storage and executor-policy substrates before architecture selection"
@@ -234,5 +234,5 @@
   "next_safe_action": "In a fresh chat, begin at frame_and_recover_existing_substrates. Read the authoritative task capsule and evidence-first research workflow. Inspect current research-engine persistence/schema code and workspace-control task/workflow/policy structures before proposing a graph technology. In parallel, investigate the MILCOM 2026 Boeing/PhD/best-poster ontology lead using public sources. Do not mutate production research-engine or workspace-control behavior and do not change the Local EXTRACT task.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Core hypothesis from the user: a durable data structure may be able to represent both accumulated knowledge about the world/research domain and the semantics that tell executors what action is appropriate in a given situation. The task must investigate this seriously while preventing a dangerous collapse of 'is true/believed' into 'is authorized/should execute'. The envisioned long-term system may support continual learning, research-gap discovery, and context-sensitive executor coordination, but those capabilities are hypotheses to evaluate rather than assumed goals."
+  "notes": "Core hypothesis from the user: a durable data structure may be able to represent both accumulated knowledge about the world/research domain and the semantics that tell executors what action is appropriate in a given situation. The task must investigate this seriously while preventing a dangerous collapse of 'is true/believed' into 'is authorized/should execute'. The envisioned long-term system may support continual learning, research-gap discovery, and context-sensitive executor coordination, but those capabilities are hypotheses to evaluate rather than assumed goals.\n\n2026-10-23 task creation checkpoint: workspace-control PR #308 validated and merged as f370bdc7afc8037dbb5f87a0228abfc011011329. The task is now durably available for fresh-chat execution; no ontology implementation or production mutation has begun."
 }
