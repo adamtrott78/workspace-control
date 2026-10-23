@@ -37,7 +37,9 @@ test("heartbeat_snapshot is app-only, turn-scoped, and exposes bounded full turn
   const block=toolBlock("heartbeat_snapshot","heartbeat_get");
   assert.ok(block.includes('visibility: ["app"]'));
   assert.ok(block.includes("turn_id: z.string().min(1).max(160)"));
-  assert.ok(block.includes("store.getTurnSnapshot"));
+  assert.ok(block.includes("store.observeUi"));
+  assert.ok(server.includes("observeUi({ taskId, turnId, now = new Date() })"));
+  assert.ok(server.includes("last_ui_seen_at: z.string().nullable()"));
   assert.ok(server.includes("turn_history: z.array(heartbeatSchema).max(50)"));
   assert.ok(!block.includes("resourceUri:"));
 });
