@@ -1,0 +1,179 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-heartbeat-executor-liveness-v1",
+  "title": "Workspace Heartbeat Executor Liveness v1",
+  "status": "IN_PROGRESS",
+  "goal": "Measure and operationally distinguish ChatGPT browser/UI disconnect from continued server-side assistant execution, then replace indefinite stale Heartbeat ownership with a bounded, fail-closed executor lease and safe takeover protocol so a fresh chat can recover without guessing or restarting the Heartbeat server.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-heartbeat-plugin-v1",
+  "current_stage": "observability_contract_and_measurement",
+  "acceptance_criteria": [
+    "Document the exact signals available to a ChatGPT custom MCP server and explicitly distinguish them from unavailable internal ChatGPT turn-terminal events.",
+    "Record separate timestamps for model/executor activity and live-card/UI polling so browser disconnect can be observed independently from continued assistant-side activity.",
+    "Add a model-only executor lease/touch mechanism that does not create user-visible semantic heartbeat entries or pollute task history.",
+    "Expose a read-only liveness status that reports active owner, last model touch, last UI observation, lease expiry, and takeover eligibility without exposing the opaque openai/session identifier.",
+    "Keep current cross-conversation ownership fail-closed while a lease is fresh.",
+    "After a lease expires, allow an atomic explicit takeover that supersedes the stale turn and makes every later old-turn heartbeat/lease operation fail closed.",
+    "Require a fresh lease assertion before mutating external work after long waits or recovery boundaries; document that Heartbeat cannot physically block unrelated GitHub/tool mutations without a future orchestrator proxy.",
+    "Prove by tests that an expired writer can be replaced without a Heartbeat-server restart, an unexpired writer cannot be stolen, and a superseded old writer cannot renew or update its turn.",
+    "Prove in live ChatGPT use that the website/UI can stop or disconnect while executor touches continue, then that recovery becomes deterministically eligible only after the executor lease stops renewing.",
+    "Preserve all accepted v0.4.6 live-card sizing, turn-history, semantic heartbeat, and stale-turn isolation behavior."
+  ],
+  "constraints": [
+    "Do not modify or deploy the live Heartbeat runtime until workspace-heartbeat-plugin-v1 v0.4.6 PR #155 completes its remaining host gates and is merged or otherwise durably accepted.",
+    "Do not claim exact internal ChatGPT executor death is observable unless OpenAI exposes a documented ChatGPT turn/session terminal signal to custom MCP servers.",
+    "Do not treat an individual Streamable HTTP request/socket close as assistant-turn death; the current server creates a request-scoped MCP transport.",
+    "Keep executor lease traffic separate from user-facing semantic heartbeat history and UI updates.",
+    "Use _meta[\"openai/session\"] only as anonymized conversation ownership evidence; never expose or persist it in operator-visible output.",
+    "Do not weaken current cross-conversation ownership merely to recover faster; takeover requires an expired lease and must atomically fence the old turn.",
+    "Do not rely on a guessed 40-minute timeout. Current field evidence includes one Heartbeat turn with updates spanning about 47 minutes and another spanning about 37 minutes.",
+    "Do not claim the Heartbeat server can physically prevent direct mutations through unrelated tools; enforcement outside Heartbeat remains an executor/procedure contract unless a future proxy is added.",
+    "Persist design/acceptance evidence in workspace-control, but keep per-touch runtime lease state ephemeral."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "ac4d321f056d5b9a30f6dce2f78dfb7617affb06",
+      "remote": {
+        "branch": "workspace-heartbeat-executor-liveness-v1",
+        "checkpoint_sha": "ac4d321f056d5b9a30f6dce2f78dfb7617affb06",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-heartbeat-executor-liveness-v1.json",
+        "tasks/active/workspace-heartbeat-executor-liveness-v1.md",
+        "plugins/workspace-heartbeat/**",
+        "procedures/progress_heartbeat.md"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "observability_contract_and_measurement",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+web+heartbeat",
+      "inputs": [
+        "current workspace-heartbeat server/store implementation",
+        "Heartbeat task history from real long-running ChatGPT turns",
+        "current OpenAI ChatGPT plugin/MCP documentation",
+        "user-observed website connection interruption while Heartbeat updates continue"
+      ],
+      "outputs": [
+        "documented observable-vs-unobservable lifecycle boundary",
+        "executor lease data model and takeover state machine",
+        "UI-vs-executor liveness measurement plan"
+      ],
+      "validation": [
+        {
+          "check": "Fixed 40-minute executor cutoff hypothesis",
+          "result": "FAIL",
+          "evidence": [
+            "Heartbeat turn 61947087-4246-41ae-a91c-5f52f5c64968 emitted from 2026-10-22T22:46:15.335Z through 2026-10-22T23:33:22.291Z, about 47 minutes 7 seconds.",
+            "Heartbeat turn 98f8cc2b-f3da-4821-ae02-33ac62039df3 emitted from 2026-10-22T23:51:47.088Z through 2026-10-23T00:28:39.472Z, about 36 minutes 52 seconds.",
+            "Observed duration is therefore variable and not consistent with a strict 40-minute hard stop."
+          ]
+        },
+        {
+          "check": "Current Heartbeat stale-owner mechanism",
+          "result": "PASS",
+          "evidence": [
+            "HeartbeatStore retains ownerSessionId until terminal done or same-session supersession.",
+            "A different conversation is rejected while ownerSessionId remains set.",
+            "Current recovery after an unreachable owner is coordinated Heartbeat-server restart; there is no lease expiry."
+          ]
+        },
+        {
+          "check": "Current MCP transport cannot identify whole assistant-turn death",
+          "result": "PASS",
+          "evidence": [
+            "workspace-heartbeat server creates a new StreamableHTTPServerTransport and McpServer for each /mcp HTTP request and closes that transport on the individual response close event.",
+            "Therefore HTTP response close is request lifecycle, not the lifetime of the ChatGPT assistant executor.",
+            "Current ChatGPT tool metadata supplies anonymized openai/session conversation identity but no documented assistant-turn terminal event to this custom MCP server."
+          ]
+        }
+      ],
+      "resume_condition": "v0.4.6 live-card release is accepted/merged and the liveness state machine is frozen before implementation."
+    },
+    {
+      "id": "observation_only_instrumentation",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "accepted v0.4.6 plugin",
+        "frozen liveness contract"
+      ],
+      "outputs": [
+        "model-only executor_touch/lease timestamp",
+        "UI snapshot last-seen timestamp",
+        "read-only executor liveness status",
+        "tests and live observation evidence without automatic takeover"
+      ],
+      "validation": [],
+      "resume_condition": "Field evidence proves model and UI timestamps behave independently during a real frontend interruption."
+    },
+    {
+      "id": "bounded_expiry_and_takeover",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated observation-only instrumentation"
+      ],
+      "outputs": [
+        "bounded lease TTL selected from field evidence",
+        "atomic expired-owner takeover",
+        "old-turn fencing and pre-mutation lease assertion procedure",
+        "live handoff/recovery acceptance without server restart"
+      ],
+      "validation": [],
+      "resume_condition": "Observation data supports a TTL that avoids false takeover during normal long operations."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "baseline-current-main",
+      "kind": "git_commit",
+      "identity": "ac4d321f056d5b9a30f6dce2f78dfb7617affb06",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace-control main before executor-liveness task creation.",
+        "Heartbeat v0.4.6 remains a separate open release PR #155 and must finish acceptance before liveness implementation is layered on top."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "User field evidence motivates new work",
+      "result": "PASS",
+      "evidence": [
+        "User observes ChatGPT website 'connection interrupted' before server-side execution stops; Heartbeat continues receiving updates after the website failure.",
+        "User also observes Heartbeat eventually stops, but current system gives no deterministic indication of when the executor has actually become unrecoverable.",
+        "Existing stale-owner recovery requires guessing or restarting the Heartbeat server."
+      ]
+    }
+  ],
+  "blockers": [
+    "Implementation/deployment is gated on completion or durable acceptance of workspace-heartbeat v0.4.6 PR #155 so this work does not invalidate its remaining live visual/handoff acceptance."
+  ],
+  "remaining_work": [
+    "Finish the observability contract and exact state machine using current OpenAI documentation and live Heartbeat evidence.",
+    "After v0.4.6 acceptance, implement observation-only model-touch and UI-seen timestamps plus read-only liveness status.",
+    "Run a deliberate long-turn/frontend-interruption measurement and record the gap between UI last-seen and executor touches.",
+    "Choose a bounded lease TTL from measured behavior rather than a guessed chat duration.",
+    "Implement and validate atomic expired-owner takeover plus stale-writer fencing.",
+    "Update the canonical Heartbeat procedure with safe takeover/recovery rules and preserve restart as rollback."
+  ],
+  "next_safe_action": "Do not change the live Heartbeat runtime yet. First finish/merge the pending v0.4.6 release PR #155 and its short-card, six-plus-update, and planned chat-handoff host gates. In parallel, freeze the executor-liveness state machine: separate last_model_touch_at from last_ui_seen_at; keep semantic heartbeats independent; define lease_expires_at and read-only status; permit takeover only after expiry; atomically supersede the old turn on takeover; make old-turn update/touch operations fail closed; and require a fresh lease assertion before post-wait mutating work. Then implement observation-only instrumentation on top of the accepted v0.4.6 source before enabling automatic takeover.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+web+heartbeat",
+  "notes": "Created from live field evidence on 2026-10-22/23. The user specifically observed the ChatGPT website disconnect while the server-side assistant continued to emit Heartbeat updates, followed later by Heartbeat silence. Current custom MCP tools do not receive a documented ChatGPT assistant-turn terminal event, so the design must distinguish exact internal death (currently unobservable) from operational liveness (measurable and recoverable). The proposed lease is intentionally machine-facing and must not reintroduce noisy timed semantic heartbeat updates."
+}
