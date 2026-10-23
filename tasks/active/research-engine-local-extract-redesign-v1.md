@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d6c1375c36fc3634f628392e4b1cee55b61caf12
+- Remote checkpoint: 0787b183377ea60d04437973489b2d389e27865d
 - Remote verified: true
 
 ### research-engine
@@ -42,16 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Wave 6 implementation is already merged in research-engine main at 265a7e4784209d411383cb09da4fe0adcf50f319 (PR #140, CI PASS). Bind that exact merged workflow into the existing reusable Lambda plane: add route model-eval-local-extract-wave6 with execution contract model-dual-public-v1, trusted workflow .github/workflows/lambda-ci-local-extract-wave6.yml blob c81e7cbb31f1731ada483a9b1f9256a4e6d78312, trigger /lambda-ci-local-extract-wave6, unchanged actor/open-same-repository-PR/fork-denial gates, and accepted Qwen/runtime bindings. Advance only project-manifest source identity and exact-blob regression coverage, validate/merge, require trusted reconciliation, then run exactly one inert-trigger Wave-6 benchmark. Do not modify GitRunner substrate code and do not auto-start Wave 7.
+Wave 6 is scientifically PARTIAL, not promotion-ready. The selector correction succeeded exactly (selected-source teacher mean F1 0.30305743036333815), but end-to-end local completion is 8/9 with two normalization CLAIM_SCHEMA hard rejects on arxiv:2609.20765 and teacher coverage at F1>=0.5 remains 0/6. After this result checkpoint, close inert trigger PR #141 unmerged. Do not start Wave 7 automatically. Production EXTRACT remains STANDARD Codex and accepted Qwen VERIFY remains unchanged; any next experiment requires an explicit residual-focused design decision.
 
 ## Remaining work
 
-- Bind merged Wave 6 into the existing research-engine project manifest as route model-eval-local-extract-wave6 using execution contract model-dual-public-v1, trusted workflow .github/workflows/lambda-ci-local-extract-wave6.yml blob c81e7cbb31f1731ada483a9b1f9256a4e6d78312, trigger /lambda-ci-local-extract-wave6, unchanged actor/open-same-repository-PR/fork-denial gates, and accepted Qwen/runtime bindings.
-- Advance only project-manifest source identity and exact-blob regression coverage required by the Wave-6 route; do not modify GitRunner substrate code or execution authority.
-- Validate and merge the workspace-control route change, then require trusted reconciliation before execution.
-- Create/use one inert research-engine trigger PR at exact current Wave-6 main SHA 265a7e4784209d411383cb09da4fe0adcf50f319 and execute exactly one bounded Wave-6 benchmark.
-- Immediately checkpoint the Wave-6 artifact, metrics, scientific disposition, and residual localization before any further experiment.
-- Do not auto-start Wave 7; only after the Wave-6 decision should any next experiment, VERIFY-boundary analysis, or production integration be considered.
+- Close inert research-engine trigger PR #141 unmerged after this Wave-6 result checkpoint is durably recorded.
+- Do not automatically design, implement, route, or execute Wave 7.
+- Treat the Wave-6 selector hypothesis as confirmed: paper-global BM25 reached the intended 0.30305743036333815 selected-source mean F1, but the end-to-end candidate remains PARTIAL because one paper required residual fallback and normalized semantic agreement remains below the promotion gate.
+- Any further experiment requires an explicit new decision that names the residual being tested; production EXTRACT remains STANDARD Codex and accepted page-scoped Qwen VERIFY remains unchanged.
+- If work resumes, analyze the two CLAIM_SCHEMA normalization rejects and the persistent 0/6 teacher coverage before selecting a next bounded experiment; do not reopen GitRunner/controller/provisioner/runtime design.
 
 ## Blockers / gates
 
