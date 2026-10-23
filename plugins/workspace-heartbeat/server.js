@@ -69,7 +69,7 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.4.6",
+      version: "0.4.7",
     },
     {
       instructions:
