@@ -379,7 +379,7 @@
       "trusted_workflow": {
         "path": ".github/workflows/lambda-ci-local-extract-wave7a3.yml",
         "default_branch": "main",
-        "blob_sha": "fefb6812c03643118ed33d8eaabb6046bb612b22"
+        "blob_sha": "0f12d06667c6c45e5c0ee9bc5b3d4a3ba45844b8"
       },
       "trigger": {
         "event_name": "issue_comment",

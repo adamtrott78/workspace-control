@@ -105,7 +105,7 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
             "model-eval-local-extract-oracle-query-v1": "9ee22449510d425381e30aa3fc330764d8cb6464",
             "model-eval-local-extract-wave7-intents": "082226c6738ef9ae6865eebcc4c22b9f92a47c19",
             "model-eval-local-extract-wave7a2": "789c572bed32e0507c5f9e63476b3ace67e0a265",
-            "model-eval-local-extract-wave7a3": "fefb6812c03643118ed33d8eaabb6046bb612b22",
+            "model-eval-local-extract-wave7a3": "0f12d06667c6c45e5c0ee9bc5b3d4a3ba45844b8",
         }
         self.assertEqual(set(RESEARCH["routes"]), set(expected))
         for route_id, sha in expected.items():
