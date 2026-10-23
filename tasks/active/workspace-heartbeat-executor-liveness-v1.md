@@ -29,14 +29,13 @@ Give the operator, inside the existing Heartbeat card and without opening a new 
 
 ## Next safe action
 
-v0.4.7 observation-only MVP is merged and GitHub CI PASS. Keep live v0.4.6 running until explicit controlled host rollout; validate same-card executor/UI/progress indicators and interruption behavior with real field evidence. Do not enable automatic stale-owner takeover.
+v0.4.7 is live and same-card server/executor/semantic signal separation is field-validated. Run a deliberate long-turn field test and, if ChatGPT reports 'Connection interrupted', do not stop the turn; observe whether Card/server poll and Executor freshness continue to diverge from Semantic progress. Record measured touch gaps. Do not enable automatic stale-owner takeover.
 
 ## Remaining work
 
-- Host-deploy accepted v0.4.7 candidate only after verifying rollout/rollback plan, with v0.4.6 and v0.4.5 retained.
-- Verify current-card freshness display and sizing during same-chat activity.
-- Collect real ChatGPT frontend-interruption evidence and measure touch gaps; do not infer exact assistant death.
-- Choose a measured lease TTL and any recovery/takeover semantics only in a separate approved phase.
+- Collect real ChatGPT frontend-interruption evidence while a long turn is active; do not infer exact assistant death.
+- Measure observed executor-touch gaps during/around the interruption and choose any lease TTL only from field evidence.
+- Choose any recovery/takeover semantics only in a separate approved phase; automatic takeover remains disabled.
 
 ## Blockers / gates
 

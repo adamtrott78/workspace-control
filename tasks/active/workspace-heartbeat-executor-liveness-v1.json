@@ -117,9 +117,30 @@
             "Silent touch is turn/session fenced and does not mutate semantic sequence/history; app snapshot independently updates UI last-seen timestamp.",
             "No live host deployment, interrupted-browser field observation, or automatic takeover performed."
           ]
+        },
+        {
+          "check": "v0.4.7 live host deployment",
+          "result": "PASS",
+          "evidence": [
+            "Exact live runtime source advanced to workspace-control main 9e5858738a4fd11801510e2839b0f94f19541506 after PR #284 and PR #285 corrected stale test-only assertions.",
+            "Lambda npm test passed 27/27 under Node v20.20.2, including silent executor-touch invariants.",
+            "Isolated port 8788 startup PASS, pre-cutover v0.4.6 health PASS, v0.4.6 rollback preserved, local port 8787 health PASS, public ngrok health PASS.",
+            "Live Node process CWD verified as /home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v047/plugins/workspace-heartbeat.",
+            "After ChatGPT plugin refresh, the connected tool surface exposed heartbeat_touch."
+          ]
+        },
+        {
+          "check": "Live same-card signal separation",
+          "result": "PASS",
+          "evidence": [
+            "During a live v0.4.7 turn, repeated model-only heartbeat_touch calls were acknowledged while ordinary GitHub work continued.",
+            "The operator directly observed Executor signal freshness updating while Semantic progress remained unchanged.",
+            "After touches stopped, the same card continued polling while executor and semantic ages advanced independently; operator screenshot showed Executor signal not recent ~35s, Card/server poll ~1s, Semantic progress ~35s.",
+            "Touch traffic did not create semantic Heartbeat entries; the first later semantic update remained an explicit heartbeat_update."
+          ]
         }
       ],
-      "resume_condition": "A live frontend interruption demonstrates UI polling and executor touches can diverge in the expected direction."
+      "resume_condition": "A real ChatGPT frontend 'Connection interrupted' event occurs while the card remains mounted, allowing direct observation of whether executor touches continue independently of UI/card polling and semantic progress."
     },
     {
       "id": "bounded_expiry_and_recovery",
@@ -175,13 +196,12 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Host-deploy accepted v0.4.7 candidate only after verifying rollout/rollback plan, with v0.4.6 and v0.4.5 retained.",
-    "Verify current-card freshness display and sizing during same-chat activity.",
-    "Collect real ChatGPT frontend-interruption evidence and measure touch gaps; do not infer exact assistant death.",
-    "Choose a measured lease TTL and any recovery/takeover semantics only in a separate approved phase."
+    "Collect real ChatGPT frontend-interruption evidence while a long turn is active; do not infer exact assistant death.",
+    "Measure observed executor-touch gaps during/around the interruption and choose any lease TTL only from field evidence.",
+    "Choose any recovery/takeover semantics only in a separate approved phase; automatic takeover remains disabled."
   ],
-  "next_safe_action": "v0.4.7 observation-only MVP is merged and GitHub CI PASS. Keep live v0.4.6 running until explicit controlled host rollout; validate same-card executor/UI/progress indicators and interruption behavior with real field evidence. Do not enable automatic stale-owner takeover.",
+  "next_safe_action": "v0.4.7 is live and same-card server/executor/semantic signal separation is field-validated. Run a deliberate long-turn field test and, if ChatGPT reports 'Connection interrupted', do not stop the turn; observe whether Card/server poll and Executor freshness continue to diverge from Semantic progress. Record measured touch gaps. Do not enable automatic stale-owner takeover.",
   "last_executor": "chatgpt",
-  "last_surface": "github+web+heartbeat",
-  "notes": "Created from live field evidence on 2026-10-22/23. The user specifically observed the ChatGPT website disconnect while the server-side assistant continued to emit Heartbeat updates, followed later by Heartbeat silence. Current custom MCP tools do not receive a documented ChatGPT assistant-turn terminal event, so the design must distinguish exact internal death (currently unobservable) from operational liveness (measurable and recoverable). The proposed lease is intentionally machine-facing and must not reintroduce noisy timed semantic heartbeat updates.\n\n2026-10-23 requirement refinement: the primary operator goal is same-chat observability, not recovery from a second conversation. The operator wants the already-mounted Heartbeat card to remain useful after the ChatGPT page reports connection interrupted and to show whether the assistant executor has recently demonstrated activity. Semantic Heartbeat updates must remain sparse and meaningful. The liveness MVP therefore adds a silent heartbeat_touch path and independent UI/executor timestamps; takeover is explicitly deferred until field measurement.\n\n2026-10-23 pre-handoff checkpoint: the same-chat liveness contract merged to workspace-control main as 050198002dfcf01c2520871d08b858bf43072547. The user explicitly confirmed the currently live v0.4.6 Heartbeat card has no formatting/blank-gap issues after six real semantic updates, satisfying both short-card intrinsic sizing and grow-through-five/scroll-from-six visual host gates. Because historical PR #155 is 211 commits behind main, exact v0.4.6 plugin bytes and updated release evidence were restaged on fresh branch workspace-heartbeat-v046-current-main-restage in PR #280. The remaining v0.4.6 gate is one planned chat-to-chat handoff with terminal Heartbeat done and same real task ID. After that release is accepted/merged, implement observation-only same-card liveness instrumentation; automatic takeover remains deferred.\n\n2026-10-23 receiving-chat checkpoint: planned v0.4.6 handoff PASS using existing task_id, active=true and not superseded. Restage PR #280 merged at cd396157d7e3e5c3f955c15e41bebba501057693. v0.4.7 observation-only implementation underway on workspace-heartbeat-executor-liveness-mvp; no live deployment or takeover.\n\n2026-10-23 receiving-chat completion: v0.4.7 observation-only MVP merged via PR #282 at 04852fe2111143a7950ccbdb15f3ed13b95a7521; GitHub Actions run 39885683115 FULL_INTEGRATION success. Runtime still live v0.4.6; no deployment/restart. Field interruption validation and any TTL decision remain open."
+  "last_surface": "github+lambda+chatgpt+heartbeat",
+  "notes": "Created from live field evidence on 2026-10-22/23. The user specifically observed the ChatGPT website disconnect while the server-side assistant continued to emit Heartbeat updates, followed later by Heartbeat silence. Current custom MCP tools do not receive a documented ChatGPT assistant-turn terminal event, so the design must distinguish exact internal death (currently unobservable) from operational liveness (measurable and recoverable). The proposed lease is intentionally machine-facing and must not reintroduce noisy timed semantic heartbeat updates.\n\n2026-10-23 requirement refinement: the primary operator goal is same-chat observability, not recovery from a second conversation. The operator wants the already-mounted Heartbeat card to remain useful after the ChatGPT page reports connection interrupted and to show whether the assistant executor has recently demonstrated activity. Semantic Heartbeat updates must remain sparse and meaningful. The liveness MVP therefore adds a silent heartbeat_touch path and independent UI/executor timestamps; takeover is explicitly deferred until field measurement.\n\n2026-10-23 pre-handoff checkpoint: the same-chat liveness contract merged to workspace-control main as 050198002dfcf01c2520871d08b858bf43072547. The user explicitly confirmed the currently live v0.4.6 Heartbeat card has no formatting/blank-gap issues after six real semantic updates, satisfying both short-card intrinsic sizing and grow-through-five/scroll-from-six visual host gates. Because historical PR #155 is 211 commits behind main, exact v0.4.6 plugin bytes and updated release evidence were restaged on fresh branch workspace-heartbeat-v046-current-main-restage in PR #280. The remaining v0.4.6 gate is one planned chat-to-chat handoff with terminal Heartbeat done and same real task ID. After that release is accepted/merged, implement observation-only same-card liveness instrumentation; automatic takeover remains deferred.\n\n2026-10-23 receiving-chat checkpoint: planned v0.4.6 handoff PASS using existing task_id, active=true and not superseded. Restage PR #280 merged at cd396157d7e3e5c3f955c15e41bebba501057693. v0.4.7 observation-only implementation underway on workspace-heartbeat-executor-liveness-mvp; no live deployment or takeover.\n\n2026-10-23 receiving-chat completion: v0.4.7 observation-only MVP merged via PR #282 at 04852fe2111143a7950ccbdb15f3ed13b95a7521; GitHub Actions run 39885683115 FULL_INTEGRATION success. Runtime still live v0.4.6; no deployment/restart. Field interruption validation and any TTL decision remain open.\n\n2026-10-23 v0.4.7 LIVE HOST CHECKPOINT: Lambda rollout completed successfully at workspace-control main 9e5858738a4fd11801510e2839b0f94f19541506 after test-only corrections PR #284 and PR #285. Node v20.20.2 npm test passed 27/27; isolated :8788 startup, pre-cutover v0.4.6 health, v0.4.6 rollback preservation, live :8787 health, verified v0.4.7 runtime CWD, and public ngrok health all PASS. ChatGPT plugin refresh exposed heartbeat_touch. Live same-card field observation then proved the three signals are independent in practice: the operator directly observed Executor freshness updating while Semantic progress did not change; after touch traffic stopped, the card continued polling while Executor and Semantic ages advanced. This is PASS for observation-only same-card signal separation. The remaining unproven field gate is persistence/usefulness across an actual ChatGPT frontend 'Connection interrupted' event; automatic takeover and TTL remain deferred."
 }
