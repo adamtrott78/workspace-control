@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-knowledge-action-ontology-v1",
   "title": "Unified Knowledge-Action Ontology Architecture v1",
-  "status": "IN_PROGRESS",
+  "status": "CHECKPOINTED",
   "goal": "Determine whether a provenance-preserving typed ontology/knowledge-graph substrate can unify research knowledge representation with executor decision/action semantics—so accumulated knowledge can help determine what should be done next—without conflating scientific evidence with policy authority, and produce a bounded architecture/benchmark plan before any production mutation.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -11,7 +11,7 @@
     "checkpoint_sha": "dbce355969e6378eef9effa2914393cc8add2e4c",
     "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
   },
-  "current_stage": "frame_and_recover_existing_substrates",
+  "current_stage": "implementation_handoff_if_justified",
   "acceptance_criteria": [
     "The task recovers the actual current research-engine persistence architecture and schema from repository/runtime evidence, including authoritative evidence storage, normalized knowledge, relations, checkpoints, embeddings/search projections, and any graph-like structures already present.",
     "The task recovers the actual workspace-control execution/policy representation, including task capsules, workflows, procedures, policy/authority boundaries, executor routing, state transitions, and receipts/evidence used to determine safe next actions.",
@@ -71,7 +71,7 @@
   "stages": [
     {
       "id": "frame_and_recover_existing_substrates",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+web+scholar",
@@ -88,12 +88,33 @@
         "explicit epistemic-vs-normative-vs-execution boundary model",
         "precise problem statement and invariants for external research"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Research-engine authoritative/projection boundary recovered",
+          "result": "PASS",
+          "evidence": [
+            "research-engine pinned evidence: main ba9d09abf77af7280fdc5f5890dee1cb7a05ff67.",
+            "README v1 invariants state scientific/source records are authoritative, source bytes are SHA-256 content addressed, and graph/vector/text indexes are rebuildable projections.",
+            "sql/schema.sql, domain.py, graph.py, sql_queries.py, artifact_store.py, checkpoints.py, corpus_loader.py, and PostgreSQL tests confirm immutable evidence IDs, supersession history, verification events, deterministic knowledge checkpoints, pgvector embeddings, and a non-authoritative in-memory EvidenceGraph reference projection.",
+            "Current corpus fixtures have typed evidence relations but no specialized contradiction relation/resolver; contradiction semantics are therefore a real design gap rather than an existing capability."
+          ]
+        },
+        {
+          "check": "Workspace-control authority/decision/execution boundary recovered",
+          "result": "PASS",
+          "evidence": [
+            "workflow descriptors encode reusable procedure, dependencies, authority owners, gates, validation, and forbidden mutations while explicitly excluding live task state.",
+            "task capsules encode one execution's durable status, selected executor/surface, stage state, validation, checkpoints, blockers, remaining work, and next_safe_action.",
+            "lambda-ci-workload-policy states workflow/candidate input is a claim and root-owned policy is authority; admission manifests bind exact policy/workflow/candidate/resource identities; execution receipts record what actually happened and cleanup/state effects.",
+            "Heartbeat is progress/liveness transport only and is not an authority source."
+          ]
+        }
+      ],
       "resume_condition": "Actual existing substrate and authority boundaries are recovered from repository evidence before external architecture selection."
     },
     {
       "id": "milcom_ontology_lead_investigation",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "web+scholar",
@@ -105,17 +126,27 @@
         "autonomous vehicle sends ontology/semantic graph to external server for low-latency inference/action rather than raw sensor payloads"
       ],
       "outputs": [
-        "candidate identity evidence",
-        "paper/poster title if verifiable",
-        "technical architecture summary of the relevant work",
-        "specific concepts worth carrying into the ontology architecture survey"
+        "identity remains unresolved after bounded public search; no identity claim made",
+        "false-lead elimination: the Springer book The 4th Industrial Revolution: Responding to the Impact of Artificial Intelligence on Business is by Mark Skilton and Felix Hovsepian and does not match the Boeing/California/current-PhD clues",
+        "candidate clue Jonathan Hujsak matches a publication title beginning The 4th Industrial Revolution and California autonomous-systems interests but public evidence places him at General Atomics rather than Boeing and does not converge on the MILCOM poster",
+        "technical architecture clue retained independently: vehicle/edge semantic representations can reduce raw-sensor transfer and support knowledge-driven inference, but this is not treated as verified evidence about the unknown MILCOM researcher"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "MILCOM identity evidence convergence",
+          "result": "PASS",
+          "evidence": [
+            "Targeted MILCOM 2026, Boeing, ontology, autonomous-vehicle, semantic-communication, book-title, and author searches did not produce a candidate satisfying all clues.",
+            "Weak/partial candidates were explicitly rejected rather than promoted to identity claims.",
+            "Per task acceptance criteria, the lead is durably left unresolved with candidate evidence and is not an architecture blocker."
+          ]
+        }
+      ],
       "resume_condition": "Identity/paper is either verified from converging public evidence or explicitly left unresolved with documented candidate evidence."
     },
     {
       "id": "external_ontology_and_knowledge_action_research",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "web+scholar+github",
@@ -130,12 +161,32 @@
         "continual-learning/update patterns",
         "failure modes and lessons from comparable autonomous systems"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Semantic/provenance/policy standards survey",
+          "result": "PASS",
+          "evidence": [
+            "W3C OWL 2 provides formally defined ontology semantics; RDF datasets/named graphs provide graph/context organization; PROV-O provides provenance entities/activities/agents; SHACL provides validation reports over immutable input graphs; ODRL models permissions, prohibitions, duties, and constraints.",
+            "ISO/IEC 9075-16 SQL/PGQ and ISO/IEC 39075 GQL show property graphs are standardized query/data models, but do not imply a graph database must replace PostgreSQL.",
+            "Cedar and OPA reinforce a separate policy-decision boundary: structured context may inform authorization, but policy evaluation remains a distinct governed function with default-deny/fail-closed behavior."
+          ]
+        },
+        {
+          "check": "Planning/autonomy/continual-learning survey",
+          "result": "PASS",
+          "evidence": [
+            "PDDL separates action preconditions/effects; HTN planning decomposes high-level tasks using domain knowledge; behavior trees emphasize modularity, hierarchy, applicability, and feedback; formal synthesis emphasizes explicit specifications and guarantees.",
+            "Autonomous-driving knowledge-graph literature supports semantic/scene knowledge for prediction/planning and highlights real-time reasoning, uncertainty, and benchmark heterogeneity as open concerns.",
+            "Temporal/continual knowledge-graph literature treats changing facts and lifelong representation as versioned learning problems; learned embeddings are therefore suitable as rebuildable projections, not authoritative policy or scientific truth.",
+            "NPS Mission Execution Ontology is a close architectural precedent: semantically validate human-authored mission/constraint/capability descriptions before execution rather than letting ontology inference itself become command authority."
+          ]
+        }
+      ],
       "resume_condition": "Evidence is sufficient to compare materially distinct architecture families without relying on terminology alone."
     },
     {
       "id": "synthesize_unified_architecture_families",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "reasoning+github",
@@ -145,17 +196,27 @@
         "authority/provenance invariants"
       ],
       "outputs": [
-        "separate linked knowledge-graph + action-policy graph architecture",
-        "unified typed graph architecture with strict semantic/authority layers",
-        "event-sourced knowledge/action substrate with rebuildable graph projections",
-        "comparison across correctness, provenance, update semantics, explainability, implementation complexity, and migration risk"
+        "Family A — separate but linked epistemic research graph and normative/action graph: strongest isolation but duplicates shared entities and weakens end-to-end lineage/query ergonomics",
+        "Family B — one authoritative unified typed graph: best cross-domain traversal but rejected for v1 because it raises epistemic-to-authority contamination, migration, contradiction, and failure-isolation risk",
+        "Family C — existing authoritative stores/history plus rebuildable unified typed semantic projections: selected; combines logical unification with physical authority separation",
+        "Selected C+B projection hybrid: one typed semantic projection may expose epistemic, normative, and execution layers together, but only existing authority-owned policy artifacts/evaluators may create executable authority"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Architecture-family comparison and selection",
+          "result": "PASS",
+          "evidence": [
+            "Family A, B, and C were compared across authority safety, provenance, contradictions, temporal replay, explainability, query usefulness, migration cost, and failure isolation.",
+            "Recommendation is to PURSUE but NARROW the unification hypothesis: unify semantic representation/querying, not the authoritative write path.",
+            "No graph database replacement, full event-sourcing rewrite, unrestricted OWL entailment, or planner-generated authority is recommended."
+          ]
+        }
+      ],
       "resume_condition": "A bounded shortlist and explicit rejected premises exist."
     },
     {
       "id": "benchmark_and_prototype_contract",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "reasoning+github",
@@ -164,12 +225,27 @@
         "current known-good research-engine/workspace-control behavior"
       ],
       "outputs": [
-        "additive prototype boundary",
-        "benchmark cases joining research knowledge and executor-decision contexts",
-        "promotion/reject thresholds",
-        "rollback and human-approval semantics"
+        "additive projection-only prototype boundary over frozen research-engine/workspace-control fixtures",
+        "benchmark cases for provenance, contradiction, supersession/temporal replay, authorization adversaries, explainability, retrieval/query utility, continual updates, and projection failure",
+        "hard promotion gates: zero authorization escapes, complete benchmark provenance, no silent overwrite, deterministic/equivalent rebuild, exact temporal decision replay, fail-closed authority behavior, and expected-answer query agreement",
+        "no fixed latency promotion threshold until the current PostgreSQL baseline is measured; latency is compared against a recorded baseline rather than guessed"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Benchmark contract frozen before implementation",
+          "result": "PASS",
+          "evidence": [
+            "P1 provenance: every epistemic assertion must trace to source/checkpoint or inference basis; every normative rule to exact authority artifact/version; every execution outcome to admission/receipt.",
+            "P2 contradiction: conflicting claims remain simultaneously representable with explicit context/temporal provenance; no silent reconciliation or global-truth collapse.",
+            "P3 temporal/supersession: old/new evidence and old/new policy epochs replay historical decisions without rewriting prior state.",
+            "P4 decision correctness: factual/model-generated statements that an action is allowed cannot grant authority; only exact authority-owned policy plus satisfied preconditions can permit, otherwise deny/abstain.",
+            "P5 explainability: decision evidence identifies fact checkpoint, applicable policy/rules, precondition results, selected action/executor, rejected alternatives where material, and terminal receipt.",
+            "P6 retrieval/query utility: multi-hop semantic queries must match frozen expected answer sets and be compared with the current relational baseline.",
+            "P7 failure isolation: stale/corrupt/unavailable projection cannot mutate scientific truth or policy; authorization that depends on unavailable required context fails closed; rebuild restores the same canonical semantic manifest.",
+            "P8 controlled continual update: adding evidence/mappings preserves prior authoritative history and can rebuild embeddings/projections; policy revision remains separately versioned and human/authority gated."
+          ]
+        }
+      ],
       "resume_condition": "Prototype scope and predeclared success/failure gates are frozen before implementation."
     },
     {
@@ -186,7 +262,7 @@
         "explicit implementation task or rejection/narrowing checkpoint"
       ],
       "validation": [],
-      "resume_condition": "No implementation begins until architecture research and benchmark contract are reviewed."
+      "resume_condition": "Operator reviews the checkpointed recommendation and frozen benchmark. If accepted, create a separate additive implementation task; no implementation is authorized by this checkpoint alone."
     }
   ],
   "checkpoints": [
@@ -200,6 +276,19 @@
         "research-engine main=ba9d09abf77af7280fdc5f5890dee1cb7a05ff67",
         "task is research-first; only its own capsule/handoff may mutate before an implementation gate",
         "next action=recover actual current storage and executor-policy substrates before architecture selection"
+      ]
+    },
+    {
+      "id": "architecture-research-v1",
+      "kind": "architecture_decision",
+      "identity": "knowledge-action-projection-v1:authoritative-records+typed-projection+policy-boundary",
+      "required_for_resume": true,
+      "evidence": [
+        "Recommendation: pursue but narrow the unified knowledge-action hypothesis.",
+        "Keep PostgreSQL, content-addressed artifacts, task capsules, workflows, policy files, and execution receipts authoritative.",
+        "Add only a rebuildable cross-domain typed semantic projection with explicit epistemic, normative, and execution layers.",
+        "Authority rule: epistemic/model-derived edges may provide context but can never create executor permission/obligation; only authority-owned versioned policy evaluation may do so.",
+        "Frozen benchmark contract is recorded in benchmark_and_prototype_contract validation before any implementation."
       ]
     }
   ],
@@ -220,19 +309,35 @@
         "Existing automated-research-engine durable evidence records the selected v1 persistence direction as PostgreSQL + content-addressed artifact store + rebuildable pgvector/text/graph projections.",
         "The new task treats this as a starting hypothesis to verify against current research-engine implementation rather than as permission to replace storage."
       ]
+    },
+    {
+      "check": "Evidence-first architecture research complete",
+      "result": "PASS",
+      "evidence": [
+        "Current research-engine and workspace-control substrates recovered from pinned repository evidence.",
+        "External standards/literature/implementation patterns surveyed across ontology, RDF/OWL/property graph, policy engines, planning, autonomous agents, and continual knowledge.",
+        "MILCOM lead bounded without unsupported identity claim.",
+        "Architecture recommendation and benchmark contract frozen before implementation."
+      ]
+    },
+    {
+      "check": "Production and Local EXTRACT isolation",
+      "result": "PASS",
+      "evidence": [
+        "No research-engine source, production routing, policy enforcement, Lambda execution behavior, or Local EXTRACT task state was mutated.",
+        "This checkpoint mutates only the ontology task capsule and its deterministic derived Markdown handoff."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Recover and diagram the actual current research-engine persistence/schema/provenance model from code and current durable evidence.",
-    "Recover and diagram how workspace-control currently represents executor policy, workflow state, authority, preconditions, next-safe-action decisions, and execution evidence.",
-    "Investigate the MILCOM 2026 Boeing/PhD/best-poster ontology-graph researcher and paper using public evidence.",
-    "Research current ontology, knowledge-graph, semantic-scene-graph, rule/policy, planning, neuro-symbolic, and continual-knowledge methods relevant to a knowledge-to-action substrate.",
-    "Compare architecture families while preserving a hard boundary between facts/inferences and action authority.",
-    "Freeze a bounded benchmark/prototype contract before any implementation."
+    "Operator review of the checkpointed C+B projection recommendation and frozen benchmark contract.",
+    "If accepted, spin off a separate implementation task for an additive, rebuildable projection prototype using frozen fixtures; do not change production authority or scientific-state behavior during the prototype.",
+    "Continue the MILCOM 2026 identity/paper search only as a non-blocking targeted evidence follow-up unless new public evidence appears.",
+    "Before the next substantial chat uses Workspace Heartbeat, release the prior conversation's volatile writer with state=done if reachable; otherwise use the canonical coordinated Heartbeat-server-only orphan recovery procedure. Never invent a replacement task ID."
   ],
-  "next_safe_action": "In a fresh chat, begin at frame_and_recover_existing_substrates. Read the authoritative task capsule and evidence-first research workflow. Inspect current research-engine persistence/schema code and workspace-control task/workflow/policy structures before proposing a graph technology. In parallel, investigate the MILCOM 2026 Boeing/PhD/best-poster ontology lead using public sources. Do not mutate production research-engine or workspace-control behavior and do not change the Local EXTRACT task.",
+  "next_safe_action": "Review the checkpointed architecture recommendation and benchmark contract. The selected direction is an additive rebuildable typed semantic projection over existing authoritative PostgreSQL/CAS/task/policy/receipt stores, with hard epistemic-vs-normative-vs-execution boundaries and a separate fail-closed policy decision function. If the operator accepts this direction, create a separate implementation task for the bounded projection prototype and run only the frozen benchmark fixtures before considering any production integration. Keep Local EXTRACT unchanged. Before a new substantial Heartbeat-backed turn, release/recover the stale volatile Heartbeat owner using the canonical procedure and the same real task ID.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Core hypothesis from the user: a durable data structure may be able to represent both accumulated knowledge about the world/research domain and the semantics that tell executors what action is appropriate in a given situation. The task must investigate this seriously while preventing a dangerous collapse of 'is true/believed' into 'is authorized/should execute'. The envisioned long-term system may support continual learning, research-gap discovery, and context-sensitive executor coordination, but those capabilities are hypotheses to evaluate rather than assumed goals.\n\n2026-10-23 task creation checkpoint: workspace-control PR #308 validated and merged as f370bdc7afc8037dbb5f87a0228abfc011011329. The task is now durably available for fresh-chat execution; no ontology implementation or production mutation has begun."
+  "notes": "Core hypothesis from the user: a durable data structure may be able to represent both accumulated knowledge about the world/research domain and the semantics that tell executors what action is appropriate in a given situation. The task must investigate this seriously while preventing a dangerous collapse of 'is true/believed' into 'is authorized/should execute'. The envisioned long-term system may support continual learning, research-gap discovery, and context-sensitive executor coordination, but those capabilities are hypotheses to evaluate rather than assumed goals.\n\n2026-10-23 task creation checkpoint: workspace-control PR #308 validated and merged as f370bdc7afc8037dbb5f87a0228abfc011011329. The task is now durably available for fresh-chat execution; no ontology implementation or production mutation has begun.\n\n2026-10-23 evidence-first architecture checkpoint:\n\nCURRENT SUBSTRATES. research-engine@ba9d09abf77af7280fdc5f5890dee1cb7a05ff67 already implements the architectural primitive this task needs: PostgreSQL scientific/source records are authoritative; source bytes are immutable SHA-256 content-addressed artifacts; evidence objects/relations preserve source locators, verification state, extractor identity, supersession, and attributes; verification changes append durable events; knowledge checkpoints fingerprint authoritative records; pgvector/text/in-memory EvidenceGraph structures are rebuildable projections. Current fixtures do not implement first-class contradiction semantics, so explicit contradiction/context/temporal treatment belongs in the prototype benchmark rather than being assumed present.\n\nworkspace-control uses a complementary authority model. Workflow descriptors define reusable procedure/authority owners/dependencies/gates/forbidden mutations; task capsules hold one execution's live durable state and next_safe_action; root-owned workload policy/admission manifests decide whether a declared capability is actually authorized; execution receipts record attempted/completed effects and cleanup. The policy principle is already explicit: workflow/candidate input is a claim, root-owned policy is authority. Heartbeat is only progress/liveness transport.\n\nMILCOM LEAD. A bounded public search did not identify the researcher with sufficient confidence. The Springer book The 4th Industrial Revolution: Responding to the Impact of Artificial Intelligence on Business is a false lead because its authors do not match the Boeing/California/current-PhD clues. Jonathan Hujsak is a partial clue match for a publication beginning The 4th Industrial Revolution and California autonomous-systems interests, but available evidence places him at General Atomics rather than Boeing and does not converge on the MILCOM poster. No identity or paper title is claimed. This remains a non-blocking evidence gap.\n\nEXTERNAL ARCHITECTURE EVIDENCE. OWL/RDF provide formal semantic representation; PROV-O provides provenance vocabulary; SHACL validates graph structure without mutating the input graph; ODRL supplies useful permission/prohibition/duty concepts. ISO SQL/PGQ and GQL standardize property-graph interaction but do not require a new database. Cedar and OPA reinforce separating policy decisions from application/business logic and using structured context as input to a distinct authorizer. PDDL/HTN/behavior trees are appropriate for action preconditions/decomposition/reactive execution, not for granting authority. Event sourcing/materialized-view patterns support immutable history plus disposable query projections, but a wholesale event-sourcing rewrite would add migration cost without solving the core authority problem. NPS Mission Execution Ontology is a particularly relevant precedent: semantic mission/constraint/capability validation can help determine whether an action plan is coherent while human-authored mission authority remains separate.\n\nRECOMMENDATION — PURSUE, BUT NARROW. Select Family C with Family-B-style logical typing: retain existing authoritative stores and histories, and add a deterministic cross-domain semantic projection that can query epistemic, normative, and execution entities together. Physical authority remains separated even if the projection is logically unified. Do not make the graph authoritative in v1 and do not replace PostgreSQL, pgvector, CAS, task capsules, workflows, or policy files.\n\nProjection layers:\n1. Epistemic: source artifact, locator, evidence object, claim/result/method/limitation, relation, inference, verification, confidence, temporal validity, contradiction, supersession, checkpoint.\n2. Normative/action: authority artifact, policy version, permission, prohibition, obligation, preference, capability, precondition, gate, workflow stage, action schema, executor eligibility. Every normative edge carries exact authority provenance.\n3. Execution: request, admission, task-stage transition, attempt, executor, receipt, cleanup/state effect, success/failure. Receipts are immutable evidence of what happened.\n\nThe bridge is an auditable DecisionEvaluation, not an inferred permission edge: it binds an exact knowledge checkpoint, exact authority-policy version, candidate action, evaluated preconditions, applicability/deny reasons, selected executor/action, and later execution receipt. Epistemic/model-derived edges may inform context and preconditions but are structurally forbidden from becoming authority roots. Missing/stale required authority context fails closed.\n\nCONTRADICTION/TIME/CONTINUAL SEMANTICS. Preserve competing assertions rather than unioning them into one world state. Add explicit contradiction/disagreement edges plus context compatibility and valid/observed/asserted time. Revisions append new records and supersession links. Continual learning means adding versioned evidence, mappings, derived relations, and rebuildable embeddings/projections; it does not mean autonomous policy mutation. Policy revisions remain separately versioned, reviewable, and human/authority gated.\n\nFROZEN BENCHMARK. Before implementation, the prototype must pass eight fixture families: provenance, contradiction, temporal/supersession replay, authorization adversaries, decision explainability, retrieval/query utility, failure isolation, and controlled continual update. Hard gates: 100% denial of authorization-escape cases; 100% provenance completeness for benchmark assertions/decisions; zero silent overwrite/loss of contradictory history; exact historical-decision replay from frozen snapshots; deterministic or canonically equivalent projection rebuild; expected-answer-set agreement for semantic queries; projection failure cannot alter authoritative truth/policy and authorization fails closed when required context is unavailable. Measure query latency against the current PostgreSQL baseline first; do not invent a latency threshold before baseline measurement.\n\nREJECTED PREMISES. Do not adopt a graph database merely because graph traversal is attractive; do not treat OWL entailment as authorization; do not let a planner/behavior tree/model-generated edge grant permission; do not force a full event-sourcing rewrite; do not collapse contradictory evidence into one asserted world; do not enable self-modifying policy.\n\nHEARTBEAT RUNTIME NOTE. This receiving chat attempted heartbeat_begin_turn with the real task ID and correctly failed closed because the prior conversation still owns the volatile Heartbeat writer. The durable task was not corrupted and research continued through GitHub/web read paths. The next Heartbeat-backed chat must use the canonical release/orphan-recovery procedure and the same real task ID."
 }

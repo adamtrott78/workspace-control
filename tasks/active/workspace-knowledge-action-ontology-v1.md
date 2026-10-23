@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-knowledge-action-ontology-v1
 - Title: Unified Knowledge-Action Ontology Architecture v1
-- Status: IN_PROGRESS
+- Status: CHECKPOINTED
 - Capsule schema: v2
 
 ## Goal
@@ -42,16 +42,14 @@ Determine whether a provenance-preserving typed ontology/knowledge-graph substra
 
 ## Next safe action
 
-In a fresh chat, begin at frame_and_recover_existing_substrates. Read the authoritative task capsule and evidence-first research workflow. Inspect current research-engine persistence/schema code and workspace-control task/workflow/policy structures before proposing a graph technology. In parallel, investigate the MILCOM 2026 Boeing/PhD/best-poster ontology lead using public sources. Do not mutate production research-engine or workspace-control behavior and do not change the Local EXTRACT task.
+Review the checkpointed architecture recommendation and benchmark contract. The selected direction is an additive rebuildable typed semantic projection over existing authoritative PostgreSQL/CAS/task/policy/receipt stores, with hard epistemic-vs-normative-vs-execution boundaries and a separate fail-closed policy decision function. If the operator accepts this direction, create a separate implementation task for the bounded projection prototype and run only the frozen benchmark fixtures before considering any production integration. Keep Local EXTRACT unchanged. Before a new substantial Heartbeat-backed turn, release/recover the stale volatile Heartbeat owner using the canonical procedure and the same real task ID.
 
 ## Remaining work
 
-- Recover and diagram the actual current research-engine persistence/schema/provenance model from code and current durable evidence.
-- Recover and diagram how workspace-control currently represents executor policy, workflow state, authority, preconditions, next-safe-action decisions, and execution evidence.
-- Investigate the MILCOM 2026 Boeing/PhD/best-poster ontology-graph researcher and paper using public evidence.
-- Research current ontology, knowledge-graph, semantic-scene-graph, rule/policy, planning, neuro-symbolic, and continual-knowledge methods relevant to a knowledge-to-action substrate.
-- Compare architecture families while preserving a hard boundary between facts/inferences and action authority.
-- Freeze a bounded benchmark/prototype contract before any implementation.
+- Operator review of the checkpointed C+B projection recommendation and frozen benchmark contract.
+- If accepted, spin off a separate implementation task for an additive, rebuildable projection prototype using frozen fixtures; do not change production authority or scientific-state behavior during the prototype.
+- Continue the MILCOM 2026 identity/paper search only as a non-blocking targeted evidence follow-up unless new public evidence appears.
+- Before the next substantial chat uses Workspace Heartbeat, release the prior conversation's volatile writer with state=done if reachable; otherwise use the canonical coordinated Heartbeat-server-only orphan recovery procedure. Never invent a replacement task ID.
 
 ## Blockers / gates
 
