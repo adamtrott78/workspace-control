@@ -29,13 +29,11 @@ Preserve the accepted Workspace Heartbeat v0.4.5 lifecycle and semantic behavior
 
 ## Next safe action
 
-v0.4.6 accepted: PR #280 merged at cd396157d7e3e5c3f955c15e41bebba501057693. Preserve v0.4.5 rollback; continue separate v0.4.7 liveness task.
+v0.4.6 accepted and merged at cd396157d7e3e5c3f955c15e41bebba501057693; preserve v0.4.5 rollback. Continue separate observation-only executor-liveness v0.4.7 candidate; do not enable automatic takeover.
 
 ## Remaining work
 
-- Validate one planned chat-to-chat handoff: outgoing chat synchronizes durable handoff state, sends terminal Heartbeat done, and a fresh receiving chat begins the same task_id without a server restart.
-- After that handoff PASS, mark the v0.4.6 stage VALIDATED/task COMPLETE and merge the fresh current-main restage branch rather than stale PR #155.
-- Preserve the accepted v0.4.5 rollback and stop; executor-liveness implementation is owned by workspace-heartbeat-executor-liveness-v1.
+- None.
 
 ## Blockers / gates
 
@@ -54,7 +52,3 @@ Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
-
-## 2026-10-23 receiving-chat checkpoint
-
-Planned cross-chat handoff PASS using the same task ID without server restart. v0.4.6 was merged through fresh restage PR #280 at `cd396157d7e3e5c3f955c15e41bebba501057693`. Observation-only liveness work is separately staged as v0.4.7; automatic takeover remains disabled.
