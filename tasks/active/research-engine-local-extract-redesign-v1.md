@@ -30,29 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: b004931b8ccc7e4eb9977ba4ba080cab90d36532
+- Remote checkpoint: b08f0367095cc392352e44b50142c03ac51b2e5f
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ba9d09abf77af7280fdc5f5890dee1cb7a05ff67
+- Remote checkpoint: 8e3481c4ad00ffe26cd175d0e6c6275081d70ab0
 - Remote verified: true
 
 ## Next safe action
 
-STOP after valid Wave 7A.2. Scientific verdict is WAVE7A2_REJECT, while the oracle-query hypothesis remains supported. Evidence-conditioned answerability preserved page coverage but regressed because it allocated intents to background/definition/citation facts rather than high-salience scientific contributions. Resume with targeted research/design for scientific salience/contribution-aware intent generation; do not start Wave 7B, change production EXTRACT/VERIFY, train a reranker, or change generation-model family.
+Exactly one Wave 7A.3 run is authorized from exact research-engine SHA 8e3481c4ad00ffe26cd175d0e6c6275081d70ab0 after trusted route reconciliation PASS run 40021083789. Create an inert open same-repository trigger PR at that exact head, issue one `/lambda-ci-local-extract-wave7a3 8e3481c4ad00ffe26cd175d0e6c6275081d70ab0` comment, then hard-stop at the frozen WAVE7A3_PROMISING/PARTIAL/REJECT verdict. Do not retune the contract, start Wave 7B, or change production EXTRACT/VERIFY.
 
 ## Remaining work
 
-- STOP after the valid Wave 7A.2 WAVE7A2_REJECT checkpoint; do not start Wave 7B automatically.
-- Before another experiment, research methods for scientific salience/contribution modeling: contribution-sentence identification, scientific discourse/rhetorical-role classification, argument/claim mining, novelty/result/limitation prioritization, and salience-aware question generation.
-- Design the next bounded experiment around allocating intent budget to high-salience contribution/evaluation evidence rather than to every answerable proposition; evidence answerability alone is now a rejected objective.
-- Preserve the existing coarse page route, authoritative proposition pool, BM25/BGE retrieval stack, Qwen3.5 model/runtime, top-24 budget, production STANDARD Codex EXTRACT fallback, and accepted Qwen VERIFY during the first salience-aware experiment.
-- Keep BM25 as a first-class cheap retriever: the repaired one-shot source-aware control reached 7/13 teacher atoms with BM25 and recovered all three historical hard misses.
-- Do not train a custom reranker or change generation-model family unless a salience-aware intent architecture is tested under a frozen gate and still fails.
-- Treat semantic intent deduplication and coverage of high-salience atomic facts as secondary design requirements; do not solve them by unrestricted query proliferation.
+- Trigger exactly one Wave 7A.3 run from exact research-engine SHA 8e3481c4ad00ffe26cd175d0e6c6275081d70ab0 using the trusted /lambda-ci-local-extract-wave7a3 route.
+- Apply only the frozen WAVE7A3_PROMISING / WAVE7A3_PARTIAL / WAVE7A3_REJECT gates, including explicit recovery of the six source-aware-BM25 residual teacher atoms and retention of prior supported atoms.
+- Persist the exact run/artifact/report identities and scientific disposition in research-engine, close the inert trigger PR unmerged, and checkpoint workspace-control.
+- Hard-stop before Wave 7B or production EXTRACT/VERIFY changes.
+- Only if Wave 7A.3 rejects, reopen targeted design research for a trained scientific contribution/discourse classifier as a new independent variable; do not add it to the current experiment after seeing results.
 
 ## Blockers / gates
 
