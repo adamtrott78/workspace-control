@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d69d7e5e7aa10b2f0705df408d9b59c2b75b474e
+- Remote checkpoint: 885dbbbff97ea40af13783d303231fbe836fa508
 - Remote verified: true
 
 ### research-engine
@@ -42,11 +42,10 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-After closing inert trigger PR #193 unmerged, begin a new evidence-first EXTRACT design phase from the durable Family C PROTECTED_AUGMENT_NEGATIVE result at research-engine@fda45f3024cebfb2d760952b2eb93dfa07247b97. The new phase must treat source-aware intent-utility preservation as an insufficient semantic-preservation proxy and compare materially different teacher-blind preservation/iterative-coverage mechanisms before any new implementation or run. Do not rerun/tune LEXICOGRAPHIC_ZERO_LOSS_SWAP_V1, execute STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1, promote the fixed 20/4 quota, train/download a classifier, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate ontology/semantic-control mechanisms.
+Begin a new evidence-first EXTRACT design phase from the durable Family C PROTECTED_AUGMENT_NEGATIVE result at research-engine@fda45f3024cebfb2d760952b2eb93dfa07247b97. Treat source-aware intent-utility preservation as an insufficient semantic-preservation proxy and compare materially different teacher-blind semantic-preservation or iterative-coverage mechanisms before any new implementation/run. Do not rerun/tune LEXICOGRAPHIC_ZERO_LOSS_SWAP_V1, execute STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1, promote the fixed 20/4 quota, train/download a classifier, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate ontology/semantic-control mechanisms.
 
 ## Remaining work
 
-- Close inert research-engine trigger PR #193 unmerged after this result checkpoint is durable.
 - Begin a new evidence-first design phase for a materially different teacher-blind semantic-preservation objective or iterative coverage mechanism; treat LEXICOGRAPHIC_ZERO_LOSS_SWAP_V1 as rejected scientific evidence.
 - The next design must explain why preserving source-aware intent utility can still lose source-aware teacher atoms and must directly target semantic evidence preservation without teacher leakage.
 - Do not execute STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1 on the rejected selector, train/download a sufficiency critic or contribution classifier, promote the fixed 20/4 quota, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
