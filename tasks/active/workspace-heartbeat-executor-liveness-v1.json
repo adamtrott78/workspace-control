@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-heartbeat-plugin-v1",
-  "current_stage": "same_chat_liveness_contract",
+  "current_stage": "observation_only_same_card_instrumentation",
   "acceptance_criteria": [
     "The existing live Heartbeat card shows three independent concepts: Heartbeat/server connectivity, executor/model activity freshness, and last meaningful semantic progress.",
     "Add a model-only heartbeat_touch(task_id, turn_id) operation that renews executor activity without creating a semantic Heartbeat entry, changing semantic sequence/history, or adding another transcript card.",
@@ -38,8 +38,8 @@
       "intent": "mutate",
       "base_sha": "ac4d321f056d5b9a30f6dce2f78dfb7617affb06",
       "remote": {
-        "branch": "workspace-heartbeat-executor-liveness-v1",
-        "checkpoint_sha": "ac4d321f056d5b9a30f6dce2f78dfb7617affb06",
+        "branch": "workspace-heartbeat-executor-liveness-mvp",
+        "checkpoint_sha": "cd396157d7e3e5c3f955c15e41bebba501057693",
         "verified": true
       },
       "local": null,
@@ -92,10 +92,10 @@
     },
     {
       "id": "observation_only_same_card_instrumentation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+heartbeat",
       "inputs": [
         "accepted v0.4.6 live-card implementation",
         "validated same-chat liveness contract"
@@ -152,21 +152,25 @@
         "User also observes Heartbeat eventually stops, but current system gives no deterministic indication of when the executor has actually become unrecoverable.",
         "Existing stale-owner recovery requires guessing or restarting the Heartbeat server."
       ]
+    },
+    {
+      "check": "v0.4.6 release prerequisite and planned handoff",
+      "result": "PASS",
+      "evidence": [
+        "Existing task accepted across conversation by heartbeat_begin_turn, without a server restart.",
+        "v0.4.6 merged in PR #280 at cd396157d7e3e5c3f955c15e41bebba501057693."
+      ]
     }
   ],
-  "blockers": [
-    "Do not implement or deploy the liveness layer until Workspace Heartbeat v0.4.6 PR #155 passes its remaining short-card, six-plus-update, and planned handoff live-host gates and is durably merged."
-  ],
+  "blockers": [],
   "remaining_work": [
-    "Finish full validation of fresh current-main v0.4.6 restage PR #280.",
-    "Perform the final planned chat-to-chat handoff gate using this same real task ID and terminal Heartbeat done without a server restart.",
-    "Record v0.4.6 acceptance, merge the fresh restage, and preserve v0.4.5 rollback.",
-    "Implement observation-only same-card liveness: heartbeat_touch, last_executor_touch_at, last_ui_seen_at, and an executor freshness/status row.",
-    "Run a deliberate frontend-interruption observation and measure executor-touch behavior before choosing any lease TTL.",
-    "Only after measurement consider expired-owner takeover."
+    "Validate isolated v0.4.7 observation-only candidate with CI and regression tests.",
+    "Inspect v0.4.7 UI card tests and merge only after successful validation.",
+    "Do not deploy without explicit host validation; preserve v0.4.6 and v0.4.5 rollback.",
+    "Observe a real frontend interruption and measure touch gaps before any TTL or takeover design."
   ],
-  "next_safe_action": "Finish the fresh v0.4.6 restage validation in PR #280, then perform the final planned chat-to-chat handoff gate. The outgoing conversation must leave this liveness task durably synchronized and make terminal heartbeat_update(..., state=\"done\") its final Heartbeat operation. A fresh receiving chat must begin this same task_id without a Heartbeat-server restart. If that succeeds, record the handoff PASS in the v0.4.6 release task, mark/merge the fresh v0.4.6 restage, then implement observation-only same-card liveness instrumentation: heartbeat_touch, last_executor_touch_at, last_ui_seen_at, and executor freshness status. Do not enable automatic takeover yet.",
+  "next_safe_action": "Validate observation-only v0.4.7 liveness branch workspace-heartbeat-executor-liveness-mvp. Keep semantic progress, executor touch, and app UI poll independent; no automatic stale-owner takeover. Deploy only after acceptance, then collect real interrupted-chat evidence.",
   "last_executor": "chatgpt",
   "last_surface": "github+web+heartbeat",
-  "notes": "Created from live field evidence on 2026-10-22/23. The user specifically observed the ChatGPT website disconnect while the server-side assistant continued to emit Heartbeat updates, followed later by Heartbeat silence. Current custom MCP tools do not receive a documented ChatGPT assistant-turn terminal event, so the design must distinguish exact internal death (currently unobservable) from operational liveness (measurable and recoverable). The proposed lease is intentionally machine-facing and must not reintroduce noisy timed semantic heartbeat updates.\n\n2026-10-23 requirement refinement: the primary operator goal is same-chat observability, not recovery from a second conversation. The operator wants the already-mounted Heartbeat card to remain useful after the ChatGPT page reports connection interrupted and to show whether the assistant executor has recently demonstrated activity. Semantic Heartbeat updates must remain sparse and meaningful. The liveness MVP therefore adds a silent heartbeat_touch path and independent UI/executor timestamps; takeover is explicitly deferred until field measurement.\n\n2026-10-23 pre-handoff checkpoint: the same-chat liveness contract merged to workspace-control main as 050198002dfcf01c2520871d08b858bf43072547. The user explicitly confirmed the currently live v0.4.6 Heartbeat card has no formatting/blank-gap issues after six real semantic updates, satisfying both short-card intrinsic sizing and grow-through-five/scroll-from-six visual host gates. Because historical PR #155 is 211 commits behind main, exact v0.4.6 plugin bytes and updated release evidence were restaged on fresh branch workspace-heartbeat-v046-current-main-restage in PR #280. The remaining v0.4.6 gate is one planned chat-to-chat handoff with terminal Heartbeat done and same real task ID. After that release is accepted/merged, implement observation-only same-card liveness instrumentation; automatic takeover remains deferred."
+  "notes": "Created from live field evidence on 2026-10-22/23. The user specifically observed the ChatGPT website disconnect while the server-side assistant continued to emit Heartbeat updates, followed later by Heartbeat silence. Current custom MCP tools do not receive a documented ChatGPT assistant-turn terminal event, so the design must distinguish exact internal death (currently unobservable) from operational liveness (measurable and recoverable). The proposed lease is intentionally machine-facing and must not reintroduce noisy timed semantic heartbeat updates.\n\n2026-10-23 requirement refinement: the primary operator goal is same-chat observability, not recovery from a second conversation. The operator wants the already-mounted Heartbeat card to remain useful after the ChatGPT page reports connection interrupted and to show whether the assistant executor has recently demonstrated activity. Semantic Heartbeat updates must remain sparse and meaningful. The liveness MVP therefore adds a silent heartbeat_touch path and independent UI/executor timestamps; takeover is explicitly deferred until field measurement.\n\n2026-10-23 pre-handoff checkpoint: the same-chat liveness contract merged to workspace-control main as 050198002dfcf01c2520871d08b858bf43072547. The user explicitly confirmed the currently live v0.4.6 Heartbeat card has no formatting/blank-gap issues after six real semantic updates, satisfying both short-card intrinsic sizing and grow-through-five/scroll-from-six visual host gates. Because historical PR #155 is 211 commits behind main, exact v0.4.6 plugin bytes and updated release evidence were restaged on fresh branch workspace-heartbeat-v046-current-main-restage in PR #280. The remaining v0.4.6 gate is one planned chat-to-chat handoff with terminal Heartbeat done and same real task ID. After that release is accepted/merged, implement observation-only same-card liveness instrumentation; automatic takeover remains deferred.\n\n2026-10-23 receiving-chat checkpoint: planned v0.4.6 handoff PASS using existing task_id, active=true and not superseded. Restage PR #280 merged at cd396157d7e3e5c3f955c15e41bebba501057693. v0.4.7 observation-only implementation underway on workspace-heartbeat-executor-liveness-mvp; no live deployment or takeover."
 }
