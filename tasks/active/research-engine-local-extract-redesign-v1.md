@@ -30,27 +30,30 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: b08f0367095cc392352e44b50142c03ac51b2e5f
+- Remote checkpoint: fd40f6e9c7eb29f41067814bd0cc4853cd18433a
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8e3481c4ad00ffe26cd175d0e6c6275081d70ab0
+- Remote checkpoint: 3c0ad3eefd70c86c0bfdc2349ac23d2d47022882
 - Remote verified: true
 
 ## Next safe action
 
-Do not trigger Wave 7A.3 again. Unique run 40021544696 is already in flight from inert research-engine PR #175 at exact head 8e3481c4ad00ffe26cd175d0e6c6275081d70ab0 (trigger comment id 6374372304). Inspect that run until terminal, recover its artifact/report, apply the frozen WAVE7A3 verdict gates without retuning, checkpoint the result, close PR #175 unmerged, and stop before Wave 7B.
+Resume at Wave 7A.3 implementation-validity repair, NOT research/design. Read research-engine benchmarks/document_intelligence/local-extract-wave7a3-invalid-interface.v1.json and the frozen Wave 7A.3 contract. Diagnose/fix only the author-anchor structured-output interface and add a hard generator-success validity gate; audit exact source-aware control representation/parity without changing the frozen scientific hypothesis, residual atoms, retrieval budget, PROMISING/PARTIAL/REJECT thresholds, model family, production EXTRACT, or VERIFY. The raw WAVE7A3_REJECT from run 40021544696 is INVALID_IMPLEMENTATION and the scientific gate remains unconsumed. Do not issue a new trigger until the repair is CI-valid (and route-reconciled if the workflow blob changes).
 
 ## Remaining work
 
-- Observe the unique in-flight Wave 7A.3 run 40021544696; do not issue another trigger.
-- When it completes, recover the artifact/report and apply only the frozen WAVE7A3_PROMISING / WAVE7A3_PARTIAL / WAVE7A3_REJECT gates.
-- Persist the exact run/artifact/report identities and scientific disposition in research-engine, close inert trigger PR #175 unmerged, and checkpoint workspace-control.
-- Hard-stop before Wave 7B or production EXTRACT/VERIFY changes.
-- Only if Wave 7A.3 rejects, reopen targeted design research for a trained scientific contribution/discourse classifier as a new independent variable.
+- STOP after the Wave 7A.3 invalid-interface recovery; do not treat raw WAVE7A3_REJECT as scientific evidence and do not start Wave 7B.
+- Do not redo the completed scientific-salience/contribution research or redesign the frozen Wave 7A.3 hypothesis/gates. The author-framed problem/contribution/result/limitation anchor architecture remains the experiment under test.
+- Repair only Wave 7A.3 execution validity: diagnose why verdict-eligible anchor generation emits multiple/invalid JSON structures through the current model_claims interface, and make structured output reliably schema-conformant without tuning the scientific content toward teacher answers.
+- Add a hard pre-scientific validity gate so the workflow/evaluator cannot emit PROMISING/PARTIAL/REJECT when the verdict-eligible generator fails closed across the required evaluation corpus; preserve diagnostics/artifact upload for invalid runs.
+- Audit the source-aware control implementation against the exact valid Wave 7A.2 control representation and explain the BM25 5/13 versus frozen 7/13 drift before rerunning. Do not alter frozen promotion thresholds based on this observed run.
+- Validate the bounded implementation repair in research-engine CI. If the trusted workflow blob changes, update only the declarative workspace-control route identity and pass trusted reconciliation; do not change controller/provisioner/GitRunner authority.
+- After implementation validity is proven, create a fresh inert trigger PR at the corrected exact SHA and issue exactly one valid Wave 7A.3 run under the unchanged contract. Then checkpoint the scientific disposition and close the trigger unmerged.
+- Keep production STANDARD Codex EXTRACT and accepted page-scoped Qwen VERIFY unchanged throughout.
 
 ## Blockers / gates
 
