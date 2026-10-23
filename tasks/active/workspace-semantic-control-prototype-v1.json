@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-knowledge-action-ontology-v1",
-  "current_stage": "freeze_contract_and_fixtures",
+  "current_stage": "build_semantic_twin_and_query_layer",
   "acceptance_criteria": [
     "The prototype consumes only frozen, provenance-pinned fixtures from authoritative research-engine/workspace-control state; it does not become an authoritative store.",
     "SemanticObservationV1 preserves exact source identity, authoritative record ID, source/checkpoint identity, verification/provenance metadata, temporal context, and supersession/contradiction state needed to reconstruct why an assertion exists.",
@@ -62,7 +62,7 @@
       "base_sha": "80da2cae9f8d80a7e7049a9b5339807becc54a98",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "80da2cae9f8d80a7e7049a9b5339807becc54a98",
+        "checkpoint_sha": "007d88b37f34554e8be8e8ad9c976e3724a82521",
         "verified": true
       },
       "local": null,
@@ -76,7 +76,7 @@
   "stages": [
     {
       "id": "freeze_contract_and_fixtures",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -91,15 +91,24 @@
         "Versioned prototype contracts: SemanticObservationV1, EvidenceRequirementV1, OntologySliceV1, CandidateActionV1, DecisionEvaluationV1",
         "Frozen expected-answer benchmark scenarios spanning research evidence, workspace policy/task state, contradictions, supersession, evidence gaps, and authorization adversaries"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Contract and fixture freeze",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #181 merged as 07bba4cb5552e17e944bea962ad99224e346de2f after CI run 40031925620 PASS.",
+            "Five V1 contracts, seven exact source pins, and P1-P8 expected answers were frozen before implementation."
+          ]
+        }
+      ],
       "resume_condition": "All fixtures and interface contracts are frozen before semantic engine implementation."
     },
     {
       "id": "implement_observation_and_federation_adapters",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "Frozen contract/fixture manifest",
         "research-engine evidence/provenance fixtures",
@@ -110,15 +119,27 @@
         "Pure deterministic workspace-control -> typed semantic entity/relation adapter",
         "Canonical serialization and stable semantic-manifest hashing"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Deterministic federation adapters",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #183 merged as 007d88b37f34554e8be8e8ad9c976e3724a82521 after CI run 40032373955 PASS.",
+            "Adapters operate only on frozen fixture objects and use no production research-engine, database, model, network, Lambda, or executor imports.",
+            "Canonical semantic-manifest SHA256 is invariant to input ordering.",
+            "Every projected observation expands provenance to exact frozen repository, commit, path, and Git blob identity.",
+            "Unknown adapter or source IDs fail closed."
+          ]
+        }
+      ],
       "resume_condition": "Adapters preserve 100% required provenance and canonical rebuild identity on frozen fixtures."
     },
     {
       "id": "build_semantic_twin_and_query_layer",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "Canonical semantic observations and authority/execution projections"
       ],
@@ -209,6 +230,26 @@
         "Production STANDARD Codex EXTRACT and accepted page-scoped Qwen VERIFY remain unchanged.",
         "This checkpoint is used only as frozen fixture/exclusion evidence and does not constrain the future accepted EXTRACT architecture."
       ]
+    },
+    {
+      "id": "contract-fixture-freeze-v1",
+      "kind": "prototype_contract",
+      "identity": "research-engine@07bba4cb5552e17e944bea962ad99224e346de2f:semantic-control-contracts-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #181 CI PASS",
+        "Frozen sources remain pinned to pre-implementation checkpoints."
+      ]
+    },
+    {
+      "id": "deterministic-adapters-v1",
+      "kind": "prototype_implementation",
+      "identity": "research-engine@007d88b37f34554e8be8e8ad9c976e3724a82521:semantic-control-adapters-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #183 CI PASS",
+        "Canonical hashing and exact provenance tests passed."
+      ]
     }
   ],
   "artifacts": [],
@@ -239,12 +280,12 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Freeze the exact fixture manifest and V1 interface schemas before writing semantic-engine code.",
-    "Implement deterministic adapters and canonical semantic-manifest hashing only after fixture/contract freeze.",
-    "Implement/query the in-memory semantic twin, then evidence escalation/context slicing, then action-candidate/DecisionEvaluation in that order.",
-    "Run the frozen P1-P8 benchmark and issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT without touching production paths."
+    "Build the in-memory semantic twin and deterministic multi-hop query layer over adapter output.",
+    "Implement evidence escalation/context slicing after semantic-twin P1/P2/P3/P6/P7 tests pass.",
+    "Implement CandidateAction/DecisionEvaluation bridge after the evidence layer passes.",
+    "Run frozen P1-P8 and issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT."
   ],
-  "next_safe_action": "Create the research-engine prototype branch from exact checkpoint 80da2cae9f8d80a7e7049a9b5339807becc54a98 and perform only stage freeze_contract_and_fixtures: inspect the exact authoritative fixture candidates, write a provenance-pinned fixture manifest and V1 interface contracts under benchmarks/semantic_control/**, and add contract/fixture tests under tests/semantic_control/**. Do not implement the semantic engine until those contracts and expected-answer fixtures are frozen.",
+  "next_safe_action": "Implement only build_semantic_twin_and_query_layer from research-engine checkpoint 007d88b37f34554e8be8e8ad9c976e3724a82521. Add in-memory deterministic projection/query code under prototypes/semantic_control/** and tests under tests/semantic_control/**. Prove provenance traversal, contradiction preservation, temporal/supersession replay, deterministic rebuild, and the frozen P6 multi-hop task/scientific-state query. No evidence escalation, CandidateAction evaluation, database/model/network/Lambda/executor calls, or production imports yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This child task is the implementation boundary created from workspace-knowledge-action-ontology-v1 after operator acceptance. It deliberately treats the semantic representation backend as an implementation detail: v1 uses deterministic typed records and in-memory indexes to prove semantics before selecting RDF/SPARQL/property-graph technology. The task consumes the valid Wave 7A.3 REJECT as frozen evidence while remaining scientifically independent from the ongoing/future Local EXTRACT redesign. The intended eventual integration is adapter-based: accepted future EXTRACT output -> stable evidence/output adapter -> semantic-control layer. The semantic-control layer may request evidence or generate CandidateAction records, but only existing authority-owned policy evaluation can authorize execution."
