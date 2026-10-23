@@ -47,7 +47,7 @@
       "base_sha": "796dd9fb9c5fd25009d756a4fd42d53b85a5ac3d",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "fd40f6e9c7eb29f41067814bd0cc4853cd18433a",
+        "checkpoint_sha": "8d4e078733c076f273ecc62a7d30adae30f90ae6",
         "verified": true
       },
       "local": null,
@@ -607,13 +607,13 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "fd40f6e9c7eb29f41067814bd0cc4853cd18433a",
+      "identity": "8d4e078733c076f273ecc62a7d30adae30f90ae6",
       "required_for_resume": true,
       "evidence": [
-        "workspace-control main at recovery base=fd40f6e9c7eb29f41067814bd0cc4853cd18433a",
+        "workspace-control Wave 7A.3 invalid-interface recovery merged=8d4e078733c076f273ecc62a7d30adae30f90ae6",
         "research-engine invalid-run recovery merged=3c0ad3eefd70c86c0bfdc2349ac23d2d47022882",
-        "Wave 7A.3 research/design/route/reconcile complete; raw run 40021544696 classified INVALID_IMPLEMENTATION and scientific gate unconsumed",
-        "old trigger PR #175 closed unmerged; no second run exists",
+        "Wave 7A.3 research/design/route/reconcile complete; run 40021544696 is INVALID_IMPLEMENTATION and scientific gate unconsumed",
+        "trigger PR #175 closed unmerged; no second run exists",
         "next action=repair structured-output validity/control parity only, then one valid Wave 7A.3 run"
       ]
     }
