@@ -152,6 +152,7 @@ export class HeartbeatStore {
       state,
       now,
     });
+    turn.last_executor_touch_at = now.toISOString();
 
     if (state === "done") {
       this._completeTurn({ task, turn, now });
@@ -223,12 +224,34 @@ export class HeartbeatStore {
       state,
       now,
     });
+    turn.last_executor_touch_at = now.toISOString();
 
     if (state === "done") {
       this._completeTurn({ task, turn, now });
     }
 
     return heartbeat;
+  }
+
+  touchTurn({ sessionId, taskId, turnId, now = new Date() }) {
+    const sessionKey = this._sessionKey(sessionId);
+    const turn = this.turns.get(turnId);
+    if (!turn) fail("HEARTBEAT_TURN_NOT_FOUND", "Unknown turn.");
+    if (turn.taskId !== taskId) fail("HEARTBEAT_TURN_TASK_MISMATCH", "Wrong task.");
+    if (turn.sessionId !== sessionKey) fail("HEARTBEAT_TURN_CONVERSATION_MISMATCH", "Wrong conversation.");
+    const task = this._taskRecord(taskId);
+    if (!turn.active || task.activeTurnId !== turnId || task.ownerSessionId !== sessionKey) {
+      fail("HEARTBEAT_TURN_STALE", "Turn no longer owns this task.");
+    }
+    turn.last_executor_touch_at = now.toISOString();
+    return { acknowledged: true };
+  }
+
+  observeUi({ taskId, turnId, now = new Date() }) {
+    const turn = this.turns.get(turnId);
+    if (!turn || turn.taskId !== taskId) return null;
+    turn.last_ui_seen_at = now.toISOString();
+    return this.getTurnSnapshot({ taskId, turnId });
   }
 
   getTurnSnapshot({ taskId, turnId }) {
@@ -244,6 +267,10 @@ export class HeartbeatStore {
       active: turn.active,
       superseded: turn.superseded,
       completed: turn.completed,
+      last_executor_touch_at: turn.last_executor_touch_at ?? null,
+      last_ui_seen_at: turn.last_ui_seen_at ?? null,
+      executor_touch_age_seconds: turn.last_executor_touch_at ? Math.max(0, (Date.now() - Date.parse(turn.last_executor_touch_at)) / 1000) : null,
+      ui_seen_age_seconds: turn.last_ui_seen_at ? Math.max(0, (Date.now() - Date.parse(turn.last_ui_seen_at)) / 1000) : null,
     };
   }
 

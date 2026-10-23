@@ -23,26 +23,24 @@ Give the operator, inside the existing Heartbeat card and without opening a new 
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-heartbeat-executor-liveness-v1
-- Remote checkpoint: ac4d321f056d5b9a30f6dce2f78dfb7617affb06
+- Remote branch: workspace-heartbeat-executor-liveness-mvp
+- Remote checkpoint: cd396157d7e3e5c3f955c15e41bebba501057693
 - Remote verified: true
 
 ## Next safe action
 
-Finish the fresh v0.4.6 restage validation in PR #280, then perform the final planned chat-to-chat handoff gate. The outgoing conversation must leave this liveness task durably synchronized and make terminal heartbeat_update(..., state="done") its final Heartbeat operation. A fresh receiving chat must begin this same task_id without a Heartbeat-server restart. If that succeeds, record the handoff PASS in the v0.4.6 release task, mark/merge the fresh v0.4.6 restage, then implement observation-only same-card liveness instrumentation: heartbeat_touch, last_executor_touch_at, last_ui_seen_at, and executor freshness status. Do not enable automatic takeover yet.
+Validate observation-only v0.4.7 liveness branch workspace-heartbeat-executor-liveness-mvp. Keep semantic progress, executor touch, and app UI poll independent; no automatic stale-owner takeover. Deploy only after acceptance, then collect real interrupted-chat evidence.
 
 ## Remaining work
 
-- Finish full validation of fresh current-main v0.4.6 restage PR #280.
-- Perform the final planned chat-to-chat handoff gate using this same real task ID and terminal Heartbeat done without a server restart.
-- Record v0.4.6 acceptance, merge the fresh restage, and preserve v0.4.5 rollback.
-- Implement observation-only same-card liveness: heartbeat_touch, last_executor_touch_at, last_ui_seen_at, and an executor freshness/status row.
-- Run a deliberate frontend-interruption observation and measure executor-touch behavior before choosing any lease TTL.
-- Only after measurement consider expired-owner takeover.
+- Validate isolated v0.4.7 observation-only candidate with CI and regression tests.
+- Inspect v0.4.7 UI card tests and merge only after successful validation.
+- Do not deploy without explicit host validation; preserve v0.4.6 and v0.4.5 rollback.
+- Observe a real frontend interruption and measure touch gaps before any TTL or takeover design.
 
 ## Blockers / gates
 
-- Do not implement or deploy the liveness layer until Workspace Heartbeat v0.4.6 PR #155 passes its remaining short-card, six-plus-update, and planned handoff live-host gates and is durably merged.
+- None.
 
 ## Fresh-chat initialization
 

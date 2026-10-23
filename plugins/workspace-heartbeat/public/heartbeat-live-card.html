@@ -18,6 +18,7 @@ main{padding:13px 16px}
 .message{margin:0;font-size:13.5px;line-height:1.45;white-space:pre-wrap}
 .meta{margin-top:4px;font-size:10.5px;opacity:.48}
 .footer{margin-top:7px;font-size:10.5px;opacity:.55}
+.liveness{font-size:10.5px;opacity:.7;display:flex;flex-wrap:wrap;gap:10px;padding:6px 0;border-top:1px solid color-mix(in srgb,CanvasText 11%,transparent)}
 .empty{font-size:13px;opacity:.62}
 </style>
 </head>
@@ -27,6 +28,7 @@ main{padding:13px 16px}
     <div id="title" class="title">Workspace heartbeat</div>
     <div id="state" class="state">starting</div>
   </div>
+  <div id="liveness" class="liveness"><span id="executor">Executor: awaiting signal</span><span id="ui-seen">Card/server: awaiting poll</span><span id="progress-age">Progress: awaiting update</span></div>
   <div id="history" class="history"><div class="empty">Waiting for current-turn progress…</div></div>
   <div id="footer" class="footer">Preparing live connection…</div>
 </main>
@@ -36,6 +38,9 @@ const titleEl=document.getElementById("title");
 const stateEl=document.getElementById("state");
 const historyEl=document.getElementById("history");
 const footerEl=document.getElementById("footer");
+const executorEl=document.getElementById("executor");
+const uiSeenEl=document.getElementById("ui-seen");
+const progressAgeEl=document.getElementById("progress-age");
 const pending=new Map();
 let nextRpcId=0;
 let taskId=null;
@@ -46,6 +51,9 @@ let inFlight=false;
 let timer=null;
 let failures=0;
 let lastKey="";
+let lastSnapshot=null;
+function elapsed(value){if(!value)return "no signal";const ms=Date.now()-Date.parse(value);if(!Number.isFinite(ms))return "unknown";const sec=Math.max(0,Math.floor(ms/1000));return sec<60?sec+"s ago":Math.floor(sec/60)+"m ago";}
+function renderFreshness(){if(!lastSnapshot)return;const snap=lastSnapshot;const age=snap.last_executor_touch_at?Date.now()-Date.parse(snap.last_executor_touch_at):Infinity;executorEl.textContent="Executor signal: "+(age<=30000?"recent · ":"not recent · ")+elapsed(snap.last_executor_touch_at);uiSeenEl.textContent="Card/server poll: "+elapsed(snap.last_ui_seen_at);progressAgeEl.textContent="Semantic progress: "+elapsed(snap.heartbeat?.updated_at);}
 
 function fmt(value){
   const date=new Date(value);
@@ -114,6 +122,8 @@ function renderSnapshot(payload){
 
   titleEl.textContent=taskId;
   if(!latest)return false;
+  lastSnapshot=payload;
+  renderFreshness();
 
   const key=String(latest.sequence)+":"+latest.updated_at;
   if(lastKey!==key){
@@ -171,6 +181,7 @@ function schedule(delay){
 }
 async function poll(){
   if(!bridgeActive||!turnActive||!taskId||!turnId||document.hidden||inFlight)return;
+  renderFreshness();
   inFlight=true;
   try{
     const response=await request("tools/call",{
@@ -224,7 +235,7 @@ document.addEventListener("visibilitychange",()=>{
 async function initializeBridge(){
   try{
     await request("ui/initialize",{
-      appInfo:{name:"workspace-heartbeat-live",version:"0.4.5"},
+      appInfo:{name:"workspace-heartbeat-live",version:"0.4.7"},
       appCapabilities:{},
       protocolVersion:"2026-01-26"
     });

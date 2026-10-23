@@ -11,7 +11,7 @@ import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
 const PANEL_URI = "ui://workspace-heartbeat/panel-v8.html";
-const LIVE_URI = "ui://workspace-heartbeat/live-v5.html";
+const LIVE_URI = "ui://workspace-heartbeat/live-v6.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
   "utf8",
@@ -44,6 +44,10 @@ const heartbeatTurnOutputSchema = {
   active: z.boolean(),
   superseded: z.boolean(),
   completed: z.boolean(),
+  last_executor_touch_at: z.string().nullable(),
+  last_ui_seen_at: z.string().nullable(),
+  executor_touch_age_seconds: z.number().nonnegative().nullable(),
+  ui_seen_age_seconds: z.number().nonnegative().nullable(),
 };
 
 const heartbeatOutputSchema = {
@@ -67,11 +71,11 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.4.6",
+      version: "0.4.7",
     },
     {
       instructions:
-        "For every substantial assistant response, call heartbeat_begin_turn(task_id, message, state) exactly once at the first natural user-facing progress point. That operation supersedes the prior heartbeat turn for this conversation/task, creates a new opaque turn_id, records the first semantic progress update, and mounts the current-turn live card. Carry the returned turn_id explicitly on every later heartbeat_update for that assistant response and never call heartbeat_begin_turn again until a later assistant response. Emit heartbeat_update primarily on meaningful semantic changes: new evidence, changed diagnosis, resolved uncertainty, material decisions, validation results, blockers, changed next action, or before a long opaque phase. Commits, merges, checkpoints, phase changes, and routine tool calls are not by themselves reasons to emit. Tool count is only an anti-silence backstop: do not perform more than 10 non-heartbeat tool operations without a useful heartbeat update. Never call heartbeat_snapshot directly; it is app-only. heartbeat_get is explicit task-history/debugging only. A stale/missing turn_id must fail closed. If this conversation does not expose heartbeat_begin_turn or heartbeat_update does not accept turn_id, its plugin contract is stale: do not use Heartbeat here until the plugin surface is refreshed and verified.",
+        "For every substantial assistant response, call heartbeat_begin_turn(task_id, message, state) exactly once at the first natural user-facing progress point. That operation supersedes the prior heartbeat turn for this conversation/task, creates a new opaque turn_id, records the first semantic progress update, and mounts the current-turn live card. Carry the returned turn_id explicitly on every later heartbeat_update for that assistant response and never call heartbeat_begin_turn again until a later assistant response. Emit heartbeat_update primarily on meaningful semantic changes: new evidence, changed diagnosis, resolved uncertainty, material decisions, validation results, blockers, changed next action, or before a long opaque phase. Commits, merges, checkpoints, phase changes, and routine tool calls are not by themselves reasons to emit. Tool count is only an anti-silence backstop: do not perform more than 10 non-heartbeat tool operations without a useful heartbeat update. Use heartbeat_touch(task_id, turn_id) for silent proof of activity during long semantic-silent tool phases; it never replaces real semantic updates. Never call heartbeat_snapshot directly; it is app-only. heartbeat_get is explicit task-history/debugging only. A stale/missing turn_id must fail closed. If this conversation does not expose heartbeat_begin_turn or heartbeat_update does not accept turn_id, its plugin contract is stale: do not use Heartbeat here until the plugin surface is refreshed and verified.",
     },
   );
 
@@ -221,6 +225,28 @@ function createHeartbeatServer() {
 
   registerAppTool(
     server,
+    "heartbeat_touch",
+    {
+      title: "Renew executor activity",
+      description: "Silent observation-only current-turn activity signal. Does not change semantic progress, sequence, history, or create a card. Not proof the executor is continuously alive between calls.",
+      inputSchema: {
+        task_id: z.string().min(1).max(160),
+        turn_id: z.string().min(1).max(160),
+      },
+      outputSchema: { acknowledged: z.boolean() },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+      _meta: { ui: { visibility: ["model"] } },
+    },
+    async ({ task_id, turn_id }, { _meta } = {}) => {
+      const result = store.touchTurn({
+        sessionId: sessionIdFromMeta(_meta), taskId: task_id.trim(), turnId: turn_id.trim(),
+      });
+      return { structuredContent: result, content: [] };
+    },
+  );
+
+  registerAppTool(
+    server,
     "heartbeat_snapshot",
     {
       title: "Read one heartbeat turn snapshot",
@@ -243,7 +269,7 @@ function createHeartbeatServer() {
       },
     },
     async ({ task_id, turn_id }) => {
-      const snapshot = store.getTurnSnapshot({
+      const snapshot = store.observeUi({
         taskId: task_id.trim(),
         turnId: turn_id.trim(),
       });
