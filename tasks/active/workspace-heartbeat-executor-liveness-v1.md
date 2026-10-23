@@ -18,33 +18,28 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Give the operator, inside the existing Heartbeat card and without opening a new chat, an independent view of demonstrated assistant-executor liveness that remains useful when the ChatGPT website says connection interrupted. Keep semantic progress and executor activity separate, then use the same observation layer later for bounded stale-owner recovery.
 
-## Current validated state
+## Repositories
 
-- v0.4.7 live on Lambda: PASS
-- Node v20.20.2 plugin tests: 27/27 PASS
-- Isolated :8788 startup: PASS
-- Managed :8787 and public ngrok health: PASS
-- v0.4.6 rollback preserved: PASS
-- ChatGPT refreshed tool surface exposes heartbeat_touch: PASS
-- Live same-card server/executor/semantic signal separation: PASS
-- Real frontend-interruption persistence: PENDING
-- Automatic stale-owner takeover: DISABLED / DEFERRED
+### workspace-control
 
-## Field evidence
-
-During a live v0.4.7 turn, silent heartbeat_touch calls were interleaved with ordinary GitHub work. The operator directly observed Executor freshness updating while Semantic progress remained unchanged. After touches stopped, Card/server polling remained fresh while Executor and Semantic ages advanced. Touches did not add semantic Heartbeat history.
+- Intent: mutate
+- Remote branch: checkpoint-heartbeat-liveness-mvp-acceptance
+- Remote checkpoint: 04852fe2111143a7950ccbdb15f3ed13b95a7521
+- Remote verified: true
 
 ## Next safe action
 
-Run a deliberate long-turn field test. If ChatGPT reports `Connection interrupted`, do not press Stop. Observe whether the already-mounted card continues to show fresh Card/server polling and/or Executor touches independently of Semantic progress, and record the measured executor-touch gaps.
-
-Do not enable automatic stale-owner takeover or choose a lease TTL until real interruption evidence exists.
+v0.4.7 is live and same-card server/executor/semantic signal separation is field-validated. Run a deliberate long-turn field test and, if ChatGPT reports 'Connection interrupted', do not stop the turn; observe whether Card/server poll and Executor freshness continue to diverge from Semantic progress. Record measured touch gaps. Do not enable automatic stale-owner takeover.
 
 ## Remaining work
 
-- Collect one real frontend-interruption observation.
-- Measure executor-touch gaps during/around the interruption.
-- Decide any TTL/recovery semantics only in a later approved phase.
+- Collect real ChatGPT frontend-interruption evidence while a long turn is active; do not infer exact assistant death.
+- Measure observed executor-touch gaps during/around the interruption and choose any lease TTL only from field evidence.
+- Choose any recovery/takeover semantics only in a separate approved phase; automatic takeover remains disabled.
+
+## Blockers / gates
+
+- None.
 
 ## Fresh-chat initialization
 
