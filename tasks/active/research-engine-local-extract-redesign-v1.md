@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 373fc05de8cdb270ec9d901def0c70ec287ba004
+- Remote checkpoint: 9fb81182950886787d02901be330896e106a36e6
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 837def54ab744e66ca8395aabce501b20af750c7
+- Remote checkpoint: 250d149d88989933ee73514e4483a93dc6a33ef3
 - Remote verified: true
 
 ## Next safe action
 
-Execute exactly one zero-generation page-conditioned proposition retrieval diagnostic on the preserved exact-SHA nine-paper corpus. Keep current top-12 region retrieval only to identify candidate pages, enumerate all exact propositions on those pages, rank at most twelve propositions with the existing query/facet retrieval logic, and compare teacher alignment against Wave 6 and the expected-page ceiling. Do not download a retrieval model, start Wave 7, change production EXTRACT/VERIFY, or reopen execution substrate.
+STOP after the page-conditioned diagnostic checkpoint and perform candidate-selection research only: identify and predeclare a minimal retrieval/reranking bakeoff aimed at proposition-ranking semantics, together with a semantic-support evaluation track that complements but does not replace the frozen lexical F1 metric. Do not download new retrieval models, start Wave 7, change production EXTRACT/VERIFY, or reopen GitRunner/controller/provisioner/runtime until that candidate contract is durable.
 
 ## Remaining work
 
-- Run one bounded zero-model page-conditioned proposition retrieval diagnostic: retain current FACET_INTERLEAVED_BM25_V1 only as coarse page routing, enumerate all exact propositions on those selected pages, and rank a maximum of twelve propositions with the existing paper query/facets.
-- Compare that selector against the frozen Wave-6 selector and expected-page proposition ceiling before considering any embedding or reranker download.
-- Use current research to shortlist at most a small number of external retrieval candidates only if the deterministic page-conditioned arm leaves a material retrieval residual; BGE-M3 hybrid sparse+dense/multi-vector and ColBERT-style late interaction are candidates, not authorized downloads.
-- Add a semantic-support evaluation track informed by SciFact/FActScore/AlignScore while retaining the legacy lexical F1 metric unchanged for longitudinal continuity.
-- Do not design, route, or execute Wave 7 until the retrieval diagnostic and evaluation research identify one bounded next implementation.
+- Research and predeclare the smallest justified retrieval/reranking candidate set targeted specifically at proposition-ranking semantics. Candidate families may include hybrid sparse+dense/multi-vector retrieval such as BGE-M3-class methods and ColBERT-style late interaction; no model download is authorized until the candidate contract is durable.
+- Keep current coarse page routing, exact proposition enumeration, authoritative PDF provenance, Qwen3.5-4B normalizer, production STANDARD Codex fallback, and accepted Qwen VERIFY fixed while retrieval candidates are compared.
+- Add a semantic-support evaluation track informed by scientific fact verification / atomic-fact evaluation while retaining the frozen legacy lexical F1 metric unchanged for longitudinal continuity.
+- Define one bounded retrieval/reranking experiment only after candidate selection and semantic-evaluation criteria are frozen; do not start Wave 7 automatically.
+- Treat the two historical Wave-6 CLAIM_SCHEMA rejects as a separate structured-output engineering cleanup, not the current semantic bottleneck.
 
 ## Blockers / gates
 
