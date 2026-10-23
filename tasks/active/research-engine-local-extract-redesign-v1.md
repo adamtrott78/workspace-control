@@ -30,28 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 0e03e3d7d2a9d6f7fffb676ecb1ec85a6367acde
+- Remote checkpoint: d6c1375c36fc3634f628392e4b1cee55b61caf12
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 54d347c248c7f9a8b9de9242abf01d082feb0bb5
+- Remote checkpoint: 265a7e4784209d411383cb09da4fe0adcf50f319
 - Remote verified: true
 
 ## Next safe action
 
-Resume from research-engine branch local-extract-wave6-global-proposition-ranking, which contains the durable Wave-5 decision at 210af91fef931d53e510bef18bd9f185f6808783. Freeze and implement WAVE6_PAPER_GLOBAL_PROPOSITION_BM25_THEN_NORMALIZATION_V1: keep Wave-2 region retrieval, Wave-4 exact proposition enumeration, and Wave-5 normalization/model/runtime/teacher/provenance boundaries fixed; score all exact propositions across the paper's selected regions in one existing-BM25 corpus, then choose the highest-scoring proposition within each region using deterministic tie breaks. Also fix only the Wave-5 hard-safety evaluator scoping bug by keying proposition identity within its owning paper. Validate and execute exactly one bounded benchmark through the existing reusable route pattern; do not change GitRunner substrate code.
+Wave 6 implementation is already merged in research-engine main at 265a7e4784209d411383cb09da4fe0adcf50f319 (PR #140, CI PASS). Bind that exact merged workflow into the existing reusable Lambda plane: add route model-eval-local-extract-wave6 with execution contract model-dual-public-v1, trusted workflow .github/workflows/lambda-ci-local-extract-wave6.yml blob c81e7cbb31f1731ada483a9b1f9256a4e6d78312, trigger /lambda-ci-local-extract-wave6, unchanged actor/open-same-repository-PR/fork-denial gates, and accepted Qwen/runtime bindings. Advance only project-manifest source identity and exact-blob regression coverage, validate/merge, require trusted reconciliation, then run exactly one inert-trigger Wave-6 benchmark. Do not modify GitRunner substrate code and do not auto-start Wave 7.
 
 ## Remaining work
 
-- Freeze the Wave-6 paper-global proposition-ranking contract before implementation.
-- Implement paper-global BM25 scoring over all propositions from the 12 selected regions, then retain the highest-scoring proposition per region; keep normalization unchanged.
-- Fix the hard-safety evaluator so proposition lookup is scoped to the owning paper; preserve all other provenance guards.
-- Validate/merge research-engine Wave 6, bind its exact launcher through the existing model-dual-public-v1 route pattern, reconcile, and run exactly one bounded benchmark.
-- Immediately checkpoint the Wave-6 artifact and scientific disposition before any further experiment.
-- Only after a candidate passes the semantic-quality gate consider VERIFY-boundary analysis or production integration.
+- Bind merged Wave 6 into the existing research-engine project manifest as route model-eval-local-extract-wave6 using execution contract model-dual-public-v1, trusted workflow .github/workflows/lambda-ci-local-extract-wave6.yml blob c81e7cbb31f1731ada483a9b1f9256a4e6d78312, trigger /lambda-ci-local-extract-wave6, unchanged actor/open-same-repository-PR/fork-denial gates, and accepted Qwen/runtime bindings.
+- Advance only project-manifest source identity and exact-blob regression coverage required by the Wave-6 route; do not modify GitRunner substrate code or execution authority.
+- Validate and merge the workspace-control route change, then require trusted reconciliation before execution.
+- Create/use one inert research-engine trigger PR at exact current Wave-6 main SHA 265a7e4784209d411383cb09da4fe0adcf50f319 and execute exactly one bounded Wave-6 benchmark.
+- Immediately checkpoint the Wave-6 artifact, metrics, scientific disposition, and residual localization before any further experiment.
+- Do not auto-start Wave 7; only after the Wave-6 decision should any next experiment, VERIFY-boundary analysis, or production integration be considered.
 
 ## Blockers / gates
 
