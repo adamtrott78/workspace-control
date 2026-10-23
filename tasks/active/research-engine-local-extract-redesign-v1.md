@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: f8ef39e9a9ff394491590448725689fa9cb0eb16
+- Remote checkpoint: 34e475bd8480c85299aa5bd81441abf8adbc478c
 - Remote verified: true
 
 ### research-engine
@@ -42,18 +42,18 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-On research-engine inert PR #178, verify head SHA dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276 and then issue exactly one comment: /lambda-ci-local-extract-wave7a3 dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276. Observe only the resulting run. Do not issue a duplicate trigger, do not merge the trigger PR, do not change the frozen Wave 7A.3 scientific contract, and do not start Wave 7B.
+Observe only research-engine Wave 7A.3 run 40027366528, created by the single authorized trigger comment 6375134209 at exact candidate SHA dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276. Do not issue any duplicate trigger. When terminal, recover its artifact and apply implementation validity before accepting any PROMISING/PARTIAL/REJECT scientific verdict; checkpoint the disposition immediately, then close PR #178 unmerged.
 
 ## Remaining work
 
-- Issue exactly one /lambda-ci-local-extract-wave7a3 dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276 comment on open inert PR #178; do not mutate its head and do not merge it.
-- Observe the resulting corrected Wave 7A.3 run under the original frozen contract. If it returns INVALID_IMPLEMENTATION, keep scientific_gate_consumed=false and repair only demonstrated execution validity. If it reaches PROMISING/PARTIAL/REJECT, treat that as the single valid scientific disposition.
-- Checkpoint the corrected run artifact/hashes, implementation-validity status, control metrics, and scientific disposition immediately in research-engine and this task capsule; then close PR #178 unmerged.
-- Do not begin Wave 7B and do not change production STANDARD Codex EXTRACT or accepted page-scoped Qwen VERIFY.
+- Observe unique corrected Wave 7A.3 run 40027366528 through terminal state; do not retrigger.
+- Recover the generated-intents/report artifact and first apply the frozen implementation-validity gate. INVALID_IMPLEMENTATION leaves scientific_gate_consumed=false; PROMISING/PARTIAL/REJECT is the single valid scientific disposition.
+- Checkpoint the run ID, artifact ID/hashes, implementation-validity evidence, control metrics, and scientific disposition immediately in research-engine and this task capsule.
+- Close inert trigger PR #178 unmerged after result checkpointing. Do not begin Wave 7B and do not change production STANDARD Codex EXTRACT or accepted page-scoped Qwen VERIFY.
 
 ## Blockers / gates
 
-- Exactly one corrected Wave 7A.3 scientific trigger is authorized on inert PR #178 at exact head dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276. After that comment is issued, do not issue any duplicate trigger while its run is queued or running.
+- Wave 7A.3 corrected run 40027366528 is the unique in-flight scientific benchmark created by comment 6375134209. Do not issue any second /lambda-ci-local-extract-wave7a3 trigger under any circumstance; observe this run only.
 
 ## Fresh-chat initialization
 
