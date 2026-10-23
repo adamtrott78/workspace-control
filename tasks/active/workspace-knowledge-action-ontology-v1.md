@@ -30,7 +30,7 @@ Determine whether a provenance-preserving typed ontology/knowledge-graph substra
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: dbce355969e6378eef9effa2914393cc8add2e4c
+- Remote checkpoint: f370bdc7afc8037dbb5f87a0228abfc011011329
 - Remote verified: true
 
 ### research-engine
