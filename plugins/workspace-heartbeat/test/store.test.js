@@ -114,3 +114,24 @@ test("missing task still returns empty task-level snapshot",()=>{
     heartbeat:null,history:[],timeline:[]
   });
 });
+
+test("silent executor touch preserves all semantic history, sequence and card history",()=>{
+  const store=makeStore();
+  const begin=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"working",now:new Date("2026-10-22T10:00:00Z")});
+  const old=store.getTurnSnapshot({taskId:"task-a",turnId:begin.turn_id});
+  assert.deepEqual(store.touchTurn({sessionId:"chat-a",taskId:"task-a",turnId:begin.turn_id,now:new Date("2026-10-22T10:01:00Z")}),{acknowledged:true});
+  const touched=store.getTurnSnapshot({taskId:"task-a",turnId:begin.turn_id});
+  assert.equal(touched.last_executor_touch_at,"2026-10-22T10:01:00.000Z");
+  assert.equal(touched.heartbeat.sequence,old.heartbeat.sequence);
+  assert.deepEqual(touched.turn_history,old.turn_history);
+  assert.deepEqual(touched.recent,old.recent);
+  assert.equal(touched.last_ui_seen_at,null);
+  const polled=store.observeUi({taskId:"task-a",turnId:begin.turn_id,now:new Date("2026-10-22T10:02:00Z")});
+  assert.equal(polled.last_ui_seen_at,"2026-10-22T10:02:00.000Z");
+  assert.equal(polled.last_executor_touch_at,touched.last_executor_touch_at);
+  assert.deepEqual(polled.turn_history,old.turn_history);
+  assert.throws(()=>store.touchTurn({sessionId:"chat-b",taskId:"task-a",turnId:begin.turn_id}),/CONVERSATION_MISMATCH/);
+  assert.throws(()=>store.touchTurn({sessionId:"chat-a",taskId:"other",turnId:begin.turn_id}),/TASK_MISMATCH/);
+  store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"next"});
+  assert.throws(()=>store.touchTurn({sessionId:"chat-a",taskId:"task-a",turnId:begin.turn_id}),/TURN_STALE/);
+});
