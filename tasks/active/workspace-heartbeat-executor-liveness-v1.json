@@ -92,7 +92,7 @@
     },
     {
       "id": "observation_only_same_card_instrumentation",
-      "status": "VALIDATING",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github+heartbeat",
