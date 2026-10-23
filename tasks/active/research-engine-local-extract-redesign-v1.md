@@ -30,34 +30,30 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8d4e078733c076f273ecc62a7d30adae30f90ae6
+- Remote checkpoint: f8ef39e9a9ff394491590448725689fa9cb0eb16
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 3c0ad3eefd70c86c0bfdc2349ac23d2d47022882
+- Remote checkpoint: dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276
 - Remote verified: true
 
 ## Next safe action
 
-Resume at Wave 7A.3 implementation-validity repair, NOT research/design. Read research-engine benchmarks/document_intelligence/local-extract-wave7a3-invalid-interface.v1.json and the frozen Wave 7A.3 contract. Diagnose/fix only the author-anchor structured-output interface and add a hard generator-success validity gate; audit exact source-aware control representation/parity without changing the frozen scientific hypothesis, residual atoms, retrieval budget, PROMISING/PARTIAL/REJECT thresholds, model family, production EXTRACT, or VERIFY. The raw WAVE7A3_REJECT from run 40021544696 is INVALID_IMPLEMENTATION and the scientific gate remains unconsumed. Do not issue a new trigger until the repair is CI-valid (and route-reconciled if the workflow blob changes).
+On research-engine inert PR #178, verify head SHA dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276 and then issue exactly one comment: /lambda-ci-local-extract-wave7a3 dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276. Observe only the resulting run. Do not issue a duplicate trigger, do not merge the trigger PR, do not change the frozen Wave 7A.3 scientific contract, and do not start Wave 7B.
 
 ## Remaining work
 
-- STOP after the Wave 7A.3 invalid-interface recovery; do not treat raw WAVE7A3_REJECT as scientific evidence and do not start Wave 7B.
-- Do not redo the completed scientific-salience/contribution research or redesign the frozen Wave 7A.3 hypothesis/gates. The author-framed problem/contribution/result/limitation anchor architecture remains the experiment under test.
-- Repair only Wave 7A.3 execution validity: diagnose why verdict-eligible anchor generation emits multiple/invalid JSON structures through the current model_claims interface, and make structured output reliably schema-conformant without tuning the scientific content toward teacher answers.
-- Add a hard pre-scientific validity gate so the workflow/evaluator cannot emit PROMISING/PARTIAL/REJECT when the verdict-eligible generator fails closed across the required evaluation corpus; preserve diagnostics/artifact upload for invalid runs.
-- Audit the source-aware control implementation against the exact valid Wave 7A.2 control representation and explain the BM25 5/13 versus frozen 7/13 drift before rerunning. Do not alter frozen promotion thresholds based on this observed run.
-- Validate the bounded implementation repair in research-engine CI. If the trusted workflow blob changes, update only the declarative workspace-control route identity and pass trusted reconciliation; do not change controller/provisioner/GitRunner authority.
-- After implementation validity is proven, create a fresh inert trigger PR at the corrected exact SHA and issue exactly one valid Wave 7A.3 run under the unchanged contract. Then checkpoint the scientific disposition and close the trigger unmerged.
-- Keep production STANDARD Codex EXTRACT and accepted page-scoped Qwen VERIFY unchanged throughout.
+- Issue exactly one /lambda-ci-local-extract-wave7a3 dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276 comment on open inert PR #178; do not mutate its head and do not merge it.
+- Observe the resulting corrected Wave 7A.3 run under the original frozen contract. If it returns INVALID_IMPLEMENTATION, keep scientific_gate_consumed=false and repair only demonstrated execution validity. If it reaches PROMISING/PARTIAL/REJECT, treat that as the single valid scientific disposition.
+- Checkpoint the corrected run artifact/hashes, implementation-validity status, control metrics, and scientific disposition immediately in research-engine and this task capsule; then close PR #178 unmerged.
+- Do not begin Wave 7B and do not change production STANDARD Codex EXTRACT or accepted page-scoped Qwen VERIFY.
 
 ## Blockers / gates
 
-- Wave 7A.3 run 40021544696 is the unique in-flight scientific benchmark. Do not issue any second /lambda-ci-local-extract-wave7a3 trigger while it is queued or running.
+- Exactly one corrected Wave 7A.3 scientific trigger is authorized on inert PR #178 at exact head dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276. After that comment is issued, do not issue any duplicate trigger while its run is queued or running.
 
 ## Fresh-chat initialization
 
