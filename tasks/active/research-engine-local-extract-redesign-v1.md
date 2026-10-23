@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 0787b183377ea60d04437973489b2d389e27865d
+- Remote checkpoint: 4b2c56eebe6ce7f04320f6ae31d11754f9eda197
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Wave 6 is scientifically PARTIAL, not promotion-ready. The selector correction succeeded exactly (selected-source teacher mean F1 0.30305743036333815), but end-to-end local completion is 8/9 with two normalization CLAIM_SCHEMA hard rejects on arxiv:2609.20765 and teacher coverage at F1>=0.5 remains 0/6. After this result checkpoint, close inert trigger PR #141 unmerged. Do not start Wave 7 automatically. Production EXTRACT remains STANDARD Codex and accepted Qwen VERIFY remains unchanged; any next experiment requires an explicit residual-focused design decision.
+STOP at the Wave 6 checkpoint. The one authorized benchmark is complete and inert research-engine PR #141 is closed unmerged. Wave 6 remains scientifically PARTIAL: selector alignment reached the intended 0.30305743036333815 target, but local completion is 8/9 and teacher coverage at F1>=0.5 remains 0/6. Do not start Wave 7 automatically. Production EXTRACT remains STANDARD Codex and accepted Qwen VERIFY remains unchanged. Resume only after an explicit decision selects a residual-focused next experiment or ends the redesign.
 
 ## Remaining work
 
-- Close inert research-engine trigger PR #141 unmerged after this Wave-6 result checkpoint is durably recorded.
 - Do not automatically design, implement, route, or execute Wave 7.
 - Treat the Wave-6 selector hypothesis as confirmed: paper-global BM25 reached the intended 0.30305743036333815 selected-source mean F1, but the end-to-end candidate remains PARTIAL because one paper required residual fallback and normalized semantic agreement remains below the promotion gate.
 - Any further experiment requires an explicit new decision that names the residual being tested; production EXTRACT remains STANDARD Codex and accepted page-scoped Qwen VERIFY remains unchanged.
-- If work resumes, analyze the two CLAIM_SCHEMA normalization rejects and the persistent 0/6 teacher coverage before selecting a next bounded experiment; do not reopen GitRunner/controller/provisioner/runtime design.
+- If work resumes, analyze the two CLAIM_SCHEMA normalization rejects on arxiv:2609.20765 and the persistent 0/6 teacher coverage before selecting a next bounded experiment; do not reopen GitRunner/controller/provisioner/runtime design.
 
 ## Blockers / gates
 
