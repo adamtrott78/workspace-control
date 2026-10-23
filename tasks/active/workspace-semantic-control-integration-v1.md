@@ -31,23 +31,23 @@ Integrate the validated semantic-control prototype with the real current researc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4febcf79bca2b40a0b48ddd66ac87c98ecf983d0
+- Remote checkpoint: 8bf738f2c6722cda60f98190b58892e8e7979918
 - Remote verified: true
 
 ## Next safe action
 
-Implement only implement_workspace_control_snapshot_adapter from the frozen workspace-control source manifest. Add bounded snapshot inputs under benchmarks/semantic_control_integration/**, adapter code under prototypes/semantic_control_integration/**, and tests under tests/semantic_control_integration/**. Project root workload policy as NORMATIVE authority, project/profile/execution-contract and task dependency state as EXECUTION observations, and preserve exact Git blob provenance. Prove deterministic rebuild, workload capability+authority queries, explicit policy DENY precedence over capability/routes, stale/blob-drift fail-closed behavior, and Local EXTRACT dependency_state_only semantics. Do not bind accepted EXTRACT output yet and do not mutate workspace-control authority files.
+Implement the pre-EXTRACT cross-system integration benchmark under prototypes/semantic_control_integration/**, benchmarks/semantic_control_integration/**, and tests/semantic_control_integration/** from research-engine checkpoint 8bf738f2c6722cda60f98190b58892e8e7979918. Use CI's ephemeral Postgres to build the validated research-engine semantic manifest, build the pinned workspace-control semantic manifest, prove all four relational answer hashes equal semantic reconstruction hashes, rerun gpu-small ALLOW/generic gpu-heavy DENY authority gates with zero authorization escapes, test workspace blob drift and research answer drift fail closed, and report empirical relational plus semantic projection overhead with no retroactive threshold. The benchmark must emit PRE_EXTRACT_INTEGRATION_PASS or REVISE and must record EXTRACT_BINDING=BLOCKED_EVIDENCE; it must not issue READY_FOR_PRODUCTION_PROMOTION while the accepted EXTRACT output gate is unresolved.
 
 ## Remaining work
 
-- Implement the read-only workspace-control snapshot adapter and cross-task/capability/authority queries.
-- Wait for and bind only a durable accepted EXTRACT output checkpoint before EXTRACT-specific integration.
-- Run cross-system integration benchmark on all currently authorized components and rerun authority/failure-isolation gates.
-- After accepted EXTRACT binding exists, complete final integration benchmark and issue READY_FOR_PRODUCTION_PROMOTION, REVISE, or REJECT.
+- Run and persist a pre-EXTRACT cross-system benchmark across the validated research-engine and workspace-control adapters, relational baseline, semantic overhead, authority/adversary gates, and failure isolation.
+- When the owning EXTRACT task reaches a durable accepted architecture/output checkpoint, resume bind_accepted_extract_output with a versioned adapter only.
+- Rerun the final cross-system benchmark including the accepted EXTRACT adapter.
+- Issue READY_FOR_PRODUCTION_PROMOTION, REVISE, or REJECT and, if ready, create a separate production-promotion task.
 
 ## Blockers / gates
 
-- None.
+- EXTRACT-specific binding and final production-promotion verdict are blocked on a durable accepted output checkpoint from research-engine-local-extract-redesign-v1. Current proposition-alignment state is implementation-only.
 
 ## Fresh-chat initialization
 
