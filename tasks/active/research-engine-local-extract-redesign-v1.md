@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: research-engine-local-extract-redesign-v1
 - Title: Research Engine Mostly-Local EXTRACT Redesign v1
-- Status: IN_PROGRESS
+- Status: CHECKPOINTED
 - Capsule schema: v2
 
 ## Goal
@@ -30,30 +30,29 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 34e475bd8480c85299aa5bd81441abf8adbc478c
+- Remote checkpoint: 2f5b950c557171318e5cb764add35fc3c95a97fc
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276
+- Remote checkpoint: 80da2cae9f8d80a7e7049a9b5339807becc54a98
 - Remote verified: true
 
 ## Next safe action
 
-Observe only research-engine Wave 7A.3 run 40027366528, created by the single authorized trigger comment 6375134209 at exact candidate SHA dcdcfc8c85ddda2bfbf8fe439c79a8e0784ee276. Do not issue any duplicate trigger. When terminal, recover its artifact and apply implementation validity before accepting any PROMISING/PARTIAL/REJECT scientific verdict; checkpoint the disposition immediately, then close PR #178 unmerged.
+STOP at the valid Wave 7A.3 scientific checkpoint. Run 40027366528 is implementation-valid and WAVE7A3_REJECT; the scientific gate is consumed, PR #178 is closed unmerged, and Wave 7B is not authorized. Do not issue another Wave 7A.3/Wave 7B trigger or tune the frozen experiment. If the user explicitly resumes local EXTRACT research, begin a new evidence-first design phase for a materially different intent-generation architecture using benchmarks/document_intelligence/local-extract-wave7a3-author-anchored-result.v1.json as exclusion evidence.
 
 ## Remaining work
 
-- Observe unique corrected Wave 7A.3 run 40027366528 through terminal state; do not retrigger.
-- Recover the generated-intents/report artifact and first apply the frozen implementation-validity gate. INVALID_IMPLEMENTATION leaves scientific_gate_consumed=false; PROMISING/PARTIAL/REJECT is the single valid scientific disposition.
-- Checkpoint the run ID, artifact ID/hashes, implementation-validity evidence, control metrics, and scientific disposition immediately in research-engine and this task capsule.
-- Close inert trigger PR #178 unmerged after result checkpointing. Do not begin Wave 7B and do not change production STANDARD Codex EXTRACT or accepted page-scoped Qwen VERIFY.
+- No current experiment or Wave 7B execution is authorized after the valid WAVE7A3_REJECT.
+- If the user explicitly resumes the local EXTRACT redesign, start a new evidence-first research/design phase that treats author-anchored obligations as rejected-as-implemented and requires a materially different intent-generation architecture before any new run.
+- Preserve production STANDARD Codex EXTRACT and accepted page-scoped Qwen VERIFY unless a separate future task explicitly reopens those production boundaries.
 
 ## Blockers / gates
 
-- Wave 7A.3 corrected run 40027366528 is the unique in-flight scientific benchmark created by comment 6375134209. Do not issue any second /lambda-ci-local-extract-wave7a3 trigger under any circumstance; observe this run only.
+- None.
 
 ## Fresh-chat initialization
 
