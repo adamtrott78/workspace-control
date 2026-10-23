@@ -30,25 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 885dbbbff97ea40af13783d303231fbe836fa508
+- Remote checkpoint: 0ff16a8d877a748e83f13b2d546d1b47a0b74744
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: fda45f3024cebfb2d760952b2eb93dfa07247b97
+- Remote checkpoint: ed666137ecf5c42950fb5eee2cd5ecc0d69f7c13
 - Remote verified: true
 
 ## Next safe action
 
-Begin a new evidence-first EXTRACT design phase from the durable Family C PROTECTED_AUGMENT_NEGATIVE result at research-engine@fda45f3024cebfb2d760952b2eb93dfa07247b97. Treat source-aware intent-utility preservation as an insufficient semantic-preservation proxy and compare materially different teacher-blind semantic-preservation or iterative-coverage mechanisms before any new implementation/run. Do not rerun/tune LEXICOGRAPHIC_ZERO_LOSS_SWAP_V1, execute STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1, promote the fixed 20/4 quota, train/download a classifier, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate ontology/semantic-control mechanisms.
+Implement the frozen PROPOSITION_ALIGNMENT_CERTIFIED_AUGMENTATION_DIAGNOSTIC_V1 from execution-isolated research-engine design head ca6ada76b1850a164ab964a9673a120a10d2f15e. Use DYNAMIC_SAME_PAGE_ALIGNMENT_SWAP_V1 exactly as frozen (same-page token_f1 >=0.40, certificate from another still-retained original baseline proposition, dynamic recomputation, baseline page-set preservation, residual RRF ordering, final budget 24), add focused tests and normal CI, then durable-checkpoint the implementation before exactly one zero-generation trigger.
 
 ## Remaining work
 
-- Begin a new evidence-first design phase for a materially different teacher-blind semantic-preservation objective or iterative coverage mechanism; treat LEXICOGRAPHIC_ZERO_LOSS_SWAP_V1 as rejected scientific evidence.
-- The next design must explain why preserving source-aware intent utility can still lose source-aware teacher atoms and must directly target semantic evidence preservation without teacher leakage.
-- Do not execute STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1 on the rejected selector, train/download a sufficiency critic or contribution classifier, promote the fixed 20/4 quota, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
+- Implement DYNAMIC_SAME_PAGE_ALIGNMENT_SWAP_V1 exactly as frozen from isolated research-engine design head ca6ada76b1850a164ab964a9673a120a10d2f15e.
+- Add deterministic tests for same-page token-F1 certificate, dynamic recomputation, page-set preservation, residual ordering, and ALIGNMENT_AUGMENT_STRONG/FEASIBLE/NEGATIVE gates; run normal CI.
+- Checkpoint the validated implementation, then create one inert trigger PR from the isolated implementation head and issue exactly one zero-generation diagnostic.
+- Checkpoint the result immediately and close the inert trigger unmerged. No post-result threshold/gate tuning.
+- Do not execute the rejected Qwen gap judge, promote fixed 20/4 quota, train/download a classifier, start Wave 7B, change production EXTRACT/VERIFY, or incorporate ontology/semantic-control mechanisms.
 
 ## Blockers / gates
 
