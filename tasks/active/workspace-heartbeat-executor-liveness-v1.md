@@ -16,7 +16,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 ## Goal
 
-Measure and operationally distinguish ChatGPT browser/UI disconnect from continued server-side assistant execution, then replace indefinite stale Heartbeat ownership with a bounded, fail-closed executor lease and safe takeover protocol so a fresh chat can recover without guessing or restarting the Heartbeat server.
+Give the operator, inside the existing Heartbeat card and without opening a new chat, an independent view of demonstrated assistant-executor liveness that remains useful when the ChatGPT website says connection interrupted. Keep semantic progress and executor activity separate, then use the same observation layer later for bounded stale-owner recovery.
 
 ## Repositories
 
@@ -29,20 +29,20 @@ Measure and operationally distinguish ChatGPT browser/UI disconnect from continu
 
 ## Next safe action
 
-Do not change the live Heartbeat runtime yet. First finish/merge the pending v0.4.6 release PR #155 and its short-card, six-plus-update, and planned chat-handoff host gates. In parallel, freeze the executor-liveness state machine: separate last_model_touch_at from last_ui_seen_at; keep semantic heartbeats independent; define lease_expires_at and read-only status; permit takeover only after expiry; atomically supersede the old turn on takeover; make old-turn update/touch operations fail closed; and require a fresh lease assertion before post-wait mutating work. Then implement observation-only instrumentation on top of the accepted v0.4.6 source before enabling automatic takeover.
+Finish Workspace Heartbeat v0.4.6 PR #155 host acceptance first. Use the already-live v0.4.6 candidate to confirm (1) short one/two-update cards hug intrinsic content with no giant blank gap, (2) six same-turn semantic updates preserve grow-through-five/scroll-from-six, and (3) one planned chat-to-chat handoff releases with terminal done and lets a receiving chat begin the same task ID without server restart. After PR #155 is merged, implement the observation-only same-card liveness layer: model-only heartbeat_touch, last_executor_touch_at, last_ui_seen_at, and a live-card status row. Do not enable automatic takeover or claim exact executor death.
 
 ## Remaining work
 
-- Finish the observability contract and exact state machine using current OpenAI documentation and live Heartbeat evidence.
-- After v0.4.6 acceptance, implement observation-only model-touch and UI-seen timestamps plus read-only liveness status.
-- Run a deliberate long-turn/frontend-interruption measurement and record the gap between UI last-seen and executor touches.
-- Choose a bounded lease TTL from measured behavior rather than a guessed chat duration.
-- Implement and validate atomic expired-owner takeover plus stale-writer fencing.
-- Update the canonical Heartbeat procedure with safe takeover/recovery rules and preserve restart as rollback.
+- Finish the three remaining v0.4.6 live-host gates and merge PR #155 without changing the liveness feature.
+- On top of accepted v0.4.6, implement heartbeat_touch and independent executor/UI timestamps without changing semantic Heartbeat history.
+- Add the same-card status row showing server/card connectivity, executor last-seen age/status, and semantic-progress age.
+- Test that heartbeat_touch is cross-conversation/turn fenced, does not increment semantic sequence/history, and does not create/resize transcript UI.
+- Run a deliberate frontend-interruption observation to measure how long executor touches continue after the website reports connection interruption.
+- Only after measurement choose a lease TTL and consider stale-owner takeover.
 
 ## Blockers / gates
 
-- Implementation/deployment is gated on completion or durable acceptance of workspace-heartbeat v0.4.6 PR #155 so this work does not invalidate its remaining live visual/handoff acceptance.
+- Do not implement or deploy the liveness layer until Workspace Heartbeat v0.4.6 PR #155 passes its remaining short-card, six-plus-update, and planned handoff live-host gates and is durably merged.
 
 ## Fresh-chat initialization
 
