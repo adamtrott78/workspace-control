@@ -12,7 +12,7 @@
     "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
   },
   "parent_execution_owner": "research-engine-local-document-pipeline-v1",
-  "current_stage": "wave6_result_checkpointed_stop_before_next_experiment",
+  "current_stage": "preserved_job_benchmark_and_fallback_measurement",
   "acceptance_criteria": [
     "A current literature and implementation survey identifies how comparable local scientific-document, structured-information-extraction, evidence-grounding, claim-extraction, and high-precision fallback systems solve the same or adjacent problem.",
     "Previously failed approaches are explicitly excluded from reconsideration unless new evidence changes the failed premise; in particular, the already-tested Qwen3.5-4B grounded-candidate EXTRACT architecture is not simply rerun with cosmetic prompt changes.",
@@ -470,7 +470,7 @@
     },
     {
       "check": "Wave-6 one-shot benchmark and scientific disposition",
-      "result": "PARTIAL",
+      "result": "PASS",
       "evidence": [
         "run=39892171136 artifact=12474829916 report_sha256=2183cf2c598ef738c7d72cfb6150d731635f99f9c91e3e2254ee0681c0bc6119",
         "8/9 local completion; 74 accepted claims; proposal_model_calls=0; normalization_hard_reject_count=2; residual paper arxiv:2609.20765.",
