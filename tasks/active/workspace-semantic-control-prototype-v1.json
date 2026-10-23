@@ -1,0 +1,251 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-semantic-control-prototype-v1",
+  "title": "Semantic Control Plane Prototype v1",
+  "status": "IN_PROGRESS",
+  "goal": "Build and benchmark an additive, deterministic semantic-control prototype over frozen research-engine and workspace-control evidence that proves provenance-preserving semantic observations, cross-store semantic federation, contradiction/time handling, targeted evidence escalation, bounded ontology/schema context retrieval, shared semantic-twin queries, and fail-closed action-candidate/DecisionEvaluation semantics without changing production scientific truth, EXTRACT/VERIFY behavior, policy authority, or execution.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-knowledge-action-ontology-v1",
+  "current_stage": "freeze_contract_and_fixtures",
+  "acceptance_criteria": [
+    "The prototype consumes only frozen, provenance-pinned fixtures from authoritative research-engine/workspace-control state; it does not become an authoritative store.",
+    "SemanticObservationV1 preserves exact source identity, authoritative record ID, source/checkpoint identity, verification/provenance metadata, temporal context, and supersession/contradiction state needed to reconstruct why an assertion exists.",
+    "Research-engine and workspace-control adapters are pure/deterministic over fixtures and do not call live databases, models, Lambda, external services, or production mutation paths.",
+    "A deterministic WorkspaceSemanticTwin projection can represent epistemic, normative/action, and execution entities together while preserving hard layer typing and source authority.",
+    "Contradictory and superseded assertions remain simultaneously representable; no projection step silently selects a global truth.",
+    "OntologySliceV1 or equivalent bounded schema-context retrieval returns only the classes/relations relevant to a frozen task/query and is deterministic for the same semantic manifest.",
+    "EvidenceRequirementV1 can be derived from missing facets, source level, verification state, contradiction, staleness, or benchmark-calibrated insufficiency and never relies solely on raw model self-confidence.",
+    "Evidence escalation produces requests/candidates only; it cannot itself acquire evidence, launch models, mutate scientific state, or execute an experiment.",
+    "CandidateActionV1 and DecisionEvaluationV1 bind exact semantic/knowledge and authority-policy checkpoints; inferred/model-derived facts cannot create permission or obligation.",
+    "All authorization-adversary fixtures fail closed with zero authority escapes.",
+    "The projection rebuild is deterministic or canonically equivalent and produces a stable semantic-manifest identity from identical frozen inputs.",
+    "Frozen benchmark expected-answer sets pass for provenance traversal, contradiction/time replay, multi-hop semantic queries, evidence-needs derivation, action-candidate explanation, and historical decision replay.",
+    "Projection corruption/unavailability cannot mutate authoritative research or policy state; any decision requiring unavailable authority context denies/abstains.",
+    "Current relational/query baseline latency is measured before any performance promotion claim; no invented latency threshold is used.",
+    "The final prototype verdict is PROMOTE_TO_INTEGRATION, REVISE, or REJECT. PROMOTE_TO_INTEGRATION creates a separate integration task; this task never directly promotes code into production paths."
+  ],
+  "constraints": [
+    "Do not mutate research-engine-local-extract-redesign-v1, its benchmarks, scientific gates, next_safe_action, or production STANDARD Codex EXTRACT / accepted page-scoped Qwen VERIFY.",
+    "Treat research-engine@80da2cae9f8d80a7e7049a9b5339807becc54a98 Wave 7A.3 WAVE7A3_REJECT as frozen scientific evidence/exclusion evidence, not as an accepted EXTRACT architecture.",
+    "Do not mutate src/research_engine/**, deploy/**, README.md, pyproject/dependency files, database schemas/migrations, or .github workflows in prototype v1.",
+    "Do not mutate workspace-control workflows, policies, procedures, schemas, architecture policy, Heartbeat implementation, or any task other than this child capsule/handoff.",
+    "No graph database, persistent KG service, PostgreSQL schema change, RDF store, or production semantic service is introduced in v1.",
+    "Do not add a new third-party runtime dependency in v1. Prove the semantics first with deterministic typed records and in-memory indexes; technology/backend evaluation is a later decision.",
+    "No model inference, web request, Lambda/GPU execution, or autonomous experiment launch is required or authorized by prototype v1.",
+    "No semantic inference, evidence object, graph edge, model output, or CandidateAction may grant executor authority. Only explicit authority-owned policy context may permit an action.",
+    "No autonomous policy self-modification. Policy changes remain explicit, versioned, reviewable, and outside this prototype.",
+    "Preserve open-world scientific semantics: unknown is not false, contradictions are retained, provenance is mandatory, and revisions use supersession rather than overwrite.",
+    "Prototype fixtures may copy bounded source records only when each copy records exact originating repository, commit/checkpoint, path/record identity, and content hash.",
+    "Cross-chat coordination uses durable Git/task-capsule state and exact SHAs. Heartbeat is liveness/ownership transport only.",
+    "If a required behavior cannot be tested without entering a forbidden production path, record the limitation and stop rather than widening scope implicitly."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "ce4c211bf28efa84d3e6113984bef9356ddceeb4",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "ce4c211bf28efa84d3e6113984bef9356ddceeb4",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-semantic-control-prototype-v1.json",
+        "tasks/active/workspace-semantic-control-prototype-v1.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "mutate",
+      "base_sha": "80da2cae9f8d80a7e7049a9b5339807becc54a98",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "80da2cae9f8d80a7e7049a9b5339807becc54a98",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "prototypes/semantic_control/**",
+        "benchmarks/semantic_control/**",
+        "tests/semantic_control/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "freeze_contract_and_fixtures",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Parent architecture checkpoint workspace-control@a2cbec9ca6dae07771bb1e7f924a119b1b243e45",
+        "Current child-task creation base workspace-control@ce4c211bf28efa84d3e6113984bef9356ddceeb4",
+        "Valid Local EXTRACT Wave 7A.3 scientific checkpoint research-engine@80da2cae9f8d80a7e7049a9b5339807becc54a98",
+        "Frozen benchmark families P1-P8 from workspace-knowledge-action-ontology-v1"
+      ],
+      "outputs": [
+        "Fixture manifest with exact source repository/commit/path or record identity/content hashes",
+        "Versioned prototype contracts: SemanticObservationV1, EvidenceRequirementV1, OntologySliceV1, CandidateActionV1, DecisionEvaluationV1",
+        "Frozen expected-answer benchmark scenarios spanning research evidence, workspace policy/task state, contradictions, supersession, evidence gaps, and authorization adversaries"
+      ],
+      "validation": [],
+      "resume_condition": "All fixtures and interface contracts are frozen before semantic engine implementation."
+    },
+    {
+      "id": "implement_observation_and_federation_adapters",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Frozen contract/fixture manifest",
+        "research-engine evidence/provenance fixtures",
+        "workspace-control task/workflow/policy/receipt fixtures"
+      ],
+      "outputs": [
+        "Pure deterministic research-engine -> SemanticObservationV1 adapter",
+        "Pure deterministic workspace-control -> typed semantic entity/relation adapter",
+        "Canonical serialization and stable semantic-manifest hashing"
+      ],
+      "validation": [],
+      "resume_condition": "Adapters preserve 100% required provenance and canonical rebuild identity on frozen fixtures."
+    },
+    {
+      "id": "build_semantic_twin_and_query_layer",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Canonical semantic observations and authority/execution projections"
+      ],
+      "outputs": [
+        "In-memory WorkspaceSemanticTwin with strict epistemic/normative/execution layer typing",
+        "Contradiction, supersession, temporal/context, and provenance traversal primitives",
+        "Deterministic multi-hop query interface and expected-answer tests"
+      ],
+      "validation": [],
+      "resume_condition": "P1, P2, P3, P6, and deterministic rebuild portions of P7 pass."
+    },
+    {
+      "id": "implement_context_slice_and_evidence_escalation",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "WorkspaceSemanticTwin",
+        "Frozen research-gap and extraction fixtures"
+      ],
+      "outputs": [
+        "OntologySliceV1 bounded relevant-schema/context selection",
+        "EvidenceRequirementV1 derivation from durable evidence-sufficiency signals",
+        "Explainable targeted escalation plans that request evidence without executing acquisition"
+      ],
+      "validation": [],
+      "resume_condition": "Frozen expected evidence-gap cases produce the correct bounded requirements without model calls or authority effects."
+    },
+    {
+      "id": "implement_action_candidate_and_decision_bridge",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Semantic twin",
+        "Frozen workspace-control authority/policy fixtures",
+        "Frozen candidate-action scenarios"
+      ],
+      "outputs": [
+        "CandidateActionV1 generation from semantic state",
+        "DecisionEvaluationV1 binding exact semantic/knowledge checkpoint, policy identity, preconditions, applicability/deny reasons, and selected/denied candidate",
+        "Fail-closed authority adversary tests; no executor invocation"
+      ],
+      "validation": [],
+      "resume_condition": "P4 and P5 pass with zero authorization escapes and exact explanation provenance."
+    },
+    {
+      "id": "integrated_benchmark_and_verdict",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "All prototype components",
+        "Frozen P1-P8 benchmark contract"
+      ],
+      "outputs": [
+        "End-to-end semantic-control benchmark report",
+        "Relational/current-baseline comparison measurements",
+        "PROMOTE_TO_INTEGRATION, REVISE, or REJECT verdict",
+        "If promoted, exact interface/migration boundary for a separate production-integration task"
+      ],
+      "validation": [],
+      "resume_condition": "All hard gates are evaluated and a bounded verdict is durably checkpointed."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "parent-architecture-checkpoint",
+      "kind": "architecture_decision",
+      "identity": "workspace-control@a2cbec9ca6dae07771bb1e7f924a119b1b243e45:knowledge-action-projection-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "Parent selected existing authoritative stores plus rebuildable typed semantic projection with strict epistemic/normative/execution boundaries.",
+        "Luti synthesis added federation, semantic observations, ontology-slice retrieval, confidence/evidence-sufficiency escalation, shared semantic twin, and separate decision evaluation."
+      ]
+    },
+    {
+      "id": "extract-scientific-checkpoint",
+      "kind": "scientific_evidence",
+      "identity": "research-engine@80da2cae9f8d80a7e7049a9b5339807becc54a98:wave7a3-reject",
+      "required_for_resume": true,
+      "evidence": [
+        "Wave 7A.3 corrected run 40027366528 is implementation-valid.",
+        "Scientific verdict WAVE7A3_REJECT; scientific_gate_consumed=true.",
+        "Production STANDARD Codex EXTRACT and accepted page-scoped Qwen VERIFY remain unchanged.",
+        "This checkpoint is used only as frozen fixture/exclusion evidence and does not constrain the future accepted EXTRACT architecture."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Explicit operator authorization",
+      "result": "PASS",
+      "evidence": [
+        "Operator explicitly said to get to work and requested a concrete plan and scope after confirming cross-chat coordination and the valid EXTRACT scientific checkpoint."
+      ]
+    },
+    {
+      "check": "Cross-task isolation",
+      "result": "PASS",
+      "evidence": [
+        "EXTRACT redesign task is CHECKPOINTED at valid WAVE7A3_REJECT and remains independent.",
+        "Prototype mutation scope excludes EXTRACT task state, production research-engine paths, workspace-control policy/procedure paths, and runtime execution."
+      ]
+    },
+    {
+      "check": "Scope closure before implementation",
+      "result": "PASS",
+      "evidence": [
+        "Prototype v1 is bounded to six semantic-control primitives plus frozen fixtures and P1-P8 benchmarks.",
+        "Graph backend selection, production integration, model calls, Lambda, policy changes, database migrations, and new dependencies are explicitly deferred."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Freeze the exact fixture manifest and V1 interface schemas before writing semantic-engine code.",
+    "Implement deterministic adapters and canonical semantic-manifest hashing only after fixture/contract freeze.",
+    "Implement/query the in-memory semantic twin, then evidence escalation/context slicing, then action-candidate/DecisionEvaluation in that order.",
+    "Run the frozen P1-P8 benchmark and issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT without touching production paths."
+  ],
+  "next_safe_action": "Create the research-engine prototype branch from exact checkpoint 80da2cae9f8d80a7e7049a9b5339807becc54a98 and perform only stage freeze_contract_and_fixtures: inspect the exact authoritative fixture candidates, write a provenance-pinned fixture manifest and V1 interface contracts under benchmarks/semantic_control/**, and add contract/fixture tests under tests/semantic_control/**. Do not implement the semantic engine until those contracts and expected-answer fixtures are frozen.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "This child task is the implementation boundary created from workspace-knowledge-action-ontology-v1 after operator acceptance. It deliberately treats the semantic representation backend as an implementation detail: v1 uses deterministic typed records and in-memory indexes to prove semantics before selecting RDF/SPARQL/property-graph technology. The task consumes the valid Wave 7A.3 REJECT as frozen evidence while remaining scientifically independent from the ongoing/future Local EXTRACT redesign. The intended eventual integration is adapter-based: accepted future EXTRACT output -> stable evidence/output adapter -> semantic-control layer. The semantic-control layer may request evidence or generate CandidateAction records, but only existing authority-owned policy evaluation can authorize execution."
+}
