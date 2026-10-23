@@ -30,28 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: f7608b0a22a5be1edc542ab5fbe97b09eea5cc56
+- Remote checkpoint: 0e7fa15e49fa5413d61c7c18d7be4e98d9e41cfa
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ec592f877bde55c213dadf3a84aad5dec76197c2
+- Remote checkpoint: c528da5112885d9e7a3cb84df6e887a4f1e8df4b
 - Remote verified: true
 
 ## Next safe action
 
-Create a new inert research-engine trigger PR based on the merged zero-generation diagnostic implementation ec592f877bde55c213dadf3a84aad5dec76197c2, then issue exactly one `/local-extract-post-wave7a3-coverage <exact-trigger-head-sha>` comment. Observe that single run to completion, evaluate only the frozen COMPOSITION_CONFIRMED/PARTIAL/NEGATIVE contract, checkpoint its artifact hashes and disposition immediately, and close the trigger PR unmerged. Do not alter selector weights/gates after seeing results, train/download a contribution classifier, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
+Close inert research-engine PR #184 unmerged. Then start a new evidence-first EXTRACT design phase for FAMILY_C iterative retrieve-verify-retrieve (or another materially different coverage-preserving mechanism) using benchmarks/document_intelligence/local-extract-post-wave7a3-coverage-result.v1.json as exclusion evidence. The design must define a teacher-blind way to identify uncovered evidence after the frozen source-aware first pass and a bounded residual retrieval/selection step before any run. Do not tune/rerun BALANCED_FACILITY_LOCATION_RRF_V1, promote the non-verdict 20/4 quota control post hoc, train/download a contribution classifier, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
 
 ## Remaining work
 
-- Create one inert research-engine trigger PR from implementation checkpoint ec592f877bde55c213dadf3a84aad5dec76197c2 without changing diagnostic semantics.
-- Issue exactly one /local-extract-post-wave7a3-coverage <exact-trigger-head-sha> comment and do not issue a second trigger while that run exists.
-- Evaluate only COMPOSITION_CONFIRMED/PARTIAL/NEGATIVE from the frozen report, preserve all diagnostic artifacts/hashes, and checkpoint the scientific result immediately.
-- Close the inert trigger PR unmerged after result checkpointing.
-- Only if COMPOSITION_CONFIRMED may a separate evidence-first contract open compact contribution/discourse classifier training/domain-transfer evaluation.
-- Do not start Wave 7B, change production STANDARD Codex EXTRACT or accepted Qwen VERIFY, or introduce ontology/semantic-control mechanisms.
+- Close inert research-engine trigger PR #184 unmerged; no second composition run is authorized.
+- Begin a new evidence-first design phase for FAMILY_C iterative retrieve-verify-retrieve or another materially different coverage-preserving architecture. Treat COMPOSITION_NEGATIVE and the 20/4 quota control as exclusion/design evidence, not as a license to tune the rejected selector.
+- Research how to define teacher-blind residual coverage/uncovered evidence locally before a bounded second retrieval pass; preserve exact authoritative-PDF provenance, the source-aware baseline first pass, BM25 first-class status, and current top-24 final budget unless new evidence independently justifies changing them.
+- Do not train/download a contribution/discourse classifier unless a future architecture independently establishes a valid composition/coverage stage and a separate evidence-first training contract authorizes it.
+- Keep workspace-knowledge-action-ontology-v1 downstream-only and preserve a deterministic provenance-bearing EXTRACT output boundary for external adaptation.
+- Do not start Wave 7B or change production STANDARD Codex EXTRACT / accepted page-scoped Qwen VERIFY.
 
 ## Blockers / gates
 
