@@ -219,8 +219,9 @@
       "validation": [
         {
           "check": "Accepted EXTRACT output dependency",
-          "result": "BLOCKED_EVIDENCE",
+          "result": "NOT_RUN",
           "evidence": [
+            "BLOCKED_EVIDENCE: accepted EXTRACT architecture/output checkpoint is not yet available.",
             "Current owning task research-engine-local-extract-redesign-v1 is CHECKPOINTED at proposition_alignment_preservation_implementation.",
             "Current workspace-control task blob is 50b57caad1acc5b017c025ae97c548cd7b752061.",
             "Current research-engine EXTRACT checkpoint is f3d5dc4f8cc5007d3159b232ae00317620a59de6 and records implementation only; no proposition-alignment diagnostic result exists yet.",
