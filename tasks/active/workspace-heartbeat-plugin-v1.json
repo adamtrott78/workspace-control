@@ -908,7 +908,7 @@
     },
     {
       "id": "v046_intrinsic_resize_hotfix",
-      "status": "VALIDATING",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda+chatgpt",
@@ -1035,7 +1035,7 @@
         },
         {
           "check": "v0.4.6 planned chat-to-chat handoff gate",
-          "result": "PENDING",
+          "result": "NOT_RUN",
           "evidence": [
             "Still requires one planned release: outgoing chat synchronizes durable state, emits terminal Heartbeat done, and a fresh receiving chat begins the same real task_id without a server restart."
           ]
