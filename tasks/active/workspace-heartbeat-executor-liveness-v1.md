@@ -23,20 +23,20 @@ Give the operator, inside the existing Heartbeat card and without opening a new 
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-heartbeat-executor-liveness-mvp
-- Remote checkpoint: cd396157d7e3e5c3f955c15e41bebba501057693
+- Remote branch: checkpoint-heartbeat-liveness-mvp-acceptance
+- Remote checkpoint: 04852fe2111143a7950ccbdb15f3ed13b95a7521
 - Remote verified: true
 
 ## Next safe action
 
-Validate observation-only v0.4.7 liveness branch workspace-heartbeat-executor-liveness-mvp. Keep semantic progress, executor touch, and app UI poll independent; no automatic stale-owner takeover. Deploy only after acceptance, then collect real interrupted-chat evidence.
+v0.4.7 observation-only MVP is merged and GitHub CI PASS. Keep live v0.4.6 running until explicit controlled host rollout; validate same-card executor/UI/progress indicators and interruption behavior with real field evidence. Do not enable automatic stale-owner takeover.
 
 ## Remaining work
 
-- Validate isolated v0.4.7 observation-only candidate with CI and regression tests.
-- Inspect v0.4.7 UI card tests and merge only after successful validation.
-- Do not deploy without explicit host validation; preserve v0.4.6 and v0.4.5 rollback.
-- Observe a real frontend interruption and measure touch gaps before any TTL or takeover design.
+- Host-deploy accepted v0.4.7 candidate only after verifying rollout/rollback plan, with v0.4.6 and v0.4.5 retained.
+- Verify current-card freshness display and sizing during same-chat activity.
+- Collect real ChatGPT frontend-interruption evidence and measure touch gaps; do not infer exact assistant death.
+- Choose a measured lease TTL and any recovery/takeover semantics only in a separate approved phase.
 
 ## Blockers / gates
 
