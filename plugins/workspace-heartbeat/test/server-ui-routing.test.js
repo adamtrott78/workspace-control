@@ -15,7 +15,7 @@ function toolBlock(name,next){
 
 test("v0.4.6 backend and cache-busted live resource are explicit",()=>{
   assert.ok(server.includes('version: "0.4.6"'));
-  assert.ok(server.includes('const LIVE_URI = "ui://workspace-heartbeat/live-v5.html"'));
+  assert.ok(server.includes('const LIVE_URI = "ui://workspace-heartbeat/live-v6.html"'));
 });
 
 test("heartbeat_begin_turn is the single mounted turn boundary",()=>{
