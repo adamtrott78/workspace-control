@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 1e1448efc6a61aa984051ef6c7c8badca03fbcce
+- Remote checkpoint: ad4f788890473add0ca86bbcd5ca9de678dba75f
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 1f8a955a6990871960072867378e3461ba18e86b
+- Remote checkpoint: 8329f160a154d86f8178bb094e9b53a8274193b5
 - Remote verified: true
 
 ## Next safe action
 
-Install the exact declarative proposition-reranker diagnostic route in workspace-control using existing gpu-single-public-ci-v1 authority, validate/merge/reconcile it, then execute exactly one bounded research-engine reranker bakeoff at implementation SHA 1f8a955a6990871960072867378e3461ba18e86b. Stop after PROMISING/NEGATIVE result checkpoint; do not start Wave 7 or change production EXTRACT/VERIFY.
+Monitor exactly one active reranker bakeoff run 39983057391 from inert research-engine PR #159 at exact head 8329f160a154d86f8178bb094e9b53a8274193b5. Do not trigger another run while it is queued/running. If it reaches scientific scoring, recover and checkpoint the report, classify only under the frozen PROMISING/NEGATIVE rule, close PR #159 unmerged, and STOP before Wave 7. If it fails before producing any proposition score, classify the pre-scoring failure and fix only that runtime boundary before any retry.
 
 ## Remaining work
 
-- Bind exactly one declarative workspace-control route model-eval-local-extract-reranker-v1 to research-engine workflow blob 6c101c99f5829772f97c48f666aff960697006ea using accepted execution contract gpu-single-public-ci-v1, model_id=null, and runtime qwen35-vllm-cu129-image-native-sampler-v3.
-- Validate/merge the route and require trusted Lambda CI Project Reconcile PASS before any benchmark trigger.
-- Create one inert same-repository research-engine trigger PR at exact implementation main 1f8a955a6990871960072867378e3461ba18e86b and issue /lambda-ci-local-extract-reranker-bakeoff exactly once.
-- Run exactly one bounded reranker bakeoff and classify only under the frozen PROMISING/NEGATIVE rule; checkpoint the artifact and close the trigger PR unmerged.
-- Do not start Wave 7 automatically. Production EXTRACT remains STANDARD Codex, accepted Qwen VERIFY remains unchanged, and the historical Wave-6 CLAIM_SCHEMA rejects remain a separate structured-output cleanup.
+- Monitor run 39983057391 only; no duplicate trigger while it is queued or running.
+- If the run produces valid arm rankings, recover the artifact and classify under the frozen PROMISING/NEGATIVE gate; do not retune queries, top_k, candidate pool, hybrid weights, support oracle, or thresholds after seeing results.
+- If the run fails before any proposition score is produced, record that the scientific gate remains unconsumed and fix only the narrow pre-scoring runtime fault.
+- After a valid result, checkpoint the report, close inert PR #159 unmerged, and stop before Wave 7 or any production EXTRACT/VERIFY change.
+- Heartbeat executor-touch liveness remains an independent workspace-heartbeat task; v0.4.7 exposes heartbeat_touch but the canonical procedures/progress_heartbeat.md still lacks a touch-emission cadence/rule.
 
 ## Blockers / gates
 
