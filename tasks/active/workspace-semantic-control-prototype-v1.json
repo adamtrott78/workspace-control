@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-knowledge-action-ontology-v1",
-  "current_stage": "build_semantic_twin_and_query_layer",
+  "current_stage": "implement_context_slice_and_evidence_escalation",
   "acceptance_criteria": [
     "The prototype consumes only frozen, provenance-pinned fixtures from authoritative research-engine/workspace-control state; it does not become an authoritative store.",
     "SemanticObservationV1 preserves exact source identity, authoritative record ID, source/checkpoint identity, verification/provenance metadata, temporal context, and supersession/contradiction state needed to reconstruct why an assertion exists.",
@@ -62,7 +62,7 @@
       "base_sha": "80da2cae9f8d80a7e7049a9b5339807becc54a98",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "007d88b37f34554e8be8e8ad9c976e3724a82521",
+        "checkpoint_sha": "633d99ec357014aaa34f0141b6bda58ec03f649c",
         "verified": true
       },
       "local": null,
@@ -136,7 +136,7 @@
     },
     {
       "id": "build_semantic_twin_and_query_layer",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -148,15 +148,29 @@
         "Contradiction, supersession, temporal/context, and provenance traversal primitives",
         "Deterministic multi-hop query interface and expected-answer tests"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "In-memory semantic twin and query layer",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #186 merged as 633d99ec357014aaa34f0141b6bda58ec03f649c after CI run 40032834838 PASS.",
+            "Twin rebuild hash is deterministic under input reordering.",
+            "P1 provenance traversal reaches the frozen source IDs.",
+            "P2 preserves both sides of a contradiction without selecting a global truth.",
+            "P3 retains superseded history and replays January/February state correctly.",
+            "P6 returns CHECKPOINTED + WAVE7A3_REJECT + wave7b_authorized=false from cross-layer state.",
+            "Projection returns deep copies and duplicate/missing-contradiction corruption fails closed."
+          ]
+        }
+      ],
       "resume_condition": "P1, P2, P3, P6, and deterministic rebuild portions of P7 pass."
     },
     {
       "id": "implement_context_slice_and_evidence_escalation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "WorkspaceSemanticTwin",
         "Frozen research-gap and extraction fixtures"
@@ -250,6 +264,16 @@
         "PR #183 CI PASS",
         "Canonical hashing and exact provenance tests passed."
       ]
+    },
+    {
+      "id": "semantic-twin-query-v1",
+      "kind": "prototype_implementation",
+      "identity": "research-engine@633d99ec357014aaa34f0141b6bda58ec03f649c:workspace-semantic-twin-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #186 CI PASS",
+        "P1/P2/P3/P6 and projection-isolation tests pass."
+      ]
     }
   ],
   "artifacts": [],
@@ -280,12 +304,11 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Build the in-memory semantic twin and deterministic multi-hop query layer over adapter output.",
-    "Implement evidence escalation/context slicing after semantic-twin P1/P2/P3/P6/P7 tests pass.",
-    "Implement CandidateAction/DecisionEvaluation bridge after the evidence layer passes.",
+    "Implement deterministic ontology-slice selection and request-only EvidenceRequirementV1 derivation.",
+    "Implement CandidateAction/DecisionEvaluation bridge after evidence/context tests pass.",
     "Run frozen P1-P8 and issue PROMOTE_TO_INTEGRATION, REVISE, or REJECT."
   ],
-  "next_safe_action": "Implement only build_semantic_twin_and_query_layer from research-engine checkpoint 007d88b37f34554e8be8e8ad9c976e3724a82521. Add in-memory deterministic projection/query code under prototypes/semantic_control/** and tests under tests/semantic_control/**. Prove provenance traversal, contradiction preservation, temporal/supersession replay, deterministic rebuild, and the frozen P6 multi-hop task/scientific-state query. No evidence escalation, CandidateAction evaluation, database/model/network/Lambda/executor calls, or production imports yet.",
+  "next_safe_action": "Implement only implement_context_slice_and_evidence_escalation from research-engine checkpoint 633d99ec357014aaa34f0141b6bda58ec03f649c. Add deterministic ontology-slice and EvidenceRequirementV1 derivation under prototypes/semantic_control/** with tests under tests/semantic_control/**. Cover contradiction, missing facet, source-level insufficiency, verification insufficiency, staleness, and benchmark-calibrated insufficiency using durable fixture attributes; raw model confidence alone must never trigger escalation. Every requirement must remain REQUEST_ONLY. Do not evaluate CandidateAction or invoke any database/model/network/Lambda/executor path yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "This child task is the implementation boundary created from workspace-knowledge-action-ontology-v1 after operator acceptance. It deliberately treats the semantic representation backend as an implementation detail: v1 uses deterministic typed records and in-memory indexes to prove semantics before selecting RDF/SPARQL/property-graph technology. The task consumes the valid Wave 7A.3 REJECT as frozen evidence while remaining scientifically independent from the ongoing/future Local EXTRACT redesign. The intended eventual integration is adapter-based: accepted future EXTRACT output -> stable evidence/output adapter -> semantic-control layer. The semantic-control layer may request evidence or generate CandidateAction records, but only existing authority-owned policy evaluation can authorize execution."
