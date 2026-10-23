@@ -31,7 +31,7 @@ function createHarness(){
     getBoundingClientRect(){return {top:this.top,bottom:this.bottom,height:this.height};}
   }
   const elems=new Map();
-  for(const key of ["app","title","state","history","footer"])elems.set(key,new El());
+  for(const key of ["app","title","state","history","footer","executor","ui-seen","progress-age"])elems.set(key,new El());
   const handlers=new Map();
   const messages=[];
   let timers=[],seq=0,hidden=false;
