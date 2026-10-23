@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-plugin-v1
 - Title: Workspace Heartbeat MCP Plugin v1
-- Status: VALIDATING
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat v0.4.5 lifecycle and semantic behavior
 
 ## Next safe action
 
-Complete the final v0.4.6 planned chat-to-chat handoff gate. The short-card intrinsic-sizing and six-plus-update grow/scroll host gates are now PASS. Before handoff, synchronize this capsule and derived Markdown on the fresh current-main restage branch; then emit terminal Heartbeat done from the outgoing conversation and have a fresh receiving chat call heartbeat_begin_turn on this same real task_id without a server restart. If that passes, record the evidence, mark v0.4.6 VALIDATED/COMPLETE, merge the fresh restage branch, preserve v0.4.5 rollback, and then return to workspace-heartbeat-executor-liveness-v1.
+v0.4.6 accepted: PR #280 merged at cd396157d7e3e5c3f955c15e41bebba501057693. Preserve v0.4.5 rollback; continue separate v0.4.7 liveness task.
 
 ## Remaining work
 
@@ -54,3 +54,7 @@ Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
+
+## 2026-10-23 receiving-chat checkpoint
+
+Planned cross-chat handoff PASS using the same task ID without server restart. v0.4.6 was merged through fresh restage PR #280 at `cd396157d7e3e5c3f955c15e41bebba501057693`. Observation-only liveness work is separately staged as v0.4.7; automatic takeover remains disabled.
