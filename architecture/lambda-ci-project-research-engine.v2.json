@@ -347,6 +347,30 @@
         "model_id": "qwen3.5-4b",
         "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
       }
+    },
+    "model-eval-local-extract-wave7a2": {
+      "activation_state": "MIGRATION_LIVE_EQUIVALENT",
+      "lane": "gpu",
+      "execution_contract_id": "model-dual-public-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-local-extract-wave7a2.yml",
+        "default_branch": "main",
+        "blob_sha": "0d5d021d55159c0e2a0913a158a534177e03c865"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-ci-local-extract-wave7a2",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": "qwen3.5-4b",
+        "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
+      }
     }
   },
   "bindings": {
