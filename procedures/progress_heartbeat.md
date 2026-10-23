@@ -150,6 +150,45 @@ Do not consciously optimize for a target number of Heartbeats. Short,
 straightforward work may need very few. A difficult turn may need more if the
 model's working understanding genuinely changes several times.
 
+## Executor-touch emission policy
+
+Semantic updates and executor liveness are separate contracts.
+
+`heartbeat_begin_turn` and every `heartbeat_update` are executor touches as well as
+semantic events. When meaningful semantic progress has not changed but the
+assistant is still actively executing tool work, use
+`heartbeat_touch(task_id, turn_id)` as a **silent liveness signal**.
+
+The current v0.4.7 live card renders executor activity as **recent** only while
+the last executor signal is at most 30 seconds old. The model cannot rely on an
+autonomous wall-clock timer between tool calls, so active execution uses the
+following deterministic emission rules:
+
+- after a begin-turn, semantic update, or touch, perform **at most three
+  non-Heartbeat tool operations** before another executor signal. If no semantic
+  update is warranted, call `heartbeat_touch` before a fourth non-Heartbeat
+  operation;
+- call `heartbeat_touch` immediately before a known long or opaque tool
+  operation, external wait, model run, download, CI wait/poll phase, or similar
+  step that may otherwise let the 30-second freshness window expire;
+- when such a long operation returns and more tool work will continue without a
+  semantic update, touch before the next non-Heartbeat operation;
+- during repeated polling of the same external dependency, keep semantic
+  commentary compressed, but emit silent touches so active polling does not
+  appear executor-stale;
+- do **not** emit touches while the assistant is genuinely idle, waiting on the
+  user, finished, blocked with no active execution, or otherwise unable to
+  demonstrate fresh work. A touch is evidence of a model tool call at that
+  instant, not proof of continuous process existence between calls.
+
+A `heartbeat_touch` never creates semantic history, never substitutes for a
+meaningful `heartbeat_update`, and **does not reset the 10-non-Heartbeat-tool
+semantic-silence backstop** below. Track those two backstops independently.
+
+If `heartbeat_touch` fails, do not claim fresh executor liveness. Preserve the
+durable workspace task and continue through other healthy tools when safe; report
+the Heartbeat transport/runtime problem at the next useful semantic update.
+
 ## Style
 
 Write Heartbeat messages as natural point-in-time working summaries.
