@@ -1,0 +1,238 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-knowledge-action-ontology-v1",
+  "title": "Unified Knowledge-Action Ontology Architecture v1",
+  "status": "IN_PROGRESS",
+  "goal": "Determine whether a provenance-preserving typed ontology/knowledge-graph substrate can unify research knowledge representation with executor decision/action semantics—so accumulated knowledge can help determine what should be done next—without conflating scientific evidence with policy authority, and produce a bounded architecture/benchmark plan before any production mutation.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/evidence-first-solution-research.v1.json",
+    "checkpoint_sha": "dbce355969e6378eef9effa2914393cc8add2e4c",
+    "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
+  },
+  "current_stage": "frame_and_recover_existing_substrates",
+  "acceptance_criteria": [
+    "The task recovers the actual current research-engine persistence architecture and schema from repository/runtime evidence, including authoritative evidence storage, normalized knowledge, relations, checkpoints, embeddings/search projections, and any graph-like structures already present.",
+    "The task recovers the actual workspace-control execution/policy representation, including task capsules, workflows, procedures, policy/authority boundaries, executor routing, state transitions, and receipts/evidence used to determine safe next actions.",
+    "The research clearly distinguishes epistemic knowledge (what is believed/observed/inferred) from normative/action knowledge (what is permitted/required/preferred) and from execution state (what has actually happened).",
+    "The MILCOM 2026 lead is investigated with public evidence: best-poster winner, Boeing employee in California, PhD student, author of a book beginning with 'The 4th Industrial Revolution:', and an autonomous-vehicle edge/cloud project using ontology/semantic graphs rather than raw sensor payloads. Identity and paper title are not claimed unless evidence converges.",
+    "A current external survey covers ontology engineering, semantic/knowledge graphs, RDF/OWL/property graphs, scene/semantic graphs, policy/rule engines, behavior trees/state machines/planning, neuro-symbolic systems, continual knowledge graphs, and knowledge-driven autonomous-agent architectures relevant to the hypothesis.",
+    "At least three materially distinct architecture families are compared, including a separated-but-linked research knowledge graph plus policy/action graph, a unified typed graph with strict layer/authority boundaries, and an event-sourced knowledge/action substrate with rebuildable graph projections.",
+    "The design preserves provenance, contradiction, temporal validity, confidence, source authority, supersession, and uncertainty rather than collapsing knowledge into one asserted world state.",
+    "No research fact, inferred relation, or model-generated edge can silently become executor authority; transitions from knowledge to action require explicit policy/authority semantics and auditable decision evidence.",
+    "Continual-learning semantics are defined as controlled append/update/versioning of evidence, derived knowledge, ontology mappings, and policy revisions rather than unconstrained self-modification.",
+    "The task evaluates whether the existing PostgreSQL + content-addressed artifact store + rebuildable pgvector/text/graph-projection strategy can host the proposed semantics before considering a new database technology.",
+    "A bounded prototype/benchmark contract is defined before implementation, measuring decision correctness, provenance traceability, contradiction handling, update behavior, retrieval/query utility, policy applicability, explainability, and failure isolation.",
+    "The final recommendation states whether to pursue, narrow, or reject the unified knowledge-action ontology hypothesis and provides a migration path that keeps current research-engine and workspace-control behavior rollback-safe."
+  ],
+  "constraints": [
+    "This is a separate research/architecture task. Do not change the Local EXTRACT Wave 7 task, its scientific gates, or its next action because of ontology research.",
+    "Do not replace PostgreSQL, pgvector, the content-addressed artifact store, task capsules, workflows, or policy files merely because graph technology appears attractive.",
+    "Preserve authoritative source evidence as scientific truth; ontology/graph structures are derived semantic representations unless an existing project contract explicitly makes them authoritative.",
+    "Keep epistemic, normative/policy, and execution-state semantics explicitly typed and distinguishable even if represented in one physical graph.",
+    "Do not let unverified research claims, model-generated edges, or inferred correlations directly authorize executor actions.",
+    "Do not introduce autonomous policy self-modification. Policy/authority changes remain explicit, reviewable, versioned, and human-gated where currently required.",
+    "Do not silently reconcile contradictory evidence; preserve disagreement, context, temporal validity, and source provenance.",
+    "Do not infer the MILCOM researcher's identity from weak clues. Use public sources and label candidate matches/uncertainty until evidence converges.",
+    "Prefer architectural evidence and working implementations over ontology buzzwords or vendor claims.",
+    "No production mutation in workspace-control or research-engine is authorized during the initial research stages beyond this task capsule and derived handoff.",
+    "Any later prototype must be additive/rebuildable and must preserve current systems as the known-good rollback state."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "dbce355969e6378eef9effa2914393cc8add2e4c",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "dbce355969e6378eef9effa2914393cc8add2e4c",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-knowledge-action-ontology-v1.json",
+        "tasks/active/workspace-knowledge-action-ontology-v1.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "ba9d09abf77af7280fdc5f5890dee1cb7a05ff67",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "ba9d09abf77af7280fdc5f5890dee1cb7a05ff67",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "frame_and_recover_existing_substrates",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+web+scholar",
+      "inputs": [
+        "research-engine current main ba9d09abf77af7280fdc5f5890dee1cb7a05ff67",
+        "workspace-control current main dbce355969e6378eef9effa2914393cc8add2e4c",
+        "automated-research-engine-v1 durable persistence decision and current schema/implementation",
+        "workspace-control task capsules, workflows, procedures, policies, Heartbeat, routing, and execution receipts",
+        "user hypothesis that accumulated knowledge and executor decision policy may benefit from a shared ontology/graph substrate"
+      ],
+      "outputs": [
+        "current research-engine storage/data-model map",
+        "current workspace-control knowledge/policy/execution-state map",
+        "explicit epistemic-vs-normative-vs-execution boundary model",
+        "precise problem statement and invariants for external research"
+      ],
+      "validation": [],
+      "resume_condition": "Actual existing substrate and authority boundaries are recovered from repository evidence before external architecture selection."
+    },
+    {
+      "id": "milcom_ontology_lead_investigation",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "web+scholar",
+      "inputs": [
+        "MILCOM 2026 best-poster clue",
+        "Boeing employee in California",
+        "PhD student",
+        "book title beginning 'The 4th Industrial Revolution:'",
+        "autonomous vehicle sends ontology/semantic graph to external server for low-latency inference/action rather than raw sensor payloads"
+      ],
+      "outputs": [
+        "candidate identity evidence",
+        "paper/poster title if verifiable",
+        "technical architecture summary of the relevant work",
+        "specific concepts worth carrying into the ontology architecture survey"
+      ],
+      "validation": [],
+      "resume_condition": "Identity/paper is either verified from converging public evidence or explicitly left unresolved with documented candidate evidence."
+    },
+    {
+      "id": "external_ontology_and_knowledge_action_research",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "web+scholar+github",
+      "inputs": [
+        "framed knowledge/action problem",
+        "existing research-engine and workspace-control constraints",
+        "MILCOM ontology lead if recovered"
+      ],
+      "outputs": [
+        "current literature and implementation survey",
+        "taxonomy of ontology/knowledge-graph/action-policy methods",
+        "continual-learning/update patterns",
+        "failure modes and lessons from comparable autonomous systems"
+      ],
+      "validation": [],
+      "resume_condition": "Evidence is sufficient to compare materially distinct architecture families without relying on terminology alone."
+    },
+    {
+      "id": "synthesize_unified_architecture_families",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "reasoning+github",
+      "inputs": [
+        "existing substrate maps",
+        "external research evidence",
+        "authority/provenance invariants"
+      ],
+      "outputs": [
+        "separate linked knowledge-graph + action-policy graph architecture",
+        "unified typed graph architecture with strict semantic/authority layers",
+        "event-sourced knowledge/action substrate with rebuildable graph projections",
+        "comparison across correctness, provenance, update semantics, explainability, implementation complexity, and migration risk"
+      ],
+      "validation": [],
+      "resume_condition": "A bounded shortlist and explicit rejected premises exist."
+    },
+    {
+      "id": "benchmark_and_prototype_contract",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "reasoning+github",
+      "inputs": [
+        "selected architecture shortlist",
+        "current known-good research-engine/workspace-control behavior"
+      ],
+      "outputs": [
+        "additive prototype boundary",
+        "benchmark cases joining research knowledge and executor-decision contexts",
+        "promotion/reject thresholds",
+        "rollback and human-approval semantics"
+      ],
+      "validation": [],
+      "resume_condition": "Prototype scope and predeclared success/failure gates are frozen before implementation."
+    },
+    {
+      "id": "implementation_handoff_if_justified",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated architecture recommendation",
+        "frozen benchmark/prototype contract"
+      ],
+      "outputs": [
+        "explicit implementation task or rejection/narrowing checkpoint"
+      ],
+      "validation": [],
+      "resume_condition": "No implementation begins until architecture research and benchmark contract are reviewed."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "dbce355969e6378eef9effa2914393cc8add2e4c",
+      "required_for_resume": true,
+      "evidence": [
+        "workspace-control main=dbce355969e6378eef9effa2914393cc8add2e4c",
+        "research-engine main=ba9d09abf77af7280fdc5f5890dee1cb7a05ff67",
+        "task is research-first; only its own capsule/handoff may mutate before an implementation gate",
+        "next action=recover actual current storage and executor-policy substrates before architecture selection"
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Explicit user authorization",
+      "result": "PASS",
+      "evidence": [
+        "User explicitly asked to spin the ontology-graph / unified knowledge-and-executor-policy idea into a separate task.",
+        "User asked that this exploration not derail the active Local EXTRACT work."
+      ]
+    },
+    {
+      "check": "Initial storage hypothesis",
+      "result": "PASS",
+      "evidence": [
+        "Existing automated-research-engine durable evidence records the selected v1 persistence direction as PostgreSQL + content-addressed artifact store + rebuildable pgvector/text/graph projections.",
+        "The new task treats this as a starting hypothesis to verify against current research-engine implementation rather than as permission to replace storage."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Recover and diagram the actual current research-engine persistence/schema/provenance model from code and current durable evidence.",
+    "Recover and diagram how workspace-control currently represents executor policy, workflow state, authority, preconditions, next-safe-action decisions, and execution evidence.",
+    "Investigate the MILCOM 2026 Boeing/PhD/best-poster ontology-graph researcher and paper using public evidence.",
+    "Research current ontology, knowledge-graph, semantic-scene-graph, rule/policy, planning, neuro-symbolic, and continual-knowledge methods relevant to a knowledge-to-action substrate.",
+    "Compare architecture families while preserving a hard boundary between facts/inferences and action authority.",
+    "Freeze a bounded benchmark/prototype contract before any implementation."
+  ],
+  "next_safe_action": "In a fresh chat, begin at frame_and_recover_existing_substrates. Read the authoritative task capsule and evidence-first research workflow. Inspect current research-engine persistence/schema code and workspace-control task/workflow/policy structures before proposing a graph technology. In parallel, investigate the MILCOM 2026 Boeing/PhD/best-poster ontology lead using public sources. Do not mutate production research-engine or workspace-control behavior and do not change the Local EXTRACT task.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Core hypothesis from the user: a durable data structure may be able to represent both accumulated knowledge about the world/research domain and the semantics that tell executors what action is appropriate in a given situation. The task must investigate this seriously while preventing a dangerous collapse of 'is true/believed' into 'is authorized/should execute'. The envisioned long-term system may support continual learning, research-gap discovery, and context-sensitive executor coordination, but those capabilities are hypotheses to evaluate rather than assumed goals."
+}
