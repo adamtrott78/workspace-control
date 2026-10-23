@@ -30,28 +30,26 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d5f43f0ead344d6db811c43649506cda7980e6de
+- Remote checkpoint: d69d7e5e7aa10b2f0705df408d9b59c2b75b474e
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 134936c8d884ee743faa82e18a886d9caebf62db
+- Remote checkpoint: fda45f3024cebfb2d760952b2eb93dfa07247b97
 - Remote verified: true
 
 ## Next safe action
 
-Create exactly one inert research-engine trigger PR carrying only a non-semantic marker on top of exact Family C implementation checkpoint 134936c8d884ee743faa82e18a886d9caebf62db, then issue exactly one `/local-extract-family-c-zero-loss <exact-trigger-head-sha>` comment. Observe that single zero-generation run to completion, evaluate only the frozen PROTECTED_AUGMENT_STRONG/FEASIBLE/NEGATIVE contract, checkpoint run/artifact/report hashes and disposition immediately, and close the trigger PR unmerged. Do not tune the selector after results or execute STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1 unless STRONG or FEASIBLE.
+After closing inert trigger PR #193 unmerged, begin a new evidence-first EXTRACT design phase from the durable Family C PROTECTED_AUGMENT_NEGATIVE result at research-engine@fda45f3024cebfb2d760952b2eb93dfa07247b97. The new phase must treat source-aware intent-utility preservation as an insufficient semantic-preservation proxy and compare materially different teacher-blind preservation/iterative-coverage mechanisms before any new implementation or run. Do not rerun/tune LEXICOGRAPHIC_ZERO_LOSS_SWAP_V1, execute STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1, promote the fixed 20/4 quota, train/download a classifier, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate ontology/semantic-control mechanisms.
 
 ## Remaining work
 
-- Create one inert research-engine trigger PR based on exact EXTRACT implementation checkpoint 134936c8d884ee743faa82e18a886d9caebf62db with only a non-semantic trigger marker.
-- Issue exactly one `/local-extract-family-c-zero-loss <exact-trigger-head-sha>` comment and do not issue a second trigger while that run exists.
-- Evaluate only PROTECTED_AUGMENT_STRONG/FEASIBLE/NEGATIVE from the frozen report and checkpoint exact run/artifact/report hashes immediately.
-- Close the inert trigger PR unmerged after result checkpointing.
-- Only if STRONG or FEASIBLE may a separate contract authorize STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1; do not execute it preemptively.
-- Do not train/download a sufficiency critic or contribution classifier, promote the fixed 20/4 quota, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
+- Close inert research-engine trigger PR #193 unmerged after this result checkpoint is durable.
+- Begin a new evidence-first design phase for a materially different teacher-blind semantic-preservation objective or iterative coverage mechanism; treat LEXICOGRAPHIC_ZERO_LOSS_SWAP_V1 as rejected scientific evidence.
+- The next design must explain why preserving source-aware intent utility can still lose source-aware teacher atoms and must directly target semantic evidence preservation without teacher leakage.
+- Do not execute STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1 on the rejected selector, train/download a sufficiency critic or contribution classifier, promote the fixed 20/4 quota, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
 
 ## Blockers / gates
 
