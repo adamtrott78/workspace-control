@@ -30,26 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9e77a99d8e0a889b8b6b002858f5a6c735f885a2
+- Remote checkpoint: f5dd5cb2dea9156b8b2c9bd665513bb7bbc8ea70
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9c03a6714f1bd244c463906cc9aad083cb4a4429
+- Remote checkpoint: 134936c8d884ee743faa82e18a886d9caebf62db
 - Remote verified: true
 
 ## Next safe action
 
-Implement the frozen ZERO_LOSS_RESIDUAL_AUGMENTATION_DIAGNOSTIC_V1 from benchmarks/document_intelligence/local-extract-family-c-iterative-residual-design.v1.json at research-engine@9c03a6714f1bd244c463906cc9aad083cb4a4429. Reuse the exact valid Wave 7A.3 generated-intents artifact, frozen source-aware BM25 RRF top-24 first pass, unchanged proposition pool/per-intent depth/RRF k/final budget, and deterministic LEXICOGRAPHIC_ZERO_LOSS_SWAP_V1. Add focused tests and normal CI, then durable-checkpoint the implementation before one and only one zero-generation trigger. Do not execute the structured Qwen gap judge unless this selector is STRONG or FEASIBLE.
+Create exactly one inert research-engine trigger PR carrying only a non-semantic marker on top of exact Family C implementation checkpoint 134936c8d884ee743faa82e18a886d9caebf62db, then issue exactly one `/local-extract-family-c-zero-loss <exact-trigger-head-sha>` comment. Observe that single zero-generation run to completion, evaluate only the frozen PROTECTED_AUGMENT_STRONG/FEASIBLE/NEGATIVE contract, checkpoint run/artifact/report hashes and disposition immediately, and close the trigger PR unmerged. Do not tune the selector after results or execute STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1 unless STRONG or FEASIBLE.
 
 ## Remaining work
 
-- Implement ZERO_LOSS_RESIDUAL_AUGMENTATION_DIAGNOSTIC_V1 exactly as frozen in research-engine@9c03a6714f1bd244c463906cc9aad083cb4a4429.
-- Add deterministic tests for source-aware control utility, residual utility, zero-loss swap feasibility/tie-breaking, and PROTECTED_AUGMENT_STRONG/FEASIBLE/NEGATIVE gates; run normal research-engine CI.
-- Checkpoint the merged implementation before creating one inert trigger PR and issuing exactly one zero-generation diagnostic.
-- Only if STRONG or FEASIBLE may a separate contract authorize STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1 on existing Qwen3.5-4B; do not execute it preemptively.
+- Create one inert research-engine trigger PR based on exact EXTRACT implementation checkpoint 134936c8d884ee743faa82e18a886d9caebf62db with only a non-semantic trigger marker.
+- Issue exactly one `/local-extract-family-c-zero-loss <exact-trigger-head-sha>` comment and do not issue a second trigger while that run exists.
+- Evaluate only PROTECTED_AUGMENT_STRONG/FEASIBLE/NEGATIVE from the frozen report and checkpoint exact run/artifact/report hashes immediately.
+- Close the inert trigger PR unmerged after result checkpointing.
+- Only if STRONG or FEASIBLE may a separate contract authorize STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1; do not execute it preemptively.
 - Do not train/download a sufficiency critic or contribution classifier, promote the fixed 20/4 quota, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
 
 ## Blockers / gates
