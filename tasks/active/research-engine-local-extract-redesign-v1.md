@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4b2c56eebe6ce7f04320f6ae31d11754f9eda197
+- Remote checkpoint: 91ea8d7545838b822878f30dd8952b26e2a3ec3f
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,16 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-STOP at the Wave 6 checkpoint. The one authorized benchmark is complete and inert research-engine PR #141 is closed unmerged. Wave 6 remains scientifically PARTIAL: selector alignment reached the intended 0.30305743036333815 target, but local completion is 8/9 and teacher coverage at F1>=0.5 remains 0/6. Do not start Wave 7 automatically. Production EXTRACT remains STANDARD Codex and accepted Qwen VERIFY remains unchanged. Resume only after an explicit decision selects a residual-focused next experiment or ends the redesign.
+Execute the post-Wave-6 Codex-parity diagnostic stage: first recover/inventory historical Codex teacher text, then implement a zero-generation stage-wise oracle and fixed-budget retrieval/window diagnostic on the preserved corpus. Do not design, route, or execute Wave 7 yet. Do not change production EXTRACT, accepted Qwen VERIFY, GitRunner/controller/provisioner/runtime, or model family.
 
 ## Remaining work
 
-- Do not automatically design, implement, route, or execute Wave 7.
-- Treat the Wave-6 selector hypothesis as confirmed: paper-global BM25 reached the intended 0.30305743036333815 selected-source mean F1, but the end-to-end candidate remains PARTIAL because one paper required residual fallback and normalized semantic agreement remains below the promotion gate.
-- Any further experiment requires an explicit new decision that names the residual being tested; production EXTRACT remains STANDARD Codex and accepted page-scoped Qwen VERIFY remains unchanged.
-- If work resumes, analyze the two CLAIM_SCHEMA normalization rejects on arxiv:2609.20765 and the persistent 0/6 teacher coverage before selecting a next bounded experiment; do not reopen GitRunner/controller/provisioner/runtime design.
+- Recover or conclusively inventory preserved normalized STANDARD Codex outputs behind the 71 historical evidence objects; do not synthesize replacements until recovery avenues are exhausted.
+- Implement a zero-generation stage-wise oracle harness on the preserved nine-paper corpus, with exact PDF/page/region/proposition/bounded-bundle support measurements and legacy lexical metrics.
+- Run a CPU/offline retrieval-window diagnostic at a fixed context budget before selecting any dense, late-interaction, or cross-encoder dependency/model download.
+- Research and shortlist external retrieval/reranking methods specifically against the measured failure mode, then benchmark only the smallest justified candidate set.
+- Classify the remaining residual as RETRIEVAL, EVIDENCE_COMPOSITION, EVALUATION_GRANULARITY, MODEL_NORMALIZATION, or STOP; do not start Wave 7 before that decision.
+- Keep the two Wave-6 CLAIM_SCHEMA rejects on arxiv:2609.20765 as a separate structured-output engineering issue; do not mistake them for the semantic bottleneck.
 
 ## Blockers / gates
 
