@@ -1,8 +1,14 @@
 # Workspace Heartbeat plugin
 
-## v0.4.5 candidate — semantic cadence + full current-turn history
+v0.4.6 is a narrow live-card sizing hotfix on top of accepted v0.4.5. The turn lifecycle, semantic-delta policy, full bounded current-turn history, grow-through-five behavior, and scroll-from-six behavior are unchanged.
 
-v0.4.5 preserves the accepted v0.4.4 turn lifecycle and changes two bounded
+The hotfix changes only iframe resize measurement: `ui/notifications/size-changed` now reports the intrinsic rendered `<main>` card height rather than `document.documentElement.scrollHeight`. The latter is at least the current iframe viewport height and can therefore feed an oversized host allocation back to ChatGPT, leaving a large blank area below short one- or two-update cards.
+
+The live resource is cache-busted to `live-v5.html`.
+
+## v0.4.6 candidate — semantic cadence + full current-turn history
+
+v0.4.6 preserves the accepted v0.4.4 turn lifecycle and changes two bounded
 surfaces:
 
 1. the MCP model instructions now match the canonical semantic-delta policy:
@@ -20,7 +26,7 @@ The lifecycle remains unchanged:
   `heartbeat_update(task_id, turn_id, ...)` in that response;
 - a later assistant response supersedes the prior turn;
 - stale, completed, wrong-task, and cross-conversation updates fail closed;
-- terminal `done` releases task ownership;
+- terminal `done` closes the current Heartbeat turn and releases task ownership; it does not by itself mark the durable workspace task complete;
 - `heartbeat_get(task_id)` remains explicit task-level history/sidebar
   inspection.
 
@@ -64,7 +70,7 @@ The MCP endpoint is:
 http://localhost:8787/mcp
 ```
 
-The accepted v0.4.4 Lambda runtime remains rollback until v0.4.5 passes exact
+The accepted v0.4.4 Lambda runtime remains rollback until v0.4.6 passes exact
 Node tests, isolated startup, live cutover, and ChatGPT host acceptance.
 
 ### Release boundary
@@ -81,3 +87,52 @@ plugin-boundary release. Use the established lifecycle:
 6. verify the actual tool surface/resource;
 7. run a live turn with at least five semantic updates and confirm all remain
    readable in the same scrollable current-turn card.
+
+
+### Durable chat-to-chat handoff
+
+A durable workspace task can move from one ChatGPT conversation to another while
+remaining in progress. The outgoing conversation must release Heartbeat's
+volatile writer lease as part of that handoff.
+
+For a planned handoff:
+
+1. finish the outgoing conversation's required task mutations and validation;
+2. synchronize the authoritative task capsule and any derived Markdown/handoff;
+3. make the **final Heartbeat operation** in the outgoing conversation
+   `heartbeat_update(task_id, turn_id, ..., state="done")`;
+4. after releasing the Heartbeat turn, do not perform additional task mutations
+   in the outgoing conversation; the final assistant text may present the
+   already-prepared handoff prompt;
+5. the receiving conversation resumes the original durable `task_id` and calls
+   `heartbeat_begin_turn` normally in its first substantial response.
+
+`state="done"` is scoped to the **Heartbeat turn/writer lease**. It means the
+outgoing Heartbeat writer is finished. It does **not** mark the durable
+workspace-control task `COMPLETE`, clear its remaining work, or authorize a
+task-state transition by itself.
+
+If the outgoing conversation becomes unreachable before it can release the
+lease, and the receiving chat fails with
+`HEARTBEAT_TASK_OWNED_BY_ANOTHER_CONVERSATION`, treat that as an orphaned
+volatile Heartbeat owner. If the old conversation cannot be resumed to send
+`done`, use the coordinated Heartbeat-server-only restart recovery below.
+Never invent a replacement task ID and never weaken cross-conversation
+ownership checks to force the handoff.
+
+### Plugin refresh and stale ownership
+
+Recreating or refreshing the custom Heartbeat plugin can change the
+conversation/session identity supplied to the MCP server. If a task still has
+an active pre-refresh Heartbeat turn, a resumed chat may fail closed with
+`HEARTBEAT_TASK_OWNED_BY_ANOTHER_CONVERSATION`.
+
+Close active turns with `state="done"` before plugin recreation where
+practical. If the old owner is no longer reachable, coordinate a restart of
+only the Workspace Heartbeat server/runtime to clear volatile in-memory
+ownership/history, then resume with the task's original durable `task_id`.
+Never invent a replacement task ID to bypass ownership.
+
+The restart affects all volatile Heartbeat state in that server process but does
+not mutate workspace-control task capsules, Git state, Lambda CI state, or other
+durable workspace data.
