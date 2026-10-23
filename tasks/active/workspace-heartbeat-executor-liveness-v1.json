@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-heartbeat-plugin-v1",
-  "current_stage": "same_chat_liveness_contract_frozen_pending_v046_acceptance",
+  "current_stage": "same_chat_liveness_contract",
   "acceptance_criteria": [
     "The existing live Heartbeat card shows three independent concepts: Heartbeat/server connectivity, executor/model activity freshness, and last meaningful semantic progress.",
     "Add a model-only heartbeat_touch(task_id, turn_id) operation that renews executor activity without creating a semantic Heartbeat entry, changing semantic sequence/history, or adding another transcript card.",
