@@ -2,12 +2,12 @@
   "schema_version": 2,
   "task_id": "workspace-semantic-control-integration-v1",
   "title": "Semantic Control Integration v1",
-  "status": "IN_PROGRESS",
+  "status": "BLOCKED_EVIDENCE",
   "goal": "Integrate the validated semantic-control prototype with the real current research-engine and workspace-control authority/data boundaries through read-only, additive adapters and measurable benchmarks, while preserving existing authoritative stores, fail-closed policy semantics, and complete isolation from the still-evolving Local EXTRACT scientific architecture. Measure the missing relational/query baseline, prove cross-system adapter correctness, and bind future accepted EXTRACT outputs only through a versioned adapter before considering any production promotion.",
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-control-prototype-v1",
-  "current_stage": "cross_system_integration_benchmark",
+  "current_stage": "bind_accepted_extract_output",
   "acceptance_criteria": [
     "The task consumes the completed prototype verdict research-engine@4317830c4f3779cebb8a5cf0d7eeec369b85d5ea: PROMOTE_TO_INTEGRATION with authorization_escape_count=0, while preserving production_integration_authorized=false.",
     "A live/current relational baseline is measured against the existing research-engine relational/store query path using ephemeral test infrastructure or other non-production read-only fixtures; no production database is accessed and no latency threshold is invented.",
@@ -59,7 +59,7 @@
       "base_sha": "4317830c4f3779cebb8a5cf0d7eeec369b85d5ea",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "8bf738f2c6722cda60f98190b58892e8e7979918",
+        "checkpoint_sha": "16150517b311b42331ce26978fbb225a760c39e2",
         "verified": true
       },
       "local": null,
@@ -221,12 +221,12 @@
           "check": "Accepted EXTRACT output dependency",
           "result": "NOT_RUN",
           "evidence": [
-            "BLOCKED_EVIDENCE: accepted EXTRACT architecture/output checkpoint is not yet available.",
-            "Current owning task research-engine-local-extract-redesign-v1 is CHECKPOINTED at proposition_alignment_preservation_implementation.",
-            "Current workspace-control task blob is 50b57caad1acc5b017c025ae97c548cd7b752061.",
-            "Current research-engine EXTRACT checkpoint is f3d5dc4f8cc5007d3159b232ae00317620a59de6 and records implementation only; no proposition-alignment diagnostic result exists yet.",
-            "The task next action is one bounded proposition-alignment trigger, not an accepted architecture/output checkpoint.",
-            "Per integration contract, no EXTRACT-specific semantic adapter may be inferred from rejected, diagnostic, or implementation-only evidence."
+            "BLOCKED_EVIDENCE: the owning EXTRACT task has no durable accepted architecture/output contract suitable for semantic integration.",
+            "Final live recheck at workspace-control@14d8fcb2ac018c903140338e2d9c96ccf0a1ca39: research-engine-local-extract-redesign-v1 blob 879d586e2ec103d98911ec3537cef388669d98c9 is CHECKPOINTED at proposition_alignment_preservation_result.",
+            "Latest EXTRACT scientific checkpoint is research-engine@9566532288bf500db8997b9befcc339788609184 with ALIGNMENT_AUGMENT_FEASIBLE.",
+            "The EXTRACT capsule explicitly says do not treat FEASIBLE as production promotion and requires a separate evidence-first semantic-certificate generalization design phase.",
+            "The result authorizes semantic-generalization design only; semantic-generalization execution=false, production_promotion=false, Wave7B=false.",
+            "Per the frozen integration contract, rejected/diagnostic/FEASIBLE evidence cannot be fabricated into an accepted EXTRACT output contract."
           ]
         }
       ],
@@ -234,7 +234,7 @@
     },
     {
       "id": "cross_system_integration_benchmark",
-      "status": "IN_PROGRESS",
+      "status": "SUSPENDED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -251,7 +251,24 @@
         "Authority/adversary regression results",
         "Failure-isolation results"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Pre-EXTRACT available-components cross-system integration benchmark",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #203 first benchmark CI run 40039432119 PASS; persisted-result CI run 40039692910 PASS; merged as 16150517b311b42331ce26978fbb225a760c39e2.",
+            "Persisted status=PRE_EXTRACT_INTEGRATION_PASS and extract_binding=BLOCKED_EVIDENCE.",
+            "All available-component gates pass: relational/semantic answer equivalence, deterministic research/workspace manifests, gpu-small ALLOW, generic gpu-heavy DENY, fake epistemic authority ABSTAIN, missing authority ABSTAIN, workspace blob drift fail-closed, research answer drift fail-closed, and pinned EXTRACT dependency non-authoritative.",
+            "authorization_escape_count=0.",
+            "Research semantic manifest SHA256 c72157edafe1d2d17b6e95743d5a4328e7eb102a69be0f984628547bf2a73a16.",
+            "Workspace semantic manifest SHA256 e666697d29609634fa4b615e3e08ae4de31e5e12c75b926ca21c4669d1ac9193.",
+            "Semantic projection p50 overhead versus frozen relational p50: Q1 0.8828%, Q2 0.4543%, Q3 0.5278%, Q4 0.4155%.",
+            "Workspace snapshot projection p50=0.242001 ms, p95=0.267789 ms over 1000 measurements.",
+            "No retroactive latency threshold or performance promotion claim was applied.",
+            "production_promotion_authorized=false and final_production_verdict_issued=false because accepted EXTRACT binding is unresolved."
+          ]
+        }
+      ],
       "resume_condition": "All correctness/safety gates pass and performance is reported empirically without retroactive thresholds."
     },
     {
@@ -290,11 +307,13 @@
       "id": "extract-dependency-gate-v1",
       "kind": "dependency_gate",
       "identity": "workspace-control:research-engine-local-extract-redesign-v1:accepted-output-required",
-      "required_for_resume": false,
+      "required_for_resume": true,
       "evidence": [
-        "Owning EXTRACT task remains scientifically independent and has not supplied an accepted semantic-integration output checkpoint at integration-task creation.",
-        "Current/rejected/diagnostic Wave7/Family-C artifacts may inform exclusion evidence but do not define the integration contract.",
-        "2026-10-23 live recheck: workspace-control EXTRACT task blob 50b57caad1acc5b017c025ae97c548cd7b752061 is CHECKPOINTED at proposition_alignment_preservation_implementation; research-engine checkpoint f3d5dc4f8cc5007d3159b232ae00317620a59de6 is implementation-only and not an accepted output contract."
+        "Owning EXTRACT task must provide a durable accepted architecture/output contract before binding.",
+        "Final live recheck: workspace-control task blob 879d586e2ec103d98911ec3537cef388669d98c9, current_stage proposition_alignment_preservation_result.",
+        "Latest scientific result research-engine@9566532288bf500db8997b9befcc339788609184 is ALIGNMENT_AUGMENT_FEASIBLE with 8/13 support and 7/7 frozen-control retention plus residual e6.a.",
+        "The EXTRACT task explicitly says FEASIBLE is accepted scientific evidence but not production promotion; next work is a new semantic-certificate generalization design.",
+        "Do not infer/bind an EXTRACT interface from this FEASIBLE result or introduce ontology/semantic-control into the EXTRACT task."
       ]
     },
     {
@@ -339,6 +358,17 @@
         "PR #200 CI 40038486220 PASS.",
         "Policy authority/capability precedence, deterministic rebuild, exact blob provenance, and dependency-only EXTRACT semantics validated."
       ]
+    },
+    {
+      "id": "pre-extract-integration-v1",
+      "kind": "integration_benchmark",
+      "identity": "research-engine@16150517b311b42331ce26978fbb225a760c39e2:PRE_EXTRACT_INTEGRATION_PASS",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #203 benchmark CI 40039432119 PASS and persisted-result CI 40039692910 PASS.",
+        "All available-component correctness/safety gates pass with authorization_escape_count=0.",
+        "EXTRACT_BINDING=BLOCKED_EVIDENCE; production promotion remains unauthorized."
+      ]
     }
   ],
   "artifacts": [
@@ -353,6 +383,48 @@
       "evidence": [
         "CI run 40037743704",
         "PR #198 CI 40038017099 PASS"
+      ]
+    },
+    {
+      "path": "benchmarks/semantic_control_integration/pre-extract-integration-result.v1.json",
+      "state": "FROZEN",
+      "role": "Persisted available-components cross-system integration result",
+      "origin": "research-engine@16150517b311b42331ce26978fbb225a760c39e2",
+      "persistence": "git",
+      "regeneration": "Create a new version only after the accepted EXTRACT dependency changes or integration semantics change.",
+      "review_requirement": "Do not overwrite this pre-EXTRACT evidence; preserve it as the blocked-boundary checkpoint.",
+      "evidence": [
+        "PR #203",
+        "CI 40039432119 PASS",
+        "persisted-result CI 40039692910 PASS",
+        "PRE_EXTRACT_INTEGRATION_PASS"
+      ]
+    },
+    {
+      "path": "benchmarks/semantic_control_integration/pre-extract-integration-evidence.v1.json",
+      "state": "FROZEN",
+      "role": "Exact CI provenance binding for pre-EXTRACT integration result",
+      "origin": "research-engine@16150517b311b42331ce26978fbb225a760c39e2",
+      "persistence": "git",
+      "regeneration": "Create a new version only after the accepted EXTRACT dependency changes or integration semantics change.",
+      "review_requirement": "Do not overwrite this pre-EXTRACT evidence; preserve it as the blocked-boundary checkpoint.",
+      "evidence": [
+        "PR #203",
+        "CI job 120706748226"
+      ]
+    },
+    {
+      "path": "benchmarks/semantic_control_integration/extract-dependency-gate-current.v1.json",
+      "state": "FROZEN",
+      "role": "Pinned current EXTRACT dependency evidence proving accepted-output gate remains unresolved",
+      "origin": "research-engine@16150517b311b42331ce26978fbb225a760c39e2",
+      "persistence": "git",
+      "regeneration": "Create a new version only after the accepted EXTRACT dependency changes or integration semantics change.",
+      "review_requirement": "Do not overwrite this pre-EXTRACT evidence; preserve it as the blocked-boundary checkpoint.",
+      "evidence": [
+        "research-engine@9566532288bf500db8997b9befcc339788609184",
+        "ALIGNMENT_AUGMENT_FEASIBLE",
+        "production_promotion_authorized=false"
       ]
     }
   ],
@@ -376,16 +448,16 @@
     }
   ],
   "blockers": [
-    "EXTRACT-specific binding and final production-promotion verdict are blocked on a durable accepted output checkpoint from research-engine-local-extract-redesign-v1. Current proposition-alignment state is implementation-only."
+    "BLOCKED_EVIDENCE: research-engine-local-extract-redesign-v1 has not yet produced a durable accepted architecture/output contract. Latest ALIGNMENT_AUGMENT_FEASIBLE result is accepted scientific evidence but explicitly not production promotion and opens another design phase."
   ],
   "remaining_work": [
-    "Run and persist a pre-EXTRACT cross-system benchmark across the validated research-engine and workspace-control adapters, relational baseline, semantic overhead, authority/adversary gates, and failure isolation.",
-    "When the owning EXTRACT task reaches a durable accepted architecture/output checkpoint, resume bind_accepted_extract_output with a versioned adapter only.",
-    "Rerun the final cross-system benchmark including the accepted EXTRACT adapter.",
-    "Issue READY_FOR_PRODUCTION_PROMOTION, REVISE, or REJECT and, if ready, create a separate production-promotion task."
+    "Wait for the owning EXTRACT task to produce a durable accepted architecture/output checkpoint with exact artifact/schema identity.",
+    "Bind that accepted output through a versioned semantic adapter without changing EXTRACT internals.",
+    "Rerun the final cross-system integration benchmark including the accepted EXTRACT adapter.",
+    "Issue READY_FOR_PRODUCTION_PROMOTION, REVISE, or REJECT; if READY, create a separate production-promotion task."
   ],
-  "next_safe_action": "Implement the pre-EXTRACT cross-system integration benchmark under prototypes/semantic_control_integration/**, benchmarks/semantic_control_integration/**, and tests/semantic_control_integration/** from research-engine checkpoint 8bf738f2c6722cda60f98190b58892e8e7979918. Use CI's ephemeral Postgres to build the validated research-engine semantic manifest, build the pinned workspace-control semantic manifest, prove all four relational answer hashes equal semantic reconstruction hashes, rerun gpu-small ALLOW/generic gpu-heavy DENY authority gates with zero authorization escapes, test workspace blob drift and research answer drift fail closed, and report empirical relational plus semantic projection overhead with no retroactive threshold. The benchmark must emit PRE_EXTRACT_INTEGRATION_PASS or REVISE and must record EXTRACT_BINDING=BLOCKED_EVIDENCE; it must not issue READY_FOR_PRODUCTION_PROMOTION while the accepted EXTRACT output gate is unresolved.",
+  "next_safe_action": "Do not mutate integration or production behavior while BLOCKED_EVIDENCE. On resume, first re-read tasks/active/research-engine-local-extract-redesign-v1.json and its exact referenced research-engine result. Resume bind_accepted_extract_output only if that owning task durably identifies an accepted EXTRACT architecture/output contract with exact artifact/schema identity. Current research-engine@9566532288bf500db8997b9befcc339788609184 ALIGNMENT_AUGMENT_FEASIBLE is explicitly insufficient: it authorizes a new semantic-generalization design phase, not semantic execution or production promotion. Once the gate is genuinely satisfied, create the versioned EXTRACT adapter, rerun the final cross-system benchmark, and only then issue the production-promotion verdict.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created from the completed workspace-semantic-control-prototype-v1 PROMOTE_TO_INTEGRATION verdict. This task is an integration-validation layer, not production rollout. It deliberately allows read-only use/import of current research-engine store/query interfaces in isolated integration tests while forbidding modifications to src/research_engine/** or authoritative stores. It also separates general research-engine/workspace-control integration work from the evolving Local EXTRACT scientific task: baseline measurement and non-EXTRACT adapters can proceed now; EXTRACT-specific binding waits for a durable accepted output checkpoint. A successful result can only create a later production-promotion task.\n\n2026-10-23 INTEGRATION CONTRACT FREEZE COMPLETE. research-engine PR #192 merged as 291ce566c8544628584b91312c4ae3e784ca533e after corrected CI run 40035899874 PASS. The freeze pins four real PostgresStore reads, exact five-work expected answers, 5-warmup/50-measurement methodology, workspace-control authority/execution source blobs, and an unresolved accepted-EXTRACT-output dependency gate. No adapter or production code was added. The task advances to ephemeral relational baseline measurement."
+  "notes": "Created from the completed workspace-semantic-control-prototype-v1 PROMOTE_TO_INTEGRATION verdict. This task is an integration-validation layer, not production rollout. It deliberately allows read-only use/import of current research-engine store/query interfaces in isolated integration tests while forbidding modifications to src/research_engine/** or authoritative stores. It also separates general research-engine/workspace-control integration work from the evolving Local EXTRACT scientific task: baseline measurement and non-EXTRACT adapters can proceed now; EXTRACT-specific binding waits for a durable accepted output checkpoint. A successful result can only create a later production-promotion task.\n\n2026-10-23 INTEGRATION CONTRACT FREEZE COMPLETE. research-engine PR #192 merged as 291ce566c8544628584b91312c4ae3e784ca533e after corrected CI run 40035899874 PASS. The freeze pins four real PostgresStore reads, exact five-work expected answers, 5-warmup/50-measurement methodology, workspace-control authority/execution source blobs, and an unresolved accepted-EXTRACT-output dependency gate. No adapter or production code was added. The task advances to ephemeral relational baseline measurement.\n\n2026-10-23 PRE-EXTRACT INTEGRATION CHECKPOINT. All currently executable integration work is complete. research-engine PR #203 passed benchmark CI 40039432119 and persisted-result CI 40039692910, then merged as 16150517b311b42331ce26978fbb225a760c39e2 with PRE_EXTRACT_INTEGRATION_PASS, zero authorization escapes, exact relational/semantic equivalence, deterministic cross-system projections, fail-closed drift behavior, and sub-1% semantic projection overhead relative to the frozen relational p50s. Final live EXTRACT dependency recheck at workspace-control@14d8fcb2ac018c903140338e2d9c96ccf0a1ca39 confirms research-engine@9566532288bf500db8997b9befcc339788609184 ALIGNMENT_AUGMENT_FEASIBLE is accepted scientific evidence but explicitly not production promotion; the owning task requires another semantic-certificate generalization design phase. Therefore bind_accepted_extract_output and the final production-promotion verdict are correctly blocked on external scientific evidence, not unfinished integration implementation."
 }

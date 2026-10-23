@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-semantic-control-integration-v1
 - Title: Semantic Control Integration v1
-- Status: IN_PROGRESS
+- Status: BLOCKED_EVIDENCE
 - Capsule schema: v2
 
 ## Goal
@@ -31,23 +31,23 @@ Integrate the validated semantic-control prototype with the real current researc
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8bf738f2c6722cda60f98190b58892e8e7979918
+- Remote checkpoint: 16150517b311b42331ce26978fbb225a760c39e2
 - Remote verified: true
 
 ## Next safe action
 
-Implement the pre-EXTRACT cross-system integration benchmark under prototypes/semantic_control_integration/**, benchmarks/semantic_control_integration/**, and tests/semantic_control_integration/** from research-engine checkpoint 8bf738f2c6722cda60f98190b58892e8e7979918. Use CI's ephemeral Postgres to build the validated research-engine semantic manifest, build the pinned workspace-control semantic manifest, prove all four relational answer hashes equal semantic reconstruction hashes, rerun gpu-small ALLOW/generic gpu-heavy DENY authority gates with zero authorization escapes, test workspace blob drift and research answer drift fail closed, and report empirical relational plus semantic projection overhead with no retroactive threshold. The benchmark must emit PRE_EXTRACT_INTEGRATION_PASS or REVISE and must record EXTRACT_BINDING=BLOCKED_EVIDENCE; it must not issue READY_FOR_PRODUCTION_PROMOTION while the accepted EXTRACT output gate is unresolved.
+Do not mutate integration or production behavior while BLOCKED_EVIDENCE. On resume, first re-read tasks/active/research-engine-local-extract-redesign-v1.json and its exact referenced research-engine result. Resume bind_accepted_extract_output only if that owning task durably identifies an accepted EXTRACT architecture/output contract with exact artifact/schema identity. Current research-engine@9566532288bf500db8997b9befcc339788609184 ALIGNMENT_AUGMENT_FEASIBLE is explicitly insufficient: it authorizes a new semantic-generalization design phase, not semantic execution or production promotion. Once the gate is genuinely satisfied, create the versioned EXTRACT adapter, rerun the final cross-system benchmark, and only then issue the production-promotion verdict.
 
 ## Remaining work
 
-- Run and persist a pre-EXTRACT cross-system benchmark across the validated research-engine and workspace-control adapters, relational baseline, semantic overhead, authority/adversary gates, and failure isolation.
-- When the owning EXTRACT task reaches a durable accepted architecture/output checkpoint, resume bind_accepted_extract_output with a versioned adapter only.
-- Rerun the final cross-system benchmark including the accepted EXTRACT adapter.
-- Issue READY_FOR_PRODUCTION_PROMOTION, REVISE, or REJECT and, if ready, create a separate production-promotion task.
+- Wait for the owning EXTRACT task to produce a durable accepted architecture/output checkpoint with exact artifact/schema identity.
+- Bind that accepted output through a versioned semantic adapter without changing EXTRACT internals.
+- Rerun the final cross-system integration benchmark including the accepted EXTRACT adapter.
+- Issue READY_FOR_PRODUCTION_PROMOTION, REVISE, or REJECT; if READY, create a separate production-promotion task.
 
 ## Blockers / gates
 
-- EXTRACT-specific binding and final production-promotion verdict are blocked on a durable accepted output checkpoint from research-engine-local-extract-redesign-v1. Current proposition-alignment state is implementation-only.
+- BLOCKED_EVIDENCE: research-engine-local-extract-redesign-v1 has not yet produced a durable accepted architecture/output contract. Latest ALIGNMENT_AUGMENT_FEASIBLE result is accepted scientific evidence but explicitly not production promotion and opens another design phase.
 
 ## Fresh-chat initialization
 
