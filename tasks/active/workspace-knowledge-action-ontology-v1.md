@@ -42,13 +42,14 @@ Determine whether a provenance-preserving typed ontology/knowledge-graph substra
 
 ## Next safe action
 
-Review the checkpointed architecture recommendation and benchmark contract with the MILCOM ontology lead now resolved as Malik Luti. The selected direction remains an additive rebuildable typed semantic projection over existing authoritative PostgreSQL/CAS/task/policy/receipt stores, with hard epistemic-vs-normative-vs-execution boundaries and a separate fail-closed policy decision function. If the operator accepts this direction, create a separate implementation task for the bounded projection prototype and run only the frozen benchmark fixtures before considering any production integration. Keep Local EXTRACT unchanged.
+Review the Luti-derived semantic-control-loop synthesis together with the existing frozen benchmark. The strongest implementation candidate is now a six-primitive additive prototype: (1) federated semantic projection over existing authoritative stores, (2) provenance-bearing semantic observation packets that point back to raw evidence, (3) ontology-slice retrieval for bounded model context, (4) confidence/evidence-sufficiency-driven targeted escalation, (5) a shared semantic twin for cross-agent/task state, and (6) an auditable DecisionEvaluation/action-candidate bridge whose authority still comes only from root-owned policy. If the operator accepts this scope, create a separate implementation task and run only frozen fixtures; keep Local EXTRACT and production behavior unchanged.
 
 ## Remaining work
 
-- Operator review of the checkpointed C+B projection recommendation and frozen benchmark contract.
-- If accepted, spin off a separate implementation task for an additive, rebuildable projection prototype using frozen fixtures; do not change production authority or scientific-state behavior during the prototype.
-- When the MILCOM 2026 proceedings become public, independently bind the operator-provided title/affiliation to the published bibliographic record; this is a provenance-completion follow-up, not an architecture blocker.
+- Operator review of the checkpointed C+B projection recommendation, frozen benchmark contract, and the newly recovered Malik Luti semantic-control-loop pattern.
+- If accepted, spin off a separate implementation task for an additive, rebuildable prototype containing six bounded primitives: federated semantic projection, provenance-bearing semantic observation packets, ontology-slice retrieval, confidence-aware evidence escalation, shared semantic twin, and DecisionEvaluation/action-candidate bridge.
+- Prototype escalation must use calibrated evidence sufficiency/verification signals rather than trusting raw model self-confidence; low confidence may request more evidence or human review but may not authorize execution.
+- When the MILCOM 2026 proceedings become public, independently bind the operator-provided title/affiliation to the published bibliographic record; this is provenance completion, not an architecture blocker.
 
 ## Blockers / gates
 
