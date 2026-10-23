@@ -30,28 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 91ea8d7545838b822878f30dd8952b26e2a3ec3f
+- Remote checkpoint: 373fc05de8cdb270ec9d901def0c70ec287ba004
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 265a7e4784209d411383cb09da4fe0adcf50f319
+- Remote checkpoint: 837def54ab744e66ca8395aabce501b20af750c7
 - Remote verified: true
 
 ## Next safe action
 
-Execute the post-Wave-6 Codex-parity diagnostic stage: first recover/inventory historical Codex teacher text, then implement a zero-generation stage-wise oracle and fixed-budget retrieval/window diagnostic on the preserved corpus. Do not design, route, or execute Wave 7 yet. Do not change production EXTRACT, accepted Qwen VERIFY, GitRunner/controller/provisioner/runtime, or model family.
+Execute exactly one zero-generation page-conditioned proposition retrieval diagnostic on the preserved exact-SHA nine-paper corpus. Keep current top-12 region retrieval only to identify candidate pages, enumerate all exact propositions on those pages, rank at most twelve propositions with the existing query/facet retrieval logic, and compare teacher alignment against Wave 6 and the expected-page ceiling. Do not download a retrieval model, start Wave 7, change production EXTRACT/VERIFY, or reopen execution substrate.
 
 ## Remaining work
 
-- Recover or conclusively inventory preserved normalized STANDARD Codex outputs behind the 71 historical evidence objects; do not synthesize replacements until recovery avenues are exhausted.
-- Implement a zero-generation stage-wise oracle harness on the preserved nine-paper corpus, with exact PDF/page/region/proposition/bounded-bundle support measurements and legacy lexical metrics.
-- Run a CPU/offline retrieval-window diagnostic at a fixed context budget before selecting any dense, late-interaction, or cross-encoder dependency/model download.
-- Research and shortlist external retrieval/reranking methods specifically against the measured failure mode, then benchmark only the smallest justified candidate set.
-- Classify the remaining residual as RETRIEVAL, EVIDENCE_COMPOSITION, EVALUATION_GRANULARITY, MODEL_NORMALIZATION, or STOP; do not start Wave 7 before that decision.
-- Keep the two Wave-6 CLAIM_SCHEMA rejects on arxiv:2609.20765 as a separate structured-output engineering issue; do not mistake them for the semantic bottleneck.
+- Run one bounded zero-model page-conditioned proposition retrieval diagnostic: retain current FACET_INTERLEAVED_BM25_V1 only as coarse page routing, enumerate all exact propositions on those selected pages, and rank a maximum of twelve propositions with the existing paper query/facets.
+- Compare that selector against the frozen Wave-6 selector and expected-page proposition ceiling before considering any embedding or reranker download.
+- Use current research to shortlist at most a small number of external retrieval candidates only if the deterministic page-conditioned arm leaves a material retrieval residual; BGE-M3 hybrid sparse+dense/multi-vector and ColBERT-style late interaction are candidates, not authorized downloads.
+- Add a semantic-support evaluation track informed by SciFact/FActScore/AlignScore while retaining the legacy lexical F1 metric unchanged for longitudinal continuity.
+- Do not design, route, or execute Wave 7 until the retrieval diagnostic and evaluation research identify one bounded next implementation.
 
 ## Blockers / gates
 
