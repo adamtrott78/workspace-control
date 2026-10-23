@@ -12,7 +12,7 @@
     "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
   },
   "parent_execution_owner": "research-engine-local-document-pipeline-v1",
-  "current_stage": "oracle_query_diagnostic_confirmed",
+  "current_stage": "post_wave6_codex_parity_diagnostics",
   "acceptance_criteria": [
     "A current literature and implementation survey identifies how comparable local scientific-document, structured-information-extraction, evidence-grounding, claim-extraction, and high-precision fallback systems solve the same or adjacent problem.",
     "Previously failed approaches are explicitly excluded from reconsideration unless new evidence changes the failed premise; in particular, the already-tested Qwen3.5-4B grounded-candidate EXTRACT architecture is not simply rerun with cosmetic prompt changes.",
@@ -529,8 +529,9 @@
         },
         {
           "check": "Oracle-query diagnostic",
-          "result": "QUERY_REPRESENTATION_CONFIRMED",
+          "result": "PASS",
           "evidence": [
+            "Scientific verdict: QUERY_REPRESENTATION_CONFIRMED.",
             "Research-engine PR #161 CI PASS and merged as 4aafd7e1ca2160c25a931f29bb9bb9a5f15ed25b; exact oracle workflow blob 9ee22449510d425381e30aa3fc330764d8cb6464.",
             "Workspace-control route PR #300 validated/merged as 6d306ab4798c0542be0cd620103c642ff079ee60; trusted reconcile run 39991315786 PASS.",
             "Exactly one oracle-query diagnostic run 39991479494 completed SUCCESS; artifact 12518690424 ZIP SHA256 a55ea171dd4dc77d5d5df3fbe05ad1039b1a7c8f7b0a9aec8d5dd52a97c1ec16; report SHA256 4340afe82bd28f0f16b50cb1844f42c8cee386bfe25dfccdd3b876a45e252fe3.",
