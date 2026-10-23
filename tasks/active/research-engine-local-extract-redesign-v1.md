@@ -40,14 +40,6 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 - Remote checkpoint: 7d2b7b9b131881de9b2d0c31640110fd7b0df348
 - Remote verified: true
 
-## Current scientific state
-
-- Wave 2: structural guard/atomicization fix succeeded; 9/9 local completion and 70 accepted claims, but teacher coverage remained 0/6.
-- Wave 3: soft-terminal-region hypothesis was negative; do not retain that source-region change.
-- Wave 4: exact proposition enumeration was useful, but Qwen proposition selection was the primary residual. Available proposition mean teacher-source F1 was ~0.319, Qwen-selected ~0.215, final normalized agreement ~0.178.
-- Offline deterministic BM25 proposition selection recovered ~0.303 mean teacher-source F1.
-- Wave-5 branch `local-extract-wave5-deterministic-proposal-ranking` exists and currently contains only the durable Wave-4 decision artifact; Wave-5 implementation has not begun.
-
 ## Next safe action
 
 Resume from research-engine branch local-extract-wave5-deterministic-proposal-ranking, which is currently exactly one commit ahead of research-engine main 7d2b7b9b131881de9b2d0c31640110fd7b0df348 and contains only benchmarks/document_intelligence/local-extract-wave4-decision.v1.json. First commit a frozen Wave-5 contract. Then implement WAVE5_DETERMINISTIC_PROPOSITION_RANKING_THEN_NORMALIZATION_V1: keep Wave-2 region construction and top-12 FACET_INTERLEAVED_BM25_V1 retrieval; retain exact proposition enumeration; replace only the Qwen proposal selector with deterministic per-region BM25 proposition ranking; keep the existing Qwen normalization prompt/schema and strict guard unchanged; retain the preserved teacher scorer/F1 threshold and all provenance/production boundaries. Validate in research-engine, merge exact implementation, add only a declarative model-dual-public-v1 route binding for its exact launcher blob in workspace-control, require successful trusted reconciliation, and execute exactly one bounded Wave-5 benchmark. Do not rerun Wave 4 and do not modify controller/provisioner/runtime/reconciler code.
@@ -66,10 +58,6 @@ Resume from research-engine branch local-extract-wave5-deterministic-proposal-ra
 ## Blockers / gates
 
 - None.
-
-## Durability rule
-
-Checkpoint the authoritative capsule immediately after each implementation merge, benchmark result/artifact, scientific disposition/residual localization, and next-experiment selection. Do not wait for an end-of-chat handoff.
 
 ## Fresh-chat initialization
 
