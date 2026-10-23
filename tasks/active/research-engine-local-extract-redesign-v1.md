@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9fb81182950886787d02901be330896e106a36e6
+- Remote checkpoint: 1e1448efc6a61aa984051ef6c7c8badca03fbcce
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 250d149d88989933ee73514e4483a93dc6a33ef3
+- Remote checkpoint: 1f8a955a6990871960072867378e3461ba18e86b
 - Remote verified: true
 
 ## Next safe action
 
-STOP after the page-conditioned diagnostic checkpoint and perform candidate-selection research only: identify and predeclare a minimal retrieval/reranking bakeoff aimed at proposition-ranking semantics, together with a semantic-support evaluation track that complements but does not replace the frozen lexical F1 metric. Do not download new retrieval models, start Wave 7, change production EXTRACT/VERIFY, or reopen GitRunner/controller/provisioner/runtime until that candidate contract is durable.
+Install the exact declarative proposition-reranker diagnostic route in workspace-control using existing gpu-single-public-ci-v1 authority, validate/merge/reconcile it, then execute exactly one bounded research-engine reranker bakeoff at implementation SHA 1f8a955a6990871960072867378e3461ba18e86b. Stop after PROMISING/NEGATIVE result checkpoint; do not start Wave 7 or change production EXTRACT/VERIFY.
 
 ## Remaining work
 
-- Research and predeclare the smallest justified retrieval/reranking candidate set targeted specifically at proposition-ranking semantics. Candidate families may include hybrid sparse+dense/multi-vector retrieval such as BGE-M3-class methods and ColBERT-style late interaction; no model download is authorized until the candidate contract is durable.
-- Keep current coarse page routing, exact proposition enumeration, authoritative PDF provenance, Qwen3.5-4B normalizer, production STANDARD Codex fallback, and accepted Qwen VERIFY fixed while retrieval candidates are compared.
-- Add a semantic-support evaluation track informed by scientific fact verification / atomic-fact evaluation while retaining the frozen legacy lexical F1 metric unchanged for longitudinal continuity.
-- Define one bounded retrieval/reranking experiment only after candidate selection and semantic-evaluation criteria are frozen; do not start Wave 7 automatically.
-- Treat the two historical Wave-6 CLAIM_SCHEMA rejects as a separate structured-output engineering cleanup, not the current semantic bottleneck.
+- Bind exactly one declarative workspace-control route model-eval-local-extract-reranker-v1 to research-engine workflow blob 6c101c99f5829772f97c48f666aff960697006ea using accepted execution contract gpu-single-public-ci-v1, model_id=null, and runtime qwen35-vllm-cu129-image-native-sampler-v3.
+- Validate/merge the route and require trusted Lambda CI Project Reconcile PASS before any benchmark trigger.
+- Create one inert same-repository research-engine trigger PR at exact implementation main 1f8a955a6990871960072867378e3461ba18e86b and issue /lambda-ci-local-extract-reranker-bakeoff exactly once.
+- Run exactly one bounded reranker bakeoff and classify only under the frozen PROMISING/NEGATIVE rule; checkpoint the artifact and close the trigger PR unmerged.
+- Do not start Wave 7 automatically. Production EXTRACT remains STANDARD Codex, accepted Qwen VERIFY remains unchanged, and the historical Wave-6 CLAIM_SCHEMA rejects remain a separate structured-output cleanup.
 
 ## Blockers / gates
 
