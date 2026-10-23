@@ -22,7 +22,7 @@ main{padding:13px 16px}
 </style>
 </head>
 <body>
-<main>
+<main id="app">
   <div class="top">
     <div id="title" class="title">Workspace heartbeat</div>
     <div id="state" class="state">starting</div>
@@ -31,6 +31,7 @@ main{padding:13px 16px}
   <div id="footer" class="footer">Preparing live connection…</div>
 </main>
 <script type="module">
+const appEl=document.getElementById("app");
 const titleEl=document.getElementById("title");
 const stateEl=document.getElementById("state");
 const historyEl=document.getElementById("history");
@@ -75,7 +76,7 @@ function stopLive(reason){
 }
 function reportSize(){
   if(!bridgeActive)return;
-  const height=Math.ceil(document.documentElement?.scrollHeight??document.body?.scrollHeight??0);
+  const height=Math.ceil(appEl?.getBoundingClientRect?.().height??0);
   if(height>0)notify("ui/notifications/size-changed",{height});
 }
 function applyHistoryViewport(turnHistory){
