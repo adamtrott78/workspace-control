@@ -30,27 +30,26 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 0ff16a8d877a748e83f13b2d546d1b47a0b74744
+- Remote checkpoint: 8430baf2e6ec29296e812b6dbb4559b725154543
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ed666137ecf5c42950fb5eee2cd5ecc0d69f7c13
+- Remote checkpoint: f3d5dc4f8cc5007d3159b232ae00317620a59de6
 - Remote verified: true
 
 ## Next safe action
 
-Implement the frozen PROPOSITION_ALIGNMENT_CERTIFIED_AUGMENTATION_DIAGNOSTIC_V1 from execution-isolated research-engine design head ca6ada76b1850a164ab964a9673a120a10d2f15e. Use DYNAMIC_SAME_PAGE_ALIGNMENT_SWAP_V1 exactly as frozen (same-page token_f1 >=0.40, certificate from another still-retained original baseline proposition, dynamic recomputation, baseline page-set preservation, residual RRF ordering, final budget 24), add focused tests and normal CI, then durable-checkpoint the implementation before exactly one zero-generation trigger.
+Create exactly one inert research-engine trigger PR from isolated implementation head 0abf32f0fa106c2b22a6f080341b0dadc4794f96, then issue exactly one `/local-extract-proposition-alignment-preservation <exact-trigger-head-sha>` comment. Observe the unique zero-generation run, evaluate only frozen ALIGNMENT_AUGMENT_STRONG/FEASIBLE/NEGATIVE, checkpoint exact artifact/report hashes and disposition, and close the trigger PR unmerged.
 
 ## Remaining work
 
-- Implement DYNAMIC_SAME_PAGE_ALIGNMENT_SWAP_V1 exactly as frozen from isolated research-engine design head ca6ada76b1850a164ab964a9673a120a10d2f15e.
-- Add deterministic tests for same-page token-F1 certificate, dynamic recomputation, page-set preservation, residual ordering, and ALIGNMENT_AUGMENT_STRONG/FEASIBLE/NEGATIVE gates; run normal CI.
-- Checkpoint the validated implementation, then create one inert trigger PR from the isolated implementation head and issue exactly one zero-generation diagnostic.
-- Checkpoint the result immediately and close the inert trigger unmerged. No post-result threshold/gate tuning.
-- Do not execute the rejected Qwen gap judge, promote fixed 20/4 quota, train/download a classifier, start Wave 7B, change production EXTRACT/VERIFY, or incorporate ontology/semantic-control mechanisms.
+- Create one inert research-engine trigger PR from exact isolated implementation head 0abf32f0fa106c2b22a6f080341b0dadc4794f96 with only a non-semantic marker.
+- Issue exactly one `/local-extract-proposition-alignment-preservation <exact-trigger-head-sha>` comment and do not issue a second trigger.
+- Evaluate only frozen ALIGNMENT_AUGMENT_STRONG/FEASIBLE/NEGATIVE, checkpoint run/artifact/report hashes immediately, and close trigger unmerged.
+- Do not tune threshold/gates after result, promote fixed quota, execute rejected Qwen gap judge, train/download classifier, start Wave 7B, change production EXTRACT/VERIFY, or add ontology/semantic-control.
 
 ## Blockers / gates
 
