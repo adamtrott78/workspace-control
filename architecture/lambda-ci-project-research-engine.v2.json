@@ -283,7 +283,7 @@
       "trusted_workflow": {
         "path": ".github/workflows/lambda-ci-local-extract-reranker-bakeoff.yml",
         "default_branch": "main",
-        "blob_sha": "6c101c99f5829772f97c48f666aff960697006ea"
+        "blob_sha": "d15af2d5295a5c149de9a77046ad5fd94c63862e"
       },
       "trigger": {
         "event_name": "issue_comment",
