@@ -13,7 +13,6 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - Title: Research Engine Mostly-Local EXTRACT Redesign v1
 - Status: IN_PROGRESS
 - Capsule schema: v2
-- Current stage: post_wave6_codex_parity_diagnostics
 
 ## Goal
 
@@ -40,19 +39,6 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 - Remote branch: main
 - Remote checkpoint: 265a7e4784209d411383cb09da4fe0adcf50f319
 - Remote verified: true
-
-## Current diagnostic contract
-
-The user explicitly authorized a post-Wave-6 Codex-parity diagnostic/research phase. This is not Wave 7.
-
-The phase must:
-- recover or inventory preserved STANDARD Codex teacher text before creating new labels;
-- retain the original six-claim lexical F1 benchmark unchanged for continuity;
-- measure a stage-wise oracle ladder from parsed PDF through bounded 2-3 proposition evidence bundles and final normalization;
-- measure evidence-span/atom-support retrieval at a fixed context budget rather than page recall alone;
-- begin with zero-generation CPU/offline retrieval-window diagnostics before any external model download;
-- classify the residual as RETRIEVAL, EVIDENCE_COMPOSITION, EVALUATION_GRANULARITY, MODEL_NORMALIZATION, or STOP before Wave 7;
-- keep production EXTRACT, accepted Qwen VERIFY, and GitRunner/controller/provisioner/runtime unchanged.
 
 ## Next safe action
 
