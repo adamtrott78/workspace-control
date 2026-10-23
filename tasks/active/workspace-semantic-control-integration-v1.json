@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-control-prototype-v1",
-  "current_stage": "measure_relational_baseline",
+  "current_stage": "implement_read_only_research_engine_adapter",
   "acceptance_criteria": [
     "The task consumes the completed prototype verdict research-engine@4317830c4f3779cebb8a5cf0d7eeec369b85d5ea: PROMOTE_TO_INTEGRATION with authorization_escape_count=0, while preserving production_integration_authorized=false.",
     "A live/current relational baseline is measured against the existing research-engine relational/store query path using ephemeral test infrastructure or other non-production read-only fixtures; no production database is accessed and no latency threshold is invented.",
@@ -59,7 +59,7 @@
       "base_sha": "4317830c4f3779cebb8a5cf0d7eeec369b85d5ea",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "291ce566c8544628584b91312c4ae3e784ca533e",
+        "checkpoint_sha": "b09df52942fc0b7b49ee7f82a6f8242df0924fba",
         "verified": true
       },
       "local": null,
@@ -108,7 +108,7 @@
     },
     {
       "id": "measure_relational_baseline",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -122,15 +122,27 @@
         "Latency distribution and methodology",
         "Exact fixture/store/version identities"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Ephemeral relational/store baseline",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #195 measurement CI 40036307847 PASS; persisted-result CI 40036517793 PASS; merged b09df52942fc0b7b49ee7f82a6f8242df0924fba.",
+            "All 200 measured calls returned exact frozen answers with stable canonical result hashes.",
+            "p50 ms: Q1=9.875312, Q2=9.929321, Q3=8.831432, Q4=9.413461; Q2 p95=18.500285 ms; other p95 values 9.959113-10.554582 ms.",
+            "PostgreSQL 18.6, psycopg 3.3.6, Python 3.12.15; production database access=false; production mutation=false.",
+            "No latency threshold/performance promotion claim. Result SHA256 09a2b695580a2262629bca33dc568fe450edea726d92d70c1b9f24d5c0d5fcca."
+          ]
+        }
+      ],
       "resume_condition": "Baseline is reproducible, non-production, and records no invented pass/fail threshold."
     },
     {
       "id": "implement_read_only_research_engine_adapter",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "Frozen integration contract",
         "Current research-engine read/query interfaces",
@@ -253,6 +265,17 @@
         "Four-query relational baseline and exact measurement methodology frozen before implementation.",
         "EXTRACT-specific binding gate remains unresolved."
       ]
+    },
+    {
+      "id": "relational-baseline-v1",
+      "kind": "performance_baseline",
+      "identity": "research-engine@b09df52942fc0b7b49ee7f82a6f8242df0924fba:semantic-control-relational-baseline-v1:09a2b695580a2262629bca33dc568fe450edea726d92d70c1b9f24d5c0d5fcca",
+      "required_for_resume": true,
+      "evidence": [
+        "CI run 40036307847 job 120696530150 measured the frozen baseline.",
+        "Persisted result validated in CI 40036517793.",
+        "All answers correct; no production DB access; no threshold/performance claim."
+      ]
     }
   ],
   "artifacts": [],
@@ -277,12 +300,12 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Measure the frozen four-query PostgresStore relational baseline on CI's ephemeral non-production PostgreSQL service and persist the result.",
-    "Implement read-only research-engine and workspace-control adapters and prove answer/provenance equivalence.",
+    "Implement the read-only research-engine current-store adapter and prove relational-answer vs semantic-answer equivalence plus provenance preservation.",
+    "Implement the read-only workspace-control snapshot adapter and cross-task/capability/authority queries.",
     "Wait for and bind only a durable accepted EXTRACT output checkpoint before EXTRACT-specific integration.",
     "Run cross-system integration benchmark and issue READY_FOR_PRODUCTION_PROMOTION, REVISE, or REJECT."
   ],
-  "next_safe_action": "Implement only measure_relational_baseline from research-engine checkpoint 291ce566c8544628584b91312c4ae3e784ca533e. Add a benchmark runner under prototypes/semantic_control_integration/** and an integration test under tests/semantic_control_integration/** that initializes only CI's ephemeral RESEARCH_ENGINE_DATABASE_URL, loads the exact frozen five-work fixture, validates exact answers, performs the frozen 5 warmups + 50 measured calls for each of Q1-Q4 using time.perf_counter_ns, prints one machine-readable SEMANTIC_CONTROL_RELATIONAL_BASELINE_V1 JSON record, and makes no threshold/performance claim. Do not touch production DB, src/research_engine/**, workflow files, adapters, EXTRACT, policies, Lambda, or executors yet.",
+  "next_safe_action": "Implement only implement_read_only_research_engine_adapter from research-engine checkpoint b09df52942fc0b7b49ee7f82a6f8242df0924fba. Add adapter code under prototypes/semantic_control_integration/** and tests under tests/semantic_control_integration/**. The adapter may call only claim_support, qualifiers_for_method, source_level_counts, and provenance_path. It must never mutate the store or call models, network, Lambda, or executors. Convert read results into deterministic SemanticObservationV1-compatible records with exact repository/store/query/fixture provenance; prove semantic-answer equivalence on the ephemeral five-work fixture and measure projection overhead separately from the frozen relational latency. Do not implement workspace-control or EXTRACT binding yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Created from the completed workspace-semantic-control-prototype-v1 PROMOTE_TO_INTEGRATION verdict. This task is an integration-validation layer, not production rollout. It deliberately allows read-only use/import of current research-engine store/query interfaces in isolated integration tests while forbidding modifications to src/research_engine/** or authoritative stores. It also separates general research-engine/workspace-control integration work from the evolving Local EXTRACT scientific task: baseline measurement and non-EXTRACT adapters can proceed now; EXTRACT-specific binding waits for a durable accepted output checkpoint. A successful result can only create a later production-promotion task.\n\n2026-10-23 INTEGRATION CONTRACT FREEZE COMPLETE. research-engine PR #192 merged as 291ce566c8544628584b91312c4ae3e784ca533e after corrected CI run 40035899874 PASS. The freeze pins four real PostgresStore reads, exact five-work expected answers, 5-warmup/50-measurement methodology, workspace-control authority/execution source blobs, and an unresolved accepted-EXTRACT-output dependency gate. No adapter or production code was added. The task advances to ephemeral relational baseline measurement."
