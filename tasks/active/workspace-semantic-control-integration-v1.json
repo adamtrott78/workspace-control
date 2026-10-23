@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-control-prototype-v1",
-  "current_stage": "freeze_integration_contract_and_baseline",
+  "current_stage": "measure_relational_baseline",
   "acceptance_criteria": [
     "The task consumes the completed prototype verdict research-engine@4317830c4f3779cebb8a5cf0d7eeec369b85d5ea: PROMOTE_TO_INTEGRATION with authorization_escape_count=0, while preserving production_integration_authorized=false.",
     "A live/current relational baseline is measured against the existing research-engine relational/store query path using ephemeral test infrastructure or other non-production read-only fixtures; no production database is accessed and no latency threshold is invented.",
@@ -59,7 +59,7 @@
       "base_sha": "4317830c4f3779cebb8a5cf0d7eeec369b85d5ea",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "4317830c4f3779cebb8a5cf0d7eeec369b85d5ea",
+        "checkpoint_sha": "291ce566c8544628584b91312c4ae3e784ca533e",
         "verified": true
       },
       "local": null,
@@ -73,7 +73,7 @@
   "stages": [
     {
       "id": "freeze_integration_contract_and_baseline",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -89,15 +89,29 @@
         "Pinned workspace-control live-snapshot source manifest",
         "Explicit EXTRACT dependency gate requiring a future accepted output checkpoint"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Integration contract and baseline methodology freeze",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #192 merged as 291ce566c8544628584b91312c4ae3e784ca533e after corrected CI run 40035899874 PASS.",
+            "Frozen read boundary uses current PostgresStore claim_support, qualifiers_for_method, source_level_counts, and provenance_path methods.",
+            "Frozen baseline uses existing five-work fixture: 5 works, 21 evidence objects, 11 relations.",
+            "Timing contract fixes 5 warmups + 50 measured repetitions per query, whole public-method latency including current connection behavior, and no pass/fail latency threshold.",
+            "Workspace-control source manifest pins task schema, root workload policy, research-engine project profile, execution contracts, pilot receipt/runtime contract, and Local EXTRACT dependency state by Git blob identity.",
+            "Local EXTRACT binding remains explicitly UNRESOLVED and diagnostic/rejected Wave7/Family-C artifacts cannot define the adapter contract.",
+            "Initial CI failure was only a pytest module-basename collision; renaming the integration test module resolved it without contract changes."
+          ]
+        }
+      ],
       "resume_condition": "Integration contract and baseline methodology are frozen before read-only adapter implementation."
     },
     {
       "id": "measure_relational_baseline",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "Frozen baseline query set",
         "Existing research-engine relational/store implementation",
@@ -228,6 +242,17 @@
         "Owning EXTRACT task remains scientifically independent and has not supplied an accepted semantic-integration output checkpoint at integration-task creation.",
         "Current/rejected/diagnostic Wave7/Family-C artifacts may inform exclusion evidence but do not define the integration contract."
       ]
+    },
+    {
+      "id": "integration-contract-baseline-freeze-v1",
+      "kind": "integration_contract",
+      "identity": "research-engine@291ce566c8544628584b91312c4ae3e784ca533e:semantic-control-integration-contract-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #192 corrected CI run 40035899874 PASS.",
+        "Four-query relational baseline and exact measurement methodology frozen before implementation.",
+        "EXTRACT-specific binding gate remains unresolved."
+      ]
     }
   ],
   "artifacts": [],
@@ -252,14 +277,13 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Freeze the integration adapter contract, relational baseline query set/methodology, and pinned workspace-control snapshot manifest.",
-    "Measure the current relational/store baseline using non-production ephemeral infrastructure.",
+    "Measure the frozen four-query PostgresStore relational baseline on CI's ephemeral non-production PostgreSQL service and persist the result.",
     "Implement read-only research-engine and workspace-control adapters and prove answer/provenance equivalence.",
     "Wait for and bind only a durable accepted EXTRACT output checkpoint before EXTRACT-specific integration.",
     "Run cross-system integration benchmark and issue READY_FOR_PRODUCTION_PROMOTION, REVISE, or REJECT."
   ],
-  "next_safe_action": "Start only freeze_integration_contract_and_baseline. Inspect current research-engine store/query interfaces and current workspace-control task/policy/project/receipt-style schemas at the pinned integration bases. Define a small frozen relational baseline query set, exact non-production measurement methodology, versioned read-only adapter boundary, and pinned workspace-control snapshot manifest under benchmarks/semantic_control_integration/** with tests under tests/semantic_control_integration/**. Do not implement adapters until the contract/baseline is frozen. Do not bind Local EXTRACT output yet; its accepted-output dependency remains unresolved.",
+  "next_safe_action": "Implement only measure_relational_baseline from research-engine checkpoint 291ce566c8544628584b91312c4ae3e784ca533e. Add a benchmark runner under prototypes/semantic_control_integration/** and an integration test under tests/semantic_control_integration/** that initializes only CI's ephemeral RESEARCH_ENGINE_DATABASE_URL, loads the exact frozen five-work fixture, validates exact answers, performs the frozen 5 warmups + 50 measured calls for each of Q1-Q4 using time.perf_counter_ns, prints one machine-readable SEMANTIC_CONTROL_RELATIONAL_BASELINE_V1 JSON record, and makes no threshold/performance claim. Do not touch production DB, src/research_engine/**, workflow files, adapters, EXTRACT, policies, Lambda, or executors yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created from the completed workspace-semantic-control-prototype-v1 PROMOTE_TO_INTEGRATION verdict. This task is an integration-validation layer, not production rollout. It deliberately allows read-only use/import of current research-engine store/query interfaces in isolated integration tests while forbidding modifications to src/research_engine/** or authoritative stores. It also separates general research-engine/workspace-control integration work from the evolving Local EXTRACT scientific task: baseline measurement and non-EXTRACT adapters can proceed now; EXTRACT-specific binding waits for a durable accepted output checkpoint. A successful result can only create a later production-promotion task."
+  "notes": "Created from the completed workspace-semantic-control-prototype-v1 PROMOTE_TO_INTEGRATION verdict. This task is an integration-validation layer, not production rollout. It deliberately allows read-only use/import of current research-engine store/query interfaces in isolated integration tests while forbidding modifications to src/research_engine/** or authoritative stores. It also separates general research-engine/workspace-control integration work from the evolving Local EXTRACT scientific task: baseline measurement and non-EXTRACT adapters can proceed now; EXTRACT-specific binding waits for a durable accepted output checkpoint. A successful result can only create a later production-promotion task.\n\n2026-10-23 INTEGRATION CONTRACT FREEZE COMPLETE. research-engine PR #192 merged as 291ce566c8544628584b91312c4ae3e784ca533e after corrected CI run 40035899874 PASS. The freeze pins four real PostgresStore reads, exact five-work expected answers, 5-warmup/50-measurement methodology, workspace-control authority/execution source blobs, and an unresolved accepted-EXTRACT-output dependency gate. No adapter or production code was added. The task advances to ephemeral relational baseline measurement."
 }
