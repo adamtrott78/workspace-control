@@ -30,28 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 0e7fa15e49fa5413d61c7c18d7be4e98d9e41cfa
+- Remote checkpoint: 9f9f50df1afcddff7994a6ca8d9f37113b7f32c3
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: c528da5112885d9e7a3cb84df6e887a4f1e8df4b
+- Remote checkpoint: 9c03a6714f1bd244c463906cc9aad083cb4a4429
 - Remote verified: true
 
 ## Next safe action
 
-Close inert research-engine PR #184 unmerged. Then start a new evidence-first EXTRACT design phase for FAMILY_C iterative retrieve-verify-retrieve (or another materially different coverage-preserving mechanism) using benchmarks/document_intelligence/local-extract-post-wave7a3-coverage-result.v1.json as exclusion evidence. The design must define a teacher-blind way to identify uncovered evidence after the frozen source-aware first pass and a bounded residual retrieval/selection step before any run. Do not tune/rerun BALANCED_FACILITY_LOCATION_RRF_V1, promote the non-verdict 20/4 quota control post hoc, train/download a contribution classifier, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
+Implement the frozen ZERO_LOSS_RESIDUAL_AUGMENTATION_DIAGNOSTIC_V1 from benchmarks/document_intelligence/local-extract-family-c-iterative-residual-design.v1.json at research-engine@9c03a6714f1bd244c463906cc9aad083cb4a4429. Reuse the exact valid Wave 7A.3 generated-intents artifact, frozen source-aware BM25 RRF top-24 first pass, unchanged proposition pool/per-intent depth/RRF k/final budget, and deterministic LEXICOGRAPHIC_ZERO_LOSS_SWAP_V1. Add focused tests and normal CI, then durable-checkpoint the implementation before one and only one zero-generation trigger. Do not execute the structured Qwen gap judge unless this selector is STRONG or FEASIBLE.
 
 ## Remaining work
 
-- Close inert research-engine trigger PR #184 unmerged; no second composition run is authorized.
-- Begin a new evidence-first design phase for FAMILY_C iterative retrieve-verify-retrieve or another materially different coverage-preserving architecture. Treat COMPOSITION_NEGATIVE and the 20/4 quota control as exclusion/design evidence, not as a license to tune the rejected selector.
-- Research how to define teacher-blind residual coverage/uncovered evidence locally before a bounded second retrieval pass; preserve exact authoritative-PDF provenance, the source-aware baseline first pass, BM25 first-class status, and current top-24 final budget unless new evidence independently justifies changing them.
-- Do not train/download a contribution/discourse classifier unless a future architecture independently establishes a valid composition/coverage stage and a separate evidence-first training contract authorizes it.
-- Keep workspace-knowledge-action-ontology-v1 downstream-only and preserve a deterministic provenance-bearing EXTRACT output boundary for external adaptation.
-- Do not start Wave 7B or change production STANDARD Codex EXTRACT / accepted page-scoped Qwen VERIFY.
+- Implement ZERO_LOSS_RESIDUAL_AUGMENTATION_DIAGNOSTIC_V1 exactly as frozen in research-engine@9c03a6714f1bd244c463906cc9aad083cb4a4429.
+- Add deterministic tests for source-aware control utility, residual utility, zero-loss swap feasibility/tie-breaking, and PROTECTED_AUGMENT_STRONG/FEASIBLE/NEGATIVE gates; run normal research-engine CI.
+- Checkpoint the merged implementation before creating one inert trigger PR and issuing exactly one zero-generation diagnostic.
+- Only if STRONG or FEASIBLE may a separate contract authorize STRUCTURED_SCIENTIFIC_GAP_JUDGE_V1 on existing Qwen3.5-4B; do not execute it preemptively.
+- Do not train/download a sufficiency critic or contribution classifier, promote the fixed 20/4 quota, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
 
 ## Blockers / gates
 
