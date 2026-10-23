@@ -30,28 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d1d0349a438ac5d8bf00270d4d3616366783957f
+- Remote checkpoint: f7608b0a22a5be1edc542ab5fbe97b09eea5cc56
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 983fe308a2e74841bdf3d4c1bff0200ffd0f4eea
+- Remote checkpoint: ec592f877bde55c213dadf3a84aad5dec76197c2
 - Remote verified: true
 
 ## Next safe action
 
-Implement the frozen zero-generation MULTIVIEW_SUBMODULAR_COVERAGE_DIAGNOSTIC_V1 from benchmarks/document_intelligence/local-extract-post-wave7a3-coverage-design.v1.json at research-engine@983fe308a2e74841bdf3d4c1bff0200ffd0f4eea. The implementation must reuse the exact valid Wave 7A.3 generated intents as fixed diagnostic inputs, recompute BM25 per-intent rankings over the unchanged selected-page proposition pool, apply BALANCED_FACILITY_LOCATION_RRF_V1 with the frozen 0.5/0.5 branch weighting and top-24 budget, add focused tests/CI, then route and issue exactly one zero-generation diagnostic. Do not train/download a contribution classifier, start Wave 7B, change production STANDARD Codex EXTRACT/Qwen VERIFY, or introduce ontology/semantic-control mechanisms.
+Create a new inert research-engine trigger PR based on the merged zero-generation diagnostic implementation ec592f877bde55c213dadf3a84aad5dec76197c2, then issue exactly one `/local-extract-post-wave7a3-coverage <exact-trigger-head-sha>` comment. Observe that single run to completion, evaluate only the frozen COMPOSITION_CONFIRMED/PARTIAL/NEGATIVE contract, checkpoint its artifact hashes and disposition immediately, and close the trigger PR unmerged. Do not alter selector weights/gates after seeing results, train/download a contribution classifier, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
 
 ## Remaining work
 
-- Implement MULTIVIEW_SUBMODULAR_COVERAGE_DIAGNOSTIC_V1 exactly as frozen in research-engine@983fe308a2e74841bdf3d4c1bff0200ffd0f4eea; reuse the exact valid Wave 7A.3 generated intents, BM25, selected-page proposition pool, per-intent depth 12, and final budget 24.
-- Add focused deterministic tests for BALANCED_FACILITY_LOCATION_RRF_V1 and the frozen COMPOSITION_CONFIRMED/PARTIAL/NEGATIVE gates; run normal research-engine CI.
-- Route the zero-generation diagnostic through existing bounded execution authority without changing GitRunner/controller/provisioner authority, then issue exactly one diagnostic run and checkpoint its result.
-- Only if COMPOSITION_CONFIRMED may a separate evidence-first contract open training/domain-transfer evaluation for a compact contribution/discourse residual detector; do not download/train it preemptively.
-- Keep workspace-knowledge-action-ontology-v1 downstream-only. Preserve a clean deterministic provenance-bearing EXTRACT output contract for any future external adapter, but do not optimize EXTRACT for ontology/RDF/semantic-control structures.
-- Preserve production STANDARD Codex EXTRACT and accepted page-scoped Qwen VERIFY; do not start Wave 7B.
+- Create one inert research-engine trigger PR from implementation checkpoint ec592f877bde55c213dadf3a84aad5dec76197c2 without changing diagnostic semantics.
+- Issue exactly one /local-extract-post-wave7a3-coverage <exact-trigger-head-sha> comment and do not issue a second trigger while that run exists.
+- Evaluate only COMPOSITION_CONFIRMED/PARTIAL/NEGATIVE from the frozen report, preserve all diagnostic artifacts/hashes, and checkpoint the scientific result immediately.
+- Close the inert trigger PR unmerged after result checkpointing.
+- Only if COMPOSITION_CONFIRMED may a separate evidence-first contract open compact contribution/discourse classifier training/domain-transfer evaluation.
+- Do not start Wave 7B, change production STANDARD Codex EXTRACT or accepted Qwen VERIFY, or introduce ontology/semantic-control mechanisms.
 
 ## Blockers / gates
 
