@@ -29,12 +29,12 @@ Give the operator, inside the existing Heartbeat card and without opening a new 
 
 ## Next safe action
 
-v0.4.7 is live and same-card server/executor/semantic signal separation is field-validated. Run a deliberate long-turn field test and, if ChatGPT reports 'Connection interrupted', do not stop the turn; observe whether Card/server poll and Executor freshness continue to diverge from Semantic progress. Record measured touch gaps. Do not enable automatic stale-owner takeover.
+Merge and validate the canonical heartbeat_touch emission-policy patch. After merge, use the <=3 non-Heartbeat-operation liveness backstop immediately in task chats; deploy/refresh the v0.4.7 runtime when convenient so server-delivered instructions match. Then collect one long-turn/frontend-interruption observation before considering TTL or automatic takeover.
 
 ## Remaining work
 
-- Collect real ChatGPT frontend-interruption evidence while a long turn is active; do not infer exact assistant death.
-- Measure observed executor-touch gaps during/around the interruption and choose any lease TTL only from field evidence.
+- Deploy/refresh the v0.4.7 runtime from the merged source when convenient so the MCP server-delivered instructions include the new touch cadence; the canonical workspace-control procedure is authoritative immediately after merge.
+- Collect a deliberate long-turn / frontend-interruption field observation under the new touch-emission policy and record measured executor-touch gaps.
 - Choose any recovery/takeover semantics only in a separate approved phase; automatic takeover remains disabled.
 
 ## Blockers / gates
