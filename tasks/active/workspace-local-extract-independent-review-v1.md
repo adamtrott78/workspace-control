@@ -36,13 +36,13 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-No reviewer-side blocker remains on LOCAL_RESCUE_CONFIRMED. Owner may select and freeze the next bounded scientific design comparing neighborhood-rescue generalization/cost against deeper-per-intent allocation, while preserving ALIGNMENT_AUGMENT_FEASIBLE and all rejected-family/production/Wave7B/semantic-control boundaries. Independent design review is required before implementation.
+Owner may implement exactly LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1 from research-engine@abd55d31d2768f6d66d0aa187e90fa4950cfd26f / design blob f51c864d098181f4f00c75bef4f20eea3df401f2. Re-engage reviewer only if science changes or after the genuine result.
 
 ## Remaining work
 
-- Wait for owner to select and freeze the next bounded robustness/generalization phase using LOCAL_RESCUE_CONFIRMED as one-case sufficiency evidence, not a generalized robustness claim.
-- Require independent design review before implementation of the next genuinely new architecture/experiment.
-- After the next genuine scientific result, independently audit exact run/artifact before further phase selection.
+- Wait for the EXTRACT owner to implement and execute exactly LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1.
+- Do not review routine implementation/CI/packaging/trigger mechanics unless they materially alter the frozen cross-paper science.
+- After the genuine cross-paper structural verdict, independently audit exact run/artifact/result before next-phase selection.
 - If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
 
 ## Blockers / gates
