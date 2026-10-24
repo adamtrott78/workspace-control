@@ -31,16 +31,15 @@ Harden the generic semantic-control substrate independently of the Local EXTRACT
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 5e0496b76aa004c97d281265dc045a49007b4806
+- Remote checkpoint: 8e2007b021504739525a2fd72c86bbca1d72842d
 - Remote verified: true
 
 ## Next safe action
 
-Implement only implement_historical_replay_and_temporal_semantics from research-engine checkpoint 5e0496b76aa004c97d281265dc045a49007b4806. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/**. Reproduce frozen R1/R2/R3 historical decisions from pinned historical authority/candidate/precondition inputs while ignoring divergent current state; implement temporal replay for supersession intervals, contradiction preservation, and UNKNOWN semantics. No version-skew enforcement, ontology slicing, scale work, EXTRACT binding, external runtime, or production mutation yet.
+Implement only implement_version_skew_and_failure_isolation from research-engine checkpoint 8e2007b021504739525a2fd72c86bbca1d72842d. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/** for the frozen V1-V8 adversaries: stale ALLOW/current DENY, missing current authority at required epoch, task checkpoint drift, receipt binding mismatch, source blob drift, cross-repository disagreement, fake EPISTEMIC ALLOW, and duplicate-ID corrupt projection. All authority-sensitive cases must DENY or ABSTAIN with the frozen reason code; receipt mismatch has authority_effect=NONE; corrupt projection fails closed. Do not implement ontology slicing, scale, EXTRACT socket, external runtime, or production mutation yet.
 
 ## Remaining work
 
-- Implement historical decision replay and temporal/supersession/contradiction semantics.
 - Implement version-skew/failure-isolation hardening.
 - Implement bounded ontology slicing and generalized request-only evidence requirements.
 - Implement decision audit chains and receipt-reference validation.
