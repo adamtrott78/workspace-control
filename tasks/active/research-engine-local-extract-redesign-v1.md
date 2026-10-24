@@ -30,27 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 3450afdff207bc4fdccf6db79ef790dba6a0de83
+- Remote checkpoint: fbb43982c41355d0c4d9a491a8363b5f3f954f23
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 3f433e3e31fd8fac3edf86f65cef9628635652cf
+- Remote checkpoint: e8b3814d3b0d02e45bbc2d1c8914fdeb04a1bf8e
 - Remote verified: true
 
 ## Next safe action
 
-Implement NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 exactly from frozen design research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf. Add only the deterministic append-only diagnostic runner/tests and any bounded workflow/fixture wiring needed to replay frozen inputs; do not change selector, budgets 24/26/28/32, controls, evaluator, verdict interpretation, models/prompts, production EXTRACT/VERIFY, or teacher-blind boundary.
+After this implementation/pre-run checkpoint validates and merges, issue exactly one `/local-extract-nondestructive-evidence-frontier b932ee2f2ddfb4ff5cd5958369337f5b6e531655` comment on open research-engine PR #233. Bind the unique resulting run to that exact SHA. Do not issue a second trigger. Evaluate only the frozen ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE interpretation and stop for independent post-result review after a genuine result.
 
 ## Remaining work
 
-- Implement NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 exactly as frozen in research-engine, with deterministic tests and no generation/model changes.
-- Run normal CI and persist the exact implementation checkpoint before scientific execution.
-- Execute exactly one scientific diagnostic and stop at ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE; no valid-result rerun or tuning.
-- After the genuine result, obtain independent post-result review before selecting the next scientific phase.
-- Do not reopen rejected NLI/predicate-argument/AMR mechanisms, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
+- After this exact implementation/pre-run checkpoint merges, issue exactly one /local-extract-nondestructive-evidence-frontier b932ee2f2ddfb4ff5cd5958369337f5b6e531655 comment on open research-engine PR #233.
+- Observe only the unique scientific diagnostic run and evaluate the frozen ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE verdict; do not retrigger after a valid result.
+- Persist exact run/artifact/report identities and the budget-wise frozen support/cost/provenance metrics.
+- Close PR #233 unmerged after the genuine result is durably checkpointed.
+- Obtain independent post-result review before selecting the next scientific phase.
+- Do not tune budgets/order/evaluator, reopen NLI/predicate-argument/AMR, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
