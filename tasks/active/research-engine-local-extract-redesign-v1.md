@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 63e032dcd0e00c17451c2a5f651860386448d143
+- Remote checkpoint: 41e5c729ec2eab2cce95aefc138878fad4d265a6
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-After this route-readiness checkpoint validates and merges, create exactly one inert same-repository research-engine trigger PR derived from research-engine@329e7e5a31553551e39d4384a09f2c406c4a3e2f. Record the exact trigger head SHA, then issue exactly one `/lambda-ci-local-extract-amr-graph-certificate-validation <sha>` comment. Observe only that run and evaluate the frozen AMR_GRAPH_CERTIFICATE_VALIDATED/PARTIAL/REJECTED gate.
+After this pre-run checkpoint validates and merges, issue exactly one `/lambda-ci-local-extract-amr-graph-certificate-validation 4818bed9d51830406a7521be225ea28f9e3ca323` comment on open research-engine PR #227. Bind the resulting run to that exact SHA and do not issue a second trigger. Evaluate only the frozen AMR graph certificate verdict.
 
 ## Remaining work
 
-- Create one inert same-repository research-engine trigger PR derived from implementation checkpoint 329e7e5a31553551e39d4384a09f2c406c4a3e2f and record its exact head SHA.
-- Issue exactly one /lambda-ci-local-extract-amr-graph-certificate-validation <exact-head-sha> comment and observe the unique external-only validation run; do not retrigger while it is active.
+- Issue exactly one /lambda-ci-local-extract-amr-graph-certificate-validation 4818bed9d51830406a7521be225ea28f9e3ca323 comment on research-engine PR #227.
+- Observe only the unique external-only AMR validation run; do not retrigger while it is active.
 - Evaluate only frozen AMR_GRAPH_CERTIFICATE_VALIDATED/PARTIAL/REJECTED and persist exact run/artifact/report/parser/tokenizer/data identities.
-- Close the inert trigger PR unmerged after the result is durably checkpointed.
+- Close research-engine PR #227 unmerged after the result is durably checkpointed.
 - At the result checkpoint, re-read workspace-local-extract-independent-review-v1 before selecting another scientific phase.
 - Do not use EXTRACT teacher labels, alter production EXTRACT/VERIFY, start Wave 7B, train/fine-tune the parser, or emit semantic-control/RDF/ontology output.
 
