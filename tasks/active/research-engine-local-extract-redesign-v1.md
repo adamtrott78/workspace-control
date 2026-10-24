@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 2eb11c3e00755147e9fef3a0361ce5c9bf05430e
+- Remote checkpoint: 39f47730a68bd6d0e4916fe3879f2ec47052d5e9
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d058ee664c3b8be765258abc626dc667589618b7
+- Remote checkpoint: 6e6442e797b0648fb094bb1113af2be7182fb598
 - Remote verified: true
 
 ## Next safe action
 
-Perform the evidence-first next-architecture search using FACET_RESERVATION_CONFIRMED plus its anti-leak sensitivity and ALIGNMENT_AUGMENT_FEASIBLE. Compare acquisition+compression/preservation, robustness-aware structural coverage, adaptive evidence-set planning, and compositional evidence-set reasoning. Freeze the smallest experiment that discriminates these premises before any implementation.
+Re-engage workspace-local-extract-independent-review-v1 on the exact frozen design research-engine@6e6442e797b0648fb094bb1113af2be7182fb598 / blob e58c8b87e122caf1d236c9ae6857c0492d78744f. Do not implement PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 until that independent design review is durable.
 
 ## Remaining work
 
-- Compare materially distinct next mechanism families against the confirmed-but-fragile facet reservation result, ALIGNMENT_AUGMENT_FEASIBLE, and the rejected pairwise-certificate families.
-- Freeze the smallest discriminating experiment with problem model, competing hypotheses, controls, metrics, gates, interpretation table, stopping rule, teacher-blind boundary, and exact PASS authority before implementation.
-- Obtain independent review of that genuinely new frozen design before implementation.
-- Do not retune the completed facet reservation experiment or reopen NLI/predicate-argument/AMR without new premise-level evidence.
-- Do not alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
+- Obtain independent review of exact design research-engine@6e6442e797b0648fb094bb1113af2be7182fb598 / blob e58c8b87e122caf1d236c9ae6857c0492d78744f before implementation.
+- If reviewer disposition is NO_BLOCKING_FINDING, implement only PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 exactly as frozen.
+- Execute exactly one valid scientific run and stop at COMPOSED_COMPLEMENTARITY_ROBUST / COMPOSED_COMPLEMENTARITY_FRAGILE / COMPOSITION_PARTIAL / COMPOSITION_COLLISION; do not tune or rerun after a valid result.
+- After a genuine result, obtain independent post-result review before selecting another phase.
+- Do not reopen NLI/predicate-argument/AMR, add new query generation, alter production EXTRACT/VERIFY, start Wave7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
