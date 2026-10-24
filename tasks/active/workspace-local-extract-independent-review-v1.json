@@ -32,10 +32,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "cd26f0cb38363f994640f1cfb08aa1a01b9b299d",
+      "base_sha": "0953a3c1b2dfb3b757281fe2386006ac28bc281b",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "cd26f0cb38363f994640f1cfb08aa1a01b9b299d",
+        "checkpoint_sha": "0953a3c1b2dfb3b757281fe2386006ac28bc281b",
         "verified": true
       },
       "local": null,
@@ -47,10 +47,10 @@
     {
       "name": "research-engine",
       "intent": "read",
-      "base_sha": "8f03b818f415b33c3a3d0bd92d2c7396920013d6",
+      "base_sha": "3f433e3e31fd8fac3edf86f65cef9628635652cf",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "8f03b818f415b33c3a3d0bd92d2c7396920013d6",
+        "checkpoint_sha": "3f433e3e31fd8fac3edf86f65cef9628635652cf",
         "verified": true
       },
       "local": null,
@@ -128,6 +128,22 @@
             "SPARK calibration used 589 positive and 2945 negative pairs across 49 topics and selected no threshold from the frozen 0.40-0.95 grid satisfying precision>=0.95 and recall>=0.05.",
             "PR #230 changes only benchmarks/document_intelligence/local-extract-amr-graph-validation-recovery-trigger.v1.json; frozen design blob 59de8011dce2b1e8d72a5da9f7e189b01ab4a7cf is unchanged from repaired research-engine main.",
             "All hard-safety flags remain false: no EXTRACT teacher access, no EXTRACT scientific-state materialization, no AMR certificate use in EXTRACT, no production routing change, no parser/model training, no Wave 7B, no semantic-control/ontology use, and no RDF output."
+          ]
+        },
+        {
+          "check": "Non-destructive evidence frontier design independent review",
+          "result": "PASS",
+          "evidence": [
+            "Exact owner design is research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf, artifact benchmarks/document_intelligence/local-extract-nondestructive-evidence-frontier-design.v1.json blob ac3f4087b141fdfb59a15ca03d46001482d717d7.",
+            "Design PR #231 CI run 40130199564 PASS and contains design only; no runner, workflow, route, production, or model changes.",
+            "The selected mechanism is not another pairwise-score/threshold redundancy certificate: it holds the frozen source-aware top-24 immutable and appends a frozen complementary author-anchored residual ordering.",
+            "Selection is teacher-blind. Frozen teacher atoms are used only after selection for verdict evaluation; they do not generate, calibrate, rank, select, or tune candidates.",
+            "The diagnostic distinguishes H1_BRANCH_COMPLEMENTARITY_BUDGET_COLLISION from H2_INTENT_GENERATION_INCOMPLETENESS under predeclared budgets 24/26/28/32 and has explicit PARTIAL/NEGATIVE interpretations that change the next mechanism family.",
+            "ALIGNMENT_AUGMENT_FEASIBLE is retained as positive preservation evidence/reference rather than discarded or modified.",
+            "NLI_CERTIFICATE_REJECTED, PREDICATE_ARGUMENT_CERTIFICATE_REJECTED, and AMR_GRAPH_CERTIFICATE_REJECTED remain exclusion evidence; the design contains no rescue/tuning path for them.",
+            "The fixed 7/7 control retention in the append-only arm is structural by construction, not independent proof of semantic preservation. The owner design correctly limits the experiment to diagnosing whether a small extra evidence frontier exposes complementary residual support.",
+            "Budgets 28 and 32 are acceptable only as frozen diagnostic cost ceilings. A result may not be used to post-hoc select or tune a production budget.",
+            "A CONFIRMED result is not general proof of EXTRACT quality or an accepted output contract; the design correctly limits authority to a later bounded architecture/cost-compression design and requires another result review."
           ]
         }
       ],
@@ -224,6 +240,20 @@
         "No accepted EXTRACT architecture/output contract exists; semantic-control integration remains blocked.",
         "Reviewer does not choose the next EXTRACT architecture; the EXTRACT owner retains scientific authority."
       ]
+    },
+    {
+      "id": "nondestructive-evidence-frontier-design-review-v1",
+      "kind": "independent_review",
+      "identity": "research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf|design_blob@ac3f4087b141fdfb59a15ca03d46001482d717d7:NO_BLOCKING_FINDING",
+      "required_for_resume": true,
+      "evidence": [
+        "Disposition=NO_BLOCKING_FINDING for implementation of exactly NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 as frozen.",
+        "The experiment is a mechanism-discrimination diagnostic, not a production architecture acceptance test.",
+        "Teacher labels are evaluation-only; candidate selection remains teacher-blind.",
+        "No pairwise semantic redundancy certificate, threshold calibration, model swap, or rejected-mechanism rescue is present.",
+        "Structural preservation of the immutable top-24 must not be overinterpreted; the scientific information is whether the complementary residual evidence appears within the frozen small frontier.",
+        "No budget tuning or second valid scientific run is permitted; post-result reviewer boundary remains mandatory."
+      ]
     }
   ],
   "artifacts": [
@@ -282,17 +312,25 @@
         "NO_BLOCKING_FINDING on the correctness of the frozen rejection verdict for run 40125779107.",
         "This reviewer PASS means the result is methodologically consistent; it does not mean AMR passed scientifically."
       ]
+    },
+    {
+      "check": "Non-destructive evidence frontier design reviewer disposition",
+      "result": "PASS",
+      "evidence": [
+        "NO_BLOCKING_FINDING on exact design research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf.",
+        "Implementation may proceed only if it preserves the frozen selector, budgets, metrics, interpretation table, stopping rule, teacher-blind boundary, and PASS authority."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Wait for the EXTRACT owner to durably checkpoint the AMR scientific result and select its next evidence-first scientific phase under its own authority.",
-    "Review the next genuinely new scientific architecture before implementation, or the next genuine scientific result before phase selection.",
-    "Do not review routine CI, packaging, route, trigger, or cleanup mechanics unless they materially alter the frozen experiment.",
-    "If a genuine accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration."
+    "Wait for the EXTRACT owner to implement and execute exactly NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 under the reviewed frozen design.",
+    "Do not review routine implementation, CI, packaging, routing, trigger, or cleanup mechanics unless they materially alter the frozen experiment.",
+    "After the genuine ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE result, independently audit the exact run/artifact/verdict before the owner selects the next scientific phase.",
+    "If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration."
   ],
-  "next_safe_action": "No reviewer-side mutation is currently required. The AMR rejection is independently confirmed. Wait for the EXTRACT owner to durably checkpoint the result and choose the next scientific phase; re-engage only at the next genuinely new architecture boundary or scientific-result boundary. Do not influence routine execution mechanics.",
+  "next_safe_action": "No reviewer-side mutation is required during routine implementation/execution. The owner may implement exactly NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 from research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf. Re-engage this reviewer only if the experiment is materially redesigned or after the genuine scientific result before next-phase selection.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists."
+  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists.\n2026-10-24 design review: NO_BLOCKING_FINDING for research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Reviewer confirms the append-only frontier is a teacher-blind budget/selection-collision diagnostic, not a semantic-similarity certificate. Structural 7/7 control retention must not be overclaimed, frozen budgets may not be tuned, and any valid result requires post-result review."
 }
