@@ -36,17 +36,17 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 ## Next safe action
 
-Remain non-blocking while EXTRACT closes its current facet-reservation result and independent review. Do not publish a prescriptive next-architecture recommendation into shared state before the EXTRACT owner freezes its next design. Re-engage at the next scientific design/result boundary to collect uncontaminated prospective methodology evidence.
+Validate and merge the self-study checkpoint. Then keep v0.1 frozen and treat OUTCOME_PARTITION_EXHAUSTIVENESS_V0_2 as candidate-only until it is prospectively applied to a future design before implementation. Do not prescribe EXTRACT's active composed-acquisition architecture.
 
 ## Remaining work
 
-- Validate and merge the first prospective shadow evaluation and contamination-aware validation protocol.
-- Preserve the v0.1 methodology and its first shadow snapshot unchanged as historical evidence.
-- Treat automatic-intent exposure and facet-reservation results as observational methodology evidence only because no pre-result shadow was frozen for them.
-- At a future genuinely independent architecture-selection boundary, avoid publishing a prescriptive recommendation into shared state before the EXTRACT owner freezes its own design if selection independence is to be evaluated.
-- Continue measuring residual clarity, hypothesis breadth, experiment discrimination, falsifiability, premise-reuse control, invariant preservation, failure informativeness, research efficiency, next-action calibration, and coordination overhead.
-- Do not promote the methodology until prospective evidence is broader and architecture-selection independence is genuinely defensible.
-- If warranted after methodology stabilization, create a separate ontology/research-knowledge integration task.
+- Validate and merge the methodology self-study, CANDIDATE_SUPPORTED outcome-partition result, and candidate-only v0.2 schema.
+- Prospectively test the outcome-partition candidate on a future scientific design before implementation; do not retrofit governing v0.1.
+- Continue prospective validation of diagnostic-depth semantics and measure steady-state methodology overhead.
+- Design a practical blind/isolated commitment protocol before claiming independent architecture-selection quality.
+- Test whether ordinal Decision Value remains discriminating when multiple eligible experiments are genuinely close.
+- Accumulate evidence beyond EXTRACT before canonical methodology promotion.
+- If methodology concepts stabilize, create a separate ontology/research-knowledge integration task.
 
 ## Blockers / gates
 

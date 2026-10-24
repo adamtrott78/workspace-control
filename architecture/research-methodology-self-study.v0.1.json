@@ -1,0 +1,617 @@
+{
+  "schema_version": 1,
+  "research_state_id": "research-methodology-self-study-v0.1",
+  "project_id": "workspace-research-methodology-v1",
+  "evidence_cutoff": "2026-10-24T22:35:00Z",
+  "research_questions": [
+    {
+      "id": "rq-method-improvement",
+      "statement": "Which bounded changes to Evidence-First Research Methodology v0.1 most improve scientific decision quality per unit coordination cost without weakening falsifiability, provenance, or independence?",
+      "decision_target": "Select methodology v0.2 candidates for testing; do not alter validated v0.1 in place.",
+      "objective": "Improve the methodology using the same evidence-first loop it prescribes while preventing recursive process bloat.",
+      "status": "OPEN",
+      "evidence_ids": [
+        "ev-v01",
+        "ev-frontier-eval",
+        "ev-composition-missing-outcome",
+        "ev-composition-correction"
+      ]
+    }
+  ],
+  "residuals": [
+    {
+      "id": "res-outcome-space",
+      "statement": "v0.1 requires predeclared outcome interpretations but does not require a demonstrably exhaustive and mutually exclusive scientific verdict partition.",
+      "status": "OPEN",
+      "severity": "HIGH",
+      "evidence_ids": [
+        "ev-composition-missing-outcome",
+        "ev-composition-correction"
+      ]
+    },
+    {
+      "id": "res-next-action-calibration",
+      "statement": "v0.1 outcome tables can over-specify the next architecture instead of reopening the residual and preferring a cheaper discriminating diagnostic.",
+      "status": "OPEN",
+      "severity": "HIGH",
+      "evidence_ids": [
+        "ev-frontier-eval",
+        "ev-exposure-observation"
+      ]
+    },
+    {
+      "id": "res-selection-independence",
+      "statement": "Shared methodology guidance can contaminate later attempts to measure independent architecture-selection quality.",
+      "status": "OPEN",
+      "severity": "MEDIUM",
+      "evidence_ids": [
+        "ev-frontier-eval"
+      ]
+    },
+    {
+      "id": "res-overhead",
+      "statement": "Steady-state coordination overhead of the methodology has not yet been measured prospectively.",
+      "status": "OPEN",
+      "severity": "MEDIUM",
+      "evidence_ids": [
+        "ev-v01"
+      ]
+    },
+    {
+      "id": "res-decision-value-calibration",
+      "statement": "The ordinal Decision Value rubric has not yet been tested for whether it reliably discriminates between multiple eligible experiments.",
+      "status": "OPEN",
+      "severity": "MEDIUM",
+      "evidence_ids": [
+        "ev-v01"
+      ]
+    },
+    {
+      "id": "res-recursion-control",
+      "statement": "Self-application can create infinite meta-methodology recursion unless the research object and governing method version are explicitly separated.",
+      "status": "OPEN",
+      "severity": "MEDIUM",
+      "evidence_ids": [
+        "ev-meta-research"
+      ]
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "h-outcome-partition-check",
+      "statement": "Adding an explicit outcome-space exhaustiveness and exclusivity check will catch scientifically meaningful verdict gaps before implementation with low overhead.",
+      "status": "OPEN",
+      "residual_ids": [
+        "res-outcome-space"
+      ],
+      "predictions": [
+        "Applied to the original composition design, a formal outcome partition check identifies the uncovered valid state: controls retained, e1.a absent, e6.a absent, execution valid.",
+        "Applied to corrected composition design, every valid scientific state is classified exactly once or explicitly delegated to a defined residual class.",
+        "The same check distinguishes operational invalidity from negative scientific outcomes."
+      ],
+      "falsifiers": [
+        "The check fails to identify the known composition gap.",
+        "The check requires project-specific logic so burdensome that it cannot be represented as a small reusable experiment-design requirement."
+      ],
+      "supporting_evidence_ids": [
+        "ev-composition-missing-outcome",
+        "ev-composition-correction"
+      ],
+      "weakening_evidence_ids": []
+    },
+    {
+      "id": "h-diagnostic-depth",
+      "statement": "Reopening the residual after each result and preferring a cheaper discriminating diagnostic before a larger architecture improves next-action calibration.",
+      "status": "SUPPORTED",
+      "residual_ids": [
+        "res-next-action-calibration"
+      ],
+      "predictions": [
+        "A lower-cost diagnostic can sometimes reduce uncertainty after a partial result more effectively than immediate architecture-family selection."
+      ],
+      "falsifiers": [
+        "Across prospective cases, diagnostic-depth checks repeatedly add no decision-relevant information and only delay the same architecture choice."
+      ],
+      "supporting_evidence_ids": [
+        "ev-frontier-eval",
+        "ev-exposure-observation"
+      ],
+      "weakening_evidence_ids": []
+    },
+    {
+      "id": "h-blind-commitment",
+      "statement": "Independent architecture-selection quality requires a sealed or otherwise isolated precommitment channel; shared visible recommendations are insufficient.",
+      "status": "OPEN",
+      "residual_ids": [
+        "res-selection-independence"
+      ],
+      "predictions": [
+        "A dual-lane commitment protocol can preserve recommendation identity before reveal while preventing the EXTRACT owner from observing the recommendation."
+      ],
+      "falsifiers": [
+        "No practical commitment mechanism can be made durable without exposing the recommendation or adding unacceptable coordination overhead."
+      ],
+      "supporting_evidence_ids": [
+        "ev-frontier-eval",
+        "ev-preregistration"
+      ],
+      "weakening_evidence_ids": []
+    },
+    {
+      "id": "h-lightweight-boundaries",
+      "statement": "Most methodology value comes from scientific-boundary state, mechanism-family memory, frozen interpretation, and stopping rules; applying the full method to routine engineering operations would add cost without scientific benefit.",
+      "status": "SUPPORTED",
+      "residual_ids": [
+        "res-overhead"
+      ],
+      "predictions": [
+        "Boundary-only use preserves scientific safeguards while operational implementation/CI proceeds without methodology stops."
+      ],
+      "falsifiers": [
+        "Repeated operational defects materially alter scientific interpretation and would have been prevented by applying the methodology inside the engineering loop."
+      ],
+      "supporting_evidence_ids": [
+        "ev-v01",
+        "ev-frontier-eval"
+      ],
+      "weakening_evidence_ids": []
+    },
+    {
+      "id": "h-ordinal-decision-value",
+      "statement": "Ordinal Decision Value dimensions are sufficient for early methodology use and are safer than an unjustified weighted numeric score.",
+      "status": "OPEN",
+      "residual_ids": [
+        "res-decision-value-calibration"
+      ],
+      "predictions": [
+        "When candidate experiments differ materially, ordinal comparisons produce a stable preference without fabricated precision."
+      ],
+      "falsifiers": [
+        "Prospective cases repeatedly leave two or more candidate experiments tied or arbitrarily ordered in ways that materially change research decisions."
+      ],
+      "supporting_evidence_ids": [
+        "ev-v01"
+      ],
+      "weakening_evidence_ids": []
+    },
+    {
+      "id": "h-one-meta-level",
+      "statement": "A single frozen-method-on-method self-study layer is sufficient for controlled methodology improvement; recursive evaluation of the meta-method itself before new evidence would add process without information.",
+      "status": "OPEN",
+      "residual_ids": [
+        "res-recursion-control"
+      ],
+      "predictions": [
+        "v0.1 can generate falsifiable v0.2 candidates while remaining frozen as the governing instrument.",
+        "Candidate revisions can be evaluated prospectively before adoption without constructing a separate meta-meta methodology."
+      ],
+      "falsifiers": [
+        "Material contradictions cannot be resolved without introducing a distinct higher-order methodology."
+      ],
+      "supporting_evidence_ids": [
+        "ev-meta-research",
+        "ev-preregistration"
+      ],
+      "weakening_evidence_ids": []
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "a-v01-frozen-instrument",
+      "statement": "Evidence-First Research Methodology v0.1 remains frozen as the governing instrument during this self-study; proposed changes are v0.2 candidates only.",
+      "status": "SUPPORTED",
+      "evidence_ids": [
+        "ev-v01"
+      ]
+    },
+    {
+      "id": "a-extract-case-not-general-proof",
+      "statement": "EXTRACT can generate methodology evidence and counterexamples but one project is insufficient to establish general methodology validity.",
+      "status": "SUPPORTED",
+      "evidence_ids": [
+        "ev-frontier-eval"
+      ]
+    }
+  ],
+  "mechanism_families": [
+    {
+      "id": "mf-verdict-space-formalization",
+      "name": "Formal scientific outcome partition",
+      "premise": "An experiment design can represent valid scientific outcome dimensions explicitly enough to verify coverage, exclusivity, and separation from operational invalidity before execution.",
+      "status": "OPEN",
+      "hypothesis_ids": [
+        "h-outcome-partition-check"
+      ],
+      "evidence_ids": [
+        "ev-composition-missing-outcome",
+        "ev-composition-correction"
+      ],
+      "stopping_rule_ids": [
+        "sr-outcome-partition"
+      ],
+      "reopening_condition_ids": []
+    },
+    {
+      "id": "mf-diagnostic-depth",
+      "name": "Residual-first diagnostic depth",
+      "premise": "After each result, the methodology should reopen the residual state and prefer a cheaper discriminating diagnostic when one can reduce uncertainty before architecture commitment.",
+      "status": "OPEN",
+      "hypothesis_ids": [
+        "h-diagnostic-depth"
+      ],
+      "evidence_ids": [
+        "ev-frontier-eval",
+        "ev-exposure-observation"
+      ],
+      "stopping_rule_ids": [],
+      "reopening_condition_ids": []
+    },
+    {
+      "id": "mf-blind-methodology-commitment",
+      "name": "Blind methodology commitment",
+      "premise": "Independent selection quality can be evaluated by committing a methodology-side recommendation in a channel unavailable to the owning researcher until after both choices are frozen.",
+      "status": "OPEN",
+      "hypothesis_ids": [
+        "h-blind-commitment"
+      ],
+      "evidence_ids": [
+        "ev-preregistration"
+      ],
+      "stopping_rule_ids": [],
+      "reopening_condition_ids": []
+    }
+  ],
+  "candidate_architectures": [
+    {
+      "id": "candidate-outcome-partition-v02",
+      "name": "OUTCOME_PARTITION_EXHAUSTIVENESS_V0_2",
+      "mechanism_family_ids": [
+        "mf-verdict-space-formalization"
+      ],
+      "status": "SELECTED",
+      "scientific_difference": "Adds formal outcome dimensions plus a requirement that all valid scientific states map to exactly one verdict while operational invalidity remains outside the scientific partition.",
+      "evidence_ids": [
+        "ev-composition-missing-outcome",
+        "ev-composition-correction"
+      ]
+    },
+    {
+      "id": "candidate-diagnostic-depth-v02",
+      "name": "DIAGNOSTIC_DEPTH_RULE_V0_2",
+      "mechanism_family_ids": [
+        "mf-diagnostic-depth"
+      ],
+      "status": "CANDIDATE",
+      "scientific_difference": "Changes next-action semantics from a prescribed architecture to an admissible scientific region followed by a fresh cheapest-discriminating-diagnostic check.",
+      "evidence_ids": [
+        "ev-frontier-eval",
+        "ev-exposure-observation"
+      ]
+    },
+    {
+      "id": "candidate-blind-commitment-v02",
+      "name": "BLIND_DUAL_LANE_COMMITMENT_V0_2",
+      "mechanism_family_ids": [
+        "mf-blind-methodology-commitment"
+      ],
+      "status": "DEFERRED",
+      "scientific_difference": "Adds an isolation mechanism for independent architecture-selection evaluation rather than relying on visible shared-state recommendations.",
+      "evidence_ids": [
+        "ev-frontier-eval",
+        "ev-preregistration"
+      ]
+    }
+  ],
+  "evidence_items": [
+    {
+      "id": "ev-v01",
+      "kind": "ARTIFACT",
+      "statement": "Evidence-First Research Methodology v0.1 is the frozen governing instrument for this self-study.",
+      "source_identity": "workspace-control:architecture/evidence-first-research-methodology.v0.1.md@ff54e22252bfb9398ddc292364ac534fbea8cfb8",
+      "observed_at": "2026-10-24T20:43:21Z",
+      "content_sha256": null,
+      "notes": "v0.1 is not mutated in place during this self-study."
+    },
+    {
+      "id": "ev-frontier-eval",
+      "kind": "BENCHMARK_RESULT",
+      "statement": "The first prospective shadow correctly predeclared ADDITIVE_FRONTIER_PARTIAL and its interpretation but required revision of next-action calibration; architecture-selection independence was not evaluable.",
+      "source_identity": "workspace-control:architecture/extract-frontier-shadow-evaluation.v0.1.json@9c7fda8a23e623dade4a8941012eb6e3ab0528e6",
+      "observed_at": "2026-10-24T22:19:30Z",
+      "content_sha256": null,
+      "notes": "Prospective interpretation evidence; selection independence contaminated."
+    },
+    {
+      "id": "ev-exposure-observation",
+      "kind": "BENCHMARK_RESULT",
+      "statement": "After the frontier PARTIAL result, a smaller automatic-intent exposure diagnostic classified e1.a as SHALLOW_DISTRIBUTED_EXPOSURE before the next planner design.",
+      "source_identity": "research-engine|run=40133862467|artifact=12576550404|report=0908733e01e3a7efe9bc1b18bf198bc65d354520841c34b1ea8e320401e4aefc",
+      "observed_at": "2026-10-24T22:00:00Z",
+      "content_sha256": "0908733e01e3a7efe9bc1b18bf198bc65d354520841c34b1ea8e320401e4aefc",
+      "notes": "Observational methodology evidence only."
+    },
+    {
+      "id": "ev-composition-missing-outcome",
+      "kind": "DIAGNOSTIC",
+      "statement": "The original composed acquisition/preservation design omitted the valid scientific state where all seven controls are retained but neither e1.a nor e6.a is supported.",
+      "source_identity": "research-engine@6e6442e797b0648fb094bb1113af2be7182fb598|design_blob=e58c8b87e122caf1d236c9ae6857c0492d78744f",
+      "observed_at": "2026-10-24T22:20:00Z",
+      "content_sha256": null,
+      "notes": "Caught before implementation by pre-implementation audit."
+    },
+    {
+      "id": "ev-composition-correction",
+      "kind": "ARTIFACT",
+      "statement": "The corrected composition design adds COMPOSITION_NEGATIVE for the previously uncovered valid state and was independently re-reviewed before implementation.",
+      "source_identity": "research-engine@23fd3e91b3837b57201ae1524fd72e1f2d502bd5|design_blob=bf03092eb027aab75e3594250ca935b0a7e04995",
+      "observed_at": "2026-10-24T22:25:00Z",
+      "content_sha256": null,
+      "notes": "Experiment mechanics remained unchanged; correction was interpretation-only."
+    },
+    {
+      "id": "ev-meta-research",
+      "kind": "EXTERNAL_SOURCE",
+      "statement": "Meta-research explicitly treats research methods and practices as empirical objects to evaluate and improve.",
+      "source_identity": "Ioannidis et al. 2015, PLOS Biology, doi:10.1371/journal.pbio.1002264",
+      "observed_at": "2026-10-24T22:35:00Z",
+      "content_sha256": null,
+      "notes": "External methodological foundation."
+    },
+    {
+      "id": "ev-preregistration",
+      "kind": "EXTERNAL_SOURCE",
+      "statement": "Preregistration separates prediction from postdiction by committing research questions and analysis plans before observing outcomes.",
+      "source_identity": "Nosek et al. 2018, PNAS, doi:10.1073/pnas.1708274114",
+      "observed_at": "2026-10-24T22:35:00Z",
+      "content_sha256": null,
+      "notes": "Supports freezing v0.1 as instrument and treating v0.2 changes as prospective candidates."
+    }
+  ],
+  "invariants": [
+    {
+      "id": "inv-v01-immutability",
+      "statement": "Do not silently rewrite Evidence-First Research Methodology v0.1 after observing its evaluation results; preserve it as historical instrument evidence.",
+      "status": "ACTIVE",
+      "evidence_ids": [
+        "ev-v01",
+        "ev-preregistration"
+      ],
+      "reopening_rationale": null
+    },
+    {
+      "id": "inv-extract-noninterference",
+      "statement": "Methodology self-research must not prescribe or mutate the active EXTRACT architecture while independent methodology validation is being pursued.",
+      "status": "ACTIVE",
+      "evidence_ids": [
+        "ev-frontier-eval"
+      ],
+      "reopening_rationale": null
+    }
+  ],
+  "experiment_candidates": [
+    {
+      "id": "exp-outcome-partition-audit-v1",
+      "question_id": "rq-method-improvement",
+      "status": "SELECTED",
+      "target_uncertainty": "Whether outcome-space incompleteness is a structural methodology weakness that can be caught cheaply and generically before implementation.",
+      "target_hypothesis_ids": [
+        "h-outcome-partition-check"
+      ],
+      "competing_hypothesis_ids": [
+        "h-lightweight-boundaries"
+      ],
+      "mechanism_family_ids": [
+        "mf-verdict-space-formalization"
+      ],
+      "discrimination_claim": "Apply a formal valid-state partition audit to the known pre-correction composition design and recent neighboring designs. If the audit catches the known missing state without requiring architecture-specific post-hoc knowledge, the candidate is justified for prospective testing.",
+      "controls": [
+        "Original composition design before COMPOSITION_NEGATIVE.",
+        "Corrected composition design after COMPOSITION_NEGATIVE.",
+        "Frontier and facet-reservation designs as neighboring controls."
+      ],
+      "metrics": [
+        "known_missing_state_detected",
+        "valid_state_coverage",
+        "outcome_overlap_count",
+        "operational_invalidity_separated_from_scientific_negative",
+        "manual_project_specific_rules_required"
+      ],
+      "frozen_gates": [
+        "CANDIDATE_SUPPORTED: known missing composition state is detected, corrected design covers it, and the rule can be stated generically with low project-specific burden.",
+        "CANDIDATE_PARTIAL: known gap is detected but generic formalization is too ambiguous or requires substantial project-specific encoding.",
+        "CANDIDATE_REJECTED: the rule fails to detect the known gap or creates more ambiguity than it removes."
+      ],
+      "outcome_interpretations": [
+        {
+          "outcome": "CANDIDATE_SUPPORTED",
+          "evidence_pattern": "Known gap detected and reusable formal rule demonstrated.",
+          "interpretation": "Promote outcome-partition exhaustiveness to a v0.2 candidate for prospective testing.",
+          "authorized_next_action": "Draft a candidate schema/validator without modifying v0.1."
+        },
+        {
+          "outcome": "CANDIDATE_PARTIAL",
+          "evidence_pattern": "Gap detected but reusable formalization is weak or costly.",
+          "interpretation": "Keep as reviewer guidance rather than schema-level methodology requirement.",
+          "authorized_next_action": "Collect another case before implementation."
+        },
+        {
+          "outcome": "CANDIDATE_REJECTED",
+          "evidence_pattern": "Known gap not detected or rule introduces comparable ambiguity.",
+          "interpretation": "Do not add outcome-partition formalization to v0.2.",
+          "authorized_next_action": "Return to other methodology residuals."
+        },
+        {
+          "outcome": "INVALID_META_EXPERIMENT",
+          "evidence_pattern": "Required historical designs or outcome semantics cannot be reconstructed faithfully.",
+          "interpretation": "No methodology update.",
+          "authorized_next_action": "Repair evidence reconstruction only."
+        }
+      ],
+      "invalidation_conditions": [
+        "Using the corrected composition verdict to define the audit rule in a way that merely hard-codes COMPOSITION_NEGATIVE.",
+        "Modifying v0.1 before the self-study result is classified.",
+        "Treating one EXTRACT case as sufficient for canonical methodology promotion."
+      ],
+      "teacher_blind": true,
+      "cost_class": "LOW",
+      "what_pass_authorizes": "Only a v0.2 candidate schema/validator for prospective methodology testing.",
+      "stopping_rule_ids": [
+        "sr-outcome-partition"
+      ],
+      "decision_value": {
+        "discrimination_breadth": "HIGH",
+        "decision_relevance": "HIGH",
+        "falsifiability": "HIGH",
+        "independence": "MEDIUM",
+        "cost": "LOW",
+        "confound_risk": "LOW",
+        "reuse_value": "HIGH",
+        "rationale": "A known pre-implementation verdict gap provides a strong positive control; the test is cheap, structural, and can fail if generic formalization does not actually recover the gap."
+      }
+    },
+    {
+      "id": "exp-blind-commitment-protocol-v1",
+      "question_id": "rq-method-improvement",
+      "status": "CANDIDATE",
+      "target_uncertainty": "Whether independent architecture-selection quality can be measured without contaminating EXTRACT.",
+      "target_hypothesis_ids": [
+        "h-blind-commitment"
+      ],
+      "competing_hypothesis_ids": [
+        "h-lightweight-boundaries"
+      ],
+      "mechanism_family_ids": [
+        "mf-blind-methodology-commitment"
+      ],
+      "discrimination_claim": "Prototype a cryptographic or user-mediated sealed commitment and evaluate whether it preserves durable identity without exposing recommendation content before owner freeze.",
+      "controls": [
+        "Current shared-state contamination example."
+      ],
+      "metrics": [
+        "recommendation_confidential_before_reveal",
+        "durable_commitment_verifiable",
+        "coordination_steps",
+        "recovery_if_chat_dies"
+      ],
+      "frozen_gates": [
+        "Candidate only; no implementation until higher-priority outcome-partition audit completes."
+      ],
+      "outcome_interpretations": [
+        {
+          "outcome": "FEASIBLE",
+          "evidence_pattern": "Durable verifiable commitment with bounded user overhead.",
+          "interpretation": "Eligible for future independent selection trial.",
+          "authorized_next_action": "Run only at a future architecture boundary."
+        },
+        {
+          "outcome": "INFEASIBLE",
+          "evidence_pattern": "Cannot preserve both secrecy and durable recovery with available tooling.",
+          "interpretation": "Architecture-selection independence remains not directly measurable in shared workspace.",
+          "authorized_next_action": "Limit methodology validation claims accordingly."
+        }
+      ],
+      "invalidation_conditions": [
+        "Revealing recommendation content to EXTRACT before owner freeze."
+      ],
+      "teacher_blind": true,
+      "cost_class": "MEDIUM",
+      "what_pass_authorizes": "A future independent selection-evaluation protocol only.",
+      "stopping_rule_ids": [],
+      "decision_value": {
+        "discrimination_breadth": "MEDIUM",
+        "decision_relevance": "HIGH",
+        "falsifiability": "HIGH",
+        "independence": "HIGH",
+        "cost": "MEDIUM",
+        "confound_risk": "MEDIUM",
+        "reuse_value": "HIGH",
+        "rationale": "Important for validation credibility but less urgent than a concrete structural defect already observed in v0.1."
+      }
+    }
+  ],
+  "selected_experiment_id": "exp-outcome-partition-audit-v1",
+  "scientific_results": [],
+  "belief_updates": [],
+  "stopping_rules": [
+    {
+      "id": "sr-outcome-partition",
+      "scope_type": "EXPERIMENT_SERIES",
+      "scope_id": "exp-outcome-partition-audit-v1",
+      "condition": "One bounded audit across the known positive-control gap and neighboring designs is completed.",
+      "action": "Stop and classify; do not iterate the audit rule to fit every historical design."
+    }
+  ],
+  "reopening_conditions": [],
+  "decisions": [
+    {
+      "id": "d-freeze-v01",
+      "kind": "PRESERVE_INVARIANT",
+      "statement": "Freeze v0.1 as the governing methodology instrument and place all self-improvement proposals into v0.2 candidates.",
+      "selected_id": "inv-v01-immutability",
+      "rationale": "Changing the instrument after observing its own evaluation results would erase the prediction/postdiction boundary.",
+      "evidence_ids": [
+        "ev-v01",
+        "ev-preregistration"
+      ],
+      "decided_at": "2026-10-24T22:35:00Z"
+    },
+    {
+      "id": "d-select-outcome-partition",
+      "kind": "SELECT_EXPERIMENT",
+      "statement": "Test verdict-space exhaustiveness before other methodology changes.",
+      "selected_id": "exp-outcome-partition-audit-v1",
+      "rationale": "It targets a demonstrated structural defect, has a known positive control, low cost, low confound risk, and high reuse value.",
+      "evidence_ids": [
+        "ev-composition-missing-outcome",
+        "ev-composition-correction"
+      ],
+      "decided_at": "2026-10-24T22:35:00Z"
+    }
+  ],
+  "relations": [
+    {
+      "source_id": "ev-composition-missing-outcome",
+      "relation": "SUPPORTS",
+      "target_id": "h-outcome-partition-check",
+      "evidence_ids": [
+        "ev-composition-missing-outcome"
+      ]
+    },
+    {
+      "source_id": "exp-outcome-partition-audit-v1",
+      "relation": "TESTS",
+      "target_id": "h-outcome-partition-check",
+      "evidence_ids": [
+        "ev-composition-missing-outcome",
+        "ev-composition-correction"
+      ]
+    },
+    {
+      "source_id": "ev-frontier-eval",
+      "relation": "SUPPORTS",
+      "target_id": "h-diagnostic-depth",
+      "evidence_ids": [
+        "ev-frontier-eval"
+      ]
+    },
+    {
+      "source_id": "inv-v01-immutability",
+      "relation": "CONSTRAINS",
+      "target_id": "rq-method-improvement",
+      "evidence_ids": [
+        "ev-v01",
+        "ev-preregistration"
+      ]
+    }
+  ],
+  "provenance": {
+    "created_at": "2026-10-24T22:35:00Z",
+    "created_by": "workspace-research-methodology-v1",
+    "source_repositories": [
+      "adamtrott78/workspace-control",
+      "adamtrott78/research-engine"
+    ],
+    "hindsight_disclosure": "This self-study uses v0.1 as a frozen governing instrument after observing some v0.1 evaluation evidence. It may generate and test v0.2 candidates but cannot retrospectively redefine v0.1 success criteria. EXTRACT remains an observational case unless a future precommitment is independently frozen.",
+    "notes": "One meta-level only: v0.1 studies v0.1 as an object. Candidate v0.2 changes are not recursively treated as a new governing methodology until prospectively evaluated."
+  }
+}
