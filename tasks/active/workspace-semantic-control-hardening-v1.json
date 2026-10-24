@@ -1,0 +1,276 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-semantic-control-hardening-v1",
+  "title": "Semantic Control Hardening v1",
+  "status": "IN_PROGRESS",
+  "goal": "Harden the generic semantic-control substrate independently of the Local EXTRACT scientific task by proving historical decision replay, temporal/supersession/contradiction behavior, stale-state and version-skew failure isolation, bounded ontology-slice retrieval, generalized request-only EvidenceRequirement semantics, end-to-end DecisionEvaluation audit chains, deterministic scale behavior, and a consumer-side opaque EXTRACT integration socket. This task must improve the semantic-control infrastructure without defining, steering, implementing, or mutating EXTRACT.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-semantic-control-integration-v1",
+  "current_stage": "freeze_hardening_contract_and_adversaries",
+  "acceptance_criteria": [
+    "The task consumes the completed prototype and PRE_EXTRACT_INTEGRATION_PASS checkpoints but does not mutate workspace-semantic-control-integration-v1.",
+    "The task does not modify research-engine-local-extract-redesign-v1, its scientific hypotheses, benchmarks, prompts, retrieval/generation methods, Qwen/Codex choices, routes, or acceptance criteria.",
+    "Historical decision replay reproduces the exact prior ALLOW/DENY/ABSTAIN result from pinned knowledge, policy, candidate, precondition, and decision identities even when current state differs.",
+    "Temporal semantics preserve superseded records, contradictions, and open-world unknowns without destructive overwrite or global truth collapse.",
+    "Stale or version-skewed policy/task/receipt/source state fails closed for any action that requires current authority context.",
+    "OntologySliceV1 retrieval is deterministic, bounded, provenance-bearing, and returns only schema/entity/relation context relevant to the frozen query/action scenarios.",
+    "EvidenceRequirementV1 remains REQUEST_ONLY and is derived from durable evidence needs such as missing facet, source level, verification state, contradiction, staleness, and benchmark-calibrated insufficiency; raw model confidence alone cannot create an escalation.",
+    "DecisionEvaluation audit chains bind candidate action, semantic/knowledge checkpoint, exact authority artifact/version, precondition evidence, decision reasons, and optional later receipt identity without fabricating execution.",
+    "Adversarial tests cover stale ALLOW, policy downgrade, fake epistemic permission, incorrect receipt binding, source blob drift, repository disagreement, missing authority, and corrupt projection; all authority-sensitive cases fail closed with zero authorization escapes.",
+    "Synthetic scale benchmarks exercise deterministic semantic state at 1k, 10k, and 100k observations for manifest rebuild, bounded slicing, provenance traversal, temporal replay, and decision lookup; results are empirical with no retroactive threshold.",
+    "The consumer-side EXTRACT socket is versioned and opaque: it defines how a future accepted external output descriptor is registered and adapted into SemanticObservationV1, but does not define the external EXTRACT payload schema itself.",
+    "No RDF/Neo4j/persistent KG service or new third-party runtime dependency is introduced by default; backend changes require separate evidence.",
+    "No production database/schema/policy/EXTRACT/VERIFY/Lambda/executor routing mutation occurs in this task.",
+    "Final verdict is HARDENING_PASS, REVISE, or REJECT. HARDENING_PASS may be consumed by the blocked integration task later but does not itself authorize production promotion."
+  ],
+  "constraints": [
+    "Do not mutate tasks/active/research-engine-local-extract-redesign-v1.json or any EXTRACT-owned benchmark/result.",
+    "Do not mutate tasks/active/workspace-semantic-control-integration-v1.json; read it only as dependency state.",
+    "Do not modify src/research_engine/**, sql/**, migrations, pyproject/dependencies, .github workflows, production routing, model configuration, or runtime controllers.",
+    "Do not modify workspace-control workflows, procedures, policies, schemas, architecture authority files, Heartbeat implementation, or any task other than this hardening capsule/handoff.",
+    "Use deterministic typed records and in-memory indexes only. No graph database or persistent semantic service.",
+    "No external network, model inference, Lambda/GPU execution, autonomous experiment launch, or executor invocation.",
+    "Semantic inference, learned/model output, graph edges, EvidenceRequirement, OntologySlice, CandidateAction, or hardening benchmark results never create authority.",
+    "Unknown is not false; contradictory assertions coexist; supersession preserves history; authority revisions remain separate, explicit, and versioned.",
+    "Synthetic scale fixtures must be generated deterministically from frozen seeds/parameters and must never be presented as scientific evidence.",
+    "The EXTRACT socket must remain opaque until the owning EXTRACT task independently earns an accepted output contract.",
+    "Cross-chat coordination uses durable Git/task capsules and exact SHAs. Heartbeat is liveness/ownership only."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "086ebf8b03dc136d733b3b9541551ea0dd99c316",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "086ebf8b03dc136d733b3b9541551ea0dd99c316",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-semantic-control-hardening-v1.json",
+        "tasks/active/workspace-semantic-control-hardening-v1.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "mutate",
+      "base_sha": "16150517b311b42331ce26978fbb225a760c39e2",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "16150517b311b42331ce26978fbb225a760c39e2",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "prototypes/semantic_control_hardening/**",
+        "benchmarks/semantic_control_hardening/**",
+        "tests/semantic_control_hardening/**"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "freeze_hardening_contract_and_adversaries",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Completed semantic-control prototype verdict",
+        "PRE_EXTRACT_INTEGRATION_PASS result at research-engine@16150517b311b42331ce26978fbb225a760c39e2",
+        "Pinned workspace-control authority/task source identities",
+        "Current blocked integration boundary",
+        "Current EXTRACT task as dependency state only"
+      ],
+      "outputs": [
+        "Versioned hardening contract",
+        "Frozen historical replay scenarios",
+        "Frozen temporal/version-skew adversary scenarios",
+        "Frozen ontology-slice/evidence-requirement scenarios",
+        "Frozen deterministic scale parameters",
+        "Opaque FutureAcceptedExtractOutput descriptor contract"
+      ],
+      "validation": [],
+      "resume_condition": "Contracts, adversary cases, scale parameters, and opaque EXTRACT socket are frozen before hardening implementation."
+    },
+    {
+      "id": "implement_historical_replay_and_temporal_semantics",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Frozen replay and temporal scenarios"
+      ],
+      "outputs": [
+        "Historical DecisionEvaluation replay engine",
+        "Temporal/supersession/contradiction query helpers",
+        "Exact old-decision reconstruction tests"
+      ],
+      "validation": [],
+      "resume_condition": "Historical decisions replay exactly and history/contradiction semantics remain non-destructive."
+    },
+    {
+      "id": "implement_version_skew_and_failure_isolation",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Frozen adversary scenarios"
+      ],
+      "outputs": [
+        "Staleness/version-skew detector",
+        "Fail-closed authority context checks",
+        "Receipt/source/task/policy drift adversary tests"
+      ],
+      "validation": [],
+      "resume_condition": "All frozen authority-sensitive adversaries fail closed with zero authorization escapes."
+    },
+    {
+      "id": "implement_bounded_ontology_slice_and_evidence_requirements",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Frozen slice and evidence scenarios"
+      ],
+      "outputs": [
+        "Deterministic bounded ontology-slice retrieval",
+        "Generalized EvidenceRequirementV1 derivation",
+        "Provenance and request-only invariants"
+      ],
+      "validation": [],
+      "resume_condition": "Relevant bounded context and evidence requirements match frozen expected answers and never grant authority."
+    },
+    {
+      "id": "implement_decision_audit_chain",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Historical replay engine",
+        "Authority context checks",
+        "DecisionEvaluationV1"
+      ],
+      "outputs": [
+        "End-to-end auditable decision chain",
+        "Receipt binding validation without executor invocation",
+        "Exact explanation/provenance reconstruction"
+      ],
+      "validation": [],
+      "resume_condition": "Every frozen decision can be explained from exact checkpoint through authority/preconditions to decision/receipt reference."
+    },
+    {
+      "id": "implement_scale_benchmark",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Frozen deterministic scale parameters"
+      ],
+      "outputs": [
+        "1k/10k/100k synthetic semantic-state generator",
+        "Manifest rebuild/slice/provenance/replay/decision-lookup measurements",
+        "Empirical scaling report with no invented threshold"
+      ],
+      "validation": [],
+      "resume_condition": "All scale sizes remain deterministic/correct and empirical performance is durably recorded."
+    },
+    {
+      "id": "implement_opaque_extract_socket",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Frozen opaque EXTRACT socket contract"
+      ],
+      "outputs": [
+        "FutureAcceptedExtractOutputDescriptorV1 registration boundary",
+        "Adapter compatibility harness using synthetic opaque descriptors only",
+        "Tests proving no EXTRACT payload schema is assumed or defined"
+      ],
+      "validation": [],
+      "resume_condition": "Consumer-side socket is versioned/tested while external EXTRACT payload remains opaque and unbound."
+    },
+    {
+      "id": "integrated_hardening_benchmark_and_verdict",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Historical replay",
+        "Version-skew/failure isolation",
+        "Ontology slicing/evidence requirements",
+        "Decision audit chain",
+        "Scale benchmark",
+        "Opaque EXTRACT socket"
+      ],
+      "outputs": [
+        "Integrated hardening report",
+        "HARDENING_PASS, REVISE, or REJECT",
+        "Exact hardening checkpoint consumable by future integration resume"
+      ],
+      "validation": [],
+      "resume_condition": "All hardening hard gates are evaluated and durably checkpointed without changing production or EXTRACT."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "pre-extract-integration-parent-v1",
+      "kind": "integration_benchmark",
+      "identity": "research-engine@16150517b311b42331ce26978fbb225a760c39e2:PRE_EXTRACT_INTEGRATION_PASS",
+      "required_for_resume": true,
+      "evidence": [
+        "Relational/semantic answer equivalence and cross-system authority/failure-isolation gates passed.",
+        "authorization_escape_count=0.",
+        "EXTRACT_BINDING=BLOCKED_EVIDENCE; production promotion remains unauthorized."
+      ]
+    },
+    {
+      "id": "extract-independence-gate-v1",
+      "kind": "dependency_gate",
+      "identity": "workspace-control:research-engine-local-extract-redesign-v1:independent-scientific-owner",
+      "required_for_resume": false,
+      "evidence": [
+        "EXTRACT owns its own evidence-first research, implementation, and acceptance process.",
+        "Hardening may read EXTRACT task state only to verify that the opaque socket remains unbound.",
+        "Hardening must never infer an external payload schema from rejected, diagnostic, FEASIBLE, or design-phase EXTRACT evidence."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Parallel-lane isolation",
+      "result": "PASS",
+      "evidence": [
+        "workspace-semantic-control-integration-v1 remains BLOCKED_EVIDENCE and is not mutated by this task.",
+        "research-engine-local-extract-redesign-v1 remains independently owned and is not mutated by this task.",
+        "research-engine mutation is restricted to semantic_control_hardening prototype/benchmark/test paths."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Freeze the hardening contract, adversary fixtures, scale parameters, and opaque EXTRACT socket.",
+    "Implement historical replay and temporal semantics.",
+    "Implement version-skew/failure-isolation hardening.",
+    "Implement bounded ontology slicing and generalized request-only evidence requirements.",
+    "Implement decision audit chains and receipt-reference validation.",
+    "Run deterministic 1k/10k/100k scale benchmarks.",
+    "Implement and test the opaque consumer-side EXTRACT socket without defining EXTRACT payload.",
+    "Run integrated hardening benchmark and issue HARDENING_PASS, REVISE, or REJECT."
+  ],
+  "next_safe_action": "Start only freeze_hardening_contract_and_adversaries from research-engine checkpoint 16150517b311b42331ce26978fbb225a760c39e2. Inspect the existing semantic-control prototype/integration contracts and freeze versioned historical replay cases, temporal/supersession/contradiction cases, stale-policy/task/receipt/source adversaries, bounded ontology-slice and EvidenceRequirement expected answers, deterministic 1k/10k/100k scale parameters, and FutureAcceptedExtractOutputDescriptorV1 as an opaque consumer-side descriptor. Write only benchmarks/semantic_control_hardening/** and tests/semantic_control_hardening/** in the first stage. Do not implement hardening code until those contracts and fixtures are frozen. Do not modify or define EXTRACT output.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Created as a parallel sibling lane after workspace-semantic-control-integration-v1 reached PRE_EXTRACT_INTEGRATION_PASS and correctly blocked on an accepted EXTRACT output contract. This task deliberately hardens the generic semantic-control substrate while the independent EXTRACT chat continues scientific research. The eventual integration task may consume HARDENING_PASS plus a future accepted EXTRACT output checkpoint, but this task cannot unblock EXTRACT or authorize production."
+}
