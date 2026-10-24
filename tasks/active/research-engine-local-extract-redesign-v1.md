@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9b35486e384b7a72a8a2cbcf7f647efddbbdabe9
+- Remote checkpoint: e4131f4ef73b71d4eaca03522e2a067e7d75a959
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact LOCAL_RESCUE_CONFIRMED result checkpoint, close research-engine PR #248 unmerged, then re-engage workspace-local-extract-independent-review-v1 on run 40143476764 / artifact 12580076512 / report sha256:e1a2f61f16cae4e957b10a9c24b475d5cb481afa9381084de65a1cd9c6568d23. Do not select the next scientific phase until that review is durable.
+Perform the evidence-first next-phase search using LOCAL_RESCUE_CONFIRMED as one-case sufficiency evidence only. Compare bounded cross-paper neighborhood-rescue generalization/cost against deeper-per-intent allocation/retrieval-path survival, freeze the smallest discriminating experiment before implementation, and obtain independent design review.
 
 ## Remaining work
 
-- Obtain independent post-result review of run 40143476764 / artifact 12580076512 / LOCAL_RESCUE_CONFIRMED before selecting the next scientific phase.
-- After this exact result checkpoint merges, close research-engine PR #248 unmerged and do not retrigger.
-- If reviewer finds no blocking issue, compare a bounded cross-paper/generalization test of neighborhood-aware rescue against deeper-per-intent allocation/cost; do not treat the one-case CONFIRMED result as generalized robustness.
-- Preserve ALIGNMENT_AUGMENT_FEASIBLE and rejected NLI/predicate-argument/AMR exclusions; do not alter production EXTRACT/VERIFY, start Wave7B, or emit semantic-control/RDF/ontology output.
+- Compare materially different bounded next-phase mechanisms for cross-paper/generalization and cost: neighborhood-aware local rescue versus deeper-per-intent allocation/retrieval-path survival.
+- Freeze the smallest experiment that discriminates whether the local-pruning mechanism generalizes beyond the single known fragile case before implementation.
+- Obtain independent review of that genuinely new frozen design before implementation.
+- Preserve ALIGNMENT_AUGMENT_FEASIBLE and rejected NLI/predicate-argument/AMR exclusions; no production EXTRACT/VERIFY, Wave7B, or semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
