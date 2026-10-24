@@ -31,16 +31,15 @@ Harden the generic semantic-control substrate independently of the Local EXTRACT
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: b0abcc2b2bf8ae1630e0f149969875e32bb08ead
+- Remote checkpoint: b9ef0b451fec5e294c705d4886dbd828881bea05
 - Remote verified: true
 
 ## Next safe action
 
-Implement only implement_scale_benchmark from research-engine checkpoint b0abcc2b2bf8ae1630e0f149969875e32bb08ead. Add a deterministic synthetic generator and benchmark under prototypes/semantic_control_hardening/**, benchmarks/semantic_control_hardening/**, and tests/semantic_control_hardening/** using the frozen seed 20261023 and sizes 1k/10k/100k. Measure canonical manifest rebuild, bounded ontology slice, provenance traversal, temporal replay, and decision lookup with the frozen repetition counts. Prove same seed/size gives identical manifest hash, slices remain bounded, provenance terminates on exact generated source IDs, temporal replay returns generated validity-window answers, and decision lookup has zero authorization escapes. Persist empirical min/mean/p50/p95/max; apply no pass/fail latency threshold and make no performance-promotion claim. Do not implement EXTRACT socket or production behavior yet.
+Implement only implement_opaque_extract_socket from research-engine checkpoint b9ef0b451fec5e294c705d4886dbd828881bea05. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/** that validates/registers FutureAcceptedExtractOutputDescriptorV1. Reject binding for unaccepted/design-only descriptors; register accepted descriptors only as metadata while keeping binding_state UNBOUND until a separate concrete adapter exists. Enforce payload_schema_opaque=true, required exact repository/commit/artifact/blob/schema identity, accepted scientific disposition/evidence, adapter_target_contract=SemanticObservationV1, and forbidden payload/prompt/model/retrieval/ontology/RDF fields. Do not define or inspect EXTRACT payload, do not mutate EXTRACT/integration/production, and do not create the final hardening verdict until this stage passes.
 
 ## Remaining work
 
-- Run deterministic 1k/10k/100k scale benchmarks.
 - Implement and test the opaque consumer-side EXTRACT socket without defining EXTRACT payload.
 - Run integrated hardening benchmark and issue HARDENING_PASS, REVISE, or REJECT.
 
