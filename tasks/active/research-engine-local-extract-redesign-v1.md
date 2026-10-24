@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4000cd0ebc6f186efbf2cea4d75c23aa5bc057a3
+- Remote checkpoint: 8ad13cf10df87a3d01bc7f012c1d6edc8c1349d6
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Re-engage workspace-local-extract-independent-review-v1 on corrected neighborhood-rescue design research-engine@763c40589644d0c96b2408a8b443fbedf53ada0f / blob d7ab4883b4c97300540a0cab80770a5c1cf70645. Do not implement before corrected-design NO_BLOCKING_FINDING is durable.
+Implement ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 exactly from corrected design research-engine@763c40589644d0c96b2408a8b443fbedf53ada0f / blob d7ab4883b4c97300540a0cab80770a5c1cf70645. Add only deterministic replay/rescue runner/tests/workflow; do not change stress identity, surviving intents, depth12, adjacency, structural ranking, one-slot budget28, teacher use, verdict partition, alignment mechanism, or hard boundaries.
 
 ## Remaining work
 
-- Obtain independent re-review of corrected design research-engine@763c40589644d0c96b2408a8b443fbedf53ada0f / blob d7ab4883b4c97300540a0cab80770a5c1cf70645.
-- If reviewer disposition is NO_BLOCKING_FINDING, implement exactly ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 from the corrected design.
-- Execute exactly one valid scientific run and stop at the disjoint frozen neighborhood-rescue verdict.
-- After a genuine result, obtain independent post-result review before next-phase selection.
+- Implement ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 exactly from corrected design in research-engine with deterministic tests and no generation/model changes.
+- Run normal CI and persist exact implementation checkpoint before scientific execution.
+- Execute exactly one valid scientific run and stop at the frozen disjoint neighborhood-rescue verdict; no valid-result rerun or tuning.
+- After genuine result, obtain independent post-result review before next-phase selection.
 
 ## Blockers / gates
 
