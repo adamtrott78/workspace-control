@@ -24,7 +24,7 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9fe9a21c9bb463e0a4196a5f10eb11468cebb5b2
+- Remote checkpoint: ccb24ead808c8d42ed25085846afac4e589c8fea
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 ## Next safe action
 
-Validate and merge the self-study checkpoint. Then keep v0.1 frozen and treat OUTCOME_PARTITION_EXHAUSTIVENESS_V0_2 as candidate-only until it is prospectively applied to a future design before implementation. Do not prescribe EXTRACT's active composed-acquisition architecture.
+Do not alter governing v0.1. Wait for a future scientific design boundary where OUTCOME_PARTITION_EXHAUSTIVENESS_V0_2 can be prospectively applied before implementation, or advance another explicitly selected self-study experiment such as steady-state overhead telemetry or blind commitment design without prescribing EXTRACT's active architecture.
 
 ## Remaining work
 
