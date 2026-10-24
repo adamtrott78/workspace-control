@@ -30,28 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8f3058cf217ffd894f9b2ae28b38e709779da786
+- Remote checkpoint: 758b7a683a589ca63a08cdc98f8858532551b7e5
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 259d8c9381398b169de9a201517129e226e3ca94
+- Remote checkpoint: 5eddc47dac17cd28216b64c890fd99a32ad2649d
 - Remote verified: true
 
 ## Next safe action
 
-At the durable design checkpoint research-engine@259d8c9381398b169de9a201517129e226e3ca94, re-read tasks/active/workspace-local-extract-independent-review-v1.json and consume any review checkpoint explicitly tied to this exact design SHA. If no applicable review exists, proceed without waiting: implement only the external DEPENDENCY_PREDICATE_ARGUMENT_CERTIFICATE_VALIDATION_V1 harness/workflow exactly as frozen, with no EXTRACT teacher-fixture input and no EXTRACT predicate/argument experiment.
+Create exactly one inert research-engine trigger PR from isolated predicate/argument validation implementation head 8913b49218ee1519b2921bc1ff29675d06ef4d06, then issue exactly one `/local-extract-predicate-argument-certificate-validation <exact-trigger-head-sha>` comment. Observe the unique external-only SPARK+FOBIE validation run, evaluate only the frozen PREDICATE_ARGUMENT_CERTIFICATE_VALIDATED/PARTIAL/REJECTED gate, checkpoint exact parser/data/run/artifact/report identities, and close the trigger PR unmerged.
 
 ## Remaining work
 
-- Re-read workspace-local-extract-independent-review-v1 at the durable pre-implementation design checkpoint research-engine@259d8c9381398b169de9a201517129e226e3ca94 and consume only an exact-applicable review if one exists; do not block indefinitely if none exists.
-- Implement the frozen external-only DEPENDENCY_PREDICATE_ARGUMENT_CERTIFICATE_VALIDATION_V1 harness and workflow with pinned spaCy 3.8.2 / en_core_web_sm 3.8.0.
-- Validate redundancy safety on frozen SPARK calibration/held-out splits and scientific relation fidelity on FOBIE held-out test without reading EXTRACT teacher fixtures.
-- Checkpoint PREDICATE_ARGUMENT_CERTIFICATE_VALIDATED/PARTIAL/REJECTED with exact parser/data/run/artifact/report identities before choosing the next scientific phase.
+- Create one inert research-engine trigger PR from exact isolated predicate/argument validation head 8913b49218ee1519b2921bc1ff29675d06ef4d06.
+- Issue exactly one `/local-extract-predicate-argument-certificate-validation <exact-trigger-head-sha>` comment.
+- Observe the one external-only run, evaluate only frozen PREDICATE_ARGUMENT_CERTIFICATE_VALIDATED/PARTIAL/REJECTED, and checkpoint exact parser/data/run/artifact/report identities.
+- At the meaningful result checkpoint before selecting the next scientific phase, re-read workspace-local-extract-independent-review-v1 and consume only an exact-applicable review if one exists; do not block indefinitely.
 - Only if VALIDATED may a separate EXTRACT design substitute predicate/argument redundancy into the accepted dynamic-swap/page-preservation/top-24 architecture.
-- Do not retune accepted lexical 0.40, reuse rejected NLI, use EXTRACT teacher labels for calibration, train a model/parser, start Wave 7B, change production EXTRACT/VERIFY, or incorporate semantic-control/ontology output.
+- Do not use EXTRACT teacher labels for calibration, retune accepted lexical 0.40, reuse rejected NLI, train a parser/model, start Wave 7B, change production EXTRACT/VERIFY, or incorporate semantic-control/ontology output.
 
 ## Blockers / gates
 
