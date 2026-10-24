@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 6331f1750774290a918f1f8135e1db63b7904aee
+- Remote checkpoint: 3450afdff207bc4fdccf6db79ef790dba6a0de83
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Re-engage workspace-local-extract-independent-review-v1 on the exact frozen design research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / artifact blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Do not implement NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 until the independent design review is durable.
+Implement NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 exactly from frozen design research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf. Add only the deterministic append-only diagnostic runner/tests and any bounded workflow/fixture wiring needed to replay frozen inputs; do not change selector, budgets 24/26/28/32, controls, evaluator, verdict interpretation, models/prompts, production EXTRACT/VERIFY, or teacher-blind boundary.
 
 ## Remaining work
 
-- Obtain independent review of exact design research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / blob ac3f4087b141fdfb59a15ca03d46001482d717d7 before implementation.
-- If reviewer disposition is NO_BLOCKING_FINDING, implement only NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 exactly as frozen, with no generation/model changes and no teacher-informed selection.
-- Execute exactly one scientific diagnostic and stop at ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE; a valid result consumes the gate and may not be rerun or retuned.
+- Implement NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 exactly as frozen in research-engine, with deterministic tests and no generation/model changes.
+- Run normal CI and persist the exact implementation checkpoint before scientific execution.
+- Execute exactly one scientific diagnostic and stop at ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE; no valid-result rerun or tuning.
 - After the genuine result, obtain independent post-result review before selecting the next scientific phase.
-- Do not reopen NLI, predicate-argument, or AMR certificate families without new premise-level evidence; do not alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
+- Do not reopen rejected NLI/predicate-argument/AMR mechanisms, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
