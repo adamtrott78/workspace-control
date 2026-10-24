@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-control-integration-v1",
-  "current_stage": "freeze_hardening_contract_and_adversaries",
+  "current_stage": "implement_historical_replay_and_temporal_semantics",
   "acceptance_criteria": [
     "The task consumes the completed prototype and PRE_EXTRACT_INTEGRATION_PASS checkpoints but does not mutate workspace-semantic-control-integration-v1.",
     "The task does not modify research-engine-local-extract-redesign-v1, its scientific hypotheses, benchmarks, prompts, retrieval/generation methods, Qwen/Codex choices, routes, or acceptance criteria.",
@@ -59,7 +59,7 @@
       "base_sha": "16150517b311b42331ce26978fbb225a760c39e2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "16150517b311b42331ce26978fbb225a760c39e2",
+        "checkpoint_sha": "5e0496b76aa004c97d281265dc045a49007b4806",
         "verified": true
       },
       "local": null,
@@ -73,7 +73,7 @@
   "stages": [
     {
       "id": "freeze_hardening_contract_and_adversaries",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -92,15 +92,25 @@
         "Frozen deterministic scale parameters",
         "Opaque FutureAcceptedExtractOutput descriptor contract"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Hardening contract/adversary freeze",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #204 CI run 40043937230 PASS and merged as 5e0496b76aa004c97d281265dc045a49007b4806.",
+            "Historical replay cases, temporal/version-skew adversaries, ontology/evidence expected answers, deterministic scale parameters, and opaque EXTRACT descriptor contract were frozen before implementation.",
+            "Opaque EXTRACT descriptor contains no payload fields, prompt, retrieval method, model choice, or ontology/RDF output requirement."
+          ]
+        }
+      ],
       "resume_condition": "Contracts, adversary cases, scale parameters, and opaque EXTRACT socket are frozen before hardening implementation."
     },
     {
       "id": "implement_historical_replay_and_temporal_semantics",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "Frozen replay and temporal scenarios"
       ],
@@ -244,6 +254,16 @@
         "Hardening may read EXTRACT task state only to verify that the opaque socket remains unbound.",
         "Hardening must never infer an external payload schema from rejected, diagnostic, FEASIBLE, or design-phase EXTRACT evidence."
       ]
+    },
+    {
+      "id": "hardening-contract-freeze-v1",
+      "kind": "hardening_contract",
+      "identity": "research-engine@5e0496b76aa004c97d281265dc045a49007b4806:semantic-control-hardening-contract-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #204 CI PASS",
+        "All hardening fixtures/contracts frozen before implementation."
+      ]
     }
   ],
   "artifacts": [],
@@ -260,8 +280,7 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Freeze the hardening contract, adversary fixtures, scale parameters, and opaque EXTRACT socket.",
-    "Implement historical replay and temporal semantics.",
+    "Implement historical decision replay and temporal/supersession/contradiction semantics.",
     "Implement version-skew/failure-isolation hardening.",
     "Implement bounded ontology slicing and generalized request-only evidence requirements.",
     "Implement decision audit chains and receipt-reference validation.",
@@ -269,7 +288,7 @@
     "Implement and test the opaque consumer-side EXTRACT socket without defining EXTRACT payload.",
     "Run integrated hardening benchmark and issue HARDENING_PASS, REVISE, or REJECT."
   ],
-  "next_safe_action": "Start only freeze_hardening_contract_and_adversaries from research-engine checkpoint 16150517b311b42331ce26978fbb225a760c39e2. Inspect the existing semantic-control prototype/integration contracts and freeze versioned historical replay cases, temporal/supersession/contradiction cases, stale-policy/task/receipt/source adversaries, bounded ontology-slice and EvidenceRequirement expected answers, deterministic 1k/10k/100k scale parameters, and FutureAcceptedExtractOutputDescriptorV1 as an opaque consumer-side descriptor. Write only benchmarks/semantic_control_hardening/** and tests/semantic_control_hardening/** in the first stage. Do not implement hardening code until those contracts and fixtures are frozen. Do not modify or define EXTRACT output.",
+  "next_safe_action": "Implement only implement_historical_replay_and_temporal_semantics from research-engine checkpoint 5e0496b76aa004c97d281265dc045a49007b4806. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/**. Reproduce frozen R1/R2/R3 historical decisions from pinned historical authority/candidate/precondition inputs while ignoring divergent current state; implement temporal replay for supersession intervals, contradiction preservation, and UNKNOWN semantics. No version-skew enforcement, ontology slicing, scale work, EXTRACT binding, external runtime, or production mutation yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Created as a parallel sibling lane after workspace-semantic-control-integration-v1 reached PRE_EXTRACT_INTEGRATION_PASS and correctly blocked on an accepted EXTRACT output contract. This task deliberately hardens the generic semantic-control substrate while the independent EXTRACT chat continues scientific research. The eventual integration task may consume HARDENING_PASS plus a future accepted EXTRACT output checkpoint, but this task cannot unblock EXTRACT or authorize production."

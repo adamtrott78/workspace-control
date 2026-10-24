@@ -31,17 +31,16 @@ Harden the generic semantic-control substrate independently of the Local EXTRACT
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 16150517b311b42331ce26978fbb225a760c39e2
+- Remote checkpoint: 5e0496b76aa004c97d281265dc045a49007b4806
 - Remote verified: true
 
 ## Next safe action
 
-Start only freeze_hardening_contract_and_adversaries from research-engine checkpoint 16150517b311b42331ce26978fbb225a760c39e2. Inspect the existing semantic-control prototype/integration contracts and freeze versioned historical replay cases, temporal/supersession/contradiction cases, stale-policy/task/receipt/source adversaries, bounded ontology-slice and EvidenceRequirement expected answers, deterministic 1k/10k/100k scale parameters, and FutureAcceptedExtractOutputDescriptorV1 as an opaque consumer-side descriptor. Write only benchmarks/semantic_control_hardening/** and tests/semantic_control_hardening/** in the first stage. Do not implement hardening code until those contracts and fixtures are frozen. Do not modify or define EXTRACT output.
+Implement only implement_historical_replay_and_temporal_semantics from research-engine checkpoint 5e0496b76aa004c97d281265dc045a49007b4806. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/**. Reproduce frozen R1/R2/R3 historical decisions from pinned historical authority/candidate/precondition inputs while ignoring divergent current state; implement temporal replay for supersession intervals, contradiction preservation, and UNKNOWN semantics. No version-skew enforcement, ontology slicing, scale work, EXTRACT binding, external runtime, or production mutation yet.
 
 ## Remaining work
 
-- Freeze the hardening contract, adversary fixtures, scale parameters, and opaque EXTRACT socket.
-- Implement historical replay and temporal semantics.
+- Implement historical decision replay and temporal/supersession/contradiction semantics.
 - Implement version-skew/failure-isolation hardening.
 - Implement bounded ontology slicing and generalized request-only evidence requirements.
 - Implement decision audit chains and receipt-reference validation.
