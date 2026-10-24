@@ -36,14 +36,13 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-Owner may implement exactly ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 from research-engine@1fe469ee3b681db38b7d3b880fd448e7a9000bc1 / design blob 0c8dd756d184880c899214d751a409bc619cb974. Re-engage reviewer only if science changes or after the genuine result.
+Owner may implement exactly ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 from corrected research-engine@763c40589644d0c96b2408a8b443fbedf53ada0f / design blob d7ab4883b4c97300540a0cab80770a5c1cf70645. Re-engage reviewer only if science changes or after the genuine result.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to implement and execute exactly ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1.
-- Do not review routine implementation/CI/packaging/trigger mechanics unless they materially alter the frozen neighborhood-rescue science.
-- After the genuine neighborhood-rescue verdict, independently audit the exact run/artifact/result before next-phase selection.
-- If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
+- Wait for owner to implement and execute exactly ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 from the corrected design.
+- Do not review routine implementation/CI/trigger mechanics unless science changes.
+- After the genuine result, independently audit the exact run/artifact before next-phase selection.
 
 ## Blockers / gates
 
