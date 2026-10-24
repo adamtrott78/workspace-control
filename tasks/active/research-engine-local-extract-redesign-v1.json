@@ -12,7 +12,7 @@
     "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
   },
   "parent_execution_owner": "research-engine-local-document-pipeline-v1",
-  "current_stage": "amr_graph_certificate_design_final",
+  "current_stage": "amr_graph_certificate_design_smatch_hotfix",
   "acceptance_criteria": [
     "A current literature and implementation survey identifies how comparable local scientific-document, structured-information-extraction, evidence-grounding, claim-extraction, and high-precision fallback systems solve the same or adjacent problem.",
     "Previously failed approaches are explicitly excluded from reconsideration unless new evidence changes the failed premise; in particular, the already-tested Qwen3.5-4B grounded-candidate EXTRACT architecture is not simply rerun with cosmetic prompt changes.",
