@@ -36,13 +36,14 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-Owner may implement exactly SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 from corrected research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6 / design blob 5eb24fd2e7ed69a940c2fbde1fd7ddfba29c55fb. Re-engage reviewer only if science changes or after the genuine result.
+No reviewer-side blocker remains on the facet planner result. The owner may select and freeze the next bounded scientific design, but must preserve the anti-leak sensitivity caveat, keep ALIGNMENT_AUGMENT_FEASIBLE as complementary positive evidence, and obtain independent review of the genuinely new frozen design before implementation.
 
 ## Remaining work
 
-- Wait for owner implementation/execution of exactly SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1.
-- Do not review routine implementation, CI, trigger, or cleanup unless science changes.
-- After a genuine FACET_RESERVATION result, audit the exact run/artifact/verdict before next-phase selection.
+- Wait for the EXTRACT owner to select and freeze the next bounded scientific phase using the confirmed acquisition-planner result plus its anti-leak sensitivity caveat and ALIGNMENT_AUGMENT_FEASIBLE.
+- Do not review routine implementation/CI/packaging/routing/trigger mechanics unless they materially change the next frozen science.
+- After the next genuine scientific result, independently audit the exact result before further phase selection.
+- If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
 
 ## Blockers / gates
 
