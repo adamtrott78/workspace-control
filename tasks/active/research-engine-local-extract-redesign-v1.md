@@ -30,27 +30,26 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 41e5c729ec2eab2cce95aefc138878fad4d265a6
+- Remote checkpoint: 2b4a6ab43114107a9c5b1d5ff96272abc236fe34
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 329e7e5a31553551e39d4384a09f2c406c4a3e2f
+- Remote checkpoint: 8f03b818f415b33c3a3d0bd92d2c7396920013d6
 - Remote verified: true
 
 ## Next safe action
 
-After this pre-run checkpoint validates and merges, issue exactly one `/lambda-ci-local-extract-amr-graph-certificate-validation 4818bed9d51830406a7521be225ea28f9e3ca323` comment on open research-engine PR #227. Bind the resulting run to that exact SHA and do not issue a second trigger. Evaluate only the frozen AMR graph certificate verdict.
+Do not issue another `/lambda-ci-local-extract-amr-graph-certificate-validation` V1 trigger. Treat the single authorized trigger as consumed by run 40062934298, which failed before scientific execution, so the AMR scientific certificate is NOT_RUN. Before any future AMR external execution, first establish a new explicit predeclared execution-authority checkpoint with a fresh inert exact-SHA anchor derived from repaired research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6, re-read workspace-local-extract-independent-review-v1, and preserve the frozen scientific identities/gates unless newer durable design authority explicitly changes them.
 
 ## Remaining work
 
-- Issue exactly one /lambda-ci-local-extract-amr-graph-certificate-validation 4818bed9d51830406a7521be225ea28f9e3ca323 comment on research-engine PR #227.
-- Observe only the unique external-only AMR validation run; do not retrigger while it is active.
-- Evaluate only frozen AMR_GRAPH_CERTIFICATE_VALIDATED/PARTIAL/REJECTED and persist exact run/artifact/report/parser/tokenizer/data identities.
-- Close research-engine PR #227 unmerged after the result is durably checkpointed.
-- At the result checkpoint, re-read workspace-local-extract-independent-review-v1 before selecting another scientific phase.
+- AMR graph scientific certificate remains NOT_RUN; do not issue another V1 trigger.
+- If AMR external validation is resumed, first create and durably validate a new explicit one-shot execution-authority checkpoint with a fresh inert exact-SHA anchor based on repaired research-engine state.
+- Re-read workspace-local-extract-independent-review-v1 at that future checkpoint; current reviewer state has no exact AMR failure/hotfix finding.
+- Preserve all frozen AMR parser/model/tokenizer/data/Smatch identities and scientific gates unless newer durable design authority explicitly changes them.
 - Do not use EXTRACT teacher labels, alter production EXTRACT/VERIFY, start Wave 7B, train/fine-tune the parser, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
