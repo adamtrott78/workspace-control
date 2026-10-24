@@ -36,7 +36,7 @@
       "base_sha": "6331f1750774290a918f1f8135e1db63b7904aee",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "6331f1750774290a918f1f8135e1db63b7904aee",
+        "checkpoint_sha": "fbb43982c41355d0c4d9a491a8363b5f3f954f23",
         "verified": true
       },
       "local": null,
@@ -57,7 +57,7 @@
       "base_sha": "8f03b818f415b33c3a3d0bd92d2c7396920013d6",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "8f03b818f415b33c3a3d0bd92d2c7396920013d6",
+        "checkpoint_sha": "3f433e3e31fd8fac3edf86f65cef9628635652cf",
         "verified": true
       },
       "local": null,
@@ -265,15 +265,16 @@
     {
       "id": "research-methodology-v0.1-foundation",
       "kind": "experimental_methodology_checkpoint",
-      "identity": "workspace-control@research-methodology-v01-foundations:run=40130896253:V0_1_VALIDATED_EXPERIMENTAL",
+      "identity": "workspace-control@fbb43982c41355d0c4d9a491a8363b5f3f954f23:V0_1_VALIDATED_EXPERIMENTAL",
       "required_for_resume": true,
       "evidence": [
+        "PR #386 final validation run 40131007716 PASS.",
+        "PR #386 merged as workspace-control@fbb43982c41355d0c4d9a491a8363b5f3f954f23.",
         "Methodology blob ff54e22252bfb9398ddc292364ac534fbea8cfb8.",
         "Schema blob d07d5f33b3db212de67702283f35ab80a34684e2.",
         "Replay blob eb9be3f88ada52c8a2ce893e5615c746f429f307.",
         "Post-AMR state blob 6ecd165a40285cb61c92ff365fafb523a871d450.",
         "Pre-result frontier shadow blob 3278ae36acf9f8a3fd0b722edd5e1bcd96ef3ffa.",
-        "Workspace Control Validation 40130896253 PASS.",
         "v0.1 remains experimental/non-canonical; promotion requires prospective evidence."
       ]
     }
@@ -377,6 +378,14 @@
         "Unit regression, pinned-controller validation, and full integration contracts PASS.",
         "Methodology does not mutate or block EXTRACT and does not impose ontology-specific output."
       ]
+    },
+    {
+      "check": "Methodology v0.1 durable merge",
+      "result": "PASS",
+      "evidence": [
+        "PR #386 final Workspace Control Validation 40131007716 PASS.",
+        "PR #386 merged as fbb43982c41355d0c4d9a491a8363b5f3f954f23."
+      ]
     }
   ],
   "blockers": [],
@@ -388,8 +397,8 @@
     "Make an evidence-based methodology promotion decision only after prospective evidence exists.",
     "If warranted, create a separate ontology/research-knowledge integration task."
   ],
-  "next_safe_action": "Merge the validated experimental v0.1 foundation. Then keep the methodology lane non-blocking and wait for NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 to produce its scientific result; compare that result and next-phase handling against the frozen pre-result shadow without changing the shadow prediction.",
+  "next_safe_action": "Wait for the owning EXTRACT task to produce the genuine NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 scientific result. Then compare that result and the owner's next-phase interpretation against the already-frozen pre-result shadow, without changing the shadow prediction and without blocking or mutating EXTRACT.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-10-24 project creation: methodology development is intentionally separated from EXTRACT scientific ownership. EXTRACT is the first retrospective/live case study, not a dependency or subordinate workflow. Ontology integration is a downstream opportunity, not a v0.1 requirement.\n2026-10-24 v0.1 foundation work: external methodology evidence supports combining strong inference (alternative hypotheses/crucial experiments), design-science problem/objective/artifact/evaluation separation, preregistration-style precommitment, and decision-theoretic experiment selection. Retrospective EXTRACT replay identifies mechanism-family tracking and family-level stopping/reopening rules as the clearest missing research-control concepts.\n2026-10-24 v0.1 validation: Workspace Control Validation 40130896253 PASS over methodology, schema, replay, post-AMR state, pre-result frontier shadow, and contract tests. The first live shadow is pre-result but architecture-selection independence is NOT_EVALUABLE because methodology constraints were communicated before the EXTRACT design was selected."
+  "notes": "2026-10-24 project creation: methodology development is intentionally separated from EXTRACT scientific ownership. EXTRACT is the first retrospective/live case study, not a dependency or subordinate workflow. Ontology integration is a downstream opportunity, not a v0.1 requirement.\n2026-10-24 v0.1 foundation work: external methodology evidence supports combining strong inference (alternative hypotheses/crucial experiments), design-science problem/objective/artifact/evaluation separation, preregistration-style precommitment, and decision-theoretic experiment selection. Retrospective EXTRACT replay identifies mechanism-family tracking and family-level stopping/reopening rules as the clearest missing research-control concepts.\n2026-10-24 v0.1 validation: Workspace Control Validation 40130896253 PASS over methodology, schema, replay, post-AMR state, pre-result frontier shadow, and contract tests. The first live shadow is pre-result but architecture-selection independence is NOT_EVALUABLE because methodology constraints were communicated before the EXTRACT design was selected.\n2026-10-24 v0.1 durable merge: PR #386 final validation 40131007716 PASS and merged as workspace-control@fbb43982c41355d0c4d9a491a8363b5f3f954f23. The methodology lane is now in non-blocking prospective shadow mode."
 }
