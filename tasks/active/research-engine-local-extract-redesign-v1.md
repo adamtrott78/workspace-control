@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: c6ba762afcff8eaf35ae2d2b4c539630cea6c0e4
+- Remote checkpoint: 2eb11c3e00755147e9fef3a0361ce5c9bf05430e
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact facet planner result checkpoint, close research-engine PR #240 unmerged, then re-engage workspace-local-extract-independent-review-v1 on run 40136509371 / artifact 12577280307 / report 7ec84d93dde8814442a6079704773c48739e90fa3d8246514713129288998901 before next-phase selection.
+Perform the evidence-first next-architecture search using FACET_RESERVATION_CONFIRMED plus its anti-leak sensitivity and ALIGNMENT_AUGMENT_FEASIBLE. Compare acquisition+compression/preservation, robustness-aware structural coverage, adaptive evidence-set planning, and compositional evidence-set reasoning. Freeze the smallest experiment that discriminates these premises before any implementation.
 
 ## Remaining work
 
-- Obtain independent post-result review of run 40136509371 / artifact 12577280307 / FACET_RESERVATION_CONFIRMED, including the anti-leak sensitivity.
-- After this checkpoint merges, close research-engine PR #240 unmerged and do not retrigger.
-- Do not select the next scientific phase until reviewer disposition is durable.
-- Preserve ALIGNMENT_AUGMENT_FEASIBLE as complementary e6.a preservation evidence.
+- Compare materially distinct next mechanism families against the confirmed-but-fragile facet reservation result, ALIGNMENT_AUGMENT_FEASIBLE, and the rejected pairwise-certificate families.
+- Freeze the smallest discriminating experiment with problem model, competing hypotheses, controls, metrics, gates, interpretation table, stopping rule, teacher-blind boundary, and exact PASS authority before implementation.
+- Obtain independent review of that genuinely new frozen design before implementation.
+- Do not retune the completed facet reservation experiment or reopen NLI/predicate-argument/AMR without new premise-level evidence.
+- Do not alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
