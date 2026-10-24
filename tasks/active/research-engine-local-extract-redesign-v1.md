@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4dd4a64199192318c864476e4b4b89a79ee089eb
+- Remote checkpoint: 9b63f7e85a8fc2be27f10d905c49c96f904ad29c
 - Remote verified: true
 
 ### research-engine
@@ -42,13 +42,13 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Re-engage workspace-local-extract-independent-review-v1 on corrected design research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6 / blob 5eb24fd2e7ed69a940c2fbde1fd7ddfba29c55fb. Do not implement before durable review approval.
+Implement SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 exactly from corrected research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6. Preserve the immutable source-aware top24, frozen structural tiers, alternating reservation schedule, BM25 top3 depth, budgets 24/26/28/32, and posthoc-only teacher evaluation.
 
 ## Remaining work
 
-- Obtain independent re-review of corrected design research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6 / blob 5eb24fd2e7ed69a940c2fbde1fd7ddfba29c55fb.
-- If review passes, implement SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 exactly as frozen.
-- Do not alter frozen strata, schedule, depth, budgets, teacher-use boundary, interpretation, or stopping rule.
+- Implement SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 exactly as frozen with deterministic tests and zero model/generation changes.
+- Run normal CI, checkpoint exact implementation and inert trigger anchor, then authorize exactly one scientific execution.
+- Stop at FACET_RESERVATION_CONFIRMED/PARTIAL/NEGATIVE or INVALID_EXECUTION; no post-result tuning.
 
 ## Blockers / gates
 
