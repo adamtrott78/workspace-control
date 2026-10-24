@@ -24,7 +24,7 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: c49c3374a1bcdaabbf013cbc92c92d80705928b4
+- Remote checkpoint: 2c8f2b629d7dff21a37116dba544174962004829
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,10 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-Validate and merge this task-only review contract. Then re-read the latest EXTRACT capsule before the first substantive review; review only exact durable checkpoints and publish findings here without mutating EXTRACT or integration.
+Re-read tasks/active/research-engine-local-extract-redesign-v1.json and its exact latest referenced research-engine checkpoint. Perform an independent methodological/control-parity/downstream-bindability review of the newest durable EXTRACT design or result. Persist only material findings in this task; do not mutate EXTRACT or integration.
 
 ## Remaining work
 
-- Validate and merge this independent review contract.
 - On each meaningful new EXTRACT design/result checkpoint, re-read the authoritative EXTRACT capsule and exact evidence before reviewing.
 - Persist only material review findings; do not duplicate the EXTRACT owner's scientific work.
 - When an accepted EXTRACT output contract eventually appears, audit bindability and hand exact evidence back to workspace-semantic-control-integration-v1.
