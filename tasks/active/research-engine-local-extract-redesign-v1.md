@@ -30,26 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ac388e03dd793747de6126da51a193a29c707f31
+- Remote checkpoint: bca2e37c95c680f1146c76273aaf2da1f6571ee8
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 23fd3e91b3837b57201ae1524fd72e1f2d502bd5
+- Remote checkpoint: 07e2180975ca1bda4e7ac58cbec198e05cf5b733
 - Remote verified: true
 
 ## Next safe action
 
-Implement corrected PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 exactly from research-engine@23fd3e91b3837b57201ae1524fd72e1f2d502bd5 / design blob bf03092eb027aab75e3594250ca935b0a7e04995. Add only deterministic replay/composition logic, tests, and bounded workflow wiring; do not change exact planner28 set, alignment swap, budget28, sensitivity, teacher boundary, or exhaustive verdict interpretation.
+Merge this exact composed acquisition/preservation pre-run checkpoint. Then issue exactly one `/local-extract-composed-acquisition-preservation f1c1d3d99fe4ad1a0101dd75a8a309572b326bc3` comment on research-engine PR #244 and bind the unique resulting run to that exact head. Do not issue a second trigger.
 
 ## Remaining work
 
-- Implement corrected PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 exactly as frozen in research-engine.
-- Run normal CI and checkpoint exact implementation before one-shot scientific execution.
-- Execute exactly one valid scientific run and stop at the frozen verdict; no valid-result rerun or tuning.
-- After genuine result, obtain independent post-result review before selecting another phase.
+- After this exact checkpoint merges, issue exactly one `/local-extract-composed-acquisition-preservation f1c1d3d99fe4ad1a0101dd75a8a309572b326bc3` comment on open research-engine PR #244.
+- Bind the unique resulting workflow run to exact PR head f1c1d3d99fe4ad1a0101dd75a8a309572b326bc3 and inspect the uploaded report.
+- Stop at COMPOSED_COMPLEMENTARITY_ROBUST / COMPOSED_COMPLEMENTARITY_FRAGILE / COMPOSITION_PARTIAL / COMPOSITION_NEGATIVE / COMPOSITION_COLLISION or operational INVALID_EXECUTION; do not tune or rerun after a valid scientific verdict.
+- Persist the exact result and close PR #244 unmerged only after the result checkpoint is durable.
+- After a genuine scientific verdict, obtain independent post-result review before selecting the next phase.
 
 ## Blockers / gates
 
