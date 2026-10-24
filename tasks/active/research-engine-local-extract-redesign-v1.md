@@ -30,26 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: f33dde1c0105ccbbcdbce1d92ac6b67023331440
+- Remote checkpoint: 8f3058cf217ffd894f9b2ae28b38e709779da786
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: eb492ee8284fc9198bb8d931e3591c870b34ea12
+- Remote checkpoint: 259d8c9381398b169de9a201517129e226e3ca94
 - Remote verified: true
 
 ## Next safe action
 
-Begin a new evidence-first EXTRACT design phase from research-engine@eb492ee8284fc9198bb8d931e3591c870b34ea12. Treat learned mutual-entailment as rejected exclusion evidence because no frozen SPARK calibration threshold satisfied precision>=0.95 and recall>=0.05 despite acceptable SciNLI discrimination. Compare semantic-tuple coverage against at least one other materially different teacher-blind evidence-unit representation before any implementation. Preserve accepted lexical ALIGNMENT_AUGMENT_FEASIBLE; do not retune/rerun NLI, use EXTRACT teacher labels for certificate calibration, treat FEASIBLE as production promotion, start Wave 7B, change production EXTRACT/VERIFY, or incorporate semantic-control/ontology mechanisms.
+At the durable design checkpoint research-engine@259d8c9381398b169de9a201517129e226e3ca94, re-read tasks/active/workspace-local-extract-independent-review-v1.json and consume any review checkpoint explicitly tied to this exact design SHA. If no applicable review exists, proceed without waiting: implement only the external DEPENDENCY_PREDICATE_ARGUMENT_CERTIFICATE_VALIDATION_V1 harness/workflow exactly as frozen, with no EXTRACT teacher-fixture input and no EXTRACT predicate/argument experiment.
 
 ## Remaining work
 
-- Begin a new evidence-first EXTRACT design phase for semantic-tuple coverage or another materially different evidence-unit representation.
-- Treat learned mutual-entailment as rejected exclusion evidence; do not tune its threshold, rerun it, or use EXTRACT teacher labels to rescue it.
-- Preserve accepted lexical DYNAMIC_SAME_PAGE_ALIGNMENT_SWAP_V1 / ALIGNMENT_AUGMENT_FEASIBLE as the strongest validated preservation checkpoint.
-- Do not treat ALIGNMENT_AUGMENT_FEASIBLE as production promotion, start Wave 7B, alter production EXTRACT/VERIFY, emit RDF/ontology output, or modify EXTRACT to satisfy semantic-control.
+- Re-read workspace-local-extract-independent-review-v1 at the durable pre-implementation design checkpoint research-engine@259d8c9381398b169de9a201517129e226e3ca94 and consume only an exact-applicable review if one exists; do not block indefinitely if none exists.
+- Implement the frozen external-only DEPENDENCY_PREDICATE_ARGUMENT_CERTIFICATE_VALIDATION_V1 harness and workflow with pinned spaCy 3.8.2 / en_core_web_sm 3.8.0.
+- Validate redundancy safety on frozen SPARK calibration/held-out splits and scientific relation fidelity on FOBIE held-out test without reading EXTRACT teacher fixtures.
+- Checkpoint PREDICATE_ARGUMENT_CERTIFICATE_VALIDATED/PARTIAL/REJECTED with exact parser/data/run/artifact/report identities before choosing the next scientific phase.
+- Only if VALIDATED may a separate EXTRACT design substitute predicate/argument redundancy into the accepted dynamic-swap/page-preservation/top-24 architecture.
+- Do not retune accepted lexical 0.40, reuse rejected NLI, use EXTRACT teacher labels for calibration, train a model/parser, start Wave 7B, change production EXTRACT/VERIFY, or incorporate semantic-control/ontology output.
 
 ## Blockers / gates
 
