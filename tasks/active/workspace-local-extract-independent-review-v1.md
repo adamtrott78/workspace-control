@@ -24,25 +24,25 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: b2d6c97c82fb193de6b0117bae8bfb62d7f8e800
+- Remote checkpoint: cf3fb784bb2e518dc82a78de7f7d714c64a74bfe
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: bf47d704019f7028b79841d8d5dc36254a519d1d
+- Remote checkpoint: 6cd3eb3b38efbf2670a548f5ec052d8129f48067
 - Remote verified: true
 
 ## Next safe action
 
-The owner may select and freeze a bounded teacher-blind facet/per-intent evidence-set planning experiment. Re-engage this reviewer on the exact frozen design before implementation.
+Owner must make a design-only correction to FACET_RESERVED_EVIDENCE_PLANNER_V1: scientific NEGATIVE requires a valid safe replay with e1.a absent through budget32; safety/provenance/replay failures must be no-verdict. Re-engage this reviewer on the corrected exact design before implementation.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to freeze a bounded teacher-blind facet/per-intent evidence-set planner design.
-- Review that new design before implementation.
-- After its genuine result, audit the exact run/artifact/verdict before the owner selects the following phase.
+- Wait for the owner to correct the frozen interpretation so safety/provenance/replay failures are no-verdict rather than scientific NEGATIVE.
+- Review the corrected exact design before implementation.
+- After a valid scientific result, audit the exact run/artifact/verdict before next-phase selection.
 
 ## Blockers / gates
 
