@@ -42,15 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-After this recovery pre-run checkpoint validates and merges, issue exactly one `/lambda-ci-local-extract-amr-graph-certificate-validation f3d30744696e5fd1e791d6ca5601f5a25950bb7d` comment on open research-engine PR #230. Bind the unique resulting run to that exact SHA and do not issue a second trigger. Evaluate only the frozen AMR graph certificate verdict. Do not stop for independent review during execution mechanics; re-engage the reviewer only after a genuine AMR scientific result exists unless the experiment is materially redesigned first.
+Merge this exact AMR scientific-result checkpoint, then close research-engine PR #230 unmerged and re-engage workspace-local-extract-independent-review-v1 on run 40125779107 / artifact 12573487854 / verdict AMR_GRAPH_CERTIFICATE_REJECTED. Do not select or implement the next scientific architecture until that independent post-result review is durable.
 
 ## Remaining work
 
-- Issue exactly one /lambda-ci-local-extract-amr-graph-certificate-validation f3d30744696e5fd1e791d6ca5601f5a25950bb7d comment on open research-engine PR #230 after this checkpoint merges.
-- Observe only the unique recovery external AMR validation run; do not retrigger while it is active or after completion.
-- Evaluate only the frozen AMR_GRAPH_CERTIFICATE_VALIDATED/PARTIAL/REJECTED verdict and persist exact run/artifact/report/parser/tokenizer/data identities.
-- After a genuine AMR scientific result lands, re-read workspace-local-extract-independent-review-v1 before selecting the next scientific phase or claiming an accepted architecture/output contract.
-- Close research-engine PR #230 unmerged after the scientific result is durably checkpointed.
+- Obtain an independent-review checkpoint for the exact AMR_GRAPH_CERTIFICATE_REJECTED result before selecting the next scientific phase.
+- After this result checkpoint is durably merged, close research-engine PR #230 unmerged; do not issue another AMR recovery trigger.
+- Treat full AMR parser+Smatch redundancy scoring as rejected evidence; do not post-hoc tune thresholds, parser/model identities, Smatch restarts, or data to rescue the certificate.
+- Only after reviewer disposition, return to the surviving EXTRACT residual problem and choose a materially different bounded architecture/design using accumulated negative evidence from Qwen one-shot, NLI, predicate-argument, and AMR certificates.
 - Do not use EXTRACT teacher labels, alter production EXTRACT/VERIFY, start Wave 7B, train/fine-tune the parser, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
