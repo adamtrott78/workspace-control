@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a7541dff862ad0a6fc42ba22e49aec81bb6bc663
+- Remote checkpoint: 6331f1750774290a918f1f8135e1db63b7904aee
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8f03b818f415b33c3a3d0bd92d2c7396920013d6
+- Remote checkpoint: 3f433e3e31fd8fac3edf86f65cef9628635652cf
 - Remote verified: true
 
 ## Next safe action
 
-Merge this exact AMR scientific-result checkpoint, then close research-engine PR #230 unmerged and re-engage workspace-local-extract-independent-review-v1 on run 40125779107 / artifact 12573487854 / verdict AMR_GRAPH_CERTIFICATE_REJECTED. Do not select or implement the next scientific architecture until that independent post-result review is durable.
+Re-engage workspace-local-extract-independent-review-v1 on the exact frozen design research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / artifact blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Do not implement NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 until the independent design review is durable.
 
 ## Remaining work
 
-- Obtain an independent-review checkpoint for the exact AMR_GRAPH_CERTIFICATE_REJECTED result before selecting the next scientific phase.
-- After this result checkpoint is durably merged, close research-engine PR #230 unmerged; do not issue another AMR recovery trigger.
-- Treat full AMR parser+Smatch redundancy scoring as rejected evidence; do not post-hoc tune thresholds, parser/model identities, Smatch restarts, or data to rescue the certificate.
-- Only after reviewer disposition, return to the surviving EXTRACT residual problem and choose a materially different bounded architecture/design using accumulated negative evidence from Qwen one-shot, NLI, predicate-argument, and AMR certificates.
-- Do not use EXTRACT teacher labels, alter production EXTRACT/VERIFY, start Wave 7B, train/fine-tune the parser, or emit semantic-control/RDF/ontology output.
+- Obtain independent review of exact design research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / blob ac3f4087b141fdfb59a15ca03d46001482d717d7 before implementation.
+- If reviewer disposition is NO_BLOCKING_FINDING, implement only NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 exactly as frozen, with no generation/model changes and no teacher-informed selection.
+- Execute exactly one scientific diagnostic and stop at ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE; a valid result consumes the gate and may not be rerun or retuned.
+- After the genuine result, obtain independent post-result review before selecting the next scientific phase.
+- Do not reopen NLI, predicate-argument, or AMR certificate families without new premise-level evidence; do not alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
