@@ -235,6 +235,18 @@
             "A COMPOSED_COMPLEMENTARITY_FRAGILE result must not be interpreted as robust 9/13 architecture acceptance; it authorizes only a robustness-focused follow-up while preserving ALIGNMENT_AUGMENT_FEASIBLE.",
             "No new query generation, model/ranker, semantic pairwise score, threshold calibration, production change, Wave7B, or semantic-control output is present."
           ]
+        },
+        {
+          "check": "Corrected composed acquisition/preservation design independent review",
+          "result": "PASS",
+          "evidence": [
+            "Corrected exact design is research-engine@23fd3e91b3837b57201ae1524fd72e1f2d502bd5 / blob bf03092eb027aab75e3594250ca935b0a7e04995.",
+            "Correction is interpretation-only and occurred before implementation: selector, composition operator, frozen inputs, budget28, teacher boundary, metrics, and all other science remain unchanged.",
+            "COMPOSITION_NEGATIVE now explicitly covers the previously omitted valid safe outcome where all seven frozen controls survive but neither e1.a nor e6.a survives.",
+            "The stopping rule and next-decision table now enumerate all valid safe composition outcomes plus INVALID_EXECUTION.",
+            "The prior NO_BLOCKING_FINDING on the composition mechanics remains applicable; the corrected interpretation is more conservative and exhaustive.",
+            "No implementation began under the superseded interpretation table."
+          ]
         }
       ],
       "resume_condition": "A new or current EXTRACT design/result checkpoint is available for review."
@@ -436,6 +448,19 @@
         "No valid-result rerun or posthoc modification of budget28, planner set, swap identity, sensitivity, or verdict table is permitted.",
         "Post-result independent review remains mandatory."
       ]
+    },
+    {
+      "id": "composed-acquisition-preservation-design-review-v2",
+      "kind": "independent_review",
+      "identity": "research-engine@23fd3e91b3837b57201ae1524fd72e1f2d502bd5|design_blob@bf03092eb027aab75e3594250ca935b0a7e04995:NO_BLOCKING_FINDING",
+      "required_for_resume": true,
+      "evidence": [
+        "Disposition=NO_BLOCKING_FINDING for corrected design.",
+        "Verdict space is now exhaustive: ROBUST, FRAGILE, PARTIAL, NEGATIVE, COLLISION, or operational INVALID_EXECUTION.",
+        "Experiment mechanics remain identical to the previously reviewed version.",
+        "Implementation may proceed only from the corrected exact SHA/blob.",
+        "Post-result independent review remains mandatory."
+      ]
     }
   ],
   "artifacts": [
@@ -542,17 +567,25 @@
         "NO_BLOCKING_FINDING on exact design research-engine@6e6442e797b0648fb094bb1113af2be7182fb598.",
         "Owner may implement exactly the deterministic one-paper composition diagnostic as frozen."
       ]
+    },
+    {
+      "check": "Corrected composed design reviewer disposition",
+      "result": "PASS",
+      "evidence": [
+        "NO_BLOCKING_FINDING on corrected research-engine@23fd3e91b3837b57201ae1524fd72e1f2d502bd5.",
+        "Owner may implement exactly PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 with the corrected exhaustive verdict table."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Wait for the EXTRACT owner to implement and execute exactly PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1.",
-    "Do not review routine implementation/CI/packaging/trigger mechanics unless they materially alter the frozen composition science.",
+    "Wait for owner implementation and one-shot execution of exactly the corrected PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1.",
+    "Do not review routine implementation/CI/packaging/trigger mechanics unless frozen science changes.",
     "After the genuine composition verdict, independently audit exact run/artifact/result before next-phase selection.",
     "If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration."
   ],
-  "next_safe_action": "Owner may implement exactly PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 from research-engine@6e6442e797b0648fb094bb1113af2be7182fb598 / design blob e58c8b87e122caf1d236c9ae6857c0492d78744f. Re-engage reviewer only if science changes or after the genuine result.",
+  "next_safe_action": "Owner may implement exactly PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 from corrected research-engine@23fd3e91b3837b57201ae1524fd72e1f2d502bd5 / blob bf03092eb027aab75e3594250ca935b0a7e04995. Re-engage reviewer only if science changes or after the genuine result.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists.\n2026-10-24 design review: NO_BLOCKING_FINDING for research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Reviewer confirms the append-only frontier is a teacher-blind budget/selection-collision diagnostic, not a semantic-similarity certificate. Structural 7/7 control retention must not be overclaimed, frozen budgets may not be tuned, and any valid result requires post-result review.\n2026-10-24 frontier result review: NO_BLOCKING_FINDING for run 40131250903 / ADDITIVE_FRONTIER_PARTIAL. e6.a recovery at budget26 validates non-destructive branch complementarity but does not exceed ALIGNMENT_AUGMENT_FEASIBLE's 8/13 high-water mark. e1.a remains absent through budget32 despite +13,322 raw chars, so static append-only union is insufficient and must not be tuned/rerun.\n2026-10-24 automatic-intent exposure design review: NO_BLOCKING_FINDING for research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381 / design blob 1653b8fe0c469b0841edea7ac95e687b81361ded. Teacher anchors are posthoc evaluation only. Shallow exposure is premise evidence, not planner-cost acceptance; REPLAY_INCONSISTENT is no-verdict.\n2026-10-24 automatic-intent exposure post-result review: NO_BLOCKING_FINDING on run 40133862467. SHALLOW_DISTRIBUTED_EXPOSURE is valid premise evidence for teacher-blind multi-intent evidence assembly, not planner or production acceptance.\n2026-10-24 facet-reserved planner design review found one blocking interpretation error: safety/provenance/replay failure was conflated with scientific NEGATIVE. Correct design before implementation, then re-review.\n2026-10-24 facet planner result review: NO_BLOCKING_FINDING for run 40136509371 / artifact 12577280307 / FACET_RESERVATION_CONFIRMED. Primary verdict is valid under frozen teacher-blind gates: 8/13 at budget28 with e1.a recovered and all seven immutable controls retained. However, the predeclared anti-leak sensitivity removes flagged-only page:p2:s33 and collapses the gain back to 7/13, so the acquisition premise is supported but fragile. Next design must preserve this caveat and retain ALIGNMENT_AUGMENT_FEASIBLE as complementary e6.a evidence.\n2026-10-24 composed acquisition/preservation design review: NO_BLOCKING_FINDING for research-engine@6e6442e797b0648fb094bb1113af2be7182fb598 / blob e58c8b87e122caf1d236c9ae6857c0492d78744f. The exact prior alignment swap can be replayed on planner28 only under its frozen preconditions; no replacement search is allowed. The experiment primarily discriminates composability from interference. Any primary 9/13 result that fails flagged-origin sensitivity is FRAGILE, not robust acceptance."
+  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists.\n2026-10-24 design review: NO_BLOCKING_FINDING for research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Reviewer confirms the append-only frontier is a teacher-blind budget/selection-collision diagnostic, not a semantic-similarity certificate. Structural 7/7 control retention must not be overclaimed, frozen budgets may not be tuned, and any valid result requires post-result review.\n2026-10-24 frontier result review: NO_BLOCKING_FINDING for run 40131250903 / ADDITIVE_FRONTIER_PARTIAL. e6.a recovery at budget26 validates non-destructive branch complementarity but does not exceed ALIGNMENT_AUGMENT_FEASIBLE's 8/13 high-water mark. e1.a remains absent through budget32 despite +13,322 raw chars, so static append-only union is insufficient and must not be tuned/rerun.\n2026-10-24 automatic-intent exposure design review: NO_BLOCKING_FINDING for research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381 / design blob 1653b8fe0c469b0841edea7ac95e687b81361ded. Teacher anchors are posthoc evaluation only. Shallow exposure is premise evidence, not planner-cost acceptance; REPLAY_INCONSISTENT is no-verdict.\n2026-10-24 automatic-intent exposure post-result review: NO_BLOCKING_FINDING on run 40133862467. SHALLOW_DISTRIBUTED_EXPOSURE is valid premise evidence for teacher-blind multi-intent evidence assembly, not planner or production acceptance.\n2026-10-24 facet-reserved planner design review found one blocking interpretation error: safety/provenance/replay failure was conflated with scientific NEGATIVE. Correct design before implementation, then re-review.\n2026-10-24 facet planner result review: NO_BLOCKING_FINDING for run 40136509371 / artifact 12577280307 / FACET_RESERVATION_CONFIRMED. Primary verdict is valid under frozen teacher-blind gates: 8/13 at budget28 with e1.a recovered and all seven immutable controls retained. However, the predeclared anti-leak sensitivity removes flagged-only page:p2:s33 and collapses the gain back to 7/13, so the acquisition premise is supported but fragile. Next design must preserve this caveat and retain ALIGNMENT_AUGMENT_FEASIBLE as complementary e6.a evidence.\n2026-10-24 composed acquisition/preservation design review: NO_BLOCKING_FINDING for research-engine@6e6442e797b0648fb094bb1113af2be7182fb598 / blob e58c8b87e122caf1d236c9ae6857c0492d78744f. The exact prior alignment swap can be replayed on planner28 only under its frozen preconditions; no replacement search is allowed. The experiment primarily discriminates composability from interference. Any primary 9/13 result that fails flagged-origin sensitivity is FRAGILE, not robust acceptance.\n2026-10-24 corrected composition design re-review: NO_BLOCKING_FINDING for research-engine@23fd3e91b3837b57201ae1524fd72e1f2d502bd5 / blob bf03092eb027aab75e3594250ca935b0a7e04995. COMPOSITION_NEGATIVE closes the only missing valid safe outcome; experiment mechanics are unchanged and implementation had not started."
 }
