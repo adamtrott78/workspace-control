@@ -24,26 +24,26 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: cd26f0cb38363f994640f1cfb08aa1a01b9b299d
+- Remote checkpoint: 0953a3c1b2dfb3b757281fe2386006ac28bc281b
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: 8f03b818f415b33c3a3d0bd92d2c7396920013d6
+- Remote checkpoint: 3f433e3e31fd8fac3edf86f65cef9628635652cf
 - Remote verified: true
 
 ## Next safe action
 
-No reviewer-side mutation is currently required. The AMR rejection is independently confirmed. Wait for the EXTRACT owner to durably checkpoint the result and choose the next scientific phase; re-engage only at the next genuinely new architecture boundary or scientific-result boundary. Do not influence routine execution mechanics.
+No reviewer-side mutation is required during routine implementation/execution. The owner may implement exactly NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 from research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf. Re-engage this reviewer only if the experiment is materially redesigned or after the genuine scientific result before next-phase selection.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to durably checkpoint the AMR scientific result and select its next evidence-first scientific phase under its own authority.
-- Review the next genuinely new scientific architecture before implementation, or the next genuine scientific result before phase selection.
-- Do not review routine CI, packaging, route, trigger, or cleanup mechanics unless they materially alter the frozen experiment.
-- If a genuine accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
+- Wait for the EXTRACT owner to implement and execute exactly NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 under the reviewed frozen design.
+- Do not review routine implementation, CI, packaging, routing, trigger, or cleanup mechanics unless they materially alter the frozen experiment.
+- After the genuine ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE result, independently audit the exact run/artifact/verdict before the owner selects the next scientific phase.
+- If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
 
 ## Blockers / gates
 
