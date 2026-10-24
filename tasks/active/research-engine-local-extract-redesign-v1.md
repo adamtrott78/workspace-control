@@ -30,28 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 758b7a683a589ca63a08cdc98f8858532551b7e5
+- Remote checkpoint: d07a0eec8f0b929836a99e60a5a46d1979d7c37f
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 5eddc47dac17cd28216b64c890fd99a32ad2649d
+- Remote checkpoint: a135b89a855166171073ab1012df41a0be5ba9b6
 - Remote verified: true
 
 ## Next safe action
 
-Create exactly one inert research-engine trigger PR from isolated predicate/argument validation implementation head 8913b49218ee1519b2921bc1ff29675d06ef4d06, then issue exactly one `/local-extract-predicate-argument-certificate-validation <exact-trigger-head-sha>` comment. Observe the unique external-only SPARK+FOBIE validation run, evaluate only the frozen PREDICATE_ARGUMENT_CERTIFICATE_VALIDATED/PARTIAL/REJECTED gate, checkpoint exact parser/data/run/artifact/report identities, and close the trigger PR unmerged.
+After closing inert trigger PR #221 unmerged, re-read tasks/active/workspace-local-extract-independent-review-v1.json for any review checkpoint explicitly tied to research-engine@a135b89a855166171073ab1012df41a0be5ba9b6. If no applicable review exists, proceed without waiting into a new evidence-first EXTRACT design that compares AMR/graph coverage against at least one materially different teacher-blind evidence representation. Treat learned mutual-entailment and dependency predicate/argument units as rejected exclusion evidence. Do not retune/rerun them, use EXTRACT teacher labels for calibration, treat ALIGNMENT_AUGMENT_FEASIBLE as production promotion, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate semantic-control/ontology mechanisms.
 
 ## Remaining work
 
-- Create one inert research-engine trigger PR from exact isolated predicate/argument validation head 8913b49218ee1519b2921bc1ff29675d06ef4d06.
-- Issue exactly one `/local-extract-predicate-argument-certificate-validation <exact-trigger-head-sha>` comment.
-- Observe the one external-only run, evaluate only frozen PREDICATE_ARGUMENT_CERTIFICATE_VALIDATED/PARTIAL/REJECTED, and checkpoint exact parser/data/run/artifact/report identities.
-- At the meaningful result checkpoint before selecting the next scientific phase, re-read workspace-local-extract-independent-review-v1 and consume only an exact-applicable review if one exists; do not block indefinitely.
-- Only if VALIDATED may a separate EXTRACT design substitute predicate/argument redundancy into the accepted dynamic-swap/page-preservation/top-24 architecture.
-- Do not use EXTRACT teacher labels for calibration, retune accepted lexical 0.40, reuse rejected NLI, train a parser/model, start Wave 7B, change production EXTRACT/VERIFY, or incorporate semantic-control/ontology output.
+- Close inert research-engine trigger PR #221 unmerged after this result checkpoint is durable.
+- Re-read workspace-local-extract-independent-review-v1 at exact result research-engine@a135b89a855166171073ab1012df41a0be5ba9b6 before selecting the next scientific phase; consume only an exact-applicable review if one exists and do not block indefinitely if none exists.
+- Begin a new evidence-first EXTRACT design comparing AMR/graph coverage against at least one other materially different teacher-blind evidence representation; dependency predicate/argument units and learned mutual entailment are rejected exclusion evidence.
+- Preserve accepted lexical ALIGNMENT_AUGMENT_FEASIBLE and do not retune its 0.40 threshold post hoc.
+- Do not rerun/tune predicate/argument validation, reuse rejected NLI, use EXTRACT teacher labels for representation calibration, train a model/parser, start Wave 7B, change production EXTRACT/VERIFY, or incorporate semantic-control/ontology output.
 
 ## Blockers / gates
 
