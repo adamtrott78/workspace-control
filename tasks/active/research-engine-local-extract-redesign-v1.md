@@ -46,10 +46,10 @@ Merge this exact facet planner pre-run checkpoint. Then issue exactly one `/loca
 
 ## Remaining work
 
-- After this checkpoint merges, issue exactly one frozen facet planner trigger on PR #240.
-- Bind the unique resulting run to exact head 61c57dd72f0cb174908e5648405d87e89c0ec904 and inspect the report.
-- Stop at the frozen verdict; no post-result tuning or valid rerun.
-- Persist the result, close PR #240 unmerged after result checkpoint, and obtain independent post-result review.
+- After this checkpoint merges, issue exactly one `/local-extract-facet-reserved-evidence-planner 61c57dd72f0cb174908e5648405d87e89c0ec904` comment on PR #240.
+- Bind the unique resulting run to that exact head and inspect the report.
+- Stop at FACET_RESERVATION_CONFIRMED/PARTIAL/NEGATIVE or INVALID_EXECUTION; do not tune or rerun after a valid scientific result.
+- Persist the result, close PR #240 unmerged after the result checkpoint is durable, and obtain independent post-result review.
 
 ## Blockers / gates
 
