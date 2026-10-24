@@ -24,7 +24,7 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 01bc9b762a5cd5f650189adf42500d52a6233802
+- Remote checkpoint: 6331f1750774290a918f1f8135e1db63b7904aee
 - Remote verified: true
 
 ### research-engine
@@ -36,17 +36,15 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 ## Next safe action
 
-Validate and merge this task-only project contract. Then begin reconstruction of the EXTRACT research history and external methodology research in parallel; do not mutate or block the active EXTRACT task.
+Finish and validate the v0.1 methodology artifacts plus the post-AMR machine-readable EXTRACT research-state snapshot. Then enter prospective shadow mode: at the next genuinely new EXTRACT architecture boundary, snapshot the evidence and independently record methodology-side hypotheses/decision constraints without delaying or mutating EXTRACT.
 
 ## Remaining work
 
-- Validate and merge the methodology project contract.
-- Reconstruct the EXTRACT research history into explicit residual, hypothesis, mechanism, evidence, experiment, and decision states.
-- Research external methodological foundations and synthesize methodology v0.1.
-- Define and validate a machine-readable research-state schema.
-- Retrospectively replay historical EXTRACT decisions without hindsight leakage.
-- Run prospective shadow validation at future EXTRACT architecture/result boundaries without blocking EXTRACT.
-- Make an evidence-based methodology promotion decision.
+- Validate methodology v0.1, research-state schema, EXTRACT machine-readable snapshot, replay, and focused contract tests.
+- Complete retrospective replay as a hindsight-disclosed sanity check and persist a bounded v0.1 checkpoint.
+- At the next genuine EXTRACT architecture boundary, record a prospective shadow research-state snapshot/recommendation before the future result without blocking the EXTRACT owner.
+- Accumulate prospective evidence on residual clarity, hypothesis breadth, experiment discrimination, falsifiability, premise-reuse control, invariant preservation, failure informativeness, research efficiency, and coordination overhead.
+- Make an evidence-based methodology promotion decision only after prospective evidence exists.
 - If warranted, create a separate ontology/research-knowledge integration task.
 
 ## Blockers / gates
