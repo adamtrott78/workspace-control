@@ -31,16 +31,15 @@ Harden the generic semantic-control substrate independently of the Local EXTRACT
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: dcbe638af63fa9f9682089909caecc8834169797
+- Remote checkpoint: 57517d5b73275c07321d05a5ae731ff3e1001e92
 - Remote verified: true
 
 ## Next safe action
 
-Implement only implement_bounded_ontology_slice_and_evidence_requirements from research-engine checkpoint dcbe638af63fa9f9682089909caecc8834169797. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/**. For frozen S1-S3, select only relevant observations/entity types/predicates and never exceed max_observations; preserve exact provenance and never widen authority. For frozen E1-E7, derive generalized EvidenceRequirementV1-compatible request-only records for contradiction, missing facet, source-level insufficiency, verification insufficiency, staleness, and benchmark insufficiency; raw model confidence alone yields no requirement. Do not implement decision audit, scale, EXTRACT socket, external runtime, or production mutation yet.
+Implement only implement_decision_audit_chain from research-engine checkpoint 57517d5b73275c07321d05a5ae731ff3e1001e92. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/**. Build an audit-chain record that binds candidate_action_id, semantic_manifest_id, knowledge_checkpoint_ids, exact authority context/source identity, precondition evidence, DecisionEvaluation decision/reasons, and an optional later execution receipt reference. Validate receipt identity against candidate/evaluation without giving receipts authority. Prove exact chain hashing/reconstruction, historical replay compatibility, missing/mismatched receipt fail-closed labeling, and no fabricated receipt when none exists. Do not implement scale or EXTRACT socket yet.
 
 ## Remaining work
 
-- Implement bounded ontology slicing and generalized request-only evidence requirements.
 - Implement decision audit chains and receipt-reference validation.
 - Run deterministic 1k/10k/100k scale benchmarks.
 - Implement and test the opaque consumer-side EXTRACT socket without defining EXTRACT payload.
