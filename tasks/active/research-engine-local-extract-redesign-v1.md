@@ -30,27 +30,25 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: f6f665d4240e2a5ba1c6aa52477a5af1f8be3db4
+- Remote checkpoint: 4dd4a64199192318c864476e4b4b89a79ee089eb
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 6cd3eb3b38efbf2670a548f5ec052d8129f48067
+- Remote checkpoint: 5d4a72f36f7407cdbe8662b53ac879861a2931e6
 - Remote verified: true
 
 ## Next safe action
 
-Re-engage workspace-local-extract-independent-review-v1 on exact design research-engine@6cd3eb3b38efbf2670a548f5ec052d8129f48067 / blob 37b249524c1ea1d7db0e0fe07b96c0e02322dfd3. Do not implement SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 until that review is durable.
+Re-engage workspace-local-extract-independent-review-v1 on corrected design research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6 / blob 5eb24fd2e7ed69a940c2fbde1fd7ddfba29c55fb. Do not implement before durable review approval.
 
 ## Remaining work
 
-- Obtain independent design review of exact research-engine@6cd3eb3b38efbf2670a548f5ec052d8129f48067 / design blob 37b249524c1ea1d7db0e0fe07b96c0e02322dfd3.
-- If reviewer disposition is NO_BLOCKING_FINDING, implement only SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 exactly as frozen.
-- Run normal CI and persist exact implementation/inert trigger authority before exactly one scientific execution.
-- Stop at FACET_RESERVATION_CONFIRMED, FACET_RESERVATION_PARTIAL, FACET_RESERVATION_NEGATIVE, or REPLAY_INCONSISTENT; no post-result schedule/budget tuning or valid rerun.
-- After the genuine result, obtain independent post-result review before selecting the following phase.
+- Obtain independent re-review of corrected design research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6 / blob 5eb24fd2e7ed69a940c2fbde1fd7ddfba29c55fb.
+- If review passes, implement SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 exactly as frozen.
+- Do not alter frozen strata, schedule, depth, budgets, teacher-use boundary, interpretation, or stopping rule.
 
 ## Blockers / gates
 
