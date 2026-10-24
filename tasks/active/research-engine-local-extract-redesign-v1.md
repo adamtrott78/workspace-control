@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: c3708185976c9e18f1d828c0346ec939bd86b1a5
+- Remote checkpoint: 3496bb95faeefba2112d821de56a578ad35568ec
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Re-engage workspace-local-extract-independent-review-v1 on exact cross-paper design research-engine@abd55d31d2768f6d66d0aa187e90fa4950cfd26f / blob f51c864d098181f4f00c75bef4f20eea3df401f2. Do not implement LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1 until independent design review is durable.
+Implement LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1 exactly from frozen design research-engine@abd55d31d2768f6d66d0aa187e90fa4950cfd26f. Add only deterministic nine-paper baseline/stress/local-vs-allocation comparison code, tests, and bounded workflow wiring; do not change corpus, stress rules, radius1, top12 allocation pool, rank-stratum definitions, budget28, historical-page secondary use, verdict table, or hard boundaries.
 
 ## Remaining work
 
-- Obtain independent review of exact cross-paper design research-engine@abd55d31d2768f6d66d0aa187e90fa4950cfd26f / blob f51c864d098181f4f00c75bef4f20eea3df401f2 before implementation.
-- If reviewer disposition is NO_BLOCKING_FINDING, implement exactly LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1.
+- Implement LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1 exactly as frozen in research-engine with deterministic tests and no generation/model changes.
+- Run normal CI and persist the exact implementation checkpoint before scientific execution.
 - Execute exactly one valid scientific run and stop at the frozen cross-paper structural verdict; no valid-result rerun or tuning.
-- After a genuine result, obtain independent post-result review before selecting another phase.
+- After the genuine result, obtain independent post-result review before selecting the next scientific phase.
 - Preserve semantic-generalization limits, rejected-family exclusions, production/Wave7B/semantic-control boundaries.
 
 ## Blockers / gates
