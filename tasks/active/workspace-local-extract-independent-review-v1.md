@@ -36,12 +36,12 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-Owner may implement exactly PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 from research-engine@6e6442e797b0648fb094bb1113af2be7182fb598 / design blob e58c8b87e122caf1d236c9ae6857c0492d78744f. Re-engage reviewer only if science changes or after the genuine result.
+Owner may implement exactly PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 from corrected research-engine@23fd3e91b3837b57201ae1524fd72e1f2d502bd5 / blob bf03092eb027aab75e3594250ca935b0a7e04995. Re-engage reviewer only if science changes or after the genuine result.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to implement and execute exactly PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1.
-- Do not review routine implementation/CI/packaging/trigger mechanics unless they materially alter the frozen composition science.
+- Wait for owner implementation and one-shot execution of exactly the corrected PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1.
+- Do not review routine implementation/CI/packaging/trigger mechanics unless frozen science changes.
 - After the genuine composition verdict, independently audit exact run/artifact/result before next-phase selection.
 - If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
 
