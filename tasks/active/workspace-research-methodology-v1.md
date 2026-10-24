@@ -36,16 +36,17 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 ## Next safe action
 
-Wait for the owning EXTRACT task to produce the genuine NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 scientific result. Then compare that result and the owner's next-phase interpretation against the already-frozen pre-result shadow, without changing the shadow prediction and without blocking or mutating EXTRACT.
+Validate and merge the frontier shadow evaluation plus prospective-validation protocol. Then remain non-blocking while EXTRACT closes its current facet-reservation result/review; do not publish a prescriptive next-architecture recommendation into shared state before the owner freezes its next design.
 
 ## Remaining work
 
-- Validate the full methodology v0.1 artifact set and frozen pre-result evidence-frontier shadow snapshot.
-- After NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 produces a genuine result, compare that result and the EXTRACT owner's next decision against the frozen shadow interpretation without changing the prediction.
-- Accumulate at least one future architecture-selection shadow case that was not shaped by methodology-side advice.
-- Measure residual clarity, hypothesis breadth, experiment discrimination, falsifiability, premise-reuse control, invariant preservation, failure informativeness, research efficiency, and coordination overhead.
-- Make an evidence-based methodology promotion decision only after prospective evidence exists.
-- If warranted, create a separate ontology/research-knowledge integration task.
+- Validate and merge the first prospective shadow evaluation and contamination-aware validation protocol.
+- Preserve the v0.1 methodology and its first shadow snapshot unchanged as historical evidence.
+- Treat automatic-intent exposure and facet-reservation results as observational methodology evidence only because no pre-result shadow was frozen for them.
+- At a future genuinely independent architecture-selection boundary, avoid publishing a prescriptive recommendation into shared state before the EXTRACT owner freezes its own design if selection independence is to be evaluated.
+- Continue measuring residual clarity, hypothesis breadth, experiment discrimination, falsifiability, premise-reuse control, invariant preservation, failure informativeness, research efficiency, next-action calibration, and coordination overhead.
+- Do not promote the methodology until prospective evidence is broader and architecture-selection independence is genuinely defensible.
+- If warranted after methodology stabilization, create a separate ontology/research-knowledge integration task.
 
 ## Blockers / gates
 

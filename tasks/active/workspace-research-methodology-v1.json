@@ -48,7 +48,9 @@
         "architecture/extract-research-replay.v0.1.md",
         "architecture/extract-research-state.v0.1.json",
         "tests/test_research_methodology_contract.py",
-        "architecture/extract-prospective-shadow-frontier.v0.1.json"
+        "architecture/extract-prospective-shadow-frontier.v0.1.json",
+        "architecture/extract-frontier-shadow-evaluation.v0.1.json",
+        "architecture/research-methodology-prospective-validation.v0.1.md"
       ]
     },
     {
@@ -196,9 +198,11 @@
         "Methodology constraints were communicated to EXTRACT before architecture selection, so selection agreement is not an independent prospective test."
       ],
       "outputs": [
-        "Frozen pre-result shadow snapshot architecture/extract-prospective-shadow-frontier.v0.1.json.",
-        "Methodology-side assessment: the evidence-frontier diagnostic has high discrimination, high decision relevance/falsifiability/independence/reuse value, low cost, and low confound risk.",
-        "Architecture-selection agreement marked NOT_EVALUABLE for independent validation; only pre-result interpretation and later result handling remain prospective evidence."
+        "Frozen pre-result frontier shadow snapshot architecture/extract-prospective-shadow-frontier.v0.1.json.",
+        "Post-result evaluation architecture/extract-frontier-shadow-evaluation.v0.1.json.",
+        "Prospective validation protocol architecture/research-methodology-prospective-validation.v0.1.md.",
+        "First result-interpretation case: ADDITIVE_FRONTIER_PARTIAL matched a predeclared outcome class and interpretation; architecture-selection independence remains NOT_EVALUABLE.",
+        "Revision candidate: add diagnostic-depth semantics so authorized next actions define an admissible scientific region rather than forcing an immediate architecture jump."
       ],
       "validation": [
         {
@@ -209,6 +213,16 @@
             "Frozen EXTRACT design identity research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7.",
             "Architecture-selection agreement is explicitly NOT_EVALUABLE because methodology constraints were communicated before design selection.",
             "The prospective evidence retained for later evaluation is the frozen pre-result interpretation/decision table and result-handling logic."
+          ]
+        },
+        {
+          "check": "First prospective pre-result interpretation evaluation",
+          "result": "PASS",
+          "evidence": [
+            "Frozen shadow blob 3278ae36acf9f8a3fd0b722edd5e1bcd96ef3ffa predates the frontier scientific result.",
+            "Actual result run 40131250903 / artifact 12574218788 / report sha256 8c1ddc2ddd5f916a5f0b8898d26992d46138816b59bf416ead3ed528934895bc returned ADDITIVE_FRONTIER_PARTIAL.",
+            "Observed e6.a recovery at budget26 with all seven controls retained and e1.a absent through budget32 matches the frozen PARTIAL interpretation.",
+            "Architecture-selection quality is not counted because methodology guidance was supplied before the design was selected."
           ]
         }
       ],
@@ -276,6 +290,19 @@
         "Post-AMR state blob 6ecd165a40285cb61c92ff365fafb523a871d450.",
         "Pre-result frontier shadow blob 3278ae36acf9f8a3fd0b722edd5e1bcd96ef3ffa.",
         "v0.1 remains experimental/non-canonical; promotion requires prospective evidence."
+      ]
+    },
+    {
+      "id": "frontier-shadow-evaluation-v1",
+      "kind": "methodology_prospective_evaluation",
+      "identity": "run@40131250903|artifact@12574218788|shadow@3278ae36acf9f8a3fd0b722edd5e1bcd96ef3ffa:INTERPRETATION_PASS_WITH_REVISION",
+      "required_for_resume": true,
+      "evidence": [
+        "Evaluation blob 9c7fda8a23e623dade4a8941012eb6e3ab0528e6.",
+        "Outcome class and interpretation PASS.",
+        "Invariant preservation, falsifiability, and no-post-hoc-tuning PASS.",
+        "Architecture-selection independence NOT_EVALUABLE.",
+        "Next-action calibration REVISE: EXTRACT's smaller automatic-intent exposure diagnostic was more discriminating than the shadow's immediate architecture-family comparison."
       ]
     }
   ],
@@ -359,6 +386,30 @@
       "evidence": [
         "branch research-methodology-v01-foundations blob 3278ae36acf9f8a3fd0b722edd5e1bcd96ef3ffa"
       ]
+    },
+    {
+      "path": "architecture/extract-frontier-shadow-evaluation.v0.1.json",
+      "state": "evaluated_prospective_case",
+      "role": "Post-result evaluation of the first prospective pre-result shadow case.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Must preserve the frozen shadow unchanged and distinguish prospective interpretation evidence from non-independent architecture selection.",
+      "evidence": [
+        "blob 9c7fda8a23e623dade4a8941012eb6e3ab0528e6"
+      ]
+    },
+    {
+      "path": "architecture/research-methodology-prospective-validation.v0.1.md",
+      "state": "experimental_validation_protocol",
+      "role": "Defines contamination-aware prospective validation and the diagnostic-depth rule.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Experimental; must not become canonical policy before methodology promotion.",
+      "evidence": [
+        "blob 6ad512c9fbd40c8ee13891cb9d843a11b7f597df"
+      ]
     }
   ],
   "validation": [
@@ -390,15 +441,16 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Validate the full methodology v0.1 artifact set and frozen pre-result evidence-frontier shadow snapshot.",
-    "After NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 produces a genuine result, compare that result and the EXTRACT owner's next decision against the frozen shadow interpretation without changing the prediction.",
-    "Accumulate at least one future architecture-selection shadow case that was not shaped by methodology-side advice.",
-    "Measure residual clarity, hypothesis breadth, experiment discrimination, falsifiability, premise-reuse control, invariant preservation, failure informativeness, research efficiency, and coordination overhead.",
-    "Make an evidence-based methodology promotion decision only after prospective evidence exists.",
-    "If warranted, create a separate ontology/research-knowledge integration task."
+    "Validate and merge the first prospective shadow evaluation and contamination-aware validation protocol.",
+    "Preserve the v0.1 methodology and its first shadow snapshot unchanged as historical evidence.",
+    "Treat automatic-intent exposure and facet-reservation results as observational methodology evidence only because no pre-result shadow was frozen for them.",
+    "At a future genuinely independent architecture-selection boundary, avoid publishing a prescriptive recommendation into shared state before the EXTRACT owner freezes its own design if selection independence is to be evaluated.",
+    "Continue measuring residual clarity, hypothesis breadth, experiment discrimination, falsifiability, premise-reuse control, invariant preservation, failure informativeness, research efficiency, next-action calibration, and coordination overhead.",
+    "Do not promote the methodology until prospective evidence is broader and architecture-selection independence is genuinely defensible.",
+    "If warranted after methodology stabilization, create a separate ontology/research-knowledge integration task."
   ],
-  "next_safe_action": "Wait for the owning EXTRACT task to produce the genuine NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 scientific result. Then compare that result and the owner's next-phase interpretation against the already-frozen pre-result shadow, without changing the shadow prediction and without blocking or mutating EXTRACT.",
+  "next_safe_action": "Validate and merge the frontier shadow evaluation plus prospective-validation protocol. Then remain non-blocking while EXTRACT closes its current facet-reservation result/review; do not publish a prescriptive next-architecture recommendation into shared state before the owner freezes its next design.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-10-24 project creation: methodology development is intentionally separated from EXTRACT scientific ownership. EXTRACT is the first retrospective/live case study, not a dependency or subordinate workflow. Ontology integration is a downstream opportunity, not a v0.1 requirement.\n2026-10-24 v0.1 foundation work: external methodology evidence supports combining strong inference (alternative hypotheses/crucial experiments), design-science problem/objective/artifact/evaluation separation, preregistration-style precommitment, and decision-theoretic experiment selection. Retrospective EXTRACT replay identifies mechanism-family tracking and family-level stopping/reopening rules as the clearest missing research-control concepts.\n2026-10-24 v0.1 validation: Workspace Control Validation 40130896253 PASS over methodology, schema, replay, post-AMR state, pre-result frontier shadow, and contract tests. The first live shadow is pre-result but architecture-selection independence is NOT_EVALUABLE because methodology constraints were communicated before the EXTRACT design was selected.\n2026-10-24 v0.1 durable merge: PR #386 final validation 40131007716 PASS and merged as workspace-control@fbb43982c41355d0c4d9a491a8363b5f3f954f23. The methodology lane is now in non-blocking prospective shadow mode."
+  "notes": "2026-10-24 project creation: methodology development is intentionally separated from EXTRACT scientific ownership. EXTRACT is the first retrospective/live case study, not a dependency or subordinate workflow. Ontology integration is a downstream opportunity, not a v0.1 requirement.\n2026-10-24 v0.1 foundation work: external methodology evidence supports combining strong inference (alternative hypotheses/crucial experiments), design-science problem/objective/artifact/evaluation separation, preregistration-style precommitment, and decision-theoretic experiment selection. Retrospective EXTRACT replay identifies mechanism-family tracking and family-level stopping/reopening rules as the clearest missing research-control concepts.\n2026-10-24 v0.1 validation: Workspace Control Validation 40130896253 PASS over methodology, schema, replay, post-AMR state, pre-result frontier shadow, and contract tests. The first live shadow is pre-result but architecture-selection independence is NOT_EVALUABLE because methodology constraints were communicated before the EXTRACT design was selected.\n2026-10-24 v0.1 durable merge: PR #386 final validation 40131007716 PASS and merged as workspace-control@fbb43982c41355d0c4d9a491a8363b5f3f954f23. The methodology lane is now in non-blocking prospective shadow mode.\n2026-10-24 first prospective shadow evaluation: frozen frontier shadow correctly predeclared ADDITIVE_FRONTIER_PARTIAL and its interpretation. The case reveals a methodology revision candidate: after each valid result, prefer a lower-cost residual diagnostic when it can reduce uncertainty before choosing the next architecture. Architecture-selection agreement remains NOT_EVALUABLE because methodology guidance preceded the frontier design."
 }

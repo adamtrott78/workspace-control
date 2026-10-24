@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "evaluation_id": "extract-frontier-shadow-evaluation-v0.1",
+  "methodology_version": "evidence-first-research-methodology.v0.1",
+  "shadow_identity": {
+    "path": "architecture/extract-prospective-shadow-frontier.v0.1.json",
+    "blob_sha": "3278ae36acf9f8a3fd0b722edd5e1bcd96ef3ffa",
+    "evidence_cutoff": "2026-10-24T20:38:14Z",
+    "independence": {
+      "architecture_selection": "NOT_EVALUABLE",
+      "result_interpretation": "PROSPECTIVE",
+      "rationale": "Methodology constraints were communicated before EXTRACT selected the frontier design, but the shadow interpretation table was durably frozen before the scientific result."
+    }
+  },
+  "actual_result": {
+    "experiment": "NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1",
+    "run_id": 40131250903,
+    "artifact_id": 12574218788,
+    "artifact_zip_sha256": "3d6f20979c53dcd17ce4fa8563b8f9542aba182ab5bb48d824b82056e8215523",
+    "report_sha256": "8c1ddc2ddd5f916a5f0b8898d26992d46138816b59bf416ead3ed528934895bc",
+    "verdict": "ADDITIVE_FRONTIER_PARTIAL",
+    "observations": [
+      "e6.a appears at budget 26.",
+      "All 7 immutable source-aware controls remain supported.",
+      "e1.a remains absent through the frozen maximum budget 32.",
+      "No post-result budget tuning is authorized."
+    ],
+    "interpretation": "Static branch/global-budget collision contributes to the residual but does not fully explain it."
+  },
+  "frozen_shadow_comparison": {
+    "outcome_classification": {
+      "result": "PASS",
+      "expected": "ADDITIVE_FRONTIER_PARTIAL was explicitly predeclared as an outcome class.",
+      "observed": "The scientific result was exactly ADDITIVE_FRONTIER_PARTIAL."
+    },
+    "interpretation": {
+      "result": "PASS",
+      "expected": "Budget collision contributes but does not fully explain the residual at the preferred small frontier.",
+      "observed": "e6.a was recovered non-destructively while e1.a remained absent through budget 32."
+    },
+    "positive_invariant_preservation": {
+      "result": "PASS",
+      "expected": "The immutable core should protect the validated seven source-aware control atoms.",
+      "observed": "All 7 immutable controls remained supported."
+    },
+    "falsifiability": {
+      "result": "PASS",
+      "expected": "Failure to recover both observed residuals by the frozen frontier prevents a CONFIRMED interpretation.",
+      "observed": "e1.a remained absent through budget 32, so the favored branch-budget-collision hypothesis did not receive full confirmation."
+    },
+    "no_post_hoc_tuning": {
+      "result": "PASS",
+      "expected": "Do not tune the frontier budget after a valid result.",
+      "observed": "EXTRACT moved to a new diagnostic rather than changing the frozen 24/26/28/32 budgets."
+    },
+    "next_action_specificity": {
+      "result": "REVISE",
+      "expected": "The frozen shadow suggested comparing source-derived subquestion decomposition against iterative gap-directed retrieval after PARTIAL.",
+      "observed": "EXTRACT inserted a smaller AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 first, which classified e1.a as SHALLOW_DISTRIBUTED_EXPOSURE before committing to a larger architecture family.",
+      "lesson": "The methodology should treat a frozen outcome's authorized next action as a constraint on admissible next science, not as a mandatory architecture jump. After each result, it should re-open the residual state and prefer a cheaper discriminating diagnostic when one can materially reduce uncertainty."
+    }
+  },
+  "later_observational_evidence_not_counted_as_prospective_validation": [
+    {
+      "experiment": "AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1",
+      "result": "SHALLOW_DISTRIBUTED_EXPOSURE",
+      "evidence": "Both e1.a anchors are available at rank 1 across the existing intent union, require two intents through depth 8, and only co-occur in one intent at depth 10; e6.a is complete at depth 1.",
+      "methodological_use": "Supports adding an explicit diagnostic-depth rule: before selecting a more complex architecture, test whether the unresolved residual is absence, shallow distributed exposure, deep exposure, or recognition failure.",
+      "validation_status": "OBSERVATIONAL_ONLY"
+    },
+    {
+      "experiment": "SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1",
+      "result": "FACET_RESERVATION_CONFIRMED",
+      "evidence": "At budget 28 the planner preserves the immutable seven controls and adds e1.a; sensitivity excluding flagged-only reservation evidence falls back to 7/13.",
+      "methodological_use": "Shows the sequence continued to localize the residual through bounded mechanism tests, but this result was not pre-shadowed and therefore cannot count as prospective methodology validation.",
+      "validation_status": "OBSERVATIONAL_ONLY"
+    }
+  ],
+  "methodology_update_candidate": {
+    "id": "diagnostic-depth-before-architecture-v0.2-candidate",
+    "status": "PROPOSED_NOT_ADOPTED",
+    "statement": "After every valid scientific result, reconstruct the residual/hypothesis state before choosing the next architecture. If a lower-cost diagnostic can distinguish evidence absence, shallow/distributed exposure, representation failure, composition failure, or selection failure, prefer that diagnostic over immediate architecture commitment.",
+    "rationale": "The first prospective shadow interpretation was correct, but its next-action wording was too architecture-forward. EXTRACT's intervening exposure diagnostic produced useful information at lower scientific commitment."
+  },
+  "scorecard": {
+    "residual_clarity": "PASS",
+    "hypothesis_discrimination": "PASS",
+    "falsifiability": "PASS",
+    "invariant_preservation": "PASS",
+    "post_hoc_resistance": "PASS",
+    "architecture_selection_quality": "NOT_EVALUABLE",
+    "next_action_precision": "REVISE",
+    "coordination_overhead": "NOT_MEASURED",
+    "research_efficiency": "PROMISING_NOT_PROVEN"
+  },
+  "disposition": "V0_1_PROSPECTIVE_INTERPRETATION_PASS_WITH_REVISION_CANDIDATE",
+  "promotion_effect": "Insufficient for promotion. One prospective interpretation case is positive, but architecture-selection independence was contaminated and coordination/efficiency evidence is still incomplete."
+}
