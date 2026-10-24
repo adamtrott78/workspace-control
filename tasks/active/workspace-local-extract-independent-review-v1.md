@@ -24,25 +24,25 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: cf3fb784bb2e518dc82a78de7f7d714c64a74bfe
+- Remote checkpoint: 43106fbd89c8a46493dee24f241fff4b5accbf2e
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: 6cd3eb3b38efbf2670a548f5ec052d8129f48067
+- Remote checkpoint: 5d4a72f36f7407cdbe8662b53ac879861a2931e6
 - Remote verified: true
 
 ## Next safe action
 
-Owner must make a design-only correction to FACET_RESERVED_EVIDENCE_PLANNER_V1: scientific NEGATIVE requires a valid safe replay with e1.a absent through budget32; safety/provenance/replay failures must be no-verdict. Re-engage this reviewer on the corrected exact design before implementation.
+Owner may implement exactly SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 from corrected research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6 / design blob 5eb24fd2e7ed69a940c2fbde1fd7ddfba29c55fb. Re-engage reviewer only if science changes or after the genuine result.
 
 ## Remaining work
 
-- Wait for the owner to correct the frozen interpretation so safety/provenance/replay failures are no-verdict rather than scientific NEGATIVE.
-- Review the corrected exact design before implementation.
-- After a valid scientific result, audit the exact run/artifact/verdict before next-phase selection.
+- Wait for owner implementation/execution of exactly SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1.
+- Do not review routine implementation, CI, trigger, or cleanup unless science changes.
+- After a genuine FACET_RESERVATION result, audit the exact run/artifact/verdict before next-phase selection.
 
 ## Blockers / gates
 
