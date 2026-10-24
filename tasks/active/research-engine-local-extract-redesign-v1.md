@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: fbb43982c41355d0c4d9a491a8363b5f3f954f23
+- Remote checkpoint: b3bb9ae137a71e7ab5f257f04ef734c6c58f7f86
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: e8b3814d3b0d02e45bbc2d1c8914fdeb04a1bf8e
+- Remote checkpoint: 5ba005d9e0a1ee79056e8e4f4377c36903c09381
 - Remote verified: true
 
 ## Next safe action
 
-Merge this exact ADDITIVE_FRONTIER_PARTIAL result checkpoint, close research-engine PR #233 unmerged, then re-engage workspace-local-extract-independent-review-v1 on run 40131250903 / artifact 12574218788 / report SHA256 8c1ddc2ddd5f916a5f0b8898d26992d46138816b59bf416ead3ed528934895bc. Do not select the next scientific phase until that post-result review is durable.
+Re-engage workspace-local-extract-independent-review-v1 on the exact frozen automatic-intent exposure design research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381 / blob 1653b8fe0c469b0841edea7ac95e687b81361ded. Do not implement AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 until that design review is durable.
 
 ## Remaining work
 
-- Merge this exact ADDITIVE_FRONTIER_PARTIAL result checkpoint, then close research-engine PR #233 unmerged; do not retrigger the consumed scientific gate.
-- Obtain independent post-result review of run 40131250903 / artifact 12574218788 / report SHA256 8c1ddc2ddd5f916a5f0b8898d26992d46138816b59bf416ead3ed528934895bc before selecting the next scientific phase.
-- After reviewer disposition, follow the frozen PARTIAL interpretation: compare source-derived subquestion decomposition against iterative gap-directed retrieval as materially different next mechanism families; do not tune the append frontier.
-- Preserve ALIGNMENT_AUGMENT_FEASIBLE and the new finding that non-destructive complementarity can recover e6.a cheaply, while treating e1.a absence through budget32 as evidence against static branch union being sufficient.
-- Do not reopen NLI/predicate-argument/AMR certificate families, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
+- Obtain independent review of exact automatic-intent exposure design research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381 / blob 1653b8fe0c469b0841edea7ac95e687b81361ded before implementation.
+- If reviewer disposition is NO_BLOCKING_FINDING, implement only AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 exactly as frozen; no new generation/model calls.
+- Execute exactly one valid exposure diagnostic and stop at the frozen classification.
+- After the genuine exposure result, obtain independent post-result review before selecting/implementing the mechanism family authorized by that classification.
+- Do not tune the prior append frontier, reopen NLI/predicate-argument/AMR, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
