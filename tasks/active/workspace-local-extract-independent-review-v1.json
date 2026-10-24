@@ -1,0 +1,198 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-local-extract-independent-review-v1",
+  "title": "Local EXTRACT Independent Review v1",
+  "status": "IN_PROGRESS",
+  "goal": "Provide an independent, durable review/support lane for research-engine-local-extract-redesign-v1 while preserving a single EXTRACT scientific owner. Consume exact EXTRACT checkpoints, artifacts, benchmark/result evidence, and frozen gates; identify methodological or contract inconsistencies; assess downstream compatibility with the opaque semantic-control integration socket; and publish bounded review findings in workspace-control without changing EXTRACT science, implementation, acceptance criteria, or semantic-control production behavior.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-semantic-control-integration-v1",
+  "current_stage": "freeze_independent_review_contract",
+  "acceptance_criteria": [
+    "research-engine-local-extract-redesign-v1 remains the sole owner of EXTRACT hypotheses, architecture selection, prompts, retrieval/generation, model choices, benchmarks, scientific acceptance criteria, experiment execution, and scientific verdicts.",
+    "This task mutates only its own workspace-control capsule and derived Markdown handoff; research-engine and the EXTRACT/integration/hardening task capsules remain read-only.",
+    "Every review finding is grounded in exact durable Git SHAs, artifact/report identities, frozen gates, or CI/runtime evidence and distinguishes observed evidence from reviewer interpretation.",
+    "Review findings may identify methodological inconsistencies, control drift, invalid gate claims, missing evidence, or downstream bindability concerns, but may not rewrite EXTRACT gates post hoc or issue the EXTRACT scientific verdict.",
+    "Downstream compatibility review treats the hardening opaque EXTRACT socket as consumer-side only: EXTRACT is not required to emit RDF, ontology-native structures, SemanticObservationV1, or any semantic-control-specific payload.",
+    "No review finding can grant authorization, production promotion, or semantic-control authority; semantic-control integration remains BLOCKED_EVIDENCE until the EXTRACT owner durably identifies a genuinely accepted architecture/output contract with exact artifact/schema identity.",
+    "When a new EXTRACT design or result checkpoint appears, this task can independently audit it and persist a compact review checkpoint that the owning EXTRACT chat can consume through Git.",
+    "If a genuinely accepted EXTRACT output contract appears, this task performs a bindability audit only; actual AcceptedExtractOutput -> SemanticObservationV1 adapter implementation remains owned by workspace-semantic-control-integration-v1."
+  ],
+  "constraints": [
+    "Do not mutate tasks/active/research-engine-local-extract-redesign-v1.json or its Markdown handoff.",
+    "Do not mutate tasks/active/workspace-semantic-control-integration-v1.json, workspace-semantic-control-hardening-v1.json, or their handoffs.",
+    "Do not modify research-engine code, workflows, benchmarks, prompts, routes, model configuration, production EXTRACT/VERIFY, or scientific artifacts.",
+    "Do not start, rerun, cancel, or otherwise control EXTRACT experiments.",
+    "Do not propose a competing EXTRACT architecture as an alternate scientific owner. Review the owning task's durable choices and evidence instead.",
+    "Do not impose semantic-control ontology/schema requirements upstream on EXTRACT.",
+    "Do not convert FEASIBLE, PARTIAL, validation-design progress, or reviewer approval into an accepted EXTRACT output contract.",
+    "Do not hold Heartbeat while idle; use this task only during an active review/reconciliation turn."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "c49c3374a1bcdaabbf013cbc92c92d80705928b4",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "c49c3374a1bcdaabbf013cbc92c92d80705928b4",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-local-extract-independent-review-v1.json",
+        "tasks/active/workspace-local-extract-independent-review-v1.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "eb492ee8284fc9198bb8d931e3591c870b34ea12",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "eb492ee8284fc9198bb8d931e3591c870b34ea12",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "freeze_independent_review_contract",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-local-extract-independent-review-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Completed HARDENING_PASS checkpoint research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd.",
+        "Blocked semantic-control integration task workspace-semantic-control-integration-v1.",
+        "Current EXTRACT checkpoint research-engine@eb492ee8284fc9198bb8d931e3591c870b34ea12 with NLI_CERTIFICATE_REJECTED.",
+        "Opaque consumer-side FutureAcceptedExtractOutput descriptor contract from semantic-control hardening."
+      ],
+      "outputs": [
+        "Durable read-only reviewer ownership boundary.",
+        "Review classification and handoff protocol.",
+        "Exact mutation/read scopes preventing dual scientific ownership."
+      ],
+      "validation": [],
+      "resume_condition": "Validate and merge the task-only contract before publishing review findings."
+    },
+    {
+      "id": "review_extract_design_and_result_checkpoints",
+      "status": "PLANNED",
+      "execution_owner": "workspace-local-extract-independent-review-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Latest authoritative EXTRACT capsule.",
+        "Exact referenced research-engine design/result checkpoints and artifacts.",
+        "Frozen EXTRACT gates and prior negative/positive evidence."
+      ],
+      "outputs": [
+        "Independent review checkpoints with exact evidence identities.",
+        "Bounded concerns or NO_BLOCKING_FINDING disposition for the EXTRACT owner.",
+        "No scientific mutation or alternate verdict."
+      ],
+      "validation": [],
+      "resume_condition": "A new or current EXTRACT design/result checkpoint is available for review."
+    },
+    {
+      "id": "audit_accepted_output_bindability",
+      "status": "PLANNED",
+      "execution_owner": "workspace-local-extract-independent-review-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "A future EXTRACT-owner checkpoint explicitly identifying an accepted architecture/output contract.",
+        "Exact EXTRACT repository SHA, artifact path/hash, schema identity, and scientific acceptance evidence.",
+        "Opaque semantic-control integration socket and HARDENING_PASS."
+      ],
+      "outputs": [
+        "Bindability review: INTEGRATION_COMPATIBLE, REVIEW_CONCERN, or INSUFFICIENT_ACCEPTANCE_EVIDENCE.",
+        "Exact evidence package for workspace-semantic-control-integration-v1."
+      ],
+      "validation": [],
+      "resume_condition": "Run only after the EXTRACT owner durably claims an accepted output contract."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "review-baseline-hardening-pass",
+      "kind": "semantic_control_hardening",
+      "identity": "research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd:HARDENING_PASS:3b14229dca3b2c06915a97bd820a21536ecfdfa55d944458e709e6b1460b98f6",
+      "required_for_resume": true,
+      "evidence": [
+        "Opaque EXTRACT socket is consumer-side and defines no EXTRACT payload schema.",
+        "Semantic inference cannot grant authority."
+      ]
+    },
+    {
+      "id": "review-baseline-pre-extract-integration",
+      "kind": "semantic_control_integration",
+      "identity": "research-engine@16150517b311b42331ce26978fbb225a760c39e2:PRE_EXTRACT_INTEGRATION_PASS",
+      "required_for_resume": true,
+      "evidence": [
+        "Authorization escapes=0.",
+        "EXTRACT_BINDING remains BLOCKED_EVIDENCE pending accepted output contract."
+      ]
+    },
+    {
+      "id": "review-baseline-extract-nli-rejection",
+      "kind": "extract_scientific_checkpoint",
+      "identity": "research-engine@eb492ee8284fc9198bb8d931e3591c870b34ea12:NLI_CERTIFICATE_REJECTED",
+      "required_for_resume": true,
+      "evidence": [
+        "Run 40049443488 SUCCESS.",
+        "Artifact 12544077187 ZIP SHA256 4282b5434de94e84ce62b71b976ac377dac92e0c7a17f230366de03682ba29cb.",
+        "Report SHA256 2e07359b7ca23c563134904f3dd1f8bb04116cfb1b4490f4855b6f28adba9333.",
+        "No frozen SPARK threshold met precision>=0.95 and recall>=0.05; learned mutual entailment is rejected exclusion evidence."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "tasks/active/workspace-local-extract-independent-review-v1.json",
+      "state": "authoritative_task_capsule",
+      "role": "Durable independent review findings and ownership boundary.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Only this review task may mutate it; every finding must cite exact durable EXTRACT evidence.",
+      "evidence": []
+    },
+    {
+      "path": "tasks/active/workspace-local-extract-independent-review-v1.md",
+      "state": "derived_handoff",
+      "role": "Human-readable cross-chat review handoff.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": "Regenerate from the authoritative JSON capsule when the capsule changes.",
+      "review_requirement": "Must remain synchronized with the JSON capsule.",
+      "evidence": []
+    }
+  ],
+  "validation": [
+    {
+      "check": "Initial ownership-boundary audit",
+      "result": "PASS",
+      "evidence": [
+        "EXTRACT scientific owner remains research-engine-local-extract-redesign-v1.",
+        "Integration owner remains workspace-semantic-control-integration-v1.",
+        "Review task mutation scope is limited to its own two workspace-control files.",
+        "research-engine is explicitly read-only."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Validate and merge this independent review contract.",
+    "On each meaningful new EXTRACT design/result checkpoint, re-read the authoritative EXTRACT capsule and exact evidence before reviewing.",
+    "Persist only material review findings; do not duplicate the EXTRACT owner's scientific work.",
+    "When an accepted EXTRACT output contract eventually appears, audit bindability and hand exact evidence back to workspace-semantic-control-integration-v1."
+  ],
+  "next_safe_action": "Validate and merge this task-only review contract. Then re-read the latest EXTRACT capsule before the first substantive review; review only exact durable checkpoints and publish findings here without mutating EXTRACT or integration.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory."
+}
