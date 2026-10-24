@@ -32,10 +32,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "2f4d0c64d6153b737bc606bd81f7a8119cbb1220",
+      "base_sha": "cd26f0cb38363f994640f1cfb08aa1a01b9b299d",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "2f4d0c64d6153b737bc606bd81f7a8119cbb1220",
+        "checkpoint_sha": "cd26f0cb38363f994640f1cfb08aa1a01b9b299d",
         "verified": true
       },
       "local": null,
@@ -116,6 +116,19 @@
             "workspace-control PR #376 validation 40073944709 PASS and reconciliation 40074045032 PASS.",
             "workspace-control PR #377 validation 40074217587 PASS; merge 2f4d0c64d6153b737bc606bd81f7a8119cbb1220."
           ]
+        },
+        {
+          "check": "AMR graph scientific rejection independent review",
+          "result": "PASS",
+          "evidence": [
+            "Recovery run 40125779107 completed SUCCESS at exact trigger anchor research-engine#230@f3d30744696e5fd1e791d6ca5601f5a25950bb7d.",
+            "Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3.",
+            "Frozen verdict AMR_GRAPH_CERTIFICATE_REJECTED is consistent with the predeclared gate.",
+            "Bio-AMR corpus Smatch F1=0.37837723114799326 versus frozen minimum 0.60; valid prediction fraction=1.0 versus minimum 0.98.",
+            "SPARK calibration used 589 positive and 2945 negative pairs across 49 topics and selected no threshold from the frozen 0.40-0.95 grid satisfying precision>=0.95 and recall>=0.05.",
+            "PR #230 changes only benchmarks/document_intelligence/local-extract-amr-graph-validation-recovery-trigger.v1.json; frozen design blob 59de8011dce2b1e8d72a5da9f7e189b01ab4a7cf is unchanged from repaired research-engine main.",
+            "All hard-safety flags remain false: no EXTRACT teacher access, no EXTRACT scientific-state materialization, no AMR certificate use in EXTRACT, no production routing change, no parser/model training, no Wave 7B, no semantic-control/ontology use, and no RDF output."
+          ]
         }
       ],
       "resume_condition": "A new or current EXTRACT design/result checkpoint is available for review."
@@ -195,6 +208,22 @@
         "No scientific threshold, model/data identity, Smatch rule, teacher-blind boundary, or production behavior changed.",
         "This review does not grant authority for a new AMR execution."
       ]
+    },
+    {
+      "id": "amr-scientific-rejection-review-v1",
+      "kind": "independent_review",
+      "identity": "run@40125779107|artifact@12573487854|report@febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3:NO_BLOCKING_FINDING",
+      "required_for_resume": true,
+      "evidence": [
+        "Reviewer confirms AMR_GRAPH_CERTIFICATE_REJECTED follows the frozen design without post-hoc gate movement.",
+        "Bio-AMR failed by a large margin: corpus Smatch F1 0.37837723114799326 < 0.60, despite 500/500 valid parses.",
+        "SPARK failed at calibration because no safe threshold exists; held-out threshold evaluation is therefore not scientifically actionable.",
+        "This result excludes the frozen AMR_GRAPH_REDUNDANCY_CERTIFICATE_VALIDATION_V1 mechanism as a safe semantic redundancy certificate in its tested form.",
+        "Do not retune parser/tokenizer/beam/Smatch rule/threshold grid or gates using this result.",
+        "Accepted lexical ALIGNMENT_AUGMENT_FEASIBLE remains the strongest validated preservation checkpoint.",
+        "No accepted EXTRACT architecture/output contract exists; semantic-control integration remains blocked.",
+        "Reviewer does not choose the next EXTRACT architecture; the EXTRACT owner retains scientific authority."
+      ]
     }
   ],
   "artifacts": [
@@ -245,16 +274,25 @@
         "NO_BLOCKING_FINDING at research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220.",
         "Reviewer PASS is not a scientific verdict or execution authorization."
       ]
+    },
+    {
+      "check": "AMR scientific result reviewer disposition",
+      "result": "PASS",
+      "evidence": [
+        "NO_BLOCKING_FINDING on the correctness of the frozen rejection verdict for run 40125779107.",
+        "This reviewer PASS means the result is methodologically consistent; it does not mean AMR passed scientifically."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Wait for a new durable EXTRACT design/result checkpoint or a separately authorized future AMR execution checkpoint.",
-    "At that checkpoint, re-read the authoritative EXTRACT capsule and exact evidence before reviewing.",
+    "Wait for the EXTRACT owner to durably checkpoint the AMR scientific result and select its next evidence-first scientific phase under its own authority.",
+    "Review the next genuinely new scientific architecture before implementation, or the next genuine scientific result before phase selection.",
+    "Do not review routine CI, packaging, route, trigger, or cleanup mechanics unless they materially alter the frozen experiment.",
     "If a genuine accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration."
   ],
-  "next_safe_action": "No reviewer-side mutation is currently required. Wait for a new durable EXTRACT design/result checkpoint or a future explicit AMR execution-authority checkpoint; then re-read the exact EXTRACT evidence and review it. Current NO_BLOCKING_FINDING does not authorize execution.",
+  "next_safe_action": "No reviewer-side mutation is currently required. The AMR rejection is independently confirmed. Wait for the EXTRACT owner to durably checkpoint the result and choose the next scientific phase; re-engage only at the next genuinely new architecture boundary or scientific-result boundary. Do not influence routine execution mechanics.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN."
+  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists."
 }

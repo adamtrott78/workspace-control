@@ -24,7 +24,7 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 2f4d0c64d6153b737bc606bd81f7a8119cbb1220
+- Remote checkpoint: cd26f0cb38363f994640f1cfb08aa1a01b9b299d
 - Remote verified: true
 
 ### research-engine
@@ -36,12 +36,13 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-No reviewer-side mutation is currently required. Wait for a new durable EXTRACT design/result checkpoint or a future explicit AMR execution-authority checkpoint; then re-read the exact EXTRACT evidence and review it. Current NO_BLOCKING_FINDING does not authorize execution.
+No reviewer-side mutation is currently required. The AMR rejection is independently confirmed. Wait for the EXTRACT owner to durably checkpoint the result and choose the next scientific phase; re-engage only at the next genuinely new architecture boundary or scientific-result boundary. Do not influence routine execution mechanics.
 
 ## Remaining work
 
-- Wait for a new durable EXTRACT design/result checkpoint or a separately authorized future AMR execution checkpoint.
-- At that checkpoint, re-read the authoritative EXTRACT capsule and exact evidence before reviewing.
+- Wait for the EXTRACT owner to durably checkpoint the AMR scientific result and select its next evidence-first scientific phase under its own authority.
+- Review the next genuinely new scientific architecture before implementation, or the next genuine scientific result before phase selection.
+- Do not review routine CI, packaging, route, trigger, or cleanup mechanics unless they materially alter the frozen experiment.
 - If a genuine accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
 
 ## Blockers / gates
