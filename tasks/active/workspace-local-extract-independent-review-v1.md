@@ -24,25 +24,25 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8533ab24f51ebfc4abaf184a68dc8723591bf3a5
+- Remote checkpoint: 0f9ce8178e0ed778fa27c2f663af1889843e08fd
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: e8b3814d3b0d02e45bbc2d1c8914fdeb04a1bf8e
+- Remote checkpoint: 5ba005d9e0a1ee79056e8e4f4377c36903c09381
 - Remote verified: true
 
 ## Next safe action
 
-No reviewer-side mutation is required until the owner freezes a genuinely new scientific design or produces the next genuine result. The owner may now compare decomposition/query-generation, coverage-planning, and iterative gap-directed mechanisms under the accumulated evidence; no static-frontier retuning or rejected-mechanism rescue is authorized.
+No reviewer-side mutation is required during routine implementation. The owner may implement exactly AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 from research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381. Re-engage this reviewer only if the experiment is materially redesigned or after the genuine exposure result.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to select and freeze the next scientific phase using the valid ADDITIVE_FRONTIER_PARTIAL evidence.
-- Do not require reviewer stops during routine implementation/execution unless the frozen science changes.
-- After the next genuine scientific result, independently audit exact run/artifact/verdict before another phase selection.
+- Wait for the EXTRACT owner to implement and execute exactly AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1.
+- Do not review routine implementation/CI/trigger mechanics unless they materially change the frozen experiment.
+- After the genuine exposure classification, independently audit the exact run/artifact/result before the owner implements the mechanism family authorized by the frozen interpretation.
 - If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
 
 ## Blockers / gates
