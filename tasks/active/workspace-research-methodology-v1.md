@@ -36,14 +36,15 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 ## Next safe action
 
-Run the frozen OUTCOME_PARTITION_EXHAUSTIVENESS_V0_2 meta-experiment exactly as specified using the generic validator and positive-control designs. Persist a separate result artifact. Do not mutate v0.1 or prescribe EXTRACT's next architecture.
+Validate and merge the self-study checkpoint. Then keep v0.1 frozen and treat OUTCOME_PARTITION_EXHAUSTIVENESS_V0_2 as candidate-only until it is prospectively applied to a future design before implementation. Do not prescribe EXTRACT's active composed-acquisition architecture.
 
 ## Remaining work
 
-- Execute and validate the frozen outcome-partition meta-experiment; classify CANDIDATE_SUPPORTED, CANDIDATE_PARTIAL, CANDIDATE_REJECTED, or INVALID_META_EXPERIMENT without changing its gates.
-- If supported, create a separate v0.2 candidate schema/validator representation; do not mutate v0.1 in place.
+- Validate and merge the methodology self-study, CANDIDATE_SUPPORTED outcome-partition result, and candidate-only v0.2 schema.
+- Prospectively test the outcome-partition candidate on a future scientific design before implementation; do not retrofit governing v0.1.
 - Continue prospective validation of diagnostic-depth semantics and measure steady-state methodology overhead.
 - Design a practical blind/isolated commitment protocol before claiming independent architecture-selection quality.
+- Test whether ordinal Decision Value remains discriminating when multiple eligible experiments are genuinely close.
 - Accumulate evidence beyond EXTRACT before canonical methodology promotion.
 - If methodology concepts stabilize, create a separate ontology/research-knowledge integration task.
 
