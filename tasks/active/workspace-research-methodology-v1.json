@@ -275,13 +275,15 @@
     },
     {
       "path": "architecture/extract-research-state.v0.1.json",
-      "state": "planned",
+      "state": "draft",
       "role": "Machine-readable EXTRACT case-study research-state snapshot at the post-AMR evidence cutoff.",
       "origin": "workspace-control",
       "persistence": "git",
       "regeneration": null,
       "review_requirement": "Must not select EXTRACT's next architecture; state only evidence, hypotheses, mechanism-family status, invariants, and methodology-side decisions.",
-      "evidence": []
+      "evidence": [
+        "branch research-methodology-v01-foundations blob 6ecd165a40285cb61c92ff365fafb523a871d450"
+      ]
     }
   ],
   "validation": [
