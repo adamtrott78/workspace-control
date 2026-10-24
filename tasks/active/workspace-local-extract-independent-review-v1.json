@@ -32,10 +32,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "cf3fb784bb2e518dc82a78de7f7d714c64a74bfe",
+      "base_sha": "43106fbd89c8a46493dee24f241fff4b5accbf2e",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "cf3fb784bb2e518dc82a78de7f7d714c64a74bfe",
+        "checkpoint_sha": "43106fbd89c8a46493dee24f241fff4b5accbf2e",
         "verified": true
       },
       "local": null,
@@ -47,10 +47,10 @@
     {
       "name": "research-engine",
       "intent": "read",
-      "base_sha": "6cd3eb3b38efbf2670a548f5ec052d8129f48067",
+      "base_sha": "5d4a72f36f7407cdbe8662b53ac879861a2931e6",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "6cd3eb3b38efbf2670a548f5ec052d8129f48067",
+        "checkpoint_sha": "5d4a72f36f7407cdbe8662b53ac879861a2931e6",
         "verified": true
       },
       "local": null,
@@ -193,6 +193,18 @@
             "Core architecture is materially distinct from rejected global RRF/facility-location/global-append mechanisms and preserves teacher-blind selection.",
             "Blocking issue: FACET_RESERVATION_NEGATIVE currently treats provenance/teacher-blind safety failure as scientific mechanism rejection. Safety/replay failure must instead produce no scientific verdict.",
             "No implementation is authorized until the owner corrects that interpretation boundary and the corrected exact design is reviewed."
+          ]
+        },
+        {
+          "check": "Corrected facet-reserved planner design independent review",
+          "result": "PASS",
+          "evidence": [
+            "Corrected exact design research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6 / blob 5eb24fd2e7ed69a940c2fbde1fd7ddfba29c55fb reviewed before implementation.",
+            "Prior blocking finding is resolved: invalid replay/provenance/teacher-blind/hard-safety execution now yields INVALID_EXECUTION with no scientific verdict.",
+            "FACET_RESERVATION_NEGATIVE now requires a valid safe replay through budget32 with e1.a still unsupported.",
+            "Selector, structural strata, tier order, BM25 top3 depth, budgets 24/26/28/32, teacher evaluation boundary, and scientific success/partial criteria are unchanged.",
+            "No new model, query generation, semantic pairwise score, threshold calibration, production change, Wave 7B, or ontology output is introduced.",
+            "Disposition=NO_BLOCKING_FINDING for implementation exactly as corrected."
           ]
         }
       ],
@@ -355,6 +367,19 @@
         "Any teacher-blind, provenance, hard-safety, or replay identity failure must be operational/invalid with no scientific verdict.",
         "All other reviewed boundaries remain acceptable; correction should be design-only and must be re-reviewed before implementation."
       ]
+    },
+    {
+      "id": "facet-reserved-planner-design-review-v2",
+      "kind": "independent_review",
+      "identity": "research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6|design_blob@5eb24fd2e7ed69a940c2fbde1fd7ddfba29c55fb:NO_BLOCKING_FINDING",
+      "required_for_resume": true,
+      "evidence": [
+        "Prior invalid-result semantics block is corrected without changing the planner mechanism.",
+        "Implementation is authorized only for exactly SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 as frozen.",
+        "Teacher data remains posthoc evaluation only.",
+        "A valid scientific result consumes the gate; invalid execution requires explicit recovery authority.",
+        "Post-result independent review remains mandatory."
+      ]
     }
   ],
   "artifacts": [
@@ -449,11 +474,11 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Wait for the owner to correct the frozen interpretation so safety/provenance/replay failures are no-verdict rather than scientific NEGATIVE.",
-    "Review the corrected exact design before implementation.",
-    "After a valid scientific result, audit the exact run/artifact/verdict before next-phase selection."
+    "Wait for owner implementation/execution of exactly SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1.",
+    "Do not review routine implementation, CI, trigger, or cleanup unless science changes.",
+    "After a genuine FACET_RESERVATION result, audit the exact run/artifact/verdict before next-phase selection."
   ],
-  "next_safe_action": "Owner must make a design-only correction to FACET_RESERVED_EVIDENCE_PLANNER_V1: scientific NEGATIVE requires a valid safe replay with e1.a absent through budget32; safety/provenance/replay failures must be no-verdict. Re-engage this reviewer on the corrected exact design before implementation.",
+  "next_safe_action": "Owner may implement exactly SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 from corrected research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6 / design blob 5eb24fd2e7ed69a940c2fbde1fd7ddfba29c55fb. Re-engage reviewer only if science changes or after the genuine result.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists.\n2026-10-24 design review: NO_BLOCKING_FINDING for research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Reviewer confirms the append-only frontier is a teacher-blind budget/selection-collision diagnostic, not a semantic-similarity certificate. Structural 7/7 control retention must not be overclaimed, frozen budgets may not be tuned, and any valid result requires post-result review.\n2026-10-24 frontier result review: NO_BLOCKING_FINDING for run 40131250903 / ADDITIVE_FRONTIER_PARTIAL. e6.a recovery at budget26 validates non-destructive branch complementarity but does not exceed ALIGNMENT_AUGMENT_FEASIBLE's 8/13 high-water mark. e1.a remains absent through budget32 despite +13,322 raw chars, so static append-only union is insufficient and must not be tuned/rerun.\n2026-10-24 automatic-intent exposure design review: NO_BLOCKING_FINDING for research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381 / design blob 1653b8fe0c469b0841edea7ac95e687b81361ded. Teacher anchors are posthoc evaluation only. Shallow exposure is premise evidence, not planner-cost acceptance; REPLAY_INCONSISTENT is no-verdict.\n2026-10-24 automatic-intent exposure post-result review: NO_BLOCKING_FINDING on run 40133862467. SHALLOW_DISTRIBUTED_EXPOSURE is valid premise evidence for teacher-blind multi-intent evidence assembly, not planner or production acceptance.\n2026-10-24 facet-reserved planner design review found one blocking interpretation error: safety/provenance/replay failure was conflated with scientific NEGATIVE. Correct design before implementation, then re-review."
