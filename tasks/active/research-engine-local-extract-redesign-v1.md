@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 549f80ffb6fdbd6e31ce024fb66ce4a1e821a553
+- Remote checkpoint: 789bc112de5f9170e69ece1000936757abd01dc8
 - Remote verified: true
 
 ### research-engine
@@ -42,16 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact automatic-intent exposure pre-run checkpoint. Then issue exactly one `/local-extract-automatic-intent-exposure 96b39d2b94477f4c058bfb0425afa9f811c677f5` comment on research-engine PR #236 and bind the unique resulting run to that exact head. Do not issue a second trigger.
+Merge this exact SHALLOW_DISTRIBUTED_EXPOSURE result checkpoint, then close research-engine PR #236 unmerged and re-engage workspace-local-extract-independent-review-v1 on run 40133862467 / artifact 12576550404 / report sha256:0908733e01e3a7efe9bc1b18bf198bc65d354520841c34b1ea8e320401e4aefc. Do not freeze or implement the next planner before that review is durable.
 
 ## Remaining work
 
-- After this exact checkpoint merges, issue exactly one `/local-extract-automatic-intent-exposure 96b39d2b94477f4c058bfb0425afa9f811c677f5` comment on open research-engine PR #236.
-- Bind the unique resulting workflow run to exact PR head 96b39d2b94477f4c058bfb0425afa9f811c677f5 and inspect the uploaded report.
-- Stop at SHALLOW_SINGLE_INTENT_EXPOSURE, SHALLOW_DISTRIBUTED_EXPOSURE, DEEP_EXPOSURE, STATIC_INTENTS_INSUFFICIENT, or operational REPLAY_INCONSISTENT; do not tune or rerun after a valid scientific classification.
-- Persist the exact result and close PR #236 unmerged only after the result checkpoint is durable.
-- After a genuine scientific classification, obtain independent post-result review before selecting the next scientific phase.
-- Do not reopen NLI/predicate-argument/AMR, change production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
+- Obtain independent post-result review of run 40133862467 / artifact 12576550404 / SHALLOW_DISTRIBUTED_EXPOSURE before freezing the next scientific architecture.
+- After this result checkpoint merges, close research-engine PR #236 unmerged; do not issue another exposure trigger.
+- If reviewer finds no blocking issue, design the smallest teacher-blind FACET_RESERVED_EVIDENCE_PLANNER diagnostic that tests whether shallow per-intent reservation/assembly can recover e1.a while preserving validated source-aware control coverage and bounded cost.
+- Do not add new query generation yet; the frozen exposure interpretation says existing static intents already expose e1.a shallowly across the union.
+- Do not reopen NLI/predicate-argument/AMR, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
