@@ -1,0 +1,991 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/research_state.v1.schema.json",
+  "title": "Evidence-First Research State v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "research_state_id",
+    "project_id",
+    "evidence_cutoff",
+    "research_questions",
+    "residuals",
+    "hypotheses",
+    "assumptions",
+    "mechanism_families",
+    "candidate_architectures",
+    "evidence_items",
+    "invariants",
+    "experiment_candidates",
+    "decisions",
+    "relations",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "research_state_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_cutoff": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "research_questions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/research_question"
+      }
+    },
+    "residuals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/residual"
+      }
+    },
+    "hypotheses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/hypothesis"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/assumption"
+      }
+    },
+    "mechanism_families": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/mechanism_family"
+      }
+    },
+    "candidate_architectures": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/candidate_architecture"
+      }
+    },
+    "evidence_items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence_item"
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/invariant"
+      }
+    },
+    "experiment_candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/experiment_design"
+      }
+    },
+    "selected_experiment_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "scientific_results": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/scientific_result"
+      },
+      "default": []
+    },
+    "belief_updates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/belief_update"
+      },
+      "default": []
+    },
+    "stopping_rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/stopping_rule"
+      },
+      "default": []
+    },
+    "reopening_conditions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/reopening_condition"
+      },
+      "default": []
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/decision"
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/relation"
+      }
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._:-]*$",
+      "minLength": 1
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/id"
+      },
+      "uniqueItems": true
+    },
+    "research_question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "decision_target",
+        "objective",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "OPEN",
+            "ANSWERED",
+            "SUPERSEDED",
+            "DEFERRED"
+          ]
+        },
+        "evidence_ids": {
+          "$ref": "#/$defs/evidence_refs"
+        }
+      }
+    },
+    "residual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "status",
+        "evidence_ids"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "OPEN",
+            "RESOLVED",
+            "SUPERSEDED"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+          ]
+        },
+        "evidence_ids": {
+          "$ref": "#/$defs/evidence_refs"
+        }
+      }
+    },
+    "hypothesis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "status",
+        "predictions",
+        "falsifiers",
+        "supporting_evidence_ids",
+        "weakening_evidence_ids"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "OPEN",
+            "SUPPORTED",
+            "WEAKENED",
+            "FALSIFIED",
+            "DEFERRED"
+          ]
+        },
+        "residual_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "predictions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "falsifiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "supporting_evidence_ids": {
+          "$ref": "#/$defs/evidence_refs"
+        },
+        "weakening_evidence_ids": {
+          "$ref": "#/$defs/evidence_refs"
+        }
+      }
+    },
+    "assumption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "UNTESTED",
+            "SUPPORTED",
+            "WEAKENED",
+            "FALSIFIED",
+            "SUPERSEDED"
+          ]
+        },
+        "evidence_ids": {
+          "$ref": "#/$defs/evidence_refs"
+        }
+      }
+    },
+    "mechanism_family": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "premise",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "premise": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "OPEN",
+            "DEFERRED",
+            "CLOSED",
+            "REOPENED"
+          ]
+        },
+        "hypothesis_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "evidence_ids": {
+          "$ref": "#/$defs/evidence_refs"
+        },
+        "stopping_rule_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "reopening_condition_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "candidate_architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "mechanism_family_ids",
+        "status",
+        "scientific_difference"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mechanism_family_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "status": {
+          "enum": [
+            "CANDIDATE",
+            "SELECTED",
+            "REJECTED",
+            "DEFERRED",
+            "IMPLEMENTED"
+          ]
+        },
+        "scientific_difference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ids": {
+          "$ref": "#/$defs/evidence_refs"
+        }
+      }
+    },
+    "evidence_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "statement",
+        "source_identity",
+        "observed_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "BENCHMARK_RESULT",
+            "ARTIFACT",
+            "EXTERNAL_SOURCE",
+            "DIAGNOSTIC",
+            "CONTROL",
+            "NEGATIVE_RESULT",
+            "EXECUTION_FAILURE",
+            "REVIEW_FINDING",
+            "OTHER"
+          ]
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_identity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "content_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "invariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "status",
+        "evidence_ids"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "ACTIVE",
+            "REOPENED",
+            "SUPERSEDED"
+          ]
+        },
+        "evidence_ids": {
+          "$ref": "#/$defs/evidence_refs"
+        },
+        "reopening_rationale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "experiment_design": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "question_id",
+        "status",
+        "target_uncertainty",
+        "target_hypothesis_ids",
+        "competing_hypothesis_ids",
+        "discrimination_claim",
+        "controls",
+        "metrics",
+        "frozen_gates",
+        "outcome_interpretations",
+        "invalidation_conditions",
+        "what_pass_authorizes",
+        "decision_value"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "question_id": {
+          "$ref": "#/$defs/id"
+        },
+        "status": {
+          "enum": [
+            "CANDIDATE",
+            "SELECTED",
+            "FROZEN",
+            "RUNNING",
+            "COMPLETE",
+            "INVALIDATED"
+          ]
+        },
+        "target_uncertainty": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_hypothesis_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "competing_hypothesis_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "mechanism_family_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "discrimination_claim": {
+          "type": "string",
+          "minLength": 1
+        },
+        "controls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "frozen_gates": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "outcome_interpretations": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "outcome",
+              "evidence_pattern",
+              "interpretation",
+              "authorized_next_action"
+            ],
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence_pattern": {
+                "type": "string",
+                "minLength": 1
+              },
+              "interpretation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "authorized_next_action": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "invalidation_conditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "teacher_blind": {
+          "type": "boolean"
+        },
+        "cost_class": {
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "VERY_HIGH"
+          ]
+        },
+        "what_pass_authorizes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stopping_rule_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "decision_value": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "discrimination_breadth",
+            "decision_relevance",
+            "falsifiability",
+            "independence",
+            "cost",
+            "confound_risk",
+            "reuse_value",
+            "rationale"
+          ],
+          "properties": {
+            "discrimination_breadth": {
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+              ]
+            },
+            "decision_relevance": {
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+              ]
+            },
+            "falsifiability": {
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+              ]
+            },
+            "independence": {
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+              ]
+            },
+            "cost": {
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "VERY_HIGH"
+              ]
+            },
+            "confound_risk": {
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+              ]
+            },
+            "reuse_value": {
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+              ]
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "scientific_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "experiment_id",
+        "classification",
+        "statement",
+        "evidence_ids"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "experiment_id": {
+          "$ref": "#/$defs/id"
+        },
+        "classification": {
+          "enum": [
+            "SUPPORTED",
+            "WEAKENED",
+            "FALSIFIED",
+            "INCONCLUSIVE",
+            "INVALID_EXPERIMENT"
+          ]
+        },
+        "project_verdict": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ids": {
+          "$ref": "#/$defs/evidence_refs"
+        }
+      }
+    },
+    "belief_update": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "result_id",
+        "changes",
+        "next_priority_uncertainty"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "result_id": {
+          "$ref": "#/$defs/id"
+        },
+        "changes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "next_priority_uncertainty": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "stopping_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "scope_type",
+        "scope_id",
+        "condition",
+        "action"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "scope_type": {
+          "enum": [
+            "HYPOTHESIS",
+            "MECHANISM_FAMILY",
+            "EXPERIMENT_SERIES"
+          ]
+        },
+        "scope_id": {
+          "$ref": "#/$defs/id"
+        },
+        "condition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "reopening_condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "scope_type",
+        "scope_id",
+        "required_new_evidence"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "scope_type": {
+          "enum": [
+            "HYPOTHESIS",
+            "MECHANISM_FAMILY",
+            "INVARIANT"
+          ]
+        },
+        "scope_id": {
+          "$ref": "#/$defs/id"
+        },
+        "required_new_evidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "statement",
+        "selected_id",
+        "rationale",
+        "evidence_ids",
+        "decided_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "SELECT_UNCERTAINTY",
+            "SELECT_EXPERIMENT",
+            "SELECT_ARCHITECTURE",
+            "CLOSE_MECHANISM",
+            "REOPEN_MECHANISM",
+            "PRESERVE_INVARIANT",
+            "PROMOTION"
+          ]
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selected_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ids": {
+          "$ref": "#/$defs/evidence_refs"
+        },
+        "decided_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "relation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "relation",
+        "target_id",
+        "evidence_ids"
+      ],
+      "properties": {
+        "source_id": {
+          "$ref": "#/$defs/id"
+        },
+        "relation": {
+          "enum": [
+            "EXPLAINS",
+            "SUPPORTS",
+            "WEAKENS",
+            "FALSIFIES",
+            "CONTRADICTS",
+            "TESTS",
+            "TESTS_PREMISE_OF",
+            "PRESERVES",
+            "CONSTRAINS",
+            "DEPENDS_ON",
+            "SUPERSEDES",
+            "CLOSES",
+            "REOPENS",
+            "JUSTIFIES"
+          ]
+        },
+        "target_id": {
+          "$ref": "#/$defs/id"
+        },
+        "evidence_ids": {
+          "$ref": "#/$defs/evidence_refs"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "created_at",
+        "created_by",
+        "source_repositories",
+        "hindsight_disclosure"
+      ],
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_repositories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "hindsight_disclosure": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
