@@ -30,25 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 076a5abb02e5f7ee922c7e7854a6d0f60549940b
+- Remote checkpoint: 16b424bd58e60913d96f5544df7ef7f866c991dc
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9566532288bf500db8997b9befcc339788609184
+- Remote checkpoint: 3bec68414a929ea82dc70e9c6729250bb566663f
 - Remote verified: true
 
 ## Next safe action
 
-Begin a separate evidence-first EXTRACT design phase from the durable ALIGNMENT_AUGMENT_FEASIBLE result at research-engine@9566532288bf500db8997b9befcc339788609184. Generalize the validated direct proposition redundancy certificate semantically only after comparing materially distinct teacher-blind mechanisms, including semantic-tuple coverage versus a separately validated paraphrase/entailment certificate. Do not tune the accepted 0.40 lexical certificate post hoc, treat FEASIBLE as production promotion, promote fixed 20/4, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate ontology/semantic-control mechanisms.
+Implement the external-only SCIENTIFIC_NLI_REDUNDANCY_CERTIFICATE_VALIDATION_V1 from research-engine@3bec68414a929ea82dc70e9c6729250bb566663f. The harness may download only the pinned tasksource/deberta-small-long-nli model revision and pinned SPARK/SciNLI validation data; it must not read EXTRACT teacher fixtures. Run normal CI, durable-checkpoint the validation implementation, then execute exactly one external validation run and record NLI_CERTIFICATE_VALIDATED/PARTIAL/REJECTED before any learned certificate is allowed into an EXTRACT experiment.
 
 ## Remaining work
 
-- Begin a separate evidence-first design for semantic generalization of the validated direct redundancy certificate. Compare at least semantic-tuple coverage and a separately validated learned paraphrase/entailment certificate before choosing an implementation.
-- Preserve DYNAMIC_SAME_PAGE_ALIGNMENT_SWAP_V1 and ALIGNMENT_AUGMENT_FEASIBLE as accepted scientific evidence; do not tune the 0.40 threshold post hoc.
-- Do not treat FEASIBLE as production promotion, promote the fixed 20/4 quota, execute the rejected intent-utility/Qwen gap-judge path, train/download a classifier without a new contract, start Wave 7B, change production EXTRACT/VERIFY, or introduce ontology/semantic-control mechanisms.
+- Implement the frozen external-only SCIENTIFIC_NLI_REDUNDANCY_CERTIFICATE_VALIDATION_V1 harness and hosted workflow.
+- Validate pinned tasksource/deberta-small-long-nli revision/hash on external SPARK proposition-clustering data and held-out SciNLI entailment discrimination, using only the frozen calibration split/grid/gates.
+- Checkpoint NLI_CERTIFICATE_VALIDATED/PARTIAL/REJECTED with exact model/data/run/artifact/report identities.
+- Only if NLI_CERTIFICATE_VALIDATED may a separate EXTRACT design substitute the validated mutual-entailment certificate into the accepted dynamic-swap/page-preservation/top-24 architecture.
+- Do not use EXTRACT teacher labels for NLI calibration, tune the accepted lexical 0.40 certificate post hoc, treat FEASIBLE as production promotion, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate semantic-control/ontology mechanisms.
 
 ## Blockers / gates
 
