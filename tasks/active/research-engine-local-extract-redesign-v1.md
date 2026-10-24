@@ -30,27 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d07a0eec8f0b929836a99e60a5a46d1979d7c37f
+- Remote checkpoint: 5b0107ead0a559a25dc72c9b452eb46b485d7397
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a135b89a855166171073ab1012df41a0be5ba9b6
+- Remote checkpoint: 02e12643e64756395f09cafca1b36cae80dbb085
 - Remote verified: true
 
 ## Next safe action
 
-After closing inert trigger PR #221 unmerged, re-read tasks/active/workspace-local-extract-independent-review-v1.json for any review checkpoint explicitly tied to research-engine@a135b89a855166171073ab1012df41a0be5ba9b6. If no applicable review exists, proceed without waiting into a new evidence-first EXTRACT design that compares AMR/graph coverage against at least one materially different teacher-blind evidence representation. Treat learned mutual-entailment and dependency predicate/argument units as rejected exclusion evidence. Do not retune/rerun them, use EXTRACT teacher labels for calibration, treat ALIGNMENT_AUGMENT_FEASIBLE as production promotion, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate semantic-control/ontology mechanisms.
+At durable AMR design checkpoint research-engine@02e12643e64756395f09cafca1b36cae80dbb085, re-read tasks/active/workspace-local-extract-independent-review-v1.json and consume any review explicitly tied to this exact design SHA. If none exists, proceed without waiting: implement only the external AMR_GRAPH_REDUNDANCY_CERTIFICATE_VALIDATION_V1 from isolated design head 50cf3ae923552712fd6f2159d1ef0afa064dbd43, with no EXTRACT teacher input or EXTRACT AMR experiment.
 
 ## Remaining work
 
-- Close inert research-engine trigger PR #221 unmerged after this result checkpoint is durable.
-- Re-read workspace-local-extract-independent-review-v1 at exact result research-engine@a135b89a855166171073ab1012df41a0be5ba9b6 before selecting the next scientific phase; consume only an exact-applicable review if one exists and do not block indefinitely if none exists.
-- Begin a new evidence-first EXTRACT design comparing AMR/graph coverage against at least one other materially different teacher-blind evidence representation; dependency predicate/argument units and learned mutual entailment are rejected exclusion evidence.
-- Preserve accepted lexical ALIGNMENT_AUGMENT_FEASIBLE and do not retune its 0.40 threshold post hoc.
-- Do not rerun/tune predicate/argument validation, reuse rejected NLI, use EXTRACT teacher labels for representation calibration, train a model/parser, start Wave 7B, change production EXTRACT/VERIFY, or incorporate semantic-control/ontology output.
+- Re-read workspace-local-extract-independent-review-v1 at exact AMR design SHA research-engine@02e12643e64756395f09cafca1b36cae80dbb085; consume only an exact applicable review if present, otherwise proceed without waiting.
+- Implement only external AMR_GRAPH_REDUNDANCY_CERTIFICATE_VALIDATION_V1 from isolated design head 50cf3ae923552712fd6f2159d1ef0afa064dbd43.
+- Verify parser model asset size/MD5, compute and record parser tarball SHA256, pin Bio-AMR mirror bytes and SPARK blob, and enforce deterministic Smatch internal reseeds.
+- Run normal CI and durable-checkpoint implementation before exactly one external AMR validation trigger.
+- Evaluate only AMR_GRAPH_CERTIFICATE_VALIDATED/PARTIAL/REJECTED from frozen SPARK and Bio-AMR gates.
+- Do not use EXTRACT teacher labels, retune prior lexical/NLI/predicate-argument gates, train/fine-tune AMR, start Wave 7B, alter production EXTRACT/VERIFY, or emit semantic-control/RDF/ontology payloads.
 
 ## Blockers / gates
 
