@@ -30,26 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: e4131f4ef73b71d4eaca03522e2a067e7d75a959
+- Remote checkpoint: c3708185976c9e18f1d828c0346ec939bd86b1a5
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 14acd0aeb6cda93f0d82bc129649a73dba21a200
+- Remote checkpoint: abd55d31d2768f6d66d0aa187e90fa4950cfd26f
 - Remote verified: true
 
 ## Next safe action
 
-Perform the evidence-first next-phase search using LOCAL_RESCUE_CONFIRMED as one-case sufficiency evidence only. Compare bounded cross-paper neighborhood-rescue generalization/cost against deeper-per-intent allocation/retrieval-path survival, freeze the smallest discriminating experiment before implementation, and obtain independent design review.
+Re-engage workspace-local-extract-independent-review-v1 on exact cross-paper design research-engine@abd55d31d2768f6d66d0aa187e90fa4950cfd26f / blob f51c864d098181f4f00c75bef4f20eea3df401f2. Do not implement LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1 until independent design review is durable.
 
 ## Remaining work
 
-- Compare materially different bounded next-phase mechanisms for cross-paper/generalization and cost: neighborhood-aware local rescue versus deeper-per-intent allocation/retrieval-path survival.
-- Freeze the smallest experiment that discriminates whether the local-pruning mechanism generalizes beyond the single known fragile case before implementation.
-- Obtain independent review of that genuinely new frozen design before implementation.
-- Preserve ALIGNMENT_AUGMENT_FEASIBLE and rejected NLI/predicate-argument/AMR exclusions; no production EXTRACT/VERIFY, Wave7B, or semantic-control/RDF/ontology output.
+- Obtain independent review of exact cross-paper design research-engine@abd55d31d2768f6d66d0aa187e90fa4950cfd26f / blob f51c864d098181f4f00c75bef4f20eea3df401f2 before implementation.
+- If reviewer disposition is NO_BLOCKING_FINDING, implement exactly LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1.
+- Execute exactly one valid scientific run and stop at the frozen cross-paper structural verdict; no valid-result rerun or tuning.
+- After a genuine result, obtain independent post-result review before selecting another phase.
+- Preserve semantic-generalization limits, rejected-family exclusions, production/Wave7B/semantic-control boundaries.
 
 ## Blockers / gates
 
