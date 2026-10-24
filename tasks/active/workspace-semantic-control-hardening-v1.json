@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-control-integration-v1",
-  "current_stage": "implement_scale_benchmark",
+  "current_stage": "implement_opaque_extract_socket",
   "acceptance_criteria": [
     "The task consumes the completed prototype and PRE_EXTRACT_INTEGRATION_PASS checkpoints but does not mutate workspace-semantic-control-integration-v1.",
     "The task does not modify research-engine-local-extract-redesign-v1, its scientific hypotheses, benchmarks, prompts, retrieval/generation methods, Qwen/Codex choices, routes, or acceptance criteria.",
@@ -59,7 +59,7 @@
       "base_sha": "16150517b311b42331ce26978fbb225a760c39e2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "b0abcc2b2bf8ae1630e0f149969875e32bb08ead",
+        "checkpoint_sha": "b9ef0b451fec5e294c705d4886dbd828881bea05",
         "verified": true
       },
       "local": null,
@@ -233,7 +233,7 @@
     },
     {
       "id": "implement_scale_benchmark",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -245,15 +245,30 @@
         "Manifest rebuild/slice/provenance/replay/decision-lookup measurements",
         "Empirical scaling report with no invented threshold"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Deterministic 1k/10k/100k semantic-control scale benchmark",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #212 initial CI run 40047074263 PASS; persisted-result CI run 40047323410 PASS; merged as b9ef0b451fec5e294c705d4886dbd828881bea05.",
+            "All sizes 1k/10k/100k reproduce identical manifest hashes for identical seed/size.",
+            "All bounded slices stay at or below 12 observations.",
+            "All provenance traversals terminate on exact generated synthetic source IDs.",
+            "Temporal replay returns old at 2026-01-15 and new at 2026-02-15 for all sizes.",
+            "Decision lookup yields workload:protected=DENY, workload:missing=ABSTAIN, workload:allowed=ALLOW with authorization_escape_count=0.",
+            "100k p50 timings: canonical_manifest_rebuild=945.821274 ms; bounded_ontology_slice=649.963236 ms; provenance_traversal=103.066236 ms; temporal_replay=48.755270 ms; decision_lookup=71.931721 ms.",
+            "No pass/fail latency threshold, no performance promotion claim, production_mutation=false, scientific_evidence=false."
+          ]
+        }
+      ],
       "resume_condition": "All scale sizes remain deterministic/correct and empirical performance is durably recorded."
     },
     {
       "id": "implement_opaque_extract_socket",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "Frozen opaque EXTRACT socket contract"
       ],
@@ -360,9 +375,47 @@
         "PR #211 CI PASS",
         "Deterministic chain, receipt non-authority, tamper detection, and replay compatibility passed."
       ]
+    },
+    {
+      "id": "hardening-scale-benchmark-v1",
+      "kind": "performance_benchmark",
+      "identity": "research-engine@b9ef0b451fec5e294c705d4886dbd828881bea05:semantic-control-hardening-scale-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #212 CI 40047074263 PASS and persisted-result CI 40047323410 PASS.",
+        "1k/10k/100k correctness gates all pass with zero authorization escapes.",
+        "Empirical timings only; no threshold or promotion claim."
+      ]
     }
   ],
-  "artifacts": [],
+  "artifacts": [
+    {
+      "path": "benchmarks/semantic_control_hardening/scale-result.v1.json",
+      "state": "FROZEN",
+      "role": "Persisted deterministic synthetic scale benchmark result",
+      "origin": "research-engine@b9ef0b451fec5e294c705d4886dbd828881bea05",
+      "persistence": "git",
+      "regeneration": "Create a new version if scale generator/operations/parameters change.",
+      "review_requirement": "Do not overwrite v1 empirical evidence.",
+      "evidence": [
+        "CI 40047074263 PASS",
+        "persisted-result CI 40047323410 PASS"
+      ]
+    },
+    {
+      "path": "benchmarks/semantic_control_hardening/scale-evidence.v1.json",
+      "state": "FROZEN",
+      "role": "Exact CI provenance binding for scale benchmark",
+      "origin": "research-engine@b9ef0b451fec5e294c705d4886dbd828881bea05",
+      "persistence": "git",
+      "regeneration": "Create a new version if scale generator/operations/parameters change.",
+      "review_requirement": "Do not overwrite v1 empirical evidence.",
+      "evidence": [
+        "PR #212",
+        "CI job 120731149942"
+      ]
+    }
+  ],
   "validation": [
     {
       "check": "Parallel-lane isolation",
@@ -376,11 +429,10 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Run deterministic 1k/10k/100k scale benchmarks.",
     "Implement and test the opaque consumer-side EXTRACT socket without defining EXTRACT payload.",
     "Run integrated hardening benchmark and issue HARDENING_PASS, REVISE, or REJECT."
   ],
-  "next_safe_action": "Implement only implement_scale_benchmark from research-engine checkpoint b0abcc2b2bf8ae1630e0f149969875e32bb08ead. Add a deterministic synthetic generator and benchmark under prototypes/semantic_control_hardening/**, benchmarks/semantic_control_hardening/**, and tests/semantic_control_hardening/** using the frozen seed 20261023 and sizes 1k/10k/100k. Measure canonical manifest rebuild, bounded ontology slice, provenance traversal, temporal replay, and decision lookup with the frozen repetition counts. Prove same seed/size gives identical manifest hash, slices remain bounded, provenance terminates on exact generated source IDs, temporal replay returns generated validity-window answers, and decision lookup has zero authorization escapes. Persist empirical min/mean/p50/p95/max; apply no pass/fail latency threshold and make no performance-promotion claim. Do not implement EXTRACT socket or production behavior yet.",
+  "next_safe_action": "Implement only implement_opaque_extract_socket from research-engine checkpoint b9ef0b451fec5e294c705d4886dbd828881bea05. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/** that validates/registers FutureAcceptedExtractOutputDescriptorV1. Reject binding for unaccepted/design-only descriptors; register accepted descriptors only as metadata while keeping binding_state UNBOUND until a separate concrete adapter exists. Enforce payload_schema_opaque=true, required exact repository/commit/artifact/blob/schema identity, accepted scientific disposition/evidence, adapter_target_contract=SemanticObservationV1, and forbidden payload/prompt/model/retrieval/ontology/RDF fields. Do not define or inspect EXTRACT payload, do not mutate EXTRACT/integration/production, and do not create the final hardening verdict until this stage passes.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Created as a parallel sibling lane after workspace-semantic-control-integration-v1 reached PRE_EXTRACT_INTEGRATION_PASS and correctly blocked on an accepted EXTRACT output contract. This task deliberately hardens the generic semantic-control substrate while the independent EXTRACT chat continues scientific research. The eventual integration task may consume HARDENING_PASS plus a future accepted EXTRACT output checkpoint, but this task cannot unblock EXTRACT or authorize production."
