@@ -24,25 +24,25 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 2c8f2b629d7dff21a37116dba544174962004829
+- Remote checkpoint: 2f4d0c64d6153b737bc606bd81f7a8119cbb1220
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: eb492ee8284fc9198bb8d931e3591c870b34ea12
+- Remote checkpoint: 8f03b818f415b33c3a3d0bd92d2c7396920013d6
 - Remote verified: true
 
 ## Next safe action
 
-Re-read tasks/active/research-engine-local-extract-redesign-v1.json and its exact latest referenced research-engine checkpoint. Perform an independent methodological/control-parity/downstream-bindability review of the newest durable EXTRACT design or result. Persist only material findings in this task; do not mutate EXTRACT or integration.
+No reviewer-side mutation is currently required. Wait for a new durable EXTRACT design/result checkpoint or a future explicit AMR execution-authority checkpoint; then re-read the exact EXTRACT evidence and review it. Current NO_BLOCKING_FINDING does not authorize execution.
 
 ## Remaining work
 
-- On each meaningful new EXTRACT design/result checkpoint, re-read the authoritative EXTRACT capsule and exact evidence before reviewing.
-- Persist only material review findings; do not duplicate the EXTRACT owner's scientific work.
-- When an accepted EXTRACT output contract eventually appears, audit bindability and hand exact evidence back to workspace-semantic-control-integration-v1.
+- Wait for a new durable EXTRACT design/result checkpoint or a separately authorized future AMR execution checkpoint.
+- At that checkpoint, re-read the authoritative EXTRACT capsule and exact evidence before reviewing.
+- If a genuine accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
 
 ## Blockers / gates
 
