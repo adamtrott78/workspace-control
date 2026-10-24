@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-control-integration-v1",
-  "current_stage": "implement_version_skew_and_failure_isolation",
+  "current_stage": "implement_bounded_ontology_slice_and_evidence_requirements",
   "acceptance_criteria": [
     "The task consumes the completed prototype and PRE_EXTRACT_INTEGRATION_PASS checkpoints but does not mutate workspace-semantic-control-integration-v1.",
     "The task does not modify research-engine-local-extract-redesign-v1, its scientific hypotheses, benchmarks, prompts, retrieval/generation methods, Qwen/Codex choices, routes, or acceptance criteria.",
@@ -59,7 +59,7 @@
       "base_sha": "16150517b311b42331ce26978fbb225a760c39e2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "8e2007b021504739525a2fd72c86bbca1d72842d",
+        "checkpoint_sha": "dcbe638af63fa9f9682089909caecc8834169797",
         "verified": true
       },
       "local": null,
@@ -137,7 +137,7 @@
     },
     {
       "id": "implement_version_skew_and_failure_isolation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -149,15 +149,32 @@
         "Fail-closed authority context checks",
         "Receipt/source/task/policy drift adversary tests"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Version-skew and failure-isolation adversaries",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #208 CI run 40044640416 PASS and merged as dcbe638af63fa9f9682089909caecc8834169797.",
+            "V1 stale projected ALLOW with current DENY resolves DENY / STALE_AUTHORITY_CONTEXT.",
+            "V2 missing required authority epoch ABSTAINS / REQUIRED_AUTHORITY_UNAVAILABLE.",
+            "V3 task checkpoint drift ABSTAINS / TASK_STATE_STALE.",
+            "V4 receipt mismatch is INVALID_BINDING with authority_effect=NONE; even valid receipt binding has authority_effect=NONE.",
+            "V5 source blob drift ABSTAINS / SOURCE_IDENTITY_DRIFT.",
+            "V6 cross-repository disagreement ABSTAINS / CROSS_SOURCE_DISAGREEMENT.",
+            "V7 EPISTEMIC fake ALLOW ABSTAINS / NON_AUTHORITATIVE_PERMISSION_CLAIM.",
+            "V8 duplicate observation identity fails projection closed with authority_effect=NONE.",
+            "Zero frozen authority-sensitive adversary cases can ALLOW."
+          ]
+        }
+      ],
       "resume_condition": "All frozen authority-sensitive adversaries fail closed with zero authorization escapes."
     },
     {
       "id": "implement_bounded_ontology_slice_and_evidence_requirements",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "Frozen slice and evidence scenarios"
       ],
@@ -287,6 +304,16 @@
         "PR #206 CI PASS",
         "Historical replay and temporal/contradiction/UNKNOWN cases passed."
       ]
+    },
+    {
+      "id": "version-skew-failure-isolation-v1",
+      "kind": "hardening_implementation",
+      "identity": "research-engine@dcbe638af63fa9f9682089909caecc8834169797:version-skew-failure-isolation-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #208 CI PASS",
+        "All V1-V8 frozen adversaries match fail-closed expected answers."
+      ]
     }
   ],
   "artifacts": [],
@@ -303,14 +330,13 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement version-skew/failure-isolation hardening.",
     "Implement bounded ontology slicing and generalized request-only evidence requirements.",
     "Implement decision audit chains and receipt-reference validation.",
     "Run deterministic 1k/10k/100k scale benchmarks.",
     "Implement and test the opaque consumer-side EXTRACT socket without defining EXTRACT payload.",
     "Run integrated hardening benchmark and issue HARDENING_PASS, REVISE, or REJECT."
   ],
-  "next_safe_action": "Implement only implement_version_skew_and_failure_isolation from research-engine checkpoint 8e2007b021504739525a2fd72c86bbca1d72842d. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/** for the frozen V1-V8 adversaries: stale ALLOW/current DENY, missing current authority at required epoch, task checkpoint drift, receipt binding mismatch, source blob drift, cross-repository disagreement, fake EPISTEMIC ALLOW, and duplicate-ID corrupt projection. All authority-sensitive cases must DENY or ABSTAIN with the frozen reason code; receipt mismatch has authority_effect=NONE; corrupt projection fails closed. Do not implement ontology slicing, scale, EXTRACT socket, external runtime, or production mutation yet.",
+  "next_safe_action": "Implement only implement_bounded_ontology_slice_and_evidence_requirements from research-engine checkpoint dcbe638af63fa9f9682089909caecc8834169797. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/**. For frozen S1-S3, select only relevant observations/entity types/predicates and never exceed max_observations; preserve exact provenance and never widen authority. For frozen E1-E7, derive generalized EvidenceRequirementV1-compatible request-only records for contradiction, missing facet, source-level insufficiency, verification insufficiency, staleness, and benchmark insufficiency; raw model confidence alone yields no requirement. Do not implement decision audit, scale, EXTRACT socket, external runtime, or production mutation yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Created as a parallel sibling lane after workspace-semantic-control-integration-v1 reached PRE_EXTRACT_INTEGRATION_PASS and correctly blocked on an accepted EXTRACT output contract. This task deliberately hardens the generic semantic-control substrate while the independent EXTRACT chat continues scientific research. The eventual integration task may consume HARDENING_PASS plus a future accepted EXTRACT output checkpoint, but this task cannot unblock EXTRACT or authorize production."
