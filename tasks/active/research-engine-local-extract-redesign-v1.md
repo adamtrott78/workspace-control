@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 2ae7eaedac665700376684ce4af6fcbf280f5674
+- Remote checkpoint: c6ba762afcff8eaf35ae2d2b4c539630cea6c0e4
 - Remote verified: true
 
 ### research-engine
@@ -42,7 +42,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact facet planner pre-run checkpoint. Then issue exactly one `/local-extract-facet-reserved-evidence-planner 61c57dd72f0cb174908e5648405d87e89c0ec904` comment on research-engine PR #240. Do not issue a second trigger.
+Merge this exact facet planner result checkpoint, close research-engine PR #240 unmerged, then re-engage workspace-local-extract-independent-review-v1 on run 40136509371 / artifact 12577280307 / report 7ec84d93dde8814442a6079704773c48739e90fa3d8246514713129288998901 before next-phase selection.
 
 ## Remaining work
 
