@@ -32,10 +32,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "0953a3c1b2dfb3b757281fe2386006ac28bc281b",
+      "base_sha": "8533ab24f51ebfc4abaf184a68dc8723591bf3a5",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "0953a3c1b2dfb3b757281fe2386006ac28bc281b",
+        "checkpoint_sha": "8533ab24f51ebfc4abaf184a68dc8723591bf3a5",
         "verified": true
       },
       "local": null,
@@ -47,10 +47,10 @@
     {
       "name": "research-engine",
       "intent": "read",
-      "base_sha": "3f433e3e31fd8fac3edf86f65cef9628635652cf",
+      "base_sha": "e8b3814d3b0d02e45bbc2d1c8914fdeb04a1bf8e",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "3f433e3e31fd8fac3edf86f65cef9628635652cf",
+        "checkpoint_sha": "e8b3814d3b0d02e45bbc2d1c8914fdeb04a1bf8e",
         "verified": true
       },
       "local": null,
@@ -144,6 +144,19 @@
             "The fixed 7/7 control retention in the append-only arm is structural by construction, not independent proof of semantic preservation. The owner design correctly limits the experiment to diagnosing whether a small extra evidence frontier exposes complementary residual support.",
             "Budgets 28 and 32 are acceptable only as frozen diagnostic cost ceilings. A result may not be used to post-hoc select or tune a production budget.",
             "A CONFIRMED result is not general proof of EXTRACT quality or an accepted output contract; the design correctly limits authority to a later bounded architecture/cost-compression design and requires another result review."
+          ]
+        },
+        {
+          "check": "Nondestructive evidence frontier result independent review",
+          "result": "PASS",
+          "evidence": [
+            "Exact result checkpoint is research-engine@e8b3814d3b0d02e45bbc2d1c8914fdeb04a1bf8e / run 40131250903 / artifact 12574218788 / report SHA256 8c1ddc2ddd5f916a5f0b8898d26992d46138816b59bf416ead3ed528934895bc.",
+            "Frozen verdict ADDITIVE_FRONTIER_PARTIAL matches the predeclared interpretation: budget26 first recovers e6.a with 8/13 total support and all seven immutable-core controls; budgets28 and32 do not recover e1.a.",
+            "The result does not establish new semantic-preservation evidence beyond ALIGNMENT_AUGMENT_FEASIBLE: both reach 8/13 with e6.a recovered and 7/7 controls retained. It instead establishes that destructive replacement is unnecessary for recovering e6.a.",
+            "Static branch/budget collision is therefore a real contributor but not a complete explanation of the residual. Increasing the frozen frontier from +2 propositions/+2,880 chars to +8/+13,322 chars did not recover e1.a.",
+            "All provenance and teacher-blind safety checks passed; the historical page-recall ceiling remained unchanged at 0.7441860465116279.",
+            "No post-result budget/order tuning or rerun is scientifically authorized. The result is valid negative/partial evidence for static append-only union.",
+            "The frozen PARTIAL decision table is appropriate: the next owner-side scientific selection should compare materially different source-derived subquestion/decomposition mechanisms against iterative gap-directed retrieval or an even cheaper diagnostic that discriminates whether automatic intents expose the missing evidence at all."
           ]
         }
       ],
@@ -254,6 +267,19 @@
         "Structural preservation of the immutable top-24 must not be overinterpreted; the scientific information is whether the complementary residual evidence appears within the frozen small frontier.",
         "No budget tuning or second valid scientific run is permitted; post-result reviewer boundary remains mandatory."
       ]
+    },
+    {
+      "id": "nondestructive-evidence-frontier-result-review-v1",
+      "kind": "independent_review",
+      "identity": "research-engine@e8b3814d3b0d02e45bbc2d1c8914fdeb04a1bf8e|run=40131250903|ADDITIVE_FRONTIER_PARTIAL:NO_BLOCKING_FINDING",
+      "required_for_resume": true,
+      "evidence": [
+        "Disposition=NO_BLOCKING_FINDING for the owner to select the next scientific phase under the frozen PARTIAL interpretation.",
+        "e6.a additive recovery is valid but is not a new coverage high-water mark beyond ALIGNMENT_AUGMENT_FEASIBLE.",
+        "e1.a remains the discriminating residual: absent through frozen budget32 despite rising evidence cost.",
+        "Do not tune or rerun the static append-only frontier.",
+        "Preserve the teacher-blind and no-rejected-mechanism-rescue boundaries in the next design."
+      ]
     }
   ],
   "artifacts": [
@@ -320,17 +346,25 @@
         "NO_BLOCKING_FINDING on exact design research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf.",
         "Implementation may proceed only if it preserves the frozen selector, budgets, metrics, interpretation table, stopping rule, teacher-blind boundary, and PASS authority."
       ]
+    },
+    {
+      "check": "Nondestructive evidence frontier result reviewer disposition",
+      "result": "PASS",
+      "evidence": [
+        "NO_BLOCKING_FINDING on exact run 40131250903 / artifact 12574218788.",
+        "Owner may select the next scientific phase; no accepted EXTRACT output contract exists."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Wait for the EXTRACT owner to implement and execute exactly NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 under the reviewed frozen design.",
-    "Do not review routine implementation, CI, packaging, routing, trigger, or cleanup mechanics unless they materially alter the frozen experiment.",
-    "After the genuine ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE result, independently audit the exact run/artifact/verdict before the owner selects the next scientific phase.",
+    "Wait for the EXTRACT owner to select and freeze the next scientific phase using the valid ADDITIVE_FRONTIER_PARTIAL evidence.",
+    "Do not require reviewer stops during routine implementation/execution unless the frozen science changes.",
+    "After the next genuine scientific result, independently audit exact run/artifact/verdict before another phase selection.",
     "If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration."
   ],
-  "next_safe_action": "No reviewer-side mutation is required during routine implementation/execution. The owner may implement exactly NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 from research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf. Re-engage this reviewer only if the experiment is materially redesigned or after the genuine scientific result before next-phase selection.",
+  "next_safe_action": "No reviewer-side mutation is required until the owner freezes a genuinely new scientific design or produces the next genuine result. The owner may now compare decomposition/query-generation, coverage-planning, and iterative gap-directed mechanisms under the accumulated evidence; no static-frontier retuning or rejected-mechanism rescue is authorized.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists.\n2026-10-24 design review: NO_BLOCKING_FINDING for research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Reviewer confirms the append-only frontier is a teacher-blind budget/selection-collision diagnostic, not a semantic-similarity certificate. Structural 7/7 control retention must not be overclaimed, frozen budgets may not be tuned, and any valid result requires post-result review."
+  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists.\n2026-10-24 design review: NO_BLOCKING_FINDING for research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Reviewer confirms the append-only frontier is a teacher-blind budget/selection-collision diagnostic, not a semantic-similarity certificate. Structural 7/7 control retention must not be overclaimed, frozen budgets may not be tuned, and any valid result requires post-result review.\n2026-10-24 frontier result review: NO_BLOCKING_FINDING for run 40131250903 / ADDITIVE_FRONTIER_PARTIAL. e6.a recovery at budget26 validates non-destructive branch complementarity but does not exceed ALIGNMENT_AUGMENT_FEASIBLE's 8/13 high-water mark. e1.a remains absent through budget32 despite +13,322 raw chars, so static append-only union is insufficient and must not be tuned/rerun."
 }
