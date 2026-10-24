@@ -206,6 +206,21 @@
             "No new model, query generation, semantic pairwise score, threshold calibration, production change, Wave 7B, or ontology output is introduced.",
             "Disposition=NO_BLOCKING_FINDING for implementation exactly as corrected."
           ]
+        },
+        {
+          "check": "Facet-reserved planner scientific result independent review",
+          "result": "PASS",
+          "evidence": [
+            "Exact owner result is research-engine run 40136509371 / job 120999057139 / artifact 12577280307 / report sha256 7ec84d93dde8814442a6079704773c48739e90fa3d8246514713129288998901.",
+            "Frozen primary verdict FACET_RESERVATION_CONFIRMED is internally consistent with the corrected design: by budget28, e1.a is supported, all seven immutable control atoms remain supported, exact provenance and replay identity pass, and teacher data was not used for reservation selection.",
+            "Primary support path is 7/13 at budgets24 and26, then 8/13 at budgets28 and32; qualifying budget is 28.",
+            "The result is mechanistically informative: deterministic structural reservation can acquire e1.a at a small frontier where the prior global append frontier failed through budget32.",
+            "The predeclared non-verdict anti-leak sensitivity removes proposition page:p2:s33, which was introduced only from the historically teacher-leak-flagged source-aware method intent, and support falls back to the immutable 7/13 core. This does not invalidate the frozen primary verdict because the audit was posthoc and teacher-blind selection remained intact, but it materially limits robustness/generalization claims.",
+            "The positive result therefore supports the acquisition-planner premise but does not establish that this exact reservation schedule is independently robust to intent-quality contamination, nor that it is production-ready.",
+            "ALIGNMENT_AUGMENT_FEASIBLE remains complementary positive evidence for e6.a preservation/recovery and must remain in the next comparison rather than being discarded.",
+            "NLI_CERTIFICATE_REJECTED, PREDICATE_ARGUMENT_CERTIFICATE_REJECTED, and AMR_GRAPH_CERTIFICATE_REJECTED remain negative evidence; this result supplies no new basis to reopen pairwise-score/threshold redundancy certificates.",
+            "No accepted EXTRACT output contract exists. Production EXTRACT/VERIFY, Wave7B, semantic-control/RDF/ontology output remain out of scope."
+          ]
         }
       ],
       "resume_condition": "A new or current EXTRACT design/result checkpoint is available for review."
@@ -380,6 +395,19 @@
         "A valid scientific result consumes the gate; invalid execution requires explicit recovery authority.",
         "Post-result independent review remains mandatory."
       ]
+    },
+    {
+      "id": "facet-reserved-planner-result-review-v1",
+      "kind": "independent_review",
+      "identity": "research-engine@d058ee664c3b8be765258abc626dc667589618b7|run=40136509371|FACET_RESERVATION_CONFIRMED:NO_BLOCKING_FINDING",
+      "required_for_resume": true,
+      "evidence": [
+        "Disposition=NO_BLOCKING_FINDING on correctness of the frozen FACET_RESERVATION_CONFIRMED verdict.",
+        "The reviewer accepts the result only as evidence that structural multi-intent reservation can recover e1.a within budget28 while retaining the immutable seven-control core.",
+        "The posthoc anti-leak sensitivity is a material robustness caveat: removing evidence unique to the flagged source intent eliminates the e1.a gain and returns support to 7/13.",
+        "Next scientific design may test acquisition-plus-preservation/compression and robustness/generalization, but may not claim production acceptance or ignore the sensitivity.",
+        "No rerun, budget tuning, intent-order tuning, or teacher-informed repair of the completed experiment is authorized."
+      ]
     }
   ],
   "artifacts": [
@@ -470,16 +498,25 @@
         "NO_BLOCKING_FINDING on exact scientific result.",
         "Owner may freeze only a bounded teacher-blind multi-intent/facet evidence-assembly experiment next."
       ]
+    },
+    {
+      "check": "Facet-reserved planner post-result reviewer disposition",
+      "result": "PASS",
+      "evidence": [
+        "NO_BLOCKING_FINDING for exact run 40136509371 / artifact 12577280307.",
+        "Owner may select the next bounded scientific phase under the frozen pass authority, while preserving the sensitivity caveat and ALIGNMENT_AUGMENT_FEASIBLE."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Wait for owner implementation/execution of exactly SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1.",
-    "Do not review routine implementation, CI, trigger, or cleanup unless science changes.",
-    "After a genuine FACET_RESERVATION result, audit the exact run/artifact/verdict before next-phase selection."
+    "Wait for the EXTRACT owner to select and freeze the next bounded scientific phase using the confirmed acquisition-planner result plus its anti-leak sensitivity caveat and ALIGNMENT_AUGMENT_FEASIBLE.",
+    "Do not review routine implementation/CI/packaging/routing/trigger mechanics unless they materially change the next frozen science.",
+    "After the next genuine scientific result, independently audit the exact result before further phase selection.",
+    "If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration."
   ],
-  "next_safe_action": "Owner may implement exactly SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 from corrected research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6 / design blob 5eb24fd2e7ed69a940c2fbde1fd7ddfba29c55fb. Re-engage reviewer only if science changes or after the genuine result.",
+  "next_safe_action": "No reviewer-side blocker remains on the facet planner result. The owner may select and freeze the next bounded scientific design, but must preserve the anti-leak sensitivity caveat, keep ALIGNMENT_AUGMENT_FEASIBLE as complementary positive evidence, and obtain independent review of the genuinely new frozen design before implementation.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists.\n2026-10-24 design review: NO_BLOCKING_FINDING for research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Reviewer confirms the append-only frontier is a teacher-blind budget/selection-collision diagnostic, not a semantic-similarity certificate. Structural 7/7 control retention must not be overclaimed, frozen budgets may not be tuned, and any valid result requires post-result review.\n2026-10-24 frontier result review: NO_BLOCKING_FINDING for run 40131250903 / ADDITIVE_FRONTIER_PARTIAL. e6.a recovery at budget26 validates non-destructive branch complementarity but does not exceed ALIGNMENT_AUGMENT_FEASIBLE's 8/13 high-water mark. e1.a remains absent through budget32 despite +13,322 raw chars, so static append-only union is insufficient and must not be tuned/rerun.\n2026-10-24 automatic-intent exposure design review: NO_BLOCKING_FINDING for research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381 / design blob 1653b8fe0c469b0841edea7ac95e687b81361ded. Teacher anchors are posthoc evaluation only. Shallow exposure is premise evidence, not planner-cost acceptance; REPLAY_INCONSISTENT is no-verdict.\n2026-10-24 automatic-intent exposure post-result review: NO_BLOCKING_FINDING on run 40133862467. SHALLOW_DISTRIBUTED_EXPOSURE is valid premise evidence for teacher-blind multi-intent evidence assembly, not planner or production acceptance.\n2026-10-24 facet-reserved planner design review found one blocking interpretation error: safety/provenance/replay failure was conflated with scientific NEGATIVE. Correct design before implementation, then re-review."
+  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists.\n2026-10-24 design review: NO_BLOCKING_FINDING for research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Reviewer confirms the append-only frontier is a teacher-blind budget/selection-collision diagnostic, not a semantic-similarity certificate. Structural 7/7 control retention must not be overclaimed, frozen budgets may not be tuned, and any valid result requires post-result review.\n2026-10-24 frontier result review: NO_BLOCKING_FINDING for run 40131250903 / ADDITIVE_FRONTIER_PARTIAL. e6.a recovery at budget26 validates non-destructive branch complementarity but does not exceed ALIGNMENT_AUGMENT_FEASIBLE's 8/13 high-water mark. e1.a remains absent through budget32 despite +13,322 raw chars, so static append-only union is insufficient and must not be tuned/rerun.\n2026-10-24 automatic-intent exposure design review: NO_BLOCKING_FINDING for research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381 / design blob 1653b8fe0c469b0841edea7ac95e687b81361ded. Teacher anchors are posthoc evaluation only. Shallow exposure is premise evidence, not planner-cost acceptance; REPLAY_INCONSISTENT is no-verdict.\n2026-10-24 automatic-intent exposure post-result review: NO_BLOCKING_FINDING on run 40133862467. SHALLOW_DISTRIBUTED_EXPOSURE is valid premise evidence for teacher-blind multi-intent evidence assembly, not planner or production acceptance.\n2026-10-24 facet-reserved planner design review found one blocking interpretation error: safety/provenance/replay failure was conflated with scientific NEGATIVE. Correct design before implementation, then re-review.\n2026-10-24 facet planner result review: NO_BLOCKING_FINDING for run 40136509371 / artifact 12577280307 / FACET_RESERVATION_CONFIRMED. Primary verdict is valid under frozen teacher-blind gates: 8/13 at budget28 with e1.a recovered and all seven immutable controls retained. However, the predeclared anti-leak sensitivity removes flagged-only page:p2:s33 and collapses the gain back to 7/13, so the acquisition premise is supported but fragile. Next design must preserve this caveat and retain ALIGNMENT_AUGMENT_FEASIBLE as complementary e6.a evidence."
 }
