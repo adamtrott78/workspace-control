@@ -24,25 +24,25 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 0953a3c1b2dfb3b757281fe2386006ac28bc281b
+- Remote checkpoint: 8533ab24f51ebfc4abaf184a68dc8723591bf3a5
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: 3f433e3e31fd8fac3edf86f65cef9628635652cf
+- Remote checkpoint: e8b3814d3b0d02e45bbc2d1c8914fdeb04a1bf8e
 - Remote verified: true
 
 ## Next safe action
 
-No reviewer-side mutation is required during routine implementation/execution. The owner may implement exactly NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 from research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf. Re-engage this reviewer only if the experiment is materially redesigned or after the genuine scientific result before next-phase selection.
+No reviewer-side mutation is required until the owner freezes a genuinely new scientific design or produces the next genuine result. The owner may now compare decomposition/query-generation, coverage-planning, and iterative gap-directed mechanisms under the accumulated evidence; no static-frontier retuning or rejected-mechanism rescue is authorized.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to implement and execute exactly NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 under the reviewed frozen design.
-- Do not review routine implementation, CI, packaging, routing, trigger, or cleanup mechanics unless they materially alter the frozen experiment.
-- After the genuine ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE result, independently audit the exact run/artifact/verdict before the owner selects the next scientific phase.
+- Wait for the EXTRACT owner to select and freeze the next scientific phase using the valid ADDITIVE_FRONTIER_PARTIAL evidence.
+- Do not require reviewer stops during routine implementation/execution unless the frozen science changes.
+- After the next genuine scientific result, independently audit exact run/artifact/verdict before another phase selection.
 - If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
 
 ## Blockers / gates
