@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": null,
-  "current_stage": "retrospective_temporal_replay",
+  "current_stage": "prospective_shadow_validation",
   "acceptance_criteria": [
     "The methodology cleanly separates the outer scientific-reasoning loop from the existing inner engineering/execution loop.",
     "The research state explicitly represents residuals, competing hypotheses, assumptions, mechanism families, candidate architectures, evidence, experiments, controls, gates, observations, interpretations, belief updates, stopping rules, reopening conditions, and decisions.",
@@ -158,12 +158,15 @@
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "Live future EXTRACT architecture/result boundaries.",
-        "Frozen methodology v0.1."
+        "Frozen EXTRACT design research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / blob ac3f4087b141fdfb59a15ca03d46001482d717d7.",
+        "Independent design review NO_BLOCKING_FINDING for that exact frozen design.",
+        "Methodology v0.1 and post-AMR shadow state.",
+        "Methodology constraints were communicated to EXTRACT before architecture selection, so selection agreement is not an independent prospective test."
       ],
       "outputs": [
-        "Non-blocking methodology predictions and decision rationales made before EXTRACT outcomes.",
-        "Measured agreement/disagreement and whether methodology reasoning adds useful information or avoidable overhead."
+        "Frozen pre-result shadow snapshot architecture/extract-prospective-shadow-frontier.v0.1.json.",
+        "Methodology-side assessment: the evidence-frontier diagnostic has high discrimination, high decision relevance/falsifiability/independence/reuse value, low cost, and low confound risk.",
+        "Architecture-selection agreement marked NOT_EVALUABLE for independent validation; only pre-result interpretation and later result handling remain prospective evidence."
       ],
       "validation": [],
       "resume_condition": "Begin at the next genuine EXTRACT architecture boundary without delaying the EXTRACT owner."
@@ -288,13 +291,15 @@
     },
     {
       "path": "architecture/extract-prospective-shadow-frontier.v0.1.json",
-      "state": "planned",
+      "state": "draft_frozen_pre_result",
       "role": "Pre-result shadow snapshot for the frozen evidence-frontier diagnostic.",
       "origin": "workspace-control",
       "persistence": "git",
       "regeneration": null,
       "review_requirement": "Must be frozen before the scientific result and must not block EXTRACT.",
-      "evidence": []
+      "evidence": [
+        "branch research-methodology-v01-foundations blob 3278ae36acf9f8a3fd0b722edd5e1bcd96ef3ffa"
+      ]
     }
   ],
   "validation": [
@@ -309,14 +314,14 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Validate methodology v0.1, research-state schema, EXTRACT machine-readable snapshot, replay, and focused contract tests.",
-    "Complete retrospective replay as a hindsight-disclosed sanity check and persist a bounded v0.1 checkpoint.",
-    "At the next genuine EXTRACT architecture boundary, record a prospective shadow research-state snapshot/recommendation before the future result without blocking the EXTRACT owner.",
-    "Accumulate prospective evidence on residual clarity, hypothesis breadth, experiment discrimination, falsifiability, premise-reuse control, invariant preservation, failure informativeness, research efficiency, and coordination overhead.",
+    "Validate the full methodology v0.1 artifact set and frozen pre-result evidence-frontier shadow snapshot.",
+    "After NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 produces a genuine result, compare that result and the EXTRACT owner's next decision against the frozen shadow interpretation without changing the prediction.",
+    "Accumulate at least one future architecture-selection shadow case that was not shaped by methodology-side advice.",
+    "Measure residual clarity, hypothesis breadth, experiment discrimination, falsifiability, premise-reuse control, invariant preservation, failure informativeness, research efficiency, and coordination overhead.",
     "Make an evidence-based methodology promotion decision only after prospective evidence exists.",
     "If warranted, create a separate ontology/research-knowledge integration task."
   ],
-  "next_safe_action": "Freeze and validate a pre-result methodology shadow snapshot for the frozen evidence-frontier diagnostic without mutating or delaying EXTRACT.",
+  "next_safe_action": "Validate and merge the frozen methodology v0.1 foundation plus its pre-result evidence-frontier shadow snapshot. Then wait for the EXTRACT scientific result and compare it against the frozen interpretation without blocking or mutating EXTRACT.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "2026-10-24 project creation: methodology development is intentionally separated from EXTRACT scientific ownership. EXTRACT is the first retrospective/live case study, not a dependency or subordinate workflow. Ontology integration is a downstream opportunity, not a v0.1 requirement.\n2026-10-24 v0.1 foundation work: external methodology evidence supports combining strong inference (alternative hypotheses/crucial experiments), design-science problem/objective/artifact/evaluation separation, preregistration-style precommitment, and decision-theoretic experiment selection. Retrospective EXTRACT replay identifies mechanism-family tracking and family-level stopping/reopening rules as the clearest missing research-control concepts."
