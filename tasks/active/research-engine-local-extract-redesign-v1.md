@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: e91790ce18e8d97d794b7164d82eedefb26909ca
+- Remote checkpoint: f33dde1c0105ccbbcdbce1d92ac6b67023331440
 - Remote verified: true
 
 ### research-engine
@@ -42,11 +42,10 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-After closing inert replacement trigger PR #217 unmerged, begin a new evidence-first EXTRACT design phase from research-engine@eb492ee8284fc9198bb8d931e3591c870b34ea12. Treat learned mutual-entailment as rejected exclusion evidence because no frozen SPARK calibration threshold satisfied precision>=0.95 and recall>=0.05 despite acceptable SciNLI discrimination. Compare semantic-tuple coverage against at least one other materially different teacher-blind evidence-unit representation before any implementation. Preserve the accepted lexical ALIGNMENT_AUGMENT_FEASIBLE checkpoint; do not retune/rerun NLI, use EXTRACT teacher labels for certificate calibration, treat FEASIBLE as production promotion, start Wave 7B, change production EXTRACT/VERIFY, or incorporate semantic-control/ontology mechanisms.
+Begin a new evidence-first EXTRACT design phase from research-engine@eb492ee8284fc9198bb8d931e3591c870b34ea12. Treat learned mutual-entailment as rejected exclusion evidence because no frozen SPARK calibration threshold satisfied precision>=0.95 and recall>=0.05 despite acceptable SciNLI discrimination. Compare semantic-tuple coverage against at least one other materially different teacher-blind evidence-unit representation before any implementation. Preserve accepted lexical ALIGNMENT_AUGMENT_FEASIBLE; do not retune/rerun NLI, use EXTRACT teacher labels for certificate calibration, treat FEASIBLE as production promotion, start Wave 7B, change production EXTRACT/VERIFY, or incorporate semantic-control/ontology mechanisms.
 
 ## Remaining work
 
-- Close inert replacement trigger PR #217 unmerged after this result checkpoint is durable.
 - Begin a new evidence-first EXTRACT design phase for semantic-tuple coverage or another materially different evidence-unit representation.
 - Treat learned mutual-entailment as rejected exclusion evidence; do not tune its threshold, rerun it, or use EXTRACT teacher labels to rescue it.
 - Preserve accepted lexical DYNAMIC_SAME_PAGE_ALIGNMENT_SWAP_V1 / ALIGNMENT_AUGMENT_FEASIBLE as the strongest validated preservation checkpoint.
