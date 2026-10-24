@@ -31,16 +31,15 @@ Harden the generic semantic-control substrate independently of the Local EXTRACT
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8e2007b021504739525a2fd72c86bbca1d72842d
+- Remote checkpoint: dcbe638af63fa9f9682089909caecc8834169797
 - Remote verified: true
 
 ## Next safe action
 
-Implement only implement_version_skew_and_failure_isolation from research-engine checkpoint 8e2007b021504739525a2fd72c86bbca1d72842d. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/** for the frozen V1-V8 adversaries: stale ALLOW/current DENY, missing current authority at required epoch, task checkpoint drift, receipt binding mismatch, source blob drift, cross-repository disagreement, fake EPISTEMIC ALLOW, and duplicate-ID corrupt projection. All authority-sensitive cases must DENY or ABSTAIN with the frozen reason code; receipt mismatch has authority_effect=NONE; corrupt projection fails closed. Do not implement ontology slicing, scale, EXTRACT socket, external runtime, or production mutation yet.
+Implement only implement_bounded_ontology_slice_and_evidence_requirements from research-engine checkpoint dcbe638af63fa9f9682089909caecc8834169797. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/**. For frozen S1-S3, select only relevant observations/entity types/predicates and never exceed max_observations; preserve exact provenance and never widen authority. For frozen E1-E7, derive generalized EvidenceRequirementV1-compatible request-only records for contradiction, missing facet, source-level insufficiency, verification insufficiency, staleness, and benchmark insufficiency; raw model confidence alone yields no requirement. Do not implement decision audit, scale, EXTRACT socket, external runtime, or production mutation yet.
 
 ## Remaining work
 
-- Implement version-skew/failure-isolation hardening.
 - Implement bounded ontology slicing and generalized request-only evidence requirements.
 - Implement decision audit chains and receipt-reference validation.
 - Run deterministic 1k/10k/100k scale benchmarks.
