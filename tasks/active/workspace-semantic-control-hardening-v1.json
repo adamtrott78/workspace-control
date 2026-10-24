@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-control-integration-v1",
-  "current_stage": "implement_historical_replay_and_temporal_semantics",
+  "current_stage": "implement_version_skew_and_failure_isolation",
   "acceptance_criteria": [
     "The task consumes the completed prototype and PRE_EXTRACT_INTEGRATION_PASS checkpoints but does not mutate workspace-semantic-control-integration-v1.",
     "The task does not modify research-engine-local-extract-redesign-v1, its scientific hypotheses, benchmarks, prompts, retrieval/generation methods, Qwen/Codex choices, routes, or acceptance criteria.",
@@ -59,7 +59,7 @@
       "base_sha": "16150517b311b42331ce26978fbb225a760c39e2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "5e0496b76aa004c97d281265dc045a49007b4806",
+        "checkpoint_sha": "8e2007b021504739525a2fd72c86bbca1d72842d",
         "verified": true
       },
       "local": null,
@@ -107,7 +107,7 @@
     },
     {
       "id": "implement_historical_replay_and_temporal_semantics",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -119,15 +119,28 @@
         "Temporal/supersession/contradiction query helpers",
         "Exact old-decision reconstruction tests"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Historical decision replay and temporal semantics",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #206 CI run 40044280719 PASS and merged as 8e2007b021504739525a2fd72c86bbca1d72842d.",
+            "Frozen historical replay decisions reproduce exactly: R1 ALLOW, R2 DENY, R3 ABSTAIN.",
+            "Arbitrary divergent current-state changes do not alter historical replay outputs or historical-input identity.",
+            "Supersession replay uses validity intervals and returns old/new values at the frozen historical instants while preserving both versions.",
+            "Contradictions remain coexisting with global_truth_resolution=NONE.",
+            "UNKNOWN remains UNKNOWN and is not coerced to false."
+          ]
+        }
+      ],
       "resume_condition": "Historical decisions replay exactly and history/contradiction semantics remain non-destructive."
     },
     {
       "id": "implement_version_skew_and_failure_isolation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "Frozen adversary scenarios"
       ],
@@ -264,6 +277,16 @@
         "PR #204 CI PASS",
         "All hardening fixtures/contracts frozen before implementation."
       ]
+    },
+    {
+      "id": "historical-replay-temporal-v1",
+      "kind": "hardening_implementation",
+      "identity": "research-engine@8e2007b021504739525a2fd72c86bbca1d72842d:historical-replay-temporal-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #206 CI PASS",
+        "Historical replay and temporal/contradiction/UNKNOWN cases passed."
+      ]
     }
   ],
   "artifacts": [],
@@ -280,7 +303,6 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement historical decision replay and temporal/supersession/contradiction semantics.",
     "Implement version-skew/failure-isolation hardening.",
     "Implement bounded ontology slicing and generalized request-only evidence requirements.",
     "Implement decision audit chains and receipt-reference validation.",
@@ -288,7 +310,7 @@
     "Implement and test the opaque consumer-side EXTRACT socket without defining EXTRACT payload.",
     "Run integrated hardening benchmark and issue HARDENING_PASS, REVISE, or REJECT."
   ],
-  "next_safe_action": "Implement only implement_historical_replay_and_temporal_semantics from research-engine checkpoint 5e0496b76aa004c97d281265dc045a49007b4806. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/**. Reproduce frozen R1/R2/R3 historical decisions from pinned historical authority/candidate/precondition inputs while ignoring divergent current state; implement temporal replay for supersession intervals, contradiction preservation, and UNKNOWN semantics. No version-skew enforcement, ontology slicing, scale work, EXTRACT binding, external runtime, or production mutation yet.",
+  "next_safe_action": "Implement only implement_version_skew_and_failure_isolation from research-engine checkpoint 8e2007b021504739525a2fd72c86bbca1d72842d. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/** for the frozen V1-V8 adversaries: stale ALLOW/current DENY, missing current authority at required epoch, task checkpoint drift, receipt binding mismatch, source blob drift, cross-repository disagreement, fake EPISTEMIC ALLOW, and duplicate-ID corrupt projection. All authority-sensitive cases must DENY or ABSTAIN with the frozen reason code; receipt mismatch has authority_effect=NONE; corrupt projection fails closed. Do not implement ontology slicing, scale, EXTRACT socket, external runtime, or production mutation yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Created as a parallel sibling lane after workspace-semantic-control-integration-v1 reached PRE_EXTRACT_INTEGRATION_PASS and correctly blocked on an accepted EXTRACT output contract. This task deliberately hardens the generic semantic-control substrate while the independent EXTRACT chat continues scientific research. The eventual integration task may consume HARDENING_PASS plus a future accepted EXTRACT output checkpoint, but this task cannot unblock EXTRACT or authorize production."
