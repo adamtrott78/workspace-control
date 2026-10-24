@@ -30,25 +30,26 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9b63f7e85a8fc2be27f10d905c49c96f904ad29c
+- Remote checkpoint: 2ae7eaedac665700376684ce4af6fcbf280f5674
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 5d4a72f36f7407cdbe8662b53ac879861a2931e6
+- Remote checkpoint: d058ee664c3b8be765258abc626dc667589618b7
 - Remote verified: true
 
 ## Next safe action
 
-Implement SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 exactly from corrected research-engine@5d4a72f36f7407cdbe8662b53ac879861a2931e6. Preserve the immutable source-aware top24, frozen structural tiers, alternating reservation schedule, BM25 top3 depth, budgets 24/26/28/32, and posthoc-only teacher evaluation.
+Merge this exact facet planner pre-run checkpoint. Then issue exactly one `/local-extract-facet-reserved-evidence-planner 61c57dd72f0cb174908e5648405d87e89c0ec904` comment on research-engine PR #240. Do not issue a second trigger.
 
 ## Remaining work
 
-- Implement SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 exactly as frozen with deterministic tests and zero model/generation changes.
-- Run normal CI, checkpoint exact implementation and inert trigger anchor, then authorize exactly one scientific execution.
-- Stop at FACET_RESERVATION_CONFIRMED/PARTIAL/NEGATIVE or INVALID_EXECUTION; no post-result tuning.
+- After this checkpoint merges, issue exactly one frozen facet planner trigger on PR #240.
+- Bind the unique resulting run to exact head 61c57dd72f0cb174908e5648405d87e89c0ec904 and inspect the report.
+- Stop at the frozen verdict; no post-result tuning or valid rerun.
+- Persist the result, close PR #240 unmerged after result checkpoint, and obtain independent post-result review.
 
 ## Blockers / gates
 
