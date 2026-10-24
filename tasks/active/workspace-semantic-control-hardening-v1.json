@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-semantic-control-hardening-v1",
   "title": "Semantic Control Hardening v1",
-  "status": "IN_PROGRESS",
+  "status": "COMPLETE",
   "goal": "Harden the generic semantic-control substrate independently of the Local EXTRACT scientific task by proving historical decision replay, temporal/supersession/contradiction behavior, stale-state and version-skew failure isolation, bounded ontology-slice retrieval, generalized request-only EvidenceRequirement semantics, end-to-end DecisionEvaluation audit chains, deterministic scale behavior, and a consumer-side opaque EXTRACT integration socket. This task must improve the semantic-control infrastructure without defining, steering, implementing, or mutating EXTRACT.",
   "execution_topology": "remote_only",
   "workflow": null,
@@ -59,7 +59,7 @@
       "base_sha": "16150517b311b42331ce26978fbb225a760c39e2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "569772c38c0166e884629494af144af826baf6c1",
+        "checkpoint_sha": "33b44e201b8464dd033b748afe34a5f7e26646cd",
         "verified": true
       },
       "local": null,
@@ -296,7 +296,7 @@
     },
     {
       "id": "integrated_hardening_benchmark_and_verdict",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -313,7 +313,17 @@
         "HARDENING_PASS, REVISE, or REJECT",
         "Exact hardening checkpoint consumable by future integration resume"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Integrated hardening verdict",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #214 corrected CI 40048589513 PASS; persisted-result CI 40048840162 PASS; merged as 33b44e201b8464dd033b748afe34a5f7e26646cd.",
+            "HARDENING_PASS result SHA256 3b14229dca3b2c06915a97bd820a21536ecfdfa55d944458e709e6b1460b98f6; all gates true; authorization_escape_count=0.",
+            "hardening_authorizes_production=false; hardening_binds_extract=false; production_mutation=false; extract_mutation=false."
+          ]
+        }
+      ],
       "resume_condition": "All hardening hard gates are evaluated and durably checkpointed without changing production or EXTRACT."
     }
   ],
@@ -410,6 +420,15 @@
         "PR #213 CI 40047847521 PASS.",
         "Metadata-only accepted-contract registration validated with payload schema remaining opaque and binding UNBOUND."
       ]
+    },
+    {
+      "id": "semantic-control-hardening-final-v1",
+      "kind": "hardening_verdict",
+      "identity": "research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd:HARDENING_PASS:3b14229dca3b2c06915a97bd820a21536ecfdfa55d944458e709e6b1460b98f6",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #214 corrected and persisted CI PASS; zero authorization escapes; no EXTRACT/production authority."
+      ]
     }
   ],
   "artifacts": [
@@ -438,6 +457,32 @@
         "PR #212",
         "CI job 120731149942"
       ]
+    },
+    {
+      "path": "benchmarks/semantic_control_hardening/integrated-hardening-result.v1.json",
+      "state": "FROZEN",
+      "role": "Final integrated hardening verdict",
+      "origin": "research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd",
+      "persistence": "git",
+      "regeneration": "Create a new version under a separate future hardening task.",
+      "review_requirement": "Do not overwrite v1 final hardening evidence.",
+      "evidence": [
+        "HARDENING_PASS",
+        "PR #214"
+      ]
+    },
+    {
+      "path": "benchmarks/semantic_control_hardening/integrated-hardening-evidence.v1.json",
+      "state": "FROZEN",
+      "role": "Final hardening CI provenance",
+      "origin": "research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd",
+      "persistence": "git",
+      "regeneration": "Create a new version under a separate future hardening task.",
+      "review_requirement": "Do not overwrite v1 final hardening evidence.",
+      "evidence": [
+        "HARDENING_PASS",
+        "PR #214"
+      ]
     }
   ],
   "validation": [
@@ -452,11 +497,8 @@
     }
   ],
   "blockers": [],
-  "remaining_work": [
-    "Run the integrated hardening benchmark across replay/temporal semantics, V1-V8 failure isolation, bounded ontology/evidence requirements, decision audit chain, persisted scale evidence, and opaque EXTRACT socket.",
-    "Issue HARDENING_PASS, REVISE, or REJECT and durably checkpoint the result for future integration consumption."
-  ],
-  "next_safe_action": "Implement only integrated_hardening_benchmark_and_verdict from research-engine checkpoint 569772c38c0166e884629494af144af826baf6c1. Add a deterministic benchmark runner and result contract under prototypes/semantic_control_hardening/**, benchmarks/semantic_control_hardening/**, and tests/semantic_control_hardening/**. Re-run all frozen hardening correctness/safety gates together: exact historical replay, temporal supersession/contradiction/UNKNOWN semantics, V1-V8 fail-closed outcomes with zero authorization escapes, bounded deterministic ontology slices, request-only evidence requirements with model-confidence no-op, deterministic audit-chain/tamper detection and receipt authority_effect=NONE, persisted 1k/10k/100k scale evidence integrity, and opaque EXTRACT descriptor registration behavior. Verdict must be exactly HARDENING_PASS, REVISE, or REJECT. HARDENING_PASS may be consumed later by workspace-semantic-control-integration-v1 but must not mutate that task, bind EXTRACT, or authorize production.",
+  "remaining_work": [],
+  "next_safe_action": "Task COMPLETE. Preserve HARDENING_PASS at research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd. Future integration may consume this checkpoint only after its independent accepted-EXTRACT-output gate is satisfied; any new hardening scope requires a separate task.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Created as a parallel sibling lane after workspace-semantic-control-integration-v1 reached PRE_EXTRACT_INTEGRATION_PASS and correctly blocked on an accepted EXTRACT output contract. This task deliberately hardens the generic semantic-control substrate while the independent EXTRACT chat continues scientific research. The eventual integration task may consume HARDENING_PASS plus a future accepted EXTRACT output checkpoint, but this task cannot unblock EXTRACT or authorize production."

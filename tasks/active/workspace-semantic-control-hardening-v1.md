@@ -11,12 +11,12 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-semantic-control-hardening-v1
 - Title: Semantic Control Hardening v1
-- Status: IN_PROGRESS
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
 
-Harden the generic semantic-control substrate independently of the Local EXTRACT scientific task by proving historical decision replay, temporal/supersession/contradiction behavior, stale-state and version-skew failure isolation, bounded ontology-slice retrieval, generalized request-only EvidenceRequirement semantics, end-to-end DecisionEvaluation audit chains, deterministic scale behavior, and a consumer-side opaque EXTRACT integration socket. This task must improve the semantic-control infrastructure without defining, steering, implementing, or mutating EXTRACT.
+Harden the generic semantic-control substrate independently of Local EXTRACT while preserving strict authority boundaries.
 
 ## Repositories
 
@@ -24,24 +24,31 @@ Harden the generic semantic-control substrate independently of the Local EXTRACT
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 086ebf8b03dc136d733b3b9541551ea0dd99c316
+- Remote checkpoint: 80d4bc50d4d5af550970ac4c0faa2551a15866cf
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 569772c38c0166e884629494af144af826baf6c1
+- Remote checkpoint: 33b44e201b8464dd033b748afe34a5f7e26646cd
 - Remote verified: true
+
+## Final verdict
+
+HARDENING_PASS
+
+Result SHA256: 3b14229dca3b2c06915a97bd820a21536ecfdfa55d944458e709e6b1460b98f6
+
+All integrated hardening gates passed with zero authorization escapes. Hardening does not bind EXTRACT and does not authorize production.
 
 ## Next safe action
 
-Implement only integrated_hardening_benchmark_and_verdict from research-engine checkpoint 569772c38c0166e884629494af144af826baf6c1. Add a deterministic benchmark runner and result contract under prototypes/semantic_control_hardening/**, benchmarks/semantic_control_hardening/**, and tests/semantic_control_hardening/**. Re-run all frozen hardening correctness/safety gates together: exact historical replay, temporal supersession/contradiction/UNKNOWN semantics, V1-V8 fail-closed outcomes with zero authorization escapes, bounded deterministic ontology slices, request-only evidence requirements with model-confidence no-op, deterministic audit-chain/tamper detection and receipt authority_effect=NONE, persisted 1k/10k/100k scale evidence integrity, and opaque EXTRACT descriptor registration behavior. Verdict must be exactly HARDENING_PASS, REVISE, or REJECT. HARDENING_PASS may be consumed later by workspace-semantic-control-integration-v1 but must not mutate that task, bind EXTRACT, or authorize production.
+Task COMPLETE. Preserve the frozen HARDENING_PASS checkpoint. Future semantic-control integration may consume it only after the independent accepted-EXTRACT-output gate is satisfied. Any new generic hardening scope requires a separate task.
 
 ## Remaining work
 
-- Run the integrated hardening benchmark across replay/temporal semantics, V1-V8 failure isolation, bounded ontology/evidence requirements, decision audit chain, persisted scale evidence, and opaque EXTRACT socket.
-- Issue HARDENING_PASS, REVISE, or REJECT and durably checkpoint the result for future integration consumption.
+- None. Task is COMPLETE.
 
 ## Blockers / gates
 
@@ -53,10 +60,4 @@ Implement only integrated_hardening_benchmark_and_verdict from research-engine c
 
 https://github.com/adamtrott78/workspace-control
 
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-semantic-control-hardening-v1.json
-
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+This task is COMPLETE. Treat the authoritative capsule and frozen Git evidence as historical handoff state; do not resume implementation without a separate future task.
