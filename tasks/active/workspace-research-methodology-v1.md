@@ -24,7 +24,7 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: fbb43982c41355d0c4d9a491a8363b5f3f954f23
+- Remote checkpoint: 9fe9a21c9bb463e0a4196a5f10eb11468cebb5b2
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 ## Next safe action
 
-Validate and merge the frontier shadow evaluation plus prospective-validation protocol. Then remain non-blocking while EXTRACT closes its current facet-reservation result/review; do not publish a prescriptive next-architecture recommendation into shared state before the owner freezes its next design.
+Remain non-blocking while EXTRACT closes its current facet-reservation result and independent review. Do not publish a prescriptive next-architecture recommendation into shared state before the EXTRACT owner freezes its next design. Re-engage at the next scientific design/result boundary to collect uncontaminated prospective methodology evidence.
 
 ## Remaining work
 
