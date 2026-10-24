@@ -9,6 +9,7 @@ SCHEMA = ROOT / "schemas" / "research_state.v1.schema.json"
 METHODOLOGY = ROOT / "architecture" / "evidence-first-research-methodology.v0.1.md"
 REPLAY = ROOT / "architecture" / "extract-research-replay.v0.1.md"
 STATE = ROOT / "architecture" / "extract-research-state.v0.1.json"
+SHADOW = ROOT / "architecture" / "extract-prospective-shadow-frontier.v0.1.json"
 
 
 def test_research_state_schema_has_required_outer_loop_entities() -> None:
@@ -74,3 +75,22 @@ def test_post_amr_state_tracks_mechanism_family_and_positive_invariant() -> None
     assert results["sr-amr-invalid"]["classification"] == "INVALID_EXPERIMENT"
     assert results["sr-amr"]["classification"] == "FALSIFIED"
     assert data["selected_experiment_id"] is None
+
+
+def test_frontier_shadow_is_pre_result_and_non_blocking() -> None:
+    data = json.loads(SHADOW.read_text())
+    experiment = {
+        item["id"]: item for item in data["experiment_candidates"]
+    }["exp-nondestructive-frontier-v1"]
+
+    assert data["selected_experiment_id"] == "exp-nondestructive-frontier-v1"
+    assert experiment["status"] == "FROZEN"
+    assert experiment["decision_value"]["cost"] == "LOW"
+    assert experiment["decision_value"]["confound_risk"] == "LOW"
+    assert len(experiment["outcome_interpretations"]) == 4
+    assert "NOT_EVALUABLE" in data["provenance"]["hindsight_disclosure"]
+    assert "pre-result" in data["provenance"]["hindsight_disclosure"].lower()
+    assert all(
+        result["experiment_id"] != "exp-nondestructive-frontier-v1"
+        for result in data["scientific_results"]
+    )
