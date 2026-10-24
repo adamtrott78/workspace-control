@@ -24,19 +24,19 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 6331f1750774290a918f1f8135e1db63b7904aee
+- Remote checkpoint: fbb43982c41355d0c4d9a491a8363b5f3f954f23
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: 8f03b818f415b33c3a3d0bd92d2c7396920013d6
+- Remote checkpoint: 3f433e3e31fd8fac3edf86f65cef9628635652cf
 - Remote verified: true
 
 ## Next safe action
 
-Merge the validated experimental v0.1 foundation. Then keep the methodology lane non-blocking and wait for NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 to produce its scientific result; compare that result and next-phase handling against the frozen pre-result shadow without changing the shadow prediction.
+Wait for the owning EXTRACT task to produce the genuine NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 scientific result. Then compare that result and the owner's next-phase interpretation against the already-frozen pre-result shadow, without changing the shadow prediction and without blocking or mutating EXTRACT.
 
 ## Remaining work
 
