@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "schemas" / "research_state.v1.schema.json"
 METHODOLOGY = ROOT / "architecture" / "evidence-first-research-methodology.v0.1.md"
 REPLAY = ROOT / "architecture" / "extract-research-replay.v0.1.md"
+STATE = ROOT / "architecture" / "extract-research-state.v0.1.json"
 
 
 def test_research_state_schema_has_required_outer_loop_entities() -> None:
@@ -55,3 +56,21 @@ def test_replay_discloses_hindsight_and_mechanism_family_divergence() -> None:
     assert "METHODOLOGY/HISTORY DIVERGENCE" in text
     assert "INVALID_EXPERIMENT / NOT_RUN" in text
     assert "Prospective shadow validation is required for actual validation." in text
+
+
+def test_post_amr_state_tracks_mechanism_family_and_positive_invariant() -> None:
+    data = json.loads(STATE.read_text())
+    families = {item["id"]: item for item in data["mechanism_families"]}
+    invariants = {item["id"]: item for item in data["invariants"]}
+    results = {item["id"]: item for item in data["scientific_results"]}
+
+    assert families["mf-pairwise-semantic-certificate"]["status"] == "CLOSED"
+    assert set(families["mf-pairwise-semantic-certificate"]["evidence_ids"]) == {
+        "ev-nli",
+        "ev-predarg",
+        "ev-amr",
+    }
+    assert invariants["inv-lexical-preservation"]["status"] == "ACTIVE"
+    assert results["sr-amr-invalid"]["classification"] == "INVALID_EXPERIMENT"
+    assert results["sr-amr"]["classification"] == "FALSIFIED"
+    assert data["selected_experiment_id"] is None
