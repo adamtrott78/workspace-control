@@ -36,7 +36,7 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 ## Next safe action
 
-Validate and merge the frozen methodology v0.1 foundation plus its pre-result evidence-frontier shadow snapshot. Then wait for the EXTRACT scientific result and compare it against the frozen interpretation without blocking or mutating EXTRACT.
+Merge the validated experimental v0.1 foundation. Then keep the methodology lane non-blocking and wait for NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 to produce its scientific result; compare that result and next-phase handling against the frozen pre-result shadow without changing the shadow prediction.
 
 ## Remaining work
 
