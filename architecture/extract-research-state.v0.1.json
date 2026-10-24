@@ -1,0 +1,456 @@
+{
+  "schema_version": 1,
+  "research_state_id": "extract-post-amr-shadow-v0.1",
+  "project_id": "research-engine-local-extract-redesign-v1",
+  "evidence_cutoff": "2026-10-24T19:57:08Z",
+  "research_questions": [
+    {
+      "id": "rq-residual",
+      "statement": "What mechanism should be tested next to reduce the remaining unsupported scientific-evidence residual while preserving already validated local evidence behavior?",
+      "decision_target": "Select the next bounded scientific experiment class, not a production architecture.",
+      "objective": "Reduce uncertainty about why five target atoms remain unsupported after the strongest validated lexical-preservation result.",
+      "status": "OPEN",
+      "evidence_ids": [
+        "ev-align",
+        "ev-nli",
+        "ev-predarg",
+        "ev-amr"
+      ]
+    }
+  ],
+  "residuals": [
+    {
+      "id": "res-incomplete-support",
+      "statement": "The strongest validated proposition-alignment mechanism supports 8/13 target atoms, leaving five unsupported while preserving all 7/7 frozen controls.",
+      "status": "OPEN",
+      "severity": "HIGH",
+      "evidence_ids": [
+        "ev-align"
+      ]
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "h-retrieval-absence",
+      "statement": "Some unsupported targets remain unsupported because the necessary evidence is absent from the bounded candidate evidence set.",
+      "status": "OPEN",
+      "residual_ids": [
+        "res-incomplete-support"
+      ],
+      "predictions": [
+        "An evidence-availability oracle would fail to locate sufficient support for at least some unsupported targets within the current bounded candidate set."
+      ],
+      "falsifiers": [
+        "A teacher-blind or independently labeled availability diagnostic establishes that sufficient support is present for all unsupported targets inside the bounded candidate set."
+      ],
+      "supporting_evidence_ids": [],
+      "weakening_evidence_ids": []
+    },
+    {
+      "id": "h-semantic-recognition",
+      "statement": "Sufficient evidence is present, but lexical proposition alignment misses semantically equivalent or related evidence.",
+      "status": "WEAKENED",
+      "residual_ids": [
+        "res-incomplete-support"
+      ],
+      "predictions": [
+        "A valid semantic representation should add safe non-lexical matches while preserving accepted controls."
+      ],
+      "falsifiers": [
+        "Multiple materially distinct semantic-certificate representations fail to expose a safe operating point under independent validation."
+      ],
+      "supporting_evidence_ids": [
+        "ev-align"
+      ],
+      "weakening_evidence_ids": [
+        "ev-nli",
+        "ev-predarg",
+        "ev-amr"
+      ]
+    },
+    {
+      "id": "h-evidence-composition",
+      "statement": "Some unsupported targets require bounded composition over multiple evidence units rather than one-to-one proposition substitution.",
+      "status": "OPEN",
+      "residual_ids": [
+        "res-incomplete-support"
+      ],
+      "predictions": [
+        "A bounded evidence-set diagnostic should recover support that no single candidate unit can provide while preserving accepted controls."
+      ],
+      "falsifiers": [
+        "A ceiling diagnostic establishes that bounded multi-unit evidence provides no additional support beyond the best single units."
+      ],
+      "supporting_evidence_ids": [],
+      "weakening_evidence_ids": [
+        "ev-composition"
+      ]
+    },
+    {
+      "id": "h-obligation-decomposition",
+      "statement": "Some unsupported targets need to be decomposed into explicit evidence obligations before retrieval or evidence-set reasoning can succeed.",
+      "status": "OPEN",
+      "residual_ids": [
+        "res-incomplete-support"
+      ],
+      "predictions": [
+        "A decomposition/oracle diagnostic should expose separable missing obligations whose satisfaction changes support coverage."
+      ],
+      "falsifiers": [
+        "Independent obligation decomposition produces no additional discriminative retrieval or support signal."
+      ],
+      "supporting_evidence_ids": [],
+      "weakening_evidence_ids": []
+    },
+    {
+      "id": "h-selection-policy",
+      "statement": "Relevant evidence exists and is individually recognizable, but the bounded selection policy discards it while optimizing a proxy objective.",
+      "status": "OPEN",
+      "residual_ids": [
+        "res-incomplete-support"
+      ],
+      "predictions": [
+        "Oracle replacement or counterfactual selection under the same evidence pool should improve support without changing representation quality."
+      ],
+      "falsifiers": [
+        "Counterfactual selection cannot improve support when representation and evidence pool are held fixed."
+      ],
+      "supporting_evidence_ids": [
+        "ev-familyc"
+      ],
+      "weakening_evidence_ids": []
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "a-pairwise-safe-threshold",
+      "statement": "A general pairwise semantic score can expose a high-precision, nontrivial-recall threshold suitable for redundancy certification.",
+      "status": "FALSIFIED",
+      "evidence_ids": [
+        "ev-nli",
+        "ev-predarg",
+        "ev-amr"
+      ]
+    },
+    {
+      "id": "a-lexical-preservation-useful",
+      "statement": "The accepted lexical proposition-alignment mechanism is useful positive evidence that should be preserved by default.",
+      "status": "SUPPORTED",
+      "evidence_ids": [
+        "ev-align"
+      ]
+    }
+  ],
+  "mechanism_families": [
+    {
+      "id": "mf-direct-lexical-preservation",
+      "name": "Direct lexical proposition preservation",
+      "premise": "A bounded lexical proposition-level redundancy signal can identify safe replacements while preserving already-supported evidence.",
+      "status": "OPEN",
+      "hypothesis_ids": [
+        "h-selection-policy"
+      ],
+      "evidence_ids": [
+        "ev-align"
+      ],
+      "stopping_rule_ids": [],
+      "reopening_condition_ids": []
+    },
+    {
+      "id": "mf-pairwise-semantic-certificate",
+      "name": "Pairwise semantic redundancy certificate",
+      "premise": "A semantic model or representation can assign a pairwise score with a safe high-precision, nontrivial-recall operating point for certifying proposition redundancy.",
+      "status": "CLOSED",
+      "hypothesis_ids": [
+        "h-semantic-recognition"
+      ],
+      "evidence_ids": [
+        "ev-nli",
+        "ev-predarg",
+        "ev-amr"
+      ],
+      "stopping_rule_ids": [
+        "sr-pairwise-family"
+      ],
+      "reopening_condition_ids": [
+        "rc-pairwise-family"
+      ]
+    },
+    {
+      "id": "mf-coverage-composition",
+      "name": "Coverage-preserving evidence composition",
+      "premise": "Complementary evidence selection can recover missing support while preserving a strong baseline under a fixed evidence budget.",
+      "status": "DEFERRED",
+      "hypothesis_ids": [
+        "h-evidence-composition",
+        "h-selection-policy"
+      ],
+      "evidence_ids": [
+        "ev-composition",
+        "ev-familyc"
+      ],
+      "stopping_rule_ids": [],
+      "reopening_condition_ids": []
+    }
+  ],
+  "candidate_architectures": [],
+  "evidence_items": [
+    {
+      "id": "ev-composition",
+      "kind": "NEGATIVE_RESULT",
+      "statement": "MULTIVIEW_SUBMODULAR_COVERAGE_DIAGNOSTIC_V1 returned COMPOSITION_NEGATIVE; the verdict-eligible selector supported 4/13 targets and retained 2/7 frozen controls.",
+      "source_identity": "run=40032590597|artifact=12535338326|result=c528da5112885d9e7a3cb84df6e887a4f1e8df4b",
+      "observed_at": "2026-10-23T00:00:00Z",
+      "content_sha256": "550e04010624426cc1331edfe64da3f0aabc64332cf555957de4d45c1032a8eb",
+      "notes": "Date-level timestamp only in this snapshot."
+    },
+    {
+      "id": "ev-familyc",
+      "kind": "NEGATIVE_RESULT",
+      "statement": "ZERO_LOSS_RESIDUAL_AUGMENTATION_DIAGNOSTIC_V1 returned PROTECTED_AUGMENT_NEGATIVE; teacher-blind source-aware utility preservation did not preserve semantic teacher evidence.",
+      "source_identity": "run=40035904753|artifact=12536818273|result=fda45f3024cebfb2d760952b2eb93dfa07247b97",
+      "observed_at": "2026-10-23T00:00:00Z",
+      "content_sha256": "5a27ac5cb7def8649b3bce0122a17079a4d5adb514fadb41cb1edc1fe001e55d",
+      "notes": "Date-level timestamp only in this snapshot."
+    },
+    {
+      "id": "ev-align",
+      "kind": "BENCHMARK_RESULT",
+      "statement": "DYNAMIC_SAME_PAGE_ALIGNMENT_SWAP_V1 returned ALIGNMENT_AUGMENT_FEASIBLE with 8/13 target support, all 7/7 frozen controls retained, e6.a recovered, and full page-ceiling preservation.",
+      "source_identity": "research-engine@9566532288bf500db8997b9befcc339788609184|run=40038661074|artifact=12537639453",
+      "observed_at": "2026-10-23T00:00:00Z",
+      "content_sha256": "f676a5d36c030984f3839ed4ee0e7f07408996ffc81910597b0b1b417fdc8c8f",
+      "notes": "Strongest validated positive preservation checkpoint in this snapshot."
+    },
+    {
+      "id": "ev-nli",
+      "kind": "NEGATIVE_RESULT",
+      "statement": "SCIENTIFIC_NLI_REDUNDANCY_CERTIFICATE_VALIDATION_V1 returned NLI_CERTIFICATE_REJECTED because no frozen SPARK threshold met precision>=0.95 and recall>=0.05.",
+      "source_identity": "research-engine@eb492ee8284fc9198bb8d931e3591c870b34ea12|run=40049443488|artifact=12544077187",
+      "observed_at": "2026-10-23T00:00:00Z",
+      "content_sha256": "2e07359b7ca23c563134904f3dd1f8bb04116cfb1b4490f4855b6f28adba9333",
+      "notes": "SciNLI discrimination did not override redundancy-safety failure."
+    },
+    {
+      "id": "ev-predarg",
+      "kind": "NEGATIVE_RESULT",
+      "statement": "DEPENDENCY_PREDICATE_ARGUMENT_CERTIFICATE_VALIDATION_V1 returned PREDICATE_ARGUMENT_CERTIFICATE_REJECTED; no safe SPARK threshold existed and FOBIE held-out relation recall was 4/153.",
+      "source_identity": "research-engine@a135b89a855166171073ab1012df41a0be5ba9b6|run=40057016505|artifact=12546156155",
+      "observed_at": "2026-10-24T00:00:00Z",
+      "content_sha256": "a19675655cd756f2e3146a6d6e5d9e76ea33fe993dbb4749ff9057eaf5dc523e",
+      "notes": "100% sentence unit coverage did not rescue relation fidelity."
+    },
+    {
+      "id": "ev-amr",
+      "kind": "NEGATIVE_RESULT",
+      "statement": "AMR_GRAPH_CERTIFICATE_VALIDATION_V1 returned AMR_GRAPH_CERTIFICATE_REJECTED; Bio-AMR corpus Smatch F1 was 0.3783772311 versus 0.60 and SPARK selected no safe calibration threshold.",
+      "source_identity": "research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6|run=40125779107|artifact=12573487854",
+      "observed_at": "2026-10-24T19:47:52Z",
+      "content_sha256": "febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3",
+      "notes": "Independent reviewer confirmed the frozen rejection verdict."
+    },
+    {
+      "id": "ev-amr-pre-science-failure",
+      "kind": "EXECUTION_FAILURE",
+      "statement": "The first AMR trigger failed during packaging before parser/model/data scientific execution; scientific status was NOT_RUN.",
+      "source_identity": "run=40062934298",
+      "observed_at": "2026-10-24T04:36:05Z",
+      "content_sha256": null,
+      "notes": "This is execution evidence, not negative scientific evidence."
+    }
+  ],
+  "invariants": [
+    {
+      "id": "inv-lexical-preservation",
+      "statement": "Preserve the validated lexical proposition-alignment behavior by default: 8/13 target support with 7/7 frozen controls retained and e6.a recovered.",
+      "status": "ACTIVE",
+      "evidence_ids": [
+        "ev-align"
+      ],
+      "reopening_rationale": null
+    }
+  ],
+  "experiment_candidates": [],
+  "selected_experiment_id": null,
+  "scientific_results": [
+    {
+      "id": "sr-nli",
+      "experiment_id": "external-historical-nli",
+      "classification": "FALSIFIED",
+      "project_verdict": "NLI_CERTIFICATE_REJECTED",
+      "statement": "The tested learned mutual-entailment certificate did not satisfy the frozen safe-redundancy gate.",
+      "evidence_ids": [
+        "ev-nli"
+      ]
+    },
+    {
+      "id": "sr-predarg",
+      "experiment_id": "external-historical-predarg",
+      "classification": "FALSIFIED",
+      "project_verdict": "PREDICATE_ARGUMENT_CERTIFICATE_REJECTED",
+      "statement": "The tested dependency predicate/argument certificate failed both safe redundancy calibration and scientific relation fidelity.",
+      "evidence_ids": [
+        "ev-predarg"
+      ]
+    },
+    {
+      "id": "sr-amr",
+      "experiment_id": "external-historical-amr",
+      "classification": "FALSIFIED",
+      "project_verdict": "AMR_GRAPH_CERTIFICATE_REJECTED",
+      "statement": "The tested AMR graph certificate failed scientific-domain fidelity and safe redundancy calibration.",
+      "evidence_ids": [
+        "ev-amr"
+      ]
+    },
+    {
+      "id": "sr-amr-invalid",
+      "experiment_id": "external-historical-amr-first-trigger",
+      "classification": "INVALID_EXPERIMENT",
+      "project_verdict": "NOT_RUN",
+      "statement": "The first AMR execution failed before scientific scoring and therefore did not update scientific beliefs.",
+      "evidence_ids": [
+        "ev-amr-pre-science-failure"
+      ]
+    }
+  ],
+  "belief_updates": [
+    {
+      "id": "bu-pairwise-family",
+      "result_id": "sr-amr",
+      "changes": [
+        "Close mf-pairwise-semantic-certificate in the methodology-side research model because three materially distinct implementations produced negative evidence and two independently failed the same safe-calibration premise.",
+        "Keep h-retrieval-absence, h-evidence-composition, h-obligation-decomposition, and h-selection-policy open.",
+        "Keep inv-lexical-preservation active."
+      ],
+      "next_priority_uncertainty": "Determine which non-certificate explanation best accounts for the remaining five unsupported targets before selecting another architecture."
+    }
+  ],
+  "stopping_rules": [
+    {
+      "id": "sr-pairwise-family",
+      "scope_type": "MECHANISM_FAMILY",
+      "scope_id": "mf-pairwise-semantic-certificate",
+      "condition": "Multiple materially distinct semantic-certificate representations fail premise-relevant external gates, including repeated failure to expose the frozen high-precision/nontrivial-recall safe operating point.",
+      "action": "Close the mechanism family in the methodology-side model; do not test another pairwise semantic-certificate implementation without premise-changing evidence."
+    }
+  ],
+  "reopening_conditions": [
+    {
+      "id": "rc-pairwise-family",
+      "scope_type": "MECHANISM_FAMILY",
+      "scope_id": "mf-pairwise-semantic-certificate",
+      "required_new_evidence": "Evidence must change the failed premise, such as demonstrating that prior validation was invalid, establishing a materially different decision rule that does not depend on the failed safe-threshold assumption, or changing the research objective so that the original gate is no longer relevant. A newer model or parameter retune alone is insufficient."
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-preserve-lexical",
+      "kind": "PRESERVE_INVARIANT",
+      "statement": "Carry the accepted lexical proposition-alignment result forward as a default preservation obligation.",
+      "selected_id": "inv-lexical-preservation",
+      "rationale": "It is the strongest validated positive preservation result and retains every frozen control.",
+      "evidence_ids": [
+        "ev-align"
+      ],
+      "decided_at": "2026-10-24T19:57:08Z"
+    },
+    {
+      "id": "d-close-pairwise",
+      "kind": "CLOSE_MECHANISM",
+      "statement": "Close the pairwise semantic redundancy-certificate family in the methodology-side shadow model pending premise-changing evidence.",
+      "selected_id": "mf-pairwise-semantic-certificate",
+      "rationale": "NLI, dependency predicate/argument, and AMR are materially different representations, yet all provide negative evidence against the family; NLI and AMR/predicate-argument repeatedly fail the same safe-calibration premise.",
+      "evidence_ids": [
+        "ev-nli",
+        "ev-predarg",
+        "ev-amr"
+      ],
+      "decided_at": "2026-10-24T19:57:08Z"
+    },
+    {
+      "id": "d-next-uncertainty",
+      "kind": "SELECT_UNCERTAINTY",
+      "statement": "The next methodology-side question is which non-certificate residual explanation should be discriminated, not which semantic representation to try next.",
+      "selected_id": "res-incomplete-support",
+      "rationale": "The certificate family is closed in the shadow model while multiple residual explanations remain open.",
+      "evidence_ids": [
+        "ev-align",
+        "ev-nli",
+        "ev-predarg",
+        "ev-amr"
+      ],
+      "decided_at": "2026-10-24T19:57:08Z"
+    }
+  ],
+  "relations": [
+    {
+      "source_id": "ev-align",
+      "relation": "SUPPORTS",
+      "target_id": "a-lexical-preservation-useful",
+      "evidence_ids": [
+        "ev-align"
+      ]
+    },
+    {
+      "source_id": "inv-lexical-preservation",
+      "relation": "CONSTRAINS",
+      "target_id": "rq-residual",
+      "evidence_ids": [
+        "ev-align"
+      ]
+    },
+    {
+      "source_id": "ev-nli",
+      "relation": "WEAKENS",
+      "target_id": "h-semantic-recognition",
+      "evidence_ids": [
+        "ev-nli"
+      ]
+    },
+    {
+      "source_id": "ev-predarg",
+      "relation": "WEAKENS",
+      "target_id": "h-semantic-recognition",
+      "evidence_ids": [
+        "ev-predarg"
+      ]
+    },
+    {
+      "source_id": "ev-amr",
+      "relation": "FALSIFIES",
+      "target_id": "a-pairwise-safe-threshold",
+      "evidence_ids": [
+        "ev-amr"
+      ]
+    },
+    {
+      "source_id": "sr-amr",
+      "relation": "CLOSES",
+      "target_id": "mf-pairwise-semantic-certificate",
+      "evidence_ids": [
+        "ev-amr"
+      ]
+    },
+    {
+      "source_id": "d-close-pairwise",
+      "relation": "JUSTIFIES",
+      "target_id": "mf-pairwise-semantic-certificate",
+      "evidence_ids": [
+        "ev-nli",
+        "ev-predarg",
+        "ev-amr"
+      ]
+    }
+  ],
+  "provenance": {
+    "created_at": "2026-10-24T20:00:00Z",
+    "created_by": "workspace-research-methodology-v1",
+    "source_repositories": [
+      "adamtrott78/workspace-control",
+      "adamtrott78/research-engine"
+    ],
+    "hindsight_disclosure": "This snapshot is a methodology-side reconstruction created after the AMR result and therefore cannot validate prospective predictive quality. It must not choose or mutate the EXTRACT owner's next architecture.",
+    "notes": "Evidence is derived from durable EXTRACT task checkpoints and independent-review state. Some historical evidence observed_at timestamps are date-level placeholders because exact event times were not required for this first schema exercise."
+  }
+}

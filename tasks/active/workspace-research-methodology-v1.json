@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": null,
-  "current_stage": "freeze_methodology_project_contract",
+  "current_stage": "prospective_shadow_validation",
   "acceptance_criteria": [
     "The methodology cleanly separates the outer scientific-reasoning loop from the existing inner engineering/execution loop.",
     "The research state explicitly represents residuals, competing hypotheses, assumptions, mechanism families, candidate architectures, evidence, experiments, controls, gates, observations, interpretations, belief updates, stopping rules, reopening conditions, and decisions.",
@@ -33,10 +33,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "01bc9b762a5cd5f650189adf42500d52a6233802",
+      "base_sha": "6331f1750774290a918f1f8135e1db63b7904aee",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "01bc9b762a5cd5f650189adf42500d52a6233802",
+        "checkpoint_sha": "6331f1750774290a918f1f8135e1db63b7904aee",
         "verified": true
       },
       "local": null,
@@ -46,7 +46,9 @@
         "architecture/evidence-first-research-methodology.v0.1.md",
         "schemas/research_state.v1.schema.json",
         "architecture/extract-research-replay.v0.1.md",
-        "tests/test_research_methodology_contract.py"
+        "architecture/extract-research-state.v0.1.json",
+        "tests/test_research_methodology_contract.py",
+        "architecture/extract-prospective-shadow-frontier.v0.1.json"
       ]
     },
     {
@@ -65,7 +67,7 @@
   "stages": [
     {
       "id": "freeze_methodology_project_contract",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-research-methodology-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -79,12 +81,23 @@
         "Explicit shadow-mode validation strategy.",
         "Bounded artifact/mutation scope for methodology development."
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Methodology project contract validation",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control PR #382 validation run 40130174260 PASS.",
+            "PR #382 merged as 6331f1750774290a918f1f8135e1db63b7904aee.",
+            "Mutation scope isolates methodology artifacts; EXTRACT, independent-review, semantic-control hardening/integration, and research-engine remain outside mutation authority.",
+            "Shadow-mode contract explicitly prevents methodology development from blocking active EXTRACT research."
+          ]
+        }
+      ],
       "resume_condition": "Validate and merge the task-only project contract before methodology artifacts become durable."
     },
     {
       "id": "reconstruct_extract_research_state",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "workspace-research-methodology-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+scholarly-research",
@@ -93,15 +106,27 @@
         "Independent-review evidence and exact Git/run/artifact identities."
       ],
       "outputs": [
-        "Explicit historical residual/hypothesis/evidence/mechanism/experiment/decision graph.",
-        "Identification of implicit reasoning steps, repeated premises, and missing research-state fields."
+        "architecture/extract-research-replay.v0.1.md reconstructing selected EXTRACT decision boundaries and mechanism families.",
+        "architecture/extract-research-state.v0.1.json machine-readable current research-state snapshot.",
+        "Identification of pairwise semantic redundancy certification as a cross-implementation mechanism family spanning NLI, predicate/argument, and AMR certificate experiments.",
+        "Identification of lexical proposition alignment as the strongest surviving positive preservation invariant."
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "EXTRACT research-state reconstruction",
+          "result": "PASS",
+          "evidence": [
+            "Post-AMR machine-readable snapshot blob 6ecd165a40285cb61c92ff365fafb523a871d450.",
+            "Snapshot explicitly separates residuals, hypotheses, assumptions, mechanism families, evidence, invariants, stopping/reopening rules, and decisions.",
+            "Pairwise semantic redundancy certification is represented as one cross-implementation mechanism family spanning NLI, predicate/argument, and AMR."
+          ]
+        }
+      ],
       "resume_condition": "Start after the project contract is durable."
     },
     {
       "id": "synthesize_methodology_v0_1",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "workspace-research-methodology-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+scholarly-research",
@@ -110,16 +135,28 @@
         "Relevant literature on design science, preregistration/registered reports, sequential/optimal experimental design, falsification, and evidence-based decision processes."
       ],
       "outputs": [
-        "architecture/evidence-first-research-methodology.v0.1.md",
-        "schemas/research_state.v1.schema.json",
-        "A predeclared experiment-selection and interpretation contract."
+        "architecture/evidence-first-research-methodology.v0.1.md experimental methodology specification.",
+        "schemas/research_state.v1.schema.json machine-readable research-state contract.",
+        "tests/test_research_methodology_contract.py structural contract tests.",
+        "Methodological synthesis of strong inference, design-science research, preregistration/registered-report logic, and decision-theoretic experimental design."
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Methodology v0.1 structural and integration validation",
+          "result": "PASS",
+          "evidence": [
+            "Methodology blob ff54e22252bfb9398ddc292364ac534fbea8cfb8.",
+            "Research-state schema blob d07d5f33b3db212de67702283f35ab80a34684e2.",
+            "Contract-test blob d7b14d2283e261dc19ad21c6cc30e44fe052b8e9.",
+            "Workspace Control Validation 40130896253 PASS including unit regression and full integration contracts."
+          ]
+        }
+      ],
       "resume_condition": "Methodology concepts must be supported by both historical failure modes and external research-method evidence."
     },
     {
       "id": "retrospective_temporal_replay",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "workspace-research-methodology-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -128,27 +165,53 @@
         "Historical EXTRACT evidence snapshots with later evidence withheld."
       ],
       "outputs": [
-        "architecture/extract-research-replay.v0.1.md",
-        "Replay evaluations of uncertainty localization, experiment discrimination, premise reuse, positive-invariant preservation, and hindsight leakage."
+        "architecture/extract-research-replay.v0.1.md with explicit evidence cutoffs and hindsight disclosure.",
+        "Replay identifies the post-predicate/argument boundary as the strongest methodology/history divergence: two materially distinct safe-calibration failures should have forced an explicit family-level stopping/reopening decision before AMR.",
+        "Replay treats retrospective evidence as sanity-check evidence only; prospective shadow validation remains required."
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Hindsight-disclosed EXTRACT retrospective replay",
+          "result": "PASS",
+          "evidence": [
+            "Replay blob eb9be3f88ada52c8a2ce893e5615c746f429f307.",
+            "Replay declares evidence cutoffs and analyst hindsight contamination.",
+            "Replay identifies post-predicate/argument as the strongest history/methodology divergence: repeated safe-calibration failure should have forced an explicit family-level stop/reopen decision before a third certificate representation.",
+            "Retrospective replay is explicitly not treated as prospective validation."
+          ]
+        }
+      ],
       "resume_condition": "Run only after methodology v0.1 is frozen."
     },
     {
       "id": "prospective_shadow_validation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-research-methodology-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "Live future EXTRACT architecture/result boundaries.",
-        "Frozen methodology v0.1."
+        "Frozen EXTRACT design research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / blob ac3f4087b141fdfb59a15ca03d46001482d717d7.",
+        "Independent design review NO_BLOCKING_FINDING for that exact frozen design.",
+        "Methodology v0.1 and post-AMR shadow state.",
+        "Methodology constraints were communicated to EXTRACT before architecture selection, so selection agreement is not an independent prospective test."
       ],
       "outputs": [
-        "Non-blocking methodology predictions and decision rationales made before EXTRACT outcomes.",
-        "Measured agreement/disagreement and whether methodology reasoning adds useful information or avoidable overhead."
+        "Frozen pre-result shadow snapshot architecture/extract-prospective-shadow-frontier.v0.1.json.",
+        "Methodology-side assessment: the evidence-frontier diagnostic has high discrimination, high decision relevance/falsifiability/independence/reuse value, low cost, and low confound risk.",
+        "Architecture-selection agreement marked NOT_EVALUABLE for independent validation; only pre-result interpretation and later result handling remain prospective evidence."
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "First pre-result shadow freeze",
+          "result": "PASS",
+          "evidence": [
+            "Pre-result shadow blob 3278ae36acf9f8a3fd0b722edd5e1bcd96ef3ffa frozen before any scientific result appeared in the authoritative EXTRACT capsule.",
+            "Frozen EXTRACT design identity research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7.",
+            "Architecture-selection agreement is explicitly NOT_EVALUABLE because methodology constraints were communicated before design selection.",
+            "The prospective evidence retained for later evaluation is the frozen pre-result interpretation/decision table and result-handling logic."
+          ]
+        }
+      ],
       "resume_condition": "Begin at the next genuine EXTRACT architecture boundary without delaying the EXTRACT owner."
     },
     {
@@ -186,7 +249,35 @@
       "resume_condition": "Only after methodology promotion or a separately justified stable-schema checkpoint."
     }
   ],
-  "checkpoints": [],
+  "checkpoints": [
+    {
+      "id": "research-methodology-project-contract-v1",
+      "kind": "workspace_control_task_contract",
+      "identity": "workspace-control@6331f1750774290a918f1f8135e1db63b7904aee:workspace-research-methodology-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #382 validation run 40130174260 PASS.",
+        "Methodology is non-canonical and shadow-mode.",
+        "EXTRACT remains sole scientific owner and research-engine remains read-only.",
+        "Ontology integration is deferred to a separate future task after methodology stabilization."
+      ]
+    },
+    {
+      "id": "research-methodology-v0.1-foundation",
+      "kind": "experimental_methodology_checkpoint",
+      "identity": "workspace-control@research-methodology-v01-foundations:run=40130896253:V0_1_VALIDATED_EXPERIMENTAL",
+      "required_for_resume": true,
+      "evidence": [
+        "Methodology blob ff54e22252bfb9398ddc292364ac534fbea8cfb8.",
+        "Schema blob d07d5f33b3db212de67702283f35ab80a34684e2.",
+        "Replay blob eb9be3f88ada52c8a2ce893e5615c746f429f307.",
+        "Post-AMR state blob 6ecd165a40285cb61c92ff365fafb523a871d450.",
+        "Pre-result frontier shadow blob 3278ae36acf9f8a3fd0b722edd5e1bcd96ef3ffa.",
+        "Workspace Control Validation 40130896253 PASS.",
+        "v0.1 remains experimental/non-canonical; promotion requires prospective evidence."
+      ]
+    }
+  ],
   "artifacts": [
     {
       "path": "tasks/active/workspace-research-methodology-v1.json",
@@ -210,49 +301,95 @@
     },
     {
       "path": "architecture/evidence-first-research-methodology.v0.1.md",
-      "state": "planned",
+      "state": "validated_experimental_v0.1",
       "role": "Experimental, non-canonical methodology specification.",
       "origin": "workspace-control",
       "persistence": "git",
       "regeneration": null,
       "review_requirement": "Must remain non-normative until methodology promotion evidence exists.",
-      "evidence": []
+      "evidence": [
+        "branch research-methodology-v01-foundations blob ff54e22252bfb9398ddc292364ac534fbea8cfb8"
+      ]
     },
     {
       "path": "schemas/research_state.v1.schema.json",
-      "state": "planned",
+      "state": "validated_experimental_v0.1",
       "role": "Machine-readable research-state contract designed for provenance/temporal semantics and later ontology mapping.",
       "origin": "workspace-control",
       "persistence": "git",
       "regeneration": null,
       "review_requirement": "Must not require ontology-native or semantic-control-specific payloads.",
-      "evidence": []
+      "evidence": [
+        "branch research-methodology-v01-foundations blob d07d5f33b3db212de67702283f35ab80a34684e2"
+      ]
     },
     {
       "path": "architecture/extract-research-replay.v0.1.md",
-      "state": "planned",
+      "state": "validated_experimental_v0.1",
       "role": "Temporal retrospective replay and later prospective shadow-validation evidence.",
       "origin": "workspace-control",
       "persistence": "git",
       "regeneration": null,
       "review_requirement": "Replay must disclose evidence cutoff at every checkpoint.",
-      "evidence": []
+      "evidence": [
+        "branch research-methodology-v01-foundations blob eb9be3f88ada52c8a2ce893e5615c746f429f307"
+      ]
+    },
+    {
+      "path": "architecture/extract-research-state.v0.1.json",
+      "state": "validated_experimental_v0.1",
+      "role": "Machine-readable EXTRACT case-study research-state snapshot at the post-AMR evidence cutoff.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Must not select EXTRACT's next architecture; state only evidence, hypotheses, mechanism-family status, invariants, and methodology-side decisions.",
+      "evidence": [
+        "branch research-methodology-v01-foundations blob 6ecd165a40285cb61c92ff365fafb523a871d450"
+      ]
+    },
+    {
+      "path": "architecture/extract-prospective-shadow-frontier.v0.1.json",
+      "state": "frozen_pre_result_shadow",
+      "role": "Pre-result shadow snapshot for the frozen evidence-frontier diagnostic.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Must be frozen before the scientific result and must not block EXTRACT.",
+      "evidence": [
+        "branch research-methodology-v01-foundations blob 3278ae36acf9f8a3fd0b722edd5e1bcd96ef3ffa"
+      ]
     }
   ],
-  "validation": [],
+  "validation": [
+    {
+      "check": "Methodology project ownership boundary",
+      "result": "PASS",
+      "evidence": [
+        "workspace-control PR #382 validation run 40130174260 PASS and merge 6331f1750774290a918f1f8135e1db63b7904aee.",
+        "Active methodology development cannot mutate or block EXTRACT."
+      ]
+    },
+    {
+      "check": "Evidence-first research methodology v0.1 foundation",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation 40130896253 PASS.",
+        "Unit regression, pinned-controller validation, and full integration contracts PASS.",
+        "Methodology does not mutate or block EXTRACT and does not impose ontology-specific output."
+      ]
+    }
+  ],
   "blockers": [],
   "remaining_work": [
-    "Validate and merge the methodology project contract.",
-    "Reconstruct the EXTRACT research history into explicit residual, hypothesis, mechanism, evidence, experiment, and decision states.",
-    "Research external methodological foundations and synthesize methodology v0.1.",
-    "Define and validate a machine-readable research-state schema.",
-    "Retrospectively replay historical EXTRACT decisions without hindsight leakage.",
-    "Run prospective shadow validation at future EXTRACT architecture/result boundaries without blocking EXTRACT.",
-    "Make an evidence-based methodology promotion decision.",
+    "Validate the full methodology v0.1 artifact set and frozen pre-result evidence-frontier shadow snapshot.",
+    "After NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 produces a genuine result, compare that result and the EXTRACT owner's next decision against the frozen shadow interpretation without changing the prediction.",
+    "Accumulate at least one future architecture-selection shadow case that was not shaped by methodology-side advice.",
+    "Measure residual clarity, hypothesis breadth, experiment discrimination, falsifiability, premise-reuse control, invariant preservation, failure informativeness, research efficiency, and coordination overhead.",
+    "Make an evidence-based methodology promotion decision only after prospective evidence exists.",
     "If warranted, create a separate ontology/research-knowledge integration task."
   ],
-  "next_safe_action": "Validate and merge this task-only project contract. Then begin reconstruction of the EXTRACT research history and external methodology research in parallel; do not mutate or block the active EXTRACT task.",
+  "next_safe_action": "Merge the validated experimental v0.1 foundation. Then keep the methodology lane non-blocking and wait for NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 to produce its scientific result; compare that result and next-phase handling against the frozen pre-result shadow without changing the shadow prediction.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-10-24 project creation: methodology development is intentionally separated from EXTRACT scientific ownership. EXTRACT is the first retrospective/live case study, not a dependency or subordinate workflow. Ontology integration is a downstream opportunity, not a v0.1 requirement."
+  "notes": "2026-10-24 project creation: methodology development is intentionally separated from EXTRACT scientific ownership. EXTRACT is the first retrospective/live case study, not a dependency or subordinate workflow. Ontology integration is a downstream opportunity, not a v0.1 requirement.\n2026-10-24 v0.1 foundation work: external methodology evidence supports combining strong inference (alternative hypotheses/crucial experiments), design-science problem/objective/artifact/evaluation separation, preregistration-style precommitment, and decision-theoretic experiment selection. Retrospective EXTRACT replay identifies mechanism-family tracking and family-level stopping/reopening rules as the clearest missing research-control concepts.\n2026-10-24 v0.1 validation: Workspace Control Validation 40130896253 PASS over methodology, schema, replay, post-AMR state, pre-result frontier shadow, and contract tests. The first live shadow is pre-result but architecture-selection independence is NOT_EVALUABLE because methodology constraints were communicated before the EXTRACT design was selected."
 }
