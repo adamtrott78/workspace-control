@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 39f47730a68bd6d0e4916fe3879f2ec47052d5e9
+- Remote checkpoint: 034212254148ccf7c0bdb52d525ac9279fbcbeb4
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Re-engage workspace-local-extract-independent-review-v1 on the exact frozen design research-engine@6e6442e797b0648fb094bb1113af2be7182fb598 / blob e58c8b87e122caf1d236c9ae6857c0492d78744f. Do not implement PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 until that independent design review is durable.
+Implement PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 exactly from frozen design research-engine@6e6442e797b0648fb094bb1113af2be7182fb598. Add only deterministic replay/composition logic, tests, and bounded workflow wiring; do not change the exact planner28 set, alignment swap, budget28, sensitivity, teacher boundary, or verdict interpretation.
 
 ## Remaining work
 
-- Obtain independent review of exact design research-engine@6e6442e797b0648fb094bb1113af2be7182fb598 / blob e58c8b87e122caf1d236c9ae6857c0492d78744f before implementation.
-- If reviewer disposition is NO_BLOCKING_FINDING, implement only PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 exactly as frozen.
-- Execute exactly one valid scientific run and stop at COMPOSED_COMPLEMENTARITY_ROBUST / COMPOSED_COMPLEMENTARITY_FRAGILE / COMPOSITION_PARTIAL / COMPOSITION_COLLISION; do not tune or rerun after a valid result.
-- After a genuine result, obtain independent post-result review before selecting another phase.
-- Do not reopen NLI/predicate-argument/AMR, add new query generation, alter production EXTRACT/VERIFY, start Wave7B, or emit semantic-control/RDF/ontology output.
+- Implement PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 exactly as frozen in research-engine with deterministic replay/tests and no new model/query generation.
+- Run normal CI and checkpoint the exact implementation before one-shot scientific execution.
+- Execute exactly one valid scientific run and stop at the frozen composition verdict; no valid-result rerun or tuning.
+- After the genuine result, obtain independent post-result review before selecting the next scientific phase.
+- Do not reopen rejected semantic-certificate families, change production EXTRACT/VERIFY, start Wave7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
