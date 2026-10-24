@@ -42,16 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-After this implementation/pre-run checkpoint validates and merges, issue exactly one `/local-extract-nondestructive-evidence-frontier b932ee2f2ddfb4ff5cd5958369337f5b6e531655` comment on open research-engine PR #233. Bind the unique resulting run to that exact SHA. Do not issue a second trigger. Evaluate only the frozen ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE interpretation and stop for independent post-result review after a genuine result.
+Merge this exact ADDITIVE_FRONTIER_PARTIAL result checkpoint, close research-engine PR #233 unmerged, then re-engage workspace-local-extract-independent-review-v1 on run 40131250903 / artifact 12574218788 / report SHA256 8c1ddc2ddd5f916a5f0b8898d26992d46138816b59bf416ead3ed528934895bc. Do not select the next scientific phase until that post-result review is durable.
 
 ## Remaining work
 
-- After this exact implementation/pre-run checkpoint merges, issue exactly one /local-extract-nondestructive-evidence-frontier b932ee2f2ddfb4ff5cd5958369337f5b6e531655 comment on open research-engine PR #233.
-- Observe only the unique scientific diagnostic run and evaluate the frozen ADDITIVE_FRONTIER_CONFIRMED/PARTIAL/NEGATIVE verdict; do not retrigger after a valid result.
-- Persist exact run/artifact/report identities and the budget-wise frozen support/cost/provenance metrics.
-- Close PR #233 unmerged after the genuine result is durably checkpointed.
-- Obtain independent post-result review before selecting the next scientific phase.
-- Do not tune budgets/order/evaluator, reopen NLI/predicate-argument/AMR, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
+- Merge this exact ADDITIVE_FRONTIER_PARTIAL result checkpoint, then close research-engine PR #233 unmerged; do not retrigger the consumed scientific gate.
+- Obtain independent post-result review of run 40131250903 / artifact 12574218788 / report SHA256 8c1ddc2ddd5f916a5f0b8898d26992d46138816b59bf416ead3ed528934895bc before selecting the next scientific phase.
+- After reviewer disposition, follow the frozen PARTIAL interpretation: compare source-derived subquestion decomposition against iterative gap-directed retrieval as materially different next mechanism families; do not tune the append frontier.
+- Preserve ALIGNMENT_AUGMENT_FEASIBLE and the new finding that non-destructive complementarity can recover e6.a cheaply, while treating e1.a absence through budget32 as evidence against static branch union being sufficient.
+- Do not reopen NLI/predicate-argument/AMR certificate families, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
