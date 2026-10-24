@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: bca2e37c95c680f1146c76273aaf2da1f6571ee8
+- Remote checkpoint: bcca859e14d4e00412365677c574d3da75ccb092
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact composed acquisition/preservation pre-run checkpoint. Then issue exactly one `/local-extract-composed-acquisition-preservation f1c1d3d99fe4ad1a0101dd75a8a309572b326bc3` comment on research-engine PR #244 and bind the unique resulting run to that exact head. Do not issue a second trigger.
+Merge this exact COMPOSED_COMPLEMENTARITY_FRAGILE result checkpoint, close research-engine PR #244 unmerged, then re-engage workspace-local-extract-independent-review-v1 on run 40139717644 / artifact 12577434130 / report sha256:315b18622bd1f5751ff2c551da974ec054d6c7dbf2fe3ff770cd7dcd4d987369 before next-phase selection.
 
 ## Remaining work
 
-- After this exact checkpoint merges, issue exactly one `/local-extract-composed-acquisition-preservation f1c1d3d99fe4ad1a0101dd75a8a309572b326bc3` comment on open research-engine PR #244.
-- Bind the unique resulting workflow run to exact PR head f1c1d3d99fe4ad1a0101dd75a8a309572b326bc3 and inspect the uploaded report.
-- Stop at COMPOSED_COMPLEMENTARITY_ROBUST / COMPOSED_COMPLEMENTARITY_FRAGILE / COMPOSITION_PARTIAL / COMPOSITION_NEGATIVE / COMPOSITION_COLLISION or operational INVALID_EXECUTION; do not tune or rerun after a valid scientific verdict.
-- Persist the exact result and close PR #244 unmerged only after the result checkpoint is durable.
-- After a genuine scientific verdict, obtain independent post-result review before selecting the next phase.
+- Obtain independent post-result review of run 40139717644 / artifact 12577434130 / COMPOSED_COMPLEMENTARITY_FRAGILE before selecting the next scientific phase.
+- After this result checkpoint merges, close research-engine PR #244 unmerged and do not retrigger.
+- If reviewer finds no blocking issue, next architecture search must focus on teacher-blind robustness of acquisition to intent-origin/query-path perturbation while preserving the validated alignment mechanism.
+- Do not treat primary 9/13 as robust acceptance; the frozen sensitivity establishes that e1.a remains fragile.
+- Do not reopen NLI/predicate-argument/AMR, add new query generation without new evidence, alter production EXTRACT/VERIFY, start Wave7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
