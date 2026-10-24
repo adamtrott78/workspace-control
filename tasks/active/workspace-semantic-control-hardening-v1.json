@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-control-integration-v1",
-  "current_stage": "implement_decision_audit_chain",
+  "current_stage": "implement_scale_benchmark",
   "acceptance_criteria": [
     "The task consumes the completed prototype and PRE_EXTRACT_INTEGRATION_PASS checkpoints but does not mutate workspace-semantic-control-integration-v1.",
     "The task does not modify research-engine-local-extract-redesign-v1, its scientific hypotheses, benchmarks, prompts, retrieval/generation methods, Qwen/Codex choices, routes, or acceptance criteria.",
@@ -59,7 +59,7 @@
       "base_sha": "16150517b311b42331ce26978fbb225a760c39e2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "57517d5b73275c07321d05a5ae731ff3e1001e92",
+        "checkpoint_sha": "b0abcc2b2bf8ae1630e0f149969875e32bb08ead",
         "verified": true
       },
       "local": null,
@@ -201,7 +201,7 @@
     },
     {
       "id": "implement_decision_audit_chain",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -215,15 +215,28 @@
         "Receipt binding validation without executor invocation",
         "Exact explanation/provenance reconstruction"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Decision audit chain",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #211 CI run 40045782887 PASS and merged as b0abcc2b2bf8ae1630e0f149969875e32bb08ead.",
+            "Audit chain deterministically binds CandidateAction, semantic/knowledge checkpoints, exact authority context/source IDs, precondition evidence, DecisionEvaluation decision/reasons, and optional receipt binding.",
+            "Missing receipt is represented as ABSENT with no fabricated receipt ID.",
+            "Valid and invalid later receipts both have authority_effect=NONE and do not rewrite the original decision.",
+            "Chain tampering is detected by exact recomputation/hash comparison.",
+            "Historical replay decision and knowledge checkpoints match the audit chain for the frozen historical ALLOW case."
+          ]
+        }
+      ],
       "resume_condition": "Every frozen decision can be explained from exact checkpoint through authority/preconditions to decision/receipt reference."
     },
     {
       "id": "implement_scale_benchmark",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "Frozen deterministic scale parameters"
       ],
@@ -337,6 +350,16 @@
         "PR #210 corrected CI PASS",
         "S1-S3 and E1-E7 frozen cases passed."
       ]
+    },
+    {
+      "id": "decision-audit-chain-v1",
+      "kind": "hardening_implementation",
+      "identity": "research-engine@b0abcc2b2bf8ae1630e0f149969875e32bb08ead:decision-audit-chain-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #211 CI PASS",
+        "Deterministic chain, receipt non-authority, tamper detection, and replay compatibility passed."
+      ]
     }
   ],
   "artifacts": [],
@@ -353,12 +376,11 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement decision audit chains and receipt-reference validation.",
     "Run deterministic 1k/10k/100k scale benchmarks.",
     "Implement and test the opaque consumer-side EXTRACT socket without defining EXTRACT payload.",
     "Run integrated hardening benchmark and issue HARDENING_PASS, REVISE, or REJECT."
   ],
-  "next_safe_action": "Implement only implement_decision_audit_chain from research-engine checkpoint 57517d5b73275c07321d05a5ae731ff3e1001e92. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/**. Build an audit-chain record that binds candidate_action_id, semantic_manifest_id, knowledge_checkpoint_ids, exact authority context/source identity, precondition evidence, DecisionEvaluation decision/reasons, and an optional later execution receipt reference. Validate receipt identity against candidate/evaluation without giving receipts authority. Prove exact chain hashing/reconstruction, historical replay compatibility, missing/mismatched receipt fail-closed labeling, and no fabricated receipt when none exists. Do not implement scale or EXTRACT socket yet.",
+  "next_safe_action": "Implement only implement_scale_benchmark from research-engine checkpoint b0abcc2b2bf8ae1630e0f149969875e32bb08ead. Add a deterministic synthetic generator and benchmark under prototypes/semantic_control_hardening/**, benchmarks/semantic_control_hardening/**, and tests/semantic_control_hardening/** using the frozen seed 20261023 and sizes 1k/10k/100k. Measure canonical manifest rebuild, bounded ontology slice, provenance traversal, temporal replay, and decision lookup with the frozen repetition counts. Prove same seed/size gives identical manifest hash, slices remain bounded, provenance terminates on exact generated source IDs, temporal replay returns generated validity-window answers, and decision lookup has zero authorization escapes. Persist empirical min/mean/p50/p95/max; apply no pass/fail latency threshold and make no performance-promotion claim. Do not implement EXTRACT socket or production behavior yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Created as a parallel sibling lane after workspace-semantic-control-integration-v1 reached PRE_EXTRACT_INTEGRATION_PASS and correctly blocked on an accepted EXTRACT output contract. This task deliberately hardens the generic semantic-control substrate while the independent EXTRACT chat continues scientific research. The eventual integration task may consume HARDENING_PASS plus a future accepted EXTRACT output checkpoint, but this task cannot unblock EXTRACT or authorize production."
