@@ -36,14 +36,14 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-No reviewer-side blocker remains on the FRAGILE composition result. Owner may freeze the next bounded robustness-focused design, preserving the confirmed alignment mechanism and testing teacher-blind stability of e1.a acquisition under intent-origin/query-path perturbation. Independent review is required before implementation.
+Owner may implement exactly ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 from research-engine@1fe469ee3b681db38b7d3b880fd448e7a9000bc1 / design blob 0c8dd756d184880c899214d751a409bc619cb974. Re-engage reviewer only if science changes or after the genuine result.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to select and freeze the next smallest teacher-blind acquisition-robustness experiment using the FRAGILE result.
-- The next design should distinguish whether e1.a fragility is specific to one historically flagged intent wording/origin versus a broader structural dependence on that intent family.
-- Do not review routine implementation/CI/packaging/trigger mechanics unless the next frozen science changes.
-- After the next genuine scientific result, independently audit exact run/artifact/result before further phase selection.
+- Wait for the EXTRACT owner to implement and execute exactly ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1.
+- Do not review routine implementation/CI/packaging/trigger mechanics unless they materially alter the frozen neighborhood-rescue science.
+- After the genuine neighborhood-rescue verdict, independently audit the exact run/artifact/result before next-phase selection.
+- If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
 
 ## Blockers / gates
 
