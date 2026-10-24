@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schemas/research_outcome_partition.v0.2-candidate.schema.json",
+  "title": "Research Scientific Outcome Partition v0.2 Candidate",
+  "description": "Candidate-only contract for proving scientific verdict-space exhaustiveness/exclusivity before implementation. It does not modify Evidence-First Research Methodology v0.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "partition_id",
+    "status",
+    "validity_scope",
+    "strategy",
+    "dimensions",
+    "rules",
+    "invalidity_rules",
+    "require_totality",
+    "require_exclusivity"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.2-candidate"
+    },
+    "partition_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "const": "CANDIDATE_NOT_GOVERNING"
+    },
+    "validity_scope": {
+      "const": "SCIENTIFIC_VALID_EXECUTIONS_ONLY"
+    },
+    "strategy": {
+      "enum": [
+        "FINITE_ENUMERATION",
+        "ORDERED_PREDICATES_WITH_ELSE"
+      ]
+    },
+    "dimensions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/dimension"
+      }
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/rule"
+      }
+    },
+    "invalidity_rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/invalidity_rule"
+      }
+    },
+    "require_totality": {
+      "const": true
+    },
+    "require_exclusivity": {
+      "const": true
+    },
+    "catch_all_scientific_verdict": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Required for ORDERED_PREDICATES_WITH_ELSE; null is allowed for finite partitions only when enumeration proves totality."
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "primitive": {
+      "type": [
+        "string",
+        "number",
+        "integer",
+        "boolean",
+        "null"
+      ]
+    },
+    "dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "values"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+        },
+        "values": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/primitive"
+          }
+        },
+        "scientific_role": {
+          "type": "string"
+        }
+      }
+    },
+    "predicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dimension_id",
+        "operator",
+        "value"
+      ],
+      "properties": {
+        "dimension_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operator": {
+          "const": "EQ"
+        },
+        "value": {
+          "$ref": "#/$defs/primitive"
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "verdict",
+        "predicates",
+        "interpretation"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verdict": {
+          "type": "string",
+          "minLength": 1
+        },
+        "predicates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/predicate"
+          }
+        },
+        "interpretation": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "invalidity_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "classification",
+        "condition",
+        "interpretation"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "classification": {
+          "const": "INVALID_EXPERIMENT"
+        },
+        "condition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interpretation": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
