@@ -63,6 +63,6 @@ Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-research-methodology-v1.json
 
 Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced evidence as the complete handoff.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
