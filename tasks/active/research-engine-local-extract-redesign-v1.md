@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 034212254148ccf7c0bdb52d525ac9279fbcbeb4
+- Remote checkpoint: 32a52de5c42c3aba9a0ac31a09d6f69216369266
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 6e6442e797b0648fb094bb1113af2be7182fb598
+- Remote checkpoint: 23fd3e91b3837b57201ae1524fd72e1f2d502bd5
 - Remote verified: true
 
 ## Next safe action
 
-Implement PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 exactly from frozen design research-engine@6e6442e797b0648fb094bb1113af2be7182fb598. Add only deterministic replay/composition logic, tests, and bounded workflow wiring; do not change the exact planner28 set, alignment swap, budget28, sensitivity, teacher boundary, or verdict interpretation.
+Re-engage workspace-local-extract-independent-review-v1 on corrected design research-engine@23fd3e91b3837b57201ae1524fd72e1f2d502bd5 / blob bf03092eb027aab75e3594250ca935b0a7e04995. Do not implement before corrected-design NO_BLOCKING_FINDING is durable.
 
 ## Remaining work
 
-- Implement PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 exactly as frozen in research-engine with deterministic replay/tests and no new model/query generation.
-- Run normal CI and checkpoint the exact implementation before one-shot scientific execution.
-- Execute exactly one valid scientific run and stop at the frozen composition verdict; no valid-result rerun or tuning.
-- After the genuine result, obtain independent post-result review before selecting the next scientific phase.
-- Do not reopen rejected semantic-certificate families, change production EXTRACT/VERIFY, start Wave7B, or emit semantic-control/RDF/ontology output.
+- Obtain independent re-review of corrected exact design research-engine@23fd3e91b3837b57201ae1524fd72e1f2d502bd5 / blob bf03092eb027aab75e3594250ca935b0a7e04995.
+- Do not implement until corrected-design reviewer disposition is durable.
+- After NO_BLOCKING_FINDING, implement only the frozen deterministic composition diagnostic and preserve the exhaustive verdict table.
+- Execute exactly one valid scientific run; no valid-result rerun or tuning.
+- After a genuine result, obtain independent post-result review before selecting another phase.
 
 ## Blockers / gates
 
