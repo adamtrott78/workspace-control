@@ -10,6 +10,8 @@ AUDIT = ROOT / "architecture" / "research-methodology-outcome-partition-audit.v0
 SELF_STUDY = ROOT / "architecture" / "research-methodology-self-study.v0.1.json"
 CANDIDATES = ROOT / "architecture" / "evidence-first-research-methodology.v0.2-candidates.md"
 VALIDATOR = ROOT / "scripts" / "validate_research_outcome_partition.py"
+RESULT = ROOT / "architecture" / "research-methodology-outcome-partition-result.v0.1.json"
+PARTITION_SCHEMA = ROOT / "schemas" / "research_outcome_partition.v0.2-candidate.schema.json"
 
 
 def _load_validator():
@@ -57,3 +59,17 @@ def test_v02_candidates_are_non_governing_and_include_recursion_limit() -> None:
     assert "Contamination-aware architecture-selection validation" in text
     assert "Explicit steady-state overhead telemetry" in text
     assert "Recursion limit" in text
+
+
+def test_outcome_partition_result_authorizes_candidate_only() -> None:
+    result = json.loads(RESULT.read_text())
+    schema = json.loads(PARTITION_SCHEMA.read_text())
+
+    assert result["verdict"] == "CANDIDATE_SUPPORTED"
+    assert result["observations"]["original_partition"]["uncovered_count"] == 2
+    assert result["observations"]["corrected_partition"]["uncovered_count"] == 0
+    assert "May draft a candidate" in result["authorization"]
+    assert schema["properties"]["status"]["const"] == "CANDIDATE_NOT_GOVERNING"
+    assert schema["properties"]["require_totality"]["const"] is True
+    assert schema["properties"]["require_exclusivity"]["const"] is True
+    assert schema["properties"]["validity_scope"]["const"] == "SCIENTIFIC_VALID_EXECUTIONS_ONLY"
