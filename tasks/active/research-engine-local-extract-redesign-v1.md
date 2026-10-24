@@ -13,49 +13,38 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - Title: Research Engine Mostly-Local EXTRACT Redesign v1
 - Status: CHECKPOINTED
 - Capsule schema: v2
+- Current stage: amr_graph_certificate_validation_result
 
 ## Goal
 
 Return to first principles on research-engine EXTRACT and identify, benchmark, and if justified implement a provenance-preserving mostly-local extraction architecture that makes STANDARD Codex a rare ambiguity/failure fallback rather than the default, while reusing accepted local document/VERIFY infrastructure and not repeating approaches already invalidated by durable evidence.
 
-## Workflow
+## Current scientific result
 
-- Repository: workspace-control
-- Path: workflows/evidence-first-solution-research.v1.json
-- Checkpoint: a9041372c50bf1258daea2236a3e62542a115117
-
-## Repositories
-
-### workspace-control
-
-- Intent: mutate
-- Remote branch: main
-- Remote checkpoint: a7541dff862ad0a6fc42ba22e49aec81bb6bc663
-- Remote verified: true
-
-### research-engine
-
-- Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 8f03b818f415b33c3a3d0bd92d2c7396920013d6
-- Remote verified: true
+- Recovery run: research-engine Actions run 40125779107, job 120966744810.
+- Exact recovery anchor: research-engine#230@f3d30744696e5fd1e791d6ca5601f5a25950bb7d.
+- Operational result: SUCCESS end-to-end; packaging repair, exact external assets, frozen scientific scoring, and report upload all passed.
+- Scientific verdict: **AMR_GRAPH_CERTIFICATE_REJECTED**.
+- Bio-AMR: 500/500 valid predictions; Smatch P=0.3941108851, R=0.3638515858, F1=0.3783772311, below frozen F1>=0.60.
+- SPARK: no calibration threshold met frozen precision>=0.95 and recall>=0.05; selected threshold is null, which forces REJECTED.
+- Artifact: 12573487854, ZIP digest `sha256:3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4`.
+- Scientific step runtime was about 14 minutes; runtime is additional operational evidence against using full parser+Smatch in the normal EXTRACT inner loop, but the formal rejection is from the frozen scientific gates.
 
 ## Next safe action
 
-After this recovery pre-run checkpoint validates and merges, issue exactly one `/lambda-ci-local-extract-amr-graph-certificate-validation f3d30744696e5fd1e791d6ca5601f5a25950bb7d` comment on open research-engine PR #230. Bind the unique resulting run to that exact SHA and do not issue a second trigger. Evaluate only the frozen AMR graph certificate verdict. Do not stop for independent review during execution mechanics; re-engage the reviewer only after a genuine AMR scientific result exists unless the experiment is materially redesigned first.
+Merge this exact AMR scientific-result checkpoint, then close research-engine PR #230 unmerged and re-engage `workspace-local-extract-independent-review-v1` on run 40125779107 / artifact 12573487854 / verdict AMR_GRAPH_CERTIFICATE_REJECTED. Do not select or implement the next scientific architecture until that independent post-result review is durable.
 
 ## Remaining work
 
-- Issue exactly one /lambda-ci-local-extract-amr-graph-certificate-validation f3d30744696e5fd1e791d6ca5601f5a25950bb7d comment on open research-engine PR #230 after this checkpoint merges.
-- Observe only the unique recovery external AMR validation run; do not retrigger while it is active or after completion.
-- Evaluate only the frozen AMR_GRAPH_CERTIFICATE_VALIDATED/PARTIAL/REJECTED verdict and persist exact run/artifact/report/parser/tokenizer/data identities.
-- After a genuine AMR scientific result lands, re-read workspace-local-extract-independent-review-v1 before selecting the next scientific phase or claiming an accepted architecture/output contract.
-- Close research-engine PR #230 unmerged after the scientific result is durably checkpointed.
-- Do not use EXTRACT teacher labels, alter production EXTRACT/VERIFY, start Wave 7B, train/fine-tune the parser, or emit semantic-control/RDF/ontology output.
+- Obtain an independent-review checkpoint for the exact rejected AMR result before selecting the next scientific phase.
+- Close research-engine PR #230 unmerged after this checkpoint merges; do not retrigger AMR.
+- Treat full AMR parser+Smatch as rejected evidence; no post-hoc threshold/model/parser/Smatch tuning to rescue it.
+- After reviewer disposition, choose a materially different bounded architecture using the accumulated negative evidence rather than another cosmetic model/prompt swap.
+- Preserve production EXTRACT/VERIFY and all teacher-blind / no-Wave-7B / no-semantic-control-output constraints.
 
 ## Blockers / gates
 
-- None.
+- Scientific selection gate: independent post-result review required.
 
 ## Fresh-chat initialization
 
