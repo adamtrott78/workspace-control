@@ -1,0 +1,258 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-research-methodology-v1",
+  "title": "Evidence-First Research Methodology v1",
+  "status": "IN_PROGRESS",
+  "goal": "Develop and validate a reusable outer-loop research methodology for AI/software research that converts residual problems into explicit competing hypotheses, evidence-backed mechanism choices, discriminating experiments, preregistered interpretation rules, belief updates, and stopping/reopening rules. Use the Local EXTRACT research history as a read-only retrospective and live shadow case study, while keeping EXTRACT scientifically independent and deferring ontology/semantic-control integration until the methodology itself is validated.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": null,
+  "current_stage": "freeze_methodology_project_contract",
+  "acceptance_criteria": [
+    "The methodology cleanly separates the outer scientific-reasoning loop from the existing inner engineering/execution loop.",
+    "The research state explicitly represents residuals, competing hypotheses, assumptions, mechanism families, candidate architectures, evidence, experiments, controls, gates, observations, interpretations, belief updates, stopping rules, reopening conditions, and decisions.",
+    "Experiment selection is justified by expected decision value or discriminatory power rather than architectural novelty or simple next-idea intuition.",
+    "Every experiment design freezes the question, hypotheses, controls, metrics, gates, interpretation table, and stopping rule before outcome evidence is consumed.",
+    "Retrospective replay uses only evidence available at each historical checkpoint and prevents hindsight leakage from later EXTRACT results.",
+    "Live EXTRACT usage begins in non-blocking shadow mode; the methodology does not control or delay EXTRACT until prospective evidence supports promotion.",
+    "The methodology preserves provenance and temporal supersession sufficiently for later ontology/semantic-control integration without requiring ontology-native output during methodology development.",
+    "Methodology promotion requires explicit retrospective and prospective evidence that it improves falsifiability, decision quality, or research efficiency without unacceptable coordination overhead.",
+    "Ontology integration is designed only after the methodology's conceptual model stabilizes and is executed under a separate future task."
+  ],
+  "constraints": [
+    "Do not mutate research-engine-local-extract-redesign-v1, workspace-local-extract-independent-review-v1, workspace-semantic-control-hardening-v1, workspace-semantic-control-integration-v1, or research-engine while developing this methodology.",
+    "Treat EXTRACT as a read-only case study and preserve its sole scientific ownership.",
+    "Do not impose the methodology on active EXTRACT work during shadow validation.",
+    "Do not encode conclusions using future evidence during retrospective replay; each replay decision must be time-indexed to the evidence actually available then.",
+    "Do not collapse technological implementations into distinct scientific hypotheses when they share the same underlying mechanism; track mechanism-family identity explicitly.",
+    "Do not promote a failed mechanism family merely through cosmetic parameter, model, prompt, or implementation changes without new premise-changing evidence.",
+    "Do not make semantic-control, RDF, ontology, or SemanticObservationV1 a requirement for research-state representation in v0.1.",
+    "Do not promote experimental methodology artifacts into canonical procedures until validation evidence supports promotion."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "01bc9b762a5cd5f650189adf42500d52a6233802",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "01bc9b762a5cd5f650189adf42500d52a6233802",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-research-methodology-v1.json",
+        "tasks/active/workspace-research-methodology-v1.md",
+        "architecture/evidence-first-research-methodology.v0.1.md",
+        "schemas/research_state.v1.schema.json",
+        "architecture/extract-research-replay.v0.1.md",
+        "tests/test_research_methodology_contract.py"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "8f03b818f415b33c3a3d0bd92d2c7396920013d6",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "8f03b818f415b33c3a3d0bd92d2c7396920013d6",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "freeze_methodology_project_contract",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-research-methodology-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Current workspace-control operator workflow and task-capsule contracts.",
+        "Current EXTRACT scientific history and independent-review checkpoints.",
+        "Completed semantic-control hardening evidence establishing provenance, temporal/supersession, contradiction, and bounded semantic-query capabilities."
+      ],
+      "outputs": [
+        "Durable methodology-project ownership and non-interference boundary.",
+        "Explicit shadow-mode validation strategy.",
+        "Bounded artifact/mutation scope for methodology development."
+      ],
+      "validation": [],
+      "resume_condition": "Validate and merge the task-only project contract before methodology artifacts become durable."
+    },
+    {
+      "id": "reconstruct_extract_research_state",
+      "status": "PLANNED",
+      "execution_owner": "workspace-research-methodology-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+scholarly-research",
+      "inputs": [
+        "Time-ordered EXTRACT checkpoints and results through AMR_GRAPH_CERTIFICATE_REJECTED.",
+        "Independent-review evidence and exact Git/run/artifact identities."
+      ],
+      "outputs": [
+        "Explicit historical residual/hypothesis/evidence/mechanism/experiment/decision graph.",
+        "Identification of implicit reasoning steps, repeated premises, and missing research-state fields."
+      ],
+      "validation": [],
+      "resume_condition": "Start after the project contract is durable."
+    },
+    {
+      "id": "synthesize_methodology_v0_1",
+      "status": "PLANNED",
+      "execution_owner": "workspace-research-methodology-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+scholarly-research",
+      "inputs": [
+        "Reconstructed EXTRACT research state.",
+        "Relevant literature on design science, preregistration/registered reports, sequential/optimal experimental design, falsification, and evidence-based decision processes."
+      ],
+      "outputs": [
+        "architecture/evidence-first-research-methodology.v0.1.md",
+        "schemas/research_state.v1.schema.json",
+        "A predeclared experiment-selection and interpretation contract."
+      ],
+      "validation": [],
+      "resume_condition": "Methodology concepts must be supported by both historical failure modes and external research-method evidence."
+    },
+    {
+      "id": "retrospective_temporal_replay",
+      "status": "PLANNED",
+      "execution_owner": "workspace-research-methodology-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Frozen methodology v0.1.",
+        "Historical EXTRACT evidence snapshots with later evidence withheld."
+      ],
+      "outputs": [
+        "architecture/extract-research-replay.v0.1.md",
+        "Replay evaluations of uncertainty localization, experiment discrimination, premise reuse, positive-invariant preservation, and hindsight leakage."
+      ],
+      "validation": [],
+      "resume_condition": "Run only after methodology v0.1 is frozen."
+    },
+    {
+      "id": "prospective_shadow_validation",
+      "status": "PLANNED",
+      "execution_owner": "workspace-research-methodology-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Live future EXTRACT architecture/result boundaries.",
+        "Frozen methodology v0.1."
+      ],
+      "outputs": [
+        "Non-blocking methodology predictions and decision rationales made before EXTRACT outcomes.",
+        "Measured agreement/disagreement and whether methodology reasoning adds useful information or avoidable overhead."
+      ],
+      "validation": [],
+      "resume_condition": "Begin at the next genuine EXTRACT architecture boundary without delaying the EXTRACT owner."
+    },
+    {
+      "id": "methodology_promotion_decision",
+      "status": "PLANNED",
+      "execution_owner": "workspace-research-methodology-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Retrospective replay evidence.",
+        "Prospective shadow-validation evidence."
+      ],
+      "outputs": [
+        "PROMOTE_TO_CANONICAL_RESEARCH_WORKFLOW, REVISE_METHODOLOGY, or REJECT_METHODOLOGY_V1.",
+        "If promoted, a separate task for canonical procedure adoption."
+      ],
+      "validation": [],
+      "resume_condition": "Require both retrospective and prospective evidence; no promotion from design plausibility alone."
+    },
+    {
+      "id": "ontology_integration_handoff",
+      "status": "PLANNED",
+      "execution_owner": "workspace-research-methodology-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "A stable validated research-state conceptual model.",
+        "Existing semantic-control hardening capabilities."
+      ],
+      "outputs": [
+        "A bounded handoff for a separate research-knowledge ontology/integration task.",
+        "No ontology implementation inside this task unless scope is explicitly superseded."
+      ],
+      "validation": [],
+      "resume_condition": "Only after methodology promotion or a separately justified stable-schema checkpoint."
+    }
+  ],
+  "checkpoints": [],
+  "artifacts": [
+    {
+      "path": "tasks/active/workspace-research-methodology-v1.json",
+      "state": "authoritative_task_capsule",
+      "role": "Durable owner for methodology design, validation, and shadow-mode evidence.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Must remain within this task's mutation scope.",
+      "evidence": []
+    },
+    {
+      "path": "tasks/active/workspace-research-methodology-v1.md",
+      "state": "derived_handoff",
+      "role": "Human-readable durable handoff.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": "Regenerate from the authoritative JSON capsule when the capsule changes.",
+      "review_requirement": "Must remain synchronized with the JSON capsule.",
+      "evidence": []
+    },
+    {
+      "path": "architecture/evidence-first-research-methodology.v0.1.md",
+      "state": "planned",
+      "role": "Experimental, non-canonical methodology specification.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Must remain non-normative until methodology promotion evidence exists.",
+      "evidence": []
+    },
+    {
+      "path": "schemas/research_state.v1.schema.json",
+      "state": "planned",
+      "role": "Machine-readable research-state contract designed for provenance/temporal semantics and later ontology mapping.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Must not require ontology-native or semantic-control-specific payloads.",
+      "evidence": []
+    },
+    {
+      "path": "architecture/extract-research-replay.v0.1.md",
+      "state": "planned",
+      "role": "Temporal retrospective replay and later prospective shadow-validation evidence.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Replay must disclose evidence cutoff at every checkpoint.",
+      "evidence": []
+    }
+  ],
+  "validation": [],
+  "blockers": [],
+  "remaining_work": [
+    "Validate and merge the methodology project contract.",
+    "Reconstruct the EXTRACT research history into explicit residual, hypothesis, mechanism, evidence, experiment, and decision states.",
+    "Research external methodological foundations and synthesize methodology v0.1.",
+    "Define and validate a machine-readable research-state schema.",
+    "Retrospectively replay historical EXTRACT decisions without hindsight leakage.",
+    "Run prospective shadow validation at future EXTRACT architecture/result boundaries without blocking EXTRACT.",
+    "Make an evidence-based methodology promotion decision.",
+    "If warranted, create a separate ontology/research-knowledge integration task."
+  ],
+  "next_safe_action": "Validate and merge this task-only project contract. Then begin reconstruction of the EXTRACT research history and external methodology research in parallel; do not mutate or block the active EXTRACT task.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "2026-10-24 project creation: methodology development is intentionally separated from EXTRACT scientific ownership. EXTRACT is the first retrospective/live case study, not a dependency or subordinate workflow. Ontology integration is a downstream opportunity, not a v0.1 requirement."
+}
