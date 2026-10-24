@@ -36,14 +36,14 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 ## Next safe action
 
-Finish and validate the v0.1 methodology artifacts plus the post-AMR machine-readable EXTRACT research-state snapshot. Then enter prospective shadow mode: at the next genuinely new EXTRACT architecture boundary, snapshot the evidence and independently record methodology-side hypotheses/decision constraints without delaying or mutating EXTRACT.
+Validate and merge the frozen methodology v0.1 foundation plus its pre-result evidence-frontier shadow snapshot. Then wait for the EXTRACT scientific result and compare it against the frozen interpretation without blocking or mutating EXTRACT.
 
 ## Remaining work
 
-- Validate methodology v0.1, research-state schema, EXTRACT machine-readable snapshot, replay, and focused contract tests.
-- Complete retrospective replay as a hindsight-disclosed sanity check and persist a bounded v0.1 checkpoint.
-- At the next genuine EXTRACT architecture boundary, record a prospective shadow research-state snapshot/recommendation before the future result without blocking the EXTRACT owner.
-- Accumulate prospective evidence on residual clarity, hypothesis breadth, experiment discrimination, falsifiability, premise-reuse control, invariant preservation, failure informativeness, research efficiency, and coordination overhead.
+- Validate the full methodology v0.1 artifact set and frozen pre-result evidence-frontier shadow snapshot.
+- After NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1 produces a genuine result, compare that result and the EXTRACT owner's next decision against the frozen shadow interpretation without changing the prediction.
+- Accumulate at least one future architecture-selection shadow case that was not shaped by methodology-side advice.
+- Measure residual clarity, hypothesis breadth, experiment discrimination, falsifiability, premise-reuse control, invariant preservation, failure informativeness, research efficiency, and coordination overhead.
 - Make an evidence-based methodology promotion decision only after prospective evidence exists.
 - If warranted, create a separate ontology/research-knowledge integration task.
 
