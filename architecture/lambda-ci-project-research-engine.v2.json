@@ -403,7 +403,7 @@
       "trusted_workflow": {
         "path": ".github/workflows/lambda-ci-local-extract-amr-graph-certificate-validation.yml",
         "default_branch": "main",
-        "blob_sha": "70483ed29dffc19ec8e3c8eaa754321e6f44b653"
+        "blob_sha": "4bbc0840e85f979b4bd70f5f717cb3c8b21783dc"
       },
       "trigger": {
         "event_name": "issue_comment",
