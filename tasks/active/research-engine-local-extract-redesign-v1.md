@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: bd76a3a79aa5e0880aa6659c9518bdc68cbd753d
+- Remote checkpoint: c6ccffc1b060495f2c54cf74b15b193535c32f5a
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 5c30b580a8315fc74741aff212f45d09d2afcb81
+- Remote checkpoint: 329e7e5a31553551e39d4384a09f2c406c4a3e2f
 - Remote verified: true
 
 ## Next safe action
 
-Implement only AMR_GRAPH_REDUNDANCY_CERTIFICATE_VALIDATION_V1 from isolated final design head 7749bd2092cf3d1250dcdc8bacf3b31684417c4c using the existing lambda-research-engine-gpu lane. No exact independent-review checkpoint exists for final design SHA 5c30b580a8315fc74741aff212f45d09d2afcb81, so proceed without waiting. No EXTRACT teacher input or EXTRACT AMR experiment is authorized.
+Checkpoint the validated AMR implementation, then add only the smallest declarative workspace-control route binding for workload model-eval-local-extract-amr-graph-v1 to the existing gpu-single-public-ci-v1 contract and trusted workflow blob 70483ed29dffc19ec8e3c8eaa754321e6f44b653. Reconcile trusted state before exactly one external-only validation trigger. Do not redesign runner/controller/provisioner infrastructure and do not access EXTRACT teacher inputs.
 
 ## Remaining work
 
-- Implement external AMR_GRAPH_REDUNDANCY_CERTIFICATE_VALIDATION_V1 from isolated final design head 7749bd2092cf3d1250dcdc8bacf3b31684417c4c using existing lambda-research-engine-gpu.
-- Pin amrlib@38b29706ea982da5a5b081a04f00c93cc6cc1e9c, parser asset id 57066548/size/MD5/SHA256, facebook/bart-large tokenizer revision 22fa33834dccc11df99c4fc5fcc96c67f806dfdb, Smatch v1.0.4 commit 1bcd49cc8535056aa1c941763580fc5a572f1204, SPARK blob, and Bio-AMR mirror blob.
-- Run normal CI and durable-checkpoint implementation before exactly one external AMR validation trigger.
-- Evaluate only frozen AMR_GRAPH_CERTIFICATE_VALIDATED/PARTIAL/REJECTED.
-- At the eventual result checkpoint, re-read independent-review before selecting another scientific phase.
+- Bind the AMR validation workflow/command declaratively to the existing lambda-research-engine-gpu gpu-single-public-ci-v1 execution contract; do not redesign GitRunner/controller/provisioner/runtime infrastructure.
+- Trusted-reconcile the route/workflow identity before any AMR parser execution.
+- After durable route readiness, create an inert exact-SHA trigger PR and issue exactly one AMR_GRAPH_REDUNDANCY_CERTIFICATE_VALIDATION_V1 trigger.
+- Evaluate only frozen AMR_GRAPH_CERTIFICATE_VALIDATED/PARTIAL/REJECTED and persist exact run/artifact/report/parser/tokenizer/data identities.
+- At the result checkpoint, re-read workspace-local-extract-independent-review-v1 before selecting another scientific phase.
 - Do not use EXTRACT teacher labels, alter production EXTRACT/VERIFY, start Wave 7B, train/fine-tune the parser, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
