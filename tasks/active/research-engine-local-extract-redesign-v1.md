@@ -18,6 +18,12 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Return to first principles on research-engine EXTRACT and identify, benchmark, and if justified implement a provenance-preserving mostly-local extraction architecture that makes STANDARD Codex a rare ambiguity/failure fallback rather than the default, while reusing accepted local document/VERIFY infrastructure and not repeating approaches already invalidated by durable evidence.
 
+## Workflow
+
+- Repository: workspace-control
+- Path: workflows/evidence-first-solution-research.v1.json
+- Checkpoint: a9041372c50bf1258daea2236a3e62542a115117
+
 ## Repositories
 
 ### workspace-control
@@ -50,3 +56,17 @@ Re-read tasks/active/workspace-local-extract-independent-review-v1.json for any 
 ## Blockers / gates
 
 - None.
+
+## Fresh-chat initialization
+
+@GitHub
+
+https://github.com/adamtrott78/workspace-control
+
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/research-engine-local-extract-redesign-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
