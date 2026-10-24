@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 5d3938ffff5bdea2ddfb03ae79c203a95a3bce05
+- Remote checkpoint: 9b35486e384b7a72a8a2cbcf7f647efddbbdabe9
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact neighborhood-rescue pre-run checkpoint. Then issue exactly one `/local-extract-adjacent-proposition-rescue 7b53deccf4e8b5a34aa30bc0472493e189ad5f44` comment on research-engine PR #248 and bind the unique resulting run. Do not issue a second trigger.
+Merge this exact LOCAL_RESCUE_CONFIRMED result checkpoint, close research-engine PR #248 unmerged, then re-engage workspace-local-extract-independent-review-v1 on run 40143476764 / artifact 12580076512 / report sha256:e1a2f61f16cae4e957b10a9c24b475d5cb481afa9381084de65a1cd9c6568d23. Do not select the next scientific phase until that review is durable.
 
 ## Remaining work
 
-- After this checkpoint merges, issue exactly one `/local-extract-adjacent-proposition-rescue 7b53deccf4e8b5a34aa30bc0472493e189ad5f44` comment on PR #248.
-- Bind the unique resulting workflow run to the exact trigger head and inspect the report/artifact.
-- Stop at the frozen disjoint neighborhood-rescue verdict; no valid-result rerun or tuning.
-- Persist the result, close PR #248 unmerged after result checkpoint is durable, and obtain independent post-result review.
+- Obtain independent post-result review of run 40143476764 / artifact 12580076512 / LOCAL_RESCUE_CONFIRMED before selecting the next scientific phase.
+- After this exact result checkpoint merges, close research-engine PR #248 unmerged and do not retrigger.
+- If reviewer finds no blocking issue, compare a bounded cross-paper/generalization test of neighborhood-aware rescue against deeper-per-intent allocation/cost; do not treat the one-case CONFIRMED result as generalized robustness.
+- Preserve ALIGNMENT_AUGMENT_FEASIBLE and rejected NLI/predicate-argument/AMR exclusions; do not alter production EXTRACT/VERIFY, start Wave7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
