@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 789bc112de5f9170e69ece1000936757abd01dc8
+- Remote checkpoint: f6f665d4240e2a5ba1c6aa52477a5af1f8be3db4
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: bf47d704019f7028b79841d8d5dc36254a519d1d
+- Remote checkpoint: 6cd3eb3b38efbf2670a548f5ec052d8129f48067
 - Remote verified: true
 
 ## Next safe action
 
-Merge this exact SHALLOW_DISTRIBUTED_EXPOSURE result checkpoint, then close research-engine PR #236 unmerged and re-engage workspace-local-extract-independent-review-v1 on run 40133862467 / artifact 12576550404 / report sha256:0908733e01e3a7efe9bc1b18bf198bc65d354520841c34b1ea8e320401e4aefc. Do not freeze or implement the next planner before that review is durable.
+Re-engage workspace-local-extract-independent-review-v1 on exact design research-engine@6cd3eb3b38efbf2670a548f5ec052d8129f48067 / blob 37b249524c1ea1d7db0e0fe07b96c0e02322dfd3. Do not implement SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 until that review is durable.
 
 ## Remaining work
 
-- Obtain independent post-result review of run 40133862467 / artifact 12576550404 / SHALLOW_DISTRIBUTED_EXPOSURE before freezing the next scientific architecture.
-- After this result checkpoint merges, close research-engine PR #236 unmerged; do not issue another exposure trigger.
-- If reviewer finds no blocking issue, design the smallest teacher-blind FACET_RESERVED_EVIDENCE_PLANNER diagnostic that tests whether shallow per-intent reservation/assembly can recover e1.a while preserving validated source-aware control coverage and bounded cost.
-- Do not add new query generation yet; the frozen exposure interpretation says existing static intents already expose e1.a shallowly across the union.
-- Do not reopen NLI/predicate-argument/AMR, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
+- Obtain independent design review of exact research-engine@6cd3eb3b38efbf2670a548f5ec052d8129f48067 / design blob 37b249524c1ea1d7db0e0fe07b96c0e02322dfd3.
+- If reviewer disposition is NO_BLOCKING_FINDING, implement only SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1 exactly as frozen.
+- Run normal CI and persist exact implementation/inert trigger authority before exactly one scientific execution.
+- Stop at FACET_RESERVATION_CONFIRMED, FACET_RESERVATION_PARTIAL, FACET_RESERVATION_NEGATIVE, or REPLAY_INCONSISTENT; no post-result schedule/budget tuning or valid rerun.
+- After the genuine result, obtain independent post-result review before selecting the following phase.
 
 ## Blockers / gates
 
