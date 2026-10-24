@@ -32,10 +32,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "2c8f2b629d7dff21a37116dba544174962004829",
+      "base_sha": "2f4d0c64d6153b737bc606bd81f7a8119cbb1220",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "2c8f2b629d7dff21a37116dba544174962004829",
+        "checkpoint_sha": "2f4d0c64d6153b737bc606bd81f7a8119cbb1220",
         "verified": true
       },
       "local": null,
@@ -47,10 +47,10 @@
     {
       "name": "research-engine",
       "intent": "read",
-      "base_sha": "eb492ee8284fc9198bb8d931e3591c870b34ea12",
+      "base_sha": "8f03b818f415b33c3a3d0bd92d2c7396920013d6",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "eb492ee8284fc9198bb8d931e3591c870b34ea12",
+        "checkpoint_sha": "8f03b818f415b33c3a3d0bd92d2c7396920013d6",
         "verified": true
       },
       "local": null,
@@ -105,7 +105,19 @@
         "Bounded concerns or NO_BLOCKING_FINDING disposition for the EXTRACT owner.",
         "No scientific mutation or alternate verdict."
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "AMR pre-science repair independent review",
+          "result": "PASS",
+          "evidence": [
+            "Run 40062934298 stopped before external assets or scientific scoring; AMR scientific status remains NOT_RUN.",
+            "research-engine PR #229 changed only the AMR validation workflow and its test; CI 40073561576 PASS; merge 8f03b818f415b33c3a3d0bd92d2c7396920013d6.",
+            "Frozen AMR scientific identities and gates were preserved.",
+            "workspace-control PR #376 validation 40073944709 PASS and reconciliation 40074045032 PASS.",
+            "workspace-control PR #377 validation 40074217587 PASS; merge 2f4d0c64d6153b737bc606bd81f7a8119cbb1220."
+          ]
+        }
+      ],
       "resume_condition": "A new or current EXTRACT design/result checkpoint is available for review."
     },
     {
@@ -171,6 +183,18 @@
         "Reviewer task mutation scope limited to its own capsule/handoff.",
         "Downstream opaque-socket review cannot impose semantic-control schema upstream."
       ]
+    },
+    {
+      "id": "amr-pre-science-repair-review-v1",
+      "kind": "independent_review",
+      "identity": "research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6|workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220:NO_BLOCKING_FINDING",
+      "required_for_resume": true,
+      "evidence": [
+        "Reviewer disposition=NO_BLOCKING_FINDING for the packaging repair and fail-closed checkpoint.",
+        "Scientific status remains NOT_RUN.",
+        "No scientific threshold, model/data identity, Smatch rule, teacher-blind boundary, or production behavior changed.",
+        "This review does not grant authority for a new AMR execution."
+      ]
     }
   ],
   "artifacts": [
@@ -213,16 +237,24 @@
         "Workspace Control Validation run 40055602179 PASS.",
         "PR #364 merged as 2c8f2b629d7dff21a37116dba544174962004829."
       ]
+    },
+    {
+      "check": "AMR pre-science repair reviewer disposition",
+      "result": "PASS",
+      "evidence": [
+        "NO_BLOCKING_FINDING at research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220.",
+        "Reviewer PASS is not a scientific verdict or execution authorization."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "On each meaningful new EXTRACT design/result checkpoint, re-read the authoritative EXTRACT capsule and exact evidence before reviewing.",
-    "Persist only material review findings; do not duplicate the EXTRACT owner's scientific work.",
-    "When an accepted EXTRACT output contract eventually appears, audit bindability and hand exact evidence back to workspace-semantic-control-integration-v1."
+    "Wait for a new durable EXTRACT design/result checkpoint or a separately authorized future AMR execution checkpoint.",
+    "At that checkpoint, re-read the authoritative EXTRACT capsule and exact evidence before reviewing.",
+    "If a genuine accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration."
   ],
-  "next_safe_action": "Re-read tasks/active/research-engine-local-extract-redesign-v1.json and its exact latest referenced research-engine checkpoint. Perform an independent methodological/control-parity/downstream-bindability review of the newest durable EXTRACT design or result. Persist only material findings in this task; do not mutate EXTRACT or integration.",
+  "next_safe_action": "No reviewer-side mutation is currently required. Wait for a new durable EXTRACT design/result checkpoint or a future explicit AMR execution-authority checkpoint; then re-read the exact EXTRACT evidence and review it. Current NO_BLOCKING_FINDING does not authorize execution.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner."
+  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN."
 }
