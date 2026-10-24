@@ -30,25 +30,26 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: e757902775193c3e6088905426ea4015cf22df78
+- Remote checkpoint: 80d4bc50d4d5af550970ac4c0faa2551a15866cf
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: f0699337f7ee5111d3945a0068a927c272b36f75
+- Remote checkpoint: 21c436018c9f91787d03c22174f4c4dce61ae3cb
 - Remote verified: true
 
 ## Next safe action
 
-Create exactly one inert research-engine trigger PR from isolated validation implementation head f9790f4d614f022a127b5b87e33955f613159963, then issue exactly one `/local-extract-nli-certificate-validation <exact-trigger-head-sha>` comment. Observe the unique external-only validation run, evaluate only NLI_CERTIFICATE_VALIDATED/PARTIAL/REJECTED using the frozen SPARK/SciNLI gates, checkpoint exact model/data/run/artifact/report identities, and close the trigger PR unmerged. Do not run a learned certificate inside EXTRACT unless validation is separately durable and VALIDATED.
+From isolated validation implementation head f9790f4d614f022a127b5b87e33955f613159963, create an execution-envelope-only recovery that changes only `.github/workflows/local-extract-nli-certificate-validation.yml` timeout-minutes from 45 to 120. Preserve model revision/hash, SPARK/SciNLI identities, mutual-entailment scoring, max-length=1680, batch-size=16, threshold grid/calibration rule, and held-out gates exactly. Run normal CI, checkpoint the exact recovery head, then issue exactly one replacement external-only validation trigger.
 
 ## Remaining work
 
-- Create one inert research-engine trigger PR from isolated NLI validation head f9790f4d614f022a127b5b87e33955f613159963 with only a non-semantic marker.
-- Issue exactly one `/local-extract-nli-certificate-validation <exact-trigger-head-sha>` comment.
-- Observe the one external-only run, evaluate only frozen NLI_CERTIFICATE_VALIDATED/PARTIAL/REJECTED, and checkpoint exact model/data/run/artifact/report identities.
+- Patch only workflow timeout-minutes from isolated NLI validation implementation head f9790f4d614f022a127b5b87e33955f613159963; model/data/scoring/batch/max-length/gates remain byte-for-byte or semantically unchanged.
+- Run normal CI and durable-checkpoint the timeout-only recovery implementation.
+- Create one inert trigger PR from the timeout-only recovery head and issue exactly one replacement `/local-extract-nli-certificate-validation <exact-trigger-head-sha>` comment.
+- Observe the replacement external-only run and checkpoint NLI_CERTIFICATE_VALIDATED/PARTIAL/REJECTED with exact model/data/run/artifact/report identities.
 - Only if NLI_CERTIFICATE_VALIDATED may a separate EXTRACT design substitute mutual entailment for the accepted lexical certificate; no learned EXTRACT run is authorized by validation alone.
 - Do not use EXTRACT teacher labels for calibration, tune the accepted lexical threshold, train a model, start Wave 7B, change production EXTRACT/VERIFY, emit RDF/ontology output, or alter EXTRACT for semantic-control.
 
