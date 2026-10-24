@@ -32,10 +32,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "0f9ce8178e0ed778fa27c2f663af1889843e08fd",
+      "base_sha": "b2d6c97c82fb193de6b0117bae8bfb62d7f8e800",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "0f9ce8178e0ed778fa27c2f663af1889843e08fd",
+        "checkpoint_sha": "b2d6c97c82fb193de6b0117bae8bfb62d7f8e800",
         "verified": true
       },
       "local": null,
@@ -47,10 +47,10 @@
     {
       "name": "research-engine",
       "intent": "read",
-      "base_sha": "5ba005d9e0a1ee79056e8e4f4377c36903c09381",
+      "base_sha": "bf47d704019f7028b79841d8d5dc36254a519d1d",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "5ba005d9e0a1ee79056e8e4f4377c36903c09381",
+        "checkpoint_sha": "bf47d704019f7028b79841d8d5dc36254a519d1d",
         "verified": true
       },
       "local": null,
@@ -171,6 +171,18 @@
             "The depth<=3 shallow gate is predeclared and may not be tuned after result. It is a premise classifier, not a claim that unioning top-3 across all intents is already cost-effective.",
             "If shallow exposure passes, only a later facet-reserved planner design is authorized; planner cost, slot allocation, and preservation remain separate scientific questions.",
             "No pairwise semantic certificate, threshold calibration, rejected-mechanism rescue, semantic-control requirement, production change, or teacher-informed query/ranking is present."
+          ]
+        },
+        {
+          "check": "Automatic intent exposure result independent review",
+          "result": "PASS",
+          "evidence": [
+            "Run 40133862467 / artifact 12576550404 / report 0908733e01e3a7efe9bc1b18bf198bc65d354520841c34b1ea8e320401e4aefc is internally consistent with the frozen design.",
+            "SHALLOW_DISTRIBUTED_EXPOSURE follows the predeclared gate: e1.a union depth=1, single-intent depth=10, two intents needed through depth8.",
+            "e6.a positive control and author-top24 replay both pass.",
+            "The rank-1 e1.a anchors come from two frozen independently generated intents: source-aware intent 0 and author-anchored intent 3.",
+            "No model/query/ranker changes, semantic pairwise scoring, threshold calibration, production changes, Wave 7B, or ontology output occurred.",
+            "Result supports testing teacher-blind multi-intent evidence allocation next; it is not planner or production acceptance."
           ]
         }
       ],
@@ -307,6 +319,20 @@
         "REPLAY_INCONSISTENT is operational/no-verdict.",
         "Post-result reviewer boundary remains mandatory."
       ]
+    },
+    {
+      "id": "automatic-intent-exposure-result-review-v1",
+      "kind": "independent_review",
+      "identity": "research-engine@bf47d704019f7028b79841d8d5dc36254a519d1d|run=40133862467|SHALLOW_DISTRIBUTED_EXPOSURE:NO_BLOCKING_FINDING",
+      "required_for_resume": true,
+      "evidence": [
+        "Disposition=NO_BLOCKING_FINDING for next-phase selection under the frozen interpretation.",
+        "Next eligible family: teacher-blind per-intent/facet evidence reservation and assembly.",
+        "Do not add new query generation yet; current static intents already expose e1.a shallowly across the union.",
+        "Teacher data remains evaluation-only and may not select reservation, quotas, ranking, or stopping.",
+        "Preserve ALIGNMENT_AUGMENT_FEASIBLE and the rejected NLI/predicate-argument/AMR mechanisms as prior evidence.",
+        "A new scientific design review is required after the planner experiment is frozen and before implementation."
+      ]
     }
   ],
   "artifacts": [
@@ -389,17 +415,24 @@
         "NO_BLOCKING_FINDING on research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381.",
         "Implementation may proceed exactly as frozen; no architecture family is accepted until the exposure classification lands and is independently reviewed."
       ]
+    },
+    {
+      "check": "Automatic intent exposure post-result reviewer disposition",
+      "result": "PASS",
+      "evidence": [
+        "NO_BLOCKING_FINDING on exact scientific result.",
+        "Owner may freeze only a bounded teacher-blind multi-intent/facet evidence-assembly experiment next."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Wait for the EXTRACT owner to implement and execute exactly AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1.",
-    "Do not review routine implementation/CI/trigger mechanics unless they materially change the frozen experiment.",
-    "After the genuine exposure classification, independently audit the exact run/artifact/result before the owner implements the mechanism family authorized by the frozen interpretation.",
-    "If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration."
+    "Wait for the EXTRACT owner to freeze a bounded teacher-blind facet/per-intent evidence-set planner design.",
+    "Review that new design before implementation.",
+    "After its genuine result, audit the exact run/artifact/verdict before the owner selects the following phase."
   ],
-  "next_safe_action": "No reviewer-side mutation is required during routine implementation. The owner may implement exactly AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 from research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381. Re-engage this reviewer only if the experiment is materially redesigned or after the genuine exposure result.",
+  "next_safe_action": "The owner may select and freeze a bounded teacher-blind facet/per-intent evidence-set planning experiment. Re-engage this reviewer on the exact frozen design before implementation.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists.\n2026-10-24 design review: NO_BLOCKING_FINDING for research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Reviewer confirms the append-only frontier is a teacher-blind budget/selection-collision diagnostic, not a semantic-similarity certificate. Structural 7/7 control retention must not be overclaimed, frozen budgets may not be tuned, and any valid result requires post-result review.\n2026-10-24 frontier result review: NO_BLOCKING_FINDING for run 40131250903 / ADDITIVE_FRONTIER_PARTIAL. e6.a recovery at budget26 validates non-destructive branch complementarity but does not exceed ALIGNMENT_AUGMENT_FEASIBLE's 8/13 high-water mark. e1.a remains absent through budget32 despite +13,322 raw chars, so static append-only union is insufficient and must not be tuned/rerun.\n2026-10-24 automatic-intent exposure design review: NO_BLOCKING_FINDING for research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381 / design blob 1653b8fe0c469b0841edea7ac95e687b81361ded. Teacher anchors are posthoc evaluation only. Shallow exposure is premise evidence, not planner-cost acceptance; REPLAY_INCONSISTENT is no-verdict."
+  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner.\n2026-10-24 AMR repair review: NO_BLOCKING_FINDING for research-engine@8f03b818f415b33c3a3d0bd92d2c7396920013d6 and workspace-control@2f4d0c64d6153b737bc606bd81f7a8119cbb1220. Scientific status remains NOT_RUN.\n2026-10-24 AMR scientific result review: run 40125779107 produced AMR_GRAPH_CERTIFICATE_REJECTED. Artifact 12573487854 ZIP SHA256 3fee9ef513429fb4a495153021b408a77ba4b753990a5172bd0277cb7f1d8fc4; report SHA256 febdc0e85b058e4fdae186460ad72ba904d54471cee5eea25ba1fbcdeb603da3. Bio-AMR F1=0.37837723114799326 <0.60 and SPARK selected no safe threshold. Reviewer disposition NO_BLOCKING_FINDING on verdict correctness; AMR remains scientifically rejected and no integration signal exists.\n2026-10-24 design review: NO_BLOCKING_FINDING for research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf / design blob ac3f4087b141fdfb59a15ca03d46001482d717d7. Reviewer confirms the append-only frontier is a teacher-blind budget/selection-collision diagnostic, not a semantic-similarity certificate. Structural 7/7 control retention must not be overclaimed, frozen budgets may not be tuned, and any valid result requires post-result review.\n2026-10-24 frontier result review: NO_BLOCKING_FINDING for run 40131250903 / ADDITIVE_FRONTIER_PARTIAL. e6.a recovery at budget26 validates non-destructive branch complementarity but does not exceed ALIGNMENT_AUGMENT_FEASIBLE's 8/13 high-water mark. e1.a remains absent through budget32 despite +13,322 raw chars, so static append-only union is insufficient and must not be tuned/rerun.\n2026-10-24 automatic-intent exposure design review: NO_BLOCKING_FINDING for research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381 / design blob 1653b8fe0c469b0841edea7ac95e687b81361ded. Teacher anchors are posthoc evaluation only. Shallow exposure is premise evidence, not planner-cost acceptance; REPLAY_INCONSISTENT is no-verdict.\n2026-10-24 automatic-intent exposure post-result review: NO_BLOCKING_FINDING on run 40133862467. SHALLOW_DISTRIBUTED_EXPOSURE is valid premise evidence for teacher-blind multi-intent evidence assembly, not planner or production acceptance."
 }
