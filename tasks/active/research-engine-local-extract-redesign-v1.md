@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: c6ccffc1b060495f2c54cf74b15b193535c32f5a
+- Remote checkpoint: 63e032dcd0e00c17451c2a5f651860386448d143
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Checkpoint the validated AMR implementation, then add only the smallest declarative workspace-control route binding for workload model-eval-local-extract-amr-graph-v1 to the existing gpu-single-public-ci-v1 contract and trusted workflow blob 70483ed29dffc19ec8e3c8eaa754321e6f44b653. Reconcile trusted state before exactly one external-only validation trigger. Do not redesign runner/controller/provisioner infrastructure and do not access EXTRACT teacher inputs.
+After this route-readiness checkpoint validates and merges, create exactly one inert same-repository research-engine trigger PR derived from research-engine@329e7e5a31553551e39d4384a09f2c406c4a3e2f. Record the exact trigger head SHA, then issue exactly one `/lambda-ci-local-extract-amr-graph-certificate-validation <sha>` comment. Observe only that run and evaluate the frozen AMR_GRAPH_CERTIFICATE_VALIDATED/PARTIAL/REJECTED gate.
 
 ## Remaining work
 
-- Bind the AMR validation workflow/command declaratively to the existing lambda-research-engine-gpu gpu-single-public-ci-v1 execution contract; do not redesign GitRunner/controller/provisioner/runtime infrastructure.
-- Trusted-reconcile the route/workflow identity before any AMR parser execution.
-- After durable route readiness, create an inert exact-SHA trigger PR and issue exactly one AMR_GRAPH_REDUNDANCY_CERTIFICATE_VALIDATION_V1 trigger.
+- Create one inert same-repository research-engine trigger PR derived from implementation checkpoint 329e7e5a31553551e39d4384a09f2c406c4a3e2f and record its exact head SHA.
+- Issue exactly one /lambda-ci-local-extract-amr-graph-certificate-validation <exact-head-sha> comment and observe the unique external-only validation run; do not retrigger while it is active.
 - Evaluate only frozen AMR_GRAPH_CERTIFICATE_VALIDATED/PARTIAL/REJECTED and persist exact run/artifact/report/parser/tokenizer/data identities.
+- Close the inert trigger PR unmerged after the result is durably checkpointed.
 - At the result checkpoint, re-read workspace-local-extract-independent-review-v1 before selecting another scientific phase.
 - Do not use EXTRACT teacher labels, alter production EXTRACT/VERIFY, start Wave 7B, train/fine-tune the parser, or emit semantic-control/RDF/ontology output.
 
