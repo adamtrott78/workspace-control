@@ -30,28 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4961e36ad31f8f944486219e7dd0a7e4ac76535a
+- Remote checkpoint: 549f80ffb6fdbd6e31ce024fb66ce4a1e821a553
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 5ba005d9e0a1ee79056e8e4f4377c36903c09381
+- Remote checkpoint: bf47d704019f7028b79841d8d5dc36254a519d1d
 - Remote verified: true
 
 ## Next safe action
 
-Implement exactly AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 from research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381. Replay only the frozen accepted source-aware and author-anchored intents with BM25_DIRECT on arxiv:2403.04036, evaluate fixed depths 1/3/5/8/12 using frozen teacher anchors only after ranking, reproduce the known author top-24 e1.a/e6.a support as a consistency check, and make no model/generation/production changes.
+Merge this exact automatic-intent exposure pre-run checkpoint. Then issue exactly one `/local-extract-automatic-intent-exposure 96b39d2b94477f4c058bfb0425afa9f811c677f5` comment on research-engine PR #236 and bind the unique resulting run to that exact head. Do not issue a second trigger.
 
 ## Remaining work
 
-- Implement AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 exactly as frozen on arxiv:2403.04036 with deterministic tests and no generation/model changes.
-- Run normal CI and persist the exact implementation checkpoint before scientific execution.
-- Create an inert exact-SHA trigger anchor and authorize exactly one valid exposure run.
-- Stop at SHALLOW_SINGLE_INTENT_EXPOSURE, SHALLOW_DISTRIBUTED_EXPOSURE, DEEP_EXPOSURE, STATIC_INTENTS_INSUFFICIENT, or operational REPLAY_INCONSISTENT.
-- After a genuine scientific exposure classification, obtain independent post-result review before designing/implementing the mechanism family authorized by that classification.
-- Do not tune prior frontiers, reopen NLI/predicate-argument/AMR, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
+- After this exact checkpoint merges, issue exactly one `/local-extract-automatic-intent-exposure 96b39d2b94477f4c058bfb0425afa9f811c677f5` comment on open research-engine PR #236.
+- Bind the unique resulting workflow run to exact PR head 96b39d2b94477f4c058bfb0425afa9f811c677f5 and inspect the uploaded report.
+- Stop at SHALLOW_SINGLE_INTENT_EXPOSURE, SHALLOW_DISTRIBUTED_EXPOSURE, DEEP_EXPOSURE, STATIC_INTENTS_INSUFFICIENT, or operational REPLAY_INCONSISTENT; do not tune or rerun after a valid scientific classification.
+- Persist the exact result and close PR #236 unmerged only after the result checkpoint is durable.
+- After a genuine scientific classification, obtain independent post-result review before selecting the next scientific phase.
+- Do not reopen NLI/predicate-argument/AMR, change production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
