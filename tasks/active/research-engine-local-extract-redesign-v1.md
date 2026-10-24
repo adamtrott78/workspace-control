@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: f2c5fa6ac448196c908ef6e8bd35552c62653527
+- Remote checkpoint: e91790ce18e8d97d794b7164d82eedefb26909ca
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 315d73e3c2f17902d228430f8b13ece002d487c9
+- Remote checkpoint: eb492ee8284fc9198bb8d931e3591c870b34ea12
 - Remote verified: true
 
 ## Next safe action
 
-Create exactly one inert research-engine trigger PR from timeout-recovery head 443a03ce84508859f18129aee3cad1bd703e295c, then issue exactly one replacement `/local-extract-nli-certificate-validation <exact-trigger-head-sha>` comment. Observe the unique replacement external-only run under the 120-minute execution envelope and evaluate only frozen NLI_CERTIFICATE_VALIDATED/PARTIAL/REJECTED. Checkpoint exact model/data/run/artifact/report identities and close the trigger PR unmerged. No additional replacement run is authorized by this capsule.
+After closing inert replacement trigger PR #217 unmerged, begin a new evidence-first EXTRACT design phase from research-engine@eb492ee8284fc9198bb8d931e3591c870b34ea12. Treat learned mutual-entailment as rejected exclusion evidence because no frozen SPARK calibration threshold satisfied precision>=0.95 and recall>=0.05 despite acceptable SciNLI discrimination. Compare semantic-tuple coverage against at least one other materially different teacher-blind evidence-unit representation before any implementation. Preserve the accepted lexical ALIGNMENT_AUGMENT_FEASIBLE checkpoint; do not retune/rerun NLI, use EXTRACT teacher labels for certificate calibration, treat FEASIBLE as production promotion, start Wave 7B, change production EXTRACT/VERIFY, or incorporate semantic-control/ontology mechanisms.
 
 ## Remaining work
 
-- Create one inert research-engine trigger PR from exact timeout-recovery head 443a03ce84508859f18129aee3cad1bd703e295c.
-- Issue exactly one replacement `/local-extract-nli-certificate-validation <exact-trigger-head-sha>` comment; no further rerun is authorized by the current capsule.
-- Observe the replacement external-only validation run and checkpoint NLI_CERTIFICATE_VALIDATED/PARTIAL/REJECTED with exact model/data/run/artifact/report identities.
-- Only if NLI_CERTIFICATE_VALIDATED may a separate EXTRACT design substitute mutual entailment for the accepted lexical certificate; no learned EXTRACT run is authorized by validation alone.
-- Do not use EXTRACT teacher labels for calibration, tune the accepted lexical threshold, train a model, start Wave 7B, change production EXTRACT/VERIFY, emit RDF/ontology output, or alter EXTRACT for semantic-control.
+- Close inert replacement trigger PR #217 unmerged after this result checkpoint is durable.
+- Begin a new evidence-first EXTRACT design phase for semantic-tuple coverage or another materially different evidence-unit representation.
+- Treat learned mutual-entailment as rejected exclusion evidence; do not tune its threshold, rerun it, or use EXTRACT teacher labels to rescue it.
+- Preserve accepted lexical DYNAMIC_SAME_PAGE_ALIGNMENT_SWAP_V1 / ALIGNMENT_AUGMENT_FEASIBLE as the strongest validated preservation checkpoint.
+- Do not treat ALIGNMENT_AUGMENT_FEASIBLE as production promotion, start Wave 7B, alter production EXTRACT/VERIFY, emit RDF/ontology output, or modify EXTRACT to satisfy semantic-control.
 
 ## Blockers / gates
 
