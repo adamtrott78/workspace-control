@@ -24,26 +24,25 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 0f9ce8178e0ed778fa27c2f663af1889843e08fd
+- Remote checkpoint: b2d6c97c82fb193de6b0117bae8bfb62d7f8e800
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: 5ba005d9e0a1ee79056e8e4f4377c36903c09381
+- Remote checkpoint: bf47d704019f7028b79841d8d5dc36254a519d1d
 - Remote verified: true
 
 ## Next safe action
 
-No reviewer-side mutation is required during routine implementation. The owner may implement exactly AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 from research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381. Re-engage this reviewer only if the experiment is materially redesigned or after the genuine exposure result.
+The owner may select and freeze a bounded teacher-blind facet/per-intent evidence-set planning experiment. Re-engage this reviewer on the exact frozen design before implementation.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to implement and execute exactly AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1.
-- Do not review routine implementation/CI/trigger mechanics unless they materially change the frozen experiment.
-- After the genuine exposure classification, independently audit the exact run/artifact/result before the owner implements the mechanism family authorized by the frozen interpretation.
-- If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
+- Wait for the EXTRACT owner to freeze a bounded teacher-blind facet/per-intent evidence-set planner design.
+- Review that new design before implementation.
+- After its genuine result, audit the exact run/artifact/verdict before the owner selects the following phase.
 
 ## Blockers / gates
 
