@@ -47,7 +47,8 @@
         "schemas/research_state.v1.schema.json",
         "architecture/extract-research-replay.v0.1.md",
         "architecture/extract-research-state.v0.1.json",
-        "tests/test_research_methodology_contract.py"
+        "tests/test_research_methodology_contract.py",
+        "architecture/extract-prospective-shadow-frontier.v0.1.json"
       ]
     },
     {
@@ -152,7 +153,7 @@
     },
     {
       "id": "prospective_shadow_validation",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-research-methodology-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -284,6 +285,16 @@
       "evidence": [
         "branch research-methodology-v01-foundations blob 6ecd165a40285cb61c92ff365fafb523a871d450"
       ]
+    },
+    {
+      "path": "architecture/extract-prospective-shadow-frontier.v0.1.json",
+      "state": "planned",
+      "role": "Pre-result shadow snapshot for the frozen evidence-frontier diagnostic.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Must be frozen before the scientific result and must not block EXTRACT.",
+      "evidence": []
     }
   ],
   "validation": [
@@ -305,7 +316,7 @@
     "Make an evidence-based methodology promotion decision only after prospective evidence exists.",
     "If warranted, create a separate ontology/research-knowledge integration task."
   ],
-  "next_safe_action": "Finish and validate the v0.1 methodology artifacts plus the post-AMR machine-readable EXTRACT research-state snapshot. Then enter prospective shadow mode: at the next genuinely new EXTRACT architecture boundary, snapshot the evidence and independently record methodology-side hypotheses/decision constraints without delaying or mutating EXTRACT.",
+  "next_safe_action": "Freeze and validate a pre-result methodology shadow snapshot for the frozen evidence-frontier diagnostic without mutating or delaying EXTRACT.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "2026-10-24 project creation: methodology development is intentionally separated from EXTRACT scientific ownership. EXTRACT is the first retrospective/live case study, not a dependency or subordinate workflow. Ontology integration is a downstream opportunity, not a v0.1 requirement.\n2026-10-24 v0.1 foundation work: external methodology evidence supports combining strong inference (alternative hypotheses/crucial experiments), design-science problem/objective/artifact/evaluation separation, preregistration-style precommitment, and decision-theoretic experiment selection. Retrospective EXTRACT replay identifies mechanism-family tracking and family-level stopping/reopening rules as the clearest missing research-control concepts."
