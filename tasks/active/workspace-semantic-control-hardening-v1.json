@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-control-integration-v1",
-  "current_stage": "implement_opaque_extract_socket",
+  "current_stage": "integrated_hardening_benchmark_and_verdict",
   "acceptance_criteria": [
     "The task consumes the completed prototype and PRE_EXTRACT_INTEGRATION_PASS checkpoints but does not mutate workspace-semantic-control-integration-v1.",
     "The task does not modify research-engine-local-extract-redesign-v1, its scientific hypotheses, benchmarks, prompts, retrieval/generation methods, Qwen/Codex choices, routes, or acceptance criteria.",
@@ -59,7 +59,7 @@
       "base_sha": "16150517b311b42331ce26978fbb225a760c39e2",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "b9ef0b451fec5e294c705d4886dbd828881bea05",
+        "checkpoint_sha": "569772c38c0166e884629494af144af826baf6c1",
         "verified": true
       },
       "local": null,
@@ -265,7 +265,7 @@
     },
     {
       "id": "implement_opaque_extract_socket",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -277,15 +277,29 @@
         "Adapter compatibility harness using synthetic opaque descriptors only",
         "Tests proving no EXTRACT payload schema is assumed or defined"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Opaque consumer-side EXTRACT contract socket",
+          "result": "PASS",
+          "evidence": [
+            "research-engine PR #213 CI run 40047847521 PASS and merged as 569772c38c0166e884629494af144af826baf6c1.",
+            "Unaccepted/design-only descriptors are REJECT_BINDING with binding_state=UNBOUND.",
+            "Accepted descriptors register metadata only with REGISTER_DESCRIPTOR_ONLY and remain UNBOUND until a separate concrete adapter exists.",
+            "Real descriptors require explicit schema_version, exact 40-hex external commit/blob identity, non-empty artifact path/schema_id, payload_schema_opaque=true, and adapter_target_contract=SemanticObservationV1.",
+            "Forbidden payload/prompt/retrieval/model/Qwen/Codex/ontology/RDF fields fail closed recursively.",
+            "Accepted descriptors cannot self-declare BOUND; CONCRETE_ADAPTER_REQUIRED_BEFORE_BINDING is returned.",
+            "payload_accessed=false, payload_schema_defined=false, extract_mutation=false, production_mutation=false."
+          ]
+        }
+      ],
       "resume_condition": "Consumer-side socket is versioned/tested while external EXTRACT payload remains opaque and unbound."
     },
     {
       "id": "integrated_hardening_benchmark_and_verdict",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "Historical replay",
         "Version-skew/failure isolation",
@@ -386,6 +400,16 @@
         "1k/10k/100k correctness gates all pass with zero authorization escapes.",
         "Empirical timings only; no threshold or promotion claim."
       ]
+    },
+    {
+      "id": "hardening-opaque-extract-socket-v1",
+      "kind": "integration_socket",
+      "identity": "research-engine@569772c38c0166e884629494af144af826baf6c1:future-accepted-extract-output-descriptor-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #213 CI 40047847521 PASS.",
+        "Metadata-only accepted-contract registration validated with payload schema remaining opaque and binding UNBOUND."
+      ]
     }
   ],
   "artifacts": [
@@ -429,10 +453,10 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement and test the opaque consumer-side EXTRACT socket without defining EXTRACT payload.",
-    "Run integrated hardening benchmark and issue HARDENING_PASS, REVISE, or REJECT."
+    "Run the integrated hardening benchmark across replay/temporal semantics, V1-V8 failure isolation, bounded ontology/evidence requirements, decision audit chain, persisted scale evidence, and opaque EXTRACT socket.",
+    "Issue HARDENING_PASS, REVISE, or REJECT and durably checkpoint the result for future integration consumption."
   ],
-  "next_safe_action": "Implement only implement_opaque_extract_socket from research-engine checkpoint b9ef0b451fec5e294c705d4886dbd828881bea05. Add pure deterministic code under prototypes/semantic_control_hardening/** and tests under tests/semantic_control_hardening/** that validates/registers FutureAcceptedExtractOutputDescriptorV1. Reject binding for unaccepted/design-only descriptors; register accepted descriptors only as metadata while keeping binding_state UNBOUND until a separate concrete adapter exists. Enforce payload_schema_opaque=true, required exact repository/commit/artifact/blob/schema identity, accepted scientific disposition/evidence, adapter_target_contract=SemanticObservationV1, and forbidden payload/prompt/model/retrieval/ontology/RDF fields. Do not define or inspect EXTRACT payload, do not mutate EXTRACT/integration/production, and do not create the final hardening verdict until this stage passes.",
+  "next_safe_action": "Implement only integrated_hardening_benchmark_and_verdict from research-engine checkpoint 569772c38c0166e884629494af144af826baf6c1. Add a deterministic benchmark runner and result contract under prototypes/semantic_control_hardening/**, benchmarks/semantic_control_hardening/**, and tests/semantic_control_hardening/**. Re-run all frozen hardening correctness/safety gates together: exact historical replay, temporal supersession/contradiction/UNKNOWN semantics, V1-V8 fail-closed outcomes with zero authorization escapes, bounded deterministic ontology slices, request-only evidence requirements with model-confidence no-op, deterministic audit-chain/tamper detection and receipt authority_effect=NONE, persisted 1k/10k/100k scale evidence integrity, and opaque EXTRACT descriptor registration behavior. Verdict must be exactly HARDENING_PASS, REVISE, or REJECT. HARDENING_PASS may be consumed later by workspace-semantic-control-integration-v1 but must not mutate that task, bind EXTRACT, or authorize production.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "Created as a parallel sibling lane after workspace-semantic-control-integration-v1 reached PRE_EXTRACT_INTEGRATION_PASS and correctly blocked on an accepted EXTRACT output contract. This task deliberately hardens the generic semantic-control substrate while the independent EXTRACT chat continues scientific research. The eventual integration task may consume HARDENING_PASS plus a future accepted EXTRACT output checkpoint, but this task cannot unblock EXTRACT or authorize production."
