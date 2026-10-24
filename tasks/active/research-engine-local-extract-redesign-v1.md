@@ -30,26 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: c45e978363b3e6dd25292966b7b01199262573df
+- Remote checkpoint: f054bebc9ec311ae5259ec00991357b25750eb8d
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 07e2180975ca1bda4e7ac58cbec198e05cf5b733
+- Remote checkpoint: 1fe469ee3b681db38b7d3b880fd448e7a9000bc1
 - Remote verified: true
 
 ## Next safe action
 
-Perform the evidence-first acquisition-robustness architecture search. Start from the exact clue that only source-aware method intent 0 is teacher-leak-flagged while unflagged author-contribution intent 3 already exposes all e1.a anchors by BM25 depth10. Compare frozen-depth alternate-path diagnostics, leave-one-intent-out structural reservation, robustness-aware reservation, and new query generation; freeze the smallest discriminating test before implementation.
+Re-engage workspace-local-extract-independent-review-v1 on exact neighborhood-rescue design research-engine@1fe469ee3b681db38b7d3b880fd448e7a9000bc1 / blob 0c8dd756d184880c899214d751a409bc619cb974. Do not implement ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 until independent design review is durable.
 
 ## Remaining work
 
-- Compare robustness-focused mechanism families using the exact FRAGILE result and frozen automatic-intent exposure evidence.
-- Freeze the smallest teacher-blind experiment that distinguishes single-intent/path dependence from recoverable alternate-path depth truncation and broader intent-family insufficiency.
-- Obtain independent review of that frozen design before implementation.
-- Preserve exact validated alignment mechanism, rejected-family exclusions, production/Wave7B/semantic-control boundaries.
+- Obtain independent review of exact neighborhood-rescue design research-engine@1fe469ee3b681db38b7d3b880fd448e7a9000bc1 / blob 0c8dd756d184880c899214d751a409bc619cb974.
+- If reviewer disposition is NO_BLOCKING_FINDING, implement exactly ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1.
+- Execute exactly one valid scientific run and stop at the frozen neighborhood-rescue verdict; no valid-result rerun or tuning.
+- After a genuine result, obtain independent post-result review before selecting the next phase.
+- Preserve rejected-family exclusions, exact alignment mechanism, production/Wave7B/semantic-control boundaries.
 
 ## Blockers / gates
 
