@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: b3bb9ae137a71e7ab5f257f04ef734c6c58f7f86
+- Remote checkpoint: 4961e36ad31f8f944486219e7dd0a7e4ac76535a
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,16 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Re-engage workspace-local-extract-independent-review-v1 on the exact frozen automatic-intent exposure design research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381 / blob 1653b8fe0c469b0841edea7ac95e687b81361ded. Do not implement AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 until that design review is durable.
+Implement exactly AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 from research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381. Replay only the frozen accepted source-aware and author-anchored intents with BM25_DIRECT on arxiv:2403.04036, evaluate fixed depths 1/3/5/8/12 using frozen teacher anchors only after ranking, reproduce the known author top-24 e1.a/e6.a support as a consistency check, and make no model/generation/production changes.
 
 ## Remaining work
 
-- Obtain independent review of exact automatic-intent exposure design research-engine@5ba005d9e0a1ee79056e8e4f4377c36903c09381 / blob 1653b8fe0c469b0841edea7ac95e687b81361ded before implementation.
-- If reviewer disposition is NO_BLOCKING_FINDING, implement only AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 exactly as frozen; no new generation/model calls.
-- Execute exactly one valid exposure diagnostic and stop at the frozen classification.
-- After the genuine exposure result, obtain independent post-result review before selecting/implementing the mechanism family authorized by that classification.
-- Do not tune the prior append frontier, reopen NLI/predicate-argument/AMR, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
+- Implement AUTOMATIC_INTENT_EXPOSURE_DIAGNOSTIC_V1 exactly as frozen on arxiv:2403.04036 with deterministic tests and no generation/model changes.
+- Run normal CI and persist the exact implementation checkpoint before scientific execution.
+- Create an inert exact-SHA trigger anchor and authorize exactly one valid exposure run.
+- Stop at SHALLOW_SINGLE_INTENT_EXPOSURE, SHALLOW_DISTRIBUTED_EXPOSURE, DEEP_EXPOSURE, STATIC_INTENTS_INSUFFICIENT, or operational REPLAY_INCONSISTENT.
+- After a genuine scientific exposure classification, obtain independent post-result review before designing/implementing the mechanism family authorized by that classification.
+- Do not tune prior frontiers, reopen NLI/predicate-argument/AMR, alter production EXTRACT/VERIFY, start Wave 7B, or emit semantic-control/RDF/ontology output.
 
 ## Blockers / gates
 
