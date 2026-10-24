@@ -16,7 +16,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 ## Goal
 
-Harden the generic semantic-control substrate independently of Local EXTRACT while preserving strict authority boundaries.
+Harden the generic semantic-control substrate independently of the Local EXTRACT scientific task by proving historical decision replay, temporal/supersession/contradiction behavior, stale-state and version-skew failure isolation, bounded ontology-slice retrieval, generalized request-only EvidenceRequirement semantics, end-to-end DecisionEvaluation audit chains, deterministic scale behavior, and a consumer-side opaque EXTRACT integration socket. This task must improve the semantic-control infrastructure without defining, steering, implementing, or mutating EXTRACT.
 
 ## Repositories
 
@@ -24,7 +24,7 @@ Harden the generic semantic-control substrate independently of Local EXTRACT whi
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 80d4bc50d4d5af550970ac4c0faa2551a15866cf
+- Remote checkpoint: 086ebf8b03dc136d733b3b9541551ea0dd99c316
 - Remote verified: true
 
 ### research-engine
@@ -34,21 +34,13 @@ Harden the generic semantic-control substrate independently of Local EXTRACT whi
 - Remote checkpoint: 33b44e201b8464dd033b748afe34a5f7e26646cd
 - Remote verified: true
 
-## Final verdict
-
-HARDENING_PASS
-
-Result SHA256: 3b14229dca3b2c06915a97bd820a21536ecfdfa55d944458e709e6b1460b98f6
-
-All integrated hardening gates passed with zero authorization escapes. Hardening does not bind EXTRACT and does not authorize production.
-
 ## Next safe action
 
-Task COMPLETE. Preserve the frozen HARDENING_PASS checkpoint. Future semantic-control integration may consume it only after the independent accepted-EXTRACT-output gate is satisfied. Any new generic hardening scope requires a separate task.
+Task COMPLETE. Preserve HARDENING_PASS at research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd. Future integration may consume this checkpoint only after its independent accepted-EXTRACT-output gate is satisfied; any new hardening scope requires a separate task.
 
 ## Remaining work
 
-- None. Task is COMPLETE.
+- None.
 
 ## Blockers / gates
 
@@ -60,4 +52,10 @@ Task COMPLETE. Preserve the frozen HARDENING_PASS checkpoint. Future semantic-co
 
 https://github.com/adamtrott78/workspace-control
 
-This task is COMPLETE. Treat the authoritative capsule and frozen Git evidence as historical handoff state; do not resume implementation without a separate future task.
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-semantic-control-hardening-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
