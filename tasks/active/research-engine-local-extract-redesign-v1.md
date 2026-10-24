@@ -30,26 +30,26 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8ad13cf10df87a3d01bc7f012c1d6edc8c1349d6
+- Remote checkpoint: 5d3938ffff5bdea2ddfb03ae79c203a95a3bce05
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 763c40589644d0c96b2408a8b443fbedf53ada0f
+- Remote checkpoint: 14acd0aeb6cda93f0d82bc129649a73dba21a200
 - Remote verified: true
 
 ## Next safe action
 
-Implement ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 exactly from corrected design research-engine@763c40589644d0c96b2408a8b443fbedf53ada0f / blob d7ab4883b4c97300540a0cab80770a5c1cf70645. Add only deterministic replay/rescue runner/tests/workflow; do not change stress identity, surviving intents, depth12, adjacency, structural ranking, one-slot budget28, teacher use, verdict partition, alignment mechanism, or hard boundaries.
+Merge this exact neighborhood-rescue pre-run checkpoint. Then issue exactly one `/local-extract-adjacent-proposition-rescue 7b53deccf4e8b5a34aa30bc0472493e189ad5f44` comment on research-engine PR #248 and bind the unique resulting run. Do not issue a second trigger.
 
 ## Remaining work
 
-- Implement ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 exactly from corrected design in research-engine with deterministic tests and no generation/model changes.
-- Run normal CI and persist exact implementation checkpoint before scientific execution.
-- Execute exactly one valid scientific run and stop at the frozen disjoint neighborhood-rescue verdict; no valid-result rerun or tuning.
-- After genuine result, obtain independent post-result review before next-phase selection.
+- After this checkpoint merges, issue exactly one `/local-extract-adjacent-proposition-rescue 7b53deccf4e8b5a34aa30bc0472493e189ad5f44` comment on PR #248.
+- Bind the unique resulting workflow run to the exact trigger head and inspect the report/artifact.
+- Stop at the frozen disjoint neighborhood-rescue verdict; no valid-result rerun or tuning.
+- Persist the result, close PR #248 unmerged after result checkpoint is durable, and obtain independent post-result review.
 
 ## Blockers / gates
 
