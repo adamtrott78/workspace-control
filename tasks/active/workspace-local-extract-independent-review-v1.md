@@ -36,13 +36,13 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-No reviewer-side blocker remains on the facet planner result. The owner may select and freeze the next bounded scientific design, but must preserve the anti-leak sensitivity caveat, keep ALIGNMENT_AUGMENT_FEASIBLE as complementary positive evidence, and obtain independent review of the genuinely new frozen design before implementation.
+Owner may implement exactly PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1 from research-engine@6e6442e797b0648fb094bb1113af2be7182fb598 / design blob e58c8b87e122caf1d236c9ae6857c0492d78744f. Re-engage reviewer only if science changes or after the genuine result.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to select and freeze the next bounded scientific phase using the confirmed acquisition-planner result plus its anti-leak sensitivity caveat and ALIGNMENT_AUGMENT_FEASIBLE.
-- Do not review routine implementation/CI/packaging/routing/trigger mechanics unless they materially change the next frozen science.
-- After the next genuine scientific result, independently audit the exact result before further phase selection.
+- Wait for the EXTRACT owner to implement and execute exactly PLANNER_ALIGNMENT_COMPOSITION_DIAGNOSTIC_V1.
+- Do not review routine implementation/CI/packaging/trigger mechanics unless they materially alter the frozen composition science.
+- After the genuine composition verdict, independently audit exact run/artifact/result before next-phase selection.
 - If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
 
 ## Blockers / gates
