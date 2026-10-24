@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: f054bebc9ec311ae5259ec00991357b25750eb8d
+- Remote checkpoint: 414cc033edf93c67214f0d09b31e2595da379fb8
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Re-engage workspace-local-extract-independent-review-v1 on exact neighborhood-rescue design research-engine@1fe469ee3b681db38b7d3b880fd448e7a9000bc1 / blob 0c8dd756d184880c899214d751a409bc619cb974. Do not implement ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 until independent design review is durable.
+Implement ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 exactly from frozen design research-engine@1fe469ee3b681db38b7d3b880fd448e7a9000bc1. Add only the deterministic one-slot neighborhood-rescue runner/tests/workflow needed to replay the exact stressed composition result; do not change adjacency, surviving intents, depth12, ranking, budget28, teacher use, interpretation, alignment mechanism, or hard boundaries.
 
 ## Remaining work
 
-- Obtain independent review of exact neighborhood-rescue design research-engine@1fe469ee3b681db38b7d3b880fd448e7a9000bc1 / blob 0c8dd756d184880c899214d751a409bc619cb974.
-- If reviewer disposition is NO_BLOCKING_FINDING, implement exactly ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1.
+- Implement ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 exactly as frozen in research-engine with deterministic tests and no generation/model changes.
+- Run normal CI and persist the exact implementation checkpoint before scientific execution.
 - Execute exactly one valid scientific run and stop at the frozen neighborhood-rescue verdict; no valid-result rerun or tuning.
-- After a genuine result, obtain independent post-result review before selecting the next phase.
+- After the genuine result, obtain independent post-result review before selecting the next scientific phase.
 - Preserve rejected-family exclusions, exact alignment mechanism, production/Wave7B/semantic-control boundaries.
 
 ## Blockers / gates
