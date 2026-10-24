@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "audit_id": "methodology-outcome-partition-audit-v1",
+  "governing_methodology": "evidence-first-research-methodology.v0.1",
+  "target_candidate": "OUTCOME_PARTITION_EXHAUSTIVENESS_V0_2",
+  "evidence_cutoff": "2026-10-24T22:35:00Z",
+  "positive_control": {
+    "original_design": {
+      "identity": "research-engine@6e6442e797b0648fb094bb1113af2be7182fb598|blob=e58c8b87e122caf1d236c9ae6857c0492d78744f",
+      "dimensions": {
+        "controls_retained": [
+          true,
+          false
+        ],
+        "e1_supported": [
+          true,
+          false
+        ],
+        "e6_supported": [
+          true,
+          false
+        ],
+        "sensitivity": [
+          "ROBUST",
+          "FRAGILE"
+        ]
+      },
+      "rules": [
+        {
+          "verdict": "COMPOSITION_COLLISION",
+          "when": {
+            "controls_retained": false
+          }
+        },
+        {
+          "verdict": "COMPOSITION_PARTIAL",
+          "when": {
+            "controls_retained": true,
+            "e1_supported": true,
+            "e6_supported": false
+          }
+        },
+        {
+          "verdict": "COMPOSITION_PARTIAL",
+          "when": {
+            "controls_retained": true,
+            "e1_supported": false,
+            "e6_supported": true
+          }
+        },
+        {
+          "verdict": "COMPOSED_COMPLEMENTARITY_ROBUST",
+          "when": {
+            "controls_retained": true,
+            "e1_supported": true,
+            "e6_supported": true,
+            "sensitivity": "ROBUST"
+          }
+        },
+        {
+          "verdict": "COMPOSED_COMPLEMENTARITY_FRAGILE",
+          "when": {
+            "controls_retained": true,
+            "e1_supported": true,
+            "e6_supported": true,
+            "sensitivity": "FRAGILE"
+          }
+        }
+      ],
+      "operational_invalidity_separate": true
+    },
+    "corrected_design": {
+      "identity": "research-engine@23fd3e91b3837b57201ae1524fd72e1f2d502bd5|blob=bf03092eb027aab75e3594250ca935b0a7e04995",
+      "dimensions": {
+        "controls_retained": [
+          true,
+          false
+        ],
+        "e1_supported": [
+          true,
+          false
+        ],
+        "e6_supported": [
+          true,
+          false
+        ],
+        "sensitivity": [
+          "ROBUST",
+          "FRAGILE"
+        ]
+      },
+      "rules": [
+        {
+          "verdict": "COMPOSITION_COLLISION",
+          "when": {
+            "controls_retained": false
+          }
+        },
+        {
+          "verdict": "COMPOSITION_NEGATIVE",
+          "when": {
+            "controls_retained": true,
+            "e1_supported": false,
+            "e6_supported": false
+          }
+        },
+        {
+          "verdict": "COMPOSITION_PARTIAL",
+          "when": {
+            "controls_retained": true,
+            "e1_supported": true,
+            "e6_supported": false
+          }
+        },
+        {
+          "verdict": "COMPOSITION_PARTIAL",
+          "when": {
+            "controls_retained": true,
+            "e1_supported": false,
+            "e6_supported": true
+          }
+        },
+        {
+          "verdict": "COMPOSED_COMPLEMENTARITY_ROBUST",
+          "when": {
+            "controls_retained": true,
+            "e1_supported": true,
+            "e6_supported": true,
+            "sensitivity": "ROBUST"
+          }
+        },
+        {
+          "verdict": "COMPOSED_COMPLEMENTARITY_FRAGILE",
+          "when": {
+            "controls_retained": true,
+            "e1_supported": true,
+            "e6_supported": true,
+            "sensitivity": "FRAGILE"
+          }
+        }
+      ],
+      "operational_invalidity_separate": true
+    }
+  },
+  "neighbor_observations": [
+    {
+      "design": "NONDESTRUCTIVE_EVIDENCE_FRONTIER_DIAGNOSTIC_V1",
+      "identity": "research-engine@3f433e3e31fd8fac3edf86f65cef9628635652cf|blob=ac3f4087b141fdfb59a15ca03d46001482d717d7",
+      "finding": "The frozen scientific NEGATIVE condition included provenance/teacher-blind boundary failure even though the decision table separately described operational failure. This is evidence that scientific-negative and invalid-experiment partitions should be structurally separate."
+    },
+    {
+      "design": "SALIENCE_STRATIFIED_RESERVATION_DIAGNOSTIC_V1",
+      "identity": "research-engine|design_blob=5eb24fd2e7ed69a940c2fbde1fd7ddfba29c55fb",
+      "finding": "Later design explicitly separates FACET_RESERVATION_NEGATIVE from REPLAY_INCONSISTENT and INVALID_EXECUTION, showing the desired separation is practical."
+    }
+  ],
+  "frozen_gate": {
+    "CANDIDATE_SUPPORTED": [
+      "The generic enumerator detects at least one uncovered valid state in the original composition partition.",
+      "The corrected composition partition has zero uncovered valid states.",
+      "Both partitions have zero overlapping valid-state verdict assignments.",
+      "The rule is expressed in generic dimensions and condition matching rather than checking for the literal verdict name COMPOSITION_NEGATIVE.",
+      "Operational invalidity remains outside the scientific valid-state enumeration."
+    ],
+    "CANDIDATE_PARTIAL": [
+      "The known gap is detected but the representation requires substantial architecture-specific special cases or cannot cleanly separate invalid execution."
+    ],
+    "CANDIDATE_REJECTED": [
+      "The generic audit fails to detect the known gap, the corrected design remains incomplete/overlapping, or the proposed representation creates comparable ambiguity."
+    ]
+  },
+  "stopping_rule": "Execute the fixed generic enumeration once over the original and corrected positive-control partitions. Do not modify rules after observing the result.",
+  "expected_if_hypothesis_correct": "Original partition has exactly two uncovered enumerated cells corresponding to one logical scientific state with sensitivity irrelevant; corrected partition has zero uncovered and zero overlaps.",
+  "result": null
+}
