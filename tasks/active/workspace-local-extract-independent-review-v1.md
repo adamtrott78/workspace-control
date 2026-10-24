@@ -36,13 +36,14 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-Owner may implement exactly ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 from corrected research-engine@763c40589644d0c96b2408a8b443fbedf53ada0f / design blob d7ab4883b4c97300540a0cab80770a5c1cf70645. Re-engage reviewer only if science changes or after the genuine result.
+No reviewer-side blocker remains on LOCAL_RESCUE_CONFIRMED. Owner may select and freeze the next bounded scientific design comparing neighborhood-rescue generalization/cost against deeper-per-intent allocation, while preserving ALIGNMENT_AUGMENT_FEASIBLE and all rejected-family/production/Wave7B/semantic-control boundaries. Independent design review is required before implementation.
 
 ## Remaining work
 
-- Wait for owner to implement and execute exactly ADJACENT_PROPOSITION_RESCUE_DIAGNOSTIC_V1 from the corrected design.
-- Do not review routine implementation/CI/trigger mechanics unless science changes.
-- After the genuine result, independently audit the exact run/artifact before next-phase selection.
+- Wait for owner to select and freeze the next bounded robustness/generalization phase using LOCAL_RESCUE_CONFIRMED as one-case sufficiency evidence, not a generalized robustness claim.
+- Require independent design review before implementation of the next genuinely new architecture/experiment.
+- After the next genuine scientific result, independently audit exact run/artifact before further phase selection.
+- If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
 
 ## Blockers / gates
 
