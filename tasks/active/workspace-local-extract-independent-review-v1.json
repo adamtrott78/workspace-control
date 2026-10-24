@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-control-integration-v1",
-  "current_stage": "freeze_independent_review_contract",
+  "current_stage": "review_extract_design_and_result_checkpoints",
   "acceptance_criteria": [
     "research-engine-local-extract-redesign-v1 remains the sole owner of EXTRACT hypotheses, architecture selection, prompts, retrieval/generation, model choices, benchmarks, scientific acceptance criteria, experiment execution, and scientific verdicts.",
     "This task mutates only its own workspace-control capsule and derived Markdown handoff; research-engine and the EXTRACT/integration/hardening task capsules remain read-only.",
@@ -32,10 +32,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "c49c3374a1bcdaabbf013cbc92c92d80705928b4",
+      "base_sha": "2c8f2b629d7dff21a37116dba544174962004829",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "c49c3374a1bcdaabbf013cbc92c92d80705928b4",
+        "checkpoint_sha": "2c8f2b629d7dff21a37116dba544174962004829",
         "verified": true
       },
       "local": null,
@@ -60,7 +60,7 @@
   "stages": [
     {
       "id": "freeze_independent_review_contract",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-local-extract-independent-review-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -75,12 +75,23 @@
         "Review classification and handoff protocol.",
         "Exact mutation/read scopes preventing dual scientific ownership."
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Independent review contract validation",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control PR #364 Workspace Control Validation run 40055602179 PASS.",
+            "PR #364 merged as 2c8f2b629d7dff21a37116dba544174962004829.",
+            "Changed scope is exactly this task's JSON capsule and derived Markdown handoff.",
+            "research-engine remains read-only and EXTRACT/integration/hardening capsules are outside mutation scope."
+          ]
+        }
+      ],
       "resume_condition": "Validate and merge the task-only contract before publishing review findings."
     },
     {
       "id": "review_extract_design_and_result_checkpoints",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-local-extract-independent-review-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -148,6 +159,18 @@
         "Report SHA256 2e07359b7ca23c563134904f3dd1f8bb04116cfb1b4490f4855b6f28adba9333.",
         "No frozen SPARK threshold met precision>=0.95 and recall>=0.05; learned mutual entailment is rejected exclusion evidence."
       ]
+    },
+    {
+      "id": "independent-review-contract-v1",
+      "kind": "workspace_control_task_contract",
+      "identity": "workspace-control@2c8f2b629d7dff21a37116dba544174962004829:workspace-local-extract-independent-review-v1",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #364 validation run 40055602179 PASS.",
+        "Single EXTRACT scientific owner preserved.",
+        "Reviewer task mutation scope limited to its own capsule/handoff.",
+        "Downstream opaque-socket review cannot impose semantic-control schema upstream."
+      ]
     }
   ],
   "artifacts": [
@@ -182,17 +205,24 @@
         "Review task mutation scope is limited to its own two workspace-control files.",
         "research-engine is explicitly read-only."
       ]
+    },
+    {
+      "check": "Independent review task contract",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation run 40055602179 PASS.",
+        "PR #364 merged as 2c8f2b629d7dff21a37116dba544174962004829."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Validate and merge this independent review contract.",
     "On each meaningful new EXTRACT design/result checkpoint, re-read the authoritative EXTRACT capsule and exact evidence before reviewing.",
     "Persist only material review findings; do not duplicate the EXTRACT owner's scientific work.",
     "When an accepted EXTRACT output contract eventually appears, audit bindability and hand exact evidence back to workspace-semantic-control-integration-v1."
   ],
-  "next_safe_action": "Validate and merge this task-only review contract. Then re-read the latest EXTRACT capsule before the first substantive review; review only exact durable checkpoints and publish findings here without mutating EXTRACT or integration.",
+  "next_safe_action": "Re-read tasks/active/research-engine-local-extract-redesign-v1.json and its exact latest referenced research-engine checkpoint. Perform an independent methodological/control-parity/downstream-bindability review of the newest durable EXTRACT design or result. Persist only material findings in this task; do not mutate EXTRACT or integration.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory."
+  "notes": "Created to allow genuine parallel collaboration without dual scientific ownership. The EXTRACT chat remains the sole scientist/executor; this task is an independent reviewer and downstream integration-compatibility sidecar. Cross-chat communication is durable Git state, not shared conversation memory.\\n2026-10-23 independent-review contract activation: PR #364 validation run 40055602179 PASS and merged as workspace-control@2c8f2b629d7dff21a37116dba544174962004829. The review lane is now active; EXTRACT remains the sole scientific owner."
 }
