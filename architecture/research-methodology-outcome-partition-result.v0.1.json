@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "result_id": "methodology-outcome-partition-audit-result-v1",
+  "experiment_id": "exp-outcome-partition-audit-v1",
+  "frozen_audit": "architecture/research-methodology-outcome-partition-audit.v0.1.json",
+  "execution": {
+    "validator": "scripts/validate_research_outcome_partition.py",
+    "test": "tests/test_research_methodology_self_study.py::test_outcome_partition_positive_control_detects_known_gap",
+    "workspace_control_validation_run": 40139618613,
+    "conclusion": "success"
+  },
+  "observations": {
+    "original_partition": {
+      "state_count": 16,
+      "uncovered_count": 2,
+      "overlap_count": 0,
+      "uncovered_states": [
+        {
+          "controls_retained": true,
+          "e1_supported": false,
+          "e6_supported": false,
+          "sensitivity": "ROBUST"
+        },
+        {
+          "controls_retained": true,
+          "e1_supported": false,
+          "e6_supported": false,
+          "sensitivity": "FRAGILE"
+        }
+      ],
+      "interpretation": "The two enumerated cells are one logical scientific outcome because sensitivity is irrelevant when neither residual is present."
+    },
+    "corrected_partition": {
+      "state_count": 16,
+      "uncovered_count": 0,
+      "overlap_count": 0
+    },
+    "genericity": {
+      "literal_missing_verdict_name_used_by_validator": false,
+      "operational_invalidity_enumerated_as_scientific_state": false,
+      "finding": "The validator operates only on declared dimensions and rule conditions; it does not search for COMPOSITION_NEGATIVE."
+    },
+    "neighboring_design_findings": [
+      "The older frontier design's scientific NEGATIVE condition also admitted provenance/teacher-blind boundary failure, illustrating why operational invalidity should be structurally separate from negative scientific evidence.",
+      "The later facet-reservation design explicitly separates scientific NEGATIVE, REPLAY_INCONSISTENT, and INVALID_EXECUTION, showing the separation is practical."
+    ]
+  },
+  "frozen_gate_evaluation": {
+    "known_gap_detected": true,
+    "corrected_zero_uncovered": true,
+    "zero_overlaps_both": true,
+    "generic_rule_without_literal_missing_verdict": true,
+    "operational_invalidity_separate": true
+  },
+  "verdict": "CANDIDATE_SUPPORTED",
+  "interpretation": "Evidence supports adding explicit scientific outcome-partition exhaustiveness/exclusivity as a v0.2 methodology candidate. The result does not modify v0.1 or make the candidate canonical.",
+  "authorization": "May draft a candidate machine-readable outcome-partition contract and validator for prospective testing. May not alter v0.1, canonical procedures, or EXTRACT scientific authority.",
+  "belief_update": [
+    "res-outcome-space is now a supported methodology defect rather than merely an anecdotal concern.",
+    "h-outcome-partition-check is SUPPORTED for candidate development.",
+    "OUTCOME_PARTITION_EXHAUSTIVENESS_V0_2 is authorized for candidate-schema design only.",
+    "One EXTRACT positive-control case is insufficient for methodology promotion; prospective validation on future designs remains required."
+  ]
+}
