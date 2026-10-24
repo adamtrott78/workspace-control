@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 78155d9bf8f0d0479e541f92d571b314f85b98e6
+- Remote checkpoint: e757902775193c3e6088905426ea4015cf22df78
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 3bec68414a929ea82dc70e9c6729250bb566663f
+- Remote checkpoint: f0699337f7ee5111d3945a0068a927c272b36f75
 - Remote verified: true
 
 ## Next safe action
 
-Implement the external-only SCIENTIFIC_NLI_REDUNDANCY_CERTIFICATE_VALIDATION_V1 from research-engine@3bec68414a929ea82dc70e9c6729250bb566663f. The harness may download only the pinned tasksource/deberta-small-long-nli model revision and pinned SPARK/SciNLI validation data; it must not read EXTRACT teacher fixtures. Run normal CI, durable-checkpoint the validation implementation, then execute exactly one external validation run and record NLI_CERTIFICATE_VALIDATED/PARTIAL/REJECTED before any learned certificate is allowed into an EXTRACT experiment.
+Create exactly one inert research-engine trigger PR from isolated validation implementation head f9790f4d614f022a127b5b87e33955f613159963, then issue exactly one `/local-extract-nli-certificate-validation <exact-trigger-head-sha>` comment. Observe the unique external-only validation run, evaluate only NLI_CERTIFICATE_VALIDATED/PARTIAL/REJECTED using the frozen SPARK/SciNLI gates, checkpoint exact model/data/run/artifact/report identities, and close the trigger PR unmerged. Do not run a learned certificate inside EXTRACT unless validation is separately durable and VALIDATED.
 
 ## Remaining work
 
-- Implement the frozen external-only SCIENTIFIC_NLI_REDUNDANCY_CERTIFICATE_VALIDATION_V1 harness and hosted workflow.
-- Validate pinned tasksource/deberta-small-long-nli revision/hash on external SPARK proposition-clustering data and held-out SciNLI entailment discrimination, using only the frozen calibration split/grid/gates.
-- Checkpoint NLI_CERTIFICATE_VALIDATED/PARTIAL/REJECTED with exact model/data/run/artifact/report identities.
-- Only if NLI_CERTIFICATE_VALIDATED may a separate EXTRACT design substitute the validated mutual-entailment certificate into the accepted dynamic-swap/page-preservation/top-24 architecture.
-- Do not use EXTRACT teacher labels for NLI calibration, tune the accepted lexical 0.40 certificate post hoc, treat FEASIBLE as production promotion, start Wave 7B, alter production EXTRACT/VERIFY, or incorporate semantic-control/ontology mechanisms.
+- Create one inert research-engine trigger PR from isolated NLI validation head f9790f4d614f022a127b5b87e33955f613159963 with only a non-semantic marker.
+- Issue exactly one `/local-extract-nli-certificate-validation <exact-trigger-head-sha>` comment.
+- Observe the one external-only run, evaluate only frozen NLI_CERTIFICATE_VALIDATED/PARTIAL/REJECTED, and checkpoint exact model/data/run/artifact/report identities.
+- Only if NLI_CERTIFICATE_VALIDATED may a separate EXTRACT design substitute mutual entailment for the accepted lexical certificate; no learned EXTRACT run is authorized by validation alone.
+- Do not use EXTRACT teacher labels for calibration, tune the accepted lexical threshold, train a model, start Wave 7B, change production EXTRACT/VERIFY, emit RDF/ontology output, or alter EXTRACT for semantic-control.
 
 ## Blockers / gates
 
