@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: bcca859e14d4e00412365677c574d3da75ccb092
+- Remote checkpoint: c45e978363b3e6dd25292966b7b01199262573df
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact COMPOSED_COMPLEMENTARITY_FRAGILE result checkpoint, close research-engine PR #244 unmerged, then re-engage workspace-local-extract-independent-review-v1 on run 40139717644 / artifact 12577434130 / report sha256:315b18622bd1f5751ff2c551da974ec054d6c7dbf2fe3ff770cd7dcd4d987369 before next-phase selection.
+Perform the evidence-first acquisition-robustness architecture search. Start from the exact clue that only source-aware method intent 0 is teacher-leak-flagged while unflagged author-contribution intent 3 already exposes all e1.a anchors by BM25 depth10. Compare frozen-depth alternate-path diagnostics, leave-one-intent-out structural reservation, robustness-aware reservation, and new query generation; freeze the smallest discriminating test before implementation.
 
 ## Remaining work
 
-- Obtain independent post-result review of run 40139717644 / artifact 12577434130 / COMPOSED_COMPLEMENTARITY_FRAGILE before selecting the next scientific phase.
-- After this result checkpoint merges, close research-engine PR #244 unmerged and do not retrigger.
-- If reviewer finds no blocking issue, next architecture search must focus on teacher-blind robustness of acquisition to intent-origin/query-path perturbation while preserving the validated alignment mechanism.
-- Do not treat primary 9/13 as robust acceptance; the frozen sensitivity establishes that e1.a remains fragile.
-- Do not reopen NLI/predicate-argument/AMR, add new query generation without new evidence, alter production EXTRACT/VERIFY, start Wave7B, or emit semantic-control/RDF/ontology output.
+- Compare robustness-focused mechanism families using the exact FRAGILE result and frozen automatic-intent exposure evidence.
+- Freeze the smallest teacher-blind experiment that distinguishes single-intent/path dependence from recoverable alternate-path depth truncation and broader intent-family insufficiency.
+- Obtain independent review of that frozen design before implementation.
+- Preserve exact validated alignment mechanism, rejected-family exclusions, production/Wave7B/semantic-control boundaries.
 
 ## Blockers / gates
 
