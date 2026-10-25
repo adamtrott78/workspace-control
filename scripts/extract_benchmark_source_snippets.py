@@ -59,9 +59,25 @@ def main():
                 lt=locator(text)
                 pos=lt.find(normpat)
                 if pos>=0:
-                    # Locator-normalized offsets are not canonical offsets; context is navigation only.
+                    # Find the matching canonical paragraph independently of locator offsets.
+                    paragraphs=[x.strip() for x in text.split("\n\n") if x.strip()]
+                    paragraph=None
+                    for para in paragraphs:
+                        if normpat in locator(para):
+                            paragraph=para
+                            break
+                    if paragraph is None:
+                        paragraph=text
+                    span_sha=hashlib.sha256(paragraph.encode("utf-8")).hexdigest()
+                    # Context is navigation-only and is not persisted as gold.
                     a=max(0,pos-360); b=min(len(lt),pos+len(normpat)+560)
-                    found.append({"page_number":pno,"context":lt[a:b],"query":pat})
+                    found.append({
+                        "page_number":pno,
+                        "context":lt[a:b],
+                        "query":pat,
+                        "canonical_span_sha256":span_sha,
+                        "canonical_span_chars":len(paragraph)
+                    })
                     if len(found)>=3: break
             paper["matches"].append({"query":pat,"hits":found})
         out["papers"].append(paper)
