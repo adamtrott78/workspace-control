@@ -1,0 +1,170 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-extract-semantic-benchmark-v1",
+  "title": "Held-Out Multi-Paper Semantic Benchmark for Local EXTRACT",
+  "status": "IN_PROGRESS",
+  "goal": "Build an independently source-verified, held-out multi-paper semantic acceptance benchmark for Local EXTRACT so project success is measured by generalized claim/evidence quality rather than the one-paper 13-atom diagnostic. Keep active EXTRACT development scientifically independent and research-engine read-only while the benchmark corpus, annotation protocol, schemas, pilot annotations, adjudication rules, and final acceptance mapping are developed in workspace-control.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-research-methodology-v1",
+  "current_stage": "freeze_benchmark_contract_and_holdout_corpus",
+  "acceptance_criteria": [
+    "Existing nine-paper EXTRACT corpus is explicitly development/regression data and cannot serve as the final held-out semantic acceptance set.",
+    "A fresh primary-research corpus is frozen with at least two annotation-pilot papers and at least eight acceptance-holdout papers spanning open-set/unknown rejection, domain shift/generalization, authentication/security, hardware anomaly/fingerprinting, and real-world dataset/evaluation settings.",
+    "Benchmark labels are created source-first from authoritative PDFs without consulting Local EXTRACT outputs.",
+    "Every positive obligation carries exact PDF quote/page provenance and a normalized scientific claim; duplicates/overlaps are explicitly adjudicated.",
+    "The benchmark can evaluate positive evidence recall and output precision/unsupported claims, not only recall of a positive teacher subset.",
+    "Paper-level holdout and label isolation prevent architecture tuning against acceptance gold.",
+    "Final acceptance maps back to the original Local EXTRACT hard-safety and production-promotion gates rather than requiring 13/13 on the legacy teacher control.",
+    "No research-engine or active EXTRACT architecture mutation is performed by this task."
+  ],
+  "constraints": [
+    "research-engine is read-only.",
+    "Do not alter research-engine-local-extract-redesign-v1 or its scientific choices.",
+    "Do not run active EXTRACT on acceptance-holdout papers during benchmark construction.",
+    "Do not use active EXTRACT outputs to create or revise gold labels.",
+    "The legacy nine-paper corpus and 13-atom teacher oracle remain development/regression evidence only.",
+    "Pilot papers may be used to debug annotation/schema mechanics but cannot count toward final acceptance.",
+    "Acceptance gold labels must be frozen before final Local EXTRACT evaluation on those papers.",
+    "The authoritative PDF is the scientific source of truth; abstracts, metadata services, and historical Codex outputs are discovery/seed aids only.",
+    "Do not silently treat unlabeled propositions as negative examples.",
+    "Unsupported-claim evaluation is performed over system outputs by source adjudication; positive obligation recall alone is insufficient."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "8dd56b5c6d3859058437baa6a76692041f159977",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "8dd56b5c6d3859058437baa6a76692041f159977",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-extract-semantic-benchmark-v1.json",
+        "tasks/active/workspace-extract-semantic-benchmark-v1.md",
+        "architecture/extract-semantic-benchmark-contract.v0.1.md",
+        "architecture/extract-semantic-benchmark-corpus.v0.1.json",
+        "schemas/extract_semantic_benchmark.v0.1.schema.json",
+        "tests/test_extract_semantic_benchmark_contract.py",
+        "architecture/extract-semantic-benchmark-pilot-annotations.v0.1.json",
+        "architecture/extract-semantic-benchmark-adjudication.v0.1.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "abd55d31d2768f6d66d0aa187e90fa4950cfd26f",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "abd55d31d2768f6d66d0aa187e90fa4950cfd26f",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "freeze_benchmark_contract_and_holdout_corpus",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-extract-semantic-benchmark-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+scholarly-research",
+      "inputs": [
+        "Original Local EXTRACT redesign contract and production gates.",
+        "Legacy nine-paper corpus and one-paper 13-atom diagnostic oracle.",
+        "Current EXTRACT benchmark-validity audit.",
+        "Fresh open-access RF/RFF literature discovery."
+      ],
+      "outputs": [
+        "Benchmark contract.",
+        "Fresh pilot/acceptance corpus manifest.",
+        "Machine-readable annotation schema.",
+        "Contract tests."
+      ],
+      "validation": [],
+      "resume_condition": "Freeze corpus and evaluation semantics before creating gold annotations."
+    },
+    {
+      "id": "source_acquisition_and_hash_freeze",
+      "status": "PLANNED",
+      "execution_owner": "workspace-extract-semantic-benchmark-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "authoritative-pdf",
+      "inputs": [
+        "Frozen fresh corpus manifest."
+      ],
+      "outputs": [
+        "Exact authoritative PDF version/hash identity for every pilot and acceptance paper."
+      ],
+      "validation": [],
+      "resume_condition": "All papers must be retrievable and hashable before annotation."
+    },
+    {
+      "id": "pilot_annotation_and_protocol_validation",
+      "status": "PLANNED",
+      "execution_owner": "workspace-extract-semantic-benchmark-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "authoritative-pdf+github",
+      "inputs": [
+        "Two pilot PDFs.",
+        "Frozen annotation schema."
+      ],
+      "outputs": [
+        "Source-first pilot obligations.",
+        "Adjudication protocol revisions if needed."
+      ],
+      "validation": [],
+      "resume_condition": "Pilot annotations may refine schema mechanics but cannot alter acceptance-paper selection."
+    },
+    {
+      "id": "acceptance_gold_annotation",
+      "status": "PLANNED",
+      "execution_owner": "workspace-extract-semantic-benchmark-v1",
+      "selected_executor": "separate_benchmark_annotation_lane",
+      "selected_surface": "authoritative-pdf",
+      "inputs": [
+        "Eight acceptance PDFs.",
+        "Validated annotation/adjudication protocol."
+      ],
+      "outputs": [
+        "Frozen multi-paper semantic gold set with exact quote/page provenance."
+      ],
+      "validation": [],
+      "resume_condition": "Must be completed without viewing active Local EXTRACT outputs on the acceptance papers."
+    },
+    {
+      "id": "final_acceptance_evaluation",
+      "status": "PLANNED",
+      "execution_owner": "workspace-extract-semantic-benchmark-v1",
+      "selected_executor": "future_gate",
+      "selected_surface": "research-engine+workspace-control",
+      "inputs": [
+        "Frozen acceptance gold.",
+        "A separately frozen Local EXTRACT candidate architecture."
+      ],
+      "outputs": [
+        "Production-promotion benchmark report mapped to original Local EXTRACT gates."
+      ],
+      "validation": [],
+      "resume_condition": "Only after active EXTRACT architecture is frozen for acceptance evaluation."
+    }
+  ],
+  "checkpoints": [],
+  "artifacts": [],
+  "validation": [],
+  "blockers": [],
+  "remaining_work": [
+    "Freeze benchmark contract, corpus manifest, schema, and tests.",
+    "Acquire exact PDF versions and hashes for all ten fresh papers.",
+    "Create source-first annotations on the two pilot papers and validate adjudication mechanics.",
+    "Freeze source-first gold labels for the eight acceptance papers without consulting active EXTRACT outputs.",
+    "Run final Local EXTRACT evaluation only after a candidate architecture is separately frozen."
+  ],
+  "next_safe_action": "Freeze the benchmark contract/corpus/schema/tests on an isolated branch. Then acquire exact authoritative PDF identities. Keep research-engine read-only and do not expose acceptance papers to active EXTRACT runs.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Created 2026-10-24 after benchmark audit established that the legacy 13-atom oracle is a useful one-paper diagnostic but insufficient for final acceptance. This sibling task is intentionally independent of active EXTRACT architecture research."
+}
