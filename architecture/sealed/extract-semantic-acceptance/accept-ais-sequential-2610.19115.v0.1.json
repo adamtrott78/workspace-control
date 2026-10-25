@@ -1,0 +1,176 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "split": "ACCEPTANCE",
+  "paper": {
+    "benchmark_paper_id": "accept-ais-sequential-2610.19115",
+    "arxiv_id": "2610.19115",
+    "version": "v1",
+    "title": "Sequential RF Fingerprinting for AIS: Rejecting Unknown Vessels and Insider MMSI Spoofs Days After Enrollment",
+    "source_pdf_url": "https://arxiv.org/pdf/2610.19115v1",
+    "source_sha256": "60387caee63a94aa0d018d68b35a202f1ddb1acccc75a10007118e94f793ce3c",
+    "page_count": 17
+  },
+  "obligations": [
+    {
+      "obligation_id": "ais.threat.mmsi",
+      "type": "SECURITY_THREAT",
+      "importance": "CORE",
+      "normalized_claim": "AIS identity claims are unauthenticated at the protocol layer, motivating physical-layer verification of the transmitter behind a claimed MMSI.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "ais.threat.mmsi.q1",
+          "page_number": 1,
+          "anchor_excerpt": "claimed MMSI",
+          "canonical_span_sha256": "a10d578b739c3b88b88d246676b6df3863292287ef156dbb32c2e781be91b427",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Central threat model.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "ais.method.sequential",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "The system accumulates k-nearest-neighbor distance evidence from a frozen encoder using a GEM-CUSUM sequential detector for both unknown-transmitter rejection and claimed-identity verification.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "ais.method.sequential.q1",
+          "page_number": 1,
+          "anchor_excerpt": "GEM-CUSUM",
+          "canonical_span_sha256": "a10d578b739c3b88b88d246676b6df3863292287ef156dbb32c2e781be91b427",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Central detection mechanism.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "ais.dataset.temporal",
+      "type": "DATASET_SETUP",
+      "importance": "CORE",
+      "normalized_claim": "The evaluation uses multi-session AIS I/Q recordings spanning 13 days at the Istanbul Strait, with enrollment separated from later test captures.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "ais.dataset.temporal.q1",
+          "page_number": 6,
+          "anchor_excerpt": "13 days",
+          "canonical_span_sha256": "340b33a8ba7aed089da8991447877d227fba1f833e479d324589656ab248f82c",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Defines temporal/domain-shift setting.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "ais.result.openset",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "At least 10 days after enrollment, 50-burst vessel-balanced trials achieve open-set AUROC 0.956, versus 0.899 for the best per-burst score.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "ais.result.openset.q1",
+          "page_number": 1,
+          "anchor_excerpt": "0.956",
+          "canonical_span_sha256": "a10d578b739c3b88b88d246676b6df3863292287ef156dbb32c2e781be91b427",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Headline open-set result.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "ais.result.refresh",
+      "type": "ROBUSTNESS_GENERALIZATION",
+      "importance": "CORE",
+      "normalized_claim": "Refreshing the threshold from the first quarter of genuine enrolled traffic yields about 5.3% false alarms at 88.8% unknown-vessel detection.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "ais.result.refresh.q1",
+          "page_number": 8,
+          "anchor_excerpt": "5.3%",
+          "canonical_span_sha256": "36d51eb89d3ec377d5bedb89106e3ccbecd457a86d570ecaca259f4a86a62dca",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Operational drift/calibration result.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "ais.result.insider",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "When scored against the claimed identity, enrolled vessels spoofing another MMSI are separated with vessel-balanced AUROC about 0.991, while an open-set-only test cannot detect this insider threat.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "ais.result.insider.q1",
+          "page_number": 9,
+          "anchor_excerpt": "0.991",
+          "canonical_span_sha256": "006696110df075982d9f241301ab19034770cc78ff50043a437d7b25802047e1",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Headline insider-spoof result.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "ais.eval.window",
+      "type": "EVALUATION_PROTOCOL",
+      "importance": "SECONDARY",
+      "normalized_claim": "The deployed decision unit is a 50-burst trial, and detection-delay analysis measures false alarms, missed unknown trials, and bursts to alarm at that trial scale.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "ais.eval.window.q1",
+          "page_number": 8,
+          "anchor_excerpt": "50-burst",
+          "canonical_span_sha256": "36d51eb89d3ec377d5bedb89106e3ccbecd457a86d570ecaca259f4a86a62dca",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Captures evaluation unit rather than only aggregate AUROC.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "ais.limit.future",
+      "type": "LIMITATION",
+      "importance": "SECONDARY",
+      "normalized_claim": "The paper leaves cross-receiver/site validation, synthesized or replayed fingerprints, full-frame captures, and joint use of both tests for future work.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "ais.limit.future.q1",
+          "page_number": 16,
+          "anchor_excerpt": "other receivers and sites",
+          "canonical_span_sha256": "3d877f98b85e47311386b1227cb6bd3a68879a74e51d3e00cef3806fa70b96f8",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Explicit scope limitation.",
+      "adjudication_state": "PASS_A_ONLY"
+    }
+  ],
+  "annotation_provenance": {
+    "source_first": true,
+    "extract_outputs_viewed": false,
+    "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
+    "annotated_at": "2026-10-24T20:56:00-04:00",
+    "adjudicator_id": null,
+    "adjudicated_at": null
+  }
+}
