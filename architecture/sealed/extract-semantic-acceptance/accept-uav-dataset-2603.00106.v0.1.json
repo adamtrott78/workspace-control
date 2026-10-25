@@ -1,0 +1,176 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "split": "ACCEPTANCE",
+  "paper": {
+    "benchmark_paper_id": "accept-uav-dataset-2603.00106",
+    "arxiv_id": "2603.00106",
+    "version": "v2",
+    "title": "A Multi-Scenario UAV RF Dataset with Real-World Acquisition and Signal Processing Benchmarking",
+    "source_pdf_url": "https://arxiv.org/pdf/2603.00106v2",
+    "source_sha256": "71cccdd6aa6dcf214e6c70217e0bd49160056572bb889a431b2f45f54e11931f",
+    "page_count": 19
+  },
+  "obligations": [
+    {
+      "obligation_id": "uavdataset.dataset.scale",
+      "type": "DATASET_SETUP",
+      "importance": "CORE",
+      "normalized_claim": "DRFF-R2 contains RF recordings from 26 UAV units spanning eight distinct models.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "uavdataset.dataset.scale.q1",
+          "page_number": 1,
+          "anchor_excerpt": "26 UAV",
+          "canonical_span_sha256": "4c73a04fa7446bb62481113ebff143640bc96057491aca88bc726875e3bdf1ae",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Core corpus scale.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "uavdataset.dataset.subsets",
+      "type": "DATASET_SETUP",
+      "importance": "CORE",
+      "normalized_claim": "The dataset is organized into seven subsets representing different operational and signal-composition scenarios.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "uavdataset.dataset.subsets.q1",
+          "page_number": 1,
+          "anchor_excerpt": "seven",
+          "canonical_span_sha256": "4c73a04fa7446bb62481113ebff143640bc96057491aca88bc726875e3bdf1ae",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Core organization.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "uavdataset.dataset.diversity",
+      "type": "ROBUSTNESS_GENERALIZATION",
+      "importance": "CORE",
+      "normalized_claim": "Collection varies flight state, altitude, speed, acquisition day, and receiver configuration, enabling cross-condition RF-fingerprinting studies.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "uavdataset.dataset.diversity.q1",
+          "page_number": 1,
+          "anchor_excerpt": "receiver configurations",
+          "canonical_span_sha256": "4c73a04fa7446bb62481113ebff143640bc96057491aca88bc726875e3bdf1ae",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Domain-diversity property.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "uavdataset.dataset.multiscenario",
+      "type": "DATASET_SETUP",
+      "importance": "CORE",
+      "normalized_claim": "The dataset includes indoor/outdoor, cross-day/cross-receiver, dual-band frequency-hopping, WiFi-interference, and multi-UAV/co-channel scenarios.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "uavdataset.dataset.multiscenario.q1",
+          "page_number": 3,
+          "anchor_excerpt": "~375 GB",
+          "canonical_span_sha256": "6cb55bcb98acbc9cbfaca79fc0b5deea65d784e5667cac8306c61217bd092f4d",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Broad scenario coverage.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "uavdataset.method.acquisition",
+      "type": "EVALUATION_PROTOCOL",
+      "importance": "CORE",
+      "normalized_claim": "Data collection uses a standardized SDR acquisition workflow with scenario-specific labeling and fixed acquisition parameters before recording.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "uavdataset.method.acquisition.q1",
+          "page_number": 5,
+          "anchor_excerpt": "100 MS/s",
+          "canonical_span_sha256": "b4b6e5d123acfcb956092b6c14c03166666603be8e45bfc6c67d2e6e791f2dd2",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Reproducible acquisition protocol.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "uavdataset.eval.validation",
+      "type": "EVALUATION_PROTOCOL",
+      "importance": "SECONDARY",
+      "normalized_claim": "Technical validation characterizes representative indoor and outdoor recordings using signal/environment power, SNR, variability, and occupied-bandwidth metrics.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "uavdataset.eval.validation.q1",
+          "page_number": 13,
+          "anchor_excerpt": "Technical Validation",
+          "canonical_span_sha256": "10c7e7ec34af7008b35a8ab284ecf3f8f0f7dce50f79fa8411a99a23b70e9f87",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Dataset-quality evidence.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "uavdataset.result.noise",
+      "type": "LIMITATION",
+      "importance": "CORE",
+      "normalized_claim": "A background-noise calibration experiment achieves very high classification scores, indicating that background noise can materially influence the classification task and is a potential confound.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "uavdataset.result.noise.q1",
+          "page_number": 14,
+          "anchor_excerpt": "97.11%",
+          "canonical_span_sha256": "4cda99a0209718557471422b2ae52d463b9bbfefa9faf22982b9825978f995e3",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Important leakage/confounding warning.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "uavdataset.limit.metadata",
+      "type": "LIMITATION",
+      "importance": "CORE",
+      "normalized_claim": "The release lacks detailed physical-layer metadata such as waveform/modulation configuration and standardized channel parameters because commercial UAV internals are closed source.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "uavdataset.limit.metadata.q1",
+          "page_number": 14,
+          "anchor_excerpt": "physical-layer metadata",
+          "canonical_span_sha256": "4cda99a0209718557471422b2ae52d463b9bbfefa9faf22982b9825978f995e3",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Explicit dataset limitation.",
+      "adjudication_state": "PASS_A_ONLY"
+    }
+  ],
+  "annotation_provenance": {
+    "source_first": true,
+    "extract_outputs_viewed": false,
+    "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
+    "annotated_at": "2026-10-24T20:56:00-04:00",
+    "adjudicator_id": null,
+    "adjudicated_at": null
+  }
+}
