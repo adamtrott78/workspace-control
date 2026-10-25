@@ -1,0 +1,176 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "split": "ACCEPTANCE",
+  "paper": {
+    "benchmark_paper_id": "accept-holistic-rff-2610.05979",
+    "arxiv_id": "2610.05979",
+    "version": "v1",
+    "title": "From Identification to Discovery: Holistic RF Fingerprinting via Learning-Aided Quantization",
+    "source_pdf_url": "https://arxiv.org/pdf/2610.05979v1",
+    "source_sha256": "d2b9f554b07088443c5bf58db2d300562d1a1ffca11460e8aedc1bbee8d5f2a6",
+    "page_count": 13
+  },
+  "obligations": [
+    {
+      "obligation_id": "holistic.scope.threetasks",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "The framework jointly supports closed-set identification, open-set recognition, and novel-class discovery in one expandable RFFI architecture.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "holistic.scope.threetasks.q1",
+          "page_number": 1,
+          "anchor_excerpt": "novel class discovery",
+          "canonical_span_sha256": "59a8f300db26127966429df3784a62f74b384f1e1aaaaeb8e86950a08f26c2ef",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Central architecture claim.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "holistic.method.vq",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "RFFI is formulated as vector quantization in a learned latent space, with registered devices represented by labeled codewords.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "holistic.method.vq.q1",
+          "page_number": 1,
+          "anchor_excerpt": "vector quantization",
+          "canonical_span_sha256": "59a8f300db26127966429df3784a62f74b384f1e1aaaaeb8e86950a08f26c2ef",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Central representation mechanism.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "holistic.method.tasks",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "Codeword assignment supports registered-device identification, codebook-geometry uncertainty supports open-set rejection, and rejected latent representations support discovery of new device identities.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "holistic.method.tasks.q1",
+          "page_number": 1,
+          "anchor_excerpt": "codebook",
+          "canonical_span_sha256": "59a8f300db26127966429df3784a62f74b384f1e1aaaaeb8e86950a08f26c2ef",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Explains how the shared representation serves all tasks.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "holistic.method.training",
+      "type": "METHOD",
+      "importance": "SECONDARY",
+      "normalized_claim": "Training combines supervised representation learning, latent-space refinement, codebook initialization, and vector-quantization-aware optimization.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "holistic.method.training.q1",
+          "page_number": 1,
+          "anchor_excerpt": "multi-stage training",
+          "canonical_span_sha256": "59a8f300db26127966429df3784a62f74b384f1e1aaaaeb8e86950a08f26c2ef",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Training pipeline.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "holistic.dataset",
+      "type": "DATASET_SETUP",
+      "importance": "CORE",
+      "normalized_claim": "The framework is evaluated on both LoRa and WiFi RF-fingerprinting datasets.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "holistic.dataset.q1",
+          "page_number": 1,
+          "anchor_excerpt": "LoRa",
+          "canonical_span_sha256": "59a8f300db26127966429df3784a62f74b384f1e1aaaaeb8e86950a08f26c2ef",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Cross-technology evaluation scope.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "holistic.result.closedset",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "On the LoRa enrolled-device sweep, the proposed method reports closed-set identification accuracy between 97.9% and 100%.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "holistic.result.closedset.q1",
+          "page_number": 10,
+          "anchor_excerpt": "97.9%",
+          "canonical_span_sha256": "be4c24e5a6d6b16cfba2f232ff4aa624f57c3262cd9c4e55eca6f161dc0dc046",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Headline closed-set performance.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "holistic.result.osr",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "With ten enrolled and five unseen LoRa devices, the proposed density-based open-set score reports AUC 0.9947 and exceeds the compared methods.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "holistic.result.osr.q1",
+          "page_number": 10,
+          "anchor_excerpt": "0.9947",
+          "canonical_span_sha256": "be4c24e5a6d6b16cfba2f232ff4aa624f57c3262cd9c4e55eca6f161dc0dc046",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Headline open-set performance.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "holistic.motivation.pipeline",
+      "type": "ASSUMPTION_SCOPE",
+      "importance": "SECONDARY",
+      "normalized_claim": "The work is motivated by limitations of separate identification/rejection/discovery pipelines, including poor expandability and failure to transfer information between stages.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "holistic.motivation.pipeline.q1",
+          "page_number": 2,
+          "anchor_excerpt": "two main limitations",
+          "canonical_span_sha256": "eb979bcddca64211ebc9887da91e664f57f6efc0794f4329c97f32b7b6a2daa2",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Bounds the problem the unified architecture addresses.",
+      "adjudication_state": "PASS_A_ONLY"
+    }
+  ],
+  "annotation_provenance": {
+    "source_first": true,
+    "extract_outputs_viewed": false,
+    "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
+    "annotated_at": "2026-10-24T20:56:00-04:00",
+    "adjudicator_id": null,
+    "adjudicated_at": null
+  }
+}
