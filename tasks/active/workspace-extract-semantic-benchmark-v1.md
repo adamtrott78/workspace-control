@@ -34,10 +34,6 @@ Build an independently source-verified, held-out multi-paper semantic acceptance
 - Remote checkpoint: abd55d31d2768f6d66d0aa187e90fa4950cfd26f
 - Remote verified: true
 
-## Current stage
-
-freeze_benchmark_contract_and_holdout_corpus
-
 ## Next safe action
 
 Run Workspace Control Validation on the frozen benchmark foundation. If clean, merge it. Then acquire exact source identities/hashes for all ten papers before finalizing pilot annotations.
@@ -61,15 +57,9 @@ Run Workspace Control Validation on the frozen benchmark foundation. If clean, m
 https://github.com/adamtrott78/workspace-control
 
 Continue the durable workspace-control task defined by:
-
-`tasks/active/workspace-extract-semantic-benchmark-v1.json`
+Task capsule: tasks/active/workspace-extract-semantic-benchmark-v1.json
 
 Start from the normal workspace-control root route.
-
-Treat the authoritative task capsule, synchronized Markdown handoff, exact durable Git/runtime state, and referenced benchmark/source evidence as the complete handoff.
-
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
-
-Keep `research-engine` and `research-engine-local-extract-redesign-v1` read-only. The benchmark is a parallel sibling lane.
-
-Follow the capsule's `next_safe_action`.
+Follow the capsule's next_safe_action.
