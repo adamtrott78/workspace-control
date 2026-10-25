@@ -1,0 +1,176 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "split": "ACCEPTANCE",
+  "paper": {
+    "benchmark_paper_id": "accept-trustagent-rff-2610.24930",
+    "arxiv_id": "2610.24930",
+    "version": "v2",
+    "title": "TrustAgent-RFF: Agentic Diagnostic Planning for Reliable RF Fingerprinting under Domain Shift",
+    "source_pdf_url": "https://arxiv.org/pdf/2610.24930v2",
+    "source_sha256": "ec24e1709bfb0c5944af416fc699ea35a294eb6968ee1ca9ed5a2022507f6ae3",
+    "page_count": 10
+  },
+  "obligations": [
+    {
+      "obligation_id": "trustagent.problem.shift",
+      "type": "ROBUSTNESS_GENERALIZATION",
+      "importance": "CORE",
+      "normalized_claim": "Across five RFF datasets and classifier backbones, source-to-target domain shift causes an average accuracy drop of 38.7%, while many wrong target-domain predictions remain highly confident.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "trustagent.problem.shift.q1",
+          "page_number": 1,
+          "anchor_excerpt": "38.7%",
+          "canonical_span_sha256": "36dc713cbed2c7706d52558e7b066e43f70d2218261a9f89d854cda984ea518c",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Establishes the reliability problem.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "trustagent.scope.frozen",
+      "type": "ASSUMPTION_SCOPE",
+      "importance": "CORE",
+      "normalized_claim": "TrustAgent-RFF operates around a frozen I/Q classifier and does not require labeled target-domain data for its diagnostic evidence.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "trustagent.scope.frozen.q1",
+          "page_number": 1,
+          "anchor_excerpt": "frozen",
+          "canonical_span_sha256": "36dc713cbed2c7706d52558e7b066e43f70d2218261a9f89d854cda984ea518c",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Critical deployment constraint.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "trustagent.method.evidence",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "Per prediction, the framework can acquire four RF diagnostics: counterfactual stability, prototype consistency, acquisition-domain similarity, and signal quality.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "trustagent.method.evidence.q1",
+          "page_number": 1,
+          "anchor_excerpt": "counterfactual stability",
+          "canonical_span_sha256": "36dc713cbed2c7706d52558e7b066e43f70d2218261a9f89d854cda984ea518c",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Defines diagnostic evidence family.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "trustagent.method.trust",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "A source-calibrated trust estimator combines diagnostic evidence with classifier confidence, prediction margin, and evidence-availability information.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "trustagent.method.trust.q1",
+          "page_number": 1,
+          "anchor_excerpt": "source calibrated",
+          "canonical_span_sha256": "36dc713cbed2c7706d52558e7b066e43f70d2218261a9f89d854cda984ea518c",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Core trust-calibration mechanism.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "trustagent.method.planner",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "An LLM-based planner chooses the next diagnostic action using current evidence, trust state, action cost, and remaining budget.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "trustagent.method.planner.q1",
+          "page_number": 1,
+          "anchor_excerpt": "action costs",
+          "canonical_span_sha256": "36dc713cbed2c7706d52558e7b066e43f70d2218261a9f89d854cda984ea518c",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Agentic planning mechanism.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "trustagent.method.decision",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "A deterministic source-calibrated decision layer converts the evolving trust state into Accept, Reject, or Defer outcomes.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "trustagent.method.decision.q1",
+          "page_number": 1,
+          "anchor_excerpt": "Accept, Reject, or Defer",
+          "canonical_span_sha256": "36dc713cbed2c7706d52558e7b066e43f70d2218261a9f89d854cda984ea518c",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Final decision semantics.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "trustagent.eval.multidata",
+      "type": "EVALUATION_PROTOCOL",
+      "importance": "SECONDARY",
+      "normalized_claim": "Evaluation spans five RF-fingerprinting datasets and multiple classifier backbones rather than a single acquisition domain.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "trustagent.eval.multidata.q1",
+          "page_number": 1,
+          "anchor_excerpt": "five RFF datasets",
+          "canonical_span_sha256": "36dc713cbed2c7706d52558e7b066e43f70d2218261a9f89d854cda984ea518c",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Cross-dataset evaluation scope.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "trustagent.method.penalties",
+      "type": "METHOD",
+      "importance": "SECONDARY",
+      "normalized_claim": "Source-derived lower-tail penalties and cross-module interactions reduce trust when diagnostic evidence indicates weak support.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "trustagent.method.penalties.q1",
+          "page_number": 1,
+          "anchor_excerpt": "lower tail penalties",
+          "canonical_span_sha256": "36dc713cbed2c7706d52558e7b066e43f70d2218261a9f89d854cda984ea518c",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Important detail of trust updating.",
+      "adjudication_state": "PASS_A_ONLY"
+    }
+  ],
+  "annotation_provenance": {
+    "source_first": true,
+    "extract_outputs_viewed": false,
+    "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
+    "annotated_at": "2026-10-24T20:56:00-04:00",
+    "adjudicator_id": null,
+    "adjudicated_at": null
+  }
+}
