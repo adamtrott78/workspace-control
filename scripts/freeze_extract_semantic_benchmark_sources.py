@@ -36,6 +36,9 @@ def fetch(url: str, attempts: int = 4) -> bytes:
 
 
 def canonicalize_page_text(text: str) -> str:
+    # pypdf can expose unpaired UTF-16 surrogate code points from malformed
+    # ToUnicode maps. Replace those deterministically before UTF-8 hashing.
+    text = "".join("\uFFFD" if 0xD800 <= ord(ch) <= 0xDFFF else ch for ch in text)
     text = text.replace("\r\n", "\n").replace("\r", "\n")
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n[ \t]+", "\n", text)
