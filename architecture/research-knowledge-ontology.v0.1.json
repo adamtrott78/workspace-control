@@ -1,0 +1,274 @@
+{
+  "schema_version": 1,
+  "design_id": "research-knowledge-ontology-v0.1",
+  "task_id": "workspace-research-knowledge-ontology-v1",
+  "status": "FROZEN_DESIGN_ONLY",
+  "purpose": "Define a rebuildable, provenance-preserving scientific-state projection that can reconstruct research reasoning, evidence lineage, review/authority boundaries, and candidate next actions from durable workspace-control and research-engine records without becoming a new source of scientific truth or executor authority.",
+  "parent_lineage": {
+    "knowledge_action_architecture_task": "workspace-knowledge-action-ontology-v1",
+    "selected_parent_architecture": "knowledge-action-projection-v1:authoritative-records+typed-projection+policy-boundary",
+    "semantic_control_prototype_result": "research-engine@4317830c4f3779cebb8a5cf0d7eeec369b85d5ea:semantic-control-prototype-result-v1:PROMOTE_TO_INTEGRATION",
+    "semantic_control_hardening_result": "research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd:HARDENING_PASS",
+    "methodology_task": "workspace-research-methodology-v1",
+    "live_extract_owner_snapshot": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:research-engine-local-extract-redesign-v1",
+    "research_engine_snapshot": "research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc"
+  },
+  "scope": {
+    "authoritative_inputs": [
+      "workspace-control task capsules and synchronized handoffs",
+      "versioned workflow/procedure/policy artifacts",
+      "research-engine frozen design artifacts",
+      "scientific execution reports and content-addressed artifacts",
+      "independent review checkpoints/comments when durably consumed",
+      "Git commit/PR/run/job identities and execution receipts"
+    ],
+    "projection_is_rebuildable": true,
+    "production_write_path_changes": false,
+    "extract_mutation": false,
+    "sealed_acceptance_benchmark_access": false,
+    "semantic_control_production_promotion": false
+  },
+  "layer_model": {
+    "epistemic": {
+      "purpose": "Represent what is observed, hypothesized, supported, rejected, unresolved, contradicted, or interpreted.",
+      "authority": "NON_EXECUTABLE",
+      "entity_types": [
+        "ResearchProgram",
+        "Residual",
+        "Hypothesis",
+        "Assumption",
+        "MechanismFamily",
+        "Evidence",
+        "Invariant",
+        "ExperimentDesign",
+        "ScientificExecution",
+        "ScientificResult",
+        "Interpretation",
+        "Review",
+        "BeliefUpdate",
+        "OpenQuestion"
+      ]
+    },
+    "normative": {
+      "purpose": "Represent explicit reviewed constraints, gates, permissions, prohibitions, stopping rules, and reopening rules sourced from authority-owned artifacts.",
+      "authority": "SOURCE_DERIVED_ONLY",
+      "entity_types": [
+        "PolicyRule",
+        "ScientificGate",
+        "ReviewRequirement",
+        "Permission",
+        "Prohibition",
+        "Blocker",
+        "DependencyGate",
+        "StoppingRule",
+        "ReopeningRule"
+      ],
+      "critical_rule": "No inferred/model-generated graph edge may create or widen a Permission, remove a Prohibition, satisfy a ReviewRequirement, or authorize executor action."
+    },
+    "execution": {
+      "purpose": "Represent what was actually implemented, validated, triggered, run, merged, produced, or received.",
+      "authority": "OBSERVATIONAL",
+      "entity_types": [
+        "Implementation",
+        "ValidationRun",
+        "Trigger",
+        "ExecutionJob",
+        "Artifact",
+        "Commit",
+        "PullRequest",
+        "ExecutionReceipt",
+        "TaskCheckpoint"
+      ]
+    },
+    "decision_bridge": {
+      "entity_types": [
+        "CandidateAction",
+        "DecisionEvaluation"
+      ],
+      "candidate_action_authority": "NONE",
+      "decision_evaluation_authority": "EXTERNAL_POLICY_EVALUATOR_ONLY",
+      "rule": "The projection may rank or explain CandidateAction objects, but only an existing authority-owned policy/task contract may return an executable ALLOW."
+    }
+  },
+  "core_relation_types": {
+    "epistemic": [
+      "motivated_by",
+      "tests",
+      "supports",
+      "weakens",
+      "refutes",
+      "does_not_establish",
+      "derived_from",
+      "contradicts",
+      "supersedes",
+      "consistent_with",
+      "posthoc_interpretation_of",
+      "preregistered_outcome_of",
+      "preserves",
+      "violates",
+      "leaves_unresolved",
+      "narrows_to"
+    ],
+    "normative": [
+      "requires_review_before",
+      "forbids",
+      "permits_scientific_scope",
+      "blocks_until",
+      "requires_evidence",
+      "authorizes_exact_design_only",
+      "reopens_only_if",
+      "stops_after"
+    ],
+    "execution": [
+      "implemented_as",
+      "validated_by",
+      "triggered_by",
+      "executed_as",
+      "produced",
+      "merged_as",
+      "consumed_by",
+      "checkpointed_as",
+      "closed_without_merge"
+    ],
+    "cross_layer": [
+      "result_reviewed_by",
+      "review_consumed_by_task",
+      "evidence_supports_decision",
+      "decision_proposes_action",
+      "policy_evaluates_candidate",
+      "execution_satisfies_gate"
+    ]
+  },
+  "assertion_metadata_contract": {
+    "required_fields": [
+      "assertion_id",
+      "subject_id",
+      "relation",
+      "object_id",
+      "assertion_kind",
+      "source_refs",
+      "valid_from",
+      "valid_until",
+      "superseded_by",
+      "derivation_rule",
+      "authority_class"
+    ],
+    "assertion_kinds": [
+      "AUTHORITATIVE_SOURCE",
+      "OBSERVED_EXECUTION",
+      "PREREGISTERED_SCIENTIFIC_RESULT",
+      "INDEPENDENT_REVIEW_FINDING",
+      "POSTHOC_NONVERDICT",
+      "DERIVED_DETERMINISTIC",
+      "MODEL_INFERRED"
+    ],
+    "authority_classes": [
+      "NONE",
+      "EPISTEMIC_ONLY",
+      "SCIENTIFIC_SCOPE",
+      "POLICY_CONTEXT",
+      "EXECUTION_AUTHORITY_REFERENCE"
+    ],
+    "provenance_rule": "Every projected node/edge must retain at least one exact source reference; derived assertions must retain all immediate parent assertion IDs and their source references.",
+    "contradiction_rule": "Contradictory assertions remain simultaneously representable with source, time, and authority metadata. Projection code must not silently choose one truth value.",
+    "supersession_rule": "Supersession changes current-view selection but never deletes historical assertions."
+  },
+  "source_precedence_contract": {
+    "purpose": "Resolve current-state views without rewriting history.",
+    "precedence": [
+      "exact durable authority artifact explicitly named by governing task contract",
+      "merged authoritative task capsule at the pinned workspace-control snapshot",
+      "durably consumed independent review checkpoint",
+      "merged design/result artifact at exact commit/blob identity",
+      "execution receipt/run/artifact evidence",
+      "open PR or unmerged branch state",
+      "chat prose or model-generated summary"
+    ],
+    "stale_state_rule": "A lower-precedence or older assertion remains queryable as historical state but must not override a newer authoritative source in CURRENT_STATE queries.",
+    "validation_unavailable_rule": "A zero-step/pre-runner CI failure is VALIDATION_UNAVAILABLE, never PASS and never a scientific negative."
+  },
+  "research_state_model": {
+    "methodology_chain": [
+      "Residual",
+      "Hypothesis",
+      "Assumption",
+      "MechanismFamily",
+      "ExperimentDesign",
+      "ScientificExecution",
+      "ScientificResult",
+      "Interpretation",
+      "Review",
+      "BeliefUpdate",
+      "Decision"
+    ],
+    "required_distinctions": [
+      "negative scientific result vs invalid execution",
+      "preregistered verdict vs posthoc non-verdict evidence",
+      "design authority vs implementation authority vs trigger authority vs production authority",
+      "scientific scope permission vs executor permission",
+      "blocked evidence vs rejected mechanism vs incomplete validation",
+      "current authoritative state vs stale historical handoff"
+    ],
+    "candidate_action_rule": "Candidate next actions may be generated only from current residuals, live hypotheses, explicit constraints, and reviewed authority edges; rejected/reopened families must carry their reopening condition."
+  },
+  "bounded_query_contract": {
+    "required_query_families": [
+      "WHY_CURRENT_EXPERIMENT",
+      "WHY_NOT_REJECTED_MECHANISM",
+      "WHAT_REMAINS_UNPROVEN",
+      "WHAT_IS_CURRENTLY_ALLOWED",
+      "WHAT_IS_CURRENTLY_FORBIDDEN",
+      "WHAT_EVIDENCE_AUTHORIZES_NEXT_SCOPE",
+      "TRACE_RESULT_TO_NEXT_DESIGN",
+      "DISTINGUISH_VERDICT_FROM_POSTHOC",
+      "DISTINGUISH_INVALID_EXECUTION_FROM_NEGATIVE_SCIENCE",
+      "CURRENT_STATE_WITH_SUPERSESSION"
+    ],
+    "ontology_slice_rule": "Queries retrieve only the bounded classes/relations necessary to answer the question; full-graph prompt injection is forbidden.",
+    "answer_contract": {
+      "required_fields": [
+        "answer_class",
+        "answer",
+        "supporting_assertion_ids",
+        "source_refs",
+        "authority_boundary",
+        "unproven_or_caveat"
+      ],
+      "model_free_replay_baseline": true
+    }
+  },
+  "benchmark_and_safety_gates": {
+    "replay_exact_answer_rate_required": 1,
+    "provenance_traceability_required": 1,
+    "authority_escape_count_required": 0,
+    "stale_state_override_count_required": 0,
+    "verdict_posthoc_conflation_count_required": 0,
+    "invalid_execution_scientific_negative_conflation_count_required": 0,
+    "contradiction_silent_collapse_count_required": 0,
+    "sealed_holdout_access_required": 0,
+    "extract_mutation_required": 0,
+    "production_mutation_required": 0
+  },
+  "implementation_boundary": {
+    "before_implementation": [
+      "independent review of this exact ontology and replay-benchmark contract",
+      "successful workspace-control validation of task/design artifacts"
+    ],
+    "first_implementation_scope": [
+      "read-only workspace-control adapter",
+      "read-only research-engine metadata/artifact adapter",
+      "deterministic canonical projection",
+      "model-free replay query evaluator",
+      "no graph database migration; use file/in-memory or existing relational projection first"
+    ],
+    "forbidden_before_later_gate": [
+      "production routing changes",
+      "EXTRACT output binding",
+      "sealed benchmark access",
+      "policy mutation",
+      "autonomous task mutation",
+      "executor invocation from graph inference",
+      "graph-derived permission creation"
+    ]
+  }
+}
