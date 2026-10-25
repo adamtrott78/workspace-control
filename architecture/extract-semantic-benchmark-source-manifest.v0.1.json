@@ -1,0 +1,771 @@
+{
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "papers": [
+    {
+      "arxiv_id": "2411.06925",
+      "benchmark_paper_id": "pilot-deepcrf-2411.06925",
+      "page_count": 15,
+      "page_text_canonicalization": "CRLF/CR->LF; collapse horizontal whitespace; trim line-edge whitespace; collapse 3+ newlines to 2; strip; append LF",
+      "page_text_hash_algorithm": "sha256(canonicalized_pypdf_extract_text_utf8)",
+      "pages": [
+        {
+          "canonical_text_chars": 5303,
+          "canonical_text_sha256": "b95aa2fd1482c08d94b1f6e96bc956090a076292f7aa783408d8af55db9cc86c",
+          "page_number": 1
+        },
+        {
+          "canonical_text_chars": 6630,
+          "canonical_text_sha256": "85b5e295e4a3b6de8d00c3d8c64edb2b3866a51214c83f2af2ec3e51f48c031f",
+          "page_number": 2
+        },
+        {
+          "canonical_text_chars": 6344,
+          "canonical_text_sha256": "ef87c809205c7d18af27af73517e4d735ff88a3f63ab7dc9c93fed517f5ca4d0",
+          "page_number": 3
+        },
+        {
+          "canonical_text_chars": 5066,
+          "canonical_text_sha256": "f9b8d1201d5201d57e018a6fdabf22696d0f09e0f94e46dcabeeb1aed47398e9",
+          "page_number": 4
+        },
+        {
+          "canonical_text_chars": 5236,
+          "canonical_text_sha256": "13231cf3e41b69b3c0de1620220fad4368961f1498d895aca34717517944a279",
+          "page_number": 5
+        },
+        {
+          "canonical_text_chars": 5574,
+          "canonical_text_sha256": "ec8be5a6742843bcceba890bce6667350923176eed5fb401bcb7b12139f9ddeb",
+          "page_number": 6
+        },
+        {
+          "canonical_text_chars": 6071,
+          "canonical_text_sha256": "031a777882fd96bc1ca8285bb1e86333c2f3485baf750af63433e4f02fd28c9d",
+          "page_number": 7
+        },
+        {
+          "canonical_text_chars": 4495,
+          "canonical_text_sha256": "0e99c73bf7ea5ca34064bf6ab510491b745f9dcb4ce68fe26881a2ba40c8f59d",
+          "page_number": 8
+        },
+        {
+          "canonical_text_chars": 6175,
+          "canonical_text_sha256": "e867fabe4646ab111ebb4a68e5f24d380a8276076de1602f9d090c5a2c4ce937",
+          "page_number": 9
+        },
+        {
+          "canonical_text_chars": 4721,
+          "canonical_text_sha256": "91898678f69593be5b7f47d1a77a2bbc02b42910e29ab24d894cbaa0e4b9a069",
+          "page_number": 10
+        },
+        {
+          "canonical_text_chars": 4184,
+          "canonical_text_sha256": "42e8b91e2751eb76f2b423beada4d59fbf88c4477b9d620cd577e9b389e1fee4",
+          "page_number": 11
+        },
+        {
+          "canonical_text_chars": 5183,
+          "canonical_text_sha256": "b9d2600e203c86691247fb9ceb4157d3d1a4cf5c8596d53d2807d5284b815108",
+          "page_number": 12
+        },
+        {
+          "canonical_text_chars": 5341,
+          "canonical_text_sha256": "bd347e336e15db6ec45de2f3563fd34f7768a45d37c4f1cf33d9f9398c26265e",
+          "page_number": 13
+        },
+        {
+          "canonical_text_chars": 6745,
+          "canonical_text_sha256": "f189814493ef3f88e064dfed94c2be75d2c8866a23a242bb113a6602782d698b",
+          "page_number": 14
+        },
+        {
+          "canonical_text_chars": 9453,
+          "canonical_text_sha256": "1420bbd0e90e7267db657f6b8f34fef85a0805d5eb502935fc31d0ef8c471763",
+          "page_number": 15
+        }
+      ],
+      "source_pdf_bytes": 1611104,
+      "source_pdf_sha256": "02d500daa8d886a50b58f79cb314374d78f429d0c41cc33f2935c1bc7186457e",
+      "source_pdf_url": "https://arxiv.org/pdf/2411.06925v1",
+      "split": "PILOT",
+      "title": "DeepCRF: Deep Learning-Enhanced CSI-Based RF Fingerprinting for Channel-Resilient WiFi Device Identification",
+      "version": "v1"
+    },
+    {
+      "arxiv_id": "2402.05332",
+      "benchmark_paper_id": "pilot-epscnn-2402.05332",
+      "page_count": 7,
+      "page_text_canonicalization": "CRLF/CR->LF; collapse horizontal whitespace; trim line-edge whitespace; collapse 3+ newlines to 2; strip; append LF",
+      "page_text_hash_algorithm": "sha256(canonicalized_pypdf_extract_text_utf8)",
+      "pages": [
+        {
+          "canonical_text_chars": 5684,
+          "canonical_text_sha256": "1226b642f841e3602eea854216261d4230cc97083f91bdef9ebc93b0ff096084",
+          "page_number": 1
+        },
+        {
+          "canonical_text_chars": 6227,
+          "canonical_text_sha256": "887ff3b135eef88f8345d43348fca0608d846d9246e0f1c133360b65b3b13d55",
+          "page_number": 2
+        },
+        {
+          "canonical_text_chars": 4998,
+          "canonical_text_sha256": "a87857af38309f3bcd21543d0b001f5a0de1096a76ea8ce8bcbf2131417408c6",
+          "page_number": 3
+        },
+        {
+          "canonical_text_chars": 5375,
+          "canonical_text_sha256": "3391b5180d3445607680d1b80e667d4c7f456c2809f025dd233d576cf9eac120",
+          "page_number": 4
+        },
+        {
+          "canonical_text_chars": 5508,
+          "canonical_text_sha256": "c0e79d71c02645376b6481639321632f31db3664f2829a0cff7c5f9d5184c3b7",
+          "page_number": 5
+        },
+        {
+          "canonical_text_chars": 4870,
+          "canonical_text_sha256": "972d9fb8295cd36872204e7ca0670486e108af17fc9f47300b79e7008eb6a7e6",
+          "page_number": 6
+        },
+        {
+          "canonical_text_chars": 5444,
+          "canonical_text_sha256": "f4de515704fa30fc18ed4e08f02c3425bc137fcd08cabd8ceffda6064f8050f1",
+          "page_number": 7
+        }
+      ],
+      "source_pdf_bytes": 9584794,
+      "source_pdf_sha256": "9813b39353c7b7a6cb1ad5b225ad056a5e1027ac5df472c4a8c5b2c215afd788",
+      "source_pdf_url": "https://arxiv.org/pdf/2402.05332v1",
+      "split": "PILOT",
+      "title": "Domain-Agnostic Hardware Fingerprinting-Based Device Identifier for Zero-Trust IoT Security",
+      "version": "v1"
+    },
+    {
+      "arxiv_id": "2610.19115",
+      "benchmark_paper_id": "accept-ais-sequential-2610.19115",
+      "page_count": 17,
+      "page_text_canonicalization": "CRLF/CR->LF; collapse horizontal whitespace; trim line-edge whitespace; collapse 3+ newlines to 2; strip; append LF",
+      "page_text_hash_algorithm": "sha256(canonicalized_pypdf_extract_text_utf8)",
+      "pages": [
+        {
+          "canonical_text_chars": 6174,
+          "canonical_text_sha256": "618fb8e5ed772fac18d9ed9af41b637605d3eefb7032b010efc57e3ddbc0b630",
+          "page_number": 1
+        },
+        {
+          "canonical_text_chars": 6100,
+          "canonical_text_sha256": "19b5c13d1eb345a99216af712cfc310bfbb69dc258d37986cc0a81b98a4b2f16",
+          "page_number": 2
+        },
+        {
+          "canonical_text_chars": 5698,
+          "canonical_text_sha256": "6dbc8e8b070e73e11df869c4a6ac01376772367607ac96a27ccfed646671be20",
+          "page_number": 3
+        },
+        {
+          "canonical_text_chars": 4766,
+          "canonical_text_sha256": "2bc487384d3628d1459068f792c83e1241bfd2abb896bc31af2e26edc5b44a6c",
+          "page_number": 4
+        },
+        {
+          "canonical_text_chars": 5614,
+          "canonical_text_sha256": "d23201dc4f641f7e7efbdeac47db483f6f46c2014aeeeb70ab51b9abf24ce629",
+          "page_number": 5
+        },
+        {
+          "canonical_text_chars": 6028,
+          "canonical_text_sha256": "8bc8fcc921ca07513ad281c7c3c46e9fdbd5c02e773a388a0b64bd52ac098e74",
+          "page_number": 6
+        },
+        {
+          "canonical_text_chars": 5774,
+          "canonical_text_sha256": "2c598eb2b23f27e6e6f38bd91921b789350e8aa79c5a0bfdc0069596c83bb2df",
+          "page_number": 7
+        },
+        {
+          "canonical_text_chars": 6248,
+          "canonical_text_sha256": "2bac79d8b3ff7280f4835c727c4105ff5524b23713b73791672fafb5f00adad4",
+          "page_number": 8
+        },
+        {
+          "canonical_text_chars": 3687,
+          "canonical_text_sha256": "a4e7bb1a88b8dd73deaaa64c2e5e9dedc3812fff242f43060fab97da0869a510",
+          "page_number": 9
+        },
+        {
+          "canonical_text_chars": 4652,
+          "canonical_text_sha256": "0b65ccb84063cf57c83598a369668e5e24cddf95b221aacca4b3ad7a2da6b17f",
+          "page_number": 10
+        },
+        {
+          "canonical_text_chars": 5016,
+          "canonical_text_sha256": "c63e63e83aba7a5b6ae0fe2672590ddcf7e59618f7eb4a178855e1550c53d3ca",
+          "page_number": 11
+        },
+        {
+          "canonical_text_chars": 4758,
+          "canonical_text_sha256": "da400faa41ab119603d07de935059bb9b11428e5ba792e24a955ecc074fda8cb",
+          "page_number": 12
+        },
+        {
+          "canonical_text_chars": 6393,
+          "canonical_text_sha256": "c875c316f265922639c66c313da62df1a48071c2b6c2a91ed183da4d8a32982d",
+          "page_number": 13
+        },
+        {
+          "canonical_text_chars": 5656,
+          "canonical_text_sha256": "b2d703956f3f663e9dc88a6e23d8fced6d3b879a190900ecc5d2b73e01d8b9ef",
+          "page_number": 14
+        },
+        {
+          "canonical_text_chars": 3966,
+          "canonical_text_sha256": "bbce5e5d67d6d1f6b2900848e78d7d930df62c0463c2ea75b5aa8c6eb0b39b9f",
+          "page_number": 15
+        },
+        {
+          "canonical_text_chars": 5817,
+          "canonical_text_sha256": "1ff4af273c85754256f0e1e96669ecbab16c1eb7c3b83d88fbfd378953ea319b",
+          "page_number": 16
+        },
+        {
+          "canonical_text_chars": 4998,
+          "canonical_text_sha256": "44dcc839eea7848f63550db63de44a25d93032f5510bb5c320c1b16a7888ebdd",
+          "page_number": 17
+        }
+      ],
+      "source_pdf_bytes": 1148357,
+      "source_pdf_sha256": "60387caee63a94aa0d018d68b35a202f1ddb1acccc75a10007118e94f793ce3c",
+      "source_pdf_url": "https://arxiv.org/pdf/2610.19115v1",
+      "split": "ACCEPTANCE",
+      "title": "Sequential RF Fingerprinting for AIS: Rejecting Unknown Vessels and Insider MMSI Spoofs Days After Enrollment",
+      "version": "v1"
+    },
+    {
+      "arxiv_id": "2610.05979",
+      "benchmark_paper_id": "accept-holistic-rff-2610.05979",
+      "page_count": 13,
+      "page_text_canonicalization": "CRLF/CR->LF; collapse horizontal whitespace; trim line-edge whitespace; collapse 3+ newlines to 2; strip; append LF",
+      "page_text_hash_algorithm": "sha256(canonicalized_pypdf_extract_text_utf8)",
+      "pages": [
+        {
+          "canonical_text_chars": 6416,
+          "canonical_text_sha256": "318fcc9113fd8c7a59b1e966efad22d1a7958a37ca46fc9d4737bebfc93d6402",
+          "page_number": 1
+        },
+        {
+          "canonical_text_chars": 6599,
+          "canonical_text_sha256": "26cad5c30f6da8bcf34236051f6603a14e87fdc175f905b26f3b2be60be93c38",
+          "page_number": 2
+        },
+        {
+          "canonical_text_chars": 4654,
+          "canonical_text_sha256": "c3c7b627c27a9910cc90468bfb3d4d52e349111f3c146b7e3cde299dfe0e16bc",
+          "page_number": 3
+        },
+        {
+          "canonical_text_chars": 5822,
+          "canonical_text_sha256": "56affed2c52102a24054c2c404fe9659a79bcf05cb9bab313f7b5dd2d846d132",
+          "page_number": 4
+        },
+        {
+          "canonical_text_chars": 4634,
+          "canonical_text_sha256": "cde987fb49a5320871846c76161a21339df28c8ea3e5413b3754284ab93a2a02",
+          "page_number": 5
+        },
+        {
+          "canonical_text_chars": 3944,
+          "canonical_text_sha256": "88e77036b61b006eab4ddd26a9eb269338bbc0fe950d7001e998c77fe55ca7af",
+          "page_number": 6
+        },
+        {
+          "canonical_text_chars": 5312,
+          "canonical_text_sha256": "4d87f07e96ecf083c534abd995f2e9e77ae56687059f031f4af46999fbf5f2e3",
+          "page_number": 7
+        },
+        {
+          "canonical_text_chars": 6031,
+          "canonical_text_sha256": "71425aabd435ebb16fc56092e9c7fe218f2a87c1df4de08909c2dd9a3572a07c",
+          "page_number": 8
+        },
+        {
+          "canonical_text_chars": 5495,
+          "canonical_text_sha256": "54b623455e7ca92338c05f6aa0e7c7438625f0034d5a736c5a708c436c3e3e04",
+          "page_number": 9
+        },
+        {
+          "canonical_text_chars": 4228,
+          "canonical_text_sha256": "a107ec1eb8ddce7c3fa3142833e1098d54c5e69cf6859457464381c2c502a54c",
+          "page_number": 10
+        },
+        {
+          "canonical_text_chars": 4316,
+          "canonical_text_sha256": "ad175cb1ce57c48283d3a873c78b87da436cb4194715e43ce42786910fe5a551",
+          "page_number": 11
+        },
+        {
+          "canonical_text_chars": 3642,
+          "canonical_text_sha256": "22e8756f9ad7226517ffabbd13bbd642ed0ce5849ff1cc23ea6011a69e619f17",
+          "page_number": 12
+        },
+        {
+          "canonical_text_chars": 8310,
+          "canonical_text_sha256": "afc9a4817bc5acfd6f87a8ea651383d7a6bf1119c011c43b0dfe960a4c22c52b",
+          "page_number": 13
+        }
+      ],
+      "source_pdf_bytes": 940095,
+      "source_pdf_sha256": "d2b9f554b07088443c5bf58db2d300562d1a1ffca11460e8aedc1bbee8d5f2a6",
+      "source_pdf_url": "https://arxiv.org/pdf/2610.05979v1",
+      "split": "ACCEPTANCE",
+      "title": "From Identification to Discovery: Holistic RF Fingerprinting via Learning-Aided Quantization",
+      "version": "v1"
+    },
+    {
+      "arxiv_id": "2610.24930",
+      "benchmark_paper_id": "accept-trustagent-rff-2610.24930",
+      "page_count": 10,
+      "page_text_canonicalization": "CRLF/CR->LF; collapse horizontal whitespace; trim line-edge whitespace; collapse 3+ newlines to 2; strip; append LF",
+      "page_text_hash_algorithm": "sha256(canonicalized_pypdf_extract_text_utf8)",
+      "pages": [
+        {
+          "canonical_text_chars": 6114,
+          "canonical_text_sha256": "7a3c53c05c6b57e073745ac9caff99c8f051f2df4cc1a07dae8aa7c5fee4752c",
+          "page_number": 1
+        },
+        {
+          "canonical_text_chars": 6007,
+          "canonical_text_sha256": "c33ad6ad87b9bd5ecf47cf6d303fee84c86d0e9ff2e3fc093463f4b4c77f5413",
+          "page_number": 2
+        },
+        {
+          "canonical_text_chars": 5162,
+          "canonical_text_sha256": "19d2cb9d421158d445dec73bea97545c3fa3c0b6755cb6935c20fb2a2180be13",
+          "page_number": 3
+        },
+        {
+          "canonical_text_chars": 5153,
+          "canonical_text_sha256": "26ff9d42e7c414d77b4728ff103135194976939063381a91010deb4e9ce16446",
+          "page_number": 4
+        },
+        {
+          "canonical_text_chars": 5414,
+          "canonical_text_sha256": "a7b8ff96e7314c0256e5af23c61a300f0bc4f68deb4944165b5e8ce54e8e4679",
+          "page_number": 5
+        },
+        {
+          "canonical_text_chars": 4663,
+          "canonical_text_sha256": "b8fac75f27f2ddbd78f0d0c80c491e3abfe25dd15ee24918ec4b13677438ee06",
+          "page_number": 6
+        },
+        {
+          "canonical_text_chars": 5476,
+          "canonical_text_sha256": "86ec01975e882799810ac1b6236316cfa183f9b92e89af8c3b22ae355ccc413a",
+          "page_number": 7
+        },
+        {
+          "canonical_text_chars": 4722,
+          "canonical_text_sha256": "8f6829b54cdedd71da49d6da1831cef34f81be7d3f43687a72cd837d44f89858",
+          "page_number": 8
+        },
+        {
+          "canonical_text_chars": 5217,
+          "canonical_text_sha256": "6461128eff267fa98887c1d5bfc77024cceb0be5d193beeb8ea561bcd02d7dd8",
+          "page_number": 9
+        },
+        {
+          "canonical_text_chars": 8630,
+          "canonical_text_sha256": "20e1f61c10342f98226b591673576facba25cba5b5ec7b467df81aebfa683578",
+          "page_number": 10
+        }
+      ],
+      "source_pdf_bytes": 4130009,
+      "source_pdf_sha256": "ec24e1709bfb0c5944af416fc699ea35a294eb6968ee1ca9ed5a2022507f6ae3",
+      "source_pdf_url": "https://arxiv.org/pdf/2610.24930v2",
+      "split": "ACCEPTANCE",
+      "title": "TrustAgent-RFF: Agentic Diagnostic Planning for Reliable RF Fingerprinting under Domain Shift",
+      "version": "v2"
+    },
+    {
+      "arxiv_id": "2609.21873",
+      "benchmark_paper_id": "accept-sfpf-2609.21873",
+      "page_count": 8,
+      "page_text_canonicalization": "CRLF/CR->LF; collapse horizontal whitespace; trim line-edge whitespace; collapse 3+ newlines to 2; strip; append LF",
+      "page_text_hash_algorithm": "sha256(canonicalized_pypdf_extract_text_utf8)",
+      "pages": [
+        {
+          "canonical_text_chars": 5834,
+          "canonical_text_sha256": "1ee6896332deb2ed1c96243254b58dd8eb05eec0fe7692f6d9a2a42732477c89",
+          "page_number": 1
+        },
+        {
+          "canonical_text_chars": 5464,
+          "canonical_text_sha256": "30694a50bdca6df132d1cdc9bfe6d89ba64cedade15ef8437223b88bb136cfc4",
+          "page_number": 2
+        },
+        {
+          "canonical_text_chars": 4880,
+          "canonical_text_sha256": "d054b1a4540765539fcda880936b69497594dbf2b523124b05f5e04850ba86b8",
+          "page_number": 3
+        },
+        {
+          "canonical_text_chars": 4454,
+          "canonical_text_sha256": "f91aeb4242ac4bfc989cf5170606071c0aec78b66ba31bb37f26ad347deb0c09",
+          "page_number": 4
+        },
+        {
+          "canonical_text_chars": 1654,
+          "canonical_text_sha256": "5dcad1d8dea1fb9ae642a23a8c62b0982b2c5c81717cdf99cf0e0c28ff849894",
+          "page_number": 5
+        },
+        {
+          "canonical_text_chars": 4160,
+          "canonical_text_sha256": "549dcb2766bed300a143e31f8123be477fb26897c3b809a9209189df60506491",
+          "page_number": 6
+        },
+        {
+          "canonical_text_chars": 914,
+          "canonical_text_sha256": "3ea4efc8a68ed3da59e78fe3bcb0b9940977e87e85321c620965420276df65f6",
+          "page_number": 7
+        },
+        {
+          "canonical_text_chars": 5529,
+          "canonical_text_sha256": "8592c82ec0edafe924c7b68481bf431f4acfed407f00109a297854e1a599fca4",
+          "page_number": 8
+        }
+      ],
+      "source_pdf_bytes": 3252726,
+      "source_pdf_sha256": "fdc768444501afedb416cdf65fead91970d35496019f7047033d01edaaba2c80",
+      "source_pdf_url": "https://arxiv.org/pdf/2609.21873v1",
+      "split": "ACCEPTANCE",
+      "title": "SFPF: Spatio-Frequency Polarization Fingerprint for Anomalous Wireless Device Detection",
+      "version": "v1"
+    },
+    {
+      "arxiv_id": "2609.09511",
+      "benchmark_paper_id": "accept-safa-mz-2609.09511",
+      "page_count": 15,
+      "page_text_canonicalization": "CRLF/CR->LF; collapse horizontal whitespace; trim line-edge whitespace; collapse 3+ newlines to 2; strip; append LF",
+      "page_text_hash_algorithm": "sha256(canonicalized_pypdf_extract_text_utf8)",
+      "pages": [
+        {
+          "canonical_text_chars": 5709,
+          "canonical_text_sha256": "bb5eb8581be3c95372b4ec48c78a4ed5829883318906b5f48e85fd55f960864d",
+          "page_number": 1
+        },
+        {
+          "canonical_text_chars": 5005,
+          "canonical_text_sha256": "9c4989151e95cd55ae92592200d7f4b708d280775c987f877d803c094d3acb30",
+          "page_number": 2
+        },
+        {
+          "canonical_text_chars": 4904,
+          "canonical_text_sha256": "0e6fae306fb49027a9686c64abdd7d8959ddc350096537db19998ad0843a40c6",
+          "page_number": 3
+        },
+        {
+          "canonical_text_chars": 4449,
+          "canonical_text_sha256": "1fac23f6083f2263aab68e7ff84fadcf4befb94091dbe3c527da8a9ef365fa34",
+          "page_number": 4
+        },
+        {
+          "canonical_text_chars": 5814,
+          "canonical_text_sha256": "58f8c6e0d6f16f6ce6fc2c35fc3da4631eb869a28e205c5df31f3ae2f96e70bb",
+          "page_number": 5
+        },
+        {
+          "canonical_text_chars": 5346,
+          "canonical_text_sha256": "831e74f54cf8757d5ae99f82a91b2b02426f822a2b04f932c575ac92e447b8c8",
+          "page_number": 6
+        },
+        {
+          "canonical_text_chars": 4484,
+          "canonical_text_sha256": "65426663b4cab8a2a98f1dbcef3b559cc71928a382fbc00d7ede3443e6b49fb6",
+          "page_number": 7
+        },
+        {
+          "canonical_text_chars": 4487,
+          "canonical_text_sha256": "faebc16c27bce62ef54a694be19e3f870d75b4be7a8969fde336c9a22c5fda60",
+          "page_number": 8
+        },
+        {
+          "canonical_text_chars": 4457,
+          "canonical_text_sha256": "a555f4700ed031d1932d83328fcf7459f7a536cdd5aeb247394c18bf908892fd",
+          "page_number": 9
+        },
+        {
+          "canonical_text_chars": 5633,
+          "canonical_text_sha256": "bff5295ebbd36f31f9fa8a97cc1612093f3c9d6c4957bb6d31465563c4647587",
+          "page_number": 10
+        },
+        {
+          "canonical_text_chars": 5403,
+          "canonical_text_sha256": "69ea412a801fc4d494af9fad367bc39c3ccea881a73f1a9f094971f2afddea54",
+          "page_number": 11
+        },
+        {
+          "canonical_text_chars": 5344,
+          "canonical_text_sha256": "021a2a87d638b080dcb389a23023881807b01c5026a473fde3d1cd2908ea5558",
+          "page_number": 12
+        },
+        {
+          "canonical_text_chars": 3642,
+          "canonical_text_sha256": "b4c3fbb6e053057cb5890515f915b273c1164db6659653c754a5533aa6d320b6",
+          "page_number": 13
+        },
+        {
+          "canonical_text_chars": 7142,
+          "canonical_text_sha256": "2906b49a65bec9621c8b21d68925d22b23e4faad55c5d30aadb2bf78973a2b78",
+          "page_number": 14
+        },
+        {
+          "canonical_text_chars": 1391,
+          "canonical_text_sha256": "60abada0660af1167c36caf448dc646add9d2ce2cebcf1f0683287ba0427ec61",
+          "page_number": 15
+        }
+      ],
+      "source_pdf_bytes": 1314390,
+      "source_pdf_sha256": "64e41217fc7af97b0b7601d94b022a2393814682e69ebd3ac04fecea9b74a8c2",
+      "source_pdf_url": "https://arxiv.org/pdf/2609.09511v1",
+      "split": "ACCEPTANCE",
+      "title": "Adaptive Distributed Physical-Layer Authentication and Attack Detection in 6G Non-Terrestrial Networks via Causal Meta-Learning",
+      "version": "v1"
+    },
+    {
+      "arxiv_id": "2608.29845",
+      "benchmark_paper_id": "accept-microcsi-auth-2608.29845",
+      "page_count": 11,
+      "page_text_canonicalization": "CRLF/CR->LF; collapse horizontal whitespace; trim line-edge whitespace; collapse 3+ newlines to 2; strip; append LF",
+      "page_text_hash_algorithm": "sha256(canonicalized_pypdf_extract_text_utf8)",
+      "pages": [
+        {
+          "canonical_text_chars": 6232,
+          "canonical_text_sha256": "4e310df73cc51779deed0a7bc29b37ed1eb917959c3bed1f970f0e0513cddbf3",
+          "page_number": 1
+        },
+        {
+          "canonical_text_chars": 4783,
+          "canonical_text_sha256": "f40e4bbe635d7b97adf2ff7f21bd7df0223b507e629a4f56c07400e61a13a24a",
+          "page_number": 2
+        },
+        {
+          "canonical_text_chars": 4757,
+          "canonical_text_sha256": "e4f67249452950515960790adcc5f67b535818d43dd9277f6f2bf2b68bf81f91",
+          "page_number": 3
+        },
+        {
+          "canonical_text_chars": 4813,
+          "canonical_text_sha256": "38f9b5fc6371886950f403068077fcdc3b5dd931f9d15c4d4061524310c35c9c",
+          "page_number": 4
+        },
+        {
+          "canonical_text_chars": 4048,
+          "canonical_text_sha256": "10a5411081b19ed7c390be1520d0c59f866e759f65ecebd7b8d071820cc6bd65",
+          "page_number": 5
+        },
+        {
+          "canonical_text_chars": 3901,
+          "canonical_text_sha256": "99d881a340b903461f5109bde339c51034642112fb8c52a3144ca25b2f1266e7",
+          "page_number": 6
+        },
+        {
+          "canonical_text_chars": 3723,
+          "canonical_text_sha256": "c2f03f7b3406ea0f0201e9fa7e78756a29b80d9869fa6ca6befe2eb02fa906bb",
+          "page_number": 7
+        },
+        {
+          "canonical_text_chars": 4580,
+          "canonical_text_sha256": "3fcfce5b29ade69f4acb3f1fe3f2d67d92fbb5102643a90c6d17797a28b57b1e",
+          "page_number": 8
+        },
+        {
+          "canonical_text_chars": 4746,
+          "canonical_text_sha256": "569769cf5310579effa76733090c52d4951419fc4819291bbf6e39c30310d246",
+          "page_number": 9
+        },
+        {
+          "canonical_text_chars": 3194,
+          "canonical_text_sha256": "a933aa29afa501d04a714cf9a7922d49a7458c292c650c41b48c1924bde76041",
+          "page_number": 10
+        },
+        {
+          "canonical_text_chars": 254,
+          "canonical_text_sha256": "d46b61ac09393c7dcb09bf402cd11e1efff60cbd1ce7e60c2f50c4f9244fc02f",
+          "page_number": 11
+        }
+      ],
+      "source_pdf_bytes": 550067,
+      "source_pdf_sha256": "889501431e279312c212ebb9a859afa76cc3bf1d6bc7ecc293024e931fe6b907",
+      "source_pdf_url": "https://arxiv.org/pdf/2608.29845v1",
+      "split": "ACCEPTANCE",
+      "title": "From Identification to Authentication for Micro-CSI RF Fingerprinting in OFDM Systems",
+      "version": "v1"
+    },
+    {
+      "arxiv_id": "2610.15494",
+      "benchmark_paper_id": "accept-dsp-ota-2610.15494",
+      "page_count": 7,
+      "page_text_canonicalization": "CRLF/CR->LF; collapse horizontal whitespace; trim line-edge whitespace; collapse 3+ newlines to 2; strip; append LF",
+      "page_text_hash_algorithm": "sha256(canonicalized_pypdf_extract_text_utf8)",
+      "pages": [
+        {
+          "canonical_text_chars": 4963,
+          "canonical_text_sha256": "1750ab93d5fc0e8821eed3bc982316fe55b15855f955514b206ac78f1d97ec40",
+          "page_number": 1
+        },
+        {
+          "canonical_text_chars": 5307,
+          "canonical_text_sha256": "0a48bcfae5c95e66799f6b51cc481c305a54de1b2630b210f9dd60b930f662f9",
+          "page_number": 2
+        },
+        {
+          "canonical_text_chars": 5483,
+          "canonical_text_sha256": "edbcf50e122040660ffc2bfb4eec4bf9e8cee595f576e692470e263a82ee7a1d",
+          "page_number": 3
+        },
+        {
+          "canonical_text_chars": 4473,
+          "canonical_text_sha256": "f229b333c0eab6c93bebe833659f0d94fa96a0bab509d05e6d5d66a73bcfe1a3",
+          "page_number": 4
+        },
+        {
+          "canonical_text_chars": 4911,
+          "canonical_text_sha256": "aa9a0ea5e2c07684f725000a158ce06bb6ef0f80fa88d55d6ed612911bfc684f",
+          "page_number": 5
+        },
+        {
+          "canonical_text_chars": 5175,
+          "canonical_text_sha256": "443f418d66f2a358aabe239bcd718b4e23a3e042bf019c14ff39170b420a9085",
+          "page_number": 6
+        },
+        {
+          "canonical_text_chars": 2130,
+          "canonical_text_sha256": "b60e5bec4bde634337c15650c3aad833e1c7ea91e0201c1e945057324074d150",
+          "page_number": 7
+        }
+      ],
+      "source_pdf_bytes": 388794,
+      "source_pdf_sha256": "054be2ad12a605c49e747a06bb46080fa02ca1c15ea4d26ab9963626eabd494b",
+      "source_pdf_url": "https://arxiv.org/pdf/2610.15494v1",
+      "split": "ACCEPTANCE",
+      "title": "RF Fingerprinting of DSP Implementations using Machine Learning: An Over-the-Air Case Study",
+      "version": "v1"
+    },
+    {
+      "arxiv_id": "2603.00106",
+      "benchmark_paper_id": "accept-uav-dataset-2603.00106",
+      "page_count": 19,
+      "page_text_canonicalization": "CRLF/CR->LF; collapse horizontal whitespace; trim line-edge whitespace; collapse 3+ newlines to 2; strip; append LF",
+      "page_text_hash_algorithm": "sha256(canonicalized_pypdf_extract_text_utf8)",
+      "pages": [
+        {
+          "canonical_text_chars": 2541,
+          "canonical_text_sha256": "935be763c54a558adc3c88a98b069dc87103954dabbf17474d4ee352d96dfbc9",
+          "page_number": 1
+        },
+        {
+          "canonical_text_chars": 4407,
+          "canonical_text_sha256": "f2092d1f117f6f74a93dd0a6ca76a6cced95af1b695279d81fcc5733bff7a5bf",
+          "page_number": 2
+        },
+        {
+          "canonical_text_chars": 2459,
+          "canonical_text_sha256": "ef7a4e800050ff866240241bcb374b7fe2b4e407083ec00c425016375729d94d",
+          "page_number": 3
+        },
+        {
+          "canonical_text_chars": 1802,
+          "canonical_text_sha256": "bdfee7d30aa0f373883f22e3bdc995a5c43dcf7b4c814413e9658d3984ae4924",
+          "page_number": 4
+        },
+        {
+          "canonical_text_chars": 3089,
+          "canonical_text_sha256": "750d7e68f2c2db01c0c743608e127cb4ad39af0f5021e78195359aeb9e4d64e9",
+          "page_number": 5
+        },
+        {
+          "canonical_text_chars": 3717,
+          "canonical_text_sha256": "6c9020e4eb58c7583fff3eb72a7dec18919bdc5b2bdb3a1d8119f1e68a0b7ff3",
+          "page_number": 6
+        },
+        {
+          "canonical_text_chars": 2609,
+          "canonical_text_sha256": "1b1ed6d506ffc44e3f5c38ad9f269d22fecbeb2a06c42f6bff3870ee90868339",
+          "page_number": 7
+        },
+        {
+          "canonical_text_chars": 2854,
+          "canonical_text_sha256": "f05c07ce973975179f8a613c1af86e76b93b34cde91d88089c4e309e9e1a6782",
+          "page_number": 8
+        },
+        {
+          "canonical_text_chars": 1643,
+          "canonical_text_sha256": "b9ada5d717d98a62e25c5f4ec5bb2411de9010ca8b3ab0b004c27255e461e6d6",
+          "page_number": 9
+        },
+        {
+          "canonical_text_chars": 2064,
+          "canonical_text_sha256": "1144bf26dcf2459a1ed6cf669a9fabae8af9345cd7c3431029faa9777e2e4024",
+          "page_number": 10
+        },
+        {
+          "canonical_text_chars": 1960,
+          "canonical_text_sha256": "4999eda99a30ebed1ebd4e84fc19170fd8e07e02589c393bbd99c232f61cd3c1",
+          "page_number": 11
+        },
+        {
+          "canonical_text_chars": 2015,
+          "canonical_text_sha256": "d4b33c1bb19886e9780b541f562d47c98eabacba76dbac529ba494b4e0d45651",
+          "page_number": 12
+        },
+        {
+          "canonical_text_chars": 3128,
+          "canonical_text_sha256": "943abe21ad891170f7744cf90ab6a06306f27a3d3d89bc76cefd07cc632ec84b",
+          "page_number": 13
+        },
+        {
+          "canonical_text_chars": 2934,
+          "canonical_text_sha256": "cfe76be5e35d8ac41b33d2ac0110f468c1a6d2f72301845bc66338c7608c013d",
+          "page_number": 14
+        },
+        {
+          "canonical_text_chars": 2388,
+          "canonical_text_sha256": "5b3bcc39fe5861667caff3bde1664d247106dab9fec074683ab8954c8d225e2a",
+          "page_number": 15
+        },
+        {
+          "canonical_text_chars": 3080,
+          "canonical_text_sha256": "761b013826f5ecff38473d86b5c398cc6bd41b96ffe0aeed1ba781a33c3fb85b",
+          "page_number": 16
+        },
+        {
+          "canonical_text_chars": 2762,
+          "canonical_text_sha256": "c47b1e2aa9fc49e8f88cdce7c1698b69240af8c74b6f982f738ff3e8ba556a34",
+          "page_number": 17
+        },
+        {
+          "canonical_text_chars": 2907,
+          "canonical_text_sha256": "43a9a985e9d0cf602be6b0770e6773557427e7a8e49d7ae28f45ff3631b043b6",
+          "page_number": 18
+        },
+        {
+          "canonical_text_chars": 347,
+          "canonical_text_sha256": "a7ee227b0223d0ed5d6e5dc5d19fa5107dd6f39e26ff5556d320ac038f74e6a5",
+          "page_number": 19
+        }
+      ],
+      "source_pdf_bytes": 4554295,
+      "source_pdf_sha256": "71cccdd6aa6dcf214e6c70217e0bd49160056572bb889a431b2f45f54e11931f",
+      "source_pdf_url": "https://arxiv.org/pdf/2603.00106v2",
+      "split": "ACCEPTANCE",
+      "title": "A Multi-Scenario UAV RF Dataset with Real-World Acquisition and Signal Processing Benchmarking",
+      "version": "v2"
+    }
+  ],
+  "schema_version": 1,
+  "source_freeze_tool": {
+    "pypdf": "5.1.0",
+    "python": "3.11.17"
+  },
+  "status": "SOURCE_IDENTITIES_FROZEN"
+}
