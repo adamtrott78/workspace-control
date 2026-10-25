@@ -36,7 +36,7 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 ## Next safe action
 
-Keep the current 13-atom oracle as a one-paper diagnostic/regression control, not the definition of solved. Permit the already-frozen nine-paper cross-paper structural recovery experiment to proceed under its non-semantic claim boundary. Before production acceptance or a generalized semantic-success claim, design and validate a held-out multi-paper proposition/claim-level semantic benchmark. Future research Heartbeat updates must emit compact operator scorecards at genuine scientific boundaries.
+Keep the sealed acceptance benchmark untouched and do not alter the already-frozen hybrid. After LOCAL_FIRST_ALLOCATION_FALLBACK_HYBRID_V1 produces a genuine result and receives independent post-result review, use architecture/extract-legacy-four-atom-residual-audit.v0.1.json as a pre-acceptance input: either run the bounded ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 or prove the completeness/fallback controller reliably refuses analogous incomplete local outputs before ACCEPTANCE_CANDIDATE_FROZEN.
 
 ## Remaining work
 
