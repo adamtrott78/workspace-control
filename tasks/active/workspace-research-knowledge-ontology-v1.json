@@ -50,8 +50,8 @@
       "intent": "mutate",
       "base_sha": "67f3b0879dd26bbcbb5bff37080396174a7c2243",
       "remote": {
-        "branch": "research-knowledge-ontology-v02-corrections",
-        "checkpoint_sha": "b9305c7c2146fcbfc01409e26eacafdce7facb90",
+        "branch": "main",
+        "checkpoint_sha": "d096b923e7e1e07aa20e9276c8b45ecc446e3705",
         "verified": true
       },
       "local": null,
@@ -361,6 +361,18 @@
         "IDENTITY + two deterministic relabel variants per case = 63 exact-scored instances.",
         "Exact canonical JSON scoring; natural-language scoring=false."
       ]
+    },
+    {
+      "id": "research-knowledge-ontology-v0.2-merge-v1",
+      "kind": "durable_corrected_design_checkpoint",
+      "identity": "workspace-control@d096b923e7e1e07aa20e9276c8b45ecc446e3705|design@039fd2f888fb1abfb663c841df3425e2aa69fb74|benchmark@c73f6f531a05386c1177a2709690ad2b06739ea9",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #503 merged as workspace-control@d096b923e7e1e07aa20e9276c8b45ecc446e3705.",
+        "Workspace Control Validation run 40243759755 failed before any step executed and is recorded as VALIDATION_UNAVAILABLE, not PASS.",
+        "Manual structural closure validation recorded in PR #503 comment 6404741015.",
+        "No projection implementation authority exists until independent re-review returns NO_BLOCKING_FINDING on exact v0.2 blobs."
+      ]
     }
   ],
   "artifacts": [
@@ -432,5 +444,5 @@
   "next_safe_action": "Engage an independent reviewer on architecture/research-knowledge-ontology.v0.2.json blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json blob c73f6f531a05386c1177a2709690ad2b06739ea9. Re-review must specifically verify closure of all five v0.1 blockers: positive INVALID_EXECUTION coverage; contradiction fixture plus contradiction zero-count gate; 10/10 required query-family coverage including WHY_CURRENT_EXPERIMENT; operational same-query/different-graph + relabel anti-hardcoding; and exact deterministic canonical scoring with no natural-language grading. No implementation before disposition.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-10-25 task created as a parallel research lane while Local EXTRACT remains independently owned. The missing layer is scientific-state lineage/replay, not another semantic-control implementation. Exact v0.1 design and 16-case replay benchmark are frozen design-only artifacts. No EXTRACT or production mutation occurred.\n2026-10-25 provenance self-audit: replay contract source identities were tightened from conceptual labels to exact workspace-control blob/checkpoint identities before independent review. Ontology design blob now 9af5bea619ec5a2f83575b4c8d73d08922f05bdb; replay benchmark blob now 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Scientific scope and authority boundaries are unchanged.\n2026-10-25 blind-replay hardening: design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 now freeze evaluation separation, structured query inputs, zero gold leakage, and zero case-specific logic before independent review.\n2026-10-25 design merge: PR #493 merged as workspace-control@6fb3d95fe291887d564174b834743c94a663e12c under bounded zero-step validation-unavailable handling. Exact design/benchmark remain blocked on independent review.\n2026-10-25 v0.1 review consumed: BLOCKING_FINDING with five benchmark/contract defects; core ontology architecture accepted. Corrected v0.2 design blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and replay benchmark blob c73f6f531a05386c1177a2709690ad2b06739ea9 close only those five surfaces. Implementation remains blocked pending independent re-review."
+  "notes": "2026-10-25 task created as a parallel research lane while Local EXTRACT remains independently owned. The missing layer is scientific-state lineage/replay, not another semantic-control implementation. Exact v0.1 design and 16-case replay benchmark are frozen design-only artifacts. No EXTRACT or production mutation occurred.\n2026-10-25 provenance self-audit: replay contract source identities were tightened from conceptual labels to exact workspace-control blob/checkpoint identities before independent review. Ontology design blob now 9af5bea619ec5a2f83575b4c8d73d08922f05bdb; replay benchmark blob now 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Scientific scope and authority boundaries are unchanged.\n2026-10-25 blind-replay hardening: design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 now freeze evaluation separation, structured query inputs, zero gold leakage, and zero case-specific logic before independent review.\n2026-10-25 design merge: PR #493 merged as workspace-control@6fb3d95fe291887d564174b834743c94a663e12c under bounded zero-step validation-unavailable handling. Exact design/benchmark remain blocked on independent review.\n2026-10-25 v0.1 review consumed: BLOCKING_FINDING with five benchmark/contract defects; core ontology architecture accepted. Corrected v0.2 design blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and replay benchmark blob c73f6f531a05386c1177a2709690ad2b06739ea9 close only those five surfaces. Implementation remains blocked pending independent re-review.\n2026-10-25 corrected v0.2 merge: PR #503 merged as workspace-control@d096b923e7e1e07aa20e9276c8b45ecc446e3705. Exact corrected design/benchmark are durable on main; implementation remains blocked pending independent re-review."
 }
