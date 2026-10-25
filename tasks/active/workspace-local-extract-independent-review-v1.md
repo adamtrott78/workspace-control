@@ -24,26 +24,25 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: b8c98da5d58ca9efe0bdd39b99d435a62ca2dd6b
+- Remote checkpoint: 3a0baa942cb5306e2760792a245bc571e5f08238
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: aaf7aa79636b192fe6f16a71b10c727b103052f2
+- Remote checkpoint: 58ba18d21b3d99b2f4f1cecbb77705cda025c1b3
 - Remote verified: true
 
 ## Next safe action
 
-Owner must correct only the four result-affecting design ambiguities identified in atomic-obligation-residual-closure-design-review-v1, run ordinary design CI, and return the exact corrected SHA/blob for re-review. Do not implement ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 from the blocked design.
+Owner may implement exactly ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 from research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / design blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9. Preserve all frozen identities, matcher semantics, selection origins, budgets, outcome precedence, and teacher boundaries. Re-engage reviewer only if science changes or after the genuine result. No acceptance freeze.
 
 ## Remaining work
 
-- Wait for owner to correct only the four frozen-contract blockers in ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1.
-- Require exact corpus fixture/PDF identity, exact witness normalization/matching semantics, exact protected selection_origin values, and deterministic mechanism-outcome precedence.
-- Re-review the corrected exact design before any implementation.
-- Keep primary budget28, diagnostic-only budget32 sensitivity, four CORE obligations, teacher boundary, source-fidelity posthoc boundary, and sealed acceptance prohibition unchanged unless a new scientific design is intentionally proposed.
+- Wait for owner to implement exactly ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 from corrected design research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9.
+- Do not review routine implementation/CI/trigger mechanics unless the frozen science changes.
+- After exactly one valid diagnostic result, independently audit mechanism_outcome, completeness_safety_outcome, acceptance_boundary_evidence, preservation, provenance, and teacher-boundary invariants before next-phase selection.
 - Keep sealed acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
