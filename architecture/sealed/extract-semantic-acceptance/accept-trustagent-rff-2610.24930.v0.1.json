@@ -29,7 +29,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Establishes the reliability problem.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "trustagent.scope.frozen",
@@ -48,7 +48,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Critical deployment constraint.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "trustagent.method.evidence",
@@ -67,7 +67,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Defines diagnostic evidence family.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "trustagent.method.trust",
@@ -86,7 +86,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Core trust-calibration mechanism.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "trustagent.method.planner",
@@ -105,7 +105,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Agentic planning mechanism.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "trustagent.method.decision",
@@ -124,7 +124,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Final decision semantics.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "trustagent.eval.multidata",
@@ -143,7 +143,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Cross-dataset evaluation scope.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "trustagent.result.reliability",
@@ -162,7 +162,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Headline evidence that the diagnostic-planning framework improves reliability ranking while reducing assigned diagnostic cost.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     }
   ],
   "annotation_provenance": {
@@ -170,7 +170,7 @@
     "extract_outputs_viewed": false,
     "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
     "annotated_at": "2026-10-24T20:56:00-04:00",
-    "adjudicator_id": null,
-    "adjudicated_at": null
+    "adjudicator_id": "workspace-extract-semantic-benchmark-v1/pass-b",
+    "adjudicated_at": "2026-10-24T21:01:00-04:00"
   }
 }
