@@ -1,0 +1,157 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "split": "ACCEPTANCE",
+  "paper": {
+    "benchmark_paper_id": "accept-dsp-ota-2610.15494",
+    "arxiv_id": "2610.15494",
+    "version": "v1",
+    "title": "RF Fingerprinting of DSP Implementations using Machine Learning: An Over-the-Air Case Study",
+    "source_pdf_url": "https://arxiv.org/pdf/2610.15494v1",
+    "source_sha256": "054be2ad12a605c49e747a06bb46080fa02ca1c15ea4d26ab9963626eabd494b",
+    "page_count": 7
+  },
+  "obligations": [
+    {
+      "obligation_id": "dspota.scope.dsp",
+      "type": "ASSUMPTION_SCOPE",
+      "importance": "CORE",
+      "normalized_claim": "The study asks whether software/DSP implementation differences, rather than only hardware imperfections, leave RF fingerprints observable in radiated signals.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "dspota.scope.dsp.q1",
+          "page_number": 1,
+          "anchor_excerpt": "DSP implementations",
+          "canonical_span_sha256": "8c7328a1eaabd3d530c1f30df5d365d06ce8cb07c8ddfab5048b8f76bd914d1e",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Defines the distinct fingerprint source.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "dspota.dataset.impl",
+      "type": "DATASET_SETUP",
+      "importance": "CORE",
+      "normalized_claim": "The case study compares five software implementations that generate a 2-FSK RTTY waveform.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "dspota.dataset.impl.q1",
+          "page_number": 1,
+          "anchor_excerpt": "five different",
+          "canonical_span_sha256": "8c7328a1eaabd3d530c1f30df5d365d06ce8cb07c8ddfab5048b8f76bd914d1e",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Core class/setup definition.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "dspota.method.representations",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "CNN classifiers are trained on augmented software-generated signals represented as raw IQ, power spectrum, or instantaneous frequency.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "dspota.method.representations.q1",
+          "page_number": 1,
+          "anchor_excerpt": "instantaneous frequency",
+          "canonical_span_sha256": "8c7328a1eaabd3d530c1f30df5d365d06ce8cb07c8ddfab5048b8f76bd914d1e",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Model-input comparison.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "dspota.eval.ota",
+      "type": "EVALUATION_PROTOCOL",
+      "importance": "CORE",
+      "normalized_claim": "The trained networks are evaluated on over-the-air recordings produced with a shortwave transceiver and received by a software-defined radio.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "dspota.eval.ota.q1",
+          "page_number": 1,
+          "anchor_excerpt": "over-the-air",
+          "canonical_span_sha256": "8c7328a1eaabd3d530c1f30df5d365d06ce8cb07c8ddfab5048b8f76bd914d1e",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Important synthetic-train/OTA-test boundary.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "dspota.result.best",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "The best reported neural network combines IQ and power-spectrum representations and reaches up to 90% classification accuracy.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "dspota.result.best.q1",
+          "page_number": 1,
+          "anchor_excerpt": "90%",
+          "canonical_span_sha256": "8c7328a1eaabd3d530c1f30df5d365d06ce8cb07c8ddfab5048b8f76bd914d1e",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Headline quantitative result.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "dspota.robustness",
+      "type": "ROBUSTNESS_GENERALIZATION",
+      "importance": "SECONDARY",
+      "normalized_claim": "The study explicitly examines how signal-to-noise ratio and observation bandwidth affect classification accuracy.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "dspota.robustness.q1",
+          "page_number": 1,
+          "anchor_excerpt": "observation bandwidth",
+          "canonical_span_sha256": "8c7328a1eaabd3d530c1f30df5d365d06ce8cb07c8ddfab5048b8f76bd914d1e",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Robustness/evaluation dimension.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "dspota.result.complement",
+      "type": "RESULT",
+      "importance": "SECONDARY",
+      "normalized_claim": "The results support DSP-dependent fingerprinting as complementary information for specific-emitter identification rather than only conventional hardware fingerprints.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "dspota.result.complement.q1",
+          "page_number": 1,
+          "anchor_excerpt": "complementary information",
+          "canonical_span_sha256": "8c7328a1eaabd3d530c1f30df5d365d06ce8cb07c8ddfab5048b8f76bd914d1e",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Scientific implication.",
+      "adjudication_state": "PASS_A_ONLY"
+    }
+  ],
+  "annotation_provenance": {
+    "source_first": true,
+    "extract_outputs_viewed": false,
+    "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
+    "annotated_at": "2026-10-24T20:56:00-04:00",
+    "adjudicator_id": null,
+    "adjudicated_at": null
+  }
+}
