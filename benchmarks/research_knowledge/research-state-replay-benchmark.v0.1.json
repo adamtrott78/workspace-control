@@ -29,8 +29,7 @@
         "larger retrieval depth is authorized"
       ],
       "source_identities": [
-        "research-engine@1488b26a1fca63d56edd14c98bafdd55999799ad|run=40159749698|PRESERVATION_REGRESSION|UNSAFE_FALSE_COMPLETE",
-        "workspace-control independent review checkpoint atomic-obligation-residual-closure-result-review-v1"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=atomic-obligation-residual-closure-result-review-v1"
       ]
     },
     {
@@ -44,7 +43,7 @@
         "AMR_GRAPH_CERTIFICATE_REJECTED"
       ],
       "source_identities": [
-        "research-engine-local-extract-redesign-v1 durable constraints"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#constraints=rejected-certificate-families"
       ]
     },
     {
@@ -58,8 +57,8 @@
         "no rerun authority"
       ],
       "source_identities": [
-        "research-engine@a901115fb572a0647e70f87c39309bcda60f1dee|run=40166893479|VALIDITY_PREMISE_REJECTED",
-        "workspace-control PR #482 comment 6395379857"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-result-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1"
       ]
     },
     {
@@ -73,7 +72,7 @@
         "completed run must not be repaired or rerun"
       ],
       "source_identities": [
-        "workspace-control PR #482 comment 6395379857"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1"
       ]
     },
     {
@@ -92,7 +91,7 @@
         "sealed benchmark may be inspected"
       ],
       "source_identities": [
-        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-rereview-v1"
       ]
     },
     {
@@ -106,8 +105,8 @@
         "requires later successful validation before execution when validation is a gate"
       ],
       "source_identities": [
-        "research-engine design CI 40177364128/40177487876",
-        "workspace-control reviewer-handoff validation 40178745635"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00#handoff-validation=40178745635"
       ]
     },
     {
@@ -121,7 +120,7 @@
         "does not establish semantic completeness, production promotion, or acceptance readiness"
       ],
       "source_identities": [
-        "research-engine@e1d7afd32aa73fed3326b5cc0c9af1324096226a|run=40155082156|HYBRID_COMPLEMENTARITY_REALIZED"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=local-first-allocation-fallback-result-review-v1"
       ]
     },
     {
@@ -134,7 +133,8 @@
         "current exact-provenance experiment isolates binding only"
       ],
       "source_identities": [
-        "research-engine-local-extract-redesign-v1 current sequence"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1"
       ]
     },
     {
@@ -148,8 +148,8 @@
         "ontology task uses historical/read-only metadata only"
       ],
       "source_identities": [
-        "workspace-extract-semantic-benchmark-v1 dependency gate",
-        "research-engine-local-extract-redesign-v1 current boundaries"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-extract-semantic-benchmark-v1.json@f09ae7af04f6f9005c288890cef43fba18705ff5",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#frozen_boundary=sealed_acceptance_benchmark_accessed:false"
       ]
     },
     {
@@ -163,8 +163,8 @@
         "durably consumed review checkpoints remain provenance"
       ],
       "source_identities": [
-        "workspace-control task-capsule precedence",
-        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00"
       ]
     },
     {
@@ -178,8 +178,8 @@
         "authority-owned policy/task contract must evaluate execution permission"
       ],
       "source_identities": [
-        "workspace-knowledge-action-ontology-v1 architecture-research-v1",
-        "research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd:HARDENING_PASS"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239#checkpoint=architecture-research-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-hardening-v1.json@5040de32a39b42eeb90f474c886ea1f3c82c1fbb#checkpoint=semantic-control-hardening-final-v1"
       ]
     },
     {
@@ -193,7 +193,7 @@
         "it may be inspected as pending evidence only"
       ],
       "source_identities": [
-        "research-knowledge ontology source precedence contract"
+        "workspace-control:architecture/research-knowledge-ontology.v0.1.json@4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e#source_precedence_contract"
       ]
     },
     {
@@ -206,7 +206,8 @@
         "design scope, implementation authority, trigger authority, and production authority are distinct"
       ],
       "source_identities": [
-        "workspace-control research task history"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-rereview-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239#checkpoint=architecture-research-v1"
       ]
     },
     {
@@ -219,7 +220,7 @@
         "cosmetic retuning does not satisfy reopening"
       ],
       "source_identities": [
-        "research-engine-local-extract-redesign-v1 rejected mechanism constraints"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#constraints=rejected-mechanism-reopening"
       ]
     },
     {
@@ -233,7 +234,7 @@
         "current development experiments are insufficient"
       ],
       "source_identities": [
-        "workspace-semantic-control-integration-v1"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-integration-v1.json@c9701d00a2bca285603f283d7894277226fecd65#checkpoint=extract-dependency-gate-v1"
       ]
     },
     {
@@ -248,16 +249,16 @@
         "EXACT_PROVENANCE_BINDING_MICROBENCH_V1 was frozen to separate semantic judgment from exact provenance attachment"
       ],
       "source_identities": [
-        "run=40159749698",
-        "run=40166893479",
-        "workspace-control PR #482 comment 6395379857",
-        "research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc"
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=atomic-obligation-residual-closure-result-review-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-result-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1"
       ]
     }
   ],
   "pass_criteria": {
     "exact_case_answer_pass": "16/16",
-    "provenance_traceability": "16/16 cases include all required exact source identities",
+    "provenance_traceability": "16/16 cases include only exact durable source/blob/checkpoint identities",
     "authority_escape_count": 0,
     "stale_state_override_count": 0,
     "posthoc_verdict_conflation_count": 0,
@@ -267,5 +268,15 @@
   "interpretation": {
     "pass": "Authorizes implementation of the bounded read-only projection/query prototype only after independent design review; does not authorize EXTRACT binding, production promotion, or executor mutation.",
     "fail": "Revise ontology/source-precedence/replay contract before implementation. Do not compensate by adding model inference or broader source access."
+  },
+  "source_bindings": {
+    "owner": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c",
+    "parent": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239",
+    "hardening": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-hardening-v1.json@5040de32a39b42eeb90f474c886ea1f3c82c1fbb",
+    "integration": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-integration-v1.json@c9701d00a2bca285603f283d7894277226fecd65",
+    "methodology": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-research-methodology-v1.json@d3d8c7ee9e09262e05d20d31741ca398d6aaf65e",
+    "sealed": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-extract-semantic-benchmark-v1.json@f09ae7af04f6f9005c288890cef43fba18705ff5",
+    "reviewer": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00",
+    "design": "workspace-control:architecture/research-knowledge-ontology.v0.1.json@4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e"
   }
 }
