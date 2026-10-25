@@ -47,8 +47,8 @@
       "intent": "mutate",
       "base_sha": "67f3b0879dd26bbcbb5bff37080396174a7c2243",
       "remote": {
-        "branch": "research-knowledge-ontology-v1-design",
-        "checkpoint_sha": "6d08843c14aa6ed3e6cc6ebb8bf5732eeb14ef08",
+        "branch": "main",
+        "checkpoint_sha": "6fb3d95fe291887d564174b834743c94a663e12c",
         "verified": true
       },
       "local": null,
@@ -251,6 +251,19 @@
         "Primary scoring is model-free.",
         "Required pass is 16/16 exact answers + 16/16 source provenance + zero safety/authority violations."
       ]
+    },
+    {
+      "id": "research-knowledge-ontology-design-merge-v0.1",
+      "kind": "durable_design_checkpoint",
+      "identity": "workspace-control@6fb3d95fe291887d564174b834743c94a663e12c|design@9af5bea619ec5a2f83575b4c8d73d08922f05bdb|benchmark@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #493 merged as workspace-control@6fb3d95fe291887d564174b834743c94a663e12c.",
+        "Design and 16-case blind replay benchmark are durable on main.",
+        "Workspace Control Validation run 40241931276 failed twice before any step executed and is recorded as VALIDATION_UNAVAILABLE, not PASS.",
+        "Manual structural validation was recorded in PR #493 comment 6404503637.",
+        "No implementation authority exists until independent review returns NO_BLOCKING_FINDING on the exact frozen blobs."
+      ]
     }
   ],
   "artifacts": [
@@ -299,5 +312,5 @@
   "next_safe_action": "Engage an independent reviewer on architecture/research-knowledge-ontology.v0.1.json blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Reviewer should test source-precedence correctness, epistemic/normative/execution separation, verdict-vs-posthoc and negative-vs-invalid distinctions, rejected-mechanism reopening semantics, and whether CandidateAction/DecisionEvaluation can remain useful without graph-created authority. No implementation before disposition.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-10-25 task created as a parallel research lane while Local EXTRACT remains independently owned. The missing layer is scientific-state lineage/replay, not another semantic-control implementation. Exact v0.1 design and 16-case replay benchmark are frozen design-only artifacts. No EXTRACT or production mutation occurred.\n2026-10-25 provenance self-audit: replay contract source identities were tightened from conceptual labels to exact workspace-control blob/checkpoint identities before independent review. Ontology design blob now 9af5bea619ec5a2f83575b4c8d73d08922f05bdb; replay benchmark blob now 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Scientific scope and authority boundaries are unchanged.\n2026-10-25 blind-replay hardening: design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 now freeze evaluation separation, structured query inputs, zero gold leakage, and zero case-specific logic before independent review."
+  "notes": "2026-10-25 task created as a parallel research lane while Local EXTRACT remains independently owned. The missing layer is scientific-state lineage/replay, not another semantic-control implementation. Exact v0.1 design and 16-case replay benchmark are frozen design-only artifacts. No EXTRACT or production mutation occurred.\n2026-10-25 provenance self-audit: replay contract source identities were tightened from conceptual labels to exact workspace-control blob/checkpoint identities before independent review. Ontology design blob now 9af5bea619ec5a2f83575b4c8d73d08922f05bdb; replay benchmark blob now 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Scientific scope and authority boundaries are unchanged.\n2026-10-25 blind-replay hardening: design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 now freeze evaluation separation, structured query inputs, zero gold leakage, and zero case-specific logic before independent review.\n2026-10-25 design merge: PR #493 merged as workspace-control@6fb3d95fe291887d564174b834743c94a663e12c under bounded zero-step validation-unavailable handling. Exact design/benchmark remain blocked on independent review."
 }
