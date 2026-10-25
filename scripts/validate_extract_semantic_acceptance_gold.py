@@ -73,13 +73,19 @@ def validate_doc(path: Path) -> dict:
                 errors.append(f"{ob['obligation_id']}: anchor absent from hashed span")
     if not doc["annotation_provenance"]["source_first"]: errors.append("source_first false")
     if doc["annotation_provenance"]["extract_outputs_viewed"]: errors.append("extract outputs viewed")
+    states={o["adjudication_state"] for o in doc["obligations"]}
+    if "PASS_A_ONLY" in states: errors.append("unadjudicated PASS_A_ONLY obligation remains")
+    if states & {"REJECT_NOT_IMPORTANT","REJECT_UNSUPPORTED"}:
+        errors.append("rejected obligation remains in final gold")
+    canonical=json.dumps(doc,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode("utf-8")
     return {
       "file":str(path),
       "paper_id":doc["paper"]["benchmark_paper_id"],
       "obligation_count":len(doc["obligations"]),
       "core_count":sum(o["importance"]=="CORE" for o in doc["obligations"]),
       "secondary_count":sum(o["importance"]=="SECONDARY" for o in doc["obligations"]),
-      "adjudication_states":sorted(set(o["adjudication_state"] for o in doc["obligations"])),
+      "adjudication_states":sorted(states),
+      "canonical_json_sha256":hashlib.sha256(canonical).hexdigest(),
       "errors":errors,
     }
 
@@ -88,6 +94,10 @@ def main():
     assert len(files)==8, len(files)
     results=[validate_doc(p) for p in files]
     all_errors=[e for r in results for e in r["errors"]]
+    commitment_material="".join(
+        f"{r['paper_id']}:{r['canonical_json_sha256']}\n"
+        for r in sorted(results,key=lambda x:x["paper_id"])
+    ).encode("utf-8")
     report={
       "schema_version":1,
       "status":"PASS" if not all_errors else "FAIL",
@@ -95,6 +105,8 @@ def main():
       "obligation_count":sum(r["obligation_count"] for r in results),
       "core_count":sum(r["core_count"] for r in results),
       "secondary_count":sum(r["secondary_count"] for r in results),
+      "gold_commitment_sha256":hashlib.sha256(commitment_material).hexdigest(),
+      "commitment_definition":"sha256(sorted paper_id:canonical_json_sha256 + LF)",
       "papers":results,
       "errors":all_errors,
     }
