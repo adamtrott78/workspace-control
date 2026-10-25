@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: de705dda17ce62ed234866d51b03733a364ec66f
+- Remote checkpoint: b4961467c528abd51f834c378874b5f0162e633d
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact COMPLEMENTARY_STRUCTURAL_RECOVERY result checkpoint, close research-engine PR #257 unmerged, and re-engage workspace-local-extract-independent-review-v1 on run 40151063835 / artifact 12581733721 / report sha256:5f83398baba06cb2c96a51e9252ced763a760736e563a4994e7e4f09c60ff52e. Do not freeze the hybrid or acceptance candidate before that review is durable.
+Perform evidence-first hybrid architecture selection on development evidence. Compare local-first allocation-fallback, allocation-first local-fallback, union-with-deterministic-rerank, and bounded two-slot alternatives. Do not use removed proposition identity or teacher data in arbitration. Freeze one exact hybrid diagnostic and obtain independent review before implementation.
 
 ## Remaining work
 
-- Obtain independent post-result review of run 40151063835 / artifact 12581733721 / report sha256 5f83398baba06cb2c96a51e9252ced763a760736e563a4994e7e4f09c60ff52e before freezing a hybrid design.
-- After this result checkpoint merges, close research-engine PR #257 unmerged and do not retrigger.
-- If reviewer finds no blocking issue, design the smallest deterministic hybrid recovery operator using the same fixed all-nine baseline and the two unchanged structural arms; freeze and review before implementation.
-- Do not add deeper retrieval merely from the allocation-only case: its exact recovery is SHALLOW_FRONTIER and depth-extension exact recoveries are zero.
-- Keep the sealed acceptance benchmark uninspected. Do not declare ACCEPTANCE_CANDIDATE_FROZEN until a reproducible end-to-end candidate is independently justified by development evidence.
+- Compare deterministic teacher-blind hybrid policies that compose radius1 local rescue with surviving-intent allocation without oracle knowledge.
+- Freeze the smallest discriminating hybrid experiment with exact arbitration/selection, budget, costs, metrics, verdicts, and stopping rule before implementation.
+- Obtain independent review of that exact hybrid design.
+- After a valid hybrid result, independently review before any next phase or acceptance-candidate decision.
+- Keep sealed semantic acceptance benchmark uninspected and do not declare ACCEPTANCE_CANDIDATE_FROZEN yet.
 
 ## Blockers / gates
 
