@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: research-engine-local-extract-redesign-v1
 - Title: Research Engine Mostly-Local EXTRACT Redesign v1
-- Status: CHECKPOINTED
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 013301d7d47d006de054a4ab5ee8082e693f5f09
+- Remote checkpoint: 874771f5bbbcc1896efb9e63841093010943b7ac
 - Remote verified: true
 
 ### research-engine
@@ -42,17 +42,16 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Hand exact corrected design research-engine@0abc9d3c6a558a5364ec10dd2d7263745ba37e2b / design blob 4f4238030b7b667e080c2f662646e5856deacb4f / OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 back to the independent reviewer. STOP before implementation. Resume only after reviewer returns NO_BLOCKING_FINDING. No acceptance freeze or sealed holdout access.
+Implement exactly OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 from research-engine@0abc9d3c6a558a5364ec10dd2d7263745ba37e2b / design blob 4f4238030b7b667e080c2f662646e5856deacb4f. Do not change frozen science. After ordinary CI and a durable exact-SHA implementation checkpoint, execute exactly one valid development run via an inert exact-SHA trigger. Then STOP for mandatory independent post-result review. No acceptance freeze or sealed holdout access.
 
 ## Remaining work
 
-- Independent reviewer must re-review exact corrected design research-engine@0abc9d3c6a558a5364ec10dd2d7263745ba37e2b / design blob 4f4238030b7b667e080c2f662646e5856deacb4f.
-- STOP before implementation: do not create implementation code, a scientific trigger, or execute OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 until the corrected design receives NO_BLOCKING_FINDING.
-- If reviewer returns NO_BLOCKING_FINDING, owner may resume with implementation exactly as frozen, ordinary CI, durable pre-run checkpoint, and exactly one valid development run.
-- After one valid scientific result, mandatory independent post-result review is required before selecting preservation-aware admission integration.
-- Do not change the seven frozen cases, Qwen3.5-4B identity, source/corpus identities, either mechanism family, no-mutation boundary, all-or-nothing precision-first gate, completeness simulation, one-run rule, or hybrid lineage.
-- Do not reopen retrieval depth, query generation, reranking, larger-model scaling, NLI/predicate-argument/AMR certificate families, or the completed lexical-witness experiment without genuinely new premise-level evidence.
-- Keep sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
+- Implement exactly OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 from reviewed design blob 4f4238030b7b667e080c2f662646e5856deacb4f without changing prompts, visible fields, cases, parser/guard rules, model settings, or scientific gates.
+- Run ordinary CI and merge the exact implementation.
+- Create/use an inert exact-SHA trigger and execute exactly one valid development run.
+- Capture exact run/job/artifact/report identities and checkpoint the genuine scientific result.
+- STOP after the genuine result and re-engage the independent reviewer before any next scientific phase.
+- Keep acceptance_candidate_frozen=false and sealed semantic acceptance benchmark untouched.
 
 ## Blockers / gates
 
