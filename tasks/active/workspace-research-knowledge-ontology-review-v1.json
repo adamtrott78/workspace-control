@@ -1,0 +1,135 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-research-knowledge-ontology-review-v1",
+  "title": "Research Knowledge Ontology Independent Review v1",
+  "status": "IN_PROGRESS",
+  "goal": "Independently review the frozen Research Knowledge Ontology v0.1 and 16-case blind replay benchmark for scientific validity, provenance/source-precedence correctness, anti-leak integrity, authority separation, generality, and non-tautological decision support before any projection implementation.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/evidence-first-solution-research.v1.json",
+    "checkpoint_sha": "33762b90b0ecfaac879717bfe0a0fb4c809f22f2",
+    "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
+  },
+  "current_stage": "review_frozen_ontology_and_replay_contract",
+  "acceptance_criteria": [
+    "Review exact ontology design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and replay benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 without modifying them.",
+    "Determine whether epistemic, normative/scientific-authority, execution, and CandidateAction/DecisionEvaluation layers are sufficiently separated to prevent graph-created authority.",
+    "Determine whether source precedence preserves stale/history while producing a defensible current-state view from merged authoritative artifacts.",
+    "Verify contradictions, supersession, preregistered verdicts, posthoc non-verdict evidence, invalid execution, validation unavailable, blocked evidence, and rejected-mechanism reopening remain distinct states.",
+    "Verify the blind replay contract prevents projection/query code from reading case IDs, expected labels, required points, forbidden claims, or benchmark gold.",
+    "Assess whether the 16 structured query inputs test reusable graph/query semantics rather than encouraging case-specific hardcoding.",
+    "Verify all replay cases bind exact durable provenance and do not require sealed acceptance-benchmark access.",
+    "Assess whether pass criteria are strong enough: 16/16 exact replay, 16/16 provenance, zero authority escapes, zero stale overrides, zero verdict/posthoc conflation, zero invalid-vs-negative conflation, zero gold leakage, zero case-specific logic.",
+    "Return NO_BLOCKING_FINDING or exact blocking findings. No implementation authority exists until a NO_BLOCKING_FINDING is durably consumed by the owner task."
+  ],
+  "constraints": [
+    "Do not implement the projection or query engine.",
+    "Do not mutate workspace-research-knowledge-ontology-v1 science/design/benchmark artifacts.",
+    "Do not mutate Local EXTRACT, research-engine, semantic-control integration, policy, production routing, or the sealed acceptance benchmark.",
+    "Do not treat zero-step CI failures as PASS or scientific evidence.",
+    "Do not rubber-stamp because the design follows prior ontology/semantic-control work; explicitly test for tautology, benchmark leakage, source-precedence errors, and authority laundering.",
+    "If a blocker is found, identify the exact result-affecting contract surface and avoid proposing unrelated architecture expansion."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "33762b90b0ecfaac879717bfe0a0fb4c809f22f2",
+      "remote": {
+        "branch": "research-knowledge-ontology-review-v1",
+        "checkpoint_sha": "33762b90b0ecfaac879717bfe0a0fb4c809f22f2",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-research-knowledge-ontology-review-v1.json",
+        "tasks/active/workspace-research-knowledge-ontology-review-v1.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "6a4cc30e8c33a54a8cca9eca82a4f1fa300ad7e8",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "6a4cc30e8c33a54a8cca9eca82a4f1fa300ad7e8",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "recover_exact_review_inputs",
+      "status": "VALIDATED",
+      "execution_owner": "independent_reviewer",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "workspace-control@33762b90b0ecfaac879717bfe0a0fb4c809f22f2",
+        "owner task blob f7d88f4d94b498aa5eb847d06aca8e765d7813bc",
+        "design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb",
+        "benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998"
+      ],
+      "outputs": [
+        "exact review target identity frozen"
+      ],
+      "validation": [
+        {
+          "check": "Review target identity",
+          "result": "PASS",
+          "evidence": [
+            "Owner task is stopped at independent_preimplementation_review_ready.",
+            "Design and benchmark blobs are durable on main.",
+            "No projection implementation exists in this task."
+          ]
+        }
+      ],
+      "resume_condition": "Review exact frozen blobs only."
+    },
+    {
+      "id": "review_frozen_ontology_and_replay_contract",
+      "status": "READY",
+      "execution_owner": "independent_reviewer",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "architecture/research-knowledge-ontology.v0.1.json@9af5bea619ec5a2f83575b4c8d73d08922f05bdb",
+        "benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998"
+      ],
+      "outputs": [
+        "NO_BLOCKING_FINDING or exact blocking findings"
+      ],
+      "validation": [],
+      "resume_condition": "Persist reviewer disposition before owner implementation."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "frozen-review-target-v1",
+      "kind": "independent_review_target",
+      "identity": "workspace-control@33762b90b0ecfaac879717bfe0a0fb4c809f22f2|owner_blob@f7d88f4d94b498aa5eb847d06aca8e765d7813bc|design@9af5bea619ec5a2f83575b4c8d73d08922f05bdb|benchmark@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998",
+      "required_for_resume": true,
+      "evidence": [
+        "Design PR #493 merged as workspace-control@6fb3d95fe291887d564174b834743c94a663e12c.",
+        "Task reconciliation PR #494 merged as workspace-control@33762b90b0ecfaac879717bfe0a0fb4c809f22f2.",
+        "Owner blocks implementation until independent review.",
+        "Workspace Control CI was validation-unavailable due zero-step runner failures; this is review context only, not scientific evidence."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [],
+  "blockers": [],
+  "remaining_work": [
+    "Perform independent review of the exact design and replay benchmark.",
+    "Persist NO_BLOCKING_FINDING or exact blocking findings in this reviewer capsule/handoff.",
+    "If NO_BLOCKING_FINDING, allow owner to consume the disposition; do not implement from the reviewer lane."
+  ],
+  "next_safe_action": "Independently review architecture/research-knowledge-ontology.v0.1.json blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Focus on source-precedence correctness, anti-leak/blind-replay integrity, non-tautological query semantics, exact provenance, scientific-state distinctions, and prevention of graph-created execution authority. Return NO_BLOCKING_FINDING or exact blockers; do not implement anything.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Created 2026-10-25 as a separate independent review lane for the durable Research Knowledge Ontology v0.1 design. Owner task remains implementation-blocked pending this review."
+}
