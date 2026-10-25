@@ -21,12 +21,14 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 ## Repositories
 
 ### workspace-control
+
 - Intent: mutate
 - Remote branch: main
 - Remote checkpoint: 013301d7d47d006de054a4ab5ee8082e693f5f09
 - Remote verified: true
 
 ### research-engine
+
 - Intent: read
 - Remote branch: main
 - Remote checkpoint: b939ff0bbb52024f55b2f6e719aef331f6286d06
@@ -57,5 +59,6 @@ Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-local-extract-independent-review-v1.json
 
 Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced evidence as the handoff.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
