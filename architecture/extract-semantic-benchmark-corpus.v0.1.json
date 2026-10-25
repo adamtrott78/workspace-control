@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "status": "CORPUS_FROZEN_SOURCE_HASHES_PENDING",
+  "frozen_at": "2026-10-24T20:30:00-04:00",
+  "development_corpus_exclusions": {
+    "legacy_wave1_arxiv_ids": [
+      "2411.03636",
+      "2209.03142",
+      "2501.15391",
+      "2306.13895",
+      "2403.04036",
+      "2609.02007",
+      "2112.02536",
+      "2609.20765",
+      "2108.13099"
+    ],
+    "rule": "No paper used in the active nine-paper EXTRACT research corpus may count toward held-out semantic acceptance."
+  },
+  "selection_policy": {
+    "source": "Open-access primary research discovered independently of Local EXTRACT outputs.",
+    "freshness": "Prefer papers not previously used by the Local EXTRACT development corpus, with a mix of mature 2024 work and fresh 2026 work.",
+    "topical_strata": [
+      "domain_shift_and_channel_robustness",
+      "open_set_unknown_rejection",
+      "novel_class_discovery",
+      "authentication_and_spoofing",
+      "hardware_anomaly_integrity",
+      "over_the_air_fingerprinting",
+      "real_world_dataset_and_acquisition",
+      "physical_layer_security_generalization"
+    ],
+    "exclusions": [
+      "surveys/reviews as primary benchmark cases",
+      "papers already in the development corpus",
+      "papers lacking an authoritative open PDF",
+      "papers whose benchmark role is only tangential to RF/RFF evidence extraction"
+    ],
+    "anti_cherry_pick_rule": "Paper split and roles are frozen before source-first gold annotation and before any Local EXTRACT evaluation on these papers."
+  },
+  "pilot_papers": [
+    {
+      "benchmark_paper_id": "pilot-deepcrf-2411.06925",
+      "split": "PILOT",
+      "arxiv_id": "2411.06925",
+      "version": "v1",
+      "title": "DeepCRF: Deep Learning-Enhanced CSI-Based RF Fingerprinting for Channel-Resilient WiFi Device Identification",
+      "published": "2024-11-11T12:29:46Z",
+      "source_pdf_url": "https://arxiv.org/pdf/2411.06925v1",
+      "source_sha256": null,
+      "page_count": null,
+      "strata": [
+        "domain_shift_and_channel_robustness",
+        "over_the_air_fingerprinting"
+      ],
+      "role_rationale": "Mature channel-resilience case with quantitative unseen-condition results; used to validate annotation mechanics, not final acceptance.",
+      "gold_status": "UNLABELED_PILOT"
+    },
+    {
+      "benchmark_paper_id": "pilot-epscnn-2402.05332",
+      "split": "PILOT",
+      "arxiv_id": "2402.05332",
+      "version": "v1",
+      "title": "Domain-Agnostic Hardware Fingerprinting-Based Device Identifier for Zero-Trust IoT Security",
+      "published": "2024-02-08T00:23:42Z",
+      "source_pdf_url": "https://arxiv.org/pdf/2402.05332v1",
+      "source_sha256": null,
+      "page_count": null,
+      "strata": [
+        "domain_shift_and_channel_robustness",
+        "authentication_and_spoofing"
+      ],
+      "role_rationale": "Cross-day/cross-location device-identification paper with security framing and multiple evaluation regimes; pilot only.",
+      "gold_status": "UNLABELED_PILOT"
+    }
+  ],
+  "acceptance_papers": [
+    {
+      "benchmark_paper_id": "accept-ais-sequential-2610.19115",
+      "split": "ACCEPTANCE",
+      "arxiv_id": "2610.19115",
+      "version": "v1",
+      "title": "Sequential RF Fingerprinting for AIS: Rejecting Unknown Vessels and Insider MMSI Spoofs Days After Enrollment",
+      "published": "2026-10-13T19:51:10Z",
+      "source_pdf_url": "https://arxiv.org/pdf/2610.19115v1",
+      "source_sha256": null,
+      "page_count": null,
+      "strata": [
+        "open_set_unknown_rejection",
+        "authentication_and_spoofing",
+        "domain_shift_and_channel_robustness"
+      ],
+      "role_rationale": "Combines unseen-device rejection, insider-spoof detection, temporal drift, calibration, and quantitative operational metrics.",
+      "gold_status": "SEALED_UNCREATED"
+    },
+    {
+      "benchmark_paper_id": "accept-holistic-rff-2610.05979",
+      "split": "ACCEPTANCE",
+      "arxiv_id": "2610.05979",
+      "version": "v1",
+      "title": "From Identification to Discovery: Holistic RF Fingerprinting via Learning-Aided Quantization",
+      "published": "2026-10-05T08:32:30Z",
+      "source_pdf_url": "https://arxiv.org/pdf/2610.05979v1",
+      "source_sha256": null,
+      "page_count": null,
+      "strata": [
+        "open_set_unknown_rejection",
+        "novel_class_discovery"
+      ],
+      "role_rationale": "Single architecture spanning closed-set identification, open-set recognition, and novel-class discovery across LoRa/WiFi.",
+      "gold_status": "SEALED_UNCREATED"
+    },
+    {
+      "benchmark_paper_id": "accept-trustagent-rff-2610.24930",
+      "split": "ACCEPTANCE",
+      "arxiv_id": "2610.24930",
+      "version": "v2",
+      "title": "TrustAgent-RFF: Agentic Diagnostic Planning for Reliable RF Fingerprinting under Domain Shift",
+      "published": "2026-10-18T00:56:39Z",
+      "source_pdf_url": "https://arxiv.org/pdf/2610.24930v2",
+      "source_sha256": null,
+      "page_count": null,
+      "strata": [
+        "domain_shift_and_channel_robustness",
+        "physical_layer_security_generalization"
+      ],
+      "role_rationale": "Reliability under receiver/distance/day/environment shift, calibrated trust, evidence acquisition, and accept/reject/defer behavior.",
+      "gold_status": "SEALED_UNCREATED"
+    },
+    {
+      "benchmark_paper_id": "accept-sfpf-2609.21873",
+      "split": "ACCEPTANCE",
+      "arxiv_id": "2609.21873",
+      "version": "v1",
+      "title": "SFPF: Spatio-Frequency Polarization Fingerprint for Anomalous Wireless Device Detection",
+      "published": "2026-09-18T15:00:38Z",
+      "source_pdf_url": "https://arxiv.org/pdf/2609.21873v1",
+      "source_sha256": null,
+      "page_count": null,
+      "strata": [
+        "hardware_anomaly_integrity",
+        "open_set_unknown_rejection"
+      ],
+      "role_rationale": "Hardware-integrity/anomaly detection with simulation and experimental metrics over SNR and observation dimensions.",
+      "gold_status": "SEALED_UNCREATED"
+    },
+    {
+      "benchmark_paper_id": "accept-safa-mz-2609.09511",
+      "split": "ACCEPTANCE",
+      "arxiv_id": "2609.09511",
+      "version": "v1",
+      "title": "Adaptive Distributed Physical-Layer Authentication and Attack Detection in 6G Non-Terrestrial Networks via Causal Meta-Learning",
+      "published": "2026-09-08T22:53:32Z",
+      "source_pdf_url": "https://arxiv.org/pdf/2609.09511v1",
+      "source_sha256": null,
+      "page_count": null,
+      "strata": [
+        "physical_layer_security_generalization",
+        "domain_shift_and_channel_robustness",
+        "authentication_and_spoofing"
+      ],
+      "role_rationale": "Multi-feature physical-layer authentication under distribution shift with causal/meta-learning and conditional localization.",
+      "gold_status": "SEALED_UNCREATED"
+    },
+    {
+      "benchmark_paper_id": "accept-microcsi-auth-2608.29845",
+      "split": "ACCEPTANCE",
+      "arxiv_id": "2608.29845",
+      "version": "v1",
+      "title": "From Identification to Authentication for Micro-CSI RF Fingerprinting in OFDM Systems",
+      "published": "2026-08-30T15:18:53Z",
+      "source_pdf_url": "https://arxiv.org/pdf/2608.29845v1",
+      "source_sha256": null,
+      "page_count": null,
+      "strata": [
+        "authentication_and_spoofing",
+        "physical_layer_security_generalization"
+      ],
+      "role_rationale": "Authentication and adversarial spoofing case with analytical derivations and experimental validation.",
+      "gold_status": "SEALED_UNCREATED"
+    },
+    {
+      "benchmark_paper_id": "accept-dsp-ota-2610.15494",
+      "split": "ACCEPTANCE",
+      "arxiv_id": "2610.15494",
+      "version": "v1",
+      "title": "RF Fingerprinting of DSP Implementations using Machine Learning: An Over-the-Air Case Study",
+      "published": "2026-10-11T09:47:52Z",
+      "source_pdf_url": "https://arxiv.org/pdf/2610.15494v1",
+      "source_sha256": null,
+      "page_count": null,
+      "strata": [
+        "over_the_air_fingerprinting"
+      ],
+      "role_rationale": "Distinct fingerprint source (DSP implementation rather than hardware imperfections), OTA evaluation, SNR/bandwidth analysis.",
+      "gold_status": "SEALED_UNCREATED"
+    },
+    {
+      "benchmark_paper_id": "accept-uav-dataset-2603.00106",
+      "split": "ACCEPTANCE",
+      "arxiv_id": "2603.00106",
+      "version": "v2",
+      "title": "A Multi-Scenario UAV RF Dataset with Real-World Acquisition and Signal Processing Benchmarking",
+      "published": "2026-02-18T08:09:17Z",
+      "source_pdf_url": "https://arxiv.org/pdf/2603.00106v2",
+      "source_sha256": null,
+      "page_count": null,
+      "strata": [
+        "real_world_dataset_and_acquisition",
+        "domain_shift_and_channel_robustness"
+      ],
+      "role_rationale": "Real-world dataset/acquisition paper covering 26 UAVs, multiple operating conditions, receiver configurations, and interference-aware scenarios.",
+      "gold_status": "SEALED_UNCREATED"
+    }
+  ],
+  "contamination_policy": {
+    "active_extract_may_read_paper_identity": true,
+    "active_extract_may_use_acceptance_papers_for_development": false,
+    "active_extract_may_read_acceptance_gold": false,
+    "active_extract_may_run_acceptance_evaluation_before_architecture_freeze": false,
+    "failed_acceptance_result_reuse_rule": "If a failed acceptance run materially informs architecture tuning, subsequent promotion requires a new untouched holdout set for an unbiased claim."
+  }
+}
