@@ -24,7 +24,7 @@ Build an independently source-verified, held-out multi-paper semantic acceptance
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a0f4e69281341fa3eb9f9578e1f4a789db7f59d6
+- Remote checkpoint: 0bcf50cf05aeaa1e506702d402069b0cc5c7a70a
 - Remote verified: true
 
 ### research-engine
