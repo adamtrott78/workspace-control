@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ae9ca48ba7f5e4e084a2e42fc22fdb21bf3abf19
+- Remote checkpoint: 091e18a13c8fef3f4d66184acd51070b3f301a3b
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d3425684d753639e8ec8843a3cd3640f6a5a4561
+- Remote checkpoint: e1d7afd32aa73fed3326b5cc0c9af1324096226a
 - Remote verified: true
 
 ## Next safe action
 
-Implement LOCAL_FIRST_ALLOCATION_FALLBACK_REALIZATION_V1 exactly from research-engine@d3425684d753639e8ec8843a3cd3640f6a5a4561 / design blob 4d8ad8cb815e7f96cc351ae0ed6868335a87e046. Replay the exact corrected all-nine report; action uses only local.chosen presence then unchanged allocation fallback. Do not access the sealed acceptance benchmark, do not declare ACCEPTANCE_CANDIDATE_FROZEN, and do not apply the separate four-atom residual audit until after a genuine hybrid result plus post-result review.
+Create a normal inert trigger PR from exact research-engine main `e1d7afd32aa73fed3326b5cc0c9af1324096226a`, differing only by a trigger marker. Validate the exact anchor head with ordinary CI and verify zero prior comments. Do not issue the scientific trigger until that exact anchor identity is durably checkpointed in workspace-control.
 
 ## Remaining work
 
-- Implement LOCAL_FIRST_ALLOCATION_FALLBACK_REALIZATION_V1 exactly as frozen using deterministic replay of exact corrected all-nine report.
-- Run normal CI and persist exact implementation/trigger identity before one development scientific execution.
-- Execute exactly one valid hybrid realization run and stop at frozen verdict; no rerun/tuning.
-- After a genuine result, obtain independent post-result review before end-to-end integration design.
-- Keep sealed semantic acceptance benchmark uninspected and do not declare ACCEPTANCE_CANDIDATE_FROZEN.
+- Create the normal inert exact-SHA trigger anchor from `research-engine@e1d7afd32aa73fed3326b5cc0c9af1324096226a`; marker-only change, ordinary CI PASS, and zero prior comments.
+- Checkpoint the exact inert anchor identity in workspace-control and durably authorize exactly one `/local-extract-local-first-allocation-fallback <exact_sha>` trigger.
+- Execute exactly one valid hybrid realization run and stop at the frozen verdict; no rerun or post-result tuning.
+- Persist exact run/artifact/report identities, close the inert trigger PR unmerged after the result checkpoint is durable, and obtain mandatory independent post-result review.
+- Only after post-result review may the four-atom residual audit influence next-phase selection; keep the sealed semantic acceptance benchmark uninspected and `acceptance_candidate_frozen=false`.
 
 ## Blockers / gates
 
