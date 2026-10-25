@@ -30,27 +30,26 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 18565e1de9f9db8ff9c3ea4115673bdba7e52efe
+- Remote checkpoint: 373abf38c9d1f9d592c7aa4d373c5e938d01fa3b
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4d6a3bf003499a34ea0d076e55c724aaf1735c42
+- Remote checkpoint: 13a129ef820c611adf6a6ca70598df1e67d56efc
 - Remote verified: true
 
 ## Next safe action
 
-Freeze the smallest new exact-provenance-binding development experiment justified by reviewer comment 6395379857. It must separate semantic obligation judgment from source provenance attachment and must not regenerate source quotes/spans. Preserve the seven-case development evaluation, Qwen3.5-4B/runtime/source identities, no-mutation boundary, one-valid-run stopping rule, and all sealed/acceptance constraints. After the exact design is merged and checkpointed, STOP for mandatory independent pre-implementation review.
+STOP owner scientific work and re-engage the independent reviewer on exact frozen design research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e / EXACT_PROVENANCE_BINDING_MICROBENCH_V1. Reviewer should assess whether the two-arm deterministic-attachment vs opaque-pointer design cleanly tests the source-grounding interface diagnosis without leaking labels or creating a trivial/tautological gate. No implementation, trigger, acceptance freeze, or sealed holdout access before disposition.
 
 ## Remaining work
 
-- Freeze a new exact-provenance-binding development design that does not regenerate source quotes/spans.
-- Use the same seven frozen development cases only as evaluation evidence; keep teacher labels/case roles hidden at runtime.
-- Compare deterministic provenance attachment after semantic judgment against model-selected opaque evidence pointers if both remain useful discriminators.
-- Keep evidence-set mutation disabled and preservation-aware admission deferred until exact provenance/validity passes.
-- Obtain independent pre-implementation review of the exact new design blob before implementation.
+- Obtain independent pre-implementation review of research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e.
+- Do not implement either provenance-binding arm before reviewer NO_BLOCKING_FINDING.
+- Do not rerun or modify the completed OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1.
+- Keep preservation-aware admission deferred until provenance/validity passes.
 - Keep acceptance_candidate_frozen=false and sealed semantic acceptance benchmark untouched.
 
 ## Blockers / gates
