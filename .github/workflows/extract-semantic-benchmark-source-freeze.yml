@@ -1,0 +1,49 @@
+name: EXTRACT Semantic Benchmark Source Freeze
+
+on:
+  pull_request:
+    paths:
+      - "architecture/extract-semantic-benchmark-corpus.v0.1.json"
+      - "scripts/freeze_extract_semantic_benchmark_sources.py"
+      - ".github/workflows/extract-semantic-benchmark-source-freeze.yml"
+      - "tasks/active/workspace-extract-semantic-benchmark-v1.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  freeze-sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install PDF dependency
+        run: python -m pip install --disable-pip-version-check "pypdf==5.1.0"
+      - name: Freeze exact source identities
+        run: python scripts/freeze_extract_semantic_benchmark_sources.py
+      - name: Validate source manifest shape
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("architecture/extract-semantic-benchmark-source-manifest.v0.1.json")
+          d=json.loads(p.read_text())
+          assert d["status"] == "SOURCE_IDENTITIES_FROZEN"
+          assert len(d["papers"]) == 10
+          assert sum(x["split"]=="PILOT" for x in d["papers"]) == 2
+          assert sum(x["split"]=="ACCEPTANCE" for x in d["papers"]) == 8
+          for x in d["papers"]:
+              assert len(x["source_pdf_sha256"]) == 64
+              assert x["page_count"] == len(x["pages"])
+              assert x["page_count"] > 0
+          print("SOURCE_MANIFEST_CONTRACT=PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extract-semantic-benchmark-source-manifest
+          path: architecture/extract-semantic-benchmark-source-manifest.v0.1.json
+          if-no-files-found: error
