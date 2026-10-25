@@ -150,6 +150,48 @@ Do not consciously optimize for a target number of Heartbeats. Short,
 straightforward work may need very few. A difficult turn may need more if the
 model's working understanding genuinely changes several times.
 
+## Research operator scorecard
+
+For durable research tasks, Heartbeat must keep the human operator oriented to the
+research program, not only to the current experiment.
+
+At every **genuine scientific result boundary** and before beginning a second
+successive scientific phase without fresh operator input, emit one compact
+research scorecard in the normal Heartbeat message.
+
+The scorecard should summarize, in natural prose rather than a large checklist:
+
+- **current best measured result**, including the exact scope of that metric
+  (for example, "9/13 atoms on the one-paper teacher control; 7/7 frozen
+  controls retained");
+- **previous best / meaningful delta**, when there is one;
+- **what the result actually established**;
+- **what remains unproven or fragile**;
+- **the next scientific question or discriminating experiment**;
+- **the actual success/stop criterion**, when the visible metric is only a
+  diagnostic and is not itself the project acceptance gate.
+
+The scope qualifier is mandatory. Never report a narrow diagnostic such as
+`9/13` as though it were whole-project performance when it is one paper,
+one teacher subset, one stress, one benchmark arm, or another bounded control.
+
+Prefer a concise update such as:
+
+> Research scorecard — best diagnostic is 9/13 atoms on the one-paper teacher
+> control with 7/7 controls retained, up from 8/13. That proves the two recovery
+> mechanisms can coexist on this case, but cross-paper semantic generalization
+> is still unvalidated; the next experiment tests structural recovery across the
+> nine-paper corpus, while final success remains the held-out production gates.
+
+Do not turn Heartbeat into a dashboard protocol or repeat the scorecard on every
+implementation/CI event. Emit it when scientific meaning changes, on recovery
+from a long autonomous research sequence, or when another scientific phase
+would otherwise begin without the operator seeing the current high-level state.
+
+For research-task handoffs and recovery turns, the first useful Heartbeat
+commentary SHOULD include the latest research scorecard if several lower-level
+experiments have occurred since the operator last interacted.
+
 ## Executor-touch emission policy
 
 Semantic updates and executor liveness are separate contracts.
