@@ -33,10 +33,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "6331f1750774290a918f1f8135e1db63b7904aee",
+      "base_sha": "04daabeac0f3c45b6849a3a8cce15d7e15452388",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "39d65e0909a48e940d2377f3febd0b685b1f0970",
+        "checkpoint_sha": "04daabeac0f3c45b6849a3a8cce15d7e15452388",
         "verified": true
       },
       "local": null,
@@ -413,14 +413,16 @@
     {
       "id": "extract-legacy-four-atom-residual-audit-v1",
       "kind": "methodology_residual_analysis_checkpoint",
-      "identity": "architecture/extract-legacy-four-atom-residual-audit.v0.1.json@90a95a853b9d5bd803660344506036df96501230",
+      "identity": "workspace-control@04daabeac0f3c45b6849a3a8cce15d7e15452388|architecture/extract-legacy-four-atom-residual-audit.v0.1.json@75de54e56a810f6cf357fcfd393aac84e2052d53",
       "required_for_resume": false,
       "evidence": [
         "The four legacy 9/13 residuals are e1.b, e1.c, e3.c, and e6.c.",
         "All four are recoverable under precise answer-free oracle queries; BM25 oracle itself recovers all four.",
         "The strongest 9/13 composed/rescued selected set contains none of the four exact support propositions.",
         "Primary residual families are intent/obligation atomicity, evidence fusion/selection, and exact-anchor evaluator brittleness.",
-        "No sealed acceptance benchmark access and no frozen hybrid mutation."
+        "No sealed acceptance benchmark access and no frozen hybrid mutation.",
+        "PR #461 Workspace Control Validation 40153268222 PASS.",
+        "PR #461 merged as workspace-control@04daabeac0f3c45b6849a3a8cce15d7e15452388."
       ]
     }
   ],
@@ -647,6 +649,15 @@
       "evidence": [
         "PR #434 validation 40145017848 PASS.",
         "PR #434 merged as 39d65e0909a48e940d2377f3febd0b685b1f0970."
+      ]
+    },
+    {
+      "check": "Four-atom residual audit durable merge",
+      "result": "PASS",
+      "evidence": [
+        "PR #461 Workspace Control Validation 40153268222 PASS.",
+        "PR #461 merged as workspace-control@04daabeac0f3c45b6849a3a8cce15d7e15452388.",
+        "Audit blob 75de54e56a810f6cf357fcfd393aac84e2052d53."
       ]
     }
   ],
