@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 1f528eb1746760650ae4ba736e2cc1a819db74af
+- Remote checkpoint: 1c95586dc75663953b06d942a11b6f24b989e5c0
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Obtain independent re-review of exact corrected ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 design research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / design blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9. Do not implement before corrected reviewer disposition. No acceptance freeze or sealed benchmark access.
+Implement exactly ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 from research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / design blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9. Preserve all frozen corpus/PDF identities, token-prefix matcher semantics, protected/evictable selection_origin values and 23/3/1/1 start counts, budgets, outcome precedence, posthoc-only source-fidelity sets, and teacher boundary. Add ordinary tests/workflow; do not trigger science yet.
 
 ## Remaining work
 
-- Obtain independent re-review of exact corrected ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 design research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9.
-- If re-review returns NO_BLOCKING_FINDING, implement only the frozen deterministic design with exact identities/matcher/origins/precedence and add ordinary tests/workflow.
-- Execute at most one valid development diagnostic run after exact implementation/trigger authority is durable; stop on both mechanism and completeness-safety outcomes with no post-result tuning.
-- Obtain mandatory independent post-result review before any acceptance-candidate decision or subsequent scientific phase.
+- Implement exactly ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 from research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9 with deterministic tests and an inert exact-SHA one-shot workflow.
+- Run ordinary implementation CI; if PASS, merge and checkpoint exact implementation identity in workspace-control before creating/authorizing the inert scientific trigger anchor.
+- Execute exactly one valid development diagnostic and stop on mechanism_outcome plus completeness_safety_outcome; no post-result tuning or valid-result rerun.
+- Persist exact run/artifact/report identities, close the inert trigger PR unmerged after result checkpointing, and obtain mandatory independent post-result review.
 - Keep sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
