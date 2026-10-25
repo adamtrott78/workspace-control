@@ -247,7 +247,9 @@
     "contradiction_silent_collapse_count_required": 0,
     "sealed_holdout_access_required": 0,
     "extract_mutation_required": 0,
-    "production_mutation_required": 0
+    "production_mutation_required": 0,
+    "benchmark_gold_leak_count_required": 0,
+    "case_specific_logic_count_required": 0
   },
   "implementation_boundary": {
     "before_implementation": [
@@ -281,5 +283,16 @@
     "research_methodology_capsule": "tasks/active/workspace-research-methodology-v1.json@d3d8c7ee9e09262e05d20d31741ca398d6aaf65e",
     "sealed_benchmark_task_capsule": "tasks/active/workspace-extract-semantic-benchmark-v1.json@f09ae7af04f6f9005c288890cef43fba18705ff5",
     "extract_reviewer_capsule": "tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00"
+  },
+  "blind_replay_contract": {
+    "projection_source_rule": "Projection construction may read only the exact authoritative source bindings and referenced durable artifacts. It must not read the replay benchmark file, expected answers, case IDs, or forbidden claims.",
+    "query_engine_rule": "The primary evaluator is model-free and receives only a frozen structured query_input plus the projected graph/current-state view. Natural-language question text is display-only.",
+    "evaluation_rule": "The test harness may read expected_answer_class, required_points, forbidden_claims, and source_identities only after the query engine has produced its answer.",
+    "no_case_specific_logic": true,
+    "no_case_id_branching": true,
+    "no_expected_label_visibility": true,
+    "no_benchmark_specific_source_mutation": true,
+    "same_query_engine_for_all_cases": true,
+    "failure_semantics": "Any benchmark-specific hardcoding, expected-label visibility, or use of the benchmark as projection input invalidates the replay result rather than counting as a PASS."
   }
 }
