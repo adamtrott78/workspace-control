@@ -36,14 +36,14 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-No reviewer-side blocker remains on INSUFFICIENT_BASELINE_GENERALIZATION. Owner may redesign the cross-paper teacher-blind baseline only, with the explicit objective of achieving a valid matched four-origin budget28 baseline on all nine papers without using teacher labels or the observed recovery outcomes. Independent review is required before implementation.
+Owner may implement exactly TIER1_BASELINE_DEPTH_FALLBACK_DIAGNOSTIC_V1 from research-engine@d42d2947c45a06f6e03066488c119c86133107aa / design blob 718bd2f278339e4c921d37a4bb53fd1f09be35e7. Re-engage reviewer only if science changes or after the genuine result.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to freeze a teacher-blind cross-paper baseline redesign that can instantiate the matched comparison on all nine papers.
-- Do not review routine implementation/CI/trigger mechanics unless the baseline science changes.
-- After the next genuine baseline or recovery result, independently audit exact run/artifact/result before further scientific selection.
-- Do not permit proposition-level semantic generalization until a held-out multi-paper semantic benchmark exists.
+- Wait for the EXTRACT owner to implement and execute exactly TIER1_BASELINE_DEPTH_FALLBACK_DIAGNOSTIC_V1.
+- Do not review routine implementation/CI/packaging/trigger mechanics unless they materially alter the frozen baseline science.
+- After the genuine baseline verdict, independently audit exact run/artifact/result before any corrected recovery-comparison or role-fallback design.
+- Do not permit recovery-family selection or proposition-level semantic generalization from the incomplete prior cross-paper result.
 
 ## Blockers / gates
 
