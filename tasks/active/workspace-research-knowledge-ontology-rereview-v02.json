@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-research-knowledge-ontology-rereview-v02",
   "title": "Research Knowledge Ontology v0.2 Independent Re-review",
-  "status": "IN_PROGRESS",
+  "status": "COMPLETE",
   "goal": "Independently re-review the corrected Research Knowledge Ontology v0.2 and replay benchmark v0.2 after the v0.1 BLOCKING_FINDING, verifying exact closure of all five result-affecting blockers without introducing new authority leakage, benchmark tautology, or implementation ambiguity.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -11,7 +11,7 @@
     "checkpoint_sha": "f321f21ff732b3c4e1f5e92051f8cb113e212998",
     "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
   },
-  "current_stage": "review_corrected_v0.2_contract",
+  "current_stage": "review_disposition_persisted",
   "acceptance_criteria": [
     "Review exact owner blob 416e0c5b9ac6ce73cb34e8c86a0059a6622d67db, design blob 039fd2f888fb1abfb663c841df3425e2aa69fb74, and benchmark blob c73f6f531a05386c1177a2709690ad2b06739ea9 without modifying them.",
     "Verify blocker 1 is non-vacuously closed by at least one positive INVALID_EXECUTION case and a paired valid-control case with identical query visibility but different graph evidence.",
@@ -95,7 +95,7 @@
     },
     {
       "id": "review_corrected_v0.2_contract",
-      "status": "READY",
+      "status": "VALIDATED",
       "execution_owner": "independent_reviewer",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -104,10 +104,29 @@
         "benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json@c73f6f531a05386c1177a2709690ad2b06739ea9"
       ],
       "outputs": [
-        "NO_BLOCKING_FINDING or exact blocking findings"
+        "BLOCKING_FINDING",
+        "BLOCKER 1 — the positive INVALID_EXECUTION closure pair is not semantically self-sufficient. R18A_SYNTH_VALID_EXECUTION expects answer_class=VALID_NEGATIVE_SCIENCE and claim NEGATIVE_RESULT_REMAINS_SCIENTIFIC, but SYNTH_EXEC_VALID contains only expected_design_identity=design_A, observed_design_identity=design_A, and execution_integrity=VALID (plus a distractor). It contains no assertion that any scientific result is negative. Therefore the expected valid-control output cannot be derived from the frozen visible graph alone; implementation must import hidden expectation/case knowledge or invent an unstated rule. Add an explicit negative scientific-result assertion (and matching provenance) or narrow the expected class/claims to what the graph actually establishes.",
+        "BLOCKER 2 — anti-hardcoding remains only partially operational. The relabel contract rewrites identifier references, but leaves query_family, target_kind, ask, and as_of_snapshot unchanged. Across 21 base cases those non-identifier visible fields form 19 signatures: only the two synthetic pairs share a signature, while the other 17 cases are singleton fingerprints. A hybrid implementation can hardcode outputs for those 17 unchanged signatures and use graph semantics only for the two paired adversaries, passing all IDENTITY/RELABEL variants without reading graph evidence for most cases. case_specific_logic_count=0 and query_fingerprint_lookup_escape_count=0 have no frozen executable detection rule beyond the two pairs. The corrected contract must make benchmark-specific visible-query memorization insufficient across the benchmark, not only for four synthetic cases.",
+        "BLOCKER 3 — the frozen v0.2 design contains incompatible replay output schemas. bounded_query_contract.answer_contract still requires [answer_class, answer, supporting_assertion_ids, source_refs, authority_boundary, unproven_or_caveat] and marks itself model_free_replay_baseline=true, while deterministic_scoring_contract.engine_output_schema requires [answer_class, claim_codes, support_handles, authority_boundary, caveat_codes] with additional_fields_forbidden=true. No precedence or translation boundary is frozen. An implementation cannot satisfy both contracts as written, so the supposedly exact deterministic scorer remains ambiguous at the query-engine interface."
       ],
-      "validation": [],
-      "resume_condition": "Persist disposition; owner may implement only after durable NO_BLOCKING_FINDING."
+      "validation": [
+        {
+          "check": "Independent re-review of exact corrected v0.2 ontology/replay contract",
+          "result": "FAIL",
+          "evidence": [
+            "Disposition=BLOCKING_FINDING for architecture/research-knowledge-ontology.v0.2.json blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json blob c73f6f531a05386c1177a2709690ad2b06739ea9.",
+            "Previously accepted authority architecture remains sound: epistemic NON_EXECUTABLE; normative SOURCE_DERIVED_ONLY; execution OBSERVATIONAL; CandidateAction authority NONE; executable ALLOW remains external-policy-only.",
+            "Prior blocker 2 is substantially closed: active contradiction and resolved/superseded control are paired under identical query visibility, and contradiction_silent_collapse_count=0 is restored.",
+            "Prior blocker 3 is closed: all 10 required query families are represented, including WHY_CURRENT_EXPERIMENT.",
+            "The deterministic scorer itself removes natural-language/fuzzy grading, freezes duplicate rejection, raw UTF-8 sorting, exact equality, and no repair/retry.",
+            "BLOCKER 1 — the positive INVALID_EXECUTION closure pair is not semantically self-sufficient. R18A_SYNTH_VALID_EXECUTION expects answer_class=VALID_NEGATIVE_SCIENCE and claim NEGATIVE_RESULT_REMAINS_SCIENTIFIC, but SYNTH_EXEC_VALID contains only expected_design_identity=design_A, observed_design_identity=design_A, and execution_integrity=VALID (plus a distractor). It contains no assertion that any scientific result is negative. Therefore the expected valid-control output cannot be derived from the frozen visible graph alone; implementation must import hidden expectation/case knowledge or invent an unstated rule. Add an explicit negative scientific-result assertion (and matching provenance) or narrow the expected class/claims to what the graph actually establishes.",
+            "BLOCKER 2 — anti-hardcoding remains only partially operational. The relabel contract rewrites identifier references, but leaves query_family, target_kind, ask, and as_of_snapshot unchanged. Across 21 base cases those non-identifier visible fields form 19 signatures: only the two synthetic pairs share a signature, while the other 17 cases are singleton fingerprints. A hybrid implementation can hardcode outputs for those 17 unchanged signatures and use graph semantics only for the two paired adversaries, passing all IDENTITY/RELABEL variants without reading graph evidence for most cases. case_specific_logic_count=0 and query_fingerprint_lookup_escape_count=0 have no frozen executable detection rule beyond the two pairs. The corrected contract must make benchmark-specific visible-query memorization insufficient across the benchmark, not only for four synthetic cases.",
+            "BLOCKER 3 — the frozen v0.2 design contains incompatible replay output schemas. bounded_query_contract.answer_contract still requires [answer_class, answer, supporting_assertion_ids, source_refs, authority_boundary, unproven_or_caveat] and marks itself model_free_replay_baseline=true, while deterministic_scoring_contract.engine_output_schema requires [answer_class, claim_codes, support_handles, authority_boundary, caveat_codes] with additional_fields_forbidden=true. No precedence or translation boundary is frozen. An implementation cannot satisfy both contracts as written, so the supposedly exact deterministic scorer remains ambiguous at the query-engine interface.",
+            "No implementation authority is granted from the reviewed v0.2 blobs. Correct only these result-affecting surfaces, freeze new exact blobs, and obtain another independent re-review."
+          ]
+        }
+      ],
+      "resume_condition": "Correct the three result-affecting v0.2 contract defects and obtain a fresh independent re-review before implementation."
     }
   ],
   "checkpoints": [
@@ -134,18 +153,55 @@
         "Workspace Control Validation 40243931083 was zero-step VALIDATION_UNAVAILABLE, not PASS.",
         "Reviewer remains implementation-forbidden and may only persist independent disposition."
       ]
+    },
+    {
+      "id": "research-knowledge-ontology-v0.2-rereview-v1",
+      "kind": "independent_review",
+      "identity": "workspace-control@61830a8ff473671112e2d866c5aaf41e503febf2|design@039fd2f888fb1abfb663c841df3425e2aa69fb74|benchmark@c73f6f531a05386c1177a2709690ad2b06739ea9:BLOCKING_FINDING",
+      "required_for_resume": true,
+      "evidence": [
+        "Disposition=BLOCKING_FINDING for architecture/research-knowledge-ontology.v0.2.json blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json blob c73f6f531a05386c1177a2709690ad2b06739ea9.",
+        "Previously accepted authority architecture remains sound: epistemic NON_EXECUTABLE; normative SOURCE_DERIVED_ONLY; execution OBSERVATIONAL; CandidateAction authority NONE; executable ALLOW remains external-policy-only.",
+        "Prior blocker 2 is substantially closed: active contradiction and resolved/superseded control are paired under identical query visibility, and contradiction_silent_collapse_count=0 is restored.",
+        "Prior blocker 3 is closed: all 10 required query families are represented, including WHY_CURRENT_EXPERIMENT.",
+        "The deterministic scorer itself removes natural-language/fuzzy grading, freezes duplicate rejection, raw UTF-8 sorting, exact equality, and no repair/retry.",
+        "BLOCKER 1 — the positive INVALID_EXECUTION closure pair is not semantically self-sufficient. R18A_SYNTH_VALID_EXECUTION expects answer_class=VALID_NEGATIVE_SCIENCE and claim NEGATIVE_RESULT_REMAINS_SCIENTIFIC, but SYNTH_EXEC_VALID contains only expected_design_identity=design_A, observed_design_identity=design_A, and execution_integrity=VALID (plus a distractor). It contains no assertion that any scientific result is negative. Therefore the expected valid-control output cannot be derived from the frozen visible graph alone; implementation must import hidden expectation/case knowledge or invent an unstated rule. Add an explicit negative scientific-result assertion (and matching provenance) or narrow the expected class/claims to what the graph actually establishes.",
+        "BLOCKER 2 — anti-hardcoding remains only partially operational. The relabel contract rewrites identifier references, but leaves query_family, target_kind, ask, and as_of_snapshot unchanged. Across 21 base cases those non-identifier visible fields form 19 signatures: only the two synthetic pairs share a signature, while the other 17 cases are singleton fingerprints. A hybrid implementation can hardcode outputs for those 17 unchanged signatures and use graph semantics only for the two paired adversaries, passing all IDENTITY/RELABEL variants without reading graph evidence for most cases. case_specific_logic_count=0 and query_fingerprint_lookup_escape_count=0 have no frozen executable detection rule beyond the two pairs. The corrected contract must make benchmark-specific visible-query memorization insufficient across the benchmark, not only for four synthetic cases.",
+        "BLOCKER 3 — the frozen v0.2 design contains incompatible replay output schemas. bounded_query_contract.answer_contract still requires [answer_class, answer, supporting_assertion_ids, source_refs, authority_boundary, unproven_or_caveat] and marks itself model_free_replay_baseline=true, while deterministic_scoring_contract.engine_output_schema requires [answer_class, claim_codes, support_handles, authority_boundary, caveat_codes] with additional_fields_forbidden=true. No precedence or translation boundary is frozen. An implementation cannot satisfy both contracts as written, so the supposedly exact deterministic scorer remains ambiguous at the query-engine interface.",
+        "No implementation authority is granted from the reviewed v0.2 blobs. Correct only these result-affecting surfaces, freeze new exact blobs, and obtain another independent re-review."
+      ]
     }
   ],
   "artifacts": [],
-  "validation": [],
-  "blockers": [],
-  "remaining_work": [
-    "Perform independent re-review of exact v0.2 design and benchmark.",
-    "Persist NO_BLOCKING_FINDING or exact result-affecting blockers.",
-    "Do not implement from reviewer lane."
+  "validation": [
+    {
+      "check": "Independent re-review of exact corrected v0.2 ontology/replay contract",
+      "result": "FAIL",
+      "evidence": [
+        "Disposition=BLOCKING_FINDING for architecture/research-knowledge-ontology.v0.2.json blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json blob c73f6f531a05386c1177a2709690ad2b06739ea9.",
+        "Previously accepted authority architecture remains sound: epistemic NON_EXECUTABLE; normative SOURCE_DERIVED_ONLY; execution OBSERVATIONAL; CandidateAction authority NONE; executable ALLOW remains external-policy-only.",
+        "Prior blocker 2 is substantially closed: active contradiction and resolved/superseded control are paired under identical query visibility, and contradiction_silent_collapse_count=0 is restored.",
+        "Prior blocker 3 is closed: all 10 required query families are represented, including WHY_CURRENT_EXPERIMENT.",
+        "The deterministic scorer itself removes natural-language/fuzzy grading, freezes duplicate rejection, raw UTF-8 sorting, exact equality, and no repair/retry.",
+        "BLOCKER 1 — the positive INVALID_EXECUTION closure pair is not semantically self-sufficient. R18A_SYNTH_VALID_EXECUTION expects answer_class=VALID_NEGATIVE_SCIENCE and claim NEGATIVE_RESULT_REMAINS_SCIENTIFIC, but SYNTH_EXEC_VALID contains only expected_design_identity=design_A, observed_design_identity=design_A, and execution_integrity=VALID (plus a distractor). It contains no assertion that any scientific result is negative. Therefore the expected valid-control output cannot be derived from the frozen visible graph alone; implementation must import hidden expectation/case knowledge or invent an unstated rule. Add an explicit negative scientific-result assertion (and matching provenance) or narrow the expected class/claims to what the graph actually establishes.",
+        "BLOCKER 2 — anti-hardcoding remains only partially operational. The relabel contract rewrites identifier references, but leaves query_family, target_kind, ask, and as_of_snapshot unchanged. Across 21 base cases those non-identifier visible fields form 19 signatures: only the two synthetic pairs share a signature, while the other 17 cases are singleton fingerprints. A hybrid implementation can hardcode outputs for those 17 unchanged signatures and use graph semantics only for the two paired adversaries, passing all IDENTITY/RELABEL variants without reading graph evidence for most cases. case_specific_logic_count=0 and query_fingerprint_lookup_escape_count=0 have no frozen executable detection rule beyond the two pairs. The corrected contract must make benchmark-specific visible-query memorization insufficient across the benchmark, not only for four synthetic cases.",
+        "BLOCKER 3 — the frozen v0.2 design contains incompatible replay output schemas. bounded_query_contract.answer_contract still requires [answer_class, answer, supporting_assertion_ids, source_refs, authority_boundary, unproven_or_caveat] and marks itself model_free_replay_baseline=true, while deterministic_scoring_contract.engine_output_schema requires [answer_class, claim_codes, support_handles, authority_boundary, caveat_codes] with additional_fields_forbidden=true. No precedence or translation boundary is frozen. An implementation cannot satisfy both contracts as written, so the supposedly exact deterministic scorer remains ambiguous at the query-engine interface.",
+        "No implementation authority is granted from the reviewed v0.2 blobs. Correct only these result-affecting surfaces, freeze new exact blobs, and obtain another independent re-review."
+      ]
+    }
   ],
-  "next_safe_action": "Independently review architecture/research-knowledge-ontology.v0.2.json blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json blob c73f6f531a05386c1177a2709690ad2b06739ea9 against the five prior blockers. Verify non-vacuous INVALID_EXECUTION and contradiction coverage, 10/10 required query-family coverage, operational anti-hardcoding through same-query/different-graph pairs plus deterministic relabeling, and exact deterministic canonical scoring. Also verify no regression of authority separation. Return NO_BLOCKING_FINDING or exact blockers; do not implement anything.",
+  "blockers": [
+    "BLOCKER 1 — the positive INVALID_EXECUTION closure pair is not semantically self-sufficient. R18A_SYNTH_VALID_EXECUTION expects answer_class=VALID_NEGATIVE_SCIENCE and claim NEGATIVE_RESULT_REMAINS_SCIENTIFIC, but SYNTH_EXEC_VALID contains only expected_design_identity=design_A, observed_design_identity=design_A, and execution_integrity=VALID (plus a distractor). It contains no assertion that any scientific result is negative. Therefore the expected valid-control output cannot be derived from the frozen visible graph alone; implementation must import hidden expectation/case knowledge or invent an unstated rule. Add an explicit negative scientific-result assertion (and matching provenance) or narrow the expected class/claims to what the graph actually establishes.",
+    "BLOCKER 2 — anti-hardcoding remains only partially operational. The relabel contract rewrites identifier references, but leaves query_family, target_kind, ask, and as_of_snapshot unchanged. Across 21 base cases those non-identifier visible fields form 19 signatures: only the two synthetic pairs share a signature, while the other 17 cases are singleton fingerprints. A hybrid implementation can hardcode outputs for those 17 unchanged signatures and use graph semantics only for the two paired adversaries, passing all IDENTITY/RELABEL variants without reading graph evidence for most cases. case_specific_logic_count=0 and query_fingerprint_lookup_escape_count=0 have no frozen executable detection rule beyond the two pairs. The corrected contract must make benchmark-specific visible-query memorization insufficient across the benchmark, not only for four synthetic cases.",
+    "BLOCKER 3 — the frozen v0.2 design contains incompatible replay output schemas. bounded_query_contract.answer_contract still requires [answer_class, answer, supporting_assertion_ids, source_refs, authority_boundary, unproven_or_caveat] and marks itself model_free_replay_baseline=true, while deterministic_scoring_contract.engine_output_schema requires [answer_class, claim_codes, support_handles, authority_boundary, caveat_codes] with additional_fields_forbidden=true. No precedence or translation boundary is frozen. An implementation cannot satisfy both contracts as written, so the supposedly exact deterministic scorer remains ambiguous at the query-engine interface."
+  ],
+  "remaining_work": [
+    "No implementation may proceed from v0.2 design blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 / benchmark blob c73f6f531a05386c1177a2709690ad2b06739ea9.",
+    "Owner must correct only the three result-affecting contract surfaces identified by this re-review, freeze new exact blobs, and request fresh independent review.",
+    "Reviewer lane performs no implementation and does not mutate owner/design/benchmark."
+  ],
+  "next_safe_action": "Return BLOCKING_FINDING to the owner. Do not implement the projection. Correct the synthetic valid-control evidence so VALID_NEGATIVE_SCIENCE is graph-derived, make anti-hardcoding operational beyond the two paired synthetic signatures, and unify/freeze one replay query-engine output schema. Freeze new exact blobs and re-review.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created 2026-10-25 as a fresh independent re-review lane for corrected v0.2. The prior v0.1 reviewer was COMPLETE with BLOCKING_FINDING; this task reviews only exact corrected blobs and cannot implement.\n2026-10-25 re-review lane merge: PR #505 merged as workspace-control@6d8f1f7e8ae8f0150b0cbab44d23b3d50128930f; task is ready for independent review of exact corrected v0.2 blobs."
+  "notes": "Created 2026-10-25 as a fresh independent re-review lane for corrected v0.2. The prior v0.1 reviewer was COMPLETE with BLOCKING_FINDING; this task reviews only exact corrected blobs and cannot implement.\n2026-10-25 re-review lane merge: PR #505 merged as workspace-control@6d8f1f7e8ae8f0150b0cbab44d23b3d50128930f; task is ready for independent review of exact corrected v0.2 blobs.\n2026-10-25 independent v0.2 re-review: BLOCKING_FINDING on exact design blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and benchmark blob c73f6f531a05386c1177a2709690ad2b06739ea9. Authority architecture remains accepted; contradiction coverage/gate and 10/10 query-family coverage are closed, and canonical scorer semantics are mostly sound. Three result-affecting defects remain: R18A expects a negative scientific result not present in its graph; relabeling leaves 17/21 non-identifier visible query signatures unique so hybrid case lookup can still pass most cases; and bounded_query_contract.answer_contract conflicts with the deterministic replay engine schema. No implementation authorized until corrected exact blobs receive fresh independent review."
 }
