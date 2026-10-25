@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "status": "PASS_B_COMPLETE",
+  "source_first": true,
+  "local_extract_outputs_viewed": false,
+  "adjudicated_at": "2026-10-24T21:01:00-04:00",
+  "papers": [
+    {
+      "paper_id": "accept-ais-sequential-2610.19115",
+      "obligation_count": 8,
+      "decisions": {
+        "ACCEPT": 8,
+        "REWRITE_FOR_SOURCE_FIDELITY": 0
+      },
+      "commit": "b69436231294f458985d43be4a39130c5174db1d"
+    },
+    {
+      "paper_id": "accept-holistic-rff-2610.05979",
+      "obligation_count": 8,
+      "decisions": {
+        "ACCEPT": 8,
+        "REWRITE_FOR_SOURCE_FIDELITY": 0
+      },
+      "commit": "08f34f848cc961f74ad70faa14f856488a7a26b2"
+    },
+    {
+      "paper_id": "accept-trustagent-rff-2610.24930",
+      "obligation_count": 8,
+      "decisions": {
+        "ACCEPT": 8,
+        "REWRITE_FOR_SOURCE_FIDELITY": 0
+      },
+      "commit": "4e7ea37d344f7c588a484ced7f973e728ab9c400"
+    },
+    {
+      "paper_id": "accept-sfpf-2609.21873",
+      "obligation_count": 8,
+      "decisions": {
+        "ACCEPT": 8,
+        "REWRITE_FOR_SOURCE_FIDELITY": 0
+      },
+      "commit": "f22b6a0c9a0fcde5fd597ac42034c1b16ed01f49"
+    },
+    {
+      "paper_id": "accept-safa-mz-2609.09511",
+      "obligation_count": 8,
+      "decisions": {
+        "ACCEPT": 7,
+        "REWRITE_FOR_SOURCE_FIDELITY": 1
+      },
+      "commit": "c1219d5669bcc7ddc30dec03b54ef3cc0357c52b"
+    },
+    {
+      "paper_id": "accept-microcsi-auth-2608.29845",
+      "obligation_count": 7,
+      "decisions": {
+        "ACCEPT": 7,
+        "REWRITE_FOR_SOURCE_FIDELITY": 0
+      },
+      "commit": "a5237993467873b336a9c06613ff57a1c64db12c"
+    },
+    {
+      "paper_id": "accept-dsp-ota-2610.15494",
+      "obligation_count": 7,
+      "decisions": {
+        "ACCEPT": 7,
+        "REWRITE_FOR_SOURCE_FIDELITY": 0
+      },
+      "commit": "83e05b9d0b010a508d96ef4b233108665dcf254e"
+    },
+    {
+      "paper_id": "accept-uav-dataset-2603.00106",
+      "obligation_count": 8,
+      "decisions": {
+        "ACCEPT": 7,
+        "REWRITE_FOR_SOURCE_FIDELITY": 1
+      },
+      "commit": "610d36493b56165fabcb3c1f9ce666076dd93d13"
+    }
+  ],
+  "changes": [
+    {
+      "obligation_id": "safa.eval.simulation",
+      "decision": "REWRITE_FOR_SOURCE_FIDELITY",
+      "reason": "Removed an unnecessary contrast with unstated real-world deployment evidence; retained the directly supported simulation scope."
+    },
+    {
+      "obligation_id": "uavdataset.result.noise",
+      "decision": "REWRITE_FOR_SOURCE_FIDELITY",
+      "reason": "Replaced analyst interpretation 'potential confound' with the paper-supported statement that background noise influences classification."
+    }
+  ],
+  "summary": {
+    "paper_count": 8,
+    "obligation_count": 62,
+    "accept_count": 60,
+    "rewrite_count": 2,
+    "rejected_count": 0
+  }
+}
