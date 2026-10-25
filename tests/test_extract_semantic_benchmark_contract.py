@@ -11,6 +11,7 @@ CORPUS = ROOT / "architecture" / "extract-semantic-benchmark-corpus.v0.1.json"
 SCHEMA = ROOT / "schemas" / "extract_semantic_benchmark.v0.1.schema.json"
 PILOT = ROOT / "architecture" / "extract-semantic-benchmark-pilot-annotations.v0.1.json"
 SOURCE_MANIFEST = ROOT / "architecture" / "extract-semantic-benchmark-source-manifest.v0.1.json"
+PILOT_ADJUDICATION = ROOT / "architecture" / "extract-semantic-benchmark-pilot-adjudication.v0.1.json"
 
 
 def test_semantic_benchmark_uses_fresh_heldout_papers() -> None:
@@ -108,3 +109,15 @@ def test_source_manifest_freezes_all_ten_exact_pdfs() -> None:
         assert cp["source_sha256"] == p["source_pdf_sha256"]
         assert cp["page_count"] == p["page_count"]
         assert cp["source_identity_status"] == "FROZEN"
+
+
+def test_pilot_protocol_is_ready_without_acceptance_leakage() -> None:
+    pilot = json.loads(PILOT.read_text())
+    review = json.loads(PILOT_ADJUDICATION.read_text())
+
+    assert pilot["status"] == "PILOT_PASS_B_PROTOCOL_VALIDATED"
+    assert review["disposition"] == "PILOT_PROTOCOL_READY_FOR_ACCEPTANCE_ANNOTATION"
+    assert review["source_first"] is True
+    assert review["local_extract_outputs_viewed"] is False
+    assert sum(p["decision_counts"]["ACCEPT"] for p in review["papers"]) == 11
+    assert all(p["source_sha256"] for p in pilot["papers"])
