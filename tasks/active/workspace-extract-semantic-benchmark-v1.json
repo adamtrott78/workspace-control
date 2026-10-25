@@ -401,12 +401,7 @@
   ],
   "validation": [],
   "blockers": [
-    {
-      "id": "await-frozen-extract-acceptance-candidate",
-      "kind": "evidence_dependency",
-      "description": "A Local EXTRACT architecture must be separately frozen by the owning research task before the sealed acceptance gold may be revealed or the held-out benchmark executed.",
-      "resolution": "Owning EXTRACT task checkpoints an acceptance candidate and explicitly hands off one-shot held-out evaluation authority."
-    }
+    "AWAIT_FROZEN_EXTRACT_ACCEPTANCE_CANDIDATE: A Local EXTRACT architecture must be separately frozen by the owning research task before the sealed acceptance gold may be revealed or the held-out benchmark executed. Resolve only when the owner checkpoints an acceptance candidate and explicitly hands off one-shot held-out evaluation authority."
   ],
   "remaining_work": [
     "Wait for the owning EXTRACT task to freeze a candidate architecture for held-out acceptance.",
