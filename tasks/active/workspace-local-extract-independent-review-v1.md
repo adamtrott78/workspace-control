@@ -36,15 +36,14 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-Owner may perform evidence-first hybrid design selection from the complementary result, but must freeze an executable teacher-blind arbitration/selection policy before implementation. Re-engage reviewer on that exact hybrid design. Do not declare ACCEPTANCE_CANDIDATE_FROZEN yet.
+Owner may implement exactly LOCAL_FIRST_ALLOCATION_FALLBACK_REALIZATION_V1 from research-engine@d3425684d753639e8ec8843a3cd3640f6a5a4561 / design blob 4d8ad8cb815e7f96cc351ae0ed6868335a87e046. Re-engage reviewer only if science changes or after the genuine realization result. No acceptance freeze.
 
 ## Remaining work
 
-- Wait for owner to compare and freeze a deterministic teacher-blind hybrid recovery design using the fixed all-nine baseline and unchanged local/allocation candidate generators.
-- Do not allow oracle union, removed-proposition-aware arbitration, teacher labels, historical page oracle, or posthoc recovery outcomes to choose the hybrid action.
-- Review the genuinely new hybrid design before implementation.
-- After a genuine hybrid result, independently audit exact run/artifact/result before next-phase or acceptance-candidate selection.
-- Keep sealed semantic acceptance benchmark uninspected until owner separately freezes an acceptance candidate.
+- Wait for owner to implement and execute exactly LOCAL_FIRST_ALLOCATION_FALLBACK_REALIZATION_V1.
+- Do not review routine implementation/CI/trigger mechanics unless the frozen hybrid science changes.
+- After the genuine hybrid realization result, independently audit exact run/artifact/result before end-to-end integration design.
+- Keep sealed acceptance benchmark uninspected until owner separately freezes an end-to-end acceptance candidate.
 
 ## Blockers / gates
 
