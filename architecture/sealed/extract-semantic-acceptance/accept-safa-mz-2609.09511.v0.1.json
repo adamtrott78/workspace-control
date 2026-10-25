@@ -29,7 +29,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Central generalization problem.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "safa.method.fingerprint",
@@ -48,7 +48,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Core fingerprint representation.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "safa.method.scm",
@@ -67,7 +67,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Causal modeling component.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "safa.method.meta",
@@ -86,7 +86,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Cross-environment adaptation mechanism.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "safa.method.twostage",
@@ -105,7 +105,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Conditional distributed-authentication mechanism.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "safa.result.acc",
@@ -124,7 +124,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Headline result.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "safa.result.auc",
@@ -143,13 +143,13 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Headline discrimination result.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "safa.eval.simulation",
       "type": "EVALUATION_PROTOCOL",
       "importance": "SECONDARY",
-      "normalized_claim": "The reported performance evidence is simulation-based rather than a stated real-world over-the-air deployment evaluation.",
+      "normalized_claim": "The headline performance evidence reported for SAFA-MZ is simulation-based across diverse non-terrestrial-network environments.",
       "support_mode": "DIRECT",
       "quotes": [
         {
@@ -161,8 +161,8 @@
         }
       ],
       "duplicate_group": null,
-      "annotation_rationale": "Important evaluation-scope qualifier.",
-      "adjudication_state": "PASS_A_ONLY"
+      "annotation_rationale": "Important evaluation-scope qualifier stated by the paper without inferring absence of every possible real-world component.",
+      "adjudication_state": "REWRITE_FOR_SOURCE_FIDELITY"
     }
   ],
   "annotation_provenance": {
@@ -170,7 +170,7 @@
     "extract_outputs_viewed": false,
     "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
     "annotated_at": "2026-10-24T20:56:00-04:00",
-    "adjudicator_id": null,
-    "adjudicated_at": null
+    "adjudicator_id": "workspace-extract-semantic-benchmark-v1/pass-b",
+    "adjudicated_at": "2026-10-24T21:01:00-04:00"
   }
 }
