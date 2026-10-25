@@ -36,14 +36,14 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-Owner may implement exactly LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1 from research-engine@abd55d31d2768f6d66d0aa187e90fa4950cfd26f / design blob f51c864d098181f4f00c75bef4f20eea3df401f2. Re-engage reviewer only if science changes or after the genuine result.
+No reviewer-side blocker remains on INSUFFICIENT_BASELINE_GENERALIZATION. Owner may redesign the cross-paper teacher-blind baseline only, with the explicit objective of achieving a valid matched four-origin budget28 baseline on all nine papers without using teacher labels or the observed recovery outcomes. Independent review is required before implementation.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to implement and execute exactly LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1.
-- Do not review routine implementation/CI/packaging/trigger mechanics unless they materially alter the frozen cross-paper science.
-- After the genuine cross-paper structural verdict, independently audit exact run/artifact/result before next-phase selection.
-- If a genuinely accepted EXTRACT output contract eventually appears, audit bindability for semantic-control integration.
+- Wait for the EXTRACT owner to freeze a teacher-blind cross-paper baseline redesign that can instantiate the matched comparison on all nine papers.
+- Do not review routine implementation/CI/trigger mechanics unless the baseline science changes.
+- After the next genuine baseline or recovery result, independently audit exact run/artifact/result before further scientific selection.
+- Do not permit proposition-level semantic generalization until a held-out multi-paper semantic benchmark exists.
 
 ## Blockers / gates
 
