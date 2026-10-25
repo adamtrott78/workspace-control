@@ -1,0 +1,176 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "split": "ACCEPTANCE",
+  "paper": {
+    "benchmark_paper_id": "accept-sfpf-2609.21873",
+    "arxiv_id": "2609.21873",
+    "version": "v1",
+    "title": "SFPF: Spatio-Frequency Polarization Fingerprint for Anomalous Wireless Device Detection",
+    "source_pdf_url": "https://arxiv.org/pdf/2609.21873v1",
+    "source_sha256": "fdc768444501afedb416cdf65fead91970d35496019f7047033d01edaaba2c80",
+    "page_count": 8
+  },
+  "obligations": [
+    {
+      "obligation_id": "sfpf.threat.hardware",
+      "type": "SECURITY_THREAT",
+      "importance": "CORE",
+      "normalized_claim": "The target threat is unauthorized hardware replacement that can preserve communication function, credentials, and logical identity while changing internal hardware.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "sfpf.threat.hardware.q1",
+          "page_number": 1,
+          "anchor_excerpt": "hardware replacement",
+          "canonical_span_sha256": "25105724ed3e8d2c5f0f9c08d1672c6d4641b2580adce88c4173a67b94961e4b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Central security motivation.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "sfpf.limit.fixed",
+      "type": "LIMITATION",
+      "importance": "CORE",
+      "normalized_claim": "A fixed-direction polarization fingerprint can miss hardware changes when polarization differences are weak at the chosen observation direction.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "sfpf.limit.fixed.q1",
+          "page_number": 1,
+          "anchor_excerpt": "fixed-direction",
+          "canonical_span_sha256": "25105724ed3e8d2c5f0f9c08d1672c6d4641b2580adce88c4173a67b94961e4b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Failure mode motivating SFPF.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "sfpf.method",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "SFPF jointly organizes complex polarization responses across multiple frequencies and observation directions for non-intrusive hardware-anomaly inspection.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "sfpf.method.q1",
+          "page_number": 1,
+          "anchor_excerpt": "spatio-frequency",
+          "canonical_span_sha256": "25105724ed3e8d2c5f0f9c08d1672c6d4641b2580adce88c4173a67b94961e4b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Central representation.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "sfpf.eval.simulation",
+      "type": "EVALUATION_PROTOCOL",
+      "importance": "SECONDARY",
+      "normalized_claim": "Electromagnetic simulation samples multiple observation angles and frequencies to evaluate sensitivity to a controlled antenna structural modification.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "sfpf.eval.simulation.q1",
+          "page_number": 4,
+          "anchor_excerpt": "simulation validation",
+          "canonical_span_sha256": "7b369b14e8c26214b13f73f33667186d5fd748d6ca412fa6d7401a646b2c6b7e",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Simulation protocol.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "sfpf.result.separability",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "Under the same observation budget, simulation reports SFPF gains of 17.7% in normalized distance, 45.8% in Fisher score, and 11.3% in inter/intra-class ratio relative to PF.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "sfpf.result.separability.q1",
+          "page_number": 1,
+          "anchor_excerpt": "17.7%",
+          "canonical_span_sha256": "25105724ed3e8d2c5f0f9c08d1672c6d4641b2580adce88c4173a67b94961e4b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Headline separability result.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "sfpf.result.snr",
+      "type": "ROBUSTNESS_GENERALIZATION",
+      "importance": "CORE",
+      "normalized_claim": "Prototype experiments report that SFPF outperforms conventional RFF and PF across 0–20 dB SNR.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "sfpf.result.snr.q1",
+          "page_number": 1,
+          "anchor_excerpt": "0-20 dB",
+          "canonical_span_sha256": "25105724ed3e8d2c5f0f9c08d1672c6d4641b2580adce88c4173a67b94961e4b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "SNR-robustness finding.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "sfpf.result.f1",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "At 15–20 dB, anomalous-device F1 is reported in the 87.3–90.4% range.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "sfpf.result.f1.q1",
+          "page_number": 1,
+          "anchor_excerpt": "87.3-90.4%",
+          "canonical_span_sha256": "25105724ed3e8d2c5f0f9c08d1672c6d4641b2580adce88c4173a67b94961e4b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Headline anomaly-detection result.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "sfpf.result.auroc",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "At 15–20 dB, anomalous-device AUROC is reported in the 85.4–95.5% range.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "sfpf.result.auroc.q1",
+          "page_number": 1,
+          "anchor_excerpt": "85.4-95.5%",
+          "canonical_span_sha256": "25105724ed3e8d2c5f0f9c08d1672c6d4641b2580adce88c4173a67b94961e4b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Headline ranking result.",
+      "adjudication_state": "PASS_A_ONLY"
+    }
+  ],
+  "annotation_provenance": {
+    "source_first": true,
+    "extract_outputs_viewed": false,
+    "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
+    "annotated_at": "2026-10-24T20:56:00-04:00",
+    "adjudicator_id": null,
+    "adjudicated_at": null
+  }
+}
