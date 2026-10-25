@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 7bbe4c313cb484fab691af9d88cd49eae5cb9a3f
+- Remote checkpoint: 96464c33805c308ff193e17f483a7b2b30b49335
 - Remote verified: true
 
 ### research-engine
@@ -42,13 +42,13 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Re-engage workspace-local-extract-independent-review-v1 on exact hybrid design research-engine@d3425684d753639e8ec8843a3cd3640f6a5a4561 / blob 4d8ad8cb815e7f96cc351ae0ed6868335a87e046. Do not implement or access the sealed acceptance benchmark before review.
+Implement LOCAL_FIRST_ALLOCATION_FALLBACK_REALIZATION_V1 exactly from research-engine@d3425684d753639e8ec8843a3cd3640f6a5a4561. Replay exact corrected all-nine report; action uses only local.chosen presence then allocation fallback. Do not access sealed acceptance benchmark.
 
 ## Remaining work
 
-- Obtain independent review of exact local-first hybrid design research-engine@d3425684d753639e8ec8843a3cd3640f6a5a4561 / blob 4d8ad8cb815e7f96cc351ae0ed6868335a87e046 before implementation.
-- If reviewer returns NO_BLOCKING_FINDING, implement only LOCAL_FIRST_ALLOCATION_FALLBACK_REALIZATION_V1 exactly as frozen.
-- Execute exactly one valid development realization run and stop at the frozen hybrid verdict; no valid-result rerun/tuning.
+- Implement LOCAL_FIRST_ALLOCATION_FALLBACK_REALIZATION_V1 exactly as frozen using deterministic replay of exact corrected all-nine report.
+- Run normal CI and persist exact implementation/trigger identity before one development scientific execution.
+- Execute exactly one valid hybrid realization run and stop at frozen verdict; no rerun/tuning.
 - After a genuine result, obtain independent post-result review before end-to-end integration design.
 - Keep sealed semantic acceptance benchmark uninspected and do not declare ACCEPTANCE_CANDIDATE_FROZEN.
 
