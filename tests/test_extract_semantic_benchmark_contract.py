@@ -12,6 +12,7 @@ SCHEMA = ROOT / "schemas" / "extract_semantic_benchmark.v0.1.schema.json"
 PILOT = ROOT / "architecture" / "extract-semantic-benchmark-pilot-annotations.v0.1.json"
 SOURCE_MANIFEST = ROOT / "architecture" / "extract-semantic-benchmark-source-manifest.v0.1.json"
 PILOT_ADJUDICATION = ROOT / "architecture" / "extract-semantic-benchmark-pilot-adjudication.v0.1.json"
+GOLD_COMMITMENT = ROOT / "architecture" / "extract-semantic-benchmark-gold-commitment.v0.1.json"
 
 
 def test_semantic_benchmark_uses_fresh_heldout_papers() -> None:
@@ -121,3 +122,19 @@ def test_pilot_protocol_is_ready_without_acceptance_leakage() -> None:
     assert review["local_extract_outputs_viewed"] is False
     assert sum(p["decision_counts"]["ACCEPT"] for p in review["papers"]) == 11
     assert all(p["source_sha256"] for p in pilot["papers"])
+
+
+def test_gold_commitment_is_sealed_and_acceptance_ready() -> None:
+    data = json.loads(GOLD_COMMITMENT.read_text())
+
+    assert data["status"] == "ACCEPTANCE_GOLD_FROZEN_SEALED"
+    assert data["validation"]["result"] == "PASS"
+    assert data["validation"]["paper_count"] == 8
+    assert data["validation"]["obligation_count"] == 62
+    assert data["validation"]["core_count"] == 51
+    assert data["adjudication"]["local_extract_outputs_viewed"] is False
+    assert data["adjudication"]["rejected_count"] == 0
+    assert len(data["gold_commitment_sha256"]) == 64
+    assert data["contamination_boundary"]["gold_content_merged_to_main"] is False
+    assert data["contamination_boundary"]["acceptance_candidate_frozen"] is False
+    assert data["contamination_boundary"]["active_extract_outputs_used_to_construct_gold"] is False
