@@ -29,7 +29,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Central security motivation.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "sfpf.limit.fixed",
@@ -48,7 +48,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Failure mode motivating SFPF.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "sfpf.method",
@@ -67,7 +67,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Central representation.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "sfpf.eval.simulation",
@@ -86,7 +86,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Simulation protocol.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "sfpf.result.separability",
@@ -105,7 +105,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Headline separability result.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "sfpf.result.snr",
@@ -124,7 +124,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "SNR-robustness finding.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "sfpf.result.f1",
@@ -143,7 +143,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Headline anomaly-detection result.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "sfpf.result.auroc",
@@ -162,7 +162,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Headline ranking result.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     }
   ],
   "annotation_provenance": {
@@ -170,7 +170,7 @@
     "extract_outputs_viewed": false,
     "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
     "annotated_at": "2026-10-24T20:56:00-04:00",
-    "adjudicator_id": null,
-    "adjudicated_at": null
+    "adjudicator_id": "workspace-extract-semantic-benchmark-v1/pass-b",
+    "adjudicated_at": "2026-10-24T21:01:00-04:00"
   }
 }
