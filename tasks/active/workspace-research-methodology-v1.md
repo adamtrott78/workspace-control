@@ -36,16 +36,15 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 ## Next safe action
 
-Do not alter governing v0.1. Wait for a future scientific design boundary where OUTCOME_PARTITION_EXHAUSTIVENESS_V0_2 can be prospectively applied before implementation, or advance another explicitly selected self-study experiment such as steady-state overhead telemetry or blind commitment design without prescribing EXTRACT's active architecture.
+Validate and merge the benchmark-validity audit plus Heartbeat research scorecard policy. Then keep EXTRACT science non-blocking, but require operator-facing scorecards at scientific result boundaries and treat the 13-atom metric as one-paper diagnostic evidence rather than the definition of solved.
 
 ## Remaining work
 
-- Validate and merge the methodology self-study, CANDIDATE_SUPPORTED outcome-partition result, and candidate-only v0.2 schema.
-- Prospectively test the outcome-partition candidate on a future scientific design before implementation; do not retrofit governing v0.1.
-- Continue prospective validation of diagnostic-depth semantics and measure steady-state methodology overhead.
-- Design a practical blind/isolated commitment protocol before claiming independent architecture-selection quality.
-- Test whether ordinal Decision Value remains discriminating when multiple eligible experiments are genuinely close.
-- Accumulate evidence beyond EXTRACT before canonical methodology promotion.
+- Validate and merge the Local EXTRACT benchmark-validity audit and Heartbeat research-scorecard policy.
+- Use 13-atom support only as a one-paper diagnostic/regression control; do not treat 13/13 as the project acceptance target.
+- Before declaring Local EXTRACT solved, create and validate a held-out multi-paper proposition/claim-level semantic benchmark with source-verified labels and negative/unsupported-claim evaluation.
+- Prospectively test the outcome-partition v0.2 candidate on future scientific designs before implementation.
+- Continue methodology prospective validation, overhead measurement, and blind-commitment design without prescribing active EXTRACT science.
 - If methodology concepts stabilize, create a separate ontology/research-knowledge integration task.
 
 ## Blockers / gates
