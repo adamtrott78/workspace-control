@@ -24,27 +24,26 @@ Build an independently source-verified, held-out multi-paper semantic acceptance
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8dd56b5c6d3859058437baa6a76692041f159977
+- Remote checkpoint: 4013b1d8b781b4ce11283508a0407d6e599a9969
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: abd55d31d2768f6d66d0aa187e90fa4950cfd26f
+- Remote checkpoint: 44fbf6107db2e554a5e276a1862c02c66ffd1ab9
 - Remote verified: true
 
 ## Next safe action
 
-Run Workspace Control Validation on the frozen benchmark foundation. If clean, merge it. Then acquire exact source identities/hashes for all ten papers before finalizing pilot annotations.
+Run the dedicated source-freeze CI workflow on this branch, inspect its exact manifest, persist the manifest into workspace-control, and validate all ten frozen source identities before pilot adjudication.
 
 ## Remaining work
 
-- Validate and merge the benchmark foundation.
-- Acquire exact PDF hashes/page counts and canonical page-text identities for all ten fresh papers.
-- Complete/finalize the two pilot annotations and run blind Pass-B adjudication.
-- Create acceptance gold for the eight held-out papers without consulting Local EXTRACT outputs.
-- Freeze gold and evaluate only a separately frozen Local EXTRACT candidate architecture.
+- Run the dedicated source-freeze CI job and persist exact PDF SHA-256, page counts, and canonical page-text hashes for all ten fresh papers.
+- Complete/finalize the two pilot annotations against the frozen source identities and run Pass-B adjudication.
+- Create source-first acceptance gold for the eight held-out papers without consulting Local EXTRACT outputs.
+- Freeze acceptance gold and evaluate only a separately frozen Local EXTRACT candidate architecture.
 
 ## Blockers / gates
 
