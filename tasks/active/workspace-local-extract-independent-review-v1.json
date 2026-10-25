@@ -1009,7 +1009,7 @@
     },
     {
       "check": "Atomic-obligation residual-closure design reviewer disposition",
-      "result": "BLOCKED",
+      "result": "FAIL",
       "evidence": [
         "BLOCKING_FINDING on exact design research-engine@aaf7aa79636b192fe6f16a71b10c727b103052f2 / blob 4200bc0fe4ed6d308767a8ac9610cf471392b562.",
         "Four result-affecting specification gaps must be corrected before implementation; mechanism family and core science remain otherwise acceptable."
