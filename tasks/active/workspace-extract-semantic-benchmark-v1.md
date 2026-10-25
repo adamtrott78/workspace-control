@@ -36,14 +36,14 @@ Build an independently source-verified, held-out multi-paper semantic acceptance
 
 ## Next safe action
 
-Run the dedicated source-freeze CI workflow on this branch, inspect its exact manifest, persist the manifest into workspace-control, and validate all ten frozen source identities before pilot adjudication.
+Finalize and adjudicate the two pilot papers against their frozen PDF identities. Resolve any source-anchor or obligation-granularity defects before opening acceptance annotation.
 
 ## Remaining work
 
-- Run the dedicated source-freeze CI job and persist exact PDF SHA-256, page counts, and canonical page-text hashes for all ten fresh papers.
-- Complete/finalize the two pilot annotations against the frozen source identities and run Pass-B adjudication.
+- Finalize the two pilot annotations against the frozen source identities and run Pass-B protocol validation.
 - Create source-first acceptance gold for the eight held-out papers without consulting Local EXTRACT outputs.
-- Freeze acceptance gold and evaluate only a separately frozen Local EXTRACT candidate architecture.
+- Freeze acceptance gold behind the benchmark contamination boundary.
+- Evaluate only a separately frozen Local EXTRACT candidate architecture.
 
 ## Blockers / gates
 
