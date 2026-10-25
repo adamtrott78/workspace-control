@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 0f697dfaf5a8cbfc76a8573b33d389182a5905a4
+- Remote checkpoint: 92d70b6086b700bc76a9595c0cbcba8fe31e1f43
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact cross-paper recovery pre-run checkpoint. Then issue exactly one `/local-extract-cross-paper-recovery-comparison d93cdc3eca427476f71a6095f5712bdb2de5f447` comment on research-engine PR #251 and bind the unique resulting run to that exact head. Do not issue a second trigger.
+Merge this exact INSUFFICIENT_BASELINE_GENERALIZATION result checkpoint, then close research-engine PR #251 unmerged and re-engage workspace-local-extract-independent-review-v1 on run 40146681400 / artifact 12581042417 / report sha256:1a0eed000053f064ec0f247ae3bc3f93583db9b2787d1ae8ec95362206a02db1. Do not redesign the cross-paper baseline before that review is durable.
 
 ## Remaining work
 
-- After this exact checkpoint merges, issue exactly one `/local-extract-cross-paper-recovery-comparison d93cdc3eca427476f71a6095f5712bdb2de5f447` comment on open research-engine PR #251.
-- Bind the unique resulting scientific workflow run to exact PR head d93cdc3eca427476f71a6095f5712bdb2de5f447 and inspect the uploaded report.
-- Stop at the frozen cross-paper structural verdict; do not tune, rerun, alter baseline/stress rules, radius1, top12 allocation, rank-stratum definitions, budget28, historical-page secondary use, or interpretation after a valid result.
-- Persist the exact result, close PR #251 unmerged only after the result checkpoint is durable, and obtain independent post-result review before selecting another scientific phase.
+- Obtain independent post-result review of run 40146681400 / artifact 12581042417 / report sha256 1a0eed000053f064ec0f247ae3bc3f93583db9b2787d1ae8ec95362206a02db1 before redesigning the cross-paper baseline.
+- After this result checkpoint merges, close research-engine PR #251 unmerged and do not retrigger.
+- Do not select a recovery mechanism from the diagnostic-only 3-vs-1 counts because the all-nine baseline gate failed.
+- If reviewer finds no blocking issue, redesign only the cross-paper teacher-blind baseline so all nine papers can instantiate the matched comparison; freeze and review that new design before implementation.
 - Preserve semantic-generalization limits, rejected-family exclusions, production/Wave7B/semantic-control boundaries.
 
 ## Blockers / gates
