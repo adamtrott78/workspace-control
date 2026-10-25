@@ -24,25 +24,27 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 42f2d7994cafe8f7c4fd954623924cdcdbb90dd4
+- Remote checkpoint: 18565e1de9f9db8ff9c3ea4115673bdba7e52efe
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: 0abc9d3c6a558a5364ec10dd2d7263745ba37e2b
+- Remote checkpoint: a901115fb572a0647e70f87c39309bcda60f1dee
 - Remote verified: true
 
 ## Next safe action
 
-Owner may implement exactly OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 from research-engine@0abc9d3c6a558a5364ec10dd2d7263745ba37e2b / design blob 4f4238030b7b667e080c2f662646e5856deacb4f. Routine implementation/CI/one-shot trigger mechanics do not require another review unless frozen science changes. After the genuine result, stop and re-engage reviewer before any next scientific phase. No acceptance freeze or sealed holdout access.
+Owner may perform evidence-first design of one materially new bounded exact-provenance-binding experiment that separates semantic obligation judgment from source-proof attachment, preferably by selecting frozen authoritative proposition/span identifiers rather than regenerating source quotations. Freeze the design and re-engage reviewer before implementation. Do not tune/rerun the completed validity microbenchmark, do not implement preservation-aware admission yet, and do not access the sealed acceptance benchmark or declare ACCEPTANCE_CANDIDATE_FROZEN.
 
 ## Remaining work
 
-- Owner may implement exactly OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 from research-engine@0abc9d3c6a558a5364ec10dd2d7263745ba37e2b / design blob 4f4238030b7b667e080c2f662646e5856deacb4f.
-- Do not alter visible-field lists, prompts/templates, serialization, case isolation, parser/guard semantics, cases, model identity, or scientific gates during implementation.
-- After a genuine scientific result, re-engage reviewer before preservation-aware admission design, next-phase selection, or acceptance-candidate decision.
+- Owner may select and freeze a materially new bounded design that separates semantic obligation judgment from exact provenance attachment, using deterministic authoritative proposition/span identifiers or another proof-carrying pointer/selection interface as the leading family.
+- Do not rescue, tune, normalize, or rerun OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1.
+- Require independent pre-implementation review of the next genuinely new scientific design before implementation.
+- Keep preservation-aware evidence admission deferred until validity/provenance binding itself passes.
+- Keep LOCAL_FIRST_ALLOCATION_FALLBACK_HYBRID_V1 as positive lineage; do not reopen retrieval/reranker/model scaling or rejected NLI/PREDICATE_ARGUMENT/AMR certificate families without new premise-level evidence.
 - Keep sealed acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
