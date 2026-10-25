@@ -1,0 +1,176 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "split": "ACCEPTANCE",
+  "paper": {
+    "benchmark_paper_id": "accept-safa-mz-2609.09511",
+    "arxiv_id": "2609.09511",
+    "version": "v1",
+    "title": "Adaptive Distributed Physical-Layer Authentication and Attack Detection in 6G Non-Terrestrial Networks via Causal Meta-Learning",
+    "source_pdf_url": "https://arxiv.org/pdf/2609.09511v1",
+    "source_sha256": "64e41217fc7af97b0b7601d94b022a2393814682e69ebd3ac04fecea9b74a8c2",
+    "page_count": 15
+  },
+  "obligations": [
+    {
+      "obligation_id": "safa.problem.shift",
+      "type": "ROBUSTNESS_GENERALIZATION",
+      "importance": "CORE",
+      "normalized_claim": "Physical-layer authentication in non-terrestrial networks is challenged by Doppler, delay, and fast channel variation that induce distribution shift and degrade conventional learning.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "safa.problem.shift.q1",
+          "page_number": 1,
+          "anchor_excerpt": "unseen environments",
+          "canonical_span_sha256": "6773fb463f49b0e9fd118bdbf5c350472a09fa8b8092eb5481771341ef7ff966",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Central generalization problem.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "safa.method.fingerprint",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "SAFA-MZ combines spatial, angular, combiner, subspace, and Doppler-delay features into an adaptive distributed multi-feature fingerprint across aerial nodes.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "safa.method.fingerprint.q1",
+          "page_number": 1,
+          "anchor_excerpt": "multi-feature fingerprint",
+          "canonical_span_sha256": "6773fb463f49b0e9fd118bdbf5c350472a09fa8b8092eb5481771341ef7ff966",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Core fingerprint representation.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "safa.method.scm",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "A structural causal model represents relationships among design choices, environmental factors, extracted features, and authentication outcomes.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "safa.method.scm.q1",
+          "page_number": 1,
+          "anchor_excerpt": "structural causal model",
+          "canonical_span_sha256": "6773fb463f49b0e9fd118bdbf5c350472a09fa8b8092eb5481771341ef7ff966",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Causal modeling component.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "safa.method.meta",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "The adaptation method combines model-agnostic meta-learning with invariant-risk minimization and causal-consistency regularization for unseen environments with few labeled samples.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "safa.method.meta.q1",
+          "page_number": 1,
+          "anchor_excerpt": "invariant risk minimization",
+          "canonical_span_sha256": "6773fb463f49b0e9fd118bdbf5c350472a09fa8b8092eb5481771341ef7ff966",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Cross-environment adaptation mechanism.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "safa.method.twostage",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "Authentication first performs local recognition and invokes TDOA localization with a graph-attention network only when needed, reducing backhaul use.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "safa.method.twostage.q1",
+          "page_number": 1,
+          "anchor_excerpt": "TDOA",
+          "canonical_span_sha256": "6773fb463f49b0e9fd118bdbf5c350472a09fa8b8092eb5481771341ef7ff966",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Conditional distributed-authentication mechanism.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "safa.result.acc",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "Simulation reports approximately 92% authentication accuracy for SAFA-MZ across diverse environments.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "safa.result.acc.q1",
+          "page_number": 1,
+          "anchor_excerpt": "92%",
+          "canonical_span_sha256": "6773fb463f49b0e9fd118bdbf5c350472a09fa8b8092eb5481771341ef7ff966",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Headline result.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "safa.result.auc",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "Simulation reports approximately 96% AUC and states that SAFA-MZ outperforms centralized deep-learning and single-feature baselines.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "safa.result.auc.q1",
+          "page_number": 1,
+          "anchor_excerpt": "96%",
+          "canonical_span_sha256": "6773fb463f49b0e9fd118bdbf5c350472a09fa8b8092eb5481771341ef7ff966",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Headline discrimination result.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "safa.eval.simulation",
+      "type": "EVALUATION_PROTOCOL",
+      "importance": "SECONDARY",
+      "normalized_claim": "The reported performance evidence is simulation-based rather than a stated real-world over-the-air deployment evaluation.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "safa.eval.simulation.q1",
+          "page_number": 1,
+          "anchor_excerpt": "simulations",
+          "canonical_span_sha256": "6773fb463f49b0e9fd118bdbf5c350472a09fa8b8092eb5481771341ef7ff966",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Important evaluation-scope qualifier.",
+      "adjudication_state": "PASS_A_ONLY"
+    }
+  ],
+  "annotation_provenance": {
+    "source_first": true,
+    "extract_outputs_viewed": false,
+    "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
+    "annotated_at": "2026-10-24T20:56:00-04:00",
+    "adjudicator_id": null,
+    "adjudicated_at": null
+  }
+}
