@@ -880,20 +880,6 @@
         "Preservation-aware admission remains deferred until validity/provenance passes. Retrieval/reranker/model scaling and rejected NLI/PREDICATE_ARGUMENT/AMR families remain unjustified.",
         "No acceptance freeze; sealed benchmark remains untouched."
       ]
-    },
-    {
-      "id": "exact-provenance-binding-design-awaiting-review-v1",
-      "kind": "review_handoff",
-      "identity": "research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc|design_blob@09603c4d65114c75ad3e112a357ee45da384f63e|EXACT_PROVENANCE_BINDING_MICROBENCH_V1:REVIEW_REQUIRED",
-      "required_for_resume": true,
-      "evidence": [
-        "Owner has frozen the next design after the accepted post-result review.",
-        "Arm A TRI_STATE_DETERMINISTIC_PROVENANCE_ATTACHMENT_V1 returns semantic tri-state only; runtime attaches hidden exact proposition provenance for opaque E0 on support.",
-        "Arm B TRI_STATE_OPAQUE_EVIDENCE_POINTER_V1 returns tri-state plus opaque E0 pointer; no source quote/span regeneration.",
-        "Same seven frozen development cases, same Qwen3.5-4B/source/runtime identities, 14 stateless calls, no evidence-set mutation, preservation 9/9 + 7/7, fail-closed completeness, and one-valid-run stopping rule.",
-        "GitHub-hosted CI attempts 40177364128 and 40177487876 failed before checkout with zero steps; validation unavailable, not scientific failure or PASS.",
-        "No implementation or scientific run occurred. Independent pre-implementation review is mandatory."
-      ]
     }
   ],
   "artifacts": [
