@@ -24,25 +24,25 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 013301d7d47d006de054a4ab5ee8082e693f5f09
+- Remote checkpoint: 42f2d7994cafe8f7c4fd954623924cdcdbb90dd4
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: b939ff0bbb52024f55b2f6e719aef331f6286d06
+- Remote checkpoint: 0abc9d3c6a558a5364ec10dd2d7263745ba37e2b
 - Remote verified: true
 
 ## Next safe action
 
-Owner must correct OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 before implementation: freeze exact model-visible obligation fields for each arm with fail_closed_conditions/evaluation labels excluded; freeze exact prompt/template and stateless case-isolation rules; freeze parsing/guard semantics so ordinary bad verifier outputs count against the arm rather than producing INVALID_EXECUTION/rerun authority. Then re-engage reviewer on the corrected exact SHA/blob. No implementation, acceptance freeze, or sealed holdout access before NO_BLOCKING_FINDING.
+Owner may implement exactly OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 from research-engine@0abc9d3c6a558a5364ec10dd2d7263745ba37e2b / design blob 4f4238030b7b667e080c2f662646e5856deacb4f. Routine implementation/CI/one-shot trigger mechanics do not require another review unless frozen science changes. After the genuine result, stop and re-engage reviewer before any next scientific phase. No acceptance freeze or sealed holdout access.
 
 ## Remaining work
 
-- Wait for owner to correct the three result-affecting specification blockers in OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 without broadening the science.
-- Re-review the corrected exact design before any implementation.
-- If corrected design receives NO_BLOCKING_FINDING, allow exact implementation only; genuine result still requires independent post-result review.
+- Owner may implement exactly OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 from research-engine@0abc9d3c6a558a5364ec10dd2d7263745ba37e2b / design blob 4f4238030b7b667e080c2f662646e5856deacb4f.
+- Do not alter visible-field lists, prompts/templates, serialization, case isolation, parser/guard semantics, cases, model identity, or scientific gates during implementation.
+- After a genuine scientific result, re-engage reviewer before preservation-aware admission design, next-phase selection, or acceptance-candidate decision.
 - Keep sealed acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
