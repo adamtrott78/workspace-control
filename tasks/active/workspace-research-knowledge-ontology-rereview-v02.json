@@ -39,8 +39,8 @@
       "intent": "mutate",
       "base_sha": "f321f21ff732b3c4e1f5e92051f8cb113e212998",
       "remote": {
-        "branch": "research-knowledge-ontology-rereview-v02",
-        "checkpoint_sha": "f321f21ff732b3c4e1f5e92051f8cb113e212998",
+        "branch": "main",
+        "checkpoint_sha": "6d8f1f7e8ae8f0150b0cbab44d23b3d50128930f",
         "verified": true
       },
       "local": null,
@@ -123,6 +123,17 @@
         "Workspace Control validations remain zero-step VALIDATION_UNAVAILABLE; no PASS is claimed.",
         "No implementation authority exists before this re-review."
       ]
+    },
+    {
+      "id": "rereview-lane-merge-v02",
+      "kind": "durable_reviewer_checkpoint",
+      "identity": "workspace-control@6d8f1f7e8ae8f0150b0cbab44d23b3d50128930f|owner_blob@416e0c5b9ac6ce73cb34e8c86a0059a6622d67db|design@039fd2f888fb1abfb663c841df3425e2aa69fb74|benchmark@c73f6f531a05386c1177a2709690ad2b06739ea9",
+      "required_for_resume": true,
+      "evidence": [
+        "Re-review task PR #505 merged as workspace-control@6d8f1f7e8ae8f0150b0cbab44d23b3d50128930f.",
+        "Workspace Control Validation 40243931083 was zero-step VALIDATION_UNAVAILABLE, not PASS.",
+        "Reviewer remains implementation-forbidden and may only persist independent disposition."
+      ]
     }
   ],
   "artifacts": [],
@@ -136,5 +147,5 @@
   "next_safe_action": "Independently review architecture/research-knowledge-ontology.v0.2.json blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json blob c73f6f531a05386c1177a2709690ad2b06739ea9 against the five prior blockers. Verify non-vacuous INVALID_EXECUTION and contradiction coverage, 10/10 required query-family coverage, operational anti-hardcoding through same-query/different-graph pairs plus deterministic relabeling, and exact deterministic canonical scoring. Also verify no regression of authority separation. Return NO_BLOCKING_FINDING or exact blockers; do not implement anything.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created 2026-10-25 as a fresh independent re-review lane for corrected v0.2. The prior v0.1 reviewer was COMPLETE with BLOCKING_FINDING; this task reviews only exact corrected blobs and cannot implement."
+  "notes": "Created 2026-10-25 as a fresh independent re-review lane for corrected v0.2. The prior v0.1 reviewer was COMPLETE with BLOCKING_FINDING; this task reviews only exact corrected blobs and cannot implement.\n2026-10-25 re-review lane merge: PR #505 merged as workspace-control@6d8f1f7e8ae8f0150b0cbab44d23b3d50128930f; task is ready for independent review of exact corrected v0.2 blobs."
 }
