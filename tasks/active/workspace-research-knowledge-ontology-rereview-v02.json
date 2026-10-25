@@ -1,0 +1,140 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-research-knowledge-ontology-rereview-v02",
+  "title": "Research Knowledge Ontology v0.2 Independent Re-review",
+  "status": "IN_PROGRESS",
+  "goal": "Independently re-review the corrected Research Knowledge Ontology v0.2 and replay benchmark v0.2 after the v0.1 BLOCKING_FINDING, verifying exact closure of all five result-affecting blockers without introducing new authority leakage, benchmark tautology, or implementation ambiguity.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/evidence-first-solution-research.v1.json",
+    "checkpoint_sha": "f321f21ff732b3c4e1f5e92051f8cb113e212998",
+    "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
+  },
+  "current_stage": "review_corrected_v0.2_contract",
+  "acceptance_criteria": [
+    "Review exact owner blob 416e0c5b9ac6ce73cb34e8c86a0059a6622d67db, design blob 039fd2f888fb1abfb663c841df3425e2aa69fb74, and benchmark blob c73f6f531a05386c1177a2709690ad2b06739ea9 without modifying them.",
+    "Verify blocker 1 is non-vacuously closed by at least one positive INVALID_EXECUTION case and a paired valid-control case with identical query visibility but different graph evidence.",
+    "Verify blocker 2 is non-vacuously closed by an active contradiction case, a resolved/superseded control, and an explicit contradiction_silent_collapse_count=0 pass gate.",
+    "Verify blocker 3 is closed by 10/10 required query-family coverage including WHY_CURRENT_EXPERIMENT.",
+    "Verify blocker 4 is operationally closed: same-query/different-graph adversarial pairs plus deterministic relabel variants must make visible-query fingerprint lookup insufficient to pass; hidden case/fixture/gold/provenance-map metadata must remain inaccessible to the query engine.",
+    "Verify blocker 5 is closed by an exact deterministic canonical scorer with frozen output schema, support-handle resolution, duplicate rejection, raw UTF-8 sorting, exact equality, no natural-language grading, and no retry/repair.",
+    "Check corrected synthetic overlays remain test-only, nonauthoritative, isolated from production projection construction, and incapable of becoming scientific/policy truth.",
+    "Check the v0.2 correction does not weaken the already-accepted epistemic/normative/execution/CandidateAction authority boundaries.",
+    "Check all pass gates are internally consistent with 21 base cases, 42 relabel variants, 63 total instances, 10/10 family coverage, and zero authority/stale/verdict/contradiction/gold/case-specific/query-fingerprint escapes.",
+    "Return NO_BLOCKING_FINDING or exact result-affecting blockers. No implementation authority exists until the owner durably consumes NO_BLOCKING_FINDING."
+  ],
+  "constraints": [
+    "Do not implement the projection/query engine.",
+    "Do not mutate the owner task, v0.2 design, or v0.2 benchmark.",
+    "Do not inspect the sealed semantic acceptance benchmark.",
+    "Do not mutate Local EXTRACT, research-engine, semantic-control integration, policy, routing, or production behavior.",
+    "Treat prior v0.1 review as accepted negative review evidence; do not reopen already-accepted core architecture unless v0.2 correction actually regresses it.",
+    "Do not accept declarations alone for blocker closure: inspect the exact frozen executable contract semantics.",
+    "Do not treat zero-step CI as PASS or scientific evidence."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "f321f21ff732b3c4e1f5e92051f8cb113e212998",
+      "remote": {
+        "branch": "research-knowledge-ontology-rereview-v02",
+        "checkpoint_sha": "f321f21ff732b3c4e1f5e92051f8cb113e212998",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-research-knowledge-ontology-rereview-v02.json",
+        "tasks/active/workspace-research-knowledge-ontology-rereview-v02.md"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "15c2f98feb980f18fac255b74c6a39db5da4ef30",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "15c2f98feb980f18fac255b74c6a39db5da4ef30",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "recover_exact_corrected_review_target",
+      "status": "VALIDATED",
+      "execution_owner": "independent_reviewer",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "workspace-control@f321f21ff732b3c4e1f5e92051f8cb113e212998",
+        "owner blob 416e0c5b9ac6ce73cb34e8c86a0059a6622d67db",
+        "design blob 039fd2f888fb1abfb663c841df3425e2aa69fb74",
+        "benchmark blob c73f6f531a05386c1177a2709690ad2b06739ea9",
+        "prior review identity workspace-control@706957531271486b7df510933297fa9169134a65|design@9af5bea619ec5a2f83575b4c8d73d08922f05bdb|benchmark@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998:BLOCKING_FINDING"
+      ],
+      "outputs": [
+        "exact corrected re-review target frozen"
+      ],
+      "validation": [
+        {
+          "check": "Corrected target identity",
+          "result": "PASS",
+          "evidence": [
+            "Owner current_stage=corrected_v0.2_independent_rereview_ready.",
+            "v0.2 design and benchmark are durable on main.",
+            "No projection implementation is authorized or present in this task.",
+            "Correction scope is limited to the five v0.1 blockers."
+          ]
+        }
+      ],
+      "resume_condition": "Review exact frozen v0.2 blobs only."
+    },
+    {
+      "id": "review_corrected_v0.2_contract",
+      "status": "READY",
+      "execution_owner": "independent_reviewer",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "architecture/research-knowledge-ontology.v0.2.json@039fd2f888fb1abfb663c841df3425e2aa69fb74",
+        "benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json@c73f6f531a05386c1177a2709690ad2b06739ea9"
+      ],
+      "outputs": [
+        "NO_BLOCKING_FINDING or exact blocking findings"
+      ],
+      "validation": [],
+      "resume_condition": "Persist disposition; owner may implement only after durable NO_BLOCKING_FINDING."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "corrected-v0.2-review-target",
+      "kind": "independent_review_target",
+      "identity": "workspace-control@f321f21ff732b3c4e1f5e92051f8cb113e212998|owner_blob@416e0c5b9ac6ce73cb34e8c86a0059a6622d67db|design@039fd2f888fb1abfb663c841df3425e2aa69fb74|benchmark@c73f6f531a05386c1177a2709690ad2b06739ea9",
+      "required_for_resume": true,
+      "evidence": [
+        "v0.1 independent review returned BLOCKING_FINDING with five replay-contract defects.",
+        "PR #503 merged corrected v0.2 as workspace-control@d096b923e7e1e07aa20e9276c8b45ecc446e3705.",
+        "PR #504 reconciled owner task to main as workspace-control@f321f21ff732b3c4e1f5e92051f8cb113e212998.",
+        "Workspace Control validations remain zero-step VALIDATION_UNAVAILABLE; no PASS is claimed.",
+        "No implementation authority exists before this re-review."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [],
+  "blockers": [],
+  "remaining_work": [
+    "Perform independent re-review of exact v0.2 design and benchmark.",
+    "Persist NO_BLOCKING_FINDING or exact result-affecting blockers.",
+    "Do not implement from reviewer lane."
+  ],
+  "next_safe_action": "Independently review architecture/research-knowledge-ontology.v0.2.json blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json blob c73f6f531a05386c1177a2709690ad2b06739ea9 against the five prior blockers. Verify non-vacuous INVALID_EXECUTION and contradiction coverage, 10/10 required query-family coverage, operational anti-hardcoding through same-query/different-graph pairs plus deterministic relabeling, and exact deterministic canonical scoring. Also verify no regression of authority separation. Return NO_BLOCKING_FINDING or exact blockers; do not implement anything.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "Created 2026-10-25 as a fresh independent re-review lane for corrected v0.2. The prior v0.1 reviewer was COMPLETE with BLOCKING_FINDING; this task reviews only exact corrected blobs and cannot implement."
+}
