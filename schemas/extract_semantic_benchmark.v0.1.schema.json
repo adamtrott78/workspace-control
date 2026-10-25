@@ -89,7 +89,7 @@
       "required": [
         "quote_id",
         "page_number",
-        "exact_text"
+        "anchor_excerpt"
       ],
       "properties": {
         "quote_id": {
@@ -100,9 +100,17 @@
           "type": "integer",
           "minimum": 1
         },
-        "exact_text": {
+        "anchor_excerpt": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "canonical_span_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
         },
         "locator_note": {
           "type": [
