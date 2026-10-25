@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "audit_id": "extract-legacy-four-atom-residual-audit-v1",
+  "task_id": "workspace-research-methodology-v1",
+  "status": "ANALYSIS_COMPLETE_NO_ACTIVE_EXTRACT_MUTATION",
+  "purpose": "Explain the four unsupported atoms in the strongest legacy 9/13 teacher control without changing the frozen LOCAL_FIRST_ALLOCATION_FALLBACK_HYBRID_V1 design or inspecting the sealed acceptance benchmark.",
+  "scope": {
+    "teacher_paper": "arxiv:2403.04036",
+    "teacher_atom_count": 13,
+    "strongest_legacy_control_result": "9/13 supported atoms with all 7/7 frozen controls plus e1.a and e6.a",
+    "unsupported_atoms": [
+      "e1.b",
+      "e1.c",
+      "e3.c",
+      "e6.c"
+    ],
+    "acceptance_benchmark_inspected": false,
+    "active_hybrid_changed": false
+  },
+  "diagnostic_semantics": {
+    "oracle_query_diagnostic": "One teacher-derived but answer-free evidence query is issued separately for each atom. Each retriever gets up to top-12 propositions for that atom-specific query. A 13/13 score means every atom's required source anchors appear within its own top-12 list; it does NOT mean a single 12- or 24-proposition final evidence set contains all 13 atoms, and it does NOT test automatic discovery of which questions to ask.",
+    "oracle_capacity_results": {
+      "BGE_M3_DENSE": "13/13",
+      "BGE_M3_COLBERT": "13/13",
+      "BGE_M3_HYBRID_040_020_040": "13/13",
+      "QWEN3_RERANKER_0_6B": "13/13",
+      "BGE_M3_SPARSE": "12/13 (misses e1.a)",
+      "BM25_DIRECT": "11/13 (misses e1.a and e3.b)"
+    },
+    "interpretation": "The ranking/retrieval substrate has sufficient capacity under precise information needs. The gap between oracle performance and automatic 9/13 performance is primarily about automatic intent/obligation coverage, evidence allocation/fusion, and final evidence-set selection rather than missing source evidence or an intrinsically incapable retriever."
+  },
+  "frozen_evidence": {
+    "teacher_oracle": {
+      "file": "research-engine:benchmarks/document_intelligence/local-extract-teacher-atom-support.v1.json",
+      "blob": "ed4aa8dad34db65af280f07de77c4b57df24a9fd"
+    },
+    "oracle_query_result": {
+      "run_id": 39991479494,
+      "artifact_id": 12518690424,
+      "artifact_zip_sha256": "a55ea171dd4dc77d5d5df3fbe05ad1039b1a7c8f7b0a9aec8d5dd52a97c1ec16",
+      "report_sha256": "4340afe82bd28f0f16b50cb1844f42c8cee386bfe25dfccdd3b876a45e252fe3"
+    },
+    "wave7a3_automatic_intents": {
+      "run_id": 40027366528,
+      "artifact_id": 12533721500,
+      "artifact_zip_sha256": "cd02b842ad44bbadab7aad661ff424cc6108f8047d260df5d0064fba2b4f35fb",
+      "generated_intents_sha256": "a5a970725c1f16a694633416ad9fbd98e58418c267891ac83b7783d8af218ebd",
+      "report_sha256": "a87c643b28b25f6581f0bf4dd356646e0bccd168a67ecbfaf58b662b4e0f8e35"
+    },
+    "composed_9of13": {
+      "run_id": 40139717644,
+      "artifact_id": 12577434130,
+      "artifact_zip_sha256": "de632b3371b25f9b1228b49a4d02e9c1f0bf9ba249d18826d0a742de3a49e6e2",
+      "report_sha256": "315b18622bd1f5751ff2c551da974ec054d6c7dbf2fe3ff770cd7dcd4d987369"
+    },
+    "rescued_9of13": {
+      "run_id": 40143476764,
+      "artifact_id": 12580076512,
+      "artifact_zip_sha256": "696fa26d942767844ddb24119ae98a503febac02da4e8f3dcbf2eeb021304b89",
+      "report_sha256": "e1a2f61f16cae4e957b10a9c24b475d5cb481afa9381084de65a1cd9c6568d23"
+    }
+  },
+  "atoms": [
+    {
+      "id": "e1.b",
+      "normalized_form": "The proposed framework trains a classifier using source-domain device labels.",
+      "exact_support_proposition": "page:p2:s34",
+      "exact_support_text_summary": "The base encoder is used as a feature extractor and the classifier is trained from extracted features plus device labels from the source domain only.",
+      "oracle_query": "How is the classifier trained after representation learning, and which domain provides the device labels?",
+      "oracle_support_rank": {
+        "QWEN3_RERANKER_0_6B": 1,
+        "BGE_M3_SPARSE": 2,
+        "BGE_M3_DENSE": 3,
+        "BGE_M3_COLBERT": 3,
+        "BGE_M3_HYBRID_040_020_040": 3,
+        "BM25_DIRECT": 4
+      },
+      "automatic_intent_evidence": [
+        "Wave 7A source-aware diagnostic explicitly reports that no separate source-label classifier-training intent was generated.",
+        "Author-anchored generation asks how the base encoder is used in the subsequent training stage, but does not atomically ask which domain provides device labels.",
+        "The exact support proposition page:p2:s34 is absent from every Wave 7A.3 automatic merged top-24 arm.",
+        "A semantically equivalent page:p4:s15 proposition about source-domain device labels appears in the deterministic BGE automatic top-24, showing that the exact-page anchor evaluator can undercount semantically valid support in some arms; it is not present in the strongest 9/13 composed/rescued set."
+      ],
+      "current_9of13_exact_support_present": false,
+      "diagnosis": [
+        "INTENT_ATOMICITY_GAP",
+        "FINAL_SELECTION_GAP",
+        "LEGACY_EXPECTED_PAGE_FALSE_NEGATIVE_RISK"
+      ],
+      "confidence": "HIGH",
+      "implication": "Do not scale the ranker. The evidence is easy to retrieve once an atomic source-label training obligation exists. A future bounded design should test explicit atomic method-stage obligation coverage and source-fidelity evaluation."
+    },
+    {
+      "id": "e1.c",
+      "normalized_form": "The proposed framework tests on target-domain data.",
+      "exact_support_proposition": "page:p2:s35",
+      "exact_support_text_summary": "The trained base encoder and classifier are applied to target data during testing.",
+      "oracle_query": "Which domain's data is used during the testing stage?",
+      "oracle_support_rank": {
+        "BGE_M3_HYBRID_040_020_040": 1,
+        "BGE_M3_SPARSE": 1,
+        "QWEN3_RERANKER_0_6B": 1,
+        "BGE_M3_COLBERT": 2,
+        "BM25_DIRECT": 2,
+        "BGE_M3_DENSE": 3
+      },
+      "automatic_intent_evidence": [
+        "Wave 7A source-aware diagnostic explicitly reports that no separate target-domain testing intent was generated.",
+        "Automatic merged sets contain broad stage/domain-shift propositions, but the exact target-testing proposition page:p2:s35 is absent from all Wave 7A.3 automatic top-24 arms.",
+        "The strongest 9/13 composed/rescued set also omits page:p2:s35."
+      ],
+      "current_9of13_exact_support_present": false,
+      "diagnosis": [
+        "INTENT_ATOMICITY_GAP",
+        "FINAL_SELECTION_GAP"
+      ],
+      "confidence": "VERY_HIGH",
+      "implication": "This is the cleanest evidence that compound method descriptions need decomposition by lifecycle stage. The existing retrievers find the atom at rank 1-3 under a precise answer-free query."
+    },
+    {
+      "id": "e3.c",
+      "normalized_form": "The wireless testbed sampled frames with an Ettus USRP B210 at 45 MSps.",
+      "exact_support_proposition": "page:p2:s17",
+      "exact_support_text_summary": "Wireless frames are sampled/stored as IQ by an Ettus USRP B210 at 45 MSps.",
+      "oracle_query": "What receiver hardware and sampling rate are used to capture the wireless frames?",
+      "oracle_support_rank": {
+        "BM25_DIRECT": 1,
+        "BGE_M3_SPARSE": 1,
+        "QWEN3_RERANKER_0_6B": 1,
+        "BGE_M3_DENSE": 2,
+        "BGE_M3_COLBERT": 2,
+        "BGE_M3_HYBRID_040_020_040": 2
+      },
+      "automatic_intent_evidence": [
+        "Source-aware automatic generation does cover acquisition, but splits the need into a hardware/protocol question and a sampling-rate/center-frequency question rather than a single joint hardware+rate obligation.",
+        "Under the source-aware BGE-M3 hybrid arm, page:p2:s17 is selected at fusion rank 13 and e3.c is supported.",
+        "Under the stronger source-aware BM25 control, page:p2:s17 is absent and e3.c is not supported.",
+        "The strongest 9/13 composed/rescued set omits page:p2:s17."
+      ],
+      "current_9of13_exact_support_present": false,
+      "diagnosis": [
+        "QUERY_FACET_SPLIT",
+        "RETRIEVER_FUSION_SENSITIVITY",
+        "FINAL_SELECTION_GAP"
+      ],
+      "confidence": "VERY_HIGH",
+      "implication": "This is not a missing-intent problem in the same sense as e1.b/e1.c. The system asks about acquisition, but splitting coupled attributes plus the selected fusion path loses the joint evidence. A future design should preserve coupled acquisition obligations or join shallow evidence across related intents rather than globally swap retrievers."
+    },
+    {
+      "id": "e6.c",
+      "normalized_form": "The authors identify consistently misclassified devices as an area for further research.",
+      "exact_support_proposition": "page:p6:s15",
+      "exact_support_text_summary": "Certain devices are consistently misclassified and the authors plan to investigate the cause.",
+      "oracle_query": "What future work do the authors identify for devices that are consistently misclassified?",
+      "oracle_support_rank": {
+        "BM25_DIRECT": 1,
+        "BGE_M3_SPARSE": 1,
+        "BGE_M3_DENSE": 1,
+        "BGE_M3_COLBERT": 1,
+        "BGE_M3_HYBRID_040_020_040": 1,
+        "QWEN3_RERANKER_0_6B": 3
+      },
+      "automatic_intent_evidence": [
+        "Wave 7A source-aware generation explicitly failed to create a separate persistent-misclassification future-work intent.",
+        "Author-anchored generation does create a misclassification-cause question.",
+        "Its BM25 merged top-24 selects page:p6:s09 at rank 18: Device 10 is consistently mistaken for Device 5 with high probability, warranting further investigation.",
+        "The frozen exact-anchor evaluator still reports e6.c unsupported because it requires the exact page:p6:s15 wording; page:p6:s15 itself is absent.",
+        "The strongest 9/13 composed/rescued set contains neither page:p6:s15 nor page:p6:s09."
+      ],
+      "current_9of13_exact_support_present": false,
+      "diagnosis": [
+        "INTENT_COVERAGE_GAP_IN_SOURCE_AWARE_BRANCH",
+        "SELECTION_GAP_IN_AUTHOR_BRANCH",
+        "LEGACY_ANCHOR_FALSE_NEGATIVE_RISK"
+      ],
+      "confidence": "HIGH",
+      "implication": "Precise retrieval is trivial under the oracle query. The source-aware branch needs an atomic misclassification/failure-mode obligation, while evaluation should recognize source-faithful paraphrastic evidence instead of depending only on one exact anchor wording."
+    }
+  ],
+  "synthesis": {
+    "all_four_source_recoverable": true,
+    "bm25_oracle_recovers_all_four": true,
+    "exact_support_present_in_current_9of13_set": 0,
+    "primary_failure_families": [
+      "automatic intent/obligation coverage and atomicity",
+      "evidence allocation/fusion/final selection",
+      "legacy exact-page/exact-anchor evaluator brittleness on repeated or paraphrastic source evidence"
+    ],
+    "ranker_capacity_failure_supported": false,
+    "new_model_family_justified": false,
+    "interpretation": "The four residuals should not be accepted as unexplained losses. Existing development evidence says they are mostly tractable architecture/evaluation problems, not irreducible retrieval failures."
+  },
+  "recommended_next_boundary": {
+    "timing": "After the already-frozen LOCAL_FIRST_ALLOCATION_FALLBACK_HYBRID_V1 receives its genuine result and independent post-result review; do not change that hybrid mid-experiment.",
+    "next_diagnostic_id": "ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1",
+    "objective": "Using only the legacy development paper and frozen source/proposition substrate, test whether an explicit teacher-blind atomic-obligation coverage layer can expose e1.b/e1.c/e6.c and preserve the joint acquisition fact e3.c without sacrificing established controls. Separately run a source-fidelity audit of repeated/paraphrastic support so the legacy 13-atom score does not mistake valid evidence for a miss.",
+    "prohibited": [
+      "sealed acceptance benchmark access",
+      "teacher-informed runtime selection",
+      "changing the currently frozen hybrid before its result",
+      "new model-family scaling merely to chase 13/13",
+      "reopening rejected NLI/predicate-argument/AMR certificate families"
+    ],
+    "acceptance_freeze_rule": "Do not declare ACCEPTANCE_CANDIDATE_FROZEN while these four remain merely unexplained. Before freeze, either close the tractable residual mechanism with bounded development evidence or demonstrate that the final completeness/fallback controller reliably refuses local completion when analogous CORE obligations are missing."
+  }
+}
