@@ -201,7 +201,7 @@
     },
     {
       "id": "final_acceptance_evaluation",
-      "status": "BLOCKED",
+      "status": "PLANNED",
       "execution_owner": "workspace-extract-semantic-benchmark-v1",
       "selected_executor": "future_gate",
       "selected_surface": "research-engine+workspace-control",
