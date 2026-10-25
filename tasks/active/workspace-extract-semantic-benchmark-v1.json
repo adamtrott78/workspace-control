@@ -34,10 +34,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "a0f4e69281341fa3eb9f9578e1f4a789db7f59d6",
+      "base_sha": "0bcf50cf05aeaa1e506702d402069b0cc5c7a70a",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "a0f4e69281341fa3eb9f9578e1f4a789db7f59d6",
+        "checkpoint_sha": "0bcf50cf05aeaa1e506702d402069b0cc5c7a70a",
         "verified": true
       },
       "local": null,
@@ -399,7 +399,18 @@
       ]
     }
   ],
-  "validation": [],
+  "validation": [
+    {
+      "check": "Held-out semantic benchmark construction durable merge",
+      "result": "PASS",
+      "evidence": [
+        "PR #449 Workspace Control Validation 40149233262 PASS.",
+        "PR #449 merged as workspace-control@0bcf50cf05aeaa1e506702d402069b0cc5c7a70a.",
+        "Shared main contains only the sealed gold commitment and aggregate metadata.",
+        "Acceptance gold remains unmerged on sealed-extract-semantic-acceptance-gold-v1@ce040c9538b4de2836e2c0c8ead71018163a5058."
+      ]
+    }
+  ],
   "blockers": [
     "AWAIT_FROZEN_EXTRACT_ACCEPTANCE_CANDIDATE: A Local EXTRACT architecture must be separately frozen by the owning research task before the sealed acceptance gold may be revealed or the held-out benchmark executed. Resolve only when the owner checkpoints an acceptance candidate and explicitly hands off one-shot held-out evaluation authority."
   ],
@@ -412,5 +423,5 @@
   "next_safe_action": "Do not reveal the sealed acceptance gold or run Local EXTRACT on the eight acceptance papers yet. Wait for the owning EXTRACT task to freeze a specific acceptance candidate. Then verify gold commitment 98a36f7d51df13bb9bc4541e8c91fb96ac7db5ab0982a69bda38a74e4e789e0a and authorize exactly one held-out evaluation.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created 2026-10-24 after benchmark audit established that the legacy 13-atom oracle is a useful one-paper diagnostic but insufficient for final acceptance. This sibling task is intentionally independent of active EXTRACT architecture research.\n2026-10-24 benchmark foundation: selected 2 pilot + 8 acceptance papers, all outside the legacy nine-paper development corpus. Pilot source reading confirms the schema needs atomic method/setup/result/robustness/limitation obligations and explicit composite support. Acceptance papers remain unlabeled and prohibited from active EXTRACT development.\n2026-10-24 source-freeze stage: benchmark foundation PR #436 is already validated/merged. Source hashing/page extraction is being moved to a dedicated GitHub Actions job so exact arXiv PDF bytes and canonical page-text hashes are reproducible despite the chat runtime lacking direct arXiv byte access.\n2026-10-24 exact source freeze PASS: workflow 40147759885 downloaded all ten pinned arXiv versions and produced exact PDF SHA-256/page-count/per-page canonical-text identities. Source hashing is complete; pilot annotation/adjudication is now the active stage.\n2026-10-24 pilot protocol PASS: both pilot PDFs were source-reviewed against frozen identities; all 11 candidate obligations were retained. One locator anchor was repaired without semantic change. Acceptance annotation can now begin on a separate sealed branch.\n2026-10-24 acceptance annotation support: source-only workflow 40148130054 PASS. It verifies each frozen PDF hash before locating preregistered scientific phrases and emits page-numbered source contexts; it does not invoke Local EXTRACT or use its outputs.\n2026-10-24 held-out semantic benchmark construction COMPLETE: source/pilot checkpoint merged in PR #442; acceptance gold was built source-first on sealed branch sealed-extract-semantic-acceptance-gold-v1 without Local EXTRACT outputs, mechanically validated, Pass-B adjudicated, and frozen at aggregate sha256 98a36f7d51df13bb9bc4541e8c91fb96ac7db5ab0982a69bda38a74e4e789e0a. Gold content remains unmerged. Task is blocked only on a separately frozen EXTRACT acceptance candidate."
+  "notes": "Created 2026-10-24 after benchmark audit established that the legacy 13-atom oracle is a useful one-paper diagnostic but insufficient for final acceptance. This sibling task is intentionally independent of active EXTRACT architecture research.\n2026-10-24 benchmark foundation: selected 2 pilot + 8 acceptance papers, all outside the legacy nine-paper development corpus. Pilot source reading confirms the schema needs atomic method/setup/result/robustness/limitation obligations and explicit composite support. Acceptance papers remain unlabeled and prohibited from active EXTRACT development.\n2026-10-24 source-freeze stage: benchmark foundation PR #436 is already validated/merged. Source hashing/page extraction is being moved to a dedicated GitHub Actions job so exact arXiv PDF bytes and canonical page-text hashes are reproducible despite the chat runtime lacking direct arXiv byte access.\n2026-10-24 exact source freeze PASS: workflow 40147759885 downloaded all ten pinned arXiv versions and produced exact PDF SHA-256/page-count/per-page canonical-text identities. Source hashing is complete; pilot annotation/adjudication is now the active stage.\n2026-10-24 pilot protocol PASS: both pilot PDFs were source-reviewed against frozen identities; all 11 candidate obligations were retained. One locator anchor was repaired without semantic change. Acceptance annotation can now begin on a separate sealed branch.\n2026-10-24 acceptance annotation support: source-only workflow 40148130054 PASS. It verifies each frozen PDF hash before locating preregistered scientific phrases and emits page-numbered source contexts; it does not invoke Local EXTRACT or use its outputs.\n2026-10-24 held-out semantic benchmark construction COMPLETE: source/pilot checkpoint merged in PR #442; acceptance gold was built source-first on sealed branch sealed-extract-semantic-acceptance-gold-v1 without Local EXTRACT outputs, mechanically validated, Pass-B adjudicated, and frozen at aggregate sha256 98a36f7d51df13bb9bc4541e8c91fb96ac7db5ab0982a69bda38a74e4e789e0a. Gold content remains unmerged. Task is blocked only on a separately frozen EXTRACT acceptance candidate.\n2026-10-24 benchmark construction durable checkpoint: PR #449 validation 40149233262 PASS and merged as workspace-control@0bcf50cf05aeaa1e506702d402069b0cc5c7a70a. Benchmark construction is complete; task remains BLOCKED_EVIDENCE only until a separately frozen EXTRACT acceptance candidate exists."
 }
