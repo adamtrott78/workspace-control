@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: e640116db885dcfc715e0ed5c5f3a029572763fb
+- Remote checkpoint: 896e036c634e56378b7dddd001dc9eddb7ec94c0
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Issue exactly one owner comment `/local-extract-obligation-validity-microbenchmark a901115fb572a0647e70f87c39309bcda60f1dee` on research-engine PR #268. If the resulting execution has valid experiment integrity, stop on that result with no tuning or rerun, checkpoint exact run/job/artifact/report evidence, and hand it to the independent reviewer. No acceptance freeze or sealed holdout access.
+STOP scientific work and hand the exact OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 result to the independent reviewer: research-engine@a901115fb572a0647e70f87c39309bcda60f1dee / run 40166893479 / job 121089689701 / artifact 12588764634 / artifact ZIP sha256 b1c15ba161b5d291fecb5d6565256ef5d1a1a8bfe6960975ec6c8dfff5593814 / report sha256 82a71963c19b47a2e05807997353bce9294103e570173e3371985a8968b480dc / mechanism_outcome=VALIDITY_PREMISE_REJECTED. No tuning, rerun, next-phase selection, acceptance freeze, or sealed holdout access before reviewer disposition.
 
 ## Remaining work
 
-- Issue exactly one owner comment `/local-extract-obligation-validity-microbenchmark a901115fb572a0647e70f87c39309bcda60f1dee` on research-engine PR #268.
-- Observe the exact one-shot run. If experiment integrity is valid, do not rerun regardless of scientific outcome or ordinary bad verifier outputs.
-- Capture run/job/artifact/report identities, hashes, per-arm case outcomes, completeness simulation, preservation controls, and mechanism_outcome.
-- Checkpoint the genuine result in workspace-control.
-- STOP and re-engage the independent reviewer before any next scientific phase.
+- Independent reviewer must review exact genuine result research-engine@a901115fb572a0647e70f87c39309bcda60f1dee / run 40166893479 / job 121089689701 / artifact 12588764634 / report sha256 82a71963c19b47a2e05807997353bce9294103e570173e3371985a8968b480dc.
+- Do not rerun, retune, repair quotes, change newline normalization, alter prompts/visible fields/parser/guards/model settings, or cosmetically rescue either completed arm.
+- Do not select or implement the next scientific mechanism until independent post-result reviewer disposition is consumed.
+- Preserve LOCAL_FIRST_ALLOCATION_FALLBACK_HYBRID_V1 positive lineage and the new negative evidence from both validity arms.
 - Keep acceptance_candidate_frozen=false and sealed semantic acceptance benchmark untouched.
 
 ## Blockers / gates
