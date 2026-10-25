@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: research-engine-local-extract-redesign-v1
 - Title: Research Engine Mostly-Local EXTRACT Redesign v1
-- Status: IMPLEMENTING
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
