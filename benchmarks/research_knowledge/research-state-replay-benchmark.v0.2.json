@@ -664,7 +664,7 @@
     "methodology": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-research-methodology-v1.json@d3d8c7ee9e09262e05d20d31741ca398d6aaf65e",
     "sealed": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-extract-semantic-benchmark-v1.json@f09ae7af04f6f9005c288890cef43fba18705ff5",
     "reviewer": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00",
-    "design": "workspace-control:architecture/research-knowledge-ontology.v0.2.json@null"
+    "design": "workspace-control:architecture/research-knowledge-ontology.v0.2.json@039fd2f888fb1abfb663c841df3425e2aa69fb74"
   },
   "evaluation_separation": {
     "benchmark_is_evaluation_only": true,
