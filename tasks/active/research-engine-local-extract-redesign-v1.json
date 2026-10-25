@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "research-engine-local-extract-redesign-v1",
   "title": "Research Engine Mostly-Local EXTRACT Redesign v1",
-  "status": "IMPLEMENTING",
+  "status": "IN_PROGRESS",
   "goal": "Return to first principles on research-engine EXTRACT and identify, benchmark, and if justified implement a provenance-preserving mostly-local extraction architecture that makes STANDARD Codex a rare ambiguity/failure fallback rather than the default, while reusing accepted local document/VERIFY infrastructure and not repeating approaches already invalidated by durable evidence.",
   "execution_topology": "remote_only",
   "workflow": {
