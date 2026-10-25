@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-research-knowledge-ontology-review-v1",
   "title": "Research Knowledge Ontology Independent Review v1",
-  "status": "IN_PROGRESS",
+  "status": "COMPLETE",
   "goal": "Independently review the frozen Research Knowledge Ontology v0.1 and 16-case blind replay benchmark for scientific validity, provenance/source-precedence correctness, anti-leak integrity, authority separation, generality, and non-tautological decision support before any projection implementation.",
   "execution_topology": "remote_only",
   "workflow": {
@@ -11,7 +11,7 @@
     "checkpoint_sha": "33762b90b0ecfaac879717bfe0a0fb4c809f22f2",
     "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
   },
-  "current_stage": "review_frozen_ontology_and_replay_contract",
+  "current_stage": "review_disposition_persisted",
   "acceptance_criteria": [
     "Review exact ontology design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and replay benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 without modifying them.",
     "Determine whether epistemic, normative/scientific-authority, execution, and CandidateAction/DecisionEvaluation layers are sufficiently separated to prevent graph-created authority.",
@@ -91,7 +91,7 @@
     },
     {
       "id": "review_frozen_ontology_and_replay_contract",
-      "status": "READY",
+      "status": "VALIDATED",
       "execution_owner": "independent_reviewer",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -100,10 +100,32 @@
         "benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998"
       ],
       "outputs": [
-        "NO_BLOCKING_FINDING or exact blocking findings"
+        "BLOCKING_FINDING",
+        "BLOCKER 1 — INVALID_EXECUTION discrimination is not non-vacuously tested. The 16 replay cases contain VALID_NEGATIVE_SCIENCE, VALIDATION_UNAVAILABLE, and BLOCKED_EVIDENCE outcomes, but no case whose expected outcome is INVALID_EXECUTION. Therefore an implementation that never produces INVALID_EXECUTION can still satisfy invalid_execution_scientific_negative_conflation_count=0.",
+        "BLOCKER 2 — contradiction preservation is not tested by the frozen replay and its zero-count gate is dropped from benchmark pass criteria. No replay case contains coexisting contradictory assertions, while the design requires contradiction_silent_collapse_count_required=0. A projection that silently collapses contradictions can therefore pass all 16 cases.",
+        "BLOCKER 3 — the frozen benchmark does not cover every query family the design marks required. bounded_query_contract.required_query_families includes WHY_CURRENT_EXPERIMENT, but the 16 replay cases contain zero WHY_CURRENT_EXPERIMENT cases. A missing or incorrect handler can pass the frozen benchmark.",
+        "BLOCKER 4 — the blind-replay boundary does not operationally prevent benchmark-specific memorization. All 16 query-engine-visible tuples (query_family plus structured query_input, including target_id and ask) are fixed and unique. A lookup keyed by those visible fields can reproduce the expected outputs without reading case IDs or gold at runtime. no_case_specific_logic=true and case_specific_logic_count=0 are declarations only; the frozen contract specifies no executable anti-hardcoding/metamorphic/identifier-remapping or equivalent detection step.",
+        "BLOCKER 5 — exact model-free scoring is underspecified. Cases freeze expected_answer_class plus natural-language required_points/forbidden_claims, but neither the design nor benchmark freezes a deterministic comparison/canonicalization rule for those natural-language fields. model_free_primary_scoring=true and exact_case_answer_pass=16/16 therefore do not define a reproducible pass/fail function before implementation."
       ],
-      "validation": [],
-      "resume_condition": "Persist reviewer disposition before owner implementation."
+      "validation": [
+        {
+          "check": "Independent preimplementation review of exact frozen ontology and replay contract",
+          "result": "FAIL",
+          "evidence": [
+            "Disposition=BLOCKING_FINDING for architecture/research-knowledge-ontology.v0.1.json blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998.",
+            "The ontology layer split is acceptable: epistemic is NON_EXECUTABLE; normative authority is SOURCE_DERIVED_ONLY; execution is observational; CandidateAction has authority NONE; DecisionEvaluation may return executable ALLOW only through an external authority-owned evaluator.",
+            "Durable-source precedence and stale/superseded history handling are acceptable in principle; open/unmerged state is lower precedence and stale assertions remain historical rather than overriding current authoritative state.",
+            "Preregistered scientific result versus POSTHOC_NONVERDICT, rejected-mechanism reopening, VALIDATION_UNAVAILABLE, and BLOCKED_EVIDENCE are represented as distinct concepts.",
+            "BLOCKER 1 — INVALID_EXECUTION discrimination is not non-vacuously tested. The 16 replay cases contain VALID_NEGATIVE_SCIENCE, VALIDATION_UNAVAILABLE, and BLOCKED_EVIDENCE outcomes, but no case whose expected outcome is INVALID_EXECUTION. Therefore an implementation that never produces INVALID_EXECUTION can still satisfy invalid_execution_scientific_negative_conflation_count=0.",
+            "BLOCKER 2 — contradiction preservation is not tested by the frozen replay and its zero-count gate is dropped from benchmark pass criteria. No replay case contains coexisting contradictory assertions, while the design requires contradiction_silent_collapse_count_required=0. A projection that silently collapses contradictions can therefore pass all 16 cases.",
+            "BLOCKER 3 — the frozen benchmark does not cover every query family the design marks required. bounded_query_contract.required_query_families includes WHY_CURRENT_EXPERIMENT, but the 16 replay cases contain zero WHY_CURRENT_EXPERIMENT cases. A missing or incorrect handler can pass the frozen benchmark.",
+            "BLOCKER 4 — the blind-replay boundary does not operationally prevent benchmark-specific memorization. All 16 query-engine-visible tuples (query_family plus structured query_input, including target_id and ask) are fixed and unique. A lookup keyed by those visible fields can reproduce the expected outputs without reading case IDs or gold at runtime. no_case_specific_logic=true and case_specific_logic_count=0 are declarations only; the frozen contract specifies no executable anti-hardcoding/metamorphic/identifier-remapping or equivalent detection step.",
+            "BLOCKER 5 — exact model-free scoring is underspecified. Cases freeze expected_answer_class plus natural-language required_points/forbidden_claims, but neither the design nor benchmark freezes a deterministic comparison/canonicalization rule for those natural-language fields. model_free_primary_scoring=true and exact_case_answer_pass=16/16 therefore do not define a reproducible pass/fail function before implementation.",
+            "No implementation authority is granted from the reviewed frozen design/benchmark. The result-affecting replay contract must be corrected and independently re-reviewed before implementation."
+          ]
+        }
+      ],
+      "resume_condition": "Correct the result-affecting frozen replay/design contract gaps and obtain a new independent review before implementation."
     }
   ],
   "checkpoints": [
@@ -129,18 +151,59 @@
         "Workspace Control Validation 40242194799 was zero-step validation unavailable, not PASS.",
         "Reviewer lane may only review/persist disposition; implementation remains forbidden."
       ]
+    },
+    {
+      "id": "research-knowledge-ontology-preimplementation-review-v1",
+      "kind": "independent_review",
+      "identity": "workspace-control@706957531271486b7df510933297fa9169134a65|design@9af5bea619ec5a2f83575b4c8d73d08922f05bdb|benchmark@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998:BLOCKING_FINDING",
+      "required_for_resume": true,
+      "evidence": [
+        "Disposition=BLOCKING_FINDING for architecture/research-knowledge-ontology.v0.1.json blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998.",
+        "The ontology layer split is acceptable: epistemic is NON_EXECUTABLE; normative authority is SOURCE_DERIVED_ONLY; execution is observational; CandidateAction has authority NONE; DecisionEvaluation may return executable ALLOW only through an external authority-owned evaluator.",
+        "Durable-source precedence and stale/superseded history handling are acceptable in principle; open/unmerged state is lower precedence and stale assertions remain historical rather than overriding current authoritative state.",
+        "Preregistered scientific result versus POSTHOC_NONVERDICT, rejected-mechanism reopening, VALIDATION_UNAVAILABLE, and BLOCKED_EVIDENCE are represented as distinct concepts.",
+        "BLOCKER 1 — INVALID_EXECUTION discrimination is not non-vacuously tested. The 16 replay cases contain VALID_NEGATIVE_SCIENCE, VALIDATION_UNAVAILABLE, and BLOCKED_EVIDENCE outcomes, but no case whose expected outcome is INVALID_EXECUTION. Therefore an implementation that never produces INVALID_EXECUTION can still satisfy invalid_execution_scientific_negative_conflation_count=0.",
+        "BLOCKER 2 — contradiction preservation is not tested by the frozen replay and its zero-count gate is dropped from benchmark pass criteria. No replay case contains coexisting contradictory assertions, while the design requires contradiction_silent_collapse_count_required=0. A projection that silently collapses contradictions can therefore pass all 16 cases.",
+        "BLOCKER 3 — the frozen benchmark does not cover every query family the design marks required. bounded_query_contract.required_query_families includes WHY_CURRENT_EXPERIMENT, but the 16 replay cases contain zero WHY_CURRENT_EXPERIMENT cases. A missing or incorrect handler can pass the frozen benchmark.",
+        "BLOCKER 4 — the blind-replay boundary does not operationally prevent benchmark-specific memorization. All 16 query-engine-visible tuples (query_family plus structured query_input, including target_id and ask) are fixed and unique. A lookup keyed by those visible fields can reproduce the expected outputs without reading case IDs or gold at runtime. no_case_specific_logic=true and case_specific_logic_count=0 are declarations only; the frozen contract specifies no executable anti-hardcoding/metamorphic/identifier-remapping or equivalent detection step.",
+        "BLOCKER 5 — exact model-free scoring is underspecified. Cases freeze expected_answer_class plus natural-language required_points/forbidden_claims, but neither the design nor benchmark freezes a deterministic comparison/canonicalization rule for those natural-language fields. model_free_primary_scoring=true and exact_case_answer_pass=16/16 therefore do not define a reproducible pass/fail function before implementation.",
+        "No implementation authority is granted from the reviewed frozen design/benchmark. The result-affecting replay contract must be corrected and independently re-reviewed before implementation."
+      ]
     }
   ],
   "artifacts": [],
-  "validation": [],
-  "blockers": [],
-  "remaining_work": [
-    "Perform independent review of the exact design and replay benchmark.",
-    "Persist NO_BLOCKING_FINDING or exact blocking findings in this reviewer capsule/handoff.",
-    "If NO_BLOCKING_FINDING, allow owner to consume the disposition; do not implement from the reviewer lane."
+  "validation": [
+    {
+      "check": "Independent preimplementation review of exact frozen ontology and replay contract",
+      "result": "FAIL",
+      "evidence": [
+        "Disposition=BLOCKING_FINDING for architecture/research-knowledge-ontology.v0.1.json blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998.",
+        "The ontology layer split is acceptable: epistemic is NON_EXECUTABLE; normative authority is SOURCE_DERIVED_ONLY; execution is observational; CandidateAction has authority NONE; DecisionEvaluation may return executable ALLOW only through an external authority-owned evaluator.",
+        "Durable-source precedence and stale/superseded history handling are acceptable in principle; open/unmerged state is lower precedence and stale assertions remain historical rather than overriding current authoritative state.",
+        "Preregistered scientific result versus POSTHOC_NONVERDICT, rejected-mechanism reopening, VALIDATION_UNAVAILABLE, and BLOCKED_EVIDENCE are represented as distinct concepts.",
+        "BLOCKER 1 — INVALID_EXECUTION discrimination is not non-vacuously tested. The 16 replay cases contain VALID_NEGATIVE_SCIENCE, VALIDATION_UNAVAILABLE, and BLOCKED_EVIDENCE outcomes, but no case whose expected outcome is INVALID_EXECUTION. Therefore an implementation that never produces INVALID_EXECUTION can still satisfy invalid_execution_scientific_negative_conflation_count=0.",
+        "BLOCKER 2 — contradiction preservation is not tested by the frozen replay and its zero-count gate is dropped from benchmark pass criteria. No replay case contains coexisting contradictory assertions, while the design requires contradiction_silent_collapse_count_required=0. A projection that silently collapses contradictions can therefore pass all 16 cases.",
+        "BLOCKER 3 — the frozen benchmark does not cover every query family the design marks required. bounded_query_contract.required_query_families includes WHY_CURRENT_EXPERIMENT, but the 16 replay cases contain zero WHY_CURRENT_EXPERIMENT cases. A missing or incorrect handler can pass the frozen benchmark.",
+        "BLOCKER 4 — the blind-replay boundary does not operationally prevent benchmark-specific memorization. All 16 query-engine-visible tuples (query_family plus structured query_input, including target_id and ask) are fixed and unique. A lookup keyed by those visible fields can reproduce the expected outputs without reading case IDs or gold at runtime. no_case_specific_logic=true and case_specific_logic_count=0 are declarations only; the frozen contract specifies no executable anti-hardcoding/metamorphic/identifier-remapping or equivalent detection step.",
+        "BLOCKER 5 — exact model-free scoring is underspecified. Cases freeze expected_answer_class plus natural-language required_points/forbidden_claims, but neither the design nor benchmark freezes a deterministic comparison/canonicalization rule for those natural-language fields. model_free_primary_scoring=true and exact_case_answer_pass=16/16 therefore do not define a reproducible pass/fail function before implementation.",
+        "No implementation authority is granted from the reviewed frozen design/benchmark. The result-affecting replay contract must be corrected and independently re-reviewed before implementation."
+      ]
+    }
   ],
-  "next_safe_action": "Independently review architecture/research-knowledge-ontology.v0.1.json blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Focus on source-precedence correctness, anti-leak/blind-replay integrity, non-tautological query semantics, exact provenance, scientific-state distinctions, and prevention of graph-created execution authority. Return NO_BLOCKING_FINDING or exact blockers; do not implement anything.",
+  "blockers": [
+    "BLOCKER 1 — INVALID_EXECUTION discrimination is not non-vacuously tested. The 16 replay cases contain VALID_NEGATIVE_SCIENCE, VALIDATION_UNAVAILABLE, and BLOCKED_EVIDENCE outcomes, but no case whose expected outcome is INVALID_EXECUTION. Therefore an implementation that never produces INVALID_EXECUTION can still satisfy invalid_execution_scientific_negative_conflation_count=0.",
+    "BLOCKER 2 — contradiction preservation is not tested by the frozen replay and its zero-count gate is dropped from benchmark pass criteria. No replay case contains coexisting contradictory assertions, while the design requires contradiction_silent_collapse_count_required=0. A projection that silently collapses contradictions can therefore pass all 16 cases.",
+    "BLOCKER 3 — the frozen benchmark does not cover every query family the design marks required. bounded_query_contract.required_query_families includes WHY_CURRENT_EXPERIMENT, but the 16 replay cases contain zero WHY_CURRENT_EXPERIMENT cases. A missing or incorrect handler can pass the frozen benchmark.",
+    "BLOCKER 4 — the blind-replay boundary does not operationally prevent benchmark-specific memorization. All 16 query-engine-visible tuples (query_family plus structured query_input, including target_id and ask) are fixed and unique. A lookup keyed by those visible fields can reproduce the expected outputs without reading case IDs or gold at runtime. no_case_specific_logic=true and case_specific_logic_count=0 are declarations only; the frozen contract specifies no executable anti-hardcoding/metamorphic/identifier-remapping or equivalent detection step.",
+    "BLOCKER 5 — exact model-free scoring is underspecified. Cases freeze expected_answer_class plus natural-language required_points/forbidden_claims, but neither the design nor benchmark freezes a deterministic comparison/canonicalization rule for those natural-language fields. model_free_primary_scoring=true and exact_case_answer_pass=16/16 therefore do not define a reproducible pass/fail function before implementation."
+  ],
+  "remaining_work": [
+    "No implementation may proceed from the reviewed design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and replay benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998.",
+    "Owner must revise only the result-affecting contract surfaces needed to close the five blocking findings, freeze new exact blobs, and request independent re-review.",
+    "Reviewer lane performs no implementation and does not mutate the owner task/design/benchmark."
+  ],
+  "next_safe_action": "Return BLOCKING_FINDING to the owner. Do not implement the projection. The owner must correct the frozen replay/design contract so INVALID_EXECUTION and contradiction handling are non-vacuously tested, every required query family is covered, anti-hardcoding is operationally testable, and exact model-free scoring is deterministic; then freeze new exact blobs and request re-review.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created 2026-10-25 as a separate independent review lane for the durable Research Knowledge Ontology v0.1 design. Owner task remains implementation-blocked pending this review.\n2026-10-25 reviewer-lane merge: PR #496 merged as workspace-control@de81b2a8c5bc30f5a7c22a1f3d28f9de0e3445c7; task remains ready for independent review of exact frozen blobs."
+  "notes": "Created 2026-10-25 as a separate independent review lane for the durable Research Knowledge Ontology v0.1 design. Owner task remains implementation-blocked pending this review.\n2026-10-25 reviewer-lane merge: PR #496 merged as workspace-control@de81b2a8c5bc30f5a7c22a1f3d28f9de0e3445c7; task remains ready for independent review of exact frozen blobs.\n2026-10-25 independent preimplementation review: BLOCKING_FINDING on exact ontology design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and replay benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Ontology authority/layer separation and source-precedence semantics are acceptable, but the replay contract has five result-affecting gaps: no positive INVALID_EXECUTION case; no contradiction fixture and missing contradiction zero-count pass gate; no WHY_CURRENT_EXPERIMENT coverage; no operational anti-hardcoding test despite unique visible query fingerprints; and no frozen deterministic scorer for natural-language required/forbidden points. No implementation is authorized until corrected exact blobs are independently re-reviewed."
 }
