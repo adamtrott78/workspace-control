@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 17caabe2ae87f9dc8e03e7759c0797fdddcd06fc
+- Remote checkpoint: a68cc6b08d94f60c56104d02cf8ccc649c689a8a
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact atomic-obligation residual-closure pre-run checkpoint. Then issue exactly one /local-extract-atomic-obligation-residual-closure 74b38c56b30fc2ac461e7a89307735b87a4d4016 comment on research-engine PR #264 and bind the unique resulting development run. Do not issue a second trigger and do not access the sealed acceptance benchmark.
+Merge this exact atomic-obligation residual-closure scientific result checkpoint. Then close inert research-engine PR #264 unmerged and obtain mandatory independent post-result review of run 40159749698 / artifact 12586355512 / PRESERVATION_REGRESSION + UNSAFE_FALSE_COMPLETE before selecting any next scientific phase. Do not tune or rerun this valid result and do not access the sealed acceptance benchmark.
 
 ## Remaining work
 
-- After this exact checkpoint merges, issue exactly one /local-extract-atomic-obligation-residual-closure 74b38c56b30fc2ac461e7a89307735b87a4d4016 comment on open research-engine PR #264.
-- Bind the unique resulting development scientific workflow run, inspect the exact report, and stop on the frozen mechanism/completeness verdicts; do not tune or rerun a valid result.
-- Persist exact run/job/artifact/report identities and frozen verdicts in workspace-control.
-- Close PR #264 unmerged only after scientific result durability, then obtain mandatory independent post-result review before next-phase selection.
+- Merge this exact scientific result checkpoint, then close inert research-engine PR #264 unmerged; do not issue another trigger.
+- Obtain mandatory independent post-result review of research-engine@1488b26a1fca63d56edd14c98bafdd55999799ad / run 40159749698 / artifact 12586355512 / PRESERVATION_REGRESSION + UNSAFE_FALSE_COMPLETE.
+- Do not tune the valid result's witness prefixes, queries, obligation order, eviction rule, budgets, or source-fidelity sets and do not rerun it.
+- Only after independent result review may the owner freeze any next scientific design; preserve the evidence that correct residual propositions are shallowly exposed while generic lexical witness recognition is unsafe.
 - Keep sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
