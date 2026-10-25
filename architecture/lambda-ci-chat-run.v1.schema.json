@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-control.local/schema/lambda-ci-chat-run.v1.schema.json",
+  "title": "Lambda CI Chat Run Handle v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repository",
+    "pr_number",
+    "pr_title",
+    "candidate_sha",
+    "workflow_path",
+    "workflow_name",
+    "actor",
+    "trigger_comment_id",
+    "trigger_comment_created_at",
+    "baseline_run_number",
+    "job_identity",
+    "receipt_artifact"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[^/\\\\s]+/[^/\\\\s]+$"
+    },
+    "pr_number": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "pr_title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidate_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "workflow_path": {
+      "type": "string",
+      "pattern": "^\\\\.github/workflows/[^/]+\\\\.ya?ml$"
+    },
+    "workflow_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trigger_comment_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "trigger_comment_created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "baseline_run_number": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "receipt_artifact": {
+      "type": "string",
+      "minLength": 1
+    },
+    "job_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workload",
+        "trigger_command"
+      ],
+      "properties": {
+        "workload": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
+        "trigger_command": {
+          "type": "string",
+          "pattern": "^/[A-Za-z0-9._-]+$"
+        }
+      }
+    }
+  }
+}
