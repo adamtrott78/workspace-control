@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 735e2131c71c4f0c9b0b468d43e34978299e5799
+- Remote checkpoint: 8981b1437484bb1555d44666d69c0c42d3c57f32
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact local-first allocation-fallback pre-run checkpoint. Then issue exactly one /local-extract-local-first-allocation-fallback bad77ea85a0d2d09df8857249cd041ef79fd84bb comment on research-engine PR #260 and bind the unique resulting development run. Do not issue a second trigger and do not access the sealed acceptance benchmark.
+Merge this exact local-first allocation-fallback scientific result checkpoint. Then close inert research-engine PR #260 unmerged and obtain mandatory independent post-result review of run 40155082156 / artifact 12583913079 / HYBRID_COMPLEMENTARITY_REALIZED before any next-phase selection. Do not issue another scientific trigger and do not access the sealed acceptance benchmark.
 
 ## Remaining work
 
-- After this exact checkpoint merges, issue exactly one /local-extract-local-first-allocation-fallback bad77ea85a0d2d09df8857249cd041ef79fd84bb comment on open research-engine PR #260.
-- Bind the unique resulting development scientific workflow run, inspect the exact report, and stop on the frozen verdict; do not tune or rerun a valid result.
-- Persist exact run/job/artifact/report identities and frozen verdict in workspace-control.
-- Close PR #260 unmerged only after the scientific result checkpoint is durable, then obtain mandatory independent post-result review before next-phase selection.
-- Only after post-result review may the four-atom residual audit influence next-phase selection; keep the sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
+- Merge this exact scientific result checkpoint, then close inert research-engine PR #260 unmerged; do not issue another trigger.
+- Obtain mandatory independent post-result review of research-engine@e1d7afd32aa73fed3326b5cc0c9af1324096226a / run 40155082156 / artifact 12583913079 / HYBRID_COMPLEMENTARITY_REALIZED.
+- Only after the independent result review may the owner select the next scientific phase or decide whether end-to-end integration evidence is sufficient.
+- Use the separate four-atom residual audit as mandatory pre-acceptance development evidence after reviewer consumption; do not mutate the completed hybrid result.
+- Keep the sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false until remaining development evidence no longer rationally calls for architecture change.
 
 ## Blockers / gates
 
