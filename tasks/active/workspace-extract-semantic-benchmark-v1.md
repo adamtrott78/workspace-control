@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-extract-semantic-benchmark-v1
 - Title: Held-Out Multi-Paper Semantic Benchmark for Local EXTRACT
-- Status: IN_PROGRESS
+- Status: BLOCKED_EVIDENCE
 - Capsule schema: v2
 
 ## Goal
@@ -24,7 +24,7 @@ Build an independently source-verified, held-out multi-paper semantic acceptance
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4013b1d8b781b4ce11283508a0407d6e599a9969
+- Remote checkpoint: a0f4e69281341fa3eb9f9578e1f4a789db7f59d6
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,18 @@ Build an independently source-verified, held-out multi-paper semantic acceptance
 
 ## Next safe action
 
-Validate and merge this exact-source/pilot-protocol checkpoint. Then create the eight-paper acceptance gold on a separate sealed benchmark branch, record only its commitment/metadata in the shared task state, and keep active EXTRACT from reading or running the acceptance papers until architecture freeze.
+Do not reveal the sealed acceptance gold or run Local EXTRACT on the eight acceptance papers yet. Wait for the owning EXTRACT task to freeze a specific acceptance candidate. Then verify gold commitment 98a36f7d51df13bb9bc4541e8c91fb96ac7db5ab0982a69bda38a74e4e789e0a and authorize exactly one held-out evaluation.
 
 ## Remaining work
 
-- Validate and merge the exact-source + pilot-protocol checkpoint.
-- Create source-first gold for the eight held-out acceptance papers on a separate unmerged sealed benchmark branch without consulting Local EXTRACT outputs.
-- Run acceptance-gold adjudication and freeze a cryptographic gold commitment before any Local EXTRACT acceptance evaluation.
-- Evaluate only a separately frozen Local EXTRACT candidate architecture.
+- Wait for the owning EXTRACT task to freeze a candidate architecture for held-out acceptance.
+- After candidate freeze, verify the sealed gold commitment before reveal.
+- Run exactly one held-out acceptance evaluation across the eight papers and map results to the original precision/provenance/coverage/completion/fallback/VERIFY/economics promotion gates.
+- If acceptance results materially influence further architecture tuning, require a new untouched holdout for any later unbiased promotion claim.
 
 ## Blockers / gates
 
-- None.
+- A Local EXTRACT architecture must be separately frozen by the owning research task before the sealed acceptance gold may be revealed or the held-out benchmark executed.
 
 ## Fresh-chat initialization
 
