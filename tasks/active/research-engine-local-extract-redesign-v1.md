@@ -30,26 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 896e036c634e56378b7dddd001dc9eddb7ec94c0
+- Remote checkpoint: 18565e1de9f9db8ff9c3ea4115673bdba7e52efe
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
-- Remote branch: trigger-obligation-validity-microbenchmark-v1
-- Remote checkpoint: a901115fb572a0647e70f87c39309bcda60f1dee
+- Remote branch: main
+- Remote checkpoint: 4d6a3bf003499a34ea0d076e55c724aaf1735c42
 - Remote verified: true
 
 ## Next safe action
 
-STOP scientific work and hand the exact OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 result to the independent reviewer: research-engine@a901115fb572a0647e70f87c39309bcda60f1dee / run 40166893479 / job 121089689701 / artifact 12588764634 / artifact ZIP sha256 b1c15ba161b5d291fecb5d6565256ef5d1a1a8bfe6960975ec6c8dfff5593814 / report sha256 82a71963c19b47a2e05807997353bce9294103e570173e3371985a8968b480dc / mechanism_outcome=VALIDITY_PREMISE_REJECTED. No tuning, rerun, next-phase selection, acceptance freeze, or sealed holdout access before reviewer disposition.
+Freeze the smallest new exact-provenance-binding development experiment justified by reviewer comment 6395379857. It must separate semantic obligation judgment from source provenance attachment and must not regenerate source quotes/spans. Preserve the seven-case development evaluation, Qwen3.5-4B/runtime/source identities, no-mutation boundary, one-valid-run stopping rule, and all sealed/acceptance constraints. After the exact design is merged and checkpointed, STOP for mandatory independent pre-implementation review.
 
 ## Remaining work
 
-- Independent reviewer must review exact genuine result research-engine@a901115fb572a0647e70f87c39309bcda60f1dee / run 40166893479 / job 121089689701 / artifact 12588764634 / report sha256 82a71963c19b47a2e05807997353bce9294103e570173e3371985a8968b480dc.
-- Do not rerun, retune, repair quotes, change newline normalization, alter prompts/visible fields/parser/guards/model settings, or cosmetically rescue either completed arm.
-- Do not select or implement the next scientific mechanism until independent post-result reviewer disposition is consumed.
-- Preserve LOCAL_FIRST_ALLOCATION_FALLBACK_HYBRID_V1 positive lineage and the new negative evidence from both validity arms.
+- Freeze a new exact-provenance-binding development design that does not regenerate source quotes/spans.
+- Use the same seven frozen development cases only as evaluation evidence; keep teacher labels/case roles hidden at runtime.
+- Compare deterministic provenance attachment after semantic judgment against model-selected opaque evidence pointers if both remain useful discriminators.
+- Keep evidence-set mutation disabled and preservation-aware admission deferred until exact provenance/validity passes.
+- Obtain independent pre-implementation review of the exact new design blob before implementation.
 - Keep acceptance_candidate_frozen=false and sealed semantic acceptance benchmark untouched.
 
 ## Blockers / gates
