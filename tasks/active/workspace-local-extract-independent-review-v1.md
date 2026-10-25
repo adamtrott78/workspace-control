@@ -24,26 +24,27 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 3a0baa942cb5306e2760792a245bc571e5f08238
+- Remote checkpoint: bff88635be6071148178165e3e935d43eae1e0bb
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: 58ba18d21b3d99b2f4f1cecbb77705cda025c1b3
+- Remote checkpoint: 1488b26a1fca63d56edd14c98bafdd55999799ad
 - Remote verified: true
 
 ## Next safe action
 
-Owner may implement exactly ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 from research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / design blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9. Preserve all frozen identities, matcher semantics, selection origins, budgets, outcome precedence, and teacher boundaries. Re-engage reviewer only if science changes or after the genuine result. No acceptance freeze.
+Owner may use the valid PRESERVATION_REGRESSION + UNSAFE_FALSE_COMPLETE result to select a materially new bounded development design focused on teacher-blind obligation-to-evidence validity and preservation-aware admission/fallback. Preserve the evidence that the correct residual propositions are shallowly exposed and that naive lexical witness satisfaction is unsafe. Freeze the new design and re-engage reviewer before implementation. No acceptance freeze or sealed holdout access.
 
 ## Remaining work
 
-- Wait for owner to implement exactly ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 from corrected design research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9.
-- Do not review routine implementation/CI/trigger mechanics unless the frozen science changes.
-- After exactly one valid diagnostic result, independently audit mechanism_outcome, completeness_safety_outcome, acceptance_boundary_evidence, preservation, provenance, and teacher-boundary invariants before next-phase selection.
-- Keep sealed acceptance benchmark uninspected and acceptance_candidate_frozen=false.
+- Wait for owner to select and freeze a materially new bounded design addressing teacher-blind obligation-to-evidence validity and preservation-aware admission/fallback.
+- Do not permit posthoc retuning or rerunning ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1.
+- Require independent pre-implementation review for any genuinely new scientific design; routine mechanics remain non-review boundaries.
+- Before acceptance-candidate freeze, require either bounded residual closure or demonstrable teacher-blind safe incompleteness without preservation regression.
+- Keep the sealed acceptance benchmark uninspected until the owner independently freezes an end-to-end acceptance candidate.
 
 ## Blockers / gates
 
