@@ -1,0 +1,232 @@
+{
+  "schema_version": "pilot-draft-0.1",
+  "status": "PASS_A_DRAFT_SOURCE_HASHES_PENDING",
+  "purpose": "Validate evidence-obligation granularity and provenance representation on two non-acceptance pilot papers. This file is not final gold and is not used for Local EXTRACT acceptance.",
+  "constraints": {
+    "source_first": true,
+    "local_extract_outputs_viewed": false,
+    "acceptance_score_eligible": false,
+    "source_pdf_sha256_required_before_adjudication": true
+  },
+  "papers": [
+    {
+      "benchmark_paper_id": "pilot-deepcrf-2411.06925",
+      "arxiv_id": "2411.06925",
+      "version": "v1",
+      "title": "DeepCRF: Deep Learning-Enhanced CSI-Based RF Fingerprinting for Channel-Resilient WiFi Device Identification",
+      "source_pdf_url": "https://arxiv.org/pdf/2411.06925v1",
+      "page_count": 15,
+      "source_sha256": null,
+      "obligations": [
+        {
+          "obligation_id": "deepcrf.method.augmentation",
+          "type": "METHOD",
+          "importance": "CORE",
+          "normalized_claim": "DeepCRF uses a model-inspired augmentation scheme intended to make learned micro-CSI representations less dependent on channel variation.",
+          "support_mode": "DIRECT",
+          "source_spans": [
+            {
+              "page_number": 2,
+              "anchor_excerpt": "model-inspired data augmentation",
+              "canonical_span_sha256": null
+            }
+          ],
+          "duplicate_group": null,
+          "annotation_rationale": "Central mechanism for channel-resilient representation learning."
+        },
+        {
+          "obligation_id": "deepcrf.method.contrastive",
+          "type": "METHOD",
+          "importance": "CORE",
+          "normalized_claim": "DeepCRF uses supervised contrastive learning to improve robustness of learned micro-CSI representations to noise.",
+          "support_mode": "DIRECT",
+          "source_spans": [
+            {
+              "page_number": 2,
+              "anchor_excerpt": "supervised contrastive learning",
+              "canonical_span_sha256": null
+            }
+          ],
+          "duplicate_group": null,
+          "annotation_rationale": "Central training mechanism tied directly to noise robustness."
+        },
+        {
+          "obligation_id": "deepcrf.dataset.realworld",
+          "type": "DATASET_SETUP",
+          "importance": "CORE",
+          "normalized_claim": "The real-world evaluation uses CSI from 19 commercial WiFi network interface cards collected across multiple positions and environments.",
+          "support_mode": "COMPOSITE",
+          "source_spans": [
+            {
+              "page_number": 2,
+              "anchor_excerpt": "19 COTS WiFi",
+              "canonical_span_sha256": null
+            },
+            {
+              "page_number": 9,
+              "anchor_excerpt": "four environments",
+              "canonical_span_sha256": null
+            }
+          ],
+          "duplicate_group": null,
+          "annotation_rationale": "Defines the scale and environmental diversity of the primary real-world evaluation."
+        },
+        {
+          "obligation_id": "deepcrf.result.unseen",
+          "type": "RESULT",
+          "importance": "CORE",
+          "normalized_claim": "With four CSI measurements per decision, DeepCRF reports about 99.53% average accuracy across 19 NICs at seven unseen positions.",
+          "support_mode": "DIRECT",
+          "source_spans": [
+            {
+              "page_number": 11,
+              "anchor_excerpt": "99.53% accuracy",
+              "canonical_span_sha256": null
+            }
+          ],
+          "duplicate_group": null,
+          "annotation_rationale": "Primary quantitative result demonstrating generalization to unseen positions."
+        },
+        {
+          "obligation_id": "deepcrf.limit.closedset",
+          "type": "LIMITATION",
+          "importance": "CORE",
+          "normalized_claim": "The presented DeepCRF system is a closed-set identifier for a fixed device set and requires adaptation for changing device populations.",
+          "support_mode": "DIRECT",
+          "source_spans": [
+            {
+              "page_number": 14,
+              "anchor_excerpt": "closed-set identification",
+              "canonical_span_sha256": null
+            }
+          ],
+          "duplicate_group": null,
+          "annotation_rationale": "Explicitly bounds what the reported system currently solves."
+        },
+        {
+          "obligation_id": "deepcrf.limit.adversarial",
+          "type": "LIMITATION",
+          "importance": "SECONDARY",
+          "normalized_claim": "The paper does not establish adversarial robustness and identifies systematic adversarial evaluation and defenses as future work.",
+          "support_mode": "DIRECT",
+          "source_spans": [
+            {
+              "page_number": 14,
+              "anchor_excerpt": "adversarial conditions",
+              "canonical_span_sha256": null
+            }
+          ],
+          "duplicate_group": null,
+          "annotation_rationale": "Important security limitation for deployment-oriented interpretation."
+        }
+      ]
+    },
+    {
+      "benchmark_paper_id": "pilot-epscnn-2402.05332",
+      "arxiv_id": "2402.05332",
+      "version": "v1",
+      "title": "Domain-Agnostic Hardware Fingerprinting-Based Device Identifier for Zero-Trust IoT Security",
+      "source_pdf_url": "https://arxiv.org/pdf/2402.05332v1",
+      "page_count": 7,
+      "source_sha256": null,
+      "obligations": [
+        {
+          "obligation_id": "epscnn.method.eps",
+          "type": "METHOD",
+          "importance": "CORE",
+          "normalized_claim": "EPS-CNN derives a double-sided envelope power-spectrum representation from received IQ signals and feeds it to a CNN for device identification.",
+          "support_mode": "COMPOSITE",
+          "source_spans": [
+            {
+              "page_number": 2,
+              "anchor_excerpt": "double-sided envelope's power spectrum",
+              "canonical_span_sha256": null
+            },
+            {
+              "page_number": 2,
+              "anchor_excerpt": "standard Convolution Neural Network",
+              "canonical_span_sha256": null
+            }
+          ],
+          "duplicate_group": null,
+          "annotation_rationale": "Defines the proposed representation and classifier pipeline."
+        },
+        {
+          "obligation_id": "epscnn.dataset.testbed",
+          "type": "DATASET_SETUP",
+          "importance": "CORE",
+          "normalized_claim": "The experimental testbed includes 15 Pycom devices transmitting IEEE 802.11b signals to a USRP B210 receiver.",
+          "support_mode": "DIRECT",
+          "source_spans": [
+            {
+              "page_number": 4,
+              "anchor_excerpt": "15 Pycom devices",
+              "canonical_span_sha256": null
+            }
+          ],
+          "duplicate_group": null,
+          "annotation_rationale": "Core hardware/protocol setup for the empirical claims."
+        },
+        {
+          "obligation_id": "epscnn.result.crosslocation",
+          "type": "ROBUSTNESS_GENERALIZATION",
+          "importance": "CORE",
+          "normalized_claim": "EPS-CNN maintains above-95% accuracy in a representative cross-location test where the IQ-CNN baseline falls below 30%.",
+          "support_mode": "DIRECT",
+          "source_spans": [
+            {
+              "page_number": 6,
+              "anchor_excerpt": "cross-location scenarios",
+              "canonical_span_sha256": null
+            }
+          ],
+          "duplicate_group": null,
+          "annotation_rationale": "Strong domain-shift result central to the paper's claim of location robustness."
+        },
+        {
+          "obligation_id": "epscnn.result.crossday",
+          "type": "ROBUSTNESS_GENERALIZATION",
+          "importance": "CORE",
+          "normalized_claim": "In cross-day testing, EPS-CNN reports roughly 92-93% accuracy and outperforms the IQ-CNN comparison.",
+          "support_mode": "DIRECT",
+          "source_spans": [
+            {
+              "page_number": 6,
+              "anchor_excerpt": "93% and 92%",
+              "canonical_span_sha256": null
+            }
+          ],
+          "duplicate_group": null,
+          "annotation_rationale": "Primary evidence for temporal robustness."
+        },
+        {
+          "obligation_id": "epscnn.limit.aging",
+          "type": "LIMITATION",
+          "importance": "CORE",
+          "normalized_claim": "The evaluation covers only short-term hardware aging and does not establish behavior over device lifetimes of months or years.",
+          "support_mode": "COMPOSITE",
+          "source_spans": [
+            {
+              "page_number": 6,
+              "anchor_excerpt": "short-term aging",
+              "canonical_span_sha256": null
+            },
+            {
+              "page_number": 7,
+              "anchor_excerpt": "months or even years",
+              "canonical_span_sha256": null
+            }
+          ],
+          "duplicate_group": null,
+          "annotation_rationale": "Explicit limitation on durability/generalization."
+        }
+      ]
+    }
+  ],
+  "pilot_findings": [
+    "A single paper naturally yields method, setup, result, robustness, and limitation obligations; a one-type teacher-claim list would be too narrow.",
+    "Composite support is necessary for some scientifically useful claims.",
+    "CORE versus SECONDARY importance is useful for avoiding a benchmark dominated by minor details.",
+    "Page plus short anchor is sufficient for pilot navigation; final gold still requires exact PDF hash and canonical span hash."
+  ]
+}
