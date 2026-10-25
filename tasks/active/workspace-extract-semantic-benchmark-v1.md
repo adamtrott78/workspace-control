@@ -47,7 +47,7 @@ Do not reveal the sealed acceptance gold or run Local EXTRACT on the eight accep
 
 ## Blockers / gates
 
-- A Local EXTRACT architecture must be separately frozen by the owning research task before the sealed acceptance gold may be revealed or the held-out benchmark executed.
+- AWAIT_FROZEN_EXTRACT_ACCEPTANCE_CANDIDATE: A Local EXTRACT architecture must be separately frozen by the owning research task before the sealed acceptance gold may be revealed or the held-out benchmark executed. Resolve only when the owner checkpoints an acceptance candidate and explicitly hands off one-shot held-out evaluation authority.
 
 ## Fresh-chat initialization
 
