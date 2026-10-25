@@ -30,26 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a55489cf9667d033868048c3685fabd12fa255fa
+- Remote checkpoint: 87311dbb30fdd0ccc7b6f66c02ade9b4d26d1a78
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 13a129ef820c611adf6a6ca70598df1e67d56efc
+- Remote checkpoint: 15c2f98feb980f18fac255b74c6a39db5da4ef30
 - Remote verified: true
 
 ## Next safe action
 
-Implement exactly EXACT_PROVENANCE_BINDING_MICROBENCH_V1 from research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e. Preserve every frozen visible-field, prompt/template, E0 mapping, parser/guard, case, runtime, completeness, preservation, outcome, and one-valid-run contract. Obtain successful implementation/contract validation before creating or issuing any scientific trigger. No acceptance freeze or sealed holdout access.
+Do NOT trigger EXACT_PROVENANCE_BINDING_MICROBENCH_V1 yet. First obtain a successful trusted Lambda CI Project Reconcile source-validation run for the current workspace-control project manifest, allowing the live reconciliation controller to install cpu-validation-exact-provenance and model-eval-exact-provenance-binding. Then obtain an executed PASS receipt from validation run 40242535180 on research-engine PR #273 exact head 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d (or replace only if that queued run becomes unusable). Only after executed CPU validation PASS may the owner checkpoint the validated exact SHA and issue exactly one scientific trigger. No acceptance freeze or sealed holdout access.
 
 ## Remaining work
 
-- Implement exactly EXACT_PROVENANCE_BINDING_MICROBENCH_V1 from design blob 09603c4d65114c75ad3e112a357ee45da384f63e without changing visible fields, prompts/templates, E0 mapping, parser/guard rules, cases, runtime envelope, completeness, preservation, outcomes, or stopping rule.
-- Obtain successful implementation/contract validation before any scientific trigger or execution.
-- After successful validation, merge/checkpoint the exact implementation SHA, then prepare one inert exact-SHA trigger for exactly one valid development run.
-- After the genuine result, STOP and re-engage the independent reviewer before selecting the next scientific phase.
+- Get a successful trusted Lambda CI Project Reconcile source-validation run for current workspace-control reconciliation inputs. Current zero-step GitHub-hosted failures do not count as validation or scientific failures.
+- Let live reconcile-controller apply the cpu-validation-exact-provenance and model-eval-exact-provenance-binding routes.
+- Obtain executed CPU implementation/contract validation PASS for exact inert PR #273 head 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d (or a new marker-only exact head only if the existing queued run becomes unusable).
+- Do not issue any model/GPU scientific trigger before that PASS.
+- After validation PASS, checkpoint the exact validated implementation/trigger SHA and issue exactly one /local-extract-exact-provenance-binding-microbenchmark <SHA> command.
+- Stop on the first integrity-valid scientific result and re-engage the independent reviewer before selecting any next phase.
 - Keep acceptance_candidate_frozen=false and sealed semantic acceptance benchmark untouched.
 
 ## Blockers / gates
