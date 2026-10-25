@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: c5d31941db69a768324e0a2add3e74db235713ee
+- Remote checkpoint: 17caabe2ae87f9dc8e03e7759c0797fdddcd06fc
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Create a normal marker-only inert trigger PR from exact research-engine main 1488b26a1fca63d56edd14c98bafdd55999799ad. Validate the exact anchor head with ordinary CI and verify zero prior comments. Do not issue /local-extract-atomic-obligation-residual-closure until that exact anchor identity is durably checkpointed in workspace-control.
+Merge this exact atomic-obligation residual-closure pre-run checkpoint. Then issue exactly one /local-extract-atomic-obligation-residual-closure 74b38c56b30fc2ac461e7a89307735b87a4d4016 comment on research-engine PR #264 and bind the unique resulting development run. Do not issue a second trigger and do not access the sealed acceptance benchmark.
 
 ## Remaining work
 
-- Create a normal marker-only inert trigger PR from research-engine@1488b26a1fca63d56edd14c98bafdd55999799ad; validate exact head with ordinary CI and zero prior comments.
-- Checkpoint the exact anchor identity in workspace-control and authorize exactly one /local-extract-atomic-obligation-residual-closure <exact_sha> development trigger.
-- Execute exactly one valid frozen diagnostic run and stop at the independent mechanism/completeness verdicts; no post-result tuning or valid-result rerun.
-- Persist exact run/job/artifact/report identities, close the inert trigger PR unmerged after result durability, and obtain mandatory independent post-result review before any next scientific phase.
+- After this exact checkpoint merges, issue exactly one /local-extract-atomic-obligation-residual-closure 74b38c56b30fc2ac461e7a89307735b87a4d4016 comment on open research-engine PR #264.
+- Bind the unique resulting development scientific workflow run, inspect the exact report, and stop on the frozen mechanism/completeness verdicts; do not tune or rerun a valid result.
+- Persist exact run/job/artifact/report identities and frozen verdicts in workspace-control.
+- Close PR #264 unmerged only after scientific result durability, then obtain mandatory independent post-result review before next-phase selection.
 - Keep sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
