@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 038adc7c84ac58f402a5e3ab2cbcb7d72e79822f
+- Remote checkpoint: 1ff020ab832c729e9c830cbc5bcbd8fafe305f48
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d42d2947c45a06f6e03066488c119c86133107aa
+- Remote checkpoint: 5ab76baaa7f3be491780fc66f1d83104f70ef341
 - Remote verified: true
 
 ## Next safe action
 
-Implement TIER1_BASELINE_DEPTH_FALLBACK_DIAGNOSTIC_V1 exactly from frozen design research-engine@d42d2947c45a06f6e03066488c119c86133107aa. Add only deterministic baseline replay/fallback code, tests, runner, and bounded workflow; do not change top3 primary schedule, ranks4-12 fallback ceiling, tier1 roles, accepted-order traversal, budget28, corpus, metrics, interpretation, or hard boundaries.
+Merge this exact baseline-depth fallback pre-run checkpoint. Then issue exactly one `/local-extract-cross-paper-baseline-depth-fallback 36e0436bd88277b813396cdeb440f06c84aabb10` comment on research-engine PR #254 and bind the unique resulting run. Do not issue a second trigger.
 
 ## Remaining work
 
-- Implement TIER1_BASELINE_DEPTH_FALLBACK_DIAGNOSTIC_V1 exactly as frozen in research-engine with deterministic tests and bounded workflow wiring.
-- Run normal CI and persist the exact implementation checkpoint before scientific execution.
-- Execute exactly one valid baseline-only scientific run and stop at the frozen verdict; no valid-result rerun/tuning.
-- After a genuine result, obtain independent post-result review before any corrected cross-paper recovery comparison or role-fallback design.
-- Do not select recovery mechanisms from prior incomplete counts; preserve semantic-generalization, rejected-family, production/Wave7B/semantic-control boundaries.
+- After this exact checkpoint merges, issue exactly one `/local-extract-cross-paper-baseline-depth-fallback 36e0436bd88277b813396cdeb440f06c84aabb10` comment on research-engine PR #254.
+- Bind the unique resulting run and inspect the uploaded baseline-only report.
+- Stop at DEPTH_FALLBACK_COMPLETES_ALL_NINE / DEPTH_FALLBACK_STILL_INCOMPLETE / BASELINE_IDENTITY_REGRESSION; INVALID_EXECUTION is operational no-verdict. Do not tune/rerun after a valid result.
+- Persist the exact result, close PR #254 unmerged only after result checkpoint is durable, and obtain independent post-result review.
+- Do not run the recovery comparison yet; a COMPLETE result only authorizes a new corrected recovery-comparison design/review.
 
 ## Blockers / gates
 
