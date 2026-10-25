@@ -11,7 +11,7 @@
     "checkpoint_sha": "67f3b0879dd26bbcbb5bff37080396174a7c2243",
     "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
   },
-  "current_stage": "independent_preimplementation_review_ready",
+  "current_stage": "corrected_v0.2_independent_rereview_ready",
   "acceptance_criteria": [
     "The ontology explicitly separates epistemic research state, normative/scientific authority state, execution history, and non-authoritative candidate actions.",
     "Every projected node and edge preserves exact durable provenance to one or more task capsules, frozen designs, result artifacts, review checkpoints, Git identities, policy artifacts, or execution receipts.",
@@ -20,12 +20,15 @@
     "The ontology distinguishes valid negative science from invalid execution, validation unavailable, blocked evidence, rejected mechanisms, and incomplete validation.",
     "The ontology distinguishes scientific design scope, implementation authority, trigger authority, production authority, and executor permission.",
     "Rejected mechanism families retain explicit reopening conditions; cosmetic retuning cannot silently convert negative evidence into a live hypothesis.",
-    "A bounded model-free replay benchmark covers at least the frozen 16 Local EXTRACT lineage cases and must answer all cases exactly with complete source provenance.",
     "Replay safety requires zero authorization escapes, zero stale-state overrides, zero verdict/posthoc conflations, zero invalid-execution/scientific-negative conflations, and zero sealed-holdout access.",
     "The first implementation is additive and rebuildable over existing authoritative stores; it does not replace PostgreSQL, task capsules, workflow/policy artifacts, or content-addressed evidence.",
     "Graph/model inference may propose or rank CandidateAction objects but cannot create Permission, remove Prohibition, satisfy ReviewRequirement, mutate a task, trigger execution, or change production behavior.",
     "Any future semantic-control integration consumes the ontology only through the already-hardened candidate-action/DecisionEvaluation authority boundary.",
-    "Blind replay integrity requires the projection/query engine to remain unable to read benchmark gold, case IDs, expected labels, required points, or forbidden claims; benchmark-specific logic invalidates the run."
+    "Blind replay integrity requires the projection/query engine to remain unable to read benchmark gold, case IDs, expected labels, required points, or forbidden claims; benchmark-specific logic invalidates the run.",
+    "The corrected replay benchmark covers 21 base cases and all 10 required query families, including positive INVALID_EXECUTION, active contradiction, and WHY_CURRENT_EXPERIMENT cases.",
+    "Operational anti-hardcoding requires two byte-identical visible-query pairs with different graph evidence and different correct outputs, plus two deterministic identifier-relabel variants for every base case.",
+    "The corrected benchmark executes 63 total instances (21 identity + 42 relabeled) and requires exact canonical JSON equality after hidden support-handle provenance resolution.",
+    "Model-free scoring uses no natural-language semantic grading, fuzzy matching, synonym mapping, normalization rescue, repair, or retry."
   ],
   "constraints": [
     "research-engine-local-extract-redesign-v1 remains the sole owner of Local EXTRACT science. This task is read-only with respect to EXTRACT, its designs, runs, sealed acceptance benchmark, and production routing.",
@@ -47,8 +50,8 @@
       "intent": "mutate",
       "base_sha": "67f3b0879dd26bbcbb5bff37080396174a7c2243",
       "remote": {
-        "branch": "main",
-        "checkpoint_sha": "6fb3d95fe291887d564174b834743c94a663e12c",
+        "branch": "research-knowledge-ontology-v02-corrections",
+        "checkpoint_sha": "b9305c7c2146fcbfc01409e26eacafdce7facb90",
         "verified": true
       },
       "local": null,
@@ -67,7 +70,7 @@
       "base_sha": "13a129ef820c611adf6a6ca70598df1e67d56efc",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "13a129ef820c611adf6a6ca70598df1e67d56efc",
+        "checkpoint_sha": "15c2f98feb980f18fac255b74c6a39db5da4ef30",
         "verified": true
       },
       "local": null,
@@ -146,7 +149,7 @@
     },
     {
       "id": "independent_preimplementation_review",
-      "status": "READY",
+      "status": "BLOCKED",
       "execution_owner": "independent_reviewer",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -157,8 +160,66 @@
       "outputs": [
         "NO_BLOCKING_FINDING or exact blocking findings"
       ],
+      "validation": [
+        {
+          "check": "v0.1 independent review",
+          "result": "BLOCKING_FINDING",
+          "evidence": [
+            "review identity workspace-control@706957531271486b7df510933297fa9169134a65|design@9af5bea619ec5a2f83575b4c8d73d08922f05bdb|benchmark@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998:BLOCKING_FINDING",
+            "five blockers: no positive INVALID_EXECUTION; contradiction untested/missing gate; missing WHY_CURRENT_EXPERIMENT; anti-hardcoding non-operational; deterministic model-free scorer underspecified",
+            "no v0.1 implementation authorized"
+          ]
+        }
+      ],
+      "resume_condition": "Superseded by corrected v0.2 contract; v0.2 requires fresh independent re-review."
+    },
+    {
+      "id": "correct_v0_2_replay_contract",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "v0.1 BLOCKING_FINDING review checkpoint",
+        "architecture/research-knowledge-ontology.v0.1.json@9af5bea619ec5a2f83575b4c8d73d08922f05bdb",
+        "benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998"
+      ],
+      "outputs": [
+        "architecture/research-knowledge-ontology.v0.2.json",
+        "benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json"
+      ],
+      "validation": [
+        {
+          "check": "Five blocker closures",
+          "result": "PASS",
+          "evidence": [
+            "21 unique base cases.",
+            "10/10 required query families including WHY_CURRENT_EXPERIMENT.",
+            "Positive INVALID_EXECUTION case present.",
+            "Active contradiction case present and contradiction_silent_collapse_count=0 restored to pass criteria.",
+            "Two same-query/different-graph pairs prevent visible-query fingerprint lookup from passing both members.",
+            "Every base case runs under IDENTITY + RELABEL_A + RELABEL_B for 63 total instances.",
+            "Exact canonical JSON scorer freezes field schema, duplicate rejection, support-handle resolution, raw UTF-8 sorting, and exact equality with no natural-language grading."
+          ]
+        }
+      ],
+      "resume_condition": "Exact corrected v0.2 design and benchmark receive independent re-review."
+    },
+    {
+      "id": "corrected_v0_2_independent_rereview",
+      "status": "READY",
+      "execution_owner": "independent_reviewer",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "architecture/research-knowledge-ontology.v0.2.json@039fd2f888fb1abfb663c841df3425e2aa69fb74",
+        "benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json@c73f6f531a05386c1177a2709690ad2b06739ea9"
+      ],
+      "outputs": [
+        "NO_BLOCKING_FINDING or exact blocking findings"
+      ],
       "validation": [],
-      "resume_condition": "NO_BLOCKING_FINDING on the exact frozen design and replay contract before implementation."
+      "resume_condition": "NO_BLOCKING_FINDING on exact v0.2 blobs before implementation."
     },
     {
       "id": "implement_read_only_projection",
@@ -167,7 +228,7 @@
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "independently reviewed exact design and benchmark"
+        "independently re-reviewed exact v0.2 design and benchmark"
       ],
       "outputs": [
         "deterministic read-only adapters",
@@ -176,7 +237,7 @@
         "tests under tests/research_knowledge"
       ],
       "validation": [],
-      "resume_condition": "Implementation CI passes without changing frozen ontology/replay semantics."
+      "resume_condition": "Only after corrected v0.2 NO_BLOCKING_FINDING and successful implementation validation."
     },
     {
       "id": "run_replay_benchmark",
@@ -185,8 +246,8 @@
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "validated projection implementation",
-        "frozen 16-case replay benchmark"
+        "validated v0.2 projection implementation",
+        "frozen 21-case / 63-instance replay benchmark v0.2"
       ],
       "outputs": [
         "replay report",
@@ -194,7 +255,7 @@
         "bounded scientific verdict"
       ],
       "validation": [],
-      "resume_condition": "16/16 exact replay, 16/16 provenance, and every zero-count safety gate pass."
+      "resume_condition": "21/21 base cases, 63/63 total variants, 10/10 family coverage, exact provenance, and every zero-count safety gate pass."
     },
     {
       "id": "integration_decision",
@@ -264,6 +325,42 @@
         "Manual structural validation was recorded in PR #493 comment 6404503637.",
         "No implementation authority exists until independent review returns NO_BLOCKING_FINDING on the exact frozen blobs."
       ]
+    },
+    {
+      "id": "research-knowledge-ontology-v0.1-preimplementation-review-v1",
+      "kind": "independent_review",
+      "identity": "workspace-control@706957531271486b7df510933297fa9169134a65|design@9af5bea619ec5a2f83575b4c8d73d08922f05bdb|benchmark@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998:BLOCKING_FINDING",
+      "required_for_resume": true,
+      "evidence": [
+        "Reviewer capsule blob d1b8f34daf5e777a41912c3ebc91fd9c27f30bae.",
+        "Core ontology architecture/layer split accepted.",
+        "Five result-affecting replay-contract blockers identified.",
+        "No implementation authorized from v0.1."
+      ]
+    },
+    {
+      "id": "research-knowledge-ontology-design-v0.2",
+      "kind": "corrected_architecture_design",
+      "identity": "architecture/research-knowledge-ontology.v0.2.json@039fd2f888fb1abfb663c841df3425e2aa69fb74",
+      "required_for_resume": true,
+      "evidence": [
+        "Corrects only the five independently reviewed result-affecting contract surfaces.",
+        "Architecture authority/layer model is unchanged.",
+        "Adds non-vacuous INVALID_EXECUTION, contradiction, query-family coverage, metamorphic anti-hardcoding, and deterministic scoring contracts."
+      ]
+    },
+    {
+      "id": "research-state-replay-benchmark-v0.2",
+      "kind": "corrected_benchmark_contract",
+      "identity": "benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json@c73f6f531a05386c1177a2709690ad2b06739ea9",
+      "required_for_resume": true,
+      "evidence": [
+        "21 unique base cases, 10/10 required query families.",
+        "Positive INVALID_EXECUTION and active-contradiction synthetic test-only fixtures.",
+        "Two byte-identical visible-query/different-graph adversarial pairs.",
+        "IDENTITY + two deterministic relabel variants per case = 63 exact-scored instances.",
+        "Exact canonical JSON scoring; natural-language scoring=false."
+      ]
     }
   ],
   "artifacts": [
@@ -276,6 +373,16 @@
       "path": "benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json",
       "kind": "frozen_benchmark_contract",
       "sha": "45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998"
+    },
+    {
+      "path": "architecture/research-knowledge-ontology.v0.2.json",
+      "kind": "frozen_corrected_architecture_design",
+      "sha": "039fd2f888fb1abfb663c841df3425e2aa69fb74"
+    },
+    {
+      "path": "benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json",
+      "kind": "frozen_corrected_benchmark_contract",
+      "sha": "c73f6f531a05386c1177a2709690ad2b06739ea9"
     }
   ],
   "validation": [
@@ -298,19 +405,32 @@
         "Gold fields are harness-only after answer generation.",
         "Case-ID branching and benchmark-specific logic are explicitly invalid execution."
       ]
+    },
+    {
+      "check": "v0.2 blocker closure self-audit",
+      "result": "PASS",
+      "evidence": [
+        "21/21 unique base case IDs.",
+        "10/10 required query families covered; WHY_CURRENT_EXPERIMENT count=1.",
+        "Expected INVALID_EXECUTION count=1.",
+        "Expected ACTIVE_CONTRADICTION count=1.",
+        "Both paired adversaries expose identical query_family + query_input within each pair.",
+        "No v0.1 natural-language gold fields remain in v0.2 cases.",
+        "Benchmark design binding resolves to exact v0.2 design blob 039fd2f888fb1abfb663c841df3425e2aa69fb74."
+      ]
     }
   ],
   "blockers": [
-    "Independent pre-implementation review is required for exact design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and replay-benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 before any projection implementation."
+    "Corrected v0.2 design blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and benchmark blob c73f6f531a05386c1177a2709690ad2b06739ea9 require independent re-review before any projection implementation."
   ],
   "remaining_work": [
-    "Obtain independent review of the exact frozen ontology/replay contract.",
-    "If NO_BLOCKING_FINDING, implement only the read-only deterministic projection and model-free replay evaluator in workspace-control.",
-    "Run the frozen 16-case replay benchmark and require all exact/provenance/safety gates.",
+    "Obtain independent re-review of exact corrected v0.2 design and benchmark.",
+    "If and only if NO_BLOCKING_FINDING, implement the read-only deterministic projection and exact model-free replay evaluator in workspace-control.",
+    "Validate implementation before executing the 21-case / 63-instance frozen benchmark.",
     "Do not integrate with live EXTRACT or production semantic-control in this task."
   ],
-  "next_safe_action": "Engage an independent reviewer on architecture/research-knowledge-ontology.v0.1.json blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Reviewer should test source-precedence correctness, epistemic/normative/execution separation, verdict-vs-posthoc and negative-vs-invalid distinctions, rejected-mechanism reopening semantics, and whether CandidateAction/DecisionEvaluation can remain useful without graph-created authority. No implementation before disposition.",
+  "next_safe_action": "Engage an independent reviewer on architecture/research-knowledge-ontology.v0.2.json blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and benchmarks/research_knowledge/research-state-replay-benchmark.v0.2.json blob c73f6f531a05386c1177a2709690ad2b06739ea9. Re-review must specifically verify closure of all five v0.1 blockers: positive INVALID_EXECUTION coverage; contradiction fixture plus contradiction zero-count gate; 10/10 required query-family coverage including WHY_CURRENT_EXPERIMENT; operational same-query/different-graph + relabel anti-hardcoding; and exact deterministic canonical scoring with no natural-language grading. No implementation before disposition.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-10-25 task created as a parallel research lane while Local EXTRACT remains independently owned. The missing layer is scientific-state lineage/replay, not another semantic-control implementation. Exact v0.1 design and 16-case replay benchmark are frozen design-only artifacts. No EXTRACT or production mutation occurred.\n2026-10-25 provenance self-audit: replay contract source identities were tightened from conceptual labels to exact workspace-control blob/checkpoint identities before independent review. Ontology design blob now 9af5bea619ec5a2f83575b4c8d73d08922f05bdb; replay benchmark blob now 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Scientific scope and authority boundaries are unchanged.\n2026-10-25 blind-replay hardening: design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 now freeze evaluation separation, structured query inputs, zero gold leakage, and zero case-specific logic before independent review.\n2026-10-25 design merge: PR #493 merged as workspace-control@6fb3d95fe291887d564174b834743c94a663e12c under bounded zero-step validation-unavailable handling. Exact design/benchmark remain blocked on independent review."
+  "notes": "2026-10-25 task created as a parallel research lane while Local EXTRACT remains independently owned. The missing layer is scientific-state lineage/replay, not another semantic-control implementation. Exact v0.1 design and 16-case replay benchmark are frozen design-only artifacts. No EXTRACT or production mutation occurred.\n2026-10-25 provenance self-audit: replay contract source identities were tightened from conceptual labels to exact workspace-control blob/checkpoint identities before independent review. Ontology design blob now 9af5bea619ec5a2f83575b4c8d73d08922f05bdb; replay benchmark blob now 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Scientific scope and authority boundaries are unchanged.\n2026-10-25 blind-replay hardening: design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 now freeze evaluation separation, structured query inputs, zero gold leakage, and zero case-specific logic before independent review.\n2026-10-25 design merge: PR #493 merged as workspace-control@6fb3d95fe291887d564174b834743c94a663e12c under bounded zero-step validation-unavailable handling. Exact design/benchmark remain blocked on independent review.\n2026-10-25 v0.1 review consumed: BLOCKING_FINDING with five benchmark/contract defects; core ontology architecture accepted. Corrected v0.2 design blob 039fd2f888fb1abfb663c841df3425e2aa69fb74 and replay benchmark blob c73f6f531a05386c1177a2709690ad2b06739ea9 close only those five surfaces. Implementation remains blocked pending independent re-review."
 }
