@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "status": "PILOT_PROTOCOL_VALIDATED",
+  "source_first": true,
+  "local_extract_outputs_viewed": false,
+  "reviewer_scope": "Protocol validation only; pilots never count toward final acceptance.",
+  "papers": [
+    {
+      "benchmark_paper_id": "pilot-deepcrf-2411.06925",
+      "source_pdf_sha256": "02d500daa8d886a50b58f79cb314374d78f429d0c41cc33f2935c1bc7186457e",
+      "decision_counts": {
+        "ACCEPT": 6,
+        "REWRITE_FOR_SOURCE_FIDELITY": 0,
+        "MERGE_DUPLICATE": 0,
+        "SPLIT_ATOMIC_FACTS": 0,
+        "REJECT_NOT_IMPORTANT": 0,
+        "REJECT_UNSUPPORTED": 0
+      },
+      "decisions": [
+        [
+          "deepcrf.method.augmentation",
+          "ACCEPT",
+          "Source directly ties model-inspired augmentation to learning micro-CSI while reducing channel dependence."
+        ],
+        [
+          "deepcrf.method.contrastive",
+          "ACCEPT",
+          "Source directly states supervised contrastive learning is used to improve noise robustness."
+        ],
+        [
+          "deepcrf.dataset.realworld",
+          "ACCEPT",
+          "Composite source spans establish 19 COTS WiFi NICs and data collection across four environments."
+        ],
+        [
+          "deepcrf.result.unseen",
+          "ACCEPT",
+          "Source reports 99.53% average accuracy across 19 NICs at seven unseen positions with four CSI measurements."
+        ],
+        [
+          "deepcrf.limit.closedset",
+          "ACCEPT",
+          "Limitations section explicitly bounds the current framework to closed-set identification and says dynamic sets require adaptation."
+        ],
+        [
+          "deepcrf.limit.adversarial",
+          "ACCEPT",
+          "Limitations section schedules systematic adversarial evaluation and defensive mechanisms as future work, so present adversarial robustness is not established."
+        ]
+      ],
+      "protocol_repairs": [
+        "Tightened the adversarial locator anchor from a hyphenation-sensitive phrase to an exact frozen-page anchor; scientific claim unchanged."
+      ]
+    },
+    {
+      "benchmark_paper_id": "pilot-epscnn-2402.05332",
+      "source_pdf_sha256": "9813b39353c7b7a6cb1ad5b225ad056a5e1027ac5df472c4a8c5b2c215afd788",
+      "decision_counts": {
+        "ACCEPT": 5,
+        "REWRITE_FOR_SOURCE_FIDELITY": 0,
+        "MERGE_DUPLICATE": 0,
+        "SPLIT_ATOMIC_FACTS": 0,
+        "REJECT_NOT_IMPORTANT": 0,
+        "REJECT_UNSUPPORTED": 0
+      },
+      "decisions": [
+        [
+          "epscnn.method.eps",
+          "ACCEPT",
+          "Source describes double-sided envelope power spectrum generation from IQ bursts and feeding EPS into a CNN."
+        ],
+        [
+          "epscnn.dataset.testbed",
+          "ACCEPT",
+          "Source identifies the 15-device Pycom testbed, IEEE 802.11b, and USRP B210 receiver."
+        ],
+        [
+          "epscnn.result.crosslocation",
+          "ACCEPT",
+          "Source reports a representative cross-location condition with EPS-CNN above 95% and IQ-CNN below 30%."
+        ],
+        [
+          "epscnn.result.crossday",
+          "ACCEPT",
+          "Source reports EPS-CNN cross-day results of 93% and 92%, exceeding the IQ-CNN comparisons."
+        ],
+        [
+          "epscnn.limit.aging",
+          "ACCEPT",
+          "Source says the current evaluation focuses on short-term aging and prolonged months/years behavior remains to be explored."
+        ]
+      ],
+      "protocol_repairs": []
+    }
+  ],
+  "findings": [
+    "The evidence-type vocabulary covers both pilots without forcing a new class.",
+    "Composite support is necessary for setup/limitation obligations that require more than one source span.",
+    "CORE/SECONDARY separation is usable and prevents minor details from dominating primary recall.",
+    "Exact frozen PDF hash + canonical page hash + short anchor excerpt provides durable source provenance without committing long copyrighted passages.",
+    "Pilot validation found a locator-quality defect but no scientific-obligation defect, demonstrating that provenance mechanics can be repaired without changing gold semantics."
+  ],
+  "disposition": "PILOT_PROTOCOL_READY_FOR_ACCEPTANCE_ANNOTATION"
+}
