@@ -1,0 +1,157 @@
+{
+  "schema_version": "0.1",
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "split": "ACCEPTANCE",
+  "paper": {
+    "benchmark_paper_id": "accept-microcsi-auth-2608.29845",
+    "arxiv_id": "2608.29845",
+    "version": "v1",
+    "title": "From Identification to Authentication for Micro-CSI RF Fingerprinting in OFDM Systems",
+    "source_pdf_url": "https://arxiv.org/pdf/2608.29845v1",
+    "source_sha256": "889501431e279312c212ebb9a859afa76cc3bf1d6bc7ecc293024e931fe6b907",
+    "page_count": 11
+  },
+  "obligations": [
+    {
+      "obligation_id": "microcsi.method.auth",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "The authentication system extracts a micro-CSI fingerprint from OFDM pilots and compares it with a stored reference using a likelihood-test-based decision.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "microcsi.method.auth.q1",
+          "page_number": 1,
+          "anchor_excerpt": "likelihood test",
+          "canonical_span_sha256": "238848263016ad9b0024437279116cd8050270856be6eb3a3735a81ca5f5428b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Core authentication mechanism.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "microcsi.threat.collusion",
+      "type": "SECURITY_THREAT",
+      "importance": "CORE",
+      "normalized_claim": "The proposed spoofing attack uses two colluding adversarial devices to estimate the micro-CSI fingerprints associated with the legitimate endpoints and construct a forged signal.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "microcsi.threat.collusion.q1",
+          "page_number": 1,
+          "anchor_excerpt": "collude",
+          "canonical_span_sha256": "238848263016ad9b0024437279116cd8050270856be6eb3a3735a81ca5f5428b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Central adversarial model.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "microcsi.method.distribution",
+      "type": "METHOD",
+      "importance": "CORE",
+      "normalized_claim": "The work derives approximate closed-form distributions of the authentication statistic under legitimate and spoofing hypotheses.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "microcsi.method.distribution.q1",
+          "page_number": 1,
+          "anchor_excerpt": "closed-form distributions",
+          "canonical_span_sha256": "238848263016ad9b0024437279116cd8050270856be6eb3a3735a81ca5f5428b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Analytical contribution.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "microcsi.eval.errors",
+      "type": "EVALUATION_PROTOCOL",
+      "importance": "CORE",
+      "normalized_claim": "Those distributions are used to derive false-alarm and misdetection probabilities for the authentication test.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "microcsi.eval.errors.q1",
+          "page_number": 1,
+          "anchor_excerpt": "false alarm",
+          "canonical_span_sha256": "238848263016ad9b0024437279116cd8050270856be6eb3a3735a81ca5f5428b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Security evaluation metrics.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "microcsi.eval.empirical",
+      "type": "DATASET_SETUP",
+      "importance": "CORE",
+      "normalized_claim": "The analytical results are validated against micro-CSI fingerprints extracted from experimental data.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "microcsi.eval.empirical.q1",
+          "page_number": 1,
+          "anchor_excerpt": "experimental data",
+          "canonical_span_sha256": "238848263016ad9b0024437279116cd8050270856be6eb3a3735a81ca5f5428b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Empirical validation boundary.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "microcsi.result.break",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "With enough pilot observations or equivalent attacker noise conditions, the attack can drive the authentication statistic toward random-classifier behavior, eliminating the claimed security benefit.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "microcsi.result.break.q1",
+          "page_number": 1,
+          "anchor_excerpt": "random classifier",
+          "canonical_span_sha256": "238848263016ad9b0024437279116cd8050270856be6eb3a3735a81ca5f5428b",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Headline security result.",
+      "adjudication_state": "PASS_A_ONLY"
+    },
+    {
+      "obligation_id": "microcsi.eval.threshold",
+      "type": "METHOD",
+      "importance": "SECONDARY",
+      "normalized_claim": "The authentication decision compares a noise-weighted squared-distance statistic against a threshold to select the legitimate or spoofing hypothesis.",
+      "support_mode": "DIRECT",
+      "quotes": [
+        {
+          "quote_id": "microcsi.eval.threshold.q1",
+          "page_number": 4,
+          "anchor_excerpt": "decision statistic",
+          "canonical_span_sha256": "7399d65024c179fdbcfd9c075cb8dece8abd053118575584ee464c6b86ca7a9a",
+          "locator_note": null
+        }
+      ],
+      "duplicate_group": null,
+      "annotation_rationale": "Concrete test formulation.",
+      "adjudication_state": "PASS_A_ONLY"
+    }
+  ],
+  "annotation_provenance": {
+    "source_first": true,
+    "extract_outputs_viewed": false,
+    "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
+    "annotated_at": "2026-10-24T20:56:00-04:00",
+    "adjudicator_id": null,
+    "adjudicated_at": null
+  }
+}
