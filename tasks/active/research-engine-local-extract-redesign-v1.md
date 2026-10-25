@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 8981b1437484bb1555d44666d69c0c42d3c57f32
+- Remote checkpoint: eace22dad50fe24d945770f8cbea2ae5f66bdc49
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact local-first allocation-fallback scientific result checkpoint. Then close inert research-engine PR #260 unmerged and obtain mandatory independent post-result review of run 40155082156 / artifact 12583913079 / HYBRID_COMPLEMENTARITY_REALIZED before any next-phase selection. Do not issue another scientific trigger and do not access the sealed acceptance benchmark.
+Freeze the smallest bounded ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 design using only development evidence and audit blob 75de54e56a810f6cf357fcfd393aac84e2052d53. Preserve the completed hybrid result unchanged, prohibit teacher-informed runtime selection and sealed-benchmark access, predeclare controls/metrics/verdicts/stopping rule, and obtain independent design review before implementation.
 
 ## Remaining work
 
-- Merge this exact scientific result checkpoint, then close inert research-engine PR #260 unmerged; do not issue another trigger.
-- Obtain mandatory independent post-result review of research-engine@e1d7afd32aa73fed3326b5cc0c9af1324096226a / run 40155082156 / artifact 12583913079 / HYBRID_COMPLEMENTARITY_REALIZED.
-- Only after the independent result review may the owner select the next scientific phase or decide whether end-to-end integration evidence is sufficient.
-- Use the separate four-atom residual audit as mandatory pre-acceptance development evidence after reviewer consumption; do not mutate the completed hybrid result.
-- Keep the sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false until remaining development evidence no longer rationally calls for architecture change.
+- Freeze a bounded next-phase design using HYBRID_COMPLEMENTARITY_REALIZED plus audit blob 75de54e56a810f6cf357fcfd393aac84e2052d53; leading diagnostic is ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1.
+- The design must separately test source-label classifier training, target-domain testing, coupled receiver+sampling-rate evidence, persistent misclassification/future-work coverage, and source-faithful paraphrase/repeated-evidence evaluation without teacher-informed runtime selection.
+- Obtain independent pre-implementation review of the newly frozen diagnostic before implementation.
+- Before acceptance freeze, establish either bounded residual closure or reliable teacher-blind safe-incompleteness/fallback behavior for analogous missing CORE obligations.
+- Keep the sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
 
