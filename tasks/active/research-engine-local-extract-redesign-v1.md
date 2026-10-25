@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a68cc6b08d94f60c56104d02cf8ccc649c689a8a
+- Remote checkpoint: 9e8ecfc98dd50e70833b91a59c791331c1cf93f9
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact atomic-obligation residual-closure scientific result checkpoint. Then close inert research-engine PR #264 unmerged and obtain mandatory independent post-result review of run 40159749698 / artifact 12586355512 / PRESERVATION_REGRESSION + UNSAFE_FALSE_COMPLETE before selecting any next scientific phase. Do not tune or rerun this valid result and do not access the sealed acceptance benchmark.
+Use the reviewed PRESERVATION_REGRESSION + UNSAFE_FALSE_COMPLETE result to select and freeze a materially new bounded diagnostic focused on teacher-blind obligation-to-evidence validity and preservation-aware admission/fallback. Preserve the shallow rank1/2 exposure evidence, do not retune/rerun the completed lexical-witness experiment, and obtain independent design review before implementation. No acceptance freeze or sealed holdout access.
 
 ## Remaining work
 
-- Merge this exact scientific result checkpoint, then close inert research-engine PR #264 unmerged; do not issue another trigger.
-- Obtain mandatory independent post-result review of research-engine@1488b26a1fca63d56edd14c98bafdd55999799ad / run 40159749698 / artifact 12586355512 / PRESERVATION_REGRESSION + UNSAFE_FALSE_COMPLETE.
-- Do not tune the valid result's witness prefixes, queries, obligation order, eviction rule, budgets, or source-fidelity sets and do not rerun it.
-- Only after independent result review may the owner freeze any next scientific design; preserve the evidence that correct residual propositions are shallowly exposed while generic lexical witness recognition is unsafe.
+- Select and freeze the smallest materially new bounded design addressing teacher-blind obligation-to-evidence validity and preservation-aware admission/fallback.
+- Preserve the established evidence that all four intended residual propositions are shallowly exposed; do not spend the next experiment on deeper retrieval, ranker scaling, or a bigger model merely to chase 13/13.
+- Do not reopen NLI, predicate-argument, or AMR certificate families without genuinely new premise-level evidence, and do not cosmetically retune the failed lexical witness matcher.
+- Obtain independent pre-implementation review of any new scientific design before implementation.
+- Before acceptance freeze, establish either bounded residual closure with preservation or reliable teacher-blind safe incompleteness/fallback without false completion.
 - Keep sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
