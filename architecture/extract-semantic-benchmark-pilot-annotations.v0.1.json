@@ -1,12 +1,12 @@
 {
   "schema_version": "pilot-draft-0.1",
-  "status": "PASS_A_DRAFT_SOURCE_HASHES_PENDING",
+  "status": "PILOT_PASS_B_PROTOCOL_VALIDATED",
   "purpose": "Validate evidence-obligation granularity and provenance representation on two non-acceptance pilot papers. This file is not final gold and is not used for Local EXTRACT acceptance.",
   "constraints": {
     "source_first": true,
     "local_extract_outputs_viewed": false,
     "acceptance_score_eligible": false,
-    "source_pdf_sha256_required_before_adjudication": true
+    "source_pdf_sha256_required_before_adjudication": false
   },
   "papers": [
     {
@@ -16,7 +16,7 @@
       "title": "DeepCRF: Deep Learning-Enhanced CSI-Based RF Fingerprinting for Channel-Resilient WiFi Device Identification",
       "source_pdf_url": "https://arxiv.org/pdf/2411.06925v1",
       "page_count": 15,
-      "source_sha256": null,
+      "source_sha256": "02d500daa8d886a50b58f79cb314374d78f429d0c41cc33f2935c1bc7186457e",
       "obligations": [
         {
           "obligation_id": "deepcrf.method.augmentation",
@@ -28,11 +28,13 @@
             {
               "page_number": 2,
               "anchor_excerpt": "model-inspired data augmentation",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "85b5e295e4a3b6de8d00c3d8c64edb2b3866a51214c83f2af2ec3e51f48c031f"
             }
           ],
           "duplicate_group": null,
-          "annotation_rationale": "Central mechanism for channel-resilient representation learning."
+          "annotation_rationale": "Central mechanism for channel-resilient representation learning.",
+          "adjudication_state": "ACCEPT"
         },
         {
           "obligation_id": "deepcrf.method.contrastive",
@@ -44,11 +46,13 @@
             {
               "page_number": 2,
               "anchor_excerpt": "supervised contrastive learning",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "85b5e295e4a3b6de8d00c3d8c64edb2b3866a51214c83f2af2ec3e51f48c031f"
             }
           ],
           "duplicate_group": null,
-          "annotation_rationale": "Central training mechanism tied directly to noise robustness."
+          "annotation_rationale": "Central training mechanism tied directly to noise robustness.",
+          "adjudication_state": "ACCEPT"
         },
         {
           "obligation_id": "deepcrf.dataset.realworld",
@@ -60,16 +64,19 @@
             {
               "page_number": 2,
               "anchor_excerpt": "19 COTS WiFi",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "85b5e295e4a3b6de8d00c3d8c64edb2b3866a51214c83f2af2ec3e51f48c031f"
             },
             {
               "page_number": 9,
               "anchor_excerpt": "four environments",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "e867fabe4646ab111ebb4a68e5f24d380a8276076de1602f9d090c5a2c4ce937"
             }
           ],
           "duplicate_group": null,
-          "annotation_rationale": "Defines the scale and environmental diversity of the primary real-world evaluation."
+          "annotation_rationale": "Defines the scale and environmental diversity of the primary real-world evaluation.",
+          "adjudication_state": "ACCEPT"
         },
         {
           "obligation_id": "deepcrf.result.unseen",
@@ -81,11 +88,13 @@
             {
               "page_number": 11,
               "anchor_excerpt": "99.53% accuracy",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "42e8b91e2751eb76f2b423beada4d59fbf88c4477b9d620cd577e9b389e1fee4"
             }
           ],
           "duplicate_group": null,
-          "annotation_rationale": "Primary quantitative result demonstrating generalization to unseen positions."
+          "annotation_rationale": "Primary quantitative result demonstrating generalization to unseen positions.",
+          "adjudication_state": "ACCEPT"
         },
         {
           "obligation_id": "deepcrf.limit.closedset",
@@ -97,11 +106,13 @@
             {
               "page_number": 14,
               "anchor_excerpt": "closed-set identification",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "f189814493ef3f88e064dfed94c2be75d2c8866a23a242bb113a6602782d698b"
             }
           ],
           "duplicate_group": null,
-          "annotation_rationale": "Explicitly bounds what the reported system currently solves."
+          "annotation_rationale": "Explicitly bounds what the reported system currently solves.",
+          "adjudication_state": "ACCEPT"
         },
         {
           "obligation_id": "deepcrf.limit.adversarial",
@@ -112,12 +123,14 @@
           "source_spans": [
             {
               "page_number": 14,
-              "anchor_excerpt": "adversarial conditions",
-              "canonical_span_sha256": null
+              "anchor_excerpt": "systematic evaluations of DeepCRF under adversarial",
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "f189814493ef3f88e064dfed94c2be75d2c8866a23a242bb113a6602782d698b"
             }
           ],
           "duplicate_group": null,
-          "annotation_rationale": "Important security limitation for deployment-oriented interpretation."
+          "annotation_rationale": "Important security limitation for deployment-oriented interpretation.",
+          "adjudication_state": "ACCEPT"
         }
       ]
     },
@@ -128,7 +141,7 @@
       "title": "Domain-Agnostic Hardware Fingerprinting-Based Device Identifier for Zero-Trust IoT Security",
       "source_pdf_url": "https://arxiv.org/pdf/2402.05332v1",
       "page_count": 7,
-      "source_sha256": null,
+      "source_sha256": "9813b39353c7b7a6cb1ad5b225ad056a5e1027ac5df472c4a8c5b2c215afd788",
       "obligations": [
         {
           "obligation_id": "epscnn.method.eps",
@@ -140,16 +153,19 @@
             {
               "page_number": 2,
               "anchor_excerpt": "double-sided envelope's power spectrum",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "887ff3b135eef88f8345d43348fca0608d846d9246e0f1c133360b65b3b13d55"
             },
             {
               "page_number": 2,
               "anchor_excerpt": "standard Convolution Neural Network",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "887ff3b135eef88f8345d43348fca0608d846d9246e0f1c133360b65b3b13d55"
             }
           ],
           "duplicate_group": null,
-          "annotation_rationale": "Defines the proposed representation and classifier pipeline."
+          "annotation_rationale": "Defines the proposed representation and classifier pipeline.",
+          "adjudication_state": "ACCEPT"
         },
         {
           "obligation_id": "epscnn.dataset.testbed",
@@ -161,11 +177,13 @@
             {
               "page_number": 4,
               "anchor_excerpt": "15 Pycom devices",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "3391b5180d3445607680d1b80e667d4c7f456c2809f025dd233d576cf9eac120"
             }
           ],
           "duplicate_group": null,
-          "annotation_rationale": "Core hardware/protocol setup for the empirical claims."
+          "annotation_rationale": "Core hardware/protocol setup for the empirical claims.",
+          "adjudication_state": "ACCEPT"
         },
         {
           "obligation_id": "epscnn.result.crosslocation",
@@ -177,11 +195,13 @@
             {
               "page_number": 6,
               "anchor_excerpt": "cross-location scenarios",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "972d9fb8295cd36872204e7ca0670486e108af17fc9f47300b79e7008eb6a7e6"
             }
           ],
           "duplicate_group": null,
-          "annotation_rationale": "Strong domain-shift result central to the paper's claim of location robustness."
+          "annotation_rationale": "Strong domain-shift result central to the paper's claim of location robustness.",
+          "adjudication_state": "ACCEPT"
         },
         {
           "obligation_id": "epscnn.result.crossday",
@@ -193,11 +213,13 @@
             {
               "page_number": 6,
               "anchor_excerpt": "93% and 92%",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "972d9fb8295cd36872204e7ca0670486e108af17fc9f47300b79e7008eb6a7e6"
             }
           ],
           "duplicate_group": null,
-          "annotation_rationale": "Primary evidence for temporal robustness."
+          "annotation_rationale": "Primary evidence for temporal robustness.",
+          "adjudication_state": "ACCEPT"
         },
         {
           "obligation_id": "epscnn.limit.aging",
@@ -209,16 +231,19 @@
             {
               "page_number": 6,
               "anchor_excerpt": "short-term aging",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "972d9fb8295cd36872204e7ca0670486e108af17fc9f47300b79e7008eb6a7e6"
             },
             {
               "page_number": 7,
               "anchor_excerpt": "months or even years",
-              "canonical_span_sha256": null
+              "canonical_span_sha256": null,
+              "canonical_page_text_sha256": "f4de515704fa30fc18ed4e08f02c3425bc137fcd08cabd8ceffda6064f8050f1"
             }
           ],
           "duplicate_group": null,
-          "annotation_rationale": "Explicit limitation on durability/generalization."
+          "annotation_rationale": "Explicit limitation on durability/generalization.",
+          "adjudication_state": "ACCEPT"
         }
       ]
     }
@@ -227,6 +252,7 @@
     "A single paper naturally yields method, setup, result, robustness, and limitation obligations; a one-type teacher-claim list would be too narrow.",
     "Composite support is necessary for some scientifically useful claims.",
     "CORE versus SECONDARY importance is useful for avoiding a benchmark dominated by minor details.",
-    "Page plus short anchor is sufficient for pilot navigation; final gold still requires exact PDF hash and canonical span hash."
+    "Page plus short anchor is sufficient for pilot navigation; final gold still requires exact PDF hash and canonical span hash.",
+    "Pass-B protocol validation against the frozen PDFs accepted all 11 pilot obligations; one DeepCRF adversarial locator anchor was tightened to a phrase present verbatim on the frozen page without changing the normalized claim."
   ]
 }

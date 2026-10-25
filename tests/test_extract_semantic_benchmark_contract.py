@@ -10,6 +10,8 @@ CONTRACT = ROOT / "architecture" / "extract-semantic-benchmark-contract.v0.1.md"
 CORPUS = ROOT / "architecture" / "extract-semantic-benchmark-corpus.v0.1.json"
 SCHEMA = ROOT / "schemas" / "extract_semantic_benchmark.v0.1.schema.json"
 PILOT = ROOT / "architecture" / "extract-semantic-benchmark-pilot-annotations.v0.1.json"
+SOURCE_MANIFEST = ROOT / "architecture" / "extract-semantic-benchmark-source-manifest.v0.1.json"
+PILOT_ADJUDICATION = ROOT / "architecture" / "extract-semantic-benchmark-pilot-adjudication.v0.1.json"
 
 
 def test_semantic_benchmark_uses_fresh_heldout_papers() -> None:
@@ -83,3 +85,39 @@ def test_pilot_annotations_are_source_first_and_not_acceptance_gold() -> None:
         for p in data["papers"]
         for o in p["obligations"]
     )
+
+
+def test_source_manifest_freezes_all_ten_exact_pdfs() -> None:
+    corpus = json.loads(CORPUS.read_text())
+    manifest = json.loads(SOURCE_MANIFEST.read_text())
+    papers = manifest["papers"]
+
+    assert manifest["status"] == "SOURCE_IDENTITIES_FROZEN"
+    assert len(papers) == 10
+    assert sum(p["split"] == "PILOT" for p in papers) == 2
+    assert sum(p["split"] == "ACCEPTANCE" for p in papers) == 8
+
+    corpus_papers = {
+        p["benchmark_paper_id"]: p
+        for p in corpus["pilot_papers"] + corpus["acceptance_papers"]
+    }
+    for p in papers:
+        assert len(p["source_pdf_sha256"]) == 64
+        assert p["source_pdf_bytes"] > 0
+        assert p["page_count"] == len(p["pages"]) > 0
+        cp = corpus_papers[p["benchmark_paper_id"]]
+        assert cp["source_sha256"] == p["source_pdf_sha256"]
+        assert cp["page_count"] == p["page_count"]
+        assert cp["source_identity_status"] == "FROZEN"
+
+
+def test_pilot_protocol_is_ready_without_acceptance_leakage() -> None:
+    pilot = json.loads(PILOT.read_text())
+    review = json.loads(PILOT_ADJUDICATION.read_text())
+
+    assert pilot["status"] == "PILOT_PASS_B_PROTOCOL_VALIDATED"
+    assert review["disposition"] == "PILOT_PROTOCOL_READY_FOR_ACCEPTANCE_ANNOTATION"
+    assert review["source_first"] is True
+    assert review["local_extract_outputs_viewed"] is False
+    assert sum(p["decision_counts"]["ACCEPT"] for p in review["papers"]) == 11
+    assert all(p["source_sha256"] for p in pilot["papers"])

@@ -1,0 +1,30 @@
+name: EXTRACT Semantic Benchmark Annotation Support
+
+on:
+  pull_request:
+    paths:
+      - "architecture/extract-semantic-benchmark-annotation-queries.v0.1.json"
+      - "scripts/extract_benchmark_source_snippets.py"
+      - ".github/workflows/extract-semantic-benchmark-annotation-support.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-snippets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --disable-pip-version-check "pypdf==5.1.0"
+      - name: Extract source-only annotation contexts
+        run: python scripts/extract_benchmark_source_snippets.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extract-semantic-benchmark-annotation-snippets
+          path: architecture/extract-semantic-benchmark-annotation-snippets.v0.1.json
+          if-no-files-found: error
