@@ -24,7 +24,7 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: ccb24ead808c8d42ed25085846afac4e589c8fea
+- Remote checkpoint: 39d65e0909a48e940d2377f3febd0b685b1f0970
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Develop and validate a reusable outer-loop research methodology for AI/software 
 
 ## Next safe action
 
-Validate and merge the benchmark-validity audit plus Heartbeat research scorecard policy. Then keep EXTRACT science non-blocking, but require operator-facing scorecards at scientific result boundaries and treat the 13-atom metric as one-paper diagnostic evidence rather than the definition of solved.
+Keep the current 13-atom oracle as a one-paper diagnostic/regression control, not the definition of solved. Permit the already-frozen nine-paper cross-paper structural recovery experiment to proceed under its non-semantic claim boundary. Before production acceptance or a generalized semantic-success claim, design and validate a held-out multi-paper proposition/claim-level semantic benchmark. Future research Heartbeat updates must emit compact operator scorecards at genuine scientific boundaries.
 
 ## Remaining work
 
