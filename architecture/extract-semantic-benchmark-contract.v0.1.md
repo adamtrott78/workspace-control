@@ -104,7 +104,8 @@ For every paper:
 2. record the authoritative PDF URL;
 3. compute and freeze SHA-256;
 4. record page count;
-5. perform annotation against that exact PDF.
+5. canonicalize page text deterministically for span hashing;
+6. perform annotation against that exact PDF.
 
 Metadata services and abstracts may be used for discovery only.
 
@@ -124,8 +125,8 @@ Each obligation contains:
 - paper/source identity;
 - evidence type;
 - normalized scientific claim;
-- one or more exact source quotes;
-- authoritative page number for every quote;
+- one or more exact source-span identities, stored as authoritative page + canonical span hash + a short anchor excerpt;
+- authoritative page number for every source span;
 - support mode;
 - importance tier;
 - duplicate/overlap group when applicable;
@@ -226,7 +227,7 @@ Positive recall alone is insufficient.
 
 For every locally emitted claim on an acceptance paper, evaluation records:
 
-- exact quote locatability;
+- exact source-span locatability;
 - page correctness;
 - type correctness;
 - normalized-claim support;
@@ -242,6 +243,8 @@ Output classifications:
 - `UNSUPPORTED`
 - `UNLOCATABLE`
 - `OUT_OF_SCOPE`
+
+Full verbatim source text need not be committed to Git: the authoritative PDF plus canonical span hash/page identity controls, and a short anchor excerpt supports human navigation.
 
 An emitted claim does not need to match a pre-existing gold obligation to be
 valid. If it is source-supported and relevant, it may count positively while
@@ -271,7 +274,7 @@ Macro paper recall is primary so one dense paper cannot dominate the benchmark.
 
 ### 10.3 Provenance
 
-- exact quote locatability;
+- exact source-span locatability;
 - page agreement;
 - source-span coverage.
 
