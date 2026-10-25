@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 874771f5bbbcc1896efb9e63841093010943b7ac
+- Remote checkpoint: 50d5a5cf032721c81e6a8a14060514002d2b48da
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 0abc9d3c6a558a5364ec10dd2d7263745ba37e2b
+- Remote checkpoint: 4d6a3bf003499a34ea0d076e55c724aaf1735c42
 - Remote verified: true
 
 ## Next safe action
 
-Implement exactly OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 from research-engine@0abc9d3c6a558a5364ec10dd2d7263745ba37e2b / design blob 4f4238030b7b667e080c2f662646e5856deacb4f. Do not change frozen science. After ordinary CI and a durable exact-SHA implementation checkpoint, execute exactly one valid development run via an inert exact-SHA trigger. Then STOP for mandatory independent post-result review. No acceptance freeze or sealed holdout access.
+Create an inert trigger PR from exact implementation research-engine@4d6a3bf003499a34ea0d076e55c724aaf1735c42, checkpoint its exact head SHA, and issue exactly one owner comment `/local-extract-obligation-validity-microbenchmark <SHA>`. Do not change frozen science. Stop on the first integrity-valid result, checkpoint it, and hand it to the independent reviewer. No acceptance freeze or sealed holdout access.
 
 ## Remaining work
 
-- Implement exactly OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 from reviewed design blob 4f4238030b7b667e080c2f662646e5856deacb4f without changing prompts, visible fields, cases, parser/guard rules, model settings, or scientific gates.
-- Run ordinary CI and merge the exact implementation.
-- Create/use an inert exact-SHA trigger and execute exactly one valid development run.
-- Capture exact run/job/artifact/report identities and checkpoint the genuine scientific result.
-- STOP after the genuine result and re-engage the independent reviewer before any next scientific phase.
+- Create an inert trigger PR from research-engine@4d6a3bf003499a34ea0d076e55c724aaf1735c42 with no scientific changes.
+- Checkpoint the exact inert trigger SHA and issue exactly one owner comment: /local-extract-obligation-validity-microbenchmark <exact_sha>.
+- Wait for the exact one-shot development run; do not tune or rerun after an integrity-valid result.
+- Capture run/job/artifact/report identities, scientific outcome, per-arm gates, completeness outcomes, and preservation/integrity evidence.
+- STOP after the genuine result and re-engage independent reviewer before any next scientific phase.
 - Keep acceptance_candidate_frozen=false and sealed semantic acceptance benchmark untouched.
 
 ## Blockers / gates
