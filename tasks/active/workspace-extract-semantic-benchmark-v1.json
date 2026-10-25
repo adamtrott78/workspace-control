@@ -52,7 +52,8 @@
         "architecture/extract-semantic-benchmark-adjudication.v0.1.md",
         "scripts/freeze_extract_semantic_benchmark_sources.py",
         ".github/workflows/extract-semantic-benchmark-source-freeze.yml",
-        "architecture/extract-semantic-benchmark-source-manifest.v0.1.json"
+        "architecture/extract-semantic-benchmark-source-manifest.v0.1.json",
+        "architecture/extract-semantic-benchmark-pilot-adjudication.v0.1.json"
       ]
     },
     {
@@ -131,7 +132,7 @@
     },
     {
       "id": "pilot_annotation_and_protocol_validation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-extract-semantic-benchmark-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "authoritative-pdf+github",
@@ -140,10 +141,23 @@
         "Frozen annotation schema."
       ],
       "outputs": [
-        "Source-first pilot obligations.",
-        "Adjudication protocol revisions if needed."
+        "architecture/extract-semantic-benchmark-pilot-annotations.v0.1.json with 11 source-bound obligations across two pilot papers.",
+        "architecture/extract-semantic-benchmark-pilot-adjudication.v0.1.json with all 11 pilot obligations accepted and one locator-only repair.",
+        "Pilot evidence confirms METHOD/DATASET_SETUP/RESULT/ROBUSTNESS_GENERALIZATION/LIMITATION, CORE/SECONDARY, and COMPOSITE support are sufficient for the pilot corpus."
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Pilot source-first annotation/adjudication protocol",
+          "result": "PASS",
+          "evidence": [
+            "Frozen pilot PDF identities are 02d500daa8d886a50b58f79cb314374d78f429d0c41cc33f2935c1bc7186457e and 9813b39353c7b7a6cb1ad5b225ad056a5e1027ac5df472c4a8c5b2c215afd788.",
+            "11/11 proposed obligations accepted after source review.",
+            "One DeepCRF adversarial anchor was tightened for locator robustness without changing claim semantics.",
+            "No Local EXTRACT outputs were consulted.",
+            "Pilot adjudication blob 94b39b75f61fc3f81513982f9015d00e7838a124."
+          ]
+        }
+      ],
       "resume_condition": "Pilot annotations may refine schema mechanics but cannot alter acceptance-paper selection."
     },
     {
@@ -199,6 +213,18 @@
         "All ten corpus PDF identities frozen before acceptance annotation.",
         "Pilot PDFs: 02d500daa8d886a50b58f79cb314374d78f429d0c41cc33f2935c1bc7186457e (15 pages), 9813b39353c7b7a6cb1ad5b225ad056a5e1027ac5df472c4a8c5b2c215afd788 (7 pages).",
         "Acceptance source identities are committed in architecture/extract-semantic-benchmark-source-manifest.v0.1.json."
+      ]
+    },
+    {
+      "id": "semantic-benchmark-pilot-protocol-v1",
+      "kind": "benchmark_pilot_validation_checkpoint",
+      "identity": "pilot_adjudication@94b39b75f61fc3f81513982f9015d00e7838a124:PILOT_PROTOCOL_READY_FOR_ACCEPTANCE_ANNOTATION",
+      "required_for_resume": true,
+      "evidence": [
+        "2 source-frozen pilot papers.",
+        "11/11 obligations accepted.",
+        "No acceptance paper or active EXTRACT output used in pilot scoring.",
+        "Protocol is ready to be applied source-first to the eight acceptance papers."
       ]
     }
   ],
@@ -285,18 +311,30 @@
         "blob 9b1683cd7bbea83ac197749503cbcebef17ef5ef",
         "workflow run 40147759885 PASS"
       ]
+    },
+    {
+      "path": "architecture/extract-semantic-benchmark-pilot-adjudication.v0.1.json",
+      "state": "pilot_protocol_validated",
+      "role": "Pass-B protocol validation across both non-acceptance pilot papers.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Pilot only; never contributes to final acceptance score.",
+      "evidence": [
+        "blob 94b39b75f61fc3f81513982f9015d00e7838a124"
+      ]
     }
   ],
   "validation": [],
   "blockers": [],
   "remaining_work": [
-    "Finalize the two pilot annotations against the frozen source identities and run Pass-B protocol validation.",
-    "Create source-first acceptance gold for the eight held-out papers without consulting Local EXTRACT outputs.",
-    "Freeze acceptance gold behind the benchmark contamination boundary.",
+    "Validate and merge the exact-source + pilot-protocol checkpoint.",
+    "Create source-first gold for the eight held-out acceptance papers on a separate unmerged sealed benchmark branch without consulting Local EXTRACT outputs.",
+    "Run acceptance-gold adjudication and freeze a cryptographic gold commitment before any Local EXTRACT acceptance evaluation.",
     "Evaluate only a separately frozen Local EXTRACT candidate architecture."
   ],
-  "next_safe_action": "Finalize and adjudicate the two pilot papers against their frozen PDF identities. Resolve any source-anchor or obligation-granularity defects before opening acceptance annotation.",
+  "next_safe_action": "Validate and merge this exact-source/pilot-protocol checkpoint. Then create the eight-paper acceptance gold on a separate sealed benchmark branch, record only its commitment/metadata in the shared task state, and keep active EXTRACT from reading or running the acceptance papers until architecture freeze.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created 2026-10-24 after benchmark audit established that the legacy 13-atom oracle is a useful one-paper diagnostic but insufficient for final acceptance. This sibling task is intentionally independent of active EXTRACT architecture research.\n2026-10-24 benchmark foundation: selected 2 pilot + 8 acceptance papers, all outside the legacy nine-paper development corpus. Pilot source reading confirms the schema needs atomic method/setup/result/robustness/limitation obligations and explicit composite support. Acceptance papers remain unlabeled and prohibited from active EXTRACT development.\n2026-10-24 source-freeze stage: benchmark foundation PR #436 is already validated/merged. Source hashing/page extraction is being moved to a dedicated GitHub Actions job so exact arXiv PDF bytes and canonical page-text hashes are reproducible despite the chat runtime lacking direct arXiv byte access.\n2026-10-24 exact source freeze PASS: workflow 40147759885 downloaded all ten pinned arXiv versions and produced exact PDF SHA-256/page-count/per-page canonical-text identities. Source hashing is complete; pilot annotation/adjudication is now the active stage."
+  "notes": "Created 2026-10-24 after benchmark audit established that the legacy 13-atom oracle is a useful one-paper diagnostic but insufficient for final acceptance. This sibling task is intentionally independent of active EXTRACT architecture research.\n2026-10-24 benchmark foundation: selected 2 pilot + 8 acceptance papers, all outside the legacy nine-paper development corpus. Pilot source reading confirms the schema needs atomic method/setup/result/robustness/limitation obligations and explicit composite support. Acceptance papers remain unlabeled and prohibited from active EXTRACT development.\n2026-10-24 source-freeze stage: benchmark foundation PR #436 is already validated/merged. Source hashing/page extraction is being moved to a dedicated GitHub Actions job so exact arXiv PDF bytes and canonical page-text hashes are reproducible despite the chat runtime lacking direct arXiv byte access.\n2026-10-24 exact source freeze PASS: workflow 40147759885 downloaded all ten pinned arXiv versions and produced exact PDF SHA-256/page-count/per-page canonical-text identities. Source hashing is complete; pilot annotation/adjudication is now the active stage.\n2026-10-24 pilot protocol PASS: both pilot PDFs were source-reviewed against frozen identities; all 11 candidate obligations were retained. One locator anchor was repaired without semantic change. Acceptance annotation can now begin on a separate sealed branch."
 }
