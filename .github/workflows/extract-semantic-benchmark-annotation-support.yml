@@ -1,6 +1,13 @@
 name: EXTRACT Semantic Benchmark Annotation Support
 
 on:
+  push:
+    branches:
+      - sealed-extract-semantic-acceptance-gold-v1
+    paths:
+      - "architecture/extract-semantic-benchmark-annotation-queries.v0.1.json"
+      - "scripts/extract_benchmark_source_snippets.py"
+      - ".github/workflows/extract-semantic-benchmark-annotation-support.yml"
   pull_request:
     paths:
       - "architecture/extract-semantic-benchmark-annotation-queries.v0.1.json"
