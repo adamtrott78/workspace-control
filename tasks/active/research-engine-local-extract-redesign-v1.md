@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 92d70b6086b700bc76a9595c0cbcba8fe31e1f43
+- Remote checkpoint: 35ea3e5777479cf716e7f684729af12af960d67e
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact INSUFFICIENT_BASELINE_GENERALIZATION result checkpoint, then close research-engine PR #251 unmerged and re-engage workspace-local-extract-independent-review-v1 on run 40146681400 / artifact 12581042417 / report sha256:1a0eed000053f064ec0f247ae3bc3f93583db9b2787d1ae8ec95362206a02db1. Do not redesign the cross-paper baseline before that review is durable.
+Analyze the arxiv:2501.15391 baseline-construction failure under the frozen teacher-blind reservation schedule, compare minimal baseline-repair mechanisms, and freeze the smallest design that can test all-nine baseline completeness without using teacher labels or recovery outcomes. Do not implement before independent design review.
 
 ## Remaining work
 
-- Obtain independent post-result review of run 40146681400 / artifact 12581042417 / report sha256 1a0eed000053f064ec0f247ae3bc3f93583db9b2787d1ae8ec95362206a02db1 before redesigning the cross-paper baseline.
-- After this result checkpoint merges, close research-engine PR #251 unmerged and do not retrigger.
-- Do not select a recovery mechanism from the diagnostic-only 3-vs-1 counts because the all-nine baseline gate failed.
-- If reviewer finds no blocking issue, redesign only the cross-paper teacher-blind baseline so all nine papers can instantiate the matched comparison; freeze and review that new design before implementation.
-- Preserve semantic-generalization limits, rejected-family exclusions, production/Wave7B/semantic-control boundaries.
+- Perform an evidence-first baseline-redesign search focused on why arxiv:2501.15391 yields only three tier1 reservation events at budget28.
+- Compare materially distinct teacher-blind baseline repair mechanisms without using teacher labels, removed propositions, or observed recovery outcomes for selection.
+- Freeze the smallest discriminating baseline experiment/design with exact all-nine completeness gate, metrics, interpretation table, stopping rule, and pass authority.
+- Obtain independent review of the genuinely new baseline design before implementation.
+- Do not select a recovery family from the incomplete 8-paper result; preserve semantic-generalization limits, rejected-family exclusions, production/Wave7B/semantic-control boundaries.
 
 ## Blockers / gates
 
