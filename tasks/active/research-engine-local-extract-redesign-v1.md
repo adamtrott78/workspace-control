@@ -30,27 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: a0f4e69281341fa3eb9f9578e1f4a789db7f59d6
+- Remote checkpoint: be00b9244d3b97979e550f08335e4c936682e10a
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 5ab76baaa7f3be491780fc66f1d83104f70ef341
+- Remote checkpoint: 05b8149cbfa81d7ceafadf2b5ce867bd687cfa14
 - Remote verified: true
 
 ## Next safe action
 
-Freeze the corrected all-nine cross-paper structural recovery-comparison design using exact baseline fallback from run 40148614485 / report sha256 fd893f34870b8a52b899bbf2d8f495b7bc771a7573008d6fdf130db844a38d93 while leaving the two recovery arms unchanged. Obtain independent design review before implementation.
+Re-engage workspace-local-extract-independent-review-v1 on exact corrected all-nine design research-engine@05b8149cbfa81d7ceafadf2b5ce867bd687cfa14 / blob 86a21acbf2d50e5fb42ed1e1a4e3287d2a82bd57. Keep the held-out semantic benchmark sealed and do not declare ACCEPTANCE_CANDIDATE_FROZEN yet.
 
 ## Remaining work
 
-- Freeze a corrected all-nine cross-paper structural recovery-comparison design binding the exact top3-then-ranks4-12 fallback baseline from run 40148614485.
-- Preserve the previously reviewed radius1 local rescue and global surviving-intent allocation arms, matched one-slot origin-drop stress, fixed budget28, structural exact-recovery metrics, and secondary historical-page context.
-- Obtain independent review of the genuinely new corrected design before implementation.
-- Execute only after reviewed implementation and one-shot authority; post-result review required before mechanism selection.
-- Preserve semantic-generalization, rejected-family, production/Wave7B/semantic-control boundaries.
+- Obtain independent review of exact corrected all-nine design research-engine@05b8149cbfa81d7ceafadf2b5ce867bd687cfa14 / blob 86a21acbf2d50e5fb42ed1e1a4e3287d2a82bd57 before implementation.
+- If reviewer disposition is NO_BLOCKING_FINDING, implement only ALL_NINE_FIXED_BASELINE_RECOVERY_COMPARISON_V1 exactly as frozen.
+- Execute exactly one valid development scientific run and stop at the frozen structural verdict; no valid-result rerun/tuning.
+- After the genuine result, obtain independent post-result review before next-phase selection.
+- Keep workspace-extract-semantic-benchmark-v1 sealed. Do not inspect its sealed branch/gold or run development probes on acceptance papers.
+- Declare ACCEPTANCE_CANDIDATE_FROZEN only when exact reproducible code/architecture/model/config/fallback/evaluation/runtime identity and pre-acceptance rationale are durably frozen without held-out feedback.
 
 ## Blockers / gates
 
