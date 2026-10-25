@@ -23,8 +23,8 @@ Build and validate a read-only, provenance-preserving scientific-state knowledge
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: research-knowledge-ontology-v1-design
-- Remote checkpoint: 6d08843c14aa6ed3e6cc6ebb8bf5732eeb14ef08
+- Remote branch: main
+- Remote checkpoint: 6fb3d95fe291887d564174b834743c94a663e12c
 - Remote verified: true
 
 ### research-engine
