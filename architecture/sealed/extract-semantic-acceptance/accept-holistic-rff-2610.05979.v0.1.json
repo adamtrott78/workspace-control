@@ -29,7 +29,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Central architecture claim.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "holistic.method.vq",
@@ -48,7 +48,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Central representation mechanism.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "holistic.method.tasks",
@@ -67,7 +67,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Explains how the shared representation serves all tasks.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "holistic.method.training",
@@ -86,7 +86,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Training pipeline.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "holistic.dataset",
@@ -105,7 +105,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Cross-technology evaluation scope.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "holistic.result.closedset",
@@ -124,7 +124,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Headline closed-set performance.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "holistic.result.osr",
@@ -143,7 +143,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Headline open-set performance.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "holistic.motivation.pipeline",
@@ -162,7 +162,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Bounds the problem the unified architecture addresses.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     }
   ],
   "annotation_provenance": {
@@ -170,7 +170,7 @@
     "extract_outputs_viewed": false,
     "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
     "annotated_at": "2026-10-24T20:56:00-04:00",
-    "adjudicator_id": null,
-    "adjudicated_at": null
+    "adjudicator_id": "workspace-extract-semantic-benchmark-v1/pass-b",
+    "adjudicated_at": "2026-10-24T21:01:00-04:00"
   }
 }
