@@ -42,15 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Create a normal inert trigger PR from exact research-engine main `e1d7afd32aa73fed3326b5cc0c9af1324096226a`, differing only by a trigger marker. Validate the exact anchor head with ordinary CI and verify zero prior comments. Do not issue the scientific trigger until that exact anchor identity is durably checkpointed in workspace-control.
+Create a normal inert trigger PR from exact research-engine main e1d7afd32aa73fed3326b5cc0c9af1324096226a, differing only by a trigger marker. Validate the exact anchor head with ordinary CI and verify zero prior comments. Do not issue the scientific trigger until that exact anchor identity is durably checkpointed in workspace-control.
 
 ## Remaining work
 
-- Create the normal inert exact-SHA trigger anchor from `research-engine@e1d7afd32aa73fed3326b5cc0c9af1324096226a`; marker-only change, ordinary CI PASS, and zero prior comments.
-- Checkpoint the exact inert anchor identity in workspace-control and durably authorize exactly one `/local-extract-local-first-allocation-fallback <exact_sha>` trigger.
+- Create the normal inert exact-SHA trigger anchor from research-engine@e1d7afd32aa73fed3326b5cc0c9af1324096226a; marker-only change, ordinary CI PASS, and zero prior comments.
+- Checkpoint the exact inert anchor identity in workspace-control and durably authorize exactly one /local-extract-local-first-allocation-fallback <exact_sha> trigger.
 - Execute exactly one valid hybrid realization run and stop at the frozen verdict; no rerun or post-result tuning.
 - Persist exact run/artifact/report identities, close the inert trigger PR unmerged after the result checkpoint is durable, and obtain mandatory independent post-result review.
-- Only after post-result review may the four-atom residual audit influence next-phase selection; keep the sealed semantic acceptance benchmark uninspected and `acceptance_candidate_frozen=false`.
+- Only after post-result review may the four-atom residual audit influence next-phase selection; keep the sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
 
