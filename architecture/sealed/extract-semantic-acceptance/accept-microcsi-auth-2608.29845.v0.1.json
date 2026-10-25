@@ -29,7 +29,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Core authentication mechanism.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "microcsi.threat.collusion",
@@ -48,7 +48,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Central adversarial model.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "microcsi.method.distribution",
@@ -67,7 +67,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Analytical contribution.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "microcsi.eval.errors",
@@ -86,7 +86,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Security evaluation metrics.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "microcsi.eval.empirical",
@@ -105,7 +105,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Empirical validation boundary.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "microcsi.result.break",
@@ -124,7 +124,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Headline security result.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     },
     {
       "obligation_id": "microcsi.eval.threshold",
@@ -143,7 +143,7 @@
       ],
       "duplicate_group": null,
       "annotation_rationale": "Concrete test formulation.",
-      "adjudication_state": "PASS_A_ONLY"
+      "adjudication_state": "ACCEPT"
     }
   ],
   "annotation_provenance": {
@@ -151,7 +151,7 @@
     "extract_outputs_viewed": false,
     "annotator_id": "workspace-extract-semantic-benchmark-v1/pass-a",
     "annotated_at": "2026-10-24T20:56:00-04:00",
-    "adjudicator_id": null,
-    "adjudicated_at": null
+    "adjudicator_id": "workspace-extract-semantic-benchmark-v1/pass-b",
+    "adjudicated_at": "2026-10-24T21:01:00-04:00"
   }
 }
