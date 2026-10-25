@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 1ff020ab832c729e9c830cbc5bcbd8fafe305f48
+- Remote checkpoint: 58898e4ee5f6836b2164ffea70ad6c81f803e179
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact baseline-depth fallback pre-run checkpoint. Then issue exactly one `/local-extract-cross-paper-baseline-depth-fallback 36e0436bd88277b813396cdeb440f06c84aabb10` comment on research-engine PR #254 and bind the unique resulting run. Do not issue a second trigger.
+Merge this exact DEPTH_FALLBACK_COMPLETES_ALL_NINE result checkpoint, then close research-engine PR #254 unmerged and re-engage workspace-local-extract-independent-review-v1 on run 40148614485 / artifact 12582395555 / report sha256:fd893f34870b8a52b899bbf2d8f495b7bc771a7573008d6fdf130db844a38d93. Do not design the corrected recovery comparison before that review is durable.
 
 ## Remaining work
 
-- After this exact checkpoint merges, issue exactly one `/local-extract-cross-paper-baseline-depth-fallback 36e0436bd88277b813396cdeb440f06c84aabb10` comment on research-engine PR #254.
-- Bind the unique resulting run and inspect the uploaded baseline-only report.
-- Stop at DEPTH_FALLBACK_COMPLETES_ALL_NINE / DEPTH_FALLBACK_STILL_INCOMPLETE / BASELINE_IDENTITY_REGRESSION; INVALID_EXECUTION is operational no-verdict. Do not tune/rerun after a valid result.
-- Persist the exact result, close PR #254 unmerged only after result checkpoint is durable, and obtain independent post-result review.
-- Do not run the recovery comparison yet; a COMPLETE result only authorizes a new corrected recovery-comparison design/review.
+- Obtain independent post-result review of run 40148614485 / artifact 12582395555 / report sha256 fd893f34870b8a52b899bbf2d8f495b7bc771a7573008d6fdf130db844a38d93 before designing a corrected recovery comparison.
+- After this result checkpoint merges, close research-engine PR #254 unmerged and do not retrigger.
+- If reviewer finds no blocking issue, freeze a corrected cross-paper structural recovery comparison that uses the exact top3-then-same-tier-ranks4-12 fallback baseline and leaves the two recovery arms otherwise unchanged.
+- Do not directly rerun the old comparison without a new design/review.
+- Preserve semantic-generalization limits, rejected-family exclusions, production/Wave7B/semantic-control boundaries.
 
 ## Blockers / gates
 
