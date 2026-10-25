@@ -1,0 +1,271 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "research-state-replay-benchmark-v0.1",
+  "task_id": "workspace-research-knowledge-ontology-v1",
+  "status": "FROZEN_REPLAY_CONTRACT",
+  "source_snapshot": {
+    "workspace_control": "67f3b0879dd26bbcbb5bff37080396174a7c2243",
+    "research_engine": "13a129ef820c611adf6a6ca70598df1e67d56efc"
+  },
+  "policy": {
+    "historical_and_current_durable_records_only": true,
+    "sealed_acceptance_benchmark_access": false,
+    "model_free_primary_scoring": true,
+    "no_source_mutation": true,
+    "no_live_extract_mutation": true
+  },
+  "cases": [
+    {
+      "id": "R1_WHY_NOT_DEEPER_RETRIEVAL",
+      "query_family": "WHY_NOT_REJECTED_MECHANISM",
+      "question": "Why is deeper retrieval not the supported next move after the atomic-obligation result?",
+      "expected_answer_class": "NEGATIVE_MECHANISM_SELECTION",
+      "required_points": [
+        "Correct evidence for all four residual obligations was already shallow rank1/2.",
+        "The failure was safe obligation-to-evidence recognition/preservation, not retrieval capacity."
+      ],
+      "forbidden_claims": [
+        "deeper retrieval was never tested",
+        "larger retrieval depth is authorized"
+      ],
+      "source_identities": [
+        "research-engine@1488b26a1fca63d56edd14c98bafdd55999799ad|run=40159749698|PRESERVATION_REGRESSION|UNSAFE_FALSE_COMPLETE",
+        "workspace-control independent review checkpoint atomic-obligation-residual-closure-result-review-v1"
+      ]
+    },
+    {
+      "id": "R2_REJECTED_CERTIFICATE_FAMILIES",
+      "query_family": "WHY_NOT_REJECTED_MECHANISM",
+      "question": "Which semantic-certificate mechanism families are explicitly negative evidence and cannot be cosmetically reopened?",
+      "expected_answer_class": "REJECTED_MECHANISMS",
+      "required_points": [
+        "NLI_CERTIFICATE_REJECTED",
+        "PREDICATE_ARGUMENT_CERTIFICATE_REJECTED",
+        "AMR_GRAPH_CERTIFICATE_REJECTED"
+      ],
+      "source_identities": [
+        "research-engine-local-extract-redesign-v1 durable constraints"
+      ]
+    },
+    {
+      "id": "R3_VALIDITY_RESULT_CLASS",
+      "query_family": "DISTINGUISH_INVALID_EXECUTION_FROM_NEGATIVE_SCIENCE",
+      "question": "Was OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 an invalid execution or a valid negative scientific result?",
+      "expected_answer_class": "VALID_NEGATIVE_SCIENCE",
+      "required_points": [
+        "VALIDITY_PREMISE_REJECTED",
+        "execution integrity valid",
+        "no rerun authority"
+      ],
+      "source_identities": [
+        "research-engine@a901115fb572a0647e70f87c39309bcda60f1dee|run=40166893479|VALIDITY_PREMISE_REJECTED",
+        "workspace-control PR #482 comment 6395379857"
+      ]
+    },
+    {
+      "id": "R4_POSTHOC_7_OF_7",
+      "query_family": "DISTINGUISH_VERDICT_FROM_POSTHOC",
+      "question": "Does raw candidate_status being semantically correct on 7/7 cases change the frozen VALIDITY_PREMISE_REJECTED verdict?",
+      "expected_answer_class": "POSTHOC_NONVERDICT",
+      "required_points": [
+        "No",
+        "7/7 is posthoc non-verdict evidence",
+        "completed run must not be repaired or rerun"
+      ],
+      "source_identities": [
+        "workspace-control PR #482 comment 6395379857"
+      ]
+    },
+    {
+      "id": "R5_EXACT_PROVENANCE_AUTHORITY",
+      "query_family": "WHAT_IS_CURRENTLY_ALLOWED",
+      "question": "What did the independent review of EXACT_PROVENANCE_BINDING_MICROBENCH_V1 authorize?",
+      "expected_answer_class": "EXACT_DESIGN_IMPLEMENTATION_ONLY",
+      "required_points": [
+        "Implementation of exactly research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / blob 09603c4d65114c75ad3e112a357ee45da384f63e",
+        "successful implementation/contract validation before trigger",
+        "post-result independent review required"
+      ],
+      "forbidden_claims": [
+        "production promotion authorized",
+        "acceptance candidate frozen",
+        "sealed benchmark may be inspected"
+      ],
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243"
+      ]
+    },
+    {
+      "id": "R6_ZERO_STEP_CI",
+      "query_family": "DISTINGUISH_INVALID_EXECUTION_FROM_NEGATIVE_SCIENCE",
+      "question": "How should GitHub-hosted CI failures with zero executed steps be represented?",
+      "expected_answer_class": "VALIDATION_UNAVAILABLE",
+      "required_points": [
+        "not PASS",
+        "not scientific/design failure",
+        "requires later successful validation before execution when validation is a gate"
+      ],
+      "source_identities": [
+        "research-engine design CI 40177364128/40177487876",
+        "workspace-control reviewer-handoff validation 40178745635"
+      ]
+    },
+    {
+      "id": "R7_HYBRID_SCOPE",
+      "query_family": "WHAT_REMAINS_UNPROVEN",
+      "question": "What does HYBRID_COMPLEMENTARITY_REALIZED establish and not establish?",
+      "expected_answer_class": "BOUNDED_STRUCTURAL_RESULT",
+      "required_points": [
+        "4/36 exact structural recoveries with 3 local-only and 1 allocation-only",
+        "establishes executable structural complementarity",
+        "does not establish semantic completeness, production promotion, or acceptance readiness"
+      ],
+      "source_identities": [
+        "research-engine@e1d7afd32aa73fed3326b5cc0c9af1324096226a|run=40155082156|HYBRID_COMPLEMENTARITY_REALIZED"
+      ]
+    },
+    {
+      "id": "R8_PRESERVATION_ADMISSION_DEFERRED",
+      "query_family": "WHAT_REMAINS_UNPROVEN",
+      "question": "Why is preservation-aware admission still deferred?",
+      "expected_answer_class": "DEPENDENCY_NOT_SATISFIED",
+      "required_points": [
+        "validity plus exact provenance must succeed first",
+        "current exact-provenance experiment isolates binding only"
+      ],
+      "source_identities": [
+        "research-engine-local-extract-redesign-v1 current sequence"
+      ]
+    },
+    {
+      "id": "R9_SEALED_HOLDOUT",
+      "query_family": "WHAT_IS_CURRENTLY_FORBIDDEN",
+      "question": "May this ontology task inspect the sealed eight-paper semantic acceptance benchmark?",
+      "expected_answer_class": "FORBIDDEN",
+      "required_points": [
+        "No",
+        "acceptance_candidate_frozen=false",
+        "ontology task uses historical/read-only metadata only"
+      ],
+      "source_identities": [
+        "workspace-extract-semantic-benchmark-v1 dependency gate",
+        "research-engine-local-extract-redesign-v1 current boundaries"
+      ]
+    },
+    {
+      "id": "R10_STALE_REVIEWER_VS_OWNER",
+      "query_family": "CURRENT_STATE_WITH_SUPERSESSION",
+      "question": "If an older reviewer capsule still says the prior validity experiment may be implemented but the owner capsule has advanced to exact-provenance implementation authority, which governs current scientific state?",
+      "expected_answer_class": "NEWER_AUTHORITATIVE_OWNER_STATE",
+      "required_points": [
+        "current merged owner capsule governs the scientific boundary",
+        "stale reviewer text remains historical evidence only",
+        "durably consumed review checkpoints remain provenance"
+      ],
+      "source_identities": [
+        "workspace-control task-capsule precedence",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243"
+      ]
+    },
+    {
+      "id": "R11_GRAPH_AUTHORITY_ESCAPE",
+      "query_family": "WHAT_IS_CURRENTLY_FORBIDDEN",
+      "question": "Can a graph inference or model-generated edge authorize an executor action?",
+      "expected_answer_class": "FORBIDDEN",
+      "required_points": [
+        "No",
+        "CandidateAction is non-authoritative",
+        "authority-owned policy/task contract must evaluate execution permission"
+      ],
+      "source_identities": [
+        "workspace-knowledge-action-ontology-v1 architecture-research-v1",
+        "research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd:HARDENING_PASS"
+      ]
+    },
+    {
+      "id": "R12_OPEN_PR_AUTHORITY",
+      "query_family": "CURRENT_STATE_WITH_SUPERSESSION",
+      "question": "Does an open or unmerged PR override merged task-capsule authority?",
+      "expected_answer_class": "NO",
+      "required_points": [
+        "No",
+        "open PR is lower precedence than merged authoritative task state",
+        "it may be inspected as pending evidence only"
+      ],
+      "source_identities": [
+        "research-knowledge ontology source precedence contract"
+      ]
+    },
+    {
+      "id": "R13_SCIENTIFIC_SCOPE_VS_EXECUTOR_PERMISSION",
+      "query_family": "WHAT_EVIDENCE_AUTHORIZES_NEXT_SCOPE",
+      "question": "Does a reviewed scientific result that permits designing the next mechanism automatically authorize implementation or execution?",
+      "expected_answer_class": "AUTHORITY_LAYER_SEPARATION",
+      "required_points": [
+        "No",
+        "design scope, implementation authority, trigger authority, and production authority are distinct"
+      ],
+      "source_identities": [
+        "workspace-control research task history"
+      ]
+    },
+    {
+      "id": "R14_REOPENING_REJECTED_FAMILY",
+      "query_family": "WHAT_IS_CURRENTLY_ALLOWED",
+      "question": "When may a rejected mechanism family be reconsidered?",
+      "expected_answer_class": "CONDITIONAL_REOPEN_ONLY",
+      "required_points": [
+        "only when new evidence changes the failed premise",
+        "cosmetic retuning does not satisfy reopening"
+      ],
+      "source_identities": [
+        "research-engine-local-extract-redesign-v1 rejected mechanism constraints"
+      ]
+    },
+    {
+      "id": "R15_INTEGRATION_GATE",
+      "query_family": "WHAT_IS_CURRENTLY_FORBIDDEN",
+      "question": "May semantic-control integration bind the current EXTRACT output now?",
+      "expected_answer_class": "BLOCKED_EVIDENCE",
+      "required_points": [
+        "No",
+        "workspace-semantic-control-integration-v1 requires a durable accepted EXTRACT architecture/output contract",
+        "current development experiments are insufficient"
+      ],
+      "source_identities": [
+        "workspace-semantic-control-integration-v1"
+      ]
+    },
+    {
+      "id": "R16_TRACE_TO_EXACT_PROVENANCE",
+      "query_family": "TRACE_RESULT_TO_NEXT_DESIGN",
+      "question": "Trace the evidence chain that led from unsafe lexical completion to the exact-provenance experiment.",
+      "expected_answer_class": "CAUSAL_LINEAGE",
+      "required_points": [
+        "PRESERVATION_REGRESSION + UNSAFE_FALSE_COMPLETE showed shallow correct evidence but unsafe semantic recognition",
+        "OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 then validly returned VALIDITY_PREMISE_REJECTED",
+        "posthoc review isolated proof/source-grounding interface fidelity",
+        "EXACT_PROVENANCE_BINDING_MICROBENCH_V1 was frozen to separate semantic judgment from exact provenance attachment"
+      ],
+      "source_identities": [
+        "run=40159749698",
+        "run=40166893479",
+        "workspace-control PR #482 comment 6395379857",
+        "research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc"
+      ]
+    }
+  ],
+  "pass_criteria": {
+    "exact_case_answer_pass": "16/16",
+    "provenance_traceability": "16/16 cases include all required exact source identities",
+    "authority_escape_count": 0,
+    "stale_state_override_count": 0,
+    "posthoc_verdict_conflation_count": 0,
+    "invalid_execution_scientific_negative_conflation_count": 0,
+    "sealed_holdout_access_count": 0
+  },
+  "interpretation": {
+    "pass": "Authorizes implementation of the bounded read-only projection/query prototype only after independent design review; does not authorize EXTRACT binding, production promotion, or executor mutation.",
+    "fail": "Revise ontology/source-precedence/replay contract before implementation. Do not compensate by adding model inference or broader source access."
+  }
+}
