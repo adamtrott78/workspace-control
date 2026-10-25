@@ -23,8 +23,8 @@ Independently review the frozen Research Knowledge Ontology v0.1 and 16-case bli
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: research-knowledge-ontology-review-v1
-- Remote checkpoint: 33762b90b0ecfaac879717bfe0a0fb4c809f22f2
+- Remote branch: main
+- Remote checkpoint: de81b2a8c5bc30f5a7c22a1f3d28f9de0e3445c7
 - Remote verified: true
 
 ### research-engine

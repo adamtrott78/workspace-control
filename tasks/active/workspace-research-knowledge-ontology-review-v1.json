@@ -37,8 +37,8 @@
       "intent": "mutate",
       "base_sha": "33762b90b0ecfaac879717bfe0a0fb4c809f22f2",
       "remote": {
-        "branch": "research-knowledge-ontology-review-v1",
-        "checkpoint_sha": "33762b90b0ecfaac879717bfe0a0fb4c809f22f2",
+        "branch": "main",
+        "checkpoint_sha": "de81b2a8c5bc30f5a7c22a1f3d28f9de0e3445c7",
         "verified": true
       },
       "local": null,
@@ -118,6 +118,17 @@
         "Owner blocks implementation until independent review.",
         "Workspace Control CI was validation-unavailable due zero-step runner failures; this is review context only, not scientific evidence."
       ]
+    },
+    {
+      "id": "reviewer-lane-merge-v1",
+      "kind": "durable_reviewer_checkpoint",
+      "identity": "workspace-control@de81b2a8c5bc30f5a7c22a1f3d28f9de0e3445c7|owner_blob@f7d88f4d94b498aa5eb847d06aca8e765d7813bc|design@9af5bea619ec5a2f83575b4c8d73d08922f05bdb|benchmark@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998",
+      "required_for_resume": true,
+      "evidence": [
+        "Reviewer task PR #496 merged as workspace-control@de81b2a8c5bc30f5a7c22a1f3d28f9de0e3445c7.",
+        "Workspace Control Validation 40242194799 was zero-step validation unavailable, not PASS.",
+        "Reviewer lane may only review/persist disposition; implementation remains forbidden."
+      ]
     }
   ],
   "artifacts": [],
@@ -131,5 +142,5 @@
   "next_safe_action": "Independently review architecture/research-knowledge-ontology.v0.1.json blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Focus on source-precedence correctness, anti-leak/blind-replay integrity, non-tautological query semantics, exact provenance, scientific-state distinctions, and prevention of graph-created execution authority. Return NO_BLOCKING_FINDING or exact blockers; do not implement anything.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created 2026-10-25 as a separate independent review lane for the durable Research Knowledge Ontology v0.1 design. Owner task remains implementation-blocked pending this review."
+  "notes": "Created 2026-10-25 as a separate independent review lane for the durable Research Knowledge Ontology v0.1 design. Owner task remains implementation-blocked pending this review.\n2026-10-25 reviewer-lane merge: PR #496 merged as workspace-control@de81b2a8c5bc30f5a7c22a1f3d28f9de0e3445c7; task remains ready for independent review of exact frozen blobs."
 }
