@@ -36,14 +36,14 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-Owner may implement exactly TIER1_BASELINE_DEPTH_FALLBACK_DIAGNOSTIC_V1 from research-engine@d42d2947c45a06f6e03066488c119c86133107aa / design blob 718bd2f278339e4c921d37a4bb53fd1f09be35e7. Re-engage reviewer only if science changes or after the genuine result.
+No reviewer-side blocker remains on DEPTH_FALLBACK_COMPLETES_ALL_NINE. Owner may freeze a corrected all-nine cross-paper recovery-comparison design that binds the exact fallback baseline and preserves the already-reviewed recovery arms. Independent design review is required before implementation; do not directly rerun the old comparison.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to implement and execute exactly TIER1_BASELINE_DEPTH_FALLBACK_DIAGNOSTIC_V1.
-- Do not review routine implementation/CI/packaging/trigger mechanics unless they materially alter the frozen baseline science.
-- After the genuine baseline verdict, independently audit exact run/artifact/result before any corrected recovery-comparison or role-fallback design.
-- Do not permit recovery-family selection or proposition-level semantic generalization from the incomplete prior cross-paper result.
+- Wait for the EXTRACT owner to freeze a corrected all-nine structural recovery-comparison design that uses the exact reviewed top3-then-ranks4-12 fallback baseline and leaves recovery arms unchanged.
+- Do not review routine implementation/CI/trigger mechanics unless science changes.
+- After the corrected comparison's genuine result, independently audit the exact run/artifact/result before further phase selection.
+- Do not permit proposition-level semantic generalization until a held-out multi-paper semantic benchmark exists.
 
 ## Blockers / gates
 
