@@ -21,30 +21,27 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 ## Repositories
 
 ### workspace-control
-
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: bff88635be6071148178165e3e935d43eae1e0bb
+- Remote checkpoint: 013301d7d47d006de054a4ab5ee8082e693f5f09
 - Remote verified: true
 
 ### research-engine
-
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: 1488b26a1fca63d56edd14c98bafdd55999799ad
+- Remote checkpoint: b939ff0bbb52024f55b2f6e719aef331f6286d06
 - Remote verified: true
 
 ## Next safe action
 
-Owner may use the valid PRESERVATION_REGRESSION + UNSAFE_FALSE_COMPLETE result to select a materially new bounded development design focused on teacher-blind obligation-to-evidence validity and preservation-aware admission/fallback. Preserve the evidence that the correct residual propositions are shallowly exposed and that naive lexical witness satisfaction is unsafe. Freeze the new design and re-engage reviewer before implementation. No acceptance freeze or sealed holdout access.
+Owner must correct OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 before implementation: freeze exact model-visible obligation fields for each arm with fail_closed_conditions/evaluation labels excluded; freeze exact prompt/template and stateless case-isolation rules; freeze parsing/guard semantics so ordinary bad verifier outputs count against the arm rather than producing INVALID_EXECUTION/rerun authority. Then re-engage reviewer on the corrected exact SHA/blob. No implementation, acceptance freeze, or sealed holdout access before NO_BLOCKING_FINDING.
 
 ## Remaining work
 
-- Wait for owner to select and freeze a materially new bounded design addressing teacher-blind obligation-to-evidence validity and preservation-aware admission/fallback.
-- Do not permit posthoc retuning or rerunning ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1.
-- Require independent pre-implementation review for any genuinely new scientific design; routine mechanics remain non-review boundaries.
-- Before acceptance-candidate freeze, require either bounded residual closure or demonstrable teacher-blind safe incompleteness without preservation regression.
-- Keep the sealed acceptance benchmark uninspected until the owner independently freezes an end-to-end acceptance candidate.
+- Wait for owner to correct the three result-affecting specification blockers in OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 without broadening the science.
+- Re-review the corrected exact design before any implementation.
+- If corrected design receives NO_BLOCKING_FINDING, allow exact implementation only; genuine result still requires independent post-result review.
+- Keep sealed acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
 
@@ -60,6 +57,5 @@ Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-local-extract-independent-review-v1.json
 
 Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
+Treat the task capsule, exact durable Git/runtime state, and referenced evidence as the handoff.
 Follow the capsule's next_safe_action.
