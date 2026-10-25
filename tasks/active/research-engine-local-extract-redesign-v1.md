@@ -30,24 +30,24 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: c06dce94036f5cc28b12c268f71eebe50968d2ea
+- Remote checkpoint: 1f528eb1746760650ae4ba736e2cc1a819db74af
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: aaf7aa79636b192fe6f16a71b10c727b103052f2
+- Remote checkpoint: 58ba18d21b3d99b2f4f1cecbb77705cda025c1b3
 - Remote verified: true
 
 ## Next safe action
 
-Obtain independent review of exact ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 design research-engine@aaf7aa79636b192fe6f16a71b10c727b103052f2 / design blob 4200bc0fe4ed6d308767a8ac9610cf471392b562. Do not implement before reviewer disposition. No acceptance freeze or sealed benchmark access.
+Obtain independent re-review of exact corrected ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 design research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / design blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9. Do not implement before corrected reviewer disposition. No acceptance freeze or sealed benchmark access.
 
 ## Remaining work
 
-- Obtain independent review of exact ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 design research-engine@aaf7aa79636b192fe6f16a71b10c727b103052f2 / blob 4200bc0fe4ed6d308767a8ac9610cf471392b562.
-- If reviewer returns NO_BLOCKING_FINDING, implement only the frozen deterministic design with exact inputs/budgets/orderings and add ordinary tests/workflow.
+- Obtain independent re-review of exact corrected ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 design research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9.
+- If re-review returns NO_BLOCKING_FINDING, implement only the frozen deterministic design with exact identities/matcher/origins/precedence and add ordinary tests/workflow.
 - Execute at most one valid development diagnostic run after exact implementation/trigger authority is durable; stop on both mechanism and completeness-safety outcomes with no post-result tuning.
 - Obtain mandatory independent post-result review before any acceptance-candidate decision or subsequent scientific phase.
 - Keep sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
