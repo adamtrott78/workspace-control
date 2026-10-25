@@ -1,0 +1,303 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-research-knowledge-ontology-v1",
+  "title": "Research Knowledge Ontology v1",
+  "status": "IN_PROGRESS",
+  "goal": "Build and validate a read-only, provenance-preserving scientific-state knowledge projection that reconstructs residuals, hypotheses, assumptions, mechanism families, frozen experiments, executions, results, interpretations, independent reviews, belief updates, authority boundaries, and candidate next actions from durable workspace-control and research-engine evidence—without becoming a new source of scientific truth, policy authority, EXTRACT behavior, or executor permission.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/evidence-first-solution-research.v1.json",
+    "checkpoint_sha": "67f3b0879dd26bbcbb5bff37080396174a7c2243",
+    "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
+  },
+  "current_stage": "independent_preimplementation_review_ready",
+  "acceptance_criteria": [
+    "The ontology explicitly separates epistemic research state, normative/scientific authority state, execution history, and non-authoritative candidate actions.",
+    "Every projected node and edge preserves exact durable provenance to one or more task capsules, frozen designs, result artifacts, review checkpoints, Git identities, policy artifacts, or execution receipts.",
+    "The projection preserves contradiction, supersession, temporal validity, stale-state history, preregistered verdicts, and posthoc non-verdict interpretations without silently collapsing them.",
+    "Current-state queries apply an explicit durable-source precedence rule so stale reviewer handoffs or open PRs cannot override newer merged authoritative task state.",
+    "The ontology distinguishes valid negative science from invalid execution, validation unavailable, blocked evidence, rejected mechanisms, and incomplete validation.",
+    "The ontology distinguishes scientific design scope, implementation authority, trigger authority, production authority, and executor permission.",
+    "Rejected mechanism families retain explicit reopening conditions; cosmetic retuning cannot silently convert negative evidence into a live hypothesis.",
+    "A bounded model-free replay benchmark covers at least the frozen 16 Local EXTRACT lineage cases and must answer all cases exactly with complete source provenance.",
+    "Replay safety requires zero authorization escapes, zero stale-state overrides, zero verdict/posthoc conflations, zero invalid-execution/scientific-negative conflations, and zero sealed-holdout access.",
+    "The first implementation is additive and rebuildable over existing authoritative stores; it does not replace PostgreSQL, task capsules, workflow/policy artifacts, or content-addressed evidence.",
+    "Graph/model inference may propose or rank CandidateAction objects but cannot create Permission, remove Prohibition, satisfy ReviewRequirement, mutate a task, trigger execution, or change production behavior.",
+    "Any future semantic-control integration consumes the ontology only through the already-hardened candidate-action/DecisionEvaluation authority boundary.",
+    "Blind replay integrity requires the projection/query engine to remain unable to read benchmark gold, case IDs, expected labels, required points, or forbidden claims; benchmark-specific logic invalidates the run."
+  ],
+  "constraints": [
+    "research-engine-local-extract-redesign-v1 remains the sole owner of Local EXTRACT science. This task is read-only with respect to EXTRACT, its designs, runs, sealed acceptance benchmark, and production routing.",
+    "Do not inspect the sealed eight-paper semantic acceptance benchmark or any hidden gold labels.",
+    "Do not bind or infer a production EXTRACT output contract; workspace-semantic-control-integration-v1 remains BLOCKED_EVIDENCE until the EXTRACT owner durably freezes an accepted output contract.",
+    "Do not let graph inference or model-generated assertions become executor authority.",
+    "Do not replace authoritative task capsules, result artifacts, Git identities, policies, or receipts with graph state; the graph is a rebuildable projection.",
+    "Do not silently reconcile contradictory or stale assertions. Preserve source, time, authority class, and supersession lineage.",
+    "Do not treat open PR state or chat prose as equivalent to merged authoritative task state.",
+    "Do not treat zero-step/pre-runner CI failures as PASS or scientific rejection.",
+    "Do not implement graph code before independent review of the exact frozen ontology design blob and replay-benchmark blob.",
+    "Do not add a graph database in v1. Use deterministic file/in-memory or existing relational projections first; database changes require a later evidence-backed task.",
+    "Do not perform production mutation, executor invocation, autonomous task mutation, or policy self-modification in this task.",
+    "Keep all first-pass implementation scoped to workspace-control prototypes/benchmarks/tests so research-engine remains read-only during this task."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "67f3b0879dd26bbcbb5bff37080396174a7c2243",
+      "remote": {
+        "branch": "research-knowledge-ontology-v1-design",
+        "checkpoint_sha": "6d08843c14aa6ed3e6cc6ebb8bf5732eeb14ef08",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-research-knowledge-ontology-v1.json",
+        "tasks/active/workspace-research-knowledge-ontology-v1.md",
+        "architecture/research-knowledge-ontology.v0.1.json",
+        "benchmarks/research_knowledge/**",
+        "prototypes/research_knowledge/**",
+        "tests/research_knowledge/**"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "13a129ef820c611adf6a6ca70598df1e67d56efc",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "13a129ef820c611adf6a6ca70598df1e67d56efc",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "recover_parent_and_current_boundaries",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "workspace-knowledge-action-ontology-v1 parent architecture",
+        "workspace-semantic-control-prototype-v1 PROMOTE_TO_INTEGRATION result",
+        "workspace-semantic-control-hardening-v1 HARDENING_PASS result",
+        "workspace-semantic-control-integration-v1 BLOCKED_EVIDENCE gate",
+        "workspace-research-methodology-v1 research-state methodology",
+        "research-engine-local-extract-redesign-v1 current owner capsule"
+      ],
+      "outputs": [
+        "confirmed missing layer is research-state lineage/provenance projection rather than another semantic-control substrate",
+        "confirmed EXTRACT and semantic-control integration remain independent",
+        "confirmed candidate-action authority boundary is already hardened"
+      ],
+      "validation": [
+        {
+          "check": "Parent architecture and downstream authority boundaries recovered",
+          "result": "PASS",
+          "evidence": [
+            "workspace-knowledge-action-ontology-v1 selects rebuildable typed projection over authoritative records.",
+            "workspace-semantic-control-prototype-v1 completed PROMOTE_TO_INTEGRATION with authorization_escape_count=0.",
+            "workspace-semantic-control-hardening-v1 completed HARDENING_PASS.",
+            "workspace-semantic-control-integration-v1 remains BLOCKED_EVIDENCE pending an accepted EXTRACT output contract.",
+            "Current EXTRACT owner state on workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243 permits exact-provenance implementation only after review/validation and does not expose sealed acceptance data."
+          ]
+        }
+      ],
+      "resume_condition": "Parent and live scientific/authority boundaries remain recoverable from durable state."
+    },
+    {
+      "id": "freeze_research_state_ontology_and_replay_benchmark",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "research methodology chain Residual -> Hypothesis -> Assumption -> MechanismFamily -> Experiment -> Result -> Interpretation -> Review -> BeliefUpdate -> Decision",
+        "knowledge-action epistemic/normative/execution separation",
+        "Local EXTRACT durable research history as read-only replay fixture"
+      ],
+      "outputs": [
+        "architecture/research-knowledge-ontology.v0.1.json",
+        "benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json"
+      ],
+      "validation": [
+        {
+          "check": "Ontology design frozen",
+          "result": "PASS",
+          "evidence": [
+            "design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb",
+            "explicit layer model, assertion metadata, source precedence, bounded query contract, authority boundary, and safety gates"
+          ]
+        },
+        {
+          "check": "Replay benchmark frozen",
+          "result": "PASS",
+          "evidence": [
+            "benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998",
+            "16 frozen cases cover rejected mechanisms, negative-vs-invalid execution, verdict-vs-posthoc, stale-state precedence, zero-step CI, exact-design authority, sealed-holdout prohibition, and graph authority escape"
+          ]
+        }
+      ],
+      "resume_condition": "Exact design and benchmark blobs receive independent pre-implementation review."
+    },
+    {
+      "id": "independent_preimplementation_review",
+      "status": "READY",
+      "execution_owner": "independent_reviewer",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb",
+        "replay benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998"
+      ],
+      "outputs": [
+        "NO_BLOCKING_FINDING or exact blocking findings"
+      ],
+      "validation": [],
+      "resume_condition": "NO_BLOCKING_FINDING on the exact frozen design and replay contract before implementation."
+    },
+    {
+      "id": "implement_read_only_projection",
+      "status": "PENDING",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "independently reviewed exact design and benchmark"
+      ],
+      "outputs": [
+        "deterministic read-only adapters",
+        "canonical typed projection",
+        "model-free bounded query evaluator",
+        "tests under tests/research_knowledge"
+      ],
+      "validation": [],
+      "resume_condition": "Implementation CI passes without changing frozen ontology/replay semantics."
+    },
+    {
+      "id": "run_replay_benchmark",
+      "status": "PENDING",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "validated projection implementation",
+        "frozen 16-case replay benchmark"
+      ],
+      "outputs": [
+        "replay report",
+        "provenance/safety report",
+        "bounded scientific verdict"
+      ],
+      "validation": [],
+      "resume_condition": "16/16 exact replay, 16/16 provenance, and every zero-count safety gate pass."
+    },
+    {
+      "id": "integration_decision",
+      "status": "PENDING",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "replay result",
+        "semantic-control hardening boundary",
+        "current EXTRACT integration dependency state"
+      ],
+      "outputs": [
+        "RETAIN_AS_RESEARCH_TWIN, REVISE, or REJECT",
+        "separate later task if any live semantic-control integration is justified"
+      ],
+      "validation": [],
+      "resume_condition": "No live integration occurs in this task."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "parent-substrate-recovery-v1",
+      "kind": "architecture_lineage",
+      "identity": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:research-knowledge-parent-boundaries",
+      "required_for_resume": true,
+      "evidence": [
+        "Parent architecture: knowledge-action-projection-v1 with authoritative stores plus rebuildable typed projection.",
+        "Semantic-control prototype: research-engine@4317830c4f3779cebb8a5cf0d7eeec369b85d5ea PROMOTE_TO_INTEGRATION.",
+        "Semantic-control hardening: research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd HARDENING_PASS.",
+        "Semantic-control integration remains BLOCKED_EVIDENCE until an accepted EXTRACT output contract exists.",
+        "EXTRACT remains read-only and sealed acceptance data remains off-limits."
+      ]
+    },
+    {
+      "id": "research-knowledge-ontology-design-v0.1",
+      "kind": "architecture_design",
+      "identity": "architecture/research-knowledge-ontology.v0.1.json@9af5bea619ec5a2f83575b4c8d73d08922f05bdb",
+      "required_for_resume": true,
+      "evidence": [
+        "Epistemic, normative, execution, and decision-bridge layers are explicitly separated.",
+        "Every assertion requires exact provenance and authority metadata.",
+        "Source precedence preserves stale/history while protecting CURRENT_STATE queries.",
+        "CandidateAction remains non-authoritative and external policy evaluation remains the only path to executor permission."
+      ]
+    },
+    {
+      "id": "research-state-replay-benchmark-v0.1",
+      "kind": "benchmark_contract",
+      "identity": "benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998",
+      "required_for_resume": true,
+      "evidence": [
+        "16 frozen replay cases use Local EXTRACT durable history without sealed acceptance data.",
+        "Primary scoring is model-free.",
+        "Required pass is 16/16 exact answers + 16/16 source provenance + zero safety/authority violations."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "architecture/research-knowledge-ontology.v0.1.json",
+      "kind": "frozen_architecture_design",
+      "sha": "9af5bea619ec5a2f83575b4c8d73d08922f05bdb"
+    },
+    {
+      "path": "benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json",
+      "kind": "frozen_benchmark_contract",
+      "sha": "45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998"
+    }
+  ],
+  "validation": [
+    {
+      "check": "Design-only mutation boundary",
+      "result": "PASS",
+      "evidence": [
+        "No research-engine mutation.",
+        "No EXTRACT implementation/run/trigger.",
+        "No sealed acceptance benchmark access.",
+        "No production or policy mutation."
+      ]
+    },
+    {
+      "check": "Blind replay anti-leak contract",
+      "result": "PASS",
+      "evidence": [
+        "Projection source rule excludes the benchmark file from graph construction.",
+        "Query engine sees only query_family + structured query_input.",
+        "Gold fields are harness-only after answer generation.",
+        "Case-ID branching and benchmark-specific logic are explicitly invalid execution."
+      ]
+    }
+  ],
+  "blockers": [
+    "Independent pre-implementation review is required for exact design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and replay-benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 before any projection implementation."
+  ],
+  "remaining_work": [
+    "Obtain independent review of the exact frozen ontology/replay contract.",
+    "If NO_BLOCKING_FINDING, implement only the read-only deterministic projection and model-free replay evaluator in workspace-control.",
+    "Run the frozen 16-case replay benchmark and require all exact/provenance/safety gates.",
+    "Do not integrate with live EXTRACT or production semantic-control in this task."
+  ],
+  "next_safe_action": "Engage an independent reviewer on architecture/research-knowledge-ontology.v0.1.json blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Reviewer should test source-precedence correctness, epistemic/normative/execution separation, verdict-vs-posthoc and negative-vs-invalid distinctions, rejected-mechanism reopening semantics, and whether CandidateAction/DecisionEvaluation can remain useful without graph-created authority. No implementation before disposition.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "2026-10-25 task created as a parallel research lane while Local EXTRACT remains independently owned. The missing layer is scientific-state lineage/replay, not another semantic-control implementation. Exact v0.1 design and 16-case replay benchmark are frozen design-only artifacts. No EXTRACT or production mutation occurred.\n2026-10-25 provenance self-audit: replay contract source identities were tightened from conceptual labels to exact workspace-control blob/checkpoint identities before independent review. Ontology design blob now 9af5bea619ec5a2f83575b4c8d73d08922f05bdb; replay benchmark blob now 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Scientific scope and authority boundaries are unchanged.\n2026-10-25 blind-replay hardening: design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 now freeze evaluation separation, structured query inputs, zero gold leakage, and zero case-specific logic before independent review."
+}
