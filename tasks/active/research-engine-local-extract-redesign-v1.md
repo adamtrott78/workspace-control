@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 96464c33805c308ff193e17f483a7b2b30b49335
+- Remote checkpoint: ae9ca48ba7f5e4e084a2e42fc22fdb21bf3abf19
 - Remote verified: true
 
 ### research-engine
@@ -42,7 +42,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Implement LOCAL_FIRST_ALLOCATION_FALLBACK_REALIZATION_V1 exactly from research-engine@d3425684d753639e8ec8843a3cd3640f6a5a4561. Replay exact corrected all-nine report; action uses only local.chosen presence then allocation fallback. Do not access sealed acceptance benchmark.
+Implement LOCAL_FIRST_ALLOCATION_FALLBACK_REALIZATION_V1 exactly from research-engine@d3425684d753639e8ec8843a3cd3640f6a5a4561 / design blob 4d8ad8cb815e7f96cc351ae0ed6868335a87e046. Replay the exact corrected all-nine report; action uses only local.chosen presence then unchanged allocation fallback. Do not access the sealed acceptance benchmark, do not declare ACCEPTANCE_CANDIDATE_FROZEN, and do not apply the separate four-atom residual audit until after a genuine hybrid result plus post-result review.
 
 ## Remaining work
 
