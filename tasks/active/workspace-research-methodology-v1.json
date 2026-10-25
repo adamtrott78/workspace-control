@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": null,
-  "current_stage": "methodology_self_research",
+  "current_stage": "benchmark_validity_and_operator_visibility",
   "acceptance_criteria": [
     "The methodology cleanly separates the outer scientific-reasoning loop from the existing inner engineering/execution loop.",
     "The research state explicitly represents residuals, competing hypotheses, assumptions, mechanism families, candidate architectures, evidence, experiments, controls, gates, observations, interpretations, belief updates, stopping rules, reopening conditions, and decisions.",
@@ -57,7 +57,9 @@
         "architecture/research-methodology-outcome-partition-result.v0.1.json",
         "scripts/validate_research_outcome_partition.py",
         "tests/test_research_methodology_self_study.py",
-        "schemas/research_outcome_partition.v0.2-candidate.schema.json"
+        "schemas/research_outcome_partition.v0.2-candidate.schema.json",
+        "architecture/extract-benchmark-validity-audit.v0.1.md",
+        "procedures/progress_heartbeat.md"
       ]
     },
     {
@@ -270,6 +272,26 @@
         }
       ],
       "resume_condition": "Keep v0.1 frozen as the governing instrument; candidate v0.2 changes remain non-governing until individually tested."
+    },
+    {
+      "id": "benchmark_validity_and_operator_visibility",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-research-methodology-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Local EXTRACT redesign contract and production/research gates.",
+        "Nine-paper Wave-1 corpus metadata and preserved teacher-label inventory.",
+        "13-atom deterministic teacher-support oracle.",
+        "Oracle-query diagnostic demonstrating the one-paper atom ceiling.",
+        "Workspace Heartbeat semantic-delta procedure."
+      ],
+      "outputs": [
+        "architecture/extract-benchmark-validity-audit.v0.1.md",
+        "Research-specific Heartbeat operator scorecard policy at scientific boundaries."
+      ],
+      "validation": [],
+      "resume_condition": "Validate that the audit distinguishes diagnostic metrics from project acceptance and that the Heartbeat policy does not require plugin/runtime changes."
     },
     {
       "id": "methodology_promotion_decision",
@@ -521,6 +543,18 @@
       "evidence": [
         "blob 8a2ad6f654e69ede6a80d948cf770c8b691a276a"
       ]
+    },
+    {
+      "path": "architecture/extract-benchmark-validity-audit.v0.1.md",
+      "state": "draft",
+      "role": "Defines what the 13-atom control does and does not measure, and separates diagnostic progress from final EXTRACT acceptance.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Must preserve the original redesign contract's production gates and benchmark limitations.",
+      "evidence": [
+        "blob 36a93b24058d84d9e578c1e578462abadecb7a20"
+      ]
     }
   ],
   "validation": [
@@ -570,16 +604,15 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Validate and merge the methodology self-study, CANDIDATE_SUPPORTED outcome-partition result, and candidate-only v0.2 schema.",
-    "Prospectively test the outcome-partition candidate on a future scientific design before implementation; do not retrofit governing v0.1.",
-    "Continue prospective validation of diagnostic-depth semantics and measure steady-state methodology overhead.",
-    "Design a practical blind/isolated commitment protocol before claiming independent architecture-selection quality.",
-    "Test whether ordinal Decision Value remains discriminating when multiple eligible experiments are genuinely close.",
-    "Accumulate evidence beyond EXTRACT before canonical methodology promotion.",
+    "Validate and merge the Local EXTRACT benchmark-validity audit and Heartbeat research-scorecard policy.",
+    "Use 13-atom support only as a one-paper diagnostic/regression control; do not treat 13/13 as the project acceptance target.",
+    "Before declaring Local EXTRACT solved, create and validate a held-out multi-paper proposition/claim-level semantic benchmark with source-verified labels and negative/unsupported-claim evaluation.",
+    "Prospectively test the outcome-partition v0.2 candidate on future scientific designs before implementation.",
+    "Continue methodology prospective validation, overhead measurement, and blind-commitment design without prescribing active EXTRACT science.",
     "If methodology concepts stabilize, create a separate ontology/research-knowledge integration task."
   ],
-  "next_safe_action": "Do not alter governing v0.1. Wait for a future scientific design boundary where OUTCOME_PARTITION_EXHAUSTIVENESS_V0_2 can be prospectively applied before implementation, or advance another explicitly selected self-study experiment such as steady-state overhead telemetry or blind commitment design without prescribing EXTRACT's active architecture.",
+  "next_safe_action": "Validate and merge the benchmark-validity audit plus Heartbeat research scorecard policy. Then keep EXTRACT science non-blocking, but require operator-facing scorecards at scientific result boundaries and treat the 13-atom metric as one-paper diagnostic evidence rather than the definition of solved.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-10-24 project creation: methodology development is intentionally separated from EXTRACT scientific ownership. EXTRACT is the first retrospective/live case study, not a dependency or subordinate workflow. Ontology integration is a downstream opportunity, not a v0.1 requirement.\n2026-10-24 v0.1 foundation work: external methodology evidence supports combining strong inference (alternative hypotheses/crucial experiments), design-science problem/objective/artifact/evaluation separation, preregistration-style precommitment, and decision-theoretic experiment selection. Retrospective EXTRACT replay identifies mechanism-family tracking and family-level stopping/reopening rules as the clearest missing research-control concepts.\n2026-10-24 v0.1 validation: Workspace Control Validation 40130896253 PASS over methodology, schema, replay, post-AMR state, pre-result frontier shadow, and contract tests. The first live shadow is pre-result but architecture-selection independence is NOT_EVALUABLE because methodology constraints were communicated before the EXTRACT design was selected.\n2026-10-24 v0.1 durable merge: PR #386 final validation 40131007716 PASS and merged as workspace-control@fbb43982c41355d0c4d9a491a8363b5f3f954f23. The methodology lane is now in non-blocking prospective shadow mode.\n2026-10-24 first prospective shadow evaluation: frozen frontier shadow correctly predeclared ADDITIVE_FRONTIER_PARTIAL and its interpretation. The case reveals a methodology revision candidate: after each valid result, prefer a lower-cost residual diagnostic when it can reduce uncertainty before choosing the next architecture. Architecture-selection agreement remains NOT_EVALUABLE because methodology guidance preceded the frontier design.\n2026-10-24 first prospective evaluation durable merge: PR #407 validation 40138048179 PASS and merged as workspace-control@9fe9a21c9bb463e0a4196a5f10eb11468cebb5b2.\n2026-10-24 methodology self-study opened: frozen v0.1 is now being used as the governing instrument to study v0.1 itself. v0.2 ideas are candidate-only. First selected meta-experiment tests scientific verdict-space exhaustiveness using the composition design's pre-implementation missing-outcome correction as a positive control. This is one meta-level only; no recursive meta-meta loop.\n2026-10-24 methodology-on-methodology result: the first frozen meta-experiment returned CANDIDATE_SUPPORTED. Generic finite-state enumeration detected the composition design's known missing valid state without hard-coding COMPOSITION_NEGATIVE; the corrected partition has zero uncovered states/overlaps. A candidate-only v0.2 outcome-partition schema is now drafted. v0.1 remains immutable and governing.\n2026-10-24 methodology self-study durable merge: PR #415 final validation 40139772599 PASS and merged as workspace-control@ccb24ead808c8d42ed25085846afac4e589c8fea. First methodology-on-methodology experiment supports outcome-partition exhaustiveness as a v0.2 candidate only."
+  "notes": "2026-10-24 project creation: methodology development is intentionally separated from EXTRACT scientific ownership. EXTRACT is the first retrospective/live case study, not a dependency or subordinate workflow. Ontology integration is a downstream opportunity, not a v0.1 requirement.\n2026-10-24 v0.1 foundation work: external methodology evidence supports combining strong inference (alternative hypotheses/crucial experiments), design-science problem/objective/artifact/evaluation separation, preregistration-style precommitment, and decision-theoretic experiment selection. Retrospective EXTRACT replay identifies mechanism-family tracking and family-level stopping/reopening rules as the clearest missing research-control concepts.\n2026-10-24 v0.1 validation: Workspace Control Validation 40130896253 PASS over methodology, schema, replay, post-AMR state, pre-result frontier shadow, and contract tests. The first live shadow is pre-result but architecture-selection independence is NOT_EVALUABLE because methodology constraints were communicated before the EXTRACT design was selected.\n2026-10-24 v0.1 durable merge: PR #386 final validation 40131007716 PASS and merged as workspace-control@fbb43982c41355d0c4d9a491a8363b5f3f954f23. The methodology lane is now in non-blocking prospective shadow mode.\n2026-10-24 first prospective shadow evaluation: frozen frontier shadow correctly predeclared ADDITIVE_FRONTIER_PARTIAL and its interpretation. The case reveals a methodology revision candidate: after each valid result, prefer a lower-cost residual diagnostic when it can reduce uncertainty before choosing the next architecture. Architecture-selection agreement remains NOT_EVALUABLE because methodology guidance preceded the frontier design.\n2026-10-24 first prospective evaluation durable merge: PR #407 validation 40138048179 PASS and merged as workspace-control@9fe9a21c9bb463e0a4196a5f10eb11468cebb5b2.\n2026-10-24 methodology self-study opened: frozen v0.1 is now being used as the governing instrument to study v0.1 itself. v0.2 ideas are candidate-only. First selected meta-experiment tests scientific verdict-space exhaustiveness using the composition design's pre-implementation missing-outcome correction as a positive control. This is one meta-level only; no recursive meta-meta loop.\n2026-10-24 methodology-on-methodology result: the first frozen meta-experiment returned CANDIDATE_SUPPORTED. Generic finite-state enumeration detected the composition design's known missing valid state without hard-coding COMPOSITION_NEGATIVE; the corrected partition has zero uncovered states/overlaps. A candidate-only v0.2 outcome-partition schema is now drafted. v0.1 remains immutable and governing.\n2026-10-24 methodology self-study durable merge: PR #415 final validation 40139772599 PASS and merged as workspace-control@ccb24ead808c8d42ed25085846afac4e589c8fea. First methodology-on-methodology experiment supports outcome-partition exhaustiveness as a v0.2 candidate only.\n2026-10-24 benchmark audit: the 13-atom oracle is a deterministic semantic-support diagnostic for the single proposition-labeled teacher paper, not the full nine-paper acceptance benchmark. The original redesign contract requires >=0.90 teacher claim coverage for production, >=0.80 job-local completion, hard provenance/precision gates, fallback reduction, and no downstream VERIFY regression; it does not require 13/13. Oracle-query diagnostics show 13/13 is reachable under precise intents, so the control is not impossible, but it is neither necessary nor sufficient for project success. Heartbeat is being extended by semantic policy only to emit compact research scorecards at genuine scientific boundaries."
 }
