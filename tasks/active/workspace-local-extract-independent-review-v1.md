@@ -36,14 +36,13 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-Immediately review exact frozen design research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e / EXACT_PROVENANCE_BINDING_MICROBENCH_V1. Verify that the two-arm deterministic-attachment vs opaque-pointer comparison tests the accepted source-grounding-interface diagnosis without teacher/evaluation leakage, tautological support, or hidden admission/retrieval changes. Do not implement, trigger, freeze acceptance, or inspect the sealed holdout during review.
+Owner may implement exactly EXACT_PROVENANCE_BINDING_MICROBENCH_V1 from research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e under reviewer disposition NO_BLOCKING_FINDING. Preserve every frozen visible-field, prompt/template, E0 mapping, parser/guard, case, runtime, completeness, preservation, outcome, and one-valid-run contract. Obtain successful implementation/contract validation before any scientific trigger or execution. Any scientific contract change requires re-review. After the genuine result, stop and re-engage independent reviewer before next-phase selection. No acceptance freeze or sealed holdout access.
 
 ## Remaining work
 
-- Review exact frozen design research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e / EXACT_PROVENANCE_BINDING_MICROBENCH_V1.
-- Assess whether deterministic provenance attachment and opaque evidence-pointer selection cleanly test the source-grounding interface diagnosis without leaking labels, making support tautological, or collapsing the two mechanism arms.
-- Return NO_BLOCKING_FINDING or exact blocking findings before any implementation.
-- After any genuine result, perform mandatory independent post-result review before next science or acceptance-candidate decision.
+- Owner may implement exactly research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e / EXACT_PROVENANCE_BINDING_MICROBENCH_V1; no scientific contract changes are authorized.
+- Require successful implementation and exact contract validation before any one-shot scientific trigger; zero-step GitHub-hosted failures are validation unavailable, not PASS.
+- After any genuine scientific result, perform mandatory independent post-result review before preservation-aware admission design, next science, or acceptance-candidate decision.
 - Keep sealed acceptance benchmark untouched and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
