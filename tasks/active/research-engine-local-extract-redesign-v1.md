@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 4877a891a2c0f26c326e8f40116ecf0572e62a2f
+- Remote checkpoint: e213e7b85d197f38e264eff4b08c9daf68129cab
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 05b8149cbfa81d7ceafadf2b5ce867bd687cfa14
+- Remote checkpoint: 1766cc6d11c9e65265a90579342fbac4888d0274
 - Remote verified: true
 
 ## Next safe action
 
-Implement ALL_NINE_FIXED_BASELINE_RECOVERY_COMPARISON_V1 exactly from frozen design research-engine@05b8149cbfa81d7ceafadf2b5ce867bd687cfa14. Add only deterministic materialization of the reviewed all-nine baseline plus unchanged radius1 and surviving-intent allocation comparison code/tests/workflow; do not inspect or use the sealed acceptance benchmark.
+Merge this exact corrected all-nine pre-run checkpoint. Then issue exactly one `/local-extract-corrected-all-nine-recovery-comparison 1da2435487080ae8bb3580305b9d08d093c261e8` comment on research-engine PR #257 and bind the unique resulting development run. Do not issue a second trigger and do not access the sealed acceptance benchmark.
 
 ## Remaining work
 
-- Implement ALL_NINE_FIXED_BASELINE_RECOVERY_COMPARISON_V1 exactly as frozen in research-engine with deterministic tests and bounded workflow wiring.
-- Run normal CI and persist exact implementation/trigger identity before scientific execution.
-- Execute exactly one valid development scientific run and stop at the frozen structural verdict; no valid-result rerun/tuning.
-- After genuine result, obtain independent post-result review before next-phase selection.
-- Keep sealed semantic acceptance benchmark uninspected and do not declare ACCEPTANCE_CANDIDATE_FROZEN unless development evidence independently justifies it.
+- After this exact checkpoint merges, issue exactly one `/local-extract-corrected-all-nine-recovery-comparison 1da2435487080ae8bb3580305b9d08d093c261e8` comment on open research-engine PR #257.
+- Bind the unique resulting development scientific workflow run and inspect the exact report.
+- Stop at the frozen structural verdict; do not tune/rerun or alter exact baseline artifact, stress origins, recovery arms, ranking, budget28, metrics, or interpretation after a valid result.
+- Persist the exact result, close PR #257 unmerged only after result checkpoint is durable, and obtain independent post-result review before further phase selection.
+- Keep workspace-extract-semantic-benchmark-v1 sealed and uninspected. Do not declare ACCEPTANCE_CANDIDATE_FROZEN based solely on this structural run.
 
 ## Blockers / gates
 
