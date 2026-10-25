@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 58898e4ee5f6836b2164ffea70ad6c81f803e179
+- Remote checkpoint: a0f4e69281341fa3eb9f9578e1f4a789db7f59d6
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact DEPTH_FALLBACK_COMPLETES_ALL_NINE result checkpoint, then close research-engine PR #254 unmerged and re-engage workspace-local-extract-independent-review-v1 on run 40148614485 / artifact 12582395555 / report sha256:fd893f34870b8a52b899bbf2d8f495b7bc771a7573008d6fdf130db844a38d93. Do not design the corrected recovery comparison before that review is durable.
+Freeze the corrected all-nine cross-paper structural recovery-comparison design using exact baseline fallback from run 40148614485 / report sha256 fd893f34870b8a52b899bbf2d8f495b7bc771a7573008d6fdf130db844a38d93 while leaving the two recovery arms unchanged. Obtain independent design review before implementation.
 
 ## Remaining work
 
-- Obtain independent post-result review of run 40148614485 / artifact 12582395555 / report sha256 fd893f34870b8a52b899bbf2d8f495b7bc771a7573008d6fdf130db844a38d93 before designing a corrected recovery comparison.
-- After this result checkpoint merges, close research-engine PR #254 unmerged and do not retrigger.
-- If reviewer finds no blocking issue, freeze a corrected cross-paper structural recovery comparison that uses the exact top3-then-same-tier-ranks4-12 fallback baseline and leaves the two recovery arms otherwise unchanged.
-- Do not directly rerun the old comparison without a new design/review.
-- Preserve semantic-generalization limits, rejected-family exclusions, production/Wave7B/semantic-control boundaries.
+- Freeze a corrected all-nine cross-paper structural recovery-comparison design binding the exact top3-then-ranks4-12 fallback baseline from run 40148614485.
+- Preserve the previously reviewed radius1 local rescue and global surviving-intent allocation arms, matched one-slot origin-drop stress, fixed budget28, structural exact-recovery metrics, and secondary historical-page context.
+- Obtain independent review of the genuinely new corrected design before implementation.
+- Execute only after reviewed implementation and one-shot authority; post-result review required before mechanism selection.
+- Preserve semantic-generalization, rejected-family, production/Wave7B/semantic-control boundaries.
 
 ## Blockers / gates
 
