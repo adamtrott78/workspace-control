@@ -36,14 +36,15 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 ## Next safe action
 
-Owner may implement exactly ALL_NINE_FIXED_BASELINE_RECOVERY_COMPARISON_V1 from research-engine@05b8149cbfa81d7ceafadf2b5ce867bd687cfa14 / design blob 86a21acbf2d50e5fb42ed1e1a4e3287d2a82bd57. Re-engage reviewer only if science changes or after the genuine result. The sealed acceptance benchmark remains off-limits.
+Owner may perform evidence-first hybrid design selection from the complementary result, but must freeze an executable teacher-blind arbitration/selection policy before implementation. Re-engage reviewer on that exact hybrid design. Do not declare ACCEPTANCE_CANDIDATE_FROZEN yet.
 
 ## Remaining work
 
-- Wait for the EXTRACT owner to implement and execute exactly ALL_NINE_FIXED_BASELINE_RECOVERY_COMPARISON_V1.
-- Do not review routine implementation/CI/packaging/trigger mechanics unless they materially alter the frozen corrected comparison science.
-- After the genuine corrected all-nine comparison result, independently audit the exact run/artifact/result before next-phase selection.
-- Keep the sealed acceptance benchmark uninspected until the owner separately freezes an acceptance candidate.
+- Wait for owner to compare and freeze a deterministic teacher-blind hybrid recovery design using the fixed all-nine baseline and unchanged local/allocation candidate generators.
+- Do not allow oracle union, removed-proposition-aware arbitration, teacher labels, historical page oracle, or posthoc recovery outcomes to choose the hybrid action.
+- Review the genuinely new hybrid design before implementation.
+- After a genuine hybrid result, independently audit exact run/artifact/result before next-phase or acceptance-candidate selection.
+- Keep sealed semantic acceptance benchmark uninspected until owner separately freezes an acceptance candidate.
 
 ## Blockers / gates
 
