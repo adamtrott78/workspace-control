@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: e213e7b85d197f38e264eff4b08c9daf68129cab
+- Remote checkpoint: de705dda17ce62ed234866d51b03733a364ec66f
 - Remote verified: true
 
 ### research-engine
@@ -42,15 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Merge this exact corrected all-nine pre-run checkpoint. Then issue exactly one `/local-extract-corrected-all-nine-recovery-comparison 1da2435487080ae8bb3580305b9d08d093c261e8` comment on research-engine PR #257 and bind the unique resulting development run. Do not issue a second trigger and do not access the sealed acceptance benchmark.
+Merge this exact COMPLEMENTARY_STRUCTURAL_RECOVERY result checkpoint, close research-engine PR #257 unmerged, and re-engage workspace-local-extract-independent-review-v1 on run 40151063835 / artifact 12581733721 / report sha256:5f83398baba06cb2c96a51e9252ced763a760736e563a4994e7e4f09c60ff52e. Do not freeze the hybrid or acceptance candidate before that review is durable.
 
 ## Remaining work
 
-- After this exact checkpoint merges, issue exactly one `/local-extract-corrected-all-nine-recovery-comparison 1da2435487080ae8bb3580305b9d08d093c261e8` comment on open research-engine PR #257.
-- Bind the unique resulting development scientific workflow run and inspect the exact report.
-- Stop at the frozen structural verdict; do not tune/rerun or alter exact baseline artifact, stress origins, recovery arms, ranking, budget28, metrics, or interpretation after a valid result.
-- Persist the exact result, close PR #257 unmerged only after result checkpoint is durable, and obtain independent post-result review before further phase selection.
-- Keep workspace-extract-semantic-benchmark-v1 sealed and uninspected. Do not declare ACCEPTANCE_CANDIDATE_FROZEN based solely on this structural run.
+- Obtain independent post-result review of run 40151063835 / artifact 12581733721 / report sha256 5f83398baba06cb2c96a51e9252ced763a760736e563a4994e7e4f09c60ff52e before freezing a hybrid design.
+- After this result checkpoint merges, close research-engine PR #257 unmerged and do not retrigger.
+- If reviewer finds no blocking issue, design the smallest deterministic hybrid recovery operator using the same fixed all-nine baseline and the two unchanged structural arms; freeze and review before implementation.
+- Do not add deeper retrieval merely from the allocation-only case: its exact recovery is SHALLOW_FRONTIER and depth-extension exact recoveries are zero.
+- Keep the sealed acceptance benchmark uninspected. Do not declare ACCEPTANCE_CANDIDATE_FROZEN until a reproducible end-to-end candidate is independently justified by development evidence.
 
 ## Blockers / gates
 
