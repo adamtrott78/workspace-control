@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: be00b9244d3b97979e550f08335e4c936682e10a
+- Remote checkpoint: 4877a891a2c0f26c326e8f40116ecf0572e62a2f
 - Remote verified: true
 
 ### research-engine
@@ -42,16 +42,15 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Re-engage workspace-local-extract-independent-review-v1 on exact corrected all-nine design research-engine@05b8149cbfa81d7ceafadf2b5ce867bd687cfa14 / blob 86a21acbf2d50e5fb42ed1e1a4e3287d2a82bd57. Keep the held-out semantic benchmark sealed and do not declare ACCEPTANCE_CANDIDATE_FROZEN yet.
+Implement ALL_NINE_FIXED_BASELINE_RECOVERY_COMPARISON_V1 exactly from frozen design research-engine@05b8149cbfa81d7ceafadf2b5ce867bd687cfa14. Add only deterministic materialization of the reviewed all-nine baseline plus unchanged radius1 and surviving-intent allocation comparison code/tests/workflow; do not inspect or use the sealed acceptance benchmark.
 
 ## Remaining work
 
-- Obtain independent review of exact corrected all-nine design research-engine@05b8149cbfa81d7ceafadf2b5ce867bd687cfa14 / blob 86a21acbf2d50e5fb42ed1e1a4e3287d2a82bd57 before implementation.
-- If reviewer disposition is NO_BLOCKING_FINDING, implement only ALL_NINE_FIXED_BASELINE_RECOVERY_COMPARISON_V1 exactly as frozen.
+- Implement ALL_NINE_FIXED_BASELINE_RECOVERY_COMPARISON_V1 exactly as frozen in research-engine with deterministic tests and bounded workflow wiring.
+- Run normal CI and persist exact implementation/trigger identity before scientific execution.
 - Execute exactly one valid development scientific run and stop at the frozen structural verdict; no valid-result rerun/tuning.
-- After the genuine result, obtain independent post-result review before next-phase selection.
-- Keep workspace-extract-semantic-benchmark-v1 sealed. Do not inspect its sealed branch/gold or run development probes on acceptance papers.
-- Declare ACCEPTANCE_CANDIDATE_FROZEN only when exact reproducible code/architecture/model/config/fallback/evaluation/runtime identity and pre-acceptance rationale are durably frozen without held-out feedback.
+- After genuine result, obtain independent post-result review before next-phase selection.
+- Keep sealed semantic acceptance benchmark uninspected and do not declare ACCEPTANCE_CANDIDATE_FROZEN unless development evidence independently justifies it.
 
 ## Blockers / gates
 
