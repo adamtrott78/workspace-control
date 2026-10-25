@@ -146,22 +146,22 @@
       "adjudication_state": "PASS_A_ONLY"
     },
     {
-      "obligation_id": "trustagent.method.penalties",
-      "type": "METHOD",
-      "importance": "SECONDARY",
-      "normalized_claim": "Source-derived lower-tail penalties and cross-module interactions reduce trust when diagnostic evidence indicates weak support.",
+      "obligation_id": "trustagent.result.reliability",
+      "type": "RESULT",
+      "importance": "CORE",
+      "normalized_claim": "Across the evaluation, TrustAgent-RFF reduces the error rate among retained high-confidence predictions from 39.6% to 32.4%, produces lower selective risk than softmax confidence at matched coverage, and reduces assigned diagnostic cost by 54.3% relative to sequential execution.",
       "support_mode": "DIRECT",
       "quotes": [
         {
-          "quote_id": "trustagent.method.penalties.q1",
-          "page_number": 1,
-          "anchor_excerpt": "lower tail penalties",
-          "canonical_span_sha256": "36dc713cbed2c7706d52558e7b066e43f70d2218261a9f89d854cda984ea518c",
+          "quote_id": "trustagent.result.reliability.q1",
+          "page_number": 9,
+          "anchor_excerpt": "39.6% to 32.4%",
+          "canonical_span_sha256": "1c7a322f9dfb85b7b964e282d696af6bda4c64db383845b5b2353a68430138db",
           "locator_note": null
         }
       ],
       "duplicate_group": null,
-      "annotation_rationale": "Important detail of trust updating.",
+      "annotation_rationale": "Headline evidence that the diagnostic-planning framework improves reliability ranking while reducing assigned diagnostic cost.",
       "adjudication_state": "PASS_A_ONLY"
     }
   ],
