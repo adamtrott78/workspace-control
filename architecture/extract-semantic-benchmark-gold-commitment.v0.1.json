@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "local-extract-heldout-semantic-v1",
+  "status": "ACCEPTANCE_GOLD_FROZEN_SEALED",
+  "sealed_branch": "sealed-extract-semantic-acceptance-gold-v1",
+  "sealed_branch_head": "ce040c9538b4de2836e2c0c8ead71018163a5058",
+  "gold_commitment_sha256": "98a36f7d51df13bb9bc4541e8c91fb96ac7db5ab0982a69bda38a74e4e789e0a",
+  "commitment_definition": "sha256(sorted paper_id:canonical_json_sha256 + LF)",
+  "validation": {
+    "workflow_run_id": 40149000002,
+    "result": "PASS",
+    "paper_count": 8,
+    "obligation_count": 62,
+    "core_count": 51,
+    "secondary_count": 11,
+    "provenance_errors": 0
+  },
+  "adjudication": {
+    "pass_b_complete": true,
+    "accept_count": 60,
+    "rewrite_for_source_fidelity_count": 2,
+    "rejected_count": 0,
+    "local_extract_outputs_viewed": false
+  },
+  "papers": [
+    {
+      "paper_id": "accept-ais-sequential-2610.19115",
+      "canonical_json_sha256": "af33ec94323eabaec10957c2b802d4bbaa9334520a9bc8f32acd73b68e0bdb99",
+      "obligation_count": 8
+    },
+    {
+      "paper_id": "accept-dsp-ota-2610.15494",
+      "canonical_json_sha256": "adace1b5735faaa77c87564ccf3b9e4cc9c63e0ecaccbf038edd4e2ee974442a",
+      "obligation_count": 7
+    },
+    {
+      "paper_id": "accept-holistic-rff-2610.05979",
+      "canonical_json_sha256": "2fb0162acf3f8a7f35d4f58c32cd09395b901c96b84577b99207cabe1cd034ca",
+      "obligation_count": 8
+    },
+    {
+      "paper_id": "accept-microcsi-auth-2608.29845",
+      "canonical_json_sha256": "daf1ff2cd8bd0b8e2dd670c8e3ee78eaeccb14b5cfa7f642455e8f2e06acbe79",
+      "obligation_count": 7
+    },
+    {
+      "paper_id": "accept-safa-mz-2609.09511",
+      "canonical_json_sha256": "203a0d1e1af4781a11016f129c656aa8ae94e82a17c43f2a4c46d52e44e9caea",
+      "obligation_count": 8
+    },
+    {
+      "paper_id": "accept-sfpf-2609.21873",
+      "canonical_json_sha256": "8fa3dfcdcb8f2f503628dc1a77c0da858752ce3a98a377a522388bf02c5f7db1",
+      "obligation_count": 8
+    },
+    {
+      "paper_id": "accept-trustagent-rff-2610.24930",
+      "canonical_json_sha256": "dd186b21e632819e174626416c5258bae1bf7534002bccd77d99fc137a690ee4",
+      "obligation_count": 8
+    },
+    {
+      "paper_id": "accept-uav-dataset-2603.00106",
+      "canonical_json_sha256": "b2b5e7a7ba4f1fca82500b51393116536a855798d94f1e2e91442f107a0e83eb",
+      "obligation_count": 8
+    }
+  ],
+  "contamination_boundary": {
+    "gold_content_merged_to_main": false,
+    "active_extract_outputs_used_to_construct_gold": false,
+    "acceptance_papers_used_for_active_extract_development": false,
+    "acceptance_candidate_frozen": false,
+    "gold_read_authority": "DENIED_TO_ACTIVE_EXTRACT_UNTIL_ACCEPTANCE_CANDIDATE_FREEZE",
+    "failed_acceptance_reuse_rule": "If acceptance results materially inform architecture tuning, a new untouched holdout is required for a later unbiased promotion claim."
+  },
+  "next_authorized_action": "Wait for the owning EXTRACT task to freeze a candidate architecture for held-out acceptance. Only then reveal the sealed gold to the acceptance evaluator and run one acceptance evaluation."
+}
