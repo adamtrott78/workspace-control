@@ -36,13 +36,13 @@ Build an independently source-verified, held-out multi-paper semantic acceptance
 
 ## Next safe action
 
-Finalize and adjudicate the two pilot papers against their frozen PDF identities. Resolve any source-anchor or obligation-granularity defects before opening acceptance annotation.
+Validate and merge this exact-source/pilot-protocol checkpoint. Then create the eight-paper acceptance gold on a separate sealed benchmark branch, record only its commitment/metadata in the shared task state, and keep active EXTRACT from reading or running the acceptance papers until architecture freeze.
 
 ## Remaining work
 
-- Finalize the two pilot annotations against the frozen source identities and run Pass-B protocol validation.
-- Create source-first acceptance gold for the eight held-out papers without consulting Local EXTRACT outputs.
-- Freeze acceptance gold behind the benchmark contamination boundary.
+- Validate and merge the exact-source + pilot-protocol checkpoint.
+- Create source-first gold for the eight held-out acceptance papers on a separate unmerged sealed benchmark branch without consulting Local EXTRACT outputs.
+- Run acceptance-gold adjudication and freeze a cryptographic gold commitment before any Local EXTRACT acceptance evaluation.
 - Evaluate only a separately frozen Local EXTRACT candidate architecture.
 
 ## Blockers / gates
