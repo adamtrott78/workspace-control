@@ -30,26 +30,26 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 3496bb95faeefba2112d821de56a578ad35568ec
+- Remote checkpoint: 0f697dfaf5a8cbfc76a8573b33d389182a5905a4
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: abd55d31d2768f6d66d0aa187e90fa4950cfd26f
+- Remote checkpoint: 44fbf6107db2e554a5e276a1862c02c66ffd1ab9
 - Remote verified: true
 
 ## Next safe action
 
-Implement LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1 exactly from frozen design research-engine@abd55d31d2768f6d66d0aa187e90fa4950cfd26f. Add only deterministic nine-paper baseline/stress/local-vs-allocation comparison code, tests, and bounded workflow wiring; do not change corpus, stress rules, radius1, top12 allocation pool, rank-stratum definitions, budget28, historical-page secondary use, verdict table, or hard boundaries.
+Merge this exact cross-paper recovery pre-run checkpoint. Then issue exactly one `/local-extract-cross-paper-recovery-comparison d93cdc3eca427476f71a6095f5712bdb2de5f447` comment on research-engine PR #251 and bind the unique resulting run to that exact head. Do not issue a second trigger.
 
 ## Remaining work
 
-- Implement LEAVE_ONE_RESERVATION_ORIGIN_OUT_COMPARISON_V1 exactly as frozen in research-engine with deterministic tests and no generation/model changes.
-- Run normal CI and persist the exact implementation checkpoint before scientific execution.
-- Execute exactly one valid scientific run and stop at the frozen cross-paper structural verdict; no valid-result rerun or tuning.
-- After the genuine result, obtain independent post-result review before selecting the next scientific phase.
+- After this exact checkpoint merges, issue exactly one `/local-extract-cross-paper-recovery-comparison d93cdc3eca427476f71a6095f5712bdb2de5f447` comment on open research-engine PR #251.
+- Bind the unique resulting scientific workflow run to exact PR head d93cdc3eca427476f71a6095f5712bdb2de5f447 and inspect the uploaded report.
+- Stop at the frozen cross-paper structural verdict; do not tune, rerun, alter baseline/stress rules, radius1, top12 allocation, rank-stratum definitions, budget28, historical-page secondary use, or interpretation after a valid result.
+- Persist the exact result, close PR #251 unmerged only after the result checkpoint is durable, and obtain independent post-result review before selecting another scientific phase.
 - Preserve semantic-generalization limits, rejected-family exclusions, production/Wave7B/semantic-control boundaries.
 
 ## Blockers / gates
