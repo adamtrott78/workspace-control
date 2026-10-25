@@ -22,7 +22,7 @@
         {
           "quote_id": "uavdataset.dataset.scale.q1",
           "page_number": 1,
-          "anchor_excerpt": "26 UAV",
+          "anchor_excerpt": "26 ua v units",
           "canonical_span_sha256": "4c73a04fa7446bb62481113ebff143640bc96057491aca88bc726875e3bdf1ae",
           "locator_note": null
         }
@@ -79,7 +79,7 @@
         {
           "quote_id": "uavdataset.dataset.multiscenario.q1",
           "page_number": 3,
-          "anchor_excerpt": "~375 GB",
+          "anchor_excerpt": "26 ua vs / 8 models",
           "canonical_span_sha256": "6cb55bcb98acbc9cbfaca79fc0b5deea65d784e5667cac8306c61217bd092f4d",
           "locator_note": null
         }
