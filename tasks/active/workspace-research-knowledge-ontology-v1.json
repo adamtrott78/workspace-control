@@ -24,7 +24,8 @@
     "Replay safety requires zero authorization escapes, zero stale-state overrides, zero verdict/posthoc conflations, zero invalid-execution/scientific-negative conflations, and zero sealed-holdout access.",
     "The first implementation is additive and rebuildable over existing authoritative stores; it does not replace PostgreSQL, task capsules, workflow/policy artifacts, or content-addressed evidence.",
     "Graph/model inference may propose or rank CandidateAction objects but cannot create Permission, remove Prohibition, satisfy ReviewRequirement, mutate a task, trigger execution, or change production behavior.",
-    "Any future semantic-control integration consumes the ontology only through the already-hardened candidate-action/DecisionEvaluation authority boundary."
+    "Any future semantic-control integration consumes the ontology only through the already-hardened candidate-action/DecisionEvaluation authority boundary.",
+    "Blind replay integrity requires the projection/query engine to remain unable to read benchmark gold, case IDs, expected labels, required points, or forbidden claims; benchmark-specific logic invalidates the run."
   ],
   "constraints": [
     "research-engine-local-extract-redesign-v1 remains the sole owner of Local EXTRACT science. This task is read-only with respect to EXTRACT, its designs, runs, sealed acceptance benchmark, and production routing.",
@@ -47,7 +48,7 @@
       "base_sha": "67f3b0879dd26bbcbb5bff37080396174a7c2243",
       "remote": {
         "branch": "research-knowledge-ontology-v1-design",
-        "checkpoint_sha": "05e1dc990b36fff9c26f1d42f0b14de3b06f4f21",
+        "checkpoint_sha": "6d08843c14aa6ed3e6cc6ebb8bf5732eeb14ef08",
         "verified": true
       },
       "local": null,
@@ -128,7 +129,7 @@
           "check": "Ontology design frozen",
           "result": "PASS",
           "evidence": [
-            "design blob 4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e",
+            "design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb",
             "explicit layer model, assertion metadata, source precedence, bounded query contract, authority boundary, and safety gates"
           ]
         },
@@ -136,7 +137,7 @@
           "check": "Replay benchmark frozen",
           "result": "PASS",
           "evidence": [
-            "benchmark blob 5dc45bcc162f43cc8304ce9a8ee7be0020f14b4b",
+            "benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998",
             "16 frozen cases cover rejected mechanisms, negative-vs-invalid execution, verdict-vs-posthoc, stale-state precedence, zero-step CI, exact-design authority, sealed-holdout prohibition, and graph authority escape"
           ]
         }
@@ -150,8 +151,8 @@
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "design blob 4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e",
-        "replay benchmark blob 5dc45bcc162f43cc8304ce9a8ee7be0020f14b4b"
+        "design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb",
+        "replay benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998"
       ],
       "outputs": [
         "NO_BLOCKING_FINDING or exact blocking findings"
@@ -231,7 +232,7 @@
     {
       "id": "research-knowledge-ontology-design-v0.1",
       "kind": "architecture_design",
-      "identity": "architecture/research-knowledge-ontology.v0.1.json@4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e",
+      "identity": "architecture/research-knowledge-ontology.v0.1.json@9af5bea619ec5a2f83575b4c8d73d08922f05bdb",
       "required_for_resume": true,
       "evidence": [
         "Epistemic, normative, execution, and decision-bridge layers are explicitly separated.",
@@ -243,7 +244,7 @@
     {
       "id": "research-state-replay-benchmark-v0.1",
       "kind": "benchmark_contract",
-      "identity": "benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json@5dc45bcc162f43cc8304ce9a8ee7be0020f14b4b",
+      "identity": "benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998",
       "required_for_resume": true,
       "evidence": [
         "16 frozen replay cases use Local EXTRACT durable history without sealed acceptance data.",
@@ -256,12 +257,12 @@
     {
       "path": "architecture/research-knowledge-ontology.v0.1.json",
       "kind": "frozen_architecture_design",
-      "sha": "4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e"
+      "sha": "9af5bea619ec5a2f83575b4c8d73d08922f05bdb"
     },
     {
       "path": "benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json",
       "kind": "frozen_benchmark_contract",
-      "sha": "5dc45bcc162f43cc8304ce9a8ee7be0020f14b4b"
+      "sha": "45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998"
     }
   ],
   "validation": [
@@ -274,10 +275,20 @@
         "No sealed acceptance benchmark access.",
         "No production or policy mutation."
       ]
+    },
+    {
+      "check": "Blind replay anti-leak contract",
+      "result": "PASS",
+      "evidence": [
+        "Projection source rule excludes the benchmark file from graph construction.",
+        "Query engine sees only query_family + structured query_input.",
+        "Gold fields are harness-only after answer generation.",
+        "Case-ID branching and benchmark-specific logic are explicitly invalid execution."
+      ]
     }
   ],
   "blockers": [
-    "Independent pre-implementation review is required for exact design blob 4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e and replay-benchmark blob 5dc45bcc162f43cc8304ce9a8ee7be0020f14b4b before any projection implementation."
+    "Independent pre-implementation review is required for exact design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and replay-benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 before any projection implementation."
   ],
   "remaining_work": [
     "Obtain independent review of the exact frozen ontology/replay contract.",
@@ -285,8 +296,8 @@
     "Run the frozen 16-case replay benchmark and require all exact/provenance/safety gates.",
     "Do not integrate with live EXTRACT or production semantic-control in this task."
   ],
-  "next_safe_action": "Engage an independent reviewer on architecture/research-knowledge-ontology.v0.1.json blob 4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 5dc45bcc162f43cc8304ce9a8ee7be0020f14b4b. Reviewer should test source-precedence correctness, epistemic/normative/execution separation, verdict-vs-posthoc and negative-vs-invalid distinctions, rejected-mechanism reopening semantics, and whether CandidateAction/DecisionEvaluation can remain useful without graph-created authority. No implementation before disposition.",
+  "next_safe_action": "Engage an independent reviewer on architecture/research-knowledge-ontology.v0.1.json blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Reviewer should test source-precedence correctness, epistemic/normative/execution separation, verdict-vs-posthoc and negative-vs-invalid distinctions, rejected-mechanism reopening semantics, and whether CandidateAction/DecisionEvaluation can remain useful without graph-created authority. No implementation before disposition.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-10-25 task created as a parallel research lane while Local EXTRACT remains independently owned. The missing layer is scientific-state lineage/replay, not another semantic-control implementation. Exact v0.1 design and 16-case replay benchmark are frozen design-only artifacts. No EXTRACT or production mutation occurred.\n2026-10-25 provenance self-audit: replay contract source identities were tightened from conceptual labels to exact workspace-control blob/checkpoint identities before independent review. Ontology design blob now 4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e; replay benchmark blob now 5dc45bcc162f43cc8304ce9a8ee7be0020f14b4b. Scientific scope and authority boundaries are unchanged."
+  "notes": "2026-10-25 task created as a parallel research lane while Local EXTRACT remains independently owned. The missing layer is scientific-state lineage/replay, not another semantic-control implementation. Exact v0.1 design and 16-case replay benchmark are frozen design-only artifacts. No EXTRACT or production mutation occurred.\n2026-10-25 provenance self-audit: replay contract source identities were tightened from conceptual labels to exact workspace-control blob/checkpoint identities before independent review. Ontology design blob now 9af5bea619ec5a2f83575b4c8d73d08922f05bdb; replay benchmark blob now 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998. Scientific scope and authority boundaries are unchanged.\n2026-10-25 blind-replay hardening: design blob 9af5bea619ec5a2f83575b4c8d73d08922f05bdb and benchmark blob 45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998 now freeze evaluation separation, structured query inputs, zero gold leakage, and zero case-specific logic before independent review."
 }
