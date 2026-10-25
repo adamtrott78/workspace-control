@@ -443,6 +443,30 @@
         "model_id": "qwen3.5-4b",
         "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
       }
+    },
+    "cpu-validation-exact-provenance": {
+      "activation_state": "MIGRATION_LIVE_EQUIVALENT",
+      "lane": "cpu",
+      "execution_contract_id": "cpu-public-ci-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/exact-provenance-implementation-validation.yml",
+        "default_branch": "main",
+        "blob_sha": "948127a890245bff6856fa550b7fcdc6c949398c"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/validate-exact-provenance-binding",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": null,
+        "runtime_id": null
+      }
     }
   },
   "bindings": {
