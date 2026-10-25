@@ -37,19 +37,19 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 58ba18d21b3d99b2f4f1cecbb77705cda025c1b3
+- Remote checkpoint: 1488b26a1fca63d56edd14c98bafdd55999799ad
 - Remote verified: true
 
 ## Next safe action
 
-Implement exactly ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 from research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / design blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9. Preserve all frozen corpus/PDF identities, token-prefix matcher semantics, protected/evictable selection_origin values and 23/3/1/1 start counts, budgets, outcome precedence, posthoc-only source-fidelity sets, and teacher boundary. Add ordinary tests/workflow; do not trigger science yet.
+Create a normal marker-only inert trigger PR from exact research-engine main 1488b26a1fca63d56edd14c98bafdd55999799ad. Validate the exact anchor head with ordinary CI and verify zero prior comments. Do not issue /local-extract-atomic-obligation-residual-closure until that exact anchor identity is durably checkpointed in workspace-control.
 
 ## Remaining work
 
-- Implement exactly ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 from research-engine@58ba18d21b3d99b2f4f1cecbb77705cda025c1b3 / blob 90bfc59edd2e91f03de3a1ec02fe51c4dd1085b9 with deterministic tests and an inert exact-SHA one-shot workflow.
-- Run ordinary implementation CI; if PASS, merge and checkpoint exact implementation identity in workspace-control before creating/authorizing the inert scientific trigger anchor.
-- Execute exactly one valid development diagnostic and stop on mechanism_outcome plus completeness_safety_outcome; no post-result tuning or valid-result rerun.
-- Persist exact run/artifact/report identities, close the inert trigger PR unmerged after result checkpointing, and obtain mandatory independent post-result review.
+- Create a normal marker-only inert trigger PR from research-engine@1488b26a1fca63d56edd14c98bafdd55999799ad; validate exact head with ordinary CI and zero prior comments.
+- Checkpoint the exact anchor identity in workspace-control and authorize exactly one /local-extract-atomic-obligation-residual-closure <exact_sha> development trigger.
+- Execute exactly one valid frozen diagnostic run and stop at the independent mechanism/completeness verdicts; no post-result tuning or valid-result rerun.
+- Persist exact run/job/artifact/report identities, close the inert trigger PR unmerged after result durability, and obtain mandatory independent post-result review before any next scientific phase.
 - Keep sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
