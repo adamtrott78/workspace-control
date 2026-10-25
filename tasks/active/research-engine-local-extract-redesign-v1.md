@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 35ea3e5777479cf716e7f684729af12af960d67e
+- Remote checkpoint: 4013b1d8b781b4ce11283508a0407d6e599a9969
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 44fbf6107db2e554a5e276a1862c02c66ffd1ab9
+- Remote checkpoint: d42d2947c45a06f6e03066488c119c86133107aa
 - Remote verified: true
 
 ## Next safe action
 
-Analyze the arxiv:2501.15391 baseline-construction failure under the frozen teacher-blind reservation schedule, compare minimal baseline-repair mechanisms, and freeze the smallest design that can test all-nine baseline completeness without using teacher labels or recovery outcomes. Do not implement before independent design review.
+Re-engage workspace-local-extract-independent-review-v1 on exact baseline-depth fallback design research-engine@d42d2947c45a06f6e03066488c119c86133107aa / blob 718bd2f278339e4c921d37a4bb53fd1f09be35e7. Do not implement TIER1_BASELINE_DEPTH_FALLBACK_DIAGNOSTIC_V1 until independent review is durable.
 
 ## Remaining work
 
-- Perform an evidence-first baseline-redesign search focused on why arxiv:2501.15391 yields only three tier1 reservation events at budget28.
-- Compare materially distinct teacher-blind baseline repair mechanisms without using teacher labels, removed propositions, or observed recovery outcomes for selection.
-- Freeze the smallest discriminating baseline experiment/design with exact all-nine completeness gate, metrics, interpretation table, stopping rule, and pass authority.
-- Obtain independent review of the genuinely new baseline design before implementation.
-- Do not select a recovery family from the incomplete 8-paper result; preserve semantic-generalization limits, rejected-family exclusions, production/Wave7B/semantic-control boundaries.
+- Obtain independent review of exact baseline-depth fallback design research-engine@d42d2947c45a06f6e03066488c119c86133107aa / blob 718bd2f278339e4c921d37a4bb53fd1f09be35e7 before implementation.
+- If reviewer disposition is NO_BLOCKING_FINDING, implement exactly TIER1_BASELINE_DEPTH_FALLBACK_DIAGNOSTIC_V1.
+- Execute exactly one valid baseline-only diagnostic run and stop at the frozen verdict; no valid-result rerun/tuning.
+- After a genuine result, obtain independent post-result review before designing a corrected recovery comparison or role fallback.
+- Do not select a recovery family from prior incomplete cross-paper counts; preserve semantic-generalization, rejected-family, production/Wave7B/semantic-control boundaries.
 
 ## Blockers / gates
 
