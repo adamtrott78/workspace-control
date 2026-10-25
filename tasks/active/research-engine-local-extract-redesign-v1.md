@@ -30,27 +30,28 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 9e8ecfc98dd50e70833b91a59c791331c1cf93f9
+- Remote checkpoint: f28875032e9734527201bd32ef92e3a91d33c5d7
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 1488b26a1fca63d56edd14c98bafdd55999799ad
+- Remote checkpoint: b939ff0bbb52024f55b2f6e719aef331f6286d06
 - Remote verified: true
 
 ## Next safe action
 
-Use the reviewed PRESERVATION_REGRESSION + UNSAFE_FALSE_COMPLETE result to select and freeze a materially new bounded diagnostic focused on teacher-blind obligation-to-evidence validity and preservation-aware admission/fallback. Preserve the shallow rank1/2 exposure evidence, do not retune/rerun the completed lexical-witness experiment, and obtain independent design review before implementation. No acceptance freeze or sealed holdout access.
+Re-engage the independent reviewer on exact frozen design research-engine@b939ff0bbb52024f55b2f6e719aef331f6286d06 / design blob 16100c540729a3c73a03778490b63846e6865030 / OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1. No implementation, acceptance freeze, or sealed holdout access before reviewer disposition.
 
 ## Remaining work
 
-- Select and freeze the smallest materially new bounded design addressing teacher-blind obligation-to-evidence validity and preservation-aware admission/fallback.
-- Preserve the established evidence that all four intended residual propositions are shallowly exposed; do not spend the next experiment on deeper retrieval, ranker scaling, or a bigger model merely to chase 13/13.
-- Do not reopen NLI, predicate-argument, or AMR certificate families without genuinely new premise-level evidence, and do not cosmetically retune the failed lexical witness matcher.
-- Obtain independent pre-implementation review of any new scientific design before implementation.
-- Before acceptance freeze, establish either bounded residual closure with preservation or reliable teacher-blind safe incompleteness/fallback without false completion.
+- Obtain independent pre-implementation review of research-engine@b939ff0bbb52024f55b2f6e719aef331f6286d06 / design blob 16100c540729a3c73a03778490b63846e6865030.
+- Do not implement, trigger, tune, or alter OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 until reviewer disposition is NO_BLOCKING_FINDING.
+- If reviewed without blockers, implement exactly the frozen two-arm validity microbenchmark with evidence-set mutation disabled, ordinary CI first, then a separately checkpointed one-shot development trigger.
+- After one valid result, obtain mandatory independent post-result review before selecting preservation-aware admission integration.
+- Do not reopen retrieval depth, query generation, reranking, larger-model scaling, NLI/predicate-argument/AMR certificate families, or the completed lexical-witness experiment without genuinely new premise-level evidence.
+- Keep LOCAL_FIRST_ALLOCATION_FALLBACK_HYBRID_V1 as the positive retrieval lineage unless later evidence specifically falsifies it.
 - Keep sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
