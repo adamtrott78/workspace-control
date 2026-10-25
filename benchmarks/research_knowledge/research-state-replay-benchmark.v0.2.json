@@ -1,0 +1,931 @@
+{
+  "schema_version": 2,
+  "benchmark_id": "research-state-replay-benchmark-v0.2",
+  "task_id": "workspace-research-knowledge-ontology-v1",
+  "status": "FROZEN_CORRECTED_REPLAY_CONTRACT",
+  "source_snapshot": {
+    "workspace_control": "67f3b0879dd26bbcbb5bff37080396174a7c2243",
+    "research_engine": "13a129ef820c611adf6a6ca70598df1e67d56efc"
+  },
+  "policy": {
+    "historical_and_current_durable_records_only": false,
+    "sealed_acceptance_benchmark_access": false,
+    "model_free_primary_scoring": true,
+    "no_source_mutation": true,
+    "no_live_extract_mutation": true,
+    "synthetic_test_overlays_allowed_only_for_frozen_adversarial_semantics": true,
+    "synthetic_test_overlays_are_nonauthoritative": true,
+    "natural_language_scoring": false
+  },
+  "cases": [
+    {
+      "id": "R1_WHY_NOT_DEEPER_RETRIEVAL",
+      "query_family": "WHY_NOT_REJECTED_MECHANISM",
+      "question": "Why is deeper retrieval not the supported next move after the atomic-obligation result?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=atomic-obligation-residual-closure-result-review-v1"
+      ],
+      "query_input": {
+        "target_kind": "CandidateAction",
+        "target_id": "deeper_retrieval",
+        "ask": "why_not_supported_next_move",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "NEGATIVE_MECHANISM_SELECTION",
+        "claim_codes": [
+          "CORRECT_RESIDUAL_EVIDENCE_ALREADY_SHALLOW",
+          "BOTTLENECK_IS_VALIDITY_AND_PRESERVATION_NOT_RETRIEVAL_DEPTH"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=atomic-obligation-residual-closure-result-review-v1"
+        ],
+        "authority_boundary": "SCIENTIFIC_SCOPE_ONLY",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R2_REJECTED_CERTIFICATE_FAMILIES",
+      "query_family": "WHY_NOT_REJECTED_MECHANISM",
+      "question": "Which semantic-certificate mechanism families are explicitly negative evidence and cannot be cosmetically reopened?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#constraints=rejected-certificate-families"
+      ],
+      "query_input": {
+        "target_kind": "MechanismFamilySet",
+        "target_id": "semantic_certificate_families",
+        "ask": "rejected_members_and_reopening_status",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "REJECTED_MECHANISMS",
+        "claim_codes": [
+          "NLI_CERTIFICATE_REJECTED",
+          "PREDICATE_ARGUMENT_CERTIFICATE_REJECTED",
+          "AMR_GRAPH_CERTIFICATE_REJECTED",
+          "COSMETIC_RETUNING_DOES_NOT_REOPEN"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#constraints=rejected-certificate-families"
+        ],
+        "authority_boundary": "SCIENTIFIC_SCOPE_ONLY",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R3_VALIDITY_RESULT_CLASS",
+      "query_family": "DISTINGUISH_INVALID_EXECUTION_FROM_NEGATIVE_SCIENCE",
+      "question": "Was OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 an invalid execution or a valid negative scientific result?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-result-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1"
+      ],
+      "query_input": {
+        "target_kind": "ScientificExecution",
+        "target_id": "OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1",
+        "ask": "execution_and_scientific_outcome_class",
+        "as_of_snapshot": "after_run_40166893479"
+      },
+      "expected_output": {
+        "answer_class": "VALID_NEGATIVE_SCIENCE",
+        "claim_codes": [
+          "VALIDITY_PREMISE_REJECTED",
+          "EXECUTION_INTEGRITY_VALID",
+          "RERUN_NOT_AUTHORIZED"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-result-v1",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1"
+        ],
+        "authority_boundary": "EPISTEMIC_ONLY",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R4_POSTHOC_7_OF_7",
+      "query_family": "DISTINGUISH_VERDICT_FROM_POSTHOC",
+      "question": "Does raw candidate_status being semantically correct on 7/7 cases change the frozen VALIDITY_PREMISE_REJECTED verdict?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1"
+      ],
+      "query_input": {
+        "target_kind": "Interpretation",
+        "target_id": "obligation_validity_raw_candidate_status_7_of_7",
+        "ask": "verdict_effect_and_assertion_kind",
+        "as_of_snapshot": "postresult_review"
+      },
+      "expected_output": {
+        "answer_class": "POSTHOC_NONVERDICT",
+        "claim_codes": [
+          "POSTHOC_7_OF_7_DOES_NOT_CHANGE_FROZEN_VERDICT",
+          "COMPLETED_RUN_NOT_REPAIRABLE_OR_RERUNNABLE"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1"
+        ],
+        "authority_boundary": "EPISTEMIC_ONLY",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R5_EXACT_PROVENANCE_AUTHORITY",
+      "query_family": "WHAT_IS_CURRENTLY_ALLOWED",
+      "question": "What did the independent review of EXACT_PROVENANCE_BINDING_MICROBENCH_V1 authorize?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-rereview-v1"
+      ],
+      "query_input": {
+        "target_kind": "ExperimentDesign",
+        "target_id": "EXACT_PROVENANCE_BINDING_MICROBENCH_V1",
+        "ask": "current_authorized_scope_and_required_next_gate",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "EXACT_DESIGN_IMPLEMENTATION_ONLY",
+        "claim_codes": [
+          "EXACT_DESIGN_IMPLEMENTATION_ONLY",
+          "IMPLEMENTATION_VALIDATION_REQUIRED_BEFORE_TRIGGER",
+          "POSTRESULT_REVIEW_REQUIRED"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-rereview-v1"
+        ],
+        "authority_boundary": "SCIENTIFIC_IMPLEMENTATION_SCOPE_ONLY",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R6_ZERO_STEP_CI",
+      "query_family": "DISTINGUISH_INVALID_EXECUTION_FROM_NEGATIVE_SCIENCE",
+      "question": "How should GitHub-hosted CI failures with zero executed steps be represented?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00#handoff-validation=40178745635"
+      ],
+      "query_input": {
+        "target_kind": "ValidationRunSet",
+        "target_id": "zero_step_ci_attempts",
+        "ask": "classification_and_scientific_effect",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "VALIDATION_UNAVAILABLE",
+        "claim_codes": [
+          "ZERO_STEP_IS_VALIDATION_UNAVAILABLE",
+          "ZERO_STEP_IS_NOT_PASS",
+          "ZERO_STEP_IS_NOT_SCIENTIFIC_NEGATIVE"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00#handoff-validation=40178745635"
+        ],
+        "authority_boundary": "NO_SCIENTIFIC_AUTHORITY_CHANGE",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R7_HYBRID_SCOPE",
+      "query_family": "WHAT_REMAINS_UNPROVEN",
+      "question": "What does HYBRID_COMPLEMENTARITY_REALIZED establish and not establish?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=local-first-allocation-fallback-result-review-v1"
+      ],
+      "query_input": {
+        "target_kind": "ScientificResult",
+        "target_id": "HYBRID_COMPLEMENTARITY_REALIZED",
+        "ask": "established_and_not_established",
+        "as_of_snapshot": "postresult_review"
+      },
+      "expected_output": {
+        "answer_class": "BOUNDED_STRUCTURAL_RESULT",
+        "claim_codes": [
+          "HYBRID_EXACT_RECOVERY_4_OF_36",
+          "LOCAL_ONLY_3",
+          "ALLOCATION_ONLY_1",
+          "STRUCTURAL_COMPLEMENTARITY_ONLY",
+          "SEMANTIC_ACCEPTANCE_NOT_ESTABLISHED"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=local-first-allocation-fallback-result-review-v1"
+        ],
+        "authority_boundary": "EPISTEMIC_ONLY",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R8_PRESERVATION_ADMISSION_DEFERRED",
+      "query_family": "WHAT_REMAINS_UNPROVEN",
+      "question": "Why is preservation-aware admission still deferred?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1"
+      ],
+      "query_input": {
+        "target_kind": "CandidateAction",
+        "target_id": "preservation_aware_admission",
+        "ask": "dependency_status_and_blocking_evidence",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "DEPENDENCY_NOT_SATISFIED",
+        "claim_codes": [
+          "VALIDITY_AND_EXACT_PROVENANCE_REQUIRED_BEFORE_ADMISSION",
+          "EXACT_PROVENANCE_EXPERIMENT_IS_BINDING_ONLY"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1"
+        ],
+        "authority_boundary": "NO_ADMISSION_AUTHORITY",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R9_SEALED_HOLDOUT",
+      "query_family": "WHAT_IS_CURRENTLY_FORBIDDEN",
+      "question": "May this ontology task inspect the sealed eight-paper semantic acceptance benchmark?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-extract-semantic-benchmark-v1.json@f09ae7af04f6f9005c288890cef43fba18705ff5",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#frozen_boundary=sealed_acceptance_benchmark_accessed:false"
+      ],
+      "query_input": {
+        "target_kind": "Resource",
+        "target_id": "sealed_eight_paper_semantic_acceptance_benchmark",
+        "ask": "access_permission",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "FORBIDDEN",
+        "claim_codes": [
+          "SEALED_HOLDOUT_ACCESS_FORBIDDEN",
+          "ACCEPTANCE_CANDIDATE_NOT_FROZEN"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-extract-semantic-benchmark-v1.json@f09ae7af04f6f9005c288890cef43fba18705ff5",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#frozen_boundary=sealed_acceptance_benchmark_accessed:false"
+        ],
+        "authority_boundary": "ACCESS_FORBIDDEN",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R10_STALE_REVIEWER_VS_OWNER",
+      "query_family": "CURRENT_STATE_WITH_SUPERSESSION",
+      "question": "If an older reviewer capsule still says the prior validity experiment may be implemented but the owner capsule has advanced to exact-provenance implementation authority, which governs current scientific state?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00"
+      ],
+      "query_input": {
+        "target_kind": "TaskState",
+        "target_id": "research-engine-local-extract-redesign-v1",
+        "ask": "current_state_under_supersession",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "NEWER_AUTHORITATIVE_OWNER_STATE",
+        "claim_codes": [
+          "NEWER_MERGED_OWNER_STATE_GOVERNS",
+          "STALE_REVIEWER_STATE_IS_HISTORICAL_ONLY",
+          "CONSUMED_REVIEW_REMAINS_PROVENANCE"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00"
+        ],
+        "authority_boundary": "CURRENT_MERGED_OWNER_AUTHORITY",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R11_GRAPH_AUTHORITY_ESCAPE",
+      "query_family": "WHAT_IS_CURRENTLY_FORBIDDEN",
+      "question": "Can a graph inference or model-generated edge authorize an executor action?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239#checkpoint=architecture-research-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-hardening-v1.json@5040de32a39b42eeb90f474c886ea1f3c82c1fbb#checkpoint=semantic-control-hardening-final-v1"
+      ],
+      "query_input": {
+        "target_kind": "CandidateAction",
+        "target_id": "graph_inferred_executor_action",
+        "ask": "execution_authority",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "FORBIDDEN",
+        "claim_codes": [
+          "GRAPH_INFERENCE_CANNOT_AUTHORIZE_EXECUTION",
+          "CANDIDATE_ACTION_NONAUTHORITATIVE",
+          "EXTERNAL_AUTHORITY_EVALUATOR_REQUIRED"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239#checkpoint=architecture-research-v1",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-hardening-v1.json@5040de32a39b42eeb90f474c886ea1f3c82c1fbb#checkpoint=semantic-control-hardening-final-v1"
+        ],
+        "authority_boundary": "EXTERNAL_POLICY_EVALUATOR_ONLY",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R12_OPEN_PR_AUTHORITY",
+      "query_family": "CURRENT_STATE_WITH_SUPERSESSION",
+      "question": "Does an open or unmerged PR override merged task-capsule authority?",
+      "source_identities": [
+        "workspace-control:architecture/research-knowledge-ontology.v0.1.json@4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e#source_precedence_contract"
+      ],
+      "query_input": {
+        "target_kind": "AuthorityPrecedence",
+        "target_id": "open_pr_vs_merged_task_capsule",
+        "ask": "which_source_governs_current_state",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "NO",
+        "claim_codes": [
+          "OPEN_PR_DOES_NOT_OVERRIDE_MERGED_AUTHORITY",
+          "OPEN_PR_IS_PENDING_EVIDENCE_ONLY"
+        ],
+        "source_refs": [
+          "workspace-control:architecture/research-knowledge-ontology.v0.1.json@4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e#source_precedence_contract"
+        ],
+        "authority_boundary": "MERGED_AUTHORITY_PRECEDENCE",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R13_SCIENTIFIC_SCOPE_VS_EXECUTOR_PERMISSION",
+      "query_family": "WHAT_EVIDENCE_AUTHORIZES_NEXT_SCOPE",
+      "question": "Does a reviewed scientific result that permits designing the next mechanism automatically authorize implementation or execution?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-rereview-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239#checkpoint=architecture-research-v1"
+      ],
+      "query_input": {
+        "target_kind": "AuthorityBoundary",
+        "target_id": "scientific_scope_vs_execution",
+        "ask": "authority_transition_requirements",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "AUTHORITY_LAYER_SEPARATION",
+        "claim_codes": [
+          "DESIGN_SCOPE_NOT_EXECUTION_PERMISSION",
+          "IMPLEMENTATION_TRIGGER_PRODUCTION_AUTHORITIES_DISTINCT"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-rereview-v1",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239#checkpoint=architecture-research-v1"
+        ],
+        "authority_boundary": "SEPARATE_AUTHORITY_LAYERS",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R14_REOPENING_REJECTED_FAMILY",
+      "query_family": "WHAT_IS_CURRENTLY_ALLOWED",
+      "question": "When may a rejected mechanism family be reconsidered?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#constraints=rejected-mechanism-reopening"
+      ],
+      "query_input": {
+        "target_kind": "MechanismFamily",
+        "target_id": "rejected_mechanism_family",
+        "ask": "reopening_condition",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "CONDITIONAL_REOPEN_ONLY",
+        "claim_codes": [
+          "REOPEN_ONLY_IF_NEW_EVIDENCE_CHANGES_FAILED_PREMISE",
+          "COSMETIC_RETUNING_INSUFFICIENT"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#constraints=rejected-mechanism-reopening"
+        ],
+        "authority_boundary": "SCIENTIFIC_SCOPE_CONDITIONAL",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R15_INTEGRATION_GATE",
+      "query_family": "WHAT_IS_CURRENTLY_FORBIDDEN",
+      "question": "May semantic-control integration bind the current EXTRACT output now?",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-integration-v1.json@c9701d00a2bca285603f283d7894277226fecd65#checkpoint=extract-dependency-gate-v1"
+      ],
+      "query_input": {
+        "target_kind": "TaskState",
+        "target_id": "workspace-semantic-control-integration-v1",
+        "ask": "extract_binding_permission_and_blocker",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "BLOCKED_EVIDENCE",
+        "claim_codes": [
+          "EXTRACT_BINDING_BLOCKED_EVIDENCE",
+          "ACCEPTED_OUTPUT_CONTRACT_REQUIRED"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-integration-v1.json@c9701d00a2bca285603f283d7894277226fecd65#checkpoint=extract-dependency-gate-v1"
+        ],
+        "authority_boundary": "BLOCKED_EVIDENCE",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R16_TRACE_TO_EXACT_PROVENANCE",
+      "query_family": "TRACE_RESULT_TO_NEXT_DESIGN",
+      "question": "Trace the evidence chain that led from unsafe lexical completion to the exact-provenance experiment.",
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=atomic-obligation-residual-closure-result-review-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-result-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1"
+      ],
+      "query_input": {
+        "target_kind": "ResearchLineage",
+        "target_id": "unsafe_completion_to_exact_provenance",
+        "ask": "ordered_causal_evidence_chain",
+        "as_of_snapshot": "current"
+      },
+      "expected_output": {
+        "answer_class": "CAUSAL_LINEAGE",
+        "claim_codes": [
+          "UNSAFE_FALSE_COMPLETE_PRECEDED_VALIDITY_TEST",
+          "VALIDITY_PREMISE_REJECTED",
+          "POSTHOC_DIAGNOSIS_SOURCE_GROUNDING_INTERFACE_FIDELITY",
+          "EXACT_PROVENANCE_BINDING_IS_NEXT_FROZEN_EXPERIMENT"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=atomic-obligation-residual-closure-result-review-v1",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-result-v1",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1"
+        ],
+        "authority_boundary": "EPISTEMIC_LINEAGE_ONLY",
+        "caveat_codes": []
+      }
+    },
+    {
+      "id": "R17_WHY_CURRENT_EXPERIMENT",
+      "query_family": "WHY_CURRENT_EXPERIMENT",
+      "question": "Why is EXACT_PROVENANCE_BINDING_MICROBENCH_V1 the current experiment at the frozen source snapshot?",
+      "query_input": {
+        "target_kind": "ExperimentDesign",
+        "target_id": "EXACT_PROVENANCE_BINDING_MICROBENCH_V1",
+        "ask": "why_current_experiment",
+        "as_of_snapshot": "workspace_control_67f3b087"
+      },
+      "source_identities": [
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-result-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1",
+        "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1"
+      ],
+      "expected_output": {
+        "answer_class": "CURRENT_EXPERIMENT_JUSTIFIED",
+        "claim_codes": [
+          "PRIOR_VALIDITY_RUN_IS_VALID_NEGATIVE",
+          "POSTHOC_DIAGNOSIS_IS_SOURCE_GROUNDING_INTERFACE_FIDELITY",
+          "EXACT_PROVENANCE_BINDING_SEPARATES_SEMANTIC_JUDGMENT_FROM_ATTACHMENT",
+          "RETRIEVAL_AND_REJECTED_CERTIFICATE_FAMILIES_NOT_REOPENED"
+        ],
+        "source_refs": [
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-result-v1",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1",
+          "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1"
+        ],
+        "authority_boundary": "SCIENTIFIC_DESIGN_LINEAGE_ONLY",
+        "caveat_codes": [
+          "DOES_NOT_AUTHORIZE_TRIGGER_OR_PRODUCTION"
+        ]
+      }
+    },
+    {
+      "id": "R18A_SYNTH_VALID_EXECUTION",
+      "fixture_id": "SYNTH_EXEC_VALID",
+      "query_family": "DISTINGUISH_INVALID_EXECUTION_FROM_NEGATIVE_SCIENCE",
+      "question": "Synthetic control: classify the execution when expected and observed design identity match and integrity is valid.",
+      "query_input": {
+        "target_kind": "ScientificExecution",
+        "target_id": "synthetic_execution_pair",
+        "ask": "execution_and_scientific_outcome_class",
+        "as_of_snapshot": "T1"
+      },
+      "source_identities": [
+        "synthetic://rko-v0.2/SYNTH_EXEC_VALID/expected_design",
+        "synthetic://rko-v0.2/SYNTH_EXEC_VALID/observed_design",
+        "synthetic://rko-v0.2/SYNTH_EXEC_VALID/integrity"
+      ],
+      "expected_output": {
+        "answer_class": "VALID_NEGATIVE_SCIENCE",
+        "claim_codes": [
+          "EXPECTED_AND_OBSERVED_IDENTITY_MATCH",
+          "EXECUTION_INTEGRITY_VALID",
+          "NEGATIVE_RESULT_REMAINS_SCIENTIFIC"
+        ],
+        "source_refs": [
+          "synthetic://rko-v0.2/SYNTH_EXEC_VALID/expected_design",
+          "synthetic://rko-v0.2/SYNTH_EXEC_VALID/observed_design",
+          "synthetic://rko-v0.2/SYNTH_EXEC_VALID/integrity"
+        ],
+        "authority_boundary": "EPISTEMIC_ONLY",
+        "caveat_codes": [
+          "SYNTHETIC_TEST_ONLY"
+        ]
+      }
+    },
+    {
+      "id": "R18B_SYNTH_INVALID_EXECUTION",
+      "fixture_id": "SYNTH_EXEC_INVALID",
+      "query_family": "DISTINGUISH_INVALID_EXECUTION_FROM_NEGATIVE_SCIENCE",
+      "question": "Synthetic adversary: classify the execution when observed design identity mismatches the expected identity.",
+      "query_input": {
+        "target_kind": "ScientificExecution",
+        "target_id": "synthetic_execution_pair",
+        "ask": "execution_and_scientific_outcome_class",
+        "as_of_snapshot": "T1"
+      },
+      "source_identities": [
+        "synthetic://rko-v0.2/SYNTH_EXEC_INVALID/expected_design",
+        "synthetic://rko-v0.2/SYNTH_EXEC_INVALID/observed_design",
+        "synthetic://rko-v0.2/SYNTH_EXEC_INVALID/integrity"
+      ],
+      "expected_output": {
+        "answer_class": "INVALID_EXECUTION",
+        "claim_codes": [
+          "EXPECTED_AND_OBSERVED_IDENTITY_MISMATCH",
+          "EXECUTION_INTEGRITY_INVALID",
+          "NO_SCIENTIFIC_VERDICT_FROM_INVALID_EXECUTION"
+        ],
+        "source_refs": [
+          "synthetic://rko-v0.2/SYNTH_EXEC_INVALID/expected_design",
+          "synthetic://rko-v0.2/SYNTH_EXEC_INVALID/observed_design",
+          "synthetic://rko-v0.2/SYNTH_EXEC_INVALID/integrity"
+        ],
+        "authority_boundary": "NO_SCIENTIFIC_AUTHORITY_CHANGE",
+        "caveat_codes": [
+          "SYNTHETIC_TEST_ONLY"
+        ]
+      }
+    },
+    {
+      "id": "R19A_SYNTH_ACTIVE_CONTRADICTION",
+      "fixture_id": "SYNTH_CONTRADICTION_ACTIVE",
+      "query_family": "CURRENT_STATE_WITH_SUPERSESSION",
+      "question": "Synthetic adversary: report current state when conflicting assertions coexist with no supersession.",
+      "query_input": {
+        "target_kind": "EpistemicAssertionSet",
+        "target_id": "synthetic_claim",
+        "ask": "current_contradiction_state_with_history",
+        "as_of_snapshot": "T1"
+      },
+      "source_identities": [
+        "synthetic://rko-v0.2/SYNTH_CONTRADICTION_ACTIVE/supported",
+        "synthetic://rko-v0.2/SYNTH_CONTRADICTION_ACTIVE/rejected"
+      ],
+      "expected_output": {
+        "answer_class": "ACTIVE_CONTRADICTION",
+        "claim_codes": [
+          "CONFLICTING_ASSERTIONS_COEXIST",
+          "NEITHER_ASSERTION_SUPERSEDES_OTHER",
+          "CURRENT_STATE_MUST_PRESERVE_CONTRADICTION"
+        ],
+        "source_refs": [
+          "synthetic://rko-v0.2/SYNTH_CONTRADICTION_ACTIVE/supported",
+          "synthetic://rko-v0.2/SYNTH_CONTRADICTION_ACTIVE/rejected"
+        ],
+        "authority_boundary": "EPISTEMIC_ONLY",
+        "caveat_codes": [
+          "SYNTHETIC_TEST_ONLY"
+        ]
+      }
+    },
+    {
+      "id": "R19B_SYNTH_RESOLVED_CONTRADICTION",
+      "fixture_id": "SYNTH_CONTRADICTION_RESOLVED",
+      "query_family": "CURRENT_STATE_WITH_SUPERSESSION",
+      "question": "Synthetic control: report current state when the older conflicting assertion is explicitly superseded.",
+      "query_input": {
+        "target_kind": "EpistemicAssertionSet",
+        "target_id": "synthetic_claim",
+        "ask": "current_contradiction_state_with_history",
+        "as_of_snapshot": "T1"
+      },
+      "source_identities": [
+        "synthetic://rko-v0.2/SYNTH_CONTRADICTION_RESOLVED/supported_historical",
+        "synthetic://rko-v0.2/SYNTH_CONTRADICTION_RESOLVED/rejected_current"
+      ],
+      "expected_output": {
+        "answer_class": "NO_ACTIVE_CONTRADICTION",
+        "claim_codes": [
+          "HISTORICAL_CONFLICT_PRESERVED",
+          "OLDER_ASSERTION_SUPERSEDED",
+          "CURRENT_ASSERTION_REJECTED"
+        ],
+        "source_refs": [
+          "synthetic://rko-v0.2/SYNTH_CONTRADICTION_RESOLVED/supported_historical",
+          "synthetic://rko-v0.2/SYNTH_CONTRADICTION_RESOLVED/rejected_current"
+        ],
+        "authority_boundary": "EPISTEMIC_ONLY",
+        "caveat_codes": [
+          "SYNTHETIC_TEST_ONLY"
+        ]
+      }
+    }
+  ],
+  "pass_criteria": {
+    "base_case_exact_pass": "21/21",
+    "total_variant_exact_pass": "63/63",
+    "provenance_traceability": "63/63",
+    "required_query_family_coverage": "10/10",
+    "positive_invalid_execution_case_count": 1,
+    "contradiction_case_count": 1,
+    "paired_same_query_different_graph_pair_count": 2,
+    "relabel_variant_count": 42,
+    "authority_escape_count": 0,
+    "stale_state_override_count": 0,
+    "posthoc_verdict_conflation_count": 0,
+    "invalid_execution_scientific_negative_conflation_count": 0,
+    "contradiction_silent_collapse_count": 0,
+    "sealed_holdout_access_count": 0,
+    "benchmark_gold_leak_count": 0,
+    "case_specific_logic_count": 0,
+    "query_fingerprint_lookup_escape_count": 0
+  },
+  "interpretation": {
+    "pass": "Authorizes implementation of the bounded read-only projection/query prototype only after independent review accepts this exact corrected design and benchmark. Does not authorize EXTRACT binding, production promotion, policy mutation, executor invocation, or sealed-holdout access.",
+    "fail": "Correct only the failing result-affecting contract or implementation surface and re-review/revalidate as required. Do not compensate with model inference, broader source access, or production integration."
+  },
+  "source_bindings": {
+    "owner": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c",
+    "parent": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239",
+    "hardening": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-hardening-v1.json@5040de32a39b42eeb90f474c886ea1f3c82c1fbb",
+    "integration": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-integration-v1.json@c9701d00a2bca285603f283d7894277226fecd65",
+    "methodology": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-research-methodology-v1.json@d3d8c7ee9e09262e05d20d31741ca398d6aaf65e",
+    "sealed": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-extract-semantic-benchmark-v1.json@f09ae7af04f6f9005c288890cef43fba18705ff5",
+    "reviewer": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00",
+    "design": "workspace-control:architecture/research-knowledge-ontology.v0.2.json@null"
+  },
+  "evaluation_separation": {
+    "benchmark_is_evaluation_only": true,
+    "projection_may_read_this_file": false,
+    "harness_may_read_this_file": true,
+    "query_engine_visible_fields": [
+      "query_family",
+      "query_input",
+      "test_view_graph"
+    ],
+    "query_engine_hidden_fields": [
+      "id",
+      "fixture_id",
+      "expected_output",
+      "question",
+      "source_identities",
+      "metamorphic_controls",
+      "source_handle_map",
+      "relabel_seed"
+    ],
+    "case_id_visible_to_query_engine": false,
+    "fixture_id_visible_to_query_engine": false,
+    "source_handle_map_visible_to_query_engine": false,
+    "no_case_specific_logic": true,
+    "invalid_execution_on_gold_or_hidden_metadata_leak": true
+  },
+  "corrects_review": {
+    "disposition_identity": "workspace-control@706957531271486b7df510933297fa9169134a65|design@9af5bea619ec5a2f83575b4c8d73d08922f05bdb|benchmark@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998:BLOCKING_FINDING",
+    "reviewer_capsule_blob": "d1b8f34daf5e777a41912c3ebc91fd9c27f30bae",
+    "correction_scope": [
+      "positive INVALID_EXECUTION coverage",
+      "explicit contradiction-preservation fixture and pass gate",
+      "WHY_CURRENT_EXPERIMENT query-family coverage",
+      "operational anti-hardcoding via same-query/different-graph pairs plus deterministic identifier relabeling",
+      "fully deterministic model-free canonical scorer"
+    ],
+    "architecture_reversal": false
+  },
+  "scoring_contract": {
+    "engine_output_schema": {
+      "required_fields": [
+        "answer_class",
+        "claim_codes",
+        "support_handles",
+        "authority_boundary",
+        "caveat_codes"
+      ],
+      "additional_fields_forbidden": true,
+      "types": {
+        "answer_class": "nonempty enum string",
+        "claim_codes": "array of unique enum strings",
+        "support_handles": "array of unique opaque support-handle strings",
+        "authority_boundary": "enum string",
+        "caveat_codes": "array of unique enum strings"
+      }
+    },
+    "harness_resolution": "Resolve each support_handle through the hidden current-view handle map to an exact source_ref. Unknown, duplicate, stale-invalid, or unmapped handles fail the instance.",
+    "canonicalization": [
+      "Reject missing or extra top-level fields.",
+      "Reject duplicate array members before sorting.",
+      "Sort claim_codes, resolved source_refs, and caveat_codes by raw UTF-8 byte order.",
+      "Preserve answer_class and authority_boundary exactly; no case folding, whitespace normalization, synonym mapping, fuzzy matching, or semantic grading.",
+      "Construct canonical object with field order answer_class, claim_codes, source_refs, authority_boundary, caveat_codes.",
+      "Compare canonical object for exact structural/string equality against frozen expected_output."
+    ],
+    "natural_language_scoring": false,
+    "rendered_answer_scored": false,
+    "retry_or_repair": false
+  },
+  "metamorphic_contract": {
+    "base_case_count_required": 21,
+    "variants_per_base_case": [
+      "IDENTITY",
+      "RELABEL_A",
+      "RELABEL_B"
+    ],
+    "total_evaluation_instances_required": 63,
+    "relabel_algorithm": {
+      "seeds": {
+        "RELABEL_A": "RKO_V02_RELABEL_A",
+        "RELABEL_B": "RKO_V02_RELABEL_B"
+      },
+      "canonical_collection": "For each test view, collect query-visible node_id, assertion_id, and support_handle strings; sort each identifier class by raw UTF-8 byte order.",
+      "mapping": "For each original identifier x and seed s, replacement = class_prefix + first_16_hex(SHA256(s || 0x00 || x)); mapping must be bijective within the view. Collision is INVALID_EXECUTION.",
+      "query_rewrite": "Apply the same node-id mapping to every query_input identifier reference, including target_id. query_family and ask operation semantics are not relabeled.",
+      "support_expectation": "The engine must return relabeled support handles. The harness privately resolves returned handles back through the inverse relabel map and source-handle provenance map before canonical scoring."
+    },
+    "paired_adversary_rule": {
+      "required_pairs": [
+        "SYNTH_EXECUTION_CLASSIFICATION_PAIR",
+        "SYNTH_CONTRADICTION_STATE_PAIR"
+      ],
+      "exact_query_visibility": "Each pair exposes identical query_family and query_input to the engine for both members; only the graph/test view differs.",
+      "purpose": "Detect lookup keyed only by visible query fingerprints and non-vacuously exercise result-state semantics."
+    },
+    "distractor_rule": "Each synthetic paired test view includes at least one irrelevant assertion that shares no required support path. Returning distractor support fails exact scoring."
+  },
+  "synthetic_fixtures": {
+    "SYNTH_EXEC_VALID": {
+      "pair_id": "SYNTH_EXECUTION_CLASSIFICATION_PAIR",
+      "authority": "TEST_ONLY_NONAUTHORITATIVE",
+      "assertions": [
+        {
+          "assertion_id": "sxv_a1",
+          "subject_id": "synthetic_execution_pair",
+          "relation": "expected_design_identity",
+          "object_id": "design_A",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_EXEC_VALID/expected_design"
+        },
+        {
+          "assertion_id": "sxv_a2",
+          "subject_id": "synthetic_execution_pair",
+          "relation": "observed_design_identity",
+          "object_id": "design_A",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_EXEC_VALID/observed_design"
+        },
+        {
+          "assertion_id": "sxv_a3",
+          "subject_id": "synthetic_execution_pair",
+          "relation": "execution_integrity",
+          "object_id": "VALID",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_EXEC_VALID/integrity"
+        },
+        {
+          "assertion_id": "sxv_d1",
+          "subject_id": "irrelevant_subject",
+          "relation": "unrelated",
+          "object_id": "irrelevant",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_EXEC_VALID/distractor"
+        }
+      ]
+    },
+    "SYNTH_EXEC_INVALID": {
+      "pair_id": "SYNTH_EXECUTION_CLASSIFICATION_PAIR",
+      "authority": "TEST_ONLY_NONAUTHORITATIVE",
+      "assertions": [
+        {
+          "assertion_id": "sxi_a1",
+          "subject_id": "synthetic_execution_pair",
+          "relation": "expected_design_identity",
+          "object_id": "design_A",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_EXEC_INVALID/expected_design"
+        },
+        {
+          "assertion_id": "sxi_a2",
+          "subject_id": "synthetic_execution_pair",
+          "relation": "observed_design_identity",
+          "object_id": "design_B",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_EXEC_INVALID/observed_design"
+        },
+        {
+          "assertion_id": "sxi_a3",
+          "subject_id": "synthetic_execution_pair",
+          "relation": "execution_integrity",
+          "object_id": "IDENTITY_MISMATCH",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_EXEC_INVALID/integrity"
+        },
+        {
+          "assertion_id": "sxi_d1",
+          "subject_id": "irrelevant_subject",
+          "relation": "unrelated",
+          "object_id": "irrelevant",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_EXEC_INVALID/distractor"
+        }
+      ]
+    },
+    "SYNTH_CONTRADICTION_ACTIVE": {
+      "pair_id": "SYNTH_CONTRADICTION_STATE_PAIR",
+      "authority": "TEST_ONLY_NONAUTHORITATIVE",
+      "assertions": [
+        {
+          "assertion_id": "sca_a1",
+          "subject_id": "synthetic_claim",
+          "relation": "status",
+          "object_id": "SUPPORTED",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_CONTRADICTION_ACTIVE/supported"
+        },
+        {
+          "assertion_id": "sca_a2",
+          "subject_id": "synthetic_claim",
+          "relation": "status",
+          "object_id": "REJECTED",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_CONTRADICTION_ACTIVE/rejected"
+        },
+        {
+          "assertion_id": "sca_d1",
+          "subject_id": "irrelevant_subject",
+          "relation": "unrelated",
+          "object_id": "irrelevant",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_CONTRADICTION_ACTIVE/distractor"
+        }
+      ]
+    },
+    "SYNTH_CONTRADICTION_RESOLVED": {
+      "pair_id": "SYNTH_CONTRADICTION_STATE_PAIR",
+      "authority": "TEST_ONLY_NONAUTHORITATIVE",
+      "assertions": [
+        {
+          "assertion_id": "scr_a1",
+          "subject_id": "synthetic_claim",
+          "relation": "status",
+          "object_id": "SUPPORTED",
+          "valid_from": "T0",
+          "valid_until": "T1",
+          "superseded_by": "scr_a2",
+          "source_ref": "synthetic://rko-v0.2/SYNTH_CONTRADICTION_RESOLVED/supported_historical"
+        },
+        {
+          "assertion_id": "scr_a2",
+          "subject_id": "synthetic_claim",
+          "relation": "status",
+          "object_id": "REJECTED",
+          "valid_from": "T1",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_CONTRADICTION_RESOLVED/rejected_current"
+        },
+        {
+          "assertion_id": "scr_d1",
+          "subject_id": "irrelevant_subject",
+          "relation": "unrelated",
+          "object_id": "irrelevant",
+          "valid_from": "T0",
+          "valid_until": null,
+          "superseded_by": null,
+          "source_ref": "synthetic://rko-v0.2/SYNTH_CONTRADICTION_RESOLVED/distractor"
+        }
+      ]
+    }
+  }
+}
