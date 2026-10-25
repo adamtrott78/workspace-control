@@ -24,7 +24,7 @@ Build and validate a read-only, provenance-preserving scientific-state knowledge
 
 - Intent: mutate
 - Remote branch: research-knowledge-ontology-v1-design
-- Remote checkpoint: 3d8b2d4f2bf646ad1eb6e0b8b8e3b4331d740af1
+- Remote checkpoint: 05e1dc990b36fff9c26f1d42f0b14de3b06f4f21
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Build and validate a read-only, provenance-preserving scientific-state knowledge
 
 ## Next safe action
 
-Engage an independent reviewer on architecture/research-knowledge-ontology.v0.1.json blob 66fce530c9539ddc8e1da15e1581d7b5d32fcca4 and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 6aa796b49209b87c3fc5cc4351122eb4b679cb3b. Reviewer should test source-precedence correctness, epistemic/normative/execution separation, verdict-vs-posthoc and negative-vs-invalid distinctions, rejected-mechanism reopening semantics, and whether CandidateAction/DecisionEvaluation can remain useful without graph-created authority. No implementation before disposition.
+Engage an independent reviewer on architecture/research-knowledge-ontology.v0.1.json blob 4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e and benchmarks/research_knowledge/research-state-replay-benchmark.v0.1.json blob 5dc45bcc162f43cc8304ce9a8ee7be0020f14b4b. Reviewer should test source-precedence correctness, epistemic/normative/execution separation, verdict-vs-posthoc and negative-vs-invalid distinctions, rejected-mechanism reopening semantics, and whether CandidateAction/DecisionEvaluation can remain useful without graph-created authority. No implementation before disposition.
 
 ## Remaining work
 
@@ -47,7 +47,7 @@ Engage an independent reviewer on architecture/research-knowledge-ontology.v0.1.
 
 ## Blockers / gates
 
-- Independent pre-implementation review is required for exact design blob 66fce530c9539ddc8e1da15e1581d7b5d32fcca4 and replay-benchmark blob 6aa796b49209b87c3fc5cc4351122eb4b679cb3b before any projection implementation.
+- Independent pre-implementation review is required for exact design blob 4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e and replay-benchmark blob 5dc45bcc162f43cc8304ce9a8ee7be0020f14b4b before any projection implementation.
 
 ## Fresh-chat initialization
 
