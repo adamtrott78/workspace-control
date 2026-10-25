@@ -9,6 +9,7 @@ TASK = ROOT / "tasks" / "active" / "workspace-extract-semantic-benchmark-v1.json
 CONTRACT = ROOT / "architecture" / "extract-semantic-benchmark-contract.v0.1.md"
 CORPUS = ROOT / "architecture" / "extract-semantic-benchmark-corpus.v0.1.json"
 SCHEMA = ROOT / "schemas" / "extract_semantic_benchmark.v0.1.schema.json"
+PILOT = ROOT / "architecture" / "extract-semantic-benchmark-pilot-annotations.v0.1.json"
 
 
 def test_semantic_benchmark_uses_fresh_heldout_papers() -> None:
@@ -61,3 +62,24 @@ def test_task_keeps_research_engine_read_only() -> None:
     assert repos["research-engine"]["intent"] == "read"
     assert repos["research-engine"]["allowed_mutation_scope"] == []
     assert data["current_stage"] == "freeze_benchmark_contract_and_holdout_corpus"
+
+
+def test_pilot_annotations_are_source_first_and_not_acceptance_gold() -> None:
+    data = json.loads(PILOT.read_text())
+
+    assert data["constraints"]["source_first"] is True
+    assert data["constraints"]["local_extract_outputs_viewed"] is False
+    assert data["constraints"]["acceptance_score_eligible"] is False
+    assert len(data["papers"]) == 2
+    assert all(p["source_sha256"] is None for p in data["papers"])
+    assert sum(len(p["obligations"]) for p in data["papers"]) >= 10
+    assert any(
+        o["support_mode"] == "COMPOSITE"
+        for p in data["papers"]
+        for o in p["obligations"]
+    )
+    assert any(
+        o["type"] == "LIMITATION"
+        for p in data["papers"]
+        for o in p["obligations"]
+    )
