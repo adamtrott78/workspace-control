@@ -30,7 +30,13 @@
       ],
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=atomic-obligation-residual-closure-result-review-v1"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "CandidateAction",
+        "target_id": "deeper_retrieval",
+        "ask": "why_not_supported_next_move",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R2_REJECTED_CERTIFICATE_FAMILIES",
@@ -44,7 +50,13 @@
       ],
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#constraints=rejected-certificate-families"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "MechanismFamilySet",
+        "target_id": "semantic_certificate_families",
+        "ask": "rejected_members_and_reopening_status",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R3_VALIDITY_RESULT_CLASS",
@@ -59,7 +71,13 @@
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-result-v1",
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "ScientificExecution",
+        "target_id": "OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1",
+        "ask": "execution_and_scientific_outcome_class",
+        "as_of_snapshot": "after_run_40166893479"
+      }
     },
     {
       "id": "R4_POSTHOC_7_OF_7",
@@ -73,7 +91,13 @@
       ],
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "Interpretation",
+        "target_id": "obligation_validity_raw_candidate_status_7_of_7",
+        "ask": "verdict_effect_and_assertion_kind",
+        "as_of_snapshot": "postresult_review"
+      }
     },
     {
       "id": "R5_EXACT_PROVENANCE_AUTHORITY",
@@ -92,7 +116,13 @@
       ],
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-rereview-v1"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "ExperimentDesign",
+        "target_id": "EXACT_PROVENANCE_BINDING_MICROBENCH_V1",
+        "ask": "current_authorized_scope_and_required_next_gate",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R6_ZERO_STEP_CI",
@@ -107,7 +137,13 @@
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1",
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00#handoff-validation=40178745635"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "ValidationRunSet",
+        "target_id": "zero_step_ci_attempts",
+        "ask": "classification_and_scientific_effect",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R7_HYBRID_SCOPE",
@@ -121,7 +157,13 @@
       ],
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=local-first-allocation-fallback-result-review-v1"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "ScientificResult",
+        "target_id": "HYBRID_COMPLEMENTARITY_REALIZED",
+        "ask": "established_and_not_established",
+        "as_of_snapshot": "postresult_review"
+      }
     },
     {
       "id": "R8_PRESERVATION_ADMISSION_DEFERRED",
@@ -135,7 +177,13 @@
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1",
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "CandidateAction",
+        "target_id": "preservation_aware_admission",
+        "ask": "dependency_status_and_blocking_evidence",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R9_SEALED_HOLDOUT",
@@ -150,7 +198,13 @@
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-extract-semantic-benchmark-v1.json@f09ae7af04f6f9005c288890cef43fba18705ff5",
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#frozen_boundary=sealed_acceptance_benchmark_accessed:false"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "Resource",
+        "target_id": "sealed_eight_paper_semantic_acceptance_benchmark",
+        "ask": "access_permission",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R10_STALE_REVIEWER_VS_OWNER",
@@ -165,7 +219,13 @@
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c",
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "TaskState",
+        "target_id": "research-engine-local-extract-redesign-v1",
+        "ask": "current_state_under_supersession",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R11_GRAPH_AUTHORITY_ESCAPE",
@@ -180,7 +240,13 @@
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239#checkpoint=architecture-research-v1",
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-hardening-v1.json@5040de32a39b42eeb90f474c886ea1f3c82c1fbb#checkpoint=semantic-control-hardening-final-v1"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "CandidateAction",
+        "target_id": "graph_inferred_executor_action",
+        "ask": "execution_authority",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R12_OPEN_PR_AUTHORITY",
@@ -194,7 +260,13 @@
       ],
       "source_identities": [
         "workspace-control:architecture/research-knowledge-ontology.v0.1.json@4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e#source_precedence_contract"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "AuthorityPrecedence",
+        "target_id": "open_pr_vs_merged_task_capsule",
+        "ask": "which_source_governs_current_state",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R13_SCIENTIFIC_SCOPE_VS_EXECUTOR_PERMISSION",
@@ -208,7 +280,13 @@
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-rereview-v1",
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239#checkpoint=architecture-research-v1"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "AuthorityBoundary",
+        "target_id": "scientific_scope_vs_execution",
+        "ask": "authority_transition_requirements",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R14_REOPENING_REJECTED_FAMILY",
@@ -221,7 +299,13 @@
       ],
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#constraints=rejected-mechanism-reopening"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "MechanismFamily",
+        "target_id": "rejected_mechanism_family",
+        "ask": "reopening_condition",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R15_INTEGRATION_GATE",
@@ -235,7 +319,13 @@
       ],
       "source_identities": [
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-semantic-control-integration-v1.json@c9701d00a2bca285603f283d7894277226fecd65#checkpoint=extract-dependency-gate-v1"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "TaskState",
+        "target_id": "workspace-semantic-control-integration-v1",
+        "ask": "extract_binding_permission_and_blocker",
+        "as_of_snapshot": "current"
+      }
     },
     {
       "id": "R16_TRACE_TO_EXACT_PROVENANCE",
@@ -253,7 +343,13 @@
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-result-v1",
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=obligation-validity-precision-microbenchmark-postresult-review-v1",
         "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c#checkpoint=exact-provenance-binding-design-v1"
-      ]
+      ],
+      "query_input": {
+        "target_kind": "ResearchLineage",
+        "target_id": "unsafe_completion_to_exact_provenance",
+        "ask": "ordered_causal_evidence_chain",
+        "as_of_snapshot": "current"
+      }
     }
   ],
   "pass_criteria": {
@@ -263,7 +359,9 @@
     "stale_state_override_count": 0,
     "posthoc_verdict_conflation_count": 0,
     "invalid_execution_scientific_negative_conflation_count": 0,
-    "sealed_holdout_access_count": 0
+    "sealed_holdout_access_count": 0,
+    "benchmark_gold_leak_count": 0,
+    "case_specific_logic_count": 0
   },
   "interpretation": {
     "pass": "Authorizes implementation of the bounded read-only projection/query prototype only after independent design review; does not authorize EXTRACT binding, production promotion, or executor mutation.",
@@ -278,5 +376,25 @@
     "sealed": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-extract-semantic-benchmark-v1.json@f09ae7af04f6f9005c288890cef43fba18705ff5",
     "reviewer": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00",
     "design": "workspace-control:architecture/research-knowledge-ontology.v0.1.json@4dc5e2acf85b1e33d3bd531abfd5004f8d96e07e"
+  },
+  "evaluation_separation": {
+    "benchmark_is_evaluation_only": true,
+    "projection_may_read_this_file": false,
+    "query_engine_visible_fields": [
+      "query_family",
+      "query_input"
+    ],
+    "display_only_fields": [
+      "question"
+    ],
+    "harness_only_fields": [
+      "expected_answer_class",
+      "required_points",
+      "forbidden_claims",
+      "source_identities"
+    ],
+    "case_id_visible_to_query_engine": false,
+    "no_case_specific_logic": true,
+    "invalid_execution_on_gold_leak": true
   }
 }
