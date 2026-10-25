@@ -53,7 +53,10 @@
         "scripts/freeze_extract_semantic_benchmark_sources.py",
         ".github/workflows/extract-semantic-benchmark-source-freeze.yml",
         "architecture/extract-semantic-benchmark-source-manifest.v0.1.json",
-        "architecture/extract-semantic-benchmark-pilot-adjudication.v0.1.json"
+        "architecture/extract-semantic-benchmark-pilot-adjudication.v0.1.json",
+        "architecture/extract-semantic-benchmark-annotation-queries.v0.1.json",
+        "scripts/extract_benchmark_source_snippets.py",
+        ".github/workflows/extract-semantic-benchmark-annotation-support.yml"
       ]
     },
     {
@@ -323,6 +326,30 @@
       "evidence": [
         "blob 94b39b75f61fc3f81513982f9015d00e7838a124"
       ]
+    },
+    {
+      "path": "architecture/extract-semantic-benchmark-annotation-queries.v0.1.json",
+      "state": "source_only_support",
+      "role": "Preregistered source-only search phrases for acceptance-paper annotation support; derived from paper metadata/abstracts and benchmark strata, not Local EXTRACT outputs.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Queries may support annotation navigation but do not define acceptance gold by themselves.",
+      "evidence": [
+        "annotation-support workflow 40148130054 PASS"
+      ]
+    },
+    {
+      "path": "scripts/extract_benchmark_source_snippets.py",
+      "state": "source_only_support_tool",
+      "role": "Verifies exact PDF hashes and emits page-numbered source contexts for annotation navigation.",
+      "origin": "workspace-control",
+      "persistence": "git",
+      "regeneration": null,
+      "review_requirement": "Must not call or inspect Local EXTRACT.",
+      "evidence": [
+        "annotation-support workflow 40148130054 PASS"
+      ]
     }
   ],
   "validation": [],
@@ -336,5 +363,5 @@
   "next_safe_action": "Validate and merge this exact-source/pilot-protocol checkpoint. Then create the eight-paper acceptance gold on a separate sealed benchmark branch, record only its commitment/metadata in the shared task state, and keep active EXTRACT from reading or running the acceptance papers until architecture freeze.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created 2026-10-24 after benchmark audit established that the legacy 13-atom oracle is a useful one-paper diagnostic but insufficient for final acceptance. This sibling task is intentionally independent of active EXTRACT architecture research.\n2026-10-24 benchmark foundation: selected 2 pilot + 8 acceptance papers, all outside the legacy nine-paper development corpus. Pilot source reading confirms the schema needs atomic method/setup/result/robustness/limitation obligations and explicit composite support. Acceptance papers remain unlabeled and prohibited from active EXTRACT development.\n2026-10-24 source-freeze stage: benchmark foundation PR #436 is already validated/merged. Source hashing/page extraction is being moved to a dedicated GitHub Actions job so exact arXiv PDF bytes and canonical page-text hashes are reproducible despite the chat runtime lacking direct arXiv byte access.\n2026-10-24 exact source freeze PASS: workflow 40147759885 downloaded all ten pinned arXiv versions and produced exact PDF SHA-256/page-count/per-page canonical-text identities. Source hashing is complete; pilot annotation/adjudication is now the active stage.\n2026-10-24 pilot protocol PASS: both pilot PDFs were source-reviewed against frozen identities; all 11 candidate obligations were retained. One locator anchor was repaired without semantic change. Acceptance annotation can now begin on a separate sealed branch."
+  "notes": "Created 2026-10-24 after benchmark audit established that the legacy 13-atom oracle is a useful one-paper diagnostic but insufficient for final acceptance. This sibling task is intentionally independent of active EXTRACT architecture research.\n2026-10-24 benchmark foundation: selected 2 pilot + 8 acceptance papers, all outside the legacy nine-paper development corpus. Pilot source reading confirms the schema needs atomic method/setup/result/robustness/limitation obligations and explicit composite support. Acceptance papers remain unlabeled and prohibited from active EXTRACT development.\n2026-10-24 source-freeze stage: benchmark foundation PR #436 is already validated/merged. Source hashing/page extraction is being moved to a dedicated GitHub Actions job so exact arXiv PDF bytes and canonical page-text hashes are reproducible despite the chat runtime lacking direct arXiv byte access.\n2026-10-24 exact source freeze PASS: workflow 40147759885 downloaded all ten pinned arXiv versions and produced exact PDF SHA-256/page-count/per-page canonical-text identities. Source hashing is complete; pilot annotation/adjudication is now the active stage.\n2026-10-24 pilot protocol PASS: both pilot PDFs were source-reviewed against frozen identities; all 11 candidate obligations were retained. One locator anchor was repaired without semantic change. Acceptance annotation can now begin on a separate sealed branch.\n2026-10-24 acceptance annotation support: source-only workflow 40148130054 PASS. It verifies each frozen PDF hash before locating preregistered scientific phrases and emits page-numbered source contexts; it does not invoke Local EXTRACT or use its outputs."
 }
