@@ -467,6 +467,30 @@
         "model_id": null,
         "runtime_id": null
       }
+    },
+    "model-eval-exact-provenance-binding": {
+      "activation_state": "MIGRATION_LIVE_EQUIVALENT",
+      "lane": "gpu",
+      "execution_contract_id": "model-dual-public-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/local-extract-exact-provenance-binding-microbenchmark.yml",
+        "default_branch": "main",
+        "blob_sha": "9e710caf10ba3ffda9cb614c535b2a63494f5fef"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/local-extract-exact-provenance-binding-microbenchmark",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": "qwen3.5-4b",
+        "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
+      }
     }
   },
   "bindings": {
