@@ -24,26 +24,26 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 42f2d7994cafe8f7c4fd954623924cdcdbb90dd4
+- Remote checkpoint: 0bbe21f1caefa8b8c8a17c750f7a76b70d62bae0
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: 0abc9d3c6a558a5364ec10dd2d7263745ba37e2b
+- Remote checkpoint: 13a129ef820c611adf6a6ca70598df1e67d56efc
 - Remote verified: true
 
 ## Next safe action
 
-Owner may implement exactly OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 from research-engine@0abc9d3c6a558a5364ec10dd2d7263745ba37e2b / design blob 4f4238030b7b667e080c2f662646e5856deacb4f. Routine implementation/CI/one-shot trigger mechanics do not require another review unless frozen science changes. After the genuine result, stop and re-engage reviewer before any next scientific phase. No acceptance freeze or sealed holdout access.
+Owner may implement exactly EXACT_PROVENANCE_BINDING_MICROBENCH_V1 from research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e under reviewer disposition NO_BLOCKING_FINDING. Preserve every frozen visible-field, prompt/template, E0 mapping, parser/guard, case, runtime, completeness, preservation, outcome, and one-valid-run contract. Obtain successful implementation/contract validation before any scientific trigger or execution. Any scientific contract change requires re-review. After the genuine result, stop and re-engage independent reviewer before next-phase selection. No acceptance freeze or sealed holdout access.
 
 ## Remaining work
 
-- Owner may implement exactly OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1 from research-engine@0abc9d3c6a558a5364ec10dd2d7263745ba37e2b / design blob 4f4238030b7b667e080c2f662646e5856deacb4f.
-- Do not alter visible-field lists, prompts/templates, serialization, case isolation, parser/guard semantics, cases, model identity, or scientific gates during implementation.
-- After a genuine scientific result, re-engage reviewer before preservation-aware admission design, next-phase selection, or acceptance-candidate decision.
-- Keep sealed acceptance benchmark uninspected and acceptance_candidate_frozen=false.
+- Owner may implement exactly research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e / EXACT_PROVENANCE_BINDING_MICROBENCH_V1; no scientific contract changes are authorized.
+- Require successful implementation and exact contract validation before any one-shot scientific trigger; zero-step GitHub-hosted failures are validation unavailable, not PASS.
+- After any genuine scientific result, perform mandatory independent post-result review before preservation-aware admission design, next science, or acceptance-candidate decision.
+- Keep sealed acceptance benchmark untouched and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
 
