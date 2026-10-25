@@ -270,5 +270,16 @@
       "executor invocation from graph inference",
       "graph-derived permission creation"
     ]
+  },
+  "source_bindings": {
+    "workspace_control_snapshot": "67f3b0879dd26bbcbb5bff37080396174a7c2243",
+    "research_engine_snapshot": "13a129ef820c611adf6a6ca70598df1e67d56efc",
+    "extract_owner_capsule": "tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c",
+    "knowledge_action_parent_capsule": "tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239",
+    "semantic_control_hardening_capsule": "tasks/active/workspace-semantic-control-hardening-v1.json@5040de32a39b42eeb90f474c886ea1f3c82c1fbb",
+    "semantic_control_integration_capsule": "tasks/active/workspace-semantic-control-integration-v1.json@c9701d00a2bca285603f283d7894277226fecd65",
+    "research_methodology_capsule": "tasks/active/workspace-research-methodology-v1.json@d3d8c7ee9e09262e05d20d31741ca398d6aaf65e",
+    "sealed_benchmark_task_capsule": "tasks/active/workspace-extract-semantic-benchmark-v1.json@f09ae7af04f6f9005c288890cef43fba18705ff5",
+    "extract_reviewer_capsule": "tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00"
   }
 }
