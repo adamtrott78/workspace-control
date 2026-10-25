@@ -1,0 +1,389 @@
+{
+  "schema_version": 1,
+  "design_id": "research-knowledge-ontology-v0.2",
+  "task_id": "workspace-research-knowledge-ontology-v1",
+  "status": "FROZEN_CORRECTED_DESIGN_ONLY",
+  "purpose": "Define a rebuildable, provenance-preserving scientific-state projection that can reconstruct research reasoning, evidence lineage, review/authority boundaries, and candidate next actions from durable workspace-control and research-engine records without becoming a new source of scientific truth or executor authority.",
+  "parent_lineage": {
+    "knowledge_action_architecture_task": "workspace-knowledge-action-ontology-v1",
+    "selected_parent_architecture": "knowledge-action-projection-v1:authoritative-records+typed-projection+policy-boundary",
+    "semantic_control_prototype_result": "research-engine@4317830c4f3779cebb8a5cf0d7eeec369b85d5ea:semantic-control-prototype-result-v1:PROMOTE_TO_INTEGRATION",
+    "semantic_control_hardening_result": "research-engine@33b44e201b8464dd033b748afe34a5f7e26646cd:HARDENING_PASS",
+    "methodology_task": "workspace-research-methodology-v1",
+    "live_extract_owner_snapshot": "workspace-control@67f3b0879dd26bbcbb5bff37080396174a7c2243:research-engine-local-extract-redesign-v1",
+    "research_engine_snapshot": "research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc"
+  },
+  "scope": {
+    "authoritative_inputs": [
+      "workspace-control task capsules and synchronized handoffs",
+      "versioned workflow/procedure/policy artifacts",
+      "research-engine frozen design artifacts",
+      "scientific execution reports and content-addressed artifacts",
+      "independent review checkpoints/comments when durably consumed",
+      "Git commit/PR/run/job identities and execution receipts"
+    ],
+    "projection_is_rebuildable": true,
+    "production_write_path_changes": false,
+    "extract_mutation": false,
+    "sealed_acceptance_benchmark_access": false,
+    "semantic_control_production_promotion": false
+  },
+  "layer_model": {
+    "epistemic": {
+      "purpose": "Represent what is observed, hypothesized, supported, rejected, unresolved, contradicted, or interpreted.",
+      "authority": "NON_EXECUTABLE",
+      "entity_types": [
+        "ResearchProgram",
+        "Residual",
+        "Hypothesis",
+        "Assumption",
+        "MechanismFamily",
+        "Evidence",
+        "Invariant",
+        "ExperimentDesign",
+        "ScientificExecution",
+        "ScientificResult",
+        "Interpretation",
+        "Review",
+        "BeliefUpdate",
+        "OpenQuestion"
+      ]
+    },
+    "normative": {
+      "purpose": "Represent explicit reviewed constraints, gates, permissions, prohibitions, stopping rules, and reopening rules sourced from authority-owned artifacts.",
+      "authority": "SOURCE_DERIVED_ONLY",
+      "entity_types": [
+        "PolicyRule",
+        "ScientificGate",
+        "ReviewRequirement",
+        "Permission",
+        "Prohibition",
+        "Blocker",
+        "DependencyGate",
+        "StoppingRule",
+        "ReopeningRule"
+      ],
+      "critical_rule": "No inferred/model-generated graph edge may create or widen a Permission, remove a Prohibition, satisfy a ReviewRequirement, or authorize executor action."
+    },
+    "execution": {
+      "purpose": "Represent what was actually implemented, validated, triggered, run, merged, produced, or received.",
+      "authority": "OBSERVATIONAL",
+      "entity_types": [
+        "Implementation",
+        "ValidationRun",
+        "Trigger",
+        "ExecutionJob",
+        "Artifact",
+        "Commit",
+        "PullRequest",
+        "ExecutionReceipt",
+        "TaskCheckpoint"
+      ]
+    },
+    "decision_bridge": {
+      "entity_types": [
+        "CandidateAction",
+        "DecisionEvaluation"
+      ],
+      "candidate_action_authority": "NONE",
+      "decision_evaluation_authority": "EXTERNAL_POLICY_EVALUATOR_ONLY",
+      "rule": "The projection may rank or explain CandidateAction objects, but only an existing authority-owned policy/task contract may return an executable ALLOW."
+    }
+  },
+  "core_relation_types": {
+    "epistemic": [
+      "motivated_by",
+      "tests",
+      "supports",
+      "weakens",
+      "refutes",
+      "does_not_establish",
+      "derived_from",
+      "contradicts",
+      "supersedes",
+      "consistent_with",
+      "posthoc_interpretation_of",
+      "preregistered_outcome_of",
+      "preserves",
+      "violates",
+      "leaves_unresolved",
+      "narrows_to"
+    ],
+    "normative": [
+      "requires_review_before",
+      "forbids",
+      "permits_scientific_scope",
+      "blocks_until",
+      "requires_evidence",
+      "authorizes_exact_design_only",
+      "reopens_only_if",
+      "stops_after"
+    ],
+    "execution": [
+      "implemented_as",
+      "validated_by",
+      "triggered_by",
+      "executed_as",
+      "produced",
+      "merged_as",
+      "consumed_by",
+      "checkpointed_as",
+      "closed_without_merge"
+    ],
+    "cross_layer": [
+      "result_reviewed_by",
+      "review_consumed_by_task",
+      "evidence_supports_decision",
+      "decision_proposes_action",
+      "policy_evaluates_candidate",
+      "execution_satisfies_gate"
+    ]
+  },
+  "assertion_metadata_contract": {
+    "required_fields": [
+      "assertion_id",
+      "subject_id",
+      "relation",
+      "object_id",
+      "assertion_kind",
+      "source_refs",
+      "valid_from",
+      "valid_until",
+      "superseded_by",
+      "derivation_rule",
+      "authority_class"
+    ],
+    "assertion_kinds": [
+      "AUTHORITATIVE_SOURCE",
+      "OBSERVED_EXECUTION",
+      "PREREGISTERED_SCIENTIFIC_RESULT",
+      "INDEPENDENT_REVIEW_FINDING",
+      "POSTHOC_NONVERDICT",
+      "DERIVED_DETERMINISTIC",
+      "MODEL_INFERRED"
+    ],
+    "authority_classes": [
+      "NONE",
+      "EPISTEMIC_ONLY",
+      "SCIENTIFIC_SCOPE",
+      "POLICY_CONTEXT",
+      "EXECUTION_AUTHORITY_REFERENCE"
+    ],
+    "provenance_rule": "Every projected node/edge must retain at least one exact source reference; derived assertions must retain all immediate parent assertion IDs and their source references.",
+    "contradiction_rule": "Contradictory assertions remain simultaneously representable with source, time, and authority metadata. Projection code must not silently choose one truth value.",
+    "supersession_rule": "Supersession changes current-view selection but never deletes historical assertions."
+  },
+  "source_precedence_contract": {
+    "purpose": "Resolve current-state views without rewriting history.",
+    "precedence": [
+      "exact durable authority artifact explicitly named by governing task contract",
+      "merged authoritative task capsule at the pinned workspace-control snapshot",
+      "durably consumed independent review checkpoint",
+      "merged design/result artifact at exact commit/blob identity",
+      "execution receipt/run/artifact evidence",
+      "open PR or unmerged branch state",
+      "chat prose or model-generated summary"
+    ],
+    "stale_state_rule": "A lower-precedence or older assertion remains queryable as historical state but must not override a newer authoritative source in CURRENT_STATE queries.",
+    "validation_unavailable_rule": "A zero-step/pre-runner CI failure is VALIDATION_UNAVAILABLE, never PASS and never a scientific negative."
+  },
+  "research_state_model": {
+    "methodology_chain": [
+      "Residual",
+      "Hypothesis",
+      "Assumption",
+      "MechanismFamily",
+      "ExperimentDesign",
+      "ScientificExecution",
+      "ScientificResult",
+      "Interpretation",
+      "Review",
+      "BeliefUpdate",
+      "Decision"
+    ],
+    "required_distinctions": [
+      "negative scientific result vs invalid execution",
+      "preregistered verdict vs posthoc non-verdict evidence",
+      "design authority vs implementation authority vs trigger authority vs production authority",
+      "scientific scope permission vs executor permission",
+      "blocked evidence vs rejected mechanism vs incomplete validation",
+      "current authoritative state vs stale historical handoff"
+    ],
+    "candidate_action_rule": "Candidate next actions may be generated only from current residuals, live hypotheses, explicit constraints, and reviewed authority edges; rejected/reopened families must carry their reopening condition."
+  },
+  "bounded_query_contract": {
+    "required_query_families": [
+      "WHY_CURRENT_EXPERIMENT",
+      "WHY_NOT_REJECTED_MECHANISM",
+      "WHAT_REMAINS_UNPROVEN",
+      "WHAT_IS_CURRENTLY_ALLOWED",
+      "WHAT_IS_CURRENTLY_FORBIDDEN",
+      "WHAT_EVIDENCE_AUTHORIZES_NEXT_SCOPE",
+      "TRACE_RESULT_TO_NEXT_DESIGN",
+      "DISTINGUISH_VERDICT_FROM_POSTHOC",
+      "DISTINGUISH_INVALID_EXECUTION_FROM_NEGATIVE_SCIENCE",
+      "CURRENT_STATE_WITH_SUPERSESSION"
+    ],
+    "ontology_slice_rule": "Queries retrieve only the bounded classes/relations necessary to answer the question; full-graph prompt injection is forbidden.",
+    "answer_contract": {
+      "required_fields": [
+        "answer_class",
+        "answer",
+        "supporting_assertion_ids",
+        "source_refs",
+        "authority_boundary",
+        "unproven_or_caveat"
+      ],
+      "model_free_replay_baseline": true
+    },
+    "required_family_coverage_rule": "Every required query family must appear in at least one base benchmark case; zero-coverage families fail the benchmark before scoring."
+  },
+  "benchmark_and_safety_gates": {
+    "base_case_exact_pass_required": "21/21",
+    "total_variant_exact_pass_required": "63/63",
+    "provenance_traceability_required": "63/63",
+    "required_query_family_coverage_required": "10/10",
+    "positive_invalid_execution_case_count_required": 1,
+    "contradiction_case_count_required": 1,
+    "paired_same_query_different_graph_pair_count_required": 2,
+    "relabel_variant_count_required": 42,
+    "authority_escape_count_required": 0,
+    "stale_state_override_count_required": 0,
+    "verdict_posthoc_conflation_count_required": 0,
+    "invalid_execution_scientific_negative_conflation_count_required": 0,
+    "contradiction_silent_collapse_count_required": 0,
+    "benchmark_gold_leak_count_required": 0,
+    "case_specific_logic_count_required": 0,
+    "query_fingerprint_lookup_escape_count_required": 0,
+    "sealed_holdout_access_required": 0,
+    "extract_mutation_required": 0,
+    "production_mutation_required": 0
+  },
+  "implementation_boundary": {
+    "before_implementation": [
+      "independent review of this exact corrected ontology v0.2 design and replay-benchmark v0.2 contract",
+      "successful workspace-control validation when runner infrastructure is available; zero-step failures remain VALIDATION_UNAVAILABLE and never count as PASS"
+    ],
+    "first_implementation_scope": [
+      "read-only workspace-control adapter",
+      "read-only research-engine metadata/artifact adapter",
+      "deterministic canonical projection",
+      "model-free replay query evaluator",
+      "no graph database migration; use file/in-memory or existing relational projection first"
+    ],
+    "forbidden_before_later_gate": [
+      "production routing changes",
+      "EXTRACT output binding",
+      "sealed benchmark access",
+      "policy mutation",
+      "autonomous task mutation",
+      "executor invocation from graph inference",
+      "graph-derived permission creation"
+    ]
+  },
+  "source_bindings": {
+    "workspace_control_snapshot": "67f3b0879dd26bbcbb5bff37080396174a7c2243",
+    "research_engine_snapshot": "13a129ef820c611adf6a6ca70598df1e67d56efc",
+    "extract_owner_capsule": "tasks/active/research-engine-local-extract-redesign-v1.json@3b5fe27feb68eaff6a3a19544a630a991bc5ef5c",
+    "knowledge_action_parent_capsule": "tasks/active/workspace-knowledge-action-ontology-v1.json@ecc621cb948a952abf0f4c5a25170efc052f4239",
+    "semantic_control_hardening_capsule": "tasks/active/workspace-semantic-control-hardening-v1.json@5040de32a39b42eeb90f474c886ea1f3c82c1fbb",
+    "semantic_control_integration_capsule": "tasks/active/workspace-semantic-control-integration-v1.json@c9701d00a2bca285603f283d7894277226fecd65",
+    "research_methodology_capsule": "tasks/active/workspace-research-methodology-v1.json@d3d8c7ee9e09262e05d20d31741ca398d6aaf65e",
+    "sealed_benchmark_task_capsule": "tasks/active/workspace-extract-semantic-benchmark-v1.json@f09ae7af04f6f9005c288890cef43fba18705ff5",
+    "extract_reviewer_capsule": "tasks/active/workspace-local-extract-independent-review-v1.json@b4caba521fdbcf5d83cf84730352f63e24e5cc00"
+  },
+  "blind_replay_contract": {
+    "projection_source_rule": "Production/read-only projection construction may read only exact authoritative source bindings and referenced durable artifacts. It must not read the benchmark file, expected outputs, case IDs, fixture IDs, or metamorphic control metadata.",
+    "query_engine_rule": "The query engine receives only (1) the projected graph/test view and (2) query_family + structured query_input. It never receives case_id, fixture_id, expected_output, display question, scoring metadata, relabel seed, or source-handle-to-provenance mapping.",
+    "evaluation_rule": "The harness alone may read synthetic fixture overlays, expected_output, exact source provenance, metamorphic controls, and scoring rules. It applies fixture overlays only to isolated test views after production projection construction.",
+    "same_query_different_graph_rule": "At least two paired adversaries must present byte-identical query_family + query_input to the query engine while changing only graph/test-view evidence and requiring different expected outputs. A visible-query-fingerprint lookup therefore cannot pass both members.",
+    "deterministic_relabel_rule": "Every base case is evaluated under IDENTITY plus two deterministic identifier-relabel variants. For each relabel variant, all query-visible node IDs, assertion IDs, and support handles are bijectively remapped using the frozen relabel algorithm; semantic graph content is unchanged.",
+    "no_case_specific_logic": true,
+    "no_case_id_branching": true,
+    "no_fixture_id_visibility": true,
+    "no_expected_label_visibility": true,
+    "no_benchmark_specific_source_mutation": true,
+    "same_query_engine_for_all_cases": true,
+    "failure_semantics": "Any benchmark-specific hardcoding, expected-label visibility, fixture/case ID visibility, hidden provenance-map visibility, or projection access to benchmark gold invalidates the benchmark execution rather than counting as scientific failure."
+  },
+  "corrects_review": {
+    "disposition_identity": "workspace-control@706957531271486b7df510933297fa9169134a65|design@9af5bea619ec5a2f83575b4c8d73d08922f05bdb|benchmark@45bd39a722fc4ec24c8f29ce6c1d4eacda8c7998:BLOCKING_FINDING",
+    "reviewer_capsule_blob": "d1b8f34daf5e777a41912c3ebc91fd9c27f30bae",
+    "correction_scope": [
+      "positive INVALID_EXECUTION coverage",
+      "explicit contradiction-preservation fixture and pass gate",
+      "WHY_CURRENT_EXPERIMENT query-family coverage",
+      "operational anti-hardcoding via same-query/different-graph pairs plus deterministic identifier relabeling",
+      "fully deterministic model-free canonical scorer"
+    ],
+    "architecture_reversal": false
+  },
+  "metamorphic_evaluation_contract": {
+    "base_case_count_required": 21,
+    "variants_per_base_case": [
+      "IDENTITY",
+      "RELABEL_A",
+      "RELABEL_B"
+    ],
+    "total_evaluation_instances_required": 63,
+    "relabel_algorithm": {
+      "seeds": {
+        "RELABEL_A": "RKO_V02_RELABEL_A",
+        "RELABEL_B": "RKO_V02_RELABEL_B"
+      },
+      "canonical_collection": "For each test view, collect query-visible node_id, assertion_id, and support_handle strings; sort each identifier class by raw UTF-8 byte order.",
+      "mapping": "For each original identifier x and seed s, replacement = class_prefix + first_16_hex(SHA256(s || 0x00 || x)); mapping must be bijective within the view. Collision is INVALID_EXECUTION.",
+      "query_rewrite": "Apply the same node-id mapping to every query_input identifier reference, including target_id. query_family and ask operation semantics are not relabeled.",
+      "support_expectation": "The engine must return relabeled support handles. The harness privately resolves returned handles back through the inverse relabel map and source-handle provenance map before canonical scoring."
+    },
+    "paired_adversary_rule": {
+      "required_pairs": [
+        "SYNTH_EXECUTION_CLASSIFICATION_PAIR",
+        "SYNTH_CONTRADICTION_STATE_PAIR"
+      ],
+      "exact_query_visibility": "Each pair exposes identical query_family and query_input to the engine for both members; only the graph/test view differs.",
+      "purpose": "Detect lookup keyed only by visible query fingerprints and non-vacuously exercise result-state semantics."
+    },
+    "distractor_rule": "Each synthetic paired test view includes at least one irrelevant assertion that shares no required support path. Returning distractor support fails exact scoring."
+  },
+  "synthetic_test_overlay_contract": {
+    "authority": "TEST_ONLY_NONAUTHORITATIVE",
+    "production_projection_mutation": false,
+    "persisted_scientific_truth": false,
+    "sealed_data_access": false,
+    "application_point": "Harness applies overlay after construction of the read-only production projection and before identifier relabeling.",
+    "provenance": "Every synthetic assertion has a frozen synthetic source_ref in the benchmark and is resolvable only inside the harness.",
+    "forbidden_use": "Synthetic assertions may not be written into task capsules, research-engine, semantic-control production state, or any authority-owned policy source."
+  },
+  "deterministic_scoring_contract": {
+    "engine_output_schema": {
+      "required_fields": [
+        "answer_class",
+        "claim_codes",
+        "support_handles",
+        "authority_boundary",
+        "caveat_codes"
+      ],
+      "additional_fields_forbidden": true,
+      "types": {
+        "answer_class": "nonempty enum string",
+        "claim_codes": "array of unique enum strings",
+        "support_handles": "array of unique opaque support-handle strings",
+        "authority_boundary": "enum string",
+        "caveat_codes": "array of unique enum strings"
+      }
+    },
+    "harness_resolution": "Resolve each support_handle through the hidden current-view handle map to an exact source_ref. Unknown, duplicate, stale-invalid, or unmapped handles fail the instance.",
+    "canonicalization": [
+      "Reject missing or extra top-level fields.",
+      "Reject duplicate array members before sorting.",
+      "Sort claim_codes, resolved source_refs, and caveat_codes by raw UTF-8 byte order.",
+      "Preserve answer_class and authority_boundary exactly; no case folding, whitespace normalization, synonym mapping, fuzzy matching, or semantic grading.",
+      "Construct canonical object with field order answer_class, claim_codes, source_refs, authority_boundary, caveat_codes.",
+      "Compare canonical object for exact structural/string equality against frozen expected_output."
+    ],
+    "natural_language_scoring": false,
+    "rendered_answer_scored": false,
+    "retry_or_repair": false
+  }
+}
