@@ -59,15 +59,12 @@ Implement LOCAL_FIRST_ALLOCATION_FALLBACK_REALIZATION_V1 exactly from research-e
 ## Fresh-chat initialization
 
 @GitHub
-@Heartbeat
 
 https://github.com/adamtrott78/workspace-control
 
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/research-engine-local-extract-redesign-v1.json
 
-Use the same real Heartbeat task ID:
-research-engine-local-extract-redesign-v1
 
 Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
