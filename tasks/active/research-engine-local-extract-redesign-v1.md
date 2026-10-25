@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: eace22dad50fe24d945770f8cbea2ae5f66bdc49
+- Remote checkpoint: c06dce94036f5cc28b12c268f71eebe50968d2ea
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: e1d7afd32aa73fed3326b5cc0c9af1324096226a
+- Remote checkpoint: aaf7aa79636b192fe6f16a71b10c727b103052f2
 - Remote verified: true
 
 ## Next safe action
 
-Freeze the smallest bounded ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 design using only development evidence and audit blob 75de54e56a810f6cf357fcfd393aac84e2052d53. Preserve the completed hybrid result unchanged, prohibit teacher-informed runtime selection and sealed-benchmark access, predeclare controls/metrics/verdicts/stopping rule, and obtain independent design review before implementation.
+Obtain independent review of exact ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 design research-engine@aaf7aa79636b192fe6f16a71b10c727b103052f2 / design blob 4200bc0fe4ed6d308767a8ac9610cf471392b562. Do not implement before reviewer disposition. No acceptance freeze or sealed benchmark access.
 
 ## Remaining work
 
-- Freeze a bounded next-phase design using HYBRID_COMPLEMENTARITY_REALIZED plus audit blob 75de54e56a810f6cf357fcfd393aac84e2052d53; leading diagnostic is ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1.
-- The design must separately test source-label classifier training, target-domain testing, coupled receiver+sampling-rate evidence, persistent misclassification/future-work coverage, and source-faithful paraphrase/repeated-evidence evaluation without teacher-informed runtime selection.
-- Obtain independent pre-implementation review of the newly frozen diagnostic before implementation.
-- Before acceptance freeze, establish either bounded residual closure or reliable teacher-blind safe-incompleteness/fallback behavior for analogous missing CORE obligations.
-- Keep the sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
+- Obtain independent review of exact ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 design research-engine@aaf7aa79636b192fe6f16a71b10c727b103052f2 / blob 4200bc0fe4ed6d308767a8ac9610cf471392b562.
+- If reviewer returns NO_BLOCKING_FINDING, implement only the frozen deterministic design with exact inputs/budgets/orderings and add ordinary tests/workflow.
+- Execute at most one valid development diagnostic run after exact implementation/trigger authority is durable; stop on both mechanism and completeness-safety outcomes with no post-result tuning.
+- Obtain mandatory independent post-result review before any acceptance-candidate decision or subsequent scientific phase.
+- Keep sealed semantic acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
 
