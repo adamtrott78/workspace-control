@@ -48,8 +48,8 @@ The core ontology architecture was accepted. Five result-affecting replay-contra
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: research-knowledge-ontology-v02-corrections
-- Remote checkpoint: b9305c7c2146fcbfc01409e26eacafdce7facb90
+- Remote branch: main
+- Remote checkpoint: d096b923e7e1e07aa20e9276c8b45ecc446e3705
 - Remote verified: true
 
 ### research-engine
