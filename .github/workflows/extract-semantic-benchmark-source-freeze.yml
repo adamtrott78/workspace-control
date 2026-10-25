@@ -1,3 +1,4 @@
+# source-freeze schema: v0.1
 name: EXTRACT Semantic Benchmark Source Freeze
 
 on:
