@@ -24,26 +24,27 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: fd28457ff22a4e05ddf54b2cf7d27f82e9c92fdd
+- Remote checkpoint: b8c98da5d58ca9efe0bdd39b99d435a62ca2dd6b
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: e1d7afd32aa73fed3326b5cc0c9af1324096226a
+- Remote checkpoint: aaf7aa79636b192fe6f16a71b10c727b103052f2
 - Remote verified: true
 
 ## Next safe action
 
-Owner may proceed from HYBRID_COMPLEMENTARITY_REALIZED to bounded next-phase development selection. The valid result supports end-to-end local-first/fallback integration work, but the separate four-atom residual audit must now be treated as mandatory pre-acceptance evidence. Freeze any genuinely new scientific design and re-engage reviewer before implementation. No acceptance freeze or sealed holdout access.
+Owner must correct only the four result-affecting design ambiguities identified in atomic-obligation-residual-closure-design-review-v1, run ordinary design CI, and return the exact corrected SHA/blob for re-review. Do not implement ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1 from the blocked design.
 
 ## Remaining work
 
-- Wait for owner to select and freeze the next bounded development design using the valid hybrid result and the separate four-atom residual audit.
-- Require independent pre-implementation review for any genuinely new scientific design; routine integration/CI/trigger mechanics remain non-review boundaries.
-- Before any acceptance-candidate freeze, require either bounded residual closure for atomic scientific obligations/evidence selection or demonstrable teacher-blind safe-incompleteness handling.
-- Keep the sealed acceptance benchmark uninspected until the owner independently freezes an end-to-end acceptance candidate.
+- Wait for owner to correct only the four frozen-contract blockers in ATOMIC_OBLIGATION_RESIDUAL_CLOSURE_DIAGNOSTIC_V1.
+- Require exact corpus fixture/PDF identity, exact witness normalization/matching semantics, exact protected selection_origin values, and deterministic mechanism-outcome precedence.
+- Re-review the corrected exact design before any implementation.
+- Keep primary budget28, diagnostic-only budget32 sensitivity, four CORE obligations, teacher boundary, source-fidelity posthoc boundary, and sealed acceptance prohibition unchanged unless a new scientific design is intentionally proposed.
+- Keep sealed acceptance benchmark uninspected and acceptance_candidate_frozen=false.
 
 ## Blockers / gates
 
