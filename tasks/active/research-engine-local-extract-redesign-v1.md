@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 50d5a5cf032721c81e6a8a14060514002d2b48da
+- Remote checkpoint: e640116db885dcfc715e0ed5c5f3a029572763fb
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 4d6a3bf003499a34ea0d076e55c724aaf1735c42
+- Remote branch: trigger-obligation-validity-microbenchmark-v1
+- Remote checkpoint: a901115fb572a0647e70f87c39309bcda60f1dee
 - Remote verified: true
 
 ## Next safe action
 
-Create an inert trigger PR from exact implementation research-engine@4d6a3bf003499a34ea0d076e55c724aaf1735c42, checkpoint its exact head SHA, and issue exactly one owner comment `/local-extract-obligation-validity-microbenchmark <SHA>`. Do not change frozen science. Stop on the first integrity-valid result, checkpoint it, and hand it to the independent reviewer. No acceptance freeze or sealed holdout access.
+Issue exactly one owner comment `/local-extract-obligation-validity-microbenchmark a901115fb572a0647e70f87c39309bcda60f1dee` on research-engine PR #268. If the resulting execution has valid experiment integrity, stop on that result with no tuning or rerun, checkpoint exact run/job/artifact/report evidence, and hand it to the independent reviewer. No acceptance freeze or sealed holdout access.
 
 ## Remaining work
 
-- Create an inert trigger PR from research-engine@4d6a3bf003499a34ea0d076e55c724aaf1735c42 with no scientific changes.
-- Checkpoint the exact inert trigger SHA and issue exactly one owner comment: /local-extract-obligation-validity-microbenchmark <exact_sha>.
-- Wait for the exact one-shot development run; do not tune or rerun after an integrity-valid result.
-- Capture run/job/artifact/report identities, scientific outcome, per-arm gates, completeness outcomes, and preservation/integrity evidence.
-- STOP after the genuine result and re-engage independent reviewer before any next scientific phase.
+- Issue exactly one owner comment `/local-extract-obligation-validity-microbenchmark a901115fb572a0647e70f87c39309bcda60f1dee` on research-engine PR #268.
+- Observe the exact one-shot run. If experiment integrity is valid, do not rerun regardless of scientific outcome or ordinary bad verifier outputs.
+- Capture run/job/artifact/report identities, hashes, per-arm case outcomes, completeness simulation, preservation controls, and mechanism_outcome.
+- Checkpoint the genuine result in workspace-control.
+- STOP and re-engage the independent reviewer before any next scientific phase.
 - Keep acceptance_candidate_frozen=false and sealed semantic acceptance benchmark untouched.
 
 ## Blockers / gates
