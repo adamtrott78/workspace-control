@@ -30,27 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: b4961467c528abd51f834c378874b5f0162e633d
+- Remote checkpoint: 7bbe4c313cb484fab691af9d88cd49eae5cb9a3f
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 1766cc6d11c9e65265a90579342fbac4888d0274
+- Remote checkpoint: d3425684d753639e8ec8843a3cd3640f6a5a4561
 - Remote verified: true
 
 ## Next safe action
 
-Perform evidence-first hybrid architecture selection on development evidence. Compare local-first allocation-fallback, allocation-first local-fallback, union-with-deterministic-rerank, and bounded two-slot alternatives. Do not use removed proposition identity or teacher data in arbitration. Freeze one exact hybrid diagnostic and obtain independent review before implementation.
+Re-engage workspace-local-extract-independent-review-v1 on exact hybrid design research-engine@d3425684d753639e8ec8843a3cd3640f6a5a4561 / blob 4d8ad8cb815e7f96cc351ae0ed6868335a87e046. Do not implement or access the sealed acceptance benchmark before review.
 
 ## Remaining work
 
-- Compare deterministic teacher-blind hybrid policies that compose radius1 local rescue with surviving-intent allocation without oracle knowledge.
-- Freeze the smallest discriminating hybrid experiment with exact arbitration/selection, budget, costs, metrics, verdicts, and stopping rule before implementation.
-- Obtain independent review of that exact hybrid design.
-- After a valid hybrid result, independently review before any next phase or acceptance-candidate decision.
-- Keep sealed semantic acceptance benchmark uninspected and do not declare ACCEPTANCE_CANDIDATE_FROZEN yet.
+- Obtain independent review of exact local-first hybrid design research-engine@d3425684d753639e8ec8843a3cd3640f6a5a4561 / blob 4d8ad8cb815e7f96cc351ae0ed6868335a87e046 before implementation.
+- If reviewer returns NO_BLOCKING_FINDING, implement only LOCAL_FIRST_ALLOCATION_FALLBACK_REALIZATION_V1 exactly as frozen.
+- Execute exactly one valid development realization run and stop at the frozen hybrid verdict; no valid-result rerun/tuning.
+- After a genuine result, obtain independent post-result review before end-to-end integration design.
+- Keep sealed semantic acceptance benchmark uninspected and do not declare ACCEPTANCE_CANDIDATE_FROZEN.
 
 ## Blockers / gates
 
