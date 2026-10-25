@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 373abf38c9d1f9d592c7aa4d373c5e938d01fa3b
+- Remote checkpoint: a55489cf9667d033868048c3685fabd12fa255fa
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,14 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-STOP owner scientific work and re-engage the independent reviewer on exact frozen design research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e / EXACT_PROVENANCE_BINDING_MICROBENCH_V1. Reviewer should assess whether the two-arm deterministic-attachment vs opaque-pointer design cleanly tests the source-grounding interface diagnosis without leaking labels or creating a trivial/tautological gate. No implementation, trigger, acceptance freeze, or sealed holdout access before disposition.
+Implement exactly EXACT_PROVENANCE_BINDING_MICROBENCH_V1 from research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e. Preserve every frozen visible-field, prompt/template, E0 mapping, parser/guard, case, runtime, completeness, preservation, outcome, and one-valid-run contract. Obtain successful implementation/contract validation before creating or issuing any scientific trigger. No acceptance freeze or sealed holdout access.
 
 ## Remaining work
 
-- Obtain independent pre-implementation review of research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e.
-- Do not implement either provenance-binding arm before reviewer NO_BLOCKING_FINDING.
-- Do not rerun or modify the completed OBLIGATION_VALIDITY_PRECISION_MICROBENCH_V1.
-- Keep preservation-aware admission deferred until provenance/validity passes.
+- Implement exactly EXACT_PROVENANCE_BINDING_MICROBENCH_V1 from design blob 09603c4d65114c75ad3e112a357ee45da384f63e without changing visible fields, prompts/templates, E0 mapping, parser/guard rules, cases, runtime envelope, completeness, preservation, outcomes, or stopping rule.
+- Obtain successful implementation/contract validation before any scientific trigger or execution.
+- After successful validation, merge/checkpoint the exact implementation SHA, then prepare one inert exact-SHA trigger for exactly one valid development run.
+- After the genuine result, STOP and re-engage the independent reviewer before selecting the next scientific phase.
 - Keep acceptance_candidate_frozen=false and sealed semantic acceptance benchmark untouched.
 
 ## Blockers / gates
