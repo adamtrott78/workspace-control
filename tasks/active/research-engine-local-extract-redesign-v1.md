@@ -30,7 +30,7 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 6d6020b734a4b3e0564c6f3907acb6940781b070
+- Remote checkpoint: 0ae83720e495bec985e21e25f1439318fd82eb4e
 - Remote verified: true
 
 ### research-engine
@@ -42,14 +42,13 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 ## Next safe action
 
-Re-verify research-engine PR #273 is OPEN, same-repository, and still exactly at head 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d. Then issue exactly one owner comment `/local-extract-exact-provenance-binding-microbenchmark 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d`. Do not issue a duplicate trigger. Capture the exact run/job/artifact/report identities and stop on the first integrity-valid scientific result for mandatory independent post-result review. Keep acceptance_candidate_frozen=false and the sealed semantic acceptance benchmark untouched.
+STOP SCIENTIFIC SELECTION. The first integrity-valid EXACT_PROVENANCE_BINDING_MICROBENCH_V1 result is run 40411159582 / job 121881887321 / artifact 12693836542 with outcome EXACT_PROVENANCE_BINDING_PREMISE_REJECTED. Re-engage independent reviewer task workspace-local-extract-independent-review-v1 for mandatory post-result review before selecting any next scientific phase, preservation-aware admission design, or acceptance-candidate decision. Do not tune or rerun this valid result. Keep acceptance_candidate_frozen=false and sealed acceptance benchmark untouched.
 
 ## Remaining work
 
-- Issue exactly one /local-extract-exact-provenance-binding-microbenchmark 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d owner command after re-verifying PR #273 exact head.
-- Capture the resulting run/job/artifact/report identities and determine whether the execution is integrity-valid under the frozen experiment contract.
-- Stop after the first integrity-valid scientific result and re-engage the independent reviewer before selecting any next scientific phase.
-- Do not tune or rerun an integrity-valid result; no duplicate scientific trigger is authorized.
+- Obtain mandatory independent post-result review of run 40411159582 / job 121881887321 / artifact 12693836542 and the frozen outcome EXACT_PROVENANCE_BINDING_PREMISE_REJECTED.
+- Do not tune or rerun the integrity-valid exact-provenance experiment.
+- After reviewer disposition, select the next scientific phase strictly from the reviewed residual evidence.
 - Keep acceptance_candidate_frozen=false and the sealed semantic acceptance benchmark untouched.
 
 ## Blockers / gates
