@@ -69,6 +69,20 @@ Separately, when temporary public visibility or hosted capacity is actually acti
 
 Live workspace-control self-hosted activation is blocked pending independent review of the exact v0.1 design/manifest.
 
+## Emergency unblock incident — 2026-10-26
+
+- Temporary public visibility on `workspace-control` restored GitHub-hosted reconciliation while `research-engine` returned private.
+- The exact-provenance implementation gate reached real Lambda execution; the original workflow and `cpu-test` systemd profiles both had 30-minute ceilings, so the job was terminated during contract tests.
+- Both infrastructure ceilings were widened to 60 minutes without changing the frozen design, implementation candidate, benchmark, or scientific authority.
+- Recovery exposed a controller reliability defect: `maxRunners=1` plus stale GitHub assigned-job bookkeeping can poison a lane after runner termination/restart, and duplicate recovery triggers make that queue state worse.
+- The exact-provenance validation route is temporarily transported through the healthy research-engine GPU scale-set listener while the root execution contract remains `cpu-public-ci-v1` / `cpu-test` / GPU count 0.
+- The validation-only contract-test step is now network-free and executes the same 31 no-argument contract tests without `pip install`; trusted workflow blob `ac03ea6196ae1b427e5f3c608e5ce5fb18704e1e` is reconciled.
+- Permanent control-plane work must include stale-assignment recovery, reviewed resource-aware concurrency instead of hard-coded/global serialization, and trusted remote maintenance actions so routine recovery does not require operator shell copy/paste.
+
+## Immediate next safe action
+
+Do not create duplicate exact-provenance validation runs. Wait for superseded run `40266278120` to become terminal. Then issue exactly one validation for candidate `3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d` using the reconciled network-free workflow and require terminal implementation-validation PASS before authorizing the single preregistered scientific trigger.
+
 ## Fresh-chat initialization
 
 @GitHub @Heartbeat
