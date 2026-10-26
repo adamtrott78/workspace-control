@@ -13,48 +13,51 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - Title: GitHub Actions Self-Hosted Control Plane v1
 - Status: IN_PROGRESS
 - Capsule schema: v2
+- Current stage: independent_preimplementation_review
 
 ## Goal
 
-Eliminate routine dependence on metered GitHub-hosted runners by moving workspace-control and project CI onto bounded self-hosted Lambda execution while preserving a non-circular bootstrap authority, per-project isolation, fail-closed admission, review gates, and a clean path to GitHub organization runner groups. Also reduce operator copy/paste by making review targets and dispositions durable and GitHub-native.
+Eliminate routine dependence on metered GitHub-hosted runners by moving workspace-control and project CI onto bounded self-hosted Lambda execution while preserving a non-circular bootstrap authority, per-project isolation, fail-closed admission, review gates, and a clean path to GitHub organization runner groups. Reduce operator copy/paste by making review targets and dispositions durable and GitHub-native.
 
-## Repositories
+## Exact frozen review target
 
-### workspace-control
+- Architecture: `architecture/github-actions-selfhosted-control-plane.v0.1.json@f70f100ba57140469ff656255de00f7de262dbc3`
+- NOT_INSTALLED workspace-control manifest: `architecture/lambda-ci-project-workspace-control.v1.json@efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588`
+- Review instructions: `.github/instructions/selfhosted-control-plane.instructions.md@e91e6179adb636a58f8518ce71c58a6f348e994b`
 
-- Intent: mutate
-- Remote branch: github-actions-selfhosted-control-plane-v1
-- Baseline checkpoint: 3619574d8b10441fbec18f92ce7005d036aad7c8
-- Remote verified: true
+No live registry, controller, workflow target, systemd, or Lambda host state was activated by this design tranche.
 
-### research-engine
+## Core architecture
 
-- Intent: read
-- Remote branch: main
-- Remote checkpoint: 15c2f98feb980f18fac255b74c6a39db5da4ef30
-- Remote verified: true
+1. **L0 stable bootstrap** — independently recoverable authority that can validate/recover control-plane policy without depending on the dynamically reconciled fleet.
+2. **L1 control JIT** — bounded ephemeral/JIT workspace-control validation, initially owner-commanded and concurrency 1.
+3. **L2 project JIT** — existing research-engine/PADataset CPU/GPU project identities and isolation.
 
-## Current stage
+The long-term GitHub organization target uses runner groups restricted by selected repository and, where supported, exact trusted workflows. GitHub-side centralization does not collapse project-specific Unix/filesystem identities.
 
-freeze_control_plane_design
+## Resource target
+
+Initial future control lane: concurrency 1, about 200% CPU, MemoryHigh about 4G, MemoryMax about 8G, no GPU, short runtime. Current project/lane controller hard-cap remains one runner; excess demand queues rather than creating unbounded simultaneous jobs.
 
 ## Next safe action
 
-Freeze the v0.1 control-plane architecture and a NOT_INSTALLED workspace-control JIT manifest, open a design-only PR, and request independent review. In parallel, once temporary public visibility or hosted capacity is available, rerun the authoritative reconciliation to unblock current EXTRACT validation without changing scientific authority.
+Request independent GitHub-native review of the exact frozen design and manifest. Verify bootstrap non-circularity, public-window containment, control isolation/resource bounds, staged automatic-event admission, staged organization migration, and non-self-approving review automation. **Do not activate the workspace-control runner before disposition.**
 
-## Key safety boundary
-
-The existing Lambda reconciliation controller requires a successful trusted reconciliation workflow run before it will hydrate policy. Therefore the trusted bootstrap/reconciliation validator cannot simply be moved onto a dynamically reconciled runner that depends on that same policy. Preserve an independently recoverable bootstrap layer.
+In parallel, once temporary public visibility or hosted capacity is available, the existing exact reconciliation can be rerun to unblock current EXTRACT validation without changing scientific authority.
 
 ## Remaining work
 
-- Freeze exact v0.1 architecture and NOT_INSTALLED workspace-control manifest.
-- Obtain independent review of the design-only change.
+- Obtain and durably consume independent review of exact v0.1 design/manifest.
 - Restore the currently blocked reconciliation/EXTRACT validation chain using the temporary emergency capacity workaround.
-- Implement and validate a bounded workspace-control self-hosted pilot without creating bootstrap circularity.
-- Migrate routine hosted CI only after the pilot is accepted.
-- Evaluate and separately execute GitHub organization migration with runner groups.
+- After NO_BLOCKING_FINDING, implement and validate the P1 owner-commanded workspace-control JIT pilot without moving bootstrap reconciliation authority.
+- Design/review control-small and automatic pull_request/push admission as P2.
+- Migrate routine hosted CI only after the pilot and automatic-event gates pass.
+- Evaluate and separately execute GitHub organization migration with runner groups and least-privilege GitHub App credentials.
 - Automate routine review request/consumption so the operator does not ferry text between chats.
+
+## Blocker / gate
+
+Live workspace-control self-hosted activation is blocked pending independent review of the exact v0.1 design/manifest.
 
 ## Fresh-chat initialization
 
@@ -63,9 +66,11 @@ The existing Lambda reconciliation controller requires a successful trusted reco
 https://github.com/adamtrott78/workspace-control
 
 Continue the durable workspace-control task defined by:
+
 `tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json`
 
 Task ID:
+
 `workspace-github-actions-selfhosted-control-plane-v1`
 
 Start from the normal workspace-control root route.
