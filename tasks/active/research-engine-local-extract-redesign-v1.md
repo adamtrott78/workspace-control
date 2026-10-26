@@ -30,29 +30,27 @@ Return to first principles on research-engine EXTRACT and identify, benchmark, a
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 87311dbb30fdd0ccc7b6f66c02ade9b4d26d1a78
+- Remote checkpoint: 6d6020b734a4b3e0564c6f3907acb6940781b070
 - Remote verified: true
 
 ### research-engine
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: 15c2f98feb980f18fac255b74c6a39db5da4ef30
+- Remote checkpoint: 0badc99b894d87413d065afdcd37a678c2839007
 - Remote verified: true
 
 ## Next safe action
 
-Do NOT trigger EXACT_PROVENANCE_BINDING_MICROBENCH_V1 yet. First obtain a successful trusted Lambda CI Project Reconcile source-validation run for the current workspace-control project manifest, allowing the live reconciliation controller to install cpu-validation-exact-provenance and model-eval-exact-provenance-binding. Then obtain an executed PASS receipt from validation run 40242535180 on research-engine PR #273 exact head 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d (or replace only if that queued run becomes unusable). Only after executed CPU validation PASS may the owner checkpoint the validated exact SHA and issue exactly one scientific trigger. No acceptance freeze or sealed holdout access.
+Re-verify research-engine PR #273 is OPEN, same-repository, and still exactly at head 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d. Then issue exactly one owner comment `/local-extract-exact-provenance-binding-microbenchmark 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d`. Do not issue a duplicate trigger. Capture the exact run/job/artifact/report identities and stop on the first integrity-valid scientific result for mandatory independent post-result review. Keep acceptance_candidate_frozen=false and the sealed semantic acceptance benchmark untouched.
 
 ## Remaining work
 
-- Get a successful trusted Lambda CI Project Reconcile source-validation run for current workspace-control reconciliation inputs. Current zero-step GitHub-hosted failures do not count as validation or scientific failures.
-- Let live reconcile-controller apply the cpu-validation-exact-provenance and model-eval-exact-provenance-binding routes.
-- Obtain executed CPU implementation/contract validation PASS for exact inert PR #273 head 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d (or a new marker-only exact head only if the existing queued run becomes unusable).
-- Do not issue any model/GPU scientific trigger before that PASS.
-- After validation PASS, checkpoint the exact validated implementation/trigger SHA and issue exactly one /local-extract-exact-provenance-binding-microbenchmark <SHA> command.
-- Stop on the first integrity-valid scientific result and re-engage the independent reviewer before selecting any next phase.
-- Keep acceptance_candidate_frozen=false and sealed semantic acceptance benchmark untouched.
+- Issue exactly one /local-extract-exact-provenance-binding-microbenchmark 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d owner command after re-verifying PR #273 exact head.
+- Capture the resulting run/job/artifact/report identities and determine whether the execution is integrity-valid under the frozen experiment contract.
+- Stop after the first integrity-valid scientific result and re-engage the independent reviewer before selecting any next scientific phase.
+- Do not tune or rerun an integrity-valid result; no duplicate scientific trigger is authorized.
+- Keep acceptance_candidate_frozen=false and the sealed semantic acceptance benchmark untouched.
 
 ## Blockers / gates
 
