@@ -451,7 +451,7 @@
       "trusted_workflow": {
         "path": ".github/workflows/exact-provenance-implementation-validation.yml",
         "default_branch": "main",
-        "blob_sha": "948127a890245bff6856fa550b7fcdc6c949398c"
+        "blob_sha": "519bd73b51bec47f94a6a2e16278eb866e9af1ea"
       },
       "trigger": {
         "event_name": "issue_comment",
