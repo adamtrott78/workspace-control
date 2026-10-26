@@ -23,31 +23,34 @@ Provide an independent, durable review/support lane for research-engine-local-ex
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 0bbe21f1caefa8b8c8a17c750f7a76b70d62bae0
+- Remote branch: review-exact-provenance-post-result-v1
+- Remote checkpoint: cd05211105620c3ad399a29a6f2fcfc8ba2e7398
 - Remote verified: true
 
 ### research-engine
 
 - Intent: read
 - Remote branch: main
-- Remote checkpoint: 13a129ef820c611adf6a6ca70598df1e67d56efc
+- Remote checkpoint: 0badc99b894d87413d065afdcd37a678c2839007
 - Remote verified: true
 
 ## Next safe action
 
-Owner may implement exactly EXACT_PROVENANCE_BINDING_MICROBENCH_V1 from research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e under reviewer disposition NO_BLOCKING_FINDING. Preserve every frozen visible-field, prompt/template, E0 mapping, parser/guard, case, runtime, completeness, preservation, outcome, and one-valid-run contract. Obtain successful implementation/contract validation before any scientific trigger or execution. Any scientific contract change requires re-review. After the genuine result, stop and re-engage independent reviewer before next-phase selection. No acceptance freeze or sealed holdout access.
+Perform the mandatory independent post-result review of the exact one-shot EXACT_PROVENANCE_BINDING_MICROBENCH_V1 result: research-engine PR #273 candidate 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d; implementation validation run 40269453984 PASS; scientific run 40411159582 / job 121881887321 / artifact 12693836542 / report sha256 fce8c958e0f91dffd9a740de2c71d1d451c6e3861e399f1afa550a50bd8f4f24. Audit the frozen all-or-nothing outcome and integrity/preservation evidence without rerun or posthoc gate changes. Persist NO_BLOCKING_FINDING or exact blocking findings in this reviewer task, then hand control back to owner task research-engine-local-extract-redesign-v1. No acceptance freeze or sealed holdout access.
 
 ## Remaining work
 
-- Owner may implement exactly research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / design blob 09603c4d65114c75ad3e112a357ee45da384f63e / EXACT_PROVENANCE_BINDING_MICROBENCH_V1; no scientific contract changes are authorized.
-- Require successful implementation and exact contract validation before any one-shot scientific trigger; zero-step GitHub-hosted failures are validation unavailable, not PASS.
-- After any genuine scientific result, perform mandatory independent post-result review before preservation-aware admission design, next science, or acceptance-candidate decision.
-- Keep sealed acceptance benchmark untouched and acceptance_candidate_frozen=false.
+- Independently review the exact one-shot scientific result run 40411159582 against frozen EXACT_PROVENANCE_BINDING_MICROBENCH_V1; do not rerun, retune, or rewrite the gate.
+- Verify Arm A: 7/7 case contracts, 3/3 false-positive reject/abstain, 3/4 true-support acceptance with exact provenance 3/4, no false-positive provenance attachments.
+- Verify Arm B: 6/7 case contracts, 3/3 false-positive reject/abstain, 4/4 true-support acceptance with exact provenance 4/4, no false-positive provenance attachments; the sole contract failure is FP_TRAINING_PRETRAINING_NO_LABELS with ordinary failure reason INVALID_ENUM_OR_FIELD_TYPE.
+- Verify all experiment-integrity and preservation controls remain PASS: evidence set 28->28 unchanged, prior supported atoms 9/9, frozen controls 7/7, teacher/PDF identities intact, 14 stateless model calls.
+- Determine whether the frozen outcome EXACT_PROVENANCE_BINDING_PREMISE_REJECTED is correct and record bounded failure interpretation; distinguish Arm A semantic false-negative behavior from Arm B schema/contract brittleness.
+- Do not authorize acceptance freeze, sealed holdout access, production EXTRACT/VERIFY changes, Wave 7B, or semantic-control coupling.
+- After reviewer disposition is durable, owner research-engine-local-extract-redesign-v1 may consume it and only then choose the next scientific phase.
 
 ## Blockers / gates
 
-- None.
+- Owner next-phase scientific selection is blocked pending independent post-result review of run 40411159582.
 
 ## Fresh-chat initialization
 
