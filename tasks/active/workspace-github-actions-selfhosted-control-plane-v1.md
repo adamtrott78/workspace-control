@@ -39,11 +39,21 @@ The long-term GitHub organization target uses runner groups restricted by select
 
 Initial future control lane: concurrency 1, about 200% CPU, MemoryHigh about 4G, MemoryMax about 8G, no GPU, short runtime. Current project/lane controller hard-cap remains one runner; excess demand queues rather than creating unbounded simultaneous jobs.
 
+## Review surface
+
+- PR #508, initial frozen design-review head `ff8515b59070b8761e5f78db633e359395880196`.
+- Copilot review was requested via GitHub REST, but no reviewer/review is currently visible; independent review remains unsatisfied.
+- Hosted validation run `40249868676` / job `121339210627` failed before runner execution with `steps=null`: `VALIDATION_UNAVAILABLE`, not design failure.
+
+## Resource audit
+
+The generic provisioner currently uses one process-global `_active` set and current project manifests use `concurrency: 1`, so generic execution is effectively host-wide serialized. Moving control jobs onto Lambda therefore increases queue depth/latency, not simultaneous host load, unless a later reviewed scheduler change deliberately permits parallelism.
+
 ## Next safe action
 
-Request independent GitHub-native review of the exact frozen design and manifest. Verify bootstrap non-circularity, public-window containment, control isolation/resource bounds, staged automatic-event admission, staged organization migration, and non-self-approving review automation. **Do not activate the workspace-control runner before disposition.**
+On PR #508, obtain an independent review of the exact frozen design and manifest. Verify bootstrap non-circularity, public-window containment, control isolation/resource bounds, current global serialization/queue implications, staged automatic-event admission, staged organization migration, and non-self-approving review automation. **Do not activate the workspace-control runner before disposition.**
 
-In parallel, once temporary public visibility or hosted capacity is available, the existing exact reconciliation can be rerun to unblock current EXTRACT validation without changing scientific authority.
+Separately, when temporary public visibility or hosted capacity is actually active, rerun authoritative reconciliation `40243005403` to unblock current EXTRACT validation without changing scientific authority.
 
 ## Remaining work
 
