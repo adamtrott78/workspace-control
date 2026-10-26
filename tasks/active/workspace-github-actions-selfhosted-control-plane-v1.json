@@ -187,7 +187,7 @@
     },
     {
       "id": "emergency_restore_current_execution",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "operator+chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -196,12 +196,33 @@
         "authoritative failed reconciliation run 40243005403"
       ],
       "outputs": [
-        "executed reconciliation PASS",
-        "hydrated lambda-research-engine exact-provenance route",
-        "exact-provenance CPU validation execution"
+        "workspace-control temporary public visibility restored hosted control-plane execution",
+        "authoritative reconciliation executes successfully on GitHub-hosted runner",
+        "research-engine remains private",
+        "exact-provenance implementation-validation route temporarily transported through healthy research-engine GPU scale-set while root execution contract remains cpu-public-ci-v1/cpu-test/GPU-count-0",
+        "implementation-validation workflow timeout raised to 60 minutes and network-dependent package installation removed from the validation-only contract-test step",
+        "final implementation validation still pending terminal PASS before scientific trigger"
       ],
-      "validation": [],
-      "resume_condition": "Current EXTRACT owner receives actual implementation-validation PASS before any scientific trigger."
+      "validation": [
+        {
+          "check": "Emergency hosted reconciliation availability",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control reconcile run 40243005403 attempt 5 executed real steps and succeeded after temporary public visibility.",
+            "workspace-control reconciliation run 40267445711 succeeded after re-pinning the network-free exact-provenance validation workflow."
+          ]
+        },
+        {
+          "check": "Exact-provenance self-hosted transport",
+          "result": "IN_PROGRESS",
+          "evidence": [
+            "research-engine exact-provenance run 40266278120 was successfully claimed and executed through the research-engine GPU scale-set listener while workflow step 'Prove bounded CPU validation runner' passed.",
+            "The root route remains cpu-public-ci-v1/cpu-test with no GPU execution authority.",
+            "Run 40266278120 uses the superseded network-dependent contract-test step and is not authoritative for the new network-free workflow."
+          ]
+        }
+      ],
+      "resume_condition": "Wait for the superseded live validation run to terminate; then issue exactly one validation using the reconciled network-free workflow and require terminal implementation-validation PASS before any scientific trigger."
     },
     {
       "id": "workspace_control_selfhosted_validation_pilot",
@@ -326,6 +347,21 @@
         "Current active project manifests use concurrency=1, so generic runner execution is effectively host-wide serialized.",
         "Adding workspace-control demand increases queue depth/latency without increasing simultaneous Lambda workload under current policy."
       ]
+    },
+    {
+      "id": "extract-unblock-infrastructure-incident-2026-10-26",
+      "kind": "runtime_incident",
+      "identity": "research-engine#273|candidate=3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d",
+      "required_for_resume": true,
+      "evidence": [
+        "Private-repository hosted Actions quota exhaustion produced zero-step VALIDATION_UNAVAILABLE failures; temporary public workspace-control restored hosted reconciliation while research-engine returned private.",
+        "Exact-provenance validation reached real Lambda execution but the original cpu-test RuntimeMaxSec=30min and workflow timeout-minutes=30 killed the job during contract tests.",
+        "Both infrastructure ceilings were raised to 60 minutes without changing candidate code, frozen design, benchmark, or scientific authority.",
+        "GitHub scale-set maxRunners=1 plus stale assigned-job bookkeeping caused repeated queue poisoning after runner termination/restart; duplicate validation triggers compounded the queue and are prohibited during recovery.",
+        "A temporary transport-only route moved cpu-validation-exact-provenance to the healthy research-engine GPU scale-set listener while retaining cpu-public-ci-v1/cpu-test/GPU-count-0 enforcement.",
+        "The implementation-validation workflow was hardened to execute the same 31 no-argument contract tests without pip/network dependency; trusted workflow blob ac03ea6196ae1b427e5f3c608e5ce5fb18704e1e is reconciled.",
+        "Permanent control-plane work must address stale assignment recovery, remove hard-coded maxRunners=1 as a recovery bottleneck, replace host-wide global serialization with reviewed resource-aware concurrency, and provide trusted remote host-maintenance actions so routine recovery does not require operator shell copy/paste."
+      ]
     }
   ],
   "artifacts": [
@@ -398,10 +434,13 @@
     "Design/review control-small and automatic pull_request/push admission as P2.",
     "Migrate routine hosted CI only after the pilot and automatic-event gates pass.",
     "Evaluate and separately execute GitHub organization migration with runner groups and least-privilege GitHub App credentials.",
-    "Automate routine review request/consumption so the operator does not ferry text between chats."
+    "Automate routine review request/consumption so the operator does not ferry text between chats.",
+    "Treat stale GitHub scale-set assignment recovery as a required controller reliability fix: a controller restart must not leave TotalAssignedJobs>0 without authoritative recoverable job metadata indefinitely blocking the lane.",
+    "Replace hard-coded maxRunners=1 and host-wide global serialization with separately reviewed bounded/resource-aware concurrency; preserve explicit GPU/CPU envelopes and fail-closed admission.",
+    "Add trusted, owner-restricted remote maintenance/reconciliation actions for controller restart, reviewed profile installation, and bounded recovery so routine operations do not require operator shell copy/paste."
   ],
-  "next_safe_action": "On PR #508, obtain an independent review of architecture/github-actions-selfhosted-control-plane.v0.1.json blob f70f100ba57140469ff656255de00f7de262dbc3 and architecture/lambda-ci-project-workspace-control.v1.json blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588. Review must verify bootstrap non-circularity, public-window containment, control isolation/resource bounds, current global serialization/queue implications, staged automatic-event admission, staged organization migration, and non-self-approving review automation. Do not activate the workspace-control runner before disposition. Separately, when temporary public visibility or hosted capacity is actually active, rerun authoritative reconciliation 40243005403 to unblock current EXTRACT validation.",
+  "next_safe_action": "Current emergency path: do not create duplicate exact-provenance validation runs. Wait for superseded run 40266278120 to become terminal, then trigger exactly one `/validate-exact-provenance-binding 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d` run using the reconciled network-free trusted workflow blob ac03ea6196ae1b427e5f3c608e5ce5fb18704e1e and require terminal implementation-validation PASS before authorizing the one preregistered scientific trigger. In parallel, PR #508 remains design-only and independently unreviewed; do not activate a workspace-control runner from that design until independent disposition.",
   "last_executor": "chatgpt",
   "last_surface": "github+heartbeat",
-  "notes": "Created 2026-10-25/26 after exhausting the account's 2,000 included private-repository GitHub-hosted Actions minutes. This task separates immediate availability recovery from the permanent architecture. The permanent target is private repositories with GitHub used for source/events/control APIs and bounded Lambda self-hosted runners for routine execution. The bootstrap authority must remain independently recoverable and cannot depend on the dynamic fleet it authorizes.\n\n2026-10-25/26 design-review checkpoint: PR #508 opened from frozen design branch. GitHub REST accepted requests for copilot-pull-request-reviewer[bot] in draft and ready states, but requested-reviewer state remained empty and no Copilot review was present, so independent review remains unsatisfied. Read-only provisioner audit established current host-wide serialization through the global _active set at manifest concurrency=1. P3 org audit also found hard-coded runnerGroupID=1, repo-scoped GitHubConfigURL rendering, and PAT-oriented reconciled env; these remain separately reviewed P3 work."
+  "notes": "Created 2026-10-25/26 after exhausting the account's 2,000 included private-repository GitHub-hosted Actions minutes. This task separates immediate availability recovery from the permanent architecture. The permanent target is private repositories with GitHub used for source/events/control APIs and bounded Lambda self-hosted runners for routine execution. The bootstrap authority must remain independently recoverable and cannot depend on the dynamic fleet it authorizes.\n\n2026-10-25/26 design-review checkpoint: PR #508 opened from frozen design branch. GitHub REST accepted requests for copilot-pull-request-reviewer[bot] in draft and ready states, but requested-reviewer state remained empty and no Copilot review was present, so independent review remains unsatisfied. Read-only provisioner audit established current host-wide serialization through the global _active set at manifest concurrency=1. P3 org audit also found hard-coded runnerGroupID=1, repo-scoped GitHubConfigURL rendering, and PAT-oriented reconciled env; these remain separately reviewed P3 work.\n\n2026-10-26 emergency-unblock incident evidence: temporary public workspace-control restored hosted reconciliation while research-engine returned private. Exact-provenance validation exposed a 30-minute workflow/systemd timeout collision, stale scale-set assignment recovery under maxRunners=1, and unnecessary network-dependent package installation inside the implementation gate. The timeout was widened to 60 minutes, exact-provenance transport was temporarily moved to the healthy research-engine GPU listener while preserving cpu-public-ci-v1/cpu-test/GPU-count-0 execution, and the validation workflow was made network-free. Permanent architecture must eliminate recurring operator shell intervention and stale-assignment queue poisoning without weakening admission or review boundaries."
 }
