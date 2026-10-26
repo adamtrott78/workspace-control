@@ -40,7 +40,7 @@
       "base_sha": "3619574d8b10441fbec18f92ce7005d036aad7c8",
       "remote": {
         "branch": "github-actions-selfhosted-control-plane-v1",
-        "checkpoint_sha": "3619574d8b10441fbec18f92ce7005d036aad7c8",
+        "checkpoint_sha": "ff8515b59070b8761e5f78db633e359395880196",
         "verified": true
       },
       "local": null,
@@ -303,6 +303,29 @@
         "Initial control resource target is concurrency=1, CPU~200%, MemoryMax~8G, no GPU.",
         "GitHub organization migration and automatic-event admission are separately gated follow-on phases."
       ]
+    },
+    {
+      "id": "design-review-pr-508",
+      "kind": "pull_request",
+      "identity": "workspace-control#508@ff8515b59070b8761e5f78db633e359395880196",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #508 is the design-only review surface.",
+        "Frozen architecture and NOT_INSTALLED manifest blobs are unchanged from the task review target.",
+        "PR was marked ready for review; no live activation is included."
+      ]
+    },
+    {
+      "id": "generic-provisioner-host-serialization-audit",
+      "kind": "runtime_policy_audit",
+      "identity": "workspace-control@3619574d8b10441fbec18f92ce7005d036aad7c8:scripts/lambda_ci_provisioner_service.py:global_active_set",
+      "required_for_resume": false,
+      "evidence": [
+        "ProvisionerService owns one process-global _active set.",
+        "Admission compares len(_active) to the requesting manifest concurrency.",
+        "Current active project manifests use concurrency=1, so generic runner execution is effectively host-wide serialized.",
+        "Adding workspace-control demand increases queue depth/latency without increasing simultaneous Lambda workload under current policy."
+      ]
     }
   ],
   "artifacts": [
@@ -354,6 +377,15 @@
         "Public visibility is explicitly emergency-only; desired steady state remains private.",
         "P2 automatic pull_request/push admission and P3 organization migration remain separately reviewed future phases."
       ]
+    },
+    {
+      "check": "PR #508 hosted validation availability",
+      "result": "NOT_RUN",
+      "evidence": [
+        "Workspace Control Validation run 40249868676 concluded failure before runner execution.",
+        "Job 121339210627 has steps=null; classify VALIDATION_UNAVAILABLE, not implementation/design FAIL.",
+        "Latest connector check still reports workspace-control private; no additional hosted rerun was issued while quota remained exhausted."
+      ]
     }
   ],
   "blockers": [
@@ -368,8 +400,8 @@
     "Evaluate and separately execute GitHub organization migration with runner groups and least-privilege GitHub App credentials.",
     "Automate routine review request/consumption so the operator does not ferry text between chats."
   ],
-  "next_safe_action": "Request independent GitHub-native review of architecture/github-actions-selfhosted-control-plane.v0.1.json blob f70f100ba57140469ff656255de00f7de262dbc3 and architecture/lambda-ci-project-workspace-control.v1.json blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588. Review must verify bootstrap non-circularity, public-window containment, control isolation/resource bounds, staged automatic-event admission, staged organization migration, and non-self-approving review automation. Do not activate the workspace-control runner before disposition.",
+  "next_safe_action": "On PR #508, obtain an independent review of architecture/github-actions-selfhosted-control-plane.v0.1.json blob f70f100ba57140469ff656255de00f7de262dbc3 and architecture/lambda-ci-project-workspace-control.v1.json blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588. Review must verify bootstrap non-circularity, public-window containment, control isolation/resource bounds, current global serialization/queue implications, staged automatic-event admission, staged organization migration, and non-self-approving review automation. Do not activate the workspace-control runner before disposition. Separately, when temporary public visibility or hosted capacity is actually active, rerun authoritative reconciliation 40243005403 to unblock current EXTRACT validation.",
   "last_executor": "chatgpt",
   "last_surface": "github+heartbeat",
-  "notes": "Created 2026-10-25/26 after exhausting the account's 2,000 included private-repository GitHub-hosted Actions minutes. This task separates immediate availability recovery from the permanent architecture. The permanent target is private repositories with GitHub used for source/events/control APIs and bounded Lambda self-hosted runners for routine execution. The bootstrap authority must remain independently recoverable and cannot depend on the dynamic fleet it authorizes."
+  "notes": "Created 2026-10-25/26 after exhausting the account's 2,000 included private-repository GitHub-hosted Actions minutes. This task separates immediate availability recovery from the permanent architecture. The permanent target is private repositories with GitHub used for source/events/control APIs and bounded Lambda self-hosted runners for routine execution. The bootstrap authority must remain independently recoverable and cannot depend on the dynamic fleet it authorizes.\n\n2026-10-25/26 design-review checkpoint: PR #508 opened from frozen design branch. GitHub REST accepted requests for copilot-pull-request-reviewer[bot] in draft and ready states, but requested-reviewer state remained empty and no Copilot review was present, so independent review remains unsatisfied. Read-only provisioner audit established current host-wide serialization through the global _active set at manifest concurrency=1. P3 org audit also found hard-coded runnerGroupID=1, repo-scoped GitHubConfigURL rendering, and PAT-oriented reconciled env; these remain separately reviewed P3 work."
 }
