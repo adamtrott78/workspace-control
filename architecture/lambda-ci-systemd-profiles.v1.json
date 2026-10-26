@@ -60,7 +60,7 @@
       "MemoryHigh": "28G",
       "MemoryMax": "32G",
       "TasksMax": 4096,
-      "RuntimeMaxSec": "30min",
+      "RuntimeMaxSec": "60min",
       "DeviceAllow": [],
       "CUDA_VISIBLE_DEVICES": ""
     },
