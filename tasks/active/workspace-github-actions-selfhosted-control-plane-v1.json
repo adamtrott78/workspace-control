@@ -214,7 +214,7 @@
         },
         {
           "check": "Exact-provenance self-hosted transport",
-          "result": "IN_PROGRESS",
+          "result": "NOT_RUN",
           "evidence": [
             "research-engine exact-provenance run 40266278120 was successfully claimed and executed through the research-engine GPU scale-set listener while workflow step 'Prove bounded CPU validation runner' passed.",
             "The root route remains cpu-public-ci-v1/cpu-test with no GPU execution authority.",
