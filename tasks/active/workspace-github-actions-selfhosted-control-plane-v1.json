@@ -1,0 +1,285 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-github-actions-selfhosted-control-plane-v1",
+  "title": "GitHub Actions Self-Hosted Control Plane v1",
+  "status": "IN_PROGRESS",
+  "goal": "Eliminate routine dependence on metered GitHub-hosted runners by moving workspace-control and project CI onto bounded self-hosted Lambda execution while preserving a non-circular bootstrap authority, per-project isolation, fail-closed admission, review gates, and a clean path to GitHub organization runner groups. Also reduce operator copy/paste by making review targets and dispositions durable and GitHub-native.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "current_stage": "freeze_control_plane_design",
+  "acceptance_criteria": [
+    "Immediate quota exhaustion is treated as an infrastructure availability failure only; scientific/implementation authority is not widened to bypass validation.",
+    "The emergency public-repository window is temporary and does not weaken owner-only commands, exact SHA checks, same-repository PR-head checks, fork execution prohibitions, or other existing admission controls.",
+    "A stable bootstrap/control authority exists below the dynamic JIT fleet so reconciliation never depends on a runner whose own existence requires that reconciliation.",
+    "workspace-control gains a bounded self-hosted validation path without granting it access to research-engine, PADataset, GPU devices, operator home, Docker sockets, provisioner state, or sibling project roots.",
+    "Routine control validation has an explicit small CPU/RAM/runtime budget and bounded concurrency; increased workflow volume creates queue depth rather than unbounded simultaneous execution.",
+    "research-engine and PADataset keep project-scoped execution identities and filesystem/security isolation even if GitHub-side runner registration later moves to organization scope.",
+    "All remaining ubuntu-latest workflows are inventoried and either migrated, intentionally retained as emergency bootstrap, or explicitly justified.",
+    "The long-term GitHub organization design uses runner groups and repository/workflow restrictions so GitHub-side runner authorization is at least as narrow as current per-repository routing.",
+    "Organization migration is reversible and separately gated; repository transfer, runner re-registration, credential changes, and workflow owner-path changes are not bundled into the first live migration.",
+    "Pre-implementation and implementation reviews can be requested and consumed from durable GitHub state without the operator manually copying review text between chats.",
+    "No live host mutation or runner activation occurs before the exact design receives independent review; design-only and NOT_INSTALLED scaffolding are allowed.",
+    "After migration, private repositories can operate routine CI without consuming GitHub-hosted Actions minutes except explicitly retained emergency/fallback workflows."
+  ],
+  "constraints": [
+    "Do not alter Local EXTRACT scientific design, benchmark contents, result interpretation, trigger authority, or sealed acceptance data.",
+    "Do not use quota exhaustion as justification to skip required validation or independent review.",
+    "Do not let a dynamically reconciled workspace-control runner become the sole authority that approves the policy required to create itself.",
+    "Do not attach unrestricted self-hosted runners to public repositories; the temporary public window is an emergency billing/bootstrap workaround only.",
+    "Do not expose /home/atrott, Docker sockets, sibling project roots, root reconciler/provisioner state, trusted model caches, or GPU devices to routine control CI.",
+    "Do not increase project/lane execution concurrency without an explicit resource and isolation review.",
+    "Do not perform GitHub organization migration in the same change that first proves the dedicated workspace-control self-hosted lane.",
+    "Prefer GitHub App credentials with least privilege over broad PATs for any later organization-scoped runner control.",
+    "Keep durable task capsules, exact Git identities, workflow blobs, receipts, and policy artifacts authoritative; runner labels or organization membership do not create execution authority.",
+    "A review bot or Copilot review may reduce operator work but cannot silently satisfy a task contract that explicitly requires an independent scientific/architecture reviewer unless that contract is amended and independently accepted."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "3619574d8b10441fbec18f92ce7005d036aad7c8",
+      "remote": {
+        "branch": "github-actions-selfhosted-control-plane-v1",
+        "checkpoint_sha": "3619574d8b10441fbec18f92ce7005d036aad7c8",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json",
+        "tasks/active/workspace-github-actions-selfhosted-control-plane-v1.md",
+        "architecture/github-actions-selfhosted-control-plane.v0.1.json",
+        "architecture/lambda-ci-project-workspace-control.v1.json",
+        "architecture/lambda-ci-project-registry.v1.json",
+        "architecture/lambda-ci-execution-contracts.v1.json",
+        "architecture/lambda-ci-systemd-profiles.v1.json",
+        "schemas/lambda-ci-project-manifest.v2.schema.json",
+        "controller/lambda-ci-controller/**",
+        "scripts/lambda_ci_*.py",
+        "templates/lambda-ci/**",
+        "systemd/workspace-ci-*.service",
+        ".github/workflows/workspace-control-validation.yml",
+        ".github/workflows/lambda-ci-project-reconcile.yml",
+        ".github/workflows/lambda-ci-workspace-control-validation.yml",
+        ".github/copilot-instructions.md",
+        ".github/instructions/**",
+        "tests/test_lambda_ci_*.py",
+        "procedures/**"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "15c2f98feb980f18fac255b74c6a39db5da4ef30",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "15c2f98feb980f18fac255b74c6a39db5da4ef30",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "recover_quota_failure_and_live_dependency",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+gmail+heartbeat",
+      "inputs": [
+        "GitHub Actions run 40243005403 and zero-step job 121320630271",
+        "research-engine queued self-hosted validation run 40242535180 / job 121317223790",
+        "GitHub usage alert: 2000/2000 included Actions minutes consumed"
+      ],
+      "outputs": [
+        "root cause: private-repository GitHub-hosted ubuntu-latest quota exhausted",
+        "self-hosted Lambda execution itself is not the metered minute source",
+        "hosted reconciliation success is an authority dependency for live route hydration"
+      ],
+      "validation": [
+        {
+          "check": "Quota/root-cause diagnosis",
+          "result": "PASS",
+          "evidence": [
+            "GitHub usage notice reports 2,000 / 2,000 included Actions minutes used for adamtrott78.",
+            "workspace-control reconcile job failed before executing any step on ubuntu-latest.",
+            "exact-provenance validation is configured for lambda-research-engine and remained queued while route hydration was unavailable."
+          ]
+        }
+      ],
+      "resume_condition": "Emergency public-repository workaround or paid hosted capacity restores one executed reconciliation PASS."
+    },
+    {
+      "id": "research_reference_architecture",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+web",
+      "inputs": [
+        "GitHub self-hosted runner documentation",
+        "GitHub runner scale set client and ephemeral/JIT guidance",
+        "GitHub organization runner-group access controls",
+        "existing workspace-control custom scale-set substrate"
+      ],
+      "outputs": [
+        "retain JIT/ephemeral project runners",
+        "introduce stable bootstrap/control authority below dynamic reconciliation",
+        "target organization-level runner groups with repository/workflow restrictions after first self-hosted control lane is proven"
+      ],
+      "validation": [
+        {
+          "check": "Industry-pattern fit",
+          "result": "PASS",
+          "evidence": [
+            "GitHub supports organization-level self-hosted runners and runner groups restricted by repository and workflow.",
+            "GitHub recommends ephemeral/JIT runners for autoscaling; workspace-control already uses the official actions/scaleset client with JIT runner creation.",
+            "Current controller hard-caps each project/lane scale set at maxRunners=1, providing backpressure instead of unbounded concurrency."
+          ]
+        }
+      ],
+      "resume_condition": "Exact architecture is frozen and independently reviewed before live migration."
+    },
+    {
+      "id": "freeze_control_plane_design",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+heartbeat",
+      "inputs": [
+        "current workspace-control main",
+        "live runner manifests/controllers/reconciler",
+        "current hosted workflows and bootstrap authority chain"
+      ],
+      "outputs": [
+        "architecture/github-actions-selfhosted-control-plane.v0.1.json",
+        "architecture/lambda-ci-project-workspace-control.v1.json",
+        "independent design review disposition"
+      ],
+      "validation": [],
+      "resume_condition": "NO_BLOCKING_FINDING or exact blockers on the frozen design-only change."
+    },
+    {
+      "id": "emergency_restore_current_execution",
+      "status": "PLANNED",
+      "execution_owner": "operator+chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "temporary public visibility or restored hosted Actions capacity",
+        "authoritative failed reconciliation run 40243005403"
+      ],
+      "outputs": [
+        "executed reconciliation PASS",
+        "hydrated lambda-research-engine exact-provenance route",
+        "exact-provenance CPU validation execution"
+      ],
+      "validation": [],
+      "resume_condition": "Current EXTRACT owner receives actual implementation-validation PASS before any scientific trigger."
+    },
+    {
+      "id": "workspace_control_selfhosted_validation_pilot",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+lambda",
+      "inputs": [
+        "independently accepted v0.1 control-plane design",
+        "NOT_INSTALLED workspace-control project manifest"
+      ],
+      "outputs": [
+        "dedicated workspace-control JIT CPU validation route",
+        "exact resource/isolation policy",
+        "pilot workflow and receipts"
+      ],
+      "validation": [],
+      "resume_condition": "Pilot passes repository/workflow identity, filesystem isolation, resource envelope, and rollback gates."
+    },
+    {
+      "id": "remove_hosted_runner_steady_state_dependency",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "accepted workspace-control pilot",
+        "automatic-event admission design",
+        "stable non-circular bootstrap authority"
+      ],
+      "outputs": [
+        "self-hosted workspace-control PR validation",
+        "self-hosted trusted reconciliation validation",
+        "research-engine ordinary CI migration",
+        "ubuntu-latest inventory with explicit retained exceptions"
+      ],
+      "validation": [],
+      "resume_condition": "Private-repository steady-state CI succeeds with zero routine hosted-runner requirement."
+    },
+    {
+      "id": "github_organization_migration",
+      "status": "PLANNED",
+      "execution_owner": "operator+chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "accepted self-hosted steady-state architecture",
+        "organization ownership decision",
+        "runner-group and credential migration plan"
+      ],
+      "outputs": [
+        "organization-owned repositories",
+        "organization runner groups separated by control/research/project scope",
+        "workflow-level runner-group restrictions where supported",
+        "least-privilege GitHub App runner management"
+      ],
+      "validation": [],
+      "resume_condition": "Repository transfer and runner re-registration pass without weakening isolation or bootstrap recovery."
+    },
+    {
+      "id": "review_automation",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "durable task/review capsules",
+        "GitHub PR review APIs",
+        "optional Copilot code review availability"
+      ],
+      "outputs": [
+        "review requests created automatically from exact PR/design identities",
+        "review dispositions consumed directly from GitHub",
+        "no operator copy/paste for routine design/code review"
+      ],
+      "validation": [],
+      "resume_condition": "Automated review preserves independence requirements and does not self-approve authority-sensitive changes."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "control-plane-overhaul-baseline",
+      "kind": "git_commit",
+      "identity": "workspace-control@3619574d8b10441fbec18f92ce7005d036aad7c8",
+      "required_for_resume": true,
+      "evidence": [
+        "Current main before control-plane redesign task creation.",
+        "Existing project-scoped JIT scale-set system remains active and is not modified by this design-only checkpoint."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [],
+  "blockers": [],
+  "remaining_work": [
+    "Freeze exact v0.1 architecture and NOT_INSTALLED workspace-control manifest.",
+    "Obtain independent review of the design-only change.",
+    "Restore the currently blocked reconciliation/EXTRACT validation chain using the temporary emergency capacity workaround.",
+    "Implement and validate a bounded workspace-control self-hosted pilot without creating bootstrap circularity.",
+    "Migrate routine hosted CI only after the pilot is accepted.",
+    "Evaluate and separately execute GitHub organization migration with runner groups.",
+    "Automate routine review request/consumption so the operator does not ferry text between chats."
+  ],
+  "next_safe_action": "Freeze the v0.1 control-plane architecture and a NOT_INSTALLED workspace-control JIT manifest, open a design-only PR, and request independent review. In parallel, once temporary public visibility or hosted capacity is available, rerun the authoritative reconciliation to unblock current EXTRACT validation without changing scientific authority.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+heartbeat",
+  "notes": "Created 2026-10-25/26 after exhausting the account's 2,000 included private-repository GitHub-hosted Actions minutes. This task separates immediate availability recovery from the permanent architecture. The permanent target is private repositories with GitHub used for source/events/control APIs and bounded Lambda self-hosted runners for routine execution. The bootstrap authority must remain independently recoverable and cannot depend on the dynamic fleet it authorizes."
+}
