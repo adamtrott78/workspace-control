@@ -280,11 +280,21 @@
         "workspace-heartbeat@0.4.8 test completed 34/34 PASS, 0 failures.",
         "The prior stale panel-contract failure was corrected before this run."
       ]
+    },
+    {
+      "check": "Port ownership after interrupted v0.4.8 benchmark",
+      "result": "PASS",
+      "evidence": [
+        "Read-only operator probe verified production :8787 has no listener after heartbeat-down.",
+        "TCP :8788 is owned only by PID 1922601, /home/atrott/miniforge3/envs/workspace-heartbeat-node/bin/node server.js, CWD workspace-heartbeat-runtime-v047/plugins/workspace-heartbeat, exact Git SHA 9e5858738a4fd11801510e2839b0f94f19541506, package v0.4.7.",
+        "PID 1922601 is parented directly to PID 1 and is therefore the orphaned isolated v0.4.7 probe from the prior measurement, not the production tmux launcher.",
+        "TCP :8789 has no listener and is available for the next isolated candidate benchmark."
+      ]
     }
   ],
   "blockers": [
-    "Isolated post-change heartbeat_poll payload benchmark remains incomplete because TCP :8788 was already occupied; identify the listener and use a free isolated port without touching unrelated processes.",
-    "Production v0.4.7 :8787 was manually stopped with heartbeat-down during the interrupted rerun and must be restored to the previously verified v0.4.7 runtime before continuing acceptance.",
+    "Production v0.4.7 :8787 remains stopped after operator heartbeat-down; restore it only through the existing verified heartbeat-up launcher after checking the launcher still targets v0.4.7/Node20/8787.",
+    "Isolated post-change heartbeat_poll payload benchmark remains incomplete; :8789 is verified free and should be used for the exact v0.4.8 candidate.",
     "Secure MCP Tunnel tunnel/workspace association, runtime authorization, embedded app resource delivery, app-only heartbeat_poll behavior, and live ChatGPT acceptance remain unverified; do not retire ngrok yet."
   ],
   "remaining_work": [
@@ -294,7 +304,7 @@
     "Perform live ChatGPT acceptance through Secure MCP Tunnel for model tools, app resource delivery, heartbeat_poll freshness, executor/semantic/card separation, and five/six-entry UI behavior.",
     "Only after acceptance, replace ngrok in the normal launcher path while preserving an operator-understandable rollback/emergency fallback and synchronize final task state."
   ],
-  "next_safe_action": "Restore only the previously verified production v0.4.7 Heartbeat runtime on :8787 using the existing operator launcher, verify exact source 9e5858738a4fd11801510e2839b0f94f19541506 and Node v20.20.2, then identify the existing :8788 listener without killing unknown processes. Run the exact def7c5fe6498b1bd742d912c1490d1f7160cab5f v0.4.8 candidate on a free isolated port and complete no-change/delta/resync payload measurements. Do not deploy v0.4.8 live or retire ngrok yet.",
+  "next_safe_action": "Verify /home/atrott/bin/heartbeat-up still targets the accepted v0.4.7 runtime, workspace-heartbeat-node environment, and port 8787; then restore production :8787 with that launcher and verify exact runtime provenance. Re-verify PID 1922601 is still the orphaned exact v0.4.7 :8788 probe before terminating only that PID. Run exact v0.4.8 candidate def7c5fe6498b1bd742d912c1490d1f7160cab5f on free isolated :8789 and complete no-change/delta/resync payload measurements. Do not deploy v0.4.8 live or retire ngrok yet.",
   "last_executor": "chatgpt+operator",
   "last_surface": "github+lambda-isolated",
   "notes": "Created 2026-10-26 after the operator identified the concrete cause of current Heartbeat connector failures: the free ngrok account exceeded its monthly network bandwidth allocation. The operator values the newly added executor-signal feature and reports that the card/server polls approximately once per second to show the latest executor signal. That feature is a requirement, not disposable overhead. The new task therefore treats transport and payload efficiency as the problem, not liveness semantics. Secure MCP Tunnel is the preferred direction if current official OpenAI support and limits are compatible. The task must empirically distinguish high-frequency live-card/app polling from heartbeat_touch model calls; do not assume they are the same traffic path. GitRunner work continues independently in its own task/chat.\n\n2026-10-26 current-main restage: live runtime provenance and isolated v0.4.7 bandwidth baseline are PASS. The original task branch diverged from main before task/GitRunner merges, so the Heartbeat-only candidate was restaged from current main 9bd1efff5409c97439df6fd37d44a0fb42e95a4a on workspace-heartbeat-secure-mcp-tunnel-v1-current-main. v0.4.8 implements a cache-busted app-only heartbeat_poll delta/resync path while retaining heartbeat_snapshot compatibility. No live deployment or ngrok retirement is authorized yet."
