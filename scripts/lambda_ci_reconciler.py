@@ -541,6 +541,138 @@ def _service_active(name: str) -> bool:
     return proc.returncode == 0
 
 
+def _service_enabled(name: str) -> bool:
+    proc = _run(["systemctl", "is-enabled", "--quiet", name], check=False)
+    return proc.returncode == 0
+
+
+PRESERVED_SERVICE_PROPERTIES = (
+    "LoadState",
+    "ActiveState",
+    "SubState",
+    "UnitFileState",
+    "NRestarts",
+    "ExecMainStatus",
+    "MainPID",
+    "InvocationID",
+)
+
+
+def _service_snapshot(name: str) -> dict[str, str]:
+    proc = _run(
+        [
+            "systemctl",
+            "show",
+            name,
+            "--no-pager",
+            "--property=" + ",".join(PRESERVED_SERVICE_PROPERTIES),
+        ]
+    )
+    snap: dict[str, str] = {}
+    for line in proc.stdout.splitlines():
+        key, sep, value = line.partition("=")
+        if sep and key in PRESERVED_SERVICE_PROPERTIES:
+            snap[key] = value
+    missing = sorted(set(PRESERVED_SERVICE_PROPERTIES) - set(snap))
+    if missing:
+        raise ReconcileError(
+            f"service snapshot missing properties for {name}: {missing}"
+        )
+    return snap
+
+
+def _desired_json_bytes(value: Any) -> bytes:
+    return (json.dumps(value, indent=2, sort_keys=True) + "\n").encode("utf-8")
+
+
+def _bytes_differ(path: pathlib.Path, desired: bytes) -> bool:
+    return not path.is_file() or path.read_bytes() != desired
+
+
+def _atomic_write_if_changed(
+    path: pathlib.Path,
+    data: bytes,
+    *,
+    mode: int = 0o644,
+) -> bool:
+    if not _bytes_differ(path, data):
+        return False
+    _atomic_write(path, data, mode=mode)
+    return True
+
+
+def _atomic_write_json_if_changed(
+    path: pathlib.Path,
+    value: Any,
+    *,
+    mode: int = 0o644,
+) -> bool:
+    return _atomic_write_if_changed(
+        path,
+        _desired_json_bytes(value),
+        mode=mode,
+    )
+
+
+def _read_installed_registry(path: pathlib.Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {"projects": {}}
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ReconcileError("installed registry is invalid")
+    projects = value.get("projects")
+    if not isinstance(projects, dict):
+        raise ReconcileError("installed registry projects are invalid")
+    return value
+
+
+def controller_reconciliation_delta(
+    *,
+    installed_registry: dict[str, Any],
+    target_registry: dict[str, Any],
+    manifests: dict[str, dict[str, Any]],
+    controllers_dir: pathlib.Path,
+    local_subnet: str,
+) -> list[dict[str, Any]]:
+    installed_projects = installed_registry.get("projects", {})
+    entries: list[dict[str, Any]] = []
+    for project_id in _active_project_ids(target_registry):
+        manifest = manifests[project_id]
+        old_entry = installed_projects.get(project_id)
+        old_active = (
+            isinstance(old_entry, dict)
+            and old_entry.get("activation_state") == ACTIVE_PROJECT_STATE
+        )
+        for lane in target_registry["projects"][project_id]["lanes"]:
+            service = f"workspace-ci-controller@{project_id}-{lane}.service"
+            env_path = controllers_dir / f"{project_id}-{lane}.env"
+            env_body = render_controller_env(manifest, lane).encode("utf-8")
+            dropin_path, dropin_body = controller_network_dropin(
+                project_id,
+                lane,
+                local_subnet,
+            )
+            config_changed = (
+                _bytes_differ(env_path, env_body)
+                or _bytes_differ(dropin_path, dropin_body)
+            )
+            entries.append(
+                {
+                    "project_id": project_id,
+                    "lane": lane,
+                    "service": service,
+                    "newly_active": not old_active,
+                    "config_changed": config_changed,
+                    "restart_required": (not old_active) or config_changed,
+                    "env_path": env_path,
+                    "env_body": env_body,
+                    "dropin_path": dropin_path,
+                    "dropin_body": dropin_body,
+                }
+            )
+    return entries
+
+
 def apply_reconciliation(
     validated: dict[str, Any],
     *,
@@ -592,6 +724,29 @@ def apply_reconciliation(
         _atomic_write_json(receipt_path, receipt, mode=0o600)
         return receipt
 
+    registry = validated["registry"]
+    manifests = validated["manifests"]
+    active_projects = plan["active_projects"]
+    installed_registry = _read_installed_registry(registry_path)
+    local_subnet = primary_local_subnet()
+    controller_delta = controller_reconciliation_delta(
+        installed_registry=installed_registry,
+        target_registry=registry,
+        manifests=manifests,
+        controllers_dir=controllers_dir,
+        local_subnet=local_subnet,
+    )
+    restart_entries = [
+        entry for entry in controller_delta if entry["restart_required"]
+    ]
+    preserved_entries = [
+        entry for entry in controller_delta if not entry["restart_required"]
+    ]
+    preserved_before = {
+        entry["service"]: _service_snapshot(entry["service"])
+        for entry in preserved_entries
+    }
+
     in_progress = {
         "schema_version": 1,
         "status": "IN_PROGRESS",
@@ -599,67 +754,113 @@ def apply_reconciliation(
         "timestamp_utc": _utc_now(),
         "plan": plan,
         "mutation_performed": True,
+        "controller_services_planned_for_restart": [
+            entry["service"] for entry in restart_entries
+        ],
+        "controller_services_planned_for_preservation": [
+            entry["service"] for entry in preserved_entries
+        ],
+        "preserved_controller_services_before": preserved_before,
     }
     _atomic_write_json(receipt_path, in_progress, mode=0o600)
 
-    registry = validated["registry"]
-    manifests = validated["manifests"]
-    active_projects = plan["active_projects"]
-
-    for project_id in active_projects:
+    projects_to_prepare = sorted(
+        {entry["project_id"] for entry in restart_entries}
+    )
+    for project_id in projects_to_prepare:
         manifest = manifests[project_id]
         _ensure_project_identity(manifest)
         _ensure_project_roots(manifest)
 
-    # Install complete reviewed policy state before starting/restarting controllers.
-    _atomic_write_json(registry_path, registry)
+    # Install only policy files whose reviewed bytes differ. Unchanged sibling
+    # project policy is not rewritten merely because another project activates.
+    registry_changed = _atomic_write_json_if_changed(registry_path, registry)
     projects_dir.mkdir(parents=True, exist_ok=True)
     os.chown(projects_dir, 0, 0)
     os.chmod(projects_dir, 0o755)
+    manifests_changed: list[str] = []
     for project_id, manifest in manifests.items():
-        _atomic_write_json(projects_dir / f"{project_id}.json", manifest)
+        if _atomic_write_json_if_changed(
+            projects_dir / f"{project_id}.json",
+            manifest,
+        ):
+            manifests_changed.append(project_id)
 
-    controllers_dir.mkdir(parents=True, exist_ok=True)
-    os.chown(controllers_dir, 0, 0)
-    os.chmod(controllers_dir, 0o755)
-    controller_services: list[str] = []
-    controller_user = pwd.getpwnam("ci-controller")
-    controller_group = grp.getgrnam("workspace-ci-controller")
-    controller_state_root = pathlib.Path("/var/lib/workspace-ci/controller/state")
-    controller_state_root.mkdir(parents=True, exist_ok=True)
-    os.chown(controller_state_root, controller_user.pw_uid, controller_group.gr_gid)
-    os.chmod(controller_state_root, 0o700)
-    local_subnet = primary_local_subnet()
-    for project_id in active_projects:
-        manifest = manifests[project_id]
-        for lane in registry["projects"][project_id]["lanes"]:
-            lane_state = controller_state_root / f"{project_id}-{lane}"
+    controllers_changed = bool(restart_entries)
+    restarted_services: list[str] = []
+    if restart_entries:
+        controllers_dir.mkdir(parents=True, exist_ok=True)
+        os.chown(controllers_dir, 0, 0)
+        os.chmod(controllers_dir, 0o755)
+        controller_user = pwd.getpwnam("ci-controller")
+        controller_group = grp.getgrnam("workspace-ci-controller")
+        controller_state_root = pathlib.Path("/var/lib/workspace-ci/controller/state")
+        controller_state_root.mkdir(parents=True, exist_ok=True)
+        os.chown(
+            controller_state_root,
+            controller_user.pw_uid,
+            controller_group.gr_gid,
+        )
+        os.chmod(controller_state_root, 0o700)
+
+        any_unit_material_changed = False
+        for entry in restart_entries:
+            lane_state = (
+                controller_state_root
+                / f"{entry['project_id']}-{entry['lane']}"
+            )
             lane_state.mkdir(parents=True, exist_ok=True)
-            os.chown(lane_state, controller_user.pw_uid, controller_group.gr_gid)
+            os.chown(
+                lane_state,
+                controller_user.pw_uid,
+                controller_group.gr_gid,
+            )
             os.chmod(lane_state, 0o700)
-            env_path = controllers_dir / f"{project_id}-{lane}.env"
-            _atomic_write(
-                env_path,
-                render_controller_env(manifest, lane).encode("utf-8"),
+            if _atomic_write_if_changed(
+                entry["env_path"],
+                entry["env_body"],
                 mode=0o644,
-            )
-            dropin_path, dropin_body = controller_network_dropin(
-                project_id,
-                lane,
-                local_subnet,
-            )
-            _atomic_write(dropin_path, dropin_body, mode=0o644)
-            controller_services.append(
-                f"workspace-ci-controller@{project_id}-{lane}.service"
-            )
+            ):
+                any_unit_material_changed = True
+            if _atomic_write_if_changed(
+                entry["dropin_path"],
+                entry["dropin_body"],
+                mode=0o644,
+            ):
+                any_unit_material_changed = True
 
-    _run(["systemctl", "daemon-reload"])
-    for service in controller_services:
-        _run(["systemctl", "enable", service])
-        _run(["systemctl", "restart", service])
-        if not _service_active(service):
-            raise ReconcileError(f"controller service is not active: {service}")
+        if any_unit_material_changed:
+            _run(["systemctl", "daemon-reload"])
 
+        for entry in restart_entries:
+            service = entry["service"]
+            if entry["newly_active"] and not _service_enabled(service):
+                _run(["systemctl", "enable", service])
+            _run(["systemctl", "restart", service])
+            restarted_services.append(service)
+            if not _service_active(service):
+                raise ReconcileError(
+                    f"controller service is not active after restart: {service}"
+                )
+
+    preserved_after = {
+        entry["service"]: _service_snapshot(entry["service"])
+        for entry in preserved_entries
+    }
+    if preserved_after != preserved_before:
+        changed = sorted(
+            service
+            for service in preserved_before
+            if preserved_before[service] != preserved_after.get(service)
+        )
+        raise ReconcileError(
+            "preserved controller service identity/state changed: "
+            + ",".join(changed)
+        )
+
+    active_controller_services = [
+        entry["service"] for entry in controller_delta
+    ]
     receipt = {
         "schema_version": 1,
         "status": "COMPLETED",
@@ -667,7 +868,16 @@ def apply_reconciliation(
         "timestamp_utc": _utc_now(),
         "plan": plan,
         "mutation_performed": True,
-        "active_controller_services": controller_services,
+        "registry_changed": registry_changed,
+        "manifests_changed": sorted(manifests_changed),
+        "controller_configuration_changed": controllers_changed,
+        "active_controller_services": active_controller_services,
+        "controller_services_restarted": restarted_services,
+        "controller_services_preserved": [
+            entry["service"] for entry in preserved_entries
+        ],
+        "preserved_controller_services_before": preserved_before,
+        "preserved_controller_services_after": preserved_after,
         "planned_projects_skipped": plan["planned_projects_skipped"],
         "controller_local_subnet_denied": local_subnet,
         "installed_registry_sha256": _canonical_sha256(registry),
