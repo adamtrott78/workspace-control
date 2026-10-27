@@ -238,6 +238,47 @@ class PreactivationDiagnoseHotfixInstallTests(unittest.TestCase):
             with self.assertRaisesRegex(hotfix.HotfixError, "comment identity"):
                 hotfix.require_failed_receipt_and_cursor()
 
+    def test_restart_root_uses_ignore_dependencies_job_mode(self):
+        calls = []
+
+        def fake_run(argv, check=True, user=None):
+            calls.append(list(argv))
+            return mock.Mock(returncode=0, stdout="", stderr="")
+
+        with mock.patch.object(hotfix, "run", side_effect=fake_run):
+            hotfix.restart_root_without_dependency_propagation()
+
+        self.assertEqual(
+            calls,
+            [[
+                "systemctl",
+                "--job-mode=ignore-dependencies",
+                "restart",
+                hotfix.ROOT_SERVICE,
+            ]],
+        )
+
+    def test_dependency_graph_requires_root_service(self):
+        with mock.patch.object(
+            hotfix,
+            "run",
+            return_value=mock.Mock(
+                returncode=0,
+                stdout=hotfix.ROOT_SERVICE + " network-online.target\n",
+                stderr="",
+            ),
+        ):
+            requires = hotfix.require_controller_dependency_graph()
+        self.assertIn(hotfix.ROOT_SERVICE, requires)
+
+        with mock.patch.object(
+            hotfix,
+            "run",
+            return_value=mock.Mock(returncode=0, stdout="network-online.target\n", stderr=""),
+        ):
+            with self.assertRaisesRegex(hotfix.HotfixError, "does not require root service"):
+                hotfix.require_controller_dependency_graph()
+
     def test_success_mutates_only_installed_service_and_restarts_root_service(self):
         calls = []
         running = {
@@ -247,6 +288,8 @@ class PreactivationDiagnoseHotfixInstallTests(unittest.TestCase):
             "UnitFileState": "enabled",
             "NRestarts": "0",
             "ExecMainStatus": "0",
+            "MainPID": "4242",
+            "InvocationID": "11111111111111111111111111111111",
         }
         controllers = {
             "sentinel": {
@@ -281,6 +324,11 @@ class PreactivationDiagnoseHotfixInstallTests(unittest.TestCase):
             mock.patch.object(hotfix.os, "chown", return_value=None),
             mock.patch.object(hotfix, "run", side_effect=fake_run),
             mock.patch.object(hotfix, "require_service_running", return_value=running),
+            mock.patch.object(
+                hotfix,
+                "require_controller_dependency_graph",
+                return_value=[hotfix.ROOT_SERVICE],
+            ),
             mock.patch.object(hotfix, "require_controller_baseline", return_value=controllers),
             mock.patch.object(hotfix, "require_candidate_dormant", return_value=candidate),
             mock.patch.object(hotfix, "require_failed_receipt_and_cursor", return_value=receipt_binding),
@@ -297,7 +345,12 @@ class PreactivationDiagnoseHotfixInstallTests(unittest.TestCase):
         self.assertEqual(self.installed.read_bytes(), self.source.read_bytes())
         self.assertEqual(
             calls,
-            [["systemctl", "restart", hotfix.ROOT_SERVICE]],
+            [[
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    hotfix.ROOT_SERVICE,
+                ]],
         )
 
     def test_restart_failure_restores_prior_bytes_and_restarts_root_again(self):
@@ -310,6 +363,8 @@ class PreactivationDiagnoseHotfixInstallTests(unittest.TestCase):
             "UnitFileState": "enabled",
             "NRestarts": "0",
             "ExecMainStatus": "0",
+            "MainPID": "4242",
+            "InvocationID": "11111111111111111111111111111111",
         }
         controllers = {"sentinel": running}
         candidate = {
@@ -342,6 +397,11 @@ class PreactivationDiagnoseHotfixInstallTests(unittest.TestCase):
             mock.patch.object(hotfix.os, "chown", return_value=None),
             mock.patch.object(hotfix, "run", side_effect=fake_run),
             mock.patch.object(hotfix, "require_service_running", return_value=running),
+            mock.patch.object(
+                hotfix,
+                "require_controller_dependency_graph",
+                return_value=[hotfix.ROOT_SERVICE],
+            ),
             mock.patch.object(hotfix, "require_controller_baseline", return_value=controllers),
             mock.patch.object(hotfix, "require_candidate_dormant", return_value=candidate),
             mock.patch.object(hotfix, "require_failed_receipt_and_cursor", return_value=receipt_binding),
@@ -359,8 +419,18 @@ class PreactivationDiagnoseHotfixInstallTests(unittest.TestCase):
         self.assertEqual(
             calls,
             [
-                ["systemctl", "restart", hotfix.ROOT_SERVICE],
-                ["systemctl", "restart", hotfix.ROOT_SERVICE],
+                [
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    hotfix.ROOT_SERVICE,
+                ],
+                [
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    hotfix.ROOT_SERVICE,
+                ],
             ],
         )
 
