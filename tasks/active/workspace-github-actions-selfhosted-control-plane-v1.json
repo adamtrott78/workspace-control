@@ -918,7 +918,7 @@
     },
     {
       "check": "PR #528 independent bootstrap-install review at 46d7eb5ea1ed8b43931958c518e21bf6180b02c1",
-      "result": "BLOCKING_FINDINGS",
+      "result": "FAIL",
       "evidence": [
         "Review 5662021244.",
         "BF-1 CPU unhealthy-state re-attestation missing.",
