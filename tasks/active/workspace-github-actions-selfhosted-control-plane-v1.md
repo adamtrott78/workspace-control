@@ -23,8 +23,8 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: github-actions-selfhosted-control-plane-v02
-- Remote checkpoint: b7e8a0199e2ccd79f8787e9f95faa28365d3b216
+- Remote branch: gitrunner-p1-implementation
+- Remote checkpoint: 97d3dc9d06b7317825c96789c614a8f46281769a
 - Remote verified: true
 
 ### research-engine
