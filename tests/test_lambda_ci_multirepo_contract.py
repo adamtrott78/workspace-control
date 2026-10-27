@@ -28,9 +28,9 @@ def derived(project_id):
 
 
 class LambdaCIMultiRepoContractTests(unittest.TestCase):
-    def test_run4_activates_padataset_after_run3_acceptance(self):
+    def test_registry_activation_epoch_includes_workspace_control_p1(self):
         self.assertEqual(REGISTRY["status"], "ACTIVE")
-        self.assertEqual(REGISTRY["registry_epoch"], 5)
+        self.assertEqual(REGISTRY["registry_epoch"], 6)
         self.assertEqual(CONTRACTS["status"], "CONTRACT_ONLY_NOT_INSTALLED")
         self.assertEqual(RESEARCH["status"], "ACTIVE")
         self.assertEqual(PAD["status"], "ACTIVE")
