@@ -237,6 +237,120 @@ class ReconcileControllerTests(unittest.TestCase):
                 {"project_id", "sha256", "document"},
             )
 
+    def test_reviewed_expected_controller_transaction_is_request_bound(self):
+        fake = FakeGitHub()
+        run = controller._select_current_successful_run(fake, {"adamtrott78"})
+        expected = {
+            "restart_services": [
+                "workspace-ci-controller@workspace-control-cpu.service",
+            ],
+            "enable_services": [
+                "workspace-ci-controller@workspace-control-cpu.service",
+            ],
+            "preserve_services": [
+                "workspace-ci-controller@padataset-cpu.service",
+                "workspace-ci-controller@padataset-gpu.service",
+                "workspace-ci-controller@research-engine-cpu.service",
+                "workspace-ci-controller@research-engine-gpu.service",
+            ],
+        }
+        request = controller.build_request(
+            fake,
+            run=run,
+            allowed_actors={"adamtrott78"},
+            expected_controller_transaction=expected,
+        )
+        self.assertEqual(request["expected_controller_transaction"], expected)
+
+        without_guard = controller.build_request(
+            fake,
+            run=run,
+            allowed_actors={"adamtrott78"},
+        )
+        self.assertNotEqual(request["request_id"], without_guard["request_id"])
+
+    def test_expected_transaction_requires_complete_disjoint_sets(self):
+        with self.assertRaisesRegex(
+            controller.ReconcileControllerError,
+            "requires restart/enable/preserve",
+        ):
+            controller._normalize_expected_controller_transaction(
+                restart_services=[
+                    "workspace-ci-controller@workspace-control-cpu.service"
+                ],
+                enable_services=None,
+                preserve_services=[],
+            )
+        with self.assertRaisesRegex(
+            controller.ReconcileControllerError,
+            "must not overlap",
+        ):
+            controller._normalize_expected_controller_transaction(
+                restart_services=[
+                    "workspace-ci-controller@workspace-control-cpu.service"
+                ],
+                enable_services=[
+                    "workspace-ci-controller@workspace-control-cpu.service"
+                ],
+                preserve_services=[
+                    "workspace-ci-controller@workspace-control-cpu.service"
+                ],
+            )
+
+    def test_one_shot_unit_preserves_daemon_sandbox_and_pins_transaction(self):
+        daemon = (
+            ROOT / "systemd/workspace-ci-reconcile-controller.service"
+        ).read_text()
+        once = (
+            ROOT / "systemd/workspace-ci-reconcile-controller-once.service"
+        ).read_text()
+
+        self.assertIn("Type=simple", daemon)
+        self.assertNotIn("--once", daemon)
+        self.assertIn("Restart=on-failure", daemon)
+
+        self.assertIn("Type=oneshot", once)
+        self.assertIn("--once", once)
+        self.assertNotIn("Restart=", once)
+        self.assertNotIn("[Install]", once)
+        self.assertIn(
+            "--expect-restart-service "
+            "workspace-ci-controller@workspace-control-cpu.service",
+            once,
+        )
+        self.assertIn(
+            "--expect-enable-service "
+            "workspace-ci-controller@workspace-control-cpu.service",
+            once,
+        )
+        for service in (
+            "workspace-ci-controller@padataset-cpu.service",
+            "workspace-ci-controller@padataset-gpu.service",
+            "workspace-ci-controller@research-engine-cpu.service",
+            "workspace-ci-controller@research-engine-gpu.service",
+        ):
+            self.assertIn(f"--expect-preserve-service {service}", once)
+
+        for directive in (
+            "User=ci-reconciler",
+            "Group=workspace-ci-reconciler",
+            "NoNewPrivileges=yes",
+            "CapabilityBoundingSet=",
+            "PrivateDevices=yes",
+            "ProtectSystem=strict",
+            "ProtectHome=yes",
+            "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6",
+            "InaccessiblePaths=/home/atrott /var/run/docker.sock /run/docker.sock "
+            "/var/lib/workspace-ci/controller /var/lib/workspace-ci/provisioner "
+            "/srv/workspace-ci",
+            "DevicePolicy=closed",
+            "TasksMax=128",
+            "MemoryMax=256M",
+            "CPUQuota=100%",
+        ):
+            self.assertIn(directive, daemon)
+            self.assertIn(directive, once)
+
     def test_existing_success_is_refreshed_to_equivalent_current_main(self):
         import tempfile
         from unittest import mock
