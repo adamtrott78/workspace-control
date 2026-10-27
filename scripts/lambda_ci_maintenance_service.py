@@ -365,7 +365,7 @@ def apply_request(
         qpath, quarantine = _quarantine_state(
             target,
             request["quarantine_receipt_id"],
-            None,
+            request["reset_generation"],
         )
         generation = request["reset_generation"]
         pending = target["state_dir"] / f"reset-pending-{generation}.json"
