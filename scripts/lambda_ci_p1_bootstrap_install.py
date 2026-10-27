@@ -28,6 +28,8 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from typing import Any
 
@@ -204,6 +206,72 @@ def no_active_project_execution() -> None:
         raise BootstrapError(
             "active project execution exists; bootstrap refuses to mutate:\n"
             + "\n".join(active)
+        )
+
+
+def github_get_with_token(token_path: pathlib.Path, api_path: str) -> Any:
+    st = token_path.stat()
+    if st.st_mode & 0o077:
+        raise BootstrapError(f"source token permissions too broad: {token_path}")
+    token = token_path.read_text(encoding="utf-8").strip()
+    if not token:
+        raise BootstrapError(f"source token empty: {token_path}")
+    req = urllib.request.Request(
+        "https://api.github.com" + api_path,
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "User-Agent": "workspace-control-p1-bootstrap/1",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as response:
+            raw = response.read()
+    except urllib.error.HTTPError as exc:
+        body = exc.read(2048).decode("utf-8", errors="replace")
+        raise BootstrapError(
+            f"GitHub credential preflight HTTP {exc.code} for {api_path}: {body}"
+        ) from exc
+    except urllib.error.URLError as exc:
+        raise BootstrapError(
+            f"GitHub credential preflight unavailable for {api_path}: {exc}"
+        ) from exc
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise BootstrapError(
+            f"GitHub credential preflight returned invalid JSON for {api_path}"
+        ) from exc
+
+
+def verify_credential_scope() -> None:
+    read_token = pathlib.Path(
+        "/var/lib/workspace-ci/reconcile-controller/github-token"
+    )
+    runner_token = pathlib.Path("/var/lib/workspace-ci/controller/github-token")
+
+    issue = github_get_with_token(
+        read_token,
+        f"/repos/adamtrott78/workspace-control/issues/{MAINTENANCE_ISSUE_NUMBER}",
+    )
+    if not isinstance(issue, dict) or issue.get("state") != "open":
+        raise BootstrapError("reconciliation token cannot read maintenance issue #527")
+    comments = github_get_with_token(
+        read_token,
+        f"/repos/adamtrott78/workspace-control/issues/{MAINTENANCE_ISSUE_NUMBER}/comments?per_page=1",
+    )
+    if not isinstance(comments, list):
+        raise BootstrapError("reconciliation token cannot read maintenance comments")
+
+    runners = github_get_with_token(
+        runner_token,
+        "/repos/adamtrott78/workspace-control/actions/runners?per_page=1",
+    )
+    if not isinstance(runners, dict) or not isinstance(runners.get("runners"), list):
+        raise BootstrapError(
+            "controller token lacks workspace-control Actions runner read/admin scope"
         )
 
 
@@ -461,6 +529,8 @@ def main() -> int:
     print(f"head={head}")
     verify_live_fingerprint()
     print("LIVE_PREFLIGHT_FINGERPRINT=PASS")
+    verify_credential_scope()
+    print("GITHUB_CREDENTIAL_SCOPE_PREFLIGHT=PASS")
 
     # Build before the first host mutation.
     built_controller = build_controller(repo)
@@ -484,6 +554,10 @@ def main() -> int:
         # controllers and the root provisioner remain available until their
         # narrowly scoped restart below.
         run(["systemctl", "stop", RECONCILE_CONTROLLER])
+        # This lane was already in an auto-restart storm at read-only
+        # preflight. Quiesce it before replacing the shared controller binary
+        # so it cannot race through a mixed old-unit/new-binary interval.
+        run(["systemctl", "stop", RESEARCH_CPU])
         mutated = True
 
         install_file(
