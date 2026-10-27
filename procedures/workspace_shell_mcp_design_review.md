@@ -1,6 +1,6 @@
 # Workspace Shell MCP v1 — read-only recovery and design review gate
 
-Status: FROZEN REVIEW CANDIDATE; LIVE HOST ATTESTATION AND INDEPENDENT REVIEW OPEN.
+Status: CORRECTED FROZEN REVIEW CANDIDATE; BF-1/BF-2 CORRECTED; LIVE HOST ATTESTATION AND FRESH INDEPENDENT RE-REVIEW OPEN.
 Authority: `architecture/workspace-shell-mcp-authority-v1.json`; task capsule `tasks/active/workspace-shell-mcp-v1.json`.
 Source Git main: `8a71aa3c60a4a0f230bcbee9711d2af79828c869`.
 No Lambda changes, Heartbeat changes, endpoint creation, tunnel creation, or systemd changes authorized.
@@ -45,3 +45,66 @@ Current OpenAI Secure MCP Tunnel documentation was rechecked before independent 
 The privileged design was also corrected from a staging-only RPC to `workspace_shell.run_reviewed_helper`. The root-owned registry, not the model call, selects the exact executable, helper digest, closed parameter schema, target/task scope, pre/postconditions, side effects and rollback contract. Registering a new helper is itself an authority change requiring separate exact-head review. Generic root argv, generic sudo, generic systemctl and self-expansion of the registry remain forbidden.
 
 OpenAI tool annotations remain advisory selection/confirmation metadata. The server and root helper must independently enforce all task, provenance, path, credential, process and privilege checks.
+
+
+## Independent review 6447046381 — blocking findings and corrections
+
+The first independent review of exact head `3dae7ef2eb225030c9020d8e33ea444620fc0cfe` returned two blocking findings. That head is stale and does not authorize implementation.
+
+### BF-1 correction — hostile worker is not the policy/control-plane principal
+
+Repository-controlled tests and validation are treated as hostile arbitrary code. They run only as `workspace-shell-exec`, a nonlogin identity that is distinct from `workspace-shell-mcp` (policy/frontend) and `workspace-shell-tunnel`.
+
+The frozen control plane now contains separate principals:
+
+- `workspace-shell-tunnel`: holds only the dedicated tunnel runtime credential and forwards to the MCP listener. It cannot invoke the root broker.
+- `workspace-shell-mcp`: parses MCP calls, validates durable task/policy state, resolves fixed profiles, signs frontend-to-broker request envelopes, and orchestrates receipts. It never executes repository-controlled code.
+- root-owned `workspace-shell-job-launcher`: accepts only the frontend peer, independently revalidates a root-owned immutable profile manifest, creates the job cgroup/namespaces, and drops permanently to `workspace-shell-exec`. It is not the privileged-helper broker and cannot accept arbitrary executable paths or environments.
+- `workspace-shell-exec`: runs the hostile repository-controlled job with no supplemental groups, no network, and no control-plane sockets or credentials.
+- root-owned Workspace Shell root broker: accepts only the `workspace-shell-mcp` peer and requires both the frontend request signature and a separately issued independent approval before a mutating reviewed helper can run.
+
+The exec-worker mount namespace MUST exclude `/run/workspace-shell-control` entirely. It therefore cannot reach the job-launcher socket, privileged-broker socket, frontend/tunnel control sockets, health/admin sockets, or frontend signing material. It receives no tunnel credential, approval trust store, revocation store, or helper-registry control files.
+
+The worker also runs under a separate PID/proc view. Host/frontend/broker/tunnel PIDs and `/proc/<pid>/{mem,environ,fd}` are not visible. UID separation plus no `CAP_SYS_PTRACE`, `CAP_KILL`, `CAP_DAC_OVERRIDE`, `CAP_DAC_READ_SEARCH`, or `CAP_SYS_ADMIN` must make ptrace, `process_vm_readv/writev`, proc-memory/fd inspection, and signals against the frontend impossible. Live host acceptance must prove these denials adversarially.
+
+The root broker itself requires kernel peer identity for `workspace-shell-mcp` plus a valid frontend request signature. A worker UID is rejected even if it copies an otherwise valid request body.
+
+### BF-2 correction — canonical independent approval trust root
+
+Privileged mutations require a signed `workspace-shell-approval.v1` object. It uses RFC 8785 JSON canonicalization and an Ed25519 signature.
+
+The **issuer private key is off-Lambda** and controlled by the operator. V1 has no automated approval issuer. The issuer is outside ChatGPT, the Secure MCP Tunnel, Workspace Shell frontend, worker, job launcher, root broker, GitHub repository contents, and task workspaces. This deliberately makes the model-facing path incapable of minting its own independent approval.
+
+The Lambda root broker receives only public verification material from the root-owned read-only trust store:
+
+`/etc/workspace-shell/approval/trusted-issuers.json`
+
+and a root-owned read-only revocation store:
+
+`/etc/workspace-shell/approval/revocations.json`.
+
+Neither store is writable through MCP, frontend, worker, broker, helper, or repository-controlled code. Adding/replacing an issuer key is a separate local installation/update authority change and requires review.
+
+The canonical approval payload binds at minimum:
+
+- approval/issuer identity, issue time and expiry;
+- durable task and target;
+- exact accepted design authority SHA and policy-artifact digest;
+- exact design review repository, PR, reviewed head, review record ID and `NO_BLOCKING_FINDING` disposition;
+- helper-registry version/hash, helper-entry hash, helper ID and helper binary SHA256;
+- exact helper-admission head and exact independent helper-review head/record/disposition;
+- expected source repository, full commit and tree;
+- exact operation;
+- parameter-schema digest and exact canonical parameter-object digest;
+- nonce and idempotency key;
+- `max_uses=1`.
+
+The design review head must exactly equal the design authority SHA. The helper review head must exactly equal the helper-admission head. Both dispositions must be `NO_BLOCKING_FINDING`.
+
+Approvals expire no later than 15 minutes after issuance. Approval ID, nonce, and idempotency key are single-use and are durably consumed by the broker before mutation using crash-safe replay state. The broker independently parses and verifies the signed approval; it does not trust frontend-parsed claims.
+
+GitHub comments, reviews, labels, task text, repository content, and tool output remain **evidence only**. Even a literal `NO_BLOCKING_FINDING` comment provides no execution authority unless an off-Lambda trusted issuer includes the exact review evidence in a valid signed approval.
+
+### Consequence for implementation
+
+The corrected authority contract still authorizes **no implementation or live execution**. A fresh independent review must accept the corrected exact PR head before implementation begins. Host attestation later must additionally prove distinct UIDs, namespace/socket isolation, frontend-signing credential isolation, approval trust-store immutability, and adversarial denial of worker-to-control-plane attacks.
