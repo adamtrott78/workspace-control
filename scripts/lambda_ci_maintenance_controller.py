@@ -169,6 +169,7 @@ def maintenance_request_id(
             str(command.get("quarantine_receipt_id") or ""),
             operation,
             str(reset_generation or ""),
+            MAINTENANCE_POLICY_GENERATION,
         ]
     )
     return str(uuid.uuid5(UUID_NAMESPACE, material))
