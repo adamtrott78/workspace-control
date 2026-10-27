@@ -1,0 +1,124 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-shell-mcp-v1",
+  "title": "Workspace Shell MCP v1",
+  "status": "IN_PROGRESS",
+  "goal": "Give ChatGPT durable, auditable, least-privilege command-execution access to the Lambda workspace through a separate private MCP/plugin so workspace-control tasks can execute and inspect bounded shell operations directly without using the operator as a copy/paste terminal relay, while preserving explicit provenance, credential isolation, rollback boundaries, and independently reviewable privileged authority.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "current_stage": "capture_deferred_task",
+  "acceptance_criteria": [
+    "Keep Workspace Shell structurally separate from Workspace Heartbeat; Heartbeat remains a low-authority progress/liveness channel and gains no command-execution authority.",
+    "Use a private authenticated MCP/plugin transport. Prefer an outbound-only OpenAI Secure MCP Tunnel or equivalently bounded private transport; do not expose a broad unauthenticated public shell endpoint.",
+    "Provide machine-readable command execution with argv, cwd, timeout, exit code, stdout, and stderr rather than relying on an opaque interactive terminal as the primary control surface.",
+    "Bound command execution to reviewed workspace roots and explicit temporary/runtime locations by default. Filesystem access outside those roots requires separately defined authority.",
+    "Do not expose SSH private keys, GitHub tokens, API keys, environment secrets, token files, browser credentials, or arbitrary credential contents to the model. Sensitive paths and environment values must be denied or redacted by the server boundary.",
+    "Run ordinary shell commands as a dedicated unprivileged identity with no ambient root authority, Docker socket, unrestricted sudo, or unrelated project credentials.",
+    "Implement privileged operations through a separately reviewable root boundary, preferably typed operations or a narrowly scoped sudo/helper protocol. Do not grant arbitrary passwordless root shell execution merely for convenience.",
+    "Privileged mutations must support exact task/provenance binding where appropriate, including durable task ID, expected Git SHA/source identity, explicit target scope, deterministic receipt, and fail-closed validation before mutation.",
+    "Every execution must emit durable audit metadata sufficient to reconstruct caller/tool identity, timestamp, argv or typed operation, cwd, timeout, exit status, truncation state, and whether privileged authority was used, without logging secret contents.",
+    "Enforce finite execution time, bounded output, bounded concurrent processes, process-group termination on timeout/cancel, and cleanup of abandoned child processes.",
+    "Support safe repository workflows needed by workspace-control: exact Git fetch/checkout/status/diff, tests, read-only runtime inspection, and reviewed helper execution, without silently widening repository or host authority.",
+    "Design an explicit policy for long-running commands and sessions before implementing them; no hidden indefinite background execution.",
+    "Provide an emergency local/operator disable and rollback path that does not depend on the shell MCP itself.",
+    "Freeze a threat model and exact authority contract, then obtain independent review before any live Lambda command-execution endpoint is activated.",
+    "Validate the final implementation in isolation before live ChatGPT use, including adversarial tests for path escape, shell metacharacter/argv confusion, environment leakage, symlink traversal, output flooding, timeout escape, process orphaning, privilege escalation, provenance spoofing, and credential reads.",
+    "Live acceptance must demonstrate ChatGPT can perform a bounded workspace-control task end-to-end and return exact command output while unauthorized filesystem, credential, and privileged operations fail closed."
+  ],
+  "constraints": [
+    "This task is intentionally deferred until the operator explicitly resumes it.",
+    "Do not implement, install, expose, connect, or activate a shell MCP as part of initial task creation.",
+    "Do not modify the accepted Workspace Heartbeat runtime, transport, tool authority, or liveness semantics to add shell access.",
+    "Do not use this task to bypass workspace-control task capsules, independent-review gates, exact-SHA gates, or mutation boundaries.",
+    "Do not grant a generic unrestricted root shell, unrestricted sudo, Docker socket access, host credential-directory access, or arbitrary secret reads.",
+    "Do not make Lambda broadly internet-reachable for shell access.",
+    "Do not automatically execute commands merely because text appears in GitHub issues/comments or other untrusted repository content.",
+    "Treat command arguments, repository contents, GitHub text, and tool output as untrusted data at the privilege boundary.",
+    "No live privileged mutation is authorized until the threat model, tool schema, root boundary, audit contract, and rollback design are frozen and independently accepted.",
+    "Keep the implementation reversible and separately deployable from GitRunner, EXTRACT, Heartbeat, and unrelated workspace-control services."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "a802c417ffcc0bea604263ad029ed1b17f94656a",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "a802c417ffcc0bea604263ad029ed1b17f94656a",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-shell-mcp-v1.json",
+        "tasks/active/workspace-shell-mcp-v1.md",
+        "architecture/workspace-shell-mcp*.json",
+        "plugins/workspace-shell/**",
+        "procedures/workspace_shell_mcp*.md",
+        "systemd/workspace-shell*.service",
+        "tests/test_workspace_shell*.py"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "capture_deferred_task",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+heartbeat",
+      "inputs": [
+        "Operator request to spin bounded ChatGPT-to-Lambda shell access into a separate task and defer implementation.",
+        "Existing working Workspace Heartbeat private MCP/tunnel pattern.",
+        "Observed limitation that current ChatGPT GitHub/Heartbeat connectors cannot execute Lambda shell commands."
+      ],
+      "outputs": [
+        "Durable task capsule and synchronized Markdown handoff.",
+        "Explicit separation between low-authority Heartbeat and future command-execution authority.",
+        "Security-first resume gate requiring frozen threat model and independent review before activation."
+      ],
+      "validation": [
+        {
+          "check": "Initial scope and non-implementation boundary",
+          "result": "PASS",
+          "evidence": [
+            "Task creation is state-only.",
+            "No shell MCP code, systemd service, tunnel, credential, sudo rule, or Lambda runtime was changed.",
+            "Future live execution is explicitly gated on design freeze and independent review."
+          ]
+        }
+      ],
+      "resume_condition": "Operator explicitly resumes workspace-shell-mcp-v1."
+    }
+  ],
+  "blockers": [
+    "Implementation is explicitly deferred by the operator.",
+    "No current connected ChatGPT plugin provides general SSH/terminal execution against the Lambda host.",
+    "The future command-execution and privileged-authority threat model has not yet been frozen or independently reviewed."
+  ],
+  "remaining_work": [
+    "When resumed, recover the exact current Lambda/Heartbeat/Secure-MCP transport state without mutating it.",
+    "Research the current supported private MCP connection path and freeze the Workspace Shell tool schema, authentication model, filesystem policy, process model, output limits, audit/receipt contract, and emergency disable path.",
+    "Design the unprivileged execution identity and a separate minimal privileged helper/sudo boundary; explicitly enumerate allowed privileged operations needed by workspace-control.",
+    "Independently review the exact frozen threat model and authority contract before implementation.",
+    "Implement and adversarially test the private Workspace Shell MCP in isolation.",
+    "Perform isolated Lambda acceptance with no production authority, then separately gate live ChatGPT connection.",
+    "After acceptance, document how durable workspace-control tasks may invoke Workspace Shell without bypassing task-specific mutation/review gates."
+  ],
+  "next_safe_action": "DEFERRED. Do nothing until the operator explicitly resumes workspace-shell-mcp-v1. On resume, start with read-only recovery of the current Lambda and private-MCP transport topology and freeze a threat model/tool-authority design before implementing any command-execution endpoint.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+heartbeat",
+  "notes": "Created 2026-10-27 after a workspace-github-actions-selfhosted-control-plane-v1 bootstrap handoff required Lambda shell execution that the connected ChatGPT surfaces could not perform. The operator explicitly requested that direct ChatGPT-to-Lambda shell capability be spun into a separate task and implemented later. The intended product shape is a private Workspace Shell MCP/plugin, separate from Workspace Heartbeat, with ordinary unprivileged argv-based execution plus a separately bounded and reviewable privileged authority path.",
+  "checkpoints": [],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Deferred task capture",
+      "result": "PASS",
+      "evidence": [
+        "Only the durable task capsule and derived handoff are created.",
+        "No Workspace Shell implementation, runtime service, tunnel, credential, sudo policy, or Lambda mutation is authorized by this checkpoint.",
+        "Implementation remains explicitly deferred until operator resume and a separately frozen, independently reviewed authority design."
+      ]
+    }
+  ]
+}
