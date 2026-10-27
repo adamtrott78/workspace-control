@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
+	"log/slog"
 	"net"
 	"os"
 	"path/filepath"
@@ -248,18 +250,157 @@ func TestAdmissionV2CanProvisionFromPreAttestedJobAvailable(t *testing.T) {
 		TotalAcquiredJobs:  0,
 		TotalAssignedJobs:  0,
 	}
-	if got := desiredRunnerTarget(stats, 1); got != 1 {
+	if got := desiredRunnerTarget(stats, 1, 0, true); got != 1 {
 		t.Fatalf("pre-attested JobAvailable did not create runner target: %d", got)
 	}
-	if got := desiredRunnerTarget(stats, 0); got != 0 {
+	if got := desiredRunnerTarget(stats, 0, 0, true); got != 0 {
 		t.Fatalf("unattested available job unexpectedly created runner target: %d", got)
 	}
 }
 
 func TestAdmissionV2TargetRemainsBounded(t *testing.T) {
 	stats := &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 99}
-	if got := desiredRunnerTarget(stats, 99); got != maxRunners {
+	if got := desiredRunnerTarget(stats, 99, 0, true); got != maxRunners {
 		t.Fatalf("target exceeded maxRunners: %d", got)
+	}
+}
+
+func TestAdmissionV2AssignedStatisticAloneNeverCreatesExecutionTarget(t *testing.T) {
+	stats := &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1}
+	if got := desiredRunnerTarget(stats, 0, 0, true); got != 0 {
+		t.Fatalf("aggregate assigned statistic became execution authority: %d", got)
+	}
+	if got := desiredRunnerTarget(stats, 0, 0, false); got != 1 {
+		t.Fatalf("legacy non-v2 target semantics unexpectedly changed: %d", got)
+	}
+}
+
+type neverCalledAttestor struct {
+	calls int
+}
+
+func (a *neverCalledAttestor) Attest(
+	context.Context,
+	*scaleset.JobMessageBase,
+	string,
+	string,
+) (controllerAttestation, error) {
+	a.calls++
+	return controllerAttestation{}, nil
+}
+
+func TestAssignmentDivergenceQuarantinesAndSuppressesNewAcquisition(t *testing.T) {
+	dir := t.TempDir()
+	client := &fakeRunnerJITClient{}
+	attestor := &neverCalledAttestor{}
+	s := &scaler{
+		active:       make(map[string]string),
+		client:       client,
+		scaleSetID:   17,
+		projectID:    "workspace-control",
+		lane:         "cpu",
+		scaleSetName: "lambda-workspace-control",
+		runnerPrefix: "lambda-workspace-control-",
+		stateDir:     dir,
+		admissionV2:  true,
+		attestor:     attestor,
+		pending:      make(map[string]pendingAdmissionJob),
+		logger:       slog.Default(),
+	}
+
+	if err := s.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if !s.quarantined || s.quarantineID == "" {
+		t.Fatalf("assignment divergence did not quarantine lane: %#v", s)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "quarantine.json")); err != nil {
+		t.Fatalf("durable quarantine receipt missing: %v", err)
+	}
+
+	available := availableCPUJob()
+	if err := s.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics:         &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 0},
+		JobAvailableMessages: []scaleset.JobAvailable{*available},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if attestor.calls != 0 {
+		t.Fatalf("quarantined lane attested new available work: %d calls", attestor.calls)
+	}
+	if client.generated != 0 {
+		t.Fatalf("quarantined lane generated JIT configuration: %d", client.generated)
+	}
+	if !s.quarantined {
+		t.Fatal("aggregate zero improperly auto-cleared quarantine")
+	}
+}
+
+func TestControllerQuarantineSurvivesRestart(t *testing.T) {
+	dir := t.TempDir()
+	receipt := laneQuarantineReceipt{
+		SchemaVersion:       1,
+		ReceiptID:           "01234567-89ab-4cde-8fab-0123456789ab",
+		Status:              "ASSIGNMENT_DIVERGENCE_QUARANTINED",
+		ProjectID:           "workspace-control",
+		Lane:                "cpu",
+		ScaleSetName:        "lambda-workspace-control",
+		ScaleSetID:          31,
+		TotalAssignedJobs:   1,
+		ReconstructableJobs: 0,
+		ObservedAt:          time.Now().UTC().Format(time.RFC3339Nano),
+	}
+	if err := atomicWriteJSON(filepath.Join(dir, "quarantine.json"), receipt); err != nil {
+		t.Fatal(err)
+	}
+	s := &scaler{
+		scaleSetID:   31,
+		projectID:    "workspace-control",
+		lane:         "cpu",
+		scaleSetName: "lambda-workspace-control",
+		stateDir:     dir,
+	}
+	if err := s.loadQuarantine(); err != nil {
+		t.Fatal(err)
+	}
+	if !s.quarantined || s.quarantineID != receipt.ReceiptID {
+		t.Fatalf("quarantine did not survive restart: %#v", s)
+	}
+}
+
+func TestQuarantineAutoResolutionRequiresCompleteReconstructedAssignment(t *testing.T) {
+	dir := t.TempDir()
+	s := &scaler{
+		active:       make(map[string]string),
+		scaleSetID:   41,
+		projectID:    "workspace-control",
+		lane:         "cpu",
+		scaleSetName: "lambda-workspace-control",
+		stateDir:     dir,
+		pending:      make(map[string]pendingAdmissionJob),
+		logger:       slog.Default(),
+	}
+	stats := &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1}
+	if err := s.persistAssignmentQuarantine(stats, 0, 0); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.resolveQuarantineFromCompleteMetadata(
+		&scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 0},
+		0,
+		0,
+	); err == nil {
+		t.Fatal("aggregate zero resolved quarantine without complete metadata")
+	}
+	if err := s.resolveQuarantineFromCompleteMetadata(stats, 0, 1); err != nil {
+		t.Fatal(err)
+	}
+	if s.quarantined {
+		t.Fatal("complete reconstructed assignment did not resolve quarantine")
+	}
+	if _, err := os.Stat(filepath.Join(dir, "quarantine.json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("resolved quarantine file still present: %v", err)
 	}
 }
 
