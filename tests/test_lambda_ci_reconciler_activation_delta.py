@@ -1,3 +1,4 @@
+import contextlib
 import copy
 import json
 import pathlib
@@ -462,7 +463,12 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
                     return_value=types.SimpleNamespace(gr_gid=1000),
                 ),
             )
-            with (*common, mock.patch.object(reconciler, "_run", side_effect=first_run)):
+            with contextlib.ExitStack() as stack:
+                for ctx in common:
+                    stack.enter_context(ctx)
+                stack.enter_context(
+                    mock.patch.object(reconciler, "_run", side_effect=first_run)
+                )
                 with self.assertRaisesRegex(
                     reconciler.ReconcileError,
                     "synthetic interruption before restart",
@@ -542,7 +548,12 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
                     return_value=types.SimpleNamespace(gr_gid=1000),
                 ),
             )
-            with (*common2, mock.patch.object(reconciler, "_run", side_effect=second_run)):
+            with contextlib.ExitStack() as stack:
+                for ctx in common2:
+                    stack.enter_context(ctx)
+                stack.enter_context(
+                    mock.patch.object(reconciler, "_run", side_effect=second_run)
+                )
                 receipt = reconciler.apply_reconciliation(
                     fx["validated"],
                     registry_path=fx["registry_path"],
