@@ -24,27 +24,27 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 
 - Intent: mutate
 - Remote branch: workspace-shell-mcp-v1-design-freeze
-- Remote checkpoint: cc37231f7c88d65f564b3357ce679e2035e153d8
+- Remote checkpoint: 4f23fbed3916a53d4a4fe738857bda3612d64056
 - Remote verified: true
 
 ## Next safe action
 
-Validate PR #550 at the corrected exact head. If validation passes, record a fresh independent review request bound to that immutable head for the frozen authority/threat design. Do not implement, install, provision a tunnel/key, create a sudo/root helper, or mutate Lambda until the applicable review gates are satisfied.
+Run Workspace Control Validation on the BF-1/BF-2 corrected PR #550 head. If SUCCESS, record a fresh immutable-head independent re-review request that consumes blocking review 6447046381. Do not implement, merge, install, provision tunnel/key, create job-launcher/root-broker/helper authority, execute Lambda commands, modify Heartbeat, or mutate project controllers.
 
 ## Remaining work
 
-- Validate the corrected task capsule/handoff and frozen design artifacts on PR #550.
-- Request fresh independent review against the exact immutable PR head and resolve every blocking finding.
-- After design acceptance, implement the isolated unprivileged server/policy and root-helper broker in repository only, with adversarial tests; no live Lambda authority yet.
-- Obtain fresh read-only Lambda host attestation before host-specific installation design is finalized.
+- Validate the BF-1/BF-2 corrected authority artifact, review procedure, task capsule and synchronized handoff on PR #550.
+- Record a fresh corrected-head independent review request consuming blocking review 6447046381 and resolve every new finding.
+- Only after design acceptance, implement repository-only policy frontend, job-launcher protocol, hostile worker sandbox, approval verifier and reviewed-helper broker with adversarial tests; no live Lambda authority yet.
+- Obtain fresh read-only Lambda host attestation before finalizing host-specific installation units/UIDs/sockets/mounts and approval trust-store placement.
 - Independently review implementation and installation/rollback boundary before provisioning a dedicated tunnel credential or live service.
-- Run isolated acceptance, then separately authorize live exact-SHA/receipt acceptance while keeping Heartbeat and unrelated project controllers untouched.
+- Run isolated acceptance and later separately authorized live exact-SHA/receipt acceptance while keeping Heartbeat and unrelated project controllers untouched.
 
 ## Blockers / gates
 
-- Independent immutable-head authority/threat design review has not returned NO_BLOCKING_FINDING.
+- Fresh independent immutable-head review has not yet accepted the BF-1/BF-2 corrected authority/threat design.
 - Fresh live Lambda host attestation remains required before installation or activation; repository evidence alone is not host attestation.
-- Implementation is blocked until design review; tunnel provisioning, privileged helper installation and live service activation are separately prohibited until later gates.
+- Implementation, tunnel/key provisioning, job-launcher/root-broker/helper installation and live service activation remain prohibited until later gates.
 
 ## Fresh-chat initialization
 
