@@ -985,8 +985,8 @@ def apply_reconciliation(
             for item in request["project_manifests"]
         },
         "expected_controller_transaction_sha256": (
-            _canonical_sha256(validated["expected_controller_transaction"])
-            if validated["expected_controller_transaction"] is not None
+            _canonical_sha256(validated.get("expected_controller_transaction"))
+            if validated.get("expected_controller_transaction") is not None
             else None
         ),
     }
@@ -1053,7 +1053,7 @@ def apply_reconciliation(
             ),
             key=lambda entry: entry["service"],
         )
-        expected_transaction = validated["expected_controller_transaction"]
+        expected_transaction = validated.get("expected_controller_transaction")
         if expected_transaction is not None:
             actual_restart = [
                 entry["service"] for entry in restart_entries
