@@ -170,8 +170,7 @@ def maintenance_request_id(
     return str(uuid.uuid5(UUID_NAMESPACE, material))
 
 
-def submit_root(
-    socket_path: pathlib.Path,
+def build_root_request(
     *,
     comment_id: int,
     command: dict[str, Any],
@@ -182,7 +181,7 @@ def submit_root(
         "QUIESCE_LANE_FOR_RECOVERY",
         "RESUME_LANE_AFTER_RESET",
     }
-    request = {
+    return {
         "schema_version": 1,
         "request_id": maintenance_request_id(
             comment_id,
@@ -206,6 +205,22 @@ def submit_root(
             else None
         ),
     }
+
+
+def submit_root(
+    socket_path: pathlib.Path,
+    *,
+    comment_id: int,
+    command: dict[str, Any],
+    operation: str,
+    reset_generation: str | None = None,
+) -> dict[str, Any]:
+    request = build_root_request(
+        comment_id=comment_id,
+        command=command,
+        operation=operation,
+        reset_generation=reset_generation,
+    )
     conn = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     conn.settimeout(30)
     try:
