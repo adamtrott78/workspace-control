@@ -24,8 +24,8 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 - Intent: mutate
 - Remote branch: gitrunner-p1-bootstrap-install
-- Remote checkpoint: 58b8feda8684266d05111ce8b1bcbaecb39de4b9
-- Remote verified: true
+- Remote checkpoint: f4664e67c82e84922f54b3ed9ae45b677b039837
+- Remote verified: false
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate the exact gitrunner-p1-bootstrap-install head. Review scripts/lambda_ci_p1_bootstrap_install.py as a one-shot root bootstrap bound to the 2026-10-27 read-only host fingerprint. It must freeze automatic reconciliation before policy installation, back up every touched file, install only reviewed P1 controller/runtime/reconciler/L0 artifacts, keep workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND, restart only the shared provisioner/reconciler and the already-unhealthy research-engine CPU controller, preserve the three healthy project/lane controllers, initialize maintenance issue #527 without executing historical commands, retain rollback, and leave the automatic reconcile controller stopped on success. If exact-head validation passes, obtain fresh independent review before any host mutation.
+Validate the exact corrected PR #528 head. If SUCCESS, request fresh independent re-review consuming review 5662021244. Verify: research-engine CPU is re-attested as still unhealthy before mutation; rollback covers failures at both initial stop boundaries; rollback never restarts the three preserved controllers and reports incomplete rollback on restoration failure; commissioning requires exactly INITIALIZED_NO_COMMANDS_EXECUTED with no preexisting cursor; and success fails closed unless the automatic reconcile-controller remains stopped. Do not merge or execute the installer until NO_BLOCKING_FINDING is durably recorded.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Validate the exact gitrunner-p1-bootstrap-install head. Review scripts/lambda_ci
 
 ## Blockers / gates
 
-- P1 live bootstrap installer is implemented but unexecuted. Because it performs privileged host mutation, exact-head repository validation and a fresh independent bootstrap-install review are required before the operator runs it.
-- workspace-control activation remains separately blocked until the bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
+- PR #528 bootstrap installer received independent BLOCKING FINDINGS review 5662021244 at head 46d7eb5ea1ed8b43931958c518e21bf6180b02c1. All five findings have corrected code/tests on the current branch, but corrected-head validation and fresh independent re-review remain required before any Lambda mutation.
+- workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
 
