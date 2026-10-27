@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Fresh independent corrected-head re-review of PR #551 only. Consume BF-1 review 5668683858 and BF-2 comment 6447076960. Verify BF-2 is closed by treating the first matching IN_PROGRESS receipt as immutable transaction authority: original restart/enable/preserve sets and preserved-before snapshots must survive resume; policy/config materialization before interruption must not erase pending originally authorized restarts; completed restarts must be durably recorded with exact post-restart snapshots and not silently replayed/rebased; preserved sibling snapshots must remain the original first-attempt snapshots and generation/state drift between attempts must fail before further mutation; malformed/incompatible stored transaction state must fail closed. Regression-check interruption after materialization before restart, sibling generation drift, malformed transaction state, prior BF-1 installer dormancy closure, prior reconciliation-delta scope, bounded one-file installer authority, no activation, and no P2/P3/capacity widening. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
+On Lambda, run exactly the reviewed source-bound reconciler hotfix installer from a clean detached checkout of workspace-control merge 46ee8e5f3bf375539a40e4f5dd2a330a521f3487 with --expected-head set to that exact SHA. The helper is scripts/lambda_ci_p1_install_activation_delta_reconciler_hotfix.py and must be invoked via sudo from the operator account. Capture the complete stdout/stderr/exit code, especially P1_PREACTIVATION_RECONCILER_DELTA_HOTFIX_RECEIPT. Do not run reconciliation or activate workspace-control afterward; return the complete installer output for receipt review first.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Fresh independent corrected-head re-review of PR #551 only. Consume BF-1 review 
 
 ## Blockers / gates
 
-- P1 activation remains blocked pending fresh independent corrected-head review of PR #551 after BF-2 closure.
-- The currently installed Lambda reconciler still has the old restart-all-ACTIVE and interrupted-resume behavior; do not reconcile or activate before the independently accepted correction is merged, installed, and its live hotfix receipt is accepted.
-- Do not restart/reset project controllers, restart research-engine CPU, issue further maintenance commands, or widen P2/P3/capacity.
+- The accepted reconciler correction is merged but not yet installed on Lambda; the live installed reconciler still has the pre-fix behavior.
+- P1 activation/reconciliation remains blocked until the exact source-bound reconciler hotfix installer from merge 46ee8e5f3bf375539a40e4f5dd2a330a521f3487 completes successfully and its full live receipt is reviewed/recorded.
+- Do not activate/reconcile workspace-control, issue further maintenance commands, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity before the hotfix receipt gate passes.
 
 ## Fresh-chat initialization
 
