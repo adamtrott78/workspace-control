@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: gitrunner-p1-bootstrap-build-staging-fix
-- Remote checkpoint: a93f82b443de236b08d7f4a4f944ad77ae563630
-- Remote verified: false
+- Remote branch: main
+- Remote checkpoint: 74d565c4e6ce4954157c46e3289c952b4a1da7fd
+- Remote verified: true
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Request fresh independent corrected-head review of PR #535 after closing BF-1. Verify bootstrap authority derives exclusively from Path(__file__).resolve(); the executing file must resolve exactly to scripts/lambda_ci_p1_bootstrap_install.py under the derived repository; Git's top-level must equal that repository; the exact installer path must be tracked; expected HEAD and tracked-cleanliness checks must run against that repository; caller CWD must not be authoritative. Verify the external-copy regression fails before verify_live_fingerprint(), verify_credential_scope(), build_controller(), backup_targets(), or begin_mutation_phase(). Regression-check the previously accepted build-root chown/mode fix and all prior bootstrap preservation/rollback/dormant-activation boundaries. Do not merge or retry Lambda until NO_BLOCKING_FINDING is recorded on the exact final head.
+Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge 74d565c4e6ce4954157c46e3289c952b4a1da7fd with --expected-head set to that exact SHA and capture full output. The bootstrap must attest its own executing __file__ inside the reviewed checkout, preserve research-engine CPU in its accepted stable inactive/dead state, build the controller in the private ci-controller-owned 0700 staging root, and leave workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive. Return the complete bootstrap output before any GitHub -> L0 diagnose or workspace-control activation.
 
 ## Remaining work
 
@@ -49,9 +49,8 @@ Request fresh independent corrected-head review of PR #535 after closing BF-1. V
 
 ## Blockers / gates
 
-- Independent review 5663304360 on PR #535 old head f635d5734d50b88d2eb8a146e40575f8403e4cb1 found BF-1: privileged bootstrap source attestation was still bound to caller CWD rather than the installer file actually executing. That old head must not be merged or used for Lambda mutation.
-- BF-1 is corrected on PR #535 code/test head a93f82b443de236b08d7f4a4f944ad77ae563630: authority now derives from resolved __file__, exact tracked installer path, derived Git root, expected HEAD, and tracked cleanliness. Dedicated regression proves an external/copied installer fails before live fingerprinting, credential preflight, build_controller(), backup_targets(), or begin_mutation_phase(). Exact validation run 40464399665 / job 122056286646 / run #927 completed SUCCESS. Fresh independent corrected-head review remains required before merge or live retry.
-- The research-engine CPU controller remains intentionally quiesced from the accepted pre-bootstrap helper; no bootstrap path is authorized to deliberately start/restart it.
+- PR #535 corrected bootstrap staging/source-attestation change is independently accepted and merged as workspace-control@74d565c4e6ce4954157c46e3289c952b4a1da7fd. The next gate is one rollback-safe live bootstrap retry from that exact reviewed merge SHA, with full output/receipt inspection before any later action.
+- The research-engine CPU controller remains intentionally quiesced from the accepted pre-bootstrap helper receipt and must remain preservation-only; the bootstrap is not authorized to deliberately start/restart it.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
