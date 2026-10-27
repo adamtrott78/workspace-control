@@ -23,28 +23,28 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-shell-mcp-v1-design-freeze
-- Remote checkpoint: c28671e3e571cba298e8341bbce6999edc62bfd3
+- Remote branch: workspace-shell-mcp-v1-implementation
+- Remote checkpoint: be67b71ff60da30d80ddec26453e0f1e92a10780
 - Remote verified: true
 
 ## Next safe action
 
-After this state-only synchronization passes validation, record a fresh immutable-head independent re-review request on PR #550 that consumes blocking review 6447046381 and cites corrected design checkpoint c28671e3e571cba298e8341bbce6999edc62bfd3 / validation run #990. Do not implement, merge, install, provision tunnel/key, create job-launcher/root-broker/helper authority, execute Lambda commands, modify Heartbeat, or mutate project controllers.
+Implement and adversarially test Workspace Shell v1 in repository only on branch workspace-shell-mcp-v1-implementation, preserving the accepted authority contract. No Lambda installation, tunnel/key provisioning, root authority activation, Heartbeat mutation, or project-controller mutation.
 
 ## Remaining work
 
-- Validate the BF-1/BF-2 corrected authority artifact, review procedure, task capsule and synchronized handoff on PR #550.
-- Record a fresh corrected-head independent review request consuming blocking review 6447046381 and resolve every new finding.
-- Only after design acceptance, implement repository-only policy frontend, job-launcher protocol, hostile worker sandbox, approval verifier and reviewed-helper broker with adversarial tests; no live Lambda authority yet.
-- Obtain fresh read-only Lambda host attestation before finalizing host-specific installation units/UIDs/sockets/mounts and approval trust-store placement.
-- Independently review implementation and installation/rollback boundary before provisioning a dedicated tunnel credential or live service.
-- Run isolated acceptance and later separately authorized live exact-SHA/receipt acceptance while keeping Heartbeat and unrelated project controllers untouched.
+- Implement the MCP policy frontend, fixed profile grammar, task/provenance validation, bounded receipt handling and local Unix-socket clients.
+- Implement repository-only root-owned job-launcher and reviewed-helper broker protocols with peer-credential checks, hostile-worker isolation plan enforcement, approval verification and fail-closed replay/revocation logic.
+- Add adversarial tests covering argv/path/profile confusion, worker/control-plane separation, approval forgery/replay/expiry/revocation/binding failures, output limits and receipt integrity.
+- Run Workspace Control Validation and plugin-specific tests; fix all failures.
+- Request fresh independent exact-head implementation review. Do not install anything on Lambda.
+- After implementation acceptance, obtain fresh read-only host attestation and design the exact installation units/UIDs/sockets/mounts/rollback before a separate installation review.
 
 ## Blockers / gates
 
-- Fresh independent immutable-head review has not yet accepted the BF-1/BF-2 corrected authority/threat design.
-- Fresh live Lambda host attestation remains required before installation or activation; repository evidence alone is not host attestation.
-- Implementation, tunnel/key provisioning, job-launcher/root-broker/helper installation and live service activation remain prohibited until later gates.
+- Fresh live Lambda host attestation is required before installation-specific unit/UID/socket/mount choices are accepted.
+- Repository implementation must pass adversarial tests and independent exact-head implementation review before installation.
+- Tunnel/key provisioning, root/job-launcher/broker installation, systemd activation and live Lambda execution remain prohibited.
 
 ## Fresh-chat initialization
 
