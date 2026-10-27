@@ -36,12 +36,14 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Fresh chat: start from the authoritative task capsule and exact Git state, verify reviewed merge 4d98555a678050e611502de1b9b8c35b4cf9c5fa is still the pinned executable checkpoint and no intervening live mutation is recorded, then perform one P1 bootstrap retry from a detached exact checkout of that merge with --expected-head set to the same SHA. The corrected installer must preserve research-engine CPU exactly at loaded+enabled+inactive/dead+ExecMainStatus=1+NRestarts=12411; after any shared provisioner restart it may restore only research-engine GPU, PADataset CPU, and PADataset GPU if they match the reviewed clean dependency-stop predicate. Return the complete bootstrap output before any GitHub -> L0 diagnose, reconciliation, workspace-control activation, or research-engine CPU restart.
+Read-only incident inspection only. From Lambda, without starting/stopping/restarting/reloading any service, capture: systemctl show for workspace-ci-maintenance.service, workspace-ci-provisioner.service, workspace-ci-reconciler.service, workspace-ci-reconcile-controller.service, workspace-ci-controller@research-engine-cpu.service, workspace-ci-controller@research-engine-gpu.service, workspace-ci-controller@padataset-cpu.service, and workspace-ci-controller@padataset-gpu.service using LoadState,UnitFileState,ActiveState,SubState,ExecMainStatus,NRestarts; `ls -ld /run/workspace-ci /run/workspace-ci/maintenance` and `ls -l /run/workspace-ci/maintenance/maintenance.sock` if present; `journalctl -u workspace-ci-maintenance.service -n 120 --no-pager`; `journalctl -u workspace-ci-controller@research-engine-gpu.service -n 120 --no-pager`; and existence/hash/identity checks sufficient to determine whether rollback restored bootstrap-created files/users/groups. Return the complete read-only output. Do not perform recovery or retry before that evidence is durably accepted.
 
 ## Remaining work
 
-- Validate and independently review PR #530, then retry the rollback-safe P1 bootstrap installer only from the exact reviewed merge SHA; preserve the three healthy controllers and keep workspace-control dormant.
-- After bootstrap PASS, issue exactly one real owner GitHub -> L0 maintenance DIAGNOSE_LANE command on issue #527 and prove the durable accepted receipt before workspace-control activation.
+- Perform read-only post-incident fingerprinting only: inspect maintenance root unit state, maintenance socket path, recent maintenance-root journal, provisioner/reconciler/reconcile-controller state, all four preserved controller snapshots, recent research-engine GPU journal, and rollback-restored bootstrap-created filesystem/identity state. Do not start/restart/stop/reload anything.
+- Use that evidence to determine whether the maintenance-root failure is a readiness race or a daemon/service failure, and why research-engine GPU entered failed/failed during rollback.
+- Design the narrow correction only after the live evidence is frozen; validate and independently review it before any recovery mutation or bootstrap retry.
+- After a corrected bootstrap PASS, issue exactly one real owner GitHub -> L0 maintenance DIAGNOSE_LANE command on issue #527 and prove the durable accepted receipt before workspace-control activation.
 - Activate workspace-control only as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1; keep automatic pull_request/push admission disabled.
 - Validate live P1 filesystem isolation, CPU/RAM/runtime envelope, GPU0, exact candidate provenance, deterministic receipts, maintenance authorization/replay behavior, and clean teardown/rollback.
 - After live P1 acceptance, continue the separately gated work to remove routine GitHub-hosted Actions minutes; do not remove the last bootstrap path in the same change.
@@ -49,9 +51,10 @@ Fresh chat: start from the authoritative task capsule and exact Git state, verif
 
 ## Blockers / gates
 
-- Live dependency-stop recovery from reviewed merge 4d98555a678050e611502de1b9b8c35b4cf9c5fa succeeded with DEPENDENCY_STOPPED_CONTROLLERS_RESTORED. research-engine GPU, PADataset CPU, and PADataset GPU are active/running with ExecMainStatus=0 and NRestarts=0; research-engine CPU remains intentionally quiesced and unchanged at inactive/dead, ExecMainStatus=1, NRestarts=12411.
-- The next gate is one rollback-safe P1 bootstrap retry from exact reviewed merge 4d98555a678050e611502de1b9b8c35b4cf9c5fa using the corrected installer that handles supplementary maintenance group membership and shared-provisioner dependency stops. Full output must be inspected before any L0 diagnose or workspace-control activation.
-- workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
+- The exact reviewed P1 bootstrap from 4d98555a678050e611502de1b9b8c35b4cf9c5fa crossed mutation and failed at the maintenance-root readiness gate with `maintenance root socket missing`; rollback could not certify completion because research-engine GPU ended loaded+enabled+failed/failed, ExecMainStatus=1, NRestarts=0.
+- No recovery, bootstrap retry, reconciliation, GitHub -> L0 command, workspace-control activation, or research-engine CPU restart is authorized until a read-only post-incident fingerprint establishes exact service/file/identity state and recent journals for the maintenance root and research-engine GPU.
+- Static inspection of the reviewed implementation shows a plausible startup-readiness race: workspace-ci-maintenance.service is Type=simple, the installer checks `systemctl is-active` immediately after `enable --now`, and then immediately requires `/run/workspace-ci/maintenance/maintenance.sock` with no readiness wait. This is a hypothesis pending live journal/state evidence, not yet an accepted root cause.
+- workspace-control activation remains separately blocked until a corrected bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
 
@@ -62,9 +65,7 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json
 
-Task ID: `workspace-github-actions-selfhosted-control-plane-v1`
-
 Start from the normal workspace-control root route.
-Treat the authoritative task capsule, synchronized handoff, exact durable Git/runtime state, and referenced evidence as the complete handoff.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
