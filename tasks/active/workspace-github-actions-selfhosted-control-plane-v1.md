@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate and independently review the exact p1-activation-delta-reconcile correction before any live mutation. The reviewer must verify that unchanged existing ACTIVE project controllers are preservation-only, workspace-control candidate->ACTIVE would restart only workspace-ci-controller@workspace-control-cpu.service, existing controller configuration drift is explicit rather than silently ignored, preserved controller InvocationID/MainPID/state snapshots are bound before/after reconciliation, and the bounded installer replaces only /opt/workspace-ci/reconciler/lambda_ci_reconciler.py while restarting only workspace-ci-reconciler.service with --job-mode=ignore-dependencies. The installer must preserve the frozen workspace-ci-reconcile-controller.service, successful diagnose receipt/cursor 6438723476, workspace-control dormancy, research-engine CPU, and healthy sibling controllers on forward and rollback. Do not activate workspace-control yet.
+Fresh independent exact-head review of PR #551 only. Review exact code/test checkpoint b57fb768e5f17eeb706059ef3ff0ed81523b012a and the final PR head, verifying the checkpoint-to-head delta is task-state-only. Verify candidate->ACTIVE workspace-control reconciliation restarts only workspace-ci-controller@workspace-control-cpu.service; unchanged ACTIVE research-engine/PADataset controllers are preservation-only with exact before/after systemd snapshots; explicit controller-config drift becomes an explicit restart delta; unchanged sibling policy/config files are not rewritten unnecessarily; and research-engine CPU can remain inactive/dead NRestarts=12411 despite registry ACTIVE. Verify the source-bound hotfix installer binds the exact old installed reconciler digest c424e62c20cd38fa0380d315e4cf28831ce63ff63dd7aa9711913a41c405fcc6, successful diagnose receipt/cursor 6438723476, workspace-control dormancy, frozen workspace-ci-reconcile-controller.service, and project-controller baselines; replaces only the reconciler Python file; restarts only workspace-ci-reconciler.service with --job-mode=ignore-dependencies; proves live socket readiness; and restores exact prior bytes with the same preservation proofs on rollback. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Validate and independently review the exact p1-activation-delta-reconcile correc
 
 ## Blockers / gates
 
-- P1 activation is blocked because the currently installed reconciler would restart every ACTIVE project controller during reconciliation, including preserved research-engine/PADataset lanes.
-- A delta-scoped reconciler correction plus bounded source-bound reconciler hotfix installer is under validation/review on branch p1-activation-delta-reconcile.
-- Do not install that correction, reconcile, activate workspace-control, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity until fresh independent exact-head review returns NO_BLOCKING_FINDING.
+- P1 activation remains blocked until fresh independent review accepts the exact activation-delta reconciler correction and bounded installer.
+- The currently installed Lambda reconciler still has the old restart-all-ACTIVE behavior; do not reconcile or activate before the reviewed hotfix is installed and its live receipt is accepted.
+- Do not restart/reset project controllers, restart research-engine CPU, issue further maintenance commands, or widen P2/P3/capacity.
 
 ## Fresh-chat initialization
 
