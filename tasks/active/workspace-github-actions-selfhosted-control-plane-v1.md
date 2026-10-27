@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Prepare and request a fresh independent P1 activation-boundary review for workspace-control CPU only. The review must start from the authoritative task capsule, consume the successful live hotfix receipt and exact diagnose receipt for comment 6438723476, verify workspace-control remains inactive/MIGRATION_CANDIDATE_NOT_INSTALLED/PLANNED_NOT_BOUND, and review the exact activation/reconciliation procedure and rollback boundary before any live activation. P1 activation must remain bounded to workspace-control CPU with maxRunners=1/concurrency=1 and must preserve research-engine CPU plus all sibling project lanes. Do not activate, reconcile, or issue further maintenance commands before NO_BLOCKING_FINDING.
+Fresh independent corrected-head re-review of PR #551 only. Consume BF-1 review 5668683858 and BF-2 comment 6447076960. Verify BF-2 is closed by treating the first matching IN_PROGRESS receipt as immutable transaction authority: original restart/enable/preserve sets and preserved-before snapshots must survive resume; policy/config materialization before interruption must not erase pending originally authorized restarts; completed restarts must be durably recorded with exact post-restart snapshots and not silently replayed/rebased; preserved sibling snapshots must remain the original first-attempt snapshots and generation/state drift between attempts must fail before further mutation; malformed/incompatible stored transaction state must fail closed. Regression-check interruption after materialization before restart, sibling generation drift, malformed transaction state, prior BF-1 installer dormancy closure, prior reconciliation-delta scope, bounded one-file installer authority, no activation, and no P2/P3/capacity widening. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
 
 ## Remaining work
 
@@ -49,10 +49,9 @@ Prepare and request a fresh independent P1 activation-boundary review for worksp
 
 ## Blockers / gates
 
-- The maintenance/hotfix path and preactivation observation-only diagnose gate are complete and PASS.
-- workspace-control remains MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive; live activation has not yet occurred.
-- Before any activation/reconciliation or project-controller mutation, the exact P1 activation boundary and procedure must receive a fresh independent review.
-- Do not restart research-engine CPU or widen P2/P3/capacity as part of P1 activation.
+- P1 activation remains blocked pending fresh independent corrected-head review of PR #551 after BF-2 closure.
+- The currently installed Lambda reconciler still has the old restart-all-ACTIVE and interrupted-resume behavior; do not reconcile or activate before the independently accepted correction is merged, installed, and its live hotfix receipt is accepted.
+- Do not restart/reset project controllers, restart research-engine CPU, issue further maintenance commands, or widen P2/P3/capacity.
 
 ## Fresh-chat initialization
 
