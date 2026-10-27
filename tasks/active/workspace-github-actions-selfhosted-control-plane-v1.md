@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: gitrunner-p1-bootstrap-preserve-recovered-cpu
-- Remote checkpoint: 44630dea4e01d7ffb44edde58a5f192bb8f2f2bd
-- Remote verified: false
+- Remote branch: main
+- Remote checkpoint: b1edcad200faf389c55b37b37d946d90dfc298e6
+- Remote verified: true
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate the corrected PR #531 head after closing the recovered-CPU stability rebasing gap. Verify that after backup_targets() and immediately before begin_mutation_phase(), the preserved RESEARCH_CPU snapshot still satisfies the recovered predicate and exactly matches research_cpu_pre NRestarts, then perform a fresh live _verify_preserved_services() at the mutation boundary. Regression tests must inject both restart-count drift and failure between the earlier two-observation check and mutation. If exact-head validation passes, request fresh independent re-review; do not merge or retry Lambda until the corrected head receives NO_BLOCKING_FINDING.
+Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge b1edcad200faf389c55b37b37d946d90dfc298e6, with --expected-head set to that exact SHA and full output captured. The installer must preserve all four existing project/lane controllers, including recovered research-engine CPU; bind the recovered CPU backup snapshot to the original stable preflight NRestarts baseline; perform a fresh live preserved-service recheck immediately before the sole initial mutation (stopping automatic reconcile-controller); leave workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive; leave automatic reconcile-controller frozen on success; and rollback on any failed post-mutation gate. Return the complete output/receipt before any GitHub -> L0 diagnose or workspace-control activation.
 
 ## Remaining work
 
@@ -49,8 +49,7 @@ Validate the corrected PR #531 head after closing the recovered-CPU stability re
 
 ## Blockers / gates
 
-- PR #531 review at old head 096396d0383ddd9f17bb95a6117ba41508bf1a2f recorded NO_BLOCKING_FINDING, but a fresh call-path audit found a pre-mutation stability-rebasing gap: research-engine CPU could restart after the two-observation check and before begin_mutation_phase(), then backup_targets() could silently establish the new restart count as the preserved baseline. The PR head has been advanced with a bounded correction; the old review is stale and does not authorize merge/retry.
-- The corrected #531 head must pass exact validation and receive a fresh independent review before any third Lambda retry.
+- The exact corrected recovered-CPU mutation-boundary implementation is independently accepted and merged as workspace-control@b1edcad200faf389c55b37b37d946d90dfc298e6. The next gate is the bounded live bootstrap retry from that exact reviewed merge SHA; any live drift/failure must abort before mutation or rollback according to the reviewed installer.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
