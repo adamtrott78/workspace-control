@@ -76,18 +76,18 @@ class P1BootstrapInstallerTests(unittest.TestCase):
         self.assertIn('"capacity_changed": False', raw)
         self.assertIn('"p2_p3_authority_changed": False', raw)
 
-    def test_only_preexisting_broken_controller_is_deliberately_restarted(self):
+    def test_recovered_research_cpu_is_preserved_not_mutated(self):
+        module = load_module()
+        self.assertIn(module.RESEARCH_CPU, module.HEALTHY_CONTROLLERS)
+        self.assertNotIn(module.RESEARCH_CPU, module.MUTATED_SERVICES)
+
         raw = SCRIPT.read_text(encoding="utf-8")
-        self.assertIn('run(["systemctl", "restart", RESEARCH_CPU])', raw)
-        for healthy in (
-            "workspace-ci-controller@research-engine-gpu.service",
-            "workspace-ci-controller@padataset-cpu.service",
-            "workspace-ci-controller@padataset-gpu.service",
-        ):
-            self.assertNotIn(
-                f'run(["systemctl", "restart", "{healthy}"])',
-                raw,
-            )
+        self.assertNotIn('run(["systemctl", "restart", RESEARCH_CPU])', raw)
+        self.assertNotIn('run(["systemctl", "stop", RESEARCH_CPU])', raw)
+        self.assertIn(
+            '_verify_preserved_services(manifest["preserved_services"])',
+            raw,
+        )
 
     def test_automatic_reconciliation_is_frozen_before_policy_install(self):
         raw = SCRIPT.read_text(encoding="utf-8")
@@ -124,74 +124,84 @@ class P1BootstrapInstallerTests(unittest.TestCase):
             raw,
         )
 
-    def test_broken_cpu_lane_is_quiesced_before_binary_replacement(self):
+    def test_only_reconcile_controller_is_frozen_before_binary_replacement(self):
         raw = SCRIPT.read_text(encoding="utf-8")
-        stop_cpu = raw.index('run(["systemctl", "stop", RESEARCH_CPU])')
+        freeze = raw.index('run(["systemctl", "stop", RECONCILE_CONTROLLER])')
         install_binary = raw.index(
             "install_file(\n            built_controller,"
         )
-        self.assertLess(stop_cpu, install_binary)
+        self.assertLess(freeze, install_binary)
+        self.assertNotIn('run(["systemctl", "stop", RESEARCH_CPU])', raw)
 
-    def test_research_cpu_must_still_match_unhealthy_preflight(self):
+    def test_research_cpu_must_be_recovered_and_stable_before_mutation(self):
         module = load_module()
-        healthy = {
+        stable = {
             "LoadState": "loaded",
             "ActiveState": "active",
             "SubState": "running",
             "UnitFileState": "enabled",
-            "NRestarts": str(module.RESEARCH_CPU_PREFLIGHT_MIN_RESTARTS + 10),
+            "NRestarts": str(module.RESEARCH_CPU_RECOVERED_MIN_RESTARTS),
             "ExecMainStatus": "0",
         }
-        with mock.patch.object(module, "service_snapshot", return_value=healthy):
+        with mock.patch.object(
+            module,
+            "service_snapshot",
+            side_effect=[stable, stable.copy()],
+        ), mock.patch.object(module.time, "sleep") as sleep:
+            self.assertEqual(
+                module.verify_research_cpu_recovered_and_stable(),
+                stable,
+            )
+        sleep.assert_called_once_with(module.RESEARCH_CPU_STABILITY_SECONDS)
+
+        unhealthy = dict(stable)
+        unhealthy["ActiveState"] = "activating"
+        unhealthy["SubState"] = "auto-restart"
+        unhealthy["ExecMainStatus"] = "1"
+        with mock.patch.object(module, "service_snapshot", return_value=unhealthy):
             with self.assertRaisesRegex(
                 module.BootstrapError,
-                "no longer matches reviewed unhealthy preflight",
+                "does not match reviewed recovered state",
             ):
-                module.verify_research_cpu_still_unhealthy()
+                module.verify_research_cpu_recovered_and_stable()
 
-        unhealthy = {
-            "LoadState": "loaded",
-            "ActiveState": "activating",
-            "SubState": "auto-restart",
-            "UnitFileState": "enabled",
-            "NRestarts": str(module.RESEARCH_CPU_PREFLIGHT_MIN_RESTARTS),
-            "ExecMainStatus": "1",
-        }
-        with mock.patch.object(module, "service_snapshot", return_value=unhealthy):
-            self.assertEqual(
-                module.verify_research_cpu_still_unhealthy(),
-                unhealthy,
-            )
+        changed = dict(stable)
+        changed["NRestarts"] = str(
+            module.RESEARCH_CPU_RECOVERED_MIN_RESTARTS + 1
+        )
+        with mock.patch.object(
+            module,
+            "service_snapshot",
+            side_effect=[stable, changed],
+        ), mock.patch.object(module.time, "sleep"):
+            with self.assertRaisesRegex(
+                module.BootstrapError,
+                "restart count changed",
+            ):
+                module.verify_research_cpu_recovered_and_stable()
 
-    def test_failure_at_first_stop_boundary_rolls_back(self):
+    def test_failure_freezing_reconcile_controller_rolls_back(self):
         module = load_module()
         manifest = {"sentinel": True}
         with mock.patch.object(
             module,
             "run",
-            side_effect=module.BootstrapError("first stop failed"),
+            side_effect=module.BootstrapError("freeze failed"),
         ), mock.patch.object(module, "restore_targets") as restore:
-            with self.assertRaisesRegex(module.BootstrapError, "first stop failed"):
+            with self.assertRaisesRegex(module.BootstrapError, "freeze failed"):
                 module.begin_mutation_phase(manifest)
         restore.assert_called_once_with(manifest)
 
-    def test_failure_at_second_stop_boundary_rolls_back(self):
-        module = load_module()
-        manifest = {"sentinel": True}
-        calls = {"count": 0}
-
-        def fake_run(*_args, **_kwargs):
-            calls["count"] += 1
-            if calls["count"] == 2:
-                raise module.BootstrapError("second stop failed")
-            return object()
-
-        with mock.patch.object(module, "run", side_effect=fake_run), mock.patch.object(
-            module, "restore_targets"
-        ) as restore:
-            with self.assertRaisesRegex(module.BootstrapError, "second stop failed"):
-                module.begin_mutation_phase(manifest)
-        restore.assert_called_once_with(manifest)
+    def test_mutation_phase_has_no_second_project_controller_stop(self):
+        raw = SCRIPT.read_text(encoding="utf-8")
+        freeze_body = raw.split("def freeze_for_install()", 1)[1].split(
+            "def begin_mutation_phase(", 1
+        )[0]
+        self.assertIn(
+            'run(["systemctl", "stop", RECONCILE_CONTROLLER])',
+            freeze_body,
+        )
+        self.assertNotIn("RESEARCH_CPU", freeze_body)
 
     def test_rollback_cannot_restart_preserved_controllers(self):
         module = load_module()
