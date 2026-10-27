@@ -270,3 +270,17 @@ Exact v0.4.8 candidate `def7c5fe6498b1bd742d912c1490d1f7160cab5f` was started on
 The runtime key was unset after the check. Production Heartbeat remained unchanged on PID 1978095 / exact v0.4.7 SHA `9e5858738a4fd11801510e2839b0f94f19541506` / local `:8787`.
 
 Next gate: keep the exact v0.4.8 MCP endpoint and tunnel-client daemon running concurrently, prove `/readyz`, then perform ChatGPT connector discovery and live tool/app acceptance through Secure MCP Tunnel.
+
+
+### Live ChatGPT Secure MCP Tunnel tool/app acceptance — PASS (visual sizing pending)
+
+Temporary tunnel-backed personal plugin:
+- plugin ID: `plugin_asdk_app_6ae01e3e9e708191b6639dc9bc556f43`
+- name: `dev-6ae01e3e9e708191b6639dc9bc556f43`
+- tunnel: `tunnel_6ae017d8655c8191976ef3bccc31f593`
+
+From the live ChatGPT conversation, `heartbeat_begin_turn` succeeded through Secure MCP Tunnel and returned turn `31c6e972-58ba-4460-a497-e5a5df226c4c`; ChatGPT rendered the embedded Heartbeat UI. Five later `heartbeat_update` calls succeeded on the same turn through sequence 6. `heartbeat_get` returned the complete six-entry current-turn history and also rendered the app UI.
+
+This proves model tool reachability and MCP App resource delivery through the tunnel-backed v0.4.8 acceptance path, independently of ngrok.
+
+Remaining live UI gate is visual only: operator must confirm the rendered card preserves the accepted five-entry intrinsic height and that the sixth entry transitions to scrollable history while keeping the newest update visible. The assistant cannot inspect client-rendered card dimensions or scroll position directly.
