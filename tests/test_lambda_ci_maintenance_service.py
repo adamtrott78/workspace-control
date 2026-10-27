@@ -35,6 +35,13 @@ def request(operation, *, quarantine=None, generation=None, request_id="01234567
         "lane": "cpu",
         "quarantine_receipt_id": quarantine,
         "reset_generation": generation,
+        "source_attestation": {
+            "repository": "adamtrott78/workspace-control",
+            "actor_login": "adamtrott78",
+            "comment_id": 12345,
+            "command_sha256": "a" * 64,
+            "maintenance_policy_generation": "workspace-ci-maintenance-p1-v1",
+        },
     }
 
 
@@ -102,6 +109,23 @@ class MaintenanceServiceTests(unittest.TestCase):
         with self.assertRaisesRegex(maintenance.MaintenanceError, "unsupported"):
             maintenance._validate_request(req)
 
+    def test_source_attestation_is_exact_and_owner_bound(self):
+        req = request("RESTART_CONTROLLER")
+        req["source_attestation"]["actor_login"] = "someone-else"
+        with self.assertRaisesRegex(
+            maintenance.MaintenanceError,
+            "source actor is unauthorized",
+        ):
+            maintenance._validate_request(req)
+
+        req = request("RESTART_CONTROLLER")
+        req["source_attestation"]["maintenance_policy_generation"] = "future-v2"
+        with self.assertRaisesRegex(
+            maintenance.MaintenanceError,
+            "policy generation mismatch",
+        ):
+            maintenance._validate_request(req)
+
     def test_target_service_is_derived_from_installed_registry(self):
         target = maintenance.derive_target(
             registry(),
@@ -156,6 +180,11 @@ class MaintenanceServiceTests(unittest.TestCase):
             set(receipt["identity"]["installed_policy_digests"]),
             {"registry_sha256", "manifest_sha256"},
         )
+        self.assertEqual(
+            receipt["identity"]["source_attestation"]["actor_login"],
+            "adamtrott78",
+        )
+        self.assertIsNotNone(receipt["rollback"])
         self.assertEqual(
             receipt["result"]["quarantine_observed_at"],
             "2026-10-27T01:00:00Z",
