@@ -153,3 +153,10 @@ The earlier :8788 orphan was already gone. The next isolated port candidate :878
 The :8789 listener is exact orphaned v0.4.8 validation state: PID 1973910, PPID 1, Node20 executable, CWD in the `heartbeat-v048-validate-def7c5fe6498` worktree, and exact Git SHA `def7c5fe6498b1bd742d912c1490d1f7160cab5f`. The previous safety predicate rejected it only because `/proc/<pid>/cmdline` reported the absolute Node executable path rather than literal `node server.js`.
 
 The next wrapper aborted immediately after candidate checkout, before version reporting. The repository root does not ignore `node_modules`, so an existing dependency symlink inside the validation worktree can make `git status --porcelain` nonempty. Recovery must remove only a verified symlink resolving to the accepted v0.4.7 runtime's `node_modules`, prove no other worktree drift, then recreate the link for isolated execution.
+
+
+### Exact candidate cleanliness — PASS; fixed-port selection retired
+
+The exact v0.4.8 worktree was repaired by removing only the known `node_modules` symlink that resolved to the accepted v0.4.7 runtime dependency tree. After removal, the detached worktree at `def7c5fe6498b1bd742d912c1490d1f7160cab5f` had an empty `git status --porcelain`, proving no source drift. The dependency link was recreated only after that assertion passed.
+
+The subsequent abort occurred only because hard-coded test port `:8790` was occupied. Since :8788, :8789, and now :8790 have each encountered leftover listeners from interrupted isolated probes, fixed-port selection is retired. The next run must safely clean only exact orphaned Heartbeat probes and choose a free ephemeral loopback port dynamically.
