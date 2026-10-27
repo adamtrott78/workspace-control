@@ -13,6 +13,12 @@ if str(SCRIPTS) not in sys.path:
 import lambda_ci_maintenance_controller as controller
 
 
+FAKE_POLICY_DIGESTS = {
+    "registry_sha256": "a" * 64,
+    "manifest_sha256": "b" * 64,
+}
+
+
 class FakeNoReplacementRuns:
     def get_json(self, _path):
         return {"workflow_runs": []}
@@ -257,6 +263,9 @@ class MaintenanceControllerTests(unittest.TestCase):
             if operation == "QUIESCE_LANE_FOR_RECOVERY":
                 return {
                     "status": "COMPLETED",
+                    "identity": {
+                        "installed_policy_digests": dict(FAKE_POLICY_DIGESTS),
+                    },
                     "result": {
                         "local_execution_absent": True,
                         "quarantine_scale_set_id": 77,
@@ -272,6 +281,7 @@ class MaintenanceControllerTests(unittest.TestCase):
                     "status": "PASS",
                     "service_active": True,
                     "active_project_units": [],
+                    "installed_policy_digests": dict(FAKE_POLICY_DIGESTS),
                     "ready_for_single_retry": None,
                 }
                 if diag_count["value"] >= 3:
@@ -336,6 +346,15 @@ class MaintenanceControllerTests(unittest.TestCase):
         self.assertEqual(result["new_scale_set_id"], 88)
         self.assertFalse(result["automatic_workflow_triggered"])
         self.assertEqual(
+            result["installed_policy_digests"],
+            FAKE_POLICY_DIGESTS,
+        )
+        self.assertEqual(
+            result["quarantine_receipt_id"],
+            command["quarantine_receipt_id"],
+        )
+        self.assertEqual(result["source_comment_id"], 123)
+        self.assertEqual(
             result["controller_ready_receipt"]["status"],
             "READY_FOR_SINGLE_RETRY",
         )
@@ -371,6 +390,9 @@ class MaintenanceControllerTests(unittest.TestCase):
             if operation == "QUIESCE_LANE_FOR_RECOVERY":
                 return {
                     "status": "COMPLETED",
+                    "identity": {
+                        "installed_policy_digests": dict(FAKE_POLICY_DIGESTS),
+                    },
                     "result": {
                         "local_execution_absent": True,
                         "quarantine_scale_set_id": 77,
@@ -384,6 +406,7 @@ class MaintenanceControllerTests(unittest.TestCase):
                     "status": "PASS",
                     "service_active": True,
                     "active_project_units": [],
+                    "installed_policy_digests": dict(FAKE_POLICY_DIGESTS),
                 }
             raise AssertionError(operation)
 
