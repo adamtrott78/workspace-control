@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate and independently review the bounded preactivation diagnose correction on branch/PR `p1-preactivation-diagnose-fix`. Review must verify that only DIAGNOSE_LANE can set `allow_migration_candidate_observation`, that it accepts only exact registry+manifest `MIGRATION_CANDIDATE_NOT_INSTALLED`, that mixed/other inactive states fail closed, that all mutating maintenance verbs remain ACTIVE-only, and that the diagnose path performs no systemctl mutation. Do not merge or mutate Lambda before exact-head NO_BLOCKING_FINDING.
+Fresh independent review of PR #544 only. Review the final immutable PR head and validated checkpoint 495523e2f5ef89edd528608a2a787fc561856f6f. Verify that only DIAGNOSE_LANE can opt into migration-candidate observation; only exact registry+manifest MIGRATION_CANDIDATE_NOT_INSTALLED is accepted; mixed/other inactive states fail closed; all mutating maintenance verbs remain ACTIVE-only; diagnose performs no systemctl mutation; ACTIVE/ACTIVE behavior and source-attestation/replay/isolation boundaries remain unchanged. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Validate and independently review the bounded preactivation diagnose correction 
 
 ## Blockers / gates
 
-- The first live GitHub -> L0 diagnose command failed closed as designed by the current code because workspace-control is a pre-activation migration candidate. That failure is durably evidenced by comment 6437389584 and its FAILED_CLOSED receipt.
-- A bounded correction is now under review: allow observation-only DIAGNOSE_LANE for exact MIGRATION_CANDIDATE_NOT_INSTALLED registry+manifest state while preserving ACTIVE-only requirements for every mutating maintenance operation.
-- Do not issue a second maintenance command, modify Lambda, reconcile, activate workspace-control, restart/reset controllers, restart research-engine CPU, or widen P2/P3/capacity until the correction passes validation and fresh independent exact-head review.
+- The first live GitHub -> L0 diagnose command failed closed because workspace-control is a pre-activation migration candidate; this is durably evidenced by issue #527 comment 6437389584 and its FAILED_CLOSED receipt.
+- PR #544 bounded correction passed validation at checkpoint 495523e2f5ef89edd528608a2a787fc561856f6f. Fresh independent exact-head review remains required before merge/install/retry.
+- Do not issue a second maintenance command, modify Lambda, reconcile, activate workspace-control, restart/reset controllers, restart research-engine CPU, or widen P2/P3/capacity until exact-head NO_BLOCKING_FINDING.
 
 ## Fresh-chat initialization
 
