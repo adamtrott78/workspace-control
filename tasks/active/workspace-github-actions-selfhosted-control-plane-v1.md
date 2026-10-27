@@ -36,22 +36,21 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Post exactly one owner-authored maintenance comment on workspace-control issue #527 with the single-line body `/workspace-ci-maintain diagnose workspace-control cpu`. Record the immutable comment ID. Then perform only read-only inspection of `/var/lib/workspace-ci/maintenance-controller/receipts/<comment_id>.json` after the controller poll to prove status COMPLETED, exact identity/source attestation, operation DIAGNOSE_LANE, installed policy digests, and bounded diagnosis result. Do not post a second maintenance command and do not reconcile, activate workspace-control, restart/reset any controller, or restart research-engine CPU before that receipt is durably accepted.
+Read-only incident inspection only for the already-issued maintenance command comment 6437389584. On Lambda, print `/var/lib/workspace-ci/maintenance-controller/receipts/6437389584.json` if present and bounded recent journals for `workspace-ci-maintenance-controller.service` and `workspace-ci-maintenance.service` sufficient to show processing of comment 6437389584. Do not post a second command, do not modify/delete the receipt, and do not reconcile, activate workspace-control, restart/reset any controller, or restart research-engine CPU. Return the complete read-only output.
 
 ## Remaining work
 
-- Post exactly one owner-authored `/workspace-ci-maintain diagnose workspace-control cpu` comment on maintenance issue #527 and capture its immutable GitHub comment ID.
-- After the maintenance controller polls it, read only the corresponding `/var/lib/workspace-ci/maintenance-controller/receipts/<comment_id>.json` durable receipt and any bounded root diagnosis fields needed to prove DIAGNOSE_LANE acceptance; do not issue a second command.
-- Only after the diagnostic receipt is accepted, independently gate workspace-control activation as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1; keep automatic pull_request/push admission disabled.
+- Read only `/var/lib/workspace-ci/maintenance-controller/receipts/6437389584.json` plus the maintenance-controller/root-maintenance journal lines needed to bind the result to comment 6437389584. Do not rerun or post another command.
+- If the receipt is FAILED_CLOSED because workspace-control is not ACTIVE, design the narrowest correction that allows DIAGNOSE_LANE to resolve a registered migration candidate for observation only while continuing to require ACTIVE state for RESTART_CONTROLLER and all recovery mutations; add regression/adversarial tests and fresh independent review before any retry.
+- Only after a real GitHub -> L0 diagnostic receipt is durably accepted may workspace-control activation be independently gated as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1.
 - Validate live P1 filesystem isolation, CPU/RAM/runtime envelope, GPU0, exact candidate provenance, deterministic receipts, maintenance authorization/replay behavior, and clean teardown/rollback.
-- After live P1 acceptance, continue the separately gated work to remove routine GitHub-hosted Actions minutes; do not remove the last bootstrap path in the same change.
 - Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, resource-aware concurrency widening, and unrelated transport cleanup unauthorized.
 
 ## Blockers / gates
 
-- Corrected P1 bootstrap from reviewed executable checkpoint 9b402da8c0158be477ac00944b5c164ddef81193 succeeded with decision PASS. L0 maintenance root/controller are commissioned and active; no maintenance command has yet been executed.
-- The next gate is exactly one owner-authored `/workspace-ci-maintain diagnose workspace-control cpu` comment on maintenance issue #527, followed by read-only proof of the durable local maintenance-controller receipt and bounded root DIAGNOSE_LANE result.
-- workspace-control activation remains blocked until that exact GitHub -> L0 diagnostic command completes with an accepted durable receipt. No reconciliation, activation, restart, reset-stale, P2/P3, or capacity widening is authorized.
+- Corrected P1 bootstrap succeeded and first owner diagnose command was issued as issue #527 comment 6437389584, but static reviewed policy reveals a likely gate contradiction: DIAGNOSE_LANE derives only ACTIVE projects, while workspace-control is intentionally MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND before activation.
+- Do not issue a second maintenance command and do not activate workspace-control. First capture the durable maintenance-controller receipt for comment 6437389584 read-only. If it failed closed with the expected inactive-project rejection, treat that as a design/implementation blocker requiring a bounded reviewed correction to permit read-only diagnosis of a migration candidate without granting activation/execution authority.
+- No reconciliation, controller restart/reset, research-engine CPU restart, P2/P3 change, or capacity widening is authorized.
 
 ## Fresh-chat initialization
 
