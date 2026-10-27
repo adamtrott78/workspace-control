@@ -582,6 +582,240 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
                 ["workspace-ci-controller@workspace-control-cpu.service"],
             )
 
+    def test_interrupted_before_daemon_reload_completion_resumes_reload_before_restart(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            fx = self.make_apply_fixture(root)
+            first_calls = []
+
+            def first_run(argv, check=True):
+                first_calls.append(list(argv))
+                if argv == ["systemctl", "daemon-reload"]:
+                    raise reconciler.ReconcileError(
+                        "synthetic interruption before daemon-reload completion"
+                    )
+                return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+
+            with (
+                mock.patch.object(
+                    reconciler,
+                    "primary_local_subnet",
+                    return_value="192.0.2.0/24",
+                ),
+                mock.patch.object(
+                    reconciler,
+                    "controller_network_dropin",
+                    side_effect=fx["dropin"],
+                ),
+                mock.patch.object(
+                    reconciler,
+                    "_service_snapshot",
+                    side_effect=fx["snapshot"],
+                ),
+                mock.patch.object(reconciler, "_ensure_project_identity"),
+                mock.patch.object(reconciler, "_ensure_project_roots"),
+                mock.patch.object(reconciler, "_service_enabled", return_value=False),
+                mock.patch.object(reconciler, "_service_active", return_value=True),
+                mock.patch.object(reconciler, "_run", side_effect=first_run),
+                mock.patch.object(reconciler.os, "chown"),
+                mock.patch.object(
+                    reconciler.pwd,
+                    "getpwnam",
+                    return_value=types.SimpleNamespace(pw_uid=1000),
+                ),
+                mock.patch.object(
+                    reconciler.grp,
+                    "getgrnam",
+                    return_value=types.SimpleNamespace(gr_gid=1000),
+                ),
+            ):
+                with self.assertRaisesRegex(
+                    reconciler.ReconcileError,
+                    "synthetic interruption before daemon-reload completion",
+                ):
+                    reconciler.apply_reconciliation(
+                        fx["validated"],
+                        registry_path=fx["registry_path"],
+                        projects_dir=fx["projects_dir"],
+                        controllers_dir=fx["controllers_dir"],
+                        state_dir=fx["state_dir"],
+                        controller_state_root=fx["controller_state_root"],
+                    )
+
+            receipt_path = (
+                fx["state_dir"] / "receipts" / f"{fx['request_id']}.json"
+            )
+            stored = json.loads(receipt_path.read_text(encoding="utf-8"))
+            self.assertEqual(stored["status"], "IN_PROGRESS")
+            self.assertTrue(stored["transaction"]["daemon_reload_required"])
+            self.assertFalse(stored["transaction"]["daemon_reload_completed"])
+            self.assertEqual(
+                stored["transaction"]["controller_services_restarted"],
+                [],
+            )
+            workspace_dropin, workspace_dropin_body = fx["dropin"](
+                "workspace-control",
+                "cpu",
+                "192.0.2.0/24",
+            )
+            self.assertEqual(workspace_dropin.read_bytes(), workspace_dropin_body)
+            self.assertEqual(first_calls, [["systemctl", "daemon-reload"]])
+
+            second_calls = []
+
+            def second_run(argv, check=True):
+                second_calls.append(list(argv))
+                return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+
+            with (
+                mock.patch.object(
+                    reconciler,
+                    "primary_local_subnet",
+                    return_value="192.0.2.0/24",
+                ),
+                mock.patch.object(
+                    reconciler,
+                    "controller_network_dropin",
+                    side_effect=fx["dropin"],
+                ),
+                mock.patch.object(
+                    reconciler,
+                    "_service_snapshot",
+                    side_effect=fx["snapshot"],
+                ),
+                mock.patch.object(reconciler, "_ensure_project_identity"),
+                mock.patch.object(reconciler, "_ensure_project_roots"),
+                mock.patch.object(reconciler, "_service_enabled", return_value=False),
+                mock.patch.object(reconciler, "_service_active", return_value=True),
+                mock.patch.object(reconciler, "_run", side_effect=second_run),
+                mock.patch.object(reconciler.os, "chown"),
+                mock.patch.object(
+                    reconciler.pwd,
+                    "getpwnam",
+                    return_value=types.SimpleNamespace(pw_uid=1000),
+                ),
+                mock.patch.object(
+                    reconciler.grp,
+                    "getgrnam",
+                    return_value=types.SimpleNamespace(gr_gid=1000),
+                ),
+            ):
+                receipt = reconciler.apply_reconciliation(
+                    fx["validated"],
+                    registry_path=fx["registry_path"],
+                    projects_dir=fx["projects_dir"],
+                    controllers_dir=fx["controllers_dir"],
+                    state_dir=fx["state_dir"],
+                    controller_state_root=fx["controller_state_root"],
+                )
+
+            daemon_reload_index = second_calls.index(
+                ["systemctl", "daemon-reload"]
+            )
+            restart_index = second_calls.index(
+                [
+                    "systemctl",
+                    "restart",
+                    "workspace-ci-controller@workspace-control-cpu.service",
+                ]
+            )
+            self.assertLess(daemon_reload_index, restart_index)
+            self.assertTrue(receipt["daemon_reload_required"])
+            self.assertTrue(receipt["daemon_reload_completed"])
+            self.assertEqual(
+                receipt["controller_services_restarted"],
+                ["workspace-ci-controller@workspace-control-cpu.service"],
+            )
+
+    def test_resume_rejects_incompatible_daemon_reload_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            fx = self.make_apply_fixture(root)
+
+            def first_run(argv, check=True):
+                if argv == ["systemctl", "daemon-reload"]:
+                    raise reconciler.ReconcileError(
+                        "synthetic interruption before daemon-reload completion"
+                    )
+                return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+
+            with (
+                mock.patch.object(
+                    reconciler,
+                    "primary_local_subnet",
+                    return_value="192.0.2.0/24",
+                ),
+                mock.patch.object(
+                    reconciler,
+                    "controller_network_dropin",
+                    side_effect=fx["dropin"],
+                ),
+                mock.patch.object(
+                    reconciler,
+                    "_service_snapshot",
+                    side_effect=fx["snapshot"],
+                ),
+                mock.patch.object(reconciler, "_ensure_project_identity"),
+                mock.patch.object(reconciler, "_ensure_project_roots"),
+                mock.patch.object(reconciler, "_service_enabled", return_value=False),
+                mock.patch.object(reconciler, "_service_active", return_value=True),
+                mock.patch.object(reconciler, "_run", side_effect=first_run),
+                mock.patch.object(reconciler.os, "chown"),
+                mock.patch.object(
+                    reconciler.pwd,
+                    "getpwnam",
+                    return_value=types.SimpleNamespace(pw_uid=1000),
+                ),
+                mock.patch.object(
+                    reconciler.grp,
+                    "getgrnam",
+                    return_value=types.SimpleNamespace(gr_gid=1000),
+                ),
+            ):
+                with self.assertRaises(reconciler.ReconcileError):
+                    reconciler.apply_reconciliation(
+                        fx["validated"],
+                        registry_path=fx["registry_path"],
+                        projects_dir=fx["projects_dir"],
+                        controllers_dir=fx["controllers_dir"],
+                        state_dir=fx["state_dir"],
+                        controller_state_root=fx["controller_state_root"],
+                    )
+
+            receipt_path = (
+                fx["state_dir"] / "receipts" / f"{fx['request_id']}.json"
+            )
+            stored = json.loads(receipt_path.read_text(encoding="utf-8"))
+            stored["transaction"]["daemon_reload_required"] = False
+            stored["transaction"]["daemon_reload_completed"] = False
+            receipt_path.write_text(json.dumps(stored), encoding="utf-8")
+
+            with (
+                mock.patch.object(
+                    reconciler,
+                    "primary_local_subnet",
+                    return_value="192.0.2.0/24",
+                ),
+                mock.patch.object(
+                    reconciler,
+                    "controller_network_dropin",
+                    side_effect=fx["dropin"],
+                ),
+                mock.patch.object(reconciler.os, "chown"),
+            ):
+                with self.assertRaisesRegex(
+                    reconciler.ReconcileError,
+                    "daemon-reload state is incompatible",
+                ):
+                    reconciler.apply_reconciliation(
+                        fx["validated"],
+                        registry_path=fx["registry_path"],
+                        projects_dir=fx["projects_dir"],
+                        controllers_dir=fx["controllers_dir"],
+                        state_dir=fx["state_dir"],
+                        controller_state_root=fx["controller_state_root"],
+                    )
+
     def test_resume_fails_on_preserved_sibling_generation_drift(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
