@@ -160,3 +160,35 @@ The next wrapper aborted immediately after candidate checkout, before version re
 The exact v0.4.8 worktree was repaired by removing only the known `node_modules` symlink that resolved to the accepted v0.4.7 runtime dependency tree. After removal, the detached worktree at `def7c5fe6498b1bd742d912c1490d1f7160cab5f` had an empty `git status --porcelain`, proving no source drift. The dependency link was recreated only after that assertion passed.
 
 The subsequent abort occurred only because hard-coded test port `:8790` was occupied. Since :8788, :8789, and now :8790 have each encountered leftover listeners from interrupted isolated probes, fixed-port selection is retired. The next run must safely clean only exact orphaned Heartbeat probes and choose a free ephemeral loopback port dynamically.
+
+
+## v0.4.8 isolated payload-efficiency acceptance — PASS
+
+Exact candidate: `def7c5fe6498b1bd742d912c1490d1f7160cab5f` (Workspace Heartbeat 0.4.8, Node v20.20.2).
+
+Measured on an isolated dynamically selected local port while accepted production v0.4.7 remained unchanged on `:8787`:
+
+| Case | Updates | Resync | Structured content | HTTP response body | Response headers | Response-side outbound |
+| --- | ---: | --- | ---: | ---: | ---: | ---: |
+| no change, history 1 | 0 | false | 240 B | 309 B | 235 B | 544 B |
+| one semantic delta | 1 | false | 576 B | 645 B | 235 B | 880 B |
+| no change, history 5 | 0 | false | 240 B | 309 B | 235 B | 544 B |
+| no change, retained history 50 | 0 | false | 240 B | 309 B | 235 B | 544 B |
+| forced retained-window resync | 50 | true | 17134 B | 17203 B | 237 B | 17440 B |
+
+Ten additional steady no-change polls at retained history 50 were all exactly 544 B response-side outbound. Median local request latency was 0.003634 s.
+
+Against the measured v0.4.7 50-history heartbeat_snapshot response-side outbound of 18613 B, steady v0.4.8 no-change polling at history 50 is a **97.08% reduction**, with **0 B size spread** between history depths 1, 5, and 50. This validates the O(1) no-change payload requirement without reducing the 1500 ms working cadence.
+
+Residual bandwidth is intentionally recorded rather than hidden: at a 1.5 s schedule plus the measured median local latency, response-side traffic alone projects to about **0.969 GB / 0.902 GiB per 31 days** under hypothetical continuous 24/7 card visibility. Including the measured routine request side (~408 B/request) gives about **1.696 GB / 1.579 GiB of HTTP request+response traffic** before tunnel/protocol overhead. Therefore v0.4.8 eliminates the pathological history-amplification defect, but does not make a 1-GB-class metered public tunnel an acceptable continuous transport.
+
+The forced-resync path remains intentionally large and bounded: exactly 50 retained updates, only when the caller falls outside the retained sequence window.
+
+Production preservation check passed after the benchmark:
+- PID 1978095
+- CWD `workspace-heartbeat-runtime-v047/plugins/workspace-heartbeat`
+- Node executable `workspace-heartbeat-node/bin/node`
+- source SHA `9e5858738a4fd11801510e2839b0f94f19541506`
+- local `:8787` health PASS
+
+Payload-efficiency implementation stage is therefore **VALIDATED**. The next stage is isolated and live Secure MCP Tunnel acceptance; ngrok is not yet retired.
