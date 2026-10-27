@@ -897,3 +897,114 @@ func TestResetPendingRefusesAvailableWorkWithoutAttestationOrAcquire(t *testing.
 		t.Fatal("available work escaped reset-pending quarantine")
 	}
 }
+
+
+func TestRecoveryGenerationIsConsumedByFirstAcquiredJobAndClosedOnCompletion(t *testing.T) {
+	dir := t.TempDir()
+	s := &scaler{
+		scaleSetID:   88,
+		projectID:    "workspace-control",
+		lane:         "cpu",
+		scaleSetName: "lambda-workspace-control",
+		stateDir:     dir,
+		logger:       slog.Default(),
+	}
+	ready := map[string]any{
+		"schema_version": 1,
+		"status": "READY_FOR_SINGLE_RETRY",
+		"receipt_id": "11111111-2222-4333-8444-555555555555",
+		"project_id": "workspace-control",
+		"lane": "cpu",
+		"scale_set_name": "lambda-workspace-control",
+		"old_scale_set_id": 77,
+		"new_scale_set_id": 88,
+		"reset_generation": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+		"automatic_workflow_triggered": false,
+	}
+	if err := atomicWriteJSON(s.readyForSingleRetryPath(), ready); err != nil {
+		t.Fatal(err)
+	}
+	attestation := controllerAttestation{
+		WorkflowRunID: 12345,
+		JobID:         "job-67890",
+	}
+	if err := s.consumeReadyForSingleRetry(attestation); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(s.readyForSingleRetryPath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var acquired map[string]any
+	if err := json.Unmarshal(raw, &acquired); err != nil {
+		t.Fatal(err)
+	}
+	if acquired["status"] != "RECOVERY_RETRY_ACQUIRED" ||
+		acquired["job_id"] != "job-67890" {
+		t.Fatalf("recovery generation not consumed by exact job: %#v", acquired)
+	}
+	if int64(acquired["workflow_run_id"].(float64)) != 12345 {
+		t.Fatalf("workflow run identity missing: %#v", acquired)
+	}
+	if err := s.consumeReadyForSingleRetry(attestation); err != nil {
+		t.Fatal(err)
+	}
+
+	completed := &scaleset.JobCompleted{
+		Result:     "Succeeded",
+		RunnerName: "lambda-workspace-control-retry",
+		JobMessageBase: scaleset.JobMessageBase{
+			JobID: "job-67890",
+		},
+	}
+	if err := s.completeRecoveryRetry(completed); err != nil {
+		t.Fatal(err)
+	}
+	raw, err = os.ReadFile(s.readyForSingleRetryPath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var terminal map[string]any
+	if err := json.Unmarshal(raw, &terminal); err != nil {
+		t.Fatal(err)
+	}
+	if terminal["status"] != "RECOVERY_RETRY_COMPLETED" ||
+		terminal["result"] != "Succeeded" ||
+		terminal["runner_name"] != completed.RunnerName {
+		t.Fatalf("recovery retry terminal receipt mismatch: %#v", terminal)
+	}
+}
+
+func TestRecoveryRetryReceiptRejectsWrongScaleSetIdentity(t *testing.T) {
+	dir := t.TempDir()
+	s := &scaler{
+		scaleSetID:   88,
+		projectID:    "workspace-control",
+		lane:         "cpu",
+		scaleSetName: "lambda-workspace-control",
+		stateDir:     dir,
+		logger:       slog.Default(),
+	}
+	if err := atomicWriteJSON(
+		s.readyForSingleRetryPath(),
+		map[string]any{
+			"schema_version": 1,
+			"status": "READY_FOR_SINGLE_RETRY",
+			"receipt_id": "11111111-2222-4333-8444-555555555555",
+			"project_id": "workspace-control",
+			"lane": "cpu",
+			"scale_set_name": "lambda-workspace-control",
+			"old_scale_set_id": 77,
+			"new_scale_set_id": 99,
+			"reset_generation": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+			"automatic_workflow_triggered": false,
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.consumeReadyForSingleRetry(
+		controllerAttestation{WorkflowRunID: 123, JobID: "job"},
+	); err == nil {
+		t.Fatal("recovery retry consumed receipt for wrong scale-set identity")
+	}
+}
