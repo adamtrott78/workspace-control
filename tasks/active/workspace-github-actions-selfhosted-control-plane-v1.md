@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Post exactly one new owner comment on maintenance issue #527 with `/workspace-ci-maintain diagnose workspace-control cpu`. Record its immutable comment ID. Do not post any additional maintenance command. Then wait for the maintenance controller to consume that exact comment and capture its durable receipt/cursor evidence. The expected result is an observation-only successful diagnose for workspace-control cpu while workspace-control remains MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and no workflow/controller mutation occurs.
+On Lambda, inspect the maintenance-controller receipt for exact comment 6438723476 and the current cursor after the controller consumes it. Capture the complete receipt JSON and cursor JSON plus bounded maintenance-controller/root-maintenance journal evidence if needed. Expected diagnose result is a successful observation-only receipt for workspace-control cpu with automatic_workflow_triggered=false while workspace-control remains MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and no controller/service mutation occurs. Do not post another maintenance command and do not activate workspace-control yet.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Post exactly one new owner comment on maintenance issue #527 with `/workspace-ci
 
 ## Blockers / gates
 
-- Live hotfix installation is complete and preservation-clean.
-- Exactly one new owner diagnose command is now authorized. Do not issue more than one new maintenance command.
-- Do not reconcile, activate workspace-control, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity until the new diagnose receipt is captured and reviewed.
+- Exactly one new owner diagnose command has been issued as comment 6438723476.
+- Do not issue any further maintenance command until the maintenance controller consumes comment 6438723476 and its durable receipt/cursor evidence is reviewed.
+- Do not reconcile, activate workspace-control, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity before the diagnose receipt is accepted.
 
 ## Fresh-chat initialization
 
