@@ -846,7 +846,7 @@ def main() -> int:
     parser.add_argument(
         "--root-socket",
         type=pathlib.Path,
-        default=pathlib.Path("/run/workspace-ci/maintenance.sock"),
+        default=pathlib.Path("/run/workspace-ci/maintenance/maintenance.sock"),
     )
     parser.add_argument(
         "--controller-binary",
