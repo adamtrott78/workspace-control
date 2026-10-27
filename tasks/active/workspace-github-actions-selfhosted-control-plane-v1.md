@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Prepare and request a fresh independent P1 activation-boundary review only. The review must be based on the current durable capsule and the now-live reconciler installed from merge e4c81ac5fba8c4d9df8450b003147f90d771158b with installed/source SHA256 5e3c56c84f8e9755334ca4f0db7bdd7036f70b3e4cd404ebb02e8aa6b97185a9. It must verify the exact candidate->ACTIVE registry/manifest/route delta for workspace-control CPU, exact source/ref/request identity, expected reconciliation transaction with restart set exactly workspace-ci-controller@workspace-control-cpu.service and preservation set research-engine CPU/GPU plus PADataset CPU/GPU, durable daemon-reload semantics, live preactivation dormancy/preservation preconditions, exact rollback/emergency-stop authority, and post-activation acceptance checks. Do not reconcile or activate during review.
+Fresh independent exact-head review of PR #558 only. Verify the exact candidate->ACTIVE policy delta and updated activation-state regressions; confirm no P2/P3/capacity/trigger widening; confirm the currently live reconciler from merge e4c81ac5fba8c4d9df8450b003147f90d771158b with installed SHA256 5e3c56c84f8e9755334ca4f0db7bdd7036f70b3e4cd404ebb02e8aa6b97185a9 will derive restart authority only for workspace-ci-controller@workspace-control-cpu.service if the documented live candidate baseline remains unchanged, while preserving research-engine CPU/GPU and PADataset CPU/GPU exact snapshots and honoring durable daemon-reload semantics. Review the proposed post-acceptance sequence: merge PR #558 with expected-head guard; require the resulting main Lambda CI Project Reconcile workflow run to succeed; before submission live-re-attest root reconciler digest/health, frozen automatic reconcile-controller, workspace-control CPU disabled/inactive, candidate installed policy, no active workspace-control execution units, and sibling snapshots; submit exactly one reconciliation-controller --once transaction from the reviewed main policy; capture the complete root receipt; require ACTIVE installed registry/manifest/route, workspace-control CPU active/running/enabled, restart set exactly workspace-control CPU, preserved sibling snapshots exact, daemon_reload_required/completed coherent, and no automatic workload trigger. Review whether the proposed one-shot submission and emergency-stop/rollback authority are sufficiently bounded; return NO_BLOCKING_FINDING only if the complete activation boundary is acceptable. Do not merge or mutate Lambda during review.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Prepare and request a fresh independent P1 activation-boundary review only. The 
 
 ## Blockers / gates
 
-- The corrected reconciler is now live and independently reviewed, but workspace-control remains unactivated.
-- P1 activation/reconciliation is blocked until a fresh independent exact-head activation-boundary review verifies the exact candidate->ACTIVE policy delta, exact reconciliation request, expected restart/preservation sets, rollback/emergency-stop path, and post-activation acceptance checks against the now-installed reconciler.
-- Do not issue an APPLY/reconcile request, start/enable workspace-control CPU, restart/reset research-engine CPU or sibling controllers, issue maintenance commands, or widen P2/P3/capacity before that activation review returns NO_BLOCKING_FINDING.
+- PR #558 is review-only and must not be merged until fresh independent activation-boundary review returns NO_BLOCKING_FINDING.
+- workspace-control remains live MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and workspace-ci-controller@workspace-control-cpu.service remains disabled/inactive until a reviewed main policy merge and one bounded reconciliation transaction occur.
+- Do not start the automatic workspace-ci-reconcile-controller.service, issue APPLY/reconcile, start/enable workspace-control CPU manually, issue maintenance commands, restart/reset preserved sibling controllers, restart research-engine CPU, or widen P2/P3/capacity before activation review.
 
 ## Fresh-chat initialization
 
