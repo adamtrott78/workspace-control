@@ -389,7 +389,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             )
             self.assertEqual(
                 validated["plan"]["active_projects"],
-                ["padataset", "research-engine"],
+                ["padataset", "research-engine", "workspace-control"],
             )
             bad = copy.deepcopy(request)
             bad["source_attestation"]["workflow_blob_sha"] = "c" * 40
