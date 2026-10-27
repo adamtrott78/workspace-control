@@ -259,3 +259,14 @@ Remaining account-side prerequisite: create a dedicated runtime API key whose pr
 The operator created a dedicated runtime API key using **Restricted** permissions with only **Tunnels Read + Use** enabled. The secret value was not shared in chat and is not recorded in workspace-control.
 
 Next gate: isolated exact-v0.4.8 profile initialization and `tunnel-client doctor --explain`. The key must be entered only in the Lambda terminal via hidden input/environment and unset after the validation.
+
+
+### Isolated Secure MCP Tunnel doctor — PASS
+
+Exact v0.4.8 candidate `def7c5fe6498b1bd742d912c1490d1f7160cab5f` was started on loopback `http://127.0.0.1:57799/mcp`. A non-secret `workspace-heartbeat-v048-isolated` tunnel-client profile was created for `tunnel_6ae017d8655c8191976ef3bccc31f593`; profile secret scan passed.
+
+`tunnel-client doctor --profile workspace-heartbeat-v048-isolated --explain --json` exited 0 with `result: ok`. PASS checks covered configuration/profile loading, tunnel ID, runtime-key reference through `env:CONTROL_PLANE_API_KEY`, MCP target reachability, OAuth-metadata handling, and loopback ephemeral health listener. The optional Codex-plugin check was SKIP and is outside ChatGPT Heartbeat acceptance.
+
+The runtime key was unset after the check. Production Heartbeat remained unchanged on PID 1978095 / exact v0.4.7 SHA `9e5858738a4fd11801510e2839b0f94f19541506` / local `:8787`.
+
+Next gate: keep the exact v0.4.8 MCP endpoint and tunnel-client daemon running concurrently, prove `/readyz`, then perform ChatGPT connector discovery and live tool/app acceptance through Secure MCP Tunnel.
