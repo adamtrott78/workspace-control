@@ -313,6 +313,12 @@ def apply_request(
         qpath = target["state_dir"] / "quarantine.json"
         if qpath.is_file():
             quarantine = _read_json(qpath)
+        reset_pending = [
+            _read_json(path)
+            for path in sorted(target["state_dir"].glob("reset-pending-*.json"))
+        ]
+        ready_path = target["state_dir"] / "ready-for-single-retry.json"
+        ready = _read_json(ready_path) if ready_path.is_file() else None
         return {
             "schema_version": 1,
             "status": "PASS",
@@ -323,6 +329,8 @@ def apply_request(
             "service_active": _service_active(service),
             "active_project_units": _active_project_units(target["project_id"]),
             "quarantine": quarantine,
+            "reset_pending": reset_pending,
+            "ready_for_single_retry": ready,
         }
 
     if operation == "RESTART_CONTROLLER":
@@ -375,7 +383,13 @@ def apply_request(
                 raise MaintenanceError("reset generation identity mismatch")
         def resume() -> dict[str, Any]:
             if qpath.name == "quarantine.json":
-                qpath.replace(pending)
+                pending_state = dict(quarantine)
+                pending_state["status"] = "RECOVERY_SCALESET_RESET_PENDING"
+                pending_state["reset_generation"] = generation
+                pending_state["old_scale_set_id"] = quarantine.get("scale_set_id")
+                pending_state["reset_started_at"] = _utc_now()
+                _atomic_json(pending, pending_state)
+                qpath.unlink()
             _run(["systemctl", "start", service])
             if not _service_active(service):
                 raise MaintenanceError("controller did not become active")
@@ -383,7 +397,11 @@ def apply_request(
                 "service_active": True,
                 "reset_generation": generation,
                 "archived_quarantine_path": str(pending),
-                "old_scale_set_id": quarantine.get("scale_set_id"),
+                "old_scale_set_id": quarantine.get(
+                    "old_scale_set_id",
+                    quarantine.get("scale_set_id"),
+                ),
+                "controller_remains_recovery_quarantined": True,
             }
         return _mutating_receipt(
             request, target, receipts_dir=receipts_dir, mutation=resume
