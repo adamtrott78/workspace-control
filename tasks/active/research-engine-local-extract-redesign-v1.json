@@ -4118,6 +4118,24 @@
         }
       ],
       "resume_condition": "Re-verify PR #273 is OPEN, same-repository, and still exactly at 3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d. Then issue exactly one authorized scientific trigger. Capture run/job/artifact/report identities. On the first integrity-valid result, STOP and re-engage the independent reviewer."
+    },
+    {
+      "id": "exact_provenance_binding_post_result_review_required",
+      "status": "IN_PROGRESS",
+      "execution_owner": "independent_reviewer",
+      "selected_executor": "independent_reviewer",
+      "selected_surface": "github",
+      "inputs": [
+        "Frozen exact-provenance design research-engine@13a129ef820c611adf6a6ca70598df1e67d56efc / blob 09603c4d65114c75ad3e112a357ee45da384f63e.",
+        "Validated implementation candidate research-engine PR #273@3eb6b391fcd2f6e2a44277771d0bcd8d26c7002d.",
+        "Integrity-valid scientific run 40411159582 / job 121881887321 / artifact 12693836542 with frozen reported outcome EXACT_PROVENANCE_BINDING_PREMISE_REJECTED."
+      ],
+      "outputs": [
+        "Independent post-result disposition persisted by task workspace-local-extract-independent-review-v1.",
+        "No next scientific phase, preservation-aware admission design, or acceptance-candidate authority before that disposition is durably consumed."
+      ],
+      "validation": [],
+      "resume_condition": "Mandatory independent post-result review of exact run 40411159582 / job 121881887321 / artifact 12693836542 / outcome EXACT_PROVENANCE_BINDING_PREMISE_REJECTED must be durably consumed before selecting any next scientific phase, preservation-aware admission design, or acceptance-candidate decision. Do not tune or rerun the valid result; keep acceptance_candidate_frozen=false and sealed acceptance benchmark untouched."
     }
   ],
   "checkpoints": [
