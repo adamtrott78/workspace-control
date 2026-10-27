@@ -37,3 +37,19 @@ Documentation: https://developers.openai.com/api/docs/guides/secure-mcp-tunnels
 
 ## Gates
 **No tunnel cutover and no claim of completed runtime recovery.** Current host inspection, actual byte measurements, credentials/tunnel permissions, embedded-app channel acceptance, rollback and live tests are open.
+
+
+## Fresh live Lambda recovery — operator evidence 2026-10-26T21:49-04:00
+
+Read-only operator output now verifies the following **current** runtime facts without a restart:
+
+- Host: `gokhan-Lambda-Vector`; observation time `2026-10-26T21:49:27-04:00`.
+- Active process chain includes `sh -c node server.js` PID 1847969 and child `node server.js` PID 1847970, both started 20:56:17 local; ngrok PID 1847986 started one second later with `ngrok http --domain=kabob-retool-unstopped.ngrok-free.dev 8787`.
+- TCP 8787 is listening in the Node process. A direct local GET to `http://127.0.0.1:8787/` returned HTTP 200 and `workspace-heartbeat MCP server`, proving the server is alive locally while the public ngrok path is unavailable.
+- Runtime CWD resolved from the first matching launcher shell to `/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v047/plugins/workspace-heartbeat`; checkout HEAD is exactly `9e5858738a4fd11801510e2839b0f94f19541506`; package metadata is `workspace-heartbeat 0.4.7`, Node requirement `>=20`.
+- Runtime checkout has only untracked `node_modules/` and `package-lock.json` in the reported status.
+- No Heartbeat/ngrok systemd service was reported. ngrok snap mount units exist. Launcher/supervisor ancestry remains to be identified.
+- Rollback/runtime directories v0.3 through v0.4.7 are present, including explicit `workspace-heartbeat-runtime-v046` and current `workspace-heartbeat-runtime-v047`.
+- Login-shell `node --version` is `v12.22.9` and npm is `8.5.1`. This does **not** establish the running child Node version because the inspection accidentally selected launcher shell PID 1847969. Resolve `/proc/1847970/exe` and run that executable with `--version` before claiming Node runtime provenance.
+
+This evidence upgrades current local server/source/ngrok/rollback recovery from historical to live, but leaves two baseline items open: exact child Node executable/version and launcher ancestry. Payload bytes are still unmeasured.
