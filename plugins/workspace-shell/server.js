@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { readFileSync, statSync } from "node:fs";
-import { createServer as createHttpServer } from "node:http";
 import { createServer as createHttpsServer } from "node:https";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -26,7 +25,6 @@ import {
 
 const execFileAsync = promisify(execFile);
 const CONFIG_PATH = process.env.WORKSPACE_SHELL_CONFIG ?? "/etc/workspace-shell/frontend.json";
-const DEV_INSECURE = process.env.WORKSPACE_SHELL_DEV_INSECURE === "1";
 const MCP_PATH = "/mcp";
 
 function loadConfig() {
@@ -42,11 +40,9 @@ function loadConfig() {
       throw new Error(`invalid frontend config: missing ${field}`);
     }
   }
-  if (!DEV_INSECURE) {
-    for (const field of ["tls_key", "tls_cert", "tls_client_ca"]) {
-      if (typeof cfg[field] !== "string" || !cfg[field]) {
-        throw new Error(`invalid frontend config: missing ${field}`);
-      }
+  for (const field of ["tls_key", "tls_cert", "tls_client_ca"]) {
+    if (typeof cfg[field] !== "string" || !cfg[field]) {
+      throw new Error(`invalid frontend config: missing ${field}`);
     }
   }
   return cfg;
@@ -55,7 +51,6 @@ function loadConfig() {
 const config = loadConfig();
 
 function verifyRuntimeIdentity() {
-  if (DEV_INSECURE) return;
   if (!Number.isInteger(config.frontend_uid) || !Number.isInteger(config.worker_uid) || !Number.isInteger(config.tunnel_uid)) {
     throw new Error("frontend_uid, worker_uid and tunnel_uid are required integers");
   }
@@ -376,16 +371,14 @@ function createShellServer() {
   return server;
 }
 
-const tlsOptions = DEV_INSECURE
-  ? null
-  : {
-      key: readFileSync(config.tls_key),
-      cert: readFileSync(config.tls_cert),
-      ca: readFileSync(config.tls_client_ca),
-      requestCert: true,
-      rejectUnauthorized: true,
-      minVersion: "TLSv1.3",
-    };
+const tlsOptions = {
+  key: readFileSync(config.tls_key),
+  cert: readFileSync(config.tls_cert),
+  ca: readFileSync(config.tls_client_ca),
+  requestCert: true,
+  rejectUnauthorized: true,
+  minVersion: "TLSv1.3",
+};
 
 const handler = async (req, res) => {
   if (!req.url) {
@@ -429,9 +422,7 @@ const handler = async (req, res) => {
   }
 };
 
-const listener = DEV_INSECURE
-  ? createHttpServer(handler)
-  : createHttpsServer(tlsOptions, handler);
+const listener = createHttpsServer(tlsOptions, handler);
 
 const port = Number(process.env.PORT ?? config.port ?? 8797);
 listener.listen(port, "127.0.0.1", () => {
