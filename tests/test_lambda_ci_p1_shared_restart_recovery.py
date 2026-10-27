@@ -175,6 +175,87 @@ class P1SharedRestartRecoveryTests(unittest.TestCase):
                 module.main()
         recover.assert_not_called()
 
+    def test_execution_inspection_nonzero_fails_closed(self):
+        module = load(RECOVERY, "recovery_execution_inspection_rc")
+        failed = module.subprocess.CompletedProcess(
+            args=[], returncode=1, stdout="", stderr="inspection failed"
+        )
+        with mock.patch.object(module, "run", return_value=failed):
+            with self.assertRaisesRegex(
+                module.RecoveryError,
+                "unable to inspect project execution units: rc=1",
+            ):
+                module.no_active_project_execution()
+
+    def test_pre_recovery_inspection_failure_aborts_before_start(self):
+        module = load(RECOVERY, "recovery_pre_inspection_failure")
+        failed = module.subprocess.CompletedProcess(
+            args=[], returncode=1, stdout="", stderr="inspection failed"
+        )
+        with mock.patch.object(module, "run", return_value=failed) as run_call:
+            with self.assertRaisesRegex(
+                module.RecoveryError,
+                "unable to inspect project execution units: rc=1",
+            ):
+                module.recover()
+
+        commands = [call.args[0] for call in run_call.call_args_list]
+        self.assertFalse(
+            any(
+                command[:2] == ["systemctl", "start"]
+                for command in commands
+            )
+        )
+
+    def test_post_start_inspection_failure_rejects_final_certification(self):
+        module = load(RECOVERY, "recovery_post_inspection_failure")
+        before = {
+            "shared": {},
+            "cpu": dict(module.EXPECTED_CPU),
+            "targets": {
+                service: dict(module.EXPECTED_TARGET)
+                for service in module.TARGETS
+            },
+        }
+        active = {
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "UnitFileState": "enabled",
+            "NRestarts": "0",
+            "ExecMainStatus": "0",
+        }
+        snapshots = [dict(active) for _ in module.TARGETS]
+        snapshots.append(dict(module.EXPECTED_CPU))
+        snapshots.extend([dict(active) for _ in module.SHARED_REQUIRED])
+
+        def fake_run(argv, **kwargs):
+            if argv[:2] == ["systemctl", "start"]:
+                return module.subprocess.CompletedProcess(
+                    args=argv, returncode=0, stdout="", stderr=""
+                )
+            if argv[:2] == ["systemctl", "list-units"]:
+                return module.subprocess.CompletedProcess(
+                    args=argv,
+                    returncode=1,
+                    stdout="",
+                    stderr="final inspection failed",
+                )
+            raise AssertionError(f"unexpected command: {argv!r}")
+
+        with mock.patch.object(
+            module, "validate_pre_recovery_state", return_value=before
+        ), mock.patch.object(
+            module, "snapshot", side_effect=snapshots
+        ), mock.patch.object(
+            module, "run", side_effect=fake_run
+        ):
+            with self.assertRaisesRegex(
+                module.RecoveryError,
+                "unable to inspect project execution units: rc=1",
+            ):
+                module.recover()
+
     def test_incident_recovery_mutates_only_exact_three_controller_starts(self):
         module = load(RECOVERY, "recovery_mutation_scope")
         before = {
