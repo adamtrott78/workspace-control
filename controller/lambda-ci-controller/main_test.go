@@ -323,7 +323,7 @@ func TestAssignmentDivergenceQuarantinesAndSuppressesNewAcquisition(t *testing.T
 	available := availableCPUJob()
 	if err := s.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
 		Statistics:         &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 0},
-		JobAvailableMessages: []scaleset.JobAvailable{*available},
+		JobAvailableMessages: []*scaleset.JobAvailable{available},
 	}); err != nil {
 		t.Fatal(err)
 	}
