@@ -40,7 +40,7 @@
       "base_sha": "3619574d8b10441fbec18f92ce7005d036aad7c8",
       "remote": {
         "branch": "github-actions-selfhosted-control-plane-v1",
-        "checkpoint_sha": "28c8b9e091d108b6168b32409146e99b75ad150f",
+        "checkpoint_sha": "d3b2c12f6e33f35fa7613fe19ae645579cc00c30",
         "verified": true
       },
       "local": null,
@@ -339,12 +339,11 @@
     {
       "id": "design-review-pr-508",
       "kind": "pull_request",
-      "identity": "workspace-control#508@28c8b9e091d108b6168b32409146e99b75ad150f",
+      "identity": "workspace-control#508@d3b2c12f6e33f35fa7613fe19ae645579cc00c30",
       "required_for_resume": true,
       "evidence": [
         "PR #508 remains the design-only independent-review surface; frozen architecture blob f70f100ba57140469ff656255de00f7de262dbc3 and NOT_INSTALLED manifest blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 are unchanged.",
-        "Current PR head differs from the mechanically validated fc3bbdaded02625f968b18d504caa3ce52d3bb18 only in task handoff files before this hydration.",
-        "Workspace Control Validation run 40267839458 PASS on fc3bbdaded02625f968b18d504caa3ce52d3bb18, including full integration contracts.",
+        "Workspace Control Validation run 40423749220 completed SUCCESS on checkpoint d3b2c12f6e33f35fa7613fe19ae645579cc00c30, including task contracts, unit regression, controller validation, and full integration contracts.",
         "PR comments 6405597751 and 6408089808 contain post-freeze implementation/runtime evidence that the independent reviewer must consider.",
         "No independent review submission exists on PR #508 yet; live workspace-control runner activation remains unauthorized."
       ]
@@ -446,9 +445,9 @@
       "check": "PR #508 hosted validation availability",
       "result": "PASS",
       "evidence": [
-        "Workspace Control Validation run 40267839458 completed success on PR #508 head fc3bbdaded02625f968b18d504caa3ce52d3bb18.",
+        "Workspace Control Validation run 40423749220 completed success on PR #508 checkpoint d3b2c12f6e33f35fa7613fe19ae645579cc00c30.",
         "Executed checks included task-contract validation, unit regression, pinned Lambda scale-set controller validation, and full integration contracts.",
-        "This validates the design/task branch mechanically but does not satisfy the independent preimplementation review gate."
+        "This validates the design/task handoff mechanically but does not satisfy the independent preimplementation review gate."
       ]
     }
   ],
