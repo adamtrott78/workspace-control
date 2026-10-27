@@ -149,7 +149,12 @@ def parse_command(body: Any) -> dict[str, Any] | None:
     }
 
 
-def maintenance_request_id(comment_id: int, command: dict[str, Any], operation: str) -> str:
+def maintenance_request_id(
+    comment_id: int,
+    command: dict[str, Any],
+    operation: str,
+    reset_generation: str | None = None,
+) -> str:
     material = "|".join(
         [
             SOURCE_REPOSITORY,
@@ -159,6 +164,7 @@ def maintenance_request_id(comment_id: int, command: dict[str, Any], operation: 
             command["lane"],
             str(command.get("quarantine_receipt_id") or ""),
             operation,
+            str(reset_generation or ""),
         ]
     )
     return str(uuid.uuid5(UUID_NAMESPACE, material))
@@ -174,7 +180,12 @@ def submit_root(
 ) -> dict[str, Any]:
     request = {
         "schema_version": 1,
-        "request_id": maintenance_request_id(comment_id, command, operation),
+        "request_id": maintenance_request_id(
+            comment_id,
+            command,
+            operation,
+            reset_generation,
+        ),
         "operation": operation,
         "project_id": command["project_id"],
         "lane": command["lane"],
@@ -417,7 +428,6 @@ def execute_reset(
                     comment_id=comment_id,
                     command=command,
                     operation="DIAGNOSE_LANE",
-                    reset_generation=generation,
                 )
                 if _zero_observation(inspected, diag):
                     first_observation = {
@@ -444,7 +454,6 @@ def execute_reset(
             comment_id=comment_id,
             command=command,
             operation="DIAGNOSE_LANE",
-            reset_generation=generation,
         )
         if inspected.get("scale_set_id") != new_id or not _zero_observation(inspected, diag):
             raise MaintenanceControllerError(
