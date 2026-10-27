@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: e145c607ecf3fd3dc6cefdbdb91df8b364cac08a
-- Remote verified: true
+- Remote branch: gitrunner-p1-bootstrap-build-staging-fix
+- Remote checkpoint: 93bd83e6f4eb96537e622d745d991eb496d5dd4d
+- Remote verified: false
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd with --expected-head set to that exact SHA and capture full output. The just-reviewed quiesce receipt proved research-engine CPU is stable inactive/dead at NRestarts=12411 after a persistent storm 12409->12410->12411. The bootstrap must preserve that exact stable inactive state, must not deliberately start/restart the research-engine CPU controller, and must leave workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive. Return the complete bootstrap output before any GitHub -> L0 diagnose or workspace-control activation.
+Request fresh independent review of PR #535 exact validated head after the pre-mutation build-staging correction. Verify build_controller() still runs before backup_targets()/begin_mutation_phase(), the temporary build root is chowned exactly to ci-controller and remains mode 0700 before dropping privileges, the src subtree ownership/sanitized /usr/sbin/runuser boundary is unchanged, and no service/policy/reconcile/activation authority is widened. Regression must prove build_root ownership/mode are established before the ci-controller build starts. Do not merge or retry Lambda until NO_BLOCKING_FINDING is recorded on the exact final head.
 
 ## Remaining work
 
@@ -49,7 +49,9 @@ Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exac
 
 ## Blockers / gates
 
-- Live pre-bootstrap quiesce from reviewed merge e145c607ecf3fd3dc6cefdbdb91df8b364cac08a succeeded with QUIESCED_STABLE_INACTIVE. The next gate is one rollback-safe P1 bootstrap retry from exact reviewed merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd, with full receipt inspection before any later action.
+- Live bootstrap retry from reviewed merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd passed LIVE_PREFLIGHT_FINGERPRINT and GITHUB_CREDENTIAL_SCOPE_PREFLIGHT, then failed during pre-mutation Go controller build because root-created tempfile.mkdtemp build root was mode 0700/root-owned and ci-controller could not traverse to the chowned src subtree. Failure occurred before backup_targets() and begin_mutation_phase(); no Lambda host mutation occurred.
+- Bounded correction is on PR #535: chown the private temporary build root to ci-controller and retain mode 0700 before runuser build. Exact code/test head 93bd83e6f4eb96537e622d745d991eb496d5dd4d passed validation run 40463460438 / job 122053213183 / run #924 SUCCESS. Fresh independent review is required before merge or live retry.
+- The research-engine CPU controller remains intentionally quiesced from the accepted pre-bootstrap helper; no bootstrap path is authorized to deliberately start/restart it.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
