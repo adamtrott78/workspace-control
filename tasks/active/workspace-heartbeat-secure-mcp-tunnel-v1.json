@@ -60,7 +60,7 @@
   "stages": [
     {
       "id": "recover_transport_and_bandwidth_baseline",
-      "status": "COMPLETE",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt+operator",
       "selected_surface": "github+lambda-operator",
@@ -92,7 +92,7 @@
     },
     {
       "id": "freeze_secure_tunnel_migration",
-      "status": "COMPLETE",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
