@@ -13,6 +13,11 @@ if str(SCRIPTS) not in sys.path:
 import lambda_ci_maintenance_controller as controller
 
 
+class FakeNoReplacementRuns:
+    def get_json(self, _path):
+        return {"workflow_runs": []}
+
+
 ZERO_STATS = {
     "totalAvailableJobs": 0,
     "totalAcquiredJobs": 0,
@@ -107,6 +112,86 @@ class MaintenanceControllerTests(unittest.TestCase):
         )
         self.assertEqual(requiesce["reset_generation"], generation)
 
+    def test_replacement_run_gate_blocks_new_nonterminal_pilot_runs(self):
+        command = reset_command()
+        cutoff = "2026-10-27T01:00:00Z"
+
+        class Client:
+            def __init__(self, runs):
+                self.runs = runs
+
+            def get_json(self, _path):
+                return {"workflow_runs": self.runs}
+
+        controller.assert_no_replacement_runs(
+            Client(
+                [
+                    {
+                        "id": 1,
+                        "status": "in_progress",
+                        "created_at": "2026-10-27T00:59:00Z",
+                        "updated_at": "2026-10-27T00:59:30Z",
+                        "run_attempt": 1,
+                    }
+                ]
+            ),
+            command,
+            cutoff,
+        )
+
+        with self.assertRaisesRegex(
+            controller.MaintenanceControllerError,
+            "replacement pilot workflow run",
+        ):
+            controller.assert_no_replacement_runs(
+                Client(
+                    [
+                        {
+                            "id": 2,
+                            "status": "queued",
+                            "created_at": "2026-10-27T01:00:01Z",
+                            "updated_at": "2026-10-27T01:00:01Z",
+                            "run_attempt": 1,
+                        }
+                    ]
+                ),
+                command,
+                cutoff,
+            )
+
+        with self.assertRaisesRegex(
+            controller.MaintenanceControllerError,
+            "replacement pilot workflow run",
+        ):
+            controller.assert_no_replacement_runs(
+                Client(
+                    [
+                        {
+                            "id": 3,
+                            "status": "in_progress",
+                            "created_at": "2026-10-27T00:58:00Z",
+                            "updated_at": "2026-10-27T01:00:05Z",
+                            "run_attempt": 2,
+                        }
+                    ]
+                ),
+                command,
+                cutoff,
+            )
+
+    def test_p1_reset_is_limited_to_workspace_control_cpu(self):
+        command = dict(reset_command())
+        command["project_id"] = "research-engine"
+        with self.assertRaisesRegex(
+            controller.MaintenanceControllerError,
+            "limited to workspace-control/cpu",
+        ):
+            controller.assert_no_replacement_runs(
+                FakeNoReplacementRuns(),
+                command,
+                "2026-10-27T01:00:00Z",
+            )
+
     def test_load_controller_env_derives_path_and_overrides_runner_credential(self):
         with tempfile.TemporaryDirectory() as td:
             root = pathlib.Path(td)
@@ -164,6 +249,7 @@ class MaintenanceControllerTests(unittest.TestCase):
                     "result": {
                         "local_execution_absent": True,
                         "quarantine_scale_set_id": 77,
+                        "quarantine_observed_at": "2026-10-27T01:00:00Z",
                     },
                 }
             if operation == "RESUME_LANE_AFTER_RESET":
@@ -231,6 +317,7 @@ class MaintenanceControllerTests(unittest.TestCase):
                 controllers_dir=pathlib.Path("/etc/workspace-ci/controllers"),
                 runner_token_file=pathlib.Path("/run/test-token"),
                 sleep_fn=sleeps.append,
+                github_client=FakeNoReplacementRuns(),
             )
 
         self.assertEqual(result["status"], "READY_FOR_SINGLE_RETRY")
@@ -276,6 +363,7 @@ class MaintenanceControllerTests(unittest.TestCase):
                     "result": {
                         "local_execution_absent": True,
                         "quarantine_scale_set_id": 77,
+                        "quarantine_observed_at": "2026-10-27T01:00:00Z",
                     },
                 }
             if operation == "RESUME_LANE_AFTER_RESET":
@@ -317,6 +405,7 @@ class MaintenanceControllerTests(unittest.TestCase):
                     controllers_dir=pathlib.Path("/etc/workspace-ci/controllers"),
                     runner_token_file=pathlib.Path("/run/test-token"),
                     sleep_fn=lambda _seconds: None,
+                    github_client=FakeNoReplacementRuns(),
                 )
 
         self.assertEqual(root_calls[-1][0], "QUIESCE_LANE_FOR_RECOVERY")
