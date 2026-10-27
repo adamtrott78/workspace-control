@@ -972,6 +972,12 @@ def _validated_inaccessible_paths(
     """
 
     raw = spec.get("forbidden_paths")
+    if raw is None and int(spec.get("schema_version", 1)) == 1:
+        # Backward-compatible legacy synthetic/runtime specs predate the
+        # manifest deny-list contract. Preserve their historical Docker-only
+        # boundary; all schema-v2 generic/P1 specs must carry root-authored
+        # forbidden_paths and fail closed if that authority is missing.
+        raw = ["/var/run/docker.sock", "/run/docker.sock"]
     if not isinstance(raw, list) or not raw:
         raise RuntimeLaunchError("launch spec forbidden_paths must be a non-empty list")
 
