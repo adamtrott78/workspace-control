@@ -32,6 +32,7 @@ OWNER_LOGIN = "adamtrott78"
 P1_RESET_PROJECT = "workspace-control"
 P1_RESET_LANE = "cpu"
 P1_PILOT_WORKFLOW_ID = "lambda-ci-workspace-control-validation.yml"
+MAINTENANCE_POLICY_GENERATION = "workspace-ci-maintenance-p1-v1"
 UUID_NAMESPACE = uuid.UUID("450ecef9-fbb0-5cf8-a216-60d6f28f5c5c")
 PROJECT_RE = re.compile(r"^[a-z][a-z0-9-]{1,20}$")
 RESET_UUID_RE = re.compile(
@@ -207,6 +208,13 @@ def build_root_request(
             )
             else None
         ),
+        "source_attestation": {
+            "repository": SOURCE_REPOSITORY,
+            "actor_login": OWNER_LOGIN,
+            "comment_id": comment_id,
+            "command_sha256": _sha256(command),
+            "maintenance_policy_generation": MAINTENANCE_POLICY_GENERATION,
+        },
     }
 
 
@@ -679,6 +687,7 @@ def process_comment(
         "actor": OWNER_LOGIN,
         "command": command,
         "command_sha256": _sha256(command),
+        "maintenance_policy_generation": MAINTENANCE_POLICY_GENERATION,
     }
     if receipt_path.is_file():
         prior = json.loads(receipt_path.read_text(encoding="utf-8"))
