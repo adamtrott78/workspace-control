@@ -43,9 +43,9 @@ class P1BootstrapBuildStagingTests(unittest.TestCase):
             def fake_chown(path, uid, gid):
                 events.append(("chown", pathlib.Path(path), uid, gid))
 
-            def fake_chmod(path, mode):
+            def fake_chmod(path, mode, *args, **kwargs):
                 events.append(("chmod", pathlib.Path(path), mode))
-                real_chmod(path, mode)
+                real_chmod(path, mode, *args, **kwargs)
 
             def fake_run(argv, **kwargs):
                 if argv == [str(fake_go), "env", "GOVERSION"]:
