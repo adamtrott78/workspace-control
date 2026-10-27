@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-Read-only identify the current :8789 listener (PID, executable, CWD, exact Git SHA/package version, parent/ancestry, command line) and also list any other free candidate isolated ports in 8790-8795. If :8789 is proven to be an orphaned Heartbeat isolated process, terminate only that PID after re-verification; otherwise leave it untouched and use a verified free port. Then run exact v0.4.8 candidate def7c5fe6498b1bd742d912c1490d1f7160cab5f isolated and complete no-change/delta/resync payload measurements while proving restored production :8787 remains unchanged.
+Immediately re-verify PID 1973910 still owns :8789 with exact v0.4.8 worktree SHA def7c5fe6498b1bd742d912c1490d1f7160cab5f and Node20 executable, then terminate only that orphan. Remove only an existing plugins/workspace-heartbeat/node_modules symlink if it resolves to the accepted v0.4.7 runtime node_modules, verify the candidate worktree is otherwise clean at exact SHA def7c5fe6498b1bd742d912c1490d1f7160cab5f, recreate the dependency symlink, and run the isolated heartbeat_poll payload benchmark on a verified free port while keeping production :8787 unchanged.
 
 ## Remaining work
 
@@ -41,9 +41,9 @@ Read-only identify the current :8789 listener (PID, executable, CWD, exact Git S
 
 ## Blockers / gates
 
-- The exact v0.4.8 post-change payload benchmark is still pending because the intended isolated port :8789 is occupied by an unidentified listener. Identify its PID/CWD/executable/SHA/ancestry and only terminate it if it is proven to be an orphaned Heartbeat isolated probe.
-- Public ngrok remains quota-blocked from ChatGPT despite local production v0.4.7 restoration; this is expected and does not invalidate local runtime recovery.
-- Secure MCP Tunnel tunnel/workspace association, runtime authorization, embedded app resource delivery, app-only heartbeat_poll behavior, and live ChatGPT acceptance remain unverified; do not retire ngrok yet.
+- The v0.4.8 post-change payload benchmark still has not executed. The latest wrapper aborted on a dirty-worktree assertion immediately after checkout; likely cause is the validation worktree's untracked node_modules dependency link, which the repository does not ignore. Clean only that verified link, prove the worktree otherwise clean, then recreate the link for the isolated run.
+- Public ngrok remains quota-blocked from ChatGPT despite healthy local production v0.4.7.
+- Secure MCP Tunnel setup and live ChatGPT app acceptance remain unverified.
 
 ## Fresh-chat initialization
 
