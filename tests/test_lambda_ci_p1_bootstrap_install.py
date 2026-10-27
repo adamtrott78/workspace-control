@@ -24,7 +24,7 @@ class P1BootstrapInstallerTests(unittest.TestCase):
         completed.returncode = 0
         completed.stdout = ""
         completed.stderr = ""
-        with mock.patch.object(module.RUNUSER_BIN, "is_file", return_value=True), mock.patch.object(
+        with mock.patch.object(module.pathlib.Path, "is_file", return_value=True), mock.patch.object(
             module.subprocess, "run", return_value=completed
         ) as proc:
             module.run(
@@ -39,7 +39,7 @@ class P1BootstrapInstallerTests(unittest.TestCase):
 
     def test_missing_absolute_runuser_fails_before_subprocess(self):
         module = load_module()
-        with mock.patch.object(module.RUNUSER_BIN, "is_file", return_value=False), mock.patch.object(
+        with mock.patch.object(module.pathlib.Path, "is_file", return_value=False), mock.patch.object(
             module.subprocess, "run"
         ) as proc:
             with self.assertRaisesRegex(
