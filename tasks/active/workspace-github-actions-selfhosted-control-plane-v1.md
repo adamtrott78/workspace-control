@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: gitrunner-p1-quiesce-source-binding-v2
-- Remote checkpoint: dca9ae15e1e9d53283ef8ed1d4a57ccddb80abba
-- Remote verified: false
+- Remote branch: main
+- Remote checkpoint: e145c607ecf3fd3dc6cefdbdb91df8b364cac08a
+- Remote verified: true
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Request fresh independent corrected-head review of PR #534. Verify BF-1 is closed by binding source attestation to Path(__file__).resolve(), requiring the executing file to resolve exactly to scripts/lambda_ci_p1_quiesce_restart_storm.py under the derived repository, requiring Git's top-level to equal that derived repository, requiring that helper path to be tracked, and performing expected-HEAD/tracked-cleanliness checks against that repository. Verify regression tests prove an external/copied helper cannot pass attestation or reach quiesce_and_verify(). Re-review all previously accepted restart-storm proof and exact single-service-stop boundaries. Do not merge or mutate Lambda unless the exact corrected head receives NO_BLOCKING_FINDING.
+Operator: execute scripts/lambda_ci_p1_quiesce_restart_storm.py from a detached exact checkout of reviewed merge e145c607ecf3fd3dc6cefdbdb91df8b364cac08a with --expected-head set to that exact SHA and capture full output. Do not run the bootstrap in the same shell command. Return the complete P1_RESEARCH_CPU_QUIESCE_RECEIPT. Only a receipt status of NO_QUIESCE_REQUIRED or QUIESCED_STABLE_INACTIVE may authorize a later retry of reviewed bootstrap merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd.
 
 ## Remaining work
 
@@ -49,10 +49,8 @@ Request fresh independent corrected-head review of PR #534. Verify BF-1 is close
 
 ## Blockers / gates
 
-- Independent review 5662986453 on blocked PR #533 head f78e38859f6dec44e88c45d8e9c648b04c487fbb found BF-1: source attestation was bound to caller CWD rather than the executing helper file. That old head must never be used for Lambda mutation.
-- PR #533 was accidentally squash-merged as 5056304df6d5bca925fa1a4cff2ed6b1d8948242 without closing BF-1. Main was immediately restored to the exact pre-#533 tree by revert commit 0d84ac243f1dbd883e1fcd23a3b08f57378148db. No Lambda mutation occurred.
-- Corrected source-binding implementation is on PR #534. Exact code/test head dca9ae15e1e9d53283ef8ed1d4a57ccddb80abba passed run 40461478870 / job 122046888412 / run #920 SUCCESS. Fresh independent corrected-head review remains required before merge or live quiesce.
-- The independently reviewed P1 bootstrap merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd remains unchanged and is the intended bootstrap executable only after accepted quiesce.
+- PR #534 corrected pre-bootstrap restart-storm quiesce helper is independently accepted and merged as workspace-control@e145c607ecf3fd3dc6cefdbdb91df8b364cac08a. The next gate is one operator-executed quiesce helper run from that exact reviewed merge SHA, with receipt inspection before any bootstrap retry.
+- The independently reviewed P1 bootstrap merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd remains unchanged and may be retried only after a quiesce receipt proves NO_QUIESCE_REQUIRED or QUIESCED_STABLE_INACTIVE.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
