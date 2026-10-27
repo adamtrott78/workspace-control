@@ -495,6 +495,8 @@ def build_controller(repo: pathlib.Path) -> pathlib.Path:
     shutil.copytree(src, build_root / "src")
     work = build_root / "src"
     controller = pwd.getpwnam("ci-controller")
+    os.chown(build_root, controller.pw_uid, controller.pw_gid)
+    os.chmod(build_root, 0o700)
     for root, dirs, files in os.walk(work):
         os.chown(root, controller.pw_uid, controller.pw_gid)
         for name in dirs:
