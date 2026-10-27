@@ -44,7 +44,7 @@
       "base_sha": "8a71aa3c60a4a0f230bcbee9711d2af79828c869",
       "remote": {
         "branch": "workspace-shell-mcp-v1-design-freeze",
-        "checkpoint_sha": "cc37231f7c88d65f564b3357ce679e2035e153d8",
+        "checkpoint_sha": "4f23fbed3916a53d4a4fe738857bda3612d64056",
         "verified": true
       },
       "local": null,
@@ -122,57 +122,87 @@
           ]
         },
         {
+          "check": "Initial independent exact-head design review",
+          "result": "FAIL",
+          "evidence": [
+            "Review comment 6447046381 on exact head 3dae7ef2eb225030c9020d8e33ea444620fc0cfe recorded BF-1 hostile exec-worker/control-plane separation not frozen.",
+            "The same review recorded BF-2 independent approval/provenance trust root underspecified.",
+            "That head is stale and does not authorize implementation."
+          ]
+        },
+        {
+          "check": "BF-1 control-plane/worker trust-boundary correction",
+          "result": "PASS",
+          "evidence": [
+            "Corrected authority artifact requires distinct workspace-shell-tunnel, workspace-shell-mcp, root-owned job-launcher, workspace-shell-exec, and root-broker principals.",
+            "Hostile exec-worker namespace excludes /run/workspace-shell-control, tunnel/frontend/admin sockets, frontend signing material, approval trust stores and helper-registry control files.",
+            "Distinct UID plus PID/proc isolation and empty dangerous capabilities are frozen to prevent ptrace, signal, process_vm and proc-memory/fd attacks against the policy frontend.",
+            "Root broker requires kernel peer UID workspace-shell-mcp plus frontend request signature and independent approval; worker UID is always rejected."
+          ]
+        },
+        {
+          "check": "BF-2 independent approval trust-root correction",
+          "result": "PASS",
+          "evidence": [
+            "Corrected authority artifact defines signed workspace-shell-approval.v1 using RFC 8785 canonical JSON plus Ed25519.",
+            "V1 issuer private key is operator-controlled and off-Lambda; no model-facing, tunnel, frontend, worker, launcher or broker identity can mint approval.",
+            "Root broker independently verifies pinned root-owned read-only public trust/revocation stores, exact design review and helper-admission review heads, helper/source/parameter digests, <=15 minute expiry and crash-safe single-use replay state.",
+            "GitHub review/comment text remains evidence only and cannot authorize execution without a valid externally signed approval."
+          ]
+        },
+        {
           "check": "Live Lambda host attestation",
           "result": "NOT_RUN",
           "evidence": [
             "Current connected tools do not provide Lambda command execution; GitHub evidence is not claimed as fresh host attestation.",
-            "Host attestation is required before installation/activation, but does not block independent review of the abstract frozen authority contract."
+            "Pre-installation host attestation must prove distinct UIDs, PID/proc and mount/network isolation, socket ACLs, signing-material isolation and approval-store immutability."
           ]
         },
         {
-          "check": "Independent exact-head design review",
+          "check": "Fresh corrected-head independent design re-review",
           "result": "NOT_RUN",
           "evidence": [
-            "Request only after task capsule/handoff validation succeeds at a new immutable PR head."
+            "Request only after corrected four-file PR head passes Workspace Control Validation."
           ]
         }
       ],
-      "resume_condition": "Obtain independent exact-head design acceptance. Fresh read-only Lambda host attestation remains a separate pre-installation gate; no live endpoint or privileged authority before both applicable gates are satisfied."
+      "resume_condition": "Validate the BF-1/BF-2 corrected exact PR head and obtain fresh independent design acceptance. Fresh read-only Lambda host attestation remains a separate pre-installation gate; no implementation, live endpoint, tunnel/key, or root-helper installation before applicable gates."
     }
   ],
   "blockers": [
-    "Independent immutable-head authority/threat design review has not returned NO_BLOCKING_FINDING.",
+    "Fresh independent immutable-head review has not yet accepted the BF-1/BF-2 corrected authority/threat design.",
     "Fresh live Lambda host attestation remains required before installation or activation; repository evidence alone is not host attestation.",
-    "Implementation is blocked until design review; tunnel provisioning, privileged helper installation and live service activation are separately prohibited until later gates."
+    "Implementation, tunnel/key provisioning, job-launcher/root-broker/helper installation and live service activation remain prohibited until later gates."
   ],
   "remaining_work": [
-    "Validate the corrected task capsule/handoff and frozen design artifacts on PR #550.",
-    "Request fresh independent review against the exact immutable PR head and resolve every blocking finding.",
-    "After design acceptance, implement the isolated unprivileged server/policy and root-helper broker in repository only, with adversarial tests; no live Lambda authority yet.",
-    "Obtain fresh read-only Lambda host attestation before host-specific installation design is finalized.",
+    "Validate the BF-1/BF-2 corrected authority artifact, review procedure, task capsule and synchronized handoff on PR #550.",
+    "Record a fresh corrected-head independent review request consuming blocking review 6447046381 and resolve every new finding.",
+    "Only after design acceptance, implement repository-only policy frontend, job-launcher protocol, hostile worker sandbox, approval verifier and reviewed-helper broker with adversarial tests; no live Lambda authority yet.",
+    "Obtain fresh read-only Lambda host attestation before finalizing host-specific installation units/UIDs/sockets/mounts and approval trust-store placement.",
     "Independently review implementation and installation/rollback boundary before provisioning a dedicated tunnel credential or live service.",
-    "Run isolated acceptance, then separately authorize live exact-SHA/receipt acceptance while keeping Heartbeat and unrelated project controllers untouched."
+    "Run isolated acceptance and later separately authorized live exact-SHA/receipt acceptance while keeping Heartbeat and unrelated project controllers untouched."
   ],
-  "next_safe_action": "Validate PR #550 at the corrected exact head. If validation passes, record a fresh independent review request bound to that immutable head for the frozen authority/threat design. Do not implement, install, provision a tunnel/key, create a sudo/root helper, or mutate Lambda until the applicable review gates are satisfied.",
+  "next_safe_action": "Run Workspace Control Validation on the BF-1/BF-2 corrected PR #550 head. If SUCCESS, record a fresh immutable-head independent re-review request that consumes blocking review 6447046381. Do not implement, merge, install, provision tunnel/key, create job-launcher/root-broker/helper authority, execute Lambda commands, modify Heartbeat, or mutate project controllers.",
   "last_executor": "chatgpt",
   "last_surface": "github+heartbeat",
-  "notes": "Created 2026-10-27 after a workspace-github-actions-selfhosted-control-plane-v1 bootstrap handoff required Lambda shell execution that the connected ChatGPT surfaces could not perform. The operator explicitly requested that direct ChatGPT-to-Lambda shell capability be spun into a separate task and implemented later. The intended product shape is a private Workspace Shell MCP/plugin, separate from Workspace Heartbeat, with ordinary unprivileged argv-based execution plus a separately bounded and reviewable privileged authority path.\n\n2026-10-27 operational sequencing lesson from workspace-github-actions-selfhosted-control-plane-v1: the control-plane commissioning path required many manual Lambda terminal round-trips because connected ChatGPT surfaces could not execute bounded host commands directly. The safety/review gates were useful and caught real defects, but the operator copy/paste relay was operationally expensive. When this task is explicitly resumed, prioritize a bounded, auditable Workspace Shell MCP before the next Lambda-heavy control-plane phase so reviewed commands, receipts, stdout/stderr, and host-state inspection can be transported directly without weakening exact-SHA, independent-review, least-privilege, or privileged-operation boundaries.\n\n2026-10-27 explicit operator resume: GitHub-only read-only recovery from exact main 8a71aa3c60a4a0f230bcbee9711d2af79828c869. Draft frozen authority v1 review candidate on separate branch; no Lambda/Heartbeat mutations. Live host attestation and independent exact-head approval are open; do not treat design candidate as accepted.\n\n2026-10-27 pre-review correction: PR #550 initial validation run #974 failed only because the resumed task-state edit used invalid v2 capsule values/keys and a manually extended derived handoff. The authority design was also hardened before review: synchronous execution reduced to 90 seconds inside the Secure MCP Tunnel 120-second absolute deadline; inspect task IDs generalized to future durable tasks; and the root path changed from staging-only operations to an exact separately reviewed helper-registry broker with no arbitrary root argv. Host attestation remains a pre-installation gate rather than a claim or prerequisite for abstract design review.",
+  "notes": "Created 2026-10-27 after a workspace-github-actions-selfhosted-control-plane-v1 bootstrap handoff required Lambda shell execution that the connected ChatGPT surfaces could not perform. The operator explicitly requested that direct ChatGPT-to-Lambda shell capability be spun into a separate task and implemented later. The intended product shape is a private Workspace Shell MCP/plugin, separate from Workspace Heartbeat, with ordinary unprivileged argv-based execution plus a separately bounded and reviewable privileged authority path.\n\n2026-10-27 operational sequencing lesson from workspace-github-actions-selfhosted-control-plane-v1: the control-plane commissioning path required many manual Lambda terminal round-trips because connected ChatGPT surfaces could not execute bounded host commands directly. The safety/review gates were useful and caught real defects, but the operator copy/paste relay was operationally expensive. When this task is explicitly resumed, prioritize a bounded, auditable Workspace Shell MCP before the next Lambda-heavy control-plane phase so reviewed commands, receipts, stdout/stderr, and host-state inspection can be transported directly without weakening exact-SHA, independent-review, least-privilege, or privileged-operation boundaries.\n\n2026-10-27 explicit operator resume: GitHub-only read-only recovery from exact main 8a71aa3c60a4a0f230bcbee9711d2af79828c869. Draft frozen authority v1 review candidate on separate branch; no Lambda/Heartbeat mutations. Live host attestation and independent exact-head approval are open; do not treat design candidate as accepted.\n\n2026-10-27 pre-review correction: PR #550 initial validation run #974 failed only because the resumed task-state edit used invalid v2 capsule values/keys and a manually extended derived handoff. The authority design was also hardened before review: synchronous execution reduced to 90 seconds inside the Secure MCP Tunnel 120-second absolute deadline; inspect task IDs generalized to future durable tasks; and the root path changed from staging-only operations to an exact separately reviewed helper-registry broker with no arbitrary root argv. Host attestation remains a pre-installation gate rather than a claim or prerequisite for abstract design review.\n\n2026-10-27 independent review 6447046381 on exact head 3dae7ef2eb225030c9020d8e33ea444620fc0cfe returned BF-1 and BF-2. BF-1 found the hostile repository-code worker could conform while sharing or reaching policy/root-broker authority; corrected design now freezes separate tunnel/frontend/job-launcher/exec-worker/root-broker principals, control-socket/signing-material invisibility to workers, distinct UID and PID/proc isolation, and broker enforcement of frontend peer identity/signature plus independent approval. BF-2 found the approval trust root underspecified; corrected design now defines workspace-shell-approval.v1, RFC 8785 + Ed25519, off-Lambda operator-controlled issuer private key, pinned root-owned public trust/revocation stores, exact design-review/helper-review/source/helper/parameter bindings, <=15 minute expiry, single-use replay state, and root-broker independent verification. GitHub text remains evidence only. No implementation or Lambda mutation occurred.",
   "checkpoints": [],
   "artifacts": [
     {
       "path": "architecture/workspace-shell-mcp-authority-v1.json",
-      "state": "FROZEN_REVIEW_CANDIDATE_HOST_ATTESTATION_REQUIRED",
+      "state": "BF1_BF2_CORRECTED_FROZEN_REVIEW_CANDIDATE",
       "evidence": [
-        "Defines separate transport/identity, profile-bound unprivileged exec, exact reviewed-helper root broker, task/provenance binding, audit receipts, 90-second sync ceiling, kill/cleanup policy and emergency disable.",
+        "Freezes distinct tunnel/frontend/job-launcher/hostile-worker/root-broker principals and denies workers every broker/control/tunnel socket, signing secret and cross-principal proc/ptrace/signal path.",
+        "Defines canonical workspace-shell-approval.v1 with off-Lambda Ed25519 issuer, pinned read-only trust/revocation stores, exact design/helper/source/parameter/review bindings, <=15 minute expiry and single-use replay protection.",
         "No implementation or live authority is contained in this artifact."
       ]
     },
     {
       "path": "procedures/workspace_shell_mcp_design_review.md",
-      "state": "FROZEN_REVIEW_PROCEDURE",
+      "state": "BF1_BF2_CORRECTED_REVIEW_PROCEDURE",
       "evidence": [
-        "Separates GitHub/historical recovery from fresh host attestation and preserves independent-review/install/activation gates.",
-        "Documents 2026-10-27 pre-review hardening from current OpenAI Secure MCP Tunnel and plugin contracts."
+        "Records independent blocking review 6447046381 and the exact BF-1/BF-2 corrections.",
+        "Preserves the separation between abstract design review, later fresh host attestation, implementation review, installation review and live activation."
       ]
     }
   ],
