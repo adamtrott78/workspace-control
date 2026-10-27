@@ -192,3 +192,17 @@ Production preservation check passed after the benchmark:
 - local `:8787` health PASS
 
 Payload-efficiency implementation stage is therefore **VALIDATED**. The next stage is isolated and live Secure MCP Tunnel acceptance; ngrok is not yet retired.
+
+
+### Secure MCP Tunnel contract refresh — 2026-10-26
+
+Current official OpenAI documentation was rechecked before tunnel acceptance. The accepted design remains aligned with the service contract:
+
+- `tunnel-client` initiates outbound HTTPS to `api.openai.com:443` by default (or `mtls.api.openai.com:443` when control-plane mTLS is configured); no inbound internet listener is required.
+- The client forwards queued MCP JSON-RPC work to a private local HTTP MCP URL or stdio target and returns responses over the same tunnel.
+- Setup requires a `tunnel_id` plus a runtime API key. Platform tunnel permissions (Read/Use or Read/Manage) and ChatGPT custom-MCP/plugin permissions are separate.
+- Documented preflight remains `tunnel-client doctor --profile <profile> --explain`; runtime remains `tunnel-client run --profile <profile>`.
+- Default service limits remain 600 MCP requests/minute, 10 MiB serialized request or response, 120-second absolute request deadline, and 1000 queued pending requests.
+- Latest public `openai/tunnel-client` release observed during this refresh is v0.0.18.
+
+The next action is host-only read-only discovery. Do not print or commit credentials. Do not change the production Heartbeat listener or retire ngrok during this discovery.
