@@ -178,7 +178,17 @@ class MaintenanceServiceTests(unittest.TestCase):
         pending = self.lane_state() / f"reset-pending-{generation}.json"
         self.assertFalse(qpath.exists())
         self.assertTrue(pending.exists())
+        pending_state = json.loads(pending.read_text(encoding="utf-8"))
+        self.assertEqual(
+            pending_state["status"],
+            "RECOVERY_SCALESET_RESET_PENDING",
+        )
+        self.assertEqual(pending_state["reset_generation"], generation)
+        self.assertEqual(pending_state["old_scale_set_id"], 91)
         self.assertEqual(receipt["result"]["old_scale_set_id"], 91)
+        self.assertTrue(
+            receipt["result"]["controller_remains_recovery_quarantined"]
+        )
         self.assertIn(
             ["systemctl", "start", "workspace-ci-controller@workspace-control-cpu.service"],
             calls,
@@ -255,6 +265,113 @@ class MaintenanceServiceTests(unittest.TestCase):
             if argv[:2] == ["systemctl", "start"]
         ]
         self.assertEqual(len(starts), 1)
+
+
+    def test_diagnose_reports_reset_pending_and_ready_state(self):
+        lane = self.lane_state()
+        generation = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
+        pending = lane / f"reset-pending-{generation}.json"
+        pending.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "receipt_id": "11111111-2222-4333-8444-555555555555",
+                    "status": "RECOVERY_SCALESET_RESET_PENDING",
+                    "project_id": "workspace-control",
+                    "lane": "cpu",
+                    "scale_set_name": "lambda-workspace-control",
+                    "old_scale_set_id": 77,
+                    "reset_generation": generation,
+                }
+            ),
+            encoding="utf-8",
+        )
+        ready = lane / "ready-for-single-retry.json"
+        ready.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "receipt_id": "11111111-2222-4333-8444-555555555555",
+                    "status": "READY_FOR_SINGLE_RETRY",
+                    "project_id": "workspace-control",
+                    "lane": "cpu",
+                    "scale_set_name": "lambda-workspace-control",
+                    "old_scale_set_id": 77,
+                    "new_scale_set_id": 88,
+                    "reset_generation": generation,
+                    "automatic_workflow_triggered": False,
+                }
+            ),
+            encoding="utf-8",
+        )
+        with (
+            mock.patch.object(maintenance, "_service_active", return_value=True),
+            mock.patch.object(maintenance, "_active_project_units", return_value=[]),
+        ):
+            result = maintenance.apply_request(
+                request("DIAGNOSE_LANE"),
+                registry_path=self.registry_path,
+                controller_state_root=self.state_root,
+                receipts_dir=self.receipts,
+            )
+        self.assertEqual(len(result["reset_pending"]), 1)
+        self.assertEqual(
+            result["ready_for_single_retry"]["new_scale_set_id"],
+            88,
+        )
+
+    def test_requiesce_from_ready_state_restores_reset_pending(self):
+        lane = self.lane_state()
+        generation = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
+        qid = "11111111-2222-4333-8444-555555555555"
+        ready = lane / "ready-for-single-retry.json"
+        ready.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "receipt_id": qid,
+                    "status": "READY_FOR_SINGLE_RETRY",
+                    "project_id": "workspace-control",
+                    "lane": "cpu",
+                    "scale_set_name": "lambda-workspace-control",
+                    "old_scale_set_id": 77,
+                    "new_scale_set_id": 88,
+                    "reset_generation": generation,
+                    "automatic_workflow_triggered": False,
+                }
+            ),
+            encoding="utf-8",
+        )
+        with (
+            mock.patch.object(
+                maintenance,
+                "_run",
+                return_value=mock.Mock(returncode=0, stdout="", stderr=""),
+            ),
+            mock.patch.object(maintenance, "_service_inactive", return_value=True),
+            mock.patch.object(maintenance, "_active_project_units", return_value=[]),
+        ):
+            result = maintenance.apply_request(
+                request(
+                    "QUIESCE_LANE_FOR_RECOVERY",
+                    quarantine=qid,
+                    generation=generation,
+                    request_id="22222222-3333-4444-8555-666666666666",
+                ),
+                registry_path=self.registry_path,
+                controller_state_root=self.state_root,
+                receipts_dir=self.receipts,
+            )
+        pending = lane / f"reset-pending-{generation}.json"
+        self.assertFalse(ready.exists())
+        self.assertTrue(pending.exists())
+        state = json.loads(pending.read_text(encoding="utf-8"))
+        self.assertEqual(state["status"], "RECOVERY_SCALESET_RESET_PENDING")
+        self.assertEqual(state["old_scale_set_id"], 77)
+        self.assertEqual(
+            result["result"]["quarantine_scale_set_id"],
+            88,
+        )
 
 
 if __name__ == "__main__":
