@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-Verify /home/atrott/bin/heartbeat-up still targets the accepted v0.4.7 runtime, workspace-heartbeat-node environment, and port 8787; then restore production :8787 with that launcher and verify exact runtime provenance. Re-verify PID 1922601 is still the orphaned exact v0.4.7 :8788 probe before terminating only that PID. Run exact v0.4.8 candidate def7c5fe6498b1bd742d912c1490d1f7160cab5f on free isolated :8789 and complete no-change/delta/resync payload measurements. Do not deploy v0.4.8 live or retire ngrok yet.
+Read-only identify the current :8789 listener (PID, executable, CWD, exact Git SHA/package version, parent/ancestry, command line) and also list any other free candidate isolated ports in 8790-8795. If :8789 is proven to be an orphaned Heartbeat isolated process, terminate only that PID after re-verification; otherwise leave it untouched and use a verified free port. Then run exact v0.4.8 candidate def7c5fe6498b1bd742d912c1490d1f7160cab5f isolated and complete no-change/delta/resync payload measurements while proving restored production :8787 remains unchanged.
 
 ## Remaining work
 
@@ -41,8 +41,8 @@ Verify /home/atrott/bin/heartbeat-up still targets the accepted v0.4.7 runtime, 
 
 ## Blockers / gates
 
-- Production v0.4.7 :8787 remains stopped after operator heartbeat-down; restore it only through the existing verified heartbeat-up launcher after checking the launcher still targets v0.4.7/Node20/8787.
-- Isolated post-change heartbeat_poll payload benchmark remains incomplete; :8789 is verified free and should be used for the exact v0.4.8 candidate.
+- The exact v0.4.8 post-change payload benchmark is still pending because the intended isolated port :8789 is occupied by an unidentified listener. Identify its PID/CWD/executable/SHA/ancestry and only terminate it if it is proven to be an orphaned Heartbeat isolated probe.
+- Public ngrok remains quota-blocked from ChatGPT despite local production v0.4.7 restoration; this is expected and does not invalidate local runtime recovery.
 - Secure MCP Tunnel tunnel/workspace association, runtime authorization, embedded app resource delivery, app-only heartbeat_poll behavior, and live ChatGPT acceptance remain unverified; do not retire ngrok yet.
 
 ## Fresh-chat initialization
