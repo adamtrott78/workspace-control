@@ -482,7 +482,11 @@ def rejection_receipt(cfg, request, code, message, peer_uid):
 
 
 def serve(config_path):
+    if os.geteuid() != 0:
+        fail("ROOT_REQUIRED", "job launcher must run as root")
     cfg = read_json_protected(config_path)
+    if int(cfg["frontend_uid"]) == int(cfg["worker_uid"]):
+        fail("IDENTITY_COLLAPSE", "frontend_uid and worker_uid must be distinct")
     manifest = read_json_protected(cfg["profile_manifest"])
     if manifest.get("schema_version") != 1 or manifest.get("grammar_version") != "workspace-shell-profile-grammar.v1":
         fail("PROFILE_MANIFEST_INVALID", "unexpected profile manifest schema/grammar")
