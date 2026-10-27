@@ -4,6 +4,7 @@ import errno
 import hashlib
 import json
 import os
+import select
 import socket
 import sqlite3
 import stat
@@ -20,6 +21,7 @@ from runtime_common import (
     fail,
     read_json_protected,
     require_protected_path,
+    require_secure_directory,
     sha256_hex,
     write_receipt,
 )
@@ -65,9 +67,9 @@ def verify_request(cfg, raw_request):
     return result
 
 
-def ensure_replay_db(cfg):
+def ensure_replay_db(cfg, *, expected_owner_uid=0):
     db_path = Path(cfg["replay_db"])
-    db_path.parent.mkdir(parents=True, exist_ok=True)
+    require_secure_directory(db_path.parent, owner_uid=expected_owner_uid)
     conn = sqlite3.connect(db_path, timeout=5, isolation_level=None)
     try:
         conn.execute("PRAGMA journal_mode=WAL")
@@ -143,36 +145,269 @@ def decode_output(data):
         return "[non-UTF8 output omitted]"
 
 
-def execute_helper(cfg, verified):
-    helper_fd = open_verified_helper(verified["helper_path"], verified["helper_sha256"])
-    try:
-        helper_argv0 = f"/proc/self/fd/{helper_fd}"
-        params = canonical_json_bytes(verified["parameters"]) + b"\n"
-        env = {
-            "PATH": "/usr/bin:/bin",
-            "LANG": "C.UTF-8",
-            "LC_ALL": "C.UTF-8",
-            "TZ": "UTC",
-            "HOME": "/var/empty",
-            "WORKSPACE_SHELL_TASK_ID": verified["task_id"],
-            "WORKSPACE_SHELL_TARGET": verified["target"],
-            "WORKSPACE_SHELL_EXPECTED_SHA": verified["expected_source_commit"],
-            "WORKSPACE_SHELL_APPROVAL_ID": verified["approval_id"],
-            "WORKSPACE_SHELL_OPERATION": verified["operation"],
-        }
-        return bounded_run(
-            [helper_argv0],
-            cwd="/",
-            env=env,
-            timeout_s=min(float(verified["timeout_ms"]) / 1000.0, 90.0),
-            stdout_limit=65536,
-            stderr_limit=65536,
-            stdin_bytes=params,
-            pass_fds=(helper_fd,),
-        )
-    finally:
-        os.close(helper_fd)
+def stage_verified_helper(cfg, verified):
+    cache_root = require_secure_directory(cfg["helper_cache_root"], owner_uid=0)
+    digest = verified["helper_sha256"]
+    target = cache_root / f"{digest}.helper"
 
+    if target.exists():
+        st = os.lstat(target)
+        if not stat.S_ISREG(st.st_mode) or stat.S_ISLNK(st.st_mode):
+            fail("HELPER_CACHE_INVALID", "cached helper is not a regular non-symlink file")
+        if st.st_uid != 0 or st.st_mode & 0o222:
+            fail("HELPER_CACHE_MODE", "cached helper must be root-owned and immutable")
+        observed = sha256_hex(target.read_bytes())
+        if observed != digest:
+            fail("HELPER_CACHE_DIGEST_MISMATCH", "cached helper digest mismatch")
+        return target
+
+    source_fd = open_verified_helper(verified["helper_path"], digest)
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        try:
+            target_fd = os.open(target, flags, 0o500)
+        except FileExistsError:
+            os.close(source_fd)
+            return stage_verified_helper(cfg, verified)
+
+        try:
+            while True:
+                chunk = os.read(source_fd, 65536)
+                if not chunk:
+                    break
+                view = memoryview(chunk)
+                while view:
+                    written = os.write(target_fd, view)
+                    view = view[written:]
+            os.fsync(target_fd)
+        finally:
+            os.close(target_fd)
+
+        os.chmod(target, 0o500)
+        observed = sha256_hex(target.read_bytes())
+        if observed != digest:
+            try:
+                target.unlink()
+            finally:
+                fail("HELPER_CACHE_DIGEST_MISMATCH", "staged helper digest mismatch")
+        dirfd = os.open(cache_root, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+        try:
+            os.fsync(dirfd)
+        finally:
+            os.close(dirfd)
+        return target
+    finally:
+        try:
+            os.close(source_fd)
+        except OSError:
+            pass
+
+
+def build_helper_systemd_command(cfg, unit, helper_path, verified):
+    systemd_run = cfg.get("systemd_run_path", "/usr/bin/systemd-run")
+    if not Path(systemd_run).is_file():
+        fail("CGROUP_BACKEND_MISSING", f"required systemd-run missing: {systemd_run}")
+
+    confinement = verified.get("confinement") or {}
+    capabilities = confinement.get("capabilities") or []
+    read_write_paths = confinement.get("read_write_paths") or []
+    network = confinement.get("network", "deny")
+
+    props = [
+        "NoNewPrivileges=yes",
+        "PrivateDevices=yes",
+        "PrivateTmp=yes",
+        "ProtectHome=yes",
+        "ProtectSystem=strict",
+        "ProtectKernelLogs=yes",
+        "ProtectKernelModules=yes",
+        "ProtectKernelTunables=yes",
+        "ProtectControlGroups=yes",
+        "RestrictSUIDSGID=yes",
+        "KillMode=control-group",
+        "ExitType=cgroup",
+        "TimeoutStopSec=2s",
+        "TasksMax=64",
+        "MemoryMax=1G",
+        "UMask=0077",
+        "CapabilityBoundingSet=" + " ".join(capabilities),
+    ]
+    if network == "deny":
+        props.append("PrivateNetwork=yes")
+    elif network != "host-reviewed":
+        fail("HELPER_CONFINEMENT_INVALID", "unknown helper network confinement")
+
+    if read_write_paths:
+        props.append("ReadWritePaths=" + " ".join(read_write_paths))
+
+    env_args = [
+        "/usr/bin/env",
+        "-i",
+        "PATH=/usr/bin:/bin",
+        "LANG=C.UTF-8",
+        "LC_ALL=C.UTF-8",
+        "TZ=UTC",
+        "HOME=/var/empty",
+        f"WORKSPACE_SHELL_TASK_ID={verified['task_id']}",
+        f"WORKSPACE_SHELL_TARGET={verified['target']}",
+        f"WORKSPACE_SHELL_EXPECTED_SHA={verified['expected_source_commit']}",
+        f"WORKSPACE_SHELL_APPROVAL_ID={verified['approval_id']}",
+        f"WORKSPACE_SHELL_OPERATION={verified['operation']}",
+        str(helper_path),
+    ]
+
+    command = [
+        systemd_run,
+        "--quiet",
+        "--wait",
+        "--pipe",
+        "--collect",
+        f"--unit={unit}",
+    ]
+    for prop in props:
+        command.append(f"--property={prop}")
+    command.extend(["--", *env_args])
+    return command
+
+
+def helper_unit_killer(cfg, unit):
+    systemctl = cfg.get("systemctl_path", "/usr/bin/systemctl")
+
+    def kill(sig):
+        name = "TERM" if sig == signal.SIGTERM else "KILL"
+        subprocess.run(
+            [systemctl, "kill", f"--signal={name}", "--kill-whom=all", unit],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=2,
+            close_fds=True,
+            env={"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8"},
+        )
+
+    return kill
+
+
+def helper_unit_state(cfg, unit):
+    systemctl = cfg.get("systemctl_path", "/usr/bin/systemctl")
+    proc = subprocess.run(
+        [
+            systemctl,
+            "show",
+            unit,
+            "--property=ActiveState",
+            "--property=ControlGroup",
+            "--no-pager",
+        ],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        timeout=2,
+        close_fds=True,
+        text=True,
+        env={"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8"},
+    )
+    if proc.returncode != 0:
+        return None
+    values = {}
+    for line in proc.stdout.splitlines():
+        if "=" in line:
+            key, value = line.split("=", 1)
+            values[key] = value
+    return values
+
+
+def helper_cgroup_pids(control_group):
+    if not control_group:
+        return []
+    base = Path("/sys/fs/cgroup").resolve()
+    candidate = (base / control_group.lstrip("/")).resolve()
+    try:
+        candidate.relative_to(base)
+    except ValueError:
+        fail("CGROUP_PATH_ESCAPE", "systemd returned helper cgroup outside cgroup root")
+    try:
+        return [
+            line.strip()
+            for line in (candidate / "cgroup.procs").read_text().splitlines()
+            if line.strip()
+        ]
+    except FileNotFoundError:
+        return []
+
+
+def cleanup_helper_unit(cfg, unit):
+    killer = helper_unit_killer(cfg, unit)
+    observed = helper_unit_state(cfg, unit)
+    if observed is None:
+        return "COLLECTED"
+
+    if observed.get("ActiveState") not in {"inactive", "failed"} or helper_cgroup_pids(observed.get("ControlGroup")):
+        killer(signal.SIGTERM)
+        time.sleep(0.1)
+        observed = helper_unit_state(cfg, unit)
+        if observed is not None and (
+            observed.get("ActiveState") not in {"inactive", "failed"}
+            or helper_cgroup_pids(observed.get("ControlGroup"))
+        ):
+            killer(signal.SIGKILL)
+
+    deadline = time.monotonic() + 2.0
+    last = None
+    while time.monotonic() < deadline:
+        observed = helper_unit_state(cfg, unit)
+        if observed is None:
+            return "COLLECTED"
+        last = observed
+        pids = helper_cgroup_pids(observed.get("ControlGroup"))
+        if observed.get("ActiveState") in {"inactive", "failed"} and not pids:
+            return "EMPTY"
+        time.sleep(0.02)
+
+    fail(
+        "CGROUP_CLEANUP_FAILED",
+        f"privileged helper unit {unit} retained state={(last or {}).get('ActiveState')} pids={helper_cgroup_pids((last or {}).get('ControlGroup'))}",
+    )
+
+
+def peer_disconnected(conn):
+    try:
+        readable, _, exceptional = select.select([conn], [], [conn], 0)
+        if exceptional:
+            return True
+        if not readable:
+            return False
+        try:
+            data = conn.recv(1, socket.MSG_PEEK | socket.MSG_DONTWAIT)
+            return data == b""
+        except BlockingIOError:
+            return False
+        except (ConnectionResetError, BrokenPipeError):
+            return True
+    except OSError:
+        return True
+
+
+def execute_helper(cfg, verified, cancel_check=None):
+    helper_path = stage_verified_helper(cfg, verified)
+    params = canonical_json_bytes(verified["parameters"]) + b"\n"
+    unit = f"workspace-shell-helper-{verified['approval_id'][:16].replace('_', '-')}"
+    command = build_helper_systemd_command(cfg, unit, helper_path, verified)
+    result = bounded_run(
+        command,
+        cwd="/",
+        env={"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8", "TZ": "UTC"},
+        timeout_s=min(float(verified["timeout_ms"]) / 1000.0, 90.0),
+        stdout_limit=65536,
+        stderr_limit=65536,
+        stdin_bytes=params,
+        kill_callback=helper_unit_killer(cfg, unit),
+        cancel_check=cancel_check,
+    )
+    result["cgroup_cleanup_status"] = cleanup_helper_unit(cfg, unit)
+    return result
 
 def success_receipt(cfg, verified, peer_uid, result, request):
     now = time.time()
@@ -209,7 +444,7 @@ def success_receipt(cfg, verified, peer_uid, result, request):
         "privileged": True,
         "operation": verified["operation"],
         "helper_receipt_id": None,
-        "cgroup_cleanup_status": "root-helper-process-group-empty-after-wait",
+        "cgroup_cleanup_status": result["cgroup_cleanup_status"],
         "authorization_decision": "ALLOW",
         "approval_id": verified["approval_id"],
         "approval_issuer_key_id": request.get("approval", {}).get("payload", {}).get("issuer_key_id"),
@@ -227,6 +462,7 @@ def success_receipt(cfg, verified, peer_uid, result, request):
         "expected_source_tree": verified["expected_source_tree"],
         "parameter_digest_sha256": verified["parameter_digest_sha256"],
         "timed_out": result["timed_out"],
+        "cancelled": result["cancelled"],
     }
     return write_receipt(cfg["receipt_root"], receipt)
 
@@ -258,15 +494,17 @@ def rejection_receipt(cfg, request, peer_uid, code, message):
         return None
 
 
-def handle_request(cfg, replay_db, raw, peer_uid):
+def handle_request(cfg, replay_db, raw, peer_uid, cancel_check=None):
     if peer_uid != int(cfg["frontend_uid"]):
         fail("PEER_UID_DENIED", "root broker accepts workspace-shell-mcp UID only")
     if len(raw) > REQUEST_LIMIT:
         fail("REQUEST_TOO_LARGE", "broker request exceeds 64 KiB")
     request = json.loads(raw.decode("utf-8"))
     verified = verify_request(cfg, raw)
+    if cancel_check is not None and cancel_check():
+        fail("CONTROL_CANCELLED", "frontend disconnected before privileged approval consumption")
     consume_replay(replay_db, verified)
-    result = execute_helper(cfg, verified)
+    result = execute_helper(cfg, verified, cancel_check=cancel_check)
     receipt = success_receipt(cfg, verified, peer_uid, result, request)
     return {
         "ok": True,
@@ -274,6 +512,7 @@ def handle_request(cfg, replay_db, raw, peer_uid):
         "exit_code": result["exit_code"],
         "signal": result["signal"],
         "timed_out": result["timed_out"],
+        "cancelled": result["cancelled"],
         "stdout": decode_output(result["stdout"]),
         "stderr": decode_output(result["stderr"]),
         "stdout_bytes_seen": result["stdout_bytes_seen"],
@@ -291,10 +530,13 @@ def serve(config_path):
     cfg = read_json_protected(config_path)
     cfg["verifier_config"] = str(Path(cfg["verifier_config"]).resolve())
     require_protected_path(cfg["verifier_config"])
+    require_secure_directory(Path(cfg["replay_db"]).parent, owner_uid=0)
+    require_secure_directory(cfg["receipt_root"], owner_uid=0)
+    require_secure_directory(cfg["helper_cache_root"], owner_uid=0)
     replay_db = ensure_replay_db(cfg)
 
     socket_path = Path(cfg["socket_path"])
-    socket_path.parent.mkdir(parents=True, exist_ok=True)
+    require_secure_directory(socket_path.parent, owner_uid=0)
     if socket_path.exists():
         st = socket_path.lstat()
         if not stat.S_ISSOCK(st.st_mode):
@@ -327,7 +569,13 @@ def serve(config_path):
                         request = json.loads(line.decode("utf-8"))
                     except Exception:
                         request = {}
-                    response = handle_request(cfg, replay_db, line, uid)
+                    response = handle_request(
+                        cfg,
+                        replay_db,
+                        line,
+                        uid,
+                        cancel_check=lambda: peer_disconnected(conn),
+                    )
                 except Exception as exc:
                     code = exc.code if isinstance(exc, ShellRuntimeError) else "ROOT_BROKER_FAILED"
                     message = str(exc)
@@ -336,7 +584,10 @@ def serve(config_path):
                 data = json.dumps(response, separators=(",", ":"), ensure_ascii=False).encode("utf-8") + b"\n"
                 if len(data) > RESPONSE_LIMIT:
                     data = b'{"ok":false,"error":{"code":"RESPONSE_TOO_LARGE","message":"broker response exceeded bound"}}\n'
-                conn.sendall(data)
+                try:
+                    conn.sendall(data)
+                except (BrokenPipeError, ConnectionResetError):
+                    pass
     finally:
         server.close()
         try:
