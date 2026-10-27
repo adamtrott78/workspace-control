@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-Verify current official OpenAI Secure MCP Tunnel documentation and the Lambda host's tunnel-client/configuration state. Keep production v0.4.7 :8787 untouched. Prepare an isolated outbound-only tunnel profile targeting an isolated exact v0.4.8 local endpoint, with no public Lambda ingress and no ngrok retirement, then run tunnel doctor/health checks before any live ChatGPT acceptance.
+Run a read-only Lambda host preflight for Secure MCP Tunnel: detect any installed tunnel-client and version, inspect only configuration filenames/permissions (not secrets), report whether CONTROL_PLANE_API_KEY or OPENAI_API_KEY are set without printing values, confirm architecture and outbound TLS reachability to api.openai.com:443, and keep production v0.4.7 :8787 unchanged. If no client/config exists, install the current official tunnel-client release only after verifying the release asset/checksum; tunnel creation/workspace association and runtime API-key provisioning remain explicit operator steps.
 
 ## Remaining work
 
