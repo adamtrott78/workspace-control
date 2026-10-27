@@ -120,7 +120,7 @@
       "state_effect_class": "CI_VALIDATION_ONLY",
       "candidate_payload_allowed": true,
       "model_binding_mode": "FORBIDDEN",
-      "runtime_binding_mode": "FORBIDDEN",
+      "runtime_binding_mode": "OPTIONAL_EXACT_IF_ROUTE_BINDS",
       "gpu_count": 0,
       "admission_enabled_after_generic_activation": true
     }
