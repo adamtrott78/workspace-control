@@ -255,7 +255,7 @@ export function authorizeTaskExecution({ authorityRoot, taskId, target, expected
   assertTarget(target);
   assertSha(expectedSha, "expected_sha");
   const { capsule, path: capsulePath } = loadTaskCapsule(authorityRoot, taskId);
-  if (!["IN_PROGRESS", "PAUSED", "READY"].includes(capsule.status)) {
+  if (capsule.status !== "IN_PROGRESS") {
     fail("TASK_STATE_DENIED", `task status ${capsule.status} does not permit Workspace Shell execution`);
   }
   const repo = (capsule.repositories ?? []).find((entry) => entry?.name === target);
@@ -308,9 +308,13 @@ export function signFrontendRequest(payload, privateKeyPem) {
 export async function unixRpc(socketPath, request, {
   timeoutMs = 5000,
   maxResponseBytes = 1024 * 1024,
+  signal = null,
 } = {}) {
   if (typeof socketPath !== "string" || !socketPath.startsWith("/")) {
     fail("INVALID_SOCKET_PATH", "control socket path must be absolute");
+  }
+  if (signal?.aborted) {
+    fail("CONTROL_CANCELLED", "control-plane RPC was cancelled before connect");
   }
   const body = Buffer.from(canonicalize(request) + "\n", "utf8");
   if (body.length > 65536) fail("REQUEST_TOO_LARGE", "control request exceeds 64 KiB");
@@ -321,41 +325,63 @@ export async function unixRpc(socketPath, request, {
     const chunks = [];
     let settled = false;
 
-    const timer = setTimeout(() => {
-      if (!settled) {
-        settled = true;
-        socket.destroy();
-        reject(new ShellPolicyError("CONTROL_TIMEOUT", "control-plane RPC timed out"));
-      }
-    }, timeoutMs);
+    const cleanup = () => {
+      clearTimeout(timer);
+      if (signal) signal.removeEventListener("abort", onAbort);
+    };
 
-    function finishError(error) {
+    const finishError = (error) => {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
+      cleanup();
       socket.destroy();
       reject(error);
-    }
+    };
 
-    socket.on("connect", () => socket.end(body));
+    const onAbort = () => {
+      finishError(new ShellPolicyError(
+        "CONTROL_CANCELLED",
+        "control-plane RPC was cancelled by the MCP caller",
+      ));
+    };
+
+    const timer = setTimeout(() => {
+      finishError(new ShellPolicyError("CONTROL_TIMEOUT", "control-plane RPC timed out"));
+    }, timeoutMs);
+
+    if (signal) signal.addEventListener("abort", onAbort, { once: true });
+
+    socket.on("connect", () => {
+      // Keep the connection open after the newline-framed request so the
+      // root service can observe a real client disconnect as cancellation.
+      socket.write(body);
+    });
     socket.on("data", (chunk) => {
       total += chunk.length;
       if (total > maxResponseBytes) {
-        finishError(new ShellPolicyError("CONTROL_RESPONSE_TOO_LARGE", "control-plane response exceeded bound"));
+        finishError(new ShellPolicyError(
+          "CONTROL_RESPONSE_TOO_LARGE",
+          "control-plane response exceeded bound",
+        ));
         return;
       }
       chunks.push(chunk);
     });
-    socket.on("error", (error) => finishError(new ShellPolicyError("CONTROL_RPC_FAILED", error.message)));
+    socket.on("error", (error) => {
+      finishError(new ShellPolicyError("CONTROL_RPC_FAILED", error.message));
+    });
     socket.on("end", () => {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
+      cleanup();
       try {
         const text = Buffer.concat(chunks).toString("utf8").trim();
+        if (!text) throw new Error("empty control-plane response");
         resolve(JSON.parse(text));
       } catch (error) {
         reject(new ShellPolicyError("CONTROL_RESPONSE_INVALID", error.message));
+      } finally {
+        socket.destroy();
       }
     });
   });
