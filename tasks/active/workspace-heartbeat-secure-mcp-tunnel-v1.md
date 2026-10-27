@@ -59,3 +59,12 @@ Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
+
+## 2026-10-26 verified discovery checkpoint
+
+- Source audit confirms app-only `heartbeat_snapshot` sends full bounded `turn_history` on each poll; the checked-in card schedules 1500 ms while working and 3500 ms otherwise after response. `heartbeat_touch` remains model-only and silent.
+- Official Secure MCP Tunnel defaults verified: outbound HTTPS; 600 MCP requests/minute, 10 MiB serialized envelope, 120-second deadline, 1,000 queued. Embedded live-card app behavior over that transport remains unproven.
+- Heartbeat `begin_turn` attempt failed HTTP 403 at ngrok-free.dev. No new turn ID, host restart, or network cutover.
+- Historical Lambda v0.4.7 / Node v20.20.2 / port 8787 host evidence is **not** proof of present process identity. Current live launcher/source/rollback and response bytes are still unverified.
+- See `procedures/workspace_heartbeat_secure_mcp_tunnel.md` at `4ecba691b6560c31ddba4b02e7c0223726306745` for full traffic-budget scenarios and isolated acceptance plan.
+- Next action: read-only Lambda provenance + measured bytes; isolated tunnel + embedded-app acceptance; no live change before both pass.
