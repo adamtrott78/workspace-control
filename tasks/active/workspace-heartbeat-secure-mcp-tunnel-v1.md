@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-Install the current official full tunnel-client v0.0.18 Linux amd64 archive on Lambda into a user-owned non-production path after verifying its published SHA-256 (3c82307316acd93c88a384b62af1d81d3f4cb0efa975f9c0bfaef922866a04c4). Run only version/help/quickstart discovery afterward. Do not create a tunnel profile or expose credentials yet. Then create/associate a Platform Secure MCP Tunnel and provision a restricted runtime key with Tunnels Read + Use; enter the key locally, never in chat.
+Operator: in OpenAI Platform Tunnels management, create or select the Secure MCP Tunnel for Workspace Heartbeat and record the complete tunnel_id locally. In Runtime API keys, create a dedicated runtime key whose principal has Tunnels Read + Use for that tunnel. Do not paste the key into chat. After those exist, locally initialize an isolated profile targeting an exact v0.4.8 loopback MCP endpoint, referencing the runtime key via env:CONTROL_PLANE_API_KEY, use a loopback ephemeral health listener, run tunnel-client doctor --profile ... --explain, and report only non-secret status/output.
 
 ## Remaining work
 
@@ -40,10 +40,10 @@ Install the current official full tunnel-client v0.0.18 Linux amd64 archive on L
 
 ## Blockers / gates
 
-- The official tunnel-client is not installed on Lambda and no tunnel profile exists.
-- A Platform tunnel_id and restricted runtime API key are still required; do not paste the key into chat or commit it.
-- Secure MCP Tunnel workspace association and live ChatGPT custom-MCP/app acceptance remain unverified.
-- Public ngrok remains quota-blocked from ChatGPT; keep accepted production v0.4.7 :8787 and rollback intact until tunnel acceptance passes.
+- Platform Secure MCP Tunnel provisioning is now the next operator gate: create or select a tunnel in the OpenAI Platform organization/workspace used by ChatGPT, and obtain its full tunnel_id.
+- Create a separate runtime API key whose principal has Tunnels Read + Use for that tunnel. Do not paste the key into chat, logs, Git, shell history, or task files.
+- ChatGPT connector/custom-MCP association and live app-resource acceptance remain unverified.
+- Public ngrok remains quota-blocked from ChatGPT; keep accepted production v0.4.7 :8787 and rollback intact until Secure MCP Tunnel acceptance passes.
 
 ## Fresh-chat initialization
 
