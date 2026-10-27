@@ -40,7 +40,7 @@
       "base_sha": "3619574d8b10441fbec18f92ce7005d036aad7c8",
       "remote": {
         "branch": "gitrunner-p1-implementation",
-        "checkpoint_sha": "ee4f174f1247ccd1f5123600cdd9978dd67dd0e1",
+        "checkpoint_sha": "a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45",
         "verified": true
       },
       "local": null,
@@ -341,12 +341,31 @@
         "independent review 5661233375 NO_BLOCKING_FINDING"
       ],
       "outputs": [
-        "dedicated workspace-control JIT CPU validation route",
-        "exact resource/isolation policy",
-        "pilot workflow and receipts"
+        "P1 implementation code checkpoint workspace-control@a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45",
+        "PR #521 bounded P1 implementation, still unactivated",
+        "Admission-v2 aggregate assigned count is non-authoritative; assignment divergence persists fail-closed quarantine",
+        "reset-pending recovery preserves quarantine across exact scale-set delete/recreate and requires two complete zero-state observations >=15 seconds apart",
+        "durable READY_FOR_SINGLE_RETRY, RECOVERY_RETRY_ACQUIRED, and RECOVERY_RETRY_COMPLETED receipts bind one recovery generation to one job lifecycle",
+        "bounded root maintenance service plus independent outbound-only ci-maintenance controller with typed operations and replay-safe receipts",
+        "workspace-control control-small CPU-only pilot scaffold remains MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND"
       ],
-      "validation": [],
-      "resume_condition": "Only after exact v0.2 receives NO_BLOCKING_FINDING; then pilot must pass repository/workflow identity, filesystem isolation, resource envelope, stale-assignment recovery, bounded maintenance/recovery, and rollback gates."
+      "validation": [
+        {
+          "check": "P1 repository and adversarial implementation validation",
+          "result": "PASS",
+          "evidence": [
+            "Workspace Control Validation run 40437708435 / job 121970360566 completed SUCCESS on exact implementation code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45.",
+            "Validated changed task contracts, full Python unit regression, pinned Go 1.26.3 Lambda scale-set controller tests, and full integration contracts.",
+            "Controller blob c31427a879bea0c536a20e1e161bb0767c01069f makes TotalAssignedJobs non-authoritative under Admission-v2, persists assignment divergence quarantine, preserves reset-pending quarantine across controller restart, requires fresh scale-set identity and two complete zero-state observations >=15 seconds apart, and durably consumes/completes the single recovery retry.",
+            "Root maintenance service blob 0a4d995022a24a006ecfc794ad2116c0412af9a0 exposes only DIAGNOSE_LANE, RESTART_CONTROLLER, QUIESCE_LANE_FOR_RECOVERY, and RESUME_LANE_AFTER_RESET; validates SO_PEERCRED, owner/repository/comment source attestation, installed registry/manifest digests and derived targets; and persists replay-safe COMPLETED/FAILED_CLOSED receipts with rollback.",
+            "L0 maintenance controller blob 4b5ec97754c83e4b01103dea9c2f84112b3d6110 is outbound-only, owner-commanded, does not execute repository code, blocks duplicate replacement pilot runs, uses an exact configured-scale-set helper, verifies policy-digest stability, and requires the controller-authored READY receipt before declaring recovery retryable.",
+            "Workspace-control manifest blob c307b728acd7a60219189499e9c4a56d3048fdf8 remains MIGRATION_CANDIDATE_NOT_INSTALLED with route PLANNED_NOT_BOUND, concurrency=1, CPU lane only, same-repository owner command, forks disabled, and exact trusted workflow blob 524e01916e1a826efd1edb4792023973d7b3c73c.",
+            "control-small contract/resource/profile remain bounded to CPUQuota=200%, MemoryHigh=4G, MemoryMax=8G, RuntimeMaxSec=10min, GPU count 0; maxRunners remains 1.",
+            "No live Lambda runner, systemd maintenance service, installed registry/manifest, workflow route, credential, or host state was activated during implementation."
+          ]
+        }
+      ],
+      "resume_condition": "Independent implementation review returns NO_BLOCKING_FINDING on the exact PR #521 implementation target; only then may bounded live P1 installation/activation gates begin."
     },
     {
       "id": "remove_hosted_runner_steady_state_dependency",
@@ -522,6 +541,29 @@
         "Fresh independent-review request is PR #517 comment 6431125302.",
         "GitHub Copilot reviewer request did not produce a requested reviewer or review and is not counted toward the independence gate."
       ]
+    },
+    {
+      "id": "p1-implementation-code-freeze",
+      "kind": "git_commit",
+      "identity": "a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45",
+      "required_for_resume": true,
+      "evidence": [
+        "Exact P1 implementation code checkpoint before state-only review handoff synchronization.",
+        "Workspace Control Validation run 40437708435 / job 121970360566 SUCCESS.",
+        "No live activation was performed.",
+        "Independent implementation review must consume this exact code checkpoint or a descendant proven to change only task/handoff review metadata."
+      ]
+    },
+    {
+      "id": "implementation-review-pr-521",
+      "kind": "pull_request",
+      "identity": "workspace-control#521",
+      "required_for_resume": true,
+      "evidence": [
+        "P1 implementation code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45.",
+        "Successful full validation run 40437708435 / job 121970360566.",
+        "PR remains unactivated; implementation review is the sole authority gate before live P1 installation/activation."
+      ]
     }
   ],
   "artifacts": [
@@ -539,16 +581,15 @@
     },
     {
       "path": "architecture/lambda-ci-project-workspace-control.v1.json",
-      "state": "MIGRATION_CANDIDATE_NOT_INSTALLED",
+      "state": "P1_IMPLEMENTED_UNACTIVATED_PENDING_INDEPENDENT_REVIEW",
       "role": "non-live project-manifest scaffold",
       "origin": "workspace-github-actions-selfhosted-control-plane-v1",
       "persistence": "git",
       "regeneration": "only from accepted control-plane design",
-      "review_requirement": "independent preimplementation review",
+      "review_requirement": "independent implementation review",
       "evidence": [
-        "blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588",
-        "control-validation route PLANNED_NOT_BOUND; blob_sha null",
-        "unchanged and deliberately reused as the exact v0.2 manifest review target because v0.1 isolation review found no blocker"
+        "blob c307b728acd7a60219189499e9c4a56d3048fdf8",
+        "code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45"
       ]
     },
     {
@@ -573,6 +614,123 @@
       "review_requirement": "fresh independent preimplementation review",
       "evidence": [
         "blob 2866f7d76aed0d5792b86ea175e9492c90115f50"
+      ]
+    },
+    {
+      "path": ".github/workflows/lambda-ci-workspace-control-validation.yml",
+      "state": "P1_IMPLEMENTED_UNACTIVATED_PENDING_INDEPENDENT_REVIEW",
+      "role": "P1 implementation artifact",
+      "origin": "workspace-github-actions-selfhosted-control-plane-v1",
+      "persistence": "git",
+      "regeneration": "reviewed update only",
+      "review_requirement": "independent implementation review",
+      "evidence": [
+        "blob 524e01916e1a826efd1edb4792023973d7b3c73c",
+        "code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45"
+      ]
+    },
+    {
+      "path": "controller/lambda-ci-controller/main.go",
+      "state": "P1_IMPLEMENTED_UNACTIVATED_PENDING_INDEPENDENT_REVIEW",
+      "role": "P1 implementation artifact",
+      "origin": "workspace-github-actions-selfhosted-control-plane-v1",
+      "persistence": "git",
+      "regeneration": "reviewed update only",
+      "review_requirement": "independent implementation review",
+      "evidence": [
+        "blob c31427a879bea0c536a20e1e161bb0767c01069f",
+        "code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45"
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_maintenance_service.py",
+      "state": "P1_IMPLEMENTED_UNACTIVATED_PENDING_INDEPENDENT_REVIEW",
+      "role": "P1 implementation artifact",
+      "origin": "workspace-github-actions-selfhosted-control-plane-v1",
+      "persistence": "git",
+      "regeneration": "reviewed update only",
+      "review_requirement": "independent implementation review",
+      "evidence": [
+        "blob 0a4d995022a24a006ecfc794ad2116c0412af9a0",
+        "code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45"
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_maintenance_controller.py",
+      "state": "P1_IMPLEMENTED_UNACTIVATED_PENDING_INDEPENDENT_REVIEW",
+      "role": "P1 implementation artifact",
+      "origin": "workspace-github-actions-selfhosted-control-plane-v1",
+      "persistence": "git",
+      "regeneration": "reviewed update only",
+      "review_requirement": "independent implementation review",
+      "evidence": [
+        "blob 4b5ec97754c83e4b01103dea9c2f84112b3d6110",
+        "code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45"
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-project-registry.v1.json",
+      "state": "P1_IMPLEMENTED_UNACTIVATED_PENDING_INDEPENDENT_REVIEW",
+      "role": "P1 implementation artifact",
+      "origin": "workspace-github-actions-selfhosted-control-plane-v1",
+      "persistence": "git",
+      "regeneration": "reviewed update only",
+      "review_requirement": "independent implementation review",
+      "evidence": [
+        "blob fa03fb62580b23fc62248909db479e3ec533c968",
+        "code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45"
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-execution-contracts.v1.json",
+      "state": "P1_IMPLEMENTED_UNACTIVATED_PENDING_INDEPENDENT_REVIEW",
+      "role": "P1 implementation artifact",
+      "origin": "workspace-github-actions-selfhosted-control-plane-v1",
+      "persistence": "git",
+      "regeneration": "reviewed update only",
+      "review_requirement": "independent implementation review",
+      "evidence": [
+        "blob 39c5e61030b222e51cd9986542e19c7ab36e8afe",
+        "code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45"
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-workload-policy.v1.json",
+      "state": "P1_IMPLEMENTED_UNACTIVATED_PENDING_INDEPENDENT_REVIEW",
+      "role": "P1 implementation artifact",
+      "origin": "workspace-github-actions-selfhosted-control-plane-v1",
+      "persistence": "git",
+      "regeneration": "reviewed update only",
+      "review_requirement": "independent implementation review",
+      "evidence": [
+        "blob 4dbaea90546b3abbab44da1002f40fd434c2c82c",
+        "code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45"
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-systemd-profiles.v1.json",
+      "state": "P1_IMPLEMENTED_UNACTIVATED_PENDING_INDEPENDENT_REVIEW",
+      "role": "P1 implementation artifact",
+      "origin": "workspace-github-actions-selfhosted-control-plane-v1",
+      "persistence": "git",
+      "regeneration": "reviewed update only",
+      "review_requirement": "independent implementation review",
+      "evidence": [
+        "blob 6a9127079805fabb6247ece8668842cc61614eba",
+        "code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45"
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-reconciliation-ceiling.v1.json",
+      "state": "P1_IMPLEMENTED_UNACTIVATED_PENDING_INDEPENDENT_REVIEW",
+      "role": "P1 implementation artifact",
+      "origin": "workspace-github-actions-selfhosted-control-plane-v1",
+      "persistence": "git",
+      "regeneration": "reviewed update only",
+      "review_requirement": "independent implementation review",
+      "evidence": [
+        "blob 58d95c134463b969ce1ca9f8de2c8447a4c749c3",
+        "code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45"
       ]
     }
   ],
@@ -625,21 +783,30 @@
         "Fresh independent-review instructions are pinned in comment 6431125302.",
         "No review submission exists yet; P1 remains blocked."
       ]
+    },
+    {
+      "check": "Exact P1 implementation freeze and repository validation",
+      "result": "PASS",
+      "evidence": [
+        "PR #521 implementation checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45.",
+        "Workspace Control Validation run 40437708435 / job 121970360566 SUCCESS.",
+        "All validation steps succeeded: task contracts, unit regression, pinned Lambda controller, and full integration.",
+        "The implementation remains unactivated and P1 live mutation is blocked on a separate independent implementation review."
+      ]
     }
   ],
   "blockers": [
-    "P1 live activation remains blocked until the exact implementation PR passes repository/adversarial tests and receives the required independent implementation review."
+    "P1 live installation/activation is blocked pending independent implementation review of PR #521 code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45 and exact implementation blobs."
   ],
   "remaining_work": [
-    "Implement only the reviewed P1 tranche: admission-v2 assignment-divergence quarantine/recovery, bounded independently installed L0 maintenance path, and owner-commanded workspace-control JIT CPU validation pilot.",
-    "Preserve maxRunners=1 and manifest concurrency=1; do not implement resource-aware concurrency or raise capacity.",
-    "Add adversarial tests for incomplete JobAssigned restart recovery, quarantine/no-acquire behavior, exact stale-scale-set reset preconditions, replay/idempotency, typed maintenance verbs, derived targets, peer-UID/root validation, no arbitrary root command surface, and single-retry gating.",
-    "Validate workspace-control filesystem isolation, CPU/RAM/runtime envelope, no-GPU guarantee, deterministic receipts, rollback, and independent bootstrap availability.",
-    "Freeze the exact P1 implementation PR and obtain the separately required independent implementation review before any live workspace-control runner activation.",
-    "Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, resource-aware concurrency, hosted/bootstrap fallback removal, and temporary transport cleanup unauthorized."
+    "Obtain and durably consume an independent implementation review of PR #521, explicitly covering BF-1 stale-assignment/reset/retry semantics, BF-2 maintenance authority/non-circularity/receipts, workspace-control isolation/resource envelope, and all deferred P2/P3 boundaries.",
+    "If and only if the implementation review returns NO_BLOCKING_FINDING, perform bounded P1 installation/activation using the exact reviewed implementation and preserve a known-good bootstrap/rollback path.",
+    "Validate live P1 with owner-commanded same-repository PR-head execution, CPU/RAM/runtime envelope, no-GPU/forbidden-path isolation, deterministic receipts, stale-assignment recovery dry-run/contract proof, maintenance authorization, and rollback.",
+    "Do not raise maxRunners or manifest concurrency until separately reviewed resource-aware host arbitration is designed and validated.",
+    "Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, hosted/bootstrap fallback removal, and temporary transport cleanup unauthorized."
   ],
-  "next_safe_action": "Implement the bounded P1 tranche from the independently accepted v0.2 design: (1) change admission-v2 controller behavior so TotalAssignedJobs is non-authoritative for execution and unreconstructable assignment divergence enters durable fail-closed quarantine with no new AcquireJobs/JIT/root provision; (2) add the finite independently installed L0 maintenance path with typed DIAGNOSE_LANE, RESTART_CONTROLLER, QUIESCE_LANE_FOR_RECOVERY, RESUME_LANE_AFTER_RESET and exact stale-scale-set reset orchestration/receipts as frozen; (3) add the NOT_INSTALLED owner-commanded workspace-control JIT CPU validation workflow/profile scaffolding without live activation. Keep maxRunners=1/concurrency=1 and preserve all isolation/transport-vs-execution/P2/P3/rollback boundaries. Run repository/adversarial validation, freeze exact implementation identities, then obtain independent implementation review before any Lambda/live runner activation.",
+  "next_safe_action": "Perform a fresh independent P1 implementation review of workspace-control PR #521. The exact implementation code checkpoint is a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45, validated by Workspace Control Validation run 40437708435 / job 121970360566. Review the exact implementation blobs recorded in this capsule and verify: BF-1 TotalAssignedJobs non-authority, durable assignment quarantine, exact stale-scale-set reset, duplicate replacement suppression, fresh scale-set identity, reset-pending quarantine, two complete zero-state observations >=15 seconds apart, policy-digest stability, controller-authored READY receipt, single-job recovery-generation consumption/completion, and maxRunners=1; BF-2 independent L0 maintenance path, SO_PEERCRED and owner/repository/comment attestation, fixed policy generation, typed verbs/derived targets only, installed policy digests, replay-safe COMPLETED/FAILED_CLOSED root receipts with rollback, no arbitrary shell/path/unit/property/credential/policy surface, and no direct L0 access to controller/provisioner/reconciler state. Re-check workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND state, concurrency=1, 200% CPU / 4G-8G / 10min / GPU0 envelope, same-repository owner-only workflow, isolation, independent bootstrap, and P2/P3 deferral. Return and durably record NO_BLOCKING_FINDING or exact actionable blockers. Do not install or activate P1 in the review task.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created 2026-10-25/26 after exhausting the account's 2,000 included private-repository GitHub-hosted Actions minutes. This task separates immediate availability recovery from the permanent architecture. The permanent target is private repositories with GitHub used for source/events/control APIs and bounded Lambda self-hosted runners for routine execution. The bootstrap authority must remain independently recoverable and cannot depend on the dynamic fleet it authorizes.\n\n2026-10-25/26 design-review checkpoint: PR #508 opened from frozen design branch. GitHub REST accepted requests for copilot-pull-request-reviewer[bot] in draft and ready states, but requested-reviewer state remained empty and no Copilot review was present, so independent review remains unsatisfied. Read-only provisioner audit established current host-wide serialization through the global _active set at manifest concurrency=1. P3 org audit also found hard-coded runnerGroupID=1, repo-scoped GitHubConfigURL rendering, and PAT-oriented reconciled env; these remain separately reviewed P3 work.\n\n2026-10-26 emergency-unblock incident evidence: temporary public workspace-control restored hosted reconciliation while research-engine returned private. Exact-provenance validation exposed a 30-minute workflow/systemd timeout collision, stale scale-set assignment recovery under maxRunners=1, and unnecessary network-dependent package installation inside the implementation gate. The timeout was widened to 60 minutes, exact-provenance transport was temporarily moved to the healthy research-engine GPU listener while preserving cpu-public-ci-v1/cpu-test/GPU-count-0 execution, and the validation workflow was made network-free. Permanent architecture must eliminate recurring operator shell intervention and stale-assignment queue poisoning without weakening admission or review boundaries.\n\n2026-10-26 PR #508 validation recovery: after workspace-control became temporarily public, current design/task branch head fc3bbdaded02625f968b18d504caa3ce52d3bb18 completed Workspace Control Validation run 40267839458 successfully, including full integration contracts. This restores mechanical validation availability only; independent preimplementation review remains a separate unsatisfied authority gate.\n\n2026-10-26 P0 closure/handoff hydration: mandatory exact-provenance implementation validation run 40269453984 passed (job 121398888450, artifact 12626998979, 31/31 contracts). Exactly one authorized scientific run 40411159582 passed execution and produced artifact 12693836542; its scientific interpretation is owned by workspace-local-extract-independent-review-v1 and is out of scope here. The permanent control-plane task is therefore no longer blocked on EXTRACT execution. Current focus is independent review of PR #508, including runtime incident evidence in comments 6405597751 and 6408089808, before any live workspace-control self-hosted activation. workspace-control remains temporarily public and the exact-provenance validation route remains temporarily transported over the research-engine GPU listener with CPU-only execution authority; these are rollback/cleanup debt, not the target architecture.\n\n2026-10-26 handoff durability repair: PR #514 merged as workspace-control@fec659a6d75e44c56acc53b706290b248681b584, declaring the already-required exact-provenance post-result review stage in the EXTRACT owner capsule and synchronizing its Markdown handoff. This was a state-consistency repair only and removes an unrelated task-validation blocker from future control-plane PRs.\n\n2026-10-26 independent preimplementation review: exact frozen v0.1 architecture f70f100ba57140469ff656255de00f7de262dbc3 and NOT_INSTALLED workspace-control manifest efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 were reviewed against PR #508 head c69f6632c6274312f6fb0449d9f4d7789319fd7c, successful validation run 40423934526, and mandatory runtime-evidence comments 6405597751 and 6408089808. Disposition is BLOCKING FINDINGS: BF-1 requires authoritative stale-assignment recovery semantics before P1 activation; BF-2 requires a frozen bounded privileged maintenance/recovery authority model before P1 activation. PR review 5661002925 records the detailed findings. GitHub prevented REQUEST_CHANGES because the connected account owns the PR, so the review was submitted as COMMENT; the authoritative task capsule/handoff carry the disposition. Host-wide serialization may remain temporarily for P1 and is not itself a pre-P1 blocker; maxRunners must not be raised without separately reviewed resource-aware arbitration. Heartbeat was retried during this review but the connector tunnel returned HTTP 403; GitHub durable state remained authoritative and no replacement task ID/state was invented.\n\n2026-10-26 v0.2 design start: bounded revision branch github-actions-selfhosted-control-plane-v02 created from authoritative main 0988e651ee43189a84903d67eb01654fb339769f. Mutation scope now explicitly includes architecture/github-actions-selfhosted-control-plane.v0.2.json. The v0.1 NOT_INSTALLED workspace-control manifest remains unchanged because the independent review found its isolation scaffold acceptable; BF-1 and BF-2 are architecture/controller/recovery-authority blockers rather than manifest-identity blockers.\n\n2026-10-26 bounded v0.2 freeze: architecture/github-actions-selfhosted-control-plane.v0.2.json frozen as blob 2866f7d76aed0d5792b86ea175e9492c90115f50. It resolves BF-1 at design level by making TotalAssignedJobs non-authoritative for admission-v2 execution, quarantining unreconstructable assigned-job divergence, and defining exact stale scale-set delete/recreate recovery with root quiescence and two zero-state observations before READY_FOR_SINGLE_RETRY. It resolves BF-2 at design level with an independently installed L0 maintenance controller/root typed protocol limited to DIAGNOSE_LANE, RESTART_CONTROLLER, QUIESCE_LANE_FOR_RECOVERY, and RESUME_LANE_AFTER_RESET; arbitrary root command/path/unit/property/credential surfaces are forbidden. The exact workspace-control manifest blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 is intentionally unchanged/reused because v0.1 review found its isolation scaffold non-blocking. No live activation occurred. Fresh independent review is now required before P1 implementation.\n\n2026-10-26 v0.2 review surface: PR #517 opened at immutable review head b7e8a0199e2ccd79f8787e9f95faa28365d3b216. Workspace Control Validation run 40430274261 passed. Fresh independent-review instructions are pinned as comment 6431125302. A Copilot reviewer request returned no requested reviewer and no review, so it is not counted; the design-authoring chat also does not self-approve its own design. P1 remains blocked pending a genuinely independent disposition.\n\n2026-10-26/27 fresh independent v0.2 review accepted: PR #517 review 5661233375 submitted against immutable head b7e8a0199e2ccd79f8787e9f95faa28365d3b216 returned NO_BLOCKING_FINDING for exact architecture blob 2866f7d76aed0d5792b86ea175e9492c90115f50 plus unchanged manifest blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588. Reviewer consumed prior blockers/runtime evidence and independently verified run 40430274261 SUCCESS. Because PR #517 became stale relative to main after unrelated durable task-state work, the exact reviewed architecture blob is transplanted byte-for-byte onto current main through a fresh integration branch rather than merging stale task/handoff commits. P1 implementation authority is now open, but live activation remains blocked on exact implementation validation and independent implementation review.\n\n2026-10-27 P1 implementation dependency clarification: the accepted v0.2 design requires a bounded control-small CPU/RAM/runtime envelope. The existing generic provisioner derives runtime ceilings through architecture/lambda-ci-workload-policy.v1.json and validates execution-profile vocabulary through the execution-contract schema/runtime. The P1 implementation scope therefore explicitly adds the shared workload-policy file and its relevant schemas. This does not widen P1 authority: the only new resource class/profile is CPU-only control-small (200% CPU, 4G MemoryHigh, 8G MemoryMax, 10min, GPU count 0), and all changes remain unactivated pending implementation review.\n\n2026-10-27 P1 host-boundary dependency clarification: durable controller quarantine and the new L0 maintenance services require reviewed systemd tmpfiles/sysusers declarations so state/socket identities exist without ad-hoc sudo directory/user creation. Mutation scope now explicitly includes systemd/workspace-ci-tmpfiles.conf and systemd/workspace-ci-sysusers.conf. These files define only the P1 maintenance identity/state boundaries and do not activate services.\n\n2026-10-27 P1 implementation checkpoint before draft validation: branch gitrunner-p1-implementation now contains fail-closed Admission-v2 assignment-divergence quarantine, durable per-lane controller state, bounded control-small policy/profile/contract, NOT_INSTALLED workspace-control CPU-only pilot workflow/manifest/registry scaffolding, a typed root maintenance service, an outbound-only owner-commanded L0 maintenance controller, exact configured-scale-set inspect/delete helper, systemd identity/state boundaries, and adversarial/cross-file tests. No live Lambda/systemd/registry activation has occurred. The branch is ready for draft repository validation; failures will be treated as implementation feedback, not activation authority.\n\n2026-10-27 draft-validation feedback: PR #521 run 40435316073 failed at unit regression due expected exact fixture/pin drift after adding the planned workspace-control manifest and changing controller/reconciler/reconciliation-workflow blobs. The ACTIVE reconciliation ceiling must pin the new exact trusted workflow blob, so architecture/lambda-ci-reconciliation-ceiling.v1.json is explicitly added to P1 mutation scope. Historical Run-3 install/hotfix manifests remain historical and will not be silently rewritten; their tests are being corrected to distinguish frozen historical blobs from intentional later P1 source evolution.\n\n2026-10-27 PR #521 draft validation #1: Workspace Control Validation run 40435316073 failed only in unit regression. Failures were classified as (a) one new parser-test expectation bug for multiline input, and (b) exact fixture/provenance drift caused by adding the planned workspace-control manifest and changing reviewed controller/reconciler/reconciliation-workflow sources. Corrections preserve security semantics: multiline input remains ignored; fixtures now carry every registry manifest; the ACTIVE reconciliation ceiling pins the new trusted workflow; historical Run-3 install/hotfix manifests remain unchanged and their tests explicitly recognize later P1 source evolution."
+  "notes": "Created 2026-10-25/26 after exhausting the account's 2,000 included private-repository GitHub-hosted Actions minutes. This task separates immediate availability recovery from the permanent architecture. The permanent target is private repositories with GitHub used for source/events/control APIs and bounded Lambda self-hosted runners for routine execution. The bootstrap authority must remain independently recoverable and cannot depend on the dynamic fleet it authorizes.\n\n2026-10-25/26 design-review checkpoint: PR #508 opened from frozen design branch. GitHub REST accepted requests for copilot-pull-request-reviewer[bot] in draft and ready states, but requested-reviewer state remained empty and no Copilot review was present, so independent review remains unsatisfied. Read-only provisioner audit established current host-wide serialization through the global _active set at manifest concurrency=1. P3 org audit also found hard-coded runnerGroupID=1, repo-scoped GitHubConfigURL rendering, and PAT-oriented reconciled env; these remain separately reviewed P3 work.\n\n2026-10-26 emergency-unblock incident evidence: temporary public workspace-control restored hosted reconciliation while research-engine returned private. Exact-provenance validation exposed a 30-minute workflow/systemd timeout collision, stale scale-set assignment recovery under maxRunners=1, and unnecessary network-dependent package installation inside the implementation gate. The timeout was widened to 60 minutes, exact-provenance transport was temporarily moved to the healthy research-engine GPU listener while preserving cpu-public-ci-v1/cpu-test/GPU-count-0 execution, and the validation workflow was made network-free. Permanent architecture must eliminate recurring operator shell intervention and stale-assignment queue poisoning without weakening admission or review boundaries.\n\n2026-10-26 PR #508 validation recovery: after workspace-control became temporarily public, current design/task branch head fc3bbdaded02625f968b18d504caa3ce52d3bb18 completed Workspace Control Validation run 40267839458 successfully, including full integration contracts. This restores mechanical validation availability only; independent preimplementation review remains a separate unsatisfied authority gate.\n\n2026-10-26 P0 closure/handoff hydration: mandatory exact-provenance implementation validation run 40269453984 passed (job 121398888450, artifact 12626998979, 31/31 contracts). Exactly one authorized scientific run 40411159582 passed execution and produced artifact 12693836542; its scientific interpretation is owned by workspace-local-extract-independent-review-v1 and is out of scope here. The permanent control-plane task is therefore no longer blocked on EXTRACT execution. Current focus is independent review of PR #508, including runtime incident evidence in comments 6405597751 and 6408089808, before any live workspace-control self-hosted activation. workspace-control remains temporarily public and the exact-provenance validation route remains temporarily transported over the research-engine GPU listener with CPU-only execution authority; these are rollback/cleanup debt, not the target architecture.\n\n2026-10-26 handoff durability repair: PR #514 merged as workspace-control@fec659a6d75e44c56acc53b706290b248681b584, declaring the already-required exact-provenance post-result review stage in the EXTRACT owner capsule and synchronizing its Markdown handoff. This was a state-consistency repair only and removes an unrelated task-validation blocker from future control-plane PRs.\n\n2026-10-26 independent preimplementation review: exact frozen v0.1 architecture f70f100ba57140469ff656255de00f7de262dbc3 and NOT_INSTALLED workspace-control manifest efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 were reviewed against PR #508 head c69f6632c6274312f6fb0449d9f4d7789319fd7c, successful validation run 40423934526, and mandatory runtime-evidence comments 6405597751 and 6408089808. Disposition is BLOCKING FINDINGS: BF-1 requires authoritative stale-assignment recovery semantics before P1 activation; BF-2 requires a frozen bounded privileged maintenance/recovery authority model before P1 activation. PR review 5661002925 records the detailed findings. GitHub prevented REQUEST_CHANGES because the connected account owns the PR, so the review was submitted as COMMENT; the authoritative task capsule/handoff carry the disposition. Host-wide serialization may remain temporarily for P1 and is not itself a pre-P1 blocker; maxRunners must not be raised without separately reviewed resource-aware arbitration. Heartbeat was retried during this review but the connector tunnel returned HTTP 403; GitHub durable state remained authoritative and no replacement task ID/state was invented.\n\n2026-10-26 v0.2 design start: bounded revision branch github-actions-selfhosted-control-plane-v02 created from authoritative main 0988e651ee43189a84903d67eb01654fb339769f. Mutation scope now explicitly includes architecture/github-actions-selfhosted-control-plane.v0.2.json. The v0.1 NOT_INSTALLED workspace-control manifest remains unchanged because the independent review found its isolation scaffold acceptable; BF-1 and BF-2 are architecture/controller/recovery-authority blockers rather than manifest-identity blockers.\n\n2026-10-26 bounded v0.2 freeze: architecture/github-actions-selfhosted-control-plane.v0.2.json frozen as blob 2866f7d76aed0d5792b86ea175e9492c90115f50. It resolves BF-1 at design level by making TotalAssignedJobs non-authoritative for admission-v2 execution, quarantining unreconstructable assigned-job divergence, and defining exact stale scale-set delete/recreate recovery with root quiescence and two zero-state observations before READY_FOR_SINGLE_RETRY. It resolves BF-2 at design level with an independently installed L0 maintenance controller/root typed protocol limited to DIAGNOSE_LANE, RESTART_CONTROLLER, QUIESCE_LANE_FOR_RECOVERY, and RESUME_LANE_AFTER_RESET; arbitrary root command/path/unit/property/credential surfaces are forbidden. The exact workspace-control manifest blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 is intentionally unchanged/reused because v0.1 review found its isolation scaffold non-blocking. No live activation occurred. Fresh independent review is now required before P1 implementation.\n\n2026-10-26 v0.2 review surface: PR #517 opened at immutable review head b7e8a0199e2ccd79f8787e9f95faa28365d3b216. Workspace Control Validation run 40430274261 passed. Fresh independent-review instructions are pinned as comment 6431125302. A Copilot reviewer request returned no requested reviewer and no review, so it is not counted; the design-authoring chat also does not self-approve its own design. P1 remains blocked pending a genuinely independent disposition.\n\n2026-10-26/27 fresh independent v0.2 review accepted: PR #517 review 5661233375 submitted against immutable head b7e8a0199e2ccd79f8787e9f95faa28365d3b216 returned NO_BLOCKING_FINDING for exact architecture blob 2866f7d76aed0d5792b86ea175e9492c90115f50 plus unchanged manifest blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588. Reviewer consumed prior blockers/runtime evidence and independently verified run 40430274261 SUCCESS. Because PR #517 became stale relative to main after unrelated durable task-state work, the exact reviewed architecture blob is transplanted byte-for-byte onto current main through a fresh integration branch rather than merging stale task/handoff commits. P1 implementation authority is now open, but live activation remains blocked on exact implementation validation and independent implementation review.\n\n2026-10-27 P1 implementation dependency clarification: the accepted v0.2 design requires a bounded control-small CPU/RAM/runtime envelope. The existing generic provisioner derives runtime ceilings through architecture/lambda-ci-workload-policy.v1.json and validates execution-profile vocabulary through the execution-contract schema/runtime. The P1 implementation scope therefore explicitly adds the shared workload-policy file and its relevant schemas. This does not widen P1 authority: the only new resource class/profile is CPU-only control-small (200% CPU, 4G MemoryHigh, 8G MemoryMax, 10min, GPU count 0), and all changes remain unactivated pending implementation review.\n\n2026-10-27 P1 host-boundary dependency clarification: durable controller quarantine and the new L0 maintenance services require reviewed systemd tmpfiles/sysusers declarations so state/socket identities exist without ad-hoc sudo directory/user creation. Mutation scope now explicitly includes systemd/workspace-ci-tmpfiles.conf and systemd/workspace-ci-sysusers.conf. These files define only the P1 maintenance identity/state boundaries and do not activate services.\n\n2026-10-27 P1 implementation checkpoint before draft validation: branch gitrunner-p1-implementation now contains fail-closed Admission-v2 assignment-divergence quarantine, durable per-lane controller state, bounded control-small policy/profile/contract, NOT_INSTALLED workspace-control CPU-only pilot workflow/manifest/registry scaffolding, a typed root maintenance service, an outbound-only owner-commanded L0 maintenance controller, exact configured-scale-set inspect/delete helper, systemd identity/state boundaries, and adversarial/cross-file tests. No live Lambda/systemd/registry activation has occurred. The branch is ready for draft repository validation; failures will be treated as implementation feedback, not activation authority.\n\n2026-10-27 draft-validation feedback: PR #521 run 40435316073 failed at unit regression due expected exact fixture/pin drift after adding the planned workspace-control manifest and changing controller/reconciler/reconciliation-workflow blobs. The ACTIVE reconciliation ceiling must pin the new exact trusted workflow blob, so architecture/lambda-ci-reconciliation-ceiling.v1.json is explicitly added to P1 mutation scope. Historical Run-3 install/hotfix manifests remain historical and will not be silently rewritten; their tests are being corrected to distinguish frozen historical blobs from intentional later P1 source evolution.\n\n2026-10-27 PR #521 draft validation #1: Workspace Control Validation run 40435316073 failed only in unit regression. Failures were classified as (a) one new parser-test expectation bug for multiline input, and (b) exact fixture/provenance drift caused by adding the planned workspace-control manifest and changing reviewed controller/reconciler/reconciliation-workflow sources. Corrections preserve security semantics: multiline input remains ignored; fixtures now carry every registry manifest; the ACTIVE reconciliation ceiling pins the new trusted workflow; historical Run-3 install/hotfix manifests remain unchanged and their tests explicitly recognize later P1 source evolution.\n\n2026-10-27 P1 IMPLEMENTATION FREEZE: exact implementation code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45 on PR #521 passed Workspace Control Validation run 40437708435 / job 121970360566 with task-contract, Python regression, pinned Go controller, and full integration PASS. Exact key implementation blobs are frozen in artifacts/validation. BF-1 implementation now treats TotalAssignedJobs as non-authoritative, persists assignment and reset-pending quarantine, performs exact stale scale-set delete/recreate only after local/GitHub quiescence and duplicate-run suppression, requires a fresh scale-set ID plus two complete zero-state observations >=15 seconds apart with stable installed policy digests, requires a controller-authored READY_FOR_SINGLE_RETRY receipt, then durably binds exactly one acquired retry job through terminal completion. BF-2 implementation uses a separate outbound-only ci-maintenance L0 controller and bounded root Unix-socket daemon with exact source attestation, SO_PEERCRED, finite typed verbs, installed-policy-derived targets/digests, replay-safe COMPLETED/FAILED_CLOSED receipts and rollback, no arbitrary root command surface, and no direct L0 access to controller/provisioner/reconciler state. workspace-control remains MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND, maxRunners=1, concurrency=1, control-small CPU-only 200%/4G-8G/10min/GPU0. No live activation occurred. Independent implementation review is now the sole pre-activation authority gate."
 }
