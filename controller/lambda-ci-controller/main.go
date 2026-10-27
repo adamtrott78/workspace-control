@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"os"
@@ -93,6 +94,25 @@ type provisionStatusResponse struct {
 	AdmissionID   string `json:"admission_id,omitempty"`
 	ErrorType     string `json:"error_type,omitempty"`
 	Error         string `json:"error,omitempty"`
+}
+
+type scaleSetMaintenanceRequest struct {
+	SchemaVersion      int    `json:"schema_version"`
+	Operation          string `json:"operation"`
+	ExpectedScaleSetID int    `json:"expected_scale_set_id"`
+}
+
+type scaleSetMaintenanceResponse struct {
+	SchemaVersion int                            `json:"schema_version"`
+	Status        string                         `json:"status"`
+	ScaleSetID    int                            `json:"scale_set_id,omitempty"`
+	ScaleSetName  string                         `json:"scale_set_name,omitempty"`
+	Statistics    *scaleset.RunnerScaleSetStatistic `json:"statistics,omitempty"`
+}
+
+type scaleSetMaintenanceClient interface {
+	GetRunnerScaleSet(context.Context, int, string) (*scaleset.RunnerScaleSet, error)
+	DeleteRunnerScaleSet(context.Context, int) error
 }
 
 type runnerJITClient interface {
@@ -331,6 +351,101 @@ func ensureScaleSet(ctx context.Context, client *scaleset.Client, cfg config) (*
 		return nil, fmt.Errorf("create runner scale set: %w", err)
 	}
 	return created, nil
+}
+
+func executeScaleSetMaintenance(
+	ctx context.Context,
+	client scaleSetMaintenanceClient,
+	cfg config,
+	request scaleSetMaintenanceRequest,
+) (scaleSetMaintenanceResponse, error) {
+	if request.SchemaVersion != 1 {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("scale-set maintenance schema_version must be 1")
+	}
+	if request.Operation != "INSPECT" && request.Operation != "DELETE" {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("scale-set maintenance operation is unsupported")
+	}
+	if request.ExpectedScaleSetID < 0 {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("expected scale-set id is invalid")
+	}
+	const runnerGroupID = 1
+	current, err := client.GetRunnerScaleSet(ctx, runnerGroupID, cfg.ScaleSetName)
+	if err != nil {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("inspect configured scale set: %w", err)
+	}
+	if current == nil {
+		if request.Operation == "INSPECT" && request.ExpectedScaleSetID == 0 {
+			return scaleSetMaintenanceResponse{
+				SchemaVersion: 1,
+				Status:        "MISSING",
+				ScaleSetName:  cfg.ScaleSetName,
+			}, nil
+		}
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("configured scale set is missing")
+	}
+	if request.ExpectedScaleSetID > 0 && current.ID != request.ExpectedScaleSetID {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf(
+			"scale-set id mismatch: got %d want %d",
+			current.ID,
+			request.ExpectedScaleSetID,
+		)
+	}
+	response := scaleSetMaintenanceResponse{
+		SchemaVersion: 1,
+		Status:        "PRESENT",
+		ScaleSetID:    current.ID,
+		ScaleSetName:  current.Name,
+		Statistics:    current.Statistics,
+	}
+	if request.Operation == "INSPECT" {
+		return response, nil
+	}
+	if request.ExpectedScaleSetID <= 0 {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("DELETE requires exact expected scale-set id")
+	}
+	if current.Statistics == nil {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("scale-set statistics unavailable; refusing delete")
+	}
+	if current.Statistics.TotalRegisteredRunners != 0 ||
+		current.Statistics.TotalBusyRunners != 0 ||
+		current.Statistics.TotalRunningJobs != 0 {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf(
+			"scale set is not quiescent: registered=%d busy=%d running=%d",
+			current.Statistics.TotalRegisteredRunners,
+			current.Statistics.TotalBusyRunners,
+			current.Statistics.TotalRunningJobs,
+		)
+	}
+	if err := client.DeleteRunnerScaleSet(ctx, current.ID); err != nil {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("delete exact configured scale set: %w", err)
+	}
+	response.Status = "DELETED"
+	return response, nil
+}
+
+func runScaleSetMaintenance(ctx context.Context, cfg config) error {
+	client, err := newScaleSetClient(cfg)
+	if err != nil {
+		return err
+	}
+	decoder := json.NewDecoder(os.Stdin)
+	var request scaleSetMaintenanceRequest
+	if err := decoder.Decode(&request); err != nil {
+		return fmt.Errorf("decode scale-set maintenance request: %w", err)
+	}
+	var extra any
+	if err := decoder.Decode(&extra); err != io.EOF {
+		if err == nil {
+			return fmt.Errorf("scale-set maintenance accepts exactly one JSON object")
+		}
+		return fmt.Errorf("decode trailing scale-set maintenance input: %w", err)
+	}
+	response, err := executeScaleSetMaintenance(ctx, client, cfg, request)
+	if err != nil {
+		return err
+	}
+	encoder := json.NewEncoder(os.Stdout)
+	return encoder.Encode(response)
 }
 
 func randomID() (string, error) {
@@ -1199,10 +1314,18 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
+	if len(os.Args) == 2 && os.Args[1] == "--scale-set-maintenance" {
+		if err := runScaleSetMaintenance(ctx, cfg); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	if err := runController(ctx, cfg, logger); err != nil {
 		logger.Error("controller exited", slog.String("error", err.Error()))
 		os.Exit(1)
