@@ -119,7 +119,16 @@ def attest_source(expected_head: str, invoker: str) -> pathlib.Path:
 
 
 def service_snapshot(service: str) -> dict[str, str]:
-    props = ["LoadState", "ActiveState", "SubState", "UnitFileState", "NRestarts", "ExecMainStatus"]
+    props = [
+        "LoadState",
+        "ActiveState",
+        "SubState",
+        "UnitFileState",
+        "NRestarts",
+        "ExecMainStatus",
+        "MainPID",
+        "InvocationID",
+    ]
     out = run(["systemctl", "show", service, *[f"--property={p}" for p in props]]).stdout
     value: dict[str, str] = {}
     for line in out.splitlines():
@@ -138,6 +147,9 @@ def require_service_running(service: str) -> dict[str, str]:
         or snap["ActiveState"] != "active"
         or snap["SubState"] != "running"
         or snap["ExecMainStatus"] != "0"
+        or not snap["MainPID"].isdigit()
+        or int(snap["MainPID"]) <= 0
+        or not snap["InvocationID"]
     ):
         raise HotfixError(f"required service is not healthy: {service}: {snap}")
     return snap
@@ -154,7 +166,7 @@ def require_controller_baseline() -> dict[str, dict[str, str]]:
         "NRestarts": "12411",
         "ExecMainStatus": "1",
     }
-    if cpu != expected_cpu:
+    if any(cpu[key] != value for key, value in expected_cpu.items()):
         raise HotfixError(f"research-engine CPU preservation mismatch: {cpu}")
     observed[RESEARCH_CPU] = cpu
 
@@ -168,10 +180,34 @@ def require_controller_baseline() -> dict[str, dict[str, str]]:
             "NRestarts": "0",
             "ExecMainStatus": "0",
         }
-        if snap != expected:
+        if any(snap[key] != value for key, value in expected.items()):
             raise HotfixError(f"healthy controller baseline mismatch: {service}: {snap}")
         observed[service] = snap
     return observed
+
+
+def require_controller_dependency_graph() -> list[str]:
+    proc = run(
+        ["systemctl", "show", CONTROLLER_SERVICE, "--property=Requires", "--value"]
+    )
+    requires = sorted(value for value in proc.stdout.split() if value)
+    if ROOT_SERVICE not in requires:
+        raise HotfixError(
+            "maintenance controller dependency graph does not require root service: "
+            + ",".join(requires)
+        )
+    return requires
+
+
+def restart_root_without_dependency_propagation() -> None:
+    run(
+        [
+            "systemctl",
+            "--job-mode=ignore-dependencies",
+            "restart",
+            ROOT_SERVICE,
+        ]
+    )
 
 
 def require_candidate_dormant() -> dict[str, str]:
@@ -311,6 +347,7 @@ def main() -> int:
 
     root_before = require_service_running(ROOT_SERVICE)
     controller_before = require_service_running(CONTROLLER_SERVICE)
+    controller_requires = require_controller_dependency_graph()
     controllers_before = require_controller_baseline()
     candidate_before = require_candidate_dormant()
     receipt_hash, cursor_hash = require_failed_receipt_and_cursor()
@@ -321,13 +358,19 @@ def main() -> int:
     try:
         atomic_write(INSTALLED_SERVICE, source_bytes, old_mode)
         replaced = True
-        run(["systemctl", "restart", ROOT_SERVICE])
+        restart_root_without_dependency_propagation()
         wait_socket()
 
         if sha256_path(INSTALLED_SERVICE) != source_sha:
             raise HotfixError("installed hotfix digest mismatch")
         root_after = require_service_running(ROOT_SERVICE)
         controller_after = require_service_running(CONTROLLER_SERVICE)
+        if controller_after["InvocationID"] != controller_before["InvocationID"]:
+            raise HotfixError("maintenance controller invocation changed during hotfix")
+        if controller_after["MainPID"] != controller_before["MainPID"]:
+            raise HotfixError("maintenance controller MainPID changed during hotfix")
+        if require_controller_dependency_graph() != controller_requires:
+            raise HotfixError("maintenance controller dependency graph changed during hotfix")
         controllers_after = require_controller_baseline()
         candidate_after = require_candidate_dormant()
         receipt_hash_after, cursor_hash_after = require_failed_receipt_and_cursor()
@@ -347,7 +390,15 @@ def main() -> int:
             "installed_sha256": sha256_path(INSTALLED_SERVICE),
             "mutation": {
                 "file": str(INSTALLED_SERVICE),
-                "systemctl": ["systemctl", "restart", ROOT_SERVICE],
+                "systemctl": [
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    ROOT_SERVICE,
+                ],
+                "controller_invocation_preserved": True,
+                "controller_invocation_id": controller_after["InvocationID"],
+                "controller_main_pid": controller_after["MainPID"],
             },
             "root_before": root_before,
             "root_after": root_after,
@@ -366,12 +417,22 @@ def main() -> int:
             print("P1_PREACTIVATION_DIAGNOSE_HOTFIX_ROLLBACK=BEGIN")
             try:
                 atomic_write(INSTALLED_SERVICE, old_bytes, old_mode)
-                run(["systemctl", "restart", ROOT_SERVICE])
+                restart_root_without_dependency_propagation()
                 wait_socket()
                 if sha256_path(INSTALLED_SERVICE) != EXPECTED_OLD_SERVICE_SHA256:
                     raise HotfixError("rollback digest mismatch")
                 require_service_running(ROOT_SERVICE)
-                require_service_running(CONTROLLER_SERVICE)
+                controller_rollback = require_service_running(CONTROLLER_SERVICE)
+                if controller_rollback["InvocationID"] != controller_before["InvocationID"]:
+                    raise HotfixError(
+                        "rollback changed maintenance controller invocation"
+                    )
+                if controller_rollback["MainPID"] != controller_before["MainPID"]:
+                    raise HotfixError("rollback changed maintenance controller MainPID")
+                if require_controller_dependency_graph() != controller_requires:
+                    raise HotfixError(
+                        "rollback changed maintenance controller dependency graph"
+                    )
                 if require_controller_baseline() != controllers_before:
                     raise HotfixError("rollback changed project controller state")
                 if require_candidate_dormant() != candidate_before:
