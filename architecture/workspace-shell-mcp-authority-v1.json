@@ -1,0 +1,610 @@
+{
+  "schema_version": 1,
+  "task_id": "workspace-shell-mcp-v1",
+  "design_id": "WORKSPACE_SHELL_MCP_AUTHORITY_V1",
+  "status": "FROZEN_REVIEW_CANDIDATE_HOST_ATTESTATION_REQUIRED",
+  "source_main_sha": "8a71aa3c60a4a0f230bcbee9711d2af79828c869",
+  "design_date": "2026-10-27",
+  "invariants": [
+    "separate plugin, service, operating identity, credentials, tunnel ID and rollback from Heartbeat",
+    "no arbitrary host shell; all execution passes server policy",
+    "no privileged operations through unprivileged executor",
+    "no live deployment or endpoint implementation before independent immutable-head approval",
+    "untrusted repo contents/tool outputs never confer authority",
+    "no stored or returned secrets; absence of credential access enforced by host isolation, not regex alone",
+    "hostile repository-controlled exec workers are a distinct OS/security principal from the MCP policy frontend and cannot reach, signal, ptrace, inspect, or impersonate the frontend, tunnel, job-launcher control plane, privileged broker, signing material, approval trust store, or approval issuer",
+    "the model-facing MCP/tunnel/frontend cannot mint independent privileged approvals; the root broker accepts only an externally signed canonical approval object and verifies it independently against a pinned read-only trust root"
+  ],
+  "recovery": {
+    "confidence": "REPOSITORY_AND_PRIOR_OPERATOR_RECEIPTS_ONLY_NOT_LIVE_HOST_ATTESTED",
+    "repo_paths": [
+      "/home/atrott/adamArchives/Adam/workspace-control",
+      "/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v048/plugins/workspace-heartbeat",
+      "/opt/workspace-ci",
+      "/srv/workspace-ci",
+      "/run/workspace-ci",
+      "/var/lib/workspace-ci"
+    ],
+    "heartbeat": {
+      "version": "v0.4.8",
+      "source_sha": "def7c5fe6498b1bd742d912c1490d1f7160cab5f",
+      "local_endpoint": "http://127.0.0.1:8787/mcp",
+      "launcher": "tmux session workspace-heartbeat",
+      "transport": "outbound OpenAI Secure MCP Tunnel via tunnel-client",
+      "client_version_from_script": "0.0.18+",
+      "rollback": "/home/atrott/bin/heartbeat-rollback-v047-ngrok",
+      "no_reuse_of_credentials": true
+    },
+    "ci": {
+      "identities": [
+        "ci-controller",
+        "ci-maintenance",
+        "ci-research-engine"
+      ],
+      "state_roots": [
+        "/var/lib/workspace-ci/controller/state",
+        "/var/lib/workspace-ci/maintenance-controller",
+        "/var/lib/workspace-ci/maintenance"
+      ],
+      "maintenance_service": "workspace-ci-maintenance.service",
+      "maintenance_controller": "workspace-ci-maintenance-controller.service",
+      "activation_state_from_task": "workspace-control cpu inactive; MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND",
+      "must_not_change": [
+        "research-engine cpu",
+        "sibling lanes",
+        "P2/P3"
+      ]
+    },
+    "live_recovery_required": [
+      "host identity and current process/users/group IDs",
+      "uid/gid, groups, ACLs, mounts, ownership for intended roots",
+      "actual Heartbeat PID/checkout/tunnel topology and tunnel-client compatibility",
+      "actual CI unit status, root helper APIs and rollout state",
+      "separate service port/socket and unoccupied runtime paths",
+      "SELinux/AppArmor/user namespaces/cgroup-BPF filesystem and network isolation availability",
+      "disposition of service credentials, SSH agent and network routes"
+    ]
+  },
+  "transport": {
+    "protocol": "MCP Streamable HTTP, loopback-only service behind separate outbound Secure MCP Tunnel",
+    "authentication": "separate private tunnel identity; dedicated restricted runtime credential stored root-readable by tunnel-only identity, not exec uid; ChatGPT app permissioned to owner/workspace; reject unknown callers",
+    "security": "authenticated tunnel does not alone authorize executions; per-call task policy and capability check; no public inbound listener; deny unauthenticated local socket users; do not reuse Heartbeat tunnel, key, app or process",
+    "request_limits": {
+      "max_envelope_bytes": 65536,
+      "max_inflight": 2,
+      "max_queued": 8,
+      "max_request_runtime_ms": 90000
+    },
+    "secrets": "tunnel credential never inherited by executor"
+  },
+  "tools": [
+    {
+      "name": "workspace_shell.inspect",
+      "purpose": "read-only structured, pre-approved host and repository observations",
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "task_id",
+          "target",
+          "operation"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{2,100}$"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "workspace-control",
+              "workspace-shell"
+            ]
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "git_head",
+              "git_status",
+              "git_diff_name_status",
+              "unit_state",
+              "unit_properties_redacted",
+              "runtime_inventory",
+              "receipt_status"
+            ]
+          },
+          "expected_sha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          }
+        }
+      }
+    },
+    {
+      "name": "workspace_shell.exec",
+      "purpose": "bounded unprivileged commands selected by typed profile, never an unrestricted executable/argv",
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "task_id",
+          "target",
+          "expected_sha",
+          "profile",
+          "argv",
+          "cwd",
+          "timeout_ms"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{2,100}$"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "workspace-control"
+            ]
+          },
+          "expected_sha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "profile": {
+            "type": "string",
+            "enum": [
+              "git-read",
+              "pytest-bounded",
+              "validation-bounded"
+            ]
+          },
+          "argv": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 512
+            }
+          },
+          "cwd": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "timeout_ms": {
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 90000
+          }
+        }
+      },
+      "notes": "Profile resolves pinned absolute executable and fully validated argv grammar; no shell -c, python -c, interpreters with arbitrary scripts, hooks, package installers, git config/aliases, or unreviewed binary paths. Any write-capable test/validation requires task-authorized scratch-only copy."
+    },
+    {
+      "name": "workspace_shell.run_reviewed_helper",
+      "purpose": "invoke one exact, separately reviewed root helper admitted by the root-owned helper registry; never arbitrary root argv",
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "task_id",
+          "target",
+          "expected_sha",
+          "helper_id",
+          "helper_sha256",
+          "nonce",
+          "parameters",
+          "approval"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{2,100}$"
+          },
+          "target": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{1,100}$"
+          },
+          "expected_sha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "helper_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{2,100}$"
+          },
+          "helper_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "nonce": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "approval": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "payload",
+              "signature"
+            ],
+            "properties": {
+              "payload": {
+                "type": "object"
+              },
+              "signature": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{80,128}$"
+              }
+            }
+          }
+        }
+      },
+      "notes": "Root helper registry supplies the helper-specific closed parameter schema, exact path/digest, target/task scope, declared side effects, pre/postconditions and rollback semantics. The generic MCP tool cannot nominate an executable, argv, environment, sudo flag or systemctl verb. Each new helper registry admission is a separately reviewed authority change. The approval bundle is a signed workspace-shell-approval.v1 object issued off-Lambda; the root broker independently parses and verifies it. The model-facing frontend cannot mint approvals."
+    },
+    {
+      "name": "workspace_shell.receipt",
+      "purpose": "fetch structured, redacted execution receipt by opaque receipt ID",
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "task_id",
+          "receipt_id"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "receipt_id": {
+            "type": "string",
+            "maxLength": 128
+          }
+        }
+      }
+    }
+  ],
+  "execution": {
+    "identity": "dedicated workspace-shell-exec system user, nonlogin, no supplemental groups; distinct from workspace-shell-mcp and workspace-shell-tunnel",
+    "host_isolation": [
+      "mount namespace and bind mounts for a single validated source checkout as read-only",
+      "isolated disposable scratch tmpfs, no operator home mount",
+      "not merely canonical-cwd checks: block absolute paths and symlink escapes through mount policy and descriptor-relative openat2 RESOLVE_BENEATH|RESOLVE_NO_MAGICLINKS",
+      "no proc host process env, no Docker socket, no SSH agent, no credential directories",
+      "PrivateDevices=yes; NoNewPrivileges=yes; CapabilityBoundingSet empty; RestrictSUIDSGID=yes; ProtectSystem=strict; ProtectHome=yes; syscall and process restrictions; no writable executable paths",
+      "no outbound connectivity for ordinary exec, including GitHub; a distinct non-exec broker fetches an exact reviewed SHA",
+      "no user-provided environment overrides or executable lookup PATH",
+      "different UID/GID and PID/proc namespace from workspace-shell-mcp/frontend; worker cannot ptrace, signal, inspect /proc, or access frontend file descriptors",
+      "no broker/job-launcher/tunnel/frontend control sockets or signing credentials are mounted into the worker namespace"
+    ],
+    "roots": {
+      "source": "verified isolated checkout for workspace-control, read only",
+      "scratch": "/var/lib/workspace-shell/jobs/<receipt-id> per execution, private, noexec where possible",
+      "runtime": "worker receives no /run/workspace-shell-control mount; only per-job private runtime paths required by the selected profile"
+    },
+    "env": {
+      "inherit": false,
+      "allow": [
+        "LANG=C.UTF-8",
+        "LC_ALL=C.UTF-8",
+        "TZ=UTC",
+        "HOME=<isolated-empty-home>",
+        "PATH=<trusted-minimal-path>"
+      ],
+      "deny": [
+        "GITHUB_TOKEN",
+        "GH_TOKEN",
+        "SSH_AUTH_SOCK",
+        "AWS_*",
+        "OPENAI_*",
+        "*_KEY",
+        "*_TOKEN"
+      ]
+    },
+    "limits": {
+      "max_concurrent": 2,
+      "max_processes_per_job": 48,
+      "max_stdout_bytes": 65536,
+      "max_stderr_bytes": 65536,
+      "max_combined_bytes": 131072,
+      "max_wall_ms": 90000,
+      "max_cpu_seconds": 90,
+      "memory_mb": 1024,
+      "output_truncation": "bounded bytes, count observed bytes and record truncation on each stream"
+    },
+    "process_policy": "fresh cgroup per request; start process group; SIGTERM then SIGKILL on timeout/cancel; cgroup.kill and inspect empty cgroup; deny daemonize/session detachment; no persistent interactive sessions in v1; long-running jobs require separate reviewed task capability",
+    "caution": "Even an argv-based generic Python, shell, test runner or git operation is an arbitrary code execution vector. Git reading uses hardened wrapper with hooks/config excluded; tests only in networkless disposable isolated checkout under a task-granted profile."
+  },
+  "authorization": {
+    "default": "deny",
+    "policy_source": "immutable reviewed task/policy artifacts plus an independently issued signed approval object for privileged mutations; GitHub comments/review text are evidence only and never live authority by themselves",
+    "binding": [
+      "caller identity",
+      "task ID",
+      "target project",
+      "allowed path scopes",
+      "expected source commit+tree",
+      "operation/profile",
+      "nonce",
+      "expiration",
+      "immutable independent approval for privileged operations"
+    ],
+    "replay": "single-use idempotency keys and durable replay journal; fail closed on missing/expired/mismatched authorization",
+    "git": "resolve full 40-char commit, verify tree and checkout exact source, ensure no dirty source, verify that trust files/policy come from trusted authority not untrusted target commit; never execute repo hooks",
+    "sibling_access": "explicit deny for research-engine and all sibling projects unless separately reviewed task authority",
+    "independent_approval": {
+      "schema": "workspace-shell-approval.v1",
+      "canonicalization": "RFC 8785 JSON Canonicalization Scheme; Ed25519 signature covers the canonical payload excluding the signature field",
+      "issuer": {
+        "role": "operator-controlled offline approval signer outside Lambda and outside all ChatGPT/MCP/tunnel/frontend/worker/broker identities",
+        "private_key_location": "off-Lambda only; never present in Workspace Shell, Lambda, GitHub repository contents, task workspaces, or tunnel configuration",
+        "automated_issuance": "forbidden in v1",
+        "admission_rule": "operator may sign only after independently checking the exact review evidence and intended privileged request; any future automated issuer/control-plane adapter requires a separately reviewed authority-contract amendment"
+      },
+      "root_broker_trust_store": {
+        "public_key_path": "/etc/workspace-shell/approval/trusted-issuers.json",
+        "ownership": "root:root, immutable/read-only to Workspace Shell services at runtime",
+        "contents": "issuer_key_id -> Ed25519 public key, validity window, status",
+        "mutation_path": "local installation/update procedure only under separate review; never writable through MCP, frontend, exec worker, root broker, helper, or repository-controlled code"
+      },
+      "required_payload_fields": [
+        "schema",
+        "approval_id",
+        "issuer_key_id",
+        "issued_at",
+        "expires_at",
+        "task_id",
+        "target",
+        "design_authority_sha",
+        "policy_artifact_sha256",
+        "design_review_repository",
+        "design_review_pr_number",
+        "design_reviewed_head_sha",
+        "design_review_record_id",
+        "design_review_disposition",
+        "helper_registry_version",
+        "helper_registry_sha256",
+        "helper_entry_sha256",
+        "helper_id",
+        "helper_sha256",
+        "helper_review_repository",
+        "helper_review_pr_number",
+        "helper_admission_head_sha",
+        "helper_reviewed_head_sha",
+        "helper_review_record_id",
+        "helper_review_disposition",
+        "expected_source_repository",
+        "expected_source_commit",
+        "expected_source_tree",
+        "operation",
+        "parameter_schema_sha256",
+        "parameter_digest_sha256",
+        "nonce",
+        "idempotency_key",
+        "max_uses"
+      ],
+      "semantics": {
+        "design_review_disposition": "must equal NO_BLOCKING_FINDING",
+        "design_binding": "design_reviewed_head_sha must exactly equal design_authority_sha and identify the immutable head independently accepted for this authority contract",
+        "helper_review_disposition": "must equal NO_BLOCKING_FINDING",
+        "helper_binding": "helper_reviewed_head_sha must exactly equal helper_admission_head_sha; the approved registry version/hash, helper entry hash, helper ID and helper binary digest must all come from that independently reviewed helper-admission head",
+        "parameter_binding": "parameter_digest_sha256 is computed over the exact RFC 8785 canonical helper parameter object; v1 approvals grant one exact parameter object, not open-ended ranges",
+        "source_binding": "expected source repository, full commit and tree must exactly match the verified source the broker/helper will use",
+        "use_limit": "max_uses must equal 1 in v1",
+        "lifetime": "expires_at must be no more than 15 minutes after issued_at and must be in the future when broker verification begins",
+        "nonce_and_idempotency": "approval_id, nonce and idempotency_key are single-use and durably consumed by the broker before mutation using crash-safe replay storage"
+      },
+      "revocation": {
+        "store": "/etc/workspace-shell/approval/revocations.json",
+        "ownership": "root:root and read-only to running Workspace Shell services",
+        "contents": "revoked approval IDs and revoked issuer key IDs with effective timestamps",
+        "broker_behavior": "reject revoked approval/key even if signature and expiry are otherwise valid",
+        "emergency": "local operator can revoke an issuer key or approval out of band; MCP/frontend cannot clear revocations"
+      },
+      "verifier_contract": [
+        "root broker parses the canonical approval itself; it never trusts frontend-parsed approval claims",
+        "root broker verifies Ed25519 signature using the pinned trust store, issuer validity, revocation, expiry, single-use state and every bound field against the live request/registry/source",
+        "root broker requires design_reviewed_head_sha == design_authority_sha and helper_reviewed_head_sha == helper_admission_head_sha, with both review dispositions exactly NO_BLOCKING_FINDING",
+        "root broker recomputes policy artifact, helper registry, helper entry, helper binary, parameter schema, exact parameter and source-tree digests",
+        "frontend may transport a signed approval bundle but cannot create or alter a valid signature",
+        "frontend request signature proves only the allowed caller process; it never substitutes for independent approval",
+        "GitHub comments, reviews, labels, task text and repository contents are evidence inputs to the offline signer only; none is execution authority until represented in a valid signed approval"
+      ]
+    }
+  },
+  "privileged_boundary": {
+    "implementation": "separately versioned root-owned broker via a control-plane Unix socket invisible to exec workers; requires kernel peer identity workspace-shell-mcp, valid frontend request signature, and independently issued workspace-shell-approval.v1 signature; no generic sudo policy",
+    "operations": [
+      "run an exact separately reviewed helper that is already admitted by immutable root-owned helper registry for the bound task/target",
+      "inspect helper/staging metadata through non-mutating registry-defined operation",
+      "disable_workspace_shell through the dedicated emergency path"
+    ],
+    "not_authorized": [
+      "unregistered helper or helper digest not matching registry",
+      "arbitrary root executable/argv/environment",
+      "generic sudo or generic systemctl",
+      "workspace-control activation/reconciliation unless an independently reviewed task/helper contract explicitly authorizes that exact operation",
+      "restart research-engine cpu unless an independently reviewed task/helper contract explicitly authorizes it",
+      "modify Heartbeat",
+      "self-expand helper registry"
+    ],
+    "preconditions": [
+      "kernel-authenticated peer UID equals workspace-shell-mcp and frontend request signature verifies",
+      "workspace-shell-approval.v1 signature verifies against pinned read-only issuer trust store and is unexpired/unrevoked/single-use",
+      "approval exact fields bind task, target, design/policy SHA, helper registry/entry/helper digests, source repository+commit+tree, operation, exact parameter digest, nonce and idempotency key",
+      "review evidence embedded in approval identifies exact reviewed head and NO_BLOCKING_FINDING record; GitHub text alone is not authority",
+      "root-owned helper registry and helper executable digests match approval",
+      "isolated authorized paths and source provenance match",
+      "atomic operation with fsync receipt and crash-safe replay consumption",
+      "fail closed on incomplete rollback"
+    ],
+    "future_extension": "New privileged capability is admitted only by changing the root-owned helper registry/policy under a separately reviewed exact Git head. Existing workspace-control owner-command maintenance authority is not implicitly transferred to Workspace Shell.",
+    "root_broker_runtime": [
+      "CapabilityBoundingSet is empty unless a separately reviewed helper mechanism proves a narrower necessary capability; helper execution authority is not derived from ambient shell access",
+      "ProtectSystem=strict and explicit read-only mounts for /etc/workspace-shell/approval and root-owned helper registry",
+      "no approval issuer private key exists on Lambda; only public verification keys are mounted",
+      "broker cannot modify trusted-issuer or revocation stores through its service namespace",
+      "broker socket exists only in the control-plane namespace and is absent from exec-worker mounts"
+    ]
+  },
+  "audit": {
+    "schema": "workspace-shell-receipt.v1",
+    "fields": [
+      "receipt_id",
+      "request_id",
+      "task_id",
+      "caller_id",
+      "tool_name",
+      "target",
+      "timestamp_utc",
+      "policy_version_sha",
+      "review_approval_sha",
+      "expected_git_sha",
+      "observed_git_sha",
+      "argv_profile",
+      "argv_hash",
+      "redacted_argv",
+      "cwd_policy_path",
+      "timeout_ms",
+      "started_at",
+      "finished_at",
+      "duration_ms",
+      "exit_code",
+      "signal",
+      "stdout_text_redacted",
+      "stderr_text_redacted",
+      "stdout_bytes_seen",
+      "stderr_bytes_seen",
+      "stdout_truncated",
+      "stderr_truncated",
+      "privileged",
+      "operation",
+      "helper_receipt_id",
+      "cgroup_cleanup_status",
+      "authorization_decision",
+      "approval_id",
+      "approval_issuer_key_id",
+      "approval_design_head_sha",
+      "approval_review_record_id",
+      "approval_expires_at",
+      "approval_signature_verified",
+      "approval_revocation_checked",
+      "approval_replay_state",
+      "frontend_peer_uid",
+      "frontend_request_signature_verified"
+    ],
+    "storage": "append-only root-owned audit store with restricted reader returning sanitized receipts; durable hash chain and log rotation",
+    "redaction": "reject suspect secret paths before execution, no raw /proc environ, scrub common secret output formats, no binary output; redaction is defense in depth and does not justify read access"
+  },
+  "rollback": {
+    "operator_local": "local root-controlled systemd stop/mask and revoke separate tunnel credential from Platform; kill service cgroup; preserve redacted receipts",
+    "out_of_band": true,
+    "dependencies": "must not require Workspace Shell/Heartbeat to disable itself",
+    "staging": "no live runtime mutation until review and distinct activation approval",
+    "verify": "service/tunnel disconnected, socket removed, no child processes"
+  },
+  "test_plan": [
+    "malicious argv separators/newlines/NUL and shell metacharacters",
+    "absolute and .. paths, symlink and openat2 race escapes",
+    "unauthorized sibling project mount access",
+    "home, SSH private key, token and /proc environ denial",
+    "environment inheritance and secret substitution",
+    "stdout/stderr flood, binary output and truncation counts",
+    "timeout/cancel nested children, setsid and orphan cleanup",
+    "mount/network namespace escape and privilege escalation",
+    "forged task ID/SHA/approval/nonce and replay",
+    "root helper wrong op/target, missing approval or digest mismatch",
+    "Git hooks/aliases/config injection, git alternate object paths",
+    "denied self-activation and self-disable bypass",
+    "operator emergency shutdown while MCP unavailable",
+    "normal exact-SHA read-only workspace-control inspection, bounded isolated validation, deterministic receipt",
+    "hostile worker cannot open job-launcher/root-broker/frontend/tunnel sockets",
+    "hostile worker cannot read frontend signing material, tunnel credential, approval trust/revocation store, or helper registry control files",
+    "hostile worker cannot ptrace/process_vm_readv/signal/read proc mem,environ,fd of workspace-shell-mcp/frontend",
+    "root broker rejects worker UID even with a copied request body",
+    "root broker rejects a valid frontend signature without independent approval and rejects valid approval without frontend identity/signature",
+    "frontend-generated/self-signed approval is rejected because issuer key is not in pinned trust store",
+    "approval wrong design head/helper registry/helper/source tree/operation/parameters/nonce/idempotency/expiry/revocation is rejected",
+    "replayed approval is rejected after crash-safe single-use consumption",
+    "GitHub NO_BLOCKING_FINDING text without an externally signed approval cannot authorize privileged execution"
+  ],
+  "gates": {
+    "host_attestation": "OPEN: historical operator evidence is not current host attestation",
+    "schema_validation": "OPEN; current PR validation failure is task-capsule schema only, not implementation",
+    "independent_review": "BLOCKED_FINDINGS_6447046381_CORRECTED_PENDING_FRESH_REVIEW",
+    "implementation": "BLOCKED",
+    "installation": "BLOCKED",
+    "activation": "BLOCKED"
+  },
+  "design_notes": [
+    "OpenAI Secure MCP Tunnel documentation rechecked 2026-10-27: outbound-only transport, 10 MiB serialized envelope, 600 requests/minute, 120 second absolute request deadline, 1000 queued requests.",
+    "Workspace Shell uses 90 second synchronous command ceiling to retain queue/transport margin inside that 120 second absolute budget.",
+    "Tool annotations are advisory only; server-side authorization and sandboxing remain mandatory.",
+    "BF-1 correction freezes a four-principal control plane: tunnel, MCP policy frontend, root-owned job launcher, and hostile exec worker, plus a separate root broker. Worker namespaces exclude every control/broker/tunnel socket and signing material; distinct UIDs/PID-proc isolation prevent ptrace/signal/proc attacks.",
+    "BF-2 correction freezes workspace-shell-approval.v1: an off-Lambda operator-controlled Ed25519 issuer, pinned root-owned public trust/revocation stores, exact design/helper/source/parameter/review bindings, <=15 minute lifetime, single use, and independent root-broker verification. Model-facing components cannot mint approval."
+  ],
+  "control_plane_separation": {
+    "invariant": "Repository-controlled code is hostile and never runs in the MCP policy/frontend principal.",
+    "principals": {
+      "tunnel": {
+        "identity": "workspace-shell-tunnel",
+        "role": "holds only the dedicated Secure MCP Tunnel runtime credential and forwards to the loopback MCP listener",
+        "repository_code_execution": "forbidden",
+        "broker_access": "forbidden"
+      },
+      "frontend": {
+        "identity": "workspace-shell-mcp",
+        "role": "MCP protocol, task/policy validation, profile resolution, audit orchestration, and privileged-request transport",
+        "repository_code_execution": "forbidden",
+        "supplemental_groups": "none except a dedicated broker-client group if the root broker socket requires it",
+        "frontend_request_signing_key": "systemd credential or equivalent secret readable only by workspace-shell-mcp; never mounted or inherited into any worker; separate from the independent approval issuer key"
+      },
+      "job_launcher": {
+        "identity": "root-owned workspace-shell-job-launcher",
+        "role": "fixed-protocol launcher that creates the sandbox/cgroup/namespaces and drops permanently to workspace-shell-exec before executing the already-resolved profile command",
+        "authority": "independently revalidates a root-owned immutable profile manifest, pinned executable and closed argv grammar; may only create the declared sandbox/cgroup/namespaces and drop permanently to workspace-shell-exec. It cannot accept arbitrary executable paths/environment, invoke the privileged helper registry, mutate system services, or read approval/signing secrets.",
+        "socket": "/run/workspace-shell-control/job-launcher.sock",
+        "client_identity": "workspace-shell-mcp only"
+      },
+      "exec_worker": {
+        "identity": "workspace-shell-exec",
+        "role": "runs arbitrary repository-controlled tests/validation inside the per-job sandbox",
+        "different_uid_from_frontend": true,
+        "different_uid_from_tunnel": true,
+        "supplemental_groups": "none",
+        "broker_access": "forbidden",
+        "launcher_access": "forbidden after spawn",
+        "tunnel_or_frontend_socket_access": "forbidden",
+        "signing_or_approval_material_access": "forbidden"
+      },
+      "privileged_broker": {
+        "identity": "root-owned workspace-shell-root-broker",
+        "role": "verifies frontend identity/signature plus independently issued approval, then invokes only a registered exact helper",
+        "socket": "/run/workspace-shell-control/root-broker.sock",
+        "required_peer_uid": "workspace-shell-mcp",
+        "worker_peer_uid": "always rejected"
+      }
+    },
+    "worker_namespace_requirements": [
+      "worker mount namespace excludes /run/workspace-shell-control entirely, including job-launcher, root-broker, frontend/tunnel control, health/admin, and signing sockets",
+      "worker network namespace has no egress and cannot reach loopback listeners in the host/frontend namespace",
+      "worker PID namespace and procfs expose only the job subtree; host/frontend/tunnel/broker PIDs and /proc/<pid>/{mem,environ,fd} are not visible",
+      "worker has no CAP_SYS_PTRACE, CAP_KILL, CAP_DAC_OVERRIDE, CAP_DAC_READ_SEARCH, CAP_SYS_ADMIN, or other capability permitting cross-principal inspection/control",
+      "kernel UID separation plus namespace/proc restrictions must make ptrace, process_vm_readv/writev, /proc memory/fd inspection, signals, and same-principal debugger attachment to workspace-shell-mcp impossible",
+      "worker environment and file mounts never contain frontend request-signing keys, tunnel credentials, approval objects not bound to that request, trusted approval public-key store, or helper-registry control files",
+      "frontend and tunnel services never execute files from task workspaces or worker scratch and never load repository-controlled plugins/config/hooks"
+    ],
+    "frontend_to_broker_authentication": {
+      "peer_auth": "SO_PEERCRED or equivalent kernel-authenticated peer identity must equal workspace-shell-mcp",
+      "request_auth": "frontend signs a canonical request envelope with its dedicated frontend request key; broker verifies a pinned public key",
+      "approval_auth": "separate independently issued approval object is mandatory for mutating privileged helpers; frontend signature is not approval",
+      "fail_closed": "any peer/signature/approval mismatch rejects before helper resolution or mutation"
+    },
+    "implementation_gate": "Host attestation must prove distinct UIDs, socket ACLs/namespaces, key mounts, proc/PID isolation and inability of a hostile worker to signal/ptrace/read frontend before live installation can be accepted."
+  }
+}

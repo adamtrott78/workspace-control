@@ -23,30 +23,28 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: a802c417ffcc0bea604263ad029ed1b17f94656a
+- Remote branch: workspace-shell-mcp-v1-design-freeze
+- Remote checkpoint: c28671e3e571cba298e8341bbce6999edc62bfd3
 - Remote verified: true
 
 ## Next safe action
 
-DEFERRED. Do nothing until the operator explicitly resumes workspace-shell-mcp-v1. On resume, start with read-only recovery of the current Lambda and private-MCP transport topology and freeze a threat model/tool-authority design before implementing any command-execution endpoint.
+After this state-only synchronization passes validation, record a fresh immutable-head independent re-review request on PR #550 that consumes blocking review 6447046381 and cites corrected design checkpoint c28671e3e571cba298e8341bbce6999edc62bfd3 / validation run #990. Do not implement, merge, install, provision tunnel/key, create job-launcher/root-broker/helper authority, execute Lambda commands, modify Heartbeat, or mutate project controllers.
 
 ## Remaining work
 
-- When resumed, recover the exact current Lambda/Heartbeat/Secure-MCP transport state without mutating it.
-- Research the current supported private MCP connection path and freeze the Workspace Shell tool schema, authentication model, filesystem policy, process model, output limits, audit/receipt contract, and emergency disable path.
-- Design the unprivileged execution identity and a separate minimal privileged helper/sudo boundary; explicitly enumerate allowed privileged operations needed by workspace-control.
-- Independently review the exact frozen threat model and authority contract before implementation.
-- Implement and adversarially test the private Workspace Shell MCP in isolation.
-- Perform isolated Lambda acceptance with no production authority, then separately gate live ChatGPT connection.
-- After acceptance, document how durable workspace-control tasks may invoke Workspace Shell without bypassing task-specific mutation/review gates.
-- Use the completed control-plane incident chain as an acceptance scenario: reproduce a bounded exact-SHA read/execute/receipt workflow without requiring the operator to relay terminal commands manually.
+- Validate the BF-1/BF-2 corrected authority artifact, review procedure, task capsule and synchronized handoff on PR #550.
+- Record a fresh corrected-head independent review request consuming blocking review 6447046381 and resolve every new finding.
+- Only after design acceptance, implement repository-only policy frontend, job-launcher protocol, hostile worker sandbox, approval verifier and reviewed-helper broker with adversarial tests; no live Lambda authority yet.
+- Obtain fresh read-only Lambda host attestation before finalizing host-specific installation units/UIDs/sockets/mounts and approval trust-store placement.
+- Independently review implementation and installation/rollback boundary before provisioning a dedicated tunnel credential or live service.
+- Run isolated acceptance and later separately authorized live exact-SHA/receipt acceptance while keeping Heartbeat and unrelated project controllers untouched.
 
 ## Blockers / gates
 
-- Implementation is explicitly deferred by the operator.
-- No current connected ChatGPT plugin provides general SSH/terminal execution against the Lambda host.
-- The future command-execution and privileged-authority threat model has not yet been frozen or independently reviewed.
+- Fresh independent immutable-head review has not yet accepted the BF-1/BF-2 corrected authority/threat design.
+- Fresh live Lambda host attestation remains required before installation or activation; repository evidence alone is not host attestation.
+- Implementation, tunnel/key provisioning, job-launcher/root-broker/helper installation and live service activation remain prohibited until later gates.
 
 ## Fresh-chat initialization
 
