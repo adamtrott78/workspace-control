@@ -238,11 +238,49 @@ def _document_at(
     return value, blob_sha
 
 
+def _normalize_expected_controller_transaction(
+    *,
+    restart_services: list[str] | None,
+    enable_services: list[str] | None,
+    preserve_services: list[str] | None,
+) -> dict[str, list[str]] | None:
+    fields = [restart_services, enable_services, preserve_services]
+    if all(value is None for value in fields):
+        return None
+    if any(value is None for value in fields):
+        raise ReconcileControllerError(
+            "expected controller transaction requires restart/enable/preserve sets"
+        )
+    normalized = {
+        "restart_services": sorted(set(restart_services or [])),
+        "enable_services": sorted(set(enable_services or [])),
+        "preserve_services": sorted(set(preserve_services or [])),
+    }
+    if len(normalized["restart_services"]) != len(restart_services or []):
+        raise ReconcileControllerError("expected restart service set contains duplicates")
+    if len(normalized["enable_services"]) != len(enable_services or []):
+        raise ReconcileControllerError("expected enable service set contains duplicates")
+    if len(normalized["preserve_services"]) != len(preserve_services or []):
+        raise ReconcileControllerError("expected preserve service set contains duplicates")
+    if not set(normalized["enable_services"]).issubset(
+        normalized["restart_services"]
+    ):
+        raise ReconcileControllerError(
+            "expected enable services must be a subset of expected restart services"
+        )
+    if set(normalized["restart_services"]) & set(normalized["preserve_services"]):
+        raise ReconcileControllerError(
+            "expected restart and preserve service sets must not overlap"
+        )
+    return normalized
+
+
 def build_request(
     client: GitHubClient,
     *,
     run: dict[str, Any],
     allowed_actors: set[str],
+    expected_controller_transaction: dict[str, list[str]] | None = None,
 ) -> dict[str, Any]:
     head_sha = run["head_sha"]
     workflow_raw, workflow_blob = client.content_at(WORKFLOW_PATH, head_sha)
@@ -277,20 +315,24 @@ def build_request(
         )
 
     registry_digest = _sha256_json(registry)
-    identity_material = "|".join(
-        [
-            SOURCE_REPOSITORY,
-            head_sha,
-            registry_digest,
-            *[
-                item["project_id"] + ":" + item["sha256"]
-                for item in manifests
-            ],
-        ]
-    )
+    identity_parts = [
+        SOURCE_REPOSITORY,
+        head_sha,
+        registry_digest,
+        *[
+            item["project_id"] + ":" + item["sha256"]
+            for item in manifests
+        ],
+    ]
+    if expected_controller_transaction is not None:
+        identity_parts.append(
+            "expected-controller-transaction:"
+            + _sha256_json(expected_controller_transaction)
+        )
+    identity_material = "|".join(identity_parts)
     request_id = str(uuid.uuid5(UUID_NAMESPACE, identity_material))
     actor = run.get("actor", {}).get("login")
-    return {
+    request = {
         "schema_version": 1,
         "request_id": request_id,
         "operation": "APPLY_PROJECT_REGISTRY",
@@ -310,6 +352,11 @@ def build_request(
         "project_manifests": manifests,
         "dry_run": False,
     }
+    if expected_controller_transaction is not None:
+        request["expected_controller_transaction"] = (
+            expected_controller_transaction
+        )
+    return request
 
 
 def submit_request(socket_path: pathlib.Path, request: dict[str, Any]) -> dict[str, Any]:
@@ -362,13 +409,19 @@ def run_once(
     socket_path: pathlib.Path,
     state_dir: pathlib.Path,
     allowed_actors: set[str],
+    expected_controller_transaction: dict[str, list[str]] | None = None,
 ) -> dict[str, Any]:
     client = GitHubClient(_load_token(token_file))
     run = _select_current_successful_run(client, allowed_actors)
     if run is None:
         return {"status": "NO_CURRENT_SUCCESSFUL_RECONCILIATION_RUN"}
 
-    request = build_request(client, run=run, allowed_actors=allowed_actors)
+    request = build_request(
+        client,
+        run=run,
+        allowed_actors=allowed_actors,
+        expected_controller_transaction=expected_controller_transaction,
+    )
     success_path = state_dir / "last-success.json"
     rejected_path = state_dir / "last-rejected.json"
     if success_path.is_file():
@@ -441,10 +494,22 @@ def main() -> int:
     parser.add_argument("--actor", action="append", default=["adamtrott78"])
     parser.add_argument("--poll-seconds", type=int, default=15)
     parser.add_argument("--once", action="store_true")
+    parser.add_argument("--expect-restart-service", action="append")
+    parser.add_argument("--expect-enable-service", action="append")
+    parser.add_argument("--expect-preserve-service", action="append")
     args = parser.parse_args()
     allowed = set(args.actor)
     if not allowed:
         raise ReconcileControllerError("actor allowlist is empty")
+    expected_controller_transaction = _normalize_expected_controller_transaction(
+        restart_services=args.expect_restart_service,
+        enable_services=args.expect_enable_service,
+        preserve_services=args.expect_preserve_service,
+    )
+    if expected_controller_transaction is not None and not args.once:
+        raise ReconcileControllerError(
+            "expected controller transaction is only allowed with --once"
+        )
 
     while True:
         try:
@@ -453,6 +518,7 @@ def main() -> int:
                 socket_path=args.socket,
                 state_dir=args.state_dir,
                 allowed_actors=allowed,
+                expected_controller_transaction=expected_controller_transaction,
             )
         except ReconcileControllerError as exc:
             result = {

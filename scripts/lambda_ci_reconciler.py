@@ -336,7 +336,8 @@ def validate_reconciliation_request(
         "project_manifests",
         "dry_run",
     }
-    if set(request) != expected:
+    allowed = [expected, expected | {"expected_controller_transaction"}]
+    if set(request) not in allowed:
         raise ReconcileError("reconciliation request keys mismatch")
     if request["schema_version"] != 1:
         raise ReconcileError("reconciliation request schema_version must be 1")
@@ -397,6 +398,46 @@ def validate_reconciliation_request(
             raise ReconcileError(f"project manifest id mismatch: {project_id}")
         manifests[project_id] = document
 
+    expected_controller_transaction = request.get(
+        "expected_controller_transaction"
+    )
+    if expected_controller_transaction is not None:
+        required_transaction_keys = {
+            "restart_services",
+            "enable_services",
+            "preserve_services",
+        }
+        if (
+            not isinstance(expected_controller_transaction, dict)
+            or set(expected_controller_transaction) != required_transaction_keys
+        ):
+            raise ReconcileError(
+                "expected controller transaction keys mismatch"
+            )
+        for field in sorted(required_transaction_keys):
+            value = expected_controller_transaction[field]
+            if (
+                not isinstance(value, list)
+                or any(not isinstance(item, str) for item in value)
+                or value != sorted(value)
+                or len(value) != len(set(value))
+            ):
+                raise ReconcileError(
+                    f"expected controller transaction {field} is invalid"
+                )
+        if not set(
+            expected_controller_transaction["enable_services"]
+        ).issubset(expected_controller_transaction["restart_services"]):
+            raise ReconcileError(
+                "expected enable services exceed expected restart services"
+            )
+        if set(
+            expected_controller_transaction["restart_services"]
+        ) & set(expected_controller_transaction["preserve_services"]):
+            raise ReconcileError(
+                "expected restart and preserve service sets overlap"
+            )
+
     _validate_registry_semantics(registry, manifests, execution_contracts)
     _validate_no_removal(registry, installed_registry_path)
     plan = plan_reconciliation(registry, manifests)
@@ -406,6 +447,7 @@ def validate_reconciliation_request(
         "registry": registry,
         "manifests": manifests,
         "plan": plan,
+        "expected_controller_transaction": expected_controller_transaction,
     }
 
 
@@ -942,6 +984,11 @@ def apply_reconciliation(
             item["project_id"]: item["sha256"]
             for item in request["project_manifests"]
         },
+        "expected_controller_transaction_sha256": (
+            _canonical_sha256(validated.get("expected_controller_transaction"))
+            if validated.get("expected_controller_transaction") is not None
+            else None
+        ),
     }
 
     plan = validated["plan"]
@@ -1006,6 +1053,31 @@ def apply_reconciliation(
             ),
             key=lambda entry: entry["service"],
         )
+        expected_transaction = validated.get("expected_controller_transaction")
+        if expected_transaction is not None:
+            actual_restart = [
+                entry["service"] for entry in restart_entries
+            ]
+            actual_enable = sorted(
+                entry["service"]
+                for entry in restart_entries
+                if entry["newly_active"]
+            )
+            actual_preserve = [
+                entry["service"] for entry in preserved_entries
+            ]
+            actual_transaction = {
+                "restart_services": actual_restart,
+                "enable_services": actual_enable,
+                "preserve_services": actual_preserve,
+            }
+            if actual_transaction != expected_transaction:
+                raise ReconcileError(
+                    "derived controller transaction differs from reviewed "
+                    "expected transaction: "
+                    f"actual={actual_transaction} "
+                    f"expected={expected_transaction}"
+                )
         preserved_before = {
             entry["service"]: _service_snapshot(entry["service"])
             for entry in preserved_entries

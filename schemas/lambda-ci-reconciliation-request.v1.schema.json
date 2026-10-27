@@ -109,6 +109,41 @@
     },
     "dry_run": {
       "type": "boolean"
+    },
+    "expected_controller_transaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "restart_services",
+        "enable_services",
+        "preserve_services"
+      ],
+      "properties": {
+        "restart_services": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^workspace-ci-controller@[a-z][a-z0-9-]{1,20}-(cpu|gpu)\\.service$"
+          }
+        },
+        "enable_services": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^workspace-ci-controller@[a-z][a-z0-9-]{1,20}-(cpu|gpu)\\.service$"
+          }
+        },
+        "preserve_services": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^workspace-ci-controller@[a-z][a-z0-9-]{1,20}-(cpu|gpu)\\.service$"
+          }
+        }
+      }
     }
   }
 }

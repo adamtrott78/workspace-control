@@ -34,22 +34,19 @@ class ControlPlaneP1ContractTests(unittest.TestCase):
         self.workload = load_json("architecture/lambda-ci-workload-policy.v1.json")
         self.profiles = load_json("architecture/lambda-ci-systemd-profiles.v1.json")
 
-    def test_workspace_control_remains_not_installed_and_cpu_only(self):
+    def test_workspace_control_p1_activation_remains_cpu_only(self):
         entry = self.registry["projects"]["workspace-control"]
-        self.assertEqual(entry["activation_state"], "MIGRATION_CANDIDATE_NOT_INSTALLED")
+        self.assertEqual(entry["activation_state"], "ACTIVE")
         self.assertEqual(entry["lanes"], ["cpu"])
         self.assertEqual(
             entry["manifest_source_path"],
             "architecture/lambda-ci-project-workspace-control.v1.json",
         )
 
-        self.assertEqual(
-            self.manifest["status"],
-            "MIGRATION_CANDIDATE_NOT_INSTALLED",
-        )
+        self.assertEqual(self.manifest["status"], "ACTIVE")
         self.assertEqual(self.manifest["concurrency"], 1)
         route = self.manifest["routes"]["control-validation"]
-        self.assertEqual(route["activation_state"], "PLANNED_NOT_BOUND")
+        self.assertEqual(route["activation_state"], "ACTIVE")
         self.assertEqual(route["lane"], "cpu")
         self.assertFalse(route["trigger"]["fork_pr_execution_allowed"])
         self.assertEqual(route["trigger"]["allowed_actor_logins"], ["adamtrott78"])

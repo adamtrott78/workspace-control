@@ -286,9 +286,9 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         self.assertEqual(plan["mode"], "APPLY_READY_V1")
         self.assertEqual(
             plan["active_projects"],
-            ["padataset", "research-engine"],
+            ["padataset", "research-engine", "workspace-control"],
         )
-        self.assertEqual(plan["planned_projects_skipped"], ["workspace-control"])
+        self.assertEqual(plan["planned_projects_skipped"], [])
         serialized = json.dumps(plan, sort_keys=True)
         self.assertNotIn("shell", serialized)
         self.assertNotIn("argv", serialized)
@@ -313,11 +313,11 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             route["activation_state"] = "PLANNED_NOT_BOUND"
             route["trusted_workflow"]["blob_sha"] = None
         plan = reconciler.plan_reconciliation(registry, manifests)
-        self.assertEqual(plan["active_projects"], ["research-engine"])
         self.assertEqual(
-            plan["planned_projects_skipped"],
-            ["padataset", "workspace-control"],
+            plan["active_projects"],
+            ["research-engine", "workspace-control"],
         )
+        self.assertEqual(plan["planned_projects_skipped"], ["padataset"])
         serialized = json.dumps(plan, sort_keys=True)
         self.assertNotIn("ci-padataset", serialized)
         self.assertNotIn("/srv/workspace-ci/padataset", serialized)
@@ -331,6 +331,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             [
                 "workspace-ci-controller@research-engine-cpu.service",
                 "workspace-ci-controller@research-engine-gpu.service",
+                "workspace-ci-controller@workspace-control-cpu.service",
             ],
         )
 
@@ -388,7 +389,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             )
             self.assertEqual(
                 validated["plan"]["active_projects"],
-                ["padataset", "research-engine"],
+                ["padataset", "research-engine", "workspace-control"],
             )
             bad = copy.deepcopy(request)
             bad["source_attestation"]["workflow_blob_sha"] = "c" * 40

@@ -142,12 +142,9 @@ class ThirdProjectReuseContractTests(unittest.TestCase):
         plan = reconciler.plan_reconciliation(registry, manifests)
         self.assertEqual(
             plan["active_projects"],
-            ["future-research", "padataset", "research-engine"],
+            ["future-research", "padataset", "research-engine", "workspace-control"],
         )
-        self.assertEqual(
-            plan["planned_projects_skipped"],
-            ["workspace-control"],
-        )
+        self.assertEqual(plan["planned_projects_skipped"], [])
 
         serialized = json.dumps(plan, sort_keys=True)
         self.assertIn("ci-future-research", serialized)

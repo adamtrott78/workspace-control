@@ -27,6 +27,22 @@ WORKSPACE = load_json("architecture/lambda-ci-project-workspace-control.v1.json"
 
 
 class ReconcilerActivationDeltaTests(unittest.TestCase):
+    def candidate_installed_registry(self):
+        registry = copy.deepcopy(REGISTRY)
+        registry["registry_epoch"] = 5
+        registry["projects"]["workspace-control"]["activation_state"] = (
+            "MIGRATION_CANDIDATE_NOT_INSTALLED"
+        )
+        return registry
+
+    def candidate_workspace_manifest(self):
+        manifest = copy.deepcopy(WORKSPACE)
+        manifest["status"] = "MIGRATION_CANDIDATE_NOT_INSTALLED"
+        manifest["routes"]["control-validation"]["activation_state"] = (
+            "PLANNED_NOT_BOUND"
+        )
+        return manifest
+
     def activation_target(self):
         registry = copy.deepcopy(REGISTRY)
         manifests = {
@@ -42,7 +58,7 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
 
     def make_apply_fixture(self, root):
         target_registry, manifests = self.activation_target()
-        installed_registry = copy.deepcopy(REGISTRY)
+        installed_registry = self.candidate_installed_registry()
 
         registry_path = root / "registry.json"
         registry_path.write_text(
@@ -54,7 +70,7 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
         for project_id, manifest in manifests.items():
             current = copy.deepcopy(manifest)
             if project_id == "workspace-control":
-                current = copy.deepcopy(WORKSPACE)
+                current = self.candidate_workspace_manifest()
             (projects_dir / f"{project_id}.json").write_text(
                 json.dumps(current, indent=2, sort_keys=True) + "\n",
                 encoding="utf-8",
@@ -147,7 +163,7 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
 
     def test_workspace_activation_restarts_only_workspace_controller(self):
         target_registry, manifests = self.activation_target()
-        installed_registry = copy.deepcopy(REGISTRY)
+        installed_registry = self.candidate_installed_registry()
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
             controllers_dir = root / "controllers"
@@ -203,7 +219,7 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
 
     def test_existing_controller_config_drift_is_explicit_restart_delta(self):
         target_registry, manifests = self.activation_target()
-        installed_registry = copy.deepcopy(REGISTRY)
+        installed_registry = self.candidate_installed_registry()
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
             controllers_dir = root / "controllers"
@@ -251,9 +267,69 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
                 ],
             )
 
+    def test_reviewed_expected_transaction_blocks_sibling_material_drift_before_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            fx = self.make_apply_fixture(root)
+            fx["validated"]["expected_controller_transaction"] = {
+                "restart_services": [
+                    "workspace-ci-controller@workspace-control-cpu.service",
+                ],
+                "enable_services": [
+                    "workspace-ci-controller@workspace-control-cpu.service",
+                ],
+                "preserve_services": [
+                    "workspace-ci-controller@padataset-cpu.service",
+                    "workspace-ci-controller@padataset-gpu.service",
+                    "workspace-ci-controller@research-engine-cpu.service",
+                    "workspace-ci-controller@research-engine-gpu.service",
+                ],
+            }
+            (fx["controllers_dir"] / "research-engine-gpu.env").write_text(
+                "DRIFT=1\n", encoding="utf-8"
+            )
+            before_registry = fx["registry_path"].read_bytes()
+            calls = []
+
+            with (
+                mock.patch.object(
+                    reconciler,
+                    "primary_local_subnet",
+                    return_value="192.0.2.0/24",
+                ),
+                mock.patch.object(
+                    reconciler,
+                    "controller_network_dropin",
+                    side_effect=fx["dropin"],
+                ),
+                mock.patch.object(reconciler, "_run", side_effect=lambda argv, check=True: calls.append(list(argv)) or types.SimpleNamespace(returncode=0, stdout="", stderr="")),
+                mock.patch.object(reconciler.os, "chown"),
+            ):
+                with self.assertRaisesRegex(
+                    reconciler.ReconcileError,
+                    "derived controller transaction differs",
+                ):
+                    reconciler.apply_reconciliation(
+                        fx["validated"],
+                        registry_path=fx["registry_path"],
+                        projects_dir=fx["projects_dir"],
+                        controllers_dir=fx["controllers_dir"],
+                        state_dir=fx["state_dir"],
+                        controller_state_root=fx["controller_state_root"],
+                    )
+
+            self.assertEqual(fx["registry_path"].read_bytes(), before_registry)
+            self.assertEqual(
+                list((fx["state_dir"] / "receipts").glob("*.json")),
+                [],
+            )
+            self.assertFalse(
+                any(call[:2] == ["systemctl", "restart"] for call in calls)
+            )
+
     def test_apply_activation_preserves_unchanged_sibling_service_snapshots(self):
         target_registry, manifests = self.activation_target()
-        installed_registry = copy.deepcopy(REGISTRY)
+        installed_registry = self.candidate_installed_registry()
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
             registry_path = root / "registry.json"
@@ -266,7 +342,7 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
             for project_id, manifest in manifests.items():
                 current = copy.deepcopy(manifest)
                 if project_id == "workspace-control":
-                    current = copy.deepcopy(WORKSPACE)
+                    current = self.candidate_workspace_manifest()
                 (projects_dir / f"{project_id}.json").write_text(
                     json.dumps(current, indent=2, sort_keys=True) + "\n",
                     encoding="utf-8",

@@ -28,9 +28,9 @@ def derived(project_id):
 
 
 class LambdaCIMultiRepoContractTests(unittest.TestCase):
-    def test_run4_activates_padataset_after_run3_acceptance(self):
+    def test_registry_activation_epoch_includes_workspace_control_p1(self):
         self.assertEqual(REGISTRY["status"], "ACTIVE")
-        self.assertEqual(REGISTRY["registry_epoch"], 5)
+        self.assertEqual(REGISTRY["registry_epoch"], 6)
         self.assertEqual(CONTRACTS["status"], "CONTRACT_ONLY_NOT_INSTALLED")
         self.assertEqual(RESEARCH["status"], "ACTIVE")
         self.assertEqual(PAD["status"], "ACTIVE")
@@ -176,6 +176,14 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
             "registry", "project_manifests", "dry_run",
         })
         self.assertFalse(RECONCILE_SCHEMA["additionalProperties"])
+        transaction = RECONCILE_SCHEMA["properties"][
+            "expected_controller_transaction"
+        ]
+        self.assertFalse(transaction["additionalProperties"])
+        self.assertEqual(
+            set(transaction["required"]),
+            {"restart_services", "enable_services", "preserve_services"},
+        )
         source = RECONCILE_SCHEMA["properties"]["source_attestation"]["properties"]
         self.assertEqual(source["repository"]["const"], "adamtrott78/workspace-control")
         self.assertEqual(source["default_branch"]["const"], "main")

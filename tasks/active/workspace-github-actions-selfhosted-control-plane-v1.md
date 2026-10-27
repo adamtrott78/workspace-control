@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Prepare and request a fresh independent P1 activation-boundary review only. The review must be based on the current durable capsule and the now-live reconciler installed from merge e4c81ac5fba8c4d9df8450b003147f90d771158b with installed/source SHA256 5e3c56c84f8e9755334ca4f0db7bdd7036f70b3e4cd404ebb02e8aa6b97185a9. It must verify the exact candidate->ACTIVE registry/manifest/route delta for workspace-control CPU, exact source/ref/request identity, expected reconciliation transaction with restart set exactly workspace-ci-controller@workspace-control-cpu.service and preservation set research-engine CPU/GPU plus PADataset CPU/GPU, durable daemon-reload semantics, live preactivation dormancy/preservation preconditions, exact rollback/emergency-stop authority, and post-activation acceptance checks. Do not reconcile or activate during review.
+Fresh independent corrected-head P1 activation-boundary re-review of PR #558 only. Consume prior blocking reviews 6451020368 and 6451350758. Verify BF-3 closure specifically: rollback is armed before forward write #1; exceptions surfaced after replacement by write #1/#2/#3 all enter rollback; exact old root/controller bytes are restored; any newly installed one-shot unit is removed; root daemon reload/restart is bounded and non-propagating; automatic/workspace-control/sibling service snapshots are re-certified; rollback explicitly verifies restored bytes and absent unit before claiming success. Verify fault-injection regressions cover all three forward write boundaries after replacement. Regression-check BF-1 request-bound exact restart/enable/preserve semantics and BF-2 static sandbox-preserving one-shot unit/installer boundaries remain unchanged. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Prepare and request a fresh independent P1 activation-boundary review only. The 
 
 ## Blockers / gates
 
-- The corrected reconciler is now live and independently reviewed, but workspace-control remains unactivated.
-- P1 activation/reconciliation is blocked until a fresh independent exact-head activation-boundary review verifies the exact candidate->ACTIVE policy delta, exact reconciliation request, expected restart/preservation sets, rollback/emergency-stop path, and post-activation acceptance checks against the now-installed reconciler.
-- Do not issue an APPLY/reconcile request, start/enable workspace-control CPU, restart/reset research-engine CPU or sibling controllers, issue maintenance commands, or widen P2/P3/capacity before that activation review returns NO_BLOCKING_FINDING.
+- PR #558 remains review-only and unmerged pending fresh independent corrected-head activation-boundary review of BF-3 closure.
+- The corrected activation submission-boundary installer is validated in source but not installed on Lambda.
+- Do not merge PR #558, install the submission boundary, reconcile/activate workspace-control, start the automatic reconcile-controller, issue maintenance commands, restart/reset preserved project controllers, restart research-engine CPU, or widen P2/P3/capacity before corrected-head review returns NO_BLOCKING_FINDING.
 
 ## Fresh-chat initialization
 
