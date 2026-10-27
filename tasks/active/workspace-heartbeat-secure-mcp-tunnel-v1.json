@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-heartbeat-executor-liveness-v1",
-  "current_stage": "secure_tunnel_isolated_and_live_acceptance",
+  "current_stage": "retire_ngrok_normal_path",
   "acceptance_criteria": [
     "Recover and verify the exact current Heartbeat source/runtime, launcher, MCP endpoint, live-card polling path, and existing rollback state before changing transport.",
     "Treat the October 2026 ngrok incident as an infrastructure-availability failure: ERR_NGROK_725 after approximately 1.02 GB of 1 GB monthly data-transfer allowance; do not change Heartbeat semantics merely to work around the exhausted free tunnel.",
@@ -166,7 +166,7 @@
     },
     {
       "id": "secure_tunnel_isolated_and_live_acceptance",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "operator+chatgpt",
       "selected_executor": "operator+chatgpt",
       "selected_surface": "openai-secure-mcp-tunnel+lambda-isolated+chatgpt",
@@ -254,16 +254,25 @@
             "heartbeat_get returned the complete six-entry current-turn history and also rendered embedded UI, proving MCP App resource delivery on the tunnel-backed plugin.",
             "This live acceptance path is independent of the ngrok-backed production v0.4.7 plugin."
           ]
+        },
+        {
+          "check": "Live ChatGPT visual card acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Operator visually confirmed the tunnel-backed v0.4.8 card stopped growing at the accepted five-entry intrinsic height and became scrollable once the sixth entry arrived, with newest updates remaining visible.",
+            "The additional full-history panel seen during acceptance was caused by the assistant's explicit heartbeat_get diagnostic call, not by live-card delta polling.",
+            "Normal-operation contract now forbids routine heartbeat_get monitoring; live progress uses heartbeat_begin_turn/heartbeat_update/heartbeat_touch plus app-only heartbeat_poll deltas."
+          ]
         }
       ],
-      "resume_condition": "Live ChatGPT acceptance passes without public ngrok dependency."
+      "resume_condition": "SATISFIED"
     },
     {
       "id": "retire_ngrok_normal_path",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt+operator",
+      "selected_surface": "github+lambda-production",
       "inputs": [
         "accepted Secure MCP Tunnel live path"
       ],
@@ -424,9 +433,9 @@
     }
   ],
   "blockers": [
-    "Visual five-entry intrinsic height and sixth-entry scroll behavior still requires operator confirmation from the rendered ChatGPT card; the assistant cannot inspect rendered card dimensions/scroll state.",
-    "Live tunnel daemon is still an isolated foreground acceptance process, not the normal production launcher.",
-    "Ngrok remains in the production v0.4.7 launcher and must not be retired until visual UI acceptance and durable cutover/rollback design are complete."
+    "Production still runs accepted v0.4.7 on :8787 under the existing heartbeat-up launcher with ngrok as sibling transport.",
+    "A production-safe v0.4.8 runtime, supervised tunnel-client launch path, restricted non-interactive secret reference, and rollback procedure must be implemented and validated before ngrok can leave the normal path.",
+    "The temporary tunnel-backed acceptance plugin should remain available until the production cutover is proven."
   ],
   "remaining_work": [
     "Verify current official OpenAI Secure MCP Tunnel setup requirements and inspect Lambda for tunnel-client/configuration state without modifying production Heartbeat.",
@@ -434,7 +443,7 @@
     "Perform live ChatGPT acceptance through Secure MCP Tunnel for model tools, embedded app resource delivery, heartbeat_poll freshness, executor/semantic/card separation, and five/six-entry UI behavior.",
     "Only after acceptance, replace ngrok in the normal launcher path while preserving an operator-understandable rollback/emergency fallback and synchronize final task state."
   ],
-  "next_safe_action": "Operator: confirm whether the currently rendered tunnel-backed Heartbeat card shows the expected five-entry fixed-height boundary and, after sequence 6, remains at the same height with scrollable history/newest entry visible. If PASS, record live UI acceptance, then design and validate the production cutover: install v0.4.8 runtime, replace ngrok with supervised tunnel-client in the normal launcher using a non-interactive restricted secret reference, preserve rollback to v0.4.7/ngrok, and only then retire ngrok from the normal path.",
+  "next_safe_action": "Freeze and implement the production cutover design without changing live Lambda yet: inspect the existing heartbeat-up/heartbeat-down operational contract and workspace-control references; define a v0.4.8 runtime install path, tunnel-client profile using file: secret reference outside Git with mode 0600, supervised launcher behavior, health/readiness gates, and explicit rollback to the accepted v0.4.7/ngrok path. Preserve the normal-operation rule that heartbeat_get is not used for routine live monitoring.",
   "last_executor": "chatgpt+operator",
   "last_surface": "github+lambda-isolated",
   "notes": "Created 2026-10-26 after the operator identified the concrete cause of current Heartbeat connector failures: the free ngrok account exceeded its monthly network bandwidth allocation. The operator values the newly added executor-signal feature and reports that the card/server polls approximately once per second to show the latest executor signal. That feature is a requirement, not disposable overhead. The new task therefore treats transport and payload efficiency as the problem, not liveness semantics. Secure MCP Tunnel is the preferred direction if current official OpenAI support and limits are compatible. The task must empirically distinguish high-frequency live-card/app polling from heartbeat_touch model calls; do not assume they are the same traffic path. GitRunner work continues independently in its own task/chat.\n\n2026-10-26 current-main restage: live runtime provenance and isolated v0.4.7 bandwidth baseline are PASS. The original task branch diverged from main before task/GitRunner merges, so the Heartbeat-only candidate was restaged from current main 9bd1efff5409c97439df6fd37d44a0fb42e95a4a on workspace-heartbeat-secure-mcp-tunnel-v1-current-main. v0.4.8 implements a cache-busted app-only heartbeat_poll delta/resync path while retaining heartbeat_snapshot compatibility. No live deployment or ngrok retirement is authorized yet."
