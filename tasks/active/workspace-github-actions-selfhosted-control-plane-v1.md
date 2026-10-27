@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: gitrunner-p1-bootstrap-install
-- Remote checkpoint: ef54bcac5da45941d302245ff055aab1ccf54ea9
-- Remote verified: true
+- Remote branch: gitrunner-p1-bootstrap-runuser-hotfix
+- Remote checkpoint: 8cdef621b18c98845c2ba705445b98c389c36a78
+- Remote verified: false
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Request fresh independent re-review of PR #528, consuming blocking review 5662021244 and corrected validation run 40447768153 / job 122003009926. Verify closure of BF-1 through BF-5 and regression-check all previously accepted no-activation/scope boundaries. Do not merge or execute the installer until NO_BLOCKING_FINDING is durably recorded.
+Validate the bounded P1 bootstrap runuser hotfix on branch gitrunner-p1-bootstrap-runuser-hotfix. Confirm the installer uses absolute /usr/sbin/runuser whenever dropping to ci-controller/ci-maintenance, so the deliberately narrowed child PATH cannot hide the executable; confirm missing /usr/sbin/runuser fails closed before subprocess/mutation. If validation passes, obtain fresh independent review of this exact delta before retrying the live bootstrap. Do not mutate Lambda until that review returns NO_BLOCKING_FINDING.
 
 ## Remaining work
 
@@ -49,7 +49,7 @@ Request fresh independent re-review of PR #528, consuming blocking review 566202
 
 ## Blockers / gates
 
-- Corrected PR #528 bootstrap installer is validated at code checkpoint ef54bcac5da45941d302245ff055aab1ccf54ea9 (run 40447768153 / job 122003009926 / run #898 SUCCESS), but fresh independent re-review consuming blocking review 5662021244 remains required before any Lambda mutation.
+- The first live bootstrap attempt from merged installer 13aecc3d89e7e60c14e07a295a80c0fdfbfc0271 failed before the first service/control-plane mutation because the installer invoked bare `runuser` while passing a narrowed child PATH that excludes /usr/sbin. A bounded runuser-path hotfix is implemented and requires exact validation plus independent review before retry.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
