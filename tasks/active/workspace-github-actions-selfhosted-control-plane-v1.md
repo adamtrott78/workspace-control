@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: gitrunner-p1-bootstrap-stable-cpu-preservation
-- Remote checkpoint: 5f440eafd04839c6d10a5ce06e7955613639f47b
-- Remote verified: false
+- Remote branch: main
+- Remote checkpoint: 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd
+- Remote verified: true
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate the corrected PR #532 head after closing the malformed ExecMainStatus gap. The stable-state predicate must require ExecMainStatus to be explicitly present, parseable as an integer, and nonnegative before classification; active/running must require 0; failed/failed must require real nonzero; inactive/dead may accept only a present valid nonnegative value. Dedicated regression tests must reject missing, empty, negative, and non-integer ExecMainStatus for inactive and failed states. If exact-head validation passes, request a fresh independent re-review; do not merge or retry Lambda until NO_BLOCKING_FINDING is recorded on the corrected head.
+Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd, with --expected-head set to that exact SHA and full output captured. Research-engine CPU must be preserved exactly in whatever reviewed stable state it occupies (active/running with ExecMainStatus=0, inactive/dead with valid nonnegative ExecMainStatus, or failed/failed with valid positive ExecMainStatus); any malformed, transitional, or changing state must abort before mutation. The other three project/lane controllers must remain active and preserved. The sole initial service mutation remains stopping automatic reconcile-controller. On success, workspace-control must remain MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive, and automatic reconcile-controller must remain frozen. Return the complete output/receipt before any GitHub -> L0 diagnose or workspace-control activation.
 
 ## Remaining work
 
@@ -49,8 +49,7 @@ Validate the corrected PR #532 head after closing the malformed ExecMainStatus g
 
 ## Blockers / gates
 
-- Independent review 5662757200 on PR #532 old head f6a1d723a1ec33ccb3e8ecbb1e93122cdba3ea7a found a narrow malformed-state gap: missing/empty ExecMainStatus became -1 and could be accepted for inactive/dead or failed/failed. The PR head has advanced with a bounded correction and regression coverage; the old blocking review remains authoritative for the old head but does not describe the corrected head.
-- The corrected PR #532 head must pass exact validation and receive a fresh independent re-review before merge or any Lambda retry.
+- PR #532 corrected stable-state research-engine CPU preservation is independently accepted and merged as workspace-control@6bd20890e2bc8a44dba8a33227cbb69b3e1368fd. The next gate is one bounded live bootstrap retry from that exact reviewed merge SHA; any transitional/changing research CPU state or any post-mutation failure must abort/rollback according to the reviewed installer.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
