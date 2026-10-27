@@ -6,7 +6,7 @@
   "goal": "Give ChatGPT durable, auditable, least-privilege command-execution access to the Lambda workspace through a separate private MCP/plugin so workspace-control tasks can execute and inspect bounded shell operations directly without using the operator as a copy/paste terminal relay, while preserving explicit provenance, credential isolation, rollback boundaries, and independently reviewable privileged authority.",
   "execution_topology": "remote_only",
   "workflow": null,
-  "current_stage": "freeze_authority_design_review_candidate",
+  "current_stage": "read_only_repo_recovery_and_design_freeze",
   "acceptance_criteria": [
     "Keep Workspace Shell structurally separate from Workspace Heartbeat; Heartbeat remains a low-authority progress/liveness channel and gains no command-execution authority.",
     "Use a private authenticated MCP/plugin transport. Prefer an outbound-only OpenAI Secure MCP Tunnel or equivalently bounded private transport; do not expose a broad unauthenticated public shell endpoint.",
@@ -26,7 +26,7 @@
     "Live acceptance must demonstrate ChatGPT can perform a bounded workspace-control task end-to-end and return exact command output while unauthorized filesystem, credential, and privileged operations fail closed."
   ],
   "constraints": [
-    "This task is intentionally deferred until the operator explicitly resumes it.",
+    "Operator explicitly resumed this task on 2026-10-27; implementation remains gated by frozen-design independent review, and live installation/activation remains separately gated.",
     "Do not implement, install, expose, connect, or activate a shell MCP as part of initial task creation.",
     "Do not modify the accepted Workspace Heartbeat runtime, transport, tool authority, or liveness semantics to add shell access.",
     "Do not use this task to bypass workspace-control task capsules, independent-review gates, exact-SHA gates, or mutation boundaries.",
@@ -41,10 +41,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "a802c417ffcc0bea604263ad029ed1b17f94656a",
+      "base_sha": "8a71aa3c60a4a0f230bcbee9711d2af79828c869",
       "remote": {
-        "branch": "main",
-        "checkpoint_sha": "a802c417ffcc0bea604263ad029ed1b17f94656a",
+        "branch": "workspace-shell-mcp-v1-design-freeze",
+        "checkpoint_sha": "cc37231f7c88d65f564b3357ce679e2035e153d8",
         "verified": true
       },
       "local": null,
@@ -109,55 +109,71 @@
           "check": "GitHub-only authoritative recovery",
           "result": "PASS",
           "evidence": [
-            "Read capsule and handoff at exact main head",
-            "Read infrastructure definitions; no live host attestation"
+            "Read authoritative capsule and synchronized handoff from main 8a71aa3c60a4a0f230bcbee9711d2af79828c869.",
+            "Recovered accepted Workspace Heartbeat v0.4.8 Secure MCP Tunnel deployment contract and the completed control-plane incident chain without Lambda mutation."
           ]
         },
         {
-          "check": "Live Lambda attestation",
-          "result": "PENDING",
+          "check": "Current OpenAI private-MCP/tool contract refresh",
+          "result": "PASS",
           "evidence": [
-            "No authorized connected Lambda command executor; cannot claim live current process/state"
+            "OpenAI Secure MCP Tunnel documentation rechecked 2026-10-27: outbound-only private transport, 600 requests/minute, 10 MiB serialized envelope, 120 second absolute request deadline, and 1000 queued requests.",
+            "OpenAI plugin documentation rechecked 2026-10-27: tool annotations are advisory and do not replace server-side authorization."
+          ]
+        },
+        {
+          "check": "Live Lambda host attestation",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Current connected tools do not provide Lambda command execution; GitHub evidence is not claimed as fresh host attestation.",
+            "Host attestation is required before installation/activation, but does not block independent review of the abstract frozen authority contract."
           ]
         },
         {
           "check": "Independent exact-head design review",
-          "result": "PENDING",
+          "result": "NOT_RUN",
           "evidence": [
-            "Immutable PR head review must occur after candidate finalized"
+            "Request only after task capsule/handoff validation succeeds at a new immutable PR head."
           ]
         }
       ],
-      "resume_condition": "Obtain read-only Lambda attestation and independent review; no activation"
+      "resume_condition": "Obtain independent exact-head design acceptance. Fresh read-only Lambda host attestation remains a separate pre-installation gate; no live endpoint or privileged authority before both applicable gates are satisfied."
     }
   ],
   "blockers": [
-    "Live Lambda configuration and process identity remain unverified by fresh host attestation.",
     "Independent immutable-head authority/threat design review has not returned NO_BLOCKING_FINDING.",
-    "Implementation, tunnel provisioning, privileged helper installation and service activation are prohibited."
+    "Fresh live Lambda host attestation remains required before installation or activation; repository evidence alone is not host attestation.",
+    "Implementation is blocked until design review; tunnel provisioning, privileged helper installation and live service activation are separately prohibited until later gates."
   ],
   "remaining_work": [
-    "Obtain fresh read-only host attestation without exposing secrets and reconcile with frozen candidate design.",
-    "Validate exact task/design artifacts and request independent immutable-head review; address blocking findings.",
-    "Only after accepted authority design, implement isolated, unprivileged policy-bound shell with adversarial tests.",
-    "Review implementation and controlled rollback separately before any live installation or ChatGPT connection.",
-    "Run isolated and later authorized live exact-SHA receipt acceptance; keep other project controllers untouched."
+    "Validate the corrected task capsule/handoff and frozen design artifacts on PR #550.",
+    "Request fresh independent review against the exact immutable PR head and resolve every blocking finding.",
+    "After design acceptance, implement the isolated unprivileged server/policy and root-helper broker in repository only, with adversarial tests; no live Lambda authority yet.",
+    "Obtain fresh read-only Lambda host attestation before host-specific installation design is finalized.",
+    "Independently review implementation and installation/rollback boundary before provisioning a dedicated tunnel credential or live service.",
+    "Run isolated acceptance, then separately authorize live exact-SHA/receipt acceptance while keeping Heartbeat and unrelated project controllers untouched."
   ],
-  "next_safe_action": "Review design candidate artifacts on the Workspace Shell design PR. Obtain independent immutable-head review and fresh read-only Lambda host attestation; resolve all blockers with a new exact-head review before implementation. No Lambda/Heartbeat mutation or shell activation.",
+  "next_safe_action": "Validate PR #550 at the corrected exact head. If validation passes, record a fresh independent review request bound to that immutable head for the frozen authority/threat design. Do not implement, install, provision a tunnel/key, create a sudo/root helper, or mutate Lambda until the applicable review gates are satisfied.",
   "last_executor": "chatgpt",
   "last_surface": "github+heartbeat",
-  "notes": "Created 2026-10-27 after a workspace-github-actions-selfhosted-control-plane-v1 bootstrap handoff required Lambda shell execution that the connected ChatGPT surfaces could not perform. The operator explicitly requested that direct ChatGPT-to-Lambda shell capability be spun into a separate task and implemented later. The intended product shape is a private Workspace Shell MCP/plugin, separate from Workspace Heartbeat, with ordinary unprivileged argv-based execution plus a separately bounded and reviewable privileged authority path.\n\n2026-10-27 operational sequencing lesson from workspace-github-actions-selfhosted-control-plane-v1: the control-plane commissioning path required many manual Lambda terminal round-trips because connected ChatGPT surfaces could not execute bounded host commands directly. The safety/review gates were useful and caught real defects, but the operator copy/paste relay was operationally expensive. When this task is explicitly resumed, prioritize a bounded, auditable Workspace Shell MCP before the next Lambda-heavy control-plane phase so reviewed commands, receipts, stdout/stderr, and host-state inspection can be transported directly without weakening exact-SHA, independent-review, least-privilege, or privileged-operation boundaries.\n\n2026-10-27 explicit operator resume: GitHub-only read-only recovery from exact main 8a71aa3c60a4a0f230bcbee9711d2af79828c869. Draft frozen authority v1 review candidate on separate branch; no Lambda/Heartbeat mutations. Live host attestation and independent exact-head approval are open; do not treat design candidate as accepted.",
+  "notes": "Created 2026-10-27 after a workspace-github-actions-selfhosted-control-plane-v1 bootstrap handoff required Lambda shell execution that the connected ChatGPT surfaces could not perform. The operator explicitly requested that direct ChatGPT-to-Lambda shell capability be spun into a separate task and implemented later. The intended product shape is a private Workspace Shell MCP/plugin, separate from Workspace Heartbeat, with ordinary unprivileged argv-based execution plus a separately bounded and reviewable privileged authority path.\n\n2026-10-27 operational sequencing lesson from workspace-github-actions-selfhosted-control-plane-v1: the control-plane commissioning path required many manual Lambda terminal round-trips because connected ChatGPT surfaces could not execute bounded host commands directly. The safety/review gates were useful and caught real defects, but the operator copy/paste relay was operationally expensive. When this task is explicitly resumed, prioritize a bounded, auditable Workspace Shell MCP before the next Lambda-heavy control-plane phase so reviewed commands, receipts, stdout/stderr, and host-state inspection can be transported directly without weakening exact-SHA, independent-review, least-privilege, or privileged-operation boundaries.\n\n2026-10-27 explicit operator resume: GitHub-only read-only recovery from exact main 8a71aa3c60a4a0f230bcbee9711d2af79828c869. Draft frozen authority v1 review candidate on separate branch; no Lambda/Heartbeat mutations. Live host attestation and independent exact-head approval are open; do not treat design candidate as accepted.\n\n2026-10-27 pre-review correction: PR #550 initial validation run #974 failed only because the resumed task-state edit used invalid v2 capsule values/keys and a manually extended derived handoff. The authority design was also hardened before review: synchronous execution reduced to 90 seconds inside the Secure MCP Tunnel 120-second absolute deadline; inspect task IDs generalized to future durable tasks; and the root path changed from staging-only operations to an exact separately reviewed helper-registry broker with no arbitrary root argv. Host attestation remains a pre-installation gate rather than a claim or prerequisite for abstract design review.",
   "checkpoints": [],
   "artifacts": [
     {
       "path": "architecture/workspace-shell-mcp-authority-v1.json",
-      "kind": "frozen_design_review_candidate",
-      "status": "PENDING_REVIEW"
+      "state": "FROZEN_REVIEW_CANDIDATE_HOST_ATTESTATION_REQUIRED",
+      "evidence": [
+        "Defines separate transport/identity, profile-bound unprivileged exec, exact reviewed-helper root broker, task/provenance binding, audit receipts, 90-second sync ceiling, kill/cleanup policy and emergency disable.",
+        "No implementation or live authority is contained in this artifact."
+      ]
     },
     {
       "path": "procedures/workspace_shell_mcp_design_review.md",
-      "kind": "recovery_and_review_procedure",
-      "status": "PENDING_REVIEW"
+      "state": "FROZEN_REVIEW_PROCEDURE",
+      "evidence": [
+        "Separates GitHub/historical recovery from fresh host attestation and preserves independent-review/install/activation gates.",
+        "Documents 2026-10-27 pre-review hardening from current OpenAI Secure MCP Tunnel and plugin contracts."
+      ]
     }
   ],
   "validation": [
@@ -168,6 +184,15 @@
         "Only the durable task capsule and derived handoff are created.",
         "No Workspace Shell implementation, runtime service, tunnel, credential, sudo policy, or Lambda mutation is authorized by this checkpoint.",
         "Implementation remains explicitly deferred until operator resume and a separately frozen, independently reviewed authority design."
+      ]
+    },
+    {
+      "check": "Explicit resume and design-only mutation boundary",
+      "result": "PASS",
+      "evidence": [
+        "Operator explicitly resumed workspace-shell-mcp-v1.",
+        "PR #550 changes only architecture/procedure/task-state files within the capsule's allowed mutation scope.",
+        "No Workspace Shell code, Lambda runtime, systemd service, tunnel, credential, sudo policy, root helper, Heartbeat runtime, or project controller was changed."
       ]
     }
   ]
