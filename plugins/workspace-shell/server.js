@@ -136,7 +136,7 @@ function runtimeInventory() {
     launcher_socket: meta(config.launcher_socket),
     broker_socket: meta(config.broker_socket),
     receipt_root: meta(config.receipt_root),
-    mcp_transport: DEV_INSECURE ? "DEV_INSECURE_HTTP" : "HTTPS_MTLS_REQUIRED",
+    mcp_transport: "HTTPS_MTLS_REQUIRED",
   };
 }
 
@@ -406,7 +406,7 @@ const handler = async (req, res) => {
     return;
   }
 
-  if (!DEV_INSECURE && !req.socket.authorized) {
+  if (!req.socket.authorized) {
     res.writeHead(401).end("mTLS client certificate required");
     return;
   }
@@ -435,5 +435,5 @@ const listener = DEV_INSECURE
 
 const port = Number(process.env.PORT ?? config.port ?? 8797);
 listener.listen(port, "127.0.0.1", () => {
-  console.log(`workspace-shell listening on 127.0.0.1:${port}${MCP_PATH} (${DEV_INSECURE ? "DEV_INSECURE_HTTP" : "mTLS"})`);
+  console.log(`workspace-shell listening on 127.0.0.1:${port}${MCP_PATH} (mTLS)`);
 });
