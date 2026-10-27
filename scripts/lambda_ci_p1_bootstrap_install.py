@@ -207,15 +207,19 @@ def service_snapshot(name: str) -> dict[str, str]:
 
 
 def _research_cpu_stable_state_predicate(state: dict[str, str]) -> bool:
+    raw_exit_status = state.get("ExecMainStatus")
+    if raw_exit_status is None or raw_exit_status == "":
+        return False
     try:
         restarts = int(state.get("NRestarts") or -1)
-        exit_status = int(state.get("ExecMainStatus") or -1)
+        exit_status = int(raw_exit_status)
     except ValueError:
         return False
     if (
         state.get("LoadState") != "loaded"
         or state.get("UnitFileState") not in {"enabled", "enabled-runtime"}
         or restarts < 0
+        or exit_status < 0
     ):
         return False
 
