@@ -24,12 +24,12 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 
 - Intent: mutate
 - Remote branch: workspace-shell-mcp-v1-design-freeze
-- Remote checkpoint: 4f23fbed3916a53d4a4fe738857bda3612d64056
+- Remote checkpoint: c28671e3e571cba298e8341bbce6999edc62bfd3
 - Remote verified: true
 
 ## Next safe action
 
-Run Workspace Control Validation on the BF-1/BF-2 corrected PR #550 head. If SUCCESS, record a fresh immutable-head independent re-review request that consumes blocking review 6447046381. Do not implement, merge, install, provision tunnel/key, create job-launcher/root-broker/helper authority, execute Lambda commands, modify Heartbeat, or mutate project controllers.
+After this state-only synchronization passes validation, record a fresh immutable-head independent re-review request on PR #550 that consumes blocking review 6447046381 and cites corrected design checkpoint c28671e3e571cba298e8341bbce6999edc62bfd3 / validation run #990. Do not implement, merge, install, provision tunnel/key, create job-launcher/root-broker/helper authority, execute Lambda commands, modify Heartbeat, or mutate project controllers.
 
 ## Remaining work
 
