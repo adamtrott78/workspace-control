@@ -24,8 +24,8 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 - Intent: mutate
 - Remote branch: gitrunner-p1-bootstrap-runuser-fix-v1
-- Remote checkpoint: 3c5f92acb0c3564afaedb45f4b46f222621082c9
-- Remote verified: false
+- Remote checkpoint: 410c0aeebc18ebb993629bda4f235934794033c4
+- Remote verified: true
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Wait for exact-head Workspace Control Validation on PR #530. If validation passes, request a fresh independent review of the bounded runuser correction, explicitly consuming the first live pre-mutation failure evidence and verifying that only deterministic user-switch resolution changed. Do not retry the installer or mutate Lambda until NO_BLOCKING_FINDING is durably recorded.
+Request fresh independent review of PR #530 after this state synchronization. The reviewer must consume the first live pre-mutation failure evidence, verify that the code correction is limited to deterministic /usr/sbin/runuser resolution plus regression coverage, verify successful validation run 40450025002 / job 122010323489, and regression-check all previously accepted rollback/no-activation/P2-P3 boundaries. Do not merge or retry the installer until NO_BLOCKING_FINDING is durably recorded.
 
 ## Remaining work
 
@@ -49,7 +49,7 @@ Wait for exact-head Workspace Control Validation on PR #530. If validation passe
 
 ## Blockers / gates
 
-- PR #530 runuser correction must pass exact-head Workspace Control Validation and receive fresh independent NO_BLOCKING_FINDING before the privileged installer is retried.
+- PR #530 exact final review head must receive fresh independent NO_BLOCKING_FINDING before the privileged installer is retried.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
