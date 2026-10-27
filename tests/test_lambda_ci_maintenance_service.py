@@ -374,5 +374,110 @@ class MaintenanceServiceTests(unittest.TestCase):
         )
 
 
+    def test_new_reset_archives_prior_completed_recovery_receipt(self):
+        qid, _ = self.quarantine(scale_set_id=93)
+        lane = self.lane_state()
+        prior_generation = "cccccccc-dddd-4eee-8fff-aaaaaaaaaaaa"
+        ready = lane / "ready-for-single-retry.json"
+        prior = {
+            "schema_version": 1,
+            "receipt_id": "99999999-8888-4777-8666-555555555555",
+            "status": "RECOVERY_RETRY_COMPLETED",
+            "project_id": "workspace-control",
+            "lane": "cpu",
+            "scale_set_name": "lambda-workspace-control",
+            "old_scale_set_id": 70,
+            "new_scale_set_id": 80,
+            "reset_generation": prior_generation,
+            "automatic_workflow_triggered": False,
+            "job_id": "prior-job",
+            "result": "Succeeded",
+        }
+        ready.write_text(json.dumps(prior), encoding="utf-8")
+        generation = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
+
+        with (
+            mock.patch.object(
+                maintenance,
+                "_run",
+                return_value=mock.Mock(returncode=0, stdout="", stderr=""),
+            ),
+            mock.patch.object(maintenance, "_service_active", return_value=True),
+        ):
+            receipt = maintenance.apply_request(
+                request(
+                    "RESUME_LANE_AFTER_RESET",
+                    quarantine=qid,
+                    generation=generation,
+                    request_id="33333333-4444-4555-8666-777777777777",
+                ),
+                registry_path=self.registry_path,
+                controller_state_root=self.state_root,
+                receipts_dir=self.receipts,
+            )
+
+        history = lane / f"recovery-history-{prior_generation}.json"
+        self.assertFalse(ready.exists())
+        self.assertTrue(history.exists())
+        self.assertEqual(
+            json.loads(history.read_text(encoding="utf-8")),
+            prior,
+        )
+        self.assertEqual(
+            receipt["result"]["archived_previous_recovery"],
+            str(history),
+        )
+
+    def test_new_reset_rejects_nonterminal_prior_recovery_generation(self):
+        qid, _ = self.quarantine(scale_set_id=94)
+        lane = self.lane_state()
+        ready = lane / "ready-for-single-retry.json"
+        ready.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "receipt_id": "99999999-8888-4777-8666-555555555555",
+                    "status": "RECOVERY_RETRY_ACQUIRED",
+                    "project_id": "workspace-control",
+                    "lane": "cpu",
+                    "scale_set_name": "lambda-workspace-control",
+                    "old_scale_set_id": 70,
+                    "new_scale_set_id": 80,
+                    "reset_generation": "cccccccc-dddd-4eee-8fff-aaaaaaaaaaaa",
+                    "automatic_workflow_triggered": False,
+                    "job_id": "prior-job",
+                }
+            ),
+            encoding="utf-8",
+        )
+        calls = []
+
+        def fake_run(argv, check=True):
+            calls.append(argv)
+            return mock.Mock(returncode=0, stdout="", stderr="")
+
+        with (
+            mock.patch.object(maintenance, "_run", side_effect=fake_run),
+            mock.patch.object(maintenance, "_service_active", return_value=True),
+        ):
+            with self.assertRaisesRegex(
+                maintenance.MaintenanceError,
+                "previous recovery generation is not terminal",
+            ):
+                maintenance.apply_request(
+                    request(
+                        "RESUME_LANE_AFTER_RESET",
+                        quarantine=qid,
+                        generation="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+                        request_id="44444444-5555-4666-8777-888888888888",
+                    ),
+                    registry_path=self.registry_path,
+                    controller_state_root=self.state_root,
+                    receipts_dir=self.receipts,
+                )
+        starts = [argv for argv in calls if argv[:2] == ["systemctl", "start"]]
+        self.assertEqual(starts, [])
+
+
 if __name__ == "__main__":
     unittest.main()
