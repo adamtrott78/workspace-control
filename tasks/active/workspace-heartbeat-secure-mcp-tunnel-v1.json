@@ -223,14 +223,24 @@
         "HTTP 403 through ngrok-free.dev reproduced; production process not restarted or modified.",
         "Numeric traffic estimates documented but actual response bytes, ngrok attribution, and MCP Apps over tunnel remain unverified."
       ]
+    },
+    {
+      "check": "Live Lambda provenance recovery 2026-10-26",
+      "result": "PARTIAL",
+      "evidence": [
+        "Operator read-only inspection at 2026-10-26T21:49:27-04:00 verified local HTTP 200 on 127.0.0.1:8787, active node server.js child PID 1847970, and ngrok PID 1847986 forwarding the fixed ngrok-free.dev domain to 8787.",
+        "Runtime path /home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v047/plugins/workspace-heartbeat is at workspace-control@9e5858738a4fd11801510e2839b0f94f19541506 with package workspace-heartbeat 0.4.7; v046 rollback directory remains present.",
+        "Login shell reports Node v12.22.9, but the first pgrep match was launcher shell PID 1847969; exact executable/version for child PID 1847970 and launcher ancestry remain to verify before closing provenance.",
+        "No live process was restarted or modified."
+      ]
     }
   ],
   "blockers": [
     {
       "id": "lambda-live-provenance-and-bandwidth-measurement",
       "status": "OPEN",
-      "description": "No host shell/runtime connector available in this chat; exact live PID/source/launcher/ngrok/rollback and measured per-poll bytes remain unverified.",
-      "next_action": "Read-only Lambda operator inspection and isolated local payload instrumentation; no restart for discovery."
+      "description": "Live local Heartbeat source/CWD/port/ngrok process and rollback presence are now verified. Exact child Node executable/version, launcher ancestry, and measured per-poll bytes remain open.",
+      "next_action": "Resolve PID 1847970 executable/version and process ancestry read-only; then perform isolated local payload instrumentation on a separate port. No production restart."
     },
     {
       "id": "secure-mcp-tunnel-live-app-acceptance",
@@ -249,8 +259,8 @@
     "Perform live ChatGPT acceptance through Secure MCP Tunnel, including executor/card/semantic signal separation and one-second freshness.",
     "Retire ngrok from the normal Heartbeat path only after the Secure MCP Tunnel path is accepted; document rollback/emergency fallback."
   ],
-  "next_safe_action": "Perform read-only Lambda host provenance inspection and isolated payload measurement per procedures/workspace_heartbeat_secure_mcp_tunnel.md; verify actual Node/process/source/launcher/local MCP/ngrok/rollback; measure app-only snapshot wire-size and cadence separately from model Heartbeat tools; test outbound-only Secure MCP Tunnel embedded app resource and app-only snapshot in isolation. Do not restart live runtime merely for discovery or cut over before live acceptance.",
-  "last_executor": "chatgpt",
-  "last_surface": "github",
+  "next_safe_action": "Resolve the actual Node child PID 1847970 executable/version and launcher ancestry read-only. Then run an isolated Heartbeat instance on a separate port using the verified runtime executable, measure heartbeat_snapshot serialized response bytes/cadence independently from model MCP calls at bounded history sizes, and only then test outbound-only Secure MCP Tunnel embedded app/resource behavior. Do not restart or mutate live :8787 for discovery.",
+  "last_executor": "chatgpt+operator",
+  "last_surface": "github+lambda-operator",
   "notes": "Created 2026-10-26 after the operator identified the concrete cause of current Heartbeat connector failures: the free ngrok account exceeded its monthly network bandwidth allocation. The operator values the newly added executor-signal feature and reports that the card/server polls approximately once per second to show the latest executor signal. That feature is a requirement, not disposable overhead. The new task therefore treats transport and payload efficiency as the problem, not liveness semantics. Secure MCP Tunnel is the preferred direction if current official OpenAI support and limits are compatible. The task must empirically distinguish high-frequency live-card/app polling from heartbeat_touch model calls; do not assume they are the same traffic path. GitRunner work continues independently in its own task/chat.\n2026-10-26 discovery checkpoint: source-level audit confirms app-only heartbeat_snapshot retransmits full turn_history each poll; HTML source schedules 1500ms working / 3500ms other after response. Official OpenAI Secure MCP Tunnel docs confirm outbound-only private ChatGPT MCP path and defaults (600/min, 10MiB, 120s, 1000 queue), but embedded MCP Apps polling and end-to-end freshness require isolated live test. Heartbeat begin probe failed HTTP 403 ngrok-free.dev. Numeric byte budgets and exact unresolved Lambda host gates documented in procedures/workspace_heartbeat_secure_mcp_tunnel.md@4ecba691b6560c31ddba4b02e7c0223726306745. No Lambda restart, tunnel cutover, or ngrok retirement."
 }
