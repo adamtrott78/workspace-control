@@ -54,7 +54,7 @@ DEFERRED. Do nothing until the operator explicitly resumes workspace-shell-mcp-v
 
 https://github.com/adamtrott78/workspace-control
 
-Continue the durable task defined by:
+Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-shell-mcp-v1.json
 
 Start from the normal workspace-control root route.
