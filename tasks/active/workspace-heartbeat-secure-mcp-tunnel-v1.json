@@ -282,7 +282,17 @@
         "documented emergency fallback policy",
         "final bandwidth/traffic accounting"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Production cutover implementation exact-head CI",
+          "result": "PASS",
+          "evidence": [
+            "Cutover script scripts/workspace_heartbeat_secure_tunnel_cutover.sh and contract test tests/test_workspace_heartbeat_secure_tunnel_cutover.py are present on branch workspace-heartbeat-secure-mcp-tunnel-v1-current-main.",
+            "Exact head d9b6fb7232bf157beefc6bf30c894295422ef87f passed task contracts, unit regression, pinned Lambda controller validation, and FULL_INTEGRATION in GitHub Actions run 40447050727.",
+            "The script pins v0.4.8 candidate def7c5fe6498b1bd742d912c1490d1f7160cab5f, preserves v0.4.7/ngrok rollback, uses a 0600 file-backed runtime secret, refuses concurrent acceptance tunnel-client processes, and gates on MCP/tunnel readiness."
+          ]
+        }
+      ],
       "resume_condition": "Task acceptance criteria satisfied and durable state synchronized."
     }
   ],
@@ -443,7 +453,7 @@
     "Perform live ChatGPT acceptance through Secure MCP Tunnel for model tools, embedded app resource delivery, heartbeat_poll freshness, executor/semantic/card separation, and five/six-entry UI behavior.",
     "Only after acceptance, replace ngrok in the normal launcher path while preserving an operator-understandable rollback/emergency fallback and synchronize final task state."
   ],
-  "next_safe_action": "Freeze and implement the production cutover design without changing live Lambda yet: inspect the existing heartbeat-up/heartbeat-down operational contract and workspace-control references; define a v0.4.8 runtime install path, tunnel-client profile using file: secret reference outside Git with mode 0600, supervised launcher behavior, health/readiness gates, and explicit rollback to the accepted v0.4.7/ngrok path. Preserve the normal-operation rule that heartbeat_get is not used for routine live monitoring.",
+  "next_safe_action": "Operator: press Ctrl-C in the temporary Secure MCP Tunnel acceptance terminal so no second tunnel-client polls tunnel_6ae017d8655c8191976ef3bccc31f593. Then fetch exact cutover head d9b6fb7232bf157beefc6bf30c894295422ef87f on Lambda and run scripts/workspace_heartbeat_secure_tunnel_cutover.sh as the normal atrott user. Enter the dedicated runtime key only if prompted. Paste the non-secret output. Do not invoke heartbeat_get for routine monitoring.",
   "last_executor": "chatgpt+operator",
   "last_surface": "github+lambda-isolated",
   "notes": "Created 2026-10-26 after the operator identified the concrete cause of current Heartbeat connector failures: the free ngrok account exceeded its monthly network bandwidth allocation. The operator values the newly added executor-signal feature and reports that the card/server polls approximately once per second to show the latest executor signal. That feature is a requirement, not disposable overhead. The new task therefore treats transport and payload efficiency as the problem, not liveness semantics. Secure MCP Tunnel is the preferred direction if current official OpenAI support and limits are compatible. The task must empirically distinguish high-frequency live-card/app polling from heartbeat_touch model calls; do not assume they are the same traffic path. GitRunner work continues independently in its own task/chat.\n\n2026-10-26 current-main restage: live runtime provenance and isolated v0.4.7 bandwidth baseline are PASS. The original task branch diverged from main before task/GitRunner merges, so the Heartbeat-only candidate was restaged from current main 9bd1efff5409c97439df6fd37d44a0fb42e95a4a on workspace-heartbeat-secure-mcp-tunnel-v1-current-main. v0.4.8 implements a cache-busted app-only heartbeat_poll delta/resync path while retaining heartbeat_snapshot compatibility. No live deployment or ngrok retirement is authorized yet."
