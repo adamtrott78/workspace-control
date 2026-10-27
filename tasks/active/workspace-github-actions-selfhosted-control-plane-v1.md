@@ -36,14 +36,14 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Read-only incident inspection only. From Lambda, without starting/stopping/restarting/reloading any service, capture: systemctl show for workspace-ci-maintenance.service, workspace-ci-provisioner.service, workspace-ci-reconciler.service, workspace-ci-reconcile-controller.service, workspace-ci-controller@research-engine-cpu.service, workspace-ci-controller@research-engine-gpu.service, workspace-ci-controller@padataset-cpu.service, and workspace-ci-controller@padataset-gpu.service using LoadState,UnitFileState,ActiveState,SubState,ExecMainStatus,NRestarts; `ls -ld /run/workspace-ci /run/workspace-ci/maintenance` and `ls -l /run/workspace-ci/maintenance/maintenance.sock` if present; `journalctl -u workspace-ci-maintenance.service -n 120 --no-pager`; `journalctl -u workspace-ci-controller@research-engine-gpu.service -n 120 --no-pager`; and existence/hash/identity checks sufficient to determine whether rollback restored bootstrap-created files/users/groups. Return the complete read-only output. Do not perform recovery or retry before that evidence is durably accepted.
+Fresh independent review of PR #539 only. Review the final immutable PR head and the validated code/test checkpoint 70b413fc2cfe63226ead00804eba8ea6ef969c8e. Verify the Type=simple maintenance socket readiness wait is finite/fail-closed; non-CPU controller restoration is deferred until all L0 commissioning gates pass; post-start stabilization cannot widen controller authority; and the source-bound rollback-failed recovery helper accepts only the exact three-controller failed/failed ExecMainStatus=1 NRestarts=0 incident state while preserving research-engine CPU and healthy shared services. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda before that disposition.
 
 ## Remaining work
 
-- Perform read-only post-incident fingerprinting only: inspect maintenance root unit state, maintenance socket path, recent maintenance-root journal, provisioner/reconciler/reconcile-controller state, all four preserved controller snapshots, recent research-engine GPU journal, and rollback-restored bootstrap-created filesystem/identity state. Do not start/restart/stop/reload anything.
-- Use that evidence to determine whether the maintenance-root failure is a readiness race or a daemon/service failure, and why research-engine GPU entered failed/failed during rollback.
-- Design the narrow correction only after the live evidence is frozen; validate and independently review it before any recovery mutation or bootstrap retry.
-- After a corrected bootstrap PASS, issue exactly one real owner GitHub -> L0 maintenance DIAGNOSE_LANE command on issue #527 and prove the durable accepted receipt before workspace-control activation.
+- Validate the bounded maintenance-socket readiness / deferred-controller-restoration correction and exact-state rollback-failed recovery helper on a dedicated PR; obtain fresh independent exact-head review before merge or Lambda mutation.
+- After reviewed merge, run only the source-bound rollback-failed controller recovery helper from an exact detached checkout of that merge and inspect the complete receipt. It may start exactly research-engine GPU, PADataset CPU, and PADataset GPU; research-engine CPU must remain unchanged.
+- Only after recovery PASS, retry the rollback-safe P1 bootstrap from the exact reviewed merge SHA and inspect the complete bootstrap output/receipt before any later gate.
+- After bootstrap PASS, issue exactly one real owner GitHub -> L0 maintenance DIAGNOSE_LANE command on issue #527 and prove the durable accepted receipt before workspace-control activation.
 - Activate workspace-control only as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1; keep automatic pull_request/push admission disabled.
 - Validate live P1 filesystem isolation, CPU/RAM/runtime envelope, GPU0, exact candidate provenance, deterministic receipts, maintenance authorization/replay behavior, and clean teardown/rollback.
 - After live P1 acceptance, continue the separately gated work to remove routine GitHub-hosted Actions minutes; do not remove the last bootstrap path in the same change.
@@ -51,9 +51,9 @@ Read-only incident inspection only. From Lambda, without starting/stopping/resta
 
 ## Blockers / gates
 
-- The exact reviewed P1 bootstrap from 4d98555a678050e611502de1b9b8c35b4cf9c5fa crossed mutation and failed at the maintenance-root readiness gate with `maintenance root socket missing`; rollback could not certify completion because research-engine GPU ended loaded+enabled+failed/failed, ExecMainStatus=1, NRestarts=0.
-- No recovery, bootstrap retry, reconciliation, GitHub -> L0 command, workspace-control activation, or research-engine CPU restart is authorized until a read-only post-incident fingerprint establishes exact service/file/identity state and recent journals for the maintenance root and research-engine GPU.
-- Static inspection of the reviewed implementation shows a plausible startup-readiness race: workspace-ci-maintenance.service is Type=simple, the installer checks `systemctl is-active` immediately after `enable --now`, and then immediately requires `/run/workspace-ci/maintenance/maintenance.sock` with no readiness wait. This is a hypothesis pending live journal/state evidence, not yet an accepted root cause.
+- The live P1 bootstrap incident is understood but not yet repaired on Lambda. The accepted root causes are (1) an immediate Unix-socket readiness check against a Type=simple maintenance daemon and (2) restoring project controllers before later L0 gates, allowing rollback to stop freshly initializing controllers.
+- research-engine GPU, PADataset CPU, and PADataset GPU remain in the exact rollback-canceled failed/failed state with ExecMainStatus=1 and NRestarts=0. research-engine CPU remains intentionally quiesced at inactive/dead, ExecMainStatus=1, NRestarts=12411.
+- PR #539 code/test checkpoint 70b413fc2cfe63226ead00804eba8ea6ef969c8e passed Workspace Control Validation run #940. Fresh independent review of the final PR head remains the sole gate before merge/live recovery.
 - workspace-control activation remains separately blocked until a corrected bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization

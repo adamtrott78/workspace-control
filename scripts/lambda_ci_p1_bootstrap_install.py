@@ -41,6 +41,9 @@ EXPECTED_INSTALLER_RELATIVE_PATH = pathlib.Path(
 )
 RESEARCH_CPU_RECOVERED_MIN_RESTARTS = 11551  # compatibility for prior regression surface
 RESEARCH_CPU_STABILITY_SECONDS = 6
+MAINTENANCE_SOCKET_READY_TIMEOUT_SECONDS = 5
+MAINTENANCE_SOCKET_READY_POLL_SECONDS = 0.1
+PRESERVED_CONTROLLER_START_STABILITY_SECONDS = 2
 
 EXPECTED_INSTALLED_SHA256 = {
     "/opt/workspace-ci/controller/lambda-ci-controller": "11b0aa8d16eceaabdb5d3cf92d2d9525722bd73ff98960665eb857b39f6ef837",
@@ -273,6 +276,35 @@ def service_snapshot(name: str) -> dict[str, str]:
         "NRestarts",
         "ExecMainStatus",
     )
+
+
+def wait_for_socket_ready(
+    service: str,
+    path: pathlib.Path,
+    *,
+    timeout_seconds: float,
+) -> None:
+    """Wait for a Type=simple daemon to publish its Unix socket.
+
+    systemctl start may return once ExecStart has been launched even though the
+    daemon has not yet completed initialization and bound its socket. Fail
+    closed if the service exits or the bounded readiness window expires.
+    """
+    deadline = time.monotonic() + timeout_seconds
+    while True:
+        if path.is_socket():
+            return
+        if not service_active(service):
+            raise BootstrapError(
+                f"{service} exited before socket became ready: "
+                + json.dumps(service_snapshot(service), sort_keys=True)
+            )
+        if time.monotonic() >= deadline:
+            raise BootstrapError(
+                f"{service} socket did not become ready within "
+                f"{timeout_seconds:g}s: {path}"
+            )
+        time.sleep(MAINTENANCE_SOCKET_READY_POLL_SECONDS)
 
 
 def _research_cpu_stable_state_predicate(state: dict[str, str]) -> bool:
@@ -823,6 +855,10 @@ def _restore_dependency_stopped_preserved_controllers(
             )
 
         run(["systemctl", "start", service])
+        # systemctl may report a Type=simple controller active before its
+        # initial GitHub session setup has completed. Give the restored
+        # controller a bounded stabilization window before certifying it.
+        time.sleep(PRESERVED_CONTROLLER_START_STABILITY_SECONDS)
         after = service_snapshot(service)
         if (
             after.get("ActiveState") != "active"
@@ -1156,13 +1192,11 @@ def main() -> int:
 
         # Restarting the shared provisioner cleanly stops active controller
         # dependents because their unit Requires=workspace-ci-provisioner.
-        # Restore only the exact non-CPU controllers that were active in the
-        # pre-mutation snapshot and entered the reviewed clean dependency-stop
-        # state. Research-engine CPU remains preservation-only.
-        _restore_dependency_stopped_preserved_controllers(
-            manifest["preserved_services"]
-        )
-        _verify_preserved_services(manifest["preserved_services"])
+        # Keep those exact non-CPU controllers dependency-stopped until L0 is
+        # fully commissioned. If any L0 gate fails, rollback can then restore
+        # them once after the shared services are back instead of stopping a
+        # freshly-started controller during its initial GitHub session setup.
+        # Research-engine CPU remains preservation-only.
 
         # Install and commission L0. First --once call creates a watermark and
         # executes no historical comments by construction.
@@ -1172,8 +1206,11 @@ def main() -> int:
         maintenance_socket = pathlib.Path(
             "/run/workspace-ci/maintenance/maintenance.sock"
         )
-        if not maintenance_socket.is_socket():
-            raise BootstrapError("maintenance root socket missing")
+        wait_for_socket_ready(
+            MAINTENANCE_ROOT,
+            maintenance_socket,
+            timeout_seconds=MAINTENANCE_SOCKET_READY_TIMEOUT_SECONDS,
+        )
 
         cursor_path = pathlib.Path(
             "/var/lib/workspace-ci/maintenance-controller/cursor.json"
@@ -1216,6 +1253,13 @@ def main() -> int:
                 + journal.stdout[-12000:]
             )
 
+        # Only after every L0 readiness/commissioning gate has passed do we
+        # restore the exact three non-CPU controllers stopped by the shared
+        # provisioner restart. This prevents a later L0 failure from forcing
+        # rollback to stop controllers that are still initializing.
+        _restore_dependency_stopped_preserved_controllers(
+            manifest["preserved_services"]
+        )
         _verify_preserved_services(manifest["preserved_services"])
         research_cpu_final = service_snapshot(RESEARCH_CPU)
 
