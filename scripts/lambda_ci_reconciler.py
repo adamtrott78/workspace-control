@@ -861,10 +861,12 @@ def _assert_preserved_snapshots(
     snapshots: dict[str, dict[str, str]],
     *,
     context: str,
-) -> None:
+) -> dict[str, dict[str, str]]:
+    actual_snapshots: dict[str, dict[str, str]] = {}
     changed = []
     for service, expected in snapshots.items():
         actual = _service_snapshot(service)
+        actual_snapshots[service] = actual
         if actual != expected:
             changed.append(service)
     if changed:
@@ -872,6 +874,7 @@ def _assert_preserved_snapshots(
             f"{context} preserved controller service identity/state changed: "
             + ",".join(sorted(changed))
         )
+    return actual_snapshots
 
 
 def _assert_completed_restart_snapshots(
@@ -1160,17 +1163,13 @@ def apply_reconciliation(
             _atomic_write_json(receipt_path, in_progress, mode=0o600)
             completed.add(service)
 
-    _assert_preserved_snapshots(
+    preserved_after = _assert_preserved_snapshots(
         transaction["preserved_controller_services_before"],
         context="final",
     )
     _assert_completed_restart_snapshots(
         transaction["restarted_controller_services_after"]
     )
-    preserved_after = {
-        service: _service_snapshot(service)
-        for service in preserve_services
-    }
 
     receipt = {
         "schema_version": 1,
