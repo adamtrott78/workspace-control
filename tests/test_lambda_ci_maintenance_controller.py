@@ -83,6 +83,30 @@ class MaintenanceControllerTests(unittest.TestCase):
         )
         self.assertNotEqual(initial, recovery)
 
+
+    def test_root_request_only_carries_recovery_ids_for_recovery_verbs(self):
+        command = reset_command()
+        diagnose = controller.build_root_request(
+            comment_id=123,
+            command=command,
+            operation="DIAGNOSE_LANE",
+        )
+        self.assertIsNone(diagnose["quarantine_receipt_id"])
+        self.assertIsNone(diagnose["reset_generation"])
+
+        generation = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
+        requiesce = controller.build_root_request(
+            comment_id=123,
+            command=command,
+            operation="QUIESCE_LANE_FOR_RECOVERY",
+            reset_generation=generation,
+        )
+        self.assertEqual(
+            requiesce["quarantine_receipt_id"],
+            command["quarantine_receipt_id"],
+        )
+        self.assertEqual(requiesce["reset_generation"], generation)
+
     def test_load_controller_env_derives_path_and_overrides_runner_credential(self):
         with tempfile.TemporaryDirectory() as td:
             root = pathlib.Path(td)
@@ -129,6 +153,9 @@ class MaintenanceControllerTests(unittest.TestCase):
         helper_calls = []
         sleeps = []
 
+        generation_seen = {"value": None}
+        diag_count = {"value": 0}
+
         def root(_socket, *, comment_id, command, operation, reset_generation=None):
             root_calls.append((operation, reset_generation))
             if operation == "QUIESCE_LANE_FOR_RECOVERY":
@@ -140,13 +167,26 @@ class MaintenanceControllerTests(unittest.TestCase):
                     },
                 }
             if operation == "RESUME_LANE_AFTER_RESET":
+                generation_seen["value"] = reset_generation
                 return {"status": "COMPLETED", "result": {"service_active": True}}
             if operation == "DIAGNOSE_LANE":
-                return {
+                diag_count["value"] += 1
+                response = {
                     "status": "PASS",
                     "service_active": True,
                     "active_project_units": [],
+                    "ready_for_single_retry": None,
                 }
+                if diag_count["value"] >= 3:
+                    response["ready_for_single_retry"] = {
+                        "status": "READY_FOR_SINGLE_RETRY",
+                        "receipt_id": command["quarantine_receipt_id"],
+                        "reset_generation": generation_seen["value"],
+                        "old_scale_set_id": 77,
+                        "new_scale_set_id": 88,
+                        "automatic_workflow_triggered": False,
+                    }
+                return response
             raise AssertionError(operation)
 
         def helper(_binary, _env, operation, expected):
@@ -198,10 +238,15 @@ class MaintenanceControllerTests(unittest.TestCase):
         self.assertEqual(result["new_scale_set_id"], 88)
         self.assertFalse(result["automatic_workflow_triggered"])
         self.assertEqual(
+            result["controller_ready_receipt"]["status"],
+            "READY_FOR_SINGLE_RETRY",
+        )
+        self.assertEqual(
             [op for op, _ in root_calls],
             [
                 "QUIESCE_LANE_FOR_RECOVERY",
                 "RESUME_LANE_AFTER_RESET",
+                "DIAGNOSE_LANE",
                 "DIAGNOSE_LANE",
                 "DIAGNOSE_LANE",
             ],
@@ -212,6 +257,7 @@ class MaintenanceControllerTests(unittest.TestCase):
                 ("INSPECT", 77),
                 ("DELETE", 77),
                 ("INSPECT", 0),
+                ("INSPECT", 88),
                 ("INSPECT", 88),
             ],
         )
