@@ -487,8 +487,8 @@ def serve(
 
     socket_path.parent.mkdir(parents=True, exist_ok=True)
     if os.geteuid() == 0:
-        os.chown(socket_path.parent, 0, 0)
-    os.chmod(socket_path.parent, 0o711)
+        os.chown(socket_path.parent, 0, group.gr_gid)
+    os.chmod(socket_path.parent, 0o750)
     if socket_path.exists():
         socket_path.unlink()
     server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -540,7 +540,7 @@ def main() -> int:
     parser.add_argument(
         "--socket",
         type=pathlib.Path,
-        default=pathlib.Path("/run/workspace-ci/maintenance.sock"),
+        default=pathlib.Path("/run/workspace-ci/maintenance/maintenance.sock"),
     )
     parser.add_argument("--socket-group", default="workspace-ci-maintenance")
     parser.add_argument("--controller-user", default="ci-maintenance")
