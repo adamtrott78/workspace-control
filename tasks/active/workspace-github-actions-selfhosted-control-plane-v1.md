@@ -24,7 +24,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 - Intent: mutate
 - Remote branch: gitrunner-p1-implementation
-- Remote checkpoint: a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45
+- Remote checkpoint: 103c97e844647bb7fc234761fc17c7bbb829be3f
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Perform a fresh independent P1 implementation review of workspace-control PR #521. The exact implementation code checkpoint is a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45, validated by Workspace Control Validation run 40437708435 / job 121970360566. Review the exact implementation blobs recorded in this capsule and verify: BF-1 TotalAssignedJobs non-authority, durable assignment quarantine, exact stale-scale-set reset, duplicate replacement suppression, fresh scale-set identity, reset-pending quarantine, two complete zero-state observations >=15 seconds apart, policy-digest stability, controller-authored READY receipt, single-job recovery-generation consumption/completion, and maxRunners=1; BF-2 independent L0 maintenance path, SO_PEERCRED and owner/repository/comment attestation, fixed policy generation, typed verbs/derived targets only, installed policy digests, replay-safe COMPLETED/FAILED_CLOSED root receipts with rollback, no arbitrary shell/path/unit/property/credential/policy surface, and no direct L0 access to controller/provisioner/reconciler state. Re-check workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND state, concurrency=1, 200% CPU / 4G-8G / 10min / GPU0 envelope, same-repository owner-only workflow, isolation, independent bootstrap, and P2/P3 deferral. Return and durably record NO_BLOCKING_FINDING or exact actionable blockers. Do not install or activate P1 in the review task.
+Validate the BF-3 correction on exact code checkpoint 103c97e844647bb7fc234761fc17c7bbb829be3f without redundant manual reruns. Verify scripts/lambda_ci_runtime.py now consumes the root-authored launch spec forbidden_paths and emits deterministic systemd InaccessiblePaths for the exact manifest set, rejects malformed/duplicate/conflicting deny paths, preserves workspace-control's own required roots, and that adversarial tests prove sibling project roots and descendant trusted-cache paths are inaccessible. If the exact checkpoint validation passes, freeze the new implementation blobs and request a fresh independent implementation review focused on BF-3 plus regression of the previously accepted BF-1/BF-2 and scope/resource boundaries. Do not install, reconcile, activate, or trigger P1 before NO_BLOCKING_FINDING.
 
 ## Remaining work
 
@@ -48,7 +48,7 @@ Perform a fresh independent P1 implementation review of workspace-control PR #52
 
 ## Blockers / gates
 
-- P1 live installation/activation is blocked pending independent implementation review of PR #521 code checkpoint a9a3bf2c21a4c26d8dd1b52e2e81f15b85225f45 and exact implementation blobs.
+- BF-3 from independent implementation review 5661642118: workspace-control forbidden-path isolation must be enforced at the privileged runner launch boundary. Correction is implemented at code checkpoint 103c97e844647bb7fc234761fc17c7bbb829be3f and awaits exact-checkpoint repository validation plus fresh independent re-review before any P1 installation/activation.
 
 ## Fresh-chat initialization
 
