@@ -35,7 +35,7 @@ function createHarness(){
   const handlers=new Map();
   const messages=[];
   let timers=[],seq=0,hidden=false;
-  const first=snapshot(["First"]);
+  const first=snapshot(["One"]);
   const parent={postMessage(message){messages.push(message);}};
   const window={parent,openai:{toolInput:{task_id:"task-a"},toolOutput:{structuredContent:first}},addEventListener(name,fn){handlers.set("window:"+name,fn);}};
   const document={
@@ -61,11 +61,11 @@ function createHarness(){
   return {elems,messages,handleNext,flush,runTimer,get timers(){return timers},setHidden(x){hidden=x;handlers.get("document:visibilitychange")?.();},teardown(){handlers.get("window:message")?.({source:parent,data:{jsonrpc:"2.0",method:"ui/resource-teardown"}});}};
 }
 
-function snapshot(messages,{active=true,superseded=false,completed=false,includeTurnHistory=true}={}){
+function snapshot(messages,{active=true,superseded=false,completed=false,startSequence=1}={}){
   const history=messages.map((message,i)=>({
     task_id:"task-a",
     turn_id:"turn-a",
-    sequence:i+1,
+    sequence:startSequence+i,
     state:completed&&i===messages.length-1?"done":"working",
     message,
     updated_at:"2026-10-06T10:00:"+String(i+1).padStart(2,"0")+"Z"
@@ -76,20 +76,36 @@ function snapshot(messages,{active=true,superseded=false,completed=false,include
     turn_id:"turn-a",
     heartbeat:history.at(-1),
     recent,
-    ...(includeTurnHistory?{turn_history:history}:{}),
+    turn_history:history,
     active,
     superseded,
-    completed
+    completed,
+    last_executor_touch_at:"2026-10-06T10:00:00Z",
+    last_ui_seen_at:null
   };
 }
 
-test("one mounted card renders full history and reports intrinsic card height, not iframe viewport height",async()=>{
+function pollResult(messages,{afterSequence=1,turnStatus="active",resync=false,startSequence=1}={}){
+  const history=snapshot(messages,{completed:turnStatus==="completed",startSequence}).turn_history;
+  return {
+    task_id:"task-a",
+    turn_id:"turn-a",
+    turn_status:turnStatus,
+    updates:resync?history:history.filter(item=>item.sequence>afterSequence),
+    resync,
+    last_executor_touch_at:"2026-10-06T10:00:10Z",
+    last_ui_seen_at:"2026-10-06T10:00:11Z"
+  };
+}
+
+test("mounted card uses delta poll and preserves full rendered history and intrinsic sizing",async()=>{
   const h=createHarness();
   h.handleNext("ui/initialize",{});await h.flush();await h.runTimer();
-  const call=h.handleNext("tools/call",{structuredContent:snapshot(["One","Two","Three","Four","Five"])});
-  assert.equal(call.params.name,"heartbeat_snapshot");
+  const call=h.handleNext("tools/call",{structuredContent:pollResult(["One","Two","Three","Four","Five"])});
+  assert.equal(call.params.name,"heartbeat_poll");
   assert.equal(call.params.arguments.task_id,"task-a");
   assert.equal(call.params.arguments.turn_id,"turn-a");
+  assert.equal(call.params.arguments.after_sequence,1);
   await h.flush();
   assert.deepEqual(h.elems.get("history").children.map(x=>x.children[0].textContent),["One","Two","Three","Four","Five"]);
   assert.equal(h.elems.get("history").className,"history");
@@ -98,18 +114,30 @@ test("one mounted card renders full history and reports intrinsic card height, n
   assert.equal(h.messages.some(x=>x.method==="ui/notifications/size-changed"&&x.params.height===900),false);
 });
 
-test("live card falls back to latest-three when turn_history is absent",async()=>{
+test("no-change delta poll does not discard cached history",async()=>{
   const h=createHarness();
   h.handleNext("ui/initialize",{});await h.flush();await h.runTimer();
-  h.handleNext("tools/call",{structuredContent:snapshot(["One","Two","Three","Four","Five"],{includeTurnHistory:false})});
+  const call=h.handleNext("tools/call",{structuredContent:pollResult(["One"])});
   await h.flush();
-  assert.deepEqual(h.elems.get("history").children.map(x=>x.children[0].textContent),["Three","Four","Five"]);
+  assert.equal(call.params.arguments.after_sequence,1);
+  assert.deepEqual(h.elems.get("history").children.map(x=>x.children[0].textContent),["One"]);
+  assert.equal(h.elems.get("footer").textContent,"1 update · current turn · live");
+  assert.equal(h.elems.get("executor").textContent.startsWith("Executor signal:"),true);
+});
+
+test("bounded resync replaces cached history with retained server window",async()=>{
+  const h=createHarness();
+  h.handleNext("ui/initialize",{});await h.flush();await h.runTimer();
+  h.handleNext("tools/call",{structuredContent:pollResult(["Three","Four","Five","Six"],{resync:true,startSequence:3})});
+  await h.flush();
+  assert.deepEqual(h.elems.get("history").children.map(x=>x.children[0].textContent),["Three","Four","Five","Six"]);
+  assert.equal(h.elems.get("footer").textContent,"4 updates · current turn · live");
 });
 
 test("sixth update caps history at five-entry height and preserves deliberate upward scroll",async()=>{
   const h=createHarness();
   h.handleNext("ui/initialize",{});await h.flush();await h.runTimer();
-  h.handleNext("tools/call",{structuredContent:snapshot(["One","Two","Three","Four","Five"])});
+  h.handleNext("tools/call",{structuredContent:pollResult(["One","Two","Three","Four","Five"])});
   await h.flush();
   const history=h.elems.get("history");
   assert.equal(history.className,"history");
@@ -117,30 +145,32 @@ test("sixth update caps history at five-entry height and preserves deliberate up
 
   history.scrollTop=0;
   await h.runTimer();
-  h.handleNext("tools/call",{structuredContent:snapshot(["One","Two","Three","Four","Five","Six"])});
+  const call=h.handleNext("tools/call",{structuredContent:pollResult(["One","Two","Three","Four","Five","Six"],{afterSequence:5})});
+  assert.equal(call.params.arguments.after_sequence,5);
   await h.flush();
   assert.equal(history.className,"history capped");
   assert.equal(history.style.getPropertyValue("--five-update-height"),"250px");
   assert.equal(history.scrollTop,0);
 });
 
-test("superseded turn becomes static and stops polling",async()=>{
+test("superseded turn becomes static and stops polling without semantic retransmission",async()=>{
   const h=createHarness();
   h.handleNext("ui/initialize",{});await h.flush();await h.runTimer();
-  h.handleNext("tools/call",{structuredContent:snapshot(["One","Two"],{active:false,superseded:true})});
+  h.handleNext("tools/call",{structuredContent:pollResult(["One"],{turnStatus:"superseded"})});
   await h.flush();
   assert.equal(h.elems.get("state").textContent,"superseded");
   assert.equal(h.timers.length,0);
   assert.equal(h.elems.get("footer").textContent,"Prior assistant turn · no longer live");
 });
 
-test("completed turn stops polling",async()=>{
+test("completed turn stops polling after final delta",async()=>{
   const h=createHarness();
   h.handleNext("ui/initialize",{});await h.flush();await h.runTimer();
-  h.handleNext("tools/call",{structuredContent:snapshot(["One","Done"],{active:false,completed:true})});
+  h.handleNext("tools/call",{structuredContent:pollResult(["One","Done"],{turnStatus:"completed"})});
   await h.flush();
   assert.equal(h.elems.get("state").textContent,"done");
   assert.equal(h.timers.length,0);
+  assert.equal(h.elems.get("footer").textContent,"Turn complete · no longer live");
 });
 
 test("hidden and torn-down widgets do not keep polling",async()=>{
