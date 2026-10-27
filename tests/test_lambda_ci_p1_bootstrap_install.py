@@ -180,6 +180,91 @@ class P1BootstrapInstallerTests(unittest.TestCase):
             ):
                 module.verify_research_cpu_recovered_and_stable()
 
+    def test_recovered_cpu_baseline_cannot_rebase_before_mutation(self):
+        module = load_module()
+        expected = {
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "UnitFileState": "enabled",
+            "NRestarts": "11551",
+            "ExecMainStatus": "0",
+        }
+        rebased = dict(expected)
+        rebased["NRestarts"] = "11552"
+        with self.assertRaisesRegex(
+            module.BootstrapError,
+            "restart count changed after stability check",
+        ):
+            module.assert_research_cpu_preserved_baseline(
+                expected,
+                {module.RESEARCH_CPU: rebased},
+            )
+
+    def test_recovered_cpu_failure_at_backup_boundary_aborts(self):
+        module = load_module()
+        expected = {
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "UnitFileState": "enabled",
+            "NRestarts": "11551",
+            "ExecMainStatus": "0",
+        }
+        failed = dict(expected)
+        failed["ActiveState"] = "failed"
+        failed["SubState"] = "failed"
+        failed["ExecMainStatus"] = "1"
+        with self.assertRaisesRegex(
+            module.BootstrapError,
+            "no longer satisfies recovered predicate",
+        ):
+            module.assert_research_cpu_preserved_baseline(
+                expected,
+                {module.RESEARCH_CPU: failed},
+            )
+
+    def test_preserved_live_recheck_catches_post_backup_restart(self):
+        module = load_module()
+        baseline = {
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "UnitFileState": "enabled",
+            "NRestarts": "11551",
+            "ExecMainStatus": "0",
+        }
+        restarted = dict(baseline)
+        restarted["NRestarts"] = "11552"
+        with mock.patch.object(
+            module,
+            "service_snapshot",
+            return_value=restarted,
+        ):
+            with self.assertRaisesRegex(
+                module.BootstrapError,
+                "preserved controller restart count changed",
+            ):
+                module._verify_preserved_services(
+                    {module.RESEARCH_CPU: baseline}
+                )
+
+    def test_recovered_cpu_rechecks_are_immediately_before_mutation(self):
+        raw = SCRIPT.read_text(encoding="utf-8")
+        backup = raw.index("manifest = backup_targets(backup)")
+        bind = raw.index("assert_research_cpu_preserved_baseline(", backup)
+        live = raw.index(
+            '_verify_preserved_services(manifest["preserved_services"])',
+            bind,
+        )
+        mutate = raw.index("begin_mutation_phase(manifest)", live)
+        self.assertLess(backup, bind)
+        self.assertLess(bind, live)
+        self.assertLess(live, mutate)
+        between = raw[live:mutate]
+        self.assertNotIn("install_file(", between)
+        self.assertNotIn("systemctl", between)
+
     def test_failure_freezing_reconcile_controller_rolls_back(self):
         module = load_module()
         manifest = {"sentinel": True}
