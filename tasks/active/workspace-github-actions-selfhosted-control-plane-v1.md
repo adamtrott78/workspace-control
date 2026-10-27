@@ -24,7 +24,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 - Intent: mutate
 - Remote branch: github-actions-selfhosted-control-plane-v1
-- Remote checkpoint: d3b2c12f6e33f35fa7613fe19ae645579cc00c30
+- Remote checkpoint: c69f6632c6274312f6fb0449d9f4d7789319fd7c
 - Remote verified: true
 
 ### research-engine
@@ -36,25 +36,25 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Continue the permanent GitRunner/self-hosted control-plane task, not EXTRACT science. Independently review PR #508 against the exact frozen v0.1 architecture blob f70f100ba57140469ff656255de00f7de262dbc3 and NOT_INSTALLED workspace-control manifest blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588, explicitly incorporating runtime-evidence comments 6405597751 and 6408089808. Persist either NO_BLOCKING_FINDING or exact blocking findings. Do not activate a workspace-control runner before that disposition. If review is clean, implement only the P1 owner-commanded workspace-control JIT validation pilot while leaving bootstrap reconciliation authority independent. If runtime evidence blocks v0.1, revise/freeze a bounded v0.2 and re-review before implementation. Do not continue workspace-local-extract-independent-review-v1 inside this task.
+Revise and freeze a bounded v0.2 control-plane design before any P1 activation. v0.2 must address BF-1 authoritative stale-assignment recovery (fail-closed divergence detection, lane quarantine, bounded cleanup/reset, zero-live/stale proof before retrigger, duplicate-trigger suppression, receipts/tests) and BF-2 bounded owner-restricted privileged maintenance/recovery authority (allowlisted verbs/targets, exact trusted identity/blob checks, root-side validation, no arbitrary root command surface, non-circular recovery, receipts/rollback). Keep P1 serialized at concurrency=1/maxRunners=1 temporarily; do not increase capacity until resource-aware host arbitration is separately reviewed. Preserve independent L0 bootstrap, workspace-control isolation, transport-versus-execution authority separation, P3 organization deferral, and existing rollback paths. Freeze exact v0.2 architecture/manifest blobs and obtain a fresh independent review before implementation. Do not activate a live workspace-control runner and do not continue EXTRACT science in this task.
 
 ## Remaining work
 
-- Obtain and durably consume independent review of exact v0.1 design/manifest.
-- After the independent review, explicitly decide whether the observed stale-assignment, single-slot queue poisoning, global host serialization, and operator-shell recovery evidence requires a reviewed v0.2 design before P1 activation.
-- After NO_BLOCKING_FINDING, implement and validate the P1 owner-commanded workspace-control JIT pilot without moving bootstrap reconciliation authority.
+- Revise and freeze a bounded v0.2 control-plane design addressing BF-1 stale-assignment recovery and BF-2 privileged maintenance/recovery authority without widening scientific or execution authority.
+- Make v0.2 explicitly preserve P1 host-wide serialization/concurrency=1 as a temporary safe constraint; do not raise maxRunners until separately reviewed resource-aware host arbitration exists.
+- Freeze exact v0.2 architecture and workspace-control manifest blobs, then obtain a fresh independent preimplementation review.
+- Only after v0.2 receives NO_BLOCKING_FINDING, implement and validate the P1 owner-commanded workspace-control JIT pilot while leaving bootstrap reconciliation authority independent.
+- Design/review resource-aware host arbitration before any runner-count/concurrency increase; preserve explicit CPU/RAM/GPU envelopes and fail-closed admission.
 - Design/review control-small and automatic pull_request/push admission as P2.
 - Migrate routine hosted CI only after the pilot and automatic-event gates pass.
-- Evaluate and separately execute GitHub organization migration with runner groups and least-privilege GitHub App credentials.
-- Automate routine review request/consumption so the operator does not ferry text between chats.
-- Treat stale GitHub scale-set assignment recovery as a required controller reliability fix: a controller restart must not leave TotalAssignedJobs>0 without authoritative recoverable job metadata indefinitely blocking the lane.
-- Replace hard-coded maxRunners=1 and host-wide global serialization with separately reviewed bounded/resource-aware concurrency; preserve explicit GPU/CPU envelopes and fail-closed admission.
-- Add trusted, owner-restricted remote maintenance/reconciliation actions for controller restart, reviewed profile installation, and bounded recovery so routine operations do not require operator shell copy/paste.
-- Retire the temporary public workspace-control and GPU-listener transport workarounds only after a reviewed replacement path is live and rollback-safe.
+- Evaluate and separately execute GitHub organization migration with configurable runner-group IDs, organization-scoped GitHub configuration, owner/repository attestation migration, and least-privilege GitHub App credentials.
+- Automate routine review request/consumption so the operator does not ferry text between chats while preserving reviewer independence.
+- Retire the temporary public workspace-control and GPU-listener transport workarounds only after reviewed replacement paths are live and rollback-safe.
 
 ## Blockers / gates
 
-- Live workspace-control self-hosted activation is blocked pending independent review of exact v0.1 design/manifest plus the post-freeze runtime incident evidence on PR #508.
+- BF-1 PRE-P1 BLOCKER: frozen v0.1 does not define authoritative stale GitHub scale-set assignment recovery. A controller restart can observe TotalAssignedJobs>0 while incomplete JobAssigned metadata prevents authoritative job reconstruction; maxRunners=1 then wedges the lane. v0.2 must freeze fail-closed divergence detection, lane quarantine/no-new-acquisition, bounded cleanup/reset, proof of zero live/stale assignments before one replacement trigger, duplicate-trigger suppression, receipts, and restart recovery tests without merely raising maxRunners.
+- BF-2 PRE-P1 DESIGN BLOCKER: frozen v0.1 does not define bounded owner-restricted privileged maintenance/recovery authority. v0.2 must freeze an allowlisted maintenance command surface with exact trusted identity/blob checks, root-side validation, durable receipts and rollback, no arbitrary shell/path/systemd-property authority, no untrusted/fork invocation, and no circular dependence on the L1 fleet as its own sole repair authority.
 
 ## Fresh-chat initialization
 
