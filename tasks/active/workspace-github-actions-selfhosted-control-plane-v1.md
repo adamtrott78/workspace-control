@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge 74d565c4e6ce4954157c46e3289c952b4a1da7fd with --expected-head set to that exact SHA and capture full output. The bootstrap must attest its own executing __file__ inside the reviewed checkout, preserve research-engine CPU in its accepted stable inactive/dead state, build the controller in the private ci-controller-owned 0700 staging root, and leave workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive. Return the complete bootstrap output before any GitHub -> L0 diagnose or workspace-control activation.
+Operator: perform one read-only post-rollback incident fingerprint on Lambda. Capture exact service state/timestamps for provisioner, reconciler, reconcile-controller, research-engine CPU/GPU, PADataset CPU/GPU, and maintenance services; capture recent journal for research-engine GPU; capture ci-maintenance/workspace-ci-maintenance identity/group metadata; capture existence/hash metadata for bootstrap-touched files and maintenance state paths. Do not start/restart/stop/enable/disable any unit, do not reconcile, do not rerun bootstrap, and do not mutate files. Return the complete diagnostic output. Owner then determines whether rollback restored files/state, why research-engine GPU exited cleanly, and freezes the minimum independently reviewed recovery/correction.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exac
 
 ## Blockers / gates
 
-- PR #535 corrected bootstrap staging/source-attestation change is independently accepted and merged as workspace-control@74d565c4e6ce4954157c46e3289c952b4a1da7fd. The next gate is one rollback-safe live bootstrap retry from that exact reviewed merge SHA, with full output/receipt inspection before any later action.
-- The research-engine CPU controller remains intentionally quiesced from the accepted pre-bootstrap helper receipt and must remain preservation-only; the bootstrap is not authorized to deliberately start/restart it.
-- workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
+- Live bootstrap from reviewed merge 74d565c4e6ce4954157c46e3289c952b4a1da7fd crossed into the mutation phase and failed on deterministic maintenance-identity validation: systemd-sysusers created ci-maintenance with workspace-ci-maintenance as supplementary membership, while the installer incorrectly required that group to be the account primary GID.
+- Rollback restored its authorized targets but finished INCOMPLETE because final preserved-service verification found workspace-ci-controller@research-engine-gpu.service loaded/enabled but inactive/dead with ExecMainStatus=0 and NRestarts=0. Current live host state must be fingerprinted read-only before any repair or retry.
+- No further bootstrap, service restart, reconciliation, workspace-control activation, L0 diagnose, or research-engine CPU restart is authorized until the post-rollback live fingerprint is captured and independently bounded recovery is defined.
 
 ## Fresh-chat initialization
 
