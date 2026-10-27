@@ -1002,9 +1002,21 @@ func (s *scaler) consumeReadyForSingleRetry(
 		return fmt.Errorf("parse recovery retry gate: %w", err)
 	}
 	status, _ := receipt["status"].(string)
-	if status == "RECOVERY_RETRY_ACQUIRED" ||
-		status == "RECOVERY_RETRY_COMPLETED" {
+	if status == "RECOVERY_RETRY_COMPLETED" {
 		return nil
+	}
+	if status == "RECOVERY_RETRY_ACQUIRED" {
+		jobID, _ := receipt["job_id"].(string)
+		runID, _ := receipt["workflow_run_id"].(float64)
+		if jobID == attestation.JobID &&
+			int64(runID) == attestation.WorkflowRunID {
+			return nil
+		}
+		return fmt.Errorf(
+			"recovery retry generation already consumed by job %q workflow_run_id=%d",
+			jobID,
+			int64(runID),
+		)
 	}
 	if status != "READY_FOR_SINGLE_RETRY" {
 		return fmt.Errorf("recovery retry gate status is invalid: %q", status)
