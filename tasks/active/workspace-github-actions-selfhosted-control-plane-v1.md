@@ -24,7 +24,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 - Intent: mutate
 - Remote branch: gitrunner-p1-bootstrap-stable-cpu-preservation
-- Remote checkpoint: 41540399b2257ac9427e7ec55f08c03496f280af
+- Remote checkpoint: 5f440eafd04839c6d10a5ce06e7955613639f47b
 - Remote verified: false
 
 ### research-engine
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate the exact stable-state research-engine CPU preservation correction. The live bootstrap must no longer require research-engine CPU to be active and must never stop/restart it. It may proceed only if two pre-mutation observations six seconds apart are exactly identical and fall in one reviewed stable state: active/running with ExecMainStatus=0; inactive/dead; or failed/failed with nonzero ExecMainStatus. The backup snapshot must exactly equal that preflight state, followed by a fresh exact live recheck immediately before begin_mutation_phase(). Transitional/changing states must abort before mutation. If validation passes, request fresh independent review before any Lambda retry.
+Validate the corrected PR #532 head after closing the malformed ExecMainStatus gap. The stable-state predicate must require ExecMainStatus to be explicitly present, parseable as an integer, and nonnegative before classification; active/running must require 0; failed/failed must require real nonzero; inactive/dead may accept only a present valid nonnegative value. Dedicated regression tests must reject missing, empty, negative, and non-integer ExecMainStatus for inactive and failed states. If exact-head validation passes, request a fresh independent re-review; do not merge or retry Lambda until NO_BLOCKING_FINDING is recorded on the corrected head.
 
 ## Remaining work
 
@@ -49,7 +49,8 @@ Validate the exact stable-state research-engine CPU preservation correction. The
 
 ## Blockers / gates
 
-- Third live bootstrap retry from reviewed merge b1edcad200faf389c55b37b37d946d90dfc298e6 aborted before mutation because workspace-ci-controller@research-engine-cpu.service was no longer active. The prior recovered-CPU design was therefore stale. A bounded stable-state preservation correction is implemented and requires exact validation plus fresh independent review before another Lambda retry.
+- Independent review 5662757200 on PR #532 old head f6a1d723a1ec33ccb3e8ecbb1e93122cdba3ea7a found a narrow malformed-state gap: missing/empty ExecMainStatus became -1 and could be accepted for inactive/dead or failed/failed. The PR head has advanced with a bounded correction and regression coverage; the old blocking review remains authoritative for the old head but does not describe the corrected head.
+- The corrected PR #532 head must pass exact validation and receive a fresh independent re-review before merge or any Lambda retry.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
