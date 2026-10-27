@@ -219,18 +219,23 @@ def prove_persistent_restart_storm() -> dict[str, Any]:
     no_active_research_execution()
 
     first = service_snapshot(RESEARCH_CPU)
+    if _stable_state_predicate(first):
+        time.sleep(STORM_OBSERVATION_SECONDS)
+        stable_second = service_snapshot(RESEARCH_CPU)
+        if stable_second == first and _stable_state_predicate(stable_second):
+            return {
+                "status": "NO_QUIESCE_REQUIRED",
+                "reason": "research CPU is already exactly stable",
+                "stable_state": stable_second,
+            }
+        first = stable_second
+
     first_restarts = _restart_storm_sample(first)
 
     time.sleep(STORM_OBSERVATION_SECONDS)
     second = service_snapshot(RESEARCH_CPU)
     second_restarts = _restart_storm_sample(second)
     if second_restarts <= first_restarts:
-        if second == first and _stable_state_predicate(second):
-            return {
-                "status": "NO_QUIESCE_REQUIRED",
-                "reason": "research CPU became exactly stable",
-                "stable_state": second,
-            }
         raise QuiesceError(
             "research CPU restart count did not increase during storm observation: "
             + json.dumps({"first": first, "second": second}, sort_keys=True)
