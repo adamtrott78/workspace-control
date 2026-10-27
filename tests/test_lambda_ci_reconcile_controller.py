@@ -50,6 +50,9 @@ class FakeGitHub:
         pad_raw = (
             ROOT / "architecture/lambda-ci-project-padataset.v1.json"
         ).read_bytes()
+        workspace_raw = (
+            ROOT / "architecture/lambda-ci-project-workspace-control.v1.json"
+        ).read_bytes()
 
         approved = {
             controller.WORKFLOW_PATH: (workflow_raw, git_blob_sha(workflow_raw)),
@@ -68,6 +71,10 @@ class FakeGitHub:
             "architecture/lambda-ci-project-padataset.v1.json": (
                 pad_raw,
                 git_blob_sha(pad_raw),
+            ),
+            "architecture/lambda-ci-project-workspace-control.v1.json": (
+                workspace_raw,
+                git_blob_sha(workspace_raw),
             ),
         }
         current = copy_docs(approved)
@@ -207,7 +214,7 @@ class ReconcileControllerTests(unittest.TestCase):
         )
         self.assertEqual(
             [item["project_id"] for item in request["project_manifests"]],
-            ["padataset", "research-engine"],
+            ["padataset", "research-engine", "workspace-control"],
         )
         # Route documents legitimately contain reviewed trigger commands.
         # What must remain impossible is arbitrary executable/root authority in
