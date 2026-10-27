@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: b1edcad200faf389c55b37b37d946d90dfc298e6
-- Remote verified: true
+- Remote branch: gitrunner-p1-bootstrap-stable-cpu-preservation
+- Remote checkpoint: 41540399b2257ac9427e7ec55f08c03496f280af
+- Remote verified: false
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge b1edcad200faf389c55b37b37d946d90dfc298e6, with --expected-head set to that exact SHA and full output captured. The installer must preserve all four existing project/lane controllers, including recovered research-engine CPU; bind the recovered CPU backup snapshot to the original stable preflight NRestarts baseline; perform a fresh live preserved-service recheck immediately before the sole initial mutation (stopping automatic reconcile-controller); leave workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive; leave automatic reconcile-controller frozen on success; and rollback on any failed post-mutation gate. Return the complete output/receipt before any GitHub -> L0 diagnose or workspace-control activation.
+Validate the exact stable-state research-engine CPU preservation correction. The live bootstrap must no longer require research-engine CPU to be active and must never stop/restart it. It may proceed only if two pre-mutation observations six seconds apart are exactly identical and fall in one reviewed stable state: active/running with ExecMainStatus=0; inactive/dead; or failed/failed with nonzero ExecMainStatus. The backup snapshot must exactly equal that preflight state, followed by a fresh exact live recheck immediately before begin_mutation_phase(). Transitional/changing states must abort before mutation. If validation passes, request fresh independent review before any Lambda retry.
 
 ## Remaining work
 
@@ -49,7 +49,7 @@ Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exac
 
 ## Blockers / gates
 
-- The exact corrected recovered-CPU mutation-boundary implementation is independently accepted and merged as workspace-control@b1edcad200faf389c55b37b37d946d90dfc298e6. The next gate is the bounded live bootstrap retry from that exact reviewed merge SHA; any live drift/failure must abort before mutation or rollback according to the reviewed installer.
+- Third live bootstrap retry from reviewed merge b1edcad200faf389c55b37b37d946d90dfc298e6 aborted before mutation because workspace-ci-controller@research-engine-cpu.service was no longer active. The prior recovered-CPU design was therefore stale. A bounded stable-state preservation correction is implemented and requires exact validation plus fresh independent review before another Lambda retry.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
