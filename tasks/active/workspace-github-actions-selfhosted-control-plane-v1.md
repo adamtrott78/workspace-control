@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate the bounded correction PR containing: (1) a finite fail-closed wait for the Type=simple maintenance root Unix socket, (2) deferred restoration of dependency-stopped non-CPU controllers until all L0 readiness/commissioning gates pass, (3) post-start controller stabilization before certification, and (4) a source-bound one-shot recovery helper restricted to the exact current three-controller failed/failed ExecMainStatus=1 NRestarts=0 incident state. Obtain a fresh independent exact-head NO_BLOCKING_FINDING before merge or any Lambda mutation. Do not recover, retry bootstrap, diagnose L0, reconcile, activate workspace-control, or restart research-engine CPU before that review.
+Fresh independent review of PR #539 only. Review the final immutable PR head and the validated code/test checkpoint 70b413fc2cfe63226ead00804eba8ea6ef969c8e. Verify the Type=simple maintenance socket readiness wait is finite/fail-closed; non-CPU controller restoration is deferred until all L0 commissioning gates pass; post-start stabilization cannot widen controller authority; and the source-bound rollback-failed recovery helper accepts only the exact three-controller failed/failed ExecMainStatus=1 NRestarts=0 incident state while preserving research-engine CPU and healthy shared services. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda before that disposition.
 
 ## Remaining work
 
@@ -53,7 +53,7 @@ Validate the bounded correction PR containing: (1) a finite fail-closed wait for
 
 - The live P1 bootstrap incident is understood but not yet repaired on Lambda. The accepted root causes are (1) an immediate Unix-socket readiness check against a Type=simple maintenance daemon and (2) restoring project controllers before later L0 gates, allowing rollback to stop freshly initializing controllers.
 - research-engine GPU, PADataset CPU, and PADataset GPU remain in the exact rollback-canceled failed/failed state with ExecMainStatus=1 and NRestarts=0. research-engine CPU remains intentionally quiesced at inactive/dead, ExecMainStatus=1, NRestarts=12411.
-- No live recovery or bootstrap retry is authorized until the bounded readiness/sequencing correction and exact-state recovery helper pass repository validation and fresh independent review.
+- PR #539 code/test checkpoint 70b413fc2cfe63226ead00804eba8ea6ef969c8e passed Workspace Control Validation run #940. Fresh independent review of the final PR head remains the sole gate before merge/live recovery.
 - workspace-control activation remains separately blocked until a corrected bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
