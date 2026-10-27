@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: gitrunner-p1-bootstrap-shared-restart-recovery
-- Remote checkpoint: 7e8aefa6f759b11a6de4e087cdb050267c6aae34
-- Remote verified: false
+- Remote branch: main
+- Remote checkpoint: 4d98555a678050e611502de1b9b8c35b4cf9c5fa
+- Remote verified: true
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Request fresh independent corrected-head review of PR #536 after closing BF-1. Verify no_active_project_execution() requires systemctl list-units returncode exactly 0 before interpreting stdout, so any nonzero result fails closed. Verify regression coverage proves a nonzero pre-recovery inspection aborts before the exact three-controller systemctl start mutation and a nonzero post-start inspection rejects final certification. Regression-check all previously accepted PR #536 boundaries: maintenance supplementary-group correction, dependency-stop restoration, research-engine CPU preservation-only behavior, exact source provenance, exact incident-state predicates, and exact three-controller mutation scope. Do not merge or mutate Lambda until NO_BLOCKING_FINDING is recorded on the exact final head.
+Operator: execute scripts/lambda_ci_p1_restore_dependency_stopped_controllers.py from a detached exact checkout of reviewed merge 4d98555a678050e611502de1b9b8c35b4cf9c5fa with --expected-head set to that exact SHA and capture full output. The helper must fail closed unless shared provisioner/reconciler/reconcile-controller are active/running, no research-engine/PADataset execution units are active, research-engine CPU exactly remains loaded+enabled+inactive/dead+ExecMainStatus=1+NRestarts=12411, and research-engine GPU/PADataset CPU/PADataset GPU are each loaded+enabled+inactive/dead+ExecMainStatus=0+NRestarts=0. Sole authorized mutation is one systemctl start command containing exactly those three non-CPU controller units. Return the complete P1_DEPENDENCY_STOPPED_CONTROLLER_RECOVERY_RECEIPT before any bootstrap retry.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Request fresh independent corrected-head review of PR #536 after closing BF-1. V
 
 ## Blockers / gates
 
-- Independent review comment 6436235254 on PR #536 old head f31938895203a4867207138bd9c40bac061a1992 found BF-1: incident recovery accepted systemctl list-units rc=1, allowing execution-state inspection to fail open before mutation and during final certification. That old head must not be merged or used for Lambda mutation.
-- BF-1 is corrected on PR #536 code/test head 7e8aefa6f759b11a6de4e087cdb050267c6aae34: execution-state inspection now requires returncode == 0 before stdout is interpreted. Dedicated regressions prove nonzero inspection aborts before any controller start and also rejects post-start final certification. Exact validation run 40467491614 / job 122066437641 / run #932 completed SUCCESS. Fresh independent corrected-head review remains required before merge or live recovery.
-- No bootstrap retry, workspace-control activation, reconciliation, L0 diagnose, or research-engine CPU restart is authorized until PR #536 exact final head receives NO_BLOCKING_FINDING and the bounded recovery helper restores the three dependency-stopped controllers.
+- PR #536 corrected post-rollback recovery and bootstrap dependency-stop handling is independently accepted and merged as workspace-control@4d98555a678050e611502de1b9b8c35b4cf9c5fa. The next gate is one operator-executed incident recovery helper run from that exact reviewed merge SHA.
+- The recovery helper may start only research-engine GPU, PADataset CPU, and PADataset GPU if and only if the live host still exactly matches the captured incident state. Research-engine CPU must remain unchanged at inactive/dead, ExecMainStatus=1, NRestarts=12411.
+- No bootstrap retry, workspace-control activation, reconciliation, L0 diagnose, or research-engine CPU restart is authorized until the recovery receipt is inspected and accepted.
 
 ## Fresh-chat initialization
 
