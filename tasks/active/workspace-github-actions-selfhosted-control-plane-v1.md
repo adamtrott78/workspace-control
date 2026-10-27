@@ -24,7 +24,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 - Intent: mutate
 - Remote branch: gitrunner-p1-bootstrap-preserve-recovered-cpu
-- Remote checkpoint: a4b1fc0c4062408873f557d215061b8f90a475b9
+- Remote checkpoint: 44630dea4e01d7ffb44edde58a5f192bb8f2f2bd
 - Remote verified: false
 
 ### research-engine
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate the exact preserve-recovered-CPU bootstrap correction. Verify research-engine CPU is treated as a fourth preserved controller, excluded from MUTATED_SERVICES and from all stop/restart paths, requires two stable pre-mutation active/running observations with ExecMainStatus=0 and stable NRestarts >=11551, and remains restart-count-stable across bootstrap. If validation passes, obtain fresh independent review before retrying Lambda. Do not retry the installer until NO_BLOCKING_FINDING is durably recorded.
+Validate the corrected PR #531 head after closing the recovered-CPU stability rebasing gap. Verify that after backup_targets() and immediately before begin_mutation_phase(), the preserved RESEARCH_CPU snapshot still satisfies the recovered predicate and exactly matches research_cpu_pre NRestarts, then perform a fresh live _verify_preserved_services() at the mutation boundary. Regression tests must inject both restart-count drift and failure between the earlier two-observation check and mutation. If exact-head validation passes, request fresh independent re-review; do not merge or retry Lambda until the corrected head receives NO_BLOCKING_FINDING.
 
 ## Remaining work
 
@@ -49,7 +49,8 @@ Validate the exact preserve-recovered-CPU bootstrap correction. Verify research-
 
 ## Blockers / gates
 
-- Second live bootstrap retry from reviewed merge 0e7c31b7a37949b1c0b33f7202fe8fd694685004 aborted before mutation because research-engine CPU had recovered to active/running with ExecMainStatus=0 and NRestarts=11551. The installer correctly refused the previously-reviewed deliberate restart. A bounded preserve-recovered-CPU correction is implemented and requires exact validation plus fresh independent review before another retry.
+- PR #531 review at old head 096396d0383ddd9f17bb95a6117ba41508bf1a2f recorded NO_BLOCKING_FINDING, but a fresh call-path audit found a pre-mutation stability-rebasing gap: research-engine CPU could restart after the two-observation check and before begin_mutation_phase(), then backup_targets() could silently establish the new restart count as the preserved baseline. The PR head has been advanced with a bounded correction; the old review is stale and does not authorize merge/retry.
+- The corrected #531 head must pass exact validation and receive a fresh independent review before any third Lambda retry.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
