@@ -18,10 +18,14 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Empirically verify that future Chat-mode model transitions preserve the full workspace-control operating experience with equal or better accuracy, precision, durability, and operational safety. Build a frozen GPT-5.6 Sol Chat golden baseline and run the same black-box benchmark corpus in GPT-6 Chat, with special emphasis on whether individual tool operations or internally delegated execution steps lose procedural context and whether workspace-control/GitRunner deterministic authority boundaries contain such losses safely. The supported operator surface remains ordinary Chat mode; Work/Codex or other token-metered execution surfaces are not acceptable substitutes for compatibility.
 
-## Current disposition
+## Repositories
 
-- Intentionally suspended. Do not let this task interrupt GitRunner P1 or current system restoration.
-- Resume after critical functionality is restored, or earlier only if GPT-5.6 Sol availability becomes time-sensitive for golden-baseline capture.
+### workspace-control
+
+- Intent: mutate
+- Remote branch: workspace-chat-executor-compatibility-v1
+- Remote checkpoint: 9bd1efff5409c97439df6fd37d44a0fb42e95a4a
+- Remote verified: true
 
 ## Next safe action
 
@@ -51,13 +55,9 @@ Do not execute benchmark work now. Return immediately to the active GitRunner/sy
 https://github.com/adamtrott78/workspace-control
 
 Continue the durable workspace-control task defined by:
-`tasks/active/workspace-chat-executor-compatibility-v1.json`
+Task capsule: tasks/active/workspace-chat-executor-compatibility-v1.json
 
-Task ID: `workspace-chat-executor-compatibility-v1`
-
-Start from the normal `workspace-control` root route.
-Treat the authoritative task capsule, synchronized Markdown handoff, exact Git/runtime state, and referenced evidence as the complete handoff.
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
-This task is intentionally suspended unless the operator explicitly resumes it or GPT-5.6 Sol availability becomes time-sensitive for golden-baseline capture.
-Do not substitute Work/Codex/API execution for ordinary Chat mode.
-Follow the capsule's `next_safe_action`.
+Follow the capsule's next_safe_action.
