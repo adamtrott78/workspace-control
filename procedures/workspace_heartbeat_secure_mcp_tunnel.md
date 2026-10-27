@@ -242,3 +242,13 @@ Verification:
 - production Heartbeat remained unchanged on PID 1978095 / exact v0.4.7 SHA `9e5858738a4fd11801510e2839b0f94f19541506` / local `:8787`.
 
 The next gate requires operator provisioning in OpenAI Platform. No credential value is to be pasted into chat or committed.
+
+
+### Platform Secure MCP Tunnel provisioned — PASS
+
+Provisioned tunnel:
+`tunnel_6ae017d8655c8191976ef3bccc31f593`
+
+The tunnel was created in the operator's only available OpenAI Platform organization and associated with the only available ChatGPT workspace. The optional "Restrict client network access" control was left disabled because no ChatGPT ingress-network allowlist was part of the accepted design.
+
+Remaining account-side prerequisite: create a dedicated runtime API key whose principal has Tunnels **Read + Use** for this tunnel. The runtime key must be entered only on the Lambda host and must never be pasted into chat or committed.
