@@ -36,6 +36,9 @@ from typing import Any
 MAINTENANCE_ISSUE_NUMBER = 527
 GO_BIN = pathlib.Path("/opt/workspace-ci/go/1.26.3/bin/go")
 RUNUSER_BIN = pathlib.Path("/usr/sbin/runuser")
+EXPECTED_INSTALLER_RELATIVE_PATH = pathlib.Path(
+    "scripts/lambda_ci_p1_bootstrap_install.py"
+)
 RESEARCH_CPU_RECOVERED_MIN_RESTARTS = 11551  # compatibility for prior regression surface
 RESEARCH_CPU_STABILITY_SECONDS = 6
 
@@ -171,6 +174,72 @@ def sha256(path: pathlib.Path) -> str:
 def git_as(invoker: str, repo: pathlib.Path, *args: str) -> str:
     proc = run(["git", "-C", str(repo), *args], user=invoker)
     return proc.stdout.strip()
+
+
+def attest_reviewed_source(
+    expected_head: str,
+    invoker: str,
+) -> tuple[pathlib.Path, str]:
+    executing_installer = pathlib.Path(__file__).resolve()
+
+    try:
+        repo = executing_installer.parents[1]
+    except IndexError as exc:
+        raise BootstrapError(
+            "executing installer is not inside the reviewed repository layout"
+        ) from exc
+
+    expected_installer = (repo / EXPECTED_INSTALLER_RELATIVE_PATH).resolve()
+    if executing_installer != expected_installer:
+        raise BootstrapError(
+            "executing installer is outside the reviewed tracked installer path: "
+            f"actual={executing_installer} expected={expected_installer}"
+        )
+
+    git_toplevel = pathlib.Path(
+        git_as(invoker, repo, "rev-parse", "--show-toplevel")
+    ).resolve()
+    if git_toplevel != repo:
+        raise BootstrapError(
+            "executing installer repository root mismatch: "
+            f"derived={repo} git={git_toplevel}"
+        )
+
+    tracked_installer = run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "ls-files",
+            "--error-unmatch",
+            "--",
+            EXPECTED_INSTALLER_RELATIVE_PATH.as_posix(),
+        ],
+        check=False,
+        user=invoker,
+    )
+    if tracked_installer.returncode != 0:
+        raise BootstrapError(
+            "executing installer is not tracked at the reviewed installer path"
+        )
+
+    head = git_as(invoker, repo, "rev-parse", "HEAD")
+    if head != expected_head:
+        raise BootstrapError(
+            f"unexpected source HEAD: actual={head} expected={expected_head}"
+        )
+
+    tracked = git_as(
+        invoker,
+        repo,
+        "status",
+        "--porcelain",
+        "--untracked-files=no",
+    )
+    if tracked:
+        raise BootstrapError("tracked reviewed source is dirty:\n" + tracked)
+
+    return repo, head
 
 
 def service_active(name: str) -> bool:
@@ -495,6 +564,8 @@ def build_controller(repo: pathlib.Path) -> pathlib.Path:
     shutil.copytree(src, build_root / "src")
     work = build_root / "src"
     controller = pwd.getpwnam("ci-controller")
+    os.chown(build_root, controller.pw_uid, controller.pw_gid)
+    os.chmod(build_root, 0o700)
     for root, dirs, files in os.walk(work):
         os.chown(root, controller.pw_uid, controller.pw_gid)
         for name in dirs:
@@ -803,18 +874,7 @@ def main() -> int:
         return 70
 
     invoker_home = pathlib.Path(pwd.getpwnam(invoker).pw_dir)
-    repo_proc = run(["git", "rev-parse", "--show-toplevel"], user=invoker)
-    repo = pathlib.Path(repo_proc.stdout.strip()).resolve()
-    head = git_as(invoker, repo, "rev-parse", "HEAD")
-    if head != args.expected_head:
-        raise BootstrapError(
-            f"unexpected source HEAD: actual={head} expected={args.expected_head}"
-        )
-    tracked = git_as(
-        invoker, repo, "status", "--porcelain", "--untracked-files=no"
-    )
-    if tracked:
-        raise BootstrapError("tracked reviewed source is dirty:\n" + tracked)
+    repo, head = attest_reviewed_source(args.expected_head, invoker)
 
     print(f"repo={repo}")
     print(f"head={head}")
