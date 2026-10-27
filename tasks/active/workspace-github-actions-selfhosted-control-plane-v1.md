@@ -36,12 +36,11 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Fresh independent review of PR #539 only. Review the final immutable PR head and the validated code/test checkpoint 70b413fc2cfe63226ead00804eba8ea6ef969c8e. Verify the Type=simple maintenance socket readiness wait is finite/fail-closed; non-CPU controller restoration is deferred until all L0 commissioning gates pass; post-start stabilization cannot widen controller authority; and the source-bound rollback-failed recovery helper accepts only the exact three-controller failed/failed ExecMainStatus=1 NRestarts=0 incident state while preserving research-engine CPU and healthy shared services. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda before that disposition.
+From Lambda, run exactly one source-bound rollback-failed controller recovery from detached exact checkout 9b402da8c0158be477ac00944b5c164ddef81193 using `sudo python3 scripts/lambda_ci_p1_restore_rollback_failed_controllers.py --expected-head 9b402da8c0158be477ac00944b5c164ddef81193`. The helper is authorized to issue only one `systemctl start` naming research-engine GPU, PADataset CPU, and PADataset GPU after proving exact failed/failed ExecMainStatus=1 NRestarts=0 target states, healthy shared services, no active project execution, and exact research-engine CPU preservation. Return the complete recovery output/receipt before any bootstrap retry, L0 diagnose, reconciliation, workspace-control activation, or research-engine CPU restart.
 
 ## Remaining work
 
-- Validate the bounded maintenance-socket readiness / deferred-controller-restoration correction and exact-state rollback-failed recovery helper on a dedicated PR; obtain fresh independent exact-head review before merge or Lambda mutation.
-- After reviewed merge, run only the source-bound rollback-failed controller recovery helper from an exact detached checkout of that merge and inspect the complete receipt. It may start exactly research-engine GPU, PADataset CPU, and PADataset GPU; research-engine CPU must remain unchanged.
+- Run the independently reviewed rollback-failed controller recovery helper exactly once from merge 9b402da8c0158be477ac00944b5c164ddef81193 and inspect the complete receipt. It may start exactly research-engine GPU, PADataset CPU, and PADataset GPU; research-engine CPU must remain unchanged.
 - Only after recovery PASS, retry the rollback-safe P1 bootstrap from the exact reviewed merge SHA and inspect the complete bootstrap output/receipt before any later gate.
 - After bootstrap PASS, issue exactly one real owner GitHub -> L0 maintenance DIAGNOSE_LANE command on issue #527 and prove the durable accepted receipt before workspace-control activation.
 - Activate workspace-control only as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1; keep automatic pull_request/push admission disabled.
@@ -51,10 +50,9 @@ Fresh independent review of PR #539 only. Review the final immutable PR head and
 
 ## Blockers / gates
 
-- The live P1 bootstrap incident is understood but not yet repaired on Lambda. The accepted root causes are (1) an immediate Unix-socket readiness check against a Type=simple maintenance daemon and (2) restoring project controllers before later L0 gates, allowing rollback to stop freshly initializing controllers.
-- research-engine GPU, PADataset CPU, and PADataset GPU remain in the exact rollback-canceled failed/failed state with ExecMainStatus=1 and NRestarts=0. research-engine CPU remains intentionally quiesced at inactive/dead, ExecMainStatus=1, NRestarts=12411.
-- PR #539 code/test checkpoint 70b413fc2cfe63226ead00804eba8ea6ef969c8e passed Workspace Control Validation run #940. Fresh independent review of the final PR head remains the sole gate before merge/live recovery.
-- workspace-control activation remains separately blocked until a corrected bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
+- PR #539 is independently accepted and merged as 9b402da8c0158be477ac00944b5c164ddef81193, but Lambda remains in the post-incident state: research-engine GPU, PADataset CPU, and PADataset GPU are failed/failed with ExecMainStatus=1 and NRestarts=0; research-engine CPU remains intentionally quiesced at inactive/dead, ExecMainStatus=1, NRestarts=12411.
+- The next live gate is exactly one source-bound run of scripts/lambda_ci_p1_restore_rollback_failed_controllers.py from detached exact checkout 9b402da8c0158be477ac00944b5c164ddef81193 with --expected-head set to the same SHA. Full recovery receipt must be inspected before any bootstrap retry.
+- workspace-control activation remains separately blocked until recovery PASS, corrected bootstrap PASS, and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
 
