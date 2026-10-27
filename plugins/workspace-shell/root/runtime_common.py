@@ -67,6 +67,18 @@ def require_protected_path(path, *, require_root=True, regular=True):
     return st
 
 
+def require_secure_directory(path, *, owner_uid=0):
+    p = Path(path)
+    st = os.lstat(p)
+    if not stat.S_ISDIR(st.st_mode):
+        fail("SECURE_DIR_TYPE", f"{p} must be a real directory")
+    if st.st_uid != owner_uid:
+        fail("SECURE_DIR_OWNER", f"{p} must be owned by uid {owner_uid}")
+    if st.st_mode & 0o022:
+        fail("SECURE_DIR_MODE", f"{p} must not be group/world writable")
+    return p
+
+
 def _atomic_write(path, data, mode=0o600):
     path = Path(path)
     parent = path.parent
@@ -91,8 +103,7 @@ def _atomic_write(path, data, mode=0o600):
 
 
 def write_receipt(receipt_root, receipt):
-    root = Path(receipt_root)
-    root.mkdir(parents=True, exist_ok=True)
+    root = require_secure_directory(receipt_root, owner_uid=0)
     lock_path = root / ".chain.lock"
     head_path = root / ".chain-head"
 
@@ -137,6 +148,7 @@ def bounded_run(
     stdout_limit=65536,
     stderr_limit=65536,
     kill_callback=None,
+    cancel_check=None,
     stdin_bytes=None,
     pass_fds=(),
 ):
@@ -170,6 +182,8 @@ def bounded_run(
     limits = {"stdout": stdout_limit, "stderr": stderr_limit}
     start = time.monotonic()
     timed_out = False
+    cancelled = False
+    termination_requested = False
 
     def retain(stream, data):
         seen[stream] += len(data)
@@ -178,9 +192,13 @@ def bounded_run(
         if room:
             kept[stream].extend(data[:room])
 
-    def terminate():
-        nonlocal timed_out
-        timed_out = True
+    def terminate(reason):
+        nonlocal timed_out, cancelled, termination_requested
+        if termination_requested:
+            return
+        termination_requested = True
+        timed_out = reason == "timeout"
+        cancelled = reason == "cancel"
         if kill_callback is not None:
             try:
                 kill_callback(signal.SIGTERM)
@@ -206,10 +224,18 @@ def bounded_run(
 
     try:
         while selector.get_map():
+            if proc.poll() is None and cancel_check is not None:
+                try:
+                    if cancel_check():
+                        terminate("cancel")
+                except Exception:
+                    terminate("cancel")
+
             remaining = timeout_s - (time.monotonic() - start)
             if remaining <= 0 and proc.poll() is None:
-                terminate()
+                terminate("timeout")
                 remaining = 0.1
+
             events = selector.select(
                 timeout=max(0.0, min(0.25, remaining if remaining > 0 else 0.1))
             )
@@ -235,7 +261,7 @@ def bounded_run(
                 retain(key.data, data)
 
             if proc.poll() is None and time.monotonic() - start >= timeout_s:
-                terminate()
+                terminate("timeout")
 
         rc = proc.wait(timeout=2.0)
     finally:
@@ -251,6 +277,7 @@ def bounded_run(
         "exit_code": rc if rc >= 0 else None,
         "signal": sig,
         "timed_out": timed_out,
+        "cancelled": cancelled,
         "duration_ms": duration_ms,
         "stdout": bytes(kept["stdout"]),
         "stderr": bytes(kept["stderr"]),
