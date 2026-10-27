@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-Operator: create a dedicated Runtime API key in the OpenAI Platform organization for the principal that has Tunnels Read + Use on tunnel_6ae017d8655c8191976ef3bccc31f593. Do not paste the key into chat. Once created, start an isolated exact v0.4.8 Heartbeat loopback endpoint, initialize a tunnel-client profile targeting that local /mcp URL and the provisioned tunnel ID, inject CONTROL_PLANE_API_KEY locally via hidden input/environment, then run tunnel-client doctor --profile ... --explain and report only non-secret status/output.
+On Lambda, keep production v0.4.7 :8787 untouched. Start exact v0.4.8 on a dynamically selected loopback port using the validated worktree and accepted v0.4.7 dependency tree. Prompt for the dedicated runtime API key with hidden input and export it only in the current shell environment. Initialize a user-owned tunnel-client profile for tunnel_6ae017d8655c8191976ef3bccc31f593 targeting the isolated v0.4.8 /mcp URL with a loopback ephemeral health listener, then run tunnel-client doctor --profile ... --explain. Report only non-secret status/output; unset the key afterward.
 
 ## Remaining work
 
@@ -40,9 +40,8 @@ Operator: create a dedicated Runtime API key in the OpenAI Platform organization
 
 ## Blockers / gates
 
-- A dedicated runtime API key still must be created locally for the tunnel-client daemon; its principal needs Tunnels Read + Use for tunnel_6ae017d8655c8191976ef3bccc31f593.
-- The runtime key must not be pasted into chat, committed, or written into durable task files.
-- Isolated v0.4.8 tunnel profile/doctor/run and live ChatGPT connector/app acceptance remain unverified.
+- Isolated exact v0.4.8 Secure MCP Tunnel profile has not yet been initialized or validated with tunnel-client doctor.
+- Live tunnel-client run, ChatGPT connector discovery, embedded app resource delivery, heartbeat_poll freshness, and five/six-entry UI behavior remain unverified.
 - Public ngrok remains quota-blocked from ChatGPT; keep accepted production v0.4.7 :8787 and rollback intact until Secure MCP Tunnel acceptance passes.
 
 ## Fresh-chat initialization
