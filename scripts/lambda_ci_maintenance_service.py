@@ -25,6 +25,9 @@ from typing import Any
 
 MAX_REQUEST_BYTES = 64 * 1024
 REQUEST_TIMEOUT_SECONDS = 5
+SOURCE_REPOSITORY = "adamtrott78/workspace-control"
+OWNER_LOGIN = "adamtrott78"
+MAINTENANCE_POLICY_GENERATION = "workspace-ci-maintenance-p1-v1"
 ALLOWED_OPERATIONS = {
     "DIAGNOSE_LANE",
     "RESTART_CONTROLLER",
@@ -118,6 +121,7 @@ def _validate_request(request: Any) -> dict[str, Any]:
         "lane",
         "quarantine_receipt_id",
         "reset_generation",
+        "source_attestation",
     }
     if set(request) != expected:
         raise MaintenanceError("maintenance request keys mismatch")
@@ -147,6 +151,37 @@ def _validate_request(request: Any) -> dict[str, Any]:
                 uuid.UUID(str(value))
             except (ValueError, TypeError, AttributeError) as exc:
                 raise MaintenanceError(f"{name} must be UUID or null") from exc
+    source = request["source_attestation"]
+    if not isinstance(source, dict) or set(source) != {
+        "repository",
+        "actor_login",
+        "comment_id",
+        "command_sha256",
+        "maintenance_policy_generation",
+    }:
+        raise MaintenanceError("maintenance source attestation keys mismatch")
+    if source["repository"] != SOURCE_REPOSITORY:
+        raise MaintenanceError("maintenance source repository is unauthorized")
+    if source["actor_login"] != OWNER_LOGIN:
+        raise MaintenanceError("maintenance source actor is unauthorized")
+    if (
+        not isinstance(source["comment_id"], int)
+        or source["comment_id"] <= 0
+    ):
+        raise MaintenanceError("maintenance source comment id is invalid")
+    digest = source["command_sha256"]
+    if (
+        not isinstance(digest, str)
+        or len(digest) != 64
+        or any(ch not in "0123456789abcdef" for ch in digest)
+    ):
+        raise MaintenanceError("maintenance source command digest is invalid")
+    if (
+        source["maintenance_policy_generation"]
+        != MAINTENANCE_POLICY_GENERATION
+    ):
+        raise MaintenanceError("maintenance policy generation mismatch")
+
     if operation in {"DIAGNOSE_LANE", "RESTART_CONTROLLER"}:
         if quarantine is not None or generation is not None:
             raise MaintenanceError("diagnose/restart accept no recovery identifiers")
@@ -283,6 +318,7 @@ def _receipt_identity(request: dict[str, Any], target: dict[str, Any]) -> dict[s
         "quarantine_receipt_id": request["quarantine_receipt_id"],
         "reset_generation": request["reset_generation"],
         "installed_policy_digests": target["policy_digests"],
+        "source_attestation": request["source_attestation"],
     }
 
 
@@ -311,12 +347,23 @@ def _mutating_receipt(
     }
     _atomic_json(receipt_path, in_progress)
     result = mutation()
+    rollback = {
+        "RESTART_CONTROLLER": "repeat exact derived restart or use independent operator bootstrap",
+        "QUIESCE_LANE_FOR_RECOVERY": "leave lane stopped unless matching reviewed resume/reset state is proven",
+        "RESUME_LANE_AFTER_RESET": "re-quiesce exact lane with the same reset generation on any recovery drift",
+    }.get(request["operation"])
     receipt = {
         "schema_version": 1,
         "status": "COMPLETED",
         "identity": identity,
         "timestamp_utc": _utc_now(),
+        "precondition_observations": {
+            "installed_policy_digests": target["policy_digests"],
+            "derived_service": target["service"],
+            "derived_scale_set_name": target["scale_set_name"],
+        },
         "result": result,
+        "rollback": rollback,
     }
     _atomic_json(receipt_path, receipt)
     return receipt
