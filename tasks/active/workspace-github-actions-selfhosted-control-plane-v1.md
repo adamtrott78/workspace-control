@@ -24,7 +24,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 - Intent: mutate
 - Remote branch: gitrunner-p1-bootstrap-build-staging-fix
-- Remote checkpoint: 93bd83e6f4eb96537e622d745d991eb496d5dd4d
+- Remote checkpoint: a93f82b443de236b08d7f4a4f944ad77ae563630
 - Remote verified: false
 
 ### research-engine
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Request fresh independent review of PR #535 exact validated head after the pre-mutation build-staging correction. Verify build_controller() still runs before backup_targets()/begin_mutation_phase(), the temporary build root is chowned exactly to ci-controller and remains mode 0700 before dropping privileges, the src subtree ownership/sanitized /usr/sbin/runuser boundary is unchanged, and no service/policy/reconcile/activation authority is widened. Regression must prove build_root ownership/mode are established before the ci-controller build starts. Do not merge or retry Lambda until NO_BLOCKING_FINDING is recorded on the exact final head.
+Request fresh independent corrected-head review of PR #535 after closing BF-1. Verify bootstrap authority derives exclusively from Path(__file__).resolve(); the executing file must resolve exactly to scripts/lambda_ci_p1_bootstrap_install.py under the derived repository; Git's top-level must equal that repository; the exact installer path must be tracked; expected HEAD and tracked-cleanliness checks must run against that repository; caller CWD must not be authoritative. Verify the external-copy regression fails before verify_live_fingerprint(), verify_credential_scope(), build_controller(), backup_targets(), or begin_mutation_phase(). Regression-check the previously accepted build-root chown/mode fix and all prior bootstrap preservation/rollback/dormant-activation boundaries. Do not merge or retry Lambda until NO_BLOCKING_FINDING is recorded on the exact final head.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Request fresh independent review of PR #535 exact validated head after the pre-m
 
 ## Blockers / gates
 
-- Live bootstrap retry from reviewed merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd passed LIVE_PREFLIGHT_FINGERPRINT and GITHUB_CREDENTIAL_SCOPE_PREFLIGHT, then failed during pre-mutation Go controller build because root-created tempfile.mkdtemp build root was mode 0700/root-owned and ci-controller could not traverse to the chowned src subtree. Failure occurred before backup_targets() and begin_mutation_phase(); no Lambda host mutation occurred.
-- Bounded correction is on PR #535: chown the private temporary build root to ci-controller and retain mode 0700 before runuser build. Exact code/test head 93bd83e6f4eb96537e622d745d991eb496d5dd4d passed validation run 40463460438 / job 122053213183 / run #924 SUCCESS. Fresh independent review is required before merge or live retry.
+- Independent review 5663304360 on PR #535 old head f635d5734d50b88d2eb8a146e40575f8403e4cb1 found BF-1: privileged bootstrap source attestation was still bound to caller CWD rather than the installer file actually executing. That old head must not be merged or used for Lambda mutation.
+- BF-1 is corrected on PR #535 code/test head a93f82b443de236b08d7f4a4f944ad77ae563630: authority now derives from resolved __file__, exact tracked installer path, derived Git root, expected HEAD, and tracked cleanliness. Dedicated regression proves an external/copied installer fails before live fingerprinting, credential preflight, build_controller(), backup_targets(), or begin_mutation_phase(). Exact validation run 40464399665 / job 122056286646 / run #927 completed SUCCESS. Fresh independent corrected-head review remains required before merge or live retry.
 - The research-engine CPU controller remains intentionally quiesced from the accepted pre-bootstrap helper; no bootstrap path is authorized to deliberately start/restart it.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
