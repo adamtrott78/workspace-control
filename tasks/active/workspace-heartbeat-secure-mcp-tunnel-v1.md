@@ -24,26 +24,25 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 - Intent: mutate
 - Remote branch: workspace-heartbeat-secure-mcp-tunnel-v1-current-main
-- Remote checkpoint: 7c63e518d470b4edf264406a2258d12394b950a4
+- Remote checkpoint: 8f7fd9f1cb05018aec840b8e3f0cb48d59708e64
 - Remote verified: true
 
 ## Next safe action
 
-Keep production v0.4.7 :8787 untouched. Re-verify and terminate only PPID-1 orphaned Heartbeat node server.js processes whose executable, CWD, and exact Git SHA match either the accepted v0.4.7 runtime or the exact v0.4.8 candidate. Do not kill unknown listeners. Verify the exact v0.4.8 worktree is clean except for an optional known node_modules symlink, then choose a free ephemeral loopback port dynamically and run the no-change/delta/resync payload benchmark there. Record byte measurements and confirm production :8787 PID/CWD/executable/SHA are unchanged.
+Verify current official OpenAI Secure MCP Tunnel documentation and the Lambda host's tunnel-client/configuration state. Keep production v0.4.7 :8787 untouched. Prepare an isolated outbound-only tunnel profile targeting an isolated exact v0.4.8 local endpoint, with no public Lambda ingress and no ngrok retirement, then run tunnel doctor/health checks before any live ChatGPT acceptance.
 
 ## Remaining work
 
-- Validate the exact restaged v0.4.8 candidate with the Workspace Heartbeat Node test suite and workspace-control PR validation.
-- Run the candidate on isolated Lambda :8788 and measure no-change, one-delta, resync, and 50-history routine heartbeat_poll response sizes while confirming live :8787 remains unchanged.
-- Configure and validate an isolated outbound-only OpenAI Secure MCP Tunnel profile without exposing a new public Lambda endpoint.
-- Perform live ChatGPT acceptance through Secure MCP Tunnel for model tools, app resource delivery, heartbeat_poll freshness, executor/semantic/card separation, and five/six-entry UI behavior.
+- Verify current official OpenAI Secure MCP Tunnel setup requirements and inspect Lambda for tunnel-client/configuration state without modifying production Heartbeat.
+- Configure and validate an isolated outbound-only Secure MCP Tunnel profile targeting a private local v0.4.8 Heartbeat endpoint; do not expose a new public Lambda listener.
+- Perform live ChatGPT acceptance through Secure MCP Tunnel for model tools, embedded app resource delivery, heartbeat_poll freshness, executor/semantic/card separation, and five/six-entry UI behavior.
 - Only after acceptance, replace ngrok in the normal launcher path while preserving an operator-understandable rollback/emergency fallback and synchronize final task state.
 
 ## Blockers / gates
 
-- The v0.4.8 post-change payload benchmark remains pending because fixed isolated ports :8788, :8789, and :8790 have each encountered leftover listeners from prior interrupted probes. Fixed-port selection is now itself the operational defect; use exact-orphan cleanup plus an OS-selected free ephemeral port.
-- Public ngrok remains quota-blocked from ChatGPT despite healthy local production v0.4.7.
-- Secure MCP Tunnel setup and live ChatGPT app acceptance remain unverified.
+- Secure MCP Tunnel workspace association, tunnel ID/profile, runtime API-key authorization, and tunnel-client availability/configuration on Lambda have not yet been verified.
+- Official MCP forwarding support is documented, but embedded MCP Apps resource delivery plus continuous app-only heartbeat_poll behavior through Secure MCP Tunnel still require live ChatGPT acceptance.
+- Public ngrok remains quota-blocked from ChatGPT; keep the accepted local v0.4.7 production runtime and rollback path intact until Secure MCP Tunnel acceptance passes.
 
 ## Fresh-chat initialization
 
