@@ -23,6 +23,7 @@ PROFILES = json.loads((ROOT / "architecture/lambda-ci-systemd-profiles.v1.json")
 PINS = json.loads((ROOT / "architecture/lambda-ci-upstream-pins.v1.json").read_text())
 RESEARCH = json.loads((ROOT / "architecture/lambda-ci-project-research-engine.v2.json").read_text())
 PAD = json.loads((ROOT / "architecture/lambda-ci-project-padataset.v1.json").read_text())
+WORKSPACE = json.loads((ROOT / "architecture/lambda-ci-project-workspace-control.v1.json").read_text())
 SHA = "a" * 40
 
 
@@ -72,7 +73,11 @@ def request_for(manifest, route_id, *, runner_suffix="abcdef123456"):
 
 class MultiRepoGenericAdmissionTests(unittest.TestCase):
     def test_registry_resolves_distinct_projects(self):
-        manifests = {"research-engine": RESEARCH, "padataset": PAD}
+        manifests = {
+            "research-engine": RESEARCH,
+            "padataset": PAD,
+            "workspace-control": WORKSPACE,
+        }
         self.assertEqual(
             multi.resolve_project_manifest(REGISTRY, manifests, "research-engine")["repository"],
             "adamtrott78/research-engine",
@@ -158,14 +163,18 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
     def test_reconciler_is_deterministic_for_active_projects_and_has_no_commands(self):
         plan = reconciler.plan_reconciliation(
             REGISTRY,
-            {"research-engine": RESEARCH, "padataset": PAD},
+            {
+                "research-engine": RESEARCH,
+                "padataset": PAD,
+                "workspace-control": WORKSPACE,
+            },
         )
         self.assertEqual(plan["mode"], "APPLY_READY_V1")
         self.assertEqual(
             plan["active_projects"],
             ["padataset", "research-engine"],
         )
-        self.assertEqual(plan["planned_projects_skipped"], [])
+        self.assertEqual(plan["planned_projects_skipped"], ["workspace-control"])
         serialized = json.dumps(plan, sort_keys=True)
         self.assertNotIn("shell", serialized)
         self.assertNotIn("argv", serialized)
@@ -177,6 +186,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         manifests = {
             "research-engine": copy.deepcopy(RESEARCH),
             "padataset": copy.deepcopy(PAD),
+            "workspace-control": copy.deepcopy(WORKSPACE),
         }
         registry["status"] = "ACTIVE"
         registry["projects"]["research-engine"]["activation_state"] = "ACTIVE"
@@ -190,7 +200,10 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             route["trusted_workflow"]["blob_sha"] = None
         plan = reconciler.plan_reconciliation(registry, manifests)
         self.assertEqual(plan["active_projects"], ["research-engine"])
-        self.assertEqual(plan["planned_projects_skipped"], ["padataset"])
+        self.assertEqual(
+            plan["planned_projects_skipped"],
+            ["padataset", "workspace-control"],
+        )
         serialized = json.dumps(plan, sort_keys=True)
         self.assertNotIn("ci-padataset", serialized)
         self.assertNotIn("/srv/workspace-ci/padataset", serialized)
@@ -212,6 +225,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         manifests = {
             "research-engine": copy.deepcopy(RESEARCH),
             "padataset": copy.deepcopy(PAD),
+            "workspace-control": copy.deepcopy(WORKSPACE),
         }
         registry["status"] = "ACTIVE"
         registry["projects"]["research-engine"]["activation_state"] = "ACTIVE"
@@ -407,6 +421,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             registry = copy.deepcopy(REGISTRY)
             research = copy.deepcopy(RESEARCH)
             padataset = copy.deepcopy(PAD)
+            workspace = copy.deepcopy(WORKSPACE)
             registry["projects"]["padataset"]["activation_state"] = (
                 "P6_PILOT_PLANNED_NOT_INSTALLED"
             )
@@ -417,6 +432,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             registry_path.write_text(json.dumps(registry))
             (manifest_dir / "research-engine.json").write_text(json.dumps(research))
             (manifest_dir / "padataset.json").write_text(json.dumps(padataset))
+            (manifest_dir / "workspace-control.json").write_text(json.dumps(workspace))
             service = provisioner_service.ProvisionerService(
                 manifest=None,
                 profiles=PROFILES,
@@ -428,6 +444,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
                 project_manifests={
                     "research-engine": research,
                     "padataset": padataset,
+                    "workspace-control": workspace,
                 },
                 execution_contracts=CONTRACTS,
                 registry_path=registry_path,
@@ -459,6 +476,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
                 project_manifests={
                     "research-engine": RESEARCH,
                     "padataset": PAD,
+                    "workspace-control": WORKSPACE,
                 },
                 execution_contracts=CONTRACTS,
             )
