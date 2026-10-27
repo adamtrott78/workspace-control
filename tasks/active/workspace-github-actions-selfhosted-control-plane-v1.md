@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Fresh independent corrected-head re-review of PR #551 only. Consume blocking review 5668683858. Verify BF-1 is closed by live-snapshotting workspace-ci-controller@workspace-control-cpu.service before mutation, requiring inactive/dead + MainPID=0, preserving the entire exact snapshot through forward certification, and requiring the same exact preservation during rollback. Regression-check active-state rejection before mutation plus forward and rollback controller-generation drift. Also regression-check the previously accepted reconciliation-delta semantics, bounded one-file reconciler installer authority, successful diagnose/cursor binding, frozen automatic reconcile-controller, project-controller preservation, no activation, and no P2/P3/capacity widening. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
+Fresh independent corrected-head re-review of PR #551 only. Consume BF-1 review 5668683858 and BF-2 comment 6447076960. Verify BF-2 is closed by treating the first matching IN_PROGRESS receipt as immutable transaction authority: original restart/enable/preserve sets and preserved-before snapshots must survive resume; policy/config materialization before interruption must not erase pending originally authorized restarts; completed restarts must be durably recorded with exact post-restart snapshots and not silently replayed/rebased; preserved sibling snapshots must remain the original first-attempt snapshots and generation/state drift between attempts must fail before further mutation; malformed/incompatible stored transaction state must fail closed. Regression-check interruption after materialization before restart, sibling generation drift, malformed transaction state, prior BF-1 installer dormancy closure, prior reconciliation-delta scope, bounded one-file installer authority, no activation, and no P2/P3/capacity widening. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Fresh independent corrected-head re-review of PR #551 only. Consume blocking rev
 
 ## Blockers / gates
 
-- P1 activation remains blocked pending fresh independent corrected-head review of PR #551 after BF-1 closure.
-- The currently installed Lambda reconciler still has the old restart-all-ACTIVE behavior; do not reconcile or activate before the independently accepted hotfix is merged, installed, and its live receipt accepted.
+- P1 activation remains blocked pending fresh independent corrected-head review of PR #551 after BF-2 closure.
+- The currently installed Lambda reconciler still has the old restart-all-ACTIVE and interrupted-resume behavior; do not reconcile or activate before the independently accepted correction is merged, installed, and its live hotfix receipt is accepted.
 - Do not restart/reset project controllers, restart research-engine CPU, issue further maintenance commands, or widen P2/P3/capacity.
 
 ## Fresh-chat initialization
