@@ -60,7 +60,7 @@ Prepare and request a fresh independent P1 activation-boundary review for worksp
 
 https://github.com/adamtrott78/workspace-control
 
-Continue the durable task defined by:
+Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json
 
 Start from the normal workspace-control root route.
