@@ -227,3 +227,18 @@ published SHA-256:
 `3c82307316acd93c88a384b62af1d81d3f4cb0efa975f9c0bfaef922866a04c4`.
 
 Install only into a user-owned staging path first. Do not create a profile or store credentials until the binary digest and local CLI help are verified.
+
+
+### Official tunnel-client v0.0.18 staging — PASS
+
+The official full-client Linux amd64 release was staged into a user-owned tooling path without modifying production Heartbeat.
+
+Verification:
+- `SHA256SUMS.txt` digest matched `63f9996246424301c8b0680c943c67d0ea7fe2f0853a234649104f8062c67329`;
+- `tunnel-client-v0.0.18-linux-amd64.zip` matched both the pinned and official-manifest SHA-256 `3c82307316acd93c88a384b62af1d81d3f4cb0efa975f9c0bfaef922866a04c4`;
+- extracted binary is a statically linked Linux x86-64 ELF and reports `0.0.18+274a5588414819f063d27100a4fb1096aae3830f`;
+- CLI quickstart confirms `CONTROL_PLANE_TUNNEL_ID` comes from Tunnels management and `CONTROL_PLANE_API_KEY` is a separate runtime key used by `doctor` and `run`;
+- runtime-key principal requires Tunnels **Read + Use**; admin key is for tunnel CRUD and must not be used as the long-lived daemon credential;
+- production Heartbeat remained unchanged on PID 1978095 / exact v0.4.7 SHA `9e5858738a4fd11801510e2839b0f94f19541506` / local `:8787`.
+
+The next gate requires operator provisioning in OpenAI Platform. No credential value is to be pasted into chat or committed.
