@@ -44,9 +44,29 @@ class MaintenanceServiceTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.root = pathlib.Path(self.tmp.name)
         self.registry_path = self.root / "registry.json"
+        self.projects_dir = self.root / "projects"
+        self.projects_dir.mkdir()
         self.state_root = self.root / "controller-state"
         self.receipts = self.root / "maintenance-receipts"
         self.registry_path.write_text(json.dumps(registry()), encoding="utf-8")
+        (self.projects_dir / "workspace-control.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": 2,
+                    "status": "ACTIVE",
+                    "project_id": "workspace-control",
+                    "derived_identity": {
+                        "lanes": {
+                            "cpu": {
+                                "scale_set_name": "lambda-workspace-control",
+                                "runner_prefix": "lambda-workspace-control-",
+                            }
+                        }
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
 
     def lane_state(self):
         path = self.state_root / "workspace-control-cpu"
@@ -87,6 +107,7 @@ class MaintenanceServiceTests(unittest.TestCase):
             "workspace-control",
             "cpu",
             controller_state_root=self.state_root,
+            projects_dir=self.projects_dir,
         )
         self.assertEqual(
             target["service"],
@@ -124,6 +145,7 @@ class MaintenanceServiceTests(unittest.TestCase):
                 request("QUIESCE_LANE_FOR_RECOVERY", quarantine=qid),
                 registry_path=self.registry_path,
                 controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
                 receipts_dir=self.receipts,
             )
         self.assertEqual(receipt["status"], "COMPLETED")
@@ -149,6 +171,7 @@ class MaintenanceServiceTests(unittest.TestCase):
                     request("QUIESCE_LANE_FOR_RECOVERY", quarantine=qid),
                     registry_path=self.registry_path,
                     controller_state_root=self.state_root,
+                    projects_dir=self.projects_dir,
                     receipts_dir=self.receipts,
                 )
 
@@ -173,6 +196,7 @@ class MaintenanceServiceTests(unittest.TestCase):
                 ),
                 registry_path=self.registry_path,
                 controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
                 receipts_dir=self.receipts,
             )
         pending = self.lane_state() / f"reset-pending-{generation}.json"
@@ -210,12 +234,14 @@ class MaintenanceServiceTests(unittest.TestCase):
                 request("RESTART_CONTROLLER"),
                 registry_path=self.registry_path,
                 controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
                 receipts_dir=self.receipts,
             )
             second = maintenance.apply_request(
                 request("RESTART_CONTROLLER"),
                 registry_path=self.registry_path,
                 controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
                 receipts_dir=self.receipts,
             )
         self.assertEqual(first, second)
@@ -249,12 +275,14 @@ class MaintenanceServiceTests(unittest.TestCase):
                 req,
                 registry_path=self.registry_path,
                 controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
                 receipts_dir=self.receipts,
             )
             second = maintenance.apply_request(
                 req,
                 registry_path=self.registry_path,
                 controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
                 receipts_dir=self.receipts,
             )
 
@@ -312,6 +340,7 @@ class MaintenanceServiceTests(unittest.TestCase):
                 request("DIAGNOSE_LANE"),
                 registry_path=self.registry_path,
                 controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
                 receipts_dir=self.receipts,
             )
         self.assertEqual(len(result["reset_pending"]), 1)
@@ -360,6 +389,7 @@ class MaintenanceServiceTests(unittest.TestCase):
                 ),
                 registry_path=self.registry_path,
                 controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
                 receipts_dir=self.receipts,
             )
         pending = lane / f"reset-pending-{generation}.json"
@@ -413,6 +443,7 @@ class MaintenanceServiceTests(unittest.TestCase):
                 ),
                 registry_path=self.registry_path,
                 controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
                 receipts_dir=self.receipts,
             )
 
@@ -473,6 +504,7 @@ class MaintenanceServiceTests(unittest.TestCase):
                     ),
                     registry_path=self.registry_path,
                     controller_state_root=self.state_root,
+                    projects_dir=self.projects_dir,
                     receipts_dir=self.receipts,
                 )
         starts = [argv for argv in calls if argv[:2] == ["systemctl", "start"]]
