@@ -46,7 +46,7 @@
       "trusted_workflow": {
         "path": ".github/workflows/lambda-ci-workspace-control-validation.yml",
         "default_branch": "main",
-        "blob_sha": null
+        "blob_sha": "524e01916e1a826efd1edb4792023973d7b3c73c"
       },
       "trigger": {
         "event_name": "issue_comment",
