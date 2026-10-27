@@ -60,6 +60,15 @@
         "cpu",
         "gpu"
       ]
+    },
+    "workspace-control": {
+      "repository": "adamtrott78/workspace-control",
+      "repository_visibility": "private",
+      "manifest_source_path": "architecture/lambda-ci-project-workspace-control.v1.json",
+      "activation_state": "MIGRATION_CANDIDATE_NOT_INSTALLED",
+      "lanes": [
+        "cpu"
+      ]
     }
   }
 }
