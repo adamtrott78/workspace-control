@@ -32,9 +32,16 @@ Assume model prompt injection from issues, repository files, terminal output and
 6. Only with separate activation authorization provision a new tunnel, credential, service and root boundary. Never modify or share the Heartbeat runtime, port, tunnel or credentials.
 
 ## Design safety controls
-v1 exposes typed `inspect`, profile-bound `exec`, separate `privileged`, and `receipt` tools. Profile grammar is fail-closed: no free-form generic process execution, network access, shell, interpreter, package manager or hooks. No live privileged workspace-control activation is in the v1 allowlist. The dedicated process is nonlogin, no supplemental groups, mount/network isolated, has explicit source-only and scratch mounts, and is terminated by its cgroup on deadline or cancel. Ordinary exec never receives tunnel credentials.
+v1 exposes typed `inspect`, profile-bound `exec`, exact-registry `run_reviewed_helper`, and `receipt` tools. Profile grammar is fail-closed: no free-form generic process execution, network access, shell, interpreter, package manager or hooks. The root path can invoke only a helper already admitted under a separately reviewed exact registry entry; the MCP call cannot choose an executable/argv/environment. No live privileged workspace-control activation is implicitly granted. The dedicated process is nonlogin, no supplemental groups, mount/network isolated, has explicit source-only and scratch mounts, and is terminated by its cgroup on deadline or cancel. Ordinary exec never receives tunnel credentials.
 
 ## Local emergency operation
 The operator, via separate local root authority, must be able to stop/mask the Workspace Shell systemd units, kill the cgroup, revoke its Secure MCP Tunnel runtime authorization, and verify no listener/socket or child remains. Such recovery must function when the remote service itself is down. The precise installed unit/tunnel identifiers will be independently frozen at deployment review.
 
 No host commands were executed during this design recovery and no live state has been newly verified.
+
+## 2026-10-27 pre-review hardening
+Current OpenAI Secure MCP Tunnel documentation was rechecked before independent review. The documented absolute request deadline is 120 seconds and includes hosted queue time, so the v1 synchronous command ceiling is frozen at 90 seconds rather than 120 seconds. This leaves transport/queue margin and prevents a command timeout from colliding with the tunnel deadline.
+
+The privileged design was also corrected from a staging-only RPC to `workspace_shell.run_reviewed_helper`. The root-owned registry, not the model call, selects the exact executable, helper digest, closed parameter schema, target/task scope, pre/postconditions, side effects and rollback contract. Registering a new helper is itself an authority change requiring separate exact-head review. Generic root argv, generic sudo, generic systemctl and self-expansion of the registry remain forbidden.
+
+OpenAI tool annotations remain advisory selection/confirmation metadata. The server and root helper must independently enforce all task, provenance, path, credential, process and privilege checks.
