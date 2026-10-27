@@ -11,6 +11,7 @@ import {
 } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   buildFrontendRequest,
   canonicalDigest,
@@ -19,7 +20,7 @@ import {
   signFrontendRequest,
 } from "../src/core.js";
 
-const verifier = new URL("../bin/verify-broker-request.mjs", import.meta.url);
+const verifier = fileURLToPath(new URL("../bin/verify-broker-request.mjs", import.meta.url));
 
 function git(cwd, args) {
   return execFileSync("/usr/bin/git", ["-C", cwd, ...args], {
