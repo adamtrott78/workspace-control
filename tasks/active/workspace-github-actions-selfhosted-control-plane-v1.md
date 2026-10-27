@@ -23,8 +23,8 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: gitrunner-p1-quiesce-restart-storm
-- Remote checkpoint: b7e69b960703712e758bed4ecbfd6dddc0ad445c
+- Remote branch: gitrunner-p1-quiesce-source-binding-v2
+- Remote checkpoint: dca9ae15e1e9d53283ef8ed1d4a57ccddb80abba
 - Remote verified: false
 
 ### research-engine
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate and independently review the bounded pre-bootstrap research-engine CPU restart-storm quiesce helper. The helper must be source-head bound, prove no active research-engine execution, require provisioner/reconciler/reconcile-controller plus research-engine GPU and both PADataset controllers active, prove the target service uses Restart=on-failure and has NRestarts >=12110 increasing across two six-second observation intervals, and immediately before mutation recheck non-target services/execution absence. Its sole live mutation may be systemctl stop workspace-ci-controller@research-engine-cpu.service. It must then prove the target remains exactly stable inactive/dead for six seconds. It must never restart/start/enable a unit, install files, change policy, reconcile, or activate workspace-control. If independently accepted, run it once from the exact reviewed merge, inspect its receipt, then run the already-reviewed P1 bootstrap merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd unchanged.
+Request fresh independent corrected-head review of PR #534. Verify BF-1 is closed by binding source attestation to Path(__file__).resolve(), requiring the executing file to resolve exactly to scripts/lambda_ci_p1_quiesce_restart_storm.py under the derived repository, requiring Git's top-level to equal that derived repository, requiring that helper path to be tracked, and performing expected-HEAD/tracked-cleanliness checks against that repository. Verify regression tests prove an external/copied helper cannot pass attestation or reach quiesce_and_verify(). Re-review all previously accepted restart-storm proof and exact single-service-stop boundaries. Do not merge or mutate Lambda unless the exact corrected head receives NO_BLOCKING_FINDING.
 
 ## Remaining work
 
@@ -49,9 +49,10 @@ Validate and independently review the bounded pre-bootstrap research-engine CPU 
 
 ## Blockers / gates
 
-- Fourth live bootstrap retry from reviewed merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd aborted safely before mutation because research-engine CPU was in activating/auto-restart with ExecMainStatus=1 and NRestarts=12110. This confirms the pre-existing restart storm remains active and shared controller binary/template replacement cannot safely occur while that unit can relaunch mid-install.
-- A bounded pre-bootstrap quiesce helper is implemented on gitrunner-p1-quiesce-restart-storm. It may stop exactly workspace-ci-controller@research-engine-cpu.service only after proving no local research execution, all non-target control services active, and NRestarts increasing across two observation intervals. It must then prove exact stable inactive/dead state. This helper requires exact-head validation and fresh independent review before any live use.
-- The independently reviewed bootstrap merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd remains unchanged and is the intended bootstrap executable after successful quiesce.
+- Independent review 5662986453 on blocked PR #533 head f78e38859f6dec44e88c45d8e9c648b04c487fbb found BF-1: source attestation was bound to caller CWD rather than the executing helper file. That old head must never be used for Lambda mutation.
+- PR #533 was accidentally squash-merged as 5056304df6d5bca925fa1a4cff2ed6b1d8948242 without closing BF-1. Main was immediately restored to the exact pre-#533 tree by revert commit 0d84ac243f1dbd883e1fcd23a3b08f57378148db. No Lambda mutation occurred.
+- Corrected source-binding implementation is on PR #534. Exact code/test head dca9ae15e1e9d53283ef8ed1d4a57ccddb80abba passed run 40461478870 / job 122046888412 / run #920 SUCCESS. Fresh independent corrected-head review remains required before merge or live quiesce.
+- The independently reviewed P1 bootstrap merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd remains unchanged and is the intended bootstrap executable only after accepted quiesce.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
