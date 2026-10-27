@@ -35,6 +35,7 @@ from typing import Any
 
 MAINTENANCE_ISSUE_NUMBER = 527
 GO_BIN = pathlib.Path("/opt/workspace-ci/go/1.26.3/bin/go")
+RESEARCH_CPU_PREFLIGHT_MIN_RESTARTS = 11018
 
 EXPECTED_INSTALLED_SHA256 = {
     "/opt/workspace-ci/controller/lambda-ci-controller": "11b0aa8d16eceaabdb5d3cf92d2d9525722bd73ff98960665eb857b39f6ef837",
@@ -84,6 +85,14 @@ PROVISIONER = "workspace-ci-provisioner.service"
 RECONCILER = "workspace-ci-reconciler.service"
 MAINTENANCE_ROOT = "workspace-ci-maintenance.service"
 MAINTENANCE_CONTROLLER = "workspace-ci-maintenance-controller.service"
+MUTATED_SERVICES = [
+    PROVISIONER,
+    RECONCILER,
+    RECONCILE_CONTROLLER,
+    RESEARCH_CPU,
+    MAINTENANCE_ROOT,
+    MAINTENANCE_CONTROLLER,
+]
 
 TARGET_FILES = [
     "/opt/workspace-ci/controller/lambda-ci-controller",
@@ -181,6 +190,48 @@ def service_show(name: str, *properties: str) -> dict[str, str]:
     return values
 
 
+def service_snapshot(name: str) -> dict[str, str]:
+    return service_show(
+        name,
+        "LoadState",
+        "ActiveState",
+        "SubState",
+        "UnitFileState",
+        "NRestarts",
+        "ExecMainStatus",
+    )
+
+
+def verify_research_cpu_still_unhealthy() -> dict[str, str]:
+    state = service_snapshot(RESEARCH_CPU)
+    try:
+        restarts = int(state.get("NRestarts") or -1)
+        exit_status = int(state.get("ExecMainStatus") or 0)
+    except ValueError as exc:
+        raise BootstrapError(
+            "research-engine CPU health counters are invalid: "
+            + json.dumps(state, sort_keys=True)
+        ) from exc
+    still_unhealthy = (
+        (
+            state.get("ActiveState") == "activating"
+            and state.get("SubState") == "auto-restart"
+        )
+        or state.get("ActiveState") == "failed"
+    )
+    if (
+        not still_unhealthy
+        or restarts < RESEARCH_CPU_PREFLIGHT_MIN_RESTARTS
+        or exit_status == 0
+    ):
+        raise BootstrapError(
+            "research-engine CPU no longer matches reviewed unhealthy preflight "
+            "state; refusing deliberate restart: "
+            + json.dumps(state, sort_keys=True)
+        )
+    return state
+
+
 def no_active_project_execution() -> None:
     proc = run(
         [
@@ -275,7 +326,7 @@ def verify_credential_scope() -> None:
         )
 
 
-def verify_live_fingerprint() -> None:
+def verify_live_fingerprint() -> dict[str, str]:
     for raw, expected in EXPECTED_INSTALLED_SHA256.items():
         path = pathlib.Path(raw)
         if not path.is_file():
@@ -327,7 +378,9 @@ def verify_live_fingerprint() -> None:
     ):
         raise BootstrapError("existing projects are not ACTIVE in installed registry")
 
+    research_cpu_state = verify_research_cpu_still_unhealthy()
     no_active_project_execution()
+    return research_cpu_state
 
 
 def install_file(src: pathlib.Path, dst: pathlib.Path, mode: int = 0o644) -> None:
@@ -433,19 +486,12 @@ def backup_targets(backup_dir: pathlib.Path) -> dict[str, Any]:
     else:
         manifest["workspace_ci_maintenance_group_preexisting"] = True
     manifest["services"] = {
-        service: {
-            "active": service_active(service),
-            "enabled": service_enabled(service),
-        }
-        for service in [
-            PROVISIONER,
-            RECONCILER,
-            RECONCILE_CONTROLLER,
-            RESEARCH_CPU,
-            *HEALTHY_CONTROLLERS,
-            MAINTENANCE_ROOT,
-            MAINTENANCE_CONTROLLER,
-        ]
+        service: service_snapshot(service)
+        for service in MUTATED_SERVICES
+    }
+    manifest["preserved_services"] = {
+        service: service_snapshot(service)
+        for service in HEALTHY_CONTROLLERS
     }
     (backup_dir / "manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
@@ -454,12 +500,78 @@ def backup_targets(backup_dir: pathlib.Path) -> dict[str, Any]:
     return manifest
 
 
+def _restore_service_state(service: str, prior: dict[str, str]) -> None:
+    if prior.get("LoadState") != "loaded":
+        return
+
+    unit_state = prior.get("UnitFileState")
+    if unit_state in {"enabled", "enabled-runtime"}:
+        run(["systemctl", "enable", service])
+    elif unit_state:
+        run(["systemctl", "disable", service])
+
+    prior_active = prior.get("ActiveState")
+    if prior_active in {"active", "activating", "reloading"}:
+        run(["systemctl", "restart", service])
+    else:
+        run(["systemctl", "stop", service])
+
+    after = service_snapshot(service)
+    if prior_active == "active" and after.get("ActiveState") != "active":
+        raise BootstrapError(
+            f"rollback failed to restore active service {service}: "
+            + json.dumps(after, sort_keys=True)
+        )
+    if prior_active == "activating" and after.get("ActiveState") not in {
+        "active",
+        "activating",
+    }:
+        raise BootstrapError(
+            f"rollback failed to restore activating service {service}: "
+            + json.dumps(after, sort_keys=True)
+        )
+    if prior_active not in {"active", "activating", "reloading"} and after.get(
+        "ActiveState"
+    ) not in {"inactive", "failed"}:
+        raise BootstrapError(
+            f"rollback failed to restore inactive service {service}: "
+            + json.dumps(after, sort_keys=True)
+        )
+
+
+def _verify_preserved_services(
+    preserved: dict[str, dict[str, str]],
+) -> None:
+    for service, before in preserved.items():
+        after = service_snapshot(service)
+        if after.get("ActiveState") != "active":
+            raise BootstrapError(
+                f"preserved controller is no longer active: {service}: "
+                + json.dumps(after, sort_keys=True)
+            )
+        if after.get("NRestarts") != before.get("NRestarts"):
+            raise BootstrapError(
+                f"preserved controller restart count changed: {service}: "
+                + json.dumps({"before": before, "after": after}, sort_keys=True)
+            )
+
+
 def restore_targets(manifest: dict[str, Any]) -> None:
-    run(["systemctl", "disable", "--now", MAINTENANCE_CONTROLLER], check=False)
-    run(["systemctl", "disable", "--now", MAINTENANCE_ROOT], check=False)
-    run(["systemctl", "stop", RESEARCH_CPU], check=False)
-    run(["systemctl", "stop", PROVISIONER], check=False)
-    run(["systemctl", "stop", RECONCILER], check=False)
+    # Only units this bootstrap is authorized to mutate are stopped/restored.
+    # HEALTHY_CONTROLLERS are never deliberately restarted here.
+    for service in (
+        MAINTENANCE_CONTROLLER,
+        MAINTENANCE_ROOT,
+        RESEARCH_CPU,
+        PROVISIONER,
+        RECONCILER,
+    ):
+        proc = run(["systemctl", "stop", service], check=False)
+        if proc.returncode not in {0, 5}:
+            raise BootstrapError(
+                f"rollback failed to stop {service}: rc={proc.returncode}: "
+                + proc.stderr.strip()
+            )
 
     for raw, record in manifest["targets"].items():
         path = pathlib.Path(raw)
@@ -481,21 +593,58 @@ def restore_targets(manifest: dict[str, Any]) -> None:
             shutil.rmtree(path)
 
     if not manifest.get("ci_maintenance_preexisting"):
-        run(["userdel", "ci-maintenance"], check=False)
+        try:
+            pwd.getpwnam("ci-maintenance")
+        except KeyError:
+            pass
+        else:
+            run(["userdel", "ci-maintenance"])
     if not manifest.get("workspace_ci_maintenance_group_preexisting"):
-        run(["groupdel", "workspace-ci-maintenance"], check=False)
-
-    run(["systemctl", "daemon-reload"], check=False)
-
-    for service, prior in manifest["services"].items():
-        if prior["enabled"]:
-            run(["systemctl", "enable", service], check=False)
+        try:
+            grp.getgrnam("workspace-ci-maintenance")
+        except KeyError:
+            pass
         else:
-            run(["systemctl", "disable", service], check=False)
-        if prior["active"]:
-            run(["systemctl", "restart", service], check=False)
-        else:
-            run(["systemctl", "stop", service], check=False)
+            run(["groupdel", "workspace-ci-maintenance"])
+
+    run(["systemctl", "daemon-reload"])
+
+    for service in MUTATED_SERVICES:
+        _restore_service_state(service, manifest["services"][service])
+
+    _verify_preserved_services(manifest["preserved_services"])
+
+
+def rollback_after_failure(
+    manifest: dict[str, Any],
+    original: BaseException,
+) -> None:
+    print("P1_BOOTSTRAP_ROLLBACK=BEGIN", file=sys.stderr)
+    try:
+        restore_targets(manifest)
+    except Exception as rollback_exc:
+        print("P1_BOOTSTRAP_ROLLBACK=INCOMPLETE", file=sys.stderr)
+        raise BootstrapError(
+            "bootstrap failed and rollback was incomplete: "
+            f"original={type(original).__name__}:{original}; "
+            f"rollback={type(rollback_exc).__name__}:{rollback_exc}"
+        ) from original
+    print("P1_BOOTSTRAP_ROLLBACK=COMPLETE", file=sys.stderr)
+
+
+def freeze_for_install() -> None:
+    run(["systemctl", "stop", RECONCILE_CONTROLLER])
+    run(["systemctl", "stop", RESEARCH_CPU])
+
+
+def begin_mutation_phase(manifest: dict[str, Any]) -> None:
+    # This helper deliberately owns rollback for both initial stop boundaries,
+    # so even failure during the first/second stop cannot leave a partial freeze.
+    try:
+        freeze_for_install()
+    except Exception as original:
+        rollback_after_failure(manifest, original)
+        raise
 
 
 def main() -> int:
@@ -527,7 +676,7 @@ def main() -> int:
 
     print(f"repo={repo}")
     print(f"head={head}")
-    verify_live_fingerprint()
+    research_cpu_pre = verify_live_fingerprint()
     print("LIVE_PREFLIGHT_FINGERPRINT=PASS")
     verify_credential_scope()
     print("GITHUB_CREDENTIAL_SCOPE_PREFLIGHT=PASS")
@@ -547,18 +696,13 @@ def main() -> int:
     backup = out / "rollback"
     out.mkdir(parents=True, mode=0o700)
     manifest = backup_targets(backup)
-    mutated = False
+    rollback_armed = False
 
     try:
-        # Freeze only the automatic reconciliation ingress. Existing runner
-        # controllers and the root provisioner remain available until their
-        # narrowly scoped restart below.
-        run(["systemctl", "stop", RECONCILE_CONTROLLER])
-        # This lane was already in an auto-restart storm at read-only
-        # preflight. Quiesce it before replacing the shared controller binary
-        # so it cannot race through a mixed old-unit/new-binary interval.
-        run(["systemctl", "stop", RESEARCH_CPU])
-        mutated = True
+        # The initial two service mutations are guarded internally so a
+        # failure at either stop boundary restores the pre-bootstrap snapshot.
+        begin_mutation_phase(manifest)
+        rollback_armed = True
 
         install_file(
             built_controller,
@@ -738,6 +882,14 @@ def main() -> int:
         if not maintenance_socket.is_socket():
             raise BootstrapError("maintenance root socket missing")
 
+        cursor_path = pathlib.Path(
+            "/var/lib/workspace-ci/maintenance-controller/cursor.json"
+        )
+        if cursor_path.exists():
+            raise BootstrapError(
+                "maintenance commissioning cursor already exists before first poll"
+            )
+
         once = run(
             [
                 "/opt/workspace-ci/maintenance-controller/lambda_ci_maintenance_controller.py",
@@ -757,12 +909,9 @@ def main() -> int:
             raise BootstrapError(
                 "maintenance controller commissioning output invalid: " + once.stdout
             ) from exc
-        if once_json.get("status") not in {
-            "INITIALIZED_NO_COMMANDS_EXECUTED",
-            "PASS",
-        }:
+        if once_json.get("status") != "INITIALIZED_NO_COMMANDS_EXECUTED":
             raise BootstrapError(
-                "maintenance controller commissioning failed: "
+                "maintenance controller first-poll invariant failed: "
                 + json.dumps(once_json, sort_keys=True)
             )
 
@@ -802,6 +951,10 @@ def main() -> int:
             raise BootstrapError("bootstrap accidentally activated workspace-control route")
         if service_active("workspace-ci-controller@workspace-control-cpu.service"):
             raise BootstrapError("workspace-control controller unexpectedly active")
+        if service_active(RECONCILE_CONTROLLER):
+            raise BootstrapError(
+                "automatic reconcile-controller is active at bootstrap success gate"
+            )
 
         receipt = {
             "schema_version": 1,
@@ -811,9 +964,7 @@ def main() -> int:
             "workspace_control_source_sha": head,
             "maintenance_issue_number": MAINTENANCE_ISSUE_NUMBER,
             "backup_directory": str(backup),
-            "automatic_reconcile_controller_frozen": not service_active(
-                RECONCILE_CONTROLLER
-            ),
+            "automatic_reconcile_controller_frozen": True,
             "workspace_control_activation_state":
                 wc_entry.get("activation_state"),
             "workspace_control_manifest_status": wc_manifest.get("status"),
@@ -822,6 +973,7 @@ def main() -> int:
             "maintenance_root_active": service_active(MAINTENANCE_ROOT),
             "maintenance_controller_active": service_active(MAINTENANCE_CONTROLLER),
             "maintenance_commissioning": once_json,
+            "research_engine_cpu_preflight_recheck": research_cpu_pre,
             "research_engine_cpu": second,
             "healthy_controllers_preserved": {
                 service: service_active(service) for service in HEALTHY_CONTROLLERS
@@ -855,11 +1007,9 @@ def main() -> int:
         print("RECONCILE_CONTROLLER_FROZEN=true")
         print("NEXT=Return this receipt/output to the durable task.")
         return 0
-    except Exception:
-        if mutated:
-            print("P1_BOOTSTRAP_ROLLBACK=BEGIN", file=sys.stderr)
-            restore_targets(manifest)
-            print("P1_BOOTSTRAP_ROLLBACK=COMPLETE", file=sys.stderr)
+    except Exception as original:
+        if rollback_armed:
+            rollback_after_failure(manifest, original)
         raise
 
 
