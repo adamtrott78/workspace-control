@@ -311,6 +311,75 @@ class P1BootstrapInstallerTests(unittest.TestCase):
         self.assertTrue(any("P1_BOOTSTRAP_ROLLBACK=INCOMPLETE" in x for x in rendered))
         self.assertFalse(any("P1_BOOTSTRAP_ROLLBACK=COMPLETE" in x for x in rendered))
 
+    def test_maintenance_socket_waits_for_actual_readiness(self):
+        module = load_module()
+        path = mock.Mock()
+        path.is_socket.side_effect = [False, False, True]
+        with mock.patch.object(
+            module, "service_active", return_value=True
+        ), mock.patch.object(
+            module.time, "monotonic", side_effect=[0.0, 0.1, 0.2]
+        ), mock.patch.object(module.time, "sleep") as sleep:
+            module.wait_for_socket_ready(
+                module.MAINTENANCE_ROOT,
+                path,
+                timeout_seconds=1,
+            )
+        self.assertEqual(sleep.call_count, 2)
+        sleep.assert_has_calls(
+            [
+                mock.call(module.MAINTENANCE_SOCKET_READY_POLL_SECONDS),
+                mock.call(module.MAINTENANCE_SOCKET_READY_POLL_SECONDS),
+            ]
+        )
+
+    def test_maintenance_socket_wait_fails_if_service_exits(self):
+        module = load_module()
+        path = mock.Mock()
+        path.is_socket.return_value = False
+        failed = {
+            "LoadState": "loaded",
+            "ActiveState": "failed",
+            "SubState": "failed",
+            "UnitFileState": "enabled",
+            "NRestarts": "0",
+            "ExecMainStatus": "1",
+        }
+        with mock.patch.object(
+            module, "service_active", return_value=False
+        ), mock.patch.object(
+            module, "service_snapshot", return_value=failed
+        ):
+            with self.assertRaisesRegex(
+                module.BootstrapError,
+                "exited before socket became ready",
+            ):
+                module.wait_for_socket_ready(
+                    module.MAINTENANCE_ROOT,
+                    path,
+                    timeout_seconds=1,
+                )
+
+    def test_maintenance_socket_wait_is_bounded(self):
+        module = load_module()
+        path = mock.Mock()
+        path.is_socket.return_value = False
+        with mock.patch.object(
+            module, "service_active", return_value=True
+        ), mock.patch.object(
+            module.time, "monotonic", side_effect=[0.0, 1.0]
+        ), mock.patch.object(module.time, "sleep") as sleep:
+            with self.assertRaisesRegex(
+                module.BootstrapError,
+                "socket did not become ready within 1s",
+            ):
+                module.wait_for_socket_ready(
+                    module.MAINTENANCE_ROOT,
+                    path,
+                    timeout_seconds=1,
+                )
+        sleep.assert_not_called()
+
     def test_commissioning_pass_is_rejected(self):
         module = load_module()
         with self.assertRaisesRegex(
