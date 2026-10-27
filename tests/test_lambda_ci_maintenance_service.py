@@ -217,5 +217,45 @@ class MaintenanceServiceTests(unittest.TestCase):
         self.assertEqual(len(restarts), 1)
 
 
+    def test_resume_replay_after_quarantine_archive_does_not_restart_twice(self):
+        qid, _ = self.quarantine(scale_set_id=92)
+        generation = "bbbbbbbb-cccc-4ddd-8eee-ffffffffffff"
+        calls = []
+
+        def fake_run(argv, check=True):
+            calls.append(argv)
+            return mock.Mock(returncode=0, stdout="", stderr="")
+
+        req = request(
+            "RESUME_LANE_AFTER_RESET",
+            quarantine=qid,
+            generation=generation,
+        )
+        with (
+            mock.patch.object(maintenance, "_run", side_effect=fake_run),
+            mock.patch.object(maintenance, "_service_active", return_value=True),
+        ):
+            first = maintenance.apply_request(
+                req,
+                registry_path=self.registry_path,
+                controller_state_root=self.state_root,
+                receipts_dir=self.receipts,
+            )
+            second = maintenance.apply_request(
+                req,
+                registry_path=self.registry_path,
+                controller_state_root=self.state_root,
+                receipts_dir=self.receipts,
+            )
+
+        self.assertEqual(first, second)
+        starts = [
+            argv
+            for argv in calls
+            if argv[:2] == ["systemctl", "start"]
+        ]
+        self.assertEqual(len(starts), 1)
+
+
 if __name__ == "__main__":
     unittest.main()
