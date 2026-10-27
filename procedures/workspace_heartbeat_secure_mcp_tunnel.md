@@ -252,3 +252,10 @@ Provisioned tunnel:
 The tunnel was created in the operator's only available OpenAI Platform organization and associated with the only available ChatGPT workspace. The optional "Restrict client network access" control was left disabled because no ChatGPT ingress-network allowlist was part of the accepted design.
 
 Remaining account-side prerequisite: create a dedicated runtime API key whose principal has Tunnels **Read + Use** for this tunnel. The runtime key must be entered only on the Lambda host and must never be pasted into chat or committed.
+
+
+### Dedicated tunnel runtime key provisioned — PASS
+
+The operator created a dedicated runtime API key using **Restricted** permissions with only **Tunnels Read + Use** enabled. The secret value was not shared in chat and is not recorded in workspace-control.
+
+Next gate: isolated exact-v0.4.8 profile initialization and `tunnel-client doctor --explain`. The key must be entered only in the Lambda terminal via hidden input/environment and unset after the validation.
