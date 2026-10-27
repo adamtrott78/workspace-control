@@ -206,3 +206,24 @@ Current official OpenAI documentation was rechecked before tunnel acceptance. Th
 - Latest public `openai/tunnel-client` release observed during this refresh is v0.0.18.
 
 The next action is host-only read-only discovery. Do not print or commit credentials. Do not change the production Heartbeat listener or retire ngrok during this discovery.
+
+
+### Lambda Secure MCP Tunnel host preflight — PASS
+
+Read-only host discovery established:
+- production Heartbeat unchanged on exact v0.4.7 SHA `9e5858738a4fd11801510e2839b0f94f19541506` at `:8787`;
+- Ubuntu 22.04, x86_64 / amd64;
+- no `tunnel-client` binary in PATH or common user/system locations;
+- no tunnel configuration metadata discovered;
+- `CONTROL_PLANE_API_KEY` and `OPENAI_API_KEY` unset;
+- no HTTP(S)/all-proxy environment configured;
+- `api.openai.com` DNS resolution PASS;
+- unauthenticated HTTPS to `https://api.openai.com/v1/models` returned HTTP 401 with TLS verification success, proving outbound network reachability;
+- no existing tunnel-client process.
+
+Official v0.0.18 full-client Linux amd64 release asset:
+`tunnel-client-v0.0.18-linux-amd64.zip`
+published SHA-256:
+`3c82307316acd93c88a384b62af1d81d3f4cb0efa975f9c0bfaef922866a04c4`.
+
+Install only into a user-owned staging path first. Do not create a profile or store credentials until the binary digest and local CLI help are verified.
