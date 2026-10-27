@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import select
+import signal
 import socket
 import sqlite3
 import stat
@@ -150,7 +151,7 @@ def stage_verified_helper(cfg, verified):
     digest = verified["helper_sha256"]
     target = cache_root / f"{digest}.helper"
 
-    if target.exists():
+    if os.path.lexists(target):
         st = os.lstat(target)
         if not stat.S_ISREG(st.st_mode) or stat.S_ISLNK(st.st_mode):
             fail("HELPER_CACHE_INVALID", "cached helper is not a regular non-symlink file")
@@ -393,7 +394,7 @@ def peer_disconnected(conn):
 def execute_helper(cfg, verified, cancel_check=None):
     helper_path = stage_verified_helper(cfg, verified)
     params = canonical_json_bytes(verified["parameters"]) + b"\n"
-    unit = f"workspace-shell-helper-{verified['approval_id'][:16].replace('_', '-')}"
+    unit = f"workspace-shell-helper-{sha256_hex(verified['approval_id'])[:16]}"
     command = build_helper_systemd_command(cfg, unit, helper_path, verified)
     result = bounded_run(
         command,
