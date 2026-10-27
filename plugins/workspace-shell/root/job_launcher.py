@@ -2,6 +2,7 @@
 import argparse
 import json
 import os
+import select
 import shutil
 import signal
 import socket
@@ -18,6 +19,7 @@ from runtime_common import (
     bounded_run,
     fail,
     read_json_protected,
+    require_secure_directory,
     sha256_hex,
     write_receipt,
 )
@@ -173,9 +175,24 @@ def hardened_git(source_root, args):
         "GIT_CONFIG_NOSYSTEM": "1",
         "GIT_CONFIG_GLOBAL": "/dev/null",
         "GIT_OPTIONAL_LOCKS": "0",
+        "GIT_TERMINAL_PROMPT": "0",
     }
+    command = [
+        "/usr/bin/git",
+        "-C",
+        str(source_root),
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "core.fsmonitor=false",
+        "-c",
+        "diff.external=",
+        "-c",
+        "credential.helper=",
+        *args,
+    ]
     proc = subprocess.run(
-        ["/usr/bin/git", "-C", str(source_root), *args],
+        command,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -188,11 +205,15 @@ def hardened_git(source_root, args):
         fail("SOURCE_GIT_FAILED", proc.stderr.strip() or "git inspection failed")
     return proc.stdout.strip()
 
-
 def verify_source_tree(source_root, worker_uid):
     source_root = Path(source_root).resolve()
     if not source_root.is_dir():
         fail("SOURCE_ROOT_INVALID", "configured source root missing")
+    root_st = os.lstat(source_root)
+    if root_st.st_mode & 0o022:
+        fail("SOURCE_WRITABLE_BY_UNTRUSTED", "source root is group/world writable")
+    if root_st.st_uid == worker_uid and root_st.st_mode & 0o200:
+        fail("SOURCE_WRITABLE_BY_WORKER", "worker owns writable source root")
     for root, dirs, files in os.walk(source_root, followlinks=False):
         for name in dirs + files:
             p = Path(root) / name
@@ -313,10 +334,17 @@ def unit_killer(cfg, unit):
     return kill
 
 
-def cleanup_state(cfg, unit):
+def _unit_state(cfg, unit):
     systemctl = cfg.get("systemctl_path", "/usr/bin/systemctl")
     proc = subprocess.run(
-        [systemctl, "show", unit, "--property=ActiveState", "--value"],
+        [
+            systemctl,
+            "show",
+            unit,
+            "--property=ActiveState",
+            "--property=ControlGroup",
+            "--no-pager",
+        ],
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -326,10 +354,85 @@ def cleanup_state(cfg, unit):
         env={"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8"},
     )
     if proc.returncode != 0:
-        return "unit-not-found-or-collected"
-    state = proc.stdout.strip()
-    return f"active-state:{state}"
+        return None
+    values = {}
+    for line in proc.stdout.splitlines():
+        if "=" in line:
+            key, value = line.split("=", 1)
+            values[key] = value
+    return values
 
+
+def _cgroup_pids(control_group):
+    if not control_group:
+        return []
+    base = Path("/sys/fs/cgroup").resolve()
+    candidate = (base / control_group.lstrip("/")).resolve()
+    try:
+        candidate.relative_to(base)
+    except ValueError:
+        fail("CGROUP_PATH_ESCAPE", "systemd returned a control group outside cgroup root")
+    procs = candidate / "cgroup.procs"
+    try:
+        return [line.strip() for line in procs.read_text().splitlines() if line.strip()]
+    except FileNotFoundError:
+        return []
+
+
+def cleanup_state(cfg, unit):
+    observed = _unit_state(cfg, unit)
+    if observed is None:
+        return "COLLECTED"
+
+    state = observed.get("ActiveState", "")
+    if state not in {"inactive", "failed"}:
+        killer = unit_killer(cfg, unit)
+        killer(signal.SIGTERM)
+        deadline = time.monotonic() + 1.0
+        while time.monotonic() < deadline:
+            observed = _unit_state(cfg, unit)
+            if observed is None or observed.get("ActiveState") in {"inactive", "failed"}:
+                break
+            time.sleep(0.02)
+        observed = _unit_state(cfg, unit)
+        if observed is not None and observed.get("ActiveState") not in {"inactive", "failed"}:
+            killer(signal.SIGKILL)
+
+    deadline = time.monotonic() + 2.0
+    last = None
+    while time.monotonic() < deadline:
+        observed = _unit_state(cfg, unit)
+        if observed is None:
+            return "COLLECTED"
+        last = observed
+        pids = _cgroup_pids(observed.get("ControlGroup"))
+        if observed.get("ActiveState") in {"inactive", "failed"} and not pids:
+            return "EMPTY"
+        time.sleep(0.02)
+
+    pids = _cgroup_pids((last or {}).get("ControlGroup"))
+    fail(
+        "CGROUP_CLEANUP_FAILED",
+        f"transient worker unit {unit} retained state={(last or {}).get('ActiveState')} pids={pids}",
+    )
+
+
+def peer_disconnected(conn):
+    try:
+        readable, _, exceptional = select.select([conn], [], [conn], 0)
+        if exceptional:
+            return True
+        if not readable:
+            return False
+        try:
+            data = conn.recv(1, socket.MSG_PEEK | socket.MSG_DONTWAIT)
+            return data == b""
+        except BlockingIOError:
+            return False
+        except (ConnectionResetError, BrokenPipeError):
+            return True
+    except OSError:
+        return True
 
 def decode_output(data):
     try:
@@ -338,7 +441,7 @@ def decode_output(data):
         return "[non-UTF8 output omitted]"
 
 
-def run_request(cfg, manifest, request):
+def run_request(cfg, manifest, request, cancel_check=None):
     if request.get("schema") != "workspace-shell-job-request.v1":
         fail("JOB_SCHEMA_INVALID", "unexpected job request schema")
     if request.get("operation") != "exec":
@@ -365,12 +468,18 @@ def run_request(cfg, manifest, request):
     source_root = verify_source_tree(source_root, worker_uid)
 
     observed_sha = hardened_git(source_root, ["rev-parse", "HEAD"])
+    observed_tree = hardened_git(source_root, ["rev-parse", "HEAD^{tree}"])
+    dirty = hardened_git(
+        source_root,
+        ["status", "--porcelain=v1", "--untracked-files=normal"],
+    )
     if observed_sha != expected_sha:
         fail("SOURCE_SHA_MISMATCH", "observed source HEAD differs from expected_sha")
+    if dirty:
+        fail("SOURCE_DIRTY", "unprivileged source checkout must be clean before execution")
 
     receipt_id = f"job-{uuid.uuid4()}"
-    scratch_root = Path(cfg["scratch_root"])
-    scratch_root.mkdir(parents=True, exist_ok=True)
+    scratch_root = require_secure_directory(cfg["scratch_root"], owner_uid=0)
     job_root = scratch_root / receipt_id
     workspace_path = source_root
     scratch_path = None
@@ -395,6 +504,7 @@ def run_request(cfg, manifest, request):
         stdout_limit=65536,
         stderr_limit=65536,
         kill_callback=unit_killer(cfg, unit),
+        cancel_check=cancel_check,
     )
     cleanup = cleanup_state(cfg, unit)
 
@@ -411,6 +521,7 @@ def run_request(cfg, manifest, request):
         "review_approval_sha": None,
         "expected_git_sha": expected_sha,
         "observed_git_sha": observed_sha,
+        "observed_git_tree": observed_tree,
         "argv_profile": profile,
         "argv_hash": sha256_hex(json.dumps(request.get("argv"), separators=(",", ":"), ensure_ascii=False)),
         "redacted_argv": request.get("argv"),
@@ -433,6 +544,7 @@ def run_request(cfg, manifest, request):
         "cgroup_cleanup_status": cleanup,
         "authorization_decision": "ALLOW",
         "timed_out": result["timed_out"],
+        "cancelled": result["cancelled"],
     }
     stored = write_receipt(cfg["receipt_root"], receipt)
 
@@ -445,6 +557,7 @@ def run_request(cfg, manifest, request):
         "exit_code": result["exit_code"],
         "signal": result["signal"],
         "timed_out": result["timed_out"],
+        "cancelled": result["cancelled"],
         "stdout": decode_output(result["stdout"]),
         "stderr": decode_output(result["stderr"]),
         "stdout_bytes_seen": result["stdout_bytes_seen"],
@@ -492,7 +605,9 @@ def serve(config_path):
         fail("PROFILE_MANIFEST_INVALID", "unexpected profile manifest schema/grammar")
 
     socket_path = Path(cfg["socket_path"])
-    socket_path.parent.mkdir(parents=True, exist_ok=True)
+    require_secure_directory(socket_path.parent, owner_uid=0)
+    require_secure_directory(cfg["receipt_root"], owner_uid=0)
+    require_secure_directory(cfg["scratch_root"], owner_uid=0)
     if socket_path.exists():
         st = socket_path.lstat()
         if not stat.S_ISSOCK(st.st_mode):
@@ -524,7 +639,12 @@ def serve(config_path):
                             fail("REQUEST_TOO_LARGE", "launcher request exceeds 64 KiB")
                     line = bytes(raw).split(b"\n", 1)[0]
                     request = json.loads(line.decode("utf-8"))
-                    response = run_request(cfg, manifest, request)
+                    response = run_request(
+                        cfg,
+                        manifest,
+                        request,
+                        cancel_check=lambda: peer_disconnected(conn),
+                    )
                 except Exception as exc:
                     code = exc.code if isinstance(exc, ShellRuntimeError) else "JOB_LAUNCH_FAILED"
                     message = str(exc)
@@ -533,7 +653,10 @@ def serve(config_path):
                 data = json.dumps(response, separators=(",", ":"), ensure_ascii=False).encode("utf-8") + b"\n"
                 if len(data) > RESPONSE_LIMIT:
                     data = b'{"ok":false,"error":{"code":"RESPONSE_TOO_LARGE","message":"launcher response exceeded bound"}}\n'
-                conn.sendall(data)
+                try:
+                    conn.sendall(data)
+                except (BrokenPipeError, ConnectionResetError):
+                    pass
     finally:
         server.close()
         try:
