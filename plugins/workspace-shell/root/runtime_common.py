@@ -43,7 +43,7 @@ def read_json_protected(path, *, require_root=True):
     st = p.stat()
     if not stat.S_ISREG(st.st_mode):
         fail("TRUST_FILE_INVALID", f"{p} is not a regular file")
-    if require_root and os.environ.get("WORKSPACE_SHELL_TEST_ALLOW_UNOWNED") != "1":
+    if require_root:
         if st.st_uid != 0:
             fail("TRUST_FILE_OWNER", f"{p} must be root-owned")
         if st.st_mode & 0o022:
@@ -59,7 +59,7 @@ def require_protected_path(path, *, require_root=True, regular=True):
     st = p.stat()
     if regular and not stat.S_ISREG(st.st_mode):
         fail("PROTECTED_PATH_TYPE", f"{p} must be a regular file")
-    if require_root and os.environ.get("WORKSPACE_SHELL_TEST_ALLOW_UNOWNED") != "1":
+    if require_root:
         if st.st_uid != 0:
             fail("PROTECTED_PATH_OWNER", f"{p} must be root-owned")
         if st.st_mode & 0o022:
