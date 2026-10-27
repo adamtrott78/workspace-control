@@ -191,6 +191,18 @@
             "Documented defaults remain 600 MCP requests/minute, 10 MiB serialized request/response envelope, 120 s absolute request deadline, and 1000 pending requests per tunnel.",
             "OpenAI's latest public tunnel-client release observed on 2026-10-26 is v0.0.18."
           ]
+        },
+        {
+          "check": "Lambda Secure MCP Tunnel host preflight",
+          "result": "PASS",
+          "evidence": [
+            "Production Heartbeat stayed on exact v0.4.7 SHA 9e5858738a4fd11801510e2839b0f94f19541506 at :8787.",
+            "Host is Ubuntu 22.04 x86_64 / amd64.",
+            "tunnel-client is not installed in PATH or common binary locations; no tunnel config metadata was found.",
+            "CONTROL_PLANE_API_KEY and OPENAI_API_KEY are unset; no proxy variables were set.",
+            "api.openai.com resolved successfully and unauthenticated HTTPS returned HTTP 401 with tls_verify=0, proving outbound DNS/TCP/TLS/HTTPS reachability.",
+            "No existing tunnel-client/OpenAI tunnel processes were running."
+          ]
         }
       ],
       "resume_condition": "Live ChatGPT acceptance passes without public ngrok dependency."
@@ -361,9 +373,10 @@
     }
   ],
   "blockers": [
-    "Secure MCP Tunnel workspace association, tunnel ID/profile, runtime API-key authorization, and tunnel-client availability/configuration on Lambda have not yet been verified.",
-    "Official MCP forwarding support is documented, but embedded MCP Apps resource delivery plus continuous app-only heartbeat_poll behavior through Secure MCP Tunnel still require live ChatGPT acceptance.",
-    "Public ngrok remains quota-blocked from ChatGPT; keep the accepted local v0.4.7 production runtime and rollback path intact until Secure MCP Tunnel acceptance passes."
+    "The official tunnel-client is not installed on Lambda and no tunnel profile exists.",
+    "A Platform tunnel_id and restricted runtime API key are still required; do not paste the key into chat or commit it.",
+    "Secure MCP Tunnel workspace association and live ChatGPT custom-MCP/app acceptance remain unverified.",
+    "Public ngrok remains quota-blocked from ChatGPT; keep accepted production v0.4.7 :8787 and rollback intact until tunnel acceptance passes."
   ],
   "remaining_work": [
     "Verify current official OpenAI Secure MCP Tunnel setup requirements and inspect Lambda for tunnel-client/configuration state without modifying production Heartbeat.",
@@ -371,7 +384,7 @@
     "Perform live ChatGPT acceptance through Secure MCP Tunnel for model tools, embedded app resource delivery, heartbeat_poll freshness, executor/semantic/card separation, and five/six-entry UI behavior.",
     "Only after acceptance, replace ngrok in the normal launcher path while preserving an operator-understandable rollback/emergency fallback and synchronize final task state."
   ],
-  "next_safe_action": "Run a read-only Lambda host preflight for Secure MCP Tunnel: detect any installed tunnel-client and version, inspect only configuration filenames/permissions (not secrets), report whether CONTROL_PLANE_API_KEY or OPENAI_API_KEY are set without printing values, confirm architecture and outbound TLS reachability to api.openai.com:443, and keep production v0.4.7 :8787 unchanged. If no client/config exists, install the current official tunnel-client release only after verifying the release asset/checksum; tunnel creation/workspace association and runtime API-key provisioning remain explicit operator steps.",
+  "next_safe_action": "Install the current official full tunnel-client v0.0.18 Linux amd64 archive on Lambda into a user-owned non-production path after verifying its published SHA-256 (3c82307316acd93c88a384b62af1d81d3f4cb0efa975f9c0bfaef922866a04c4). Run only version/help/quickstart discovery afterward. Do not create a tunnel profile or expose credentials yet. Then create/associate a Platform Secure MCP Tunnel and provision a restricted runtime key with Tunnels Read + Use; enter the key locally, never in chat.",
   "last_executor": "chatgpt+operator",
   "last_surface": "github+lambda-isolated",
   "notes": "Created 2026-10-26 after the operator identified the concrete cause of current Heartbeat connector failures: the free ngrok account exceeded its monthly network bandwidth allocation. The operator values the newly added executor-signal feature and reports that the card/server polls approximately once per second to show the latest executor signal. That feature is a requirement, not disposable overhead. The new task therefore treats transport and payload efficiency as the problem, not liveness semantics. Secure MCP Tunnel is the preferred direction if current official OpenAI support and limits are compatible. The task must empirically distinguish high-frequency live-card/app polling from heartbeat_touch model calls; do not assume they are the same traffic path. GitRunner work continues independently in its own task/chat.\n\n2026-10-26 current-main restage: live runtime provenance and isolated v0.4.7 bandwidth baseline are PASS. The original task branch diverged from main before task/GitRunner merges, so the Heartbeat-only candidate was restaged from current main 9bd1efff5409c97439df6fd37d44a0fb42e95a4a on workspace-heartbeat-secure-mcp-tunnel-v1-current-main. v0.4.8 implements a cache-busted app-only heartbeat_poll delta/resync path while retaining heartbeat_snapshot compatibility. No live deployment or ngrok retirement is authorized yet."
