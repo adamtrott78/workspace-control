@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	defaultProvisionerSock = "/run/workspace-ci/provisioner.sock"
-	maxRunners             = 1
+	defaultProvisionerSock     = "/run/workspace-ci/provisioner.sock"
+	defaultControllerStateRoot = "/var/lib/workspace-ci/controller/state"
+	maxRunners                 = 1
 )
 
 var (
@@ -46,6 +47,7 @@ type config struct {
 	AppInstallID    int64
 	AppPrivateKey   string
 	AdmissionV2     bool
+	StateDir        string
 }
 
 type provisionRequest struct {
@@ -110,6 +112,22 @@ type pendingAdmissionJob struct {
 	RunnerName  string
 }
 
+type laneQuarantineReceipt struct {
+	SchemaVersion        int    `json:"schema_version"`
+	ReceiptID            string `json:"receipt_id"`
+	Status               string `json:"status"`
+	ProjectID            string `json:"project_id"`
+	Lane                 string `json:"lane"`
+	ScaleSetName         string `json:"scale_set_name"`
+	ScaleSetID           int    `json:"scale_set_id"`
+	TotalAssignedJobs    int    `json:"total_assigned_jobs"`
+	ReconstructableJobs  int    `json:"reconstructable_jobs"`
+	ActiveCount          int    `json:"active_count"`
+	PendingCount         int    `json:"pending_count"`
+	Reason               string `json:"reason"`
+	ObservedAt           string `json:"observed_at"`
+}
+
 type scaler struct {
 	mu              sync.Mutex
 	active          map[string]string
@@ -117,13 +135,17 @@ type scaler struct {
 	sessionClient   listener.Client
 	scaleSetID      int
 	projectID       string
+	lane            string
 	profile         string
 	scaleSetName    string
 	runnerPrefix    string
 	provisionerSock string
+	stateDir        string
 	admissionV2     bool
 	attestor        jobAttestor
 	pending         map[string]pendingAdmissionJob
+	quarantined     bool
+	quarantineID    string
 	logger          *slog.Logger
 }
 
@@ -190,6 +212,10 @@ func loadConfig() (config, error) {
 		return config{}, fmt.Errorf("controller runner prefix does not match derived project/lane identity: got %s want %s", runnerPrefix, expectedPrefix)
 	}
 
+	stateRoot := envOr("WORKSPACE_CI_CONTROLLER_STATE_ROOT", defaultControllerStateRoot)
+	if !filepath.IsAbs(stateRoot) {
+		return config{}, fmt.Errorf("WORKSPACE_CI_CONTROLLER_STATE_ROOT must be absolute")
+	}
 	cfg := config{
 		GitHubURL: githubURL, ScaleSetName: scaleSetName, ProjectID: projectID,
 		Lane: lane, RunnerPrefix: runnerPrefix, Profile: profile,
@@ -197,6 +223,7 @@ func loadConfig() (config, error) {
 		PATFile: strings.TrimSpace(os.Getenv("WORKSPACE_CI_PAT_FILE")),
 		AppClientID: strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_CLIENT_ID")),
 		AppPrivateKey: strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_PRIVATE_KEY_FILE")),
+		StateDir: filepath.Join(stateRoot, projectID+"-"+lane),
 	}
 	if raw := strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_INSTALLATION_ID")); raw != "" {
 		value, err := strconv.ParseInt(raw, 10, 64)
@@ -469,18 +496,187 @@ func (s *scaler) clearPendingRunner(runnerName string) {
 	}
 }
 
-func desiredRunnerTarget(stats *scaleset.RunnerScaleSetStatistic, pending int) int {
-	target := 0
-	if stats != nil {
-		target = stats.TotalAssignedJobs
+func reconstructableAssignedCount(active, pending int) int {
+	if pending > active {
+		return pending
 	}
-	if pending > target {
-		target = pending
+	return active
+}
+
+func desiredRunnerTarget(
+	stats *scaleset.RunnerScaleSetStatistic,
+	pending int,
+	active int,
+	admissionV2 bool,
+) int {
+	target := 0
+	if admissionV2 {
+		// Admission-v2 execution authority comes only from locally tracked,
+		// independently attested jobs. GitHub's aggregate assigned-job count is
+		// diagnostic state and must never create a JIT/root grant by itself.
+		target = reconstructableAssignedCount(active, pending)
+	} else if stats != nil {
+		target = stats.TotalAssignedJobs
 	}
 	if target > maxRunners {
 		target = maxRunners
 	}
 	return target
+}
+
+func atomicWriteJSON(path string, value any) error {
+	if !filepath.IsAbs(path) {
+		return fmt.Errorf("state path must be absolute")
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return fmt.Errorf("create state directory: %w", err)
+	}
+	raw, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal state: %w", err)
+	}
+	raw = append(raw, '\n')
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, raw, 0o600); err != nil {
+		return fmt.Errorf("write state: %w", err)
+	}
+	if err := os.Chmod(tmp, 0o600); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("chmod state: %w", err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("replace state: %w", err)
+	}
+	return nil
+}
+
+func (s *scaler) quarantinePath() string {
+	return filepath.Join(s.stateDir, "quarantine.json")
+}
+
+func (s *scaler) loadQuarantine() error {
+	raw, err := os.ReadFile(s.quarantinePath())
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("read controller quarantine: %w", err)
+	}
+	var receipt laneQuarantineReceipt
+	if err := json.Unmarshal(raw, &receipt); err != nil {
+		return fmt.Errorf("parse controller quarantine: %w", err)
+	}
+	if receipt.SchemaVersion != 1 ||
+		receipt.Status != "ASSIGNMENT_DIVERGENCE_QUARANTINED" ||
+		receipt.ProjectID != s.projectID ||
+		receipt.Lane != s.lane ||
+		receipt.ScaleSetName != s.scaleSetName ||
+		receipt.ScaleSetID != s.scaleSetID ||
+		receipt.ReceiptID == "" {
+		return fmt.Errorf("controller quarantine identity mismatch")
+	}
+	s.mu.Lock()
+	s.quarantined = true
+	s.quarantineID = receipt.ReceiptID
+	s.mu.Unlock()
+	return nil
+}
+
+func (s *scaler) persistAssignmentQuarantine(
+	stats *scaleset.RunnerScaleSetStatistic,
+	active int,
+	pending int,
+) error {
+	if stats == nil {
+		return fmt.Errorf("assignment divergence requires statistics")
+	}
+	s.mu.Lock()
+	if s.quarantined {
+		s.mu.Unlock()
+		return nil
+	}
+	s.mu.Unlock()
+	receiptID, err := randomID()
+	if err != nil {
+		return fmt.Errorf("create quarantine receipt id: %w", err)
+	}
+	receipt := laneQuarantineReceipt{
+		SchemaVersion:       1,
+		ReceiptID:           receiptID,
+		Status:              "ASSIGNMENT_DIVERGENCE_QUARANTINED",
+		ProjectID:           s.projectID,
+		Lane:                s.lane,
+		ScaleSetName:        s.scaleSetName,
+		ScaleSetID:          s.scaleSetID,
+		TotalAssignedJobs:   stats.TotalAssignedJobs,
+		ReconstructableJobs: reconstructableAssignedCount(active, pending),
+		ActiveCount:         active,
+		PendingCount:        pending,
+		Reason:              "github_assigned_count_exceeds_complete_reconstructable_jobs",
+		ObservedAt:          time.Now().UTC().Format(time.RFC3339Nano),
+	}
+	if err := atomicWriteJSON(s.quarantinePath(), receipt); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	s.quarantined = true
+	s.quarantineID = receiptID
+	s.mu.Unlock()
+	s.logger.Error(
+		"Admission-v2 lane quarantined on assignment divergence",
+		slog.String("quarantine_receipt_id", receiptID),
+		slog.Int("total_assigned_jobs", stats.TotalAssignedJobs),
+		slog.Int("reconstructable_jobs", receipt.ReconstructableJobs),
+	)
+	return nil
+}
+
+func (s *scaler) resolveQuarantineFromCompleteMetadata(
+	stats *scaleset.RunnerScaleSetStatistic,
+	active int,
+	pending int,
+) error {
+	if stats == nil || stats.TotalAssignedJobs <= 0 {
+		return fmt.Errorf("quarantine cannot auto-resolve without assigned jobs")
+	}
+	reconstructable := reconstructableAssignedCount(active, pending)
+	if reconstructable < stats.TotalAssignedJobs {
+		return fmt.Errorf("quarantine remains ambiguous")
+	}
+	s.mu.Lock()
+	receiptID := s.quarantineID
+	s.mu.Unlock()
+	resolved := map[string]any{
+		"schema_version": 1,
+		"receipt_id": receiptID,
+		"status": "RESOLVED_BY_COMPLETE_METADATA",
+		"project_id": s.projectID,
+		"lane": s.lane,
+		"scale_set_name": s.scaleSetName,
+		"scale_set_id": s.scaleSetID,
+		"total_assigned_jobs": stats.TotalAssignedJobs,
+		"reconstructable_jobs": reconstructable,
+		"resolved_at": time.Now().UTC().Format(time.RFC3339Nano),
+	}
+	if err := atomicWriteJSON(
+		filepath.Join(s.stateDir, "resolved-"+receiptID+".json"),
+		resolved,
+	); err != nil {
+		return err
+	}
+	if err := os.Remove(s.quarantinePath()); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("remove resolved quarantine: %w", err)
+	}
+	s.mu.Lock()
+	s.quarantined = false
+	s.quarantineID = ""
+	s.mu.Unlock()
+	s.logger.Info(
+		"Admission-v2 quarantine resolved from complete authoritative metadata",
+		slog.String("quarantine_receipt_id", receiptID),
+	)
+	return nil
 }
 
 func recoveryMetadataComplete(job *scaleset.JobMessageBase) bool {
@@ -500,17 +696,132 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		return nil
 	}
 
+	if s.admissionV2 {
+		if s.attestor == nil {
+			return fmt.Errorf("admission v2 enabled without GitHub attestor")
+		}
+		// Recover complete assigned-job identities before considering any new
+		// JobAvailable acquisition. Sparse aggregate assigned state is never
+		// execution authority.
+		for _, assigned := range msg.JobAssignedMessages {
+			s.mu.Lock()
+			capacity := maxRunners - reconstructableAssignedCount(len(s.active), len(s.pending))
+			s.mu.Unlock()
+			if capacity <= 0 {
+				continue
+			}
+			if !recoveryMetadataComplete(&assigned.JobMessageBase) {
+				s.logger.Warn(
+					"Incomplete JobAssigned recovery metadata is non-authoritative",
+					slog.Int64("runner_request_id", assigned.RunnerRequestID),
+					slog.Int64("workflow_run_id", assigned.WorkflowRunID),
+					slog.Bool("job_id_present", assigned.JobID != ""),
+					slog.Bool("workflow_ref_present", assigned.JobWorkflowRef != ""),
+					slog.Bool("display_name_present", assigned.JobDisplayName != ""),
+				)
+				continue
+			}
+			workload, err := workloadForDisplayClaim(assigned.JobDisplayName)
+			if err != nil {
+				return fmt.Errorf("derive assigned workload: %w", err)
+			}
+			attestation, err := s.attestor.Attest(
+				ctx,
+				&assigned.JobMessageBase,
+				s.scaleSetName,
+				workload,
+			)
+			if err != nil {
+				if errors.Is(err, errTerminalWorkflowJob) {
+					s.logger.Info(
+						"Ignoring terminal JobAssigned recovery metadata",
+						slog.Int64("runner_request_id", assigned.RunnerRequestID),
+						slog.Int64("workflow_run_id", assigned.WorkflowRunID),
+						slog.String("reason", err.Error()),
+					)
+					continue
+				}
+				return fmt.Errorf("attest assigned job recovery metadata: %w", err)
+			}
+			jobKey := attestation.JobID
+			s.mu.Lock()
+			if _, exists := s.pending[jobKey]; !exists {
+				s.pending[jobKey] = pendingAdmissionJob{
+					Metadata:    assigned.JobMessageBase,
+					Attestation: attestation,
+					Workload:    workload,
+				}
+			}
+			s.mu.Unlock()
+		}
+	}
+
+	// Apply lifecycle state before divergence detection so completed work does
+	// not look reconstructable and started work is represented by active state.
+	s.mu.Lock()
+	if s.admissionV2 {
+		for _, started := range msg.JobStartedMessages {
+			s.clearPendingRunner(started.RunnerName)
+		}
+	}
+	for _, completed := range msg.JobCompletedMessages {
+		delete(s.active, completed.RunnerName)
+		if s.admissionV2 {
+			s.clearPendingRunner(completed.RunnerName)
+		}
+	}
+	activeCount := len(s.active)
+	pendingCount := len(s.pending)
+	quarantined := s.quarantined
+	quarantineID := s.quarantineID
+	s.mu.Unlock()
+
+	if s.admissionV2 {
+		reconstructable := reconstructableAssignedCount(activeCount, pendingCount)
+		assignedReported := 0
+		if msg.Statistics != nil {
+			assignedReported = msg.Statistics.TotalAssignedJobs
+		}
+		if quarantined {
+			// A quarantined lane may clear itself only when complete,
+			// independently re-attested metadata reconstructs every currently
+			// assigned job. A later aggregate zero alone is not sufficient.
+			if assignedReported > 0 && reconstructable >= assignedReported {
+				if err := s.resolveQuarantineFromCompleteMetadata(
+					msg.Statistics,
+					activeCount,
+					pendingCount,
+				); err != nil {
+					return fmt.Errorf("resolve assignment quarantine: %w", err)
+				}
+			} else {
+				s.logger.Warn(
+					"Admission-v2 lane remains quarantined; refusing new acquisition",
+					slog.String("quarantine_receipt_id", quarantineID),
+					slog.Int("total_assigned_jobs", assignedReported),
+					slog.Int("reconstructable_jobs", reconstructable),
+				)
+				return nil
+			}
+		} else if msg.Statistics != nil && assignedReported > reconstructable {
+			if err := s.persistAssignmentQuarantine(
+				msg.Statistics,
+				activeCount,
+				pendingCount,
+			); err != nil {
+				return fmt.Errorf("persist assignment quarantine: %w", err)
+			}
+			return nil
+		}
+	}
+
 	if len(msg.JobAvailableMessages) > 0 {
 		requestIDs := make([]int64, 0, len(msg.JobAvailableMessages))
 		stagedKeys := make([]string, 0, len(msg.JobAvailableMessages))
 
 		if s.admissionV2 {
-			if s.attestor == nil {
-				return fmt.Errorf("admission v2 enabled without GitHub attestor")
-			}
-
 			s.mu.Lock()
-			capacity := maxRunners - len(s.active) - len(s.pending)
+			capacity := maxRunners - reconstructableAssignedCount(len(s.active), len(s.pending))
 			s.mu.Unlock()
 
 			for _, job := range msg.JobAvailableMessages {
@@ -573,80 +884,12 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		}
 	}
 
-	if s.admissionV2 {
-		if s.attestor == nil {
-			return fmt.Errorf("admission v2 enabled without GitHub attestor")
-		}
-		for _, assigned := range msg.JobAssignedMessages {
-			s.mu.Lock()
-			capacity := maxRunners - len(s.active) - len(s.pending)
-			s.mu.Unlock()
-			if capacity <= 0 {
-				continue
-			}
-			if !recoveryMetadataComplete(&assigned.JobMessageBase) {
-				s.logger.Warn(
-					"Ignoring incomplete JobAssigned recovery metadata",
-					slog.Int64("runner_request_id", assigned.RunnerRequestID),
-					slog.Int64("workflow_run_id", assigned.WorkflowRunID),
-					slog.Bool("job_id_present", assigned.JobID != ""),
-					slog.Bool("workflow_ref_present", assigned.JobWorkflowRef != ""),
-					slog.Bool("display_name_present", assigned.JobDisplayName != ""),
-				)
-				continue
-			}
-			workload, err := workloadForDisplayClaim(assigned.JobDisplayName)
-			if err != nil {
-				return fmt.Errorf("derive assigned workload: %w", err)
-			}
-			attestation, err := s.attestor.Attest(
-				ctx,
-				&assigned.JobMessageBase,
-				s.scaleSetName,
-				workload,
-			)
-			if err != nil {
-				if errors.Is(err, errTerminalWorkflowJob) {
-					s.logger.Info(
-						"Ignoring terminal JobAssigned recovery metadata",
-						slog.Int64("runner_request_id", assigned.RunnerRequestID),
-						slog.Int64("workflow_run_id", assigned.WorkflowRunID),
-						slog.String("reason", err.Error()),
-					)
-					continue
-				}
-				return fmt.Errorf("attest assigned job recovery metadata: %w", err)
-			}
-			jobKey := attestation.JobID
-			s.mu.Lock()
-			if _, exists := s.pending[jobKey]; !exists {
-				s.pending[jobKey] = pendingAdmissionJob{
-					Metadata:    assigned.JobMessageBase,
-					Attestation: attestation,
-					Workload:    workload,
-				}
-			}
-			s.mu.Unlock()
-		}
-	}
-
 	s.mu.Lock()
-	if s.admissionV2 {
-		for _, started := range msg.JobStartedMessages {
-			s.clearPendingRunner(started.RunnerName)
-		}
-	}
-	for _, completed := range msg.JobCompletedMessages {
-		delete(s.active, completed.RunnerName)
-		if s.admissionV2 {
-			s.clearPendingRunner(completed.RunnerName)
-		}
-	}
 	current := len(s.active)
-	pendingCount := len(s.pending)
+	pendingCount = len(s.pending)
 	s.mu.Unlock()
 
-	target := desiredRunnerTarget(msg.Statistics, pendingCount)
+	target := desiredRunnerTarget(msg.Statistics, pendingCount, current, s.admissionV2)
 	if target <= 0 {
 		s.mu.Lock()
 		clear(s.active)
@@ -675,7 +918,9 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		if s.admissionV2 {
 			pendingKey, pendingJob, pendingOK = s.nextPendingAdmission()
 			if !pendingOK {
-				s.logger.Info("Admission v2 waiting for pre-attested job metadata")
+				// This is intentionally non-authoritative even if aggregate
+				// GitHub statistics still report an assigned job.
+				s.logger.Info("Admission v2 waiting for complete pre-attested job metadata")
 				return nil
 			}
 			attestation = pendingJob.Attestation
@@ -854,9 +1099,6 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			pendingJob.RunnerName = name
 			s.pending[pendingKey] = pendingJob
 		}
-		// Keep canonical pending admission identity until JobStarted so
-		// lifecycle-specific runnerRequestId omissions or reassignments cannot
-		// create a second root grant for the same verified workflow job.
 		current = len(s.active)
 		s.mu.Unlock()
 
@@ -909,20 +1151,30 @@ func runController(ctx context.Context, cfg config, logger *slog.Logger) error {
 		}
 	}
 
+	if err := os.MkdirAll(cfg.StateDir, 0o700); err != nil {
+		return fmt.Errorf("create controller state directory: %w", err)
+	}
 	s := &scaler{
 		active:          make(map[string]string),
 		client:          client,
 		sessionClient:   sessionClient,
 		scaleSetID:      scaleSet.ID,
 		projectID:       cfg.ProjectID,
+		lane:            cfg.Lane,
 		profile:         cfg.Profile,
 		scaleSetName:    cfg.ScaleSetName,
 		runnerPrefix:    cfg.RunnerPrefix,
 		provisionerSock: cfg.ProvisionerSock,
+		stateDir:        cfg.StateDir,
 		admissionV2:     cfg.AdmissionV2,
 		attestor:        attestor,
 		pending:         make(map[string]pendingAdmissionJob),
 		logger:          logger.WithGroup("scaler"),
+	}
+	if cfg.AdmissionV2 {
+		if err := s.loadQuarantine(); err != nil {
+			return fmt.Errorf("load controller quarantine state: %w", err)
+		}
 	}
 
 	logger.Info(
@@ -931,6 +1183,8 @@ func runController(ctx context.Context, cfg config, logger *slog.Logger) error {
 		slog.String("scale_set_name", cfg.ScaleSetName),
 		slog.Int("max_runners", maxRunners),
 		slog.Bool("admission_v2", cfg.AdmissionV2),
+		slog.String("controller_state_dir", cfg.StateDir),
+		slog.Bool("quarantined", s.quarantined),
 	)
 
 	if err := l.Run(ctx, s); !errors.Is(err, context.Canceled) {
