@@ -409,7 +409,36 @@ def apply_request(
             if prior.get("receipt_id") != quarantine.get("receipt_id"):
                 raise MaintenanceError("reset generation identity mismatch")
         def resume() -> dict[str, Any]:
+            archived_previous_recovery = None
             if qpath.name == "quarantine.json":
+                ready_path = target["state_dir"] / "ready-for-single-retry.json"
+                if ready_path.is_file():
+                    prior_ready = _read_json(ready_path)
+                    if prior_ready.get("status") != "RECOVERY_RETRY_COMPLETED":
+                        raise MaintenanceError(
+                            "previous recovery generation is not terminal"
+                        )
+                    prior_generation = prior_ready.get("reset_generation")
+                    try:
+                        uuid.UUID(str(prior_generation))
+                    except (ValueError, TypeError, AttributeError) as exc:
+                        raise MaintenanceError(
+                            "previous recovery generation identity is invalid"
+                        ) from exc
+                    history_path = (
+                        target["state_dir"]
+                        / f"recovery-history-{prior_generation}.json"
+                    )
+                    if history_path.is_file():
+                        if _read_json(history_path) != prior_ready:
+                            raise MaintenanceError(
+                                "previous recovery history replay mismatch"
+                            )
+                        ready_path.unlink()
+                    else:
+                        ready_path.replace(history_path)
+                    archived_previous_recovery = str(history_path)
+
                 pending_state = dict(quarantine)
                 pending_state["status"] = "RECOVERY_SCALESET_RESET_PENDING"
                 pending_state["reset_generation"] = generation
@@ -429,6 +458,7 @@ def apply_request(
                     quarantine.get("scale_set_id"),
                 ),
                 "controller_remains_recovery_quarantined": True,
+                "archived_previous_recovery": archived_previous_recovery,
             }
         return _mutating_receipt(
             request, target, receipts_dir=receipts_dir, mutation=resume
