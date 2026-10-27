@@ -30,6 +30,8 @@ class MultiRepoRun3MigrationTests(unittest.TestCase):
                 "03ee9278bfcc8d9a455ecdacefd7bee5bd4a50b7",
             "scripts/lambda_ci_reconciler.py":
                 "e58d0ccd3e11df99dc22b9069d16b1a03c4d3a2d",
+            "scripts/lambda_ci_reconcile_controller.py":
+                "cdb38af360676abb053c1d171cc4dc3ef39e977a",
             "systemd/workspace-ci-reconciler.service":
                 "a81b758dd2f735fbe72085e3ae3c7529e10152a1",
             "systemd/workspace-ci-tmpfiles.conf":
