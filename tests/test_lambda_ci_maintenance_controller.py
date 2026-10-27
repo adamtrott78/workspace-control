@@ -98,6 +98,17 @@ class MaintenanceControllerTests(unittest.TestCase):
         )
         self.assertIsNone(diagnose["quarantine_receipt_id"])
         self.assertIsNone(diagnose["reset_generation"])
+        self.assertEqual(
+            diagnose["source_attestation"],
+            {
+                "repository": "adamtrott78/workspace-control",
+                "actor_login": "adamtrott78",
+                "comment_id": 123,
+                "command_sha256": controller._sha256(command),
+                "maintenance_policy_generation":
+                    "workspace-ci-maintenance-p1-v1",
+            },
+        )
 
         generation = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
         requiesce = controller.build_root_request(
