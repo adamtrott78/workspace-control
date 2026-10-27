@@ -616,17 +616,101 @@ def run_once(
     if "pull_request" in issue:
         raise MaintenanceControllerError("maintenance issue must not be a pull request")
 
-    comments = client.get_json(
-        f"/repos/{SOURCE_REPOSITORY}/issues/{issue_number}/comments?per_page=100"
-    )
-    if not isinstance(comments, list):
-        raise MaintenanceControllerError("maintenance issue comments are invalid")
+    cursor_path = state_dir / "cursor.json"
+    since = None
+    cursor = None
+    if cursor_path.is_file():
+        try:
+            cursor = json.loads(cursor_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise MaintenanceControllerError("maintenance cursor is invalid") from exc
+        if not isinstance(cursor, dict):
+            raise MaintenanceControllerError("maintenance cursor must be object")
+        since = cursor.get("last_seen_updated_at")
+        if not isinstance(since, str) or not since:
+            raise MaintenanceControllerError("maintenance cursor timestamp is invalid")
 
+    comments: list[dict[str, Any]] = []
+    page = 1
+    while True:
+        query = f"per_page=100&page={page}"
+        if since is not None:
+            # Re-read the boundary second. Durable per-comment receipts make
+            # duplicates harmless and this avoids timestamp-edge command loss.
+            try:
+                boundary = datetime.fromisoformat(since.replace("Z", "+00:00"))
+            except ValueError as exc:
+                raise MaintenanceControllerError("maintenance cursor timestamp is invalid") from exc
+            boundary = boundary.replace(microsecond=0)
+            boundary = boundary.timestamp() - 1
+            query += "&since=" + urllib.parse.quote(
+                datetime.fromtimestamp(boundary, timezone.utc)
+                .isoformat()
+                .replace("+00:00", "Z"),
+                safe="",
+            )
+        batch = client.get_json(
+            f"/repos/{SOURCE_REPOSITORY}/issues/{issue_number}/comments?{query}"
+        )
+        if not isinstance(batch, list):
+            raise MaintenanceControllerError("maintenance issue comments are invalid")
+        comments.extend(c for c in batch if isinstance(c, dict))
+        if len(batch) < 100:
+            break
+        page += 1
+        if page > 100:
+            raise MaintenanceControllerError("maintenance comment pagination exceeded bound")
+
+    comments.sort(key=lambda item: int(item.get("id") or 0))
+    if cursor is None:
+        # Commissioning is fail-closed: never execute commands that predate
+        # first successful controller observation. Create/open the dedicated
+        # issue first, start the controller, then issue maintenance commands.
+        latest = max(
+            (
+                str(comment.get("updated_at"))
+                for comment in comments
+                if isinstance(comment.get("updated_at"), str)
+            ),
+            default=_utc_now(),
+        )
+        max_id = max(
+            (int(comment.get("id") or 0) for comment in comments),
+            default=0,
+        )
+        _atomic_json(
+            cursor_path,
+            {
+                "schema_version": 1,
+                "initialized_at": _utc_now(),
+                "last_seen_comment_id": max_id,
+                "last_seen_updated_at": latest,
+            },
+        )
+        return {
+            "status": "INITIALIZED_NO_COMMANDS_EXECUTED",
+            "watermark_comment_id": max_id,
+        }
+
+    last_seen_id = int(cursor.get("last_seen_comment_id") or 0)
     processed = []
-    for comment in sorted(
-        (c for c in comments if isinstance(c, dict)),
-        key=lambda c: int(c.get("id") or 0),
-    ):
+    max_seen_id = last_seen_id
+    max_seen_updated = since
+    for comment in comments:
+        comment_id = int(comment.get("id") or 0)
+        updated_at = comment.get("updated_at")
+        if comment_id <= 0:
+            continue
+        max_seen_id = max(max_seen_id, comment_id)
+        if isinstance(updated_at, str) and (
+            max_seen_updated is None or updated_at > max_seen_updated
+        ):
+            max_seen_updated = updated_at
+        # Re-read comments at the timestamp boundary, but execute only comments
+        # with a new immutable numeric ID. Edited old comments cannot become a
+        # new command after the fact.
+        if comment_id <= last_seen_id:
+            continue
         try:
             receipt = process_comment(
                 comment,
@@ -639,7 +723,7 @@ def run_once(
         except MaintenanceControllerError as exc:
             processed.append(
                 {
-                    "comment_id": comment.get("id"),
+                    "comment_id": comment_id,
                     "status": "FAILED_CLOSED",
                     "error": str(exc),
                 }
@@ -648,11 +732,25 @@ def run_once(
             if receipt is not None:
                 processed.append(
                     {
-                        "comment_id": comment.get("id"),
+                        "comment_id": comment_id,
                         "status": receipt["status"],
                     }
                 )
-    return {"status": "PASS", "processed": processed}
+
+    _atomic_json(
+        cursor_path,
+        {
+            "schema_version": 1,
+            "initialized_at": cursor.get("initialized_at"),
+            "last_seen_comment_id": max_seen_id,
+            "last_seen_updated_at": max_seen_updated or _utc_now(),
+        },
+    )
+    return {
+        "status": "PASS",
+        "processed": processed,
+        "last_seen_comment_id": max_seen_id,
+    }
 
 
 def main() -> int:
