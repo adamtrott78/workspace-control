@@ -24,8 +24,8 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 - Intent: mutate
 - Remote branch: gitrunner-p1-bootstrap-install
-- Remote checkpoint: f4664e67c82e84922f54b3ed9ae45b677b039837
-- Remote verified: false
+- Remote checkpoint: ef54bcac5da45941d302245ff055aab1ccf54ea9
+- Remote verified: true
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate the exact corrected PR #528 head. If SUCCESS, request fresh independent re-review consuming review 5662021244. Verify: research-engine CPU is re-attested as still unhealthy before mutation; rollback covers failures at both initial stop boundaries; rollback never restarts the three preserved controllers and reports incomplete rollback on restoration failure; commissioning requires exactly INITIALIZED_NO_COMMANDS_EXECUTED with no preexisting cursor; and success fails closed unless the automatic reconcile-controller remains stopped. Do not merge or execute the installer until NO_BLOCKING_FINDING is durably recorded.
+Request fresh independent re-review of PR #528, consuming blocking review 5662021244 and corrected validation run 40447768153 / job 122003009926. Verify closure of BF-1 through BF-5 and regression-check all previously accepted no-activation/scope boundaries. Do not merge or execute the installer until NO_BLOCKING_FINDING is durably recorded.
 
 ## Remaining work
 
@@ -49,7 +49,7 @@ Validate the exact corrected PR #528 head. If SUCCESS, request fresh independent
 
 ## Blockers / gates
 
-- PR #528 bootstrap installer received independent BLOCKING FINDINGS review 5662021244 at head 46d7eb5ea1ed8b43931958c518e21bf6180b02c1. All five findings have corrected code/tests on the current branch, but corrected-head validation and fresh independent re-review remain required before any Lambda mutation.
+- Corrected PR #528 bootstrap installer is validated at code checkpoint ef54bcac5da45941d302245ff055aab1ccf54ea9 (run 40447768153 / job 122003009926 / run #898 SUCCESS), but fresh independent re-review consuming blocking review 5662021244 remains required before any Lambda mutation.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
