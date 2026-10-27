@@ -240,6 +240,10 @@ def bounded_run(
         rc = proc.wait(timeout=2.0)
     finally:
         selector.close()
+        if proc.stdout is not None:
+            proc.stdout.close()
+        if proc.stderr is not None:
+            proc.stderr.close()
 
     duration_ms = int((time.monotonic() - start) * 1000)
     sig = -rc if rc < 0 else None
