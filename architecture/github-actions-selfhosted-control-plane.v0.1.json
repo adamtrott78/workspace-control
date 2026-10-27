@@ -1,0 +1,248 @@
+{
+  "schema_version": 1,
+  "design_id": "github-actions-selfhosted-control-plane-v0.1",
+  "status": "FROZEN_DESIGN_ONLY_PENDING_INDEPENDENT_REVIEW",
+  "problem_statement": {
+    "observed_failure": "Private-repository GitHub-hosted Actions quota exhaustion caused ubuntu-latest jobs to fail before runner execution. A hosted reconciliation validation is currently required before the Lambda reconciliation controller will hydrate new project routes, so quota exhaustion indirectly blocked otherwise-free self-hosted research execution.",
+    "root_causes": [
+      "Routine validation and reconciliation still depend on GitHub-hosted ubuntu-latest.",
+      "High automation/PR churn multiplies short hosted jobs; per-job billing granularity makes many short jobs expensive in included-minute terms.",
+      "The reconciliation controller treats a successful trusted reconciliation workflow run as an authority prerequisite.",
+      "The existing project JIT controller admits only owner-commanded issue_comment PR-head jobs, so ordinary pull_request/push workflows cannot safely be moved by changing runs-on alone."
+    ]
+  },
+  "invariants": [
+    "Scientific and execution authority does not widen because hosted capacity is unavailable.",
+    "Dynamic runners never self-authorize the policy needed to create themselves.",
+    "Project workload runners remain ephemeral/JIT and fail closed on attestation mismatch.",
+    "Control workloads receive no GPU device access.",
+    "Control workloads cannot access operator home, Docker sockets, sibling project roots, provisioner state, reconciler state, or research trusted caches.",
+    "Project-specific Unix identities and filesystem isolation remain even if GitHub-side runner registration is centralized at organization scope.",
+    "Fork pull requests cannot execute privileged self-hosted workloads.",
+    "Repository labels, runner labels, and organization membership are routing metadata, not policy authority.",
+    "Concurrency is bounded; demand above capacity queues rather than scaling without an explicit policy change."
+  ],
+  "current_state": {
+    "hosted_workflows": [
+      ".github/workflows/workspace-control-validation.yml -> ubuntu-latest",
+      ".github/workflows/lambda-ci-project-reconcile.yml -> ubuntu-latest",
+      ".github/workflows/extract-semantic-benchmark-annotation-support.yml -> ubuntu-latest",
+      ".github/workflows/extract-semantic-benchmark-source-freeze.yml -> ubuntu-latest",
+      "research-engine/.github/workflows/ci.yml -> ubuntu-latest"
+    ],
+    "self_hosted_substrate": {
+      "controller": "official GitHub actions/scaleset client in custom Go controller",
+      "runner_mode": "JIT/ephemeral one-runner-per-job",
+      "per_project_lane_max_runners": 1,
+      "projects": [
+        "research-engine",
+        "padataset"
+      ],
+      "current_cpu_profile": "cpu-test: CPUQuota=800%, MemoryMax=32G, RuntimeMaxSec=30min",
+      "current_gpu_profiles": [
+        "gpu-small",
+        "gpu-heavy"
+      ]
+    },
+    "bootstrap_dependency": "lambda_ci_reconcile_controller.py selects a successful trusted lambda-ci-project-reconcile.yml run on main (or policy-equivalent ancestor) before submitting reviewed policy to the root reconciliation socket."
+  },
+  "target_architecture": {
+    "layers": [
+      {
+        "layer": "L0_STABLE_BOOTSTRAP",
+        "purpose": "Non-circular, minimal authority needed to validate/recover control-plane policy.",
+        "steady_state": "Prefer organization runner group restricted to workspace-control and exact trusted bootstrap/reconciliation workflow(s); initially retain hosted workflow or separately installed stable bootstrap runner until the org gate is proven.",
+        "constraints": [
+          "small resource envelope",
+          "no GPU",
+          "no research roots",
+          "no arbitrary candidate code",
+          "independent recovery path"
+        ]
+      },
+      {
+        "layer": "L1_CONTROL_JIT",
+        "purpose": "Routine workspace-control validation and bounded control CI.",
+        "steady_state": "Ephemeral/JIT Lambda runner, project identity workspace-control, max concurrency 1 initially.",
+        "constraints": [
+          "no GPU",
+          "no sibling project roots",
+          "no root control-plane state",
+          "exact workflow/PR attestation"
+        ]
+      },
+      {
+        "layer": "L2_PROJECT_JIT",
+        "purpose": "Project CPU/GPU validation and scientific/model workloads.",
+        "steady_state": "Existing project-scoped research-engine/PADataset identities and JIT runners, optionally registered through organization runner groups later.",
+        "constraints": [
+          "preserve existing execution contracts",
+          "preserve per-project Unix/fs isolation",
+          "no cross-project scale-set acceptance"
+        ]
+      }
+    ],
+    "github_organization_end_state": {
+      "repository_ownership": [
+        "workspace-control",
+        "research-engine",
+        "PADataset"
+      ],
+      "runner_groups": [
+        {
+          "name": "control-bootstrap",
+          "consumers": [
+            "workspace-control"
+          ],
+          "workflow_restriction": "exact trusted bootstrap/reconciliation workflows on default branch",
+          "runner_model": "stable minimal runner or independently provisioned bootstrap scale set",
+          "public_repository_access": false
+        },
+        {
+          "name": "control-ci",
+          "consumers": [
+            "workspace-control"
+          ],
+          "workflow_restriction": "approved control validation workflows",
+          "runner_model": "ephemeral/JIT CPU",
+          "public_repository_access": false
+        },
+        {
+          "name": "research-cpu",
+          "consumers": [
+            "research-engine"
+          ],
+          "workflow_restriction": "approved CPU validation workflows",
+          "runner_model": "ephemeral/JIT CPU",
+          "public_repository_access": false
+        },
+        {
+          "name": "research-gpu",
+          "consumers": [
+            "research-engine"
+          ],
+          "workflow_restriction": "approved GPU/model workflows",
+          "runner_model": "ephemeral/JIT GPU",
+          "public_repository_access": false
+        },
+        {
+          "name": "padataset",
+          "consumers": [
+            "PADataset"
+          ],
+          "workflow_restriction": "approved PADataset workflows",
+          "runner_model": "ephemeral/JIT CPU/GPU",
+          "public_repository_access": "must be false before enabling organization self-hosted access; public-repo execution requires a separate explicit threat-model decision"
+        }
+      ],
+      "credential_target": "GitHub App with least-privilege organization self-hosted-runner and required repository read permissions; avoid broad personal PAT as steady-state control credential.",
+      "reason": "Organization scope centralizes GitHub-side runner inventory/policy while runner groups preserve repo/workflow-level authorization; operating-system execution identities remain project-specific."
+    }
+  },
+  "phased_plan": [
+    {
+      "phase": "P0_EMERGENCY_CAPACITY_RESTORE",
+      "objective": "Unblock currently valid work without changing authority.",
+      "actions": [
+        "Temporarily restore free/paid hosted capacity; user-selected emergency path is temporary repository public visibility.",
+        "Rerun authoritative failed reconciliation 40243005403 and require an actual executed PASS.",
+        "Verify lambda-research-engine route hydration.",
+        "Allow queued exact-provenance CPU validation to execute and require PASS before exactly one scientific trigger.",
+        "Do not treat temporary visibility as the long-term runner security model."
+      ],
+      "rollback": "Return repositories to private immediately if unexpected public-runner/self-hosted interaction or secret exposure is observed."
+    },
+    {
+      "phase": "P1_DESIGN_AND_WORKSPACE_CONTROL_PILOT",
+      "objective": "Create a self-hosted control lane without touching the bootstrap authority.",
+      "actions": [
+        "Add workspace-control project manifest as MIGRATION_CANDIDATE_NOT_INSTALLED.",
+        "Use an owner-only issue_comment pilot route so the existing admission-v2 contract can attest exact PR head/workflow identity without widening the controller yet.",
+        "Create a dedicated workspace-control validation workflow whose job display claim follows wc-admission-v1.",
+        "Keep live reconciliation validation on the existing bootstrap path during this pilot.",
+        "Validate filesystem isolation, no-GPU access, resource cap, cleanup, and deterministic receipt behavior."
+      ],
+      "rollback": "Remove/disable the NOT_INSTALLED or pilot route; existing hosted reconciliation remains authoritative."
+    },
+    {
+      "phase": "P2_CONTROL_SMALL_AND_AUTOMATIC_EVENT_ADMISSION",
+      "objective": "Make routine PR/push CI self-hosted without manual slash commands.",
+      "actions": [
+        "Add explicit control-small execution profile with approximately 200% CPU, 4-8G MemoryMax, no GPU, short RuntimeMaxSec, max concurrency 1.",
+        "Extend attestation schema/controller to safely support pull_request for candidate validation and trusted push/workflow_dispatch for default-branch reconciliation.",
+        "Freeze distinct authority rules for candidate validation vs default-branch bootstrap/reconciliation.",
+        "Migrate Workspace Control Validation and appropriate research-engine ordinary CI only after new event admission passes adversarial tests."
+      ],
+      "rollback": "Retain previous issue_comment JIT route and hosted/bootstrap fallback until automatic-event admission is accepted."
+    },
+    {
+      "phase": "P3_ORGANIZATION_MIGRATION",
+      "objective": "Centralize GitHub-side runner administration without collapsing OS/project isolation.",
+      "actions": [
+        "Create GitHub organization and transfer repositories in a separately gated change.",
+        "Create runner groups with selected-repository and selected-workflow restrictions.",
+        "Re-register or migrate scale sets/controllers explicitly; do not assume transfer preserves runner registration.",
+        "Move controller authentication to a least-privilege GitHub App.",
+        "Update owner-qualified repository references, remote URLs, manifests, attestations, and allowlists.",
+        "Prove bootstrap recovery, project isolation, and rollback before disabling old registration paths."
+      ],
+      "rollback": "Repository transfer/runner migration is staged with old credentials/registration recoverable until acceptance; never delete the last known-good bootstrap path before org gates pass."
+    },
+    {
+      "phase": "P4_HOSTED_RUNNER_EXIT",
+      "objective": "Private-repository steady state with negligible hosted-runner dependence.",
+      "actions": [
+        "Inventory every runs-on: ubuntu-latest.",
+        "Move routine jobs to bounded self-hosted groups.",
+        "Retain only an explicitly documented emergency/break-glass hosted workflow if desired.",
+        "Set billing budget/alerts to detect accidental hosted usage.",
+        "Measure queue depth, CPU/RAM pressure, and research-job interference."
+      ],
+      "rollback": "Emergency hosted workflow remains available subject to budget or temporary public fallback."
+    }
+  ],
+  "resource_model": {
+    "current_controller_limit": "maxRunners=1 per project/lane",
+    "implication": "Workflow/event volume does not cause exponential simultaneous Lambda compute. Qualifying jobs queue behind a bounded lane.",
+    "proposed_control_initial_budget": {
+      "concurrency": 1,
+      "cpu_quota_target": "200%",
+      "memory_high_target": "4G",
+      "memory_max_target": "8G",
+      "runtime_max_target": "10min",
+      "gpu_count": 0
+    },
+    "research_priority": "Control lane must remain CPU-only and bounded so GPU/model work retains priority. Heavy dependency installs or full integration tests may queue but cannot consume GPUs.",
+    "scale_policy": "Any increase above one concurrent control runner requires separate measured queue-pressure and host-resource evidence."
+  },
+  "review_automation": {
+    "immediate": [
+      "Every review target is represented by exact Git commit/blob identities in a durable task capsule and PR.",
+      "Request GitHub-native review directly on the PR so later reviewers can consume comments without user copy/paste.",
+      "Where available, request GitHub Copilot code review automatically for design/code PRs as an additional reviewer, using repository/path review instructions.",
+      "A future ChatGPT reviewer starts from task ID and GitHub state; the user should not ferry review text."
+    ],
+    "limitation": "This chat cannot autonomously spawn a separate ChatGPT conversation. Copilot code review is useful for code/design review but does not automatically satisfy scientific independence requirements unless the governing task explicitly accepts that reviewer class.",
+    "future": [
+      "Optional review-broker service/GitHub App that creates review jobs against exact blobs and persists signed dispositions; evaluate separately for model cost, credentials, and independence semantics."
+    ]
+  },
+  "required_preimplementation_review": [
+    "Confirm bootstrap authority is non-circular.",
+    "Confirm workspace-control pilot cannot access sibling project roots/control-plane secrets/GPU devices.",
+    "Confirm public-repository emergency state is not treated as steady-state security.",
+    "Confirm max concurrency and resource ceilings prevent control jobs from starving research workloads.",
+    "Confirm automatic-event admission is deferred until separately designed/tested.",
+    "Confirm organization migration is staged and reversible.",
+    "Confirm review automation cannot self-approve authority-sensitive changes."
+  ],
+  "first_implementation_authority_if_reviewed": "Only P1 design scaffolding and a NOT_INSTALLED workspace-control pilot may proceed after NO_BLOCKING_FINDING. P2/P3 each require their own exact review before live activation.",
+  "non_goals": [
+    "Changing Local EXTRACT science or benchmark authority",
+    "Increasing GPU scientific concurrency",
+    "Replacing GitHub as source/event transport",
+    "Running arbitrary public pull-request code on Lambda",
+    "Collapsing all project workloads into a single shared Unix identity",
+    "Performing the organization transfer before the local control-pilot gates are satisfied"
+  ]
+}
