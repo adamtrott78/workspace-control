@@ -23,8 +23,8 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: gitrunner-p1-bootstrap-runuser-fix-v1
-- Remote checkpoint: 410c0aeebc18ebb993629bda4f235934794033c4
+- Remote branch: main
+- Remote checkpoint: 0e7c31b7a37949b1c0b33f7202fe8fd694685004
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Request fresh independent review of PR #530 after this state synchronization. The reviewer must consume the first live pre-mutation failure evidence, verify that the code correction is limited to deterministic /usr/sbin/runuser resolution plus regression coverage, verify successful validation run 40450025002 / job 122010323489, and regression-check all previously accepted rollback/no-activation/P2-P3 boundaries. Do not merge or retry the installer until NO_BLOCKING_FINDING is durably recorded.
+Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge 0e7c31b7a37949b1c0b33f7202fe8fd694685004, with --expected-head set to that exact SHA and full output captured. The installer is authorized only for the reviewed bootstrap substrate: it must revalidate live fingerprint/credential scope/unhealthy research-engine CPU state before mutation, build before mutation, back up all touched targets, preserve the three healthy controllers, keep workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive, leave automatic reconcile-controller frozen on success, and rollback on any failed post-mutation gate. Return the complete output/receipt before any GitHub -> L0 diagnose or workspace-control activation.
 
 ## Remaining work
 
@@ -49,7 +49,7 @@ Request fresh independent review of PR #530 after this state synchronization. Th
 
 ## Blockers / gates
 
-- PR #530 exact final review head must receive fresh independent NO_BLOCKING_FINDING before the privileged installer is retried.
+- The exact independently reviewed runuser correction is merged as workspace-control@0e7c31b7a37949b1c0b33f7202fe8fd694685004. The next gate is the bounded live bootstrap retry from that exact reviewed merge SHA; any drift/failure must fail closed/rollback.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
