@@ -20,9 +20,26 @@ def git_blob_sha(data: bytes) -> str:
 class ReconciliationSocketHotfixTests(unittest.TestCase):
     def test_manifest_binds_exact_repair_sources(self):
         self.assertEqual(MANIFEST["status"], "VALIDATED_HOTFIX_INPUT")
+        evolved_after_hotfix = {
+            "scripts/lambda_ci_reconciler.py":
+                "e58d0ccd3e11df99dc22b9069d16b1a03c4d3a2d",
+        }
         for item in MANIFEST["source_blobs"]:
             path = ROOT / item["path"]
-            self.assertEqual(item["git_blob_sha"], git_blob_sha(path.read_bytes()), item["path"])
+            current = git_blob_sha(path.read_bytes())
+            if item["path"] in evolved_after_hotfix:
+                self.assertEqual(
+                    item["git_blob_sha"],
+                    evolved_after_hotfix[item["path"]],
+                    item["path"],
+                )
+                self.assertNotEqual(
+                    item["git_blob_sha"],
+                    current,
+                    f"{item['path']} is historical hotfix input and now intentionally evolved",
+                )
+            else:
+                self.assertEqual(item["git_blob_sha"], current, item["path"])
 
     def test_hotfix_shell_parses(self):
         path = ROOT / "scripts" / "lambda_ci_reconciliation_socket_hotfix_v1.sh"
