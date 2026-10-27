@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 0e7c31b7a37949b1c0b33f7202fe8fd694685004
-- Remote verified: true
+- Remote branch: gitrunner-p1-bootstrap-preserve-recovered-cpu
+- Remote checkpoint: 44630dea4e01d7ffb44edde58a5f192bb8f2f2bd
+- Remote verified: false
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge 0e7c31b7a37949b1c0b33f7202fe8fd694685004, with --expected-head set to that exact SHA and full output captured. The installer is authorized only for the reviewed bootstrap substrate: it must revalidate live fingerprint/credential scope/unhealthy research-engine CPU state before mutation, build before mutation, back up all touched targets, preserve the three healthy controllers, keep workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive, leave automatic reconcile-controller frozen on success, and rollback on any failed post-mutation gate. Return the complete output/receipt before any GitHub -> L0 diagnose or workspace-control activation.
+Validate the corrected PR #531 head after closing the recovered-CPU stability rebasing gap. Verify that after backup_targets() and immediately before begin_mutation_phase(), the preserved RESEARCH_CPU snapshot still satisfies the recovered predicate and exactly matches research_cpu_pre NRestarts, then perform a fresh live _verify_preserved_services() at the mutation boundary. Regression tests must inject both restart-count drift and failure between the earlier two-observation check and mutation. If exact-head validation passes, request fresh independent re-review; do not merge or retry Lambda until the corrected head receives NO_BLOCKING_FINDING.
 
 ## Remaining work
 
@@ -49,7 +49,8 @@ Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exac
 
 ## Blockers / gates
 
-- The exact independently reviewed runuser correction is merged as workspace-control@0e7c31b7a37949b1c0b33f7202fe8fd694685004. The next gate is the bounded live bootstrap retry from that exact reviewed merge SHA; any drift/failure must fail closed/rollback.
+- PR #531 review at old head 096396d0383ddd9f17bb95a6117ba41508bf1a2f recorded NO_BLOCKING_FINDING, but a fresh call-path audit found a pre-mutation stability-rebasing gap: research-engine CPU could restart after the two-observation check and before begin_mutation_phase(), then backup_targets() could silently establish the new restart count as the preserved baseline. The PR head has been advanced with a bounded correction; the old review is stale and does not authorize merge/retry.
+- The corrected #531 head must pass exact validation and receive a fresh independent review before any third Lambda retry.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
