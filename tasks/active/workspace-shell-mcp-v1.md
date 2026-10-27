@@ -40,6 +40,7 @@ DEFERRED. Do nothing until the operator explicitly resumes workspace-shell-mcp-v
 - Implement and adversarially test the private Workspace Shell MCP in isolation.
 - Perform isolated Lambda acceptance with no production authority, then separately gate live ChatGPT connection.
 - After acceptance, document how durable workspace-control tasks may invoke Workspace Shell without bypassing task-specific mutation/review gates.
+- Use the completed control-plane incident chain as an acceptance scenario: reproduce a bounded exact-SHA read/execute/receipt workflow without requiring the operator to relay terminal commands manually.
 
 ## Blockers / gates
 
