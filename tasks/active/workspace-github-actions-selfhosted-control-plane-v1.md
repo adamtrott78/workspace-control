@@ -23,8 +23,8 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 1f8286897d5a5c75dc55480db1154ee29a3f9b5c
+- Remote branch: gitrunner-p1-bootstrap-install
+- Remote checkpoint: ef54bcac5da45941d302245ff055aab1ccf54ea9
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-On the Lambda host, from an exact clean workspace-control checkout at merged main, run only the bounded read-only P1 host preflight. Capture service states/restart counts, active workspace-ci units/processes, installed controller/provisioner/reconciler/runtime hashes, installed registry/project manifests, controller template effective unit, controller/reconciler/maintenance identity and token-file ownership/modes without reading token contents, socket ownership/modes, project-root metadata, controller envs, and isolated Go 1.26.3 availability. Do not stop/start/restart/enable/disable/copy/install/reconcile/activate or trigger any workflow. Return the exact preflight output to this task so a rollback-safe P1 installation plan can be derived before mutation.
+Request fresh independent re-review of PR #528, consuming blocking review 5662021244 and corrected validation run 40447768153 / job 122003009926. Verify closure of BF-1 through BF-5 and regression-check all previously accepted no-activation/scope boundaries. Do not merge or execute the installer until NO_BLOCKING_FINDING is durably recorded.
 
 ## Remaining work
 
@@ -49,7 +49,8 @@ On the Lambda host, from an exact clean workspace-control checkout at merged mai
 
 ## Blockers / gates
 
-- No GitHub-side review blocker remains. Live P1 installation is gated only on a read-only Lambda host preflight proving the current installed service/file/identity/socket/credential metadata and preserving the independent bootstrap/rollback path before any root mutation.
+- Corrected PR #528 bootstrap installer is validated at code checkpoint ef54bcac5da45941d302245ff055aab1ccf54ea9 (run 40447768153 / job 122003009926 / run #898 SUCCESS), but fresh independent re-review consuming blocking review 5662021244 remains required before any Lambda mutation.
+- workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
 
