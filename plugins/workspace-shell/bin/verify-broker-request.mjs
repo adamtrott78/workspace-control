@@ -16,7 +16,7 @@ function readJson(file) {
 function requireProtectedFile(file) {
   const stat = statSync(file);
   if (!stat.isFile()) fail("TRUST_FILE_INVALID", `${file} is not a regular file`);
-  if (process.env.WORKSPACE_SHELL_TEST_ALLOW_UNOWNED !== "1") {
+  const testUnowned = process.env.WORKSPACE_SHELL_TEST_ALLOW_UNOWNED === "1" && typeof process.getuid === "function" && process.getuid() !== 0;\n  if (!testUnowned) {
     if (stat.uid !== 0) fail("TRUST_FILE_OWNER", `${file} must be root-owned`);
     if ((stat.mode & 0o022) !== 0) fail("TRUST_FILE_MODE", `${file} must not be group/world writable`);
   }
