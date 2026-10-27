@@ -188,8 +188,11 @@ def no_active_project_execution() -> None:
         ],
         check=False,
     )
-    if proc.returncode not in {0, 1}:
-        raise RecoveryError("unable to inspect project execution units")
+    if proc.returncode != 0:
+        raise RecoveryError(
+            "unable to inspect project execution units: "
+            f"rc={proc.returncode}: {proc.stderr.strip()}"
+        )
     active = []
     for line in proc.stdout.splitlines():
         parts = line.split()
