@@ -109,7 +109,7 @@
       "admission_enabled_after_generic_activation": false
     },
     "control-small-ci-v1": {
-      "lifecycle": "P1_REVIEW_CANDIDATE_NOT_ACTIVATED",
+      "lifecycle": "P1_CONTROL_PILOT_REVIEW_REQUIRED",
       "execution_plane": "jit_runner",
       "execution_profile": "control-small",
       "resource_class": "control_small_v1",
