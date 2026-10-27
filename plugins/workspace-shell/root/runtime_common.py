@@ -137,6 +137,8 @@ def bounded_run(
     stdout_limit=65536,
     stderr_limit=65536,
     kill_callback=None,
+    stdin_bytes=None,
+    pass_fds=(),
 ):
     if not isinstance(argv, list) or not argv:
         fail("RUN_ARGV_INVALID", "argv must be nonempty list")
@@ -144,22 +146,37 @@ def bounded_run(
         argv,
         cwd=cwd,
         env=env,
-        stdin=subprocess.DEVNULL,
+        stdin=subprocess.PIPE if stdin_bytes is not None else subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         start_new_session=True,
         close_fds=True,
+        pass_fds=tuple(pass_fds),
         bufsize=0,
     )
+    if stdin_bytes is not None:
+        try:
+            proc.stdin.write(stdin_bytes)
+            proc.stdin.flush()
+        finally:
+            proc.stdin.close()
 
     selector = selectors.DefaultSelector()
     selector.register(proc.stdout, selectors.EVENT_READ, "stdout")
     selector.register(proc.stderr, selectors.EVENT_READ, "stderr")
     kept = {"stdout": bytearray(), "stderr": bytearray()}
     seen = {"stdout": 0, "stderr": 0}
+    digests = {"stdout": hashlib.sha256(), "stderr": hashlib.sha256()}
     limits = {"stdout": stdout_limit, "stderr": stderr_limit}
     start = time.monotonic()
     timed_out = False
+
+    def retain(stream, data):
+        seen[stream] += len(data)
+        digests[stream].update(data)
+        room = max(0, limits[stream] - len(kept[stream]))
+        if room:
+            kept[stream].extend(data[:room])
 
     def terminate():
         nonlocal timed_out
@@ -193,20 +210,20 @@ def bounded_run(
             if remaining <= 0 and proc.poll() is None:
                 terminate()
                 remaining = 0.1
-            events = selector.select(timeout=max(0.0, min(0.25, remaining if remaining > 0 else 0.1)))
+            events = selector.select(
+                timeout=max(0.0, min(0.25, remaining if remaining > 0 else 0.1))
+            )
             if not events and proc.poll() is not None:
-                for fileobj in list(selector.get_map().values()):
+                for item in list(selector.get_map().values()):
                     try:
-                        data = fileobj.fileobj.read()
+                        data = item.fileobj.read()
                     except Exception:
                         data = b""
                     if data:
-                        stream = fileobj.data
-                        seen[stream] += len(data)
-                        room = max(0, limits[stream] - len(kept[stream]))
-                        kept[stream].extend(data[:room])
-                    selector.unregister(fileobj.fileobj)
+                        retain(item.data, data)
+                    selector.unregister(item.fileobj)
                 break
+
             for key, _ in events:
                 try:
                     data = key.fileobj.read(16384)
@@ -215,11 +232,7 @@ def bounded_run(
                 if not data:
                     selector.unregister(key.fileobj)
                     continue
-                stream = key.data
-                seen[stream] += len(data)
-                room = max(0, limits[stream] - len(kept[stream]))
-                if room:
-                    kept[stream].extend(data[:room])
+                retain(key.data, data)
 
             if proc.poll() is None and time.monotonic() - start >= timeout_s:
                 terminate()
@@ -241,6 +254,6 @@ def bounded_run(
         "stderr_bytes_seen": seen["stderr"],
         "stdout_truncated": seen["stdout"] > len(kept["stdout"]),
         "stderr_truncated": seen["stderr"] > len(kept["stderr"]),
-        "stdout_sha256": sha256_hex(bytes(kept["stdout"])) if seen["stdout"] == len(kept["stdout"]) else None,
-        "stderr_sha256": sha256_hex(bytes(kept["stderr"])) if seen["stderr"] == len(kept["stderr"]) else None,
+        "stdout_sha256": digests["stdout"].hexdigest(),
+        "stderr_sha256": digests["stderr"].hexdigest(),
     }
