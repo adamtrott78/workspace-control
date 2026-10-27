@@ -12,12 +12,14 @@ test("history panel remains explicit and non-polling",()=>{
   assert.equal(panel.includes("setInterval("),false);
 });
 
-test("live card is turn-scoped full-history and self-refreshing",()=>{
+test("live card is turn-scoped, delta-polled, and self-refreshing",()=>{
   assert.ok(live.includes("payload.turn_history"));
   assert.ok(live.includes("payload.recent.slice(-3)"));
   assert.ok(live.includes("item.task_id!==taskId||item.turn_id!==turnId"));
-  assert.ok(live.includes('name:"heartbeat_snapshot"'));
-  assert.ok(live.includes("payload.superseded"));
+  assert.ok(live.includes('name:"heartbeat_poll"'));
+  assert.ok(live.includes("after_sequence:afterSequence"));
+  assert.ok(live.includes("payload.turn_status"));
+  assert.ok(live.includes("payload.resync"));
   assert.ok(live.includes("Turn complete · no longer live"));
   assert.ok(live.includes(".history.capped"));
   assert.ok(live.includes("turnHistory.length>5"));
