@@ -17,6 +17,7 @@ import {
   buildFrontendRequest,
   canonicalDigest,
   fail,
+  loadTaskCapsule,
   readReceiptNoFollow,
   resolveProfile,
   signFrontendRequest,
@@ -205,6 +206,7 @@ function createShellServer() {
     },
     async (args, extra = {}) => {
       try {
+        loadTaskCapsule(config.authority_root, args.task_id, { ownerUid: 0 });
         if (args.operation.startsWith("git_")) {
           if (args.target !== "workspace-control") fail("TARGET_NOT_AUTHORIZED", "Git inspection target must be workspace-control");
           if (!args.expected_sha) fail("EXPECTED_SHA_REQUIRED", "Git inspection requires expected_sha");
@@ -390,6 +392,7 @@ function createShellServer() {
     },
     async ({ task_id, receipt_id }) => {
       try {
+        loadTaskCapsule(config.authority_root, task_id, { ownerUid: 0 });
         const receipt = readReceiptNoFollow(config.receipt_root, receipt_id, {
           expectedUid: config.receipt_uid,
         });
@@ -421,6 +424,10 @@ const handler = async (req, res) => {
   const host = req.headers.host ?? "localhost";
   const url = new URL(req.url, `https://${host}`);
 
+  if (!req.socket.authorized) {
+    res.writeHead(401).end("mTLS client certificate required");
+    return;
+  }
   const peer = req.socket.getPeerCertificate();
   const peerDigest = peer?.raw
     ? createHash("sha256").update(peer.raw).digest("hex")
@@ -438,11 +445,6 @@ const handler = async (req, res) => {
 
   if (url.pathname !== MCP_PATH || !["POST", "GET", "DELETE"].includes(req.method ?? "")) {
     res.writeHead(404).end("Not Found");
-    return;
-  }
-
-  if (!req.socket.authorized) {
-    res.writeHead(401).end("mTLS client certificate required");
     return;
   }
 
