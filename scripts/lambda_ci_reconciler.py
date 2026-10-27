@@ -848,7 +848,7 @@ def _validate_resume_transaction(
         )
     if (
         transaction.get("controller_configuration_change_planned")
-        is not bool(restart)
+        != bool(restart)
     ):
         raise ReconcileError(
             "stored reconciliation controller-change flag is incompatible"
@@ -1049,13 +1049,13 @@ def apply_reconciliation(
             controllers_dir=controllers_dir,
         )
         in_progress = existing
-        _assert_preserved_snapshots(
-            transaction["preserved_controller_services_before"],
-            context="resume",
-        )
-        _assert_completed_restart_snapshots(
-            transaction["restarted_controller_services_after"]
-        )
+    _assert_preserved_snapshots(
+        transaction["preserved_controller_services_before"],
+        context="pre-mutation",
+    )
+    _assert_completed_restart_snapshots(
+        transaction["restarted_controller_services_after"]
+    )
 
     desired_by_service = {
         entry["service"]: entry for entry in desired_entries
