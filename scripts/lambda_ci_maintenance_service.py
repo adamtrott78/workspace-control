@@ -421,6 +421,7 @@ def apply_request(
                     "scale_set_id",
                     quarantine.get("new_scale_set_id"),
                 ),
+                "quarantine_observed_at": quarantine.get("observed_at"),
                 "local_execution_absent": True,
             }
         return _mutating_receipt(
