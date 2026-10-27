@@ -551,5 +551,52 @@ class MaintenanceServiceTests(unittest.TestCase):
         self.assertEqual(starts, [])
 
 
+    def test_failed_root_mutation_persists_terminal_fail_closed_receipt(self):
+        req = request(
+            "RESTART_CONTROLLER",
+            request_id="55555555-6666-4777-8888-999999999999",
+        )
+        with mock.patch.object(
+            maintenance,
+            "_run",
+            side_effect=maintenance.MaintenanceError("synthetic restart failure"),
+        ):
+            with self.assertRaisesRegex(
+                maintenance.MaintenanceError,
+                "synthetic restart failure",
+            ):
+                maintenance.apply_request(
+                    req,
+                    registry_path=self.registry_path,
+                    projects_dir=self.projects_dir,
+                    controller_state_root=self.state_root,
+                    receipts_dir=self.receipts,
+                )
+        receipt_path = self.receipts / f"{req['request_id']}.json"
+        failed = json.loads(receipt_path.read_text(encoding="utf-8"))
+        self.assertEqual(failed["status"], "FAILED_CLOSED")
+        self.assertEqual(
+            failed["identity"]["source_attestation"]["comment_id"],
+            12345,
+        )
+        self.assertEqual(
+            set(failed["precondition_observations"]["installed_policy_digests"]),
+            {"registry_sha256", "manifest_sha256"},
+        )
+        self.assertIsNotNone(failed["rollback"])
+
+        with self.assertRaisesRegex(
+            maintenance.MaintenanceError,
+            "prior maintenance request failed closed",
+        ):
+            maintenance.apply_request(
+                req,
+                registry_path=self.registry_path,
+                projects_dir=self.projects_dir,
+                controller_state_root=self.state_root,
+                receipts_dir=self.receipts,
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
