@@ -146,3 +146,10 @@ Restored production evidence:
 - tmux session `workspace-heartbeat` has expected MCP and ngrok processes.
 
 The earlier :8788 orphan was already gone. The next isolated port candidate :8789 was unexpectedly occupied, so the v0.4.8 byte benchmark remains pending. Do not kill the :8789 process until its identity is proven.
+
+
+### :8789 orphan and wrapper false negatives — diagnosed
+
+The :8789 listener is exact orphaned v0.4.8 validation state: PID 1973910, PPID 1, Node20 executable, CWD in the `heartbeat-v048-validate-def7c5fe6498` worktree, and exact Git SHA `def7c5fe6498b1bd742d912c1490d1f7160cab5f`. The previous safety predicate rejected it only because `/proc/<pid>/cmdline` reported the absolute Node executable path rather than literal `node server.js`.
+
+The next wrapper aborted immediately after candidate checkout, before version reporting. The repository root does not ignore `node_modules`, so an existing dependency symlink inside the validation worktree can make `git status --porcelain` nonempty. Recovery must remove only a verified symlink resolving to the accepted v0.4.7 runtime's `node_modules`, prove no other worktree drift, then recreate the link for isolated execution.
