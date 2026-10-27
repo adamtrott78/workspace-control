@@ -1,5 +1,18 @@
 # Workspace Heartbeat plugin
 
+## v0.4.8 candidate — bandwidth-bounded live polling
+
+v0.4.8 preserves the accepted v0.4.7 executor/semantic/card signal separation and the existing 1500 ms working / 3500 ms non-working live-card cadence, but removes full-history retransmission from the high-frequency path.
+
+- `heartbeat_snapshot(task_id, turn_id)` remains available for bounded full-turn compatibility/debug hydration.
+- The mounted live card now repeatedly calls app-only `heartbeat_poll(task_id, turn_id, after_sequence)`.
+- A normal no-change poll returns turn/liveness state with an empty semantic `updates` array.
+- Semantic entries are sent only when their sequence is newer than the card's last rendered sequence.
+- If the card falls behind the retained turn-history window, the server returns a bounded resync payload containing only the retained current-turn window.
+- Turn fencing, semantic history, silent `heartbeat_touch`, executor freshness, card/server freshness, grow-through-five/scroll-from-six behavior, hidden/teardown polling suspension, and stale-owner policy are unchanged.
+
+This change is a plugin-boundary release because the app resource and tool schema change. Validate exact Node tests, isolated startup, measured response bytes, and Secure MCP Tunnel app/resource behavior before any live cutover.
+
 v0.4.6 is a narrow live-card sizing hotfix on top of accepted v0.4.5. The turn lifecycle, semantic-delta policy, full bounded current-turn history, grow-through-five behavior, and scroll-from-six behavior are unchanged.
 
 The hotfix changes only iframe resize measurement: `ui/notifications/size-changed` now reports the intrinsic rendered `<main>` card height rather than `document.documentElement.scrollHeight`. The latter is at least the current iframe viewport height and can therefore feed an oversized host allocation back to ChatGPT, leaving a large blank area below short one- or two-update cards.
