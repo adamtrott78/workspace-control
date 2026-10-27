@@ -68,6 +68,6 @@ Task capsule: tasks/active/workspace-github-actions-selfhosted-control-plane-v1.
 Task ID: `workspace-github-actions-selfhosted-control-plane-v1`
 
 Start from the normal workspace-control root route.
-Treat the authoritative task capsule, synchronized handoff, exact durable Git/runtime state, and referenced evidence as the complete handoff.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
