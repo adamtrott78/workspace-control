@@ -176,6 +176,14 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
             "registry", "project_manifests", "dry_run",
         })
         self.assertFalse(RECONCILE_SCHEMA["additionalProperties"])
+        transaction = RECONCILE_SCHEMA["properties"][
+            "expected_controller_transaction"
+        ]
+        self.assertFalse(transaction["additionalProperties"])
+        self.assertEqual(
+            set(transaction["required"]),
+            {"restart_services", "enable_services", "preserve_services"},
+        )
         source = RECONCILE_SCHEMA["properties"]["source_attestation"]["properties"]
         self.assertEqual(source["repository"]["const"], "adamtrott78/workspace-control")
         self.assertEqual(source["default_branch"]["const"], "main")
