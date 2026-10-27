@@ -360,13 +360,24 @@
         "expires_at",
         "task_id",
         "target",
-        "design_head_sha",
+        "design_authority_sha",
         "policy_artifact_sha256",
+        "design_review_repository",
+        "design_review_pr_number",
+        "design_reviewed_head_sha",
+        "design_review_record_id",
+        "design_review_disposition",
         "helper_registry_version",
         "helper_registry_sha256",
         "helper_entry_sha256",
         "helper_id",
         "helper_sha256",
+        "helper_review_repository",
+        "helper_review_pr_number",
+        "helper_admission_head_sha",
+        "helper_reviewed_head_sha",
+        "helper_review_record_id",
+        "helper_review_disposition",
         "expected_source_repository",
         "expected_source_commit",
         "expected_source_tree",
@@ -375,18 +386,15 @@
         "parameter_digest_sha256",
         "nonce",
         "idempotency_key",
-        "review_repository",
-        "review_pr_number",
-        "reviewed_head_sha",
-        "review_record_id",
-        "review_disposition",
         "max_uses"
       ],
       "semantics": {
-        "review_disposition": "must equal NO_BLOCKING_FINDING",
-        "reviewed_head_binding": "reviewed_head_sha must equal design_head_sha for design authority and must additionally bind the helper-registry/helper admission head required by the selected helper entry",
-        "parameter_binding": "parameter_digest_sha256 is computed over the exact canonical helper parameter object; approvals do not grant open-ended parameter ranges in v1",
-        "source_binding": "expected source repository, commit and tree must exactly match the observed verified source used by the helper",
+        "design_review_disposition": "must equal NO_BLOCKING_FINDING",
+        "design_binding": "design_reviewed_head_sha must exactly equal design_authority_sha and identify the immutable head independently accepted for this authority contract",
+        "helper_review_disposition": "must equal NO_BLOCKING_FINDING",
+        "helper_binding": "helper_reviewed_head_sha must exactly equal helper_admission_head_sha; the approved registry version/hash, helper entry hash, helper ID and helper binary digest must all come from that independently reviewed helper-admission head",
+        "parameter_binding": "parameter_digest_sha256 is computed over the exact RFC 8785 canonical helper parameter object; v1 approvals grant one exact parameter object, not open-ended ranges",
+        "source_binding": "expected source repository, full commit and tree must exactly match the verified source the broker/helper will use",
         "use_limit": "max_uses must equal 1 in v1",
         "lifetime": "expires_at must be no more than 15 minutes after issued_at and must be in the future when broker verification begins",
         "nonce_and_idempotency": "approval_id, nonce and idempotency_key are single-use and durably consumed by the broker before mutation using crash-safe replay storage"
@@ -401,7 +409,8 @@
       "verifier_contract": [
         "root broker parses the canonical approval itself; it never trusts frontend-parsed approval claims",
         "root broker verifies Ed25519 signature using the pinned trust store, issuer validity, revocation, expiry, single-use state and every bound field against the live request/registry/source",
-        "root broker recomputes helper registry, helper entry, helper binary, parameter schema, exact parameter and source-tree digests",
+        "root broker requires design_reviewed_head_sha == design_authority_sha and helper_reviewed_head_sha == helper_admission_head_sha, with both review dispositions exactly NO_BLOCKING_FINDING",
+        "root broker recomputes policy artifact, helper registry, helper entry, helper binary, parameter schema, exact parameter and source-tree digests",
         "frontend may transport a signed approval bundle but cannot create or alter a valid signature",
         "frontend request signature proves only the allowed caller process; it never substitutes for independent approval",
         "GitHub comments, reviews, labels, task text and repository contents are evidence inputs to the offline signer only; none is execution authority until represented in a valid signed approval"
@@ -434,7 +443,14 @@
       "atomic operation with fsync receipt and crash-safe replay consumption",
       "fail closed on incomplete rollback"
     ],
-    "future_extension": "New privileged capability is admitted only by changing the root-owned helper registry/policy under a separately reviewed exact Git head. Existing workspace-control owner-command maintenance authority is not implicitly transferred to Workspace Shell."
+    "future_extension": "New privileged capability is admitted only by changing the root-owned helper registry/policy under a separately reviewed exact Git head. Existing workspace-control owner-command maintenance authority is not implicitly transferred to Workspace Shell.",
+    "root_broker_runtime": [
+      "CapabilityBoundingSet is empty unless a separately reviewed helper mechanism proves a narrower necessary capability; helper execution authority is not derived from ambient shell access",
+      "ProtectSystem=strict and explicit read-only mounts for /etc/workspace-shell/approval and root-owned helper registry",
+      "no approval issuer private key exists on Lambda; only public verification keys are mounted",
+      "broker cannot modify trusted-issuer or revocation stores through its service namespace",
+      "broker socket exists only in the control-plane namespace and is absent from exec-worker mounts"
+    ]
   },
   "audit": {
     "schema": "workspace-shell-receipt.v1",
@@ -551,7 +567,7 @@
       "job_launcher": {
         "identity": "root-owned workspace-shell-job-launcher",
         "role": "fixed-protocol launcher that creates the sandbox/cgroup/namespaces and drops permanently to workspace-shell-exec before executing the already-resolved profile command",
-        "authority": "may only launch the frozen unprivileged profile grammar; cannot invoke the privileged helper registry, mutate system services, read approval issuer private material, or accept arbitrary executable paths/environment",
+        "authority": "independently revalidates a root-owned immutable profile manifest, pinned executable and closed argv grammar; may only create the declared sandbox/cgroup/namespaces and drop permanently to workspace-shell-exec. It cannot accept arbitrary executable paths/environment, invoke the privileged helper registry, mutate system services, or read approval/signing secrets.",
         "socket": "/run/workspace-shell-control/job-launcher.sock",
         "client_identity": "workspace-shell-mcp only"
       },
