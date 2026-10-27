@@ -1,5 +1,5 @@
-import { randomUUID } from "node:crypto";
-import { readFileSync, statSync } from "node:fs";
+import { createHash, randomUUID } from "node:crypto";
+import { lstatSync, readFileSync, statSync } from "node:fs";
 import { createServer as createHttpsServer } from "node:https";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -27,7 +27,25 @@ const execFileAsync = promisify(execFile);
 const CONFIG_PATH = process.env.WORKSPACE_SHELL_CONFIG ?? "/etc/workspace-shell/frontend.json";
 const MCP_PATH = "/mcp";
 
+function requireRegularNoSymlink(file, label, { ownerUid = null, privateMode = false } = {}) {
+  const st = lstatSync(file);
+  if (!st.isFile() || st.isSymbolicLink()) {
+    throw new Error(`${label} must be a regular non-symlink file`);
+  }
+  if (ownerUid !== null && st.uid !== ownerUid) {
+    throw new Error(`${label} owner uid mismatch`);
+  }
+  if ((st.mode & 0o022) !== 0) {
+    throw new Error(`${label} must not be group/world writable`);
+  }
+  if (privateMode && (st.mode & 0o077) !== 0) {
+    throw new Error(`${label} must not be group/world readable/executable`);
+  }
+  return st;
+}
+
 function loadConfig() {
+  requireRegularNoSymlink(CONFIG_PATH, "frontend config", { ownerUid: 0 });
   const cfg = JSON.parse(readFileSync(CONFIG_PATH, "utf8"));
   for (const field of [
     "authority_root",
@@ -35,15 +53,19 @@ function loadConfig() {
     "broker_socket",
     "receipt_root",
     "frontend_signing_key",
+    "tls_key",
+    "tls_cert",
+    "tls_client_ca",
   ]) {
     if (typeof cfg[field] !== "string" || !cfg[field]) {
       throw new Error(`invalid frontend config: missing ${field}`);
     }
   }
-  for (const field of ["tls_key", "tls_cert", "tls_client_ca"]) {
-    if (typeof cfg[field] !== "string" || !cfg[field]) {
-      throw new Error(`invalid frontend config: missing ${field}`);
-    }
+  if (!/^[0-9a-f]{64}$/.test(cfg.tunnel_client_cert_sha256 ?? "")) {
+    throw new Error("invalid frontend config: tunnel_client_cert_sha256 must be lowercase SHA256");
+  }
+  if (!Number.isInteger(cfg.receipt_uid)) {
+    throw new Error("invalid frontend config: receipt_uid must be an integer");
   }
   return cfg;
 }
@@ -62,6 +84,17 @@ function verifyRuntimeIdentity() {
   }
 }
 verifyRuntimeIdentity();
+
+requireRegularNoSymlink(config.frontend_signing_key, "frontend signing key", {
+  ownerUid: config.frontend_uid,
+  privateMode: true,
+});
+requireRegularNoSymlink(config.tls_key, "frontend TLS key", {
+  ownerUid: config.frontend_uid,
+  privateMode: true,
+});
+requireRegularNoSymlink(config.tls_cert, "frontend TLS certificate");
+requireRegularNoSymlink(config.tls_client_ca, "tunnel client CA");
 
 const frontendPrivateKeyPem = readFileSync(config.frontend_signing_key, "utf8");
 
@@ -170,7 +203,7 @@ function createShellServer() {
       outputSchema: { ok: z.boolean() },
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     },
-    async (args) => {
+    async (args, extra = {}) => {
       try {
         if (args.operation.startsWith("git_")) {
           if (args.target !== "workspace-control") fail("TARGET_NOT_AUTHORIZED", "Git inspection target must be workspace-control");
@@ -198,7 +231,7 @@ function createShellServer() {
             argv: map[args.operation],
             cwd: ".",
             timeout_ms: 10000,
-          }, { timeoutMs: 15000 });
+          }, { timeoutMs: 15000, signal: extra.signal });
           return okResult({ result: response }, "Workspace Shell Git inspection completed.");
         }
 
@@ -215,7 +248,7 @@ function createShellServer() {
         if (args.operation === "receipt_status") {
           if (!args.receipt_id) fail("INVALID_RECEIPT_ID", "receipt_status requires receipt_id");
           const receipt = readReceiptNoFollow(config.receipt_root, args.receipt_id, {
-            expectedUid: config.receipt_uid ?? null,
+            expectedUid: config.receipt_uid,
           });
           if (receipt.task_id !== args.task_id) fail("RECEIPT_TASK_MISMATCH", "receipt belongs to another task");
           return okResult({
@@ -256,7 +289,7 @@ function createShellServer() {
       outputSchema: { ok: z.boolean() },
       annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false, idempotentHint: false },
     },
-    async (args) => {
+    async (args, extra = {}) => {
       try {
         authorizeTaskExecution({
           authorityRoot: config.authority_root,
@@ -277,7 +310,7 @@ function createShellServer() {
           argv: args.argv,
           cwd: args.cwd,
           timeout_ms: args.timeout_ms,
-        }, { timeoutMs: Math.min(95000, args.timeout_ms + 5000), maxResponseBytes: 1024 * 1024 });
+        }, { timeoutMs: Math.min(95000, args.timeout_ms + 5000), maxResponseBytes: 1024 * 1024, signal: extra.signal });
         return okResult({ result: response }, "Bounded Workspace Shell execution completed.");
       } catch (error) {
         return toolError(error);
@@ -307,7 +340,7 @@ function createShellServer() {
       outputSchema: { ok: z.boolean() },
       annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false, idempotentHint: false },
     },
-    async (args) => {
+    async (args, extra = {}) => {
       try {
         authorizeTaskExecution({
           authorityRoot: config.authority_root,
@@ -334,7 +367,7 @@ function createShellServer() {
           frontend_request: frontendRequest,
           approval: args.approval,
           parameters: args.parameters,
-        }, { timeoutMs: 95000, maxResponseBytes: 1024 * 1024 });
+        }, { timeoutMs: 95000, maxResponseBytes: 1024 * 1024, signal: extra.signal });
         return okResult({ result: response }, "Reviewed helper request completed.");
       } catch (error) {
         return toolError(error);
@@ -358,7 +391,7 @@ function createShellServer() {
     async ({ task_id, receipt_id }) => {
       try {
         const receipt = readReceiptNoFollow(config.receipt_root, receipt_id, {
-          expectedUid: config.receipt_uid ?? null,
+          expectedUid: config.receipt_uid,
         });
         if (receipt.task_id !== task_id) fail("RECEIPT_TASK_MISMATCH", "receipt belongs to another task");
         return okResult({ receipt }, "Workspace Shell receipt returned.");
@@ -387,6 +420,15 @@ const handler = async (req, res) => {
   }
   const host = req.headers.host ?? "localhost";
   const url = new URL(req.url, `https://${host}`);
+
+  const peer = req.socket.getPeerCertificate();
+  const peerDigest = peer?.raw
+    ? createHash("sha256").update(peer.raw).digest("hex")
+    : "";
+  if (peerDigest !== config.tunnel_client_cert_sha256) {
+    res.writeHead(403).end("Workspace Shell tunnel client certificate mismatch");
+    return;
+  }
 
   if (req.method === "GET" && url.pathname === "/healthz") {
     res.writeHead(200, { "content-type": "application/json" });
