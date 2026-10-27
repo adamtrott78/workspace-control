@@ -145,6 +145,80 @@ class PreactivationDiagnoseHotfixInstallTests(unittest.TestCase):
             with self.assertRaisesRegex(hotfix.HotfixError, "manifest state"):
                 hotfix.require_candidate_dormant()
 
+    def test_candidate_dormancy_inspection_rc1_fails_closed(self):
+        with (
+            mock.patch.object(hotfix, "REGISTRY", self.registry),
+            mock.patch.object(hotfix, "MANIFEST", self.manifest),
+            mock.patch.object(
+                hotfix,
+                "run",
+                return_value=mock.Mock(
+                    returncode=1,
+                    stdout="",
+                    stderr="synthetic list-units failure",
+                ),
+            ),
+        ):
+            with self.assertRaisesRegex(
+                hotfix.HotfixError,
+                "rc=1 stderr=synthetic list-units failure",
+            ):
+                hotfix.require_candidate_dormant()
+
+    def test_wait_socket_rejects_stale_inode_until_live_listener_exists(self):
+        socket_path = self.root / "maintenance.sock"
+        stale = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        stale.bind(str(socket_path))
+        live = None
+
+        def promote_listener(_seconds):
+            nonlocal live
+            stale.close()
+            socket_path.unlink()
+            live = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            live.bind(str(socket_path))
+            live.listen(1)
+
+        try:
+            with (
+                mock.patch.object(hotfix, "ROOT_SOCKET", socket_path),
+                mock.patch.object(
+                    hotfix,
+                    "service_snapshot",
+                    return_value={
+                        "LoadState": "loaded",
+                        "ActiveState": "active",
+                        "SubState": "running",
+                        "UnitFileState": "enabled",
+                        "NRestarts": "0",
+                        "ExecMainStatus": "0",
+                    },
+                ),
+                mock.patch.object(
+                    hotfix.time,
+                    "monotonic",
+                    side_effect=[0.0, 0.0, 0.1],
+                ),
+                mock.patch.object(
+                    hotfix.time,
+                    "sleep",
+                    side_effect=promote_listener,
+                ),
+            ):
+                self.assertFalse(hotfix.socket_listener_ready(socket_path))
+                hotfix.wait_socket()
+        finally:
+            try:
+                stale.close()
+            except OSError:
+                pass
+            if live is not None:
+                live.close()
+            try:
+                socket_path.unlink()
+            except FileNotFoundError:
+                pass
+
     def test_failed_receipt_and_cursor_are_exactly_bound(self):
         with (
             mock.patch.object(hotfix, "FAILED_RECEIPT", self.receipt),
