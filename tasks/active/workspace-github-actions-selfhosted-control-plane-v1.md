@@ -36,21 +36,22 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Read-only incident inspection only for the already-issued maintenance command comment 6437389584. On Lambda, print `/var/lib/workspace-ci/maintenance-controller/receipts/6437389584.json` if present and bounded recent journals for `workspace-ci-maintenance-controller.service` and `workspace-ci-maintenance.service` sufficient to show processing of comment 6437389584. Do not post a second command, do not modify/delete the receipt, and do not reconcile, activate workspace-control, restart/reset any controller, or restart research-engine CPU. Return the complete read-only output.
+Fresh independent review of PR #544 only. Review the final immutable PR head and validated checkpoint 495523e2f5ef89edd528608a2a787fc561856f6f. Verify that only DIAGNOSE_LANE can opt into migration-candidate observation; only exact registry+manifest MIGRATION_CANDIDATE_NOT_INSTALLED is accepted; mixed/other inactive states fail closed; all mutating maintenance verbs remain ACTIVE-only; diagnose performs no systemctl mutation; ACTIVE/ACTIVE behavior and source-attestation/replay/isolation boundaries remain unchanged. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda.
 
 ## Remaining work
 
-- Read only `/var/lib/workspace-ci/maintenance-controller/receipts/6437389584.json` plus the maintenance-controller/root-maintenance journal lines needed to bind the result to comment 6437389584. Do not rerun or post another command.
-- If the receipt is FAILED_CLOSED because workspace-control is not ACTIVE, design the narrowest correction that allows DIAGNOSE_LANE to resolve a registered migration candidate for observation only while continuing to require ACTIVE state for RESTART_CONTROLLER and all recovery mutations; add regression/adversarial tests and fresh independent review before any retry.
+- Validate the observation-only preactivation diagnose correction and adversarial tests on a dedicated PR; obtain fresh independent exact-head review before merge or Lambda mutation.
+- After reviewed merge, install only the corrected root maintenance service through the already-reviewed/bootstrap authority or an equally bounded reviewed install path, without activating workspace-control.
+- Then post exactly one new owner diagnose command and prove a durable COMPLETED receipt for DIAGNOSE_LANE on the migration candidate; do not reuse comment 6437389584.
 - Only after a real GitHub -> L0 diagnostic receipt is durably accepted may workspace-control activation be independently gated as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1.
 - Validate live P1 filesystem isolation, CPU/RAM/runtime envelope, GPU0, exact candidate provenance, deterministic receipts, maintenance authorization/replay behavior, and clean teardown/rollback.
 - Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, resource-aware concurrency widening, and unrelated transport cleanup unauthorized.
 
 ## Blockers / gates
 
-- Corrected P1 bootstrap succeeded and first owner diagnose command was issued as issue #527 comment 6437389584, but static reviewed policy reveals a likely gate contradiction: DIAGNOSE_LANE derives only ACTIVE projects, while workspace-control is intentionally MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND before activation.
-- Do not issue a second maintenance command and do not activate workspace-control. First capture the durable maintenance-controller receipt for comment 6437389584 read-only. If it failed closed with the expected inactive-project rejection, treat that as a design/implementation blocker requiring a bounded reviewed correction to permit read-only diagnosis of a migration candidate without granting activation/execution authority.
-- No reconciliation, controller restart/reset, research-engine CPU restart, P2/P3 change, or capacity widening is authorized.
+- The first live GitHub -> L0 diagnose command failed closed because workspace-control is a pre-activation migration candidate; this is durably evidenced by issue #527 comment 6437389584 and its FAILED_CLOSED receipt.
+- PR #544 bounded correction passed validation at checkpoint 495523e2f5ef89edd528608a2a787fc561856f6f. Fresh independent exact-head review remains required before merge/install/retry.
+- Do not issue a second maintenance command, modify Lambda, reconcile, activate workspace-control, restart/reset controllers, restart research-engine CPU, or widen P2/P3/capacity until exact-head NO_BLOCKING_FINDING.
 
 ## Fresh-chat initialization
 

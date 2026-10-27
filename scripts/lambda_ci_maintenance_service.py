@@ -211,6 +211,7 @@ def derive_target(
     *,
     controller_state_root: pathlib.Path,
     projects_dir: pathlib.Path,
+    allow_migration_candidate_observation: bool = False,
 ) -> dict[str, Any]:
     projects = registry.get("projects")
     if not isinstance(projects, dict):
@@ -221,14 +222,23 @@ def derive_target(
     lanes = entry.get("lanes")
     if not isinstance(lanes, list) or lane not in lanes:
         raise MaintenanceError("lane is not registered for project")
-    if entry.get("activation_state") != "ACTIVE":
-        raise MaintenanceError("maintenance target project is not active")
 
+    registry_state = entry.get("activation_state")
     manifest_path = projects_dir / f"{project_id}.json"
     manifest = _read_json(manifest_path)
     if manifest.get("project_id") != project_id:
         raise MaintenanceError("installed project manifest identity mismatch")
-    if manifest.get("status") != "ACTIVE":
+    manifest_state = manifest.get("status")
+
+    active = registry_state == "ACTIVE" and manifest_state == "ACTIVE"
+    migration_candidate_observation = (
+        allow_migration_candidate_observation
+        and registry_state == "MIGRATION_CANDIDATE_NOT_INSTALLED"
+        and manifest_state == "MIGRATION_CANDIDATE_NOT_INSTALLED"
+    )
+    if not active and not migration_candidate_observation:
+        if registry_state != "ACTIVE":
+            raise MaintenanceError("maintenance target project is not active")
         raise MaintenanceError("installed project manifest is not active")
     try:
         scale_set_name = manifest["derived_identity"]["lanes"][lane]["scale_set_name"]
@@ -398,15 +408,16 @@ def apply_request(
 ) -> dict[str, Any]:
     request = _validate_request(request)
     registry = _load_registry(registry_path)
+    operation = request["operation"]
     target = derive_target(
         registry,
         request["project_id"],
         request["lane"],
         controller_state_root=controller_state_root,
         projects_dir=projects_dir,
+        allow_migration_candidate_observation=(operation == "DIAGNOSE_LANE"),
     )
     service = target["service"]
-    operation = request["operation"]
 
     if operation == "DIAGNOSE_LANE":
         quarantine = None
@@ -432,6 +443,7 @@ def apply_request(
             "quarantine": quarantine,
             "reset_pending": reset_pending,
             "ready_for_single_retry": ready,
+            "observation_only": True,
         }
 
     if operation == "RESTART_CONTROLLER":

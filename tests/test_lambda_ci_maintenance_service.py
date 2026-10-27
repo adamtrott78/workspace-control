@@ -75,6 +75,16 @@ class MaintenanceServiceTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+    def set_migration_candidate(self):
+        self.registry_path.write_text(
+            json.dumps(registry(active=False)),
+            encoding="utf-8",
+        )
+        manifest_path = self.projects_dir / "workspace-control.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["status"] = "MIGRATION_CANDIDATE_NOT_INSTALLED"
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
     def lane_state(self):
         path = self.state_root / "workspace-control-cpu"
         path.mkdir(parents=True, exist_ok=True)
@@ -154,6 +164,86 @@ class MaintenanceServiceTests(unittest.TestCase):
                 controller_state_root=self.state_root,
                 projects_dir=self.projects_dir,
             )
+
+    def test_diagnose_may_observe_exact_migration_candidate_without_mutation(self):
+        self.set_migration_candidate()
+        calls = []
+
+        def fake_run(argv, check=True):
+            calls.append(argv)
+            if argv[:3] == ["systemctl", "is-active", "--quiet"]:
+                return mock.Mock(returncode=3, stdout="", stderr="")
+            if argv[:2] == ["systemctl", "list-units"]:
+                return mock.Mock(returncode=0, stdout="", stderr="")
+            raise AssertionError(f"unexpected command: {argv!r}")
+
+        with mock.patch.object(maintenance, "_run", side_effect=fake_run):
+            result = maintenance.apply_request(
+                request("DIAGNOSE_LANE"),
+                registry_path=self.registry_path,
+                controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
+                receipts_dir=self.receipts,
+            )
+
+        self.assertEqual(result["status"], "PASS")
+        self.assertTrue(result["observation_only"])
+        self.assertFalse(result["service_active"])
+        self.assertEqual(result["active_project_units"], [])
+        self.assertFalse(
+            any(
+                len(argv) >= 2
+                and argv[0] == "systemctl"
+                and argv[1] in {"start", "stop", "restart", "enable", "disable"}
+                for argv in calls
+            )
+        )
+
+    def test_diagnose_candidate_requires_exact_matching_candidate_states(self):
+        self.set_migration_candidate()
+        manifest_path = self.projects_dir / "workspace-control.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["status"] = "ACTIVE"
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+        with self.assertRaisesRegex(maintenance.MaintenanceError, "not active"):
+            maintenance.apply_request(
+                request("DIAGNOSE_LANE"),
+                registry_path=self.registry_path,
+                controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
+                receipts_dir=self.receipts,
+            )
+
+    def test_mutating_verbs_still_reject_migration_candidate(self):
+        self.set_migration_candidate()
+        operations = [
+            request("RESTART_CONTROLLER"),
+            request(
+                "QUIESCE_LANE_FOR_RECOVERY",
+                quarantine="11111111-2222-4333-8444-555555555555",
+            ),
+            request(
+                "RESUME_LANE_AFTER_RESET",
+                quarantine="11111111-2222-4333-8444-555555555555",
+                generation="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+            ),
+        ]
+        with mock.patch.object(maintenance, "_run") as run_call:
+            for req in operations:
+                with self.subTest(operation=req["operation"]):
+                    with self.assertRaisesRegex(
+                        maintenance.MaintenanceError,
+                        "not active",
+                    ):
+                        maintenance.apply_request(
+                            req,
+                            registry_path=self.registry_path,
+                            controller_state_root=self.state_root,
+                            projects_dir=self.projects_dir,
+                            receipts_dir=self.receipts,
+                        )
+        run_call.assert_not_called()
 
     def test_quiesce_requires_exact_quarantine_and_local_execution_absence(self):
         qid, _ = self.quarantine()
@@ -383,6 +473,7 @@ class MaintenanceServiceTests(unittest.TestCase):
                 projects_dir=self.projects_dir,
                 receipts_dir=self.receipts,
             )
+        self.assertTrue(result["observation_only"])
         self.assertEqual(len(result["reset_pending"]), 1)
         self.assertEqual(
             result["ready_for_single_retry"]["new_scale_set_id"],
