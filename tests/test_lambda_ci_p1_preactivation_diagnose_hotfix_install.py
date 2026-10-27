@@ -194,9 +194,11 @@ class PreactivationDiagnoseHotfixInstallTests(unittest.TestCase):
             calls.append(list(argv))
             return mock.Mock(returncode=0, stdout="", stderr="")
 
-        patches = self.patched_paths()
+        stack = contextlib.ExitStack()
+        self.addCleanup(stack.close)
+        for patcher in self.patched_paths():
+            stack.enter_context(patcher)
         with (
-            *patches,
             mock.patch.object(hotfix, "attest_source", return_value=self.repo),
             mock.patch.object(hotfix.os, "geteuid", return_value=0),
             mock.patch.dict(hotfix.os.environ, {"SUDO_USER": "atrott"}, clear=False),
@@ -252,9 +254,11 @@ class PreactivationDiagnoseHotfixInstallTests(unittest.TestCase):
             if socket_calls == 1:
                 raise hotfix.HotfixError("synthetic readiness failure")
 
-        patches = self.patched_paths()
+        stack = contextlib.ExitStack()
+        self.addCleanup(stack.close)
+        for patcher in self.patched_paths():
+            stack.enter_context(patcher)
         with (
-            *patches,
             mock.patch.object(hotfix, "attest_source", return_value=self.repo),
             mock.patch.object(hotfix.os, "geteuid", return_value=0),
             mock.patch.dict(hotfix.os.environ, {"SUDO_USER": "atrott"}, clear=False),
