@@ -284,3 +284,16 @@ From the live ChatGPT conversation, `heartbeat_begin_turn` succeeded through Sec
 This proves model tool reachability and MCP App resource delivery through the tunnel-backed v0.4.8 acceptance path, independently of ngrok.
 
 Remaining live UI gate is visual only: operator must confirm the rendered card preserves the accepted five-entry intrinsic height and that the sixth entry transitions to scrollable history while keeping the newest update visible. The assistant cannot inspect client-rendered card dimensions or scroll position directly.
+
+
+### Live ChatGPT visual card acceptance — PASS
+
+The operator visually confirmed the tunnel-backed v0.4.8 card preserves the accepted five-entry intrinsic height and transitions to scrollable history after the sixth entry while keeping current updates visible.
+
+The separate full-history card visible during acceptance was caused by the assistant's explicit `heartbeat_get` diagnostic invocation. It is **not** part of the normal v0.4.8 live-card polling path. Normal operation must not invoke `heartbeat_get` merely to monitor progress; routine live behavior is:
+- one `heartbeat_begin_turn` per turn;
+- semantic-only `heartbeat_update`;
+- silent `heartbeat_touch` for executor liveness;
+- app-only `heartbeat_poll` delta refresh.
+
+This completes Secure MCP Tunnel isolated + live ChatGPT acceptance. Production cutover remains a separate gate.
