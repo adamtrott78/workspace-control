@@ -247,6 +247,13 @@
         "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
         "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
       ]
+    },
+    "control_small_v1": {
+      "execution_profile": "control-small",
+      "max_runtime_seconds": 600,
+      "scratch_max_bytes": 8589934592,
+      "staging_max_bytes": 0,
+      "gpu_count": 0
     }
   },
   "workload_classes": {
