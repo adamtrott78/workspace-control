@@ -192,6 +192,96 @@ def certify_preserved(
         if snapshot(service) != before:
             raise BoundaryInstallError(f"preserved sibling changed: {service}")
 
+def install_boundary(
+    *,
+    src_root: bytes,
+    src_controller: bytes,
+    src_unit: bytes,
+    root_before: dict[str, str],
+    auto_before: dict[str, str],
+    workspace_before: dict[str, str],
+    siblings_before: dict[str, dict[str, str]],
+) -> tuple[dict[str, str], dict[str, str]]:
+    old_root = INSTALLED_ROOT.read_bytes()
+    old_controller = INSTALLED_CONTROLLER.read_bytes()
+
+    # Rollback is armed before the first potentially mutating write. An
+    # atomic_write implementation may have completed os.replace() before
+    # surfacing a later exception, so every exception from the first write
+    # onward must enter the exact-byte rollback path.
+    rollback_armed = True
+    try:
+        atomic_write(INSTALLED_ROOT, src_root, 0o755)
+        atomic_write(INSTALLED_CONTROLLER, src_controller, 0o755)
+        atomic_write(INSTALLED_ONCE_UNIT, src_unit, 0o644)
+        run(["systemctl", "daemon-reload"])
+        run([
+            "systemctl", "--job-mode=ignore-dependencies",
+            "restart", ROOT_SERVICE,
+        ])
+        wait_socket()
+        root_after = require_root_healthy()
+        certify_preserved(auto_before, workspace_before, siblings_before)
+
+        unit = snapshot(ONCE_SERVICE)
+        if (
+            unit["LoadState"] != "loaded"
+            or unit["ActiveState"] != "inactive"
+            or unit["SubState"] != "dead"
+            or unit["MainPID"] != "0"
+            or unit["UnitFileState"] != "static"
+        ):
+            raise BoundaryInstallError(f"one-shot unit is not static/inactive: {unit}")
+        if sha256_path(INSTALLED_ROOT) != sha256_bytes(src_root):
+            raise BoundaryInstallError("root reconciler install digest mismatch")
+        if sha256_path(INSTALLED_CONTROLLER) != sha256_bytes(src_controller):
+            raise BoundaryInstallError("reconcile-controller install digest mismatch")
+        if sha256_path(INSTALLED_ONCE_UNIT) != sha256_bytes(src_unit):
+            raise BoundaryInstallError("one-shot unit install digest mismatch")
+        return root_after, unit
+    except Exception as exc:
+        if not rollback_armed:
+            raise
+        rollback_errors = []
+        try:
+            atomic_write(INSTALLED_ROOT, old_root, 0o755)
+            atomic_write(INSTALLED_CONTROLLER, old_controller, 0o755)
+            if INSTALLED_ONCE_UNIT.exists():
+                INSTALLED_ONCE_UNIT.unlink()
+            run(["systemctl", "daemon-reload"])
+            run([
+                "systemctl", "--job-mode=ignore-dependencies",
+                "restart", ROOT_SERVICE,
+            ])
+            wait_socket()
+            require_root_healthy()
+            certify_preserved(auto_before, workspace_before, siblings_before)
+            if INSTALLED_ROOT.read_bytes() != old_root:
+                raise BoundaryInstallError(
+                    "rollback did not restore exact prior root reconciler bytes"
+                )
+            if INSTALLED_CONTROLLER.read_bytes() != old_controller:
+                raise BoundaryInstallError(
+                    "rollback did not restore exact prior reconcile-controller bytes"
+                )
+            if INSTALLED_ONCE_UNIT.exists():
+                raise BoundaryInstallError(
+                    "rollback did not remove one-shot reconcile unit"
+                )
+        except Exception as rollback_exc:
+            rollback_errors.append(str(rollback_exc))
+        if rollback_errors:
+            raise BoundaryInstallError(
+                f"boundary install failed and rollback incomplete: "
+                f"original={type(exc).__name__}:{exc}; "
+                f"rollback={'; '.join(rollback_errors)}"
+            ) from exc
+        raise BoundaryInstallError(
+            f"boundary install failed and rollback completed: "
+            f"{type(exc).__name__}:{exc}"
+        ) from exc
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--expected-head", required=True)
@@ -220,91 +310,39 @@ def main() -> int:
     workspace_before = require_workspace_dormant()
     siblings_before = {service: snapshot(service) for service in PRESERVED}
 
-    old_root = INSTALLED_ROOT.read_bytes()
-    old_controller = INSTALLED_CONTROLLER.read_bytes()
-    mutated = False
-    try:
-        atomic_write(INSTALLED_ROOT, src_root, 0o755)
-        atomic_write(INSTALLED_CONTROLLER, src_controller, 0o755)
-        atomic_write(INSTALLED_ONCE_UNIT, src_unit, 0o644)
-        mutated = True
-        run(["systemctl", "daemon-reload"])
-        run([
-            "systemctl", "--job-mode=ignore-dependencies",
-            "restart", ROOT_SERVICE,
-        ])
-        wait_socket()
-        root_after = require_root_healthy()
-        certify_preserved(auto_before, workspace_before, siblings_before)
+    root_after, unit = install_boundary(
+        src_root=src_root,
+        src_controller=src_controller,
+        src_unit=src_unit,
+        root_before=root_before,
+        auto_before=auto_before,
+        workspace_before=workspace_before,
+        siblings_before=siblings_before,
+    )
 
-        unit = snapshot(ONCE_SERVICE)
-        if (
-            unit["LoadState"] != "loaded"
-            or unit["ActiveState"] != "inactive"
-            or unit["SubState"] != "dead"
-            or unit["MainPID"] != "0"
-            or unit["UnitFileState"] != "static"
-        ):
-            raise BoundaryInstallError(f"one-shot unit is not static/inactive: {unit}")
-        if sha256_path(INSTALLED_ROOT) != sha256_bytes(src_root):
-            raise BoundaryInstallError("root reconciler install digest mismatch")
-        if sha256_path(INSTALLED_CONTROLLER) != sha256_bytes(src_controller):
-            raise BoundaryInstallError("reconcile-controller install digest mismatch")
-        if sha256_path(INSTALLED_ONCE_UNIT) != sha256_bytes(src_unit):
-            raise BoundaryInstallError("one-shot unit install digest mismatch")
-
-        receipt = {
-            "schema_version": 1,
-            "status": "P1_ACTIVATION_SUBMISSION_BOUNDARY_INSTALLED",
-            "source_head": args.expected_head,
-            "installed": {
-                "root_reconciler_sha256": sha256_bytes(src_root),
-                "reconcile_controller_sha256": sha256_bytes(src_controller),
-                "one_shot_unit_sha256": sha256_bytes(src_unit),
-            },
-            "root_before": root_before,
-            "root_after": root_after,
-            "automatic_reconcile_controller": auto_before,
-            "workspace_control_cpu": workspace_before,
-            "preserved_siblings": siblings_before,
-            "one_shot_unit": unit,
-            "automatic_workflow_triggered": False,
-            "activation_performed": False,
-        }
-        print(
-            "P1_ACTIVATION_SUBMISSION_BOUNDARY_RECEIPT="
-            + json.dumps(receipt, sort_keys=True)
-        )
-        return 0
-    except Exception as exc:
-        if not mutated:
-            raise
-        rollback_errors = []
-        try:
-            atomic_write(INSTALLED_ROOT, old_root, 0o755)
-            atomic_write(INSTALLED_CONTROLLER, old_controller, 0o755)
-            if INSTALLED_ONCE_UNIT.exists():
-                INSTALLED_ONCE_UNIT.unlink()
-            run(["systemctl", "daemon-reload"])
-            run([
-                "systemctl", "--job-mode=ignore-dependencies",
-                "restart", ROOT_SERVICE,
-            ])
-            wait_socket()
-            require_root_healthy()
-            certify_preserved(auto_before, workspace_before, siblings_before)
-        except Exception as rollback_exc:
-            rollback_errors.append(str(rollback_exc))
-        if rollback_errors:
-            raise BoundaryInstallError(
-                f"boundary install failed and rollback incomplete: "
-                f"original={type(exc).__name__}:{exc}; "
-                f"rollback={'; '.join(rollback_errors)}"
-            ) from exc
-        raise BoundaryInstallError(
-            f"boundary install failed and rollback completed: "
-            f"{type(exc).__name__}:{exc}"
-        ) from exc
+    receipt = {
+        "schema_version": 1,
+        "status": "P1_ACTIVATION_SUBMISSION_BOUNDARY_INSTALLED",
+        "source_head": args.expected_head,
+        "installed": {
+            "root_reconciler_sha256": sha256_bytes(src_root),
+            "reconcile_controller_sha256": sha256_bytes(src_controller),
+            "one_shot_unit_sha256": sha256_bytes(src_unit),
+        },
+        "root_before": root_before,
+        "root_after": root_after,
+        "automatic_reconcile_controller": auto_before,
+        "workspace_control_cpu": workspace_before,
+        "preserved_siblings": siblings_before,
+        "one_shot_unit": unit,
+        "automatic_workflow_triggered": False,
+        "activation_performed": False,
+    }
+    print(
+        "P1_ACTIVATION_SUBMISSION_BOUNDARY_RECEIPT="
+        + json.dumps(receipt, sort_keys=True)
+    )
+    return 0
 
 if __name__ == "__main__":
     raise SystemExit(main())
