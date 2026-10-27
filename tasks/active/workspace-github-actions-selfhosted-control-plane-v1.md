@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Fresh independent corrected-head re-review of PR #545 only. Verify BF-1 is closed by requiring `systemctl list-units` returncode exactly 0 with nonzero rc failing closed before mutation and during post-install/rollback certification. Verify BF-2 is closed by requiring a successful AF_UNIX connect to the maintenance socket rather than path existence/type alone, with a stale bound-but-not-listening inode rejected until a new live listener exists, while root-service exit and timeout remain fail-closed. Regression-check all previously reviewed source binding, exact old digest, failed receipt/cursor preservation, workspace-control dormancy, research CPU/non-CPU controller preservation, one-file/one-root-service-restart mutation surface, rollback restoration, PR #544 DIAGNOSE-only observation boundary, and no activation/reconciliation/P2-P3/capacity widening. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
+Fresh independent corrected-head re-review of PR #545 only. Verify BF-3 is closed by the exact root restart command `systemctl --job-mode=ignore-dependencies restart workspace-ci-maintenance.service`, runtime verification that workspace-ci-maintenance-controller.service Requires the root service, and exact preservation of maintenance-controller InvocationID and MainPID across both forward install and rollback. Confirm a controller invocation change blocks success and makes rollback certification fail closed. Regression-check BF-1 rc==0 dormancy inspection, BF-2 live AF_UNIX listener readiness, source binding, exact old digest, failed receipt/cursor preservation, workspace-control dormancy, research CPU/non-CPU controller preservation, one-file/root-service-only direct mutation surface, PR #544 DIAGNOSE-only observation boundary, and no activation/reconciliation/P2-P3/capacity widening. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
 
 ## Remaining work
 
@@ -49,10 +49,10 @@ Fresh independent corrected-head re-review of PR #545 only. Verify BF-1 is close
 
 ## Blockers / gates
 
-- The DIAGNOSE_LANE correction from PR #544 is independently accepted and merged, but it is not yet installed on Lambda.
-- PR #545 old head f4baa62775719d1ed65a8d0105a37bc63497c277 was independently rejected by comment 6437955200 for BF-1 fail-open list-units rc=1 and BF-2 stale-socket readiness.
-- Both findings are corrected and validated at checkpoint f203e0bad67a96c47d368ea9c4ea505620222ca7; fresh independent corrected-head review remains required before merge/live use.
-- Do not rerun the original bootstrap installer; do not issue a second maintenance command, reconcile, activate workspace-control, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity before corrected-head NO_BLOCKING_FINDING and reviewed live hotfix receipt.
+- PR #544 DIAGNOSE_LANE correction is independently accepted and merged but not yet installed on Lambda.
+- PR #545 old corrected head 55c3a81ce963f4b0cf4b44a8453695a46c629bcc was independently rejected by comment 6438197909 for BF-3 systemd Requires= restart propagation into the maintenance controller.
+- BF-3 is corrected and validated at checkpoint 0b17b10bb27759a8bbe50e83ab69419289cce883 using an ignore-dependencies root-service restart plus exact maintenance-controller InvocationID/MainPID preservation proof. Fresh independent corrected-head review remains required before merge/live use.
+- Do not issue another maintenance command, reconcile, activate workspace-control, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity before corrected-head NO_BLOCKING_FINDING and reviewed live hotfix receipt.
 
 ## Fresh-chat initialization
 
