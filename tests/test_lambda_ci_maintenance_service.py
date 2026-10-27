@@ -85,6 +85,7 @@ class MaintenanceServiceTests(unittest.TestCase):
                     "lane": "cpu",
                     "scale_set_name": "lambda-workspace-control",
                     "scale_set_id": scale_set_id,
+                    "observed_at": "2026-10-27T01:00:00Z",
                 }
             ),
             encoding="utf-8",
@@ -151,6 +152,14 @@ class MaintenanceServiceTests(unittest.TestCase):
                 receipts_dir=self.receipts,
             )
         self.assertEqual(receipt["status"], "COMPLETED")
+        self.assertEqual(
+            set(receipt["identity"]["installed_policy_digests"]),
+            {"registry_sha256", "manifest_sha256"},
+        )
+        self.assertEqual(
+            receipt["result"]["quarantine_observed_at"],
+            "2026-10-27T01:00:00Z",
+        )
         self.assertIn(
             ["systemctl", "stop", "workspace-ci-controller@workspace-control-cpu.service"],
             calls,
