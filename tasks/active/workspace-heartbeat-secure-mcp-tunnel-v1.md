@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-Freeze and implement the production cutover design without changing live Lambda yet: inspect the existing heartbeat-up/heartbeat-down operational contract and workspace-control references; define a v0.4.8 runtime install path, tunnel-client profile using file: secret reference outside Git with mode 0600, supervised launcher behavior, health/readiness gates, and explicit rollback to the accepted v0.4.7/ngrok path. Preserve the normal-operation rule that heartbeat_get is not used for routine live monitoring.
+Operator: press Ctrl-C in the temporary Secure MCP Tunnel acceptance terminal so no second tunnel-client polls tunnel_6ae017d8655c8191976ef3bccc31f593. Then fetch exact cutover head d9b6fb7232bf157beefc6bf30c894295422ef87f on Lambda and run scripts/workspace_heartbeat_secure_tunnel_cutover.sh as the normal atrott user. Enter the dedicated runtime key only if prompted. Paste the non-secret output. Do not invoke heartbeat_get for routine monitoring.
 
 ## Remaining work
 
