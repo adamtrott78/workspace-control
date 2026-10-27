@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Run the already-reviewed reconciler hotfix installer from a clean detached checkout of exact merge e4c81ac5fba8c4d9df8450b003147f90d771158b, capture its complete receipt and exit status, then stop and review that evidence before any reconciliation or activation.
+Prepare and request a fresh independent P1 activation-boundary review only. Base it on the current capsule and the now-live reconciler installed from merge e4c81ac5fba8c4d9df8450b003147f90d771158b with installed/source SHA256 5e3c56c84f8e9755334ca4f0db7bdd7036f70b3e4cd404ebb02e8aa6b97185a9. Do not reconcile or activate during review.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Run the already-reviewed reconciler hotfix installer from a clean detached check
 
 ## Blockers / gates
 
-- The accepted reconciler correction is merged but not yet installed on Lambda.
-- Activation/reconciliation remains blocked until the reviewed live hotfix install from merge e4c81ac5fba8c4d9df8450b003147f90d771158b completes and its receipt is reviewed.
-- Do not activate workspace-control or mutate project controllers before that receipt gate passes.
+- The corrected reconciler is live and independently reviewed, but workspace-control remains unactivated.
+- P1 activation/reconciliation remains blocked until a fresh independent exact-head activation-boundary review verifies the exact candidate->ACTIVE policy delta, reconciliation request, expected restart/preservation sets, rollback/emergency-stop path, and post-activation checks.
+- Do not issue APPLY/reconcile, start/enable workspace-control CPU, restart/reset preserved project controllers, issue maintenance commands, or widen P2/P3/capacity before that review returns NO_BLOCKING_FINDING.
 
 ## Fresh-chat initialization
 
