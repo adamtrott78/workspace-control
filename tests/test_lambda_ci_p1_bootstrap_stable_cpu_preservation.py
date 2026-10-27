@@ -55,6 +55,42 @@ class P1BootstrapStableCpuPreservationTests(unittest.TestCase):
                     self.assertEqual(module.verify_research_cpu_stable_state(), state)
                 sleep.assert_called_once_with(module.RESEARCH_CPU_STABILITY_SECONDS)
 
+    def test_exec_main_status_must_be_present_parseable_and_nonnegative(self):
+        module = load_module()
+        base_states = [
+            {
+                "LoadState": "loaded",
+                "ActiveState": "inactive",
+                "SubState": "dead",
+                "UnitFileState": "enabled",
+                "NRestarts": "11551",
+                "ExecMainStatus": "0",
+            },
+            {
+                "LoadState": "loaded",
+                "ActiveState": "failed",
+                "SubState": "failed",
+                "UnitFileState": "enabled",
+                "NRestarts": "11551",
+                "ExecMainStatus": "1",
+            },
+        ]
+        invalid_values = [None, "", "-1", "not-an-int"]
+        for base in base_states:
+            for invalid in invalid_values:
+                with self.subTest(
+                    active_state=base["ActiveState"],
+                    exec_main_status=invalid,
+                ):
+                    state = dict(base)
+                    if invalid is None:
+                        state.pop("ExecMainStatus")
+                    else:
+                        state["ExecMainStatus"] = invalid
+                    self.assertFalse(
+                        module._research_cpu_stable_state_predicate(state)
+                    )
+
     def test_transitional_state_is_rejected_before_mutation(self):
         module = load_module()
         transitional = {
