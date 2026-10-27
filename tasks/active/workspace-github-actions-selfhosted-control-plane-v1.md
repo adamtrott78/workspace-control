@@ -36,22 +36,23 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Fresh independent review of PR #544 only. Review the final immutable PR head and validated checkpoint 495523e2f5ef89edd528608a2a787fc561856f6f. Verify that only DIAGNOSE_LANE can opt into migration-candidate observation; only exact registry+manifest MIGRATION_CANDIDATE_NOT_INSTALLED is accepted; mixed/other inactive states fail closed; all mutating maintenance verbs remain ACTIVE-only; diagnose performs no systemctl mutation; ACTIVE/ACTIVE behavior and source-attestation/replay/isolation boundaries remain unchanged. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda.
+Fresh independent review of PR #545 only. Review the exact immutable final PR head and validated code/test checkpoint 3a4c7a706c39d3023cea3056bc2d49f80c275e0f. Verify that the helper is executing-file source-bound, requires exact expected HEAD and tracked cleanliness, requires the exact prior installed maintenance-service SHA256 5730040e5fc1ef2666207accac97194812b35cde89b027ac24ce62b0740e51ec, binds the failed diagnose receipt/comment 6437389584 and cursor without deleting or replaying them, requires workspace-control to remain MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND with no active execution, preserves research-engine CPU and the three healthy non-CPU controllers, mutates only the installed maintenance-service file and one `systemctl restart workspace-ci-maintenance.service`, waits boundedly for socket readiness, verifies the installed digest equals the reviewed source, and on failure restores exact prior bytes plus root-service readiness before failing closed. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
 
 ## Remaining work
 
-- Validate the observation-only preactivation diagnose correction and adversarial tests on a dedicated PR; obtain fresh independent exact-head review before merge or Lambda mutation.
-- After reviewed merge, install only the corrected root maintenance service through the already-reviewed/bootstrap authority or an equally bounded reviewed install path, without activating workspace-control.
-- Then post exactly one new owner diagnose command and prove a durable COMPLETED receipt for DIAGNOSE_LANE on the migration candidate; do not reuse comment 6437389584.
-- Only after a real GitHub -> L0 diagnostic receipt is durably accepted may workspace-control activation be independently gated as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1.
+- Obtain fresh independent exact-head review of PR #545, focused on source provenance, exact old installed digest binding, preservation of failed receipt/cursor, candidate dormancy, project-controller preservation, the single root-maintenance service restart mutation, bounded socket readiness, and rollback restoration.
+- After accepted merge, run the reviewed installer exactly once from its exact merge SHA and inspect the complete hotfix receipt before any maintenance retry.
+- Only after installer PASS, post exactly one new owner `/workspace-ci-maintain diagnose workspace-control cpu` command and prove a durable COMPLETED observation-only receipt; do not reuse failed comment 6437389584.
+- Only after the diagnostic receipt is accepted may workspace-control activation be independently gated as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1.
 - Validate live P1 filesystem isolation, CPU/RAM/runtime envelope, GPU0, exact candidate provenance, deterministic receipts, maintenance authorization/replay behavior, and clean teardown/rollback.
 - Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, resource-aware concurrency widening, and unrelated transport cleanup unauthorized.
 
 ## Blockers / gates
 
-- The first live GitHub -> L0 diagnose command failed closed because workspace-control is a pre-activation migration candidate; this is durably evidenced by issue #527 comment 6437389584 and its FAILED_CLOSED receipt.
-- PR #544 bounded correction passed validation at checkpoint 495523e2f5ef89edd528608a2a787fc561856f6f. Fresh independent exact-head review remains required before merge/install/retry.
-- Do not issue a second maintenance command, modify Lambda, reconcile, activate workspace-control, restart/reset controllers, restart research-engine CPU, or widen P2/P3/capacity until exact-head NO_BLOCKING_FINDING.
+- The DIAGNOSE_LANE correction from PR #544 is independently accepted and merged, but it is not yet installed on Lambda.
+- PR #545 contains the bounded source-bound rollback-safe installer for that correction. It passed validation at checkpoint 3a4c7a706c39d3023cea3056bc2d49f80c275e0f but still requires fresh independent exact-head review before merge or live use.
+- Do not rerun the original bootstrap installer: the commissioned maintenance cursor now exists by design, and the bootstrap path explicitly rejects a preexisting cursor.
+- Do not issue a second maintenance command, reconcile, activate workspace-control, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity before the installer is independently accepted and its live receipt is reviewed.
 
 ## Fresh-chat initialization
 
