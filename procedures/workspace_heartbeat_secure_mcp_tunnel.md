@@ -69,3 +69,41 @@ A second read-only probe resolves the remaining Node/launcher ambiguity:
 - The earlier login-shell Node v12.22.9 is irrelevant to the running service; runtime provenance is now exact.
 
 This closes the live runtime/source/Node/launcher recovery gate. No restart or mutation occurred.
+
+
+## Isolated payload measurement — PASS (operator run 2026-10-26)
+
+An isolated v0.4.7 instance was launched on :8788 using the exact verified source `workspace-control@9e5858738a4fd11801510e2839b0f94f19541506` and Node v20.20.2. Live :8787 remained listening and returned the normal health string after the probe. The isolated instance was disposable and did not alter ngrok or the production process.
+
+Measured Streamable HTTP `heartbeat_snapshot` sizes (request size shown by curl; outbound = response headers + response body):
+
+| Turn history | Structured content | HTTP request | Response body | Response headers | Approx HTTP outbound | 31d at 1.5s |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 1329 B | 386 B | 1398 B | 236 B | 1634 B | 2.918 GB |
+| 5 | 3322 B | 386 B | 3391 B | 236 B | 3627 B | 6.476 GB |
+| 6 | 3654 B | 386 B | 3723 B | 236 B | 3959 B | 7.069 GB |
+| 50 | 18307 B | 386 B | 18376 B | 237 B | 18613 B | 33.235 GB |
+
+The 10-poll sample at 50 history entries was stable at roughly 18,376–18,380 response-body bytes and ~2.9–8.1 ms local request latency. Request upload stayed 185 B. `heartbeat_touch` was much smaller: request 383 B, response body 90 B, response headers 234 B.
+
+### Conclusion
+
+The high-frequency live-card app poll is a confirmed bandwidth amplifier. It retransmits full immutable turn history on every successful poll even when semantic sequence is unchanged. A single continuously visible working card at the actual 1500 ms schedule exceeds a 1 GB/month tunnel allowance even at one history entry; history growth makes the effect much larger. This does not prove every byte of the operator's 1.02 GB ngrok meter came from Heartbeat, because ngrok's metering/framing/compression and actual visible-card duty cycle were not measured, but the observed path is independently sufficient in magnitude to exhaust the free allowance.
+
+Do **not** mitigate by reducing liveness cadence. The payload shape is the defect.
+
+## Frozen payload-efficiency design v1
+
+Preserve `heartbeat_snapshot(task_id, turn_id)` for compatibility/debug and initial hydration, but move the live card's repeated polling to a new app-only, read-only `heartbeat_poll(task_id, turn_id, after_sequence)` contract:
+
+- Return immutable `task_id` and `turn_id`, active/superseded/completed flags, `last_executor_touch_at`, `last_ui_seen_at`, and age fields every poll.
+- Return semantic entries only when their sequence is greater than `after_sequence`; do not resend unchanged history.
+- Include the current semantic sequence/latest heartbeat metadata needed for progress age/state without requiring full history retransmission.
+- If the caller's `after_sequence` predates the retained 50-entry window, return a bounded resync indicator plus the retained current-turn history needed to reconstruct the card. Never fetch another task/turn.
+- The live card starts from its mounted tool output/history, tracks the highest rendered sequence, calls `heartbeat_poll`, appends validated deltas, and preserves current grow-through-five / scroll-from-six / deliberate-scroll behavior.
+- Poll schedule remains 1500 ms while working and 3500 ms otherwise, including existing hidden-document, teardown, in-flight, and failure-backoff behavior.
+- `observeUi` / `last_ui_seen_at` semantics remain app-poll driven.
+- `heartbeat_touch`, begin/update semantics, semantic history, turn ownership/fencing, and stale-owner behavior remain unchanged.
+- Routine poll response target: bounded O(1) when no semantic delta. The exact byte budget must be measured after implementation; optimize field duplication if necessary, but do not weaken signal semantics.
+
+Implementation must add contract tests for no-change poll, single/multi-entry delta, retained-window resync, stale/wrong turn failure, and live-card behavior. Existing Node test suite and isolated :8788 byte benchmark must pass before tunnel testing.
