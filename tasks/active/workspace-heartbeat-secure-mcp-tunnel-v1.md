@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-Restore only the previously verified production v0.4.7 Heartbeat runtime on :8787 using the existing operator launcher, verify exact source 9e5858738a4fd11801510e2839b0f94f19541506 and Node v20.20.2, then identify the existing :8788 listener without killing unknown processes. Run the exact def7c5fe6498b1bd742d912c1490d1f7160cab5f v0.4.8 candidate on a free isolated port and complete no-change/delta/resync payload measurements. Do not deploy v0.4.8 live or retire ngrok yet.
+Verify /home/atrott/bin/heartbeat-up still targets the accepted v0.4.7 runtime, workspace-heartbeat-node environment, and port 8787; then restore production :8787 with that launcher and verify exact runtime provenance. Re-verify PID 1922601 is still the orphaned exact v0.4.7 :8788 probe before terminating only that PID. Run exact v0.4.8 candidate def7c5fe6498b1bd742d912c1490d1f7160cab5f on free isolated :8789 and complete no-change/delta/resync payload measurements. Do not deploy v0.4.8 live or retire ngrok yet.
 
 ## Remaining work
 
@@ -41,8 +41,8 @@ Restore only the previously verified production v0.4.7 Heartbeat runtime on :878
 
 ## Blockers / gates
 
-- Isolated post-change heartbeat_poll payload benchmark remains incomplete because TCP :8788 was already occupied; identify the listener and use a free isolated port without touching unrelated processes.
-- Production v0.4.7 :8787 was manually stopped with heartbeat-down during the interrupted rerun and must be restored to the previously verified v0.4.7 runtime before continuing acceptance.
+- Production v0.4.7 :8787 remains stopped after operator heartbeat-down; restore it only through the existing verified heartbeat-up launcher after checking the launcher still targets v0.4.7/Node20/8787.
+- Isolated post-change heartbeat_poll payload benchmark remains incomplete; :8789 is verified free and should be used for the exact v0.4.8 candidate.
 - Secure MCP Tunnel tunnel/workspace association, runtime authorization, embedded app resource delivery, app-only heartbeat_poll behavior, and live ChatGPT acceptance remain unverified; do not retire ngrok yet.
 
 ## Fresh-chat initialization
