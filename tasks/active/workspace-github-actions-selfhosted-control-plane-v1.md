@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Prepare and request a fresh independent P1 activation-boundary review for workspace-control CPU only. The review must start from the authoritative task capsule, consume the successful live hotfix receipt and exact diagnose receipt for comment 6438723476, verify workspace-control remains inactive/MIGRATION_CANDIDATE_NOT_INSTALLED/PLANNED_NOT_BOUND, and review the exact activation/reconciliation procedure and rollback boundary before any live activation. P1 activation must remain bounded to workspace-control CPU with maxRunners=1/concurrency=1 and must preserve research-engine CPU plus all sibling project lanes. Do not activate, reconcile, or issue further maintenance commands before NO_BLOCKING_FINDING.
+Validate and independently review the exact p1-activation-delta-reconcile correction before any live mutation. The reviewer must verify that unchanged existing ACTIVE project controllers are preservation-only, workspace-control candidate->ACTIVE would restart only workspace-ci-controller@workspace-control-cpu.service, existing controller configuration drift is explicit rather than silently ignored, preserved controller InvocationID/MainPID/state snapshots are bound before/after reconciliation, and the bounded installer replaces only /opt/workspace-ci/reconciler/lambda_ci_reconciler.py while restarting only workspace-ci-reconciler.service with --job-mode=ignore-dependencies. The installer must preserve the frozen workspace-ci-reconcile-controller.service, successful diagnose receipt/cursor 6438723476, workspace-control dormancy, research-engine CPU, and healthy sibling controllers on forward and rollback. Do not activate workspace-control yet.
 
 ## Remaining work
 
@@ -49,10 +49,9 @@ Prepare and request a fresh independent P1 activation-boundary review for worksp
 
 ## Blockers / gates
 
-- The maintenance/hotfix path and preactivation observation-only diagnose gate are complete and PASS.
-- workspace-control remains MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive; live activation has not yet occurred.
-- Before any activation/reconciliation or project-controller mutation, the exact P1 activation boundary and procedure must receive a fresh independent review.
-- Do not restart research-engine CPU or widen P2/P3/capacity as part of P1 activation.
+- P1 activation is blocked because the currently installed reconciler would restart every ACTIVE project controller during reconciliation, including preserved research-engine/PADataset lanes.
+- A delta-scoped reconciler correction plus bounded source-bound reconciler hotfix installer is under validation/review on branch p1-activation-delta-reconcile.
+- Do not install that correction, reconcile, activate workspace-control, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity until fresh independent exact-head review returns NO_BLOCKING_FINDING.
 
 ## Fresh-chat initialization
 
