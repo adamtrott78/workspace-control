@@ -23,8 +23,8 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: gitrunner-p1-bootstrap-install
-- Remote checkpoint: ef54bcac5da45941d302245ff055aab1ccf54ea9
+- Remote branch: gitrunner-p1-bootstrap-runuser-fix-v1
+- Remote checkpoint: 410c0aeebc18ebb993629bda4f235934794033c4
 - Remote verified: true
 
 ### research-engine
@@ -36,12 +36,12 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Request fresh independent re-review of PR #528, consuming blocking review 5662021244 and corrected validation run 40447768153 / job 122003009926. Verify closure of BF-1 through BF-5 and regression-check all previously accepted no-activation/scope boundaries. Do not merge or execute the installer until NO_BLOCKING_FINDING is durably recorded.
+Request fresh independent review of PR #530 after this state synchronization. The reviewer must consume the first live pre-mutation failure evidence, verify that the code correction is limited to deterministic /usr/sbin/runuser resolution plus regression coverage, verify successful validation run 40450025002 / job 122010323489, and regression-check all previously accepted rollback/no-activation/P2-P3 boundaries. Do not merge or retry the installer until NO_BLOCKING_FINDING is durably recorded.
 
 ## Remaining work
 
-- Run the bounded read-only Lambda host preflight against merged workspace-control main 99972dd906bb16099645237d584d380beca88171; do not mutate host state during preflight.
-- From that evidence, install only the exact reviewed P1 controller/provisioner/runtime/maintenance/systemd/policy artifacts while preserving current research-engine/PADataset service availability and an independently recoverable bootstrap/rollback path.
+- Validate and independently review PR #530, then retry the rollback-safe P1 bootstrap installer only from the exact reviewed merge SHA; preserve the three healthy controllers and keep workspace-control dormant.
+- After bootstrap PASS, issue exactly one real owner GitHub -> L0 maintenance DIAGNOSE_LANE command on issue #527 and prove the durable accepted receipt before workspace-control activation.
 - Activate workspace-control only as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1; keep automatic pull_request/push admission disabled.
 - Validate live P1 filesystem isolation, CPU/RAM/runtime envelope, GPU0, exact candidate provenance, deterministic receipts, maintenance authorization/replay behavior, and clean teardown/rollback.
 - After live P1 acceptance, continue the separately gated work to remove routine GitHub-hosted Actions minutes; do not remove the last bootstrap path in the same change.
@@ -49,7 +49,7 @@ Request fresh independent re-review of PR #528, consuming blocking review 566202
 
 ## Blockers / gates
 
-- Corrected PR #528 bootstrap installer is validated at code checkpoint ef54bcac5da45941d302245ff055aab1ccf54ea9 (run 40447768153 / job 122003009926 / run #898 SUCCESS), but fresh independent re-review consuming blocking review 5662021244 remains required before any Lambda mutation.
+- PR #530 exact final review head must receive fresh independent NO_BLOCKING_FINDING before the privileged installer is retried.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization

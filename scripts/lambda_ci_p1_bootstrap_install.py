@@ -35,6 +35,7 @@ from typing import Any
 
 MAINTENANCE_ISSUE_NUMBER = 527
 GO_BIN = pathlib.Path("/opt/workspace-ci/go/1.26.3/bin/go")
+RUNUSER_BIN = pathlib.Path("/usr/sbin/runuser")
 RESEARCH_CPU_PREFLIGHT_MIN_RESTARTS = 11018
 
 EXPECTED_INSTALLED_SHA256 = {
@@ -140,7 +141,7 @@ def run(
 ) -> subprocess.CompletedProcess[str]:
     command = argv
     if user is not None:
-        command = ["runuser", "-u", user, "--", *argv]
+        command = [str(RUNUSER_BIN), "-u", user, "--", *argv]
     proc = subprocess.run(
         command,
         text=True,
