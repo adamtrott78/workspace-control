@@ -23,12 +23,13 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Exact current state
 
-- `workspace-control` main: `2d99331e166cbb1f8f17b5849b6508048275155f`
+- `workspace-control` main: `fec659a6d75e44c56acc53b706290b248681b584`
 - `research-engine` main: `0badc99b894d87413d065afdcd37a678c2839007`
 - `workspace-control` is still temporarily **public** for emergency hosted-capacity recovery.
 - `research-engine` is **private**.
 - There were zero live research-engine Actions runs when this handoff was hydrated.
 - PR #508 remains open and design-only. No independent review submission exists yet.
+- PR #514 merged a state-consistency-only repair for the separate EXTRACT owner task so repository task validation is clean again.
 - Frozen v0.1 architecture/manifest blobs have not changed.
 - PR #508 runtime-evidence comments:
   - `6405597751` — organization-migration implementation audit.
