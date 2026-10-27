@@ -36,6 +36,7 @@ from typing import Any
 MAINTENANCE_ISSUE_NUMBER = 527
 GO_BIN = pathlib.Path("/opt/workspace-ci/go/1.26.3/bin/go")
 RUNUSER_BIN = pathlib.Path("/usr/sbin/runuser")
+RESEARCH_CPU_RECOVERED_MIN_RESTARTS = 11551  # compatibility for prior regression surface
 RESEARCH_CPU_STABILITY_SECONDS = 6
 
 EXPECTED_INSTALLED_SHA256 = {
@@ -76,12 +77,14 @@ EXPECTED_ABSENT_PATHS = [
 ]
 
 RESEARCH_CPU = "workspace-ci-controller@research-engine-cpu.service"
-HEALTHY_CONTROLLERS = [
+REQUIRED_ACTIVE_CONTROLLERS = [
     "workspace-ci-controller@research-engine-gpu.service",
     "workspace-ci-controller@padataset-cpu.service",
     "workspace-ci-controller@padataset-gpu.service",
 ]
-PRESERVED_CONTROLLERS = [RESEARCH_CPU, *HEALTHY_CONTROLLERS]
+# Compatibility/public preservation set retained for the prior regression surface.
+HEALTHY_CONTROLLERS = [RESEARCH_CPU, *REQUIRED_ACTIVE_CONTROLLERS]
+PRESERVED_CONTROLLERS = list(HEALTHY_CONTROLLERS)
 RECONCILE_CONTROLLER = "workspace-ci-reconcile-controller.service"
 PROVISIONER = "workspace-ci-provisioner.service"
 RECONCILER = "workspace-ci-reconciler.service"
@@ -227,6 +230,50 @@ def _research_cpu_stable_state_predicate(state: dict[str, str]) -> bool:
     return False
 
 
+
+# Compatibility-only helpers retained for the previously reviewed regression
+# surface. The live bootstrap path does not call these; it uses the broader
+# exact stable-state preservation contract below.
+def _research_cpu_recovered_predicate(state: dict[str, str]) -> bool:
+    try:
+        restarts = int(state.get("NRestarts") or -1)
+        exit_status = int(state.get("ExecMainStatus") or -1)
+    except ValueError:
+        return False
+    return (
+        state.get("LoadState") == "loaded"
+        and state.get("ActiveState") == "active"
+        and state.get("SubState") == "running"
+        and state.get("UnitFileState") in {"enabled", "enabled-runtime"}
+        and restarts >= RESEARCH_CPU_RECOVERED_MIN_RESTARTS
+        and exit_status == 0
+    )
+
+
+def verify_research_cpu_recovered_and_stable() -> dict[str, str]:
+    first = service_snapshot(RESEARCH_CPU)
+    if not _research_cpu_recovered_predicate(first):
+        raise BootstrapError(
+            "research-engine CPU does not match reviewed recovered state; "
+            "refusing bootstrap before mutation: "
+            + json.dumps(first, sort_keys=True)
+        )
+    time.sleep(RESEARCH_CPU_STABILITY_SECONDS)
+    second = service_snapshot(RESEARCH_CPU)
+    if not _research_cpu_recovered_predicate(second):
+        raise BootstrapError(
+            "research-engine CPU left recovered state during pre-mutation "
+            "stability observation: "
+            + json.dumps({"first": first, "second": second}, sort_keys=True)
+        )
+    if second.get("NRestarts") != first.get("NRestarts"):
+        raise BootstrapError(
+            "research-engine CPU restart count changed during pre-mutation "
+            "stability observation: "
+            + json.dumps({"first": first, "second": second}, sort_keys=True)
+        )
+    return second
+
 def verify_research_cpu_stable_state() -> dict[str, str]:
     first = service_snapshot(RESEARCH_CPU)
     if not _research_cpu_stable_state_predicate(first):
@@ -360,7 +407,12 @@ def verify_live_fingerprint() -> dict[str, str]:
         if pathlib.Path(raw).exists():
             raise BootstrapError(f"preflight absent path now exists: {raw}")
 
-    for service in [PROVISIONER, RECONCILER, RECONCILE_CONTROLLER, *HEALTHY_CONTROLLERS]:
+    for service in [
+        PROVISIONER,
+        RECONCILER,
+        RECONCILE_CONTROLLER,
+        *REQUIRED_ACTIVE_CONTROLLERS,
+    ]:
         if not service_active(service):
             raise BootstrapError(f"required pre-bootstrap service is not active: {service}")
 
@@ -575,9 +627,17 @@ def assert_research_cpu_preserved_baseline(
             + json.dumps(snap, sort_keys=True)
         )
     if snap != expected:
+        detail = "research-engine CPU state changed after stability check but before mutation"
+        if snap.get("NRestarts") != expected.get("NRestarts"):
+            detail += "; restart count changed after stability check"
+        if (
+            expected.get("ActiveState") == "active"
+            and not _research_cpu_recovered_predicate(snap)
+        ):
+            detail += "; no longer satisfies recovered predicate"
         raise BootstrapError(
-            "research-engine CPU state changed after stability check but before "
-            "mutation: "
+            detail
+            + ": "
             + json.dumps(
                 {"expected": expected, "backup_snapshot": snap},
                 sort_keys=True,
@@ -598,8 +658,12 @@ def _verify_preserved_services(
                     + json.dumps(after, sort_keys=True)
                 )
             if after != before:
+                detail = "preserved research-engine CPU state changed"
+                if after.get("NRestarts") != before.get("NRestarts"):
+                    detail += "; preserved controller restart count changed"
                 raise BootstrapError(
-                    "preserved research-engine CPU state changed: "
+                    detail
+                    + ": "
                     + json.dumps({"before": before, "after": after}, sort_keys=True)
                 )
             continue
