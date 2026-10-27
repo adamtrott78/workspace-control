@@ -130,6 +130,10 @@ function main() {
     fail("FRONTEND_SIGNATURE_INVALID", "frontend request signature failed");
   }
   assertExact(fr.payload.schema, "workspace-shell-frontend-request.v1", "frontend schema");
+  const frontendTimestamp = parseTime(fr.payload.timestamp, "frontend timestamp");
+  if (Math.abs(Date.now() - frontendTimestamp) > 120000) {
+    fail("FRONTEND_REQUEST_STALE", "signed frontend request is outside the 120-second freshness window");
+  }
 
   const approval = request.approval;
   if (!approval || typeof approval !== "object" || !approval.payload || typeof approval.signature !== "string") {
