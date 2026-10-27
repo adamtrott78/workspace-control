@@ -986,6 +986,95 @@ func (s *scaler) observeResetPending(
 	return true, nil
 }
 
+func (s *scaler) consumeReadyForSingleRetry(
+	attestation controllerAttestation,
+) error {
+	path := s.readyForSingleRetryPath()
+	raw, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("read recovery retry gate: %w", err)
+	}
+	var receipt map[string]any
+	if err := json.Unmarshal(raw, &receipt); err != nil {
+		return fmt.Errorf("parse recovery retry gate: %w", err)
+	}
+	status, _ := receipt["status"].(string)
+	if status == "RECOVERY_RETRY_ACQUIRED" ||
+		status == "RECOVERY_RETRY_COMPLETED" {
+		return nil
+	}
+	if status != "READY_FOR_SINGLE_RETRY" {
+		return fmt.Errorf("recovery retry gate status is invalid: %q", status)
+	}
+	if receipt["project_id"] != s.projectID ||
+		receipt["lane"] != s.lane ||
+		receipt["scale_set_name"] != s.scaleSetName {
+		return fmt.Errorf("recovery retry gate identity mismatch")
+	}
+	newID, ok := receipt["new_scale_set_id"].(float64)
+	if !ok || int(newID) != s.scaleSetID {
+		return fmt.Errorf("recovery retry gate scale-set mismatch")
+	}
+	receipt["status"] = "RECOVERY_RETRY_ACQUIRED"
+	receipt["job_id"] = attestation.JobID
+	receipt["workflow_run_id"] = attestation.WorkflowRunID
+	receipt["acquired_at"] = time.Now().UTC().Format(time.RFC3339Nano)
+	receipt["automatic_workflow_triggered"] = false
+	if err := atomicWriteJSON(path, receipt); err != nil {
+		return fmt.Errorf("consume recovery retry gate: %w", err)
+	}
+	s.logger.Info(
+		"Consumed recovery generation with first acquired job",
+		slog.String("job_id", attestation.JobID),
+		slog.Int64("workflow_run_id", attestation.WorkflowRunID),
+	)
+	return nil
+}
+
+func (s *scaler) completeRecoveryRetry(job *scaleset.JobCompleted) error {
+	if job == nil || job.JobID == "" {
+		return nil
+	}
+	path := s.readyForSingleRetryPath()
+	raw, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("read recovery retry receipt: %w", err)
+	}
+	var receipt map[string]any
+	if err := json.Unmarshal(raw, &receipt); err != nil {
+		return fmt.Errorf("parse recovery retry receipt: %w", err)
+	}
+	status, _ := receipt["status"].(string)
+	if status == "RECOVERY_RETRY_COMPLETED" {
+		return nil
+	}
+	if status != "RECOVERY_RETRY_ACQUIRED" {
+		return nil
+	}
+	if receipt["job_id"] != job.JobID {
+		return nil
+	}
+	receipt["status"] = "RECOVERY_RETRY_COMPLETED"
+	receipt["result"] = job.Result
+	receipt["runner_name"] = job.RunnerName
+	receipt["completed_at"] = time.Now().UTC().Format(time.RFC3339Nano)
+	if err := atomicWriteJSON(path, receipt); err != nil {
+		return fmt.Errorf("complete recovery retry receipt: %w", err)
+	}
+	s.logger.Info(
+		"Recovery retry reached terminal state",
+		slog.String("job_id", job.JobID),
+		slog.String("result", job.Result),
+	)
+	return nil
+}
+
 func recoveryMetadataComplete(job *scaleset.JobMessageBase) bool {
 	return job != nil &&
 		job.MessageType == scaleset.MessageTypeJobAssigned &&
@@ -1067,6 +1156,9 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				}
 			}
 			s.mu.Unlock()
+			if err := s.consumeReadyForSingleRetry(attestation); err != nil {
+				return fmt.Errorf("consume recovery retry on assigned recovery: %w", err)
+			}
 		}
 		}
 	}
@@ -1083,6 +1175,10 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		delete(s.active, completed.RunnerName)
 		if s.admissionV2 {
 			s.clearPendingRunner(completed.RunnerName)
+			if err := s.completeRecoveryRetry(completed); err != nil {
+				s.mu.Unlock()
+				return fmt.Errorf("complete recovery retry lifecycle: %w", err)
+			}
 		}
 	}
 	activeCount := len(s.active)
@@ -1213,6 +1309,20 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 					s.mu.Unlock()
 				}
 				return fmt.Errorf("acquire jobs: %w", err)
+			}
+			if s.admissionV2 {
+				if len(stagedKeys) != 1 {
+					return fmt.Errorf(
+						"admission-v2 acquired unexpected staged job count: %d",
+						len(stagedKeys),
+					)
+				}
+				s.mu.Lock()
+				acquired := s.pending[stagedKeys[0]]
+				s.mu.Unlock()
+				if err := s.consumeReadyForSingleRetry(acquired.Attestation); err != nil {
+					return fmt.Errorf("consume recovery retry after acquire: %w", err)
+				}
 			}
 		}
 	}
