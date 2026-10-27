@@ -36,21 +36,20 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Perform a fresh independent preimplementation review of architecture/github-actions-selfhosted-control-plane.v0.2.json@2866f7d76aed0d5792b86ea175e9492c90115f50 together with the deliberately unchanged NOT_INSTALLED workspace-control manifest architecture/lambda-ci-project-workspace-control.v1.json@efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588. The reviewer must explicitly verify BF-1 resolution (TotalAssignedJobs is non-authoritative for execution; fail-closed assignment-divergence quarantine; exact stale scale-set reset with local quiescence, fresh scale-set identity, two zero-state observations, durable receipt, and single-retry gate) and BF-2 resolution (independently installed L0 maintenance path; finite typed verbs; derived targets; SO_PEERCRED/root validation; replay-safe receipts; no arbitrary shell/path/systemd/property/credential surface; no L1 self-repair circularity). Also re-check workspace-control isolation, maxRunners=1/concurrency=1 P1 limit, transport/execution separation, independent bootstrap, P2/P3 deferral, and rollback. Persist NO_BLOCKING_FINDING or exact blockers. Do not implement or activate P1 until that disposition is durably consumed.
+Implement the bounded P1 tranche from the independently accepted v0.2 design: (1) change admission-v2 controller behavior so TotalAssignedJobs is non-authoritative for execution and unreconstructable assignment divergence enters durable fail-closed quarantine with no new AcquireJobs/JIT/root provision; (2) add the finite independently installed L0 maintenance path with typed DIAGNOSE_LANE, RESTART_CONTROLLER, QUIESCE_LANE_FOR_RECOVERY, RESUME_LANE_AFTER_RESET and exact stale-scale-set reset orchestration/receipts as frozen; (3) add the NOT_INSTALLED owner-commanded workspace-control JIT CPU validation workflow/profile scaffolding without live activation. Keep maxRunners=1/concurrency=1 and preserve all isolation/transport-vs-execution/P2/P3/rollback boundaries. Run repository/adversarial validation, freeze exact implementation identities, then obtain independent implementation review before any Lambda/live runner activation.
 
 ## Remaining work
 
-- Obtain and durably consume a fresh independent review of the exact v0.2 architecture and unchanged NOT_INSTALLED workspace-control manifest.
-- If v0.2 receives NO_BLOCKING_FINDING, implement only P1: admission-v2 assignment-divergence quarantine/recovery, bounded independently installed L0 maintenance path, and owner-commanded workspace-control JIT CPU validation pilot.
-- Validate P1 implementation with adversarial stale-assignment/replay/maintenance-authority tests, filesystem isolation, CPU/RAM/runtime envelope, no-GPU guarantee, receipts, rollback, and independent bootstrap availability.
-- Do not raise maxRunners or manifest concurrency until separately reviewed resource-aware host arbitration is designed and validated.
-- Design/review automatic pull_request/push admission as P2 only after P1 succeeds.
-- Keep GitHub organization migration, runner-group IDs, organization registration, attestation migration, and least-privilege GitHub App credentials in separately reviewed P3.
-- Retire temporary public workspace-control and research-engine GPU-listener transport only after reviewed replacement paths are live and rollback-safe.
+- Implement only the reviewed P1 tranche: admission-v2 assignment-divergence quarantine/recovery, bounded independently installed L0 maintenance path, and owner-commanded workspace-control JIT CPU validation pilot.
+- Preserve maxRunners=1 and manifest concurrency=1; do not implement resource-aware concurrency or raise capacity.
+- Add adversarial tests for incomplete JobAssigned restart recovery, quarantine/no-acquire behavior, exact stale-scale-set reset preconditions, replay/idempotency, typed maintenance verbs, derived targets, peer-UID/root validation, no arbitrary root command surface, and single-retry gating.
+- Validate workspace-control filesystem isolation, CPU/RAM/runtime envelope, no-GPU guarantee, deterministic receipts, rollback, and independent bootstrap availability.
+- Freeze the exact P1 implementation PR and obtain the separately required independent implementation review before any live workspace-control runner activation.
+- Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, resource-aware concurrency, hosted/bootstrap fallback removal, and temporary transport cleanup unauthorized.
 
 ## Blockers / gates
 
-- Live P1 implementation/activation is blocked pending fresh independent preimplementation review of architecture/github-actions-selfhosted-control-plane.v0.2.json@2866f7d76aed0d5792b86ea175e9492c90115f50 plus unchanged architecture/lambda-ci-project-workspace-control.v1.json@efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588.
+- P1 live activation remains blocked until the exact implementation PR passes repository/adversarial tests and receives the required independent implementation review.
 
 ## Fresh-chat initialization
 
