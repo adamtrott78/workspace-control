@@ -330,5 +330,115 @@ class MaintenanceControllerTests(unittest.TestCase):
             )
 
 
+    def test_first_poll_establishes_watermark_without_executing_old_commands(self):
+        with tempfile.TemporaryDirectory() as td:
+            state = pathlib.Path(td)
+            token = state / "token"
+            token.write_text("test-token", encoding="utf-8")
+            token.chmod(0o600)
+
+            class FakeGitHub:
+                def __init__(self, _token):
+                    pass
+
+                def get_json(self, path):
+                    if path.endswith("/issues/42"):
+                        return {"state": "open"}
+                    if "/issues/42/comments?" in path:
+                        return [
+                            {
+                                "id": 10,
+                                "updated_at": "2026-10-27T01:00:00Z",
+                                "user": {"login": controller.OWNER_LOGIN},
+                                "author_association": "OWNER",
+                                "body": "/workspace-ci-maintain restart workspace-control cpu",
+                            }
+                        ]
+                    raise AssertionError(path)
+
+            with (
+                mock.patch.object(controller, "GitHubClient", FakeGitHub),
+                mock.patch.object(controller, "process_comment") as process,
+            ):
+                result = controller.run_once(
+                    token_file=token,
+                    issue_number=42,
+                    state_dir=state,
+                    root_socket=pathlib.Path("/run/test.sock"),
+                    controller_binary=pathlib.Path("/bin/false"),
+                    controllers_dir=pathlib.Path("/etc/workspace-ci/controllers"),
+                    runner_token_file=pathlib.Path("/run/test-token"),
+                )
+            self.assertEqual(result["status"], "INITIALIZED_NO_COMMANDS_EXECUTED")
+            self.assertEqual(result["watermark_comment_id"], 10)
+            process.assert_not_called()
+
+    def test_subsequent_poll_executes_only_new_comment_ids(self):
+        with tempfile.TemporaryDirectory() as td:
+            state = pathlib.Path(td)
+            token = state / "token"
+            token.write_text("test-token", encoding="utf-8")
+            token.chmod(0o600)
+            (state / "cursor.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "initialized_at": "2026-10-27T01:00:00Z",
+                        "last_seen_comment_id": 10,
+                        "last_seen_updated_at": "2026-10-27T01:00:00Z",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            class FakeGitHub:
+                def __init__(self, _token):
+                    pass
+
+                def get_json(self, path):
+                    if path.endswith("/issues/42"):
+                        return {"state": "open"}
+                    if "/issues/42/comments?" in path:
+                        return [
+                            {
+                                "id": 10,
+                                "updated_at": "2026-10-27T01:00:00Z",
+                                "user": {"login": controller.OWNER_LOGIN},
+                                "author_association": "OWNER",
+                                "body": "/workspace-ci-maintain restart workspace-control cpu",
+                            },
+                            {
+                                "id": 11,
+                                "updated_at": "2026-10-27T01:01:00Z",
+                                "user": {"login": controller.OWNER_LOGIN},
+                                "author_association": "OWNER",
+                                "body": "/workspace-ci-maintain restart workspace-control cpu",
+                            },
+                        ]
+                    raise AssertionError(path)
+
+            calls = []
+
+            def fake_process(comment, **_kwargs):
+                calls.append(comment["id"])
+                return {"status": "COMPLETED"}
+
+            with (
+                mock.patch.object(controller, "GitHubClient", FakeGitHub),
+                mock.patch.object(controller, "process_comment", side_effect=fake_process),
+            ):
+                result = controller.run_once(
+                    token_file=token,
+                    issue_number=42,
+                    state_dir=state,
+                    root_socket=pathlib.Path("/run/test.sock"),
+                    controller_binary=pathlib.Path("/bin/false"),
+                    controllers_dir=pathlib.Path("/etc/workspace-ci/controllers"),
+                    runner_token_file=pathlib.Path("/run/test-token"),
+                )
+            self.assertEqual(calls, [11])
+            self.assertEqual(result["last_seen_comment_id"], 11)
+
+
 if __name__ == "__main__":
     unittest.main()
