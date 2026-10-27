@@ -90,6 +90,16 @@ class ActivationDeltaReconcilerHotfixTests(unittest.TestCase):
             "InvocationID": "frozen-generation",
         }
         self.controllers = {"sentinel": {"state": "preserved"}}
+        self.workspace_dormant = {
+            "LoadState": "loaded",
+            "ActiveState": "inactive",
+            "SubState": "dead",
+            "UnitFileState": "disabled",
+            "NRestarts": "0",
+            "ExecMainStatus": "0",
+            "MainPID": "0",
+            "InvocationID": "workspace-dormant-generation",
+        }
         self.candidate = {
             "registry_state": "MIGRATION_CANDIDATE_NOT_INSTALLED",
             "manifest_state": "MIGRATION_CANDIDATE_NOT_INSTALLED",
@@ -138,6 +148,13 @@ class ActivationDeltaReconcilerHotfixTests(unittest.TestCase):
                 hotfix,
                 "require_controller_baseline",
                 return_value=self.controllers,
+            )
+        )
+        stack.enter_context(
+            mock.patch.object(
+                hotfix,
+                "require_workspace_controller_dormant",
+                return_value=self.workspace_dormant,
             )
         )
         stack.enter_context(
@@ -194,6 +211,156 @@ class ActivationDeltaReconcilerHotfixTests(unittest.TestCase):
         with mock.patch.object(hotfix, "service_snapshot", return_value=active):
             with self.assertRaisesRegex(hotfix.HotfixError, "not frozen"):
                 hotfix.require_reconcile_controller_frozen()
+
+    def test_workspace_controller_dormancy_rejects_active_state(self):
+        active = dict(self.workspace_dormant)
+        active.update(
+            {
+                "ActiveState": "active",
+                "SubState": "running",
+                "MainPID": "6000",
+                "InvocationID": "workspace-active-generation",
+            }
+        )
+        with mock.patch.object(hotfix, "service_snapshot", return_value=active):
+            with self.assertRaisesRegex(
+                hotfix.HotfixError,
+                "workspace-control CPU controller is not dormant",
+            ):
+                hotfix.require_workspace_controller_dormant()
+
+    def test_active_workspace_controller_blocks_before_mutation(self):
+        calls = []
+
+        def fake_run(argv, check=True, user=None):
+            calls.append(list(argv))
+            return mock.Mock(returncode=0, stdout="", stderr="")
+
+        stack = self.base_stack(fake_run)
+        stack.enter_context(
+            mock.patch.object(
+                hotfix,
+                "require_workspace_controller_dormant",
+                side_effect=hotfix.HotfixError(
+                    "workspace-control CPU controller is not dormant"
+                ),
+            )
+        )
+        atomic = stack.enter_context(mock.patch.object(hotfix, "atomic_write"))
+
+        with self.assertRaisesRegex(
+            hotfix.HotfixError,
+            "workspace-control CPU controller is not dormant",
+        ):
+            hotfix.main()
+
+        atomic.assert_not_called()
+        self.assertEqual(calls, [])
+
+    def test_forward_workspace_controller_generation_drift_fails_closed(self):
+        calls = []
+
+        def fake_run(argv, check=True, user=None):
+            calls.append(list(argv))
+            return mock.Mock(returncode=0, stdout="", stderr="")
+
+        drift = dict(self.workspace_dormant)
+        drift["InvocationID"] = "workspace-drifted-generation"
+
+        stack = self.base_stack(fake_run)
+        stack.enter_context(mock.patch.object(hotfix, "wait_socket", return_value=None))
+        stack.enter_context(
+            mock.patch.object(
+                hotfix,
+                "require_workspace_controller_dormant",
+                side_effect=[
+                    self.workspace_dormant,
+                    drift,
+                    self.workspace_dormant,
+                ],
+            )
+        )
+
+        with self.assertRaisesRegex(
+            hotfix.HotfixError,
+            "workspace-control CPU controller state/generation changed during hotfix",
+        ):
+            hotfix.main()
+
+        self.assertEqual(self.installed.read_bytes(), self.old)
+        self.assertEqual(
+            calls,
+            [
+                [
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    hotfix.ROOT_SERVICE,
+                ],
+                [
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    hotfix.ROOT_SERVICE,
+                ],
+            ],
+        )
+
+    def test_rollback_workspace_controller_generation_drift_is_incomplete(self):
+        calls = []
+        waits = 0
+
+        def fake_run(argv, check=True, user=None):
+            calls.append(list(argv))
+            return mock.Mock(returncode=0, stdout="", stderr="")
+
+        def fake_wait():
+            nonlocal waits
+            waits += 1
+            if waits == 1:
+                raise hotfix.HotfixError("synthetic reconciler readiness failure")
+
+        drift = dict(self.workspace_dormant)
+        drift["InvocationID"] = "workspace-rollback-drift"
+
+        stack = self.base_stack(fake_run)
+        stack.enter_context(mock.patch.object(hotfix, "wait_socket", side_effect=fake_wait))
+        stack.enter_context(
+            mock.patch.object(
+                hotfix,
+                "require_workspace_controller_dormant",
+                side_effect=[
+                    self.workspace_dormant,
+                    drift,
+                ],
+            )
+        )
+
+        with self.assertRaisesRegex(
+            hotfix.HotfixError,
+            "rollback was incomplete.*rollback changed workspace-control CPU controller state/generation",
+        ):
+            hotfix.main()
+
+        self.assertEqual(self.installed.read_bytes(), self.old)
+        self.assertEqual(waits, 2)
+        self.assertEqual(
+            calls,
+            [
+                [
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    hotfix.ROOT_SERVICE,
+                ],
+                [
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    hotfix.ROOT_SERVICE,
+                ],
+            ],
+        )
 
     def test_success_mutates_only_reconciler_and_restarts_root_nonpropagating(self):
         calls = []
