@@ -210,7 +210,11 @@ def _quarantine_state(
     state_dir: pathlib.Path = target["state_dir"]
     candidates = [state_dir / "quarantine.json"]
     if reset_generation is not None:
-        candidates.insert(0, state_dir / f"reset-pending-{reset_generation}.json")
+        candidates = [
+            state_dir / f"reset-pending-{reset_generation}.json",
+            state_dir / "ready-for-single-retry.json",
+            *candidates,
+        ]
     for path in candidates:
         if not path.is_file():
             continue
@@ -359,10 +363,33 @@ def apply_request(
                     "project execution still active while quiescing: "
                     + ",".join(active_units)
                 )
+            state_path = qpath
+            if (
+                request["reset_generation"] is not None
+                and qpath.name == "ready-for-single-retry.json"
+            ):
+                pending = (
+                    target["state_dir"]
+                    / f"reset-pending-{request['reset_generation']}.json"
+                )
+                pending_state = dict(quarantine)
+                pending_state["status"] = "RECOVERY_SCALESET_RESET_PENDING"
+                pending_state["reset_generation"] = request["reset_generation"]
+                pending_state["old_scale_set_id"] = quarantine.get(
+                    "old_scale_set_id",
+                    quarantine.get("scale_set_id"),
+                )
+                pending_state["reset_requiesced_at"] = _utc_now()
+                _atomic_json(pending, pending_state)
+                qpath.unlink()
+                state_path = pending
             return {
                 "service_active": False,
-                "quarantine_state_path": str(qpath),
-                "quarantine_scale_set_id": quarantine.get("scale_set_id"),
+                "quarantine_state_path": str(state_path),
+                "quarantine_scale_set_id": quarantine.get(
+                    "scale_set_id",
+                    quarantine.get("new_scale_set_id"),
+                ),
                 "local_execution_absent": True,
             }
         return _mutating_receipt(
