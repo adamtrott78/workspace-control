@@ -42,7 +42,7 @@
     "control-validation": {
       "activation_state": "PLANNED_NOT_BOUND",
       "lane": "cpu",
-      "execution_contract_id": "cpu-public-ci-v1",
+      "execution_contract_id": "control-small-ci-v1",
       "trusted_workflow": {
         "path": ".github/workflows/lambda-ci-workspace-control-validation.yml",
         "default_branch": "main",
