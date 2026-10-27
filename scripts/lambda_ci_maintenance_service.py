@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import grp
+import hashlib
 import json
 import os
 import pathlib
@@ -42,6 +43,10 @@ def _utc_now() -> str:
 
 def _canonical(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
+def _canonical_sha256(value: Any) -> str:
+    return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
 
 
 def _atomic_json(path: pathlib.Path, value: dict[str, Any]) -> None:
@@ -170,6 +175,7 @@ def derive_target(
     lane: str,
     *,
     controller_state_root: pathlib.Path,
+    projects_dir: pathlib.Path,
 ) -> dict[str, Any]:
     projects = registry.get("projects")
     if not isinstance(projects, dict):
@@ -182,6 +188,20 @@ def derive_target(
         raise MaintenanceError("lane is not registered for project")
     if entry.get("activation_state") != "ACTIVE":
         raise MaintenanceError("maintenance target project is not active")
+
+    manifest_path = projects_dir / f"{project_id}.json"
+    manifest = _read_json(manifest_path)
+    if manifest.get("project_id") != project_id:
+        raise MaintenanceError("installed project manifest identity mismatch")
+    if manifest.get("status") != "ACTIVE":
+        raise MaintenanceError("installed project manifest is not active")
+    try:
+        scale_set_name = manifest["derived_identity"]["lanes"][lane]["scale_set_name"]
+    except (KeyError, TypeError) as exc:
+        raise MaintenanceError("installed project manifest lane identity is invalid") from exc
+    if not isinstance(scale_set_name, str) or not scale_set_name:
+        raise MaintenanceError("installed project scale-set name is invalid")
+
     service = f"workspace-ci-controller@{project_id}-{lane}.service"
     state_dir = controller_state_root / f"{project_id}-{lane}"
     return {
@@ -189,6 +209,11 @@ def derive_target(
         "lane": lane,
         "service": service,
         "state_dir": state_dir,
+        "scale_set_name": scale_set_name,
+        "policy_digests": {
+            "registry_sha256": _canonical_sha256(registry),
+            "manifest_sha256": _canonical_sha256(manifest),
+        },
     }
 
 
@@ -223,6 +248,8 @@ def _quarantine_state(
             continue
         if value.get("project_id") != target["project_id"] or value.get("lane") != target["lane"]:
             raise MaintenanceError("quarantine target identity mismatch")
+        if value.get("scale_set_name") != target["scale_set_name"]:
+            raise MaintenanceError("quarantine scale-set identity mismatch")
         return path, value
     raise MaintenanceError("matching quarantine receipt not found")
 
@@ -255,6 +282,7 @@ def _receipt_identity(request: dict[str, Any], target: dict[str, Any]) -> dict[s
         "service": target["service"],
         "quarantine_receipt_id": request["quarantine_receipt_id"],
         "reset_generation": request["reset_generation"],
+        "installed_policy_digests": target["policy_digests"],
     }
 
 
@@ -299,6 +327,7 @@ def apply_request(
     *,
     registry_path: pathlib.Path,
     controller_state_root: pathlib.Path,
+    projects_dir: pathlib.Path,
     receipts_dir: pathlib.Path,
 ) -> dict[str, Any]:
     request = _validate_request(request)
@@ -308,6 +337,7 @@ def apply_request(
         request["project_id"],
         request["lane"],
         controller_state_root=controller_state_root,
+        projects_dir=projects_dir,
     )
     service = target["service"]
     operation = request["operation"]
@@ -332,6 +362,7 @@ def apply_request(
             "service": service,
             "service_active": _service_active(service),
             "active_project_units": _active_project_units(target["project_id"]),
+            "installed_policy_digests": target["policy_digests"],
             "quarantine": quarantine,
             "reset_pending": reset_pending,
             "ready_for_single_retry": ready,
@@ -473,6 +504,7 @@ def serve(
     socket_group: str,
     controller_uid: int,
     registry_path: pathlib.Path,
+    projects_dir: pathlib.Path,
     controller_state_root: pathlib.Path,
     state_dir: pathlib.Path,
 ) -> None:
@@ -508,6 +540,7 @@ def serve(
                     response = apply_request(
                         request,
                         registry_path=registry_path,
+                        projects_dir=projects_dir,
                         controller_state_root=controller_state_root,
                         receipts_dir=receipts_dir,
                     )
@@ -550,6 +583,11 @@ def main() -> int:
         default=pathlib.Path("/etc/workspace-ci/lambda-ci-project-registry.v1.json"),
     )
     parser.add_argument(
+        "--projects-dir",
+        type=pathlib.Path,
+        default=pathlib.Path("/etc/workspace-ci/projects"),
+    )
+    parser.add_argument(
         "--controller-state-root",
         type=pathlib.Path,
         default=pathlib.Path("/var/lib/workspace-ci/controller/state"),
@@ -568,6 +606,7 @@ def main() -> int:
         socket_group=args.socket_group,
         controller_uid=controller.pw_uid,
         registry_path=args.registry,
+        projects_dir=args.projects_dir,
         controller_state_root=args.controller_state_root,
         state_dir=args.state_dir,
     )
