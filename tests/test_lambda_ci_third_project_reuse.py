@@ -35,6 +35,9 @@ RESEARCH = json.loads(
 PAD = json.loads(
     (ROOT / "architecture/lambda-ci-project-padataset.v1.json").read_text()
 )
+WORKSPACE = json.loads(
+    (ROOT / "architecture/lambda-ci-project-workspace-control.v1.json").read_text()
+)
 FUTURE = json.loads(
     (ROOT / "tests/fixtures/lambda-ci-project-future-research.v2.json").read_text()
 )
@@ -126,6 +129,7 @@ class ThirdProjectReuseContractTests(unittest.TestCase):
         manifests = {
             "research-engine": RESEARCH,
             "padataset": PAD,
+            "workspace-control": WORKSPACE,
             "future-research": FUTURE,
         }
         resolved = multi.resolve_project_manifest(
@@ -140,7 +144,10 @@ class ThirdProjectReuseContractTests(unittest.TestCase):
             plan["active_projects"],
             ["future-research", "padataset", "research-engine"],
         )
-        self.assertEqual(plan["planned_projects_skipped"], [])
+        self.assertEqual(
+            plan["planned_projects_skipped"],
+            ["workspace-control"],
+        )
 
         serialized = json.dumps(plan, sort_keys=True)
         self.assertIn("ci-future-research", serialized)
