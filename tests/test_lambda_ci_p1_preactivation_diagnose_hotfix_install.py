@@ -2,6 +2,7 @@ import contextlib
 import hashlib
 import json
 import pathlib
+import socket
 import sys
 import tempfile
 import unittest
