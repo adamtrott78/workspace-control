@@ -512,3 +512,131 @@ func TestOrphanJITRegistrationIsRemovedOnlyFromExpectedScaleSet(t *testing.T) {
 		t.Fatal("cross-scale-set runner registration was removed")
 	}
 }
+
+
+type fakeScaleSetMaintenanceClient struct {
+	scaleSet  *scaleset.RunnerScaleSet
+	deletedID int
+}
+
+func (f *fakeScaleSetMaintenanceClient) GetRunnerScaleSet(
+	context.Context,
+	int,
+	string,
+) (*scaleset.RunnerScaleSet, error) {
+	return f.scaleSet, nil
+}
+
+func (f *fakeScaleSetMaintenanceClient) DeleteRunnerScaleSet(
+	_ context.Context,
+	id int,
+) error {
+	f.deletedID = id
+	f.scaleSet = nil
+	return nil
+}
+
+func TestScaleSetMaintenanceDeleteRequiresExactQuiescentConfiguredScaleSet(t *testing.T) {
+	cfg := config{ScaleSetName: "lambda-workspace-control"}
+	client := &fakeScaleSetMaintenanceClient{
+		scaleSet: &scaleset.RunnerScaleSet{
+			ID:   77,
+			Name: "lambda-workspace-control",
+			Statistics: &scaleset.RunnerScaleSetStatistic{
+				TotalRegisteredRunners: 1,
+			},
+		},
+	}
+	_, err := executeScaleSetMaintenance(
+		context.Background(),
+		client,
+		cfg,
+		scaleSetMaintenanceRequest{
+			SchemaVersion:      1,
+			Operation:          "DELETE",
+			ExpectedScaleSetID: 77,
+		},
+	)
+	if err == nil || !strings.Contains(err.Error(), "not quiescent") {
+		t.Fatalf("non-quiescent scale set deletion was not rejected: %v", err)
+	}
+	if client.deletedID != 0 {
+		t.Fatalf("non-quiescent scale set was deleted: %d", client.deletedID)
+	}
+
+	client.scaleSet.Statistics.TotalRegisteredRunners = 0
+	if _, err := executeScaleSetMaintenance(
+		context.Background(),
+		client,
+		cfg,
+		scaleSetMaintenanceRequest{
+			SchemaVersion:      1,
+			Operation:          "DELETE",
+			ExpectedScaleSetID: 78,
+		},
+	); err == nil {
+		t.Fatal("wrong numeric scale-set id was accepted")
+	}
+	if client.deletedID != 0 {
+		t.Fatalf("mismatched scale set was deleted: %d", client.deletedID)
+	}
+
+	response, err := executeScaleSetMaintenance(
+		context.Background(),
+		client,
+		cfg,
+		scaleSetMaintenanceRequest{
+			SchemaVersion:      1,
+			Operation:          "DELETE",
+			ExpectedScaleSetID: 77,
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.Status != "DELETED" || response.ScaleSetID != 77 || client.deletedID != 77 {
+		t.Fatalf("exact quiescent delete failed response=%#v deleted=%d", response, client.deletedID)
+	}
+}
+
+func TestScaleSetMaintenanceInspectCannotSelectAnotherScaleSet(t *testing.T) {
+	cfg := config{ScaleSetName: "lambda-workspace-control"}
+	client := &fakeScaleSetMaintenanceClient{
+		scaleSet: &scaleset.RunnerScaleSet{
+			ID:   88,
+			Name: "lambda-workspace-control",
+			Statistics: &scaleset.RunnerScaleSetStatistic{
+				TotalAssignedJobs: 0,
+				TotalRunningJobs:  0,
+			},
+		},
+	}
+	response, err := executeScaleSetMaintenance(
+		context.Background(),
+		client,
+		cfg,
+		scaleSetMaintenanceRequest{
+			SchemaVersion:      1,
+			Operation:          "INSPECT",
+			ExpectedScaleSetID: 0,
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.ScaleSetID != 88 || response.ScaleSetName != cfg.ScaleSetName {
+		t.Fatalf("inspect identity drift: %#v", response)
+	}
+	if _, err := executeScaleSetMaintenance(
+		context.Background(),
+		client,
+		cfg,
+		scaleSetMaintenanceRequest{
+			SchemaVersion:      1,
+			Operation:          "DELETE_OTHER",
+			ExpectedScaleSetID: 88,
+		},
+	); err == nil {
+		t.Fatal("arbitrary scale-set maintenance operation accepted")
+	}
+}
