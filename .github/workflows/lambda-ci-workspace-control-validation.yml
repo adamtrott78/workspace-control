@@ -1,0 +1,174 @@
+name: Lambda CI Workspace Control Validation
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  control-validation:
+    name: "${{ format('wc-admission-v1|workload=control-validation|pr={0}|request={1}', github.event.issue.number, github.event.comment.body) }}"
+    if: >-
+      github.event.issue.pull_request &&
+      github.actor == 'adamtrott78' &&
+      github.event.comment.author_association == 'OWNER' &&
+      startsWith(github.event.comment.body, '/workspace-control-validate ')
+    runs-on: lambda-workspace-control
+    timeout-minutes: 10
+
+    steps:
+      - name: Verify exact same-repository PR head
+        id: gate
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          expected_sha="$(printf '%s\n' "$COMMENT_BODY" | awk '{print $2}')"
+          [[ "$expected_sha" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "Invalid /workspace-control-validate SHA" >&2
+            exit 20
+          }
+          pr_json="$(
+            curl -fsSL \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/$REPOSITORY/pulls/$PR_NUMBER"
+          )"
+          readarray -t values < <(
+            python3 -c 'import json,sys; p=json.load(sys.stdin); print(p["head"]["sha"]); print(p["head"]["repo"]["full_name"]); print(p["state"])' <<<"$pr_json"
+          )
+          [[ "${values[0]}" == "$expected_sha" ]] || {
+            echo "Requested SHA does not match current PR head" >&2
+            exit 21
+          }
+          [[ "${values[1]}" == "$REPOSITORY" ]] || {
+            echo "Fork/foreign PR head rejected" >&2
+            exit 22
+          }
+          [[ "${values[2]}" == "open" ]] || {
+            echo "PR is not open" >&2
+            exit 23
+          }
+          echo "expected_sha=$expected_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Prove bounded workspace-control runner isolation
+        env:
+          EXPECTED_SHA: ${{ steps.gate.outputs.expected_sha }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(id -un)" == "ci-workspace-control" ]]
+          [[ -n "${RUNNER_NAME:-}" ]]
+          [[ -n "${RUNNER_TEMP:-}" ]]
+          [[ -n "${XDG_CACHE_HOME:-}" ]]
+          [[ "$RUNNER_NAME" == lambda-workspace-control-* ]]
+
+          runner_dir="$(dirname "$(dirname "$RUNNER_TEMP")")"
+          job_dir="$(dirname "$runner_dir")"
+          [[ "$job_dir" == /srv/workspace-ci/workspace-control/jobs/* ]]
+          [[ "$XDG_CACHE_HOME" == /srv/workspace-ci/workspace-control/staging-cache/* ]]
+
+          for forbidden in \
+            /home/atrott \
+            /srv/workspace-ci/research-engine \
+            /srv/workspace-ci/padataset \
+            /var/lib/workspace-ci/provisioner \
+            /var/lib/workspace-ci/reconciler \
+            /var/lib/workspace-ci/controller \
+            /run/workspace-ci
+          do
+            [[ ! -r "$forbidden" ]] || {
+              echo "Forbidden path readable: $forbidden" >&2
+              exit 30
+            }
+          done
+
+          for socket in /var/run/docker.sock /run/docker.sock; do
+            if [[ -e "$socket" ]]; then
+              [[ ! -r "$socket" && ! -w "$socket" ]] || {
+                echo "Docker socket accessible: $socket" >&2
+                exit 31
+              }
+            fi
+          done
+
+          if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1; then
+            echo "Workspace-control CPU pilot unexpectedly has NVIDIA device access" >&2
+            exit 32
+          fi
+
+      - name: Checkout exact candidate SHA
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ steps.gate.outputs.expected_sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Run bounded repository validation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 -m unittest discover -s tests -v
+          (
+            cd controller/lambda-ci-controller
+            go test -mod=mod ./...
+          )
+
+      - name: Write pilot receipt
+        env:
+          EXPECTED_SHA: ${{ steps.gate.outputs.expected_sha }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.actor }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          actual_sha="$(git rev-parse HEAD)"
+          [[ "$actual_sha" == "$EXPECTED_SHA" ]]
+          receipt="$RUNNER_TEMP/workspace-control-p1-receipt.json"
+          export RECEIPT_PATH="$receipt" ACTUAL_SHA="$actual_sha"
+          python3 - <<'PY'
+          import json, os, pathlib
+          payload = {
+              "schema_version": 1,
+              "phase": "workspace-control-selfhosted-p1",
+              "decision": "PASS",
+              "expected_sha": os.environ["EXPECTED_SHA"],
+              "actual_sha": os.environ["ACTUAL_SHA"],
+              "pr_number": int(os.environ["PR_NUMBER"]),
+              "actor": os.environ["ACTOR"],
+              "runner_name": os.environ.get("RUNNER_NAME"),
+              "runner_user": os.environ.get("USER"),
+              "gpu_count_expected": 0,
+              "profile_expected": "control-small",
+              "max_runners_expected": 1,
+              "project_concurrency_expected": 1,
+              "same_repository_pr_required": True,
+              "fork_execution_allowed": False,
+              "forbidden_paths_inaccessible": True,
+              "docker_access": False,
+              "nvidia_visible": False,
+          }
+          pathlib.Path(os.environ["RECEIPT_PATH"]).write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          PY
+
+      - name: Upload pilot receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: workspace-control-p1-receipt
+          path: ${{ runner.temp }}/workspace-control-p1-receipt.json
+          if-no-files-found: error
+          retention-days: 7
