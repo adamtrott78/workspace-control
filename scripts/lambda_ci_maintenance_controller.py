@@ -178,6 +178,10 @@ def submit_root(
     operation: str,
     reset_generation: str | None = None,
 ) -> dict[str, Any]:
+    recovery_operation = operation in {
+        "QUIESCE_LANE_FOR_RECOVERY",
+        "RESUME_LANE_AFTER_RESET",
+    }
     request = {
         "schema_version": 1,
         "request_id": maintenance_request_id(
@@ -189,8 +193,18 @@ def submit_root(
         "operation": operation,
         "project_id": command["project_id"],
         "lane": command["lane"],
-        "quarantine_receipt_id": command.get("quarantine_receipt_id"),
-        "reset_generation": reset_generation,
+        "quarantine_receipt_id": (
+            command.get("quarantine_receipt_id") if recovery_operation else None
+        ),
+        "reset_generation": (
+            reset_generation
+            if operation == "RESUME_LANE_AFTER_RESET"
+            or (
+                operation == "QUIESCE_LANE_FOR_RECOVERY"
+                and reset_generation is not None
+            )
+            else None
+        ),
     }
     conn = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     conn.settimeout(30)
@@ -344,6 +358,7 @@ def execute_reset(
     runner_token_file: pathlib.Path,
     sleep_fn=time.sleep,
     max_new_scale_set_waits: int = 20,
+    max_ready_waits: int = 30,
 ) -> dict[str, Any]:
     generation = str(
         uuid.uuid5(
@@ -464,6 +479,50 @@ def execute_reset(
             "scale_set": inspected,
             "root_diagnosis": diag,
         }
+
+        controller_ready = None
+        for _ in range(max_ready_waits):
+            inspected = invoke_scale_set_helper(
+                controller_binary,
+                env_values,
+                "INSPECT",
+                new_id,
+            )
+            diag = submit_root(
+                root_socket,
+                comment_id=comment_id,
+                command=command,
+                operation="DIAGNOSE_LANE",
+            )
+            if inspected.get("scale_set_id") != new_id or not _zero_observation(
+                inspected,
+                diag,
+            ):
+                raise MaintenanceControllerError(
+                    "zero-state drifted before controller READY receipt"
+                )
+            ready = diag.get("ready_for_single_retry")
+            if isinstance(ready, dict):
+                if (
+                    ready.get("status") != "READY_FOR_SINGLE_RETRY"
+                    or ready.get("receipt_id")
+                    != command["quarantine_receipt_id"]
+                    or ready.get("reset_generation") != generation
+                    or ready.get("old_scale_set_id") != old_id
+                    or ready.get("new_scale_set_id") != new_id
+                    or ready.get("automatic_workflow_triggered") is not False
+                ):
+                    raise MaintenanceControllerError(
+                        "controller READY receipt identity mismatch"
+                    )
+                controller_ready = ready
+                break
+            sleep_fn(1)
+        if controller_ready is None:
+            raise MaintenanceControllerError(
+                "controller did not emit READY_FOR_SINGLE_RETRY within bound"
+            )
+
         return {
             "status": "READY_FOR_SINGLE_RETRY",
             "reset_generation": generation,
@@ -471,6 +530,7 @@ def execute_reset(
             "new_scale_set_id": new_id,
             "first_zero_observation": first_observation,
             "second_zero_observation": second_observation,
+            "controller_ready_receipt": controller_ready,
             "automatic_workflow_triggered": False,
         }
     except Exception:
