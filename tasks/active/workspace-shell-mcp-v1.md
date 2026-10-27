@@ -27,26 +27,32 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 - Remote checkpoint: a802c417ffcc0bea604263ad029ed1b17f94656a
 - Remote verified: true
 
+## Current stage
+
+freeze_authority_design_review_candidate — design review candidate, NOT accepted. GitHub-only historical/structural recovery completed; fresh live Lambda host attestation and independent design review still open.
+
+## Design artifacts
+
+- `architecture/workspace-shell-mcp-authority-v1.json`
+- `procedures/workspace_shell_mcp_design_review.md`
+
 ## Next safe action
 
-DEFERRED. Do nothing until the operator explicitly resumes workspace-shell-mcp-v1. On resume, start with read-only recovery of the current Lambda and private-MCP transport topology and freeze a threat model/tool-authority design before implementing any command-execution endpoint.
+Review design candidate artifacts on the Workspace Shell design PR. Obtain independent immutable-head review and fresh read-only Lambda host attestation; resolve all blockers with a new exact-head review before implementation. No Lambda/Heartbeat mutation or shell activation.
 
 ## Remaining work
 
-- When resumed, recover the exact current Lambda/Heartbeat/Secure-MCP transport state without mutating it.
-- Research the current supported private MCP connection path and freeze the Workspace Shell tool schema, authentication model, filesystem policy, process model, output limits, audit/receipt contract, and emergency disable path.
-- Design the unprivileged execution identity and a separate minimal privileged helper/sudo boundary; explicitly enumerate allowed privileged operations needed by workspace-control.
-- Independently review the exact frozen threat model and authority contract before implementation.
-- Implement and adversarially test the private Workspace Shell MCP in isolation.
-- Perform isolated Lambda acceptance with no production authority, then separately gate live ChatGPT connection.
-- After acceptance, document how durable workspace-control tasks may invoke Workspace Shell without bypassing task-specific mutation/review gates.
-- Use the completed control-plane incident chain as an acceptance scenario: reproduce a bounded exact-SHA read/execute/receipt workflow without requiring the operator to relay terminal commands manually.
+- Obtain fresh read-only host attestation without exposing secrets and reconcile with frozen candidate design.
+- Validate exact task/design artifacts and request independent immutable-head review; address blocking findings.
+- Only after accepted authority design, implement isolated, unprivileged policy-bound shell with adversarial tests.
+- Review implementation and controlled rollback separately before any live installation or ChatGPT connection.
+- Run isolated and later authorized live exact-SHA receipt acceptance; keep other project controllers untouched.
 
 ## Blockers / gates
 
-- Implementation is explicitly deferred by the operator.
-- No current connected ChatGPT plugin provides general SSH/terminal execution against the Lambda host.
-- The future command-execution and privileged-authority threat model has not yet been frozen or independently reviewed.
+- Live Lambda configuration and process identity remain unverified by fresh host attestation.
+- Independent immutable-head authority/threat design review has not returned NO_BLOCKING_FINDING.
+- Implementation, tunnel provisioning, privileged helper installation and service activation are prohibited.
 
 ## Fresh-chat initialization
 
