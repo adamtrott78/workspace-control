@@ -675,7 +675,7 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
             ):
                 with self.assertRaisesRegex(
                     reconciler.ReconcileError,
-                    "resume preserved controller service identity/state changed.*padataset-cpu",
+                    "pre-mutation preserved controller service identity/state changed.*padataset-cpu",
                 ):
                     reconciler.apply_reconciliation(
                         fx["validated"],
