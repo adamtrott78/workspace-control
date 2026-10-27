@@ -23,6 +23,8 @@ class Run3BootRecoveryHotfixTests(unittest.TestCase):
         evolved_after_recovery = {
             "scripts/lambda_ci_reconciler.py":
                 "e58d0ccd3e11df99dc22b9069d16b1a03c4d3a2d",
+            "templates/lambda-ci/workspace-ci-controller@.service.in":
+                "03ee9278bfcc8d9a455ecdacefd7bee5bd4a50b7",
             "systemd/workspace-ci-reconciler.service":
                 "a81b758dd2f735fbe72085e3ae3c7529e10152a1",
             "systemd/workspace-ci-tmpfiles.conf":

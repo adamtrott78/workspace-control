@@ -26,6 +26,8 @@ class MultiRepoRun3MigrationTests(unittest.TestCase):
                 "a1f05f3c69a8168fb6cbeeb981ed7d28299d9324",
             "scripts/lambda_ci_runtime.py":
                 "89cdc45f7f96129a315e0c00253d547a23fb17fb",
+            "templates/lambda-ci/workspace-ci-controller@.service.in":
+                "03ee9278bfcc8d9a455ecdacefd7bee5bd4a50b7",
             "scripts/lambda_ci_reconciler.py":
                 "e58d0ccd3e11df99dc22b9069d16b1a03c4d3a2d",
             "systemd/workspace-ci-reconciler.service":
