@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: b1edcad200faf389c55b37b37d946d90dfc298e6
-- Remote verified: true
+- Remote branch: gitrunner-p1-bootstrap-stable-cpu-preservation
+- Remote checkpoint: 5f440eafd04839c6d10a5ce06e7955613639f47b
+- Remote verified: false
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge b1edcad200faf389c55b37b37d946d90dfc298e6, with --expected-head set to that exact SHA and full output captured. The installer must preserve all four existing project/lane controllers, including recovered research-engine CPU; bind the recovered CPU backup snapshot to the original stable preflight NRestarts baseline; perform a fresh live preserved-service recheck immediately before the sole initial mutation (stopping automatic reconcile-controller); leave workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive; leave automatic reconcile-controller frozen on success; and rollback on any failed post-mutation gate. Return the complete output/receipt before any GitHub -> L0 diagnose or workspace-control activation.
+Validate the corrected PR #532 head after closing the malformed ExecMainStatus gap. The stable-state predicate must require ExecMainStatus to be explicitly present, parseable as an integer, and nonnegative before classification; active/running must require 0; failed/failed must require real nonzero; inactive/dead may accept only a present valid nonnegative value. Dedicated regression tests must reject missing, empty, negative, and non-integer ExecMainStatus for inactive and failed states. If exact-head validation passes, request a fresh independent re-review; do not merge or retry Lambda until NO_BLOCKING_FINDING is recorded on the corrected head.
 
 ## Remaining work
 
@@ -49,7 +49,8 @@ Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exac
 
 ## Blockers / gates
 
-- The exact corrected recovered-CPU mutation-boundary implementation is independently accepted and merged as workspace-control@b1edcad200faf389c55b37b37d946d90dfc298e6. The next gate is the bounded live bootstrap retry from that exact reviewed merge SHA; any live drift/failure must abort before mutation or rollback according to the reviewed installer.
+- Independent review 5662757200 on PR #532 old head f6a1d723a1ec33ccb3e8ecbb1e93122cdba3ea7a found a narrow malformed-state gap: missing/empty ExecMainStatus became -1 and could be accepted for inactive/dead or failed/failed. The PR head has advanced with a bounded correction and regression coverage; the old blocking review remains authoritative for the old head but does not describe the corrected head.
+- The corrected PR #532 head must pass exact validation and receive a fresh independent re-review before merge or any Lambda retry.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
