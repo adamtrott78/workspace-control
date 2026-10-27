@@ -86,6 +86,28 @@ class P1BootstrapInstallerTests(unittest.TestCase):
         self.assertNotIn("print(data)", raw)
         self.assertNotIn(".decode(", raw)
 
+    def test_credential_scope_is_probed_before_first_mutation(self):
+        raw = SCRIPT.read_text(encoding="utf-8")
+        scope = raw.index("verify_credential_scope()")
+        freeze = raw.index('run(["systemctl", "stop", RECONCILE_CONTROLLER])')
+        self.assertLess(scope, freeze)
+        self.assertIn(
+            '"/repos/adamtrott78/workspace-control/actions/runners?per_page=1"',
+            raw,
+        )
+        self.assertIn(
+            'f"/repos/adamtrott78/workspace-control/issues/{MAINTENANCE_ISSUE_NUMBER}"',
+            raw,
+        )
+
+    def test_broken_cpu_lane_is_quiesced_before_binary_replacement(self):
+        raw = SCRIPT.read_text(encoding="utf-8")
+        stop_cpu = raw.index('run(["systemctl", "stop", RESEARCH_CPU])')
+        install_binary = raw.index(
+            '"/opt/workspace-ci/controller/lambda-ci-controller"'
+        )
+        self.assertLess(stop_cpu, install_binary)
+
     def test_l0_commissioning_executes_no_historical_commands(self):
         raw = SCRIPT.read_text(encoding="utf-8")
         self.assertIn('"--once"', raw)
