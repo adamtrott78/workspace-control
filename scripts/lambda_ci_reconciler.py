@@ -695,7 +695,7 @@ def controller_reconciliation_delta(
     return entries
 
 
-TRANSACTION_SCHEMA_VERSION = 1
+TRANSACTION_SCHEMA_VERSION = 2
 TRANSACTION_KEYS = {
     "schema_version",
     "controller_local_subnet_denied",
@@ -709,6 +709,8 @@ TRANSACTION_KEYS = {
     "registry_change_planned",
     "manifest_changes_planned",
     "controller_configuration_change_planned",
+    "daemon_reload_required",
+    "daemon_reload_completed",
 }
 
 
@@ -854,6 +856,25 @@ def _validate_resume_transaction(
             "stored reconciliation controller-change flag is incompatible"
         )
 
+    daemon_reload_required = transaction.get("daemon_reload_required")
+    daemon_reload_completed = transaction.get("daemon_reload_completed")
+    if not isinstance(daemon_reload_required, bool):
+        raise ReconcileError(
+            "stored reconciliation daemon-reload required flag is invalid"
+        )
+    if not isinstance(daemon_reload_completed, bool):
+        raise ReconcileError(
+            "stored reconciliation daemon-reload completed flag is invalid"
+        )
+    if not daemon_reload_required and not daemon_reload_completed:
+        raise ReconcileError(
+            "stored reconciliation daemon-reload state is incompatible"
+        )
+    if daemon_reload_required and not daemon_reload_completed and restarted:
+        raise ReconcileError(
+            "stored reconciliation restart completion precedes required daemon-reload"
+        )
+
     return transaction, desired_entries
 
 
@@ -989,6 +1010,10 @@ def apply_reconciliation(
             entry["service"]: _service_snapshot(entry["service"])
             for entry in preserved_entries
         }
+        daemon_reload_required = any(
+            _bytes_differ(entry["dropin_path"], entry["dropin_body"])
+            for entry in restart_entries
+        )
         transaction = {
             "schema_version": TRANSACTION_SCHEMA_VERSION,
             "controller_local_subnet_denied": local_subnet,
@@ -1022,6 +1047,8 @@ def apply_reconciliation(
                 )
             ),
             "controller_configuration_change_planned": bool(restart_entries),
+            "daemon_reload_required": daemon_reload_required,
+            "daemon_reload_completed": not daemon_reload_required,
         }
         in_progress = {
             "schema_version": 1,
@@ -1102,7 +1129,21 @@ def apply_reconciliation(
         )
         os.chmod(controller_state_root, 0o700)
 
-        any_unit_material_changed = False
+        if transaction["daemon_reload_completed"]:
+            drifted_dropins = sorted(
+                service
+                for service in restart_services
+                if _bytes_differ(
+                    desired_by_service[service]["dropin_path"],
+                    desired_by_service[service]["dropin_body"],
+                )
+            )
+            if drifted_dropins:
+                raise ReconcileError(
+                    "controller drop-in changed after daemon-reload completion: "
+                    + ",".join(drifted_dropins)
+                )
+
         for service in restart_services:
             entry = desired_by_service[service]
             lane_state = (
@@ -1116,26 +1157,46 @@ def apply_reconciliation(
                 controller_group.gr_gid,
             )
             os.chmod(lane_state, 0o700)
-            if _atomic_write_if_changed(
+            _atomic_write_if_changed(
                 entry["env_path"],
                 entry["env_body"],
                 mode=0o644,
-            ):
-                any_unit_material_changed = True
-            if _atomic_write_if_changed(
-                entry["dropin_path"],
-                entry["dropin_body"],
-                mode=0o644,
-            ):
-                any_unit_material_changed = True
+            )
+            if not transaction["daemon_reload_completed"]:
+                _atomic_write_if_changed(
+                    entry["dropin_path"],
+                    entry["dropin_body"],
+                    mode=0o644,
+                )
 
-        if any_unit_material_changed:
+        if (
+            transaction["daemon_reload_required"]
+            and not transaction["daemon_reload_completed"]
+        ):
             _run(["systemctl", "daemon-reload"])
+            transaction["daemon_reload_completed"] = True
+            _atomic_write_json(receipt_path, in_progress, mode=0o600)
 
         completed = set(restarted_services)
         for service in restart_services:
             if service in completed:
                 continue
+            if (
+                transaction["daemon_reload_required"]
+                and not transaction["daemon_reload_completed"]
+            ):
+                raise ReconcileError(
+                    "required daemon-reload is not durably complete before restart"
+                )
+            entry = desired_by_service[service]
+            if _bytes_differ(entry["dropin_path"], entry["dropin_body"]):
+                raise ReconcileError(
+                    f"controller drop-in drifted before restart: {service}"
+                )
+            if _bytes_differ(entry["env_path"], entry["env_body"]):
+                raise ReconcileError(
+                    f"controller environment drifted before restart: {service}"
+                )
             if service in enable_services and not _service_enabled(service):
                 _run(["systemctl", "enable", service])
             _run(["systemctl", "restart", service])
@@ -1183,6 +1244,8 @@ def apply_reconciliation(
         "controller_configuration_changed": transaction[
             "controller_configuration_change_planned"
         ],
+        "daemon_reload_required": transaction["daemon_reload_required"],
+        "daemon_reload_completed": transaction["daemon_reload_completed"],
         "active_controller_services": transaction[
             "active_controller_services"
         ],
