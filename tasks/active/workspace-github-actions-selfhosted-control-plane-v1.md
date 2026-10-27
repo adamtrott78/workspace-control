@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-On Lambda, from an exact clean checkout at immutable merge SHA a749982c29edc6f8cf09b82b62e11363aac9bcbd, run the reviewed installer exactly once via sudo with `--expected-head a749982c29edc6f8cf09b82b62e11363aac9bcbd`. Capture the complete stdout/stderr and exit code, especially the `P1_PREACTIVATION_DIAGNOSE_HOTFIX_RECEIPT=` line. Do not post another maintenance command yet. After the installer result is reviewed and accepted, the next gate is exactly one new owner `/workspace-ci-maintain diagnose workspace-control cpu` command.
+Post exactly one new owner comment on maintenance issue #527 with `/workspace-ci-maintain diagnose workspace-control cpu`. Record its immutable comment ID. Do not post any additional maintenance command. Then wait for the maintenance controller to consume that exact comment and capture its durable receipt/cursor evidence. The expected result is an observation-only successful diagnose for workspace-control cpu while workspace-control remains MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and no workflow/controller mutation occurs.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ On Lambda, from an exact clean checkout at immutable merge SHA a749982c29edc6f8c
 
 ## Blockers / gates
 
-- The independently accepted PR #544 DIAGNOSE_LANE correction and independently accepted PR #545 bounded installer are merged but the hotfix is not yet installed on Lambda.
-- Do not issue a second maintenance command until the exact live hotfix installer receipt is captured and reviewed.
-- Do not reconcile, activate workspace-control, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity before the live hotfix receipt proves preservation.
+- Live hotfix installation is complete and preservation-clean.
+- Exactly one new owner diagnose command is now authorized. Do not issue more than one new maintenance command.
+- Do not reconcile, activate workspace-control, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity until the new diagnose receipt is captured and reviewed.
 
 ## Fresh-chat initialization
 
