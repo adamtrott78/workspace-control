@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Fresh independent corrected-head activation-boundary re-review of PR #558 only. Consume blocking comment 6451020368. Verify BF-1 closure: the one-shot request carries exact reviewed restart/enable/preserve sets; root reconciliation derives its actual controller delta and fails closed before receipt/policy/controller mutation if any sibling env/drop-in drift widens the restart set; request identity is bound to the expected transaction. Verify BF-2 closure: dedicated workspace-ci-reconcile-controller-once.service is Type=oneshot, no Restart=, no [Install], exact ExecStart includes --once plus exact expected transaction arguments, and preserves the polling daemon's least-privilege systemd sandbox. Verify the source-bound boundary installer installs only updated root/controller plus the static one-shot unit, never starts automatic/one-shot reconciliation, preserves automatic-controller freeze/workspace-control dormancy/sibling snapshots, restarts only root reconciler non-propagating, and rolls back exact prior bytes/unit on failure. Regression-check activation policy, BF-1/BF-2/BF-3 reconciler semantics, successful-bootstrap provenance, CPU-only/concurrency limits, no P2/P3/capacity widening. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
+Fresh independent corrected-head P1 activation-boundary re-review of PR #558 only. Consume prior blocking reviews 6451020368 and 6451350758. Verify BF-3 closure specifically: rollback is armed before forward write #1; exceptions surfaced after replacement by write #1/#2/#3 all enter rollback; exact old root/controller bytes are restored; any newly installed one-shot unit is removed; root daemon reload/restart is bounded and non-propagating; automatic/workspace-control/sibling service snapshots are re-certified; rollback explicitly verifies restored bytes and absent unit before claiming success. Verify fault-injection regressions cover all three forward write boundaries after replacement. Regression-check BF-1 request-bound exact restart/enable/preserve semantics and BF-2 static sandbox-preserving one-shot unit/installer boundaries remain unchanged. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Fresh independent corrected-head activation-boundary re-review of PR #558 only. 
 
 ## Blockers / gates
 
-- PR #558 remains review-only and unmerged pending fresh independent corrected-head activation-boundary review of BF-1/BF-2 closure.
-- The new root/controller/one-shot boundary is validated in source but not yet installed on Lambda.
+- PR #558 remains review-only and unmerged pending fresh independent corrected-head activation-boundary review of BF-3 closure.
+- The corrected activation submission-boundary installer is validated in source but not installed on Lambda.
 - Do not merge PR #558, install the submission boundary, reconcile/activate workspace-control, start the automatic reconcile-controller, issue maintenance commands, restart/reset preserved project controllers, restart research-engine CPU, or widen P2/P3/capacity before corrected-head review returns NO_BLOCKING_FINDING.
 
 ## Fresh-chat initialization
