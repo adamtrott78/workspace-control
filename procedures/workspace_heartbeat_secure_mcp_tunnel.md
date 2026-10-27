@@ -53,3 +53,19 @@ Read-only operator output now verifies the following **current** runtime facts w
 - Login-shell `node --version` is `v12.22.9` and npm is `8.5.1`. This does **not** establish the running child Node version because the inspection accidentally selected launcher shell PID 1847969. Resolve `/proc/1847970/exe` and run that executable with `--version` before claiming Node runtime provenance.
 
 This evidence upgrades current local server/source/ngrok/rollback recovery from historical to live, but leaves two baseline items open: exact child Node executable/version and launcher ancestry. Payload bytes are still unmeasured.
+
+
+### Child runtime and launcher ancestry verified — operator evidence 2026-10-26
+
+A second read-only probe resolves the remaining Node/launcher ambiguity:
+
+- Actual Node child PID `1847970`.
+- Executable: `/home/atrott/miniforge3/envs/workspace-heartbeat-node/bin/node`.
+- Running version: **Node v20.20.2**.
+- CWD: `/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v047/plugins/workspace-heartbeat`.
+- Launch ancestry: systemd PID 1 -> tmux server PID 1847946 -> `conda run --no-capture-output -n workspace-heartbeat-node` PID 1847947 -> temporary bash launcher PID 1847952 -> `npm start` PID 1847956 -> `sh -c node server.js` PID 1847969 -> Node PID 1847970.
+- ngrok PID `1847986` is a sibling under the same tmux server and executes `/snap/ngrok/439/ngrok http --domain=kabob-retool-unstopped.ngrok-free.dev 8787`.
+- ngrok's CWD is unrelated (`.../varMax/PADataset`); its explicit command line, not CWD, defines the Heartbeat forwarding target.
+- The earlier login-shell Node v12.22.9 is irrelevant to the running service; runtime provenance is now exact.
+
+This closes the live runtime/source/Node/launcher recovery gate. No restart or mutation occurred.
