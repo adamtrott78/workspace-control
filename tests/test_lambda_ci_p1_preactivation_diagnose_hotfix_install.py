@@ -238,6 +238,15 @@ class PreactivationDiagnoseHotfixInstallTests(unittest.TestCase):
             with self.assertRaisesRegex(hotfix.HotfixError, "comment identity"):
                 hotfix.require_failed_receipt_and_cursor()
 
+    def test_reviewed_controller_unit_requires_root_service(self):
+        unit = (
+            ROOT / "systemd" / "workspace-ci-maintenance-controller.service"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "Requires=workspace-ci-maintenance.service",
+            unit.splitlines(),
+        )
+
     def test_restart_root_uses_ignore_dependencies_job_mode(self):
         calls = []
 
