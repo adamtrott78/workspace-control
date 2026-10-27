@@ -949,6 +949,14 @@ func TestRecoveryGenerationIsConsumedByFirstAcquiredJobAndClosedOnCompletion(t *
 	if err := s.consumeReadyForSingleRetry(attestation); err != nil {
 		t.Fatal(err)
 	}
+	if err := s.consumeReadyForSingleRetry(
+		controllerAttestation{
+			WorkflowRunID: 54321,
+			JobID:         "different-job",
+		},
+	); err == nil {
+		t.Fatal("second different job consumed an in-flight recovery generation")
+	}
 
 	completed := &scaleset.JobCompleted{
 		Result:     "Succeeded",
