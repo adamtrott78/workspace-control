@@ -319,7 +319,10 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
                     )
 
             self.assertEqual(fx["registry_path"].read_bytes(), before_registry)
-            self.assertFalse((fx["state_dir"] / "receipts").glob("*.json").__next__() if list((fx["state_dir"] / "receipts").glob("*.json")) else False)
+            self.assertEqual(
+                list((fx["state_dir"] / "receipts").glob("*.json")),
+                [],
+            )
             self.assertFalse(
                 any(call[:2] == ["systemctl", "restart"] for call in calls)
             )
