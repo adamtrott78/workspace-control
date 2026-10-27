@@ -46,6 +46,7 @@ EXPECTED_COMMENT_ID = 6438723476
 EXPECTED_COMMAND_SHA256 = (
     "93488cdfc9ed7e2b36de40db40a02d7ebcf55b8698eff6ad4ba861e7eb5e3a56"
 )
+WORKSPACE_CPU = "workspace-ci-controller@workspace-control-cpu.service"
 RESEARCH_CPU = "workspace-ci-controller@research-engine-cpu.service"
 HEALTHY_CONTROLLERS = [
     "workspace-ci-controller@research-engine-gpu.service",
@@ -223,6 +224,20 @@ def require_reconcile_controller_frozen() -> dict[str, str]:
         raise HotfixError(
             "automatic reconcile controller is not frozen: "
             f"{CONTROLLER_SERVICE}: {snap}"
+        )
+    return snap
+
+
+def require_workspace_controller_dormant() -> dict[str, str]:
+    snap = service_snapshot(WORKSPACE_CPU)
+    if (
+        snap["ActiveState"] != "inactive"
+        or snap["SubState"] != "dead"
+        or snap["MainPID"] != "0"
+    ):
+        raise HotfixError(
+            "workspace-control CPU controller is not dormant: "
+            f"{WORKSPACE_CPU}: {snap}"
         )
     return snap
 
@@ -449,6 +464,7 @@ def main() -> int:
     reconcile_controller_before = require_reconcile_controller_frozen()
     controller_requires = require_controller_dependency_graph()
     controllers_before = require_controller_baseline()
+    workspace_controller_before = require_workspace_controller_dormant()
     candidate_before = require_candidate_dormant()
     receipt_hash, cursor_hash = require_successful_diagnose_and_cursor()
     old_bytes = INSTALLED_SERVICE.read_bytes()
@@ -474,6 +490,11 @@ def main() -> int:
                 "reconcile controller dependency graph changed during hotfix"
             )
         controllers_after = require_controller_baseline()
+        workspace_controller_after = require_workspace_controller_dormant()
+        if workspace_controller_after != workspace_controller_before:
+            raise HotfixError(
+                "workspace-control CPU controller state/generation changed during hotfix"
+            )
         candidate_after = require_candidate_dormant()
         receipt_hash_after, cursor_hash_after = require_successful_diagnose_and_cursor()
         if receipt_hash_after != receipt_hash or cursor_hash_after != cursor_hash:
@@ -506,6 +527,8 @@ def main() -> int:
             "reconcile_controller_before": reconcile_controller_before,
             "reconcile_controller_after": reconcile_controller_after,
             "project_controllers": controllers_after,
+            "workspace_control_controller_before": workspace_controller_before,
+            "workspace_control_controller_after": workspace_controller_after,
             "workspace_control": candidate_after,
             "diagnose_receipt_sha256": receipt_hash_after,
             "cursor_canonical_sha256": cursor_hash_after,
@@ -537,6 +560,11 @@ def main() -> int:
                     )
                 if require_controller_baseline() != controllers_before:
                     raise HotfixError("rollback changed project controller state")
+                workspace_controller_rollback = require_workspace_controller_dormant()
+                if workspace_controller_rollback != workspace_controller_before:
+                    raise HotfixError(
+                        "rollback changed workspace-control CPU controller state/generation"
+                    )
                 if require_candidate_dormant() != candidate_before:
                     raise HotfixError(
                         "rollback changed workspace-control candidate state"
