@@ -640,3 +640,260 @@ func TestScaleSetMaintenanceInspectCannotSelectAnotherScaleSet(t *testing.T) {
 		t.Fatal("arbitrary scale-set maintenance operation accepted")
 	}
 }
+
+
+func zeroScaleSetStats() *scaleset.RunnerScaleSetStatistic {
+	return &scaleset.RunnerScaleSetStatistic{}
+}
+
+func TestResetPendingQuarantineSurvivesRecreatedScaleSetRestart(t *testing.T) {
+	dir := t.TempDir()
+	pendingPath := filepath.Join(
+		dir,
+		"reset-pending-aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee.json",
+	)
+	pending := laneResetPendingReceipt{
+		SchemaVersion:   1,
+		ReceiptID:       "11111111-2222-4333-8444-555555555555",
+		Status:          "RECOVERY_SCALESET_RESET_PENDING",
+		ProjectID:       "workspace-control",
+		Lane:            "cpu",
+		ScaleSetName:    "lambda-workspace-control",
+		ScaleSetID:      77,
+		OldScaleSetID:   77,
+		ResetGeneration: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+		ResetStartedAt:  time.Now().UTC().Format(time.RFC3339Nano),
+	}
+	if err := atomicWriteJSON(pendingPath, pending); err != nil {
+		t.Fatal(err)
+	}
+	s := &scaler{
+		scaleSetID:   88,
+		projectID:    "workspace-control",
+		lane:         "cpu",
+		scaleSetName: "lambda-workspace-control",
+		stateDir:     dir,
+	}
+	if err := s.loadQuarantine(); err != nil {
+		t.Fatal(err)
+	}
+	if !s.quarantined || !s.recoveryPending {
+		t.Fatalf("reset-pending quarantine did not survive restart: %#v", s)
+	}
+	if s.resetOldScaleSetID != 77 || s.scaleSetID != 88 {
+		t.Fatalf("old/new scale-set identity lost: %#v", s)
+	}
+}
+
+func TestResetPendingRejectsSameScaleSetIdentity(t *testing.T) {
+	dir := t.TempDir()
+	pendingPath := filepath.Join(
+		dir,
+		"reset-pending-aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee.json",
+	)
+	pending := laneResetPendingReceipt{
+		SchemaVersion:   1,
+		ReceiptID:       "11111111-2222-4333-8444-555555555555",
+		Status:          "RECOVERY_SCALESET_RESET_PENDING",
+		ProjectID:       "workspace-control",
+		Lane:            "cpu",
+		ScaleSetName:    "lambda-workspace-control",
+		ScaleSetID:      77,
+		OldScaleSetID:   77,
+		ResetGeneration: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+	}
+	if err := atomicWriteJSON(pendingPath, pending); err != nil {
+		t.Fatal(err)
+	}
+	s := &scaler{
+		scaleSetID:   77,
+		projectID:    "workspace-control",
+		lane:         "cpu",
+		scaleSetName: "lambda-workspace-control",
+		stateDir:     dir,
+	}
+	if err := s.loadQuarantine(); err == nil {
+		t.Fatal("reset pending accepted without a fresh scale-set id")
+	}
+}
+
+func TestResetPendingRequiresTwoSeparatedZeroObservations(t *testing.T) {
+	dir := t.TempDir()
+	pendingPath := filepath.Join(
+		dir,
+		"reset-pending-aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee.json",
+	)
+	if err := atomicWriteJSON(
+		pendingPath,
+		laneResetPendingReceipt{
+			SchemaVersion:   1,
+			ReceiptID:       "11111111-2222-4333-8444-555555555555",
+			Status:          "RECOVERY_SCALESET_RESET_PENDING",
+			ProjectID:       "workspace-control",
+			Lane:            "cpu",
+			ScaleSetName:    "lambda-workspace-control",
+			ScaleSetID:      77,
+			OldScaleSetID:   77,
+			ResetGeneration: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
+	s := &scaler{
+		active:             make(map[string]string),
+		scaleSetID:         88,
+		projectID:          "workspace-control",
+		lane:               "cpu",
+		scaleSetName:       "lambda-workspace-control",
+		stateDir:           dir,
+		pending:            make(map[string]pendingAdmissionJob),
+		quarantined:        true,
+		quarantineID:       "11111111-2222-4333-8444-555555555555",
+		recoveryPending:    true,
+		resetGeneration:    "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+		resetOldScaleSetID: 77,
+		resetPendingPath:   pendingPath,
+		logger:             slog.Default(),
+	}
+	msg := &scaleset.RunnerScaleSetMessage{Statistics: zeroScaleSetStats()}
+	ready, err := s.observeResetPending(msg, 0, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ready {
+		t.Fatal("first zero observation opened retry gate")
+	}
+	firstPath := s.recoveryZeroPath()
+	raw, err := os.ReadFile(firstPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var first recoveryZeroObservation
+	if err := json.Unmarshal(raw, &first); err != nil {
+		t.Fatal(err)
+	}
+	first.ObservedAt = time.Now().UTC().Add(-16 * time.Second).Format(time.RFC3339Nano)
+	if err := atomicWriteJSON(firstPath, first); err != nil {
+		t.Fatal(err)
+	}
+	ready, err = s.observeResetPending(msg, 0, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ready || s.quarantined || s.recoveryPending {
+		t.Fatalf("two separated zero observations did not open gate: ready=%v scaler=%#v", ready, s)
+	}
+	readyRaw, err := os.ReadFile(s.readyForSingleRetryPath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var receipt map[string]any
+	if err := json.Unmarshal(readyRaw, &receipt); err != nil {
+		t.Fatal(err)
+	}
+	if receipt["status"] != "READY_FOR_SINGLE_RETRY" {
+		t.Fatalf("ready receipt status mismatch: %#v", receipt)
+	}
+	if int(receipt["old_scale_set_id"].(float64)) != 77 ||
+		int(receipt["new_scale_set_id"].(float64)) != 88 {
+		t.Fatalf("ready receipt scale-set identity mismatch: %#v", receipt)
+	}
+	if receipt["automatic_workflow_triggered"] != false {
+		t.Fatalf("ready receipt unexpectedly claims workflow trigger: %#v", receipt)
+	}
+	if _, err := os.Stat(pendingPath); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("reset-pending state remained after ready proof: %v", err)
+	}
+}
+
+func TestResetPendingNonzeroStateInvalidatesFirstZeroObservation(t *testing.T) {
+	dir := t.TempDir()
+	pendingPath := filepath.Join(
+		dir,
+		"reset-pending-aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee.json",
+	)
+	s := &scaler{
+		scaleSetID:         88,
+		projectID:          "workspace-control",
+		lane:               "cpu",
+		scaleSetName:       "lambda-workspace-control",
+		stateDir:           dir,
+		quarantined:        true,
+		quarantineID:       "11111111-2222-4333-8444-555555555555",
+		recoveryPending:    true,
+		resetGeneration:    "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+		resetOldScaleSetID: 77,
+		resetPendingPath:   pendingPath,
+		logger:             slog.Default(),
+	}
+	if err := atomicWriteJSON(
+		s.recoveryZeroPath(),
+		recoveryZeroObservation{
+			SchemaVersion:   1,
+			ResetGeneration: s.resetGeneration,
+			ScaleSetID:      88,
+			ObservedAt:      time.Now().UTC().Add(-30 * time.Second).Format(time.RFC3339Nano),
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
+	stats := zeroScaleSetStats()
+	stats.TotalAssignedJobs = 1
+	ready, err := s.observeResetPending(
+		&scaleset.RunnerScaleSetMessage{Statistics: stats},
+		0,
+		0,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ready {
+		t.Fatal("nonzero reset-pending observation opened gate")
+	}
+	if _, err := os.Stat(s.recoveryZeroPath()); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("nonzero state did not invalidate first zero observation: %v", err)
+	}
+}
+
+func TestResetPendingRefusesAvailableWorkWithoutAttestationOrAcquire(t *testing.T) {
+	dir := t.TempDir()
+	attestor := &neverCalledAttestor{}
+	s := &scaler{
+		active:             make(map[string]string),
+		scaleSetID:         88,
+		projectID:          "workspace-control",
+		lane:               "cpu",
+		scaleSetName:       "lambda-workspace-control",
+		runnerPrefix:       "lambda-workspace-control-",
+		stateDir:           dir,
+		admissionV2:        true,
+		attestor:           attestor,
+		pending:            make(map[string]pendingAdmissionJob),
+		quarantined:        true,
+		quarantineID:       "11111111-2222-4333-8444-555555555555",
+		recoveryPending:    true,
+		resetGeneration:    "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+		resetOldScaleSetID: 77,
+		resetPendingPath:   filepath.Join(dir, "reset-pending-aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee.json"),
+		logger:             slog.Default(),
+	}
+	available := availableCPUJob()
+	if err := s.Scale(
+		context.Background(),
+		&scaleset.RunnerScaleSetMessage{
+			Statistics:           zeroScaleSetStats(),
+			JobAvailableMessages: []*scaleset.JobAvailable{available},
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
+	if attestor.calls != 0 {
+		t.Fatalf("reset-pending lane attested available work: %d", attestor.calls)
+	}
+	if len(s.pending) != 0 || len(s.active) != 0 {
+		t.Fatalf("reset-pending lane staged execution state: pending=%d active=%d", len(s.pending), len(s.active))
+	}
+	if !s.quarantined || !s.recoveryPending {
+		t.Fatal("available work escaped reset-pending quarantine")
+	}
+}
