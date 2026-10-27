@@ -23,28 +23,26 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-heartbeat-secure-mcp-tunnel-v1
-- Remote checkpoint: 95b8181aef3adda9a8c7ee52b694cd3096e8d826
+- Remote branch: workspace-heartbeat-secure-mcp-tunnel-v1-current-main
+- Remote checkpoint: 7c63e518d470b4edf264406a2258d12394b950a4
 - Remote verified: true
 
 ## Next safe action
 
-Start from workspace-control main and the existing workspace-heartbeat-executor-liveness-v1 capsule. Recover exact live Heartbeat runtime/launcher provenance on Lambda without restarting it solely for discovery. Map the traffic paths: distinguish heartbeat_touch model tool calls from the approximately one-second live-card/app snapshot poll and any other requests to the public ngrok endpoint. Measure or tightly bound bytes/request and estimate monthly traffic before attributing the 1.02 GB incident. In parallel, verify the current official OpenAI Secure MCP Tunnel setup and limits. Then freeze a bounded outbound-only migration plan that preserves the one-second executor/card freshness UX and existing Heartbeat semantics. Do not touch GitRunner, automatic takeover, or unrelated workspace-control authority. Do not expose a new public Lambda endpoint.
+Validate the exact v0.4.8 candidate restaged from current main on branch workspace-heartbeat-secure-mcp-tunnel-v1-current-main. Run the existing Workspace Heartbeat Node tests and workspace-control validation, then run an isolated :8788 post-change byte benchmark proving routine no-change heartbeat_poll responses are bounded and do not retransmit turn_history. Do not modify live :8787, reduce polling cadence, enable automatic takeover, expose Lambda publicly, or retire ngrok before isolated and live Secure MCP Tunnel acceptance.
 
 ## Remaining work
 
-- Recover the exact current live Heartbeat runtime source SHA, Node/package version, launcher, localhost MCP endpoint, ngrok startup path, and rollback artifacts on Lambda.
-- Trace the one-second card/server polling path and distinguish it from heartbeat_touch/model tool calls; measure or bound bytes per request/response and estimate monthly transfer.
-- Inspect current official OpenAI Secure MCP Tunnel setup, authentication, supported custom-MCP path, request/payload/session limits, and operational requirements.
-- Freeze an outbound-only migration and rollback design that preserves one-second freshness and accepted liveness semantics.
-- Implement only the minimal payload/transport changes justified by measurement; keep historical/task-wide data off the high-frequency poll path.
-- Run existing Heartbeat test suite plus workspace-control validation and isolated Lambda startup/transport tests.
-- Perform live ChatGPT acceptance through Secure MCP Tunnel, including executor/card/semantic signal separation and one-second freshness.
-- Retire ngrok from the normal Heartbeat path only after the Secure MCP Tunnel path is accepted; document rollback/emergency fallback.
+- Validate the exact restaged v0.4.8 candidate with the Workspace Heartbeat Node test suite and workspace-control PR validation.
+- Run the candidate on isolated Lambda :8788 and measure no-change, one-delta, resync, and 50-history routine heartbeat_poll response sizes while confirming live :8787 remains unchanged.
+- Configure and validate an isolated outbound-only OpenAI Secure MCP Tunnel profile without exposing a new public Lambda endpoint.
+- Perform live ChatGPT acceptance through Secure MCP Tunnel for model tools, app resource delivery, heartbeat_poll freshness, executor/semantic/card separation, and five/six-entry UI behavior.
+- Only after acceptance, replace ngrok in the normal launcher path while preserving an operator-understandable rollback/emergency fallback and synchronize final task state.
 
 ## Blockers / gates
 
-- None.
+- Exact v0.4.8 Node test suite, workspace-control validation, and isolated post-change payload benchmark are not yet complete; do not deploy the candidate to live :8787.
+- Secure MCP Tunnel tunnel/workspace association, runtime authorization, embedded app resource delivery, app-only heartbeat_poll behavior, and live ChatGPT acceptance remain unverified; do not retire ngrok yet.
 
 ## Fresh-chat initialization
 
