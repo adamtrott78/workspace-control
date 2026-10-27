@@ -297,3 +297,31 @@ The separate full-history card visible during acceptance was caused by the assis
 - app-only `heartbeat_poll` delta refresh.
 
 This completes Secure MCP Tunnel isolated + live ChatGPT acceptance. Production cutover remains a separate gate.
+
+
+## Production Secure MCP Tunnel cutover — PASS / task complete
+
+Production cutover executed successfully after the temporary acceptance daemon was stopped.
+
+Final normal-path receipt:
+- Heartbeat PID: `2083522`
+- runtime: `/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v048/plugins/workspace-heartbeat`
+- exact source SHA: `def7c5fe6498b1bd742d912c1490d1f7160cab5f`
+- tunnel-client PID: `2083588`
+- tunnel health: `http://127.0.0.1:41247`
+- rollback helper: `/home/atrott/bin/heartbeat-rollback-v047-ngrok`
+- local cutover marker: `WORKSPACE_HEARTBEAT_V048_TUNNEL_CUTOVER_LOCAL_GATE=PASS`
+
+A fresh post-cutover ChatGPT `heartbeat_begin_turn` succeeded through the tunnel-backed plugin and rendered the compact live card; a subsequent `heartbeat_update` succeeded on the same new turn. This proves the normal production path is now ChatGPT -> OpenAI Secure MCP Tunnel -> exact v0.4.8 Lambda runtime.
+
+### Normal operation and privacy boundary
+
+Routine Heartbeat calls send only the explicit tool arguments required by the Heartbeat interface plus MCP/session metadata. The model-facing schemas do not expose a full-chat-transcript argument. The app-only `heartbeat_poll` path accepts only `task_id`, `turn_id`, and `after_sequence` and returns only bounded liveness/delta state.
+
+Do **not** invoke `heartbeat_get` merely to monitor routine progress. It is an explicit task-history/sidebar diagnostic and renders a separate full-history panel. Normal live operation is `heartbeat_begin_turn` once per substantial response, semantic-only `heartbeat_update`, silent `heartbeat_touch`, and app-only `heartbeat_poll` delta refresh.
+
+### Rollback policy
+
+Ngrok is retired from the normal launcher path. The accepted v0.4.7/ngrok launcher is retained only as an explicit emergency rollback. Invoke `/home/atrott/bin/heartbeat-rollback-v047-ngrok` only for a real Secure MCP Tunnel production regression; it is not a parallel or routine fallback transport.
+
+Task acceptance is complete.
