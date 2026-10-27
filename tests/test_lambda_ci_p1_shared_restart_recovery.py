@@ -81,9 +81,20 @@ class P1SharedRestartRecoveryTests(unittest.TestCase):
         )
         with mock.patch.object(
             module, "service_snapshot", side_effect=snapshots
-        ), mock.patch.object(module, "run", return_value=completed) as run_call:
+        ), mock.patch.object(
+            module.time, "sleep"
+        ) as sleep, mock.patch.object(
+            module, "run", return_value=completed
+        ) as run_call:
             module._restore_dependency_stopped_preserved_controllers(preserved)
 
+        self.assertEqual(
+            sleep.call_args_list,
+            [
+                mock.call(module.PRESERVED_CONTROLLER_START_STABILITY_SECONDS)
+                for _ in module.REQUIRED_ACTIVE_CONTROLLERS
+            ],
+        )
         starts = [call.args[0] for call in run_call.call_args_list]
         self.assertEqual(
             starts,
@@ -144,16 +155,28 @@ class P1SharedRestartRecoveryTests(unittest.TestCase):
         )
         self.assertLess(restore, verify)
 
-    def test_forward_restores_dependency_stopped_controllers_after_shared_restart(self):
+    def test_forward_defers_controller_restore_until_l0_is_ready(self):
         raw = BOOTSTRAP.read_text(encoding="utf-8")
         restart = raw.index('run(["systemctl", "restart", PROVISIONER])')
+        maintenance_start = raw.index(
+            'run(["systemctl", "enable", "--now", MAINTENANCE_ROOT])',
+            restart,
+        )
+        socket_wait = raw.index("wait_for_socket_ready(", maintenance_start)
+        maintenance_controller_gate = raw.index(
+            'if not service_active(MAINTENANCE_CONTROLLER):',
+            socket_wait,
+        )
         restore = raw.index(
             "_restore_dependency_stopped_preserved_controllers(\n"
             '            manifest["preserved_services"]\n'
             "        )",
-            restart,
+            maintenance_controller_gate,
         )
-        self.assertLess(restart, restore)
+        self.assertLess(restart, maintenance_start)
+        self.assertLess(maintenance_start, socket_wait)
+        self.assertLess(socket_wait, maintenance_controller_gate)
+        self.assertLess(maintenance_controller_gate, restore)
 
     def test_incident_recovery_source_binding_rejects_external_copy(self):
         module = load(RECOVERY, "recovery_source_binding")
