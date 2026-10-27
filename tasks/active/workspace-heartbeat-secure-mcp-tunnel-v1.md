@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-Operator: confirm whether the currently rendered tunnel-backed Heartbeat card shows the expected five-entry fixed-height boundary and, after sequence 6, remains at the same height with scrollable history/newest entry visible. If PASS, record live UI acceptance, then design and validate the production cutover: install v0.4.8 runtime, replace ngrok with supervised tunnel-client in the normal launcher using a non-interactive restricted secret reference, preserve rollback to v0.4.7/ngrok, and only then retire ngrok from the normal path.
+Freeze and implement the production cutover design without changing live Lambda yet: inspect the existing heartbeat-up/heartbeat-down operational contract and workspace-control references; define a v0.4.8 runtime install path, tunnel-client profile using file: secret reference outside Git with mode 0600, supervised launcher behavior, health/readiness gates, and explicit rollback to the accepted v0.4.7/ngrok path. Preserve the normal-operation rule that heartbeat_get is not used for routine live monitoring.
 
 ## Remaining work
 
@@ -40,9 +40,9 @@ Operator: confirm whether the currently rendered tunnel-backed Heartbeat card sh
 
 ## Blockers / gates
 
-- Visual five-entry intrinsic height and sixth-entry scroll behavior still requires operator confirmation from the rendered ChatGPT card; the assistant cannot inspect rendered card dimensions/scroll state.
-- Live tunnel daemon is still an isolated foreground acceptance process, not the normal production launcher.
-- Ngrok remains in the production v0.4.7 launcher and must not be retired until visual UI acceptance and durable cutover/rollback design are complete.
+- Production still runs accepted v0.4.7 on :8787 under the existing heartbeat-up launcher with ngrok as sibling transport.
+- A production-safe v0.4.8 runtime, supervised tunnel-client launch path, restricted non-interactive secret reference, and rollback procedure must be implemented and validated before ngrok can leave the normal path.
+- The temporary tunnel-backed acceptance plugin should remain available until the production cutover is proven.
 
 ## Fresh-chat initialization
 
