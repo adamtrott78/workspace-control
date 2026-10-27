@@ -680,6 +680,9 @@ def apply_reconciliation(
     projects_dir: pathlib.Path,
     controllers_dir: pathlib.Path,
     state_dir: pathlib.Path,
+    controller_state_root: pathlib.Path = pathlib.Path(
+        "/var/lib/workspace-ci/controller/state"
+    ),
 ) -> dict[str, Any]:
     request = validated["request"]
     request_id = str(request["request_id"])
@@ -794,7 +797,6 @@ def apply_reconciliation(
         os.chmod(controllers_dir, 0o755)
         controller_user = pwd.getpwnam("ci-controller")
         controller_group = grp.getgrnam("workspace-ci-controller")
-        controller_state_root = pathlib.Path("/var/lib/workspace-ci/controller/state")
         controller_state_root.mkdir(parents=True, exist_ok=True)
         os.chown(
             controller_state_root,
