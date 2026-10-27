@@ -316,11 +316,52 @@ def main() -> int:
         print("ERROR=RUN_VIA_SUDO_FROM_OPERATOR_ACCOUNT", file=sys.stderr)
         return 70
 
+    executing_helper = pathlib.Path(__file__).resolve()
+    helper_relative = pathlib.Path(
+        "scripts/lambda_ci_p1_quiesce_restart_storm.py"
+    )
+    try:
+        repo = executing_helper.parents[1]
+    except IndexError as exc:
+        raise QuiesceError(
+            "executing helper is not inside the reviewed repository layout"
+        ) from exc
+    expected_helper = (repo / helper_relative).resolve()
+    if executing_helper != expected_helper:
+        raise QuiesceError(
+            "executing helper is outside the reviewed tracked helper path: "
+            f"actual={executing_helper} expected={expected_helper}"
+        )
+
     repo_proc = run(
-        ["git", "rev-parse", "--show-toplevel"],
+        ["git", "-C", str(repo), "rev-parse", "--show-toplevel"],
         user=invoker,
     )
-    repo = pathlib.Path(repo_proc.stdout.strip()).resolve()
+    git_toplevel = pathlib.Path(repo_proc.stdout.strip()).resolve()
+    if git_toplevel != repo:
+        raise QuiesceError(
+            "executing helper repository root mismatch: "
+            f"derived={repo} git={git_toplevel}"
+        )
+
+    tracked_helper = run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "ls-files",
+            "--error-unmatch",
+            "--",
+            helper_relative.as_posix(),
+        ],
+        check=False,
+        user=invoker,
+    )
+    if tracked_helper.returncode != 0:
+        raise QuiesceError(
+            "executing helper is not tracked at the reviewed helper path"
+        )
+
     head = run(
         ["git", "-C", str(repo), "rev-parse", "HEAD"],
         user=invoker,
