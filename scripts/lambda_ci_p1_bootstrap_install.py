@@ -552,6 +552,32 @@ def _restore_service_state(service: str, prior: dict[str, str]) -> None:
         )
 
 
+def assert_research_cpu_preserved_baseline(
+    expected: dict[str, str],
+    preserved: dict[str, dict[str, str]],
+) -> None:
+    snap = preserved.get(RESEARCH_CPU)
+    if snap is None:
+        raise BootstrapError(
+            "research-engine CPU missing from preserved-service snapshot"
+        )
+    if not _research_cpu_recovered_predicate(snap):
+        raise BootstrapError(
+            "research-engine CPU no longer satisfies recovered predicate at "
+            "pre-mutation backup boundary: "
+            + json.dumps(snap, sort_keys=True)
+        )
+    if snap.get("NRestarts") != expected.get("NRestarts"):
+        raise BootstrapError(
+            "research-engine CPU restart count changed after stability check "
+            "but before mutation: "
+            + json.dumps(
+                {"expected": expected, "backup_snapshot": snap},
+                sort_keys=True,
+            )
+        )
+
+
 def _verify_preserved_services(
     preserved: dict[str, dict[str, str]],
 ) -> None:
@@ -723,6 +749,17 @@ def main() -> int:
     backup = out / "rollback"
     out.mkdir(parents=True, mode=0o700)
     manifest = backup_targets(backup)
+
+    # Close the gap between the completed six-second recovered-state check and
+    # the first mutation. The backup snapshot must still match the reviewed
+    # recovered baseline, and every preserved controller is re-read live at the
+    # mutation boundary. Any restart/failure here aborts before systemctl stop.
+    assert_research_cpu_preserved_baseline(
+        research_cpu_pre,
+        manifest["preserved_services"],
+    )
+    _verify_preserved_services(manifest["preserved_services"])
+
     rollback_armed = False
 
     try:
