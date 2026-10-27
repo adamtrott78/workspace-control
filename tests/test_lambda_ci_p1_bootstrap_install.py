@@ -16,6 +16,39 @@ def load_module():
 
 
 class P1BootstrapInstallerTests(unittest.TestCase):
+    def test_runuser_is_absolute_and_independent_of_narrow_child_path(self):
+        module = load_module()
+        self.assertEqual(module.RUNUSER_BIN, pathlib.Path("/usr/sbin/runuser"))
+
+        completed = mock.Mock()
+        completed.returncode = 0
+        completed.stdout = ""
+        completed.stderr = ""
+        with mock.patch.object(module.RUNUSER_BIN, "is_file", return_value=True), mock.patch.object(
+            module.subprocess, "run", return_value=completed
+        ) as proc:
+            module.run(
+                ["/opt/workspace-ci/go/1.26.3/bin/go", "version"],
+                user="ci-controller",
+                env={"PATH": "/opt/workspace-ci/go/1.26.3/bin:/usr/bin:/bin"},
+            )
+
+        command = proc.call_args.args[0]
+        self.assertEqual(command[0], "/usr/sbin/runuser")
+        self.assertEqual(command[1:4], ["-u", "ci-controller", "--"])
+
+    def test_missing_absolute_runuser_fails_before_subprocess(self):
+        module = load_module()
+        with mock.patch.object(module.RUNUSER_BIN, "is_file", return_value=False), mock.patch.object(
+            module.subprocess, "run"
+        ) as proc:
+            with self.assertRaisesRegex(
+                module.BootstrapError,
+                "required runuser binary is missing",
+            ):
+                module.run(["true"], user="ci-controller")
+        proc.assert_not_called()
+
     def test_bootstrap_is_bound_to_exact_preflight_and_maintenance_issue(self):
         module = load_module()
         self.assertEqual(module.MAINTENANCE_ISSUE_NUMBER, 527)
