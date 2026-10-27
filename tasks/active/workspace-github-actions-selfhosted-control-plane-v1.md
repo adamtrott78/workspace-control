@@ -36,22 +36,22 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-From Lambda, perform exactly one corrected P1 bootstrap retry from a detached exact checkout of reviewed executable checkpoint 9b402da8c0158be477ac00944b5c164ddef81193 using `sudo python3 scripts/lambda_ci_p1_bootstrap_install.py --expected-head 9b402da8c0158be477ac00944b5c164ddef81193`. Before mutation, the installer must prove research-engine CPU exactly loaded+enabled+inactive/dead+ExecMainStatus=1+NRestarts=12411 and the three non-CPU controllers healthy active/running status 0 NRestarts 0. The corrected installer must wait for the maintenance socket readiness gate, defer non-CPU controller restoration until L0 commissioning gates pass, and keep workspace-control dormant. Return the complete bootstrap output/receipt before any GitHub -> L0 diagnose, reconciliation, workspace-control activation, or research-engine CPU restart.
+Post exactly one owner-authored maintenance comment on workspace-control issue #527 with the single-line body `/workspace-ci-maintain diagnose workspace-control cpu`. Record the immutable comment ID. Then perform only read-only inspection of `/var/lib/workspace-ci/maintenance-controller/receipts/<comment_id>.json` after the controller poll to prove status COMPLETED, exact identity/source attestation, operation DIAGNOSE_LANE, installed policy digests, and bounded diagnosis result. Do not post a second maintenance command and do not reconcile, activate workspace-control, restart/reset any controller, or restart research-engine CPU before that receipt is durably accepted.
 
 ## Remaining work
 
-- Retry the corrected rollback-safe P1 bootstrap exactly once from reviewed merge 9b402da8c0158be477ac00944b5c164ddef81193; preserve the three healthy non-CPU controllers and keep research-engine CPU unchanged and workspace-control dormant.
-- After bootstrap PASS, issue exactly one real owner GitHub -> L0 maintenance DIAGNOSE_LANE command on issue #527 and prove the durable accepted receipt before workspace-control activation.
-- Activate workspace-control only as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1; keep automatic pull_request/push admission disabled.
+- Post exactly one owner-authored `/workspace-ci-maintain diagnose workspace-control cpu` comment on maintenance issue #527 and capture its immutable GitHub comment ID.
+- After the maintenance controller polls it, read only the corresponding `/var/lib/workspace-ci/maintenance-controller/receipts/<comment_id>.json` durable receipt and any bounded root diagnosis fields needed to prove DIAGNOSE_LANE acceptance; do not issue a second command.
+- Only after the diagnostic receipt is accepted, independently gate workspace-control activation as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1; keep automatic pull_request/push admission disabled.
 - Validate live P1 filesystem isolation, CPU/RAM/runtime envelope, GPU0, exact candidate provenance, deterministic receipts, maintenance authorization/replay behavior, and clean teardown/rollback.
 - After live P1 acceptance, continue the separately gated work to remove routine GitHub-hosted Actions minutes; do not remove the last bootstrap path in the same change.
 - Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, resource-aware concurrency widening, and unrelated transport cleanup unauthorized.
 
 ## Blockers / gates
 
-- Live rollback-failed controller recovery from reviewed merge 9b402da8c0158be477ac00944b5c164ddef81193 succeeded. research-engine GPU, PADataset CPU, and PADataset GPU are active/running with ExecMainStatus=0 and NRestarts=0; research-engine CPU remains intentionally quiesced and unchanged at inactive/dead, ExecMainStatus=1, NRestarts=12411.
-- The next gate is one corrected P1 bootstrap retry from exact reviewed executable checkpoint 9b402da8c0158be477ac00944b5c164ddef81193 with --expected-head set to the same SHA. Full bootstrap output/receipt must be inspected before any L0 diagnose or workspace-control activation.
-- workspace-control activation remains separately blocked until corrected bootstrap PASS and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
+- Corrected P1 bootstrap from reviewed executable checkpoint 9b402da8c0158be477ac00944b5c164ddef81193 succeeded with decision PASS. L0 maintenance root/controller are commissioned and active; no maintenance command has yet been executed.
+- The next gate is exactly one owner-authored `/workspace-ci-maintain diagnose workspace-control cpu` comment on maintenance issue #527, followed by read-only proof of the durable local maintenance-controller receipt and bounded root DIAGNOSE_LANE result.
+- workspace-control activation remains blocked until that exact GitHub -> L0 diagnostic command completes with an accepted durable receipt. No reconciliation, activation, restart, reset-stale, P2/P3, or capacity widening is authorized.
 
 ## Fresh-chat initialization
 
