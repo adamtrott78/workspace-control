@@ -67,6 +67,7 @@ Follow the capsule's next_safe_action.
 - Official Secure MCP Tunnel defaults verified: outbound HTTPS; 600 MCP requests/minute, 10 MiB serialized envelope, 120-second deadline, 1,000 queued. Embedded live-card app behavior over that transport remains unproven.
 - Heartbeat `begin_turn` attempt failed HTTP 403 at ngrok-free.dev. No new turn ID, host restart, or network cutover.
 - Fresh operator inspection at 2026-10-26T21:49:27-04:00 verifies local Heartbeat HTTP 200 on 127.0.0.1:8787, `node server.js` child PID 1847970, ngrok PID 1847986 forwarding the fixed ngrok-free.dev domain to 8787, runtime CWD `workspace-heartbeat-runtime-v047/plugins/workspace-heartbeat`, exact checkout `9e5858738a4fd11801510e2839b0f94f19541506`, package v0.4.7, and v0.4.6 rollback directory presence.
-- Login-shell Node is v12.22.9, but the prior probe captured launcher shell PID 1847969 rather than the Node child. Exact child executable/version and launcher ancestry remain to verify.
+- Actual child PID 1847970 uses `/home/atrott/miniforge3/envs/workspace-heartbeat-node/bin/node` and reports Node v20.20.2. The login-shell Node v12.22.9 is unrelated to the running service.
+- Launcher ancestry is systemd -> tmux `workspace-heartbeat` -> `conda run -n workspace-heartbeat-node` -> bash -> `npm start` -> shell -> `node server.js`; ngrok is a sibling process under the same tmux server.
 - See `procedures/workspace_heartbeat_secure_mcp_tunnel.md` for the current evidence and isolated acceptance plan.
 - Next action: resolve child Node/launcher, then isolated payload measurement; no live :8787 restart or tunnel cutover.
