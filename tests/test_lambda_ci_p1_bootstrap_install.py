@@ -16,6 +16,27 @@ def load_module():
 
 
 class P1BootstrapInstallerTests(unittest.TestCase):
+    def test_user_switch_uses_absolute_runuser_with_sanitized_path(self):
+        module = load_module()
+        completed = module.subprocess.CompletedProcess(
+            args=[], returncode=0, stdout="", stderr=""
+        )
+        with mock.patch.object(
+            module.subprocess, "run", return_value=completed
+        ) as subprocess_run:
+            module.run(
+                ["echo", "ok"],
+                user="ci-controller",
+                env={"PATH": "/usr/bin:/bin"},
+            )
+
+        command = subprocess_run.call_args.args[0]
+        self.assertEqual(command[0], "/usr/sbin/runuser")
+        self.assertEqual(
+            command,
+            ["/usr/sbin/runuser", "-u", "ci-controller", "--", "echo", "ok"],
+        )
+
     def test_bootstrap_is_bound_to_exact_preflight_and_maintenance_issue(self):
         module = load_module()
         self.assertEqual(module.MAINTENANCE_ISSUE_NUMBER, 527)
