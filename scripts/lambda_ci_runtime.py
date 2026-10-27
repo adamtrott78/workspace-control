@@ -124,7 +124,7 @@ def execution_semantics(spec: dict[str, Any]) -> dict[str, Any]:
             }
 
     profile = semantics.get("execution_profile")
-    if profile not in {"cpu-test", "gpu-small", "gpu-heavy"}:
+    if profile not in {"control-small", "cpu-test", "gpu-small", "gpu-heavy"}:
         raise RuntimeLaunchError("execution contract profile is unsupported")
     gpu_count = semantics.get("gpu_count")
     if not isinstance(gpu_count, int) or gpu_count < 0 or gpu_count > 2:
