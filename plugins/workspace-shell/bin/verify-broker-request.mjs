@@ -92,21 +92,97 @@ function validateJsonSchema(value, schema, field = "parameters") {
 }
 
 function hardenedGit(sourceRoot, args) {
-  return execFileSync("/usr/bin/git", ["-C", sourceRoot, ...args], {
-    encoding: "utf8",
-    timeout: 3000,
-    maxBuffer: 65536,
-    env: {
-      PATH: "/usr/bin:/bin",
-      LANG: "C.UTF-8",
-      LC_ALL: "C.UTF-8",
-      GIT_CONFIG_NOSYSTEM: "1",
-      GIT_CONFIG_GLOBAL: "/dev/null",
-      GIT_OPTIONAL_LOCKS: "0",
+  return execFileSync(
+    "/usr/bin/git",
+    [
+      "-C",
+      sourceRoot,
+      "-c",
+      "core.hooksPath=/dev/null",
+      "-c",
+      "core.fsmonitor=false",
+      "-c",
+      "diff.external=",
+      "-c",
+      "credential.helper=",
+      ...args,
+    ],
+    {
+      encoding: "utf8",
+      timeout: 3000,
+      maxBuffer: 65536,
+      env: {
+        PATH: "/usr/bin:/bin",
+        LANG: "C.UTF-8",
+        LC_ALL: "C.UTF-8",
+        GIT_CONFIG_NOSYSTEM: "1",
+        GIT_CONFIG_GLOBAL: "/dev/null",
+        GIT_OPTIONAL_LOCKS: "0",
+        GIT_TERMINAL_PROMPT: "0",
+      },
     },
-  }).trim();
+  ).trim();
 }
 
+function validateHelperConfinement(helper) {
+  const confinement = helper.confinement ?? {
+    capabilities: [],
+    read_write_paths: [],
+    network: "deny",
+  };
+  if (!Array.isArray(confinement.capabilities) || confinement.capabilities.length > 16) {
+    fail("HELPER_CONFINEMENT_INVALID", "capabilities must be a bounded array");
+  }
+  for (const capability of confinement.capabilities) {
+    if (typeof capability !== "string" || !/^CAP_[A-Z0-9_]+$/.test(capability)) {
+      fail("HELPER_CONFINEMENT_INVALID", "invalid Linux capability name");
+    }
+  }
+
+  if (!Array.isArray(confinement.read_write_paths) || confinement.read_write_paths.length > 16) {
+    fail("HELPER_CONFINEMENT_INVALID", "read_write_paths must be a bounded array");
+  }
+  const forbidden = [
+    "/",
+    "/root",
+    "/home/atrott/.ssh",
+    "/home/atrott/.config/gh",
+    "/home/atrott/.config/openai",
+    "/home/atrott/.config/workspace-heartbeat",
+    "/home/atrott/.config/workspace-shell",
+    "/etc/workspace-shell",
+    "/run/workspace-shell-control",
+    "/var/lib/workspace-shell/receipts",
+    "/var/lib/workspace-shell/helper-cache",
+    "/var/lib/workspace-shell/replay",
+  ];
+  for (const item of confinement.read_write_paths) {
+    if (
+      typeof item !== "string" ||
+      !path.isAbsolute(item) ||
+      item.includes("\0") ||
+      /\s/.test(item)
+    ) {
+      fail("HELPER_CONFINEMENT_INVALID", "read_write_paths entries must be absolute paths without whitespace");
+    }
+    const normalized = path.posix.normalize(item);
+    if (
+      forbidden.some((prefix) =>
+        normalized === prefix || normalized.startsWith(prefix + "/")
+      )
+    ) {
+      fail("HELPER_CONFINEMENT_INVALID", `helper write scope includes protected path ${normalized}`);
+    }
+  }
+  if (!["deny", "host-reviewed"].includes(confinement.network)) {
+    fail("HELPER_CONFINEMENT_INVALID", "network must be deny or host-reviewed");
+  }
+  return {
+    capabilities: [...confinement.capabilities],
+    read_write_paths: [...confinement.read_write_paths],
+    network: confinement.network,
+  };
+}
 function main() {
   if (process.argv.length !== 3) fail("USAGE", "expected broker config path");
   const configPath = process.argv[2];
@@ -230,9 +306,12 @@ function main() {
   assertExact(payload.expected_source_commit, observedCommit, "observed source commit");
   assertExact(payload.expected_source_tree, observedTree, "observed source tree");
 
-  const helperPath = path.resolve(sourceRoot, helper.relative_path);
-  const sourcePrefix = sourceRoot.endsWith(path.sep) ? sourceRoot : sourceRoot + path.sep;
-  if (!helperPath.startsWith(sourcePrefix)) fail("HELPER_PATH_ESCAPE", "registered helper escaped source root");
+  const sourceReal = realpathSync(sourceRoot);
+  const helperPath = realpathSync(path.resolve(sourceReal, helper.relative_path));
+  const sourcePrefix = sourceReal.endsWith(path.sep) ? sourceReal : sourceReal + path.sep;
+  if (!helperPath.startsWith(sourcePrefix)) {
+    fail("HELPER_PATH_ESCAPE", "registered helper escaped source root through path or symlink traversal");
+  }
   const helperBytes = readFileSync(helperPath);
   assertExact(sha256Hex(helperBytes), helper.sha256, "helper binary digest");
 
@@ -256,6 +335,7 @@ function main() {
     design_review_record_id: payload.design_review_record_id,
     helper_review_record_id: payload.helper_review_record_id,
     parameter_digest_sha256: payload.parameter_digest_sha256,
+    confinement: validateHelperConfinement(helper),
   };
   process.stdout.write(JSON.stringify(result));
 }
