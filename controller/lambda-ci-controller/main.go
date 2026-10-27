@@ -148,6 +148,26 @@ type laneQuarantineReceipt struct {
 	ObservedAt           string `json:"observed_at"`
 }
 
+type laneResetPendingReceipt struct {
+	SchemaVersion   int    `json:"schema_version"`
+	ReceiptID       string `json:"receipt_id"`
+	Status          string `json:"status"`
+	ProjectID       string `json:"project_id"`
+	Lane            string `json:"lane"`
+	ScaleSetName    string `json:"scale_set_name"`
+	ScaleSetID      int    `json:"scale_set_id"`
+	OldScaleSetID   int    `json:"old_scale_set_id"`
+	ResetGeneration string `json:"reset_generation"`
+	ResetStartedAt  string `json:"reset_started_at"`
+}
+
+type recoveryZeroObservation struct {
+	SchemaVersion   int    `json:"schema_version"`
+	ResetGeneration string `json:"reset_generation"`
+	ScaleSetID      int    `json:"scale_set_id"`
+	ObservedAt      string `json:"observed_at"`
+}
+
 type scaler struct {
 	mu              sync.Mutex
 	active          map[string]string
@@ -163,10 +183,14 @@ type scaler struct {
 	stateDir        string
 	admissionV2     bool
 	attestor        jobAttestor
-	pending         map[string]pendingAdmissionJob
-	quarantined     bool
-	quarantineID    string
-	logger          *slog.Logger
+	pending             map[string]pendingAdmissionJob
+	quarantined         bool
+	quarantineID        string
+	recoveryPending     bool
+	resetGeneration     string
+	resetOldScaleSetID  int
+	resetPendingPath    string
+	logger              *slog.Logger
 }
 
 func envOr(key, fallback string) string {
@@ -672,28 +696,70 @@ func (s *scaler) quarantinePath() string {
 
 func (s *scaler) loadQuarantine() error {
 	raw, err := os.ReadFile(s.quarantinePath())
-	if errors.Is(err, os.ErrNotExist) {
+	if err == nil {
+		var receipt laneQuarantineReceipt
+		if err := json.Unmarshal(raw, &receipt); err != nil {
+			return fmt.Errorf("parse controller quarantine: %w", err)
+		}
+		if receipt.SchemaVersion != 1 ||
+			receipt.Status != "ASSIGNMENT_DIVERGENCE_QUARANTINED" ||
+			receipt.ProjectID != s.projectID ||
+			receipt.Lane != s.lane ||
+			receipt.ScaleSetName != s.scaleSetName ||
+			receipt.ScaleSetID != s.scaleSetID ||
+			receipt.ReceiptID == "" {
+			return fmt.Errorf("controller quarantine identity mismatch")
+		}
+		s.mu.Lock()
+		s.quarantined = true
+		s.quarantineID = receipt.ReceiptID
+		s.mu.Unlock()
 		return nil
 	}
-	if err != nil {
+	if !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("read controller quarantine: %w", err)
 	}
-	var receipt laneQuarantineReceipt
-	if err := json.Unmarshal(raw, &receipt); err != nil {
-		return fmt.Errorf("parse controller quarantine: %w", err)
+
+	pendingPaths, err := filepath.Glob(filepath.Join(s.stateDir, "reset-pending-*.json"))
+	if err != nil {
+		return fmt.Errorf("glob reset-pending state: %w", err)
 	}
-	if receipt.SchemaVersion != 1 ||
-		receipt.Status != "ASSIGNMENT_DIVERGENCE_QUARANTINED" ||
-		receipt.ProjectID != s.projectID ||
-		receipt.Lane != s.lane ||
-		receipt.ScaleSetName != s.scaleSetName ||
-		receipt.ScaleSetID != s.scaleSetID ||
-		receipt.ReceiptID == "" {
-		return fmt.Errorf("controller quarantine identity mismatch")
+	if len(pendingPaths) == 0 {
+		return nil
+	}
+	if len(pendingPaths) != 1 {
+		return fmt.Errorf("multiple reset-pending receipts are present")
+	}
+	raw, err = os.ReadFile(pendingPaths[0])
+	if err != nil {
+		return fmt.Errorf("read reset-pending receipt: %w", err)
+	}
+	var pending laneResetPendingReceipt
+	if err := json.Unmarshal(raw, &pending); err != nil {
+		return fmt.Errorf("parse reset-pending receipt: %w", err)
+	}
+	oldID := pending.OldScaleSetID
+	if oldID == 0 {
+		oldID = pending.ScaleSetID
+	}
+	if pending.SchemaVersion != 1 ||
+		pending.Status != "RECOVERY_SCALESET_RESET_PENDING" ||
+		pending.ProjectID != s.projectID ||
+		pending.Lane != s.lane ||
+		pending.ScaleSetName != s.scaleSetName ||
+		pending.ReceiptID == "" ||
+		pending.ResetGeneration == "" ||
+		oldID <= 0 ||
+		oldID == s.scaleSetID {
+		return fmt.Errorf("reset-pending controller identity mismatch")
 	}
 	s.mu.Lock()
 	s.quarantined = true
-	s.quarantineID = receipt.ReceiptID
+	s.quarantineID = pending.ReceiptID
+	s.recoveryPending = true
+	s.resetGeneration = pending.ResetGeneration
+	s.resetOldScaleSetID = oldID
+	s.resetPendingPath = pendingPaths[0]
 	s.mu.Unlock()
 	return nil
 }
@@ -794,6 +860,132 @@ func (s *scaler) resolveQuarantineFromCompleteMetadata(
 	return nil
 }
 
+func scaleSetStatisticsZero(stats *scaleset.RunnerScaleSetStatistic) bool {
+	return stats != nil &&
+		stats.TotalAvailableJobs == 0 &&
+		stats.TotalAcquiredJobs == 0 &&
+		stats.TotalAssignedJobs == 0 &&
+		stats.TotalRunningJobs == 0 &&
+		stats.TotalRegisteredRunners == 0 &&
+		stats.TotalBusyRunners == 0 &&
+		stats.TotalIdleRunners == 0
+}
+
+func (s *scaler) recoveryZeroPath() string {
+	return filepath.Join(s.stateDir, "reset-zero-observation.json")
+}
+
+func (s *scaler) readyForSingleRetryPath() string {
+	return filepath.Join(s.stateDir, "ready-for-single-retry.json")
+}
+
+func (s *scaler) observeResetPending(
+	msg *scaleset.RunnerScaleSetMessage,
+	active int,
+	pending int,
+) (bool, error) {
+	s.mu.Lock()
+	generation := s.resetGeneration
+	oldScaleSetID := s.resetOldScaleSetID
+	pendingPath := s.resetPendingPath
+	receiptID := s.quarantineID
+	s.mu.Unlock()
+	if generation == "" || pendingPath == "" || receiptID == "" {
+		return false, fmt.Errorf("reset-pending state is incomplete")
+	}
+
+	zero := scaleSetStatisticsZero(msg.Statistics) &&
+		active == 0 &&
+		pending == 0 &&
+		len(msg.JobAvailableMessages) == 0 &&
+		len(msg.JobAssignedMessages) == 0 &&
+		len(msg.JobStartedMessages) == 0
+	if !zero {
+		if err := os.Remove(s.recoveryZeroPath()); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return false, fmt.Errorf("clear interrupted zero-state observation: %w", err)
+		}
+		return false, nil
+	}
+
+	now := time.Now().UTC()
+	firstRaw, err := os.ReadFile(s.recoveryZeroPath())
+	if errors.Is(err, os.ErrNotExist) {
+		first := recoveryZeroObservation{
+			SchemaVersion:   1,
+			ResetGeneration: generation,
+			ScaleSetID:      s.scaleSetID,
+			ObservedAt:      now.Format(time.RFC3339Nano),
+		}
+		if err := atomicWriteJSON(s.recoveryZeroPath(), first); err != nil {
+			return false, err
+		}
+		s.logger.Info(
+			"Recorded first recovery zero-state observation",
+			slog.String("reset_generation", generation),
+			slog.Int("scale_set_id", s.scaleSetID),
+		)
+		return false, nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("read first recovery zero-state observation: %w", err)
+	}
+	var first recoveryZeroObservation
+	if err := json.Unmarshal(firstRaw, &first); err != nil {
+		return false, fmt.Errorf("parse first recovery zero-state observation: %w", err)
+	}
+	if first.SchemaVersion != 1 ||
+		first.ResetGeneration != generation ||
+		first.ScaleSetID != s.scaleSetID {
+		return false, fmt.Errorf("recovery zero-state observation identity mismatch")
+	}
+	firstAt, err := time.Parse(time.RFC3339Nano, first.ObservedAt)
+	if err != nil {
+		return false, fmt.Errorf("parse first recovery zero-state timestamp: %w", err)
+	}
+	if now.Sub(firstAt) < 15*time.Second {
+		return false, nil
+	}
+
+	ready := map[string]any{
+		"schema_version": 1,
+		"status": "READY_FOR_SINGLE_RETRY",
+		"receipt_id": receiptID,
+		"project_id": s.projectID,
+		"lane": s.lane,
+		"scale_set_name": s.scaleSetName,
+		"old_scale_set_id": oldScaleSetID,
+		"new_scale_set_id": s.scaleSetID,
+		"reset_generation": generation,
+		"first_zero_observed_at": first.ObservedAt,
+		"second_zero_observed_at": now.Format(time.RFC3339Nano),
+		"automatic_workflow_triggered": false,
+	}
+	if err := atomicWriteJSON(s.readyForSingleRetryPath(), ready); err != nil {
+		return false, err
+	}
+	if err := os.Remove(pendingPath); err != nil {
+		return false, fmt.Errorf("remove reset-pending receipt after ready proof: %w", err)
+	}
+	if err := os.Remove(s.recoveryZeroPath()); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return false, fmt.Errorf("remove recovery zero observation: %w", err)
+	}
+	s.mu.Lock()
+	s.quarantined = false
+	s.recoveryPending = false
+	s.resetGeneration = ""
+	s.resetOldScaleSetID = 0
+	s.resetPendingPath = ""
+	s.mu.Unlock()
+	s.logger.Info(
+		"Recovery reached READY_FOR_SINGLE_RETRY",
+		slog.String("quarantine_receipt_id", receiptID),
+		slog.String("reset_generation", generation),
+		slog.Int("old_scale_set_id", oldScaleSetID),
+		slog.Int("new_scale_set_id", s.scaleSetID),
+	)
+	return true, nil
+}
+
 func recoveryMetadataComplete(job *scaleset.JobMessageBase) bool {
 	return job != nil &&
 		job.MessageType == scaleset.MessageTypeJobAssigned &&
@@ -815,6 +1007,13 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		if s.attestor == nil {
 			return fmt.Errorf("admission v2 enabled without GitHub attestor")
 		}
+		s.mu.Lock()
+		recoveryPendingAtStart := s.recoveryPending
+		s.mu.Unlock()
+		// During reset-pending recovery, even complete lifecycle metadata is
+		// observation-only until two durable zero-state observations prove a
+		// fresh empty scale set. Do not reconstruct/acquire work in this mode.
+		if !recoveryPendingAtStart {
 		// Recover complete assigned-job identities before considering any new
 		// JobAvailable acquisition. Sparse aggregate assigned state is never
 		// execution authority.
@@ -869,6 +1068,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			}
 			s.mu.Unlock()
 		}
+		}
 	}
 
 	// Apply lifecycle state before divergence detection so completed work does
@@ -889,7 +1089,25 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 	pendingCount := len(s.pending)
 	quarantined := s.quarantined
 	quarantineID := s.quarantineID
+	recoveryPending := s.recoveryPending
 	s.mu.Unlock()
+
+	if s.admissionV2 && recoveryPending {
+		ready, err := s.observeResetPending(msg, activeCount, pendingCount)
+		if err != nil {
+			return fmt.Errorf("observe reset-pending zero state: %w", err)
+		}
+		if !ready {
+			s.logger.Warn(
+				"Admission-v2 lane remains reset-pending quarantined",
+				slog.String("quarantine_receipt_id", quarantineID),
+				slog.Int("scale_set_id", s.scaleSetID),
+			)
+		}
+		// Even the second zero observation only opens the retry gate; never
+		// acquire a job from the same message that transitions the state.
+		return nil
+	}
 
 	if s.admissionV2 {
 		reconstructable := reconstructableAssignedCount(activeCount, pendingCount)
