@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-Start exact v0.4.8 on an isolated loopback MCP endpoint and run tunnel-client v0.0.18 continuously with profile workspace-heartbeat-v048-isolated, keeping the dedicated runtime key only in the local environment. Verify tunnel-client /readyz and control-plane polling are healthy. While the daemon remains running, add or update the ChatGPT custom MCP/Heartbeat connection to use tunnel_6ae017d8655c8191976ef3bccc31f593 through Secure MCP Tunnel, then execute live ChatGPT tool and embedded app acceptance. Do not retire ngrok or mutate production v0.4.7 yet.
+Operator: confirm whether the currently rendered tunnel-backed Heartbeat card shows the expected five-entry fixed-height boundary and, after sequence 6, remains at the same height with scrollable history/newest entry visible. If PASS, record live UI acceptance, then design and validate the production cutover: install v0.4.8 runtime, replace ngrok with supervised tunnel-client in the normal launcher using a non-interactive restricted secret reference, preserve rollback to v0.4.7/ngrok, and only then retire ngrok from the normal path.
 
 ## Remaining work
 
@@ -40,9 +40,9 @@ Start exact v0.4.8 on an isolated loopback MCP endpoint and run tunnel-client v0
 
 ## Blockers / gates
 
-- The tunnel-client daemon has not yet been run continuously against exact v0.4.8 for ChatGPT connector discovery and MCP calls.
-- ChatGPT connector/custom-MCP association, embedded app resource delivery, heartbeat_poll freshness, executor/semantic/card separation, and five/six-entry UI behavior remain unverified.
-- Public ngrok remains quota-blocked from ChatGPT; keep accepted production v0.4.7 :8787 and rollback intact until Secure MCP Tunnel live acceptance passes.
+- Visual five-entry intrinsic height and sixth-entry scroll behavior still requires operator confirmation from the rendered ChatGPT card; the assistant cannot inspect rendered card dimensions/scroll state.
+- Live tunnel daemon is still an isolated foreground acceptance process, not the normal production launcher.
+- Ngrok remains in the production v0.4.7 launcher and must not be retired until visual UI acceptance and durable cutover/rollback design are complete.
 
 ## Fresh-chat initialization
 
