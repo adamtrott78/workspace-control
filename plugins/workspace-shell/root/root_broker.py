@@ -44,8 +44,6 @@ def verify_request(cfg, raw_request):
         "LC_ALL": "C.UTF-8",
         "TZ": "UTC",
     }
-    if os.environ.get("WORKSPACE_SHELL_TEST_ALLOW_UNOWNED") == "1":
-        env["WORKSPACE_SHELL_TEST_ALLOW_UNOWNED"] = "1"
     proc = subprocess.run(
         [node, verifier, cfg["verifier_config"]],
         input=raw_request,
@@ -288,6 +286,8 @@ def handle_request(cfg, replay_db, raw, peer_uid):
 
 
 def serve(config_path):
+    if os.geteuid() != 0:
+        fail("ROOT_REQUIRED", "root broker must run as root")
     cfg = read_json_protected(config_path)
     cfg["verifier_config"] = str(Path(cfg["verifier_config"]).resolve())
     require_protected_path(cfg["verifier_config"])
