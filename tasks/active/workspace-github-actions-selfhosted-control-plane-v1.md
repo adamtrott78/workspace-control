@@ -23,8 +23,8 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 99972dd906bb16099645237d584d380beca88171
+- Remote branch: gitrunner-p1-activation-boundary-fix
+- Remote checkpoint: 1b4a270f90dac1039338886e3f5d994025d0c20c
 - Remote verified: true
 
 ### research-engine
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Perform a read-only preflight on the Lambda host from an exact clean checkout of merged workspace-control main 99972dd906bb16099645237d584d380beca88171. Verify current installed service states and restart counts; active workspace-ci transient units/processes; installed controller/provisioner/reconciler/runtime file identities; installed registry/project manifests; controller/reconciler/maintenance identities and token-file ownership/modes (without reading token contents); /run/workspace-ci socket ownership/modes; current workspace-control/PADataset/research-engine project roots and controller envs; and availability of the isolated Go 1.26.3 toolchain. Do not stop/restart/copy/install/enable/disable/reconcile/activate anything during this preflight. Use the evidence to derive the exact rollback-safe P1 host upgrade and activation commands.
+Validate the bounded activation-boundary correction on branch gitrunner-p1-activation-boundary-fix. The correction must do only two things: grant the generic project/lane controller template write access to the exact durable controller state root /var/lib/workspace-ci/controller/state, and add a regression test proving that narrow writable boundary remains alongside ProtectSystem=strict and the read-only GitHub token. If validation passes, obtain a fresh independent review of this exact small delta before any Lambda host mutation.
 
 ## Remaining work
 
@@ -49,7 +49,7 @@ Perform a read-only preflight on the Lambda host from an exact clean checkout of
 
 ## Blockers / gates
 
-- P1 implementation review is satisfied. Live installation/activation now requires a read-only Lambda host preflight proving the current installed services, identities, credentials, source versions, active transient work, rollback-relevant state, and independent reconciliation/bootstrap path before any root mutation.
+- Activation-boundary defect discovered before host mutation: the live generic workspace-ci-controller@.service template lacked ReadWritePaths=/var/lib/workspace-ci/controller/state, so the reviewed BF-1 durable quarantine/recovery state could fail under ProtectSystem=strict. Bounded correction is on gitrunner-p1-activation-boundary-fix and requires exact-head validation plus fresh independent review before Lambda installation.
 
 ## Fresh-chat initialization
 
