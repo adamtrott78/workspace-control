@@ -131,3 +131,18 @@ Read-only operator recovery shows:
 - `:8789`: no listener.
 
 PID 1922601 is therefore the orphaned isolated v0.4.7 probe from the earlier :8788 measurement, not the production tmux-launched runtime. It may be terminated only after re-verifying those exact properties immediately before the kill. Use :8789 for the v0.4.8 benchmark to avoid coupling recovery to cleanup.
+
+
+### Production v0.4.7 restoration — PASS
+
+After the interrupted isolated benchmark, the existing operator launcher `/home/atrott/bin/heartbeat-up` was safety-checked for the v0.4.7 runtime, dedicated `workspace-heartbeat-node` environment, and port 8787, then executed.
+
+Restored production evidence:
+- local `:8787` health returns `workspace-heartbeat MCP server`;
+- listener PID 1978095;
+- CWD `/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v047/plugins/workspace-heartbeat`;
+- Node executable `/home/atrott/miniforge3/envs/workspace-heartbeat-node/bin/node`, version v20.20.2;
+- exact source SHA `9e5858738a4fd11801510e2839b0f94f19541506`;
+- tmux session `workspace-heartbeat` has expected MCP and ngrok processes.
+
+The earlier :8788 orphan was already gone. The next isolated port candidate :8789 was unexpectedly occupied, so the v0.4.8 byte benchmark remains pending. Do not kill the :8789 process until its identity is proven.
