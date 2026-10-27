@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Operator: execute scripts/lambda_ci_p1_restore_dependency_stopped_controllers.py from a detached exact checkout of reviewed merge 4d98555a678050e611502de1b9b8c35b4cf9c5fa with --expected-head set to that exact SHA and capture full output. The helper must fail closed unless shared provisioner/reconciler/reconcile-controller are active/running, no research-engine/PADataset execution units are active, research-engine CPU exactly remains loaded+enabled+inactive/dead+ExecMainStatus=1+NRestarts=12411, and research-engine GPU/PADataset CPU/PADataset GPU are each loaded+enabled+inactive/dead+ExecMainStatus=0+NRestarts=0. Sole authorized mutation is one systemctl start command containing exactly those three non-CPU controller units. Return the complete P1_DEPENDENCY_STOPPED_CONTROLLER_RECOVERY_RECEIPT before any bootstrap retry.
+Fresh chat: start from the authoritative task capsule and exact Git state, verify reviewed merge 4d98555a678050e611502de1b9b8c35b4cf9c5fa is still the pinned executable checkpoint and no intervening live mutation is recorded, then perform one P1 bootstrap retry from a detached exact checkout of that merge with --expected-head set to the same SHA. The corrected installer must preserve research-engine CPU exactly at loaded+enabled+inactive/dead+ExecMainStatus=1+NRestarts=12411; after any shared provisioner restart it may restore only research-engine GPU, PADataset CPU, and PADataset GPU if they match the reviewed clean dependency-stop predicate. Return the complete bootstrap output before any GitHub -> L0 diagnose, reconciliation, workspace-control activation, or research-engine CPU restart.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Operator: execute scripts/lambda_ci_p1_restore_dependency_stopped_controllers.py
 
 ## Blockers / gates
 
-- PR #536 corrected post-rollback recovery and bootstrap dependency-stop handling is independently accepted and merged as workspace-control@4d98555a678050e611502de1b9b8c35b4cf9c5fa. The next gate is one operator-executed incident recovery helper run from that exact reviewed merge SHA.
-- The recovery helper may start only research-engine GPU, PADataset CPU, and PADataset GPU if and only if the live host still exactly matches the captured incident state. Research-engine CPU must remain unchanged at inactive/dead, ExecMainStatus=1, NRestarts=12411.
-- No bootstrap retry, workspace-control activation, reconciliation, L0 diagnose, or research-engine CPU restart is authorized until the recovery receipt is inspected and accepted.
+- Live dependency-stop recovery from reviewed merge 4d98555a678050e611502de1b9b8c35b4cf9c5fa succeeded with DEPENDENCY_STOPPED_CONTROLLERS_RESTORED. research-engine GPU, PADataset CPU, and PADataset GPU are active/running with ExecMainStatus=0 and NRestarts=0; research-engine CPU remains intentionally quiesced and unchanged at inactive/dead, ExecMainStatus=1, NRestarts=12411.
+- The next gate is one rollback-safe P1 bootstrap retry from exact reviewed merge 4d98555a678050e611502de1b9b8c35b4cf9c5fa using the corrected installer that handles supplementary maintenance group membership and shared-provisioner dependency stops. Full output must be inspected before any L0 diagnose or workspace-control activation.
+- workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
 
@@ -62,7 +62,9 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json
 
+Task ID: `workspace-github-actions-selfhosted-control-plane-v1`
+
 Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Treat the authoritative task capsule, synchronized handoff, exact durable Git/runtime state, and referenced evidence as the complete handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
