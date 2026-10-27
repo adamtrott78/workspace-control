@@ -23,8 +23,8 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: github-actions-selfhosted-control-plane-v02
-- Remote checkpoint: b7e8a0199e2ccd79f8787e9f95faa28365d3b216
+- Remote branch: gitrunner-p1-implementation
+- Remote checkpoint: 103c97e844647bb7fc234761fc17c7bbb829be3f
 - Remote verified: true
 
 ### research-engine
@@ -36,20 +36,19 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Implement the bounded P1 tranche from the independently accepted v0.2 design: (1) change admission-v2 controller behavior so TotalAssignedJobs is non-authoritative for execution and unreconstructable assignment divergence enters durable fail-closed quarantine with no new AcquireJobs/JIT/root provision; (2) add the finite independently installed L0 maintenance path with typed DIAGNOSE_LANE, RESTART_CONTROLLER, QUIESCE_LANE_FOR_RECOVERY, RESUME_LANE_AFTER_RESET and exact stale-scale-set reset orchestration/receipts as frozen; (3) add the NOT_INSTALLED owner-commanded workspace-control JIT CPU validation workflow/profile scaffolding without live activation. Keep maxRunners=1/concurrency=1 and preserve all isolation/transport-vs-execution/P2/P3/rollback boundaries. Run repository/adversarial validation, freeze exact implementation identities, then obtain independent implementation review before any Lambda/live runner activation.
+Validate the BF-3 correction on exact code checkpoint 103c97e844647bb7fc234761fc17c7bbb829be3f without redundant manual reruns. Verify scripts/lambda_ci_runtime.py now consumes the root-authored launch spec forbidden_paths and emits deterministic systemd InaccessiblePaths for the exact manifest set, rejects malformed/duplicate/conflicting deny paths, preserves workspace-control's own required roots, and that adversarial tests prove sibling project roots and descendant trusted-cache paths are inaccessible. If the exact checkpoint validation passes, freeze the new implementation blobs and request a fresh independent implementation review focused on BF-3 plus regression of the previously accepted BF-1/BF-2 and scope/resource boundaries. Do not install, reconcile, activate, or trigger P1 before NO_BLOCKING_FINDING.
 
 ## Remaining work
 
-- Implement only the reviewed P1 tranche: admission-v2 assignment-divergence quarantine/recovery, bounded independently installed L0 maintenance path, and owner-commanded workspace-control JIT CPU validation pilot.
-- Preserve maxRunners=1 and manifest concurrency=1; do not implement resource-aware concurrency or raise capacity.
-- Add adversarial tests for incomplete JobAssigned restart recovery, quarantine/no-acquire behavior, exact stale-scale-set reset preconditions, replay/idempotency, typed maintenance verbs, derived targets, peer-UID/root validation, no arbitrary root command surface, and single-retry gating.
-- Validate workspace-control filesystem isolation, CPU/RAM/runtime envelope, no-GPU guarantee, deterministic receipts, rollback, and independent bootstrap availability.
-- Freeze the exact P1 implementation PR and obtain the separately required independent implementation review before any live workspace-control runner activation.
-- Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, resource-aware concurrency, hosted/bootstrap fallback removal, and temporary transport cleanup unauthorized.
+- Obtain and durably consume an independent implementation review of PR #521, explicitly covering BF-1 stale-assignment/reset/retry semantics, BF-2 maintenance authority/non-circularity/receipts, workspace-control isolation/resource envelope, and all deferred P2/P3 boundaries.
+- If and only if the implementation review returns NO_BLOCKING_FINDING, perform bounded P1 installation/activation using the exact reviewed implementation and preserve a known-good bootstrap/rollback path.
+- Validate live P1 with owner-commanded same-repository PR-head execution, CPU/RAM/runtime envelope, no-GPU/forbidden-path isolation, deterministic receipts, stale-assignment recovery dry-run/contract proof, maintenance authorization, and rollback.
+- Do not raise maxRunners or manifest concurrency until separately reviewed resource-aware host arbitration is designed and validated.
+- Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, hosted/bootstrap fallback removal, and temporary transport cleanup unauthorized.
 
 ## Blockers / gates
 
-- P1 live activation remains blocked until the exact implementation PR passes repository/adversarial tests and receives the required independent implementation review.
+- BF-3 from independent implementation review 5661642118: workspace-control forbidden-path isolation must be enforced at the privileged runner launch boundary. Correction is implemented at code checkpoint 103c97e844647bb7fc234761fc17c7bbb829be3f and awaits exact-checkpoint repository validation plus fresh independent re-review before any P1 installation/activation.
 
 ## Fresh-chat initialization
 

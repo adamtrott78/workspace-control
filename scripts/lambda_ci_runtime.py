@@ -124,7 +124,7 @@ def execution_semantics(spec: dict[str, Any]) -> dict[str, Any]:
             }
 
     profile = semantics.get("execution_profile")
-    if profile not in {"cpu-test", "gpu-small", "gpu-heavy"}:
+    if profile not in {"control-small", "cpu-test", "gpu-small", "gpu-heavy"}:
         raise RuntimeLaunchError("execution contract profile is unsupported")
     gpu_count = semantics.get("gpu_count")
     if not isinstance(gpu_count, int) or gpu_count < 0 or gpu_count > 2:
@@ -958,6 +958,82 @@ def trusted_cuda_oom_probe_terminal_evidence(
     return evidence
 
 
+def _validated_inaccessible_paths(
+    spec: dict[str, Any],
+    runner_dir: pathlib.Path,
+    staging_dir: pathlib.Path,
+) -> list[str]:
+    """Validate the root-authored per-project filesystem deny contract.
+
+    The launch spec is produced from installed/root-owned project policy, but
+    the privileged runtime still fails closed if that contract is malformed or
+    would hide a path required by the same project. This prevents manifest
+    metadata from drifting away from the actual transient-unit mount boundary.
+    """
+
+    raw = spec.get("forbidden_paths")
+    if raw is None and int(spec.get("schema_version", 1)) == 1:
+        # Backward-compatible legacy synthetic/runtime specs predate the
+        # manifest deny-list contract. Preserve their historical Docker-only
+        # boundary; all schema-v2 generic/P1 specs must carry root-authored
+        # forbidden_paths and fail closed if that authority is missing.
+        raw = ["/var/run/docker.sock", "/run/docker.sock"]
+    if not isinstance(raw, list) or not raw:
+        raise RuntimeLaunchError("launch spec forbidden_paths must be a non-empty list")
+
+    paths = spec.get("paths")
+    if not isinstance(paths, dict):
+        raise RuntimeLaunchError("launch spec paths must be an object")
+
+    required_raw = [
+        paths.get("job_root"),
+        paths.get("staging_cache"),
+        paths.get("trusted_cache"),
+        paths.get("home"),
+        paths.get("logs"),
+        str(runner_dir),
+        str(staging_dir),
+    ]
+    required: list[pathlib.PurePosixPath] = []
+    for value in required_raw:
+        if not isinstance(value, str) or not value.startswith("/"):
+            raise RuntimeLaunchError("required project path is not absolute")
+        if any(ch.isspace() for ch in value) or "\x00" in value:
+            raise RuntimeLaunchError("required project path contains unsafe characters")
+        parsed = pathlib.PurePosixPath(value)
+        if parsed == pathlib.PurePosixPath("/") or ".." in parsed.parts:
+            raise RuntimeLaunchError("required project path is not bounded")
+        if str(parsed) != value:
+            raise RuntimeLaunchError("required project path is not canonical")
+        required.append(parsed)
+
+    result: list[str] = []
+    seen: set[str] = set()
+    for value in raw:
+        if not isinstance(value, str) or not value.startswith("/"):
+            raise RuntimeLaunchError("forbidden path is not absolute")
+        if any(ch.isspace() for ch in value) or "\x00" in value:
+            raise RuntimeLaunchError("forbidden path contains unsafe characters")
+        parsed = pathlib.PurePosixPath(value)
+        if parsed == pathlib.PurePosixPath("/") or ".." in parsed.parts:
+            raise RuntimeLaunchError("forbidden path is not bounded")
+        if str(parsed) != value:
+            raise RuntimeLaunchError("forbidden path is not canonical")
+        if value in seen:
+            raise RuntimeLaunchError("forbidden path is duplicated")
+
+        for allowed in required:
+            if parsed == allowed or parsed in allowed.parents:
+                raise RuntimeLaunchError(
+                    "forbidden path overlaps a required project path"
+                )
+
+        seen.add(value)
+        result.append(value)
+
+    return result
+
+
 def build_cpu_systemd_command(
     spec: dict[str, Any],
     runner_dir: pathlib.Path,
@@ -976,6 +1052,11 @@ def build_cpu_systemd_command(
 
     memory_max = int(resources["memory_max_bytes"])
     memory_high = max(1, memory_max - (4 * 1024**3))
+    inaccessible_paths = _validated_inaccessible_paths(
+        spec,
+        runner_dir,
+        staging_dir,
+    )
 
     return [
         "systemd-run",
@@ -1010,8 +1091,7 @@ def build_cpu_systemd_command(
         "-p", f"ReadWritePaths={paths['home']}",
         "-p", f"ReadWritePaths={paths['logs']}",
         "-p", f"ReadOnlyPaths={paths['trusted_cache']}",
-        "-p", "InaccessiblePaths=/var/run/docker.sock",
-        "-p", "InaccessiblePaths=/run/docker.sock",
+        "-p", "InaccessiblePaths=" + " ".join(inaccessible_paths),
         "-p", "DevicePolicy=closed",
         "-p", "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6",
         "-p", "IPAddressAllow=127.0.0.53/32",

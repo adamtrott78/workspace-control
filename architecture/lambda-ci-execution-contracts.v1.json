@@ -107,6 +107,22 @@
       "runtime_binding_mode": "OPTIONAL_EXACT_IF_ROUTE_BINDS",
       "gpu_count": 2,
       "admission_enabled_after_generic_activation": false
+    },
+    "control-small-ci-v1": {
+      "lifecycle": "P1_CONTROL_PILOT_REVIEW_REQUIRED",
+      "execution_plane": "jit_runner",
+      "execution_profile": "control-small",
+      "resource_class": "control_small_v1",
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "payload_secret_class": "CONTROL_PLANE_EPHEMERAL_ONLY",
+      "filesystem_class": "EPHEMERAL_JOB_ONLY",
+      "cache_access_class": "NO_PERSISTENT_CACHE_AUTHORITY",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "candidate_payload_allowed": true,
+      "model_binding_mode": "FORBIDDEN",
+      "runtime_binding_mode": "OPTIONAL_EXACT_IF_ROUTE_BINDS",
+      "gpu_count": 0,
+      "admission_enabled_after_generic_activation": true
     }
   }
 }

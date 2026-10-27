@@ -1,0 +1,78 @@
+{
+  "schema_version": 2,
+  "status": "MIGRATION_CANDIDATE_NOT_INSTALLED",
+  "project_id": "workspace-control",
+  "repository": "adamtrott78/workspace-control",
+  "repository_visibility": "private",
+  "derived_identity": {
+    "runner_user": "ci-workspace-control",
+    "runner_group": "ci-workspace-control",
+    "project_root": "/srv/workspace-ci/workspace-control",
+    "lanes": {
+      "cpu": {
+        "scale_set_name": "lambda-workspace-control",
+        "runner_prefix": "lambda-workspace-control-"
+      },
+      "gpu": {
+        "scale_set_name": "lambda-workspace-control-gpu",
+        "runner_prefix": "lambda-workspace-control-gpu-"
+      }
+    }
+  },
+  "roots": {
+    "jobs": "/srv/workspace-ci/workspace-control/jobs",
+    "staging_cache": "/srv/workspace-ci/workspace-control/staging-cache",
+    "trusted_cache": "/srv/workspace-ci/workspace-control/trusted-cache",
+    "logs": "/srv/workspace-ci/workspace-control/logs",
+    "home": "/srv/workspace-ci/workspace-control/home"
+  },
+  "forbidden_paths": [
+    "/home/atrott",
+    "/var/run/docker.sock",
+    "/run/docker.sock",
+    "/srv/workspace-ci/research-engine",
+    "/srv/workspace-ci/padataset",
+    "/var/lib/workspace-ci/provisioner",
+    "/var/lib/workspace-ci/reconciler",
+    "/var/lib/workspace-ci/controller",
+    "/run/workspace-ci"
+  ],
+  "concurrency": 1,
+  "routes": {
+    "control-validation": {
+      "activation_state": "PLANNED_NOT_BOUND",
+      "lane": "cpu",
+      "execution_contract_id": "control-small-ci-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-workspace-control-validation.yml",
+        "default_branch": "main",
+        "blob_sha": "524e01916e1a826efd1edb4792023973d7b3c73c"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/workspace-control-validate",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": null,
+        "runtime_id": null
+      }
+    }
+  },
+  "bindings": {
+    "models": {},
+    "runtimes": {}
+  },
+  "isolation": {
+    "unique_project_uid_required": true,
+    "sibling_project_roots_inaccessible": true,
+    "control_plane_state_inaccessible": true,
+    "global_trusted_object_store_inaccessible_by_default": true,
+    "only_exact_authorized_trusted_objects_may_be_mounted_readonly": true
+  }
+}

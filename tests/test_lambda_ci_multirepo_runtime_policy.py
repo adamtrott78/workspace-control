@@ -15,6 +15,7 @@ import lambda_ci_multirepo as multi
 import lambda_ci_provisioner as provisioner
 import lambda_ci_provisioner_service as provisioner_service
 import lambda_ci_reconciler as reconciler
+import lambda_ci_runtime as runtime
 
 REGISTRY = json.loads((ROOT / "architecture/lambda-ci-project-registry.v1.json").read_text())
 CONTRACTS = json.loads((ROOT / "architecture/lambda-ci-execution-contracts.v1.json").read_text())
@@ -23,6 +24,7 @@ PROFILES = json.loads((ROOT / "architecture/lambda-ci-systemd-profiles.v1.json")
 PINS = json.loads((ROOT / "architecture/lambda-ci-upstream-pins.v1.json").read_text())
 RESEARCH = json.loads((ROOT / "architecture/lambda-ci-project-research-engine.v2.json").read_text())
 PAD = json.loads((ROOT / "architecture/lambda-ci-project-padataset.v1.json").read_text())
+WORKSPACE = json.loads((ROOT / "architecture/lambda-ci-project-workspace-control.v1.json").read_text())
 SHA = "a" * 40
 
 
@@ -72,7 +74,11 @@ def request_for(manifest, route_id, *, runner_suffix="abcdef123456"):
 
 class MultiRepoGenericAdmissionTests(unittest.TestCase):
     def test_registry_resolves_distinct_projects(self):
-        manifests = {"research-engine": RESEARCH, "padataset": PAD}
+        manifests = {
+            "research-engine": RESEARCH,
+            "padataset": PAD,
+            "workspace-control": WORKSPACE,
+        }
         self.assertEqual(
             multi.resolve_project_manifest(REGISTRY, manifests, "research-engine")["repository"],
             "adamtrott78/research-engine",
@@ -155,17 +161,134 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(multi.MultiRepoPolicyError, "not admission-enabled"):
             multi.mint_admission(req, manifest, CONTRACTS, WORKLOAD)
 
+    def _workspace_control_cpu_launch(self):
+        manifest = copy.deepcopy(WORKSPACE)
+        manifest["status"] = "ACTIVE"
+        manifest["routes"]["control-validation"]["activation_state"] = "ACTIVE"
+        request = request_for(manifest, "control-validation")
+        validated = provisioner.validate_request_v2_generic(
+            request,
+            manifest,
+            CONTRACTS,
+            WORKLOAD,
+            now=datetime(2026, 10, 20, 0, 0, 5, tzinfo=timezone.utc),
+        )
+        spec = provisioner.build_generic_launch_spec(
+            validated,
+            manifest,
+            PROFILES,
+            PINS,
+        )
+        runner_dir = Path(spec["paths"]["job_root"]) / validated.request_id / "runner"
+        staging_dir = (
+            Path(spec["paths"]["staging_cache"]) / validated.request_id
+        )
+        command = runtime.build_cpu_systemd_command(
+            spec,
+            runner_dir,
+            staging_dir,
+            "192.0.2.0/24",
+        )
+        return manifest, spec, runner_dir, staging_dir, command
+
+    def test_workspace_control_cpu_launch_enforces_exact_forbidden_paths(self):
+        manifest, _spec, _runner_dir, _staging_dir, command = (
+            self._workspace_control_cpu_launch()
+        )
+        properties = [
+            command[index + 1]
+            for index, value in enumerate(command[:-1])
+            if value == "-p"
+        ]
+        inaccessible = [
+            value.split("=", 1)[1]
+            for value in properties
+            if value.startswith("InaccessiblePaths=")
+        ]
+        self.assertEqual(len(inaccessible), 1)
+        denied = inaccessible[0].split(" ")
+        self.assertEqual(denied, manifest["forbidden_paths"])
+
+        # Hiding each sibling project root also hides exact descendant trusted
+        # caches even though those host directories are intentionally 0755.
+        for sibling_cache in (
+            RESEARCH["roots"]["trusted_cache"],
+            PAD["roots"]["trusted_cache"],
+        ):
+            self.assertTrue(
+                any(
+                    sibling_cache == path
+                    or sibling_cache.startswith(path.rstrip("/") + "/")
+                    for path in denied
+                ),
+                sibling_cache,
+            )
+
+        # The same mount namespace must preserve this project's own roots.
+        for own_path in manifest["roots"].values():
+            self.assertFalse(
+                any(
+                    own_path == path
+                    or own_path.startswith(path.rstrip("/") + "/")
+                    for path in denied
+                ),
+                own_path,
+            )
+
+        self.assertIn("DevicePolicy=closed", properties)
+        self.assertIn("ProtectHome=yes", properties)
+
+    def test_workspace_control_cpu_launch_rejects_forbidden_ancestor_of_own_root(self):
+        _manifest, spec, runner_dir, staging_dir, _command = (
+            self._workspace_control_cpu_launch()
+        )
+        bad = copy.deepcopy(spec)
+        bad["forbidden_paths"] = ["/srv/workspace-ci/workspace-control"]
+        with self.assertRaisesRegex(
+            runtime.RuntimeLaunchError,
+            "overlaps a required project path",
+        ):
+            runtime.build_cpu_systemd_command(
+                bad,
+                runner_dir,
+                staging_dir,
+                "192.0.2.0/24",
+            )
+
+    def test_workspace_control_cpu_launch_rejects_malformed_forbidden_path(self):
+        _manifest, spec, runner_dir, staging_dir, _command = (
+            self._workspace_control_cpu_launch()
+        )
+        bad = copy.deepcopy(spec)
+        bad["forbidden_paths"] = [
+            "/srv/workspace-ci/research-engine\nMemoryMax=infinity"
+        ]
+        with self.assertRaisesRegex(
+            runtime.RuntimeLaunchError,
+            "unsafe characters",
+        ):
+            runtime.build_cpu_systemd_command(
+                bad,
+                runner_dir,
+                staging_dir,
+                "192.0.2.0/24",
+            )
+
     def test_reconciler_is_deterministic_for_active_projects_and_has_no_commands(self):
         plan = reconciler.plan_reconciliation(
             REGISTRY,
-            {"research-engine": RESEARCH, "padataset": PAD},
+            {
+                "research-engine": RESEARCH,
+                "padataset": PAD,
+                "workspace-control": WORKSPACE,
+            },
         )
         self.assertEqual(plan["mode"], "APPLY_READY_V1")
         self.assertEqual(
             plan["active_projects"],
             ["padataset", "research-engine"],
         )
-        self.assertEqual(plan["planned_projects_skipped"], [])
+        self.assertEqual(plan["planned_projects_skipped"], ["workspace-control"])
         serialized = json.dumps(plan, sort_keys=True)
         self.assertNotIn("shell", serialized)
         self.assertNotIn("argv", serialized)
@@ -177,6 +300,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         manifests = {
             "research-engine": copy.deepcopy(RESEARCH),
             "padataset": copy.deepcopy(PAD),
+            "workspace-control": copy.deepcopy(WORKSPACE),
         }
         registry["status"] = "ACTIVE"
         registry["projects"]["research-engine"]["activation_state"] = "ACTIVE"
@@ -190,7 +314,10 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             route["trusted_workflow"]["blob_sha"] = None
         plan = reconciler.plan_reconciliation(registry, manifests)
         self.assertEqual(plan["active_projects"], ["research-engine"])
-        self.assertEqual(plan["planned_projects_skipped"], ["padataset"])
+        self.assertEqual(
+            plan["planned_projects_skipped"],
+            ["padataset", "workspace-control"],
+        )
         serialized = json.dumps(plan, sort_keys=True)
         self.assertNotIn("ci-padataset", serialized)
         self.assertNotIn("/srv/workspace-ci/padataset", serialized)
@@ -212,6 +339,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         manifests = {
             "research-engine": copy.deepcopy(RESEARCH),
             "padataset": copy.deepcopy(PAD),
+            "workspace-control": copy.deepcopy(WORKSPACE),
         }
         registry["status"] = "ACTIVE"
         registry["projects"]["research-engine"]["activation_state"] = "ACTIVE"
@@ -407,6 +535,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             registry = copy.deepcopy(REGISTRY)
             research = copy.deepcopy(RESEARCH)
             padataset = copy.deepcopy(PAD)
+            workspace = copy.deepcopy(WORKSPACE)
             registry["projects"]["padataset"]["activation_state"] = (
                 "P6_PILOT_PLANNED_NOT_INSTALLED"
             )
@@ -417,6 +546,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             registry_path.write_text(json.dumps(registry))
             (manifest_dir / "research-engine.json").write_text(json.dumps(research))
             (manifest_dir / "padataset.json").write_text(json.dumps(padataset))
+            (manifest_dir / "workspace-control.json").write_text(json.dumps(workspace))
             service = provisioner_service.ProvisionerService(
                 manifest=None,
                 profiles=PROFILES,
@@ -428,6 +558,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
                 project_manifests={
                     "research-engine": research,
                     "padataset": padataset,
+                    "workspace-control": workspace,
                 },
                 execution_contracts=CONTRACTS,
                 registry_path=registry_path,
@@ -459,6 +590,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
                 project_manifests={
                     "research-engine": RESEARCH,
                     "padataset": PAD,
+                    "workspace-control": WORKSPACE,
                 },
                 execution_contracts=CONTRACTS,
             )

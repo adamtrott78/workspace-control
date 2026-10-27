@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"os"
@@ -24,8 +25,9 @@ import (
 )
 
 const (
-	defaultProvisionerSock = "/run/workspace-ci/provisioner.sock"
-	maxRunners             = 1
+	defaultProvisionerSock     = "/run/workspace-ci/provisioner.sock"
+	defaultControllerStateRoot = "/var/lib/workspace-ci/controller/state"
+	maxRunners                 = 1
 )
 
 var (
@@ -46,6 +48,7 @@ type config struct {
 	AppInstallID    int64
 	AppPrivateKey   string
 	AdmissionV2     bool
+	StateDir        string
 }
 
 type provisionRequest struct {
@@ -93,6 +96,25 @@ type provisionStatusResponse struct {
 	Error         string `json:"error,omitempty"`
 }
 
+type scaleSetMaintenanceRequest struct {
+	SchemaVersion      int    `json:"schema_version"`
+	Operation          string `json:"operation"`
+	ExpectedScaleSetID int    `json:"expected_scale_set_id"`
+}
+
+type scaleSetMaintenanceResponse struct {
+	SchemaVersion int                            `json:"schema_version"`
+	Status        string                         `json:"status"`
+	ScaleSetID    int                            `json:"scale_set_id,omitempty"`
+	ScaleSetName  string                         `json:"scale_set_name,omitempty"`
+	Statistics    *scaleset.RunnerScaleSetStatistic `json:"statistics,omitempty"`
+}
+
+type scaleSetMaintenanceClient interface {
+	GetRunnerScaleSet(context.Context, int, string) (*scaleset.RunnerScaleSet, error)
+	DeleteRunnerScaleSet(context.Context, int) error
+}
+
 type runnerJITClient interface {
 	GenerateJitRunnerConfig(
 		context.Context,
@@ -110,6 +132,42 @@ type pendingAdmissionJob struct {
 	RunnerName  string
 }
 
+type laneQuarantineReceipt struct {
+	SchemaVersion        int    `json:"schema_version"`
+	ReceiptID            string `json:"receipt_id"`
+	Status               string `json:"status"`
+	ProjectID            string `json:"project_id"`
+	Lane                 string `json:"lane"`
+	ScaleSetName         string `json:"scale_set_name"`
+	ScaleSetID           int    `json:"scale_set_id"`
+	TotalAssignedJobs    int    `json:"total_assigned_jobs"`
+	ReconstructableJobs  int    `json:"reconstructable_jobs"`
+	ActiveCount          int    `json:"active_count"`
+	PendingCount         int    `json:"pending_count"`
+	Reason               string `json:"reason"`
+	ObservedAt           string `json:"observed_at"`
+}
+
+type laneResetPendingReceipt struct {
+	SchemaVersion   int    `json:"schema_version"`
+	ReceiptID       string `json:"receipt_id"`
+	Status          string `json:"status"`
+	ProjectID       string `json:"project_id"`
+	Lane            string `json:"lane"`
+	ScaleSetName    string `json:"scale_set_name"`
+	ScaleSetID      int    `json:"scale_set_id"`
+	OldScaleSetID   int    `json:"old_scale_set_id"`
+	ResetGeneration string `json:"reset_generation"`
+	ResetStartedAt  string `json:"reset_started_at"`
+}
+
+type recoveryZeroObservation struct {
+	SchemaVersion   int    `json:"schema_version"`
+	ResetGeneration string `json:"reset_generation"`
+	ScaleSetID      int    `json:"scale_set_id"`
+	ObservedAt      string `json:"observed_at"`
+}
+
 type scaler struct {
 	mu              sync.Mutex
 	active          map[string]string
@@ -117,14 +175,22 @@ type scaler struct {
 	sessionClient   listener.Client
 	scaleSetID      int
 	projectID       string
+	lane            string
 	profile         string
 	scaleSetName    string
 	runnerPrefix    string
 	provisionerSock string
+	stateDir        string
 	admissionV2     bool
 	attestor        jobAttestor
-	pending         map[string]pendingAdmissionJob
-	logger          *slog.Logger
+	pending             map[string]pendingAdmissionJob
+	quarantined         bool
+	quarantineID        string
+	recoveryPending     bool
+	resetGeneration     string
+	resetOldScaleSetID  int
+	resetPendingPath    string
+	logger              *slog.Logger
 }
 
 func envOr(key, fallback string) string {
@@ -190,6 +256,10 @@ func loadConfig() (config, error) {
 		return config{}, fmt.Errorf("controller runner prefix does not match derived project/lane identity: got %s want %s", runnerPrefix, expectedPrefix)
 	}
 
+	stateRoot := envOr("WORKSPACE_CI_CONTROLLER_STATE_ROOT", defaultControllerStateRoot)
+	if !filepath.IsAbs(stateRoot) {
+		return config{}, fmt.Errorf("WORKSPACE_CI_CONTROLLER_STATE_ROOT must be absolute")
+	}
 	cfg := config{
 		GitHubURL: githubURL, ScaleSetName: scaleSetName, ProjectID: projectID,
 		Lane: lane, RunnerPrefix: runnerPrefix, Profile: profile,
@@ -197,6 +267,7 @@ func loadConfig() (config, error) {
 		PATFile: strings.TrimSpace(os.Getenv("WORKSPACE_CI_PAT_FILE")),
 		AppClientID: strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_CLIENT_ID")),
 		AppPrivateKey: strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_PRIVATE_KEY_FILE")),
+		StateDir: filepath.Join(stateRoot, projectID+"-"+lane),
 	}
 	if raw := strings.TrimSpace(os.Getenv("WORKSPACE_CI_APP_INSTALLATION_ID")); raw != "" {
 		value, err := strconv.ParseInt(raw, 10, 64)
@@ -304,6 +375,101 @@ func ensureScaleSet(ctx context.Context, client *scaleset.Client, cfg config) (*
 		return nil, fmt.Errorf("create runner scale set: %w", err)
 	}
 	return created, nil
+}
+
+func executeScaleSetMaintenance(
+	ctx context.Context,
+	client scaleSetMaintenanceClient,
+	cfg config,
+	request scaleSetMaintenanceRequest,
+) (scaleSetMaintenanceResponse, error) {
+	if request.SchemaVersion != 1 {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("scale-set maintenance schema_version must be 1")
+	}
+	if request.Operation != "INSPECT" && request.Operation != "DELETE" {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("scale-set maintenance operation is unsupported")
+	}
+	if request.ExpectedScaleSetID < 0 {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("expected scale-set id is invalid")
+	}
+	const runnerGroupID = 1
+	current, err := client.GetRunnerScaleSet(ctx, runnerGroupID, cfg.ScaleSetName)
+	if err != nil {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("inspect configured scale set: %w", err)
+	}
+	if current == nil {
+		if request.Operation == "INSPECT" && request.ExpectedScaleSetID == 0 {
+			return scaleSetMaintenanceResponse{
+				SchemaVersion: 1,
+				Status:        "MISSING",
+				ScaleSetName:  cfg.ScaleSetName,
+			}, nil
+		}
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("configured scale set is missing")
+	}
+	if request.ExpectedScaleSetID > 0 && current.ID != request.ExpectedScaleSetID {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf(
+			"scale-set id mismatch: got %d want %d",
+			current.ID,
+			request.ExpectedScaleSetID,
+		)
+	}
+	response := scaleSetMaintenanceResponse{
+		SchemaVersion: 1,
+		Status:        "PRESENT",
+		ScaleSetID:    current.ID,
+		ScaleSetName:  current.Name,
+		Statistics:    current.Statistics,
+	}
+	if request.Operation == "INSPECT" {
+		return response, nil
+	}
+	if request.ExpectedScaleSetID <= 0 {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("DELETE requires exact expected scale-set id")
+	}
+	if current.Statistics == nil {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("scale-set statistics unavailable; refusing delete")
+	}
+	if current.Statistics.TotalRegisteredRunners != 0 ||
+		current.Statistics.TotalBusyRunners != 0 ||
+		current.Statistics.TotalRunningJobs != 0 {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf(
+			"scale set is not quiescent: registered=%d busy=%d running=%d",
+			current.Statistics.TotalRegisteredRunners,
+			current.Statistics.TotalBusyRunners,
+			current.Statistics.TotalRunningJobs,
+		)
+	}
+	if err := client.DeleteRunnerScaleSet(ctx, current.ID); err != nil {
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("delete exact configured scale set: %w", err)
+	}
+	response.Status = "DELETED"
+	return response, nil
+}
+
+func runScaleSetMaintenance(ctx context.Context, cfg config) error {
+	client, err := newScaleSetClient(cfg)
+	if err != nil {
+		return err
+	}
+	decoder := json.NewDecoder(os.Stdin)
+	var request scaleSetMaintenanceRequest
+	if err := decoder.Decode(&request); err != nil {
+		return fmt.Errorf("decode scale-set maintenance request: %w", err)
+	}
+	var extra any
+	if err := decoder.Decode(&extra); err != io.EOF {
+		if err == nil {
+			return fmt.Errorf("scale-set maintenance accepts exactly one JSON object")
+		}
+		return fmt.Errorf("decode trailing scale-set maintenance input: %w", err)
+	}
+	response, err := executeScaleSetMaintenance(ctx, client, cfg, request)
+	if err != nil {
+		return err
+	}
+	encoder := json.NewEncoder(os.Stdout)
+	return encoder.Encode(response)
 }
 
 func randomID() (string, error) {
@@ -469,18 +635,456 @@ func (s *scaler) clearPendingRunner(runnerName string) {
 	}
 }
 
-func desiredRunnerTarget(stats *scaleset.RunnerScaleSetStatistic, pending int) int {
-	target := 0
-	if stats != nil {
-		target = stats.TotalAssignedJobs
+func reconstructableAssignedCount(active, pending int) int {
+	if pending > active {
+		return pending
 	}
-	if pending > target {
-		target = pending
+	return active
+}
+
+func desiredRunnerTarget(
+	stats *scaleset.RunnerScaleSetStatistic,
+	pending int,
+	active int,
+	admissionV2 bool,
+) int {
+	target := 0
+	if admissionV2 {
+		// Admission-v2 execution authority comes only from locally tracked,
+		// independently attested jobs. GitHub's aggregate assigned-job count is
+		// diagnostic state and must never create a JIT/root grant by itself.
+		target = reconstructableAssignedCount(active, pending)
+	} else if stats != nil {
+		target = stats.TotalAssignedJobs
 	}
 	if target > maxRunners {
 		target = maxRunners
 	}
 	return target
+}
+
+func atomicWriteJSON(path string, value any) error {
+	if !filepath.IsAbs(path) {
+		return fmt.Errorf("state path must be absolute")
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return fmt.Errorf("create state directory: %w", err)
+	}
+	raw, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal state: %w", err)
+	}
+	raw = append(raw, '\n')
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, raw, 0o600); err != nil {
+		return fmt.Errorf("write state: %w", err)
+	}
+	if err := os.Chmod(tmp, 0o600); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("chmod state: %w", err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("replace state: %w", err)
+	}
+	return nil
+}
+
+func (s *scaler) quarantinePath() string {
+	return filepath.Join(s.stateDir, "quarantine.json")
+}
+
+func (s *scaler) loadQuarantine() error {
+	raw, err := os.ReadFile(s.quarantinePath())
+	if err == nil {
+		var receipt laneQuarantineReceipt
+		if err := json.Unmarshal(raw, &receipt); err != nil {
+			return fmt.Errorf("parse controller quarantine: %w", err)
+		}
+		if receipt.SchemaVersion != 1 ||
+			receipt.Status != "ASSIGNMENT_DIVERGENCE_QUARANTINED" ||
+			receipt.ProjectID != s.projectID ||
+			receipt.Lane != s.lane ||
+			receipt.ScaleSetName != s.scaleSetName ||
+			receipt.ScaleSetID != s.scaleSetID ||
+			receipt.ReceiptID == "" {
+			return fmt.Errorf("controller quarantine identity mismatch")
+		}
+		s.mu.Lock()
+		s.quarantined = true
+		s.quarantineID = receipt.ReceiptID
+		s.mu.Unlock()
+		return nil
+	}
+	if !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("read controller quarantine: %w", err)
+	}
+
+	pendingPaths, err := filepath.Glob(filepath.Join(s.stateDir, "reset-pending-*.json"))
+	if err != nil {
+		return fmt.Errorf("glob reset-pending state: %w", err)
+	}
+	if len(pendingPaths) == 0 {
+		return nil
+	}
+	if len(pendingPaths) != 1 {
+		return fmt.Errorf("multiple reset-pending receipts are present")
+	}
+	raw, err = os.ReadFile(pendingPaths[0])
+	if err != nil {
+		return fmt.Errorf("read reset-pending receipt: %w", err)
+	}
+	var pending laneResetPendingReceipt
+	if err := json.Unmarshal(raw, &pending); err != nil {
+		return fmt.Errorf("parse reset-pending receipt: %w", err)
+	}
+	oldID := pending.OldScaleSetID
+	if oldID == 0 {
+		oldID = pending.ScaleSetID
+	}
+	if pending.SchemaVersion != 1 ||
+		pending.Status != "RECOVERY_SCALESET_RESET_PENDING" ||
+		pending.ProjectID != s.projectID ||
+		pending.Lane != s.lane ||
+		pending.ScaleSetName != s.scaleSetName ||
+		pending.ReceiptID == "" ||
+		pending.ResetGeneration == "" ||
+		oldID <= 0 ||
+		oldID == s.scaleSetID {
+		return fmt.Errorf("reset-pending controller identity mismatch")
+	}
+	s.mu.Lock()
+	s.quarantined = true
+	s.quarantineID = pending.ReceiptID
+	s.recoveryPending = true
+	s.resetGeneration = pending.ResetGeneration
+	s.resetOldScaleSetID = oldID
+	s.resetPendingPath = pendingPaths[0]
+	s.mu.Unlock()
+	return nil
+}
+
+func (s *scaler) persistAssignmentQuarantine(
+	stats *scaleset.RunnerScaleSetStatistic,
+	active int,
+	pending int,
+) error {
+	if stats == nil {
+		return fmt.Errorf("assignment divergence requires statistics")
+	}
+	s.mu.Lock()
+	if s.quarantined {
+		s.mu.Unlock()
+		return nil
+	}
+	s.mu.Unlock()
+	receiptID, err := randomID()
+	if err != nil {
+		return fmt.Errorf("create quarantine receipt id: %w", err)
+	}
+	receipt := laneQuarantineReceipt{
+		SchemaVersion:       1,
+		ReceiptID:           receiptID,
+		Status:              "ASSIGNMENT_DIVERGENCE_QUARANTINED",
+		ProjectID:           s.projectID,
+		Lane:                s.lane,
+		ScaleSetName:        s.scaleSetName,
+		ScaleSetID:          s.scaleSetID,
+		TotalAssignedJobs:   stats.TotalAssignedJobs,
+		ReconstructableJobs: reconstructableAssignedCount(active, pending),
+		ActiveCount:         active,
+		PendingCount:        pending,
+		Reason:              "github_assigned_count_exceeds_complete_reconstructable_jobs",
+		ObservedAt:          time.Now().UTC().Format(time.RFC3339Nano),
+	}
+	if err := atomicWriteJSON(s.quarantinePath(), receipt); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	s.quarantined = true
+	s.quarantineID = receiptID
+	s.mu.Unlock()
+	s.logger.Error(
+		"Admission-v2 lane quarantined on assignment divergence",
+		slog.String("quarantine_receipt_id", receiptID),
+		slog.Int("total_assigned_jobs", stats.TotalAssignedJobs),
+		slog.Int("reconstructable_jobs", receipt.ReconstructableJobs),
+	)
+	return nil
+}
+
+func (s *scaler) resolveQuarantineFromCompleteMetadata(
+	stats *scaleset.RunnerScaleSetStatistic,
+	active int,
+	pending int,
+) error {
+	if stats == nil || stats.TotalAssignedJobs <= 0 {
+		return fmt.Errorf("quarantine cannot auto-resolve without assigned jobs")
+	}
+	reconstructable := reconstructableAssignedCount(active, pending)
+	if reconstructable < stats.TotalAssignedJobs {
+		return fmt.Errorf("quarantine remains ambiguous")
+	}
+	s.mu.Lock()
+	receiptID := s.quarantineID
+	s.mu.Unlock()
+	resolved := map[string]any{
+		"schema_version": 1,
+		"receipt_id": receiptID,
+		"status": "RESOLVED_BY_COMPLETE_METADATA",
+		"project_id": s.projectID,
+		"lane": s.lane,
+		"scale_set_name": s.scaleSetName,
+		"scale_set_id": s.scaleSetID,
+		"total_assigned_jobs": stats.TotalAssignedJobs,
+		"reconstructable_jobs": reconstructable,
+		"resolved_at": time.Now().UTC().Format(time.RFC3339Nano),
+	}
+	if err := atomicWriteJSON(
+		filepath.Join(s.stateDir, "resolved-"+receiptID+".json"),
+		resolved,
+	); err != nil {
+		return err
+	}
+	if err := os.Remove(s.quarantinePath()); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("remove resolved quarantine: %w", err)
+	}
+	s.mu.Lock()
+	s.quarantined = false
+	s.quarantineID = ""
+	s.mu.Unlock()
+	s.logger.Info(
+		"Admission-v2 quarantine resolved from complete authoritative metadata",
+		slog.String("quarantine_receipt_id", receiptID),
+	)
+	return nil
+}
+
+func scaleSetStatisticsZero(stats *scaleset.RunnerScaleSetStatistic) bool {
+	return stats != nil &&
+		stats.TotalAvailableJobs == 0 &&
+		stats.TotalAcquiredJobs == 0 &&
+		stats.TotalAssignedJobs == 0 &&
+		stats.TotalRunningJobs == 0 &&
+		stats.TotalRegisteredRunners == 0 &&
+		stats.TotalBusyRunners == 0 &&
+		stats.TotalIdleRunners == 0
+}
+
+func (s *scaler) recoveryZeroPath() string {
+	return filepath.Join(s.stateDir, "reset-zero-observation.json")
+}
+
+func (s *scaler) readyForSingleRetryPath() string {
+	return filepath.Join(s.stateDir, "ready-for-single-retry.json")
+}
+
+func (s *scaler) observeResetPending(
+	msg *scaleset.RunnerScaleSetMessage,
+	active int,
+	pending int,
+) (bool, error) {
+	s.mu.Lock()
+	generation := s.resetGeneration
+	oldScaleSetID := s.resetOldScaleSetID
+	pendingPath := s.resetPendingPath
+	receiptID := s.quarantineID
+	s.mu.Unlock()
+	if generation == "" || pendingPath == "" || receiptID == "" {
+		return false, fmt.Errorf("reset-pending state is incomplete")
+	}
+
+	zero := scaleSetStatisticsZero(msg.Statistics) &&
+		active == 0 &&
+		pending == 0 &&
+		len(msg.JobAvailableMessages) == 0 &&
+		len(msg.JobAssignedMessages) == 0 &&
+		len(msg.JobStartedMessages) == 0
+	if !zero {
+		if err := os.Remove(s.recoveryZeroPath()); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return false, fmt.Errorf("clear interrupted zero-state observation: %w", err)
+		}
+		return false, nil
+	}
+
+	now := time.Now().UTC()
+	firstRaw, err := os.ReadFile(s.recoveryZeroPath())
+	if errors.Is(err, os.ErrNotExist) {
+		first := recoveryZeroObservation{
+			SchemaVersion:   1,
+			ResetGeneration: generation,
+			ScaleSetID:      s.scaleSetID,
+			ObservedAt:      now.Format(time.RFC3339Nano),
+		}
+		if err := atomicWriteJSON(s.recoveryZeroPath(), first); err != nil {
+			return false, err
+		}
+		s.logger.Info(
+			"Recorded first recovery zero-state observation",
+			slog.String("reset_generation", generation),
+			slog.Int("scale_set_id", s.scaleSetID),
+		)
+		return false, nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("read first recovery zero-state observation: %w", err)
+	}
+	var first recoveryZeroObservation
+	if err := json.Unmarshal(firstRaw, &first); err != nil {
+		return false, fmt.Errorf("parse first recovery zero-state observation: %w", err)
+	}
+	if first.SchemaVersion != 1 ||
+		first.ResetGeneration != generation ||
+		first.ScaleSetID != s.scaleSetID {
+		return false, fmt.Errorf("recovery zero-state observation identity mismatch")
+	}
+	firstAt, err := time.Parse(time.RFC3339Nano, first.ObservedAt)
+	if err != nil {
+		return false, fmt.Errorf("parse first recovery zero-state timestamp: %w", err)
+	}
+	if now.Sub(firstAt) < 15*time.Second {
+		return false, nil
+	}
+
+	ready := map[string]any{
+		"schema_version": 1,
+		"status": "READY_FOR_SINGLE_RETRY",
+		"receipt_id": receiptID,
+		"project_id": s.projectID,
+		"lane": s.lane,
+		"scale_set_name": s.scaleSetName,
+		"old_scale_set_id": oldScaleSetID,
+		"new_scale_set_id": s.scaleSetID,
+		"reset_generation": generation,
+		"first_zero_observed_at": first.ObservedAt,
+		"second_zero_observed_at": now.Format(time.RFC3339Nano),
+		"automatic_workflow_triggered": false,
+	}
+	if err := atomicWriteJSON(s.readyForSingleRetryPath(), ready); err != nil {
+		return false, err
+	}
+	if err := os.Remove(pendingPath); err != nil {
+		return false, fmt.Errorf("remove reset-pending receipt after ready proof: %w", err)
+	}
+	if err := os.Remove(s.recoveryZeroPath()); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return false, fmt.Errorf("remove recovery zero observation: %w", err)
+	}
+	s.mu.Lock()
+	s.quarantined = false
+	s.recoveryPending = false
+	s.resetGeneration = ""
+	s.resetOldScaleSetID = 0
+	s.resetPendingPath = ""
+	s.mu.Unlock()
+	s.logger.Info(
+		"Recovery reached READY_FOR_SINGLE_RETRY",
+		slog.String("quarantine_receipt_id", receiptID),
+		slog.String("reset_generation", generation),
+		slog.Int("old_scale_set_id", oldScaleSetID),
+		slog.Int("new_scale_set_id", s.scaleSetID),
+	)
+	return true, nil
+}
+
+func (s *scaler) consumeReadyForSingleRetry(
+	attestation controllerAttestation,
+) error {
+	path := s.readyForSingleRetryPath()
+	raw, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("read recovery retry gate: %w", err)
+	}
+	var receipt map[string]any
+	if err := json.Unmarshal(raw, &receipt); err != nil {
+		return fmt.Errorf("parse recovery retry gate: %w", err)
+	}
+	status, _ := receipt["status"].(string)
+	if status == "RECOVERY_RETRY_COMPLETED" {
+		return nil
+	}
+	if status == "RECOVERY_RETRY_ACQUIRED" {
+		jobID, _ := receipt["job_id"].(string)
+		runID, _ := receipt["workflow_run_id"].(float64)
+		if jobID == attestation.JobID &&
+			int64(runID) == attestation.WorkflowRunID {
+			return nil
+		}
+		return fmt.Errorf(
+			"recovery retry generation already consumed by job %q workflow_run_id=%d",
+			jobID,
+			int64(runID),
+		)
+	}
+	if status != "READY_FOR_SINGLE_RETRY" {
+		return fmt.Errorf("recovery retry gate status is invalid: %q", status)
+	}
+	if receipt["project_id"] != s.projectID ||
+		receipt["lane"] != s.lane ||
+		receipt["scale_set_name"] != s.scaleSetName {
+		return fmt.Errorf("recovery retry gate identity mismatch")
+	}
+	newID, ok := receipt["new_scale_set_id"].(float64)
+	if !ok || int(newID) != s.scaleSetID {
+		return fmt.Errorf("recovery retry gate scale-set mismatch")
+	}
+	receipt["status"] = "RECOVERY_RETRY_ACQUIRED"
+	receipt["job_id"] = attestation.JobID
+	receipt["workflow_run_id"] = attestation.WorkflowRunID
+	receipt["acquired_at"] = time.Now().UTC().Format(time.RFC3339Nano)
+	receipt["automatic_workflow_triggered"] = false
+	if err := atomicWriteJSON(path, receipt); err != nil {
+		return fmt.Errorf("consume recovery retry gate: %w", err)
+	}
+	s.logger.Info(
+		"Consumed recovery generation with first acquired job",
+		slog.String("job_id", attestation.JobID),
+		slog.Int64("workflow_run_id", attestation.WorkflowRunID),
+	)
+	return nil
+}
+
+func (s *scaler) completeRecoveryRetry(job *scaleset.JobCompleted) error {
+	if job == nil || job.JobID == "" {
+		return nil
+	}
+	path := s.readyForSingleRetryPath()
+	raw, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("read recovery retry receipt: %w", err)
+	}
+	var receipt map[string]any
+	if err := json.Unmarshal(raw, &receipt); err != nil {
+		return fmt.Errorf("parse recovery retry receipt: %w", err)
+	}
+	status, _ := receipt["status"].(string)
+	if status == "RECOVERY_RETRY_COMPLETED" {
+		return nil
+	}
+	if status != "RECOVERY_RETRY_ACQUIRED" {
+		return nil
+	}
+	if receipt["job_id"] != job.JobID {
+		return nil
+	}
+	receipt["status"] = "RECOVERY_RETRY_COMPLETED"
+	receipt["result"] = job.Result
+	receipt["runner_name"] = job.RunnerName
+	receipt["completed_at"] = time.Now().UTC().Format(time.RFC3339Nano)
+	if err := atomicWriteJSON(path, receipt); err != nil {
+		return fmt.Errorf("complete recovery retry receipt: %w", err)
+	}
+	s.logger.Info(
+		"Recovery retry reached terminal state",
+		slog.String("job_id", job.JobID),
+		slog.String("result", job.Result),
+	)
+	return nil
 }
 
 func recoveryMetadataComplete(job *scaleset.JobMessageBase) bool {
@@ -500,17 +1104,165 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		return nil
 	}
 
+	if s.admissionV2 {
+		if s.attestor == nil {
+			return fmt.Errorf("admission v2 enabled without GitHub attestor")
+		}
+		s.mu.Lock()
+		recoveryPendingAtStart := s.recoveryPending
+		s.mu.Unlock()
+		// During reset-pending recovery, even complete lifecycle metadata is
+		// observation-only until two durable zero-state observations prove a
+		// fresh empty scale set. Do not reconstruct/acquire work in this mode.
+		if !recoveryPendingAtStart {
+		// Recover complete assigned-job identities before considering any new
+		// JobAvailable acquisition. Sparse aggregate assigned state is never
+		// execution authority.
+		for _, assigned := range msg.JobAssignedMessages {
+			s.mu.Lock()
+			capacity := maxRunners - reconstructableAssignedCount(len(s.active), len(s.pending))
+			s.mu.Unlock()
+			if capacity <= 0 {
+				continue
+			}
+			if !recoveryMetadataComplete(&assigned.JobMessageBase) {
+				s.logger.Warn(
+					"Incomplete JobAssigned recovery metadata is non-authoritative",
+					slog.Int64("runner_request_id", assigned.RunnerRequestID),
+					slog.Int64("workflow_run_id", assigned.WorkflowRunID),
+					slog.Bool("job_id_present", assigned.JobID != ""),
+					slog.Bool("workflow_ref_present", assigned.JobWorkflowRef != ""),
+					slog.Bool("display_name_present", assigned.JobDisplayName != ""),
+				)
+				continue
+			}
+			workload, err := workloadForDisplayClaim(assigned.JobDisplayName)
+			if err != nil {
+				return fmt.Errorf("derive assigned workload: %w", err)
+			}
+			attestation, err := s.attestor.Attest(
+				ctx,
+				&assigned.JobMessageBase,
+				s.scaleSetName,
+				workload,
+			)
+			if err != nil {
+				if errors.Is(err, errTerminalWorkflowJob) {
+					s.logger.Info(
+						"Ignoring terminal JobAssigned recovery metadata",
+						slog.Int64("runner_request_id", assigned.RunnerRequestID),
+						slog.Int64("workflow_run_id", assigned.WorkflowRunID),
+						slog.String("reason", err.Error()),
+					)
+					continue
+				}
+				return fmt.Errorf("attest assigned job recovery metadata: %w", err)
+			}
+			jobKey := attestation.JobID
+			s.mu.Lock()
+			if _, exists := s.pending[jobKey]; !exists {
+				s.pending[jobKey] = pendingAdmissionJob{
+					Metadata:    assigned.JobMessageBase,
+					Attestation: attestation,
+					Workload:    workload,
+				}
+			}
+			s.mu.Unlock()
+			if err := s.consumeReadyForSingleRetry(attestation); err != nil {
+				return fmt.Errorf("consume recovery retry on assigned recovery: %w", err)
+			}
+		}
+		}
+	}
+
+	// Apply lifecycle state before divergence detection so completed work does
+	// not look reconstructable and started work is represented by active state.
+	s.mu.Lock()
+	if s.admissionV2 {
+		for _, started := range msg.JobStartedMessages {
+			s.clearPendingRunner(started.RunnerName)
+		}
+	}
+	for _, completed := range msg.JobCompletedMessages {
+		delete(s.active, completed.RunnerName)
+		if s.admissionV2 {
+			s.clearPendingRunner(completed.RunnerName)
+			if err := s.completeRecoveryRetry(completed); err != nil {
+				s.mu.Unlock()
+				return fmt.Errorf("complete recovery retry lifecycle: %w", err)
+			}
+		}
+	}
+	activeCount := len(s.active)
+	pendingCount := len(s.pending)
+	quarantined := s.quarantined
+	quarantineID := s.quarantineID
+	recoveryPending := s.recoveryPending
+	s.mu.Unlock()
+
+	if s.admissionV2 && recoveryPending {
+		ready, err := s.observeResetPending(msg, activeCount, pendingCount)
+		if err != nil {
+			return fmt.Errorf("observe reset-pending zero state: %w", err)
+		}
+		if !ready {
+			s.logger.Warn(
+				"Admission-v2 lane remains reset-pending quarantined",
+				slog.String("quarantine_receipt_id", quarantineID),
+				slog.Int("scale_set_id", s.scaleSetID),
+			)
+		}
+		// Even the second zero observation only opens the retry gate; never
+		// acquire a job from the same message that transitions the state.
+		return nil
+	}
+
+	if s.admissionV2 {
+		reconstructable := reconstructableAssignedCount(activeCount, pendingCount)
+		assignedReported := 0
+		if msg.Statistics != nil {
+			assignedReported = msg.Statistics.TotalAssignedJobs
+		}
+		if quarantined {
+			// A quarantined lane may clear itself only when complete,
+			// independently re-attested metadata reconstructs every currently
+			// assigned job. A later aggregate zero alone is not sufficient.
+			if assignedReported > 0 && reconstructable >= assignedReported {
+				if err := s.resolveQuarantineFromCompleteMetadata(
+					msg.Statistics,
+					activeCount,
+					pendingCount,
+				); err != nil {
+					return fmt.Errorf("resolve assignment quarantine: %w", err)
+				}
+			} else {
+				s.logger.Warn(
+					"Admission-v2 lane remains quarantined; refusing new acquisition",
+					slog.String("quarantine_receipt_id", quarantineID),
+					slog.Int("total_assigned_jobs", assignedReported),
+					slog.Int("reconstructable_jobs", reconstructable),
+				)
+				return nil
+			}
+		} else if msg.Statistics != nil && assignedReported > reconstructable {
+			if err := s.persistAssignmentQuarantine(
+				msg.Statistics,
+				activeCount,
+				pendingCount,
+			); err != nil {
+				return fmt.Errorf("persist assignment quarantine: %w", err)
+			}
+			return nil
+		}
+	}
+
 	if len(msg.JobAvailableMessages) > 0 {
 		requestIDs := make([]int64, 0, len(msg.JobAvailableMessages))
 		stagedKeys := make([]string, 0, len(msg.JobAvailableMessages))
 
 		if s.admissionV2 {
-			if s.attestor == nil {
-				return fmt.Errorf("admission v2 enabled without GitHub attestor")
-			}
-
 			s.mu.Lock()
-			capacity := maxRunners - len(s.active) - len(s.pending)
+			capacity := maxRunners - reconstructableAssignedCount(len(s.active), len(s.pending))
 			s.mu.Unlock()
 
 			for _, job := range msg.JobAvailableMessages {
@@ -570,83 +1322,29 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				}
 				return fmt.Errorf("acquire jobs: %w", err)
 			}
-		}
-	}
-
-	if s.admissionV2 {
-		if s.attestor == nil {
-			return fmt.Errorf("admission v2 enabled without GitHub attestor")
-		}
-		for _, assigned := range msg.JobAssignedMessages {
-			s.mu.Lock()
-			capacity := maxRunners - len(s.active) - len(s.pending)
-			s.mu.Unlock()
-			if capacity <= 0 {
-				continue
-			}
-			if !recoveryMetadataComplete(&assigned.JobMessageBase) {
-				s.logger.Warn(
-					"Ignoring incomplete JobAssigned recovery metadata",
-					slog.Int64("runner_request_id", assigned.RunnerRequestID),
-					slog.Int64("workflow_run_id", assigned.WorkflowRunID),
-					slog.Bool("job_id_present", assigned.JobID != ""),
-					slog.Bool("workflow_ref_present", assigned.JobWorkflowRef != ""),
-					slog.Bool("display_name_present", assigned.JobDisplayName != ""),
-				)
-				continue
-			}
-			workload, err := workloadForDisplayClaim(assigned.JobDisplayName)
-			if err != nil {
-				return fmt.Errorf("derive assigned workload: %w", err)
-			}
-			attestation, err := s.attestor.Attest(
-				ctx,
-				&assigned.JobMessageBase,
-				s.scaleSetName,
-				workload,
-			)
-			if err != nil {
-				if errors.Is(err, errTerminalWorkflowJob) {
-					s.logger.Info(
-						"Ignoring terminal JobAssigned recovery metadata",
-						slog.Int64("runner_request_id", assigned.RunnerRequestID),
-						slog.Int64("workflow_run_id", assigned.WorkflowRunID),
-						slog.String("reason", err.Error()),
+			if s.admissionV2 {
+				if len(stagedKeys) != 1 {
+					return fmt.Errorf(
+						"admission-v2 acquired unexpected staged job count: %d",
+						len(stagedKeys),
 					)
-					continue
 				}
-				return fmt.Errorf("attest assigned job recovery metadata: %w", err)
-			}
-			jobKey := attestation.JobID
-			s.mu.Lock()
-			if _, exists := s.pending[jobKey]; !exists {
-				s.pending[jobKey] = pendingAdmissionJob{
-					Metadata:    assigned.JobMessageBase,
-					Attestation: attestation,
-					Workload:    workload,
+				s.mu.Lock()
+				acquired := s.pending[stagedKeys[0]]
+				s.mu.Unlock()
+				if err := s.consumeReadyForSingleRetry(acquired.Attestation); err != nil {
+					return fmt.Errorf("consume recovery retry after acquire: %w", err)
 				}
 			}
-			s.mu.Unlock()
 		}
 	}
 
 	s.mu.Lock()
-	if s.admissionV2 {
-		for _, started := range msg.JobStartedMessages {
-			s.clearPendingRunner(started.RunnerName)
-		}
-	}
-	for _, completed := range msg.JobCompletedMessages {
-		delete(s.active, completed.RunnerName)
-		if s.admissionV2 {
-			s.clearPendingRunner(completed.RunnerName)
-		}
-	}
 	current := len(s.active)
-	pendingCount := len(s.pending)
+	pendingCount = len(s.pending)
 	s.mu.Unlock()
 
-	target := desiredRunnerTarget(msg.Statistics, pendingCount)
+	target := desiredRunnerTarget(msg.Statistics, pendingCount, current, s.admissionV2)
 	if target <= 0 {
 		s.mu.Lock()
 		clear(s.active)
@@ -675,7 +1373,9 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		if s.admissionV2 {
 			pendingKey, pendingJob, pendingOK = s.nextPendingAdmission()
 			if !pendingOK {
-				s.logger.Info("Admission v2 waiting for pre-attested job metadata")
+				// This is intentionally non-authoritative even if aggregate
+				// GitHub statistics still report an assigned job.
+				s.logger.Info("Admission v2 waiting for complete pre-attested job metadata")
 				return nil
 			}
 			attestation = pendingJob.Attestation
@@ -854,9 +1554,6 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			pendingJob.RunnerName = name
 			s.pending[pendingKey] = pendingJob
 		}
-		// Keep canonical pending admission identity until JobStarted so
-		// lifecycle-specific runnerRequestId omissions or reassignments cannot
-		// create a second root grant for the same verified workflow job.
 		current = len(s.active)
 		s.mu.Unlock()
 
@@ -909,20 +1606,30 @@ func runController(ctx context.Context, cfg config, logger *slog.Logger) error {
 		}
 	}
 
+	if err := os.MkdirAll(cfg.StateDir, 0o700); err != nil {
+		return fmt.Errorf("create controller state directory: %w", err)
+	}
 	s := &scaler{
 		active:          make(map[string]string),
 		client:          client,
 		sessionClient:   sessionClient,
 		scaleSetID:      scaleSet.ID,
 		projectID:       cfg.ProjectID,
+		lane:            cfg.Lane,
 		profile:         cfg.Profile,
 		scaleSetName:    cfg.ScaleSetName,
 		runnerPrefix:    cfg.RunnerPrefix,
 		provisionerSock: cfg.ProvisionerSock,
+		stateDir:        cfg.StateDir,
 		admissionV2:     cfg.AdmissionV2,
 		attestor:        attestor,
 		pending:         make(map[string]pendingAdmissionJob),
 		logger:          logger.WithGroup("scaler"),
+	}
+	if cfg.AdmissionV2 {
+		if err := s.loadQuarantine(); err != nil {
+			return fmt.Errorf("load controller quarantine state: %w", err)
+		}
 	}
 
 	logger.Info(
@@ -931,6 +1638,8 @@ func runController(ctx context.Context, cfg config, logger *slog.Logger) error {
 		slog.String("scale_set_name", cfg.ScaleSetName),
 		slog.Int("max_runners", maxRunners),
 		slog.Bool("admission_v2", cfg.AdmissionV2),
+		slog.String("controller_state_dir", cfg.StateDir),
+		slog.Bool("quarantined", s.quarantined),
 	)
 
 	if err := l.Run(ctx, s); !errors.Is(err, context.Canceled) {
@@ -945,10 +1654,18 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
+	if len(os.Args) == 2 && os.Args[1] == "--scale-set-maintenance" {
+		if err := runScaleSetMaintenance(ctx, cfg); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	if err := runController(ctx, cfg, logger); err != nil {
 		logger.Error("controller exited", slog.String("error", err.Error()))
 		os.Exit(1)

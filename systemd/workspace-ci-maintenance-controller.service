@@ -1,0 +1,59 @@
+[Unit]
+Description=Workspace CI outbound-only bounded maintenance controller
+Documentation=https://github.com/adamtrott78/workspace-control
+Requires=workspace-ci-maintenance.service
+After=network-online.target workspace-ci-maintenance.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ci-maintenance
+Group=workspace-ci-maintenance
+EnvironmentFile=/etc/workspace-ci/maintenance-controller.env
+ExecStart=/opt/workspace-ci/maintenance-controller/lambda_ci_maintenance_controller.py --issue-number ${WORKSPACE_CI_MAINTENANCE_ISSUE_NUMBER}
+Restart=on-failure
+RestartSec=5s
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+ProtectProc=invisible
+ProcSubset=pid
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+IPAddressAllow=127.0.0.53/32
+IPAddressDeny=127.0.0.0/8
+IPAddressDeny=::1/128
+IPAddressDeny=10.0.0.0/8
+IPAddressDeny=172.16.0.0/12
+IPAddressDeny=192.168.0.0/16
+IPAddressDeny=100.64.0.0/10
+IPAddressDeny=169.254.0.0/16
+IPAddressDeny=fe80::/10
+IPAddressDeny=fc00::/7
+ReadOnlyPaths=/etc/workspace-ci/controllers
+ReadOnlyPaths=/etc/workspace-ci/maintenance-controller.env
+ReadOnlyPaths=/var/lib/workspace-ci/maintenance-controller/github-read-token
+ReadOnlyPaths=/var/lib/workspace-ci/maintenance-controller/runner-token
+ReadOnlyPaths=/opt/workspace-ci/controller/lambda-ci-controller
+ReadWritePaths=/var/lib/workspace-ci/maintenance-controller
+InaccessiblePaths=/home/atrott /var/run/docker.sock /run/docker.sock /srv/workspace-ci /var/lib/workspace-ci/provisioner /var/lib/workspace-ci/reconciler /var/lib/workspace-ci/controller
+DevicePolicy=closed
+TasksMax=128
+MemoryMax=256M
+CPUQuota=100%
+
+[Install]
+WantedBy=multi-user.target

@@ -20,13 +20,34 @@ def git_blob_sha(data: bytes) -> str:
 class Run3BootRecoveryHotfixTests(unittest.TestCase):
     def test_manifest_binds_exact_recovery_sources(self):
         self.assertEqual(MANIFEST["status"], "VALIDATED_HOTFIX_INPUT")
+        evolved_after_recovery = {
+            "scripts/lambda_ci_reconciler.py":
+                "e58d0ccd3e11df99dc22b9069d16b1a03c4d3a2d",
+            "systemd/workspace-ci-reconciler.service":
+                "a81b758dd2f735fbe72085e3ae3c7529e10152a1",
+            "systemd/workspace-ci-tmpfiles.conf":
+                "eb6ddec43bdeead39c7af91f052c3f1a2602ebf2",
+        }
         for item in MANIFEST["source_blobs"]:
             path = ROOT / item["path"]
-            self.assertEqual(
-                item["git_blob_sha"],
-                git_blob_sha(path.read_bytes()),
-                item["path"],
-            )
+            current = git_blob_sha(path.read_bytes())
+            if item["path"] in evolved_after_recovery:
+                self.assertEqual(
+                    item["git_blob_sha"],
+                    evolved_after_recovery[item["path"]],
+                    item["path"],
+                )
+                self.assertNotEqual(
+                    item["git_blob_sha"],
+                    current,
+                    f"{item['path']} is historical recovery input and now intentionally evolved",
+                )
+            else:
+                self.assertEqual(
+                    item["git_blob_sha"],
+                    current,
+                    item["path"],
+                )
 
     def test_tmpfiles_contract_recreates_shared_runtime_parent(self):
         value = (ROOT / "systemd" / "workspace-ci-tmpfiles.conf").read_text()

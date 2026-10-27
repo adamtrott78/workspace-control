@@ -98,6 +98,15 @@
         "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
         "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
       ]
+    },
+    "control-small": {
+      "CPUQuota": "200%",
+      "MemoryHigh": "4G",
+      "MemoryMax": "8G",
+      "TasksMax": 1024,
+      "RuntimeMaxSec": "10min",
+      "DeviceAllow": [],
+      "CUDA_VISIBLE_DEVICES": ""
     }
   },
   "unresolved_before_activation": [

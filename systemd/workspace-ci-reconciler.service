@@ -31,6 +31,7 @@ LockPersonality=yes
 RestrictAddressFamilies=AF_UNIX AF_NETLINK
 ReadWritePaths=/run/workspace-ci
 ReadWritePaths=/var/lib/workspace-ci/reconciler
+ReadWritePaths=/var/lib/workspace-ci/controller/state
 ReadWritePaths=/etc
 ReadWritePaths=/srv/workspace-ci
 ReadOnlyPaths=/opt/workspace-ci /usr /bin /lib /lib64

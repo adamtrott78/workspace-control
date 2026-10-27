@@ -22,10 +22,30 @@ class MultiRepoRun3MigrationTests(unittest.TestCase):
         self.assertEqual(INSTALL["status"], "RUN3_VALIDATED_INSTALL_INPUT")
         self.assertFalse(INSTALL["padataset_activation_allowed"])
         frozen_run3_policy = {
+            "controller/lambda-ci-controller/main.go":
+                "a1f05f3c69a8168fb6cbeeb981ed7d28299d9324",
+            "scripts/lambda_ci_runtime.py":
+                "89cdc45f7f96129a315e0c00253d547a23fb17fb",
+            "scripts/lambda_ci_reconciler.py":
+                "e58d0ccd3e11df99dc22b9069d16b1a03c4d3a2d",
+            "systemd/workspace-ci-reconciler.service":
+                "a81b758dd2f735fbe72085e3ae3c7529e10152a1",
+            "systemd/workspace-ci-tmpfiles.conf":
+                "eb6ddec43bdeead39c7af91f052c3f1a2602ebf2",
             "architecture/lambda-ci-project-registry.v1.json":
                 "762805a1d33bbd7e666377b13680116d1051b4ab",
+            "architecture/lambda-ci-execution-contracts.v1.json":
+                "9eeb0ef9223821f1768350e24891eeb3bc72a940",
+            "architecture/lambda-ci-reconciliation-ceiling.v1.json":
+                "b22be2d12de0a1ea948c1224c20f27396ca0f4c8",
             "architecture/lambda-ci-project-padataset.v1.json":
                 "63ba5e54e0489426efda3a05259792f22c95f85f",
+            "architecture/lambda-ci-systemd-profiles.v1.json":
+                "976a715efc5a3ef3c07bceeff39f5e751316e5c0",
+            "architecture/lambda-ci-workload-policy.v1.json":
+                "71bd0bb9c63436964462b1f9b889686ac328ee1d",
+            ".github/workflows/lambda-ci-project-reconcile.yml":
+                "c8b8baef1955ad2a8bd409756298f0703b85f270",
         }
         seen = set()
         for item in INSTALL["source_blobs"]:
@@ -41,7 +61,7 @@ class MultiRepoRun3MigrationTests(unittest.TestCase):
                 self.assertNotEqual(
                     item["git_blob_sha"],
                     git_blob_sha((ROOT / path).read_bytes()),
-                    f"{path} must evolve only through reconciliation after Run 3",
+                    f"{path} is frozen historical Run-3 input and must not be silently rewritten",
                 )
             else:
                 self.assertEqual(
