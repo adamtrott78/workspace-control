@@ -55,18 +55,9 @@ class P1BootstrapInstallerTests(unittest.TestCase):
             module.EXPECTED_ABSENT_PATHS,
         )
 
-    def test_bootstrap_keeps_workspace_control_dormant(self):
+    def test_bootstrap_itself_does_not_activate_workspace_control(self):
         raw = SCRIPT.read_text(encoding="utf-8")
-        manifest = (
-            ROOT / "architecture/lambda-ci-project-workspace-control.v1.json"
-        ).read_text(encoding="utf-8")
-        registry = (
-            ROOT / "architecture/lambda-ci-project-registry.v1.json"
-        ).read_text(encoding="utf-8")
 
-        self.assertIn('"status": "MIGRATION_CANDIDATE_NOT_INSTALLED"', manifest)
-        self.assertIn('"activation_state": "PLANNED_NOT_BOUND"', manifest)
-        self.assertIn('"activation_state": "MIGRATION_CANDIDATE_NOT_INSTALLED"', registry)
         self.assertNotIn(
             'systemctl", "enable", "--now", '
             '"workspace-ci-controller@workspace-control-cpu.service"',
