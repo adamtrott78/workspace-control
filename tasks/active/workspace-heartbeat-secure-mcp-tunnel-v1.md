@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-Start from workspace-control main and the existing workspace-heartbeat-executor-liveness-v1 capsule. Recover exact live Heartbeat runtime/launcher provenance on Lambda without restarting it solely for discovery. Map the traffic paths: distinguish heartbeat_touch model tool calls from the approximately one-second live-card/app snapshot poll and any other requests to the public ngrok endpoint. Measure or tightly bound bytes/request and estimate monthly traffic before attributing the 1.02 GB incident. In parallel, verify the current official OpenAI Secure MCP Tunnel setup and limits. Then freeze a bounded outbound-only migration plan that preserves the one-second executor/card freshness UX and existing Heartbeat semantics. Do not touch GitRunner, automatic takeover, or unrelated workspace-control authority. Do not expose a new public Lambda endpoint.
+Resolve the actual Node child PID 1847970 executable/version and launcher ancestry read-only. Then run an isolated Heartbeat instance on a separate port using the verified runtime executable, measure heartbeat_snapshot serialized response bytes/cadence independently from model MCP calls at bounded history sizes, and only then test outbound-only Secure MCP Tunnel embedded app/resource behavior. Do not restart or mutate live :8787 for discovery.
 
 ## Remaining work
 
@@ -44,7 +44,8 @@ Start from workspace-control main and the existing workspace-heartbeat-executor-
 
 ## Blockers / gates
 
-- None.
+- Live source/CWD/port/ngrok process and rollback presence are verified. Exact child Node executable/version, launcher ancestry, and measured per-poll bytes remain open.
+- Secure MCP Tunnel tunnel ID/permissions/runtime key, embedded app resource delivery, app-only snapshot operation, and live ChatGPT acceptance remain unverified.
 
 ## Fresh-chat initialization
 
@@ -65,6 +66,7 @@ Follow the capsule's next_safe_action.
 - Source audit confirms app-only `heartbeat_snapshot` sends full bounded `turn_history` on each poll; the checked-in card schedules 1500 ms while working and 3500 ms otherwise after response. `heartbeat_touch` remains model-only and silent.
 - Official Secure MCP Tunnel defaults verified: outbound HTTPS; 600 MCP requests/minute, 10 MiB serialized envelope, 120-second deadline, 1,000 queued. Embedded live-card app behavior over that transport remains unproven.
 - Heartbeat `begin_turn` attempt failed HTTP 403 at ngrok-free.dev. No new turn ID, host restart, or network cutover.
-- Historical Lambda v0.4.7 / Node v20.20.2 / port 8787 host evidence is **not** proof of present process identity. Current live launcher/source/rollback and response bytes are still unverified.
-- See `procedures/workspace_heartbeat_secure_mcp_tunnel.md` at `4ecba691b6560c31ddba4b02e7c0223726306745` for full traffic-budget scenarios and isolated acceptance plan.
-- Next action: read-only Lambda provenance + measured bytes; isolated tunnel + embedded-app acceptance; no live change before both pass.
+- Fresh operator inspection at 2026-10-26T21:49:27-04:00 verifies local Heartbeat HTTP 200 on 127.0.0.1:8787, `node server.js` child PID 1847970, ngrok PID 1847986 forwarding the fixed ngrok-free.dev domain to 8787, runtime CWD `workspace-heartbeat-runtime-v047/plugins/workspace-heartbeat`, exact checkout `9e5858738a4fd11801510e2839b0f94f19541506`, package v0.4.7, and v0.4.6 rollback directory presence.
+- Login-shell Node is v12.22.9, but the prior probe captured launcher shell PID 1847969 rather than the Node child. Exact child executable/version and launcher ancestry remain to verify.
+- See `procedures/workspace_heartbeat_secure_mcp_tunnel.md` for the current evidence and isolated acceptance plan.
+- Next action: resolve child Node/launcher, then isolated payload measurement; no live :8787 restart or tunnel cutover.
