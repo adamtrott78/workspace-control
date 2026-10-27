@@ -6,7 +6,7 @@
   "goal": "Eliminate routine dependence on metered GitHub-hosted runners by moving workspace-control and project CI onto bounded self-hosted Lambda execution while preserving a non-circular bootstrap authority, per-project isolation, fail-closed admission, review gates, and a clean path to GitHub organization runner groups. Also reduce operator copy/paste by making review targets and dispositions durable and GitHub-native.",
   "execution_topology": "remote_only",
   "workflow": null,
-  "current_stage": "p1_bootstrap_runuser_correction_review",
+  "current_stage": "workspace_control_selfhosted_validation_pilot",
   "acceptance_criteria": [
     "Immediate quota exhaustion is treated as an infrastructure availability failure only; scientific/implementation authority is not widened to bypass validation.",
     "The emergency public-repository window is temporary and does not weaken owner-only commands, exact SHA checks, same-repository PR-head checks, fork execution prohibitions, or other existing admission controls.",
