@@ -15,6 +15,7 @@ import lambda_ci_multirepo as multi
 import lambda_ci_provisioner as provisioner
 import lambda_ci_provisioner_service as provisioner_service
 import lambda_ci_reconciler as reconciler
+import lambda_ci_runtime as runtime
 
 REGISTRY = json.loads((ROOT / "architecture/lambda-ci-project-registry.v1.json").read_text())
 CONTRACTS = json.loads((ROOT / "architecture/lambda-ci-execution-contracts.v1.json").read_text())
@@ -159,6 +160,119 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         req = request_for(manifest, "heavy")
         with self.assertRaisesRegex(multi.MultiRepoPolicyError, "not admission-enabled"):
             multi.mint_admission(req, manifest, CONTRACTS, WORKLOAD)
+
+    def _workspace_control_cpu_launch(self):
+        manifest = copy.deepcopy(WORKSPACE)
+        manifest["status"] = "ACTIVE"
+        manifest["routes"]["control-validation"]["activation_state"] = "ACTIVE"
+        request = request_for(manifest, "control-validation")
+        validated = provisioner.validate_request_v2_generic(
+            request,
+            manifest,
+            CONTRACTS,
+            WORKLOAD,
+            now=datetime(2026, 10, 20, 0, 0, 5, tzinfo=timezone.utc),
+        )
+        spec = provisioner.build_generic_launch_spec(
+            validated,
+            manifest,
+            PROFILES,
+            PINS,
+        )
+        runner_dir = Path(spec["paths"]["job_root"]) / validated.request_id / "runner"
+        staging_dir = (
+            Path(spec["paths"]["staging_cache"]) / validated.request_id
+        )
+        command = runtime.build_cpu_systemd_command(
+            spec,
+            runner_dir,
+            staging_dir,
+            "192.0.2.0/24",
+        )
+        return manifest, spec, runner_dir, staging_dir, command
+
+    def test_workspace_control_cpu_launch_enforces_exact_forbidden_paths(self):
+        manifest, _spec, _runner_dir, _staging_dir, command = (
+            self._workspace_control_cpu_launch()
+        )
+        properties = [
+            command[index + 1]
+            for index, value in enumerate(command[:-1])
+            if value == "-p"
+        ]
+        inaccessible = [
+            value.split("=", 1)[1]
+            for value in properties
+            if value.startswith("InaccessiblePaths=")
+        ]
+        self.assertEqual(len(inaccessible), 1)
+        denied = inaccessible[0].split(" ")
+        self.assertEqual(denied, manifest["forbidden_paths"])
+
+        # Hiding each sibling project root also hides exact descendant trusted
+        # caches even though those host directories are intentionally 0755.
+        for sibling_cache in (
+            RESEARCH["roots"]["trusted_cache"],
+            PAD["roots"]["trusted_cache"],
+        ):
+            self.assertTrue(
+                any(
+                    sibling_cache == path
+                    or sibling_cache.startswith(path.rstrip("/") + "/")
+                    for path in denied
+                ),
+                sibling_cache,
+            )
+
+        # The same mount namespace must preserve this project's own roots.
+        for own_path in manifest["roots"].values():
+            self.assertFalse(
+                any(
+                    own_path == path
+                    or own_path.startswith(path.rstrip("/") + "/")
+                    for path in denied
+                ),
+                own_path,
+            )
+
+        self.assertIn("DevicePolicy=closed", properties)
+        self.assertIn("ProtectHome=yes", properties)
+
+    def test_workspace_control_cpu_launch_rejects_forbidden_ancestor_of_own_root(self):
+        _manifest, spec, runner_dir, staging_dir, _command = (
+            self._workspace_control_cpu_launch()
+        )
+        bad = copy.deepcopy(spec)
+        bad["forbidden_paths"] = ["/srv/workspace-ci/workspace-control"]
+        with self.assertRaisesRegex(
+            runtime.RuntimeLaunchError,
+            "overlaps a required project path",
+        ):
+            runtime.build_cpu_systemd_command(
+                bad,
+                runner_dir,
+                staging_dir,
+                "192.0.2.0/24",
+            )
+
+    def test_workspace_control_cpu_launch_rejects_malformed_forbidden_path(self):
+        _manifest, spec, runner_dir, staging_dir, _command = (
+            self._workspace_control_cpu_launch()
+        )
+        bad = copy.deepcopy(spec)
+        bad["forbidden_paths"] = [
+            "/srv/workspace-ci/research-engine\nMemoryMax=infinity"
+        ]
+        with self.assertRaisesRegex(
+            runtime.RuntimeLaunchError,
+            "unsafe characters",
+        ):
+            runtime.build_cpu_systemd_command(
+                bad,
+                runner_dir,
+                staging_dir,
+                "192.0.2.0/24",
+            )
 
     def test_reconciler_is_deterministic_for_active_projects_and_has_no_commands(self):
         plan = reconciler.plan_reconciliation(
