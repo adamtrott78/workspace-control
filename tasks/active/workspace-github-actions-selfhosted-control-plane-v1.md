@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 0e7c31b7a37949b1c0b33f7202fe8fd694685004
-- Remote verified: true
+- Remote branch: gitrunner-p1-bootstrap-preserve-recovered-cpu
+- Remote checkpoint: a4b1fc0c4062408873f557d215061b8f90a475b9
+- Remote verified: false
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge 0e7c31b7a37949b1c0b33f7202fe8fd694685004, with --expected-head set to that exact SHA and full output captured. The installer is authorized only for the reviewed bootstrap substrate: it must revalidate live fingerprint/credential scope/unhealthy research-engine CPU state before mutation, build before mutation, back up all touched targets, preserve the three healthy controllers, keep workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive, leave automatic reconcile-controller frozen on success, and rollback on any failed post-mutation gate. Return the complete output/receipt before any GitHub -> L0 diagnose or workspace-control activation.
+Validate the exact preserve-recovered-CPU bootstrap correction. Verify research-engine CPU is treated as a fourth preserved controller, excluded from MUTATED_SERVICES and from all stop/restart paths, requires two stable pre-mutation active/running observations with ExecMainStatus=0 and stable NRestarts >=11551, and remains restart-count-stable across bootstrap. If validation passes, obtain fresh independent review before retrying Lambda. Do not retry the installer until NO_BLOCKING_FINDING is durably recorded.
 
 ## Remaining work
 
@@ -49,7 +49,7 @@ Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exac
 
 ## Blockers / gates
 
-- The exact independently reviewed runuser correction is merged as workspace-control@0e7c31b7a37949b1c0b33f7202fe8fd694685004. The next gate is the bounded live bootstrap retry from that exact reviewed merge SHA; any drift/failure must fail closed/rollback.
+- Second live bootstrap retry from reviewed merge 0e7c31b7a37949b1c0b33f7202fe8fd694685004 aborted before mutation because research-engine CPU had recovered to active/running with ExecMainStatus=0 and NRestarts=11551. The installer correctly refused the previously-reviewed deliberate restart. A bounded preserve-recovered-CPU correction is implemented and requires exact validation plus fresh independent review before another retry.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
