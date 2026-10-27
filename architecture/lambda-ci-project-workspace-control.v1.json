@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "status": "MIGRATION_CANDIDATE_NOT_INSTALLED",
+  "status": "ACTIVE",
   "project_id": "workspace-control",
   "repository": "adamtrott78/workspace-control",
   "repository_visibility": "private",
@@ -40,7 +40,7 @@
   "concurrency": 1,
   "routes": {
     "control-validation": {
-      "activation_state": "PLANNED_NOT_BOUND",
+      "activation_state": "ACTIVE",
       "lane": "cpu",
       "execution_contract_id": "control-small-ci-v1",
       "trusted_workflow": {
