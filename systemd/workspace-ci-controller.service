@@ -50,6 +50,7 @@ IPAddressDeny=169.254.0.0/16
 IPAddressDeny=fe80::/10
 IPAddressDeny=fc00::/7
 ReadOnlyPaths=/var/lib/workspace-ci/controller/github-token
+ReadWritePaths=/var/lib/workspace-ci/controller/state
 InaccessiblePaths=/home/atrott /var/run/docker.sock /run/docker.sock
 DevicePolicy=closed
 TasksMax=256
