@@ -107,3 +107,17 @@ Preserve `heartbeat_snapshot(task_id, turn_id)` for compatibility/debug and init
 - Routine poll response target: bounded O(1) when no semantic delta. The exact byte budget must be measured after implementation; optimize field duplication if necessary, but do not weaken signal semantics.
 
 Implementation must add contract tests for no-change poll, single/multi-entry delta, retained-window resync, stale/wrong turn failure, and live-card behavior. Existing Node test suite and isolated :8788 byte benchmark must pass before tunnel testing.
+
+
+## Exact v0.4.8 Lambda Node validation — PASS; isolated benchmark interrupted
+
+Operator validation on exact candidate `def7c5fe6498b1bd742d912c1490d1f7160cab5f` under Node v20.20.2 completed **34/34 Workspace Heartbeat Node tests PASS**.
+
+The post-change byte benchmark did not execute because TCP `:8788` was already occupied. After reconnecting, the operator ran the existing `heartbeat-down` command, which stopped the production v0.4.7 `:8787` runtime. A subsequent rerun therefore failed its live precheck with connection refused on `:8787`. This is an operational interruption, not a v0.4.8 implementation/test failure.
+
+Recovery gate:
+1. restore only the previously verified v0.4.7 production runtime on :8787;
+2. verify exact source SHA and Node executable/version;
+3. identify (do not blindly kill) the process occupying :8788;
+4. choose a free isolated port if necessary and complete the v0.4.8 no-change/delta/resync byte benchmark;
+5. keep v0.4.8 out of the production launcher until isolated payload validation and Secure MCP Tunnel acceptance pass.
