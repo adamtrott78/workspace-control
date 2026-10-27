@@ -235,9 +235,10 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn("SO_PEERCRED", broker)
         self.assertIn('uid != int(cfg["frontend_uid"])', launcher)
         self.assertIn('peer_uid != int(cfg["frontend_uid"])', broker)
+        handle = broker[broker.index("def handle_request"):broker.index("def serve")]
         self.assertLess(
-            broker.index("consume_replay(replay_db, verified)"),
-            broker.index("execute_helper(cfg, verified)"),
+            handle.index("consume_replay(replay_db, verified)"),
+            handle.index("execute_helper(cfg, verified)"),
         )
         self.assertIn("requestCert: true", server)
         self.assertIn("rejectUnauthorized: true", server)
