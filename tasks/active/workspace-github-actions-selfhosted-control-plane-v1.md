@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Operator: execute scripts/lambda_ci_p1_quiesce_restart_storm.py from a detached exact checkout of reviewed merge e145c607ecf3fd3dc6cefdbdb91df8b364cac08a with --expected-head set to that exact SHA and capture full output. Do not run the bootstrap in the same shell command. Return the complete P1_RESEARCH_CPU_QUIESCE_RECEIPT. Only a receipt status of NO_QUIESCE_REQUIRED or QUIESCED_STABLE_INACTIVE may authorize a later retry of reviewed bootstrap merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd.
+Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd with --expected-head set to that exact SHA and capture full output. The just-reviewed quiesce receipt proved research-engine CPU is stable inactive/dead at NRestarts=12411 after a persistent storm 12409->12410->12411. The bootstrap must preserve that exact stable inactive state, must not deliberately start/restart the research-engine CPU controller, and must leave workspace-control MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive. Return the complete bootstrap output before any GitHub -> L0 diagnose or workspace-control activation.
 
 ## Remaining work
 
@@ -49,8 +49,7 @@ Operator: execute scripts/lambda_ci_p1_quiesce_restart_storm.py from a detached 
 
 ## Blockers / gates
 
-- PR #534 corrected pre-bootstrap restart-storm quiesce helper is independently accepted and merged as workspace-control@e145c607ecf3fd3dc6cefdbdb91df8b364cac08a. The next gate is one operator-executed quiesce helper run from that exact reviewed merge SHA, with receipt inspection before any bootstrap retry.
-- The independently reviewed P1 bootstrap merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd remains unchanged and may be retried only after a quiesce receipt proves NO_QUIESCE_REQUIRED or QUIESCED_STABLE_INACTIVE.
+- Live pre-bootstrap quiesce from reviewed merge e145c607ecf3fd3dc6cefdbdb91df8b364cac08a succeeded with QUIESCED_STABLE_INACTIVE. The next gate is one rollback-safe P1 bootstrap retry from exact reviewed merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd, with full receipt inspection before any later action.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
