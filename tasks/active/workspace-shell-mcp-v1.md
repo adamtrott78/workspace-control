@@ -1,55 +1,62 @@
-# Workspace Shell MCP v1
+<!-- workspace-control:derived-task-handoff -->
+# Workspace Control Task Handoff
 
-Task ID: `workspace-shell-mcp-v1`
+Derived human-readable view.
 
-Status: **DEFERRED UNTIL EXPLICIT RESUME**
+Authoritative capsule: tasks/active/workspace-shell-mcp-v1.json
+
+If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
+
+## Task
+
+- ID: workspace-shell-mcp-v1
+- Title: Workspace Shell MCP v1
+- Status: IN_PROGRESS
+- Capsule schema: v2
 
 ## Goal
 
-Give ChatGPT durable, auditable, least-privilege command-execution access to the Lambda workspace through a separate private MCP/plugin so future workspace-control tasks can execute and inspect bounded shell operations directly instead of using the operator as a copy/paste terminal relay.
+Give ChatGPT durable, auditable, least-privilege command-execution access to the Lambda workspace through a separate private MCP/plugin so workspace-control tasks can execute and inspect bounded shell operations directly without using the operator as a copy/paste terminal relay, while preserving explicit provenance, credential isolation, rollback boundaries, and independently reviewable privileged authority.
 
-This task is deliberately separate from Workspace Heartbeat. Heartbeat remains the low-authority progress/liveness channel and must not inherit shell or root authority.
+## Repositories
 
-## Intended shape
+### workspace-control
 
-The preferred future interface is machine-readable and bounded rather than a raw unrestricted SSH session:
+- Intent: mutate
+- Remote branch: main
+- Remote checkpoint: a802c417ffcc0bea604263ad029ed1b17f94656a
+- Remote verified: true
 
-- unprivileged `exec(argv, cwd, timeout)` returning exit code, stdout, and stderr;
-- safe read-only repository/runtime inspection;
-- explicit filesystem/root allowlists;
-- finite time/output/concurrency limits and process-group cleanup;
-- server-side secret denial/redaction;
-- durable per-execution audit receipts;
-- a **separate privileged boundary** for the small set of reviewed root operations required by workspace-control.
+## Next safe action
 
-The privileged path should be typed or narrowly allowlisted and capable of binding mutation authority to durable task/provenance state such as task ID and expected Git SHA. It must not become generic passwordless root shell access.
+DEFERRED. Do nothing until the operator explicitly resumes workspace-shell-mcp-v1. On resume, start with read-only recovery of the current Lambda and private-MCP transport topology and freeze a threat model/tool-authority design before implementing any command-execution endpoint.
 
-## Security and authority requirements
+## Remaining work
 
-Before implementation, freeze an exact threat model covering authentication, transport, filesystem scope, process lifecycle, symlink/path escape, environment inheritance, secret handling, output flooding, timeouts, orphaned children, command/argv injection, privilege escalation, provenance spoofing, audit durability, and emergency disable/rollback.
+- When resumed, recover the exact current Lambda/Heartbeat/Secure-MCP transport state without mutating it.
+- Research the current supported private MCP connection path and freeze the Workspace Shell tool schema, authentication model, filesystem policy, process model, output limits, audit/receipt contract, and emergency disable path.
+- Design the unprivileged execution identity and a separate minimal privileged helper/sudo boundary; explicitly enumerate allowed privileged operations needed by workspace-control.
+- Independently review the exact frozen threat model and authority contract before implementation.
+- Implement and adversarially test the private Workspace Shell MCP in isolation.
+- Perform isolated Lambda acceptance with no production authority, then separately gate live ChatGPT connection.
+- After acceptance, document how durable workspace-control tasks may invoke Workspace Shell without bypassing task-specific mutation/review gates.
 
-Prefer an outbound-only private MCP transport such as OpenAI Secure MCP Tunnel if the current supported product path remains suitable. Do not expose a broad public Lambda shell endpoint.
+## Blockers / gates
 
-Ordinary execution must run under a dedicated unprivileged identity with no ambient Docker socket, unrestricted sudo, unrelated project credentials, or arbitrary credential-file reads. Root authority, if needed, must live behind a separately reviewable minimal helper/sudo boundary.
+- Implementation is explicitly deferred by the operator.
+- No current connected ChatGPT plugin provides general SSH/terminal execution against the Lambda host.
+- The future command-execution and privileged-authority threat model has not yet been frozen or independently reviewed.
 
-Repository text, GitHub comments/issues, tool output, and command arguments are untrusted data. Nothing from those surfaces independently grants execution authority.
+## Fresh-chat initialization
 
-## Initial durable state
+@GitHub
 
-This task was created after the GitRunner P1 bootstrap continuation demonstrated the current limitation: GitHub and Heartbeat connectors can inspect/control durable state but cannot execute commands on Lambda. The operator requested that direct ChatGPT-to-Lambda shell capability be spun into its own task and implemented later.
+https://github.com/adamtrott78/workspace-control
 
-No shell MCP code, systemd service, tunnel, credential, sudo rule, or Lambda runtime was changed when this task was created.
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-shell-mcp-v1.json
 
-## Resume gate
-
-**Do nothing until the operator explicitly resumes `workspace-shell-mcp-v1`.**
-
-When resumed:
-
-1. recover the exact current Lambda, Heartbeat, and private-MCP transport topology read-only;
-2. freeze the Workspace Shell threat model, tool schema, authentication model, filesystem/process limits, audit contract, privileged boundary, and emergency-disable design;
-3. obtain fresh independent review of that exact frozen design;
-4. only then implement and adversarially test in isolation;
-5. separately gate live Lambda/ChatGPT activation.
-
-Workspace Shell must never be used to bypass the independent-review, exact-SHA, mutation-scope, or task-capsule gates of the workspace-control task that invokes it.
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
