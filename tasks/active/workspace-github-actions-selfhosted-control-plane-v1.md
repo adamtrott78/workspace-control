@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Fresh independent corrected-head re-review of PR #545 only. Verify BF-4 is closed by isolated MainPID-only forward and rollback regressions that hold InvocationID constant. Forward regression must prove a MainPID-only controller change rejects success with `maintenance controller MainPID changed during hotfix`, restores exact prior bytes, and uses the exact non-propagating root-service restart on forward and rollback. Rollback regression must prove a MainPID-only change with InvocationID unchanged prevents rollback certification and is reported as incomplete rollback. Regression-check BF-1 rc==0 dormancy inspection, BF-2 live AF_UNIX listener readiness, BF-3 ignore-dependencies restart plus InvocationID/MainPID preservation implementation, source binding, exact old digest, failed receipt/cursor preservation, workspace-control dormancy, research CPU/non-CPU controller preservation, PR #544 DIAGNOSE-only observation boundary, and no activation/reconciliation/P2-P3/capacity widening. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
+On Lambda, from an exact clean checkout at immutable merge SHA a749982c29edc6f8cf09b82b62e11363aac9bcbd, run the reviewed installer exactly once via sudo with `--expected-head a749982c29edc6f8cf09b82b62e11363aac9bcbd`. Capture the complete stdout/stderr and exit code, especially the `P1_PREACTIVATION_DIAGNOSE_HOTFIX_RECEIPT=` line. Do not post another maintenance command yet. After the installer result is reviewed and accepted, the next gate is exactly one new owner `/workspace-ci-maintain diagnose workspace-control cpu` command.
 
 ## Remaining work
 
@@ -49,10 +49,9 @@ Fresh independent corrected-head re-review of PR #545 only. Verify BF-4 is close
 
 ## Blockers / gates
 
-- PR #544 DIAGNOSE_LANE correction is independently accepted and merged but not yet installed on Lambda.
-- PR #545 head a22cbc4378b4a5aa8fd1125e8e9cecb6127c746c was independently rejected by comment 6438420782 for BF-4 missing isolated MainPID-only forward/rollback regressions.
-- BF-4 is corrected and validated at checkpoint 889da37c13a82d74c7ad65f17a4b161178f37e82; fresh independent corrected-head review remains required before merge/live use.
-- Do not issue another maintenance command, reconcile, activate workspace-control, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity before corrected-head NO_BLOCKING_FINDING and reviewed live hotfix receipt.
+- The independently accepted PR #544 DIAGNOSE_LANE correction and independently accepted PR #545 bounded installer are merged but the hotfix is not yet installed on Lambda.
+- Do not issue a second maintenance command until the exact live hotfix installer receipt is captured and reviewed.
+- Do not reconcile, activate workspace-control, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity before the live hotfix receipt proves preservation.
 
 ## Fresh-chat initialization
 
