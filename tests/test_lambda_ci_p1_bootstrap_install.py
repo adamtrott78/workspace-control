@@ -1,6 +1,7 @@
 import importlib.util
 import pathlib
 import unittest
+from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "lambda_ci_p1_bootstrap_install.py"
@@ -110,11 +111,119 @@ class P1BootstrapInstallerTests(unittest.TestCase):
         )
         self.assertLess(stop_cpu, install_binary)
 
+    def test_research_cpu_must_still_match_unhealthy_preflight(self):
+        module = load_module()
+        healthy = {
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "UnitFileState": "enabled",
+            "NRestarts": str(module.RESEARCH_CPU_PREFLIGHT_MIN_RESTARTS + 10),
+            "ExecMainStatus": "0",
+        }
+        with mock.patch.object(module, "service_snapshot", return_value=healthy):
+            with self.assertRaisesRegex(
+                module.BootstrapError,
+                "no longer matches reviewed unhealthy preflight",
+            ):
+                module.verify_research_cpu_still_unhealthy()
+
+        unhealthy = {
+            "LoadState": "loaded",
+            "ActiveState": "activating",
+            "SubState": "auto-restart",
+            "UnitFileState": "enabled",
+            "NRestarts": str(module.RESEARCH_CPU_PREFLIGHT_MIN_RESTARTS),
+            "ExecMainStatus": "1",
+        }
+        with mock.patch.object(module, "service_snapshot", return_value=unhealthy):
+            self.assertEqual(
+                module.verify_research_cpu_still_unhealthy(),
+                unhealthy,
+            )
+
+    def test_failure_at_first_stop_boundary_rolls_back(self):
+        module = load_module()
+        manifest = {"sentinel": True}
+        with mock.patch.object(
+            module,
+            "run",
+            side_effect=module.BootstrapError("first stop failed"),
+        ), mock.patch.object(module, "restore_targets") as restore:
+            with self.assertRaisesRegex(module.BootstrapError, "first stop failed"):
+                module.begin_mutation_phase(manifest)
+        restore.assert_called_once_with(manifest)
+
+    def test_failure_at_second_stop_boundary_rolls_back(self):
+        module = load_module()
+        manifest = {"sentinel": True}
+        calls = {"count": 0}
+
+        def fake_run(*_args, **_kwargs):
+            calls["count"] += 1
+            if calls["count"] == 2:
+                raise module.BootstrapError("second stop failed")
+            return object()
+
+        with mock.patch.object(module, "run", side_effect=fake_run), mock.patch.object(
+            module, "restore_targets"
+        ) as restore:
+            with self.assertRaisesRegex(module.BootstrapError, "second stop failed"):
+                module.begin_mutation_phase(manifest)
+        restore.assert_called_once_with(manifest)
+
+    def test_rollback_cannot_restart_preserved_controllers(self):
+        module = load_module()
+        self.assertTrue(set(module.HEALTHY_CONTROLLERS).isdisjoint(module.MUTATED_SERVICES))
+        raw = SCRIPT.read_text(encoding="utf-8")
+        restore_body = raw.split("def restore_targets(", 1)[1].split(
+            "def rollback_after_failure(", 1
+        )[0]
+        self.assertNotIn("*HEALTHY_CONTROLLERS", restore_body)
+        self.assertNotIn("restart", restore_body.split("_verify_preserved_services", 1)[-1])
+
+    def test_incomplete_rollback_is_reported_and_not_claimed_complete(self):
+        module = load_module()
+        with mock.patch.object(
+            module,
+            "restore_targets",
+            side_effect=module.BootstrapError("restore failed"),
+        ), mock.patch.object(module, "print") as printed:
+            with self.assertRaisesRegex(module.BootstrapError, "rollback was incomplete"):
+                module.rollback_after_failure({}, RuntimeError("bootstrap failed"))
+        rendered = [" ".join(str(arg) for arg in call.args) for call in printed.call_args_list]
+        self.assertTrue(any("P1_BOOTSTRAP_ROLLBACK=INCOMPLETE" in x for x in rendered))
+        self.assertFalse(any("P1_BOOTSTRAP_ROLLBACK=COMPLETE" in x for x in rendered))
+
+    def test_commissioning_pass_is_rejected(self):
+        module = load_module()
+        with self.assertRaisesRegex(
+            module.BootstrapError,
+            "first-poll invariant failed",
+        ):
+            module.validate_commissioning_result({"status": "PASS"})
+        module.validate_commissioning_result(
+            {"status": "INITIALIZED_NO_COMMANDS_EXECUTED"}
+        )
+
+    def test_final_reconcile_controller_gate_fails_closed(self):
+        module = load_module()
+        with mock.patch.object(module, "service_active", return_value=True):
+            with self.assertRaisesRegex(
+                module.BootstrapError,
+                "active at bootstrap success gate",
+            ):
+                module.assert_reconcile_controller_frozen()
+        with mock.patch.object(module, "service_active", return_value=False):
+            module.assert_reconcile_controller_frozen()
+
     def test_l0_commissioning_executes_no_historical_commands(self):
         raw = SCRIPT.read_text(encoding="utf-8")
         self.assertIn('"--once"', raw)
         self.assertIn('"INITIALIZED_NO_COMMANDS_EXECUTED"', raw)
         self.assertIn('"maintenance_controller_active"', raw)
+        self.assertIn("if cursor_path.exists():", raw)
+        self.assertIn("validate_commissioning_result(once_json)", raw)
 
 
 if __name__ == "__main__":
