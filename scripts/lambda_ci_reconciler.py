@@ -76,6 +76,7 @@ def render_controller_env(
         "WORKSPACE_CI_ADMISSION_V2_ENABLED": "YES",
         "WORKSPACE_CI_GITHUB_URL": f"https://github.com/{manifest['repository']}",
         "WORKSPACE_CI_LANE": lane,
+        "WORKSPACE_CI_CONTROLLER_STATE_ROOT": "/var/lib/workspace-ci/controller/state",
         "WORKSPACE_CI_PAT_FILE": "/var/lib/workspace-ci/controller/github-token",
         "WORKSPACE_CI_PROJECT_ID": manifest["project_id"],
         "WORKSPACE_CI_PROVISIONER_SOCKET": "/run/workspace-ci/provisioner.sock",
@@ -622,10 +623,20 @@ def apply_reconciliation(
     os.chown(controllers_dir, 0, 0)
     os.chmod(controllers_dir, 0o755)
     controller_services: list[str] = []
+    controller_user = pwd.getpwnam("ci-controller")
+    controller_group = grp.getgrnam("workspace-ci-controller")
+    controller_state_root = pathlib.Path("/var/lib/workspace-ci/controller/state")
+    controller_state_root.mkdir(parents=True, exist_ok=True)
+    os.chown(controller_state_root, controller_user.pw_uid, controller_group.gr_gid)
+    os.chmod(controller_state_root, 0o700)
     local_subnet = primary_local_subnet()
     for project_id in active_projects:
         manifest = manifests[project_id]
         for lane in registry["projects"][project_id]["lanes"]:
+            lane_state = controller_state_root / f"{project_id}-{lane}"
+            lane_state.mkdir(parents=True, exist_ok=True)
+            os.chown(lane_state, controller_user.pw_uid, controller_group.gr_gid)
+            os.chmod(lane_state, 0o700)
             env_path = controllers_dir / f"{project_id}-{lane}.env"
             _atomic_write(
                 env_path,
