@@ -180,6 +180,16 @@ class ActivationDeltaReconcilerHotfixTests(unittest.TestCase):
         )
         return stack
 
+    def test_live_reconciler_baseline_pin_matches_successful_bootstrap_source(self):
+        self.assertEqual(
+            hotfix.EXPECTED_BOOTSTRAP_SOURCE_HEAD,
+            "9b402da8c0158be477ac00944b5c164ddef81193",
+        )
+        self.assertEqual(
+            hotfix.EXPECTED_OLD_SERVICE_SHA256,
+            "f6f22a10b2ffdbffa5fced0ca69b2d7e55bc2e5e4c83b54df02bc3f981c85447",
+        )
+
     def test_successful_diagnose_receipt_and_cursor_are_exactly_bound(self):
         with (
             mock.patch.object(hotfix, "DIAGNOSE_RECEIPT", self.receipt),

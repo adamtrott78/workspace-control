@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-On Lambda, run exactly the reviewed source-bound reconciler hotfix installer from a clean detached checkout of workspace-control merge 46ee8e5f3bf375539a40e4f5dd2a330a521f3487 with --expected-head set to that exact SHA. The helper is scripts/lambda_ci_p1_install_activation_delta_reconciler_hotfix.py and must be invoked via sudo from the operator account. Capture the complete stdout/stderr/exit code, especially P1_PREACTIVATION_RECONCILER_DELTA_HOTFIX_RECEIPT. Do not run reconciliation or activate workspace-control afterward; return the complete installer output for receipt review first.
+Fresh independent exact-head review of PR #554 only. Verify the first live attempt failed before mutation because the installer incorrectly pinned the bootstrap preflight baseline c424e62c20cd38fa0380d315e4cf28831ce63ff63dd7aa9711913a41c405fcc6. Independently verify successful bootstrap source 9b402da8c0158be477ac00944b5c164ddef81193 contains scripts/lambda_ci_reconciler.py with exact SHA256 f6f22a10b2ffdbffa5fced0ca69b2d7e55bc2e5e4c83b54df02bc3f981c85447 and that this source was the file installed by the successful bootstrap. Verify PR #554 changes only the installer baseline provenance pin/diagnostic plus its regression and task state; BF-1/BF-2 reconciler/installer authority semantics remain unchanged. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ On Lambda, run exactly the reviewed source-bound reconciler hotfix installer fro
 
 ## Blockers / gates
 
-- The accepted reconciler correction is merged but not yet installed on Lambda; the live installed reconciler still has the pre-fix behavior.
-- P1 activation/reconciliation remains blocked until the exact source-bound reconciler hotfix installer from merge 46ee8e5f3bf375539a40e4f5dd2a330a521f3487 completes successfully and its full live receipt is reviewed/recorded.
-- Do not activate/reconcile workspace-control, issue further maintenance commands, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity before the hotfix receipt gate passes.
+- The corrected live-baseline provenance pin is validated but still requires fresh independent review before merge/live retry.
+- Do not rerun the reconciler hotfix installer on Lambda until the exact reviewed correction receives NO_BLOCKING_FINDING and is merged.
+- Do not reconcile/activate workspace-control, issue maintenance commands, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity.
 
 ## Fresh-chat initialization
 
