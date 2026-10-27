@@ -647,6 +647,21 @@ def begin_mutation_phase(manifest: dict[str, Any]) -> None:
         raise
 
 
+def validate_commissioning_result(value: dict[str, Any]) -> None:
+    if value.get("status") != "INITIALIZED_NO_COMMANDS_EXECUTED":
+        raise BootstrapError(
+            "maintenance controller first-poll invariant failed: "
+            + json.dumps(value, sort_keys=True)
+        )
+
+
+def assert_reconcile_controller_frozen() -> None:
+    if service_active(RECONCILE_CONTROLLER):
+        raise BootstrapError(
+            "automatic reconcile-controller is active at bootstrap success gate"
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--expected-head", required=True)
@@ -909,11 +924,7 @@ def main() -> int:
             raise BootstrapError(
                 "maintenance controller commissioning output invalid: " + once.stdout
             ) from exc
-        if once_json.get("status") != "INITIALIZED_NO_COMMANDS_EXECUTED":
-            raise BootstrapError(
-                "maintenance controller first-poll invariant failed: "
-                + json.dumps(once_json, sort_keys=True)
-            )
+        validate_commissioning_result(once_json)
 
         run(["systemctl", "enable", "--now", MAINTENANCE_CONTROLLER])
         time.sleep(5)
@@ -951,10 +962,7 @@ def main() -> int:
             raise BootstrapError("bootstrap accidentally activated workspace-control route")
         if service_active("workspace-ci-controller@workspace-control-cpu.service"):
             raise BootstrapError("workspace-control controller unexpectedly active")
-        if service_active(RECONCILE_CONTROLLER):
-            raise BootstrapError(
-                "automatic reconcile-controller is active at bootstrap success gate"
-            )
+        assert_reconcile_controller_frozen()
 
         receipt = {
             "schema_version": 1,
