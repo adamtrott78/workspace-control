@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: gitrunner-p1-quiesce-restart-storm
-- Remote checkpoint: b7e69b960703712e758bed4ecbfd6dddc0ad445c
-- Remote verified: false
+- Remote branch: main
+- Remote checkpoint: 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd
+- Remote verified: true
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate and independently review the bounded pre-bootstrap research-engine CPU restart-storm quiesce helper. The helper must be source-head bound, prove no active research-engine execution, require provisioner/reconciler/reconcile-controller plus research-engine GPU and both PADataset controllers active, prove the target service uses Restart=on-failure and has NRestarts >=12110 increasing across two six-second observation intervals, and immediately before mutation recheck non-target services/execution absence. Its sole live mutation may be systemctl stop workspace-ci-controller@research-engine-cpu.service. It must then prove the target remains exactly stable inactive/dead for six seconds. It must never restart/start/enable a unit, install files, change policy, reconcile, or activate workspace-control. If independently accepted, run it once from the exact reviewed merge, inspect its receipt, then run the already-reviewed P1 bootstrap merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd unchanged.
+Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd, with --expected-head set to that exact SHA and full output captured. Research-engine CPU must be preserved exactly in whatever reviewed stable state it occupies (active/running with ExecMainStatus=0, inactive/dead with valid nonnegative ExecMainStatus, or failed/failed with valid positive ExecMainStatus); any malformed, transitional, or changing state must abort before mutation. The other three project/lane controllers must remain active and preserved. The sole initial service mutation remains stopping automatic reconcile-controller. On success, workspace-control must remain MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive, and automatic reconcile-controller must remain frozen. Return the complete output/receipt before any GitHub -> L0 diagnose or workspace-control activation.
 
 ## Remaining work
 
@@ -49,9 +49,7 @@ Validate and independently review the bounded pre-bootstrap research-engine CPU 
 
 ## Blockers / gates
 
-- Fourth live bootstrap retry from reviewed merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd aborted safely before mutation because research-engine CPU was in activating/auto-restart with ExecMainStatus=1 and NRestarts=12110. This confirms the pre-existing restart storm remains active and shared controller binary/template replacement cannot safely occur while that unit can relaunch mid-install.
-- A bounded pre-bootstrap quiesce helper is implemented on gitrunner-p1-quiesce-restart-storm. It may stop exactly workspace-ci-controller@research-engine-cpu.service only after proving no local research execution, all non-target control services active, and NRestarts increasing across two observation intervals. It must then prove exact stable inactive/dead state. This helper requires exact-head validation and fresh independent review before any live use.
-- The independently reviewed bootstrap merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd remains unchanged and is the intended bootstrap executable after successful quiesce.
+- PR #532 corrected stable-state research-engine CPU preservation is independently accepted and merged as workspace-control@6bd20890e2bc8a44dba8a33227cbb69b3e1368fd. The next gate is one bounded live bootstrap retry from that exact reviewed merge SHA; any transitional/changing research CPU state or any post-mutation failure must abort/rollback according to the reviewed installer.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
