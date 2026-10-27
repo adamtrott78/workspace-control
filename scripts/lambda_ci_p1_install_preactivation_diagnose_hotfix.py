@@ -16,6 +16,7 @@ import json
 import os
 import pathlib
 import pwd
+import socket
 import subprocess
 import tempfile
 import time
@@ -196,8 +197,11 @@ def require_candidate_dormant() -> dict[str, str]:
         ],
         check=False,
     )
-    if active.returncode not in {0, 1}:
-        raise HotfixError("unable to inspect workspace-control execution units")
+    if active.returncode != 0:
+        raise HotfixError(
+            "unable to inspect workspace-control execution units: "
+            f"rc={active.returncode} stderr={active.stderr.strip()}"
+        )
     for line in active.stdout.splitlines():
         parts = line.split()
         if len(parts) >= 4 and parts[1] == "loaded" and parts[2] in {"active", "activating", "deactivating"}:
@@ -239,16 +243,30 @@ def require_failed_receipt_and_cursor() -> tuple[str, str]:
     return sha256_path(FAILED_RECEIPT), canonical_sha256(cursor)
 
 
+def socket_listener_ready(path: pathlib.Path) -> bool:
+    if not path.is_socket():
+        return False
+    conn = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    conn.settimeout(SOCKET_POLL_SECONDS)
+    try:
+        conn.connect(str(path))
+        return True
+    except OSError:
+        return False
+    finally:
+        conn.close()
+
+
 def wait_socket() -> None:
     deadline = time.monotonic() + SOCKET_TIMEOUT_SECONDS
     while time.monotonic() < deadline:
-        if ROOT_SOCKET.is_socket():
+        if socket_listener_ready(ROOT_SOCKET):
             return
         snap = service_snapshot(ROOT_SERVICE)
         if snap["ActiveState"] != "active":
             raise HotfixError(f"root maintenance exited before socket readiness: {snap}")
         time.sleep(SOCKET_POLL_SECONDS)
-    raise HotfixError("root maintenance socket readiness timeout")
+    raise HotfixError("root maintenance socket listener readiness timeout")
 
 
 def atomic_write(path: pathlib.Path, raw: bytes, mode: int) -> None:
