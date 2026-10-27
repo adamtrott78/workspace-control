@@ -187,7 +187,14 @@
       ]
     }
   ],
-  "artifacts": [],
+  "artifacts": [
+    {
+      "path": "procedures/workspace_heartbeat_secure_mcp_tunnel.md",
+      "kind": "discovery_evidence",
+      "description": "Verified source audit, official tunnel constraints, deterministic monthly transfer budgets, proposed isolated migration gates",
+      "commit_sha": "4ecba691b6560c31ddba4b02e7c0223726306745"
+    }
+  ],
   "validation": [
     {
       "check": "Task separation and scope",
@@ -205,9 +212,33 @@
         "Current Heartbeat 403 failures are consistent with operator-observed ngrok ERR_NGROK_725 quota exhaustion rather than evidence of Heartbeat MCP server failure.",
         "Durable Git task state remains usable while the Heartbeat transport is unavailable."
       ]
+    },
+    {
+      "check": "Source-level app poll and official tunnel capability audit",
+      "result": "PARTIAL",
+      "evidence": [
+        "GitHub plugin package 0.4.7, Node >=20, server.js /mcp default port 8787 verified; Lambda current process/source/launcher not freshly inspected.",
+        "heartbeat_snapshot is app-only and serializes full bounded turn_history on every poll; live-card code schedules 1500ms working / 3500ms other after each request.",
+        "Official OpenAI Secure MCP Tunnel documentation lists outbound-only HTTPS, ChatGPT private custom MCP, 600 req/min, 10 MiB envelope, 120s deadline, 1000 pending queue.",
+        "HTTP 403 through ngrok-free.dev reproduced; production process not restarted or modified.",
+        "Numeric traffic estimates documented but actual response bytes, ngrok attribution, and MCP Apps over tunnel remain unverified."
+      ]
     }
   ],
-  "blockers": [],
+  "blockers": [
+    {
+      "id": "lambda-live-provenance-and-bandwidth-measurement",
+      "status": "OPEN",
+      "description": "No host shell/runtime connector available in this chat; exact live PID/source/launcher/ngrok/rollback and measured per-poll bytes remain unverified.",
+      "next_action": "Read-only Lambda operator inspection and isolated local payload instrumentation; no restart for discovery."
+    },
+    {
+      "id": "secure-mcp-tunnel-live-app-acceptance",
+      "status": "OPEN",
+      "description": "Tunnel ID, permissions, runtime key, app-only snapshot/resource support and live ChatGPT acceptance are not verified.",
+      "next_action": "Configure an isolated outbound-only tunnel after host evidence and prove MCP tools, app resources and live-card updates before cutover."
+    }
+  ],
   "remaining_work": [
     "Recover the exact current live Heartbeat runtime source SHA, Node/package version, launcher, localhost MCP endpoint, ngrok startup path, and rollback artifacts on Lambda.",
     "Trace the one-second card/server polling path and distinguish it from heartbeat_touch/model tool calls; measure or bound bytes per request/response and estimate monthly transfer.",
@@ -218,8 +249,8 @@
     "Perform live ChatGPT acceptance through Secure MCP Tunnel, including executor/card/semantic signal separation and one-second freshness.",
     "Retire ngrok from the normal Heartbeat path only after the Secure MCP Tunnel path is accepted; document rollback/emergency fallback."
   ],
-  "next_safe_action": "Start from workspace-control main and the existing workspace-heartbeat-executor-liveness-v1 capsule. Recover exact live Heartbeat runtime/launcher provenance on Lambda without restarting it solely for discovery. Map the traffic paths: distinguish heartbeat_touch model tool calls from the approximately one-second live-card/app snapshot poll and any other requests to the public ngrok endpoint. Measure or tightly bound bytes/request and estimate monthly traffic before attributing the 1.02 GB incident. In parallel, verify the current official OpenAI Secure MCP Tunnel setup and limits. Then freeze a bounded outbound-only migration plan that preserves the one-second executor/card freshness UX and existing Heartbeat semantics. Do not touch GitRunner, automatic takeover, or unrelated workspace-control authority. Do not expose a new public Lambda endpoint.",
+  "next_safe_action": "Perform read-only Lambda host provenance inspection and isolated payload measurement per procedures/workspace_heartbeat_secure_mcp_tunnel.md; verify actual Node/process/source/launcher/local MCP/ngrok/rollback; measure app-only snapshot wire-size and cadence separately from model Heartbeat tools; test outbound-only Secure MCP Tunnel embedded app resource and app-only snapshot in isolation. Do not restart live runtime merely for discovery or cut over before live acceptance.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created 2026-10-26 after the operator identified the concrete cause of current Heartbeat connector failures: the free ngrok account exceeded its monthly network bandwidth allocation. The operator values the newly added executor-signal feature and reports that the card/server polls approximately once per second to show the latest executor signal. That feature is a requirement, not disposable overhead. The new task therefore treats transport and payload efficiency as the problem, not liveness semantics. Secure MCP Tunnel is the preferred direction if current official OpenAI support and limits are compatible. The task must empirically distinguish high-frequency live-card/app polling from heartbeat_touch model calls; do not assume they are the same traffic path. GitRunner work continues independently in its own task/chat."
+  "notes": "Created 2026-10-26 after the operator identified the concrete cause of current Heartbeat connector failures: the free ngrok account exceeded its monthly network bandwidth allocation. The operator values the newly added executor-signal feature and reports that the card/server polls approximately once per second to show the latest executor signal. That feature is a requirement, not disposable overhead. The new task therefore treats transport and payload efficiency as the problem, not liveness semantics. Secure MCP Tunnel is the preferred direction if current official OpenAI support and limits are compatible. The task must empirically distinguish high-frequency live-card/app polling from heartbeat_touch model calls; do not assume they are the same traffic path. GitRunner work continues independently in its own task/chat.\n2026-10-26 discovery checkpoint: source-level audit confirms app-only heartbeat_snapshot retransmits full turn_history each poll; HTML source schedules 1500ms working / 3500ms other after response. Official OpenAI Secure MCP Tunnel docs confirm outbound-only private ChatGPT MCP path and defaults (600/min, 10MiB, 120s, 1000 queue), but embedded MCP Apps polling and end-to-end freshness require isolated live test. Heartbeat begin probe failed HTTP 403 ngrok-free.dev. Numeric byte budgets and exact unresolved Lambda host gates documented in procedures/workspace_heartbeat_secure_mcp_tunnel.md@4ecba691b6560c31ddba4b02e7c0223726306745. No Lambda restart, tunnel cutover, or ngrok retirement."
 }
