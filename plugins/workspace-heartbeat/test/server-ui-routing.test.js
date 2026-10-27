@@ -14,9 +14,9 @@ function toolBlock(name,next){
   return server.slice(start,end);
 }
 
-test("v0.4.7 backend and cache-busted live resource are explicit",()=>{
-  assert.ok(server.includes('version: "0.4.7"'));
-  assert.ok(server.includes('const LIVE_URI = "ui://workspace-heartbeat/live-v6.html"'));
+test("v0.4.8 backend and cache-busted live resource are explicit",()=>{
+  assert.ok(server.includes('version: "0.4.8"'));
+  assert.ok(server.includes('const LIVE_URI = "ui://workspace-heartbeat/live-v7.html"'));
 });
 
 test("heartbeat_begin_turn is the single mounted turn boundary",()=>{
@@ -28,14 +28,14 @@ test("heartbeat_begin_turn is the single mounted turn boundary",()=>{
 });
 
 test("heartbeat_update is data-only and requires explicit turn_id",()=>{
-  const block=toolBlock("heartbeat_update","heartbeat_snapshot");
+  const block=toolBlock("heartbeat_update","heartbeat_touch");
   assert.ok(!block.includes("resourceUri:"));
   assert.ok(block.includes("turn_id: z.string().min(1).max(160)"));
   assert.ok(block.includes("store.updateTurn"));
 });
 
 test("heartbeat_snapshot is app-only, turn-scoped, and exposes bounded full turn history",()=>{
-  const block=toolBlock("heartbeat_snapshot","heartbeat_get");
+  const block=toolBlock("heartbeat_snapshot","heartbeat_poll");
   assert.ok(block.includes('visibility: ["app"]'));
   assert.ok(block.includes("turn_id: z.string().min(1).max(160)"));
   assert.ok(block.includes("store.observeUi"));
@@ -50,11 +50,21 @@ test("legacy heartbeat_open and heartbeat_render tools are removed",()=>{
   assert.ok(!server.includes('"heartbeat_render"'));
 });
 
-test("live card polls immutable task_id plus turn_id",()=>{
-  assert.ok(live.includes('name:"heartbeat_snapshot"'));
-  assert.ok(live.includes("arguments:{task_id:taskId,turn_id:turnId}"));
+test("heartbeat_poll is app-only, turn-scoped, and delta bounded",()=>{
+  const block=toolBlock("heartbeat_poll","heartbeat_get");
+  assert.ok(block.includes('visibility: ["app"]'));
+  assert.ok(block.includes("after_sequence: z.number().int().nonnegative().default(0)"));
+  assert.ok(block.includes("store.observeUiDelta"));
+  assert.ok(server.includes("turn_status: z.enum"));
+  assert.ok(server.includes("updates: z.array(heartbeatSchema).max(50)"));
+  assert.ok(!block.includes("resourceUri:"));
+});
+
+test("live card polls immutable task_id plus turn_id with last rendered sequence",()=>{
+  assert.ok(live.includes('name:"heartbeat_poll"'));
+  assert.ok(live.includes("after_sequence:afterSequence"));
   assert.ok(live.includes("item.turn_id!==turnId"));
-  assert.ok(live.includes("payload.superseded"));
+  assert.ok(live.includes("payload.turn_status"));
   assert.ok(live.includes('ui/resource-teardown'));
 });
 

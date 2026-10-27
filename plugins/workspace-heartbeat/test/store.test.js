@@ -135,3 +135,56 @@ test("silent executor touch preserves all semantic history, sequence and card hi
   store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"next"});
   assert.throws(()=>store.touchTurn({sessionId:"chat-a",taskId:"task-a",turnId:begin.turn_id}),/TURN_STALE/);
 });
+
+
+test("delta poll returns no semantic payload when sequence is unchanged",()=>{
+  const store=makeStore();
+  const begin=store.beginTurn({
+    sessionId:"chat-a",taskId:"task-a",message:"A1",state:"working",
+    now:new Date("2026-10-26T20:00:00Z")
+  });
+  const poll=store.observeUiDelta({
+    taskId:"task-a",turnId:begin.turn_id,afterSequence:begin.heartbeat.sequence,
+    now:new Date("2026-10-26T20:00:01Z")
+  });
+  assert.equal(poll.turn_status,"active");
+  assert.equal(poll.resync,false);
+  assert.deepEqual(poll.updates,[]);
+  assert.equal(poll.last_ui_seen_at,"2026-10-26T20:00:01.000Z");
+  assert.equal(poll.last_executor_touch_at,"2026-10-26T20:00:00.000Z");
+});
+
+test("delta poll returns only entries newer than afterSequence",()=>{
+  const store=makeStore();
+  const begin=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"A1",state:"working"});
+  store.updateTurn({sessionId:"chat-a",taskId:"task-a",turnId:begin.turn_id,message:"A2",state:"working"});
+  store.updateTurn({sessionId:"chat-a",taskId:"task-a",turnId:begin.turn_id,message:"A3",state:"waiting"});
+  const poll=store.observeUiDelta({
+    taskId:"task-a",turnId:begin.turn_id,afterSequence:begin.heartbeat.sequence
+  });
+  assert.equal(poll.resync,false);
+  assert.deepEqual(poll.updates.map(x=>x.message),["A2","A3"]);
+});
+
+test("delta poll bounded-resyncs when caller predates retained turn history",()=>{
+  const store=new HeartbeatStore({turnHistoryLimit:4,turnIdFactory:()=>"turn-bounded-delta"});
+  const begin=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"A1",state:"working"});
+  for(let i=2;i<=6;i++) store.updateTurn({
+    sessionId:"chat-a",taskId:"task-a",turnId:begin.turn_id,message:"A"+i,state:"working"
+  });
+  const poll=store.observeUiDelta({
+    taskId:"task-a",turnId:begin.turn_id,afterSequence:1
+  });
+  assert.equal(poll.resync,true);
+  assert.deepEqual(poll.updates.map(x=>x.message),["A3","A4","A5","A6"]);
+});
+
+test("delta poll exposes superseded state without creating semantic history",()=>{
+  const store=makeStore();
+  const a=store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"A1",state:"working"});
+  store.beginTurn({sessionId:"chat-a",taskId:"task-a",message:"B1",state:"working"});
+  const poll=store.observeUiDelta({taskId:"task-a",turnId:a.turn_id,afterSequence:a.heartbeat.sequence});
+  assert.equal(poll.turn_status,"superseded");
+  assert.deepEqual(poll.updates,[]);
+  assert.equal(store.observeUiDelta({taskId:"wrong",turnId:a.turn_id,afterSequence:0}),null);
+});

@@ -254,6 +254,37 @@ export class HeartbeatStore {
     return this.getTurnSnapshot({ taskId, turnId });
   }
 
+  observeUiDelta({ taskId, turnId, afterSequence = 0, now = new Date() }) {
+    const turn = this.turns.get(turnId);
+    if (!turn || turn.taskId !== taskId) return null;
+
+    turn.last_ui_seen_at = now.toISOString();
+    const history = [...turn.history];
+    const oldestSequence = history[0]?.sequence ?? null;
+    const latestSequence = turn.heartbeat?.sequence ?? 0;
+    const resync =
+      (oldestSequence !== null && afterSequence < oldestSequence - 1) ||
+      afterSequence > latestSequence;
+    const updates = resync
+      ? history
+      : history.filter((heartbeat) => heartbeat.sequence > afterSequence);
+    const turnStatus = turn.superseded
+      ? "superseded"
+      : turn.completed
+        ? "completed"
+        : "active";
+
+    return {
+      task_id: taskId,
+      turn_id: turnId,
+      turn_status: turnStatus,
+      updates,
+      resync,
+      last_executor_touch_at: turn.last_executor_touch_at ?? null,
+      last_ui_seen_at: turn.last_ui_seen_at ?? null,
+    };
+  }
+
   getTurnSnapshot({ taskId, turnId }) {
     const turn = this.turns.get(turnId);
     if (!turn || turn.taskId !== taskId) return null;

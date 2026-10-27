@@ -52,6 +52,7 @@ let timer=null;
 let failures=0;
 let lastKey="";
 let lastSnapshot=null;
+let historyCache=[];
 function elapsed(value){if(!value)return "no signal";const ms=Date.now()-Date.parse(value);if(!Number.isFinite(ms))return "unknown";const sec=Math.max(0,Math.floor(ms/1000));return sec<60?sec+"s ago":Math.floor(sec/60)+"m ago";}
 function renderFreshness(){if(!lastSnapshot)return;const snap=lastSnapshot;const age=snap.last_executor_touch_at?Date.now()-Date.parse(snap.last_executor_touch_at):Infinity;executorEl.textContent="Executor signal: "+(age<=30000?"recent · ":"not recent · ")+elapsed(snap.last_executor_touch_at);uiSeenEl.textContent="Card/server poll: "+elapsed(snap.last_ui_seen_at);progressAgeEl.textContent="Semantic progress: "+elapsed(snap.heartbeat?.updated_at);}
 
@@ -122,6 +123,7 @@ function renderSnapshot(payload){
 
   titleEl.textContent=taskId;
   if(!latest)return false;
+  historyCache=[...turnHistory];
   lastSnapshot=payload;
   renderFreshness();
 
@@ -163,6 +165,38 @@ function renderSnapshot(payload){
   }
   return true;
 }
+function renderPoll(payload){
+  if(!payload||typeof payload!=="object")return false;
+  if(payload.task_id!==taskId||payload.turn_id!==turnId)return false;
+  if(!Array.isArray(payload.updates))return false;
+  if(!["active","superseded","completed"].includes(payload.turn_status))return false;
+  if(payload.updates.some(item=>!item||item.task_id!==taskId||item.turn_id!==turnId))return false;
+
+  let nextHistory;
+  if(payload.resync){
+    nextHistory=[...payload.updates];
+  }else{
+    const bySequence=new Map(historyCache.map(item=>[item.sequence,item]));
+    for(const item of payload.updates)bySequence.set(item.sequence,item);
+    nextHistory=[...bySequence.values()].sort((a,b)=>a.sequence-b.sequence).slice(-50);
+  }
+  if(!nextHistory.length&&historyCache.length)nextHistory=[...historyCache];
+  const latest=nextHistory.at(-1)??lastSnapshot?.heartbeat??null;
+  if(!latest)return false;
+
+  return renderSnapshot({
+    task_id:taskId,
+    turn_id:turnId,
+    heartbeat:latest,
+    recent:nextHistory.slice(-3),
+    turn_history:nextHistory,
+    active:payload.turn_status==="active",
+    superseded:payload.turn_status==="superseded",
+    completed:payload.turn_status==="completed",
+    last_executor_touch_at:payload.last_executor_touch_at??null,
+    last_ui_seen_at:payload.last_ui_seen_at??null
+  });
+}
 function applyResult(result){
   const value=result?.structuredContent??result?.result?.structuredContent??result??null;
   return renderSnapshot(value);
@@ -184,16 +218,17 @@ async function poll(){
   renderFreshness();
   inFlight=true;
   try{
+    const afterSequence=historyCache.at(-1)?.sequence??lastSnapshot?.heartbeat?.sequence??0;
     const response=await request("tools/call",{
-      name:"heartbeat_snapshot",
-      arguments:{task_id:taskId,turn_id:turnId}
+      name:"heartbeat_poll",
+      arguments:{task_id:taskId,turn_id:turnId,after_sequence:afterSequence}
     });
-    if(response?.isError)throw new Error("Heartbeat snapshot rejected");
+    if(response?.isError)throw new Error("Heartbeat poll rejected");
     const value=response?.structuredContent??response?.result?.structuredContent??null;
-    if(!value||value.task_id!==taskId||value.turn_id!==turnId||!Array.isArray(value.recent)){
-      throw new Error("Invalid turn-scoped heartbeat snapshot");
+    if(!value||value.task_id!==taskId||value.turn_id!==turnId||!Array.isArray(value.updates)){
+      throw new Error("Invalid turn-scoped heartbeat poll");
     }
-    renderSnapshot(value);
+    if(!renderPoll(value))throw new Error("Heartbeat poll failed validation");
     failures=0;
   }catch(error){
     failures=Math.min(failures+1,5);
@@ -235,7 +270,7 @@ document.addEventListener("visibilitychange",()=>{
 async function initializeBridge(){
   try{
     await request("ui/initialize",{
-      appInfo:{name:"workspace-heartbeat-live",version:"0.4.7"},
+      appInfo:{name:"workspace-heartbeat-live",version:"0.4.8"},
       appCapabilities:{},
       protocolVersion:"2026-01-26"
     });

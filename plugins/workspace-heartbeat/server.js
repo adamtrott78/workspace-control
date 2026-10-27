@@ -11,7 +11,7 @@ import { z } from "zod";
 import { HeartbeatStore } from "./src/store.js";
 
 const PANEL_URI = "ui://workspace-heartbeat/panel-v8.html";
-const LIVE_URI = "ui://workspace-heartbeat/live-v6.html";
+const LIVE_URI = "ui://workspace-heartbeat/live-v7.html";
 const panelHtml = readFileSync(
   new URL("./public/heartbeat-panel.html", import.meta.url),
   "utf8",
@@ -50,6 +50,16 @@ const heartbeatTurnOutputSchema = {
   ui_seen_age_seconds: z.number().nonnegative().nullable(),
 };
 
+const heartbeatPollOutputSchema = {
+  task_id: z.string(),
+  turn_id: z.string(),
+  turn_status: z.enum(["active", "superseded", "completed"]),
+  updates: z.array(heartbeatSchema).max(50),
+  resync: z.boolean(),
+  last_executor_touch_at: z.string().nullable(),
+  last_ui_seen_at: z.string().nullable(),
+};
+
 const heartbeatOutputSchema = {
   heartbeat: heartbeatSchema.nullable(),
   history: z.array(heartbeatSchema),
@@ -71,11 +81,11 @@ function createHeartbeatServer() {
   const server = new McpServer(
     {
       name: "workspace-heartbeat",
-      version: "0.4.7",
+      version: "0.4.8",
     },
     {
       instructions:
-        "For every substantial assistant response, call heartbeat_begin_turn(task_id, message, state) exactly once at the first natural user-facing progress point. That operation supersedes the prior heartbeat turn for this conversation/task, creates a new opaque turn_id, records the first semantic progress update, and mounts the current-turn live card. Carry the returned turn_id explicitly on every later heartbeat_update for that assistant response and never call heartbeat_begin_turn again until a later assistant response. Emit heartbeat_update primarily on meaningful semantic changes: new evidence, changed diagnosis, resolved uncertainty, material decisions, validation results, blockers, changed next action, or before a long opaque phase. Commits, merges, checkpoints, phase changes, and routine tool calls are not by themselves reasons to emit. Tool count is only an anti-silence backstop: do not perform more than 10 non-heartbeat tool operations without a useful heartbeat update. Use heartbeat_touch(task_id, turn_id) for silent proof of activity during semantic-silent tool phases; it never replaces real semantic updates. During active tool execution, after a begin-turn, update, or touch, perform at most three non-Heartbeat tool operations before another executor signal; if no semantic update is due, touch before a fourth operation. Touch immediately before known long or opaque operations/waits and keep touches alive during repeated polling. Touches do not reset the separate 10-non-Heartbeat-tool semantic-silence backstop. Never call heartbeat_snapshot directly; it is app-only. heartbeat_get is explicit task-history/debugging only. A stale/missing turn_id must fail closed. If this conversation does not expose heartbeat_begin_turn or heartbeat_update does not accept turn_id, its plugin contract is stale: do not use Heartbeat here until the plugin surface is refreshed and verified.",
+        "For every substantial assistant response, call heartbeat_begin_turn(task_id, message, state) exactly once at the first natural user-facing progress point. That operation supersedes the prior heartbeat turn for this conversation/task, creates a new opaque turn_id, records the first semantic progress update, and mounts the current-turn live card. Carry the returned turn_id explicitly on every later heartbeat_update for that assistant response and never call heartbeat_begin_turn again until a later assistant response. Emit heartbeat_update primarily on meaningful semantic changes: new evidence, changed diagnosis, resolved uncertainty, material decisions, validation results, blockers, changed next action, or before a long opaque phase. Commits, merges, checkpoints, phase changes, and routine tool calls are not by themselves reasons to emit. Tool count is only an anti-silence backstop: do not perform more than 10 non-heartbeat tool operations without a useful heartbeat update. Use heartbeat_touch(task_id, turn_id) for silent proof of activity during semantic-silent tool phases; it never replaces real semantic updates. During active tool execution, after a begin-turn, update, or touch, perform at most three non-Heartbeat tool operations before another executor signal; if no semantic update is due, touch before a fourth operation. Touch immediately before known long or opaque operations/waits and keep touches alive during repeated polling. Touches do not reset the separate 10-non-Heartbeat-tool semantic-silence backstop. Never call heartbeat_snapshot or heartbeat_poll directly; both are app-only. heartbeat_get is explicit task-history/debugging only. A stale/missing turn_id must fail closed. If this conversation does not expose heartbeat_begin_turn or heartbeat_update does not accept turn_id, its plugin contract is stale: do not use Heartbeat here until the plugin surface is refreshed and verified.",
     },
   );
 
@@ -280,6 +290,48 @@ function createHeartbeatServer() {
       }
       return {
         structuredContent: snapshot,
+        content: [],
+      };
+    },
+  );
+
+  registerAppTool(
+    server,
+    "heartbeat_poll",
+    {
+      title: "Poll current heartbeat turn delta",
+      description:
+        "App-only lightweight current-turn poll. Returns liveness timestamps and only semantic entries newer than after_sequence; if the caller falls outside the retained turn-history window, returns a bounded resync payload. Never use for task-wide history.",
+      inputSchema: {
+        task_id: z.string().min(1).max(160),
+        turn_id: z.string().min(1).max(160),
+        after_sequence: z.number().int().nonnegative().default(0),
+      },
+      outputSchema: heartbeatPollOutputSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+        idempotentHint: true,
+      },
+      _meta: {
+        ui: { visibility: ["app"] },
+        "openai/widgetAccessible": true,
+      },
+    },
+    async ({ task_id, turn_id, after_sequence }) => {
+      const poll = store.observeUiDelta({
+        taskId: task_id.trim(),
+        turnId: turn_id.trim(),
+        afterSequence: after_sequence,
+      });
+      if (!poll) {
+        throw new Error(
+          "HEARTBEAT_TURN_NOT_FOUND: This live card refers to an unknown heartbeat turn.",
+        );
+      }
+      return {
+        structuredContent: poll,
         content: [],
       };
     },

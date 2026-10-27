@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-heartbeat-secure-mcp-tunnel-v1
 - Title: Workspace Heartbeat Secure MCP Tunnel & Bandwidth v1
-- Status: IN_PROGRESS
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -23,24 +23,17 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-heartbeat-secure-mcp-tunnel-v1
-- Remote checkpoint: 95b8181aef3adda9a8c7ee52b694cd3096e8d826
+- Remote branch: workspace-heartbeat-secure-mcp-tunnel-v1-current-main
+- Remote checkpoint: 1d373f8a3cd3d2ab7357b05b5b883b144b26d3ac
 - Remote verified: true
 
 ## Next safe action
 
-Start from workspace-control main and the existing workspace-heartbeat-executor-liveness-v1 capsule. Recover exact live Heartbeat runtime/launcher provenance on Lambda without restarting it solely for discovery. Map the traffic paths: distinguish heartbeat_touch model tool calls from the approximately one-second live-card/app snapshot poll and any other requests to the public ngrok endpoint. Measure or tightly bound bytes/request and estimate monthly traffic before attributing the 1.02 GB incident. In parallel, verify the current official OpenAI Secure MCP Tunnel setup and limits. Then freeze a bounded outbound-only migration plan that preserves the one-second executor/card freshness UX and existing Heartbeat semantics. Do not touch GitRunner, automatic takeover, or unrelated workspace-control authority. Do not expose a new public Lambda endpoint.
+Task complete. Workspace Heartbeat production now runs exact v0.4.8 with OpenAI Secure MCP Tunnel as the normal transport, bounded delta polling, preserved 1500 ms/3500 ms card cadence, and explicit v0.4.7/ngrok rollback at /home/atrott/bin/heartbeat-rollback-v047-ngrok. Routine monitoring must not invoke heartbeat_get solely for progress because that renders a separate full-history panel; use begin/update/touch plus app-only heartbeat_poll. Any future transport, polling-semantics, automatic-takeover, or broader ingress change requires a separate reviewed task.
 
 ## Remaining work
 
-- Recover the exact current live Heartbeat runtime source SHA, Node/package version, launcher, localhost MCP endpoint, ngrok startup path, and rollback artifacts on Lambda.
-- Trace the one-second card/server polling path and distinguish it from heartbeat_touch/model tool calls; measure or bound bytes per request/response and estimate monthly transfer.
-- Inspect current official OpenAI Secure MCP Tunnel setup, authentication, supported custom-MCP path, request/payload/session limits, and operational requirements.
-- Freeze an outbound-only migration and rollback design that preserves one-second freshness and accepted liveness semantics.
-- Implement only the minimal payload/transport changes justified by measurement; keep historical/task-wide data off the high-frequency poll path.
-- Run existing Heartbeat test suite plus workspace-control validation and isolated Lambda startup/transport tests.
-- Perform live ChatGPT acceptance through Secure MCP Tunnel, including executor/card/semantic signal separation and one-second freshness.
-- Retire ngrok from the normal Heartbeat path only after the Secure MCP Tunnel path is accepted; document rollback/emergency fallback.
+- None.
 
 ## Blockers / gates
 
