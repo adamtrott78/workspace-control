@@ -65,8 +65,6 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json
 
-Task ID: `workspace-github-actions-selfhosted-control-plane-v1`
-
 Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
