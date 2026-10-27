@@ -59,10 +59,14 @@ class MaintenanceControllerTests(unittest.TestCase):
             "/workspace-ci-maintain restart workspace-control gpu --now",
             "/workspace-ci-maintain diagnose workspace-control CPU",
             "/workspace-ci-maintain diagnose ../root cpu",
-            "/workspace-ci-maintain diagnose workspace-control cpu\necho pwned",
         ):
             with self.assertRaises(controller.MaintenanceControllerError):
                 controller.parse_command(body)
+        self.assertIsNone(
+            controller.parse_command(
+                "/workspace-ci-maintain diagnose workspace-control cpu\necho pwned"
+            )
+        )
         self.assertIsNone(controller.parse_command("ordinary issue discussion"))
 
     def test_reset_recovery_identity_differs_from_initial_quiesce(self):
