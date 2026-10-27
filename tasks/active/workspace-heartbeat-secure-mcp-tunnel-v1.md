@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-On Lambda, keep production v0.4.7 :8787 untouched. Start exact v0.4.8 on a dynamically selected loopback port using the validated worktree and accepted v0.4.7 dependency tree. Prompt for the dedicated runtime API key with hidden input and export it only in the current shell environment. Initialize a user-owned tunnel-client profile for tunnel_6ae017d8655c8191976ef3bccc31f593 targeting the isolated v0.4.8 /mcp URL with a loopback ephemeral health listener, then run tunnel-client doctor --profile ... --explain. Report only non-secret status/output; unset the key afterward.
+Start exact v0.4.8 on an isolated loopback MCP endpoint and run tunnel-client v0.0.18 continuously with profile workspace-heartbeat-v048-isolated, keeping the dedicated runtime key only in the local environment. Verify tunnel-client /readyz and control-plane polling are healthy. While the daemon remains running, add or update the ChatGPT custom MCP/Heartbeat connection to use tunnel_6ae017d8655c8191976ef3bccc31f593 through Secure MCP Tunnel, then execute live ChatGPT tool and embedded app acceptance. Do not retire ngrok or mutate production v0.4.7 yet.
 
 ## Remaining work
 
@@ -40,9 +40,9 @@ On Lambda, keep production v0.4.7 :8787 untouched. Start exact v0.4.8 on a dynam
 
 ## Blockers / gates
 
-- Isolated exact v0.4.8 Secure MCP Tunnel profile has not yet been initialized or validated with tunnel-client doctor.
-- Live tunnel-client run, ChatGPT connector discovery, embedded app resource delivery, heartbeat_poll freshness, and five/six-entry UI behavior remain unverified.
-- Public ngrok remains quota-blocked from ChatGPT; keep accepted production v0.4.7 :8787 and rollback intact until Secure MCP Tunnel acceptance passes.
+- The tunnel-client daemon has not yet been run continuously against exact v0.4.8 for ChatGPT connector discovery and MCP calls.
+- ChatGPT connector/custom-MCP association, embedded app resource delivery, heartbeat_poll freshness, executor/semantic/card separation, and five/six-entry UI behavior remain unverified.
+- Public ngrok remains quota-blocked from ChatGPT; keep accepted production v0.4.7 :8787 and rollback intact until Secure MCP Tunnel live acceptance passes.
 
 ## Fresh-chat initialization
 
