@@ -412,6 +412,17 @@ def assert_no_replacement_runs(
     )
 
 
+def require_policy_digests(
+    root_receipt: dict[str, Any],
+    expected: dict[str, Any],
+) -> None:
+    observed = root_receipt.get("installed_policy_digests")
+    if observed != expected:
+        raise MaintenanceControllerError(
+            "installed policy digests drifted during recovery"
+        )
+
+
 def _zero_observation(scale: dict[str, Any], root_diag: dict[str, Any]) -> bool:
     stats = scale.get("statistics")
     if not isinstance(stats, dict):
@@ -478,6 +489,17 @@ def execute_reset(
     qresult = quiesce.get("result")
     if not isinstance(qresult, dict) or qresult.get("local_execution_absent") is not True:
         raise MaintenanceControllerError("root quiescence proof is incomplete")
+    qidentity = quiesce.get("identity")
+    if not isinstance(qidentity, dict):
+        raise MaintenanceControllerError("root quiescence receipt identity is missing")
+    policy_digests = qidentity.get("installed_policy_digests")
+    if not isinstance(policy_digests, dict) or set(policy_digests) != {
+        "registry_sha256",
+        "manifest_sha256",
+    }:
+        raise MaintenanceControllerError(
+            "root quiescence installed policy digests are incomplete"
+        )
     old_id = qresult.get("quarantine_scale_set_id")
     if not isinstance(old_id, int) or old_id <= 0:
         raise MaintenanceControllerError("quarantine has no exact old scale-set id")
@@ -549,6 +571,7 @@ def execute_reset(
                     command=command,
                     operation="DIAGNOSE_LANE",
                 )
+                require_policy_digests(diag, policy_digests)
                 if _zero_observation(inspected, diag):
                     first_observation = {
                         "timestamp_utc": _utc_now(),
@@ -575,6 +598,7 @@ def execute_reset(
             command=command,
             operation="DIAGNOSE_LANE",
         )
+        require_policy_digests(diag, policy_digests)
         if inspected.get("scale_set_id") != new_id or not _zero_observation(inspected, diag):
             raise MaintenanceControllerError(
                 "second zero-state observation failed"
@@ -599,6 +623,7 @@ def execute_reset(
                 command=command,
                 operation="DIAGNOSE_LANE",
             )
+            require_policy_digests(diag, policy_digests)
             if inspected.get("scale_set_id") != new_id or not _zero_observation(
                 inspected,
                 diag,
@@ -633,6 +658,9 @@ def execute_reset(
             "reset_generation": generation,
             "old_scale_set_id": old_id,
             "new_scale_set_id": new_id,
+            "quarantine_receipt_id": command["quarantine_receipt_id"],
+            "source_comment_id": comment_id,
+            "installed_policy_digests": policy_digests,
             "first_zero_observation": first_observation,
             "second_zero_observation": second_observation,
             "controller_ready_receipt": controller_ready,
