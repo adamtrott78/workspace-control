@@ -2,6 +2,7 @@ import {
   constants as fsConstants,
   closeSync,
   fstatSync,
+  lstatSync,
   openSync,
   readFileSync,
   readSync,
@@ -221,15 +222,26 @@ export function resolveProfile(profile, argv) {
   }
 }
 
-function readJsonFile(file) {
+function readJsonFile(file, ownerUid) {
   try {
+    const stat = lstatSync(file);
+    if (!stat.isFile() || stat.isSymbolicLink()) {
+      fail("AUTHORITY_FILE_INVALID", `${file} must be a regular non-symlink file`);
+    }
+    if (ownerUid !== null && stat.uid !== ownerUid) {
+      fail("AUTHORITY_OWNER_MISMATCH", `${file} owner uid mismatch`);
+    }
+    if ((stat.mode & 0o022) !== 0) {
+      fail("AUTHORITY_MODE_INVALID", `${file} must not be group/world writable`);
+    }
     return JSON.parse(readFileSync(file, "utf8"));
   } catch (error) {
+    if (error instanceof ShellPolicyError) throw error;
     fail("AUTHORITY_READ_FAILED", `cannot read trusted authority file ${file}: ${error.message}`);
   }
 }
 
-export function loadTaskCapsule(authorityRoot, taskId) {
+export function loadTaskCapsule(authorityRoot, taskId, { ownerUid = 0 } = {}) {
   assertTaskId(taskId);
   const candidates = [
     path.join(authorityRoot, "tasks", "active", taskId + ".json"),
@@ -238,29 +250,63 @@ export function loadTaskCapsule(authorityRoot, taskId) {
   ];
   for (const candidate of candidates) {
     try {
-      const capsule = readJsonFile(candidate);
-      if (capsule.task_id !== taskId) fail("TASK_ID_MISMATCH", "capsule task_id does not match requested task");
+      const capsule = readJsonFile(candidate, ownerUid);
+      if (capsule.task_id !== taskId) {
+        fail("TASK_ID_MISMATCH", "capsule task_id does not match requested task");
+      }
       return { capsule, path: candidate };
     } catch (error) {
-      if (error?.code === "ENOENT") continue;
-      if (error instanceof ShellPolicyError && error.code === "AUTHORITY_READ_FAILED" && /ENOENT/.test(error.message)) continue;
-      if (error instanceof ShellPolicyError) throw error;
+      if (
+        error instanceof ShellPolicyError &&
+        error.code === "AUTHORITY_READ_FAILED" &&
+        /ENOENT/.test(error.message)
+      ) {
+        continue;
+      }
+      throw error;
     }
   }
   fail("TASK_NOT_FOUND", "durable task capsule not found in trusted authority root");
 }
 
-export function authorizeTaskExecution({ authorityRoot, taskId, target, expectedSha }) {
+export function authorizeTaskExecution({
+  authorityRoot,
+  taskId,
+  target,
+  expectedSha,
+  authorityOwnerUid = 0,
+}) {
   assertTaskId(taskId);
   assertTarget(target);
   assertSha(expectedSha, "expected_sha");
-  const { capsule, path: capsulePath } = loadTaskCapsule(authorityRoot, taskId);
+  const { capsule, path: capsulePath } = loadTaskCapsule(
+    authorityRoot,
+    taskId,
+    { ownerUid: authorityOwnerUid },
+  );
   if (capsule.status !== "IN_PROGRESS") {
-    fail("TASK_STATE_DENIED", `task status ${capsule.status} does not permit Workspace Shell execution`);
+    fail(
+      "TASK_STATE_DENIED",
+      `task status ${capsule.status} does not permit Workspace Shell execution`,
+    );
   }
-  const repo = (capsule.repositories ?? []).find((entry) => entry?.name === target);
-  if (!repo) fail("TASK_TARGET_DENIED", "target repository is absent from durable task scope");
-  return { capsule, capsulePath, repository: repo };
+  const repository = (capsule.repositories ?? []).find(
+    (entry) => entry?.name === target,
+  );
+  if (!repository) {
+    fail("TASK_TARGET_DENIED", "target repository is absent from durable task scope");
+  }
+  const boundSha =
+    repository.remote?.checkpoint_sha ??
+    repository.local?.head_sha ??
+    null;
+  if (!boundSha || !/^[0-9a-f]{40}$/.test(boundSha)) {
+    fail("TASK_PROVENANCE_MISSING", "task repository has no exact checkpoint SHA binding");
+  }
+  if (expectedSha !== boundSha) {
+    fail("TASK_SHA_MISMATCH", "expected_sha differs from durable task checkpoint");
+  }
+  return { capsule, capsulePath, repository };
 }
 
 export function buildFrontendRequest({
