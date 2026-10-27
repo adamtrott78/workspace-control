@@ -6,7 +6,7 @@
   "goal": "Eliminate routine dependence on metered GitHub-hosted runners by moving workspace-control and project CI onto bounded self-hosted Lambda execution while preserving a non-circular bootstrap authority, per-project isolation, fail-closed admission, review gates, and a clean path to GitHub organization runner groups. Also reduce operator copy/paste by making review targets and dispositions durable and GitHub-native.",
   "execution_topology": "remote_only",
   "workflow": null,
-  "current_stage": "revise_control_plane_design_v0_2",
+  "current_stage": "independent_preimplementation_review_v0_2",
   "acceptance_criteria": [
     "Immediate quota exhaustion is treated as an infrastructure availability failure only; scientific/implementation authority is not widened to bypass validation.",
     "The emergency public-repository window is temporary and does not weaken owner-only commands, exact SHA checks, same-repository PR-head checks, fork execution prohibitions, or other existing admission controls.",
@@ -40,7 +40,7 @@
       "base_sha": "3619574d8b10441fbec18f92ce7005d036aad7c8",
       "remote": {
         "branch": "github-actions-selfhosted-control-plane-v02",
-        "checkpoint_sha": "0988e651ee43189a84903d67eb01654fb339769f",
+        "checkpoint_sha": "5c85a80dda64e0a1b57e7ebfe757bacf02ec89a1",
         "verified": true
       },
       "local": null,
@@ -255,7 +255,7 @@
     },
     {
       "id": "revise_control_plane_design_v0_2",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -266,12 +266,46 @@
         "runtime-evidence comments 6405597751 and 6408089808"
       ],
       "outputs": [
-        "bounded v0.2 architecture with authoritative stale-assignment recovery semantics",
-        "bounded v0.2 maintenance/recovery authority model",
-        "exact frozen v0.2 architecture/manifest blobs for fresh independent review"
+        "architecture/github-actions-selfhosted-control-plane.v0.2.json@2866f7d76aed0d5792b86ea175e9492c90115f50",
+        "architecture/lambda-ci-project-workspace-control.v1.json@efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 (unchanged/reused)",
+        "BF-1 addressed by admission-v2 fail-closed assignment-divergence quarantine plus exact stale-scale-set reset contract",
+        "BF-2 addressed by independently installed L0 maintenance controller/root typed maintenance protocol"
+      ],
+      "validation": [
+        {
+          "check": "Bounded v0.2 design freeze",
+          "result": "PASS",
+          "evidence": [
+            "v0.2 architecture blob 2866f7d76aed0d5792b86ea175e9492c90115f50 is FROZEN_DESIGN_ONLY_PENDING_INDEPENDENT_REVIEW.",
+            "workspace-control manifest blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 is deliberately unchanged, remains MIGRATION_CANDIDATE_NOT_INSTALLED, control-validation remains PLANNED_NOT_BOUND, and trusted workflow blob remains null.",
+            "Admission-v2 TotalAssignedJobs is frozen as health/backlog signal only; complete re-attested job metadata remains mandatory execution authority.",
+            "Ambiguous assignment state freezes fail-closed quarantine and forbids AcquireJobs/JIT/root provisioning until authoritative resolution.",
+            "RESET_STALE_ASSIGNMENT freezes exact local-quiescence, exact scale-set delete/recreate, fresh scale-set identity, two zero-state observations, durable receipt, and single-retry gating.",
+            "P1 maintenance freezes only DIAGNOSE_LANE, RESTART_CONTROLLER, QUIESCE_LANE_FOR_RECOVERY, and RESUME_LANE_AFTER_RESET; arbitrary shell/path/unit/property/credential authority is forbidden.",
+            "P1 remains maxRunners=1 and manifest concurrency=1; resource-aware concurrency, P2 automatic events, P3 organization migration, and hosted/bootstrap removal remain unauthorized."
+          ]
+        }
+      ],
+      "resume_condition": "Fresh independent review returns NO_BLOCKING_FINDING on exact v0.2 architecture blob and reused exact NOT_INSTALLED manifest blob."
+    },
+    {
+      "id": "independent_preimplementation_review_v0_2",
+      "status": "IN_PROGRESS",
+      "execution_owner": "independent_reviewer",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "architecture/github-actions-selfhosted-control-plane.v0.2.json@2866f7d76aed0d5792b86ea175e9492c90115f50",
+        "architecture/lambda-ci-project-workspace-control.v1.json@efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588",
+        "v0.1 blocking review workspace-control#508 review 5661002925",
+        "runtime-evidence comments 6405597751 and 6408089808",
+        "pinned scaleset client github.com/actions/scaleset@e6daac702355 supporting DeleteRunnerScaleSet"
+      ],
+      "outputs": [
+        "NO_BLOCKING_FINDING or exact blocking findings"
       ],
       "validation": [],
-      "resume_condition": "Do not activate P1 until exact v0.2 blobs receive NO_BLOCKING_FINDING."
+      "resume_condition": "No P1 implementation or live workspace-control runner activation before disposition is durably consumed."
     },
     {
       "id": "workspace_control_selfhosted_validation_pilot",
@@ -439,12 +473,25 @@
         "Host-wide serialization may remain for bounded P1 and is not itself a pre-P1 blocker; any concurrency increase remains separately reviewed.",
         "Bootstrap non-circularity, NOT_INSTALLED isolation scaffold, transport-versus-execution authority separation, P3 deferral, and rollback preservation were not found blocking."
       ]
+    },
+    {
+      "id": "selfhosted-control-plane-design-v0.2",
+      "kind": "architecture_design",
+      "identity": "architecture/github-actions-selfhosted-control-plane.v0.2.json@2866f7d76aed0d5792b86ea175e9492c90115f50|workspace-control-manifest@efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588",
+      "required_for_resume": true,
+      "evidence": [
+        "v0.2 explicitly resolves the two v0.1 review blockers at the design level without activating live execution.",
+        "BF-1 resolution: TotalAssignedJobs cannot authorize execution under admission-v2; unreconstructable assignment state quarantines fail closed; stale recovery is an exact scale-set reset with quiescence and zero-state proof.",
+        "BF-2 resolution: an independently installed L0 maintenance controller/root maintenance socket exposes only finite typed operations with derived targets and durable receipts; arbitrary root command surfaces are forbidden.",
+        "The workspace-control project manifest is intentionally unchanged because its isolation scaffold was non-blocking in the v0.1 review.",
+        "P1 retains maxRunners=1/concurrency=1; resource-aware concurrency remains separately reviewed future work."
+      ]
     }
   ],
   "artifacts": [
     {
       "path": "architecture/github-actions-selfhosted-control-plane.v0.1.json",
-      "state": "FROZEN_DESIGN_ONLY_PENDING_INDEPENDENT_REVIEW",
+      "state": "SUPERSEDED_BY_BLOCKING_REVIEW",
       "role": "control-plane architecture",
       "origin": "workspace-github-actions-selfhosted-control-plane-v1",
       "persistence": "git",
@@ -464,7 +511,8 @@
       "review_requirement": "independent preimplementation review",
       "evidence": [
         "blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588",
-        "control-validation route PLANNED_NOT_BOUND; blob_sha null"
+        "control-validation route PLANNED_NOT_BOUND; blob_sha null",
+        "unchanged and deliberately reused as the exact v0.2 manifest review target because v0.1 isolation review found no blocker"
       ]
     },
     {
@@ -477,6 +525,18 @@
       "review_requirement": null,
       "evidence": [
         "blob e91e6179adb636a58f8518ce71c58a6f348e994b"
+      ]
+    },
+    {
+      "path": "architecture/github-actions-selfhosted-control-plane.v0.2.json",
+      "state": "FROZEN_DESIGN_ONLY_PENDING_INDEPENDENT_REVIEW",
+      "role": "bounded control-plane architecture resolving BF-1/BF-2",
+      "origin": "workspace-github-actions-selfhosted-control-plane-v1",
+      "persistence": "git",
+      "regeneration": "manual reviewed revision only",
+      "review_requirement": "fresh independent preimplementation review",
+      "evidence": [
+        "blob 2866f7d76aed0d5792b86ea175e9492c90115f50"
       ]
     }
   ],
@@ -509,26 +569,32 @@
         "PR review 5661002925 contains detailed findings.",
         "P1 activation is not authorized; next safe action is bounded v0.2 revision/freeze and fresh independent review."
       ]
+    },
+    {
+      "check": "Bounded v0.2 design self-audit",
+      "result": "PASS",
+      "evidence": [
+        "Exact v0.2 architecture blob 2866f7d76aed0d5792b86ea175e9492c90115f50 is frozen and design-only.",
+        "Exact reused manifest blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 remains NOT_INSTALLED and cannot authorize live execution.",
+        "No registry activation, controller/provisioner code, live workflow route, systemd state, credential, or Lambda host state changed during v0.2 design freeze.",
+        "P1 activation remains blocked on a fresh independent review."
+      ]
     }
   ],
   "blockers": [
-    "BF-1 PRE-P1 BLOCKER: frozen v0.1 does not define authoritative stale GitHub scale-set assignment recovery. A controller restart can observe TotalAssignedJobs>0 while incomplete JobAssigned metadata prevents authoritative job reconstruction; maxRunners=1 then wedges the lane. v0.2 must freeze fail-closed divergence detection, lane quarantine/no-new-acquisition, bounded cleanup/reset, proof of zero live/stale assignments before one replacement trigger, duplicate-trigger suppression, receipts, and restart recovery tests without merely raising maxRunners.",
-    "BF-2 PRE-P1 DESIGN BLOCKER: frozen v0.1 does not define bounded owner-restricted privileged maintenance/recovery authority. v0.2 must freeze an allowlisted maintenance command surface with exact trusted identity/blob checks, root-side validation, durable receipts and rollback, no arbitrary shell/path/systemd-property authority, no untrusted/fork invocation, and no circular dependence on the L1 fleet as its own sole repair authority."
+    "Live P1 implementation/activation is blocked pending fresh independent preimplementation review of architecture/github-actions-selfhosted-control-plane.v0.2.json@2866f7d76aed0d5792b86ea175e9492c90115f50 plus unchanged architecture/lambda-ci-project-workspace-control.v1.json@efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588."
   ],
   "remaining_work": [
-    "Revise and freeze a bounded v0.2 control-plane design addressing BF-1 stale-assignment recovery and BF-2 privileged maintenance/recovery authority without widening scientific or execution authority.",
-    "Make v0.2 explicitly preserve P1 host-wide serialization/concurrency=1 as a temporary safe constraint; do not raise maxRunners until separately reviewed resource-aware host arbitration exists.",
-    "Freeze exact v0.2 architecture and workspace-control manifest blobs, then obtain a fresh independent preimplementation review.",
-    "Only after v0.2 receives NO_BLOCKING_FINDING, implement and validate the P1 owner-commanded workspace-control JIT pilot while leaving bootstrap reconciliation authority independent.",
-    "Design/review resource-aware host arbitration before any runner-count/concurrency increase; preserve explicit CPU/RAM/GPU envelopes and fail-closed admission.",
-    "Design/review control-small and automatic pull_request/push admission as P2.",
-    "Migrate routine hosted CI only after the pilot and automatic-event gates pass.",
-    "Evaluate and separately execute GitHub organization migration with configurable runner-group IDs, organization-scoped GitHub configuration, owner/repository attestation migration, and least-privilege GitHub App credentials.",
-    "Automate routine review request/consumption so the operator does not ferry text between chats while preserving reviewer independence.",
-    "Retire the temporary public workspace-control and GPU-listener transport workarounds only after reviewed replacement paths are live and rollback-safe."
+    "Obtain and durably consume a fresh independent review of the exact v0.2 architecture and unchanged NOT_INSTALLED workspace-control manifest.",
+    "If v0.2 receives NO_BLOCKING_FINDING, implement only P1: admission-v2 assignment-divergence quarantine/recovery, bounded independently installed L0 maintenance path, and owner-commanded workspace-control JIT CPU validation pilot.",
+    "Validate P1 implementation with adversarial stale-assignment/replay/maintenance-authority tests, filesystem isolation, CPU/RAM/runtime envelope, no-GPU guarantee, receipts, rollback, and independent bootstrap availability.",
+    "Do not raise maxRunners or manifest concurrency until separately reviewed resource-aware host arbitration is designed and validated.",
+    "Design/review automatic pull_request/push admission as P2 only after P1 succeeds.",
+    "Keep GitHub organization migration, runner-group IDs, organization registration, attestation migration, and least-privilege GitHub App credentials in separately reviewed P3.",
+    "Retire temporary public workspace-control and research-engine GPU-listener transport only after reviewed replacement paths are live and rollback-safe."
   ],
-  "next_safe_action": "Revise and freeze a bounded v0.2 control-plane design before any P1 activation. v0.2 must address BF-1 authoritative stale-assignment recovery (fail-closed divergence detection, lane quarantine, bounded cleanup/reset, zero-live/stale proof before retrigger, duplicate-trigger suppression, receipts/tests) and BF-2 bounded owner-restricted privileged maintenance/recovery authority (allowlisted verbs/targets, exact trusted identity/blob checks, root-side validation, no arbitrary root command surface, non-circular recovery, receipts/rollback). Keep P1 serialized at concurrency=1/maxRunners=1 temporarily; do not increase capacity until resource-aware host arbitration is separately reviewed. Preserve independent L0 bootstrap, workspace-control isolation, transport-versus-execution authority separation, P3 organization deferral, and existing rollback paths. Freeze exact v0.2 architecture/manifest blobs and obtain a fresh independent review before implementation. Do not activate a live workspace-control runner and do not continue EXTRACT science in this task.",
-  "last_executor": "chatgpt_independent_reviewer",
+  "next_safe_action": "Perform a fresh independent preimplementation review of architecture/github-actions-selfhosted-control-plane.v0.2.json@2866f7d76aed0d5792b86ea175e9492c90115f50 together with the deliberately unchanged NOT_INSTALLED workspace-control manifest architecture/lambda-ci-project-workspace-control.v1.json@efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588. The reviewer must explicitly verify BF-1 resolution (TotalAssignedJobs is non-authoritative for execution; fail-closed assignment-divergence quarantine; exact stale scale-set reset with local quiescence, fresh scale-set identity, two zero-state observations, durable receipt, and single-retry gate) and BF-2 resolution (independently installed L0 maintenance path; finite typed verbs; derived targets; SO_PEERCRED/root validation; replay-safe receipts; no arbitrary shell/path/systemd/property/credential surface; no L1 self-repair circularity). Also re-check workspace-control isolation, maxRunners=1/concurrency=1 P1 limit, transport/execution separation, independent bootstrap, P2/P3 deferral, and rollback. Persist NO_BLOCKING_FINDING or exact blockers. Do not implement or activate P1 until that disposition is durably consumed.",
+  "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Created 2026-10-25/26 after exhausting the account's 2,000 included private-repository GitHub-hosted Actions minutes. This task separates immediate availability recovery from the permanent architecture. The permanent target is private repositories with GitHub used for source/events/control APIs and bounded Lambda self-hosted runners for routine execution. The bootstrap authority must remain independently recoverable and cannot depend on the dynamic fleet it authorizes.\n\n2026-10-25/26 design-review checkpoint: PR #508 opened from frozen design branch. GitHub REST accepted requests for copilot-pull-request-reviewer[bot] in draft and ready states, but requested-reviewer state remained empty and no Copilot review was present, so independent review remains unsatisfied. Read-only provisioner audit established current host-wide serialization through the global _active set at manifest concurrency=1. P3 org audit also found hard-coded runnerGroupID=1, repo-scoped GitHubConfigURL rendering, and PAT-oriented reconciled env; these remain separately reviewed P3 work.\n\n2026-10-26 emergency-unblock incident evidence: temporary public workspace-control restored hosted reconciliation while research-engine returned private. Exact-provenance validation exposed a 30-minute workflow/systemd timeout collision, stale scale-set assignment recovery under maxRunners=1, and unnecessary network-dependent package installation inside the implementation gate. The timeout was widened to 60 minutes, exact-provenance transport was temporarily moved to the healthy research-engine GPU listener while preserving cpu-public-ci-v1/cpu-test/GPU-count-0 execution, and the validation workflow was made network-free. Permanent architecture must eliminate recurring operator shell intervention and stale-assignment queue poisoning without weakening admission or review boundaries.\n\n2026-10-26 PR #508 validation recovery: after workspace-control became temporarily public, current design/task branch head fc3bbdaded02625f968b18d504caa3ce52d3bb18 completed Workspace Control Validation run 40267839458 successfully, including full integration contracts. This restores mechanical validation availability only; independent preimplementation review remains a separate unsatisfied authority gate.\n\n2026-10-26 P0 closure/handoff hydration: mandatory exact-provenance implementation validation run 40269453984 passed (job 121398888450, artifact 12626998979, 31/31 contracts). Exactly one authorized scientific run 40411159582 passed execution and produced artifact 12693836542; its scientific interpretation is owned by workspace-local-extract-independent-review-v1 and is out of scope here. The permanent control-plane task is therefore no longer blocked on EXTRACT execution. Current focus is independent review of PR #508, including runtime incident evidence in comments 6405597751 and 6408089808, before any live workspace-control self-hosted activation. workspace-control remains temporarily public and the exact-provenance validation route remains temporarily transported over the research-engine GPU listener with CPU-only execution authority; these are rollback/cleanup debt, not the target architecture.\n\n2026-10-26 handoff durability repair: PR #514 merged as workspace-control@fec659a6d75e44c56acc53b706290b248681b584, declaring the already-required exact-provenance post-result review stage in the EXTRACT owner capsule and synchronizing its Markdown handoff. This was a state-consistency repair only and removes an unrelated task-validation blocker from future control-plane PRs.\n\n2026-10-26 independent preimplementation review: exact frozen v0.1 architecture f70f100ba57140469ff656255de00f7de262dbc3 and NOT_INSTALLED workspace-control manifest efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 were reviewed against PR #508 head c69f6632c6274312f6fb0449d9f4d7789319fd7c, successful validation run 40423934526, and mandatory runtime-evidence comments 6405597751 and 6408089808. Disposition is BLOCKING FINDINGS: BF-1 requires authoritative stale-assignment recovery semantics before P1 activation; BF-2 requires a frozen bounded privileged maintenance/recovery authority model before P1 activation. PR review 5661002925 records the detailed findings. GitHub prevented REQUEST_CHANGES because the connected account owns the PR, so the review was submitted as COMMENT; the authoritative task capsule/handoff carry the disposition. Host-wide serialization may remain temporarily for P1 and is not itself a pre-P1 blocker; maxRunners must not be raised without separately reviewed resource-aware arbitration. Heartbeat was retried during this review but the connector tunnel returned HTTP 403; GitHub durable state remained authoritative and no replacement task ID/state was invented.\n\n2026-10-26 v0.2 design start: bounded revision branch github-actions-selfhosted-control-plane-v02 created from authoritative main 0988e651ee43189a84903d67eb01654fb339769f. Mutation scope now explicitly includes architecture/github-actions-selfhosted-control-plane.v0.2.json. The v0.1 NOT_INSTALLED workspace-control manifest remains unchanged because the independent review found its isolation scaffold acceptable; BF-1 and BF-2 are architecture/controller/recovery-authority blockers rather than manifest-identity blockers."
+  "notes": "Created 2026-10-25/26 after exhausting the account's 2,000 included private-repository GitHub-hosted Actions minutes. This task separates immediate availability recovery from the permanent architecture. The permanent target is private repositories with GitHub used for source/events/control APIs and bounded Lambda self-hosted runners for routine execution. The bootstrap authority must remain independently recoverable and cannot depend on the dynamic fleet it authorizes.\n\n2026-10-25/26 design-review checkpoint: PR #508 opened from frozen design branch. GitHub REST accepted requests for copilot-pull-request-reviewer[bot] in draft and ready states, but requested-reviewer state remained empty and no Copilot review was present, so independent review remains unsatisfied. Read-only provisioner audit established current host-wide serialization through the global _active set at manifest concurrency=1. P3 org audit also found hard-coded runnerGroupID=1, repo-scoped GitHubConfigURL rendering, and PAT-oriented reconciled env; these remain separately reviewed P3 work.\n\n2026-10-26 emergency-unblock incident evidence: temporary public workspace-control restored hosted reconciliation while research-engine returned private. Exact-provenance validation exposed a 30-minute workflow/systemd timeout collision, stale scale-set assignment recovery under maxRunners=1, and unnecessary network-dependent package installation inside the implementation gate. The timeout was widened to 60 minutes, exact-provenance transport was temporarily moved to the healthy research-engine GPU listener while preserving cpu-public-ci-v1/cpu-test/GPU-count-0 execution, and the validation workflow was made network-free. Permanent architecture must eliminate recurring operator shell intervention and stale-assignment queue poisoning without weakening admission or review boundaries.\n\n2026-10-26 PR #508 validation recovery: after workspace-control became temporarily public, current design/task branch head fc3bbdaded02625f968b18d504caa3ce52d3bb18 completed Workspace Control Validation run 40267839458 successfully, including full integration contracts. This restores mechanical validation availability only; independent preimplementation review remains a separate unsatisfied authority gate.\n\n2026-10-26 P0 closure/handoff hydration: mandatory exact-provenance implementation validation run 40269453984 passed (job 121398888450, artifact 12626998979, 31/31 contracts). Exactly one authorized scientific run 40411159582 passed execution and produced artifact 12693836542; its scientific interpretation is owned by workspace-local-extract-independent-review-v1 and is out of scope here. The permanent control-plane task is therefore no longer blocked on EXTRACT execution. Current focus is independent review of PR #508, including runtime incident evidence in comments 6405597751 and 6408089808, before any live workspace-control self-hosted activation. workspace-control remains temporarily public and the exact-provenance validation route remains temporarily transported over the research-engine GPU listener with CPU-only execution authority; these are rollback/cleanup debt, not the target architecture.\n\n2026-10-26 handoff durability repair: PR #514 merged as workspace-control@fec659a6d75e44c56acc53b706290b248681b584, declaring the already-required exact-provenance post-result review stage in the EXTRACT owner capsule and synchronizing its Markdown handoff. This was a state-consistency repair only and removes an unrelated task-validation blocker from future control-plane PRs.\n\n2026-10-26 independent preimplementation review: exact frozen v0.1 architecture f70f100ba57140469ff656255de00f7de262dbc3 and NOT_INSTALLED workspace-control manifest efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 were reviewed against PR #508 head c69f6632c6274312f6fb0449d9f4d7789319fd7c, successful validation run 40423934526, and mandatory runtime-evidence comments 6405597751 and 6408089808. Disposition is BLOCKING FINDINGS: BF-1 requires authoritative stale-assignment recovery semantics before P1 activation; BF-2 requires a frozen bounded privileged maintenance/recovery authority model before P1 activation. PR review 5661002925 records the detailed findings. GitHub prevented REQUEST_CHANGES because the connected account owns the PR, so the review was submitted as COMMENT; the authoritative task capsule/handoff carry the disposition. Host-wide serialization may remain temporarily for P1 and is not itself a pre-P1 blocker; maxRunners must not be raised without separately reviewed resource-aware arbitration. Heartbeat was retried during this review but the connector tunnel returned HTTP 403; GitHub durable state remained authoritative and no replacement task ID/state was invented.\n\n2026-10-26 v0.2 design start: bounded revision branch github-actions-selfhosted-control-plane-v02 created from authoritative main 0988e651ee43189a84903d67eb01654fb339769f. Mutation scope now explicitly includes architecture/github-actions-selfhosted-control-plane.v0.2.json. The v0.1 NOT_INSTALLED workspace-control manifest remains unchanged because the independent review found its isolation scaffold acceptable; BF-1 and BF-2 are architecture/controller/recovery-authority blockers rather than manifest-identity blockers.\n\n2026-10-26 bounded v0.2 freeze: architecture/github-actions-selfhosted-control-plane.v0.2.json frozen as blob 2866f7d76aed0d5792b86ea175e9492c90115f50. It resolves BF-1 at design level by making TotalAssignedJobs non-authoritative for admission-v2 execution, quarantining unreconstructable assigned-job divergence, and defining exact stale scale-set delete/recreate recovery with root quiescence and two zero-state observations before READY_FOR_SINGLE_RETRY. It resolves BF-2 at design level with an independently installed L0 maintenance controller/root typed protocol limited to DIAGNOSE_LANE, RESTART_CONTROLLER, QUIESCE_LANE_FOR_RECOVERY, and RESUME_LANE_AFTER_RESET; arbitrary root command/path/unit/property/credential surfaces are forbidden. The exact workspace-control manifest blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 is intentionally unchanged/reused because v0.1 review found its isolation scaffold non-blocking. No live activation occurred. Fresh independent review is now required before P1 implementation."
 }
