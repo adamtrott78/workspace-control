@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Prepare and request a fresh independent P1 activation-boundary review only. Base it on the current capsule and the now-live reconciler installed from merge e4c81ac5fba8c4d9df8450b003147f90d771158b with installed/source SHA256 5e3c56c84f8e9755334ca4f0db7bdd7036f70b3e4cd404ebb02e8aa6b97185a9. Do not reconcile or activate during review.
+Prepare and request a fresh independent P1 activation-boundary review only. The review must be based on the current durable capsule and the now-live reconciler installed from merge e4c81ac5fba8c4d9df8450b003147f90d771158b with installed/source SHA256 5e3c56c84f8e9755334ca4f0db7bdd7036f70b3e4cd404ebb02e8aa6b97185a9. It must verify the exact candidate->ACTIVE registry/manifest/route delta for workspace-control CPU, exact source/ref/request identity, expected reconciliation transaction with restart set exactly workspace-ci-controller@workspace-control-cpu.service and preservation set research-engine CPU/GPU plus PADataset CPU/GPU, durable daemon-reload semantics, live preactivation dormancy/preservation preconditions, exact rollback/emergency-stop authority, and post-activation acceptance checks. Do not reconcile or activate during review.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Prepare and request a fresh independent P1 activation-boundary review only. Base
 
 ## Blockers / gates
 
-- The corrected reconciler is live and independently reviewed, but workspace-control remains unactivated.
-- P1 activation/reconciliation remains blocked until a fresh independent exact-head activation-boundary review verifies the exact candidate->ACTIVE policy delta, reconciliation request, expected restart/preservation sets, rollback/emergency-stop path, and post-activation checks.
-- Do not issue APPLY/reconcile, start/enable workspace-control CPU, restart/reset preserved project controllers, issue maintenance commands, or widen P2/P3/capacity before that review returns NO_BLOCKING_FINDING.
+- The corrected reconciler is now live and independently reviewed, but workspace-control remains unactivated.
+- P1 activation/reconciliation is blocked until a fresh independent exact-head activation-boundary review verifies the exact candidate->ACTIVE policy delta, exact reconciliation request, expected restart/preservation sets, rollback/emergency-stop path, and post-activation acceptance checks against the now-installed reconciler.
+- Do not issue an APPLY/reconcile request, start/enable workspace-control CPU, restart/reset research-engine CPU or sibling controllers, issue maintenance commands, or widen P2/P3/capacity before that activation review returns NO_BLOCKING_FINDING.
 
 ## Fresh-chat initialization
 
