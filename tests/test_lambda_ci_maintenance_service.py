@@ -119,6 +119,7 @@ class MaintenanceServiceTests(unittest.TestCase):
                 "workspace-control",
                 "cpu",
                 controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
             )
         with self.assertRaises(maintenance.MaintenanceError):
             maintenance.derive_target(
@@ -126,6 +127,7 @@ class MaintenanceServiceTests(unittest.TestCase):
                 "workspace-control",
                 "gpu",
                 controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
             )
 
     def test_quiesce_requires_exact_quarantine_and_local_execution_absence(self):
