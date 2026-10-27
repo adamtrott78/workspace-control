@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 74d565c4e6ce4954157c46e3289c952b4a1da7fd
-- Remote verified: true
+- Remote branch: gitrunner-p1-bootstrap-shared-restart-recovery
+- Remote checkpoint: 58ff087133f914bb1bac7a929ecf4cd45677334a
+- Remote verified: false
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Operator: perform one read-only post-rollback incident fingerprint on Lambda. Capture exact service state/timestamps for provisioner, reconciler, reconcile-controller, research-engine CPU/GPU, PADataset CPU/GPU, and maintenance services; capture recent journal for research-engine GPU; capture ci-maintenance/workspace-ci-maintenance identity/group metadata; capture existence/hash metadata for bootstrap-touched files and maintenance state paths. Do not start/restart/stop/enable/disable any unit, do not reconcile, do not rerun bootstrap, and do not mutate files. Return the complete diagnostic output. Owner then determines whether rollback restored files/state, why research-engine GPU exited cleanly, and freezes the minimum independently reviewed recovery/correction.
+Request fresh independent review of PR #536. Verify the post-rollback diagnosis against the captured incident evidence: the three non-CPU project controllers were active pre-mutation, all became inactive/dead with ExecMainStatus=0 and NRestarts=0 at the exact shared-provisioner rollback window, and research-engine GPU journal records an explicit systemd stop rather than a crash. Review the bootstrap correction: maintenance identity uses actual group membership rather than primary-GID equality; after a shared provisioner restart, only non-CPU controllers that were active/running in the pre-mutation snapshot and are now exactly loaded+enabled+inactive/dead+ExecMainStatus=0 with unchanged NRestarts may be started; research-engine CPU remains preservation-only and cannot be started/restarted. Review the one-shot incident helper: exact source binding, exact current CPU/target incident states, shared services active, no project execution, sole mutation one systemctl start of exactly research-engine-gpu + padataset-cpu + padataset-gpu, followed by active/running verification. Do not merge or mutate Lambda until NO_BLOCKING_FINDING is recorded on the exact final head.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Operator: perform one read-only post-rollback incident fingerprint on Lambda. Ca
 
 ## Blockers / gates
 
-- Live bootstrap from reviewed merge 74d565c4e6ce4954157c46e3289c952b4a1da7fd crossed into the mutation phase and failed on deterministic maintenance-identity validation: systemd-sysusers created ci-maintenance with workspace-ci-maintenance as supplementary membership, while the installer incorrectly required that group to be the account primary GID.
-- Rollback restored its authorized targets but finished INCOMPLETE because final preserved-service verification found workspace-ci-controller@research-engine-gpu.service loaded/enabled but inactive/dead with ExecMainStatus=0 and NRestarts=0. Current live host state must be fingerprinted read-only before any repair or retry.
-- No further bootstrap, service restart, reconciliation, workspace-control activation, L0 diagnose, or research-engine CPU restart is authorized until the post-rollback live fingerprint is captured and independently bounded recovery is defined.
+- Post-rollback read-only fingerprint proved rollback restored bootstrap-created files/state and removed ci-maintenance, but all three previously healthy non-CPU project controllers were cleanly dependency-stopped at 03:11:30 when rollback restarted the shared provisioner required by their unit template. Research-engine CPU remained intentionally quiesced and unchanged.
+- PR #536 contains the bounded correction and incident recovery path. Exact code/test head 58ff087133f914bb1bac7a929ecf4cd45677334a passed validation run 40466539746 / job 122063195362 / run #929 SUCCESS. Fresh independent review remains required before merge or any Lambda recovery mutation.
+- No bootstrap retry, workspace-control activation, reconciliation, L0 diagnose, or research-engine CPU restart is authorized until PR #536 exact final head receives NO_BLOCKING_FINDING and the bounded recovery helper restores the three dependency-stopped controllers.
 
 ## Fresh-chat initialization
 
