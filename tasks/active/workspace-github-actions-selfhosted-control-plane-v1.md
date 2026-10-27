@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Fresh independent exact-head review of PR #555 only. Consume BF-3 comment 6449758373, accepted PR #554 review 6449729967, and the authoritative task capsule. Verify the durable daemon-reload obligation: first-attempt transaction state must freeze whether target systemd controller drop-ins require daemon-reload; successful reload completion must be durably journaled before any pending restart; resume with required-but-uncompleted reload must execute daemon-reload before restart even when the drop-in bytes are already materialized; malformed/incompatible reload state must fail closed; if reload is marked complete, target drop-in drift must fail closed rather than be rewritten; and desired drop-in/environment bytes must be re-attested immediately before restart. Verify the interruption regression specifically fails at daemon-reload after drop-in materialization and proves retry order daemon-reload before workspace-control restart. Regression-check BF-1/BF-2 transaction/dormancy semantics and the accepted PR #554 successful-bootstrap live-baseline installer pin remain intact. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
+Run the already-reviewed reconciler hotfix installer from a clean detached checkout of exact merge e4c81ac5fba8c4d9df8450b003147f90d771158b, capture its complete receipt and exit status, then stop and review that evidence before any reconciliation or activation.
 
 ## Remaining work
 
@@ -49,10 +49,9 @@ Fresh independent exact-head review of PR #555 only. Consume BF-3 comment 644975
 
 ## Blockers / gates
 
-- P1 live reconciler-hotfix retry remains blocked pending fresh independent exact-head review of PR #555 BF-3 correction.
-- The live Lambda reconciler still has the pre-fix reconciliation behavior because the first hotfix attempt failed before mutation; do not reconcile or activate workspace-control.
-- Do not rerun the reconciler hotfix installer until PR #555 receives NO_BLOCKING_FINDING and is merged.
-- Do not issue maintenance commands, restart/reset project controllers, restart research-engine CPU, or widen P2/P3/capacity.
+- The accepted reconciler correction is merged but not yet installed on Lambda.
+- Activation/reconciliation remains blocked until the reviewed live hotfix install from merge e4c81ac5fba8c4d9df8450b003147f90d771158b completes and its receipt is reviewed.
+- Do not activate workspace-control or mutate project controllers before that receipt gate passes.
 
 ## Fresh-chat initialization
 
