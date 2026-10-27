@@ -147,6 +147,24 @@ class ControlPlaneP1ContractTests(unittest.TestCase):
         self.assertIn("/srv/workspace-ci", unit)
         self.assertNotIn("runs-on", unit)
 
+    def test_generic_controller_template_persists_only_bounded_controller_state(self):
+        unit = (
+            ROOT / "templates/lambda-ci/workspace-ci-controller@.service.in"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "ReadWritePaths=/var/lib/workspace-ci/controller/state",
+            unit,
+        )
+        self.assertNotIn(
+            "ReadWritePaths=/var/lib/workspace-ci\n",
+            unit,
+        )
+        self.assertIn(
+            "ReadOnlyPaths=/var/lib/workspace-ci/controller/github-token",
+            unit,
+        )
+        self.assertIn("ProtectSystem=strict", unit)
+
     def test_controller_capacity_remains_one(self):
         source = (
             ROOT / "controller/lambda-ci-controller/main.go"
