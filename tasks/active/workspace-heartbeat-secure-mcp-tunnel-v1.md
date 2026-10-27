@@ -29,7 +29,7 @@ Preserve the accepted Workspace Heartbeat executor-liveness UX, including the ap
 
 ## Next safe action
 
-Immediately re-verify PID 1973910 still owns :8789 with exact v0.4.8 worktree SHA def7c5fe6498b1bd742d912c1490d1f7160cab5f and Node20 executable, then terminate only that orphan. Remove only an existing plugins/workspace-heartbeat/node_modules symlink if it resolves to the accepted v0.4.7 runtime node_modules, verify the candidate worktree is otherwise clean at exact SHA def7c5fe6498b1bd742d912c1490d1f7160cab5f, recreate the dependency symlink, and run the isolated heartbeat_poll payload benchmark on a verified free port while keeping production :8787 unchanged.
+Keep production v0.4.7 :8787 untouched. Re-verify and terminate only PPID-1 orphaned Heartbeat node server.js processes whose executable, CWD, and exact Git SHA match either the accepted v0.4.7 runtime or the exact v0.4.8 candidate. Do not kill unknown listeners. Verify the exact v0.4.8 worktree is clean except for an optional known node_modules symlink, then choose a free ephemeral loopback port dynamically and run the no-change/delta/resync payload benchmark there. Record byte measurements and confirm production :8787 PID/CWD/executable/SHA are unchanged.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ Immediately re-verify PID 1973910 still owns :8789 with exact v0.4.8 worktree SH
 
 ## Blockers / gates
 
-- The v0.4.8 post-change payload benchmark still has not executed. The latest wrapper aborted on a dirty-worktree assertion immediately after checkout; likely cause is the validation worktree's untracked node_modules dependency link, which the repository does not ignore. Clean only that verified link, prove the worktree otherwise clean, then recreate the link for the isolated run.
+- The v0.4.8 post-change payload benchmark remains pending because fixed isolated ports :8788, :8789, and :8790 have each encountered leftover listeners from prior interrupted probes. Fixed-port selection is now itself the operational defect; use exact-orphan cleanup plus an OS-selected free ephemeral port.
 - Public ngrok remains quota-blocked from ChatGPT despite healthy local production v0.4.7.
 - Secure MCP Tunnel setup and live ChatGPT app acceptance remain unverified.
 
