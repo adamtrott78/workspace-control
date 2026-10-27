@@ -338,30 +338,49 @@ def _mutating_receipt(
             raise MaintenanceError("maintenance request_id replay identity mismatch")
         if prior.get("status") == "COMPLETED":
             return prior
+        if prior.get("status") == "FAILED_CLOSED":
+            raise MaintenanceError("prior maintenance request failed closed")
         raise MaintenanceError("stored maintenance receipt is non-terminal")
-    in_progress = {
-        "schema_version": 1,
-        "status": "IN_PROGRESS",
-        "identity": identity,
-        "timestamp_utc": _utc_now(),
-    }
-    _atomic_json(receipt_path, in_progress)
-    result = mutation()
     rollback = {
         "RESTART_CONTROLLER": "repeat exact derived restart or use independent operator bootstrap",
         "QUIESCE_LANE_FOR_RECOVERY": "leave lane stopped unless matching reviewed resume/reset state is proven",
         "RESUME_LANE_AFTER_RESET": "re-quiesce exact lane with the same reset generation on any recovery drift",
     }.get(request["operation"])
+    preconditions = {
+        "installed_policy_digests": target["policy_digests"],
+        "derived_service": target["service"],
+        "derived_scale_set_name": target["scale_set_name"],
+    }
+    in_progress = {
+        "schema_version": 1,
+        "status": "IN_PROGRESS",
+        "identity": identity,
+        "timestamp_utc": _utc_now(),
+        "precondition_observations": preconditions,
+        "rollback": rollback,
+    }
+    _atomic_json(receipt_path, in_progress)
+    try:
+        result = mutation()
+    except Exception as exc:
+        failed = {
+            "schema_version": 1,
+            "status": "FAILED_CLOSED",
+            "identity": identity,
+            "timestamp_utc": _utc_now(),
+            "precondition_observations": preconditions,
+            "error_type": type(exc).__name__,
+            "error": str(exc),
+            "rollback": rollback,
+        }
+        _atomic_json(receipt_path, failed)
+        raise
     receipt = {
         "schema_version": 1,
         "status": "COMPLETED",
         "identity": identity,
         "timestamp_utc": _utc_now(),
-        "precondition_observations": {
-            "installed_policy_digests": target["policy_digests"],
-            "derived_service": target["service"],
-            "derived_scale_set_name": target["scale_set_name"],
-        },
+        "precondition_observations": preconditions,
         "result": result,
         "rollback": rollback,
     }
