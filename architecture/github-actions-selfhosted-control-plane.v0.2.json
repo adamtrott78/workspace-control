@@ -1,0 +1,479 @@
+{
+  "schema_version": 1,
+  "design_id": "github-actions-selfhosted-control-plane-v0.2",
+  "status": "FROZEN_DESIGN_ONLY_PENDING_INDEPENDENT_REVIEW",
+  "problem_statement": {
+    "observed_failure": "Private-repository GitHub-hosted Actions quota exhaustion caused ubuntu-latest jobs to fail before runner execution. A hosted reconciliation validation is currently required before the Lambda reconciliation controller will hydrate new project routes, so quota exhaustion indirectly blocked otherwise-free self-hosted research execution. Post-freeze runtime evidence also showed that a one-slot scale set can remain wedged after runner termination/controller restart when GitHub reports assigned-job state without complete per-job recovery metadata, and that routine controller/profile recovery still requires excessive operator sudo/shell access.",
+    "root_causes": [
+      "Routine validation and reconciliation still depend on GitHub-hosted ubuntu-latest.",
+      "High automation/PR churn multiplies short hosted jobs; per-job billing granularity makes many short jobs expensive in included-minute terms.",
+      "The reconciliation controller treats a successful trusted reconciliation workflow run as an authority prerequisite.",
+      "The existing project JIT controller admits only owner-commanded issue_comment PR-head jobs, so ordinary pull_request/push workflows cannot safely be moved by changing runs-on alone.",
+      "Admission-v2 currently uses statistics.TotalAssignedJobs as a scaling target while complete per-job metadata is required before a job may be re-attested and provisioned after restart; those two signals can diverge.",
+      "The permanent architecture did not freeze a bounded owner-restricted maintenance authority for controller restart and stale-assignment recovery."
+    ]
+  },
+  "invariants": [
+    "Scientific and execution authority does not widen because hosted capacity is unavailable.",
+    "Dynamic runners never self-authorize the policy needed to create themselves.",
+    "Project workload runners remain ephemeral/JIT and fail closed on attestation mismatch.",
+    "Control workloads receive no GPU device access.",
+    "Control workloads cannot access operator home, Docker sockets, sibling project roots, provisioner state, reconciler state, or research trusted caches.",
+    "Project-specific Unix identities and filesystem isolation remain even if GitHub-side runner registration is centralized at organization scope.",
+    "Fork pull requests cannot execute privileged self-hosted workloads.",
+    "Repository labels, runner labels, and organization membership are routing metadata, not policy authority.",
+    "Concurrency is bounded; demand above capacity queues rather than scaling without an explicit policy change.",
+    "Under admission-v2, statistics.TotalAssignedJobs is a health/backlog signal only and can never by itself authorize JIT generation or root provisioning; a runner grant requires a complete independently attested job.",
+    "Ambiguous assigned-job state fails closed: the lane quarantines instead of provisioning from an unreconstructable count.",
+    "Recovery may delete/recreate only the exact quarantined scale set after local execution is proven quiescent; failure to prove a fresh scale-set identity and zero assigned state leaves the lane quarantined.",
+    "Privileged maintenance is a finite typed protocol, never an arbitrary root-command interface.",
+    "The dynamic L1 fleet is never the sole transport or authority for L1 recovery."
+  ],
+  "current_state": {
+    "hosted_workflows": [
+      ".github/workflows/workspace-control-validation.yml -> ubuntu-latest",
+      ".github/workflows/lambda-ci-project-reconcile.yml -> ubuntu-latest",
+      ".github/workflows/extract-semantic-benchmark-annotation-support.yml -> ubuntu-latest",
+      ".github/workflows/extract-semantic-benchmark-source-freeze.yml -> ubuntu-latest",
+      "research-engine/.github/workflows/ci.yml -> ubuntu-latest"
+    ],
+    "self_hosted_substrate": {
+      "controller": "official GitHub actions/scaleset client in custom Go controller",
+      "runner_mode": "JIT/ephemeral one-runner-per-job",
+      "per_project_lane_max_runners": 1,
+      "projects": [
+        "research-engine",
+        "padataset"
+      ],
+      "current_cpu_profile": "cpu-test: CPUQuota=800%, MemoryMax=32G, RuntimeMaxSec=30min",
+      "current_gpu_profiles": [
+        "gpu-small",
+        "gpu-heavy"
+      ],
+      "controller_runtime_evidence": {
+        "controller_blob_on_main": "a1f05f3c69a8168fb6cbeeb981ed7d28299d9324",
+        "pinned_scaleset_module": "github.com/actions/scaleset@v0.0.0-20260916214619-e6daac702355",
+        "pinned_module_supports_delete_scale_set": true,
+        "observed_semantics": [
+          "maxRunners is hard-coded to 1",
+          "desiredRunnerTarget uses TotalAssignedJobs",
+          "incomplete JobAssigned recovery metadata is ignored",
+          "deterministic admission already reconciles orphan JIT runner registrations and durable provisioner receipts"
+        ]
+      }
+    },
+    "bootstrap_dependency": "lambda_ci_reconcile_controller.py selects a successful trusted lambda-ci-project-reconcile.yml run on main (or policy-equivalent ancestor) before submitting reviewed policy to the root reconciliation socket."
+  },
+  "target_architecture": {
+    "layers": [
+      {
+        "layer": "L0_STABLE_BOOTSTRAP",
+        "purpose": "Non-circular, minimal authority needed to validate/recover control-plane policy and perform narrowly bounded recovery.",
+        "steady_state": "Keep an independently installed bootstrap/reconciliation path plus an independently installed L0 maintenance controller/root maintenance socket. Neither depends on the dynamic L1 JIT fleet. Initially hosted reconciliation may remain as fallback until the stable L0 path is proven.",
+        "constraints": [
+          "small resource envelope",
+          "no GPU",
+          "no research roots",
+          "no arbitrary candidate code",
+          "independent recovery path",
+          "maintenance verbs are fixed and target identifiers are resolved from installed policy, never caller-supplied paths/unit names",
+          "root maintenance socket authenticates a dedicated unprivileged L0 maintenance UID via SO_PEERCRED",
+          "GitHub-side maintenance commands are owner-only and repository-scoped",
+          "durable replay-safe receipts for every mutating maintenance operation"
+        ]
+      },
+      {
+        "layer": "L1_CONTROL_JIT",
+        "purpose": "Routine workspace-control validation and bounded control CI.",
+        "steady_state": "Ephemeral/JIT Lambda runner, project identity workspace-control, maxRunners=1 and project concurrency=1 for the pilot. Admission-v2 runner creation is driven only by complete pre-attested jobs; TotalAssignedJobs alone is never execution authority.",
+        "constraints": [
+          "no GPU",
+          "no sibling project roots",
+          "no root control-plane state",
+          "exact workflow/PR attestation",
+          "assignment divergence enters fail-closed lane quarantine",
+          "no recovery-triggered runner creation until a durable READY_FOR_SINGLE_RETRY receipt exists"
+        ]
+      },
+      {
+        "layer": "L2_PROJECT_JIT",
+        "purpose": "Project CPU/GPU validation and scientific/model workloads.",
+        "steady_state": "Existing project-scoped research-engine/PADataset identities and JIT runners, optionally registered through organization runner groups later.",
+        "constraints": [
+          "preserve existing execution contracts",
+          "preserve per-project Unix/fs isolation",
+          "no cross-project scale-set acceptance"
+        ]
+      }
+    ],
+    "github_organization_end_state": {
+      "repository_ownership": [
+        "workspace-control",
+        "research-engine",
+        "PADataset"
+      ],
+      "runner_groups": [
+        {
+          "name": "control-bootstrap",
+          "consumers": [
+            "workspace-control"
+          ],
+          "workflow_restriction": "exact trusted bootstrap/reconciliation workflows on default branch",
+          "runner_model": "stable minimal runner or independently provisioned bootstrap scale set",
+          "public_repository_access": false
+        },
+        {
+          "name": "control-ci",
+          "consumers": [
+            "workspace-control"
+          ],
+          "workflow_restriction": "approved control validation workflows",
+          "runner_model": "ephemeral/JIT CPU",
+          "public_repository_access": false
+        },
+        {
+          "name": "research-cpu",
+          "consumers": [
+            "research-engine"
+          ],
+          "workflow_restriction": "approved CPU validation workflows",
+          "runner_model": "ephemeral/JIT CPU",
+          "public_repository_access": false
+        },
+        {
+          "name": "research-gpu",
+          "consumers": [
+            "research-engine"
+          ],
+          "workflow_restriction": "approved GPU/model workflows",
+          "runner_model": "ephemeral/JIT GPU",
+          "public_repository_access": false
+        },
+        {
+          "name": "padataset",
+          "consumers": [
+            "PADataset"
+          ],
+          "workflow_restriction": "approved PADataset workflows",
+          "runner_model": "ephemeral/JIT CPU/GPU",
+          "public_repository_access": "must be false before enabling organization self-hosted access; public-repo execution requires a separate explicit threat-model decision"
+        }
+      ],
+      "credential_target": "GitHub App with least-privilege organization self-hosted-runner and required repository read permissions; avoid broad personal PAT as steady-state control credential.",
+      "reason": "Organization scope centralizes GitHub-side runner inventory/policy while runner groups preserve repo/workflow-level authorization; operating-system execution identities remain project-specific."
+    }
+  },
+  "phased_plan": [
+    {
+      "phase": "P0_EMERGENCY_CAPACITY_RESTORE",
+      "objective": "Unblock currently valid work without changing authority.",
+      "actions": [
+        "Temporarily restore free/paid hosted capacity; user-selected emergency path is temporary repository public visibility.",
+        "Rerun authoritative failed reconciliation 40243005403 and require an actual executed PASS.",
+        "Verify lambda-research-engine route hydration.",
+        "Allow queued exact-provenance CPU validation to execute and require PASS before exactly one scientific trigger.",
+        "Do not treat temporary visibility as the long-term runner security model."
+      ],
+      "rollback": "Return repositories to private immediately if unexpected public-runner/self-hosted interaction or secret exposure is observed."
+    },
+    {
+      "phase": "P1_DESIGN_AND_WORKSPACE_CONTROL_PILOT",
+      "objective": "Create a self-hosted control lane without touching bootstrap authority, with stale-assignment recovery and bounded L0 maintenance implemented before live activation.",
+      "actions": [
+        "Keep the exact workspace-control manifest blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588 as MIGRATION_CANDIDATE_NOT_INSTALLED until implementation freeze.",
+        "Use an owner-only issue_comment pilot route so existing admission-v2 can attest exact same-repository PR head/workflow identity.",
+        "Change admission-v2 scaling so TotalAssignedJobs alone never causes JIT generation/root provisioning; complete pre-attested job metadata is mandatory.",
+        "Implement the ASSIGNMENT_DIVERGENCE_QUARANTINED state and durable quarantine receipts.",
+        "Implement the independently installed L0 maintenance controller/root maintenance socket with only the frozen typed P1 verbs.",
+        "Implement RESET_STALE_ASSIGNMENT exactly as frozen: local quiescence, exact scale-set delete/recreate, two zero-state observations, recovery receipt, then READY_FOR_SINGLE_RETRY.",
+        "Keep maxRunners=1 and host/project concurrency=1 for P1; do not implement general resource-aware concurrency yet.",
+        "Create the dedicated workspace-control validation workflow with wc-admission-v1 claim and CPU-only resource contract/profile.",
+        "Keep live reconciliation validation/bootstrap on its existing independent path throughout P1.",
+        "Validate filesystem isolation, no-GPU access, resource caps, stale recovery, maintenance authorization, deterministic receipts, and rollback before activation."
+      ],
+      "rollback": "Stop/disable the workspace-control pilot controller and L0 maintenance endpoint if needed; retain existing hosted/bootstrap reconciliation and temporary known-good transport paths. Never remove the last independently recoverable bootstrap path in the same change."
+    },
+    {
+      "phase": "P2_CONTROL_SMALL_AND_AUTOMATIC_EVENT_ADMISSION",
+      "objective": "Make routine PR/push CI self-hosted without manual slash commands.",
+      "actions": [
+        "Add explicit control-small execution profile with approximately 200% CPU, 4-8G MemoryMax, no GPU, short RuntimeMaxSec, max concurrency 1.",
+        "Extend attestation schema/controller to safely support pull_request for candidate validation and trusted push/workflow_dispatch for default-branch reconciliation.",
+        "Freeze distinct authority rules for candidate validation vs default-branch bootstrap/reconciliation.",
+        "Migrate Workspace Control Validation and appropriate research-engine ordinary CI only after new event admission passes adversarial tests."
+      ],
+      "rollback": "Retain previous issue_comment JIT route and hosted/bootstrap fallback until automatic-event admission is accepted."
+    },
+    {
+      "phase": "P3_ORGANIZATION_MIGRATION",
+      "objective": "Centralize GitHub-side runner administration without collapsing OS/project isolation.",
+      "actions": [
+        "Create GitHub organization and transfer repositories in a separately gated change.",
+        "Create runner groups with selected-repository and selected-workflow restrictions.",
+        "Re-register or migrate scale sets/controllers explicitly; do not assume transfer preserves runner registration.",
+        "Move controller authentication to a least-privilege GitHub App.",
+        "Update owner-qualified repository references, remote URLs, manifests, attestations, and allowlists.",
+        "Prove bootstrap recovery, project isolation, and rollback before disabling old registration paths."
+      ],
+      "rollback": "Repository transfer/runner migration is staged with old credentials/registration recoverable until acceptance; never delete the last known-good bootstrap path before org gates pass."
+    },
+    {
+      "phase": "P4_HOSTED_RUNNER_EXIT",
+      "objective": "Private-repository steady state with negligible hosted-runner dependence.",
+      "actions": [
+        "Inventory every runs-on: ubuntu-latest.",
+        "Move routine jobs to bounded self-hosted groups.",
+        "Retain only an explicitly documented emergency/break-glass hosted workflow if desired.",
+        "Set billing budget/alerts to detect accidental hosted usage.",
+        "Measure queue depth, CPU/RAM pressure, and research-job interference."
+      ],
+      "rollback": "Emergency hosted workflow remains available subject to budget or temporary public fallback."
+    }
+  ],
+  "resource_model": {
+    "current_controller_limit": "maxRunners=1 per project/lane remains mandatory for P1; it is a temporary capacity ceiling, not the stale-recovery mechanism.",
+    "implication": "P1 remains intentionally serialized. Assignment ambiguity is handled by quarantine/reset, not by increasing runner count.",
+    "proposed_control_initial_budget": {
+      "concurrency": 1,
+      "cpu_quota_target": "200%",
+      "memory_high_target": "4G",
+      "memory_max_target": "8G",
+      "runtime_max_target": "10min",
+      "gpu_count": 0
+    },
+    "research_priority": "Control lane must remain CPU-only and bounded so GPU/model work retains priority. Heavy dependency installs or full integration tests may queue but cannot consume GPUs.",
+    "scale_policy": "Any increase above one concurrent control runner or project manifest concurrency=1 requires a separately reviewed resource-aware host-arbitration design; maxRunners must not be raised as stale-assignment remediation."
+  },
+  "review_automation": {
+    "immediate": [
+      "Every review target is represented by exact Git commit/blob identities in a durable task capsule and PR.",
+      "Request GitHub-native review directly on the PR so later reviewers can consume comments without user copy/paste.",
+      "Where available, request GitHub Copilot code review automatically for design/code PRs as an additional reviewer, using repository/path review instructions.",
+      "A future ChatGPT reviewer starts from task ID and GitHub state; the user should not ferry review text."
+    ],
+    "limitation": "This chat cannot autonomously spawn a separate ChatGPT conversation. Copilot code review is useful for code/design review but does not automatically satisfy scientific independence requirements unless the governing task explicitly accepts that reviewer class.",
+    "future": [
+      "Optional review-broker service/GitHub App that creates review jobs against exact blobs and persists signed dispositions; evaluate separately for model cost, credentials, and independence semantics."
+    ]
+  },
+  "required_preimplementation_review": [
+    "Confirm bootstrap authority remains non-circular and L0 maintenance is independently installed/recoverable from L1.",
+    "Confirm admission-v2 can never generate/provision a runner from TotalAssignedJobs alone.",
+    "Confirm ambiguous assigned-job state quarantines fail-closed and cannot silently consume replacement triggers.",
+    "Confirm RESET_STALE_ASSIGNMENT has exact preconditions, exact scale-set target, local quiescence proof, fresh scale-set identity, two zero-state observations, durable receipt, and fail-closed failure semantics.",
+    "Confirm maintenance root protocol has only finite typed verbs, derives units/paths from installed policy, authenticates the fixed peer UID, and exposes no arbitrary shell/path/systemd/credential authority.",
+    "Confirm workspace-control pilot cannot access sibling project roots/control-plane state/operator home/Docker sockets/GPU devices.",
+    "Confirm P1 remains maxRunners=1 and concurrency=1; general resource-aware concurrency stays separately reviewed.",
+    "Confirm transport identity cannot widen execution resources.",
+    "Confirm automatic pull_request/push admission remains deferred to P2.",
+    "Confirm organization migration and GitHub App/runner-group changes remain deferred to P3.",
+    "Confirm temporary public visibility and GPU-listener transport are retained until reviewed replacements are live and rollback-safe.",
+    "Confirm review automation cannot self-approve authority-sensitive changes."
+  ],
+  "first_implementation_authority_if_reviewed": "After an independent NO_BLOCKING_FINDING on this exact v0.2 architecture plus manifest blob efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588, implementation authority is limited to P1: admission-v2 stale-assignment quarantine/recovery, the bounded independently installed L0 maintenance path, and the owner-commanded workspace-control JIT CPU validation pilot. P2/P3/resource-aware concurrency/hosted-runner removal remain unauthorized.",
+  "non_goals": [
+    "Changing Local EXTRACT science or benchmark authority",
+    "Increasing GPU scientific concurrency",
+    "Replacing GitHub as source/event transport",
+    "Running arbitrary public pull-request code on Lambda",
+    "Collapsing all project workloads into a single shared Unix identity",
+    "Performing the organization transfer before the local control-pilot gates are satisfied",
+    "Using increased runner count as stale-assignment recovery",
+    "Providing a general remote root shell or arbitrary systemd interface",
+    "Changing the workspace-control NOT_INSTALLED project manifest merely to encode recovery authority that belongs at L0/controller scope"
+  ],
+  "supersedes": {
+    "design_id": "github-actions-selfhosted-control-plane-v0.1",
+    "architecture_blob": "f70f100ba57140469ff656255de00f7de262dbc3",
+    "manifest_blob": "efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588",
+    "independent_review": "workspace-control#508 review 5661002925",
+    "disposition": "BLOCKING_FINDINGS",
+    "runtime_evidence_comments": [
+      "6405597751",
+      "6408089808"
+    ],
+    "blocking_findings": [
+      "BF-1: authoritative stale-assignment recovery was missing before P1 activation",
+      "BF-2: bounded privileged maintenance/recovery authority was not designed"
+    ]
+  },
+  "p1_recovery_contract": {
+    "purpose": "Resolve BF-1 without widening runner capacity or trusting ambiguous GitHub assignment state.",
+    "admission_v2_scaling_rule": {
+      "total_assigned_jobs_role": "health/backlog signal only",
+      "execution_authority": "exact complete job metadata + existing GitHub attestation + deterministic admission identity + root provisioner admission",
+      "forbidden": "GenerateJitRunnerConfig or root provision request caused only by TotalAssignedJobs with no complete attested job",
+      "max_runners_during_p1": 1
+    },
+    "controller_states": [
+      "HEALTHY",
+      "ASSIGNMENT_DIVERGENCE_QUARANTINED",
+      "RECOVERY_QUIESCED",
+      "RECOVERY_SCALESET_RESET",
+      "READY_FOR_SINGLE_RETRY"
+    ],
+    "divergence_detection": {
+      "condition": "For admission-v2, GitHub statistics report TotalAssignedJobs greater than the number of locally active plus complete re-attested pending jobs, and the missing assignment cannot be reconstructed from complete JobAssigned metadata.",
+      "response": [
+        "persist a controller quarantine receipt with project_id, lane, scale_set_id, observed TotalAssignedJobs, active/pending identities, last message/session identity when available, and timestamp",
+        "do not AcquireJobs for new work while quarantined",
+        "do not generate JIT config",
+        "do not submit root provision requests",
+        "continue read-only observation so a later complete authoritative lifecycle message can resolve the ambiguity"
+      ],
+      "automatic_clear": "Allowed only if complete authoritative metadata arrives and re-attests every assigned job needed to reconcile the statistic; otherwise explicit L0 recovery is required."
+    },
+    "stale_assignment_reset": {
+      "maintenance_verb": "RESET_STALE_ASSIGNMENT",
+      "preconditions": [
+        "exact project/lane is present in installed reviewed registry and is maintenance-allowlisted",
+        "controller has a durable ASSIGNMENT_DIVERGENCE_QUARANTINED receipt whose identifier is supplied exactly",
+        "root maintenance service stops only the derived controller instance for that project/lane",
+        "root proves no local active provisioner execution/systemd scope remains for the exact project/lane",
+        "L0 GitHub maintenance component proves there is no online or busy runner registration for the exact scale-set ID",
+        "the exact workflow route has no queued or in-progress replacement run intentionally created for recovery; if duplicates exist recovery remains blocked rather than creating another"
+      ],
+      "reset_algorithm": [
+        "remove any exact orphan JIT runner registration already identified by deterministic admission identity when safe",
+        "delete the exact quarantined GitHub runner scale set by numeric scale_set_id using the existing bounded runner-management credential",
+        "restart the exact derived controller instance; ensureScaleSet recreates the same reviewed scale-set name/configuration and yields a new scale_set_id",
+        "observe the recreated scale set until two consecutive statistics observations at least 15 seconds apart report TotalAssignedJobs=0 and TotalRunningJobs=0, with no locally active/pending admission state",
+        "persist a root/L0 recovery receipt binding old scale_set_id, new scale_set_id, installed policy digests, quarantine receipt, actor command identity, and the two zero-state observations",
+        "transition to READY_FOR_SINGLE_RETRY only after the receipt is complete"
+      ],
+      "failure_semantics": "Any failed precondition, GitHub API ambiguity, nonzero post-reset assignment/running state, local activity, identity mismatch, or receipt mismatch leaves the lane stopped/quarantined. No automatic retry job is created.",
+      "single_retry_rule": "The recovery mechanism never creates a workflow run. After READY_FOR_SINGLE_RETRY, exactly one normal owner-commanded pilot trigger may be issued. Admission remains maxRunners=1 and the first acquired qualifying job consumes the recovery generation; additional recovery-trigger attempts wait or are rejected until that job reaches terminal state.",
+      "rollback": "Disable/stop the workspace-control pilot controller and retain existing bootstrap/hosted paths. A failed reset never deletes the last bootstrap authority."
+    },
+    "required_tests": [
+      "restart with TotalAssignedJobs=1 and no complete JobAssigned metadata -> quarantine, zero JIT generation, zero root provision requests",
+      "late complete JobAssigned metadata that re-attests correctly -> safe reconstruction without reset",
+      "incomplete metadata remains ambiguous -> no autonomous provisioning",
+      "RESET_STALE_ASSIGNMENT rejects wrong project/lane, wrong quarantine receipt, active local execution, live/busy GitHub runner, or duplicate queued/in-progress recovery run",
+      "successful reset proves old scale-set deletion, new scale-set ID, two zero-state observations, and durable receipt before READY_FOR_SINGLE_RETRY",
+      "duplicate or replayed reset request is idempotent and cannot cause repeated destructive mutation",
+      "one replacement job is admitted only after READY_FOR_SINGLE_RETRY and existing exact admission checks still pass"
+    ]
+  },
+  "maintenance_authority": {
+    "purpose": "Resolve BF-2 with a separately installed L0 control path that removes routine sudo/shell copy-paste without exposing arbitrary root execution.",
+    "topology": {
+      "github_transport": "An unprivileged, independently installed L0 maintenance controller polls a dedicated workspace-control maintenance command surface through the GitHub API. It does not execute repository code and does not require an L1 runner.",
+      "root_boundary": "A dedicated root maintenance daemon exposes a Unix socket owned by root and writable only by the fixed maintenance-controller group; SO_PEERCRED must match the installed L0 maintenance UID.",
+      "independence": "L0 maintenance controller/root daemon are installed and recoverable independently of the workspace-control dynamic JIT fleet."
+    },
+    "github_command_contract": {
+      "repository": "adamtrott78/workspace-control",
+      "allowed_actor_logins": [
+        "adamtrott78"
+      ],
+      "source": "owner issue_comment on a dedicated control-plane maintenance issue or equivalently frozen owner-only command endpoint",
+      "body_grammar": "exact verb + project_id + lane + optional exact quarantine_receipt_id; no shell fragments, paths, unit names, environment values, URLs, or free-form command arguments",
+      "replay_identity": "GitHub comment id + actor + repository + exact parsed command + installed maintenance-policy generation",
+      "candidate_pr_code_authority": false,
+      "fork_authority": false
+    },
+    "root_protocol": {
+      "schema_version": 1,
+      "allowed_verbs": [
+        {
+          "verb": "DIAGNOSE_LANE",
+          "mutating": false,
+          "targets": "installed project_id/lane only",
+          "output": "bounded status snapshot: controller active state, scale-set identity known to L0, local provisioner activity summary, quarantine/recovery receipt identities"
+        },
+        {
+          "verb": "RESTART_CONTROLLER",
+          "mutating": true,
+          "targets": "exact installed controller instance derived from project_id/lane",
+          "preconditions": [
+            "actor/source command attested by L0 controller",
+            "project/lane present in root-installed registry",
+            "no caller-supplied unit/path",
+            "operation does not modify registry, manifest, profiles, credentials, or scale-set identity"
+          ]
+        },
+        {
+          "verb": "QUIESCE_LANE_FOR_RECOVERY",
+          "mutating": true,
+          "targets": "exact quarantined project_id/lane",
+          "preconditions": [
+            "matching durable controller quarantine receipt",
+            "stop only derived controller instance",
+            "prove local provisioner execution for lane is absent before returning QUIESCED"
+          ]
+        },
+        {
+          "verb": "RESUME_LANE_AFTER_RESET",
+          "mutating": true,
+          "targets": "exact previously quiesced project_id/lane",
+          "preconditions": [
+            "matching reset generation",
+            "installed policy digests unchanged",
+            "restart only derived controller instance"
+          ]
+        }
+      ],
+      "explicitly_forbidden": [
+        "arbitrary shell commands",
+        "caller-supplied executable paths",
+        "caller-supplied filesystem paths",
+        "caller-supplied systemd unit names or properties",
+        "arbitrary package installation",
+        "arbitrary credential changes",
+        "arbitrary registry/manifest/profile content",
+        "arbitrary GitHub repository or scale-set targets",
+        "GPU enablement",
+        "sibling-project filesystem access"
+      ],
+      "receipts": "Every mutating request gets a root-owned replay-safe receipt containing request identity, actor/source identity, derived target, installed policy digests, precondition observations, exact mutations, result, and rollback state."
+    },
+    "reviewed_policy_installation": "P1 maintenance does not add a generic remote policy/profile installer. Exact reviewed registry/manifest/profile material continues to flow through the existing independently bootstrapped APPLY_PROJECT_REGISTRY reconciliation contract, which already forbids arbitrary commands/paths/systemd properties. Extending maintenance to install other material is later work requiring its own review.",
+    "github_scale_set_mutation": "RESET_STALE_ASSIGNMENT is orchestrated by the L0 maintenance controller using the exact quarantined scale_set_id and existing runner-management credential only after root QUIESCE succeeds; it may call DeleteRunnerScaleSet on that exact ID and cannot select arbitrary repositories/groups/scale sets.",
+    "rollback": "Disable the maintenance controller/socket and fall back to the existing operator/root bootstrap path. Existing reconciliation remains separately authoritative."
+  },
+  "transport_execution_separation": {
+    "invariant": "GitHub listener/scale-set identity transports work; it does not grant CPU/GPU/root execution authority.",
+    "enforcement": [
+      "root provisioner remains authoritative for project, workload class, execution contract, profile, devices, CPU, RAM, runtime, filesystem and network envelope",
+      "a CPU-only job transported by a GPU-named listener remains CPU-only if and only if root admission selects the CPU contract/profile and GPU count 0",
+      "P1 workspace-control route must bind only a CPU execution contract/profile with GPU count 0"
+    ]
+  },
+  "host_resource_arbitration": {
+    "p1_decision": "DEFERRED_NOT_BLOCKING_P1",
+    "p1_constraint": "Keep maxRunners=1 and manifest concurrency=1; process-global provisioner serialization may remain during the pilot.",
+    "prohibition": "Do not raise maxRunners or project concurrency to work around stale assignments or latency.",
+    "future_requirement": "Before any concurrency increase, replace process-global count-only gating with reviewed resource-aware host arbitration accounting for CPU quota, MemoryHigh/MemoryMax, GPU device count/memory, runtime class, project/lane isolation, and research priority."
+  },
+  "manifest_binding": {
+    "path": "architecture/lambda-ci-project-workspace-control.v1.json",
+    "exact_blob": "efa6e09f4206ca1d1d2fe6daaabcb69ed01d4588",
+    "status": "MIGRATION_CANDIDATE_NOT_INSTALLED",
+    "decision": "UNCHANGED_AND_REUSED_FOR_V0_2_REVIEW",
+    "rationale": "The v0.1 independent review found the manifest isolation scaffold acceptable. BF-1 and BF-2 concern controller recovery and L0 maintenance authority, so changing project identity/routes/resources would widen the review target unnecessarily.",
+    "activation_state": "control-validation remains PLANNED_NOT_BOUND with null trusted workflow blob"
+  },
+  "v0_2_activation_gate": {
+    "before_live_workspace_control_runner": [
+      "exact v0.2 architecture blob receives independent NO_BLOCKING_FINDING",
+      "implementation PR receives required implementation review",
+      "unit/adversarial tests for quarantine and maintenance authority pass",
+      "root maintenance protocol proves no arbitrary command/path/unit/property surface",
+      "workspace-control CPU profile and forbidden-path isolation pass",
+      "one dry-run or non-executing recovery contract validation proves receipt/replay semantics",
+      "bootstrap reconciliation remains independently operational",
+      "rollback procedure is demonstrated without removing temporary known-good recovery paths"
+    ],
+    "forbidden_until_later": [
+      "automatic pull_request or push admission",
+      "maxRunners > 1",
+      "manifest concurrency > 1",
+      "resource-aware multi-workload host scheduling",
+      "organization runner groups or repository transfer",
+      "GitHub App credential migration",
+      "hosted/bootstrap fallback removal",
+      "temporary public/GPU-listener workaround retirement"
+    ]
+  }
+}
