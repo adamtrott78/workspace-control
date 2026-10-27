@@ -70,7 +70,8 @@
     "request_limits": {
       "max_envelope_bytes": 65536,
       "max_inflight": 2,
-      "max_queued": 8
+      "max_queued": 8,
+      "max_request_runtime_ms": 90000
     },
     "secrets": "tunnel credential never inherited by executor"
   },
@@ -89,7 +90,7 @@
         "properties": {
           "task_id": {
             "type": "string",
-            "const": "workspace-shell-mcp-v1"
+            "pattern": "^[a-z0-9][a-z0-9-]{2,100}$"
           },
           "target": {
             "type": "string",
@@ -171,15 +172,15 @@
           "timeout_ms": {
             "type": "integer",
             "minimum": 1000,
-            "maximum": 120000
+            "maximum": 90000
           }
         }
       },
       "notes": "Profile resolves pinned absolute executable and fully validated argv grammar; no shell -c, python -c, interpreters with arbitrary scripts, hooks, package installers, git config/aliases, or unreviewed binary paths. Any write-capable test/validation requires task-authorized scratch-only copy."
     },
     {
-      "name": "workspace_shell.privileged",
-      "purpose": "reviewed typed host action through separately authenticated root helper",
+      "name": "workspace_shell.run_reviewed_helper",
+      "purpose": "invoke one exact, separately reviewed root helper admitted by the root-owned helper registry; never arbitrary root argv",
       "input_schema": {
         "type": "object",
         "additionalProperties": false,
@@ -187,9 +188,11 @@
           "task_id",
           "target",
           "expected_sha",
-          "operation",
+          "helper_id",
+          "helper_sha256",
           "approval_receipt_id",
-          "nonce"
+          "nonce",
+          "parameters"
         ],
         "properties": {
           "task_id": {
@@ -198,21 +201,19 @@
           },
           "target": {
             "type": "string",
-            "enum": [
-              "workspace-shell-staging"
-            ]
+            "pattern": "^[a-z0-9][a-z0-9._-]{1,100}$"
           },
           "expected_sha": {
             "type": "string",
             "pattern": "^[0-9a-f]{40}$"
           },
-          "operation": {
+          "helper_id": {
             "type": "string",
-            "enum": [
-              "stage_verified_artifact",
-              "inspect_staged_service",
-              "disable_workspace_shell"
-            ]
+            "pattern": "^[a-z0-9][a-z0-9._-]{2,100}$"
+          },
+          "helper_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
           },
           "approval_receipt_id": {
             "type": "string",
@@ -221,10 +222,14 @@
           "nonce": {
             "type": "string",
             "maxLength": 128
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true
           }
         }
       },
-      "notes": "Default deny; no privileged activation, generic systemctl, sudo, root argv, package install, service restart, or workspace-control activation in v1. Any expansion requires amended design and new independent review."
+      "notes": "Root helper registry supplies the helper-specific closed parameter schema, exact path/digest, target/task scope, declared side effects, pre/postconditions and rollback semantics. The generic MCP tool cannot nominate an executable, argv, environment, sudo flag or systemctl verb. Each new helper registry admission is a separately reviewed authority change."
     },
     {
       "name": "workspace_shell.receipt",
@@ -290,8 +295,8 @@
       "max_stdout_bytes": 65536,
       "max_stderr_bytes": 65536,
       "max_combined_bytes": 131072,
-      "max_wall_ms": 120000,
-      "max_cpu_seconds": 120,
+      "max_wall_ms": 90000,
+      "max_cpu_seconds": 90,
       "memory_mb": 1024,
       "output_truncation": "bounded bytes, count observed bytes and record truncation on each stream"
     },
@@ -319,17 +324,18 @@
   "privileged_boundary": {
     "implementation": "separately versioned root-owned service via Unix socket with peer credential validation and request signatures; no generic sudo policy",
     "operations": [
-      "stage_verified_artifact into isolated workspace-shell staging (without activation)",
-      "inspect_staged_service metadata only",
-      "disable_workspace_shell (emergency path additionally available directly to local operator)"
+      "run an exact separately reviewed helper that is already admitted by immutable root-owned helper registry for the bound task/target",
+      "inspect helper/staging metadata through non-mutating registry-defined operation",
+      "disable_workspace_shell through the dedicated emergency path"
     ],
     "not_authorized": [
-      "activate/start/restart workspace-control controllers",
-      "restart research-engine cpu",
-      "arbitrary root helper",
-      "arbitrary systemctl",
-      "install shell endpoint",
-      "modify Heartbeat"
+      "unregistered helper or helper digest not matching registry",
+      "arbitrary root executable/argv/environment",
+      "generic sudo or generic systemctl",
+      "workspace-control activation/reconciliation unless an independently reviewed task/helper contract explicitly authorizes that exact operation",
+      "restart research-engine cpu unless an independently reviewed task/helper contract explicitly authorizes it",
+      "modify Heartbeat",
+      "self-expand helper registry"
     ],
     "preconditions": [
       "immutable reviewed design SHA and approval receipt",
@@ -340,7 +346,7 @@
       "atomic operation with fsync receipt",
       "fail closed on incomplete rollback"
     ],
-    "future_extension": "workspace-control maintenance commands must stay within their own independently reviewed owner-command maintenance path until a separate exact helper contract is approved"
+    "future_extension": "New privileged capability is admitted only by changing the root-owned helper registry/policy under a separately reviewed exact Git head. Existing workspace-control owner-command maintenance authority is not implicitly transferred to Workspace Shell."
   },
   "audit": {
     "schema": "workspace-shell-receipt.v1",
@@ -406,10 +412,15 @@
   ],
   "gates": {
     "host_attestation": "OPEN: historical operator evidence is not current host attestation",
-    "schema_validation": "OPEN",
+    "schema_validation": "OPEN; current PR validation failure is task-capsule schema only, not implementation",
     "independent_review": "OPEN; immutable PR head required",
     "implementation": "BLOCKED",
     "installation": "BLOCKED",
     "activation": "BLOCKED"
-  }
+  },
+  "design_notes": [
+    "OpenAI Secure MCP Tunnel documentation rechecked 2026-10-27: outbound-only transport, 10 MiB serialized envelope, 600 requests/minute, 120 second absolute request deadline, 1000 queued requests.",
+    "Workspace Shell uses 90 second synchronous command ceiling to retain queue/transport margin inside that 120 second absolute budget.",
+    "Tool annotations are advisory only; server-side authorization and sandboxing remain mandatory."
+  ]
 }
