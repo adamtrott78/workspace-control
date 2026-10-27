@@ -754,6 +754,104 @@ def _verify_preserved_services(
             )
 
 
+def _restore_dependency_stopped_preserved_controllers(
+    preserved: dict[str, dict[str, str]],
+) -> None:
+    """Restore active non-CPU controllers stopped by provisioner dependency.
+
+    The generic controller unit Requires=workspace-ci-provisioner.service.
+    Restarting that shared service therefore cleanly stops its active dependent
+    controllers. Research-engine CPU remains preservation-only and is never
+    started here. For the other preserved controllers, only the exact
+    dependency-stop shape is eligible for a bounded start.
+    """
+    cpu_before = preserved.get(RESEARCH_CPU)
+    if cpu_before is None:
+        raise BootstrapError("research-engine CPU missing from preserved snapshot")
+    if cpu_before.get("ActiveState") == "active":
+        raise BootstrapError(
+            "research-engine CPU was active before shared-service restart; "
+            "bootstrap refuses to restart a preservation-only CPU controller"
+        )
+
+    for service in REQUIRED_ACTIVE_CONTROLLERS:
+        before = preserved.get(service)
+        if before is None:
+            raise BootstrapError(
+                f"required preserved controller missing from snapshot: {service}"
+            )
+        if (
+            before.get("ActiveState") != "active"
+            or before.get("SubState") != "running"
+            or before.get("ExecMainStatus") != "0"
+        ):
+            raise BootstrapError(
+                f"required preserved controller was not active/running before "
+                f"shared-service restart: {service}: "
+                + json.dumps(before, sort_keys=True)
+            )
+
+        current = service_snapshot(service)
+        if current.get("NRestarts") != before.get("NRestarts"):
+            raise BootstrapError(
+                f"dependency-stopped controller restart count changed: {service}: "
+                + json.dumps({"before": before, "after": current}, sort_keys=True)
+            )
+
+        if current.get("ActiveState") == "active":
+            if (
+                current.get("SubState") != "running"
+                or current.get("ExecMainStatus") != "0"
+            ):
+                raise BootstrapError(
+                    f"preserved controller active in unexpected state: {service}: "
+                    + json.dumps(current, sort_keys=True)
+                )
+            continue
+
+        if not (
+            current.get("LoadState") == "loaded"
+            and current.get("UnitFileState") in {"enabled", "enabled-runtime"}
+            and current.get("ActiveState") == "inactive"
+            and current.get("SubState") == "dead"
+            and current.get("ExecMainStatus") == "0"
+        ):
+            raise BootstrapError(
+                f"preserved controller is not in the reviewed dependency-stop "
+                f"state: {service}: "
+                + json.dumps(current, sort_keys=True)
+            )
+
+        run(["systemctl", "start", service])
+        after = service_snapshot(service)
+        if (
+            after.get("ActiveState") != "active"
+            or after.get("SubState") != "running"
+            or after.get("ExecMainStatus") != "0"
+            or after.get("NRestarts") != before.get("NRestarts")
+        ):
+            raise BootstrapError(
+                f"failed to restore dependency-stopped controller: {service}: "
+                + json.dumps({"before": before, "after": after}, sort_keys=True)
+            )
+
+
+def _validate_maintenance_identity_membership(
+    maint: pwd.struct_passwd,
+    maint_group: grp.struct_group,
+) -> None:
+    try:
+        groups = os.getgrouplist("ci-maintenance", maint.pw_gid)
+    except OSError as exc:
+        raise BootstrapError(
+            "unable to resolve ci-maintenance group membership"
+        ) from exc
+    if maint_group.gr_gid not in groups:
+        raise BootstrapError(
+            "ci-maintenance is not a member of workspace-ci-maintenance"
+        )
+
+
 def restore_targets(manifest: dict[str, Any]) -> None:
     # Only units this bootstrap is authorized to mutate are stopped/restored.
     # PRESERVED_CONTROLLERS, including research-engine CPU in whatever exact
@@ -811,6 +909,9 @@ def restore_targets(manifest: dict[str, Any]) -> None:
     for service in MUTATED_SERVICES:
         _restore_service_state(service, manifest["services"][service])
 
+    _restore_dependency_stopped_preserved_controllers(
+        manifest["preserved_services"]
+    )
     _verify_preserved_services(manifest["preserved_services"])
 
 
@@ -1014,8 +1115,7 @@ def main() -> int:
 
         maint = pwd.getpwnam("ci-maintenance")
         maint_group = grp.getgrnam("workspace-ci-maintenance")
-        if maint.pw_gid != maint_group.gr_gid:
-            raise BootstrapError("ci-maintenance primary group mismatch")
+        _validate_maintenance_identity_membership(maint, maint_group)
 
         copy_token(
             pathlib.Path("/var/lib/workspace-ci/reconcile-controller/github-token"),
@@ -1054,9 +1154,14 @@ def main() -> int:
         if not pathlib.Path("/run/workspace-ci/reconciler.sock").is_socket():
             raise BootstrapError("reconciler socket missing after restart")
 
-        # All four existing project/lane controllers are preserved. Research
-        # CPU is preserved in its exact stable pre-mutation state (healthy,
-        # inactive, or failed) and is never deliberately restarted by bootstrap.
+        # Restarting the shared provisioner cleanly stops active controller
+        # dependents because their unit Requires=workspace-ci-provisioner.
+        # Restore only the exact non-CPU controllers that were active in the
+        # pre-mutation snapshot and entered the reviewed clean dependency-stop
+        # state. Research-engine CPU remains preservation-only.
+        _restore_dependency_stopped_preserved_controllers(
+            manifest["preserved_services"]
+        )
         _verify_preserved_services(manifest["preserved_services"])
 
         # Install and commission L0. First --once call creates a watermark and
