@@ -107,5 +107,18 @@
   "next_safe_action": "DEFERRED. Do nothing until the operator explicitly resumes workspace-shell-mcp-v1. On resume, start with read-only recovery of the current Lambda and private-MCP transport topology and freeze a threat model/tool-authority design before implementing any command-execution endpoint.",
   "last_executor": "chatgpt",
   "last_surface": "github+heartbeat",
-  "notes": "Created 2026-10-27 after a workspace-github-actions-selfhosted-control-plane-v1 bootstrap handoff required Lambda shell execution that the connected ChatGPT surfaces could not perform. The operator explicitly requested that direct ChatGPT-to-Lambda shell capability be spun into a separate task and implemented later. The intended product shape is a private Workspace Shell MCP/plugin, separate from Workspace Heartbeat, with ordinary unprivileged argv-based execution plus a separately bounded and reviewable privileged authority path."
+  "notes": "Created 2026-10-27 after a workspace-github-actions-selfhosted-control-plane-v1 bootstrap handoff required Lambda shell execution that the connected ChatGPT surfaces could not perform. The operator explicitly requested that direct ChatGPT-to-Lambda shell capability be spun into a separate task and implemented later. The intended product shape is a private Workspace Shell MCP/plugin, separate from Workspace Heartbeat, with ordinary unprivileged argv-based execution plus a separately bounded and reviewable privileged authority path.",
+  "checkpoints": [],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Deferred task capture",
+      "result": "PASS",
+      "evidence": [
+        "Only the durable task capsule and derived handoff are created.",
+        "No Workspace Shell implementation, runtime service, tunnel, credential, sudo policy, or Lambda mutation is authorized by this checkpoint.",
+        "Implementation remains explicitly deferred until operator resume and a separately frozen, independently reviewed authority design."
+      ]
+    }
+  ]
 }
