@@ -84,7 +84,9 @@ class P1BootstrapInstallerTests(unittest.TestCase):
         self.assertIn("P1_BOOTSTRAP_ROLLBACK=COMPLETE", raw)
         self.assertIn('"credential_contents_exposed": False', raw)
         self.assertNotIn("print(data)", raw)
-        self.assertNotIn(".decode(", raw)
+        self.assertNotIn("print(token)", raw)
+        self.assertNotIn("repr(token)", raw)
+        self.assertNotIn('"token": token', raw)
 
     def test_credential_scope_is_probed_before_first_mutation(self):
         raw = SCRIPT.read_text(encoding="utf-8")
@@ -104,7 +106,7 @@ class P1BootstrapInstallerTests(unittest.TestCase):
         raw = SCRIPT.read_text(encoding="utf-8")
         stop_cpu = raw.index('run(["systemctl", "stop", RESEARCH_CPU])')
         install_binary = raw.index(
-            '"/opt/workspace-ci/controller/lambda-ci-controller"'
+            "install_file(\n            built_controller,"
         )
         self.assertLess(stop_cpu, install_binary)
 
