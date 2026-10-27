@@ -23,8 +23,8 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: gitrunner-p1-implementation
-- Remote checkpoint: 103c97e844647bb7fc234761fc17c7bbb829be3f
+- Remote branch: main
+- Remote checkpoint: 99972dd906bb16099645237d584d380beca88171
 - Remote verified: true
 
 ### research-engine
@@ -36,19 +36,20 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate the BF-3 correction on exact code checkpoint 103c97e844647bb7fc234761fc17c7bbb829be3f without redundant manual reruns. Verify scripts/lambda_ci_runtime.py now consumes the root-authored launch spec forbidden_paths and emits deterministic systemd InaccessiblePaths for the exact manifest set, rejects malformed/duplicate/conflicting deny paths, preserves workspace-control's own required roots, and that adversarial tests prove sibling project roots and descendant trusted-cache paths are inaccessible. If the exact checkpoint validation passes, freeze the new implementation blobs and request a fresh independent implementation review focused on BF-3 plus regression of the previously accepted BF-1/BF-2 and scope/resource boundaries. Do not install, reconcile, activate, or trigger P1 before NO_BLOCKING_FINDING.
+Perform a read-only preflight on the Lambda host from an exact clean checkout of merged workspace-control main 99972dd906bb16099645237d584d380beca88171. Verify current installed service states and restart counts; active workspace-ci transient units/processes; installed controller/provisioner/reconciler/runtime file identities; installed registry/project manifests; controller/reconciler/maintenance identities and token-file ownership/modes (without reading token contents); /run/workspace-ci socket ownership/modes; current workspace-control/PADataset/research-engine project roots and controller envs; and availability of the isolated Go 1.26.3 toolchain. Do not stop/restart/copy/install/enable/disable/reconcile/activate anything during this preflight. Use the evidence to derive the exact rollback-safe P1 host upgrade and activation commands.
 
 ## Remaining work
 
-- Obtain and durably consume an independent implementation review of PR #521, explicitly covering BF-1 stale-assignment/reset/retry semantics, BF-2 maintenance authority/non-circularity/receipts, workspace-control isolation/resource envelope, and all deferred P2/P3 boundaries.
-- If and only if the implementation review returns NO_BLOCKING_FINDING, perform bounded P1 installation/activation using the exact reviewed implementation and preserve a known-good bootstrap/rollback path.
-- Validate live P1 with owner-commanded same-repository PR-head execution, CPU/RAM/runtime envelope, no-GPU/forbidden-path isolation, deterministic receipts, stale-assignment recovery dry-run/contract proof, maintenance authorization, and rollback.
-- Do not raise maxRunners or manifest concurrency until separately reviewed resource-aware host arbitration is designed and validated.
-- Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, hosted/bootstrap fallback removal, and temporary transport cleanup unauthorized.
+- Run the bounded read-only Lambda host preflight against merged workspace-control main 99972dd906bb16099645237d584d380beca88171; do not mutate host state during preflight.
+- From that evidence, install only the exact reviewed P1 controller/provisioner/runtime/maintenance/systemd/policy artifacts while preserving current research-engine/PADataset service availability and an independently recoverable bootstrap/rollback path.
+- Activate workspace-control only as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1; keep automatic pull_request/push admission disabled.
+- Validate live P1 filesystem isolation, CPU/RAM/runtime envelope, GPU0, exact candidate provenance, deterministic receipts, maintenance authorization/replay behavior, and clean teardown/rollback.
+- After live P1 acceptance, continue the separately gated work to remove routine GitHub-hosted Actions minutes; do not remove the last bootstrap path in the same change.
+- Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, resource-aware concurrency widening, and unrelated transport cleanup unauthorized.
 
 ## Blockers / gates
 
-- BF-3 from independent implementation review 5661642118: workspace-control forbidden-path isolation must be enforced at the privileged runner launch boundary. Correction is implemented at code checkpoint 103c97e844647bb7fc234761fc17c7bbb829be3f and awaits exact-checkpoint repository validation plus fresh independent re-review before any P1 installation/activation.
+- P1 implementation review is satisfied. Live installation/activation now requires a read-only Lambda host preflight proving the current installed services, identities, credentials, source versions, active transient work, rollback-relevant state, and independent reconciliation/bootstrap path before any root mutation.
 
 ## Fresh-chat initialization
 
