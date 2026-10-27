@@ -23,9 +23,9 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd
-- Remote verified: true
+- Remote branch: gitrunner-p1-quiesce-source-binding-v2
+- Remote checkpoint: dca9ae15e1e9d53283ef8ed1d4a57ccddb80abba
+- Remote verified: false
 
 ### research-engine
 
@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exact checkout of reviewed merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd, with --expected-head set to that exact SHA and full output captured. Research-engine CPU must be preserved exactly in whatever reviewed stable state it occupies (active/running with ExecMainStatus=0, inactive/dead with valid nonnegative ExecMainStatus, or failed/failed with valid positive ExecMainStatus); any malformed, transitional, or changing state must abort before mutation. The other three project/lane controllers must remain active and preserved. The sole initial service mutation remains stopping automatic reconcile-controller. On success, workspace-control must remain MIGRATION_CANDIDATE_NOT_INSTALLED / PLANNED_NOT_BOUND and inactive, and automatic reconcile-controller must remain frozen. Return the complete output/receipt before any GitHub -> L0 diagnose or workspace-control activation.
+Request fresh independent corrected-head review of PR #534. Verify BF-1 is closed by binding source attestation to Path(__file__).resolve(), requiring the executing file to resolve exactly to scripts/lambda_ci_p1_quiesce_restart_storm.py under the derived repository, requiring Git's top-level to equal that derived repository, requiring that helper path to be tracked, and performing expected-HEAD/tracked-cleanliness checks against that repository. Verify regression tests prove an external/copied helper cannot pass attestation or reach quiesce_and_verify(). Re-review all previously accepted restart-storm proof and exact single-service-stop boundaries. Do not merge or mutate Lambda unless the exact corrected head receives NO_BLOCKING_FINDING.
 
 ## Remaining work
 
@@ -49,7 +49,10 @@ Operator: execute scripts/lambda_ci_p1_bootstrap_install.py from a detached exac
 
 ## Blockers / gates
 
-- PR #532 corrected stable-state research-engine CPU preservation is independently accepted and merged as workspace-control@6bd20890e2bc8a44dba8a33227cbb69b3e1368fd. The next gate is one bounded live bootstrap retry from that exact reviewed merge SHA; any transitional/changing research CPU state or any post-mutation failure must abort/rollback according to the reviewed installer.
+- Independent review 5662986453 on blocked PR #533 head f78e38859f6dec44e88c45d8e9c648b04c487fbb found BF-1: source attestation was bound to caller CWD rather than the executing helper file. That old head must never be used for Lambda mutation.
+- PR #533 was accidentally squash-merged as 5056304df6d5bca925fa1a4cff2ed6b1d8948242 without closing BF-1. Main was immediately restored to the exact pre-#533 tree by revert commit 0d84ac243f1dbd883e1fcd23a3b08f57378148db. No Lambda mutation occurred.
+- Corrected source-binding implementation is on PR #534. Exact code/test head dca9ae15e1e9d53283ef8ed1d4a57ccddb80abba passed run 40461478870 / job 122046888412 / run #920 SUCCESS. Fresh independent corrected-head review remains required before merge or live quiesce.
+- The independently reviewed P1 bootstrap merge 6bd20890e2bc8a44dba8a33227cbb69b3e1368fd remains unchanged and is the intended bootstrap executable only after accepted quiesce.
 - workspace-control activation remains separately blocked until bootstrap install passes and a real GitHub -> L0 maintenance DIAGNOSE_LANE command produces a durable accepted receipt.
 
 ## Fresh-chat initialization
