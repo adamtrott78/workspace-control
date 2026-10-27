@@ -121,3 +121,13 @@ Recovery gate:
 3. identify (do not blindly kill) the process occupying :8788;
 4. choose a free isolated port if necessary and complete the v0.4.8 no-change/delta/resync byte benchmark;
 5. keep v0.4.8 out of the production launcher until isolated payload validation and Secure MCP Tunnel acceptance pass.
+
+
+### Port ownership after interrupted benchmark — verified
+
+Read-only operator recovery shows:
+- production `:8787`: no listener after `heartbeat-down`;
+- `:8788`: PID 1922601, exact v0.4.7 runtime `workspace-control@9e5858738a4fd11801510e2839b0f94f19541506`, package 0.4.7, Node v20.20.2, CWD `workspace-heartbeat-runtime-v047/plugins/workspace-heartbeat`, parent PID 1;
+- `:8789`: no listener.
+
+PID 1922601 is therefore the orphaned isolated v0.4.7 probe from the earlier :8788 measurement, not the production tmux-launched runtime. It may be terminated only after re-verifying those exact properties immediately before the kill. Use :8789 for the v0.4.8 benchmark to avoid coupling recovery to cleanup.
