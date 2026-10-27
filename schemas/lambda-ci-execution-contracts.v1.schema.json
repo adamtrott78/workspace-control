@@ -96,7 +96,8 @@
           "enum": [
             "ACCEPTED_MIGRATION_EQUIVALENT",
             "MIGRATION_PLUS_P6_VALIDATION_REQUIRED",
-            "PLANNED_NOT_ACCEPTED"
+            "PLANNED_NOT_ACCEPTED",
+            "P1_CONTROL_PILOT_REVIEW_REQUIRED"
           ]
         },
         "execution_plane": {
@@ -106,7 +107,8 @@
           "enum": [
             "cpu-test",
             "gpu-small",
-            "gpu-heavy"
+            "gpu-heavy",
+            "control-small"
           ]
         },
         "resource_class": {
