@@ -161,6 +161,67 @@ class HotfixReviewCorrectionTests(unittest.TestCase):
             ],
         )
 
+    def test_controller_mainpid_only_change_blocks_success(self):
+        calls = []
+        snapshots = [
+            dict(self.running),
+            dict(self.running),
+            dict(self.running),
+            {
+                **self.running,
+                "MainPID": "5252",
+            },
+            dict(self.running),
+            dict(self.running),
+        ]
+
+        def fake_run(argv, check=True, user=None):
+            calls.append(list(argv))
+            return mock.Mock(returncode=0, stdout="", stderr="")
+
+        def service_state(_service):
+            if not snapshots:
+                return dict(self.running)
+            return snapshots.pop(0)
+
+        stack = self.base_stack(fake_run)
+        stack.enter_context(
+            mock.patch.object(hotfix, "require_service_running", side_effect=service_state)
+        )
+        stack.enter_context(
+            mock.patch.object(
+                hotfix,
+                "require_candidate_dormant",
+                return_value=self.candidate,
+            )
+        )
+        stack.enter_context(mock.patch.object(hotfix, "wait_socket", return_value=None))
+
+        with self.assertRaisesRegex(
+            hotfix.HotfixError,
+            "maintenance controller MainPID changed during hotfix",
+        ):
+            hotfix.main()
+
+        self.assertEqual(self.installed.read_bytes(), self.old)
+        self.assertEqual(
+            calls,
+            [
+                [
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    hotfix.ROOT_SERVICE,
+                ],
+                [
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    hotfix.ROOT_SERVICE,
+                ],
+            ],
+        )
+
     def test_rollback_controller_invocation_change_is_incomplete(self):
         calls = []
         wait_calls = 0
@@ -212,6 +273,76 @@ class HotfixReviewCorrectionTests(unittest.TestCase):
 
         self.assertEqual(self.installed.read_bytes(), self.old)
         self.assertEqual(wait_calls, 2)
+
+    def test_rollback_controller_mainpid_only_change_is_incomplete(self):
+        calls = []
+        wait_calls = 0
+        snapshots = [
+            dict(self.running),
+            dict(self.running),
+            dict(self.running),
+            {
+                **self.running,
+                "MainPID": "5252",
+            },
+        ]
+
+        def fake_run(argv, check=True, user=None):
+            calls.append(list(argv))
+            return mock.Mock(returncode=0, stdout="", stderr="")
+
+        def service_state(_service):
+            if not snapshots:
+                return {
+                    **self.running,
+                    "MainPID": "5252",
+                }
+            return snapshots.pop(0)
+
+        def wait_check():
+            nonlocal wait_calls
+            wait_calls += 1
+            if wait_calls == 1:
+                raise hotfix.HotfixError("synthetic forward readiness failure")
+
+        stack = self.base_stack(fake_run)
+        stack.enter_context(
+            mock.patch.object(hotfix, "require_service_running", side_effect=service_state)
+        )
+        stack.enter_context(
+            mock.patch.object(
+                hotfix,
+                "require_candidate_dormant",
+                return_value=self.candidate,
+            )
+        )
+        stack.enter_context(mock.patch.object(hotfix, "wait_socket", side_effect=wait_check))
+
+        with self.assertRaisesRegex(
+            hotfix.HotfixError,
+            "rollback was incomplete.*rollback changed maintenance controller MainPID",
+        ):
+            hotfix.main()
+
+        self.assertEqual(self.installed.read_bytes(), self.old)
+        self.assertEqual(wait_calls, 2)
+        self.assertEqual(
+            calls,
+            [
+                [
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    hotfix.ROOT_SERVICE,
+                ],
+                [
+                    "systemctl",
+                    "--job-mode=ignore-dependencies",
+                    "restart",
+                    hotfix.ROOT_SERVICE,
+                ],
+            ],
+        )
 
     def test_post_install_dormancy_failure_rolls_back_instead_of_certifying(self):
         calls = []
