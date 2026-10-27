@@ -384,6 +384,12 @@ def apply_request(
             request["quarantine_receipt_id"],
             request["reset_generation"],
         )
+        if request["reset_generation"] is None:
+            observed_at = quarantine.get("observed_at")
+            if not isinstance(observed_at, str) or not observed_at:
+                raise MaintenanceError(
+                    "initial quarantine receipt lacks observed_at"
+                )
         def quiesce() -> dict[str, Any]:
             _run(["systemctl", "stop", service])
             if not _service_inactive(service):
