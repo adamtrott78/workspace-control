@@ -29,6 +29,9 @@ SOURCE_REPOSITORY = "adamtrott78/workspace-control"
 API_ROOT = "https://api.github.com"
 USER_AGENT = "workspace-control-maintenance-controller/1"
 OWNER_LOGIN = "adamtrott78"
+P1_RESET_PROJECT = "workspace-control"
+P1_RESET_LANE = "cpu"
+P1_PILOT_WORKFLOW_ID = "lambda-ci-workspace-control-validation.yml"
 UUID_NAMESPACE = uuid.UUID("450ecef9-fbb0-5cf8-a216-60d6f28f5c5c")
 PROJECT_RE = re.compile(r"^[a-z][a-z0-9-]{1,20}$")
 RESET_UUID_RE = re.compile(
@@ -332,6 +335,75 @@ def invoke_scale_set_helper(
     return response
 
 
+def _parse_github_time(value: Any, label: str) -> datetime:
+    if not isinstance(value, str) or not value:
+        raise MaintenanceControllerError(f"{label} timestamp is missing")
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise MaintenanceControllerError(f"{label} timestamp is invalid") from exc
+
+
+def assert_no_replacement_runs(
+    client: GitHubClient,
+    command: dict[str, Any],
+    quarantine_observed_at: Any,
+) -> None:
+    if (
+        command["project_id"] != P1_RESET_PROJECT
+        or command["lane"] != P1_RESET_LANE
+    ):
+        raise MaintenanceControllerError(
+            "P1 reset-stale is limited to workspace-control/cpu"
+        )
+    cutoff = _parse_github_time(
+        quarantine_observed_at,
+        "quarantine observed_at",
+    )
+    workflow_id = urllib.parse.quote(P1_PILOT_WORKFLOW_ID, safe="")
+    for page in range(1, 21):
+        payload = client.get_json(
+            f"/repos/{SOURCE_REPOSITORY}/actions/workflows/{workflow_id}/runs"
+            f"?per_page=100&page={page}"
+        )
+        runs = payload.get("workflow_runs") if isinstance(payload, dict) else None
+        if not isinstance(runs, list):
+            raise MaintenanceControllerError(
+                "pilot workflow run list is invalid"
+            )
+        for run in runs:
+            if not isinstance(run, dict):
+                raise MaintenanceControllerError(
+                    "pilot workflow run entry is invalid"
+                )
+            if run.get("status") == "completed":
+                continue
+            created = _parse_github_time(
+                run.get("created_at"),
+                "workflow run created_at",
+            )
+            updated = _parse_github_time(
+                run.get("updated_at"),
+                "workflow run updated_at",
+            )
+            try:
+                attempt = int(run.get("run_attempt", 1))
+            except (TypeError, ValueError) as exc:
+                raise MaintenanceControllerError(
+                    "workflow run attempt is invalid"
+                ) from exc
+            if created > cutoff or (attempt > 1 and updated > cutoff):
+                raise MaintenanceControllerError(
+                    "replacement pilot workflow run is still non-terminal: "
+                    f"id={run.get('id')} status={run.get('status')}"
+                )
+        if len(runs) < 100:
+            return
+    raise MaintenanceControllerError(
+        "pilot workflow run pagination exceeded fail-closed bound"
+    )
+
+
 def _zero_observation(scale: dict[str, Any], root_diag: dict[str, Any]) -> bool:
     stats = scale.get("statistics")
     if not isinstance(stats, dict):
@@ -374,6 +446,7 @@ def execute_reset(
     sleep_fn=time.sleep,
     max_new_scale_set_waits: int = 20,
     max_ready_waits: int = 30,
+    github_client: GitHubClient | None = None,
 ) -> dict[str, Any]:
     generation = str(
         uuid.uuid5(
@@ -400,6 +473,15 @@ def execute_reset(
     old_id = qresult.get("quarantine_scale_set_id")
     if not isinstance(old_id, int) or old_id <= 0:
         raise MaintenanceControllerError("quarantine has no exact old scale-set id")
+    if github_client is None:
+        raise MaintenanceControllerError(
+            "reset-stale requires GitHub replacement-run inspection"
+        )
+    assert_no_replacement_runs(
+        github_client,
+        command,
+        qresult.get("quarantine_observed_at"),
+    )
 
     before = invoke_scale_set_helper(
         controller_binary,
@@ -575,6 +657,7 @@ def process_comment(
     controllers_dir: pathlib.Path,
     runner_token_file: pathlib.Path,
     sleep_fn=time.sleep,
+    github_client: GitHubClient | None = None,
 ) -> dict[str, Any] | None:
     comment_id = comment.get("id")
     if not isinstance(comment_id, int) or comment_id <= 0:
@@ -645,6 +728,7 @@ def process_comment(
                 controllers_dir=controllers_dir,
                 runner_token_file=runner_token_file,
                 sleep_fn=sleep_fn,
+                github_client=github_client,
             )
             status = "READY_FOR_SINGLE_RETRY"
         else:
@@ -794,6 +878,7 @@ def run_once(
                 controller_binary=controller_binary,
                 controllers_dir=controllers_dir,
                 runner_token_file=runner_token_file,
+                github_client=client,
             )
         except MaintenanceControllerError as exc:
             processed.append(
