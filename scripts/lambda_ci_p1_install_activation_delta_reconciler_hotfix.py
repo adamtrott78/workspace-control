@@ -39,8 +39,11 @@ DIAGNOSE_RECEIPT = pathlib.Path(
 )
 REGISTRY = pathlib.Path("/etc/workspace-ci/lambda-ci-project-registry.v1.json")
 MANIFEST = pathlib.Path("/etc/workspace-ci/projects/workspace-control.json")
+EXPECTED_BOOTSTRAP_SOURCE_HEAD = (
+    "9b402da8c0158be477ac00944b5c164ddef81193"
+)
 EXPECTED_OLD_SERVICE_SHA256 = (
-    "c424e62c20cd38fa0380d315e4cf28831ce63ff63dd7aa9711913a41c405fcc6"
+    "f6f22a10b2ffdbffa5fced0ca69b2d7e55bc2e5e4c83b54df02bc3f981c85447"
 )
 EXPECTED_COMMENT_ID = 6438723476
 EXPECTED_COMMAND_SHA256 = (
@@ -455,9 +458,12 @@ def main() -> int:
     source_bytes = source.read_bytes()
     source_sha = sha256_bytes(source_bytes)
 
-    if sha256_path(INSTALLED_SERVICE) != EXPECTED_OLD_SERVICE_SHA256:
+    installed_before_sha = sha256_path(INSTALLED_SERVICE)
+    if installed_before_sha != EXPECTED_OLD_SERVICE_SHA256:
         raise HotfixError(
-            "installed reconciler is not the exact reviewed pre-hotfix version"
+            "installed reconciler does not match the exact successful-bootstrap "
+            f"baseline from {EXPECTED_BOOTSTRAP_SOURCE_HEAD}: "
+            f"actual={installed_before_sha} expected={EXPECTED_OLD_SERVICE_SHA256}"
         )
 
     root_before = require_service_running(ROOT_SERVICE)
