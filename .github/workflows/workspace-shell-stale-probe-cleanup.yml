@@ -20,7 +20,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          RUN_ID: "40648709652"
+          RUN_ID: "40649368609"
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -33,7 +33,7 @@ jobs:
           python3 - <<'PY' >>"$GITHUB_OUTPUT"
           import json, os
           r=json.loads(os.environ["RUN_JSON"])
-          assert int(r["id"]) == 40648709652
+          assert int(r["id"]) == 40649368609
           assert r["path"] == ".github/workflows/lambda-ci-workspace-control-validation.yml"
           assert r["event"] == "issue_comment"
           assert r["status"] in {"queued","in_progress","waiting","requested","pending","completed"}
@@ -45,7 +45,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          RUN_ID: "40648709652"
+          RUN_ID: "40649368609"
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -64,7 +64,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          RUN_ID: "40648709652"
+          RUN_ID: "40649368609"
         shell: bash
         run: |
           set -Eeuo pipefail
