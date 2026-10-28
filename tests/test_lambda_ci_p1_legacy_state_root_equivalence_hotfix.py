@@ -69,6 +69,35 @@ class LegacyStateRootEquivalenceHotfixTests(unittest.TestCase):
         )
         self.assertEqual(module.EXPECTED_ONE_SHOT["ExecMainStatus"], "70")
 
+    def test_legacy_env_renderer_omits_only_explicit_default_state_root(self):
+        module = load_module()
+        manifest = {
+            "repository": "adamtrott78/research-engine",
+            "project_id": "research-engine",
+            "derived_identity": {
+                "lanes": {
+                    "gpu": {
+                        "runner_prefix": "lambda-research-engine-gpu-",
+                        "scale_set_name": "lambda-research-engine-gpu",
+                    }
+                }
+            },
+        }
+        raw = module.render_legacy_controller_env(manifest, "gpu").decode()
+        self.assertNotIn("WORKSPACE_CI_CONTROLLER_STATE_ROOT=", raw)
+        self.assertIn(
+            "WORKSPACE_CI_ADMISSION_V2_ENABLED=YES\n",
+            raw,
+        )
+        self.assertIn(
+            "WORKSPACE_CI_PROJECT_ID=research-engine\n",
+            raw,
+        )
+        self.assertIn(
+            "WORKSPACE_CI_SCALESET_NAME=lambda-research-engine-gpu\n",
+            raw,
+        )
+
     def test_rejected_marker_validator_is_exact_and_fail_closed(self):
         module = load_module()
         value = self.rejected_marker(module)
@@ -207,6 +236,11 @@ class LegacyStateRootEquivalenceHotfixTests(unittest.TestCase):
                         module,
                         "snapshot",
                         side_effect=lambda service: dict(snapshots[service]),
+                    ),
+                    mock.patch.object(
+                        module,
+                        "verify_exact_legacy_sibling_material",
+                        return_value={"verified": {"env_sha256": "a", "dropin_sha256": "b"}},
                     ),
                     mock.patch.object(module, "run", side_effect=fake_run),
                     mock.patch.object(module, "wait_socket"),
