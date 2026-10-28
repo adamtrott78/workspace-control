@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { generateKeyPairSync } from "node:crypto";
-import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync } from "node:fs";
+import { chmodSync, mkdtempSync, mkdirSync, writeFileSync, symlinkSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import {
@@ -92,5 +92,28 @@ test("receipt reader refuses symlink traversal", () => {
   assert.throws(
     () => readReceiptNoFollow(root, "receipt-12345678"),
     /ELOOP|symbolic link|too many levels/i,
+  );
+});
+
+
+test("receipt reader verifies owner group and immutable mode", () => {
+  const root = mkdtempSync(path.join(os.tmpdir(), "workspace-shell-receipt-mode-"));
+  const receiptId = "receipt-abcdefgh";
+  const file = path.join(root, receiptId + ".json");
+  writeFileSync(file, JSON.stringify({ receipt_id: receiptId, task_id: "task-abc" }));
+  chmodSync(file, 0o640);
+  const receipt = readReceiptNoFollow(root, receiptId, {
+    expectedUid: typeof process.getuid === "function" ? process.getuid() : null,
+    expectedGid: typeof process.getgid === "function" ? process.getgid() : null,
+  });
+  assert.equal(receipt.task_id, "task-abc");
+
+  chmodSync(file, 0o660);
+  assert.throws(
+    () => readReceiptNoFollow(root, receiptId, {
+      expectedUid: typeof process.getuid === "function" ? process.getuid() : null,
+      expectedGid: typeof process.getgid === "function" ? process.getgid() : null,
+    }),
+    /RECEIPT_MODE_INVALID/,
   );
 });
