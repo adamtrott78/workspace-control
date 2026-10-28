@@ -36,21 +36,20 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Begin the review_automation engineering tranche only; do not mutate Lambda or live controllers. Inspect existing durable review/request conventions and GitHub tooling in workspace-control, freeze a bounded design for automatic review-request creation and disposition consumption, and implement/tests on a dedicated branch. The design must bind exact task/PR/head/blob identities, reject edited/stale/wrong-head/ambiguous dispositions, preserve fresh independent reviewer semantics for authority-sensitive changes, and remove routine operator copy/paste. P2, automatic reconcile-controller startup, capacity widening, maintenance widening, and organization migration remain unauthorized.
+Dogfood the merged review_automation on this state-only closure PR only. Use the default-branch issue_comment request command to create an authority-sensitive exact-head review request automatically; obtain a fresh independent reviewer disposition; verify automatic disposition consumption posts an ACCEPTED receipt. Do not mutate Lambda or live controllers. After dogfood acceptance, freeze and review the next P2/steady-state design before any automatic reconcile-controller startup or hosted-runner dependency removal.
 
 ## Remaining work
 
-- Design and implement review_automation as the next active tranche: durable review request objects/comments, exact target/head/blob binding, automatic discovery/consumption of reviewer dispositions, duplicate/edited/stale/ambiguous fail-closed behavior, and a no-self-approval rule for authority-sensitive changes.
-- Add regressions proving author/self-review cannot satisfy independent-review gates, stale or moved heads cannot be consumed, duplicate matching authority/disposition comments fail closed where ambiguity matters, and accepted exact reviews can be consumed without operator copy/paste.
-- Independently review the exact review_automation implementation before using it as authority for later control-plane gates.
-- After review_automation acceptance, continue P2 automatic pull_request/push admission and steady-state hosted-runner removal under separately reviewed gates.
-- Leave GitHub organization migration, capacity widening, maintenance-command widening, and the separate workspace-shell-mcp-v1 task paused until their own gates.
+- Dogfood merged review_automation on this exact state-only closure PR: create the authority-sensitive request through the default-branch issue_comment command, obtain a fresh independent disposition, and verify the automation posts an ACCEPTED consumption receipt without operator prompt-copy plumbing.
+- After dogfood acceptance, design the next steady-state/P2 tranche under a separate exact review gate; do not start the automatic reconcile-controller or widen live admission in this closure.
+- Then remove routine hosted-runner dependence only after private-repository steady-state CI is proven under reviewed boundaries.
+- Leave GitHub organization migration, capacity widening, maintenance-command widening, and workspace-shell-mcp-v1 paused until their own gates.
 
 ## Blockers / gates
 
-- P1 live activation is closed and validated. Do not perform another one-shot retry, start the automatic reconcile-controller, issue maintenance commands, restart/reset live project controllers, or widen P2/P3/capacity as part of closure.
-- review_automation is now the active tranche. It must preserve independent review semantics and must not allow the authoring chat/process to self-approve authority-sensitive changes.
-- Do not begin P2 automatic pull_request/push admission, steady-state hosted-runner removal, or GitHub organization migration until review_automation receives its own reviewed acceptance.
+- No live controller/runtime mutation is authorized by review_automation closure or dogfood.
+- The next stage must remain separately reviewed before any automatic reconcile-controller startup, P2 admission widening, hosted-runner dependency removal, maintenance widening, capacity widening, or organization migration.
+- The merged review automation must prove end-to-end request creation and disposition consumption on this state-only closure PR before routine reliance.
 
 ## Fresh-chat initialization
 
