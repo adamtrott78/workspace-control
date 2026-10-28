@@ -188,7 +188,12 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
                     manifest = manifests[project_id]
                     for lane in target_registry["projects"][project_id]["lanes"]:
                         (controllers_dir / f"{project_id}-{lane}.env").write_bytes(
-                            reconciler.render_controller_env(manifest, lane).encode("utf-8")
+                            reconciler
+                            .render_legacy_controller_env_with_implicit_default_state_root(
+                                manifest,
+                                lane,
+                            )
+                            .encode("utf-8")
                         )
                         path, body = dropin(project_id, lane, "192.0.2.0/24")
                         path.write_bytes(body)
@@ -539,7 +544,8 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
                 body = f"[Service]\nIPAddressDeny={subnet}\n".encode("utf-8")
                 return path, body
 
-            # Existing active siblings have exact current config.
+            # Existing active siblings retain the exact historical env
+            # encoding where the controller state root was implicit.
             with mock.patch.object(
                 reconciler,
                 "controller_network_dropin",
