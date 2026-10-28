@@ -238,10 +238,6 @@ class WorkspaceShellContractTests(unittest.TestCase):
         if issue_number != 552 or body != expected_body:
             self.skipTest("live host attestation not requested for Workspace Shell PR")
 
-            ["git", "rev-parse", "HEAD"],
-            cwd=ROOT,
-            text=True,
-        ).strip()
         proc = subprocess.run(
             [
                 sys.executable,
