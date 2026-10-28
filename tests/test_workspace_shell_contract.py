@@ -219,6 +219,55 @@ class WorkspaceShellContractTests(unittest.TestCase):
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("READY_FOR_INSTALL_PLAN", proc.stderr)
 
+    def test_live_lambda_host_attestation_when_explicitly_requested(self):
+        event_path = os.environ.get("GITHUB_EVENT_PATH")
+        if not event_path or not Path(event_path).is_file():
+            self.skipTest("not a GitHub Actions event")
+        try:
+            event = json.loads(Path(event_path).read_text())
+        except (OSError, json.JSONDecodeError):
+            self.skipTest("GitHub event unavailable")
+        body = ((event.get("comment") or {}).get("body") or "").strip()
+        if not body.startswith("/workspace-control-validate ") or not body.endswith(" host-attest"):
+            self.skipTest("live host attestation not requested")
+
+        actual_sha = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            text=True,
+        ).strip()
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(HOST_ATTEST),
+                "--source-root", str(ROOT),
+                "--source-sha", actual_sha,
+            ],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=30,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        attestation = json.loads(proc.stdout)
+        self.assertEqual(
+            attestation["schema"],
+            "workspace-shell-host-attestation.v1",
+        )
+        self.assertEqual(
+            (attestation["source"]["head"] or {}).get("stdout"),
+            actual_sha,
+        )
+        self.assertFalse(attestation["secret_policy"]["process_environments_read"])
+        self.assertFalse(attestation["secret_policy"]["secret_file_contents_read"])
+        self.assertFalse(attestation["secret_policy"]["api_tokens_read"])
+        self.assertFalse(attestation["secret_policy"]["ssh_material_read"])
+        print(
+            "WORKSPACE_SHELL_HOST_ATTESTATION_JSON="
+            + json.dumps(attestation, sort_keys=True, separators=(",", ":"))
+        )
+
     def test_launcher_duplicates_profile_grammar_and_denies_escape_shapes(self):
         manifest = json.loads((PLUGIN / "config" / "profiles.v1.json").read_text())
         good = job_launcher.resolve_profile(
