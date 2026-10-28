@@ -521,8 +521,6 @@ def validate_rejected_marker(raw: bytes) -> dict:
         raise HotfixError("last-rejected marker is invalid JSON") from exc
     if not isinstance(value, dict):
         raise HotfixError("last-rejected marker must be object")
-    if value.get("status") != "REJECTED":
-        raise HotfixError("last-rejected status mismatch")
     if value.get("commit_sha") != EXPECTED_POLICY_SHA:
         raise HotfixError("last-rejected policy SHA mismatch")
     if value.get("approved_policy_sha") != EXPECTED_POLICY_SHA:
@@ -746,7 +744,7 @@ def main() -> int:
                 "request_id": rejected["request_id"],
                 "commit_sha": rejected["commit_sha"],
                 "workflow_run_id": rejected["workflow_run_id"],
-                "status": rejected["status"],
+                "status": rejected["response"]["status"],
                 "archived_path": str(ARCHIVED_REJECTED),
                 "archived_sha256": sha256_bytes(rejected_raw),
             },

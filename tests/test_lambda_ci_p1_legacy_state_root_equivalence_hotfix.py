@@ -43,7 +43,6 @@ class LegacyStateRootEquivalenceHotfixTests(unittest.TestCase):
                 "schema_version": 1,
                 "status": "REJECTED",
             },
-            "status": "REJECTED",
             "timestamp_utc": "2026-10-28T01:07:54.830294+00:00",
             "workflow_run_id": module.EXPECTED_WORKFLOW_RUN_ID,
         }
@@ -330,6 +329,18 @@ class LegacyStateRootEquivalenceHotfixTests(unittest.TestCase):
         raw = (json.dumps(value, sort_keys=True) + "\n").encode()
         parsed = module.validate_rejected_marker(raw)
         self.assertEqual(parsed["request_id"], module.EXPECTED_REQUEST_ID)
+        self.assertNotIn("status", parsed)
+        self.assertEqual(parsed["response"]["status"], "REJECTED")
+
+        bad_response = json.loads(json.dumps(value))
+        bad_response["response"]["status"] = "PASS"
+        with self.assertRaisesRegex(
+            module.HotfixError,
+            "root response status mismatch",
+        ):
+            module.validate_rejected_marker(
+                (json.dumps(bad_response, sort_keys=True) + "\n").encode()
+            )
 
         bad = dict(value)
         bad["request_id"] = "00000000-0000-4000-8000-000000000000"
