@@ -68,6 +68,15 @@ EXPECTED_ONE_SHOT_UNIT_SHA256 = (
 EXPECTED_CONTROLLER_BINARY_SHA256 = (
     "6acd290f2312f0908d17443a2f5ee8d31711fbdb3f0bf9318171e9edd0ddee12"
 )
+EXPECTED_LOCAL_SUBNET = "134.88.12.0/22"
+LEGACY_SIBLING_MANIFESTS = {
+    "padataset": pathlib.Path(
+        "architecture/lambda-ci-project-padataset.v1.json"
+    ),
+    "research-engine": pathlib.Path(
+        "architecture/lambda-ci-project-research-engine.v2.json"
+    ),
+}
 
 EXPECTED_AUTO = {
     "LoadState": "loaded",
@@ -286,6 +295,57 @@ def validate_rejected_marker(raw: bytes) -> dict:
     return value
 
 
+def render_legacy_controller_env(
+    manifest: dict,
+    lane: str,
+) -> bytes:
+    lane_cfg = manifest["derived_identity"]["lanes"][lane]
+    values = {
+        "WORKSPACE_CI_ADMISSION_V2_ENABLED": "YES",
+        "WORKSPACE_CI_GITHUB_URL": f"https://github.com/{manifest['repository']}",
+        "WORKSPACE_CI_LANE": lane,
+        "WORKSPACE_CI_PAT_FILE": "/var/lib/workspace-ci/controller/github-token",
+        "WORKSPACE_CI_PROJECT_ID": manifest["project_id"],
+        "WORKSPACE_CI_PROVISIONER_SOCKET": "/run/workspace-ci/provisioner.sock",
+        "WORKSPACE_CI_RUNNER_PREFIX": lane_cfg["runner_prefix"],
+        "WORKSPACE_CI_SCALESET_NAME": lane_cfg["scale_set_name"],
+    }
+    return "".join(
+        f"{key}={values[key]}\n" for key in sorted(values)
+    ).encode("utf-8")
+
+
+def verify_exact_legacy_sibling_material(repo: pathlib.Path) -> dict[str, dict[str, str]]:
+    evidence: dict[str, dict[str, str]] = {}
+    for project_id, relative_manifest in LEGACY_SIBLING_MANIFESTS.items():
+        manifest = json.loads((repo / relative_manifest).read_text(encoding="utf-8"))
+        for lane in ("cpu", "gpu"):
+            env_path = pathlib.Path(
+                f"/etc/workspace-ci/controllers/{project_id}-{lane}.env"
+            )
+            expected_env = render_legacy_controller_env(manifest, lane)
+            if not env_path.is_file() or env_path.read_bytes() != expected_env:
+                raise HotfixError(
+                    f"legacy sibling env mismatch: {project_id}-{lane}"
+                )
+            dropin_path = pathlib.Path(
+                "/etc/systemd/system/"
+                f"workspace-ci-controller@{project_id}-{lane}.service.d/network.conf"
+            )
+            expected_dropin = (
+                f"[Service]\nIPAddressDeny={EXPECTED_LOCAL_SUBNET}\n"
+            ).encode("utf-8")
+            if not dropin_path.is_file() or dropin_path.read_bytes() != expected_dropin:
+                raise HotfixError(
+                    f"legacy sibling network drop-in mismatch: {project_id}-{lane}"
+                )
+            evidence[f"{project_id}-{lane}"] = {
+                "env_sha256": sha256_bytes(expected_env),
+                "dropin_sha256": sha256_bytes(expected_dropin),
+            }
+    return evidence
+
+
 def wait_socket() -> None:
     deadline = time.monotonic() + 5.0
     while time.monotonic() < deadline:
@@ -377,6 +437,7 @@ def main() -> int:
         service: require_snapshot(service, expected)
         for service, expected in EXPECTED_SIBLINGS.items()
     }
+    legacy_material = verify_exact_legacy_sibling_material(repo)
 
     old_root = INSTALLED_ROOT.read_bytes()
     rollback_armed = True
@@ -431,6 +492,7 @@ def main() -> int:
             "one_shot_controller": one_shot_before,
             "workspace_control_cpu": workspace_before,
             "preserved_siblings": siblings_before,
+            "verified_legacy_sibling_material": legacy_material,
             "activation_performed": False,
             "retry_performed": False,
             "automatic_workflow_triggered": False,
