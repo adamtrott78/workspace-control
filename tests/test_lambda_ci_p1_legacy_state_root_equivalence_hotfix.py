@@ -133,8 +133,8 @@ class LegacyStateRootEquivalenceHotfixTests(unittest.TestCase):
         module,
         **kwargs,
     ):
-        head = kwargs.get("head", "reviewed-head")
-        helper_blob = kwargs.get(
+        head = kwargs.pop("head", "reviewed-head")
+        helper_blob = kwargs.pop(
             "head_helper_blob",
             "1111111111111111111111111111111111111111",
         )
