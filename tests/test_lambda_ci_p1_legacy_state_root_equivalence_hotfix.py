@@ -69,6 +69,125 @@ class LegacyStateRootEquivalenceHotfixTests(unittest.TestCase):
         )
         self.assertEqual(module.EXPECTED_ONE_SHOT["ExecMainStatus"], "70")
 
+    def _attest_run(
+        self,
+        module,
+        *,
+        head="reviewed-descendant",
+        symbolic_rc=1,
+        symbolic_stdout="",
+        reviewed_blob=None,
+        head_blob=None,
+        changed="",
+    ):
+        reviewed_blob = (
+            reviewed_blob
+            if reviewed_blob is not None
+            else module.EXPECTED_REVIEWED_RECONCILER_GIT_BLOB
+        )
+        head_blob = (
+            head_blob
+            if head_blob is not None
+            else module.EXPECTED_REVIEWED_RECONCILER_GIT_BLOB
+        )
+
+        def fake_run(argv, check=True):
+            if argv[-2:] == ["rev-parse", "--show-toplevel"]:
+                return types.SimpleNamespace(
+                    returncode=0,
+                    stdout=str(ROOT) + "\n",
+                    stderr="",
+                )
+            if argv[-2:] == ["rev-parse", "HEAD"]:
+                return types.SimpleNamespace(
+                    returncode=0,
+                    stdout=head + "\n",
+                    stderr="",
+                )
+            if "symbolic-ref" in argv:
+                return types.SimpleNamespace(
+                    returncode=symbolic_rc,
+                    stdout=symbolic_stdout,
+                    stderr="",
+                )
+            if "status" in argv:
+                return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+            if "ls-files" in argv:
+                return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+            if "cat-file" in argv:
+                return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+            if "rev-parse" in argv:
+                spec = argv[-1]
+                if spec.startswith(module.EXPECTED_REVIEWED_SOURCE_HEAD + ":"):
+                    return types.SimpleNamespace(
+                        returncode=0,
+                        stdout=reviewed_blob + "\n",
+                        stderr="",
+                    )
+                if spec.startswith("HEAD:"):
+                    return types.SimpleNamespace(
+                        returncode=0,
+                        stdout=head_blob + "\n",
+                        stderr="",
+                    )
+            if "diff" in argv:
+                return types.SimpleNamespace(
+                    returncode=0,
+                    stdout=changed,
+                    stderr="",
+                )
+            raise AssertionError(f"unexpected git command: {argv!r}")
+
+        return mock.patch.object(module, "run", side_effect=fake_run)
+
+    def test_attest_source_rejects_different_clean_commit_with_own_expected_head(self):
+        module = load_module()
+        with self._attest_run(
+            module,
+            head="different-clean-head",
+            changed="README.md\n",
+        ):
+            with self.assertRaisesRegex(
+                module.HotfixError,
+                "unexpected post-review source delta",
+            ):
+                module.attest_source("different-clean-head", "atrott")
+
+    def test_attest_source_rejects_attached_branch(self):
+        module = load_module()
+        with self._attest_run(
+            module,
+            symbolic_rc=0,
+            symbolic_stdout="refs/heads/p1-preserve-legacy-state-root-env\n",
+        ):
+            with self.assertRaisesRegex(module.HotfixError, "HEAD must be detached"):
+                module.attest_source("reviewed-descendant", "atrott")
+
+    def test_attest_source_rejects_reconciler_source_byte_drift(self):
+        module = load_module()
+        with self._attest_run(
+            module,
+            head_blob="0000000000000000000000000000000000000000",
+        ):
+            with self.assertRaisesRegex(
+                module.HotfixError,
+                "reconciler source blob mismatch",
+            ):
+                module.attest_source("reviewed-descendant", "atrott")
+
+    def test_attest_source_accepts_only_reviewed_source_delta(self):
+        module = load_module()
+        changed = (
+            str(module.EXPECTED_HELPER)
+            + "\n"
+            + "tests/test_lambda_ci_p1_legacy_state_root_equivalence_hotfix.py\n"
+        )
+        with self._attest_run(module, changed=changed):
+            self.assertEqual(
+                module.attest_source("reviewed-descendant", "atrott"),
+                ROOT,
+            )
+
     def test_legacy_env_renderer_omits_only_explicit_default_state_root(self):
         module = load_module()
         manifest = {

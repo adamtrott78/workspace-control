@@ -68,6 +68,16 @@ EXPECTED_ONE_SHOT_UNIT_SHA256 = (
 EXPECTED_CONTROLLER_BINARY_SHA256 = (
     "6acd290f2312f0908d17443a2f5ee8d31711fbdb3f0bf9318171e9edd0ddee12"
 )
+EXPECTED_REVIEWED_SOURCE_HEAD = "a2587410cde8ca2e077ea9228342b7651abb793d"
+EXPECTED_REVIEWED_RECONCILER_GIT_BLOB = (
+    "ee86b28412c0dff70fe79d915978fc9cd1f7cbd7"
+)
+ALLOWED_POST_REVIEW_SOURCE_PATHS = {
+    str(EXPECTED_HELPER),
+    "tests/test_lambda_ci_p1_legacy_state_root_equivalence_hotfix.py",
+    "tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json",
+    "tasks/active/workspace-github-actions-selfhosted-control-plane-v1.md",
+}
 EXPECTED_LOCAL_SUBNET = "134.88.12.0/22"
 LEGACY_SIBLING_MANIFESTS = {
     "padataset": pathlib.Path(
@@ -187,20 +197,89 @@ def attest_source(expected_head: str, invoker: str) -> pathlib.Path:
     prefix = ["/usr/sbin/runuser", "-u", invoker, "--", "git", "-C", str(repo)]
     if run([*prefix, "rev-parse", "--show-toplevel"]).stdout.strip() != str(repo):
         raise HotfixError("reviewed repository top-level mismatch")
+
     head = run([*prefix, "rev-parse", "HEAD"]).stdout.strip()
     if head != expected_head:
         raise HotfixError(
             f"HEAD mismatch: actual={head} expected={expected_head}"
         )
+
+    symbolic = run([*prefix, "symbolic-ref", "-q", "HEAD"], check=False)
+    if symbolic.returncode == 0:
+        raise HotfixError(
+            "HEAD must be detached; attached="
+            + (symbolic.stdout.strip() or "<unknown>")
+        )
+    if symbolic.returncode != 1:
+        raise HotfixError(
+            "unable to prove detached HEAD: "
+            f"rc={symbolic.returncode} stderr={symbolic.stderr.strip()}"
+        )
+
     if run(
         [*prefix, "status", "--porcelain=v1", "--untracked-files=no"]
     ).stdout.strip():
         raise HotfixError("reviewed tracked tree is dirty")
+    for path in (EXPECTED_HELPER, SOURCE_ROOT):
+        if run(
+            [*prefix, "ls-files", "--error-unmatch", str(path)],
+            check=False,
+        ).returncode != 0:
+            raise HotfixError(f"reviewed tracked source is absent: {path}")
+
     if run(
-        [*prefix, "ls-files", "--error-unmatch", str(EXPECTED_HELPER)],
+        [
+            *prefix,
+            "cat-file",
+            "-e",
+            f"{EXPECTED_REVIEWED_SOURCE_HEAD}^{{commit}}",
+        ],
         check=False,
     ).returncode != 0:
-        raise HotfixError("executing helper is not tracked")
+        raise HotfixError("reviewed immutable source authority is unavailable")
+
+    reviewed_blob = run(
+        [
+            *prefix,
+            "rev-parse",
+            f"{EXPECTED_REVIEWED_SOURCE_HEAD}:{SOURCE_ROOT}",
+        ]
+    ).stdout.strip()
+    if reviewed_blob != EXPECTED_REVIEWED_RECONCILER_GIT_BLOB:
+        raise HotfixError(
+            "reviewed reconciler authority blob mismatch: "
+            f"actual={reviewed_blob} "
+            f"expected={EXPECTED_REVIEWED_RECONCILER_GIT_BLOB}"
+        )
+
+    head_blob = run(
+        [*prefix, "rev-parse", f"HEAD:{SOURCE_ROOT}"]
+    ).stdout.strip()
+    if head_blob != EXPECTED_REVIEWED_RECONCILER_GIT_BLOB:
+        raise HotfixError(
+            "reconciler source blob mismatch: "
+            f"actual={head_blob} "
+            f"expected={EXPECTED_REVIEWED_RECONCILER_GIT_BLOB}"
+        )
+
+    changed = {
+        line.strip()
+        for line in run(
+            [
+                *prefix,
+                "diff",
+                "--name-only",
+                EXPECTED_REVIEWED_SOURCE_HEAD,
+                "HEAD",
+            ]
+        ).stdout.splitlines()
+        if line.strip()
+    }
+    unexpected = sorted(changed - ALLOWED_POST_REVIEW_SOURCE_PATHS)
+    if unexpected:
+        raise HotfixError(
+            "unexpected post-review source delta: " + ", ".join(unexpected)
+        )
     return repo
 
 
