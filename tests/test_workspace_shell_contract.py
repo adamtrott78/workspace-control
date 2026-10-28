@@ -8,6 +8,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -131,6 +132,108 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn("--property=MemoryMax=1G", command)
         self.assertNotIn("workspace-shell-exec", joined)
 
+    def test_receipt_files_are_root_service_owned_and_frontend_group_readable(self):
+        with tempfile.TemporaryDirectory() as td:
+            receipt = runtime_common.write_receipt(
+                td,
+                {
+                    "schema": "workspace-shell-receipt.v1",
+                    "receipt_id": "receipt-test-1234",
+                    "task_id": "task-abc",
+                },
+                reader_gid=os.getgid(),
+                owner_uid=os.getuid(),
+            )
+            path = Path(td) / "receipt-test-1234.json"
+            st = path.stat()
+            self.assertEqual(st.st_gid, os.getgid())
+            self.assertEqual(st.st_mode & 0o777, 0o640)
+            self.assertEqual(receipt["receipt_id"], "receipt-test-1234")
+            self.assertTrue(receipt["receipt_sha256"])
+
+    def test_dirty_checkout_is_inspectable_but_not_executable(self):
+        manifest = json.loads((PLUGIN / "config" / "profiles.v1.json").read_text())
+        expected = "a" * 40
+
+        def fake_git(_root, args):
+            if args == ["rev-parse", "HEAD"]:
+                return expected
+            if args == ["rev-parse", "HEAD^{tree}"]:
+                return "b" * 40
+            if args == ["status", "--porcelain=v1", "--untracked-files=normal"]:
+                return " M tracked.txt"
+            raise AssertionError(args)
+
+        fake_result = {
+            "exit_code": 0,
+            "signal": None,
+            "timed_out": False,
+            "cancelled": False,
+            "stdout": b" M tracked.txt\n",
+            "stderr": b"",
+            "stdout_bytes_seen": 15,
+            "stderr_bytes_seen": 0,
+            "stdout_sha256": hashlib.sha256(b" M tracked.txt\n").hexdigest(),
+            "stderr_sha256": hashlib.sha256(b"").hexdigest(),
+            "stdout_truncated": False,
+            "stderr_truncated": False,
+            "duration_ms": 1,
+        }
+        cfg = {
+            "source_roots": {"workspace-control": "/repo"},
+            "worker_uid": 41001,
+            "worker_gid": 41001,
+            "scratch_root": "/scratch",
+            "receipt_root": "/receipts",
+            "frontend_gid": os.getgid(),
+        }
+        inspect_request = {
+            "schema": "workspace-shell-job-request.v1",
+            "operation": "exec",
+            "task_id": "task-abc",
+            "target": "workspace-control",
+            "expected_sha": expected,
+            "profile": "git-read",
+            "argv": ["status", "--porcelain=v1", "--untracked-files=normal"],
+            "cwd": ".",
+            "timeout_ms": 1000,
+            "request_id": "request-one",
+        }
+
+        with patch.object(job_launcher, "verify_source_tree", return_value=Path("/repo")), \
+             patch.object(job_launcher, "hardened_git", side_effect=fake_git), \
+             patch.object(job_launcher, "require_secure_directory", return_value=Path("/scratch")), \
+             patch.object(job_launcher, "build_bwrap_command", return_value=["/usr/bin/true"]), \
+             patch.object(job_launcher, "build_systemd_run_command", return_value=["/usr/bin/true"]), \
+             patch.object(job_launcher, "bounded_run", return_value=fake_result), \
+             patch.object(job_launcher, "cleanup_state", return_value="COLLECTED"), \
+             patch.object(job_launcher, "write_receipt", side_effect=lambda _root, receipt, **_kw: receipt):
+            result = job_launcher.run_request(cfg, manifest, inspect_request)
+        self.assertTrue(result["source_dirty"])
+
+        executable_request = dict(inspect_request)
+        executable_request.update({
+            "profile": "pytest-bounded",
+            "argv": ["tests/test_workspace_shell_contract.py", "-q"],
+        })
+        with patch.object(job_launcher, "verify_source_tree", return_value=Path("/repo")), \
+             patch.object(job_launcher, "hardened_git", side_effect=fake_git):
+            with self.assertRaisesRegex(
+                runtime_common.ShellRuntimeError,
+                "SOURCE_DIRTY",
+            ):
+                job_launcher.run_request(cfg, manifest, executable_request)
+
+    def test_receipt_argv_redacts_pytest_expression(self):
+        redacted = job_launcher.redact_argv(
+            "pytest-bounded",
+            ["-k", "secret_customer_name", "tests/test_example.py"],
+        )
+        self.assertEqual(
+            redacted,
+            ["-k", "[redacted-expression]", "tests/test_example.py"],
+        )
+
     def test_replay_journal_is_single_use_before_mutation(self):
         with tempfile.TemporaryDirectory() as td:
             db = root_broker.ensure_replay_db(
@@ -247,6 +350,11 @@ class WorkspaceShellContractTests(unittest.TestCase):
             "process.getuid() !== config.frontend_uid",
             server,
         )
+        self.assertIn(
+            "process.getgid() !== config.frontend_gid",
+            server,
+        )
+        self.assertIn("expectedGid: config.frontend_gid", server)
         self.assertNotIn("WORKSPACE_SHELL_DEV_INSECURE", server)
         self.assertIn("FRONTEND_SIGNATURE_INVALID", verifier)
         self.assertIn("APPROVAL_SIGNATURE_INVALID", verifier)
