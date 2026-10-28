@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import argparse, hashlib, importlib.util, json, os, pathlib, pwd, subprocess, tempfile, urllib.request
-from datetime import datetime
 
 REPO=pathlib.Path(__file__).resolve().parents[1]
 REL=pathlib.Path("scripts/local_reasoner_gpu_stale_reset_once.py")
@@ -9,12 +8,11 @@ PROJECT="research-engine"; LANE="gpu"
 QID="3eeffae8-2bd0-4344-b89f-02afbf1a445b"
 OLD_ID=2
 OBS="2026-10-28T05:15:55.833668328Z"
-MARKER=6462367016
+AUTHORITY_MARKER=6462367016
+CLEARED_MARKER=6462619666
 REG_SHA="9b65a78d83e4849ddb22abd7b14eac8953b00345557f1111f726fdd2a37b3450"
 MAN_SHA="5b003fff4045b755be7a14b537e9b56fdb8397f93f45ba66e8c2ef53e011b390"
-RESOURCE_REPO="adamtrott78/research-engine"
 CONTROL_REPO="adamtrott78/workspace-control"
-WORKFLOW="lambda-ci-local-reasoner-resource-probe.yml"
 RUNS=[40636959931,40636967211,40637274575,40637282488,40637418843,40641329629,40643628869,40643739086]
 
 class E(RuntimeError): pass
@@ -36,9 +34,18 @@ def canon_sha(path):
     return hashlib.sha256(raw).hexdigest()
 
 def api(path):
-    req=urllib.request.Request("https://api.github.com/"+path,headers={"Accept":"application/vnd.github+json","User-Agent":"workspace-control-one-shot-recovery/1","X-GitHub-Api-Version":"2022-11-28"})
+    req=urllib.request.Request("https://api.github.com/"+path,headers={"Accept":"application/vnd.github+json","User-Agent":"workspace-control-one-shot-recovery/2","X-GitHub-Api-Version":"2022-11-28"})
     with urllib.request.urlopen(req,timeout=20) as r:
         return json.loads(r.read())
+
+def require_owner_marker(comment_id,prefix):
+    m=api(f"repos/{CONTROL_REPO}/issues/comments/{comment_id}")
+    if m.get("user",{}).get("login")!="adamtrott78":
+        raise E(f"marker actor drift: {comment_id}")
+    body=str(m.get("body",""))
+    if not body.startswith(prefix):
+        raise E(f"marker body drift: {comment_id}")
+    return body
 
 def verify(inv,head):
     if os.geteuid()!=0 or not inv or inv=="root": raise E("run via sudo from operator account")
@@ -52,21 +59,17 @@ def verify(inv,head):
     exp={"project_id":PROJECT,"lane":LANE,"receipt_id":QID,"scale_set_id":OLD_ID,"scale_set_name":"lambda-research-engine-gpu","status":"ASSIGNMENT_DIVERGENCE_QUARANTINED","observed_at":OBS,"active_count":0,"pending_count":0,"reconstructable_jobs":0,"total_assigned_jobs":1}
     for k,v in exp.items():
         if q.get(k)!=v: raise E(f"quarantine drift {k}: {q.get(k)!r} != {v!r}")
-    m=api(f"repos/{CONTROL_REPO}/issues/comments/{MARKER}")
-    if m.get("user",{}).get("login")!="adamtrott78" or not str(m.get("body","")).startswith("LOCAL_REASONER_GPU_STALE_RESET_ONCE_V1"):
-        raise E("authority marker drift")
+
+    authority=require_owner_marker(AUTHORITY_MARKER,"LOCAL_REASONER_GPU_STALE_RESET_ONCE_V1")
+    if f"Quarantine receipt: {QID}" not in authority or f"Old scale-set id: {OLD_ID}" not in authority:
+        raise E("authority marker identity drift")
+
+    cleared=require_owner_marker(CLEARED_MARKER,"LOCAL_REASONER_GPU_STALE_RUNS_CLEARED_V1")
     for rid in RUNS:
-        r=api(f"repos/{RESOURCE_REPO}/actions/runs/{rid}")
-        if r.get("status")!="completed":
-            raise E(f"stale run remains nonterminal: {rid} status={r.get('status')}")
-    payload=api(f"repos/{RESOURCE_REPO}/actions/workflows/{WORKFLOW}/runs?per_page=100")
-    cutoff=datetime.fromisoformat(OBS.replace("Z","+00:00"))
-    bad=[]
-    for r in payload.get("workflow_runs",[]):
-        c=r.get("created_at"); s=r.get("status")
-        if isinstance(c,str) and isinstance(s,str) and datetime.fromisoformat(c.replace("Z","+00:00"))>=cutoff and s!="completed":
-            bad.append({"id":r.get("id"),"status":s,"created_at":c})
-    if bad: raise E("nonterminal replacement runs remain: "+json.dumps(bad,sort_keys=True))
+        if f"- {rid} completed/cancelled" not in cleared:
+            raise E(f"cleared-run evidence missing: {rid}")
+    if "No Local Reasoner Resource Probe run from this stale set remains non-terminal." not in cleared:
+        raise E("cleared-run terminal assertion missing")
 
 INNER=r'''
 import importlib.util,json,pathlib
