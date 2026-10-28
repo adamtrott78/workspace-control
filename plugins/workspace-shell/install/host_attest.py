@@ -334,9 +334,13 @@ def main():
     bwrap = bwrap_probe(commands["bwrap"]["path"] if commands["bwrap"]["exists"] else None)
 
     blockers = []
-    for required in ("python3", "git", "bwrap", "systemd-run", "openssl", "node", "tunnel-client"):
+    provisioning_requirements = []
+    for required in ("python3", "git", "systemd-run", "openssl"):
         if not commands[required]["exists"]:
-            blockers.append(f"missing required command: {required}")
+            blockers.append(f"missing required base-host command: {required}")
+    for staged in ("bwrap", "node", "tunnel-client"):
+        if not commands[staged]["exists"]:
+            provisioning_requirements.append(f"stage required runtime dependency: {staged}")
     if node_major(commands["node"]) is not None and node_major(commands["node"]) < 20:
         blockers.append("Node runtime is older than v20")
     if cgroup_controllers is None:
@@ -348,7 +352,7 @@ def main():
     if listener.get("occupied") is True:
         blockers.append(f"planned loopback port {args.port} is already occupied")
     if bwrap.get("attempted") and not bwrap.get("passed"):
-        blockers.append("bubblewrap namespace probe failed")
+        blockers.append("bubblewrap exists but namespace probe failed")
 
     evidence = {
         "schema": "workspace-shell-host-attestation.v1",
@@ -379,6 +383,7 @@ def main():
         "planned_units": [systemd_unit_meta(unit) for unit in PLANNED_UNITS],
         "heartbeat_listener": listener_meta(8787),
         "blockers": blockers,
+        "provisioning_requirements": provisioning_requirements,
         "decision": "READY_FOR_INSTALL_PLAN" if not blockers else "BLOCKED",
         "secret_policy": {
             "process_environments_read": False,
