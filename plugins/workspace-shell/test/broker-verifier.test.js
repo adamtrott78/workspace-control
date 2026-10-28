@@ -95,11 +95,7 @@ function fixture() {
     operation: "noop",
     parameter_schema: parameterSchema,
     source_repository: "workspace-control",
-    review_repository: "adamtrott78/workspace-control",
-    review_pr_number: 999,
-    admission_head_sha: "b".repeat(40),
-    review_record_id: "7000000000",
-    review_disposition: "NO_BLOCKING_FINDING",
+    enabled: true,
     timeout_ms: 5000,
   };
   const registry = {
@@ -116,9 +112,6 @@ function fixture() {
     helper_registry: registryPath,
     design_authority_sha: "a".repeat(40),
     policy_artifact_sha256: "c".repeat(64),
-    design_review_repository: "adamtrott78/workspace-control",
-    design_review_pr_number: 550,
-    design_review_record_id: "6447370753",
     source_roots: { "workspace-control": source },
   };
   writeFileSync(configPath, JSON.stringify(cfg));
@@ -132,7 +125,7 @@ function fixture() {
   } = {}) {
     const parameters = { mode: "safe" };
     let approvalPayload = {
-      schema: "workspace-shell-approval.v1",
+      schema: "workspace-shell-approval.v2",
       approval_id: "approval-12345678",
       issuer_key_id: "operator-test",
       issued_at: issuedAt.toISOString(),
@@ -141,22 +134,11 @@ function fixture() {
       target: "workspace-control",
       design_authority_sha: cfg.design_authority_sha,
       policy_artifact_sha256: cfg.policy_artifact_sha256,
-      design_review_repository: cfg.design_review_repository,
-      design_review_pr_number: cfg.design_review_pr_number,
-      design_reviewed_head_sha: cfg.design_authority_sha,
-      design_review_record_id: cfg.design_review_record_id,
-      design_review_disposition: "NO_BLOCKING_FINDING",
       helper_registry_version: registry.version,
       helper_registry_sha256: canonicalDigest(registry),
       helper_entry_sha256: canonicalDigest(helperEntry),
       helper_id: "test-helper",
       helper_sha256: helperSha,
-      helper_review_repository: helperEntry.review_repository,
-      helper_review_pr_number: helperEntry.review_pr_number,
-      helper_admission_head_sha: helperEntry.admission_head_sha,
-      helper_reviewed_head_sha: helperEntry.admission_head_sha,
-      helper_review_record_id: helperEntry.review_record_id,
-      helper_review_disposition: "NO_BLOCKING_FINDING",
       expected_source_repository: "workspace-control",
       expected_source_commit: commit,
       expected_source_tree: tree,
@@ -215,7 +197,7 @@ function fixture() {
   };
 }
 
-test("broker verifier accepts exact independently signed authority", () => {
+test("broker verifier accepts exact operator-signed exact authority", () => {
   const fx = fixture();
   const result = fx.verifyRequest(fx.build());
   assert.equal(result.ok, true);
@@ -231,7 +213,7 @@ test("model-facing self-signed approval is rejected", () => {
   assert.match(result.error.code, /APPROVAL_SIGNATURE_INVALID/);
 });
 
-test("trusted issuer cannot widen the pinned design authority", () => {
+test("operator signer cannot widen the pinned design authority", () => {
   const fx = fixture();
   const result = fx.verifyRequest(
     fx.build({
