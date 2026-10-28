@@ -24,28 +24,25 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 
 - Intent: mutate
 - Remote branch: workspace-shell-mcp-v1-implementation
-- Remote checkpoint: 4a3b6735b53a7934fb0a7bb52cbbf320915bd8ca
+- Remote checkpoint: d827b5d18f9920412e1f68a22264a9abf0993886
 - Remote verified: true
 
 ## Next safe action
 
-Continue implementing and adversarially testing Workspace Shell v1 on PR #552. Do not stop for independent-review handoffs. Preserve exact-SHA/CI boundaries and do not perform live Lambda installation, tunnel/key provisioning, OS-principal creation, privileged-helper installation, systemd activation, Heartbeat mutation, or project-controller mutation until the host-specific installation plan is validated and explicitly activated by the operator.
+Obtain fresh read-only Lambda host attestation for exact checkpoint d827b5d18f9920412e1f68a22264a9abf0993886 using the repository host_attest.py surface or an equivalently bounded existing Lambda execution surface. Do not request an independent reviewer. Do not install/activate Workspace Shell or provision secrets until the attestation-derived bundle is validated.
 
 ## Remaining work
 
-- Continue pre-installation hardening of Workspace Shell v1 without external reviewer handoffs.
-- Fix receipt-reader ownership/access semantics so root-written audit receipts are readable by the frontend without granting write authority.
-- Permit safe git-read inspection of a dirty checkout while keeping executable profiles fail-closed on dirty source.
-- Expand adversarial tests for receipt ownership/group access, dirty-source behavior, cancellation, cgroup cleanup and secret-minimized argv receipts.
-- Create host-attestation and installation artifacts for exact UIDs/GIDs, directories, sockets, systemd units, tunnel mTLS material, rollback and emergency disable.
-- Run exact-head Workspace Control Validation after each implementation checkpoint.
-- After repository validation, obtain fresh read-only Lambda host attestation and then proceed to installation only with explicit operator activation authority.
+- Obtain fresh read-only Lambda host attestation for exact checkpoint d827b5d18f9920412e1f68a22264a9abf0993886 without exposing secret contents.
+- Render and validate the exact host-specific installation bundle from the attestation, including UIDs/GIDs, root-owned directories, sockets, mTLS material locations, frontend signing material locations, tunnel identity/profile, rollback and emergency disable.
+- Keep privileged helper registry empty/fail-closed until an actual typed root mutation is needed; privileged helpers use operator-signed workspace-shell-approval.v2 rather than external reviewer records.
+- Run exact-head Workspace Control Validation on every resulting implementation/state checkpoint.
+- With explicit operator activation authority, install and start Workspace Shell in isolation, verify hostile-worker denials and end-to-end bounded command execution, then connect the dedicated ChatGPT plugin/tunnel.
 
 ## Blockers / gates
 
-- Fresh live Lambda host attestation is required before host-specific unit/UID/GID/socket/mount assumptions are accepted.
-- Repository implementation and installation artifacts must pass exact-head CI and adversarial validation before live installation.
-- Tunnel/key provisioning, root/job-launcher/broker installation, systemd activation and live Lambda execution remain prohibited until the host-specific installation plan is validated and the operator authorizes activation.
+- Fresh read-only Lambda host attestation is required before exact host-specific UIDs/GIDs, runtime paths, tunnel-client path, bubblewrap/user-namespace behavior and systemd assumptions are accepted.
+- Live installation still requires explicit operator activation authority after the host-specific bundle passes exact-head validation.
 
 ## Fresh-chat initialization
 
