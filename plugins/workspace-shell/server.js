@@ -45,6 +45,30 @@ function requireRegularNoSymlink(file, label, { ownerUid = null, privateMode = f
   return st;
 }
 
+function requireDirectoryNoSymlink(dir, label, {
+  ownerUid = null,
+  ownerGid = null,
+  requireGroupReadExecute = false,
+} = {}) {
+  const st = lstatSync(dir);
+  if (!st.isDirectory() || st.isSymbolicLink()) {
+    throw new Error(`${label} must be a real non-symlink directory`);
+  }
+  if (ownerUid !== null && st.uid !== ownerUid) {
+    throw new Error(`${label} owner uid mismatch`);
+  }
+  if (ownerGid !== null && st.gid !== ownerGid) {
+    throw new Error(`${label} owner gid mismatch`);
+  }
+  if ((st.mode & 0o022) !== 0) {
+    throw new Error(`${label} must not be group/world writable`);
+  }
+  if (requireGroupReadExecute && (st.mode & 0o050) !== 0o050) {
+    throw new Error(`${label} must grant the frontend group read/search access`);
+  }
+  return st;
+}
+
 function loadConfig() {
   requireRegularNoSymlink(CONFIG_PATH, "frontend config", { ownerUid: 0 });
   const cfg = JSON.parse(readFileSync(CONFIG_PATH, "utf8"));
@@ -65,8 +89,11 @@ function loadConfig() {
   if (!/^[0-9a-f]{64}$/.test(cfg.tunnel_client_cert_sha256 ?? "")) {
     throw new Error("invalid frontend config: tunnel_client_cert_sha256 must be lowercase SHA256");
   }
-  if (!Number.isInteger(cfg.receipt_uid)) {
-    throw new Error("invalid frontend config: receipt_uid must be an integer");
+  if (!Number.isInteger(cfg.receipt_uid) || cfg.receipt_uid !== 0) {
+    throw new Error("invalid frontend config: receipt_uid must be root (0)");
+  }
+  if (!Number.isInteger(cfg.frontend_gid)) {
+    throw new Error("invalid frontend config: frontend_gid must be an integer");
   }
   return cfg;
 }
@@ -74,14 +101,17 @@ function loadConfig() {
 const config = loadConfig();
 
 function verifyRuntimeIdentity() {
-  if (!Number.isInteger(config.frontend_uid) || !Number.isInteger(config.worker_uid) || !Number.isInteger(config.tunnel_uid)) {
-    throw new Error("frontend_uid, worker_uid and tunnel_uid are required integers");
+  if (!Number.isInteger(config.frontend_uid) || !Number.isInteger(config.frontend_gid) || !Number.isInteger(config.worker_uid) || !Number.isInteger(config.tunnel_uid)) {
+    throw new Error("frontend_uid, frontend_gid, worker_uid and tunnel_uid are required integers");
   }
   if (config.frontend_uid === config.worker_uid || config.frontend_uid === config.tunnel_uid || config.worker_uid === config.tunnel_uid) {
     throw new Error("Workspace Shell frontend/worker/tunnel UIDs must be distinct");
   }
   if (typeof process.getuid !== "function" || process.getuid() !== config.frontend_uid) {
     throw new Error("Workspace Shell MCP is not running as the configured frontend UID");
+  }
+  if (typeof process.getgid !== "function" || process.getgid() !== config.frontend_gid) {
+    throw new Error("Workspace Shell MCP is not running with the configured frontend primary GID");
   }
 }
 verifyRuntimeIdentity();
@@ -96,6 +126,11 @@ requireRegularNoSymlink(config.tls_key, "frontend TLS key", {
 });
 requireRegularNoSymlink(config.tls_cert, "frontend TLS certificate");
 requireRegularNoSymlink(config.tls_client_ca, "tunnel client CA");
+requireDirectoryNoSymlink(config.receipt_root, "receipt root", {
+  ownerUid: 0,
+  ownerGid: config.frontend_gid,
+  requireGroupReadExecute: true,
+});
 
 const frontendPrivateKeyPem = readFileSync(config.frontend_signing_key, "utf8");
 
@@ -251,6 +286,7 @@ function createShellServer() {
           if (!args.receipt_id) fail("INVALID_RECEIPT_ID", "receipt_status requires receipt_id");
           const receipt = readReceiptNoFollow(config.receipt_root, args.receipt_id, {
             expectedUid: config.receipt_uid,
+            expectedGid: config.frontend_gid,
           });
           if (receipt.task_id !== args.task_id) fail("RECEIPT_TASK_MISMATCH", "receipt belongs to another task");
           return okResult({
