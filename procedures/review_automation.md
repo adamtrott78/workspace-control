@@ -28,6 +28,26 @@ request had request_copilot=true. An issue comment can never claim Copilot
 approval. COMMENTED is not acceptance. Copilot never satisfies
 authority_sensitive.
 
+## Same-executor review boundary
+
+This automation owns **independent** review plumbing. It is not the owner of
+same-executor pre-implementation review.
+
+When the owning workflow intentionally does not require independent review, the
+executor follows the fallback review contract in
+`policies/OPERATOR_WORKFLOW.md` before consequential mutation. That self-review
+must occur before implementation/execution and again after a failed
+consequential mutation before retry.
+
+Same-executor review:
+
+- cannot satisfy `authority_sensitive`;
+- cannot be submitted as a `fresh_independent_session` disposition;
+- cannot be used to bypass an explicit independent-review gate;
+- does not require creating a second chat/reviewer when the owning workflow has
+  deliberately selected the single-executor design→review→implement→run→inspect
+  loop.
+
 ## Fail-closed rules
 
 The consumer rejects edited request/disposition comments, stale PR heads,
