@@ -157,7 +157,7 @@ class BindingTests(unittest.TestCase):
             old = Path.cwd()
             try:
                 os.chdir(root)
-                rows, bound = review_auto.changed_bindings(base, head)
+                rows, bound = review_auto.changed_bindings(base, head, root)
             finally:
                 os.chdir(old)
             values = {x["path"]: x["blob"] for x in rows}
@@ -218,7 +218,10 @@ class ConsumeTests(unittest.TestCase):
             ),
             mock.patch.object(
                 review_auto, "get_pr",
-                return_value={"head": {"sha": req["head_sha"]}},
+                return_value={
+                    "head": {"sha": req["head_sha"]},
+                    "base": {"sha": req["base_sha"]},
+                },
             ),
             mock.patch.object(
                 review_auto, "list_pages",
@@ -244,10 +247,32 @@ class ConsumeTests(unittest.TestCase):
             ),
             mock.patch.object(
                 review_auto, "get_pr",
-                return_value={"head": {"sha": "9" * 40}},
+                return_value={
+                    "head": {"sha": "9" * 40},
+                    "base": {"sha": req["base_sha"]},
+                },
             ),
         ):
             with self.assertRaisesRegex(review_auto.ReviewError, "stale"):
+                review_auto.command_consume(self.args())
+
+    def test_base_drift_fails_closed(self):
+        req = self.req()
+        with (
+            mock.patch.dict(os.environ, {"TOKEN": "x"}),
+            mock.patch.object(
+                review_auto, "get_comment",
+                return_value=self.request_comment(req),
+            ),
+            mock.patch.object(
+                review_auto, "get_pr",
+                return_value={
+                    "head": {"sha": req["head_sha"]},
+                    "base": {"sha": "8" * 40},
+                },
+            ),
+        ):
+            with self.assertRaisesRegex(review_auto.ReviewError, "base moved"):
                 review_auto.command_consume(self.args())
 
     def test_duplicate_dispositions_fail_closed(self):
@@ -270,6 +295,12 @@ class RepositoryContractTests(unittest.TestCase):
         self.assertIn("issue_comment:", text)
         self.assertIn("WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1", text)
         self.assertIn("github.event.comment.user.login != 'github-actions[bot]'", text)
+        self.assertIn("ref: ${{ github.workflow_sha }}", text)
+        self.assertIn("path: trusted", text)
+        self.assertIn("path: target", text)
+        self.assertIn("trusted/scripts/workspace_review_automation.py request", text)
+        self.assertIn("--target-repo target", text)
+        self.assertNotIn("python3 target/scripts/workspace_review_automation.py", text)
         self.assertIn("--post-receipt", text)
         self.assertNotIn("systemctl", text)
         self.assertNotIn("/var/lib/workspace-ci", text)

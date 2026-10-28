@@ -11,6 +11,7 @@ import re
 import subprocess
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 REQ_START = "WORKSPACE_CONTROL_REVIEW_REQUEST_V1"
 REQ_END = "END_WORKSPACE_CONTROL_REVIEW_REQUEST_V1"
@@ -61,29 +62,32 @@ def need_sha256(label, value):
         raise ReviewError(label + " must be 64 lowercase hex characters")
 
 
-def git(*args):
+def git_at(repo_path, *args):
     p = subprocess.run(
-        ["git", *args], text=True, stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE, check=False,
+        ["git", "-C", str(repo_path), *args], text=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
     )
     if p.returncode:
         raise ReviewError("git failed: " + " ".join(args) + ": " + p.stderr.strip())
     return p.stdout.strip()
 
 
-def changed_bindings(base_sha, head_sha):
+def changed_bindings(base_sha, head_sha, repo_path="."):
     need_sha40("base_sha", base_sha)
     need_sha40("head_sha", head_sha)
-    paths = sorted(set(filter(None, git(
-        "diff", "--name-only", "--no-renames", base_sha, head_sha
+    repo_path = Path(repo_path).resolve()
+    paths = sorted(set(filter(None, git_at(
+        repo_path, "diff", "--name-only", "--no-renames", base_sha, head_sha
     ).splitlines())))
     rows = []
     for path in paths:
         p = subprocess.run(
-            ["git", "cat-file", "-e", head_sha + ":" + path],
+            ["git", "-C", str(repo_path), "cat-file", "-e", head_sha + ":" + path],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False,
         )
-        blob = "DELETED" if p.returncode else git("rev-parse", head_sha + ":" + path)
+        blob = "DELETED" if p.returncode else git_at(
+            repo_path, "rev-parse", head_sha + ":" + path
+        )
         if blob != "DELETED":
             need_sha40("blob", blob)
         rows.append({"path": path, "blob": blob})
@@ -347,10 +351,11 @@ def command_request(args):
     base = pr.get("base", {}).get("sha")
     need_sha40("PR head", head)
     need_sha40("PR base", base)
-    if git("rev-parse", "HEAD") != head:
-        raise ReviewError("checked-out HEAD differs from current PR head")
-    tree = git("rev-parse", head + "^{tree}")
-    rows, bindings = changed_bindings(base, head)
+    target_repo = Path(args.target_repo).resolve()
+    if git_at(target_repo, "rev-parse", "HEAD") != head:
+        raise ReviewError("target checkout HEAD differs from current PR head")
+    tree = git_at(target_repo, "rev-parse", head + "^{tree}")
+    rows, bindings = changed_bindings(base, head, target_repo)
     f = fields_for_request(
         args.task_id, args.pr_number, head, base, tree, args.review_kind,
         args.sensitivity, bindings, args.request_copilot
@@ -392,9 +397,14 @@ def command_consume(args):
     if int(req["pr_number"]) != args.pr_number or req["task_id"] != args.task_id:
         raise ReviewError("consume identity does not match request")
     pr = get_pr(args.repo, args.pr_number, token)
-    current = pr.get("head", {}).get("sha")
-    if current != req["head_sha"]:
+    current_head = pr.get("head", {}).get("sha")
+    current_base = pr.get("base", {}).get("sha")
+    need_sha40("current PR head", current_head)
+    need_sha40("current PR base", current_base)
+    if current_head != req["head_sha"]:
         raise ReviewError("stale review request: PR head moved")
+    if current_base != req["base_sha"]:
+        raise ReviewError("stale review request: PR base moved")
 
     comments = list_pages(args.repo, "/issues/" + str(args.pr_number) + "/comments",
                           token)
@@ -467,6 +477,10 @@ def parser():
     r.add_argument("--review-kind", required=True)
     r.add_argument("--sensitivity", choices=sorted(SENSITIVITIES), required=True)
     r.add_argument("--request-copilot", action="store_true")
+    r.add_argument(
+        "--target-repo", default=".",
+        help="data-only checkout of the exact PR head; code is not executed from it",
+    )
     r.add_argument("--token-env", default="GITHUB_TOKEN")
     r.add_argument("--dry-run", action="store_true")
     r.set_defaults(func=command_request)

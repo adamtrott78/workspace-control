@@ -42,9 +42,17 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && inputs.operation == 'request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout trusted automation implementation
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: trusted
+          persist-credentials: false
+      - name: Checkout reviewed PR as data only
+        uses: actions/checkout@v6
         with:
           ref: refs/pull/${{ inputs.pr_number }}/head
+          path: target
           fetch-depth: 0
           persist-credentials: false
       - name: Create exact durable review request
@@ -53,12 +61,13 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -Eeuo pipefail
-          args=(python3 scripts/workspace_review_automation.py request
+          args=(python3 trusted/scripts/workspace_review_automation.py request
             --repo "${GITHUB_REPOSITORY}"
             --pr-number "${{ inputs.pr_number }}"
             --task-id "${{ inputs.task_id }}"
             --review-kind "${{ inputs.review_kind }}"
-            --sensitivity "${{ inputs.sensitivity }}")
+            --sensitivity "${{ inputs.sensitivity }}"
+            --target-repo target)
           if [[ "${{ inputs.request_copilot }}" == "true" ]]; then
             args+=(--request-copilot)
           fi
@@ -70,7 +79,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.workflow_sha }}
           persist-credentials: false
       - name: Consume exact durable review disposition
         shell: bash
@@ -92,7 +101,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.workflow_sha }}
           persist-credentials: false
       - name: Resolve disposition identity
         id: binding

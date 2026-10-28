@@ -37,7 +37,8 @@
       "request_copilot",
       "request_digest"
     ],
-    "changed_path_binding": "SHA256 over canonical sorted path/blob pairs; deleted paths bind as DELETED."
+    "changed_path_binding": "SHA256 over canonical sorted path/blob pairs; deleted paths bind as DELETED.",
+    "trusted_requester_execution": "Request generator executes only from the workflow commit (github.workflow_sha); the reviewed PR checkout is data-only and its code is never executed with write-scoped credentials."
   },
   "disposition_protocol": {
     "marker": "WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1",
@@ -48,7 +49,9 @@
     "edited": "fail_closed",
     "stale_head": "fail_closed",
     "duplicate_matching": "fail_closed",
-    "same_request_and_reviewer_principal": "fail_closed"
+    "same_request_and_reviewer_principal": "fail_closed",
+    "base_drift": "fail_closed",
+    "head_drift": "fail_closed"
   },
   "consumption": {
     "automatic_comment_consumption": true,
