@@ -1930,7 +1930,7 @@
     },
     {
       "check": "First reviewed one-shot P1 activation submission",
-      "result": "REJECTED_SAFE",
+      "result": "FAIL",
       "evidence": [
         "Operator started workspace-ci-reconcile-controller-once.service exactly once after live receipt acceptance.",
         "systemctl start returned ONE_SHOT_START_RC=1; exact one-shot InvocationID 9659518ca16b4596a6936d72bd5e1e34; unit ended failed/failed with MainPID=0, NRestarts=0, ExecMainStatus=70, UnitFileState=static.",
