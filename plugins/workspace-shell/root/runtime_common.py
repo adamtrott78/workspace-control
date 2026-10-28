@@ -67,24 +67,28 @@ def require_protected_path(path, *, require_root=True, regular=True):
     return st
 
 
-def require_secure_directory(path, *, owner_uid=0):
+def require_secure_directory(path, *, owner_uid=0, owner_gid=None):
     p = Path(path)
     st = os.lstat(p)
     if not stat.S_ISDIR(st.st_mode):
         fail("SECURE_DIR_TYPE", f"{p} must be a real directory")
     if st.st_uid != owner_uid:
         fail("SECURE_DIR_OWNER", f"{p} must be owned by uid {owner_uid}")
+    if owner_gid is not None and st.st_gid != owner_gid:
+        fail("SECURE_DIR_GROUP", f"{p} must be owned by gid {owner_gid}")
     if st.st_mode & 0o022:
         fail("SECURE_DIR_MODE", f"{p} must not be group/world writable")
     return p
 
 
-def _atomic_write(path, data, mode=0o600):
+def _atomic_write(path, data, mode=0o600, *, group_gid=None):
     path = Path(path)
     parent = path.parent
     fd, tmp = tempfile.mkstemp(prefix=f".{path.name}.", dir=str(parent))
     try:
         os.fchmod(fd, mode)
+        if group_gid is not None:
+            os.fchown(fd, -1, int(group_gid))
         with os.fdopen(fd, "wb", closefd=True) as handle:
             handle.write(data)
             handle.flush()
@@ -102,8 +106,12 @@ def _atomic_write(path, data, mode=0o600):
             pass
 
 
-def write_receipt(receipt_root, receipt):
-    root = require_secure_directory(receipt_root, owner_uid=0)
+def write_receipt(receipt_root, receipt, *, reader_gid=None, owner_uid=0):
+    root = require_secure_directory(
+        receipt_root,
+        owner_uid=owner_uid,
+        owner_gid=reader_gid,
+    )
     lock_path = root / ".chain.lock"
     head_path = root / ".chain-head"
 
@@ -129,7 +137,12 @@ def write_receipt(receipt_root, receipt):
         if final_path.exists():
             fail("RECEIPT_COLLISION", f"receipt {receipt_id} already exists")
 
-        _atomic_write(final_path, canonical_json_bytes(material) + b"\n", 0o640)
+        _atomic_write(
+            final_path,
+            canonical_json_bytes(material) + b"\n",
+            0o640,
+            group_gid=reader_gid,
+        )
         _atomic_write(head_path, (digest + "\n").encode("ascii"), 0o600)
         return material
     finally:
