@@ -16,7 +16,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 ## Goal
 
-Give ChatGPT durable, auditable, least-privilege command-execution access to the Lambda workspace through a separate private MCP/plugin so workspace-control tasks can execute and inspect bounded shell operations directly without using the operator as a copy/paste terminal relay, while preserving explicit provenance, credential isolation, rollback boundaries, and independently reviewable privileged authority.
+Give ChatGPT durable, auditable, least-privilege command-execution access to the Lambda workspace through a separate private MCP/plugin so workspace-control tasks can execute and inspect bounded shell operations directly without using the operator as a copy/paste terminal relay, while preserving explicit provenance, credential isolation, rollback boundaries, and separately auditable privileged authority.
 
 ## Repositories
 
@@ -29,21 +29,23 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 
 ## Next safe action
 
-Synchronize this implementation checkpoint into the derived handoff, validate the resulting exact PR #552 head, then record a fresh independent implementation review request. Do not merge PR #552 or mutate Lambda, provision tunnel/key material, create OS principals, install root/job-launcher/broker/helper authority, modify Heartbeat, or activate any project controller.
+Continue implementing and adversarially testing Workspace Shell v1 on PR #552. Do not stop for independent-review handoffs. Preserve exact-SHA/CI boundaries and do not perform live Lambda installation, tunnel/key provisioning, OS-principal creation, privileged-helper installation, systemd activation, Heartbeat mutation, or project-controller mutation until the host-specific installation plan is validated and explicitly activated by the operator.
 
 ## Remaining work
 
-- Validate the state-only implementation-review synchronization head.
-- Request fresh independent exact-head implementation review for PR #552, binding the review to code/test checkpoint 4a3b6735b53a7934fb0a7bb52cbbf320915bd8ca and successful validation run #1054.
-- Do not merge or install the implementation until independent review returns NO_BLOCKING_FINDING on the exact synchronized head.
-- After implementation acceptance, obtain fresh read-only Lambda host attestation and design the exact installation units, UIDs/GIDs, sockets, mounts, cgroups, credentials, tunnel binding, rollback and emergency-disable procedure.
-- Submit that installation plan and exact artifacts for a separate independent installation review before any live Lambda mutation or activation.
+- Continue pre-installation hardening of Workspace Shell v1 without external reviewer handoffs.
+- Fix receipt-reader ownership/access semantics so root-written audit receipts are readable by the frontend without granting write authority.
+- Permit safe git-read inspection of a dirty checkout while keeping executable profiles fail-closed on dirty source.
+- Expand adversarial tests for receipt ownership/group access, dirty-source behavior, cancellation, cgroup cleanup and secret-minimized argv receipts.
+- Create host-attestation and installation artifacts for exact UIDs/GIDs, directories, sockets, systemd units, tunnel mTLS material, rollback and emergency disable.
+- Run exact-head Workspace Control Validation after each implementation checkpoint.
+- After repository validation, obtain fresh read-only Lambda host attestation and then proceed to installation only with explicit operator activation authority.
 
 ## Blockers / gates
 
-- Fresh live Lambda host attestation is required before installation-specific unit/UID/socket/mount choices are accepted.
-- Repository implementation must pass adversarial tests and independent exact-head implementation review before installation.
-- Tunnel/key provisioning, root/job-launcher/broker installation, systemd activation and live Lambda execution remain prohibited.
+- Fresh live Lambda host attestation is required before host-specific unit/UID/GID/socket/mount assumptions are accepted.
+- Repository implementation and installation artifacts must pass exact-head CI and adversarial validation before live installation.
+- Tunnel/key provisioning, root/job-launcher/broker installation, systemd activation and live Lambda execution remain prohibited until the host-specific installation plan is validated and the operator authorizes activation.
 
 ## Fresh-chat initialization
 
