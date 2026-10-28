@@ -57,7 +57,11 @@ test("task authority is read from the trusted authority root and target-bound", 
       schema_version: 2,
       task_id: "task-abc",
       status: "IN_PROGRESS",
-      repositories: [{ name: "workspace-control", intent: "mutate" }],
+      repositories: [{
+        name: "workspace-control",
+        intent: "mutate",
+        remote: { checkpoint_sha: "a".repeat(40) },
+      }],
     }),
   );
   const result = authorizeTaskExecution({
@@ -65,6 +69,7 @@ test("task authority is read from the trusted authority root and target-bound", 
     taskId: "task-abc",
     target: "workspace-control",
     expectedSha: "a".repeat(40),
+    authorityOwnerUid: typeof process.getuid === "function" ? process.getuid() : null,
   });
   assert.equal(result.repository.name, "workspace-control");
   assert.throws(
