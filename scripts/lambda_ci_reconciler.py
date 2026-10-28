@@ -64,10 +64,15 @@ def _canonical_sha256(value: Any) -> str:
     return multi.sha256_json(value)
 
 
-def render_controller_env(
+DEFAULT_CONTROLLER_STATE_ROOT = "/var/lib/workspace-ci/controller/state"
+
+
+def _controller_env_values(
     manifest: dict[str, Any],
     lane: str,
-) -> str:
+    *,
+    explicit_default_state_root: bool,
+) -> dict[str, str]:
     multi.validate_project_manifest_derivations(manifest)
     lane_cfg = manifest["derived_identity"]["lanes"].get(lane)
     if lane_cfg is None:
@@ -76,14 +81,72 @@ def render_controller_env(
         "WORKSPACE_CI_ADMISSION_V2_ENABLED": "YES",
         "WORKSPACE_CI_GITHUB_URL": f"https://github.com/{manifest['repository']}",
         "WORKSPACE_CI_LANE": lane,
-        "WORKSPACE_CI_CONTROLLER_STATE_ROOT": "/var/lib/workspace-ci/controller/state",
         "WORKSPACE_CI_PAT_FILE": "/var/lib/workspace-ci/controller/github-token",
         "WORKSPACE_CI_PROJECT_ID": manifest["project_id"],
         "WORKSPACE_CI_PROVISIONER_SOCKET": "/run/workspace-ci/provisioner.sock",
         "WORKSPACE_CI_RUNNER_PREFIX": lane_cfg["runner_prefix"],
         "WORKSPACE_CI_SCALESET_NAME": lane_cfg["scale_set_name"],
     }
+    if explicit_default_state_root:
+        values["WORKSPACE_CI_CONTROLLER_STATE_ROOT"] = (
+            DEFAULT_CONTROLLER_STATE_ROOT
+        )
+    return values
+
+
+def _render_controller_env_values(values: dict[str, str]) -> str:
     return "".join(f"{key}={values[key]}\n" for key in sorted(values))
+
+
+def render_controller_env(
+    manifest: dict[str, Any],
+    lane: str,
+) -> str:
+    return _render_controller_env_values(
+        _controller_env_values(
+            manifest,
+            lane,
+            explicit_default_state_root=True,
+        )
+    )
+
+
+def render_legacy_controller_env_with_implicit_default_state_root(
+    manifest: dict[str, Any],
+    lane: str,
+) -> str:
+    # Exact historical controller material from before the state-root setting
+    # became explicit. The controller's reviewed default is the same
+    # DEFAULT_CONTROLLER_STATE_ROOT, so this exact legacy encoding is
+    # behaviorally equivalent. No other byte difference is admitted.
+    return _render_controller_env_values(
+        _controller_env_values(
+            manifest,
+            lane,
+            explicit_default_state_root=False,
+        )
+    )
+
+
+def _controller_env_requires_restart(
+    path: pathlib.Path,
+    *,
+    manifest: dict[str, Any],
+    lane: str,
+) -> bool:
+    if not path.is_file():
+        return True
+    actual = path.read_bytes()
+    desired = render_controller_env(manifest, lane).encode("utf-8")
+    if actual == desired:
+        return False
+    legacy = (
+        render_legacy_controller_env_with_implicit_default_state_root(
+            manifest,
+            lane,
+        ).encode("utf-8")
+    )
+    return actual != legacy
 
 
 def controller_env_sha256(manifest: dict[str, Any], lane: str) -> str:
@@ -723,7 +786,11 @@ def controller_reconciliation_delta(
             and old_entry.get("activation_state") == ACTIVE_PROJECT_STATE
         )
         config_changed = (
-            _bytes_differ(desired["env_path"], desired["env_body"])
+            _controller_env_requires_restart(
+                desired["env_path"],
+                manifest=manifests[desired["project_id"]],
+                lane=desired["lane"],
+            )
             or _bytes_differ(desired["dropin_path"], desired["dropin_body"])
         )
         entries.append(
