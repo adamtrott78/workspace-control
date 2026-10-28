@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "plugins" / "workspace-shell"
 ROOT_CODE = PLUGIN / "root"
 HOST_ATTEST = PLUGIN / "install" / "host_attest.py"
+RENDER_INSTALL = PLUGIN / "install" / "render_install.py"
 sys.path.insert(0, str(ROOT_CODE))
 
 job_launcher = importlib.import_module("job_launcher")
@@ -103,6 +104,120 @@ class WorkspaceShellContractTests(unittest.TestCase):
         )
         self.assertEqual(result["returncode"], 0)
         self.assertLessEqual(len(result["stdout"]), 8192)
+
+    def test_install_renderer_is_non_mutating_and_fail_closed(self):
+        proc = subprocess.run(
+            [sys.executable, "-m", "py_compile", str(RENDER_INSTALL)],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            attestation = td / "attestation.json"
+            out = td / "bundle"
+            fake = {
+                "schema": "workspace-shell-host-attestation.v1",
+                "decision": "READY_FOR_INSTALL_PLAN",
+                "blockers": [],
+                "source": {
+                    "head": {"stdout": "a" * 40},
+                    "tree": {"stdout": "b" * 40},
+                    "requested_sha": "a" * 40,
+                },
+            }
+            attestation.write_text(json.dumps(fake))
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(RENDER_INSTALL),
+                    "--attestation", str(attestation),
+                    "--output-dir", str(out),
+                    "--source-sha", "a" * 40,
+                    "--design-authority-sha", "c" * 40,
+                    "--policy-artifact-sha256", "d" * 64,
+                    "--tunnel-client-cert-sha256", "e" * 64,
+                    "--frontend-uid", "41010",
+                    "--frontend-gid", "41010",
+                    "--worker-uid", "41011",
+                    "--worker-gid", "41011",
+                    "--tunnel-uid", "41012",
+                    "--tunnel-gid", "41012",
+                ],
+                cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            manifest = json.loads((out / "install-manifest.json").read_text())
+            self.assertEqual(manifest["source_sha"], "a" * 40)
+            self.assertFalse(manifest["privileged_helpers_enabled"])
+            self.assertEqual(
+                manifest["operator_trust_store_state"],
+                "EMPTY_FAIL_CLOSED",
+            )
+            self.assertFalse(manifest["tunnel_runtime_key_included"])
+            self.assertFalse(manifest["tls_private_keys_included"])
+            self.assertTrue((out / "workspace-shell-mcp.service").is_file())
+            self.assertTrue((out / "workspace-shell-sysusers.conf").is_file())
+            self.assertEqual(
+                json.loads((out / "helper-registry.v2.json").read_text())["helpers"],
+                {},
+            )
+
+            contents = "\n".join(
+                p.read_text(errors="ignore")
+                for p in out.iterdir()
+                if p.is_file()
+            )
+            self.assertNotIn("sk-", contents)
+            self.assertNotIn("BEGIN PRIVATE KEY", contents)
+            self.assertNotIn("tunnel-runtime-key", contents)
+
+    def test_install_renderer_rejects_blocked_attestation(self):
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            attestation = td / "attestation.json"
+            out = td / "bundle"
+            attestation.write_text(json.dumps({
+                "schema": "workspace-shell-host-attestation.v1",
+                "decision": "BLOCKED",
+                "blockers": ["missing bwrap"],
+                "source": {
+                    "head": {"stdout": "a" * 40},
+                    "tree": {"stdout": "b" * 40},
+                },
+            }))
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(RENDER_INSTALL),
+                    "--attestation", str(attestation),
+                    "--output-dir", str(out),
+                    "--source-sha", "a" * 40,
+                    "--design-authority-sha", "c" * 40,
+                    "--policy-artifact-sha256", "d" * 64,
+                    "--tunnel-client-cert-sha256", "e" * 64,
+                    "--frontend-uid", "41010",
+                    "--frontend-gid", "41010",
+                    "--worker-uid", "41011",
+                    "--worker-gid", "41011",
+                    "--tunnel-uid", "41012",
+                    "--tunnel-gid", "41012",
+                ],
+                cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10,
+            )
+            self.assertNotEqual(proc.returncode, 0)
+            self.assertIn("READY_FOR_INSTALL_PLAN", proc.stderr)
 
     def test_launcher_duplicates_profile_grammar_and_denies_escape_shapes(self):
         manifest = json.loads((PLUGIN / "config" / "profiles.v1.json").read_text())
