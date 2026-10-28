@@ -15,6 +15,10 @@ from pathlib import Path
 
 REQ_START = "WORKSPACE_CONTROL_REVIEW_REQUEST_V1"
 REQ_END = "END_WORKSPACE_CONTROL_REVIEW_REQUEST_V1"
+CMD_START = "WORKSPACE_CONTROL_REVIEW_REQUEST_COMMAND_V1"
+CMD_END = "END_WORKSPACE_CONTROL_REVIEW_REQUEST_COMMAND_V1"
+CONSUME_CMD_START = "WORKSPACE_CONTROL_REVIEW_CONSUME_COMMAND_V1"
+CONSUME_CMD_END = "END_WORKSPACE_CONTROL_REVIEW_CONSUME_COMMAND_V1"
 DISP_START = "WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1"
 DISP_END = "END_WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1"
 USED_START = "WORKSPACE_CONTROL_REVIEW_CONSUMED_V1"
@@ -25,6 +29,8 @@ REQ_KEYS = {
     "review_kind", "sensitivity", "bindings_sha256",
     "request_copilot", "request_digest",
 }
+CMD_KEYS = {"task_id", "review_kind", "sensitivity", "request_copilot"}
+CONSUME_CMD_KEYS = {"task_id", "request_comment_id"}
 DISP_KEYS = {
     "request_comment_id", "request_digest", "task_id", "pr_number",
     "head_sha", "review_kind", "sensitivity",
@@ -172,13 +178,11 @@ def validate_disposition(f, req, request_id):
             raise ReviewError("disposition " + key + " mismatch")
     if f["disposition"] not in DISPOSITIONS:
         raise ReviewError("invalid disposition")
-    if f["sensitivity"] == "authority_sensitive":
-        if f["reviewer_attestation"] != "fresh_independent_session":
-            raise ReviewError("authority_sensitive requires fresh_independent_session")
-    elif f["reviewer_attestation"] not in {
-        "fresh_independent_session", "copilot_approval"
-    }:
-        raise ReviewError("invalid reviewer_attestation")
+    if f["reviewer_attestation"] != "fresh_independent_session":
+        raise ReviewError(
+            "comment dispositions require fresh_independent_session; "
+            "Copilot approval is verified only through the PR review API"
+        )
 
 
 def render_request(f, rows):
@@ -327,7 +331,10 @@ def matching_dispositions(comments, req, request_id, request_author):
 
 
 def exact_copilot_approval(reviews, req):
-    if req["sensitivity"] != "routine_code":
+    if (
+        req["sensitivity"] != "routine_code"
+        or req["request_copilot"] != "true"
+    ):
         return None
     found = []
     for r in reviews:
@@ -342,6 +349,68 @@ def exact_copilot_approval(reviews, req):
     if len(found) > 1:
         raise ReviewError("ambiguous exact-head Copilot approvals")
     return found[0] if found else None
+
+
+def parse_request_command(body):
+    f = exact_block(body, CMD_START, CMD_END, CMD_KEYS)
+    if f["sensitivity"] not in SENSITIVITIES:
+        raise ReviewError("invalid request command sensitivity")
+    if f["request_copilot"] not in {"true", "false"}:
+        raise ReviewError("invalid request command request_copilot")
+    if (
+        f["request_copilot"] == "true"
+        and f["sensitivity"] != "routine_code"
+    ):
+        raise ReviewError(
+            "authority_sensitive request command cannot request Copilot"
+        )
+    return f
+
+
+def command_request_from_comment(args):
+    body = os.environ.get(args.command_body_env, "")
+    f = parse_request_command(body)
+    inner = argparse.Namespace(
+        repo=args.repo,
+        pr_number=args.pr_number,
+        task_id=f["task_id"],
+        review_kind=f["review_kind"],
+        sensitivity=f["sensitivity"],
+        request_copilot=(f["request_copilot"] == "true"),
+        target_repo=args.target_repo,
+        token_env=args.token_env,
+        dry_run=False,
+    )
+    return command_request(inner)
+
+
+def parse_consume_command(body):
+    f = exact_block(
+        body, CONSUME_CMD_START, CONSUME_CMD_END, CONSUME_CMD_KEYS
+    )
+    try:
+        request_id = int(f["request_comment_id"])
+    except ValueError as exc:
+        raise ReviewError("request_comment_id must be an integer") from exc
+    if request_id <= 0:
+        raise ReviewError("request_comment_id must be positive")
+    return f, request_id
+
+
+def command_consume_from_comment(args):
+    body = os.environ.get(args.command_body_env, "")
+    f, request_id = parse_consume_command(body)
+    inner = argparse.Namespace(
+        repo=args.repo,
+        pr_number=args.pr_number,
+        task_id=f["task_id"],
+        request_comment_id=request_id,
+        disposition_comment_id=None,
+        token_env=args.token_env,
+        trusted_requester=["github-actions[bot]"],
+        post_receipt=True,
+    )
+    return command_consume(inner)
 
 
 def command_request(args):
@@ -485,6 +554,14 @@ def parser():
     r.add_argument("--dry-run", action="store_true")
     r.set_defaults(func=command_request)
 
+    rc = s.add_parser("request-comment")
+    rc.add_argument("--repo", required=True)
+    rc.add_argument("--pr-number", type=int, required=True)
+    rc.add_argument("--target-repo", required=True)
+    rc.add_argument("--command-body-env", default="REVIEW_COMMAND_BODY")
+    rc.add_argument("--token-env", default="GITHUB_TOKEN")
+    rc.set_defaults(func=command_request_from_comment)
+
     c = s.add_parser("consume")
     c.add_argument("--repo", required=True)
     c.add_argument("--pr-number", type=int, required=True)
@@ -497,6 +574,13 @@ def parser():
     )
     c.add_argument("--post-receipt", action="store_true")
     c.set_defaults(func=command_consume)
+
+    cc = s.add_parser("consume-comment")
+    cc.add_argument("--repo", required=True)
+    cc.add_argument("--pr-number", type=int, required=True)
+    cc.add_argument("--command-body-env", default="REVIEW_COMMAND_BODY")
+    cc.add_argument("--token-env", default="GITHUB_TOKEN")
+    cc.set_defaults(func=command_consume_from_comment)
     return p
 
 

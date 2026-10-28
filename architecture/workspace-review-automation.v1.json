@@ -38,7 +38,9 @@
       "request_digest"
     ],
     "changed_path_binding": "SHA256 over canonical sorted path/blob pairs; deleted paths bind as DELETED.",
-    "trusted_requester_execution": "Request generator executes only from the workflow commit (github.workflow_sha); the reviewed PR checkout is data-only and its code is never executed with write-scoped credentials."
+    "trusted_requester_execution": "Write-capable request creation is triggered only by issue_comment, whose workflow and github.sha resolve to the default branch. The trusted default-branch script inspects a separate PR-head checkout as Git data only; workflow_dispatch is forbidden.",
+    "trigger": "issue_comment default-branch trust root",
+    "request_command_marker": "WORKSPACE_CONTROL_REVIEW_REQUEST_COMMAND_V1"
   },
   "disposition_protocol": {
     "marker": "WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1",
@@ -51,13 +53,15 @@
     "duplicate_matching": "fail_closed",
     "same_request_and_reviewer_principal": "fail_closed",
     "base_drift": "fail_closed",
-    "head_drift": "fail_closed"
+    "head_drift": "fail_closed",
+    "comment_attestation": "Only fresh_independent_session is accepted in issue-comment dispositions. copilot_approval is never accepted from comments."
   },
   "consumption": {
     "automatic_comment_consumption": true,
-    "routine_copilot_exact_head_approved": true,
+    "routine_copilot_exact_head_approved": "Only via GitHub PR review API after request_copilot=true; a trusted issue_comment consume command may re-check pending Copilot state.",
     "authority_sensitive_copilot": "forbidden",
-    "automatic_merge": false
+    "automatic_merge": false,
+    "consume_command_marker": "WORKSPACE_CONTROL_REVIEW_CONSUME_COMMAND_V1"
   },
   "runtime_boundary": "GitHub-only; no Lambda/controller credentials or live runtime mutation."
 }

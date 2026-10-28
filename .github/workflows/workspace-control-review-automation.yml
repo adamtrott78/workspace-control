@@ -1,34 +1,6 @@
 name: Workspace Control Review Automation
 
 on:
-  workflow_dispatch:
-    inputs:
-      operation:
-        required: true
-        type: choice
-        options: [request, consume]
-      pr_number:
-        required: true
-        type: string
-      task_id:
-        required: true
-        type: string
-      review_kind:
-        required: false
-        default: implementation
-        type: string
-      sensitivity:
-        required: false
-        default: authority_sensitive
-        type: choice
-        options: [authority_sensitive, routine_code]
-      request_comment_id:
-        required: false
-        type: string
-      request_copilot:
-        required: false
-        default: false
-        type: boolean
   issue_comment:
     types: [created]
 
@@ -38,20 +10,23 @@ permissions:
   pull-requests: write
 
 jobs:
-  request:
-    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'request'
+  request-comment:
+    if: >-
+      github.event.issue.pull_request &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+      contains(github.event.comment.body, 'WORKSPACE_CONTROL_REVIEW_REQUEST_COMMAND_V1')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout trusted automation implementation
+      - name: Checkout trusted default-branch automation
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.workflow_sha }}
+          ref: ${{ github.sha }}
           path: trusted
           persist-credentials: false
       - name: Checkout reviewed PR as data only
         uses: actions/checkout@v6
         with:
-          ref: refs/pull/${{ inputs.pr_number }}/head
+          ref: refs/pull/${{ github.event.issue.number }}/head
           path: target
           fetch-depth: 0
           persist-credentials: false
@@ -59,49 +34,50 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          REVIEW_COMMAND_BODY: ${{ github.event.comment.body }}
         run: |
           set -Eeuo pipefail
-          args=(python3 trusted/scripts/workspace_review_automation.py request
-            --repo "${GITHUB_REPOSITORY}"
-            --pr-number "${{ inputs.pr_number }}"
-            --task-id "${{ inputs.task_id }}"
-            --review-kind "${{ inputs.review_kind }}"
-            --sensitivity "${{ inputs.sensitivity }}"
-            --target-repo target)
-          if [[ "${{ inputs.request_copilot }}" == "true" ]]; then
-            args+=(--request-copilot)
-          fi
-          "${args[@]}"
+          python3 trusted/scripts/workspace_review_automation.py request-comment \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pr-number "${{ github.event.issue.number }}" \
+            --target-repo target
 
-  consume-dispatch:
-    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'consume'
+  consume-command:
+    if: >-
+      github.event.issue.pull_request &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+      contains(github.event.comment.body, 'WORKSPACE_CONTROL_REVIEW_CONSUME_COMMAND_V1')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout trusted default-branch automation
+        uses: actions/checkout@v6
         with:
-          ref: ${{ github.workflow_sha }}
+          ref: ${{ github.sha }}
+          path: trusted
           persist-credentials: false
-      - name: Consume exact durable review disposition
+      - name: Consume exact review state
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          REVIEW_COMMAND_BODY: ${{ github.event.comment.body }}
         run: |
           set -Eeuo pipefail
-          test -n "${{ inputs.request_comment_id }}"
-          python3 scripts/workspace_review_automation.py consume \
+          python3 trusted/scripts/workspace_review_automation.py consume-comment \
             --repo "${GITHUB_REPOSITORY}" \
-            --pr-number "${{ inputs.pr_number }}" \
-            --task-id "${{ inputs.task_id }}" \
-            --request-comment-id "${{ inputs.request_comment_id }}" \
-            --post-receipt
+            --pr-number "${{ github.event.issue.number }}"
 
-  consume-comment:
-    if: github.event_name == 'issue_comment' && github.event.issue.pull_request && github.event.comment.user.login != 'github-actions[bot]' && contains(github.event.comment.body, 'WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1')
+  consume-disposition:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.comment.user.login != 'github-actions[bot]' &&
+      contains(github.event.comment.body, 'WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout trusted default-branch automation
+        uses: actions/checkout@v6
         with:
-          ref: ${{ github.workflow_sha }}
+          ref: ${{ github.sha }}
+          path: trusted
           persist-credentials: false
       - name: Resolve disposition identity
         id: binding
@@ -113,21 +89,26 @@ jobs:
           python3 - <<'PY'
           import os, sys
           from pathlib import Path
-          sys.path.insert(0, str(Path('scripts').resolve()))
+          sys.path.insert(0, str(Path('trusted/scripts').resolve()))
           import workspace_review_automation as r
-          f = r.exact_block(os.environ['COMMENT_BODY'], r.DISP_START, r.DISP_END, r.DISP_KEYS)
+          f = r.exact_block(
+              os.environ['COMMENT_BODY'],
+              r.DISP_START,
+              r.DISP_END,
+              r.DISP_KEYS,
+          )
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
               out.write('request_comment_id=' + f['request_comment_id'] + '\n')
               out.write('task_id=' + f['task_id'] + '\n')
               out.write('pr_number=' + f['pr_number'] + '\n')
           PY
-      - name: Automatically consume disposition
+      - name: Automatically consume independent disposition
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -Eeuo pipefail
-          python3 scripts/workspace_review_automation.py consume \
+          python3 trusted/scripts/workspace_review_automation.py consume \
             --repo "${GITHUB_REPOSITORY}" \
             --pr-number "${{ steps.binding.outputs.pr_number }}" \
             --task-id "${{ steps.binding.outputs.task_id }}" \

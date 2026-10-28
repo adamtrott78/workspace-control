@@ -68,15 +68,46 @@ class ProtocolTests(unittest.TestCase):
                 review_auto.REQ_KEYS,
             )
 
-    def test_authority_sensitive_requires_fresh_attestation(self):
-        req = self.request()
-        fields = review_auto.exact_block(
-            self.disposition(req, att="copilot_approval"),
-            review_auto.DISP_START, review_auto.DISP_END,
-            review_auto.DISP_KEYS,
+    def test_comment_dispositions_never_accept_copilot_attestation(self):
+        for req in (
+            self.request(),
+            self.request("routine_code", False),
+            self.request("routine_code", True),
+        ):
+            fields = review_auto.exact_block(
+                self.disposition(req, att="copilot_approval"),
+                review_auto.DISP_START, review_auto.DISP_END,
+                review_auto.DISP_KEYS,
+            )
+            with self.assertRaisesRegex(
+                review_auto.ReviewError, "fresh_independent_session"
+            ):
+                review_auto.validate_disposition(fields, req, 100)
+
+    def test_request_command_parsing_is_exact(self):
+        body = review_auto.block(
+            review_auto.CMD_START, review_auto.CMD_END, {
+                "task_id": "task-v1",
+                "review_kind": "implementation",
+                "sensitivity": "routine_code",
+                "request_copilot": "true",
+            },
         )
-        with self.assertRaisesRegex(review_auto.ReviewError, "fresh_independent"):
-            review_auto.validate_disposition(fields, req, 100)
+        parsed = review_auto.parse_request_command(body)
+        self.assertEqual(parsed["task_id"], "task-v1")
+        self.assertEqual(parsed["request_copilot"], "true")
+
+    def test_authority_request_command_cannot_request_copilot(self):
+        body = review_auto.block(
+            review_auto.CMD_START, review_auto.CMD_END, {
+                "task_id": "task-v1",
+                "review_kind": "implementation",
+                "sensitivity": "authority_sensitive",
+                "request_copilot": "true",
+            },
+        )
+        with self.assertRaisesRegex(review_auto.ReviewError, "cannot request"):
+            review_auto.parse_request_command(body)
 
     def test_matching_unedited_distinct_reviewer(self):
         req = self.request()
@@ -128,6 +159,11 @@ class ProtocolTests(unittest.TestCase):
         self.assertIsNone(review_auto.exact_copilot_approval(commented, req))
         self.assertIsNone(
             review_auto.exact_copilot_approval(good, self.request())
+        )
+        self.assertIsNone(
+            review_auto.exact_copilot_approval(
+                good, self.request("routine_code", False)
+            )
         )
 
 
@@ -287,20 +323,24 @@ class ConsumeTests(unittest.TestCase):
 
 
 class RepositoryContractTests(unittest.TestCase):
-    def test_workflow_is_github_only(self):
+    def test_workflow_is_default_branch_issue_comment_only(self):
         text = (
             ROOT / ".github" / "workflows"
             / "workspace-control-review-automation.yml"
         ).read_text()
         self.assertIn("issue_comment:", text)
+        self.assertNotIn("workflow_dispatch:", text)
+        self.assertNotIn("github.workflow_sha", text)
+        self.assertIn("ref: ${{ github.sha }}", text)
+        self.assertIn("WORKSPACE_CONTROL_REVIEW_REQUEST_COMMAND_V1", text)
+        self.assertIn("WORKSPACE_CONTROL_REVIEW_CONSUME_COMMAND_V1", text)
         self.assertIn("WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1", text)
-        self.assertIn("github.event.comment.user.login != 'github-actions[bot]'", text)
-        self.assertIn("ref: ${{ github.workflow_sha }}", text)
         self.assertIn("path: trusted", text)
         self.assertIn("path: target", text)
-        self.assertIn("trusted/scripts/workspace_review_automation.py request", text)
+        self.assertIn("trusted/scripts/workspace_review_automation.py request-comment", text)
         self.assertIn("--target-repo target", text)
         self.assertNotIn("python3 target/scripts/workspace_review_automation.py", text)
+        self.assertIn("github.event.comment.user.login != 'github-actions[bot]'", text)
         self.assertIn("--post-receipt", text)
         self.assertNotIn("systemctl", text)
         self.assertNotIn("/var/lib/workspace-ci", text)
