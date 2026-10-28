@@ -132,6 +132,27 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             admission["_generic"]["execution_contract_id"], "cpu-public-ci-v1"
         )
 
+    def test_reasoner_public_gpu_route_has_no_model_or_runtime_binding(self):
+        req = request_for(RESEARCH, "gpu-experiment-public")
+        admission = multi.mint_admission(
+            req,
+            RESEARCH,
+            CONTRACTS,
+            WORKLOAD,
+            now=datetime(2026, 10, 28, tzinfo=timezone.utc),
+        )
+        self.assertEqual(admission["workload_class"], "gpu-experiment-public")
+        self.assertEqual(admission["execution_profile"], "gpu-small")
+        self.assertEqual(admission["models"], [])
+        self.assertIsNone(admission["runtime"])
+        semantic = multi.execution_semantics_from_admission(admission)
+        self.assertEqual(semantic["execution_contract_id"], "gpu-single-public-ci-v1")
+        self.assertEqual(semantic["gpu_count"], 1)
+        self.assertEqual(semantic["payload_network_class"], "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD")
+        self.assertEqual(semantic["model_binding_mode"], "FORBIDDEN")
+        self.assertEqual(semantic["runtime_binding_mode"], "OPTIONAL_EXACT_IF_ROUTE_BINDS")
+        self.assertEqual(semantic["state_effect_class"], "CI_VALIDATION_ONLY")
+
     def test_public_repo_fork_head_is_rejected_even_for_allowed_actor(self):
         manifest = copy.deepcopy(PAD)
         route = manifest["routes"]["cpu-ci"]

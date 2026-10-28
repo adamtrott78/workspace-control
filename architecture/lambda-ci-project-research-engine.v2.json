@@ -491,6 +491,30 @@
         "model_id": "qwen3.5-4b",
         "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
       }
+    },
+    "gpu-experiment-public": {
+      "activation_state": "ACTIVE",
+      "lane": "gpu",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-local-reasoner-resource-probe.yml",
+        "default_branch": "main",
+        "blob_sha": "bd4fe7f65ab0ed53ff0e6ccffc5c95f5fc3d654e"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-reasoner-probe",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": null,
+        "runtime_id": null
+      }
     }
   },
   "bindings": {
