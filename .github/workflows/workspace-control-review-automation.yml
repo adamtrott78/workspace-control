@@ -1,0 +1,117 @@
+name: Workspace Control Review Automation
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  request-comment:
+    if: >-
+      github.event.issue.pull_request &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+      contains(github.event.comment.body, 'WORKSPACE_CONTROL_REVIEW_REQUEST_COMMAND_V1')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted default-branch automation
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          path: trusted
+          persist-credentials: false
+      - name: Checkout reviewed PR as data only
+        uses: actions/checkout@v6
+        with:
+          ref: refs/pull/${{ github.event.issue.number }}/head
+          path: target
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Create exact durable review request
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REVIEW_COMMAND_BODY: ${{ github.event.comment.body }}
+        run: |
+          set -Eeuo pipefail
+          python3 trusted/scripts/workspace_review_automation.py request-comment \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pr-number "${{ github.event.issue.number }}" \
+            --target-repo target
+
+  consume-command:
+    if: >-
+      github.event.issue.pull_request &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+      contains(github.event.comment.body, 'WORKSPACE_CONTROL_REVIEW_CONSUME_COMMAND_V1')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted default-branch automation
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          path: trusted
+          persist-credentials: false
+      - name: Consume exact review state
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REVIEW_COMMAND_BODY: ${{ github.event.comment.body }}
+        run: |
+          set -Eeuo pipefail
+          python3 trusted/scripts/workspace_review_automation.py consume-comment \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pr-number "${{ github.event.issue.number }}"
+
+  consume-disposition:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.comment.user.login != 'github-actions[bot]' &&
+      contains(github.event.comment.body, 'WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted default-branch automation
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          path: trusted
+          persist-credentials: false
+      - name: Resolve disposition identity
+        id: binding
+        shell: bash
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import os, sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('trusted/scripts').resolve()))
+          import workspace_review_automation as r
+          f = r.exact_block(
+              os.environ['COMMENT_BODY'],
+              r.DISP_START,
+              r.DISP_END,
+              r.DISP_KEYS,
+          )
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+              out.write('request_comment_id=' + f['request_comment_id'] + '\n')
+              out.write('task_id=' + f['task_id'] + '\n')
+              out.write('pr_number=' + f['pr_number'] + '\n')
+          PY
+      - name: Automatically consume independent disposition
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          python3 trusted/scripts/workspace_review_automation.py consume \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pr-number "${{ steps.binding.outputs.pr_number }}" \
+            --task-id "${{ steps.binding.outputs.task_id }}" \
+            --request-comment-id "${{ steps.binding.outputs.request_comment_id }}" \
+            --disposition-comment-id "${{ github.event.comment.id }}" \
+            --post-receipt

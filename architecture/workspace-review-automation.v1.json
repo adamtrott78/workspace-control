@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "id": "workspace-review-automation-v1",
+  "scope": "github_only_review_plumbing",
+  "goal": "Eliminate routine operator copy/paste for review request/disposition plumbing while preserving exact-target binding and independent-review semantics.",
+  "non_goals": [
+    "No Lambda, systemd, runner, reconciler, controller, registry, manifest, capacity, maintenance, or automatic-merge mutation.",
+    "No authority-sensitive self-approval by the authoring process.",
+    "No claim that GitHub identity cryptographically proves a fresh ChatGPT session."
+  ],
+  "review_classes": {
+    "authority_sensitive": {
+      "required_backend": "fresh_independent_session_attestation",
+      "copilot_may_satisfy": false,
+      "note": "Fresh-session independence remains a procedural review contract; the automation makes it durable and machine-checkable."
+    },
+    "routine_code": {
+      "allowed_backends": [
+        "fresh_independent_session_attestation",
+        "exact_head_copilot_approval"
+      ],
+      "copilot_may_satisfy": true,
+      "copilot_requirement": "Only APPROVED at the exact requested head is consumable; COMMENTED is not acceptance."
+    }
+  },
+  "request_protocol": {
+    "marker": "WORKSPACE_CONTROL_REVIEW_REQUEST_V1",
+    "exact_bindings": [
+      "task_id",
+      "pr_number",
+      "head_sha",
+      "base_sha",
+      "tree_sha",
+      "review_kind",
+      "sensitivity",
+      "bindings_sha256",
+      "request_copilot",
+      "request_digest"
+    ],
+    "changed_path_binding": "SHA256 over canonical sorted path/blob pairs; deleted paths bind as DELETED.",
+    "trusted_requester_execution": "Write-capable request creation is triggered only by issue_comment, whose workflow and github.sha resolve to the default branch. The trusted default-branch script inspects a separate PR-head checkout as Git data only; workflow_dispatch is forbidden.",
+    "trigger": "issue_comment default-branch trust root",
+    "request_command_marker": "WORKSPACE_CONTROL_REVIEW_REQUEST_COMMAND_V1"
+  },
+  "disposition_protocol": {
+    "marker": "WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1",
+    "dispositions": [
+      "NO_BLOCKING_FINDING",
+      "BLOCKING_FINDINGS"
+    ],
+    "edited": "fail_closed",
+    "stale_head": "fail_closed",
+    "duplicate_matching": "fail_closed",
+    "same_request_and_reviewer_principal": "fail_closed",
+    "base_drift": "fail_closed",
+    "head_drift": "fail_closed",
+    "comment_attestation": "Only fresh_independent_session is accepted in issue-comment dispositions. copilot_approval is never accepted from comments."
+  },
+  "consumption": {
+    "automatic_comment_consumption": true,
+    "routine_copilot_exact_head_approved": "Only via GitHub PR review API after request_copilot=true; a trusted issue_comment consume command may re-check pending Copilot state.",
+    "authority_sensitive_copilot": "forbidden",
+    "automatic_merge": false,
+    "consume_command_marker": "WORKSPACE_CONTROL_REVIEW_CONSUME_COMMAND_V1"
+  },
+  "runtime_boundary": "GitHub-only; no Lambda/controller credentials or live runtime mutation."
+}
