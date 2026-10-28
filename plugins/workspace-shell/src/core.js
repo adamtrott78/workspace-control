@@ -435,6 +435,7 @@ export async function unixRpc(socketPath, request, {
 
 export function readReceiptNoFollow(receiptRoot, receiptId, {
   expectedUid = null,
+  expectedGid = null,
   maxBytes = 256 * 1024,
 } = {}) {
   if (!/^[a-zA-Z0-9._-]{8,128}$/.test(receiptId)) fail("INVALID_RECEIPT_ID", "receipt_id is invalid");
@@ -447,6 +448,8 @@ export function readReceiptNoFollow(receiptRoot, receiptId, {
     const stat = fstatSync(fd);
     if (!stat.isFile()) fail("RECEIPT_NOT_REGULAR", "receipt is not a regular file");
     if (expectedUid !== null && stat.uid !== expectedUid) fail("RECEIPT_OWNER_MISMATCH", "receipt owner mismatch");
+    if (expectedGid !== null && stat.gid !== expectedGid) fail("RECEIPT_GROUP_MISMATCH", "receipt group mismatch");
+    if ((stat.mode & 0o022) !== 0) fail("RECEIPT_MODE_INVALID", "receipt must not be group/world writable");
     if (stat.size > maxBytes) fail("RECEIPT_TOO_LARGE", "receipt exceeds bound");
     const buffer = Buffer.alloc(stat.size);
     let offset = 0;
