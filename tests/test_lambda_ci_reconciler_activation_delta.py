@@ -217,6 +217,155 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
                 ],
             )
 
+    def test_exact_legacy_env_with_implicit_default_state_root_is_preserved(self):
+        target_registry, manifests = self.activation_target()
+        installed_registry = self.candidate_installed_registry()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            controllers_dir = root / "controllers"
+            controllers_dir.mkdir()
+            dropins = root / "dropins"
+            dropins.mkdir()
+
+            def dropin(project_id, lane, subnet):
+                path = dropins / f"{project_id}-{lane}.conf"
+                body = f"[Service]\nIPAddressDeny={subnet}\n".encode("utf-8")
+                return path, body
+
+            with mock.patch.object(
+                reconciler,
+                "controller_network_dropin",
+                side_effect=dropin,
+            ):
+                legacy_bytes = {}
+                for project_id in ("padataset", "research-engine"):
+                    manifest = manifests[project_id]
+                    for lane in target_registry["projects"][project_id]["lanes"]:
+                        path = controllers_dir / f"{project_id}-{lane}.env"
+                        raw = (
+                            reconciler
+                            .render_legacy_controller_env_with_implicit_default_state_root(
+                                manifest,
+                                lane,
+                            )
+                            .encode("utf-8")
+                        )
+                        legacy_bytes[(project_id, lane)] = raw
+                        path.write_bytes(raw)
+                        dropin_path, body = dropin(
+                            project_id,
+                            lane,
+                            "192.0.2.0/24",
+                        )
+                        dropin_path.write_bytes(body)
+
+                delta = reconciler.controller_reconciliation_delta(
+                    installed_registry=installed_registry,
+                    target_registry=target_registry,
+                    manifests=manifests,
+                    controllers_dir=controllers_dir,
+                    local_subnet="192.0.2.0/24",
+                )
+
+                restarted = [
+                    entry["service"]
+                    for entry in delta
+                    if entry["restart_required"]
+                ]
+                preserved = [
+                    entry["service"]
+                    for entry in delta
+                    if not entry["restart_required"]
+                ]
+                self.assertEqual(
+                    restarted,
+                    [
+                        "workspace-ci-controller@workspace-control-cpu.service",
+                    ],
+                )
+                self.assertEqual(
+                    preserved,
+                    [
+                        "workspace-ci-controller@padataset-cpu.service",
+                        "workspace-ci-controller@padataset-gpu.service",
+                        "workspace-ci-controller@research-engine-cpu.service",
+                        "workspace-ci-controller@research-engine-gpu.service",
+                    ],
+                )
+                for (project_id, lane), raw in legacy_bytes.items():
+                    self.assertEqual(
+                        (controllers_dir / f"{project_id}-{lane}.env").read_bytes(),
+                        raw,
+                    )
+
+    def test_legacy_equivalence_admits_no_other_env_drift(self):
+        target_registry, manifests = self.activation_target()
+        installed_registry = self.candidate_installed_registry()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            controllers_dir = root / "controllers"
+            controllers_dir.mkdir()
+            dropins = root / "dropins"
+            dropins.mkdir()
+
+            def dropin(project_id, lane, subnet):
+                path = dropins / f"{project_id}-{lane}.conf"
+                body = f"[Service]\nIPAddressDeny={subnet}\n".encode("utf-8")
+                return path, body
+
+            with mock.patch.object(
+                reconciler,
+                "controller_network_dropin",
+                side_effect=dropin,
+            ):
+                for project_id in ("padataset", "research-engine"):
+                    manifest = manifests[project_id]
+                    for lane in target_registry["projects"][project_id]["lanes"]:
+                        (controllers_dir / f"{project_id}-{lane}.env").write_bytes(
+                            reconciler
+                            .render_legacy_controller_env_with_implicit_default_state_root(
+                                manifest,
+                                lane,
+                            )
+                            .encode("utf-8")
+                        )
+                        path, body = dropin(
+                            project_id,
+                            lane,
+                            "192.0.2.0/24",
+                        )
+                        path.write_bytes(body)
+
+                path = controllers_dir / "research-engine-gpu.env"
+                raw = path.read_text(encoding="utf-8")
+                path.write_text(
+                    raw.replace(
+                        "WORKSPACE_CI_ADMISSION_V2_ENABLED=YES",
+                        "WORKSPACE_CI_ADMISSION_V2_ENABLED=NO",
+                    ),
+                    encoding="utf-8",
+                )
+
+                delta = reconciler.controller_reconciliation_delta(
+                    installed_registry=installed_registry,
+                    target_registry=target_registry,
+                    manifests=manifests,
+                    controllers_dir=controllers_dir,
+                    local_subnet="192.0.2.0/24",
+                )
+
+            self.assertEqual(
+                [
+                    entry["service"]
+                    for entry in delta
+                    if entry["restart_required"]
+                ],
+                [
+                    "workspace-ci-controller@research-engine-gpu.service",
+                    "workspace-ci-controller@workspace-control-cpu.service",
+                ],
+            )
+
     def test_existing_controller_config_drift_is_explicit_restart_delta(self):
         target_registry, manifests = self.activation_target()
         installed_registry = self.candidate_installed_registry()
