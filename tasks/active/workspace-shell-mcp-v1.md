@@ -24,21 +24,20 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 
 - Intent: mutate
 - Remote branch: workspace-shell-mcp-v1-implementation
-- Remote checkpoint: be67b71ff60da30d80ddec26453e0f1e92a10780
+- Remote checkpoint: 4a3b6735b53a7934fb0a7bb52cbbf320915bd8ca
 - Remote verified: true
 
 ## Next safe action
 
-Implement and adversarially test Workspace Shell v1 in repository only on branch workspace-shell-mcp-v1-implementation, preserving the accepted authority contract. No Lambda installation, tunnel/key provisioning, root authority activation, Heartbeat mutation, or project-controller mutation.
+Synchronize this implementation checkpoint into the derived handoff, validate the resulting exact PR #552 head, then record a fresh independent implementation review request. Do not merge PR #552 or mutate Lambda, provision tunnel/key material, create OS principals, install root/job-launcher/broker/helper authority, modify Heartbeat, or activate any project controller.
 
 ## Remaining work
 
-- Implement the MCP policy frontend, fixed profile grammar, task/provenance validation, bounded receipt handling and local Unix-socket clients.
-- Implement repository-only root-owned job-launcher and reviewed-helper broker protocols with peer-credential checks, hostile-worker isolation plan enforcement, approval verification and fail-closed replay/revocation logic.
-- Add adversarial tests covering argv/path/profile confusion, worker/control-plane separation, approval forgery/replay/expiry/revocation/binding failures, output limits and receipt integrity.
-- Run Workspace Control Validation and plugin-specific tests; fix all failures.
-- Request fresh independent exact-head implementation review. Do not install anything on Lambda.
-- After implementation acceptance, obtain fresh read-only host attestation and design the exact installation units/UIDs/sockets/mounts/rollback before a separate installation review.
+- Validate the state-only implementation-review synchronization head.
+- Request fresh independent exact-head implementation review for PR #552, binding the review to code/test checkpoint 4a3b6735b53a7934fb0a7bb52cbbf320915bd8ca and successful validation run #1054.
+- Do not merge or install the implementation until independent review returns NO_BLOCKING_FINDING on the exact synchronized head.
+- After implementation acceptance, obtain fresh read-only Lambda host attestation and design the exact installation units, UIDs/GIDs, sockets, mounts, cgroups, credentials, tunnel binding, rollback and emergency-disable procedure.
+- Submit that installation plan and exact artifacts for a separate independent installation review before any live Lambda mutation or activation.
 
 ## Blockers / gates
 
