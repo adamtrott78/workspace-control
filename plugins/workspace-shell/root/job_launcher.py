@@ -441,6 +441,23 @@ def decode_output(data):
         return "[non-UTF8 output omitted]"
 
 
+def redact_argv(profile, argv):
+    values = list(argv or [])
+    if profile != "pytest-bounded":
+        return values
+    redacted = []
+    i = 0
+    while i < len(values):
+        arg = values[i]
+        redacted.append(arg)
+        if arg == "-k" and i + 1 < len(values):
+            redacted.append("[redacted-expression]")
+            i += 2
+            continue
+        i += 1
+    return redacted
+
+
 def run_request(cfg, manifest, request, cancel_check=None):
     if request.get("schema") != "workspace-shell-job-request.v1":
         fail("JOB_SCHEMA_INVALID", "unexpected job request schema")
@@ -475,8 +492,8 @@ def run_request(cfg, manifest, request, cancel_check=None):
     )
     if observed_sha != expected_sha:
         fail("SOURCE_SHA_MISMATCH", "observed source HEAD differs from expected_sha")
-    if dirty:
-        fail("SOURCE_DIRTY", "unprivileged source checkout must be clean before execution")
+    if dirty and profile != "git-read":
+        fail("SOURCE_DIRTY", "executable profiles require a clean source checkout")
 
     receipt_id = f"job-{uuid.uuid4()}"
     scratch_root = require_secure_directory(cfg["scratch_root"], owner_uid=0)
@@ -524,7 +541,8 @@ def run_request(cfg, manifest, request, cancel_check=None):
         "observed_git_tree": observed_tree,
         "argv_profile": profile,
         "argv_hash": sha256_hex(json.dumps(request.get("argv"), separators=(",", ":"), ensure_ascii=False)),
-        "redacted_argv": request.get("argv"),
+        "redacted_argv": redact_argv(profile, request.get("argv")),
+        "source_dirty": bool(dirty),
         "cwd_policy_path": cwd,
         "timeout_ms": timeout_ms,
         "started_at": started,
@@ -546,7 +564,11 @@ def run_request(cfg, manifest, request, cancel_check=None):
         "timed_out": result["timed_out"],
         "cancelled": result["cancelled"],
     }
-    stored = write_receipt(cfg["receipt_root"], receipt)
+    stored = write_receipt(
+        cfg["receipt_root"],
+        receipt,
+        reader_gid=int(cfg["frontend_gid"]),
+    )
 
     if scratch_path is not None:
         shutil.rmtree(scratch_path, ignore_errors=True)
@@ -567,6 +589,7 @@ def run_request(cfg, manifest, request, cancel_check=None):
         "stdout_sha256": stored.get("stdout_sha256"),
         "stderr_sha256": stored.get("stderr_sha256"),
         "cgroup_cleanup_status": cleanup,
+        "source_dirty": bool(dirty),
     }
 
 
@@ -589,7 +612,11 @@ def rejection_receipt(cfg, request, code, message, peer_uid):
         "authorization_reason": f"{code}: {message}",
     }
     try:
-        return write_receipt(cfg["receipt_root"], receipt)["receipt_id"]
+        return write_receipt(
+            cfg["receipt_root"],
+            receipt,
+            reader_gid=int(cfg["frontend_gid"]),
+        )["receipt_id"]
     except Exception:
         return None
 
@@ -606,7 +633,11 @@ def serve(config_path):
 
     socket_path = Path(cfg["socket_path"])
     require_secure_directory(socket_path.parent, owner_uid=0)
-    require_secure_directory(cfg["receipt_root"], owner_uid=0)
+    require_secure_directory(
+        cfg["receipt_root"],
+        owner_uid=0,
+        owner_gid=int(cfg["frontend_gid"]),
+    )
     require_secure_directory(cfg["scratch_root"], owner_uid=0)
     if socket_path.exists():
         st = socket_path.lstat()
