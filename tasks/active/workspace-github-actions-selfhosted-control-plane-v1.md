@@ -36,22 +36,20 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Fresh independent exact-head review of PR #560 only. Verify the safe rejection occurred before mutation and BF-1 behaved correctly. Verify the root cause is precisely the historical sibling env encoding that omits only WORKSPACE_CI_CONTROLLER_STATE_ROOT while the exact installed reviewed Go controller binary defaults that variable to /var/lib/workspace-ci/controller/state. Verify the reconciler admits only exact current bytes or exact legacy bytes for the same manifest/lane and still treats every other env/drop-in difference as restart-requiring. Verify APPLY does not rewrite preserved legacy sibling env bytes. Verify the source-bound hotfix installer fail-closes unless the exact rejected request/policy/workflow, exact current installed digests, exact failed one-shot generation, exact controller binary, exact service snapshots, all four exact legacy env files, and all four exact 134.88.12.0/22 drop-ins are present; forward mutation is root reconciler only plus non-propagating root restart; the exact rejected marker is archived only after certification to permit one deterministic retry; rollback restores exact root and rejected-marker bytes and exact service generations. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
+Fresh independent exact-head re-review of corrected PR #560 only. Consume blocking review comment 6458462200 and verify BF-1 closure: detached HEAD is mandatory; the immutable reviewed source authority is pinned to `a2587410cde8ca2e077ea9228342b7651abb793d`; `scripts/lambda_ci_reconciler.py` must resolve at both that authority and current HEAD to exact reviewed blob `ee86b28412c0dff70fe79d915978fc9cd1f7cbd7`; the clean tracked-tree check remains; post-review source drift is limited to the installer, its regression file, and task-state files; and regressions reject a different clean commit paired with its own `--expected-head`, attached-branch execution, and reconciler source drift. Executable checkpoint `3661448cd50299a633b97b56695f4b75e0a05588` passed Workspace Control Validation run `40620049974` / job `122591614437` / #1066 SUCCESS. Preserve all previously accepted live transaction, exact legacy-env, sibling-material, rollback, controller-preservation, P1 CPU-only, concurrency, P2/P3, and capacity boundaries. Return `NO_BLOCKING_FINDING` or exact actionable blockers. Do not merge or mutate Lambda during review.
 
 ## Remaining work
 
-- Obtain fresh independent exact-head review of PR #545, focused on source provenance, exact old installed digest binding, preservation of failed receipt/cursor, candidate dormancy, project-controller preservation, the single root-maintenance service restart mutation, bounded socket readiness, and rollback restoration.
-- After accepted merge, run the reviewed installer exactly once from its exact merge SHA and inspect the complete hotfix receipt before any maintenance retry.
-- Only after installer PASS, post exactly one new owner `/workspace-ci-maintain diagnose workspace-control cpu` command and prove a durable COMPLETED observation-only receipt; do not reuse failed comment 6437389584.
-- Only after the diagnostic receipt is accepted may workspace-control activation be independently gated as the reviewed owner-commanded same-repository CPU pilot with maxRunners=1 and manifest concurrency=1.
-- Validate live P1 filesystem isolation, CPU/RAM/runtime envelope, GPU0, exact candidate provenance, deterministic receipts, maintenance authorization/replay behavior, and clean teardown/rollback.
-- Leave P2 automatic pull_request/push admission, P3 organization migration, GitHub App credential migration, resource-aware concurrency widening, and unrelated transport cleanup unauthorized.
+- Obtain fresh independent exact-head re-review of corrected PR #560, consuming prior BF-1 disposition comment 6458462200.
+- Require `NO_BLOCKING_FINDING` before any merge or Lambda hotfix installation; keep PR #559 open/unmerged and `main` pinned at `e8a458a8ce922ac89ad91354b29f5dc4ecbd5e91` during review.
+- After any later accepted live repair, require a separate live-repair receipt review before one reviewed one-shot activation retry.
+- Leave P2/P3/capacity widening, maintenance-command widening, and the separate `workspace-shell-mcp-v1` task unauthorized/paused.
 
 ## Blockers / gates
 
 - The first reviewed one-shot activation submission was safely rejected before mutation; workspace-control remains unactivated.
-- PR #560 strict legacy-env equivalence correction is validated but requires fresh independent exact-head review before any live hotfix install.
-- Do not merge PR #559 or PR #560, do not install the hotfix, do not retry the one-shot, do not start the automatic reconcile-controller, issue maintenance commands, manually start/enable workspace-control CPU, restart/reset siblings, restart research-engine CPU, or widen P2/P3/capacity until independent review returns NO_BLOCKING_FINDING.
+- PR #560 BF-1 source-authority correction is frozen at executable checkpoint `3661448cd50299a633b97b56695f4b75e0a05588` and passed full validation run #1066, but still requires fresh independent exact-head acceptance.
+- Do not merge PR #559 or PR #560, install the hotfix, retry the one-shot, start automatic reconciliation, issue maintenance commands, mutate sibling controllers/research-engine CPU, or widen P2/P3/capacity until review returns `NO_BLOCKING_FINDING`.
 
 ## Fresh-chat initialization
 
