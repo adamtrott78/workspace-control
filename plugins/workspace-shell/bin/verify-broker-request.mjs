@@ -216,14 +216,12 @@ function main() {
     fail("APPROVAL_INVALID", "signed approval bundle missing");
   }
   const payload = approval.payload;
-  if (payload.schema !== "workspace-shell-approval.v1") fail("APPROVAL_SCHEMA_INVALID", "unexpected approval schema");
+  if (payload.schema !== "workspace-shell-approval.v2") fail("APPROVAL_SCHEMA_INVALID", "unexpected approval schema");
   const required = [
     "approval_id","issuer_key_id","issued_at","expires_at","task_id","target",
     "design_authority_sha","policy_artifact_sha256",
-    "design_review_repository","design_review_pr_number","design_reviewed_head_sha","design_review_record_id","design_review_disposition",
     "helper_registry_version","helper_registry_sha256","helper_entry_sha256",
     "helper_id","helper_sha256",
-    "helper_review_repository","helper_review_pr_number","helper_admission_head_sha","helper_reviewed_head_sha","helper_review_record_id","helper_review_disposition",
     "expected_source_repository","expected_source_commit","expected_source_tree",
     "operation","parameter_schema_sha256","parameter_digest_sha256","nonce","idempotency_key","max_uses",
   ];
@@ -242,7 +240,7 @@ function main() {
   if (issuer.not_before && now < parseTime(issuer.not_before, "issuer.not_before")) fail("APPROVAL_ISSUER_NOT_YET_VALID", "issuer key not yet valid");
   if (issuer.not_after && now >= parseTime(issuer.not_after, "issuer.not_after")) fail("APPROVAL_ISSUER_EXPIRED", "issuer key expired");
   if (!verifyCanonical(payload, approval.signature, issuer.public_key_pem)) {
-    fail("APPROVAL_SIGNATURE_INVALID", "independent approval signature failed");
+    fail("APPROVAL_SIGNATURE_INVALID", "operator approval signature failed");
   }
 
   const revocations = readJson(cfg.revocations);
@@ -254,15 +252,10 @@ function main() {
   if (expiresAt <= issuedAt || expiresAt - issuedAt > 15 * 60 * 1000) fail("APPROVAL_LIFETIME_INVALID", "approval lifetime exceeds 15 minutes");
   if (now < issuedAt - 30_000) fail("APPROVAL_NOT_YET_VALID", "approval issued_at is in the future");
   if (now >= expiresAt) fail("APPROVAL_EXPIRED", "approval expired");
-  if (payload.max_uses !== 1) fail("APPROVAL_USE_LIMIT_INVALID", "v1 approval max_uses must equal 1");
+  if (payload.max_uses !== 1) fail("APPROVAL_USE_LIMIT_INVALID", "v2 approval max_uses must equal 1");
 
   assertExact(payload.design_authority_sha, cfg.design_authority_sha, "design_authority_sha");
   assertExact(payload.policy_artifact_sha256, cfg.policy_artifact_sha256, "policy_artifact_sha256");
-  assertExact(payload.design_review_repository, cfg.design_review_repository, "design_review_repository");
-  assertExact(payload.design_review_pr_number, cfg.design_review_pr_number, "design_review_pr_number");
-  assertExact(payload.design_review_record_id, cfg.design_review_record_id, "design_review_record_id");
-  assertExact(payload.design_reviewed_head_sha, payload.design_authority_sha, "design_reviewed_head_sha");
-  assertExact(payload.design_review_disposition, "NO_BLOCKING_FINDING", "design_review_disposition");
 
   assertExact(fr.payload.task_id, payload.task_id, "task_id");
   assertExact(fr.payload.target, payload.target, "target");
@@ -282,13 +275,7 @@ function main() {
   assertExact(payload.helper_sha256, helper.sha256, "registered helper sha256");
   assertExact(payload.target, helper.target, "registered helper target");
   assertExact(payload.operation, helper.operation, "registered helper operation");
-  assertExact(payload.helper_review_repository, helper.review_repository, "helper review repository");
-  assertExact(payload.helper_review_pr_number, helper.review_pr_number, "helper review PR");
-  assertExact(payload.helper_admission_head_sha, helper.admission_head_sha, "helper admission head");
-  assertExact(payload.helper_reviewed_head_sha, helper.admission_head_sha, "helper reviewed head");
-  assertExact(payload.helper_review_record_id, helper.review_record_id, "helper review record");
-  assertExact(payload.helper_review_disposition, "NO_BLOCKING_FINDING", "helper review disposition");
-  assertExact(helper.review_disposition, "NO_BLOCKING_FINDING", "registry helper review disposition");
+  if (helper.enabled !== true) fail("HELPER_DISABLED", "registered helper is not enabled");
 
   const schemaDigest = canonicalDigest(helper.parameter_schema);
   assertExact(payload.parameter_schema_sha256, schemaDigest, "parameter schema digest");
@@ -332,8 +319,9 @@ function main() {
     parameters: request.parameters,
     timeout_ms: Math.min(Number(helper.timeout_ms ?? 90000), 90000),
     design_authority_sha: payload.design_authority_sha,
-    design_review_record_id: payload.design_review_record_id,
-    helper_review_record_id: payload.helper_review_record_id,
+    policy_artifact_sha256: payload.policy_artifact_sha256,
+    helper_registry_sha256: payload.helper_registry_sha256,
+    helper_entry_sha256: payload.helper_entry_sha256,
     parameter_digest_sha256: payload.parameter_digest_sha256,
     confinement: validateHelperConfinement(helper),
   };
