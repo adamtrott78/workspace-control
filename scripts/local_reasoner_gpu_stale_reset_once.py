@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import argparse, hashlib, importlib.util, json, os, pathlib, pwd, shutil, subprocess, tempfile, time
+import argparse, hashlib, importlib.util, json, os, pathlib, pwd, subprocess, tempfile, urllib.request
 from datetime import datetime
 
 REPO=pathlib.Path(__file__).resolve().parents[1]
@@ -35,16 +35,12 @@ def canon_sha(path):
     raw=json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode()
     return hashlib.sha256(raw).hexdigest()
 
-def gh(inv,exe,*args,check=True):
-    return run([exe,*args],user=inv,check=check,env={"PATH":"/usr/bin:/bin:/usr/local/bin","HOME":home(inv),"GH_PAGER":"cat","PAGER":"cat","LANG":"C.UTF-8","LC_ALL":"C.UTF-8"})
+def api(path):
+    req=urllib.request.Request("https://api.github.com/"+path,headers={"Accept":"application/vnd.github+json","User-Agent":"workspace-control-one-shot-recovery/1","X-GitHub-Api-Version":"2022-11-28"})
+    with urllib.request.urlopen(req,timeout=20) as r:
+        return json.loads(r.read())
 
-def status(inv,exe,rid):
-    p=gh(inv,exe,"run","view",str(rid),"--repo",RESOURCE_REPO,"--json","status,conclusion")
-    v=json.loads(p.stdout); s=v.get("status")
-    if not isinstance(s,str): raise E(f"run {rid} status unavailable")
-    return s
-
-def verify(inv,head,exe):
+def verify(inv,head):
     if os.geteuid()!=0 or not inv or inv=="root": raise E("run via sudo from operator account")
     if pathlib.Path(__file__).resolve()!=(REPO/REL).resolve(): raise E("helper path drift")
     git(inv,"ls-files","--error-unmatch","--",REL.as_posix())
@@ -56,22 +52,14 @@ def verify(inv,head,exe):
     exp={"project_id":PROJECT,"lane":LANE,"receipt_id":QID,"scale_set_id":OLD_ID,"scale_set_name":"lambda-research-engine-gpu","status":"ASSIGNMENT_DIVERGENCE_QUARANTINED","observed_at":OBS,"active_count":0,"pending_count":0,"reconstructable_jobs":0,"total_assigned_jobs":1}
     for k,v in exp.items():
         if q.get(k)!=v: raise E(f"quarantine drift {k}: {q.get(k)!r} != {v!r}")
-    m=json.loads(gh(inv,exe,"api",f"repos/{CONTROL_REPO}/issues/comments/{MARKER}").stdout)
+    m=api(f"repos/{CONTROL_REPO}/issues/comments/{MARKER}")
     if m.get("user",{}).get("login")!="adamtrott78" or not str(m.get("body","")).startswith("LOCAL_REASONER_GPU_STALE_RESET_ONCE_V1"):
         raise E("authority marker drift")
-
-def cancel_all(inv,exe):
     for rid in RUNS:
-        if status(inv,exe,rid)=="completed": continue
-        p=gh(inv,exe,"run","cancel",str(rid),"--repo",RESOURCE_REPO,check=False)
-        if p.returncode and status(inv,exe,rid)!="completed": raise E(f"cancel failed for {rid}: {p.stderr.strip()}")
-    deadline=time.monotonic()+90
-    while time.monotonic()<deadline:
-        left=[r for r in RUNS if status(inv,exe,r)!="completed"]
-        if not left: break
-        time.sleep(2)
-    else: raise E("known stale runs did not become terminal")
-    payload=json.loads(gh(inv,exe,"api",f"repos/{RESOURCE_REPO}/actions/workflows/{WORKFLOW}/runs?per_page=100").stdout)
+        r=api(f"repos/{RESOURCE_REPO}/actions/runs/{rid}")
+        if r.get("status")!="completed":
+            raise E(f"stale run remains nonterminal: {rid} status={r.get('status')}")
+    payload=api(f"repos/{RESOURCE_REPO}/actions/workflows/{WORKFLOW}/runs?per_page=100")
     cutoff=datetime.fromisoformat(OBS.replace("Z","+00:00"))
     bad=[]
     for r in payload.get("workflow_runs",[]):
@@ -113,10 +101,9 @@ def inner():
 
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument("--expected-head",required=True); a=ap.parse_args()
-    inv=os.environ.get("SUDO_USER",""); exe=shutil.which("gh")
-    if exe is None: raise E("gh CLI not installed")
-    if gh(inv,exe,"auth","status",check=False).returncode: raise E("gh CLI not authenticated for operator")
-    verify(inv,a.expected_head,exe); cancel_all(inv,exe); out=inner()
+    inv=os.environ.get("SUDO_USER","")
+    verify(inv,a.expected_head)
+    out=inner()
     print("LOCAL_REASONER_GPU_STALE_RESET_ONCE=PASS"); print(out.rstrip())
     return 0
 if __name__=="__main__": raise SystemExit(main())
