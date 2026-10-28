@@ -465,7 +465,11 @@ def success_receipt(cfg, verified, peer_uid, result, request):
         "timed_out": result["timed_out"],
         "cancelled": result["cancelled"],
     }
-    return write_receipt(cfg["receipt_root"], receipt)
+    return write_receipt(
+        cfg["receipt_root"],
+        receipt,
+        reader_gid=int(cfg["frontend_gid"]),
+    )
 
 
 def rejection_receipt(cfg, request, peer_uid, code, message):
@@ -490,7 +494,11 @@ def rejection_receipt(cfg, request, peer_uid, code, message):
         "frontend_peer_uid": peer_uid,
     }
     try:
-        return write_receipt(cfg["receipt_root"], receipt)["receipt_id"]
+        return write_receipt(
+            cfg["receipt_root"],
+            receipt,
+            reader_gid=int(cfg["frontend_gid"]),
+        )["receipt_id"]
     except Exception:
         return None
 
@@ -532,7 +540,11 @@ def serve(config_path):
     cfg["verifier_config"] = str(Path(cfg["verifier_config"]).resolve())
     require_protected_path(cfg["verifier_config"])
     require_secure_directory(Path(cfg["replay_db"]).parent, owner_uid=0)
-    require_secure_directory(cfg["receipt_root"], owner_uid=0)
+    require_secure_directory(
+        cfg["receipt_root"],
+        owner_uid=0,
+        owner_gid=int(cfg["frontend_gid"]),
+    )
     require_secure_directory(cfg["helper_cache_root"], owner_uid=0)
     replay_db = ensure_replay_db(cfg)
 
