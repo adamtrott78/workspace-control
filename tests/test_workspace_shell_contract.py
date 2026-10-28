@@ -1,5 +1,6 @@
 import hashlib
 import importlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -14,6 +15,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "plugins" / "workspace-shell"
 ROOT_CODE = PLUGIN / "root"
+HOST_ATTEST = PLUGIN / "install" / "host_attest.py"
 sys.path.insert(0, str(ROOT_CODE))
 
 job_launcher = importlib.import_module("job_launcher")
@@ -52,6 +54,55 @@ class WorkspaceShellContractTests(unittest.TestCase):
             timeout=30,
         )
         self.assertEqual(proc.returncode, 0, proc.stdout + "\n" + proc.stderr)
+
+    def test_host_attestation_is_read_only_and_secret_averse(self):
+        proc = subprocess.run(
+            [sys.executable, "-m", "py_compile", str(HOST_ATTEST)],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+
+        source = HOST_ATTEST.read_text()
+        forbidden = (
+            "/proc/*/environ",
+            "/proc/{pid}/environ",
+            "os.environ",
+            ".ssh/id_",
+            "read_text(\"/home/atrott/.config",
+            "cat /home/atrott",
+        )
+        for needle in forbidden:
+            self.assertNotIn(needle, source)
+        self.assertIn('"process_environments_read": False', source)
+        self.assertIn('"secret_file_contents_read": False', source)
+        self.assertIn('"api_tokens_read": False', source)
+        self.assertIn('"ssh_material_read": False', source)
+        self.assertIn('"workspace-shell-host-attestation.v1"', source)
+        self.assertIn('"--unshare-all"', source)
+        self.assertIn('"--cap-drop"', source)
+
+    def test_host_attestation_functions_bound_output_and_do_not_mutate(self):
+        spec = importlib.util.spec_from_file_location("workspace_shell_host_attest", HOST_ATTEST)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "sample"
+            p.write_text("x")
+            meta = module.path_meta(p)
+            self.assertTrue(meta["exists"])
+            self.assertEqual(meta["type"], "file")
+            self.assertEqual(meta["mode"], "0644")
+
+        result = module.run(
+            [sys.executable, "-c", "print('x' * 9000)"],
+            timeout=3,
+        )
+        self.assertEqual(result["returncode"], 0)
+        self.assertLessEqual(len(result["stdout"]), 8192)
 
     def test_launcher_duplicates_profile_grammar_and_denies_escape_shapes(self):
         manifest = json.loads((PLUGIN / "config" / "profiles.v1.json").read_text())
