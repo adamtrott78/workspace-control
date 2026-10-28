@@ -546,6 +546,7 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
 
             # Existing active siblings retain the exact historical env
             # encoding where the controller state root was implicit.
+            legacy_env_bytes = {}
             with mock.patch.object(
                 reconciler,
                 "controller_network_dropin",
@@ -554,9 +555,16 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
                 for project_id in ("padataset", "research-engine"):
                     manifest = manifests[project_id]
                     for lane in target_registry["projects"][project_id]["lanes"]:
-                        (controllers_dir / f"{project_id}-{lane}.env").write_bytes(
-                            reconciler.render_controller_env(manifest, lane).encode("utf-8")
+                        raw = (
+                            reconciler
+                            .render_legacy_controller_env_with_implicit_default_state_root(
+                                manifest,
+                                lane,
+                            )
+                            .encode("utf-8")
                         )
+                        legacy_env_bytes[(project_id, lane)] = raw
+                        (controllers_dir / f"{project_id}-{lane}.env").write_bytes(raw)
                         path, body = dropin(project_id, lane, "192.0.2.0/24")
                         path.write_bytes(body)
 
@@ -644,6 +652,11 @@ class ReconcilerActivationDeltaTests(unittest.TestCase):
                 ]["NRestarts"],
                 "12411",
             )
+            for (project_id, lane), raw in legacy_env_bytes.items():
+                self.assertEqual(
+                    (controllers_dir / f"{project_id}-{lane}.env").read_bytes(),
+                    raw,
+                )
 
 
     def test_interrupted_apply_resumes_original_pending_restart(self):
