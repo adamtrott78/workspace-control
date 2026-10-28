@@ -36,7 +36,7 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Fresh independent corrected-head P1 activation-boundary re-review of PR #558 only. Consume prior blocking reviews 6451020368 and 6451350758. Verify BF-3 closure specifically: rollback is armed before forward write #1; exceptions surfaced after replacement by write #1/#2/#3 all enter rollback; exact old root/controller bytes are restored; any newly installed one-shot unit is removed; root daemon reload/restart is bounded and non-propagating; automatic/workspace-control/sibling service snapshots are re-certified; rollback explicitly verifies restored bytes and absent unit before claiming success. Verify fault-injection regressions cover all three forward write boundaries after replacement. Regression-check BF-1 request-bound exact restart/enable/preserve semantics and BF-2 static sandbox-preserving one-shot unit/installer boundaries remain unchanged. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
+Fresh independent exact-head review of PR #560 only. Verify the safe rejection occurred before mutation and BF-1 behaved correctly. Verify the root cause is precisely the historical sibling env encoding that omits only WORKSPACE_CI_CONTROLLER_STATE_ROOT while the exact installed reviewed Go controller binary defaults that variable to /var/lib/workspace-ci/controller/state. Verify the reconciler admits only exact current bytes or exact legacy bytes for the same manifest/lane and still treats every other env/drop-in difference as restart-requiring. Verify APPLY does not rewrite preserved legacy sibling env bytes. Verify the source-bound hotfix installer fail-closes unless the exact rejected request/policy/workflow, exact current installed digests, exact failed one-shot generation, exact controller binary, exact service snapshots, all four exact legacy env files, and all four exact 134.88.12.0/22 drop-ins are present; forward mutation is root reconciler only plus non-propagating root restart; the exact rejected marker is archived only after certification to permit one deterministic retry; rollback restores exact root and rejected-marker bytes and exact service generations. Return NO_BLOCKING_FINDING or exact actionable blockers. Do not merge or mutate Lambda during review.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Fresh independent corrected-head P1 activation-boundary re-review of PR #558 onl
 
 ## Blockers / gates
 
-- PR #558 remains review-only and unmerged pending fresh independent corrected-head activation-boundary review of BF-3 closure.
-- The corrected activation submission-boundary installer is validated in source but not installed on Lambda.
-- Do not merge PR #558, install the submission boundary, reconcile/activate workspace-control, start the automatic reconcile-controller, issue maintenance commands, restart/reset preserved project controllers, restart research-engine CPU, or widen P2/P3/capacity before corrected-head review returns NO_BLOCKING_FINDING.
+- The first reviewed one-shot activation submission was safely rejected before mutation; workspace-control remains unactivated.
+- PR #560 strict legacy-env equivalence correction is validated but requires fresh independent exact-head review before any live hotfix install.
+- Do not merge PR #559 or PR #560, do not install the hotfix, do not retry the one-shot, do not start the automatic reconcile-controller, issue maintenance commands, manually start/enable workspace-control CPU, restart/reset siblings, restart research-engine CPU, or widen P2/P3/capacity until independent review returns NO_BLOCKING_FINDING.
 
 ## Fresh-chat initialization
 
