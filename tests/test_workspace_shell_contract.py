@@ -134,7 +134,8 @@ class WorkspaceShellContractTests(unittest.TestCase):
     def test_replay_journal_is_single_use_before_mutation(self):
         with tempfile.TemporaryDirectory() as td:
             db = root_broker.ensure_replay_db(
-                {"replay_db": str(Path(td) / "replay.sqlite3")}
+                {"replay_db": str(Path(td) / "replay.sqlite3")},
+                expected_owner_uid=os.getuid(),
             )
             verified = {
                 "approval_id": "approval-one",
@@ -238,7 +239,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
         handle = broker[broker.index("def handle_request"):broker.index("def serve")]
         self.assertLess(
             handle.index("consume_replay(replay_db, verified)"),
-            handle.index("execute_helper(cfg, verified)"),
+            handle.index("execute_helper(cfg, verified, cancel_check=cancel_check)"),
         )
         self.assertIn("requestCert: true", server)
         self.assertIn("rejectUnauthorized: true", server)
