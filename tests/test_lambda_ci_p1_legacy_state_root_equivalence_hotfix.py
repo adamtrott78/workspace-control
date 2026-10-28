@@ -69,27 +69,93 @@ class LegacyStateRootEquivalenceHotfixTests(unittest.TestCase):
         )
         self.assertEqual(module.EXPECTED_ONE_SHOT["ExecMainStatus"], "70")
 
+    def review_comments(
+        self,
+        module,
+        *,
+        head,
+        helper_blob,
+        request_id=6459200001,
+        approval_id=6459200002,
+        edited=False,
+    ):
+        request_body = (
+            "Fresh independent exact-head re-review request for durable task "
+            + module.EXPECTED_REVIEW_TASK_ID
+            + ".\n\nReview exact head: "
+            + head
+        )
+        approval_body = "\n".join(
+            [
+                module.REVIEW_AUTHORITY_MARKER,
+                f"task_id={module.EXPECTED_REVIEW_TASK_ID}",
+                f"pr_number={module.EXPECTED_REVIEW_PR_NUMBER}",
+                f"head_sha={head}",
+                f"installer_blob={helper_blob}",
+                (
+                    "reconciler_blob="
+                    + module.EXPECTED_REVIEWED_RECONCILER_GIT_BLOB
+                ),
+                (
+                    "prior_blocking_comment_id="
+                    + str(module.EXPECTED_PRIOR_BLOCKING_REVIEW_COMMENT_ID)
+                ),
+                f"review_request_comment_id={request_id}",
+                "disposition=NO_BLOCKING_FINDING",
+                module.REVIEW_AUTHORITY_END,
+            ]
+        )
+        return [
+            {
+                "id": request_id,
+                "body": request_body,
+                "user": {"login": module.EXPECTED_REVIEW_OWNER},
+                "author_association": "OWNER",
+                "created_at": "2026-10-28T03:00:00Z",
+                "updated_at": "2026-10-28T03:00:00Z",
+            },
+            {
+                "id": approval_id,
+                "body": approval_body,
+                "user": {"login": module.EXPECTED_REVIEW_OWNER},
+                "author_association": "OWNER",
+                "created_at": "2026-10-28T03:01:00Z",
+                "updated_at": (
+                    "2026-10-28T03:02:00Z"
+                    if edited
+                    else "2026-10-28T03:01:00Z"
+                ),
+            },
+        ]
+
     def _attest_run(
         self,
         module,
         *,
-        head="reviewed-descendant",
+        head="reviewed-head",
         symbolic_rc=1,
         symbolic_stdout="",
         reviewed_blob=None,
-        head_blob=None,
-        changed="",
+        head_reconciler_blob=None,
+        head_helper_blob="1111111111111111111111111111111111111111",
+        review_comments=None,
     ):
         reviewed_blob = (
             reviewed_blob
             if reviewed_blob is not None
             else module.EXPECTED_REVIEWED_RECONCILER_GIT_BLOB
         )
-        head_blob = (
-            head_blob
-            if head_blob is not None
+        head_reconciler_blob = (
+            head_reconciler_blob
+            if head_reconciler_blob is not None
             else module.EXPECTED_REVIEWED_RECONCILER_GIT_BLOB
         )
+        if review_comments is None:
+            review_comments = self.review_comments(
+                module,
+                head=head,
+                helper_blob=head_helper_blob,
+            )
 
         def fake_run(argv, check=True):
             if argv[-2:] == ["rev-parse", "--show-toplevel"]:
@@ -124,69 +190,188 @@ class LegacyStateRootEquivalenceHotfixTests(unittest.TestCase):
                         stdout=reviewed_blob + "\n",
                         stderr="",
                     )
-                if spec.startswith("HEAD:"):
+                if spec == f"HEAD:{module.SOURCE_ROOT}":
                     return types.SimpleNamespace(
                         returncode=0,
-                        stdout=head_blob + "\n",
+                        stdout=head_reconciler_blob + "\n",
                         stderr="",
                     )
-            if "diff" in argv:
-                return types.SimpleNamespace(
-                    returncode=0,
-                    stdout=changed,
-                    stderr="",
-                )
+                if spec == f"HEAD:{module.EXPECTED_HELPER}":
+                    return types.SimpleNamespace(
+                        returncode=0,
+                        stdout=head_helper_blob + "\n",
+                        stderr="",
+                    )
             raise AssertionError(f"unexpected git command: {argv!r}")
 
-        return mock.patch.object(module, "run", side_effect=fake_run)
+        return contextlib.ExitStack().__enter__()
 
-    def test_attest_source_rejects_different_clean_commit_with_own_expected_head(self):
+    def attest_context(
+        self,
+        module,
+        **kwargs,
+    ):
+        head = kwargs.get("head", "reviewed-head")
+        helper_blob = kwargs.get(
+            "head_helper_blob",
+            "1111111111111111111111111111111111111111",
+        )
+        review_comments = kwargs.pop(
+            "review_comments",
+            self.review_comments(module, head=head, helper_blob=helper_blob),
+        )
+        reviewed_blob = kwargs.pop(
+            "reviewed_blob",
+            module.EXPECTED_REVIEWED_RECONCILER_GIT_BLOB,
+        )
+        head_reconciler_blob = kwargs.pop(
+            "head_reconciler_blob",
+            module.EXPECTED_REVIEWED_RECONCILER_GIT_BLOB,
+        )
+        symbolic_rc = kwargs.pop("symbolic_rc", 1)
+        symbolic_stdout = kwargs.pop("symbolic_stdout", "")
+        if kwargs:
+            raise AssertionError(f"unused attest kwargs: {kwargs}")
+
+        def fake_run(argv, check=True):
+            if argv[-2:] == ["rev-parse", "--show-toplevel"]:
+                return types.SimpleNamespace(
+                    returncode=0,
+                    stdout=str(ROOT) + "\n",
+                    stderr="",
+                )
+            if argv[-2:] == ["rev-parse", "HEAD"]:
+                return types.SimpleNamespace(
+                    returncode=0,
+                    stdout=head + "\n",
+                    stderr="",
+                )
+            if "symbolic-ref" in argv:
+                return types.SimpleNamespace(
+                    returncode=symbolic_rc,
+                    stdout=symbolic_stdout,
+                    stderr="",
+                )
+            if "status" in argv:
+                return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+            if "ls-files" in argv:
+                return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+            if "cat-file" in argv:
+                return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+            if "rev-parse" in argv:
+                spec = argv[-1]
+                if spec.startswith(module.EXPECTED_REVIEWED_SOURCE_HEAD + ":"):
+                    return types.SimpleNamespace(
+                        returncode=0,
+                        stdout=reviewed_blob + "\n",
+                        stderr="",
+                    )
+                if spec == f"HEAD:{module.SOURCE_ROOT}":
+                    return types.SimpleNamespace(
+                        returncode=0,
+                        stdout=head_reconciler_blob + "\n",
+                        stderr="",
+                    )
+                if spec == f"HEAD:{module.EXPECTED_HELPER}":
+                    return types.SimpleNamespace(
+                        returncode=0,
+                        stdout=helper_blob + "\n",
+                        stderr="",
+                    )
+            raise AssertionError(f"unexpected git command: {argv!r}")
+
+        stack = contextlib.ExitStack()
+        stack.enter_context(mock.patch.object(module, "run", side_effect=fake_run))
+        stack.enter_context(
+            mock.patch.object(
+                module,
+                "fetch_review_comments",
+                return_value=review_comments,
+            )
+        )
+        return stack
+
+    def test_attest_source_rejects_different_clean_descendant_changing_only_installer(self):
         module = load_module()
-        with self._attest_run(
+        reviewed_head = "reviewed-head"
+        reviewed_helper_blob = "1111111111111111111111111111111111111111"
+        descendant_head = "different-clean-descendant"
+        descendant_helper_blob = "2222222222222222222222222222222222222222"
+        authority = self.review_comments(
             module,
-            head="different-clean-head",
-            changed="README.md\n",
+            head=reviewed_head,
+            helper_blob=reviewed_helper_blob,
+        )
+        with self.attest_context(
+            module,
+            head=descendant_head,
+            head_helper_blob=descendant_helper_blob,
+            review_comments=authority,
         ):
             with self.assertRaisesRegex(
                 module.HotfixError,
-                "unexpected post-review source delta",
+                "external independent review authority missing",
             ):
-                module.attest_source("different-clean-head", "atrott")
+                module.attest_source(descendant_head, "atrott")
 
     def test_attest_source_rejects_attached_branch(self):
         module = load_module()
-        with self._attest_run(
+        with self.attest_context(
             module,
             symbolic_rc=0,
             symbolic_stdout="refs/heads/p1-preserve-legacy-state-root-env\n",
         ):
             with self.assertRaisesRegex(module.HotfixError, "HEAD must be detached"):
-                module.attest_source("reviewed-descendant", "atrott")
+                module.attest_source("reviewed-head", "atrott")
 
     def test_attest_source_rejects_reconciler_source_byte_drift(self):
         module = load_module()
-        with self._attest_run(
+        with self.attest_context(
             module,
-            head_blob="0000000000000000000000000000000000000000",
+            head_reconciler_blob="0000000000000000000000000000000000000000",
         ):
             with self.assertRaisesRegex(
                 module.HotfixError,
                 "reconciler source blob mismatch",
             ):
-                module.attest_source("reviewed-descendant", "atrott")
+                module.attest_source("reviewed-head", "atrott")
 
-    def test_attest_source_accepts_only_reviewed_source_delta(self):
+    def test_attest_source_rejects_edited_review_authority(self):
         module = load_module()
-        changed = (
-            str(module.EXPECTED_HELPER)
-            + "\n"
-            + "tests/test_lambda_ci_p1_legacy_state_root_equivalence_hotfix.py\n"
+        helper_blob = "1111111111111111111111111111111111111111"
+        comments = self.review_comments(
+            module,
+            head="reviewed-head",
+            helper_blob=helper_blob,
+            edited=True,
         )
-        with self._attest_run(module, changed=changed):
-            self.assertEqual(
-                module.attest_source("reviewed-descendant", "atrott"),
-                ROOT,
-            )
+        with self.attest_context(
+            module,
+            head_helper_blob=helper_blob,
+            review_comments=comments,
+        ):
+            with self.assertRaisesRegex(
+                module.HotfixError,
+                "review authority comment was edited",
+            ):
+                module.attest_source("reviewed-head", "atrott")
+
+    def test_attest_source_accepts_exact_external_review_authority(self):
+        module = load_module()
+        helper_blob = "1111111111111111111111111111111111111111"
+        with self.attest_context(
+            module,
+            head="reviewed-head",
+            head_helper_blob=helper_blob,
+        ):
+            repo, authority = module.attest_source("reviewed-head", "atrott")
+        self.assertEqual(repo, ROOT)
+        self.assertEqual(authority["head_sha"], "reviewed-head")
+        self.assertEqual(authority["installer_blob"], helper_blob)
+        self.assertEqual(
+            authority["reconciler_blob"],
+            module.EXPECTED_REVIEWED_RECONCILER_GIT_BLOB,
+        )
 
     def test_legacy_env_renderer_omits_only_explicit_default_state_root(self):
         module = load_module()
@@ -349,7 +534,20 @@ class LegacyStateRootEquivalenceHotfixTests(unittest.TestCase):
                     mock.patch.object(
                         module,
                         "attest_source",
-                        return_value=repo,
+                        return_value=(
+                            repo,
+                            {
+                                "comment_id": 6459200002,
+                                "review_request_comment_id": 6459200001,
+                                "created_at": "2026-10-28T03:01:00Z",
+                                "body_sha256": "review-body",
+                                "head_sha": "reviewed-head",
+                                "installer_blob": "reviewed-installer-blob",
+                                "reconciler_blob": (
+                                    module.EXPECTED_REVIEWED_RECONCILER_GIT_BLOB
+                                ),
+                            },
+                        ),
                     ),
                     mock.patch.object(
                         module,

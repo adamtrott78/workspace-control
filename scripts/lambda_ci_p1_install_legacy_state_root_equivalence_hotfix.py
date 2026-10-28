@@ -13,6 +13,8 @@ import socket
 import subprocess
 import tempfile
 import time
+import urllib.error
+import urllib.request
 
 EXPECTED_HELPER = pathlib.Path(
     "scripts/lambda_ci_p1_install_legacy_state_root_equivalence_hotfix.py"
@@ -72,12 +74,18 @@ EXPECTED_REVIEWED_SOURCE_HEAD = "a2587410cde8ca2e077ea9228342b7651abb793d"
 EXPECTED_REVIEWED_RECONCILER_GIT_BLOB = (
     "ee86b28412c0dff70fe79d915978fc9cd1f7cbd7"
 )
-ALLOWED_POST_REVIEW_SOURCE_PATHS = {
-    str(EXPECTED_HELPER),
-    "tests/test_lambda_ci_p1_legacy_state_root_equivalence_hotfix.py",
-    "tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json",
-    "tasks/active/workspace-github-actions-selfhosted-control-plane-v1.md",
-}
+EXPECTED_REVIEW_TASK_ID = "workspace-github-actions-selfhosted-control-plane-v1"
+EXPECTED_REVIEW_PR_NUMBER = 560
+EXPECTED_REVIEW_OWNER = "adamtrott78"
+EXPECTED_PRIOR_BLOCKING_REVIEW_COMMENT_ID = 6459054952
+REVIEW_AUTHORITY_MARKER = "WORKSPACE_CONTROL_PRIVILEGED_INSTALL_REVIEW_V1"
+REVIEW_AUTHORITY_END = "END_WORKSPACE_CONTROL_PRIVILEGED_INSTALL_REVIEW_V1"
+REVIEW_API_URL = (
+    "https://api.github.com/repos/adamtrott78/workspace-control/issues/560/comments"
+)
+REVIEW_API_TIMEOUT_SECONDS = 5.0
+REVIEW_API_MAX_PAGES = 10
+REVIEW_API_MAX_BYTES = 4 * 1024 * 1024
 EXPECTED_LOCAL_SUBNET = "134.88.12.0/22"
 LEGACY_SIBLING_MANIFESTS = {
     "padataset": pathlib.Path(
@@ -189,7 +197,182 @@ def sha256_path(path: pathlib.Path) -> str:
     return sha256_bytes(path.read_bytes())
 
 
-def attest_source(expected_head: str, invoker: str) -> pathlib.Path:
+def parse_review_authority_block(body: str) -> dict[str, str]:
+    start = body.count(REVIEW_AUTHORITY_MARKER)
+    end = body.count(REVIEW_AUTHORITY_END)
+    if start != 1 or end != 1:
+        raise HotfixError("review authority marker count mismatch")
+    before, rest = body.split(REVIEW_AUTHORITY_MARKER, 1)
+    block, after = rest.split(REVIEW_AUTHORITY_END, 1)
+    del before, after
+    lines = [line.strip() for line in block.strip().splitlines() if line.strip()]
+    parsed: dict[str, str] = {}
+    for line in lines:
+        if "=" not in line:
+            raise HotfixError("review authority block contains malformed line")
+        key, value = line.split("=", 1)
+        if not key or key in parsed:
+            raise HotfixError("review authority block contains duplicate/empty key")
+        parsed[key] = value
+    expected_keys = {
+        "task_id",
+        "pr_number",
+        "head_sha",
+        "installer_blob",
+        "reconciler_blob",
+        "prior_blocking_comment_id",
+        "review_request_comment_id",
+        "disposition",
+    }
+    if set(parsed) != expected_keys:
+        raise HotfixError(
+            "review authority block keys mismatch: "
+            f"actual={sorted(parsed)} expected={sorted(expected_keys)}"
+        )
+    return parsed
+
+
+def fetch_review_comments() -> list[dict]:
+    comments: list[dict] = []
+    for page in range(1, REVIEW_API_MAX_PAGES + 1):
+        request = urllib.request.Request(
+            f"{REVIEW_API_URL}?per_page=100&page={page}",
+            headers={
+                "Accept": "application/vnd.github+json",
+                "X-GitHub-Api-Version": "2022-11-28",
+                "User-Agent": "workspace-control-p1-hotfix-review-authority/1",
+            },
+            method="GET",
+        )
+        try:
+            with urllib.request.urlopen(
+                request,
+                timeout=REVIEW_API_TIMEOUT_SECONDS,
+            ) as response:
+                if getattr(response, "status", 200) != 200:
+                    raise HotfixError(
+                        "review authority API returned non-200 status: "
+                        f"{getattr(response, 'status', None)}"
+                    )
+                raw = response.read(REVIEW_API_MAX_BYTES + 1)
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            raise HotfixError(
+                f"unable to fetch external review authority: {exc}"
+            ) from exc
+        if len(raw) > REVIEW_API_MAX_BYTES:
+            raise HotfixError("review authority API response exceeds size bound")
+        try:
+            page_comments = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise HotfixError("review authority API returned invalid JSON") from exc
+        if not isinstance(page_comments, list):
+            raise HotfixError("review authority API response is not a comment list")
+        for comment in page_comments:
+            if not isinstance(comment, dict):
+                raise HotfixError("review authority API contains non-object comment")
+        comments.extend(page_comments)
+        if len(page_comments) < 100:
+            return comments
+    raise HotfixError("review authority comment pagination exceeded bound")
+
+
+def require_external_review_authority(
+    head: str,
+    helper_blob: str,
+) -> dict[str, object]:
+    comments = fetch_review_comments()
+    by_id: dict[int, dict] = {}
+    for comment in comments:
+        comment_id = comment.get("id")
+        if isinstance(comment_id, int):
+            by_id[comment_id] = comment
+
+    matches: list[dict[str, object]] = []
+    for comment in comments:
+        body = comment.get("body")
+        if not isinstance(body, str) or REVIEW_AUTHORITY_MARKER not in body:
+            continue
+        parsed = parse_review_authority_block(body)
+        comment_id = comment.get("id")
+        user = comment.get("user")
+        if (
+            not isinstance(comment_id, int)
+            or comment_id <= EXPECTED_PRIOR_BLOCKING_REVIEW_COMMENT_ID
+        ):
+            raise HotfixError("review authority comment identity is stale/invalid")
+        if not isinstance(user, dict) or user.get("login") != EXPECTED_REVIEW_OWNER:
+            raise HotfixError("review authority comment owner mismatch")
+        if comment.get("author_association") != "OWNER":
+            raise HotfixError("review authority comment association mismatch")
+        if (
+            not isinstance(comment.get("created_at"), str)
+            or comment.get("created_at") != comment.get("updated_at")
+        ):
+            raise HotfixError("review authority comment was edited or lacks timestamps")
+
+        expected = {
+            "task_id": EXPECTED_REVIEW_TASK_ID,
+            "pr_number": str(EXPECTED_REVIEW_PR_NUMBER),
+            "head_sha": head,
+            "installer_blob": helper_blob,
+            "reconciler_blob": EXPECTED_REVIEWED_RECONCILER_GIT_BLOB,
+            "prior_blocking_comment_id": str(
+                EXPECTED_PRIOR_BLOCKING_REVIEW_COMMENT_ID
+            ),
+            "disposition": "NO_BLOCKING_FINDING",
+        }
+        if any(parsed.get(key) != value for key, value in expected.items()):
+            continue
+
+        try:
+            request_comment_id = int(parsed["review_request_comment_id"])
+        except ValueError as exc:
+            raise HotfixError("review request comment ID is not an integer") from exc
+        request_comment = by_id.get(request_comment_id)
+        if (
+            request_comment_id <= EXPECTED_PRIOR_BLOCKING_REVIEW_COMMENT_ID
+            or not isinstance(request_comment, dict)
+        ):
+            raise HotfixError("bound review request comment is missing/stale")
+        request_body = request_comment.get("body")
+        request_user = request_comment.get("user")
+        if (
+            not isinstance(request_body, str)
+            or "Fresh independent exact-head re-review request" not in request_body
+            or head not in request_body
+            or not isinstance(request_user, dict)
+            or request_user.get("login") != EXPECTED_REVIEW_OWNER
+            or request_comment.get("author_association") != "OWNER"
+            or request_comment.get("created_at") != request_comment.get("updated_at")
+        ):
+            raise HotfixError("bound review request comment is not exact/unedited")
+        if request_comment.get("created_at") >= comment.get("created_at"):
+            raise HotfixError("review authority predates its bound review request")
+
+        matches.append(
+            {
+                "comment_id": comment_id,
+                "review_request_comment_id": request_comment_id,
+                "created_at": comment["created_at"],
+                "body_sha256": sha256_bytes(body.encode("utf-8")),
+                "head_sha": head,
+                "installer_blob": helper_blob,
+                "reconciler_blob": EXPECTED_REVIEWED_RECONCILER_GIT_BLOB,
+            }
+        )
+
+    if len(matches) != 1:
+        raise HotfixError(
+            "external independent review authority missing or ambiguous: "
+            f"matches={len(matches)}"
+        )
+    return matches[0]
+
+
+def attest_source(
+    expected_head: str,
+    invoker: str,
+) -> tuple[pathlib.Path, dict[str, object]]:
     helper = pathlib.Path(__file__).resolve()
     repo = helper.parents[1]
     if helper != (repo / EXPECTED_HELPER).resolve():
@@ -262,25 +445,16 @@ def attest_source(expected_head: str, invoker: str) -> pathlib.Path:
             f"expected={EXPECTED_REVIEWED_RECONCILER_GIT_BLOB}"
         )
 
-    changed = {
-        line.strip()
-        for line in run(
-            [
-                *prefix,
-                "diff",
-                "--name-only",
-                EXPECTED_REVIEWED_SOURCE_HEAD,
-                "HEAD",
-            ]
-        ).stdout.splitlines()
-        if line.strip()
-    }
-    unexpected = sorted(changed - ALLOWED_POST_REVIEW_SOURCE_PATHS)
-    if unexpected:
-        raise HotfixError(
-            "unexpected post-review source delta: " + ", ".join(unexpected)
-        )
-    return repo
+    helper_blob = run(
+        [*prefix, "rev-parse", f"HEAD:{EXPECTED_HELPER}"]
+    ).stdout.strip()
+    if len(helper_blob) != 40 or any(
+        char not in "0123456789abcdef" for char in helper_blob
+    ):
+        raise HotfixError("executing helper Git blob identity is malformed")
+
+    review_authority = require_external_review_authority(head, helper_blob)
+    return repo, review_authority
 
 
 def snapshot(service: str) -> dict[str, str]:
@@ -486,7 +660,7 @@ def main() -> int:
         raise HotfixError("installer requires a non-root sudo invoker")
     pwd.getpwnam(invoker)
 
-    repo = attest_source(args.expected_head, invoker)
+    repo, review_authority = attest_source(args.expected_head, invoker)
     source_root = (repo / SOURCE_ROOT).read_bytes()
 
     if sha256_path(INSTALLED_ROOT) != EXPECTED_OLD_ROOT_SHA256:
@@ -551,6 +725,7 @@ def main() -> int:
             "schema_version": 1,
             "status": "P1_LEGACY_STATE_ROOT_EQUIVALENCE_HOTFIX_INSTALLED",
             "source_head": args.expected_head,
+            "external_review_authority": review_authority,
             "installed_root_sha256": sha256_bytes(source_root),
             "controller_binary_sha256": sha256_path(INSTALLED_CONTROLLER_BINARY),
             "reconcile_controller_sha256": sha256_path(
