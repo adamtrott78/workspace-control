@@ -1,3 +1,4 @@
+import contextlib
 import importlib.util
 import hashlib
 import json
@@ -157,68 +158,78 @@ class LegacyStateRootEquivalenceHotfixTests(unittest.TestCase):
                     forward_failed = True
                     raise OSError("synthetic failure after root replace")
 
-            with (
-                mock.patch.object(module, "INSTALLED_ROOT", installed_root),
-                mock.patch.object(
-                    module,
-                    "INSTALLED_RECONCILE_CONTROLLER",
-                    installed_reconcile_controller,
-                ),
-                mock.patch.object(
-                    module,
-                    "INSTALLED_ONE_SHOT_UNIT",
-                    installed_one_shot,
-                ),
-                mock.patch.object(
-                    module,
-                    "INSTALLED_CONTROLLER_BINARY",
-                    installed_controller_binary,
-                ),
-                mock.patch.object(module, "LAST_REJECTED", last_rejected),
-                mock.patch.object(module, "ARCHIVED_REJECTED", archived),
-                mock.patch.object(
-                    module,
-                    "EXPECTED_OLD_ROOT_SHA256",
-                    hashlib.sha256(old_root).hexdigest(),
-                ),
-                mock.patch.object(
-                    module,
-                    "EXPECTED_RECONCILE_CONTROLLER_SHA256",
-                    hashlib.sha256(reconcile_controller).hexdigest(),
-                ),
-                mock.patch.object(
-                    module,
-                    "EXPECTED_ONE_SHOT_UNIT_SHA256",
-                    hashlib.sha256(one_shot).hexdigest(),
-                ),
-                mock.patch.object(
-                    module,
-                    "EXPECTED_CONTROLLER_BINARY_SHA256",
-                    hashlib.sha256(controller_binary).hexdigest(),
-                ),
-                mock.patch.object(
-                    module,
-                    "attest_source",
-                    return_value=repo,
-                ),
-                mock.patch.object(
-                    module,
-                    "snapshot",
-                    side_effect=lambda service: dict(snapshots[service]),
-                ),
-                mock.patch.object(module, "run", side_effect=fake_run),
-                mock.patch.object(module, "wait_socket"),
-                mock.patch.object(module, "atomic_write", side_effect=maybe_fault),
-                mock.patch.object(module.os, "geteuid", return_value=0),
-                mock.patch.dict(module.os.environ, {"SUDO_USER": "atrott"}),
-                mock.patch.object(module.pwd, "getpwnam"),
-                mock.patch.object(module.os, "chown"),
-                mock.patch.object(
-                    sys,
-                    "argv",
-                    ["hotfix", "--expected-head", "reviewed-head"],
-                ),
-            ):
+            with contextlib.ExitStack() as stack:
+                for patcher in (
+                    mock.patch.object(module, "INSTALLED_ROOT", installed_root),
+                    mock.patch.object(
+                        module,
+                        "INSTALLED_RECONCILE_CONTROLLER",
+                        installed_reconcile_controller,
+                    ),
+                    mock.patch.object(
+                        module,
+                        "INSTALLED_ONE_SHOT_UNIT",
+                        installed_one_shot,
+                    ),
+                    mock.patch.object(
+                        module,
+                        "INSTALLED_CONTROLLER_BINARY",
+                        installed_controller_binary,
+                    ),
+                    mock.patch.object(module, "LAST_REJECTED", last_rejected),
+                    mock.patch.object(module, "ARCHIVED_REJECTED", archived),
+                    mock.patch.object(
+                        module,
+                        "EXPECTED_OLD_ROOT_SHA256",
+                        hashlib.sha256(old_root).hexdigest(),
+                    ),
+                    mock.patch.object(
+                        module,
+                        "EXPECTED_RECONCILE_CONTROLLER_SHA256",
+                        hashlib.sha256(reconcile_controller).hexdigest(),
+                    ),
+                    mock.patch.object(
+                        module,
+                        "EXPECTED_ONE_SHOT_UNIT_SHA256",
+                        hashlib.sha256(one_shot).hexdigest(),
+                    ),
+                    mock.patch.object(
+                        module,
+                        "EXPECTED_CONTROLLER_BINARY_SHA256",
+                        hashlib.sha256(controller_binary).hexdigest(),
+                    ),
+                    mock.patch.object(
+                        module,
+                        "attest_source",
+                        return_value=repo,
+                    ),
+                    mock.patch.object(
+                        module,
+                        "snapshot",
+                        side_effect=lambda service: dict(snapshots[service]),
+                    ),
+                    mock.patch.object(module, "run", side_effect=fake_run),
+                    mock.patch.object(module, "wait_socket"),
+                    mock.patch.object(
+                        module,
+                        "atomic_write",
+                        side_effect=maybe_fault,
+                    ),
+                    mock.patch.object(module.os, "geteuid", return_value=0),
+                    mock.patch.dict(
+                        module.os.environ,
+                        {"SUDO_USER": "atrott"},
+                    ),
+                    mock.patch.object(module.pwd, "getpwnam"),
+                    mock.patch.object(module.os, "chown"),
+                    mock.patch.object(
+                        sys,
+                        "argv",
+                        ["hotfix", "--expected-head", "reviewed-head"],
+                    ),
+                ):
+                    stack.enter_context(patcher)
+
                 if fail_after_root_replace:
                     with self.assertRaisesRegex(
                         module.HotfixError,
