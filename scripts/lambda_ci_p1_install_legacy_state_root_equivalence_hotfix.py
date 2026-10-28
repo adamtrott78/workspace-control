@@ -198,14 +198,24 @@ def sha256_path(path: pathlib.Path) -> str:
 
 
 def parse_review_authority_block(body: str) -> dict[str, str]:
-    start = body.count(REVIEW_AUTHORITY_MARKER)
-    end = body.count(REVIEW_AUTHORITY_END)
-    if start != 1 or end != 1:
-        raise HotfixError("review authority marker count mismatch")
-    before, rest = body.split(REVIEW_AUTHORITY_MARKER, 1)
-    block, after = rest.split(REVIEW_AUTHORITY_END, 1)
-    del before, after
-    lines = [line.strip() for line in block.strip().splitlines() if line.strip()]
+    raw_lines = body.splitlines()
+    starts = [
+        index
+        for index, line in enumerate(raw_lines)
+        if line.strip() == REVIEW_AUTHORITY_MARKER
+    ]
+    ends = [
+        index
+        for index, line in enumerate(raw_lines)
+        if line.strip() == REVIEW_AUTHORITY_END
+    ]
+    if len(starts) != 1 or len(ends) != 1 or starts[0] >= ends[0]:
+        raise HotfixError("review authority marker count/order mismatch")
+    lines = [
+        line.strip()
+        for line in raw_lines[starts[0] + 1 : ends[0]]
+        if line.strip()
+    ]
     parsed: dict[str, str] = {}
     for line in lines:
         if "=" not in line:
