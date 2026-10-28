@@ -63,5 +63,20 @@
     "automatic_merge": false,
     "consume_command_marker": "WORKSPACE_CONTROL_REVIEW_CONSUME_COMMAND_V1"
   },
-  "runtime_boundary": "GitHub-only; no Lambda/controller credentials or live runtime mutation."
+  "runtime_boundary": "GitHub-only; no Lambda/controller credentials or live runtime mutation.",
+  "same_executor_fallback": {
+    "owner": "policies/OPERATOR_WORKFLOW.md",
+    "applies_when": "owning workflow intentionally does not require independent review for a consequential mutation",
+    "required_behavior": [
+      "same executor reviews authoritative state, exact mutation scope, implementation/control path, relevant failure modes, and existing validation before mutation",
+      "known blocking findings must be resolved before mutation",
+      "failed consequential mutation requires post-failure state inspection and a new same-executor review before retry"
+    ],
+    "non_substitution": [
+      "does not satisfy authority_sensitive review",
+      "does not satisfy fresh_independent_session attestation",
+      "does not bypass an explicit independent-review gate"
+    ],
+    "execution_model": "single executor may perform design→self-review→implement→run→inspect→patch→rerun when independent review is deliberately omitted"
+  }
 }

@@ -244,6 +244,53 @@ records as evidence is produced.
 High-impact, ambiguous, destructive, or externally consequential actions still
 require the approval rules of their owning workflow.
 
+## Same-executor pre-implementation review when independent review is omitted
+
+Independent review and executor self-review are different controls.
+
+When an owning workflow explicitly requires independent review, the executing
+author MUST NOT treat self-review as satisfying, weakening, or bypassing that
+requirement.
+
+When independent review is intentionally **not** required for a consequential
+mutation, the executing reasoner MUST perform a same-executor
+pre-implementation review before the first mutation. This is the default
+fallback review boundary for direct Chat/tool execution.
+
+The review MUST be grounded in the actual authoritative state, not only the
+executor's proposed plan. At minimum it MUST:
+
+1. reload or verify the owning task/policy and exact mutation authority;
+2. inspect the exact target repository/ref/runtime state and intended changed
+   path or live-object scope;
+3. inspect the implementation/control path that will perform the mutation;
+4. identify plausible failure modes relevant to the operation, including as
+   applicable ownership/permissions, lifecycle/startup semantics, stale or
+   concurrent work, idempotency/replay, retry behavior, rollback/fail-closed
+   behavior, and cross-project or sibling-controller contamination;
+5. inspect relevant existing tests/validation and identify material coverage
+   gaps for the proposed change;
+6. revise the implementation or execution plan for any blocking finding; and
+7. re-establish exact target identity immediately before mutation when state may
+   have drifted during review.
+
+The mutation MUST NOT proceed while the executor knows of an unresolved blocking
+finding in its own review.
+
+The depth of this review is proportional to consequence. A bounded documentation
+edit may require only a concise scope/diff review. Live control-plane,
+authority, recovery, concurrency, persistent-state, or scientific-execution
+changes require explicit failure-mode and recovery-path review.
+
+A failed consequential mutation creates a mandatory new review boundary. The
+executor MUST inspect durable post-failure state and review the corrected plan
+before retrying. Blind retry, repeated restart/reset, or widening mutation scope
+without that review is forbidden.
+
+When a durable task/PR/issue surface exists, consequential same-executor review
+SHOULD leave concise durable evidence of the reviewed scope, material findings,
+and corrected plan. This evidence does not become independent approval.
+
 ## Preflight before mutation
 
 Before mutating a prepared repository/worktree, establish the relevant:
