@@ -8,7 +8,7 @@
   "source_blobs": [
     {
       "path": "controller/lambda-ci-controller/attestation.go",
-      "git_blob_sha": "4f2762e7b005fb5ecf5b66b406f22843f8e19ad1"
+      "git_blob_sha": "4d16f9668173c2ac04e30bf09ea6814e09dd9c51"
     },
     {
       "path": "controller/lambda-ci-controller/main.go",
