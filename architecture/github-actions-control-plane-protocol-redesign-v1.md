@@ -357,3 +357,293 @@ The repository-only gate before any live migration should include:
 4. **State-machine model tests** — duplicate/redelivered/assigned/canceled/reassigned messages and controller/provisioner restarts.
 5. **Fault injection** — root DENY, BUSY, socket timeout, JIT generation failure, cleanup failure; listener liveness must be preserved where the failure is request-local.
 6. **Migration equivalence tests** — existing research-engine and workspace-control trusted workflows resolve to the same or narrower execution contracts before live cutover.
+
+
+# Whole-system controller model
+
+## Controller census
+
+The current architecture contains more than "the Git controller."
+
+### Runner scale-set controllers
+There are five registry-managed instances of the same pinned Go controller:
+
+| Project | Current lane | Current scale set | Registered routes |
+|---|---|---|---:|
+| workspace-control | cpu | `lambda-workspace-control` | 1 |
+| PADataset | cpu | `lambda-padataset` | 1 |
+| PADataset | gpu | `lambda-padataset-gpu` | 1 |
+| research-engine | cpu | `lambda-research-engine` | 1 |
+| research-engine | gpu | `lambda-research-engine-gpu` | 19 |
+
+All five currently execute as the same local Unix identity `ci-controller` and share the same root provisioner service.
+
+### Other GitHub-facing control processes
+Two additional controllers are operationally distinct and should remain separate authority planes:
+
+1. **Maintenance controller** — polls a dedicated workspace-control issue, parses `/workspace-ci-maintain` once, builds a typed JSON request, and submits it to a separate root maintenance service.
+2. **Project reconciliation controller** — observes successful trusted main-branch reconciliation workflow runs, fetches exact registry/manifests/blobs, builds a typed JSON request, and submits it to the root reconciler.
+
+These are useful internal reference architectures because neither asks root to reparse a human command.
+
+### Legacy controller generation
+The repository still retains non-templated `workspace-ci-controller.service` and `workspace-ci-controller-gpu.service`, plus legacy Research Engine P2B/P3/P4 self-hosted workflows. The redesign must explicitly retire or quarantine these artifacts so they cannot create a second scheduler generation accidentally.
+
+## Registered workflow census
+
+The root registry currently admits exactly 23 trusted routes:
+- workspace-control: 1;
+- PADataset: 2;
+- research-engine: 20.
+
+Every registered route's pinned trusted workflow blob currently exactly equals the file on that repository's current `main`. Therefore the observed false-rejection incidents are not caused by trusted-workflow pin drift.
+
+PADataset is fully affected by the current display-string protocol: both CPU and GPU workflows serialize `wc-admission-v1` into the job name and parse the issue comment body.
+
+Research Engine contains three protocol generations simultaneously:
+- legacy self-hosted label workflows (P2B/P3/P4);
+- current generic `wc-admission-v1` workflows;
+- ordinary GitHub-hosted workflows unrelated to the Lambda scale-set controller.
+
+# Runner-class model
+
+## Scale-set homogeneity is a hard invariant
+
+GitHub defines a runner scale set as a group of homogeneous runners. The pinned official Scale Set Client reference implementation acquires jobs, scales from `TotalAssignedJobs`, and starts one homogeneous runner implementation; it does not inspect a job-specific DSL to select hardware or mounts.
+
+Define a runner-class equivalence relation:
+
+Two routes are in the same runner class iff a runner provisioned before knowing which of those routes GitHub will assign is both:
+1. **safe** for either route; and
+2. **sufficient** for either route.
+
+At minimum the equivalence key includes:
+- project isolation identity;
+- execution contract;
+- systemd/resource class and ceilings;
+- GPU cardinality/device authority;
+- payload network class;
+- filesystem/cache class;
+- state-effect class;
+- exact model binding;
+- exact runtime binding;
+- any future secret/trusted-object binding that alters the root launch envelope.
+
+Route names, experiment names, and candidate SHA are explicitly excluded unless they change one of the above capabilities.
+
+## Current partition
+
+Four current scale sets are already homogeneous:
+- Workspace Control CPU;
+- PADataset CPU;
+- PADataset GPU;
+- Research Engine CPU.
+
+`lambda-research-engine-gpu` is not homogeneous. It contains jobs requiring:
+- zero GPUs;
+- one GPU;
+- two GPUs;
+- public payload network;
+- offline payload network;
+- no model/runtime mount;
+- exact runtime-only mount;
+- exact model+runtime mount.
+
+One route named `cpu-validation-exact-provenance` is even placed on the current GPU lane while its accepted contract is CPU-only.
+
+## Proposed nine runner classes
+
+| Runner class | Project | Profile | GPU | Exact bindings | Routes |
+|---|---|---|---:|---|---|
+| `workspace-control-control-small-v1` | workspace-control | control-small | 0 | none | control-validation |
+| `padataset-cpu-public-v1` | PADataset | cpu-test | 0 | none | cpu-ci |
+| `padataset-gpu-single-public-v1` | PADataset | gpu-small | 1 | none | gpu-ci |
+| `research-cpu-public-v1` | research-engine | cpu-test | 0 | none | cpu-test; cpu-validation-exact-provenance |
+| `research-gpu-single-public-v1` | research-engine | gpu-small | 1 | none | gpu-experiment-public |
+| `research-gpu-single-runtime-v1` | research-engine | gpu-small | 1 | exact Qwen expanded runtime, no model | gpu-small; reranker; oracle-query; AMR graph |
+| `research-model-single-offline-v1` | research-engine | gpu-small | 1 | exact Qwen model+runtime | model-eval-single-gpu |
+| `research-model-dual-offline-v1` | research-engine | gpu-heavy | 2 | exact Qwen model+runtime | model-eval-dual-gpu |
+| `research-model-dual-public-v1` | research-engine | gpu-heavy | 2 | exact Qwen model+runtime | Local EXTRACT dual-GPU/public families |
+
+This is nine project-scoped scale sets total. It is not nine different controller binaries: one generic controller implementation may still be instantiated nine times from a runner-class catalog.
+
+## Manifest redesign
+
+The current manifest schema is lane-centric and the controller hardcodes:
+- `cpu -> lambda-<project>`;
+- `gpu -> lambda-<project>-gpu`.
+
+That schema cannot represent the actual workload topology without parsing per-job route strings.
+
+Replace project `lanes` with explicit root-owned `runner_classes`:
+
+```json
+{
+  "runner_classes": {
+    "research-model-dual-public-v1": {
+      "scale_set_name": "lambda-research-engine-model-dual-public",
+      "runner_prefix": "lambda-research-engine-model-dual-public-",
+      "execution_contract_id": "model-dual-public-v1",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "max_runners": 1
+    }
+  },
+  "routes": {
+    "model-eval-local-extract-wave7a3": {
+      "runner_class_id": "research-model-dual-public-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-local-extract-wave7a3.yml",
+        "job_name": "local-extract-wave7a3",
+        "blob_sha": "..."
+      },
+      "ingress": {
+        "command": "/lambda-ci-local-extract-wave7a3",
+        "parameter_schema": "candidate-sha-v1"
+      }
+    }
+  }
+}
+```
+
+The ingress command is executor/UI metadata. It does not cross into the root launch request.
+
+# Trust-boundary model
+
+## GitHub scheduler -> controller
+Authenticated input is the Scale Set Client message and REST observations, not the human string.
+
+The pinned message type already supplies:
+- repository owner/name;
+- workflow run ID;
+- workflow ref;
+- event name;
+- request labels;
+- runner request ID;
+- lifecycle timestamps;
+- job ID when available.
+
+The controller verifies the exact trusted workflow identity and GitHub lifecycle facts.
+
+## Controller -> root provisioner
+The root launch request should be keyed by `runner_class_id`, not `workload_class`.
+
+The root launch envelope is already known before any candidate payload executes because the runner class is homogeneous.
+
+A v3 request therefore needs only infrastructure authority such as:
+
+```json
+{
+  "schema_version": 3,
+  "request_id": "...",
+  "runner_class_id": "research-model-dual-public-v1",
+  "runner_name": "...",
+  "jit_config": "...",
+  "github_execution": {
+    "repository": "adamtrott78/research-engine",
+    "workflow_run_id": 123,
+    "run_attempt": 1,
+    "workflow_path": ".github/workflows/lambda-ci-local-extract-wave7a3.yml",
+    "workflow_blob_sha": "...",
+    "event_name": "issue_comment",
+    "actor_login": "adamtrott78"
+  }
+}
+```
+
+The original comment body, candidate SHA, PR number, experiment options, and display-name serialization are absent from the root protocol unless a future root capability genuinely requires them.
+
+## Local controller identity must be bound to runner class
+
+Today all scale-set controllers run as `ci-controller`, while root authorizes the shared Unix peer UID. Therefore root cannot distinguish which controller instance sent a request.
+
+A v3 design must not rely solely on a request-provided `runner_class_id`. Options, in descending isolation strength:
+
+1. distinct unprivileged controller UID per runner class, mapped by root `SO_PEERCRED` to one allowed class;
+2. class-specific authenticated local socket/credential with a process sandbox that prevents one controller instance acquiring another class credential;
+3. distinct project controller identity plus a second unforgeable class binding.
+
+The selected mechanism must make this invariant true:
+
+> A compromised controller instance cannot cause root to launch a runner class stronger than the class that controller is locally authorized to manage.
+
+The existing shared-UID design does not prove that invariant.
+
+# Job-correlation model
+
+## Why correlation remains necessary
+`JobAvailable` can omit `JobID`. The current implementation resolves the canonical REST job by matching the dynamic job display name.
+
+Removing authority parsing therefore requires a replacement correlation rule.
+
+## Proposed rule
+Each trusted route declares one static self-hosted job identity. For a Scale Set Client message, the controller:
+
+1. validates repository, event, workflow run ID, workflow ref and configured scale-set labels;
+2. resolves the workflow path from `JobWorkflowRef`;
+3. maps that exact trusted workflow to the runner class from root-synchronized policy;
+4. reads the workflow run via REST and verifies repository/event/actor/default-branch workflow identity;
+5. lists jobs for the run;
+6. selects exactly one nonterminal REST job matching the configured static job name and expected runner-class labels;
+7. records the REST numeric job ID as the canonical job identity;
+8. refuses acquisition if the correlation is zero or ambiguous.
+
+`JobDisplayName` may be retained as an opaque static equality/correlation field. No component parses tokens out of it.
+
+A stronger simplification is available where a trusted workflow contains exactly one self-hosted job: the canonical attempt key can be `repository + workflow_run_id + run_attempt + workflow_path + runner_class_id`, with REST job ID added after observation.
+
+# Error and acknowledgement algebra
+
+The Scale Set Client listener acknowledges a message only when `Scale` returns nil. Any non-nil error terminates the listener and deliberately leaves the message for redelivery.
+
+Therefore every local outcome must be typed before returning from `Scale`.
+
+### Request-local terminal outcomes
+Examples:
+- workflow not trusted;
+- ambiguous job correlation;
+- root policy denial;
+- duplicate terminal request.
+
+Action:
+- persist a bounded denial/terminal receipt;
+- remove any unconsumed JIT registration;
+- update local pending state;
+- return **nil** to the listener so the message is acknowledged.
+
+### Capacity/transient outcomes
+Examples:
+- root BUSY;
+- temporary provisioner socket failure;
+- temporary GitHub REST failure.
+
+Action depends on whether safe redelivery is required. The retry policy must be explicit and idempotent, rather than implicitly restarting the whole controller.
+
+### Controller/session-fatal outcomes
+Examples:
+- corrupt durable controller state;
+- invalid scale-set session;
+- impossible response schema / trust-boundary corruption.
+
+Only these may return an error that stops `listener.Run`.
+
+# Three separate GitHub control planes
+
+The redesign should not force one protocol everywhere.
+
+### Runner execution plane
+Needs Scale Set Client lifecycle + homogeneous runner classes + trusted workflow correlation + root capacity provisioner.
+
+### Maintenance plane
+Already has the desired shape:
+`GitHub owner command -> one parser -> typed operation -> root maintenance service -> durable receipt`.
+
+Keep it separate. Add generated executor builders and schema tests, but do not route maintenance through the runner scheduler.
+
+### Reconciliation plane
+Already has an even cleaner shape:
+`trusted successful workflow/run -> exact policy documents/digests -> typed root reconciliation -> durable receipt`.
+
+Keep it separate. It is policy deployment, not job scheduling.
+
+Host attestation belongs to the maintenance/diagnostic plane, not as a free-form qualifier on candidate execution.
