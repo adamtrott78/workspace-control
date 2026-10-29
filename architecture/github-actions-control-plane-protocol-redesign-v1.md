@@ -799,3 +799,140 @@ GitHub runner groups can be configured to allow selected repositories and select
 This is defense in depth, not a replacement for controller attestation:
 - account/organization capabilities may differ;
 - root authority must remain correct even if GitHub runner-group policy is misconfigured.
+
+
+# Local authentication decision
+
+## Selected mechanism: unique controller UID per runner class
+
+Use one unprivileged Unix user for each runner class and preserve one root provisioner socket.
+
+Root authorization becomes:
+
+```text
+SO_PEERCRED.uid
+      |
+      v
+root-owned uid -> runner_class_id map
+      |
+      v
+root-owned runner-class catalog
+      |
+      v
+fixed launch envelope
+```
+
+The capacity request does not contain an authoritative project or class selector.
+
+### Why this is selected
+- kernel-enforced and simple to reason about;
+- no HMAC/key-distribution protocol to invent;
+- no parsing of systemd cgroup names or process metadata;
+- distinct UIDs prevent one class controller from signaling/ptracing another by same-UID rules;
+- class state directories can be mode 0700 and UID-owned;
+- one root Unix socket can remain, because peer UID is sufficient to derive class.
+
+### Credential grouping
+Runner-class controller UIDs for one project may share a **repository-scoped GitHub credential group** because that credential authorizes GitHub control-plane observation for the project, not root launch authority.
+
+Example:
+- `workspace-ci-github-workspace-control`;
+- `workspace-ci-github-padataset`;
+- `workspace-ci-github-research-engine`.
+
+Root launch authority is still per UID/class.
+
+A later credential-hardening pass may replace direct GitHub App private-key sharing with a project-scoped token broker. That is orthogonal to the runner-class protocol and must not reintroduce root authority into the GitHub-facing controller.
+
+## Root peer map
+The root catalog records the expected controller Unix user. At service startup, root resolves every user to a numeric UID and rejects:
+- missing users;
+- duplicate UID mappings;
+- duplicate runner prefixes;
+- duplicate scale-set names;
+- a class whose execution contract/bindings do not resolve exactly.
+
+At request time:
+1. read `SO_PEERCRED`;
+2. map peer UID to exactly one class;
+3. validate runner-name prefix for that class;
+4. validate request replay/digest;
+5. build launch spec solely from that class.
+
+An unknown peer is a fatal authorization/configuration event, not a recoverable policy denial.
+
+# Policy projections
+
+One source catalog generates two non-authoritative projections plus one root projection.
+
+### Root projection
+Contains only:
+- controller UID/user -> runner class;
+- scale-set/runner prefix identity;
+- execution contract;
+- resource ceiling;
+- exact model/runtime bindings;
+- concurrency/quarantine policy.
+
+It contains **no command strings and no candidate parameters**.
+
+### Controller projection
+One file per runner class:
+- repository;
+- scale-set identity;
+- max runners;
+- exact trusted workflow path/blob/job key;
+- allowed event;
+- allowed actor/triggering actor policy.
+
+It contains **no root resource-selection grammar** because the controller cannot select a different class.
+
+### Executor projection
+Contains:
+- human action name;
+- target PR requirements;
+- slash-command string;
+- typed argument schema/enums.
+
+It contains **no root launch semantics**.
+
+The projections share stable IDs but have intentionally different authority surfaces.
+
+# Retry / acknowledgement decision
+
+The pinned Scale Set Client acknowledges a message only after `Scale` returns nil.
+
+The target controller uses this rule deliberately.
+
+### Stable deny
+Examples: workflow path not allowlisted, wrong event, wrong actor, wrong exact workflow blob.
+
+- do not acquire the job;
+- record bounded denial evidence;
+- return nil;
+- keep listener alive.
+
+The job remains unacquired; scheduler/account policy or workflow cancellation owns its eventual terminal state.
+
+### Retryable observation/transport failure
+Examples: transient GitHub REST outage, temporary scale-set/JIT API error, temporary root socket outage.
+
+- do not convert the condition into a policy denial;
+- return a typed retryable error to a **process-local supervisor**;
+- supervisor closes/re-establishes the message session after bounded exponential backoff;
+- the unacknowledged GitHub message is redelivered;
+- the process remains under one systemd activation and does not consume `StartLimitBurst`.
+
+### Root capacity outcomes
+- `ACCEPTED`: track runner-instance request.
+- `DUPLICATE`: reconcile durable status.
+- `BUSY`: remove unconsumed JIT registration and converge on next statistics update.
+- `CLASS_QUARANTINED`: keep controller/session alive but advertise/behave as zero executable capacity until maintenance clears it.
+- malformed/root protocol corruption: fatal.
+
+### Static configuration failure
+Invalid catalog, unknown local peer, duplicate class identity, impossible runner prefix, corrupt durable ledger:
+- fail process startup;
+- require operator/reconciliation correction.
+
+Systemd restart is reserved for actual process faults, not job-level control flow.
