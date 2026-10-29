@@ -150,6 +150,52 @@ def _check_binding_mode(
         _require(runtime_id is not None, f"{project_id}/{class_id}: runtime binding required")
 
 
+def _validate_parameter_schema(
+    schema_id: str,
+    schema: dict[str, Any],
+    *,
+    execution_route: bool,
+) -> list[dict[str, Any]]:
+    _require(isinstance(schema, dict), f"{schema_id}: parameter schema must be object")
+    _require(set(schema) == {"arguments"}, f"{schema_id}: parameter schema keys mismatch")
+    arguments = schema["arguments"]
+    _require(isinstance(arguments, list) and arguments, f"{schema_id}: arguments must be nonempty list")
+
+    allowed_types = {"lower_hex_40", "enum", "catalog_runner_class_id", "uuid"}
+    seen_names: set[str] = set()
+    normalized: list[dict[str, Any]] = []
+    for index, arg in enumerate(arguments):
+        _require(isinstance(arg, dict), f"{schema_id}: argument {index} must be object")
+        allowed_keys = {"name", "type", "required", "values"}
+        _require(set(arg) <= allowed_keys, f"{schema_id}: argument {index} has unsupported keys")
+        _require({"name", "type", "required"} <= set(arg), f"{schema_id}: argument {index} missing required keys")
+        name = arg["name"]
+        arg_type = arg["type"]
+        _require(isinstance(name, str) and re.fullmatch(r"[a-z][a-z0-9_]{0,63}", name), f"{schema_id}: invalid argument name")
+        _require(name not in seen_names, f"{schema_id}: duplicate argument {name}")
+        seen_names.add(name)
+        _require(arg_type in allowed_types, f"{schema_id}: unsupported argument type {arg_type!r}")
+        _require(isinstance(arg["required"], bool), f"{schema_id}/{name}: required must be boolean")
+        if execution_route:
+            _require(
+                arg_type not in {"catalog_runner_class_id", "uuid"},
+                f"{schema_id}/{name}: execution ingress cannot select infrastructure identity",
+            )
+            _require(
+                not any(token in name for token in ("runner_class", "gpu", "runtime", "model", "resource", "profile")),
+                f"{schema_id}/{name}: execution ingress argument name implies root authority",
+            )
+        if arg_type == "enum":
+            values = arg.get("values")
+            _require(isinstance(values, list) and values, f"{schema_id}/{name}: enum values required")
+            _require(len(values) == len(set(values)), f"{schema_id}/{name}: enum values must be unique")
+            _require(all(isinstance(value, str) and value for value in values), f"{schema_id}/{name}: enum values must be nonempty strings")
+        else:
+            _require("values" not in arg, f"{schema_id}/{name}: values only allowed for enum")
+        normalized.append(copy.deepcopy(arg))
+    return normalized
+
+
 def _input_generation_material(data: dict[str, Any]) -> dict[str, Any]:
     keys = [
         "catalog",
@@ -324,6 +370,11 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
                 parameter_schema_id in parameter_schemas,
                 f"{project_id}/{route_id}: missing parameter schema {parameter_schema_id}",
             )
+            route_arguments = _validate_parameter_schema(
+                parameter_schema_id,
+                parameter_schemas[parameter_schema_id],
+                execution_route=True,
+            )
 
             ev_key = (project_id, route_id)
             _require(ev_key in evidence_by_route, f"{project_id}/{route_id}: workflow evidence missing")
@@ -351,7 +402,7 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
             })
 
             action_id = f"{project_id.replace('-', '_')}.{route_id.replace('-', '_')}"
-            args = copy.deepcopy(parameter_schemas[parameter_schema_id]["arguments"])
+            args = route_arguments
             executor_actions[action_id] = {
                 "kind": "EXECUTION_TRIGGER",
                 "repository": project["repository"],
@@ -386,9 +437,14 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
     for action_id, action in sorted(maintenance["actions"].items()):
         schema_id = action["parameter_schema_id"]
         _require(schema_id in parameter_schemas, f"{action_id}: missing maintenance parameter schema")
+        maintenance_arguments = _validate_parameter_schema(
+            schema_id,
+            parameter_schemas[schema_id],
+            execution_route=False,
+        )
         maintenance_actions[action_id] = {
             **copy.deepcopy(action),
-            "arguments": copy.deepcopy(parameter_schemas[schema_id]["arguments"]),
+            "arguments": maintenance_arguments,
         }
 
     root_projection = {
