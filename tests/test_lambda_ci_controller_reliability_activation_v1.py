@@ -36,6 +36,15 @@ def inactive_gpu_snapshot():
     }
 
 
+def prepared_payload(path: pathlib.Path):
+    return {
+        "built": path,
+        "candidate_sha256": activation.sha256_path(path),
+        "controller_unit": b"unit",
+        "maintenance_service": b"maintenance",
+    }
+
+
 class ControllerReliabilityActivationTests(unittest.TestCase):
     def test_payload_is_bound_to_reviewed_source_blobs(self):
         self.assertEqual(
@@ -87,19 +96,22 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
             ],
         )
 
-    def test_healthy_controller_baselines_match_frozen_preflight(self):
-        self.assertEqual(
-            activation.EXPECTED_HEALTHY_BASELINES[activation.PAD_CPU],
-            {"Result": "success", "NRestarts": "0"},
+    def test_immutable_candidate_is_prepared_before_live_preflight(self):
+        source = MODULE_PATH.read_text(encoding="utf-8")
+        prepare_at = source.index("prepared = prepare_payload(repo, invoker)")
+        preflight_at = source.index("before = preflight(repo)", prepare_at)
+        activate_at = source.index(
+            "receipt = activate(args.expected_head, before, prepared)",
+            preflight_at,
         )
-        self.assertEqual(
-            activation.EXPECTED_HEALTHY_BASELINES[activation.PAD_GPU],
-            {"Result": "success", "NRestarts": "0"},
-        )
-        self.assertEqual(
-            activation.EXPECTED_HEALTHY_BASELINES[activation.WORKSPACE_CPU],
-            {"Result": "success", "NRestarts": "14140"},
-        )
+        self.assertLess(prepare_at, preflight_at)
+        self.assertLess(preflight_at, activate_at)
+        activate_body = source[
+            source.index("def activate("):
+            source.index("\ndef main() -> int:")
+        ]
+        self.assertNotIn("build_controller(", activate_body)
+        self.assertNotIn("git_text(", activate_body)
 
     def test_gpu_stop_failure_is_reissued_and_containment_proved(self):
         calls = []
@@ -107,8 +119,7 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
         def fake_run(argv, check=True, user=None, env=None):
             calls.append((tuple(argv), check))
             if (
-                argv[:3]
-                == ["systemctl", "stop", activation.RESEARCH_GPU]
+                argv[:3] == ["systemctl", "stop", activation.RESEARCH_GPU]
                 and len(
                     [
                         item
@@ -145,18 +156,11 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
         ]
         self.assertGreaterEqual(len(stop_calls), 2)
 
-    def test_first_containment_failure_enters_rollback_guard(self):
+    def test_first_containment_failure_enters_rollback_before_backups(self):
         with tempfile.NamedTemporaryFile() as built:
-            backup = {"files": {}}
+            payload = prepared_payload(pathlib.Path(built.name))
             rollback = {"gpu": "inactive"}
             with (
-                mock.patch.object(
-                    activation,
-                    "build_controller",
-                    return_value=pathlib.Path(built.name),
-                ),
-                mock.patch.object(activation, "git_text", return_value="payload"),
-                mock.patch.object(activation, "save_backups", return_value=backup),
                 mock.patch.object(
                     activation,
                     "contain_gpu_fail_closed",
@@ -167,18 +171,15 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
                     "rollback_activation",
                     return_value=rollback,
                 ) as rollback_call,
+                mock.patch.object(activation, "save_backups") as backups,
             ):
                 with self.assertRaisesRegex(
                     activation.ActivationError,
-                    "activation failed; old files restored",
+                    "old files preserved/restored",
                 ):
-                    activation.activate(
-                        pathlib.Path("/tmp/repo"),
-                        "head",
-                        "operator",
-                        {},
-                    )
-            rollback_call.assert_called_once_with(backup)
+                    activation.activate("head", {}, payload)
+            rollback_call.assert_called_once_with(None)
+            backups.assert_not_called()
 
     def _write_recovery_state(self, root: pathlib.Path, status: str):
         quarantine = dict(activation.EXPECTED_QUARANTINE)
@@ -221,7 +222,55 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
                     activation.EXPECTED_QUARANTINE["receipt_id"],
                 )
 
-    def test_rollback_invalidates_retry_before_restoring_old_bytes(self):
+    def test_acquisition_between_preflight_and_containment_aborts_before_backup(self):
+        with tempfile.TemporaryDirectory() as td, tempfile.NamedTemporaryFile() as built:
+            root = pathlib.Path(td)
+            self._write_recovery_state(root, "RECOVERY_RETRY_ACQUIRED")
+            payload = prepared_payload(pathlib.Path(built.name))
+
+            def rollback_probe(backup):
+                self.assertIsNone(backup)
+                gate = json.loads(
+                    (root / "ready-for-single-retry.json").read_text()
+                )
+                self.assertEqual(
+                    gate["status"],
+                    "RECOVERY_RETRY_INVALIDATED",
+                )
+                self.assertEqual(
+                    gate["previous_status"],
+                    "RECOVERY_RETRY_ACQUIRED",
+                )
+                return {"gpu": "inactive"}
+
+            with (
+                mock.patch.object(activation, "GPU_STATE", root),
+                mock.patch.object(activation.os, "chown"),
+                mock.patch.object(
+                    activation,
+                    "contain_gpu_fail_closed",
+                    return_value={"proof": inactive_gpu_snapshot()},
+                ),
+                mock.patch.object(activation, "require_no_active_execution"),
+                mock.patch.object(
+                    activation,
+                    "rollback_activation",
+                    side_effect=rollback_probe,
+                ) as rollback_call,
+                mock.patch.object(activation, "save_backups") as backups,
+                mock.patch.object(activation, "atomic_install") as install,
+            ):
+                with self.assertRaisesRegex(
+                    activation.ActivationError,
+                    "retry authority changed between live preflight and containment",
+                ):
+                    activation.activate("head", {}, payload)
+
+            rollback_call.assert_called_once_with(None)
+            backups.assert_not_called()
+            install.assert_not_called()
+
+    def test_rollback_orders_quarantine_before_invalidation_before_old_bytes(self):
         order = []
 
         def mark(name, value):
@@ -238,18 +287,18 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
             ),
             mock.patch.object(
                 activation,
-                "ensure_retry_invalidated",
-                side_effect=mark(
-                    "invalidate",
-                    {"status": "RECOVERY_RETRY_INVALIDATED"},
-                ),
-            ),
-            mock.patch.object(
-                activation,
                 "restore_frozen_quarantine",
                 side_effect=mark(
                     "quarantine",
                     dict(activation.EXPECTED_QUARANTINE),
+                ),
+            ),
+            mock.patch.object(
+                activation,
+                "ensure_retry_invalidated",
+                side_effect=mark(
+                    "invalidate",
+                    {"status": "RECOVERY_RETRY_INVALIDATED"},
                 ),
             ),
             mock.patch.object(
@@ -289,8 +338,77 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
         ):
             activation.rollback_activation({"files": {}})
 
-        self.assertLess(order.index("contain"), order.index("invalidate"))
+        self.assertLess(order.index("contain"), order.index("quarantine"))
+        self.assertLess(order.index("quarantine"), order.index("invalidate"))
         self.assertLess(order.index("invalidate"), order.index("restore_bytes"))
+
+    def test_rollback_repairs_missing_or_drifted_quarantine_then_invalidates(self):
+        for condition in ("missing", "drifted"):
+            with self.subTest(condition=condition), tempfile.TemporaryDirectory() as td:
+                root = pathlib.Path(td)
+                self._write_recovery_state(root, "READY_FOR_SINGLE_RETRY")
+                qpath = root / "quarantine.json"
+                if condition == "missing":
+                    qpath.unlink()
+                else:
+                    drifted = dict(activation.EXPECTED_QUARANTINE)
+                    drifted["receipt_id"] = "drifted"
+                    qpath.write_text(json.dumps(drifted), encoding="utf-8")
+
+                with (
+                    mock.patch.object(activation, "GPU_STATE", root),
+                    mock.patch.object(activation.os, "chown"),
+                    mock.patch.object(
+                        activation,
+                        "contain_gpu_fail_closed",
+                        return_value={"proof": inactive_gpu_snapshot()},
+                    ),
+                    mock.patch.object(activation, "restore_backups"),
+                    mock.patch.object(
+                        activation,
+                        "run",
+                        return_value=mock.Mock(returncode=0),
+                    ),
+                    mock.patch.object(activation, "wait_socket"),
+                    mock.patch.object(
+                        activation,
+                        "stable_running",
+                        return_value={
+                            "first": {"NRestarts": "0"},
+                            "second": {"NRestarts": "0"},
+                        },
+                    ),
+                    mock.patch.object(
+                        activation,
+                        "require_inactive_research_cpu",
+                        return_value={"ActiveState": "inactive"},
+                    ),
+                    mock.patch.object(
+                        activation,
+                        "require_gpu_inactive",
+                        return_value=inactive_gpu_snapshot(),
+                    ),
+                    mock.patch.object(activation, "require_no_active_execution"),
+                ):
+                    result = activation.rollback_activation({"files": {}})
+
+                restored = json.loads(qpath.read_text())
+                gate = json.loads(
+                    (root / "ready-for-single-retry.json").read_text()
+                )
+                self.assertEqual(restored, activation.EXPECTED_QUARANTINE)
+                self.assertEqual(
+                    gate["status"],
+                    "RECOVERY_RETRY_INVALIDATED",
+                )
+                self.assertEqual(
+                    gate["invalidated_by_quarantine_receipt_id"],
+                    activation.EXPECTED_QUARANTINE["receipt_id"],
+                )
+                self.assertEqual(
+                    result["gpu"]["ActiveState"],
+                    "inactive",
+                )
 
     def test_certification_never_starts_gpu_even_if_work_arrives(self):
         source = MODULE_PATH.read_text(encoding="utf-8")
