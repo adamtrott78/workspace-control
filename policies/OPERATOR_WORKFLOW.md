@@ -803,6 +803,29 @@ The capsule should record:
 A handoff should not depend on a special prose explanation if the normal
 workspace-control entry route and durable state are sufficient.
 
+When the operator is asked to open a **fresh independent review session**, the
+same assistant response MUST include a complete, ready-to-paste handoff prompt.
+The operator MUST NOT be required to reconstruct the review request from prior
+prose, a comment link, or remembered state.
+
+That handoff MUST identify the durable review request precisely enough for the
+fresh reviewer to load the authoritative target directly. At minimum include:
+
+- repository / PR;
+- durable review-request comment or review-request identifier;
+- explicit instruction that the new session is the independent reviewer and
+  must perform the review itself;
+- instruction not to return another reviewer handoff;
+- required direct-on-PR disposition behavior;
+- any explicit no-merge / no-runtime-mutation boundary owned by the review.
+
+When the durable review automation already binds the exact head, base, tree, and
+changed blobs, the operator-facing handoff SHOULD remain minimal and reference
+that durable request instead of duplicating all bindings into chat.
+
+This handoff requirement applies every time a fresh independent review or
+corrected-head re-review is requested from the operator.
+
 When an active capsule maintains a derived
 `tasks/active/<task_id>.md` handoff, a material JSON state change and the
 Markdown regeneration form one control-cycle unit. The executor MUST regenerate
