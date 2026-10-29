@@ -10,6 +10,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
 import {
+  RequestAdmissionLimiter,
   ShellPolicyError,
   assertRelativePath,
   assertSha,
@@ -18,6 +19,7 @@ import {
   canonicalDigest,
   fail,
   loadTaskCapsule,
+  readBoundedJsonBody,
   readReceiptNoFollow,
   resolveProfile,
   signFrontendRequest,
@@ -27,6 +29,12 @@ import {
 const execFileAsync = promisify(execFile);
 const CONFIG_PATH = process.env.WORKSPACE_SHELL_CONFIG ?? "/etc/workspace-shell/frontend.json";
 const MCP_PATH = "/mcp";
+const MAX_MCP_ENVELOPE_BYTES = 65536;
+const MAX_MCP_REQUEST_RUNTIME_MS = 90000;
+const admissionLimiter = new RequestAdmissionLimiter({
+  maxInflight: 2,
+  maxQueued: 8,
+});
 
 function requireRegularNoSymlink(file, label, { ownerUid = null, privateMode = false } = {}) {
   const st = lstatSync(file);
@@ -485,21 +493,75 @@ const handler = async (req, res) => {
     return;
   }
 
+  if (req.method === "POST") {
+    const rawLength = req.headers["content-length"];
+    if (rawLength !== undefined) {
+      const contentLength = Number(rawLength);
+      if (!Number.isSafeInteger(contentLength) || contentLength < 0) {
+        res.writeHead(400).end("Invalid Content-Length");
+        return;
+      }
+      if (contentLength > MAX_MCP_ENVELOPE_BYTES) {
+        res.writeHead(413).end("MCP request body exceeds 64 KiB");
+        return;
+      }
+    }
+  }
+
+  let release;
+  try {
+    release = await admissionLimiter.acquire();
+  } catch (error) {
+    if (error instanceof ShellPolicyError && error.code === "MCP_QUEUE_FULL") {
+      res.writeHead(503, { "retry-after": "1" }).end("Workspace Shell request queue is full");
+      return;
+    }
+    throw error;
+  }
+
   const server = createShellServer();
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true,
   });
-  res.on("close", () => {
+  let closed = false;
+  const closeRequest = () => {
+    if (closed) return;
+    closed = true;
+    clearTimeout(requestTimer);
     transport.close();
     server.close();
-  });
+    release();
+  };
+  const requestTimer = setTimeout(() => {
+    if (!res.headersSent) {
+      res.writeHead(504).end("Workspace Shell request exceeded 90-second bound");
+    } else if (!res.writableEnded) {
+      res.destroy();
+    }
+    closeRequest();
+  }, MAX_MCP_REQUEST_RUNTIME_MS);
+  res.on("close", closeRequest);
+
   try {
     await server.connect(transport);
-    await transport.handleRequest(req, res);
+    const parsedBody = req.method === "POST"
+      ? await readBoundedJsonBody(req, MAX_MCP_ENVELOPE_BYTES)
+      : undefined;
+    await transport.handleRequest(req, res, parsedBody);
   } catch (error) {
     console.error("Workspace Shell MCP request failed:", error);
-    if (!res.headersSent) res.writeHead(500).end("Internal server error");
+    if (!res.headersSent) {
+      if (error instanceof ShellPolicyError && error.code === "MCP_REQUEST_TOO_LARGE") {
+        res.writeHead(413).end("MCP request body exceeds 64 KiB");
+      } else if (error instanceof ShellPolicyError && error.code === "MCP_REQUEST_INVALID") {
+        res.writeHead(400).end("Invalid MCP request body");
+      } else {
+        res.writeHead(500).end("Internal server error");
+      }
+    }
+  } finally {
+    closeRequest();
   }
 };
 
