@@ -229,6 +229,48 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
             {activation.RESEARCH_GPU, activation.WORKSPACE_CPU},
         )
 
+    def test_dual_containment_reissues_both_stops_after_joint_stop_error(self):
+        calls = []
+
+        def fake_run(argv, check=True, user=None, env=None):
+            calls.append((tuple(argv), check))
+            if argv == [
+                "systemctl",
+                "stop",
+                activation.RESEARCH_GPU,
+                activation.WORKSPACE_CPU,
+            ]:
+                raise activation.ActivationError(
+                    "synthetic joint stop failed after partial transition"
+                )
+            return mock.Mock(returncode=0, stdout="", stderr="")
+
+        def fake_snapshot(service):
+            if service == activation.RESEARCH_GPU:
+                return inactive_gpu_snapshot()
+            if service == activation.WORKSPACE_CPU:
+                return inactive_workspace_snapshot()
+            raise AssertionError(service)
+
+        with (
+            mock.patch.object(activation, "run", side_effect=fake_run),
+            mock.patch.object(activation, "service_snapshot", side_effect=fake_snapshot),
+        ):
+            with self.assertRaisesRegex(
+                activation.ActivationError,
+                "initial dual-lane stop failed after containment was proved",
+            ):
+                activation.contain_broken_lanes_fail_closed()
+
+        self.assertIn(
+            (("systemctl", "stop", activation.RESEARCH_GPU), False),
+            calls,
+        )
+        self.assertIn(
+            (("systemctl", "stop", activation.WORKSPACE_CPU), False),
+            calls,
+        )
+
     def test_first_containment_failure_enters_rollback_before_backups(self):
         with tempfile.NamedTemporaryFile() as built:
             payload = prepared_payload(pathlib.Path(built.name))
@@ -321,8 +363,13 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
                 mock.patch.object(activation.os, "chown"),
                 mock.patch.object(
                     activation,
-                    "contain_gpu_fail_closed",
-                    return_value={"proof": inactive_gpu_snapshot()},
+                    "contain_broken_lanes_fail_closed",
+                    return_value={
+                        "proofs": {
+                            activation.RESEARCH_GPU: inactive_gpu_snapshot(),
+                            activation.WORKSPACE_CPU: inactive_workspace_snapshot(),
+                        }
+                    },
                 ),
                 mock.patch.object(activation, "require_no_active_execution"),
                 mock.patch.object(
@@ -399,6 +446,11 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
                 "require_gpu_inactive",
                 return_value=inactive_gpu_snapshot(),
             ),
+            mock.patch.object(
+                activation,
+                "require_workspace_cpu_inactive",
+                return_value=inactive_workspace_snapshot(),
+            ),
             mock.patch.object(activation, "require_no_active_execution"),
             mock.patch.object(
                 activation,
@@ -460,6 +512,11 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
                         activation,
                         "require_gpu_inactive",
                         return_value=inactive_gpu_snapshot(),
+                    ),
+                    mock.patch.object(
+                        activation,
+                        "require_workspace_cpu_inactive",
+                        return_value=inactive_workspace_snapshot(),
                     ),
                     mock.patch.object(activation, "require_no_active_execution"),
                 ):
