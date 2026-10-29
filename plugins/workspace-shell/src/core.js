@@ -72,6 +72,77 @@ export function verifyCanonical(payload, signature, publicKeyPem) {
   }
 }
 
+export class RequestAdmissionLimiter {
+  constructor({ maxInflight = 2, maxQueued = 8 } = {}) {
+    if (!Number.isInteger(maxInflight) || maxInflight < 1) {
+      fail("ADMISSION_CONFIG_INVALID", "maxInflight must be a positive integer");
+    }
+    if (!Number.isInteger(maxQueued) || maxQueued < 0) {
+      fail("ADMISSION_CONFIG_INVALID", "maxQueued must be a nonnegative integer");
+    }
+    this.maxInflight = maxInflight;
+    this.maxQueued = maxQueued;
+    this.inflight = 0;
+    this.queue = [];
+  }
+
+  acquire() {
+    if (this.inflight < this.maxInflight) {
+      return Promise.resolve(this.#grant());
+    }
+    if (this.queue.length >= this.maxQueued) {
+      return Promise.reject(new ShellPolicyError(
+        "MCP_QUEUE_FULL",
+        "Workspace Shell request queue is full",
+      ));
+    }
+    return new Promise((resolve) => {
+      this.queue.push(resolve);
+    });
+  }
+
+  #grant() {
+    this.inflight += 1;
+    let released = false;
+    return () => {
+      if (released) return;
+      released = true;
+      this.inflight -= 1;
+      const next = this.queue.shift();
+      if (next) next(this.#grant());
+    };
+  }
+
+  snapshot() {
+    return { inflight: this.inflight, queued: this.queue.length };
+  }
+}
+
+export async function readBoundedJsonBody(stream, maxBytes = 65536) {
+  if (!Number.isInteger(maxBytes) || maxBytes < 1) {
+    fail("ADMISSION_CONFIG_INVALID", "maxBytes must be a positive integer");
+  }
+  const chunks = [];
+  let total = 0;
+  for await (const chunk of stream) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    total += buffer.length;
+    if (total > maxBytes) {
+      if (typeof stream.destroy === "function") stream.destroy();
+      fail("MCP_REQUEST_TOO_LARGE", "MCP request body exceeds 64 KiB");
+    }
+    chunks.push(buffer);
+  }
+  if (total === 0) {
+    fail("MCP_REQUEST_INVALID", "MCP POST body is empty");
+  }
+  try {
+    return JSON.parse(Buffer.concat(chunks, total).toString("utf8"));
+  } catch {
+    fail("MCP_REQUEST_INVALID", "MCP POST body is not valid JSON");
+  }
+}
+
 export function assertSha(value, field = "sha") {
   if (typeof value !== "string" || !/^[0-9a-f]{40}$/.test(value)) {
     fail("INVALID_SHA", `${field} must be a full lowercase 40-character Git SHA`);
