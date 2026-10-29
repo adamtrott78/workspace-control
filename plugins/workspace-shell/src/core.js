@@ -128,7 +128,6 @@ export async function readBoundedJsonBody(stream, maxBytes = 65536) {
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
     total += buffer.length;
     if (total > maxBytes) {
-      if (typeof stream.destroy === "function") stream.destroy();
       fail("MCP_REQUEST_TOO_LARGE", "MCP request body exceeds 64 KiB");
     }
     chunks.push(buffer);
