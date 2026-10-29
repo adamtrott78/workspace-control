@@ -1,4 +1,6 @@
 [Unit]
+StartLimitIntervalSec=10min
+StartLimitBurst=30
 Description=Workspace CI GitHub gpu-small scale-set controller
 Documentation=https://github.com/adamtrott78/workspace-control
 Requires=workspace-ci-provisioner.service
@@ -18,7 +20,7 @@ Environment=WORKSPACE_CI_ADMISSION_V2_ENABLED=YES
 Environment=WORKSPACE_CI_PROVISIONER_SOCKET=/run/workspace-ci/provisioner.sock
 Environment=WORKSPACE_CI_PAT_FILE=/var/lib/workspace-ci/controller/github-token
 Restart=on-failure
-RestartSec=3s
+RestartSec=10s
 UMask=0077
 NoNewPrivileges=yes
 CapabilityBoundingSet=

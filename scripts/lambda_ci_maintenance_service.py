@@ -19,12 +19,14 @@ import pwd
 import socket
 import struct
 import subprocess
+import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any
 
 MAX_REQUEST_BYTES = 64 * 1024
 REQUEST_TIMEOUT_SECONDS = 5
+CONTROLLER_STABILITY_SECONDS = 8
 SOURCE_REPOSITORY = "adamtrott78/workspace-control"
 OWNER_LOGIN = "adamtrott78"
 MAINTENANCE_POLICY_GENERATION = "workspace-ci-maintenance-p1-v1"
@@ -52,12 +54,27 @@ def _canonical_sha256(value: Any) -> str:
     return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
 
 
-def _atomic_json(path: pathlib.Path, value: dict[str, Any]) -> None:
+def _owner_pair(path: pathlib.Path) -> tuple[int, int]:
+    stat = path.stat()
+    return stat.st_uid, stat.st_gid
+
+
+def _atomic_json(
+    path: pathlib.Path,
+    value: dict[str, Any],
+    *,
+    inherit_parent_owner: bool = False,
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     raw = json.dumps(value, indent=2, sort_keys=True) + "\n"
     tmp = path.parent / f".{path.name}.tmp"
     tmp.write_text(raw, encoding="utf-8")
     tmp.chmod(0o600)
+    if inherit_parent_owner:
+        parent_owner = _owner_pair(path.parent)
+        current_owner = _owner_pair(tmp)
+        if current_owner != parent_owner:
+            os.chown(tmp, *parent_owner)
     tmp.replace(path)
 
 
@@ -76,12 +93,76 @@ def _run(argv: list[str], *, check: bool = True) -> subprocess.CompletedProcess[
     return proc
 
 
+def _service_snapshot(service: str) -> dict[str, str]:
+    props = (
+        "LoadState",
+        "ActiveState",
+        "SubState",
+        "UnitFileState",
+        "Result",
+        "ExecMainCode",
+        "ExecMainStatus",
+        "NRestarts",
+        "Restart",
+    )
+    argv = ["systemctl", "show", service, "--no-pager"]
+    for prop in props:
+        argv.extend(["-p", prop])
+    proc = _run(argv, check=False)
+    values: dict[str, str] = {}
+    for line in proc.stdout.splitlines():
+        if "=" in line:
+            key, value = line.split("=", 1)
+            values[key] = value
+    return values
+
+
+def _snapshot_running(snapshot: dict[str, str]) -> bool:
+    return (
+        snapshot.get("LoadState") == "loaded"
+        and snapshot.get("ActiveState") == "active"
+        and snapshot.get("SubState") == "running"
+        and snapshot.get("ExecMainStatus") in {"", "0"}
+    )
+
+
 def _service_active(service: str) -> bool:
-    return _run(["systemctl", "is-active", "--quiet", service], check=False).returncode == 0
+    return _snapshot_running(_service_snapshot(service))
 
 
 def _service_inactive(service: str) -> bool:
-    return _run(["systemctl", "is-active", "--quiet", service], check=False).returncode != 0
+    snapshot = _service_snapshot(service)
+    return snapshot.get("ActiveState") in {"inactive", "failed"}
+
+
+def _require_stable_running(
+    service: str,
+    *,
+    settle_seconds: int = CONTROLLER_STABILITY_SECONDS,
+) -> dict[str, Any]:
+    first = _service_snapshot(service)
+    if not _snapshot_running(first):
+        raise MaintenanceError(
+            "controller did not enter active/running state: "
+            + json.dumps(first, sort_keys=True)
+        )
+    time.sleep(settle_seconds)
+    second = _service_snapshot(service)
+    if not _snapshot_running(second):
+        raise MaintenanceError(
+            "controller did not remain active/running: "
+            + json.dumps({"first": first, "second": second}, sort_keys=True)
+        )
+    if first.get("NRestarts") != second.get("NRestarts"):
+        raise MaintenanceError(
+            "controller restart count changed during stability window: "
+            + json.dumps({"first": first, "second": second}, sort_keys=True)
+        )
+    return {
+        "settle_seconds": settle_seconds,
+        "first": first,
+        "second": second,
+    }
 
 
 def peer_uid(conn: socket.socket) -> int:
@@ -430,6 +511,13 @@ def apply_request(
         ]
         ready_path = target["state_dir"] / "ready-for-single-retry.json"
         ready = _read_json(ready_path) if ready_path.is_file() else None
+        service_state = _service_snapshot(service)
+        recovery_state_conflict = bool(
+            quarantine
+            and isinstance(ready, dict)
+            and ready.get("status")
+            in {"READY_FOR_SINGLE_RETRY", "RECOVERY_RETRY_ACQUIRED"}
+        )
         return {
             "schema_version": 1,
             "status": "PASS",
@@ -437,21 +525,28 @@ def apply_request(
             "project_id": target["project_id"],
             "lane": target["lane"],
             "service": service,
-            "service_active": _service_active(service),
+            "service_active": _snapshot_running(service_state),
+            "service_state": service_state,
             "active_project_units": _active_project_units(target["project_id"]),
             "installed_policy_digests": target["policy_digests"],
             "quarantine": quarantine,
             "reset_pending": reset_pending,
             "ready_for_single_retry": ready,
+            "recovery_state_conflict": recovery_state_conflict,
             "observation_only": True,
         }
 
     if operation == "RESTART_CONTROLLER":
         def restart() -> dict[str, Any]:
+            before = _service_snapshot(service)
+            _run(["systemctl", "reset-failed", service], check=False)
             _run(["systemctl", "restart", service])
-            if not _service_active(service):
-                raise MaintenanceError("controller did not become active")
-            return {"service_active": True}
+            stability = _require_stable_running(service)
+            return {
+                "service_active": True,
+                "before": before,
+                "stability": stability,
+            }
         return _mutating_receipt(
             request, target, receipts_dir=receipts_dir, mutation=restart
         )
@@ -495,7 +590,7 @@ def apply_request(
                     quarantine.get("scale_set_id"),
                 )
                 pending_state["reset_requiesced_at"] = _utc_now()
-                _atomic_json(pending, pending_state)
+                _atomic_json(pending, pending_state, inherit_parent_owner=True)
                 qpath.unlink()
                 state_path = pending
             return {
@@ -530,7 +625,10 @@ def apply_request(
                 ready_path = target["state_dir"] / "ready-for-single-retry.json"
                 if ready_path.is_file():
                     prior_ready = _read_json(ready_path)
-                    if prior_ready.get("status") != "RECOVERY_RETRY_COMPLETED":
+                    if prior_ready.get("status") not in {
+                        "RECOVERY_RETRY_COMPLETED",
+                        "RECOVERY_RETRY_INVALIDATED",
+                    }:
                         raise MaintenanceError(
                             "previous recovery generation is not terminal"
                         )
@@ -560,13 +658,14 @@ def apply_request(
                 pending_state["reset_generation"] = generation
                 pending_state["old_scale_set_id"] = quarantine.get("scale_set_id")
                 pending_state["reset_started_at"] = _utc_now()
-                _atomic_json(pending, pending_state)
+                _atomic_json(pending, pending_state, inherit_parent_owner=True)
                 qpath.unlink()
+            _run(["systemctl", "reset-failed", service], check=False)
             _run(["systemctl", "start", service])
-            if not _service_active(service):
-                raise MaintenanceError("controller did not become active")
+            stability = _require_stable_running(service)
             return {
                 "service_active": True,
+                "stability": stability,
                 "reset_generation": generation,
                 "archived_quarantine_path": str(pending),
                 "old_scale_set_id": quarantine.get(

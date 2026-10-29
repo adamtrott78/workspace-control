@@ -155,9 +155,17 @@ func TestAdmissionDisplayClaimIsExact(t *testing.T) {
 		t.Fatalf("unexpected claim pr=%d command=%s sha=%s", pr, command, sha)
 	}
 
+	reasoner := "wc-admission-v1|workload=gpu-experiment-public|pr=282|request=/lambda-reasoner-probe " +
+		testCandidateSHA + " qwen35-9b-q6-resource"
+	pr, command, sha, err = parseAdmissionDisplayClaim(reasoner, "gpu-experiment-public")
+	if err != nil || pr != 282 || command != "/lambda-reasoner-probe" || sha != testCandidateSHA {
+		t.Fatalf("resource-probe claim rejected pr=%d command=%q sha=%q err=%v", pr, command, sha, err)
+	}
+
 	for _, invalid := range []string{
 		"wc-admission-v1|workload=gpu-small|pr=101|request=/lambda-ci-p5 " + testCandidateSHA,
-		"wc-admission-v1|workload=cpu-test|pr=101|request=/lambda-ci-p5 " + testCandidateSHA + " extra",
+		"wc-admission-v1|workload=cpu-test|pr=101|request=/lambda-ci-p5 " + testCandidateSHA + " extra second",
+		"wc-admission-v1|workload=cpu-test|pr=101|request=/lambda-ci-p5 " + testCandidateSHA + " bad!",
 		"wc-admission-v1|workload=cpu-test|pr=101|request=/lambda-ci-p5 zzz",
 	} {
 		if _, _, _, err := parseAdmissionDisplayClaim(invalid, "cpu-test"); err == nil {

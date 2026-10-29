@@ -36,10 +36,15 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Dogfood the merged review_automation on this state-only closure PR only. Use the default-branch issue_comment request command to create an authority-sensitive exact-head review request automatically; obtain a fresh independent reviewer disposition; verify automatic disposition consumption posts an ACCEPTED receipt. Do not mutate Lambda or live controllers. After dogfood acceptance, freeze and review the next P2/steady-state design before any automatic reconcile-controller startup or hosted-runner dependency removal.
+Hold all scientific GPU execution. Capture one bounded read-only research-engine/gpu controller journal snapshot to classify the exact crash-loop error while implementing controller-reliability-hardening-v1 on branch controller-reliability-hardening-v1. No live restart/reset/reconcile/controller installation is authorized until the implementation batch passes full validation and the activation boundary is reviewed.
 
 ## Remaining work
 
+- Complete controller reliability hardening v1 before resuming the local-reasoner GPU bakeoff.
+- Classify the exact current research-engine/gpu crash-loop error from a bounded read-only journal snapshot and freeze it as regression evidence.
+- Implement and validate admission ordering, recovery-state lifecycle, state-file ownership, stable restart certification, and restart-storm containment.
+- Run full workspace-control validation on the complete hardening batch.
+- Perform the owning workflow's final authority-sensitive activation review only once the implementation batch is stable; do not reintroduce iterative independent-review loops during ordinary implementation.
 - Dogfood merged review_automation on this exact state-only closure PR: create the authority-sensitive request through the default-branch issue_comment command, obtain a fresh independent disposition, and verify the automation posts an ACCEPTED consumption receipt without operator prompt-copy plumbing.
 - After dogfood acceptance, design the next steady-state/P2 tranche under a separate exact review gate; do not start the automatic reconcile-controller or widen live admission in this closure.
 - Then remove routine hosted-runner dependence only after private-repository steady-state CI is proven under reviewed boundaries.

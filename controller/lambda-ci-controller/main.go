@@ -764,6 +764,44 @@ func (s *scaler) loadQuarantine() error {
 	return nil
 }
 
+func (s *scaler) invalidateReadyForSingleRetry(
+	newQuarantineReceiptID string,
+) error {
+	path := s.readyForSingleRetryPath()
+	raw, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("read recovery retry gate before quarantine: %w", err)
+	}
+	var receipt map[string]any
+	if err := json.Unmarshal(raw, &receipt); err != nil {
+		return fmt.Errorf("parse recovery retry gate before quarantine: %w", err)
+	}
+	status, _ := receipt["status"].(string)
+	switch status {
+	case "RECOVERY_RETRY_COMPLETED", "RECOVERY_RETRY_INVALIDATED":
+		return nil
+	case "READY_FOR_SINGLE_RETRY", "RECOVERY_RETRY_ACQUIRED":
+		receipt["previous_status"] = status
+		receipt["status"] = "RECOVERY_RETRY_INVALIDATED"
+		receipt["invalidated_by_quarantine_receipt_id"] = newQuarantineReceiptID
+		receipt["invalidated_at"] = time.Now().UTC().Format(time.RFC3339Nano)
+		if err := atomicWriteJSON(path, receipt); err != nil {
+			return fmt.Errorf("invalidate recovery retry gate: %w", err)
+		}
+		s.logger.Warn(
+			"Invalidated prior recovery retry gate after newer quarantine",
+			slog.String("new_quarantine_receipt_id", newQuarantineReceiptID),
+			slog.String("previous_status", status),
+		)
+		return nil
+	default:
+		return fmt.Errorf("recovery retry gate status is invalid during quarantine: %q", status)
+	}
+}
+
 func (s *scaler) persistAssignmentQuarantine(
 	stats *scaleset.RunnerScaleSetStatistic,
 	active int,
@@ -798,6 +836,9 @@ func (s *scaler) persistAssignmentQuarantine(
 		ObservedAt:          time.Now().UTC().Format(time.RFC3339Nano),
 	}
 	if err := atomicWriteJSON(s.quarantinePath(), receipt); err != nil {
+		return err
+	}
+	if err := s.invalidateReadyForSingleRetry(receiptID); err != nil {
 		return err
 	}
 	s.mu.Lock()
@@ -1002,7 +1043,8 @@ func (s *scaler) consumeReadyForSingleRetry(
 		return fmt.Errorf("parse recovery retry gate: %w", err)
 	}
 	status, _ := receipt["status"].(string)
-	if status == "RECOVERY_RETRY_COMPLETED" {
+	if status == "RECOVERY_RETRY_COMPLETED" ||
+		status == "RECOVERY_RETRY_INVALIDATED" {
 		return nil
 	}
 	if status == "RECOVERY_RETRY_ACQUIRED" {
@@ -1099,10 +1141,86 @@ func recoveryMetadataComplete(job *scaleset.JobMessageBase) bool {
 		job.EventName != ""
 }
 
+func (s *scaler) stageAvailableAdmissions(
+	ctx context.Context,
+	jobs []*scaleset.JobAvailable,
+) ([]int64, []string, error) {
+	requestIDs := make([]int64, 0, len(jobs))
+	stagedKeys := make([]string, 0, len(jobs))
+	if len(jobs) == 0 {
+		return requestIDs, stagedKeys, nil
+	}
+	if !s.admissionV2 {
+		for _, job := range jobs {
+			requestIDs = append(requestIDs, job.RunnerRequestID)
+		}
+		return requestIDs, stagedKeys, nil
+	}
+
+	s.mu.Lock()
+	capacity := maxRunners - reconstructableAssignedCount(len(s.active), len(s.pending))
+	s.mu.Unlock()
+
+	for _, job := range jobs {
+		if capacity <= 0 {
+			break
+		}
+		workload, err := workloadForDisplayClaim(job.JobDisplayName)
+		if err != nil {
+			s.logger.Error(
+				"Rejected JobAvailable admission metadata",
+				slog.Int64("runner_request_id", job.RunnerRequestID),
+				slog.Int64("workflow_run_id", job.WorkflowRunID),
+				slog.String("reason", err.Error()),
+			)
+			continue
+		}
+		attestation, err := s.attestor.Attest(
+			ctx,
+			&job.JobMessageBase,
+			s.scaleSetName,
+			workload,
+		)
+		if err != nil {
+			if errors.Is(err, errTerminalWorkflowJob) {
+				s.logger.Info(
+					"Ignoring terminal JobAvailable metadata",
+					slog.Int64("runner_request_id", job.RunnerRequestID),
+					slog.Int64("workflow_run_id", job.WorkflowRunID),
+					slog.String("reason", err.Error()),
+				)
+				continue
+			}
+			s.logger.Error(
+				"Rejected JobAvailable admission metadata",
+				slog.Int64("runner_request_id", job.RunnerRequestID),
+				slog.Int64("workflow_run_id", job.WorkflowRunID),
+				slog.String("reason", err.Error()),
+			)
+			continue
+		}
+		jobKey := attestation.JobID
+		s.mu.Lock()
+		if _, exists := s.pending[jobKey]; !exists {
+			s.pending[jobKey] = pendingAdmissionJob{
+				Metadata:    job.JobMessageBase,
+				Attestation: attestation,
+				Workload:    workload,
+			}
+			stagedKeys = append(stagedKeys, jobKey)
+			requestIDs = append(requestIDs, job.RunnerRequestID)
+			capacity--
+		}
+		s.mu.Unlock()
+	}
+	return requestIDs, stagedKeys, nil
+}
+
 func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage) error {
 	if msg == nil {
 		return nil
 	}
+	recoveredAssigned := make([]controllerAttestation, 0, 1)
 
 	if s.admissionV2 {
 		if s.attestor == nil {
@@ -1138,7 +1256,13 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			}
 			workload, err := workloadForDisplayClaim(assigned.JobDisplayName)
 			if err != nil {
-				return fmt.Errorf("derive assigned workload: %w", err)
+				s.logger.Error(
+					"Rejected JobAssigned recovery metadata",
+					slog.Int64("runner_request_id", assigned.RunnerRequestID),
+					slog.Int64("workflow_run_id", assigned.WorkflowRunID),
+					slog.String("reason", err.Error()),
+				)
+				continue
 			}
 			attestation, err := s.attestor.Attest(
 				ctx,
@@ -1156,7 +1280,13 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 					)
 					continue
 				}
-				return fmt.Errorf("attest assigned job recovery metadata: %w", err)
+				s.logger.Error(
+					"Rejected JobAssigned recovery metadata",
+					slog.Int64("runner_request_id", assigned.RunnerRequestID),
+					slog.Int64("workflow_run_id", assigned.WorkflowRunID),
+					slog.String("reason", err.Error()),
+				)
+				continue
 			}
 			jobKey := attestation.JobID
 			s.mu.Lock()
@@ -1168,9 +1298,7 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 				}
 			}
 			s.mu.Unlock()
-			if err := s.consumeReadyForSingleRetry(attestation); err != nil {
-				return fmt.Errorf("consume recovery retry on assigned recovery: %w", err)
-			}
+			recoveredAssigned = append(recoveredAssigned, attestation)
 		}
 		}
 	}
@@ -1217,124 +1345,119 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		return nil
 	}
 
-	if s.admissionV2 {
+	if s.admissionV2 && quarantined {
 		reconstructable := reconstructableAssignedCount(activeCount, pendingCount)
 		assignedReported := 0
 		if msg.Statistics != nil {
 			assignedReported = msg.Statistics.TotalAssignedJobs
 		}
-		if quarantined {
-			// A quarantined lane may clear itself only when complete,
-			// independently re-attested metadata reconstructs every currently
-			// assigned job. A later aggregate zero alone is not sufficient.
-			if assignedReported > 0 && reconstructable >= assignedReported {
-				if err := s.resolveQuarantineFromCompleteMetadata(
-					msg.Statistics,
-					activeCount,
-					pendingCount,
-				); err != nil {
-					return fmt.Errorf("resolve assignment quarantine: %w", err)
-				}
-			} else {
+		// A quarantined lane may clear itself only when complete,
+		// independently re-attested metadata reconstructs every currently
+		// assigned job. A later aggregate zero alone is not sufficient.
+		if assignedReported > 0 && reconstructable >= assignedReported {
+			if err := s.resolveQuarantineFromCompleteMetadata(
+				msg.Statistics,
+				activeCount,
+				pendingCount,
+			); err != nil {
+				return fmt.Errorf("resolve assignment quarantine: %w", err)
+			}
+		} else {
+			s.logger.Warn(
+				"Admission-v2 lane remains quarantined; refusing new acquisition",
+				slog.String("quarantine_receipt_id", quarantineID),
+				slog.Int("total_assigned_jobs", assignedReported),
+				slog.Int("reconstructable_jobs", reconstructable),
+			)
+			return nil
+		}
+	}
+
+	requestIDs, stagedKeys, err := s.stageAvailableAdmissions(
+		ctx,
+		msg.JobAvailableMessages,
+	)
+	if err != nil {
+		return err
+	}
+
+	if s.admissionV2 {
+		s.mu.Lock()
+		reconstructable := reconstructableAssignedCount(len(s.active), len(s.pending))
+		s.mu.Unlock()
+		assignedReported := 0
+		if msg.Statistics != nil {
+			assignedReported = msg.Statistics.TotalAssignedJobs
+		}
+		if assignedReported > reconstructable {
+			// Aggregate counts can arrive before the corresponding lifecycle
+			// message. They are never execution authority. Hold the lane
+			// fail-closed on an aggregate-only mismatch and wait for
+			// independently attestable lifecycle evidence before deciding
+			// that the state is durably divergent.
+			hasLifecycleEvidence :=
+				len(msg.JobAssignedMessages) > 0 ||
+				len(msg.JobAvailableMessages) > 0 ||
+				len(msg.JobStartedMessages) > 0 ||
+				len(msg.JobCompletedMessages) > 0
+			s.mu.Lock()
+			for _, jobKey := range stagedKeys {
+				delete(s.pending, jobKey)
+			}
+			activeAfterRollback := len(s.active)
+			pendingAfterRollback := len(s.pending)
+			s.mu.Unlock()
+			if !hasLifecycleEvidence {
 				s.logger.Warn(
-					"Admission-v2 lane remains quarantined; refusing new acquisition",
-					slog.String("quarantine_receipt_id", quarantineID),
+					"Admission-v2 aggregate assignment skew observed; awaiting lifecycle metadata",
 					slog.Int("total_assigned_jobs", assignedReported),
 					slog.Int("reconstructable_jobs", reconstructable),
 				)
 				return nil
 			}
-		} else if msg.Statistics != nil && assignedReported > reconstructable {
 			if err := s.persistAssignmentQuarantine(
 				msg.Statistics,
-				activeCount,
-				pendingCount,
+				activeAfterRollback,
+				pendingAfterRollback,
 			); err != nil {
 				return fmt.Errorf("persist assignment quarantine: %w", err)
 			}
 			return nil
 		}
-	}
 
-	if len(msg.JobAvailableMessages) > 0 {
-		requestIDs := make([]int64, 0, len(msg.JobAvailableMessages))
-		stagedKeys := make([]string, 0, len(msg.JobAvailableMessages))
-
-		if s.admissionV2 {
-			s.mu.Lock()
-			capacity := maxRunners - reconstructableAssignedCount(len(s.active), len(s.pending))
-			s.mu.Unlock()
-
-			for _, job := range msg.JobAvailableMessages {
-				if capacity <= 0 {
-					break
-				}
-				workload, err := workloadForDisplayClaim(job.JobDisplayName)
-				if err != nil {
-					return fmt.Errorf("derive available workload: %w", err)
-				}
-				attestation, err := s.attestor.Attest(
-					ctx,
-					&job.JobMessageBase,
-					s.scaleSetName,
-					workload,
-				)
-				if err != nil {
-					if errors.Is(err, errTerminalWorkflowJob) {
-						s.logger.Info(
-							"Ignoring terminal JobAvailable metadata",
-							slog.Int64("runner_request_id", job.RunnerRequestID),
-							slog.Int64("workflow_run_id", job.WorkflowRunID),
-							slog.String("reason", err.Error()),
-						)
-						continue
-					}
-					return fmt.Errorf("attest available job before acquire: %w", err)
-				}
-				jobKey := attestation.JobID
-				s.mu.Lock()
-				if _, exists := s.pending[jobKey]; !exists {
-					s.pending[jobKey] = pendingAdmissionJob{
-						Metadata:    job.JobMessageBase,
-						Attestation: attestation,
-						Workload:    workload,
-					}
-					stagedKeys = append(stagedKeys, jobKey)
-					requestIDs = append(requestIDs, job.RunnerRequestID)
-					capacity--
-				}
-				s.mu.Unlock()
-			}
-		} else {
-			for _, job := range msg.JobAvailableMessages {
-				requestIDs = append(requestIDs, job.RunnerRequestID)
+		// A JobAssigned message can be the restart-time reconstruction of the
+		// single retry already acquired by GitHub. Consume the recovery gate
+		// only after any newer quarantine has been resolved.
+		for _, attestation := range recoveredAssigned {
+			if err := s.consumeReadyForSingleRetry(attestation); err != nil {
+				return fmt.Errorf("consume recovery retry on assigned recovery: %w", err)
 			}
 		}
+	}
 
-		if len(requestIDs) > 0 {
-			if _, err := s.sessionClient.AcquireJobs(ctx, requestIDs); err != nil {
-				if s.admissionV2 {
-					s.mu.Lock()
-					for _, jobKey := range stagedKeys {
-						delete(s.pending, jobKey)
-					}
-					s.mu.Unlock()
-				}
-				return fmt.Errorf("acquire jobs: %w", err)
-			}
+	if len(requestIDs) > 0 {
+		if _, err := s.sessionClient.AcquireJobs(ctx, requestIDs); err != nil {
 			if s.admissionV2 {
-				if len(stagedKeys) != 1 {
-					return fmt.Errorf(
-						"admission-v2 acquired unexpected staged job count: %d",
-						len(stagedKeys),
-					)
-				}
 				s.mu.Lock()
-				acquired := s.pending[stagedKeys[0]]
-				s.mu.Unlock()
-				if err := s.consumeReadyForSingleRetry(acquired.Attestation); err != nil {
-					return fmt.Errorf("consume recovery retry after acquire: %w", err)
+				for _, jobKey := range stagedKeys {
+					delete(s.pending, jobKey)
 				}
+				s.mu.Unlock()
+			}
+			return fmt.Errorf("acquire jobs: %w", err)
+		}
+		if s.admissionV2 {
+			if len(stagedKeys) != 1 {
+				return fmt.Errorf(
+					"admission-v2 acquired unexpected staged job count: %d",
+					len(stagedKeys),
+				)
+			}
+			s.mu.Lock()
+			acquired := s.pending[stagedKeys[0]]
+			s.mu.Unlock()
+			if err := s.consumeReadyForSingleRetry(acquired.Attestation); err != nil {
+				return fmt.Errorf("consume recovery retry after acquire: %w", err)
 			}
 		}
 	}

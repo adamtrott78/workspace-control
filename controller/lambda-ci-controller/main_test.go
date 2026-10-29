@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net"
 	"os"
@@ -289,6 +290,320 @@ func (a *neverCalledAttestor) Attest(
 	return controllerAttestation{}, nil
 }
 
+type rejectingAdmissionAttestor struct {
+	calls int
+}
+
+func (a *rejectingAdmissionAttestor) Attest(
+	context.Context,
+	*scaleset.JobMessageBase,
+	string,
+	string,
+) (controllerAttestation, error) {
+	a.calls++
+	return controllerAttestation{}, fmt.Errorf("synthetic admission rejection")
+}
+
+type staticAdmissionAttestor struct {
+	calls int
+}
+
+func (a *staticAdmissionAttestor) Attest(
+	_ context.Context,
+	job *scaleset.JobMessageBase,
+	scaleSetName string,
+	workload string,
+) (controllerAttestation, error) {
+	a.calls++
+	return controllerAttestation{
+		SchemaVersion:    2,
+		Source:           "test",
+		Repository:       "adamtrott78/research-engine",
+		ScaleSetName:     scaleSetName,
+		JobMessageType:   string(job.MessageType),
+		RunnerRequestID:  job.RunnerRequestID,
+		WorkflowRunID:    job.WorkflowRunID,
+		JobID:            "777",
+		JobDisplayName:   job.JobDisplayName,
+		CandidateSHA:     testCandidateSHA,
+	}, nil
+}
+
+func TestAvailableAdmissionIsStagedBeforeAggregateDivergenceDecision(t *testing.T) {
+	dir := t.TempDir()
+	attestor := &staticAdmissionAttestor{}
+	s := &scaler{
+		active:       make(map[string]string),
+		scaleSetID:   17,
+		projectID:    "research-engine",
+		lane:         "cpu",
+		scaleSetName: "lambda-research-engine",
+		runnerPrefix: "lambda-research-engine-",
+		stateDir:     dir,
+		admissionV2:  true,
+		attestor:     attestor,
+		pending:      make(map[string]pendingAdmissionJob),
+		logger:       slog.Default(),
+	}
+
+	available := availableCPUJob()
+	requestIDs, stagedKeys, err := s.stageAvailableAdmissions(
+		context.Background(),
+		[]*scaleset.JobAvailable{available},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if attestor.calls != 1 {
+		t.Fatalf("available claim was not independently attested: %d", attestor.calls)
+	}
+	if !reflect.DeepEqual(requestIDs, []int64{available.RunnerRequestID}) {
+		t.Fatalf("unexpected request ids: %#v", requestIDs)
+	}
+	if !reflect.DeepEqual(stagedKeys, []string{"777"}) {
+		t.Fatalf("unexpected staged keys: %#v", stagedKeys)
+	}
+	if got := reconstructableAssignedCount(len(s.active), len(s.pending)); got != 1 {
+		t.Fatalf("attested available claim was not reconstructable before divergence check: %d", got)
+	}
+	stats := &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1}
+	if stats.TotalAssignedJobs > reconstructableAssignedCount(len(s.active), len(s.pending)) {
+		t.Fatal("normal aggregate/lifecycle skew would still be classified as divergence")
+	}
+	if _, err := os.Stat(filepath.Join(dir, "quarantine.json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("staging authoritative available work unexpectedly created quarantine: %v", err)
+	}
+}
+
+func TestNewQuarantineInvalidatesOlderReadyRetryGate(t *testing.T) {
+	dir := t.TempDir()
+	s := &scaler{
+		active:       make(map[string]string),
+		scaleSetID:   88,
+		projectID:    "research-engine",
+		lane:         "gpu",
+		scaleSetName: "lambda-research-engine-gpu",
+		stateDir:     dir,
+		pending:      make(map[string]pendingAdmissionJob),
+		logger:       slog.Default(),
+	}
+	ready := map[string]any{
+		"schema_version": 1,
+		"status": "READY_FOR_SINGLE_RETRY",
+		"receipt_id": "11111111-2222-4333-8444-555555555555",
+		"project_id": "research-engine",
+		"lane": "gpu",
+		"scale_set_name": "lambda-research-engine-gpu",
+		"old_scale_set_id": 77,
+		"new_scale_set_id": 88,
+		"reset_generation": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+		"automatic_workflow_triggered": false,
+	}
+	if err := atomicWriteJSON(s.readyForSingleRetryPath(), ready); err != nil {
+		t.Fatal(err)
+	}
+	stats := &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1}
+	if err := s.persistAssignmentQuarantine(stats, 0, 0); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(s.readyForSingleRetryPath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(raw, &got); err != nil {
+		t.Fatal(err)
+	}
+	if got["status"] != "RECOVERY_RETRY_INVALIDATED" ||
+		got["previous_status"] != "READY_FOR_SINGLE_RETRY" {
+		t.Fatalf("older retry gate remained consumable: %#v", got)
+	}
+	if got["invalidated_by_quarantine_receipt_id"] != s.quarantineID {
+		t.Fatalf("retry invalidation was not bound to new quarantine: %#v", got)
+	}
+	if _, err := os.Stat(s.quarantinePath()); err != nil {
+		t.Fatalf("new quarantine was not durably persisted: %v", err)
+	}
+}
+
+func TestInvalidatedRecoveryGateRemainsTerminalAcrossQuarantineResolution(t *testing.T) {
+	for _, priorStatus := range []string{
+		"READY_FOR_SINGLE_RETRY",
+		"RECOVERY_RETRY_ACQUIRED",
+	} {
+		t.Run(priorStatus, func(t *testing.T) {
+			dir := t.TempDir()
+			socketPath := filepath.Join(dir, "provisioner-status.sock")
+			ln, err := net.Listen("unix", socketPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer ln.Close()
+
+			statusRequests := make(chan provisionStatusRequest, 1)
+			go func() {
+				conn, err := ln.Accept()
+				if err != nil {
+					return
+				}
+				defer conn.Close()
+				var req provisionStatusRequest
+				if err := json.NewDecoder(bufio.NewReader(conn)).Decode(&req); err != nil {
+					return
+				}
+				statusRequests <- req
+				_ = json.NewEncoder(conn).Encode(provisionStatusResponse{
+					SchemaVersion: 2,
+					Status:        "COMPLETED",
+					RequestID:     req.RequestID,
+				})
+			}()
+
+			attestor := &staticAdmissionAttestor{}
+			s := &scaler{
+				active:          make(map[string]string),
+				scaleSetID:      88,
+				projectID:       "workspace-control",
+				lane:            "cpu",
+				scaleSetName:    "lambda-workspace-control",
+				runnerPrefix:    "lambda-workspace-control-",
+				stateDir:        dir,
+				admissionV2:     true,
+				attestor:        attestor,
+				pending:         make(map[string]pendingAdmissionJob),
+				provisionerSock: socketPath,
+				logger:          slog.Default(),
+			}
+
+			gate := map[string]any{
+				"schema_version": 1,
+				"status": priorStatus,
+				"receipt_id": "11111111-2222-4333-8444-555555555555",
+				"project_id": "workspace-control",
+				"lane": "cpu",
+				"scale_set_name": "lambda-workspace-control",
+				"old_scale_set_id": 77,
+				"new_scale_set_id": 88,
+				"reset_generation": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+				"automatic_workflow_triggered": false,
+			}
+			if priorStatus == "RECOVERY_RETRY_ACQUIRED" {
+				gate["job_id"] = "prior-job"
+				gate["workflow_run_id"] = int64(999)
+				gate["acquired_at"] = time.Now().UTC().Format(time.RFC3339Nano)
+			}
+			if err := atomicWriteJSON(s.readyForSingleRetryPath(), gate); err != nil {
+				t.Fatal(err)
+			}
+
+			stats := &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1}
+			if err := s.persistAssignmentQuarantine(stats, 0, 0); err != nil {
+				t.Fatal(err)
+			}
+
+			assigned := assignedCPUJob()
+			if err := s.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+				Statistics:          stats,
+				JobAssignedMessages: []*scaleset.JobAssigned{assigned},
+			}); err != nil {
+				t.Fatalf("invalidated recovery gate became controller-fatal: %v", err)
+			}
+			if s.quarantined {
+				t.Fatal("complete authoritative metadata did not resolve newer quarantine")
+			}
+			if len(s.pending) != 0 || len(s.active) != 0 {
+				t.Fatalf("invalidated retry restored execution authority: pending=%d active=%d", len(s.pending), len(s.active))
+			}
+
+			raw, err := os.ReadFile(s.readyForSingleRetryPath())
+			if err != nil {
+				t.Fatal(err)
+			}
+			var terminal map[string]any
+			if err := json.Unmarshal(raw, &terminal); err != nil {
+				t.Fatal(err)
+			}
+			if terminal["status"] != "RECOVERY_RETRY_INVALIDATED" ||
+				terminal["previous_status"] != priorStatus {
+				t.Fatalf("invalidated recovery gate changed authority state: %#v", terminal)
+			}
+
+			select {
+			case <-statusRequests:
+			case <-time.After(2 * time.Second):
+				t.Fatal("reconstructed assigned job did not complete bounded provision-state reconciliation")
+			}
+		})
+	}
+}
+
+func TestAvailableAdmissionRejectionIsFailStable(t *testing.T) {
+	tests := []struct {
+		name            string
+		mutate          func(*scaleset.JobAvailable)
+		attestor        jobAttestor
+		wantAttestCalls int
+	}{
+		{
+			name: "display_derivation_rejected",
+			mutate: func(job *scaleset.JobAvailable) {
+				job.JobDisplayName = "not-an-admission-claim"
+			},
+			attestor:        &neverCalledAttestor{},
+			wantAttestCalls: 0,
+		},
+		{
+			name:            "attestation_rejected",
+			mutate:          func(*scaleset.JobAvailable) {},
+			attestor:        &rejectingAdmissionAttestor{},
+			wantAttestCalls: 1,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			s := &scaler{
+				active:       make(map[string]string),
+				scaleSetID:   17,
+				projectID:    "research-engine",
+				lane:         "cpu",
+				scaleSetName: "lambda-research-engine",
+				runnerPrefix: "lambda-research-engine-",
+				stateDir:     dir,
+				admissionV2:  true,
+				attestor:     tc.attestor,
+				pending:      make(map[string]pendingAdmissionJob),
+				logger:       slog.Default(),
+			}
+			available := availableCPUJob()
+			tc.mutate(available)
+			if err := s.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+				Statistics:           &scaleset.RunnerScaleSetStatistic{},
+				JobAvailableMessages: []*scaleset.JobAvailable{available},
+			}); err != nil {
+				t.Fatalf("rejected JobAvailable escaped as controller-fatal error: %v", err)
+			}
+			if len(s.pending) != 0 || len(s.active) != 0 {
+				t.Fatalf("rejected JobAvailable gained execution authority: pending=%d active=%d", len(s.pending), len(s.active))
+			}
+			if s.quarantined {
+				t.Fatal("rejected JobAvailable with zero assigned aggregate created unrelated quarantine")
+			}
+			switch a := tc.attestor.(type) {
+			case *neverCalledAttestor:
+				if a.calls != tc.wantAttestCalls {
+					t.Fatalf("unexpected attestor calls: %d", a.calls)
+				}
+			case *rejectingAdmissionAttestor:
+				if a.calls != tc.wantAttestCalls {
+					t.Fatalf("unexpected attestor calls: %d", a.calls)
+				}
+			}
+		})
+	}
+}
+
 func TestAssignmentDivergenceQuarantinesAndSuppressesNewAcquisition(t *testing.T) {
 	dir := t.TempDir()
 	client := &fakeRunnerJITClient{}
@@ -313,8 +628,23 @@ func TestAssignmentDivergenceQuarantinesAndSuppressesNewAcquisition(t *testing.T
 	}); err != nil {
 		t.Fatal(err)
 	}
+	if s.quarantined {
+		t.Fatalf("aggregate-only startup skew falsely quarantined lane: %#v", s)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "quarantine.json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("aggregate-only skew created durable quarantine: %v", err)
+	}
+
+	incomplete := assignedCPUJob()
+	incomplete.JobWorkflowRef = ""
+	if err := s.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics:          &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+		JobAssignedMessages: []*scaleset.JobAssigned{incomplete},
+	}); err != nil {
+		t.Fatal(err)
+	}
 	if !s.quarantined || s.quarantineID == "" {
-		t.Fatalf("assignment divergence did not quarantine lane: %#v", s)
+		t.Fatalf("unreconstructable lifecycle evidence did not quarantine lane: %#v", s)
 	}
 	if _, err := os.Stat(filepath.Join(dir, "quarantine.json")); err != nil {
 		t.Fatalf("durable quarantine receipt missing: %v", err)
@@ -335,6 +665,40 @@ func TestAssignmentDivergenceQuarantinesAndSuppressesNewAcquisition(t *testing.T
 	}
 	if !s.quarantined {
 		t.Fatal("aggregate zero improperly auto-cleared quarantine")
+	}
+}
+
+func TestAssignedAttestationRejectionQuarantinesWithoutCrashingController(t *testing.T) {
+	dir := t.TempDir()
+	attestor := &rejectingAdmissionAttestor{}
+	s := &scaler{
+		active:       make(map[string]string),
+		scaleSetID:   17,
+		projectID:    "research-engine",
+		lane:         "gpu",
+		scaleSetName: "lambda-research-engine-gpu",
+		runnerPrefix: "lambda-research-engine-gpu-",
+		stateDir:     dir,
+		admissionV2:  true,
+		attestor:     attestor,
+		pending:      make(map[string]pendingAdmissionJob),
+		logger:       slog.Default(),
+	}
+	assigned := assignedCPUJob()
+	if err := s.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics:          &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+		JobAssignedMessages: []*scaleset.JobAssigned{assigned},
+	}); err != nil {
+		t.Fatalf("admission rejection escaped as controller-fatal error: %v", err)
+	}
+	if attestor.calls != 1 {
+		t.Fatalf("assigned recovery metadata was not attested: %d", attestor.calls)
+	}
+	if !s.quarantined {
+		t.Fatal("rejected assigned metadata did not fail lane closed")
+	}
+	if _, err := os.Stat(s.quarantinePath()); err != nil {
+		t.Fatalf("rejected assigned metadata did not persist quarantine: %v", err)
 	}
 }
 

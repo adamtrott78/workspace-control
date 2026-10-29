@@ -290,7 +290,7 @@ func parseAdmissionDisplayClaim(displayName, workload string) (int, string, stri
 	pattern := regexp.MustCompile(
 		`^wc-admission-v1\|workload=` + regexp.QuoteMeta(workload) +
 			`\|pr=([1-9][0-9]*)\|request=(/[a-z0-9][a-z0-9-]{2,63})` +
-			` ([0-9a-f]{40})$`,
+			` ([0-9a-f]{40})(?: ([a-z0-9][a-z0-9._:+/@=-]{0,127}))?$`,
 	)
 	match := pattern.FindStringSubmatch(displayName)
 	if match == nil { return 0, "", "", fmt.Errorf("job display claim does not match admission grammar") }
