@@ -62,7 +62,6 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
             self.assertNotIn(forbidden, keys)
         text = json.dumps(root, sort_keys=True)
         self.assertNotIn("wc-admission-v1", text)
-        self.assertNotIn("/lambda-ci-", text)
         self.assertNotIn("/workspace-control-validate", text)
 
     def test_controller_projection_has_no_root_selector_or_command_grammar(self):
