@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-lambda-self-hosted-execution-v1",
-  "current_stage": "producer_and_policy_compiler_design",
+  "current_stage": "repository_only_protocol_verification",
   "acceptance_criteria": [
     "Produce an end-to-end protocol graph from GitHub trigger through workflow/job construction, scale-set messages, controller attestation, root admission, launch-spec resolution, JIT runner creation, execution, completion, cleanup, replay, and recovery.",
     "Enumerate every parser, serializer, identifier, state machine, authority boundary, retry boundary, durable record, and scheduler/lifecycle signal in workspace-control and relevant research-engine workflows.",
@@ -42,7 +42,7 @@
       "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
       "remote": {
         "branch": "github-actions-control-plane-protocol-redesign-v1",
-        "checkpoint_sha": "d5d3337a17c8ea3c0a62e9909b1a03cd11da7220",
+        "checkpoint_sha": "2281b005dca2ceee955eabeb2d0e7c888ab23a0b",
         "verified": true
       },
       "local": null,
@@ -159,7 +159,7 @@
     },
     {
       "id": "producer_and_policy_compiler_design",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -174,12 +174,16 @@
       ],
       "validation": [
         {
-          "check": "Single-source compiler design started",
+          "check": "Single-source compiler and typed executor interface",
           "result": "PASS",
           "evidence": [
-            "Projection compiler contract separates static desired policy from live deployment state.",
-            "One desired-policy catalog generates root, per-class controller and executor projections with one catalog-generation digest.",
-            "Typed executor action catalog covers all 23 registered execution routes and four maintenance operations; raw command strings are not executor API inputs."
+            "Workspace Control Validation #1242 / run 40961745857 passed at exact head dd5e62e475331b4462a2310ccf02f4ad4d26f4d8.",
+            "Pure compiler emits 9 root runner classes, 9 class-controller projections, 23 execution actions, 4 maintenance actions and a 23-route compatibility matrix.",
+            "Compiler validates emitted root/controller/executor projections against checked-in schemas.",
+            "Adversarial tests reject duplicate controller UIDs, workflow blob/shape drift, target scale mismatch, missing schemas, and execution parameters that imply infrastructure authority.",
+            "Digest tests prove ingress command or workflow-local enum changes cannot alter root_policy_sha256 or controller_policy_sha256, while executor_policy_sha256 changes.",
+            "Typed builder rejects unknown action IDs, raw command override, invalid candidate SHA, unknown runner class, invalid maintenance receipt, and non-enum experiment selectors.",
+            "host-attest is exposed only as a typed maintenance action, never as an execution qualifier."
           ]
         }
       ],
@@ -187,7 +191,7 @@
     },
     {
       "id": "repository_only_protocol_verification",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -199,7 +203,16 @@
         "property/state-machine tests",
         "fault-injection tests"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Repository-only verification baseline",
+          "result": "PASS",
+          "evidence": [
+            "Compiler/builder foundation is green; no Lambda mutation occurred.",
+            "Verification plan covers scheduler lifecycle, capacity protocol, resource allocator, supervisor retry, crash recovery, maintenance, reconciliation and migration equivalence."
+          ]
+        }
+      ],
       "resume_condition": "All accepted request families traverse producer -> controller -> root policy -> launch-spec simulation with zero false rejects."
     },
     {
@@ -222,7 +235,7 @@
   ],
   "checkpoints": [],
   "blockers": [],
-  "next_safe_action": "Continue producer_and_policy_compiler_design on PR #572: freeze projection/deployment schemas and implement a repository-only compiler prototype that generates root/controller/executor projections and the 23-route compatibility matrix. Do not mutate Lambda, restart controllers, apply PR #571, or retrigger host-attest.",
+  "next_safe_action": "Continue repository_only_protocol_verification on PR #572: implement pure controller/capacity state-machine prototypes and fault-injection tests for all scheduler/recovery boundaries. Do not mutate Lambda, restart controllers, apply PR #571, or retrigger host-attest.",
   "artifacts": [
     {
       "path": "architecture/github-actions-control-plane-protocol-redesign-v1.md",
@@ -303,6 +316,48 @@
       "evidence": [
         "Covers all 23 routes, nine runner classes, three control planes, scheduler lifecycle, capacity protocol, resource contention, crash recovery, maintenance, reconciliation and migration equivalence."
       ]
+    },
+    {
+      "path": "scripts/lambda_ci_policy_compiler.py",
+      "state": "REPOSITORY_ONLY_PROTOTYPE",
+      "evidence": [
+        "Pure deterministic compiler; no network/systemd/socket/Lambda access."
+      ]
+    },
+    {
+      "path": "tests/test_lambda_ci_control_plane_compiler.py",
+      "state": "ADVERSARIAL_VERIFICATION",
+      "evidence": [
+        "Compiler/projection separation and drift tests green in validation #1242."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_executor_builder.py",
+      "state": "REPOSITORY_ONLY_PROTOTYPE",
+      "evidence": [
+        "Typed action_id + argument ingress renderer; cannot accept raw root capability selectors."
+      ]
+    },
+    {
+      "path": "tests/test_lambda_ci_executor_builder.py",
+      "state": "ADVERSARIAL_VERIFICATION",
+      "evidence": [
+        "Covers Workspace Control, PADataset, Research Engine, maintenance and injection/invalid-input rejection."
+      ]
+    },
+    {
+      "path": "schemas/workspace-ci-root-policy-projection.v1.schema.json",
+      "state": "MODEL_SCHEMA",
+      "evidence": [
+        "Compiler validates emitted root projection against this schema."
+      ]
+    },
+    {
+      "path": "schemas/workspace-ci-executor-policy-projection.v1.schema.json",
+      "state": "MODEL_SCHEMA",
+      "evidence": [
+        "Compiler validates emitted executor projection against this schema."
+      ]
     }
   ],
   "validation": [
@@ -332,22 +387,34 @@
       ]
     },
     {
-      "check": "Single-source compiler design started",
+      "check": "Single-source compiler and typed executor interface",
       "result": "PASS",
       "evidence": [
-        "Projection compiler contract separates static desired policy from live deployment state.",
-        "One desired-policy catalog generates root, per-class controller and executor projections with one catalog-generation digest.",
-        "Typed executor action catalog covers all 23 registered execution routes and four maintenance operations; raw command strings are not executor API inputs."
+        "Workspace Control Validation #1242 / run 40961745857 passed at exact head dd5e62e475331b4462a2310ccf02f4ad4d26f4d8.",
+        "Pure compiler emits 9 root runner classes, 9 class-controller projections, 23 execution actions, 4 maintenance actions and a 23-route compatibility matrix.",
+        "Compiler validates emitted root/controller/executor projections against checked-in schemas.",
+        "Adversarial tests reject duplicate controller UIDs, workflow blob/shape drift, target scale mismatch, missing schemas, and execution parameters that imply infrastructure authority.",
+        "Digest tests prove ingress command or workflow-local enum changes cannot alter root_policy_sha256 or controller_policy_sha256, while executor_policy_sha256 changes.",
+        "Typed builder rejects unknown action IDs, raw command override, invalid candidate SHA, unknown runner class, invalid maintenance receipt, and non-enum experiment selectors.",
+        "host-attest is exposed only as a typed maintenance action, never as an execution qualifier."
+      ]
+    },
+    {
+      "check": "Repository-only verification baseline",
+      "result": "PASS",
+      "evidence": [
+        "Compiler/builder foundation is green; no Lambda mutation occurred.",
+        "Verification plan covers scheduler lifecycle, capacity protocol, resource allocator, supervisor retry, crash recovery, maintenance, reconciliation and migration equivalence."
       ]
     }
   ],
   "remaining_work": [
-    "Finish producer/policy compiler design: exact projection schemas, catalog-generation digest algorithm, deployment-overlay schema, and class-specific systemd/controller identity projection.",
-    "Design the executor builder interface so every execution/maintenance trigger is selected by action_id and typed arguments rather than raw comment text.",
-    "Define legacy-to-v3 migration overlay preserving current workspace-control containment and research-engine GPU quarantine/retry-invalidated authority without implicit route activation.",
-    "Implement repository-only compiler/projection prototype and compatibility matrix for all 23 routes and nine runner classes.",
-    "Implement deterministic/state-machine/fault-injection verification plan; do not modify live Lambda.",
-    "Only after repository-only verification passes, design a separately authorized one-class-at-a-time migration and live acceptance."
+    "Implement repository-only runner-class controller admission/supervisor state-machine model against the exact pinned actions/scaleset lifecycle semantics.",
+    "Implement repository-only two-phase root capacity/resource allocator model: RESERVE, LAUNCH, STATUS, CANCEL, crash reconciliation and class quarantine.",
+    "Implement fault-injection/model tests for redelivery, reassignment, TotalAssignedJobs/lifecycle skew, transient GitHub/root errors, reservation expiry, root crash boundaries and cleanup failure.",
+    "Verify all nine runner classes and 23 routes against the state-machine model and migration-equivalence matrix.",
+    "Prototype runner-class maintenance/reconciliation projections and prove no cpu/gpu lane grammar or live activation leakage remains.",
+    "Only after repository-only protocol verification passes, design a separately authorized one-class-at-a-time live migration."
   ],
   "last_executor": "chatgpt",
   "last_surface": "github+web",
