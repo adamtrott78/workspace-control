@@ -56,6 +56,20 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
             "59395404e8a174fefbde32657e6215c87a4170f539c85fc8aa5e2295883f6e6d",
         )
 
+    def test_healthy_controller_baselines_match_frozen_preflight(self):
+        self.assertEqual(
+            activation.EXPECTED_HEALTHY_BASELINES[activation.PAD_CPU],
+            {"Result": "success", "NRestarts": "0"},
+        )
+        self.assertEqual(
+            activation.EXPECTED_HEALTHY_BASELINES[activation.PAD_GPU],
+            {"Result": "success", "NRestarts": "0"},
+        )
+        self.assertEqual(
+            activation.EXPECTED_HEALTHY_BASELINES[activation.WORKSPACE_CPU],
+            {"Result": "success", "NRestarts": "14140"},
+        )
+
     def test_activation_scope_preserves_inactive_research_cpu(self):
         self.assertNotIn(activation.RESEARCH_CPU, activation.ACTIVE_AFTER_INSTALL)
         self.assertEqual(
