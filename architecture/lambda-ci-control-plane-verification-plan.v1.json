@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "plan_id": "lambda-ci-control-plane-protocol-verification-v1",
+  "status": "MODEL_ONLY_NOT_IMPLEMENTED",
+  "scope": {
+    "projects": [
+      "workspace-control",
+      "padataset",
+      "research-engine"
+    ],
+    "registered_routes": 23,
+    "target_runner_classes": 9,
+    "control_planes": [
+      "runner-execution",
+      "maintenance",
+      "reconciliation"
+    ],
+    "upstream_pin": "actions/scaleset@e6daac702355cdb5b880b4fbdcf6d85dcd9e48e5"
+  },
+  "hard_gates": [
+    "zero authority-bearing JobDisplayName parsing in target runner execution code",
+    "zero candidate SHA/PR/command/experiment parsing in root capacity provider",
+    "every registered route maps to exactly one immutable runner class",
+    "every runner class has exactly one distinct controller Unix UID",
+    "every workflow routed to one class resolves to the same root launch envelope",
+    "all 23 trusted workflows compile with exactly one top-level self-hosted job",
+    "stable job denial never returns a listener-fatal Scale error",
+    "root BUSY/CLASS_QUARANTINED never causes process restart",
+    "TotalAssignedJobs is the only desired-capacity count input",
+    "JIT config is generated only after root RESERVE",
+    "raw JIT config is never stored on persistent disk",
+    "root external ACCEPTED requires deterministic systemd runner unit creation",
+    "resource claims release only after containment cleanup",
+    "maintenance targets runner_class_id and parses its command exactly once",
+    "reconciliation installs one catalog generation and projections atomically",
+    "legacy controller units/workflows cannot be accidentally selected after migration"
+  ],
+  "test_families": {
+    "catalog_compiler": [
+      "validate schema and global uniqueness of runner_class_id/scale_set_name/runner_prefix/controller user",
+      "verify every route references class in same project",
+      "verify exact trusted workflow blob on pinned main",
+      "parse trusted workflow YAML and require exactly one top-level job",
+      "verify job runs-on target equals generated class scale set",
+      "resolve execution contract/resource/model/runtime to deterministic root launch envelope",
+      "prove routes grouped in one class have byte/canonical-equivalent root launch projections",
+      "prove changing a class capability without changing runner_class_id is rejected"
+    ],
+    "executor_builder": [
+      "generate every one of 23 current ingress commands from typed arguments",
+      "round-trip candidate-sha-v1 for all routes that use it",
+      "round-trip reasoner-probe enum and reject all non-enum values",
+      "prove no executor parameter can modify runner class or root projection",
+      "prove host-attest exists only in maintenance builder, not execution route builders"
+    ],
+    "controller_admission": [
+      "accept exact repository/workflow/ref/blob/event/actor/labels for every route",
+      "reject wrong repository, workflow path, workflow blob, default branch ref, event, actor, triggering actor, or class labels",
+      "prove arbitrary JobDisplayName content has no effect on admission decision",
+      "prove arbitrary candidate SHA/comment-body content has no effect on infrastructure admission",
+      "prove JobID empty on JobAvailable remains valid",
+      "prove all stable denies keep supervisor SESSION_ACTIVE"
+    ],
+    "scaleset_state_machine": [
+      "initial statistics with zero jobs",
+      "initial statistics with assigned jobs after controller restart",
+      "JobAvailable -> AcquireJobs -> assigned -> started -> completed",
+      "duplicate/redelivered message produces idempotent state",
+      "JobAssigned without JobAvailable after restart does not reconstruct command authority",
+      "assignment requeue/cancel and later JobAvailable",
+      "TotalAssignedJobs greater than lifecycle message count",
+      "lifecycle arrays truncated while statistics remain authoritative",
+      "multiple trusted routes queued in same homogeneous class",
+      "untrusted available job plus trusted available job in same polling cycle"
+    ],
+    "capacity_protocol": [
+      "authorized UID RESERVE -> RESERVED -> LAUNCH -> ACCEPTED -> COMPLETED",
+      "unknown UID -> UNAUTHORIZED_PEER fatal",
+      "runner-name prefix mismatch -> INVALID_REQUEST fatal",
+      "duplicate RESERVE same request -> idempotent RESERVED/DUPLICATE",
+      "RESERVE while host/project/class/resource full -> BUSY without JIT creation",
+      "RESERVE on quarantined class -> CLASS_QUARANTINED without process exit",
+      "reservation expiry before JIT -> CANCELED/released",
+      "LAUNCH after expiry -> RESERVATION_EXPIRED and orphan JIT removal",
+      "root crash during PREPARING before unit -> FAILED recovery",
+      "root crash after unit creation before response -> ACCEPTED recovery",
+      "raw JIT exists only in runtime tmpfs PREPARING window",
+      "STATUS and CANCEL idempotence"
+    ],
+    "resource_allocator": [
+      "initial migration host_max_active_runners=1 exactly preserves effective current serialization",
+      "project/class ceilings are independently represented rather than inferred from one global _active set",
+      "GPU0-exclusive classes cannot overlap",
+      "dual-GPU class atomically reserves GPU0+GPU1 or gets BUSY",
+      "CPU classes claim no GPU resource",
+      "no partial GPU reservation survives failed dual-GPU reservation",
+      "resources stay reserved through cleanup and release only after containment proof"
+    ],
+    "supervisor_retry": [
+      "stable controller admission deny returns nil to listener",
+      "BUSY/CLASS_QUARANTINED return nil to listener and preserve session",
+      "transient GitHub REST failure triggers in-process bounded reconnect/backoff without systemd exit",
+      "transient root socket failure triggers in-process bounded reconnect/backoff",
+      "message remains unacked on retryable failure and is safe under redelivery",
+      "corrupt durable ledger/config/root response schema is fatal",
+      "100 request-local denies do not increment process restart count"
+    ],
+    "crash_recovery": [
+      "crash before RESERVE",
+      "crash after RESERVED response lost",
+      "crash after RESERVED before JIT",
+      "crash after JIT before LAUNCH",
+      "crash root PREPARING before systemd unit",
+      "crash after systemd unit before ACCEPTED response",
+      "crash while runner online",
+      "crash while runner busy",
+      "crash after runner terminal before JobCompleted",
+      "cleanup failure -> class quarantine",
+      "controller restart with TotalAssignedJobs>0 but no recoverable job semantics"
+    ],
+    "maintenance_plane": [
+      "diagnose/restart/host-attest/reset-stale accept runner_class_id, not cpu/gpu lane",
+      "command parsed once by unprivileged maintenance controller",
+      "root consumes typed operation and exact class identity",
+      "host-attest is read-only and cannot start candidate execution",
+      "reset-stale requires exact class quarantine receipt",
+      "maintenance cannot target unknown/legacy class"
+    ],
+    "reconciliation_plane": [
+      "trusted exact reconciliation workflow/run only",
+      "catalog plus root/controller/executor projections bind one catalog SHA-256",
+      "create class UIDs/groups/state dirs with exact ownership",
+      "detect UID collision, class collision, stale projection, workflow pin mismatch",
+      "atomic install or rollback; no mixed catalog generation",
+      "nonterminal previous-generation runner requests drain or remain explicitly generation-bound",
+      "legacy cpu/gpu controller env/unit entries retired only at migration boundary"
+    ],
+    "migration_equivalence": [
+      "all 23 current routes map to target class and preserve or narrow root launch envelope",
+      "PADataset CPU/GPU equivalence",
+      "Workspace Control control-small equivalence",
+      "Research CPU exact-provenance route moves from GPU scale set without gaining GPU authority",
+      "Research single/dual/offline/public model classes preserve exact model/runtime/network semantics",
+      "initial host concurrency remains one active runner",
+      "no research GPU quarantine/retry authority is implicitly restored",
+      "old wc-admission-v1 dynamic display-name semantics are absent from target controller/root code"
+    ]
+  },
+  "acceptance_evidence": [
+    "repository-only full integration green",
+    "model/state-machine fault-injection suite green",
+    "23/23 route compatibility matrix green",
+    "9/9 runner-class projection equivalence green",
+    "all three control-plane test families green",
+    "no Lambda mutation performed during repository-only verification"
+  ],
+  "live_gate": "Only after all repository-only gates pass may a separately reviewed migration transaction create new class identities/scale sets and cut over one class at a time."
+}
