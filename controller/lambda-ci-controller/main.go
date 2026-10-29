@@ -1243,7 +1243,13 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			}
 			workload, err := workloadForDisplayClaim(assigned.JobDisplayName)
 			if err != nil {
-				return fmt.Errorf("derive assigned workload: %w", err)
+				s.logger.Error(
+					"Rejected JobAssigned recovery metadata",
+					slog.Int64("runner_request_id", assigned.RunnerRequestID),
+					slog.Int64("workflow_run_id", assigned.WorkflowRunID),
+					slog.String("reason", err.Error()),
+				)
+				continue
 			}
 			attestation, err := s.attestor.Attest(
 				ctx,
@@ -1261,7 +1267,13 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 					)
 					continue
 				}
-				return fmt.Errorf("attest assigned job recovery metadata: %w", err)
+				s.logger.Error(
+					"Rejected JobAssigned recovery metadata",
+					slog.Int64("runner_request_id", assigned.RunnerRequestID),
+					slog.Int64("workflow_run_id", assigned.WorkflowRunID),
+					slog.String("reason", err.Error()),
+				)
+				continue
 			}
 			jobKey := attestation.JobID
 			s.mu.Lock()
@@ -1365,10 +1377,16 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			assignedReported = msg.Statistics.TotalAssignedJobs
 		}
 		if assignedReported > reconstructable {
-			// JobAvailable claims are independently attested above before
-			// deciding that aggregate assigned state is unreconstructable.
-			// If they still do not account for the aggregate, roll back only
-			// newly staged claims and quarantine fail-closed.
+			// Aggregate counts can arrive before the corresponding lifecycle
+			// message. They are never execution authority. Hold the lane
+			// fail-closed on an aggregate-only mismatch and wait for
+			// independently attestable lifecycle evidence before deciding
+			// that the state is durably divergent.
+			hasLifecycleEvidence :=
+				len(msg.JobAssignedMessages) > 0 ||
+				len(msg.JobAvailableMessages) > 0 ||
+				len(msg.JobStartedMessages) > 0 ||
+				len(msg.JobCompletedMessages) > 0
 			s.mu.Lock()
 			for _, jobKey := range stagedKeys {
 				delete(s.pending, jobKey)
@@ -1376,6 +1394,14 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 			activeAfterRollback := len(s.active)
 			pendingAfterRollback := len(s.pending)
 			s.mu.Unlock()
+			if !hasLifecycleEvidence {
+				s.logger.Warn(
+					"Admission-v2 aggregate assignment skew observed; awaiting lifecycle metadata",
+					slog.Int("total_assigned_jobs", assignedReported),
+					slog.Int("reconstructable_jobs", reconstructable),
+				)
+				return nil
+			}
 			if err := s.persistAssignmentQuarantine(
 				msg.Statistics,
 				activeAfterRollback,
