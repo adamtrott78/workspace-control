@@ -72,6 +72,20 @@
       "allowed_mutation_scope": [
         ".github/workflows/lambda-ci-*.yml"
       ]
+    },
+    {
+      "name": "PADataset",
+      "intent": "mutate",
+      "base_sha": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        ".github/workflows/lambda-ci-*.yml"
+      ]
     }
   ],
   "stages": [
