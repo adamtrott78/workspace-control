@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workspace-ci-runner-class-controller-policy.v1.schema.json",
+  "title": "Workspace CI Runner Class Controller Policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "runner_class_id",
+    "repository",
+    "scale_set_name",
+    "max_runners",
+    "trusted_workflows"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "runner_class_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{2,127}$"
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+    },
+    "scale_set_name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{2,95}$"
+    },
+    "max_runners": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 64
+    },
+    "trusted_workflows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "default_branch",
+          "blob_sha",
+          "job_key",
+          "allowed_events",
+          "allowed_actor_logins"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^\\.github/workflows/[^/]+\\.ya?ml$"
+          },
+          "default_branch": {
+            "type": "string",
+            "minLength": 1
+          },
+          "blob_sha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "job_key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]{1,100}$"
+          },
+          "allowed_events": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowed_actor_logins": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
