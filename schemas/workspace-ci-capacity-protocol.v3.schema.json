@@ -2,9 +2,37 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "workspace-ci-capacity-protocol.v3.schema.json",
   "title": "Workspace CI Capacity Protocol v3",
+  "description": "Two-phase runner-class capacity protocol. Runner class is derived by root from SO_PEERCRED and is never request-selectable.",
   "oneOf": [
     {
-      "title": "Provision request",
+      "title": "Reserve request",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "operation",
+        "request_id",
+        "runner_name"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 3
+        },
+        "operation": {
+          "const": "RESERVE"
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "runner_name": {
+          "type": "string",
+          "pattern": "^lambda-[A-Za-z0-9._-]{3,127}$"
+        }
+      }
+    },
+    {
+      "title": "Launch request",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -19,7 +47,7 @@
           "const": 3
         },
         "operation": {
-          "const": "PROVISION"
+          "const": "LAUNCH"
         },
         "request_id": {
           "type": "string",
@@ -59,7 +87,29 @@
       }
     },
     {
-      "title": "Provision response",
+      "title": "Cancel request",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "operation",
+        "request_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 3
+        },
+        "operation": {
+          "const": "CANCEL"
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    {
+      "title": "Reserve result",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -73,11 +123,11 @@
           "const": 3
         },
         "operation": {
-          "const": "PROVISION_RESULT"
+          "const": "RESERVE_RESULT"
         },
         "status": {
           "enum": [
-            "ACCEPTED",
+            "RESERVED",
             "DUPLICATE",
             "BUSY",
             "CLASS_QUARANTINED",
@@ -89,11 +139,17 @@
           "type": "string",
           "format": "uuid"
         },
+        "reservation_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
         "receipt_status": {
           "enum": [
+            "RESERVED",
             "ACCEPTED",
             "COMPLETED",
-            "FAILED"
+            "FAILED",
+            "CANCELED"
           ]
         },
         "error_code": {
@@ -107,7 +163,56 @@
       }
     },
     {
-      "title": "Status response",
+      "title": "Launch result",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "operation",
+        "status",
+        "request_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 3
+        },
+        "operation": {
+          "const": "LAUNCH_RESULT"
+        },
+        "status": {
+          "enum": [
+            "ACCEPTED",
+            "DUPLICATE",
+            "RESERVATION_EXPIRED",
+            "INVALID_REQUEST",
+            "UNAUTHORIZED_PEER"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "receipt_status": {
+          "enum": [
+            "RESERVED",
+            "ACCEPTED",
+            "COMPLETED",
+            "FAILED",
+            "CANCELED"
+          ]
+        },
+        "error_code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]{3,96}$"
+        },
+        "error": {
+          "type": "string",
+          "maxLength": 2048
+        }
+      }
+    },
+    {
+      "title": "Status result",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -126,9 +231,11 @@
         "status": {
           "enum": [
             "MISSING",
+            "RESERVED",
             "ACCEPTED",
             "COMPLETED",
-            "FAILED"
+            "FAILED",
+            "CANCELED"
           ]
         },
         "request_id": {
@@ -137,6 +244,51 @@
         },
         "runner_name": {
           "type": "string"
+        },
+        "reservation_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "error_code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]{3,96}$"
+        },
+        "error": {
+          "type": "string",
+          "maxLength": 2048
+        }
+      }
+    },
+    {
+      "title": "Cancel result",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "operation",
+        "status",
+        "request_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 3
+        },
+        "operation": {
+          "const": "CANCEL_RESULT"
+        },
+        "status": {
+          "enum": [
+            "CANCELED",
+            "ALREADY_TERMINAL",
+            "NOT_CANCELABLE",
+            "MISSING",
+            "INVALID_REQUEST",
+            "UNAUTHORIZED_PEER"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uuid"
         },
         "error_code": {
           "type": "string",
@@ -152,20 +304,32 @@
   "x-protocol-semantics": {
     "authority_source": "SO_PEERCRED uid mapped by root-owned runner-class catalog",
     "request_fields_non_authoritative_for_class": true,
+    "two_phase_order": [
+      "RESERVE resources",
+      "Generate GitHub JIT config",
+      "LAUNCH reserved runner"
+    ],
+    "reservation": {
+      "purpose": "atomically claim host/project/class/scarce resources before creating a GitHub JIT registration",
+      "ttl_required": true,
+      "renewal": "forbidden in v3; expired reservation requires fresh runner-instance request",
+      "raw_jit_required": false
+    },
     "jit_config_persistence": {
       "persistent_filesystem": "FORBIDDEN",
-      "root_runtime_tmpfs": "0600 root-only while internal PREPARING",
+      "root_runtime_tmpfs": "0600 root-only during internal PREPARING after LAUNCH",
       "controller_persistence": "SHA-256 digest only",
       "unlink_boundary": "after deterministic systemd runner unit inherits JIT environment"
     },
-    "status_classes": {
-      "ACCEPTED": "runner-instance request durably claimed",
-      "DUPLICATE": "same request identity already exists; reconcile receipt_status",
-      "BUSY": "class capacity temporarily unavailable; no class/policy failure",
-      "CLASS_QUARANTINED": "runner class blocked by durable containment state",
-      "INVALID_REQUEST": "controller/root protocol incompatibility; controller-fatal",
-      "UNAUTHORIZED_PEER": "local peer has no runner-class authority; controller/root configuration-fatal"
-    },
-    "accepted_boundary": "ACCEPTED is externally visible only after the deterministic systemd runner unit has been successfully created; internal PREPARING is never exposed as ACCEPTED"
+    "accepted_boundary": "ACCEPTED is externally visible only after deterministic systemd runner unit creation succeeds",
+    "fatal_result_classes": [
+      "INVALID_REQUEST",
+      "UNAUTHORIZED_PEER"
+    ],
+    "request_local_capacity_classes": [
+      "BUSY",
+      "CLASS_QUARANTINED",
+      "RESERVATION_EXPIRED"
+    ]
   }
 }
