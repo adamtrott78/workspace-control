@@ -53,6 +53,7 @@ TRUSTED_CUDA_OOM_PROBE_PATH = pathlib.Path(
 TRUSTED_CUDA_OOM_PROBE_KIND = "cuda_oom_acceptance_v1"
 TRUSTED_CUDA_OOM_PROBE_AUTHORITY = "ROOT_SYNTHETIC_CANARY_ONLY"
 TRUSTED_CUDA_OOM_PROBE_EXIT = 86
+CPU_EXECUTION_PROFILES = frozenset({"cpu-test", "control-small"})
 TRUSTED_DUAL_TIMEOUT_PROBE_PATH = pathlib.Path(
     "/opt/workspace-ci/provisioner/trusted-probes/lambda_ci_dual_timeout_probe.py"
 )
@@ -1604,8 +1605,11 @@ def admission_receipt_identity(spec: dict[str, Any]) -> dict[str, Any]:
 def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     """Launch one semantically authorized CPU runner and return a cleanup receipt."""
     semantics = execution_semantics(spec)
-    if spec["profile"] != "cpu-test" or semantics["execution_profile"] != "cpu-test":
-        raise RuntimeLaunchError("CPU runtime requires cpu-test semantic contract")
+    if (
+        spec["profile"] not in CPU_EXECUTION_PROFILES
+        or semantics["execution_profile"] != spec["profile"]
+    ):
+        raise RuntimeLaunchError("CPU runtime requires an accepted CPU semantic contract")
     if semantics["gpu_count"] != 0 or spec["resources"]["gpu_indices"]:
         raise RuntimeLaunchError("CPU semantic contract unexpectedly contains GPU authority")
     if spec["allow_production_services"]:
@@ -2221,7 +2225,7 @@ def launch_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     semantics = execution_semantics(spec)
     if semantics["execution_profile"] != profile:
         raise RuntimeLaunchError("launch profile differs from semantic contract")
-    if profile == "cpu-test":
+    if profile in CPU_EXECUTION_PROFILES:
         return launch_cpu_runner(request, spec)
     if profile == "gpu-small":
         return launch_gpu_runner(request, spec)
