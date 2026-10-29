@@ -34,24 +34,17 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 - Remote checkpoint: 0badc99b894d87413d065afdcd37a678c2839007
 - Remote verified: true
 
-## Current stage
-
-`controller_reliability_hardening_v1`
-
-Controller reliability is now a blocking control-plane stage. The observed incident includes a false assignment-divergence quarantine on research-engine/gpu scale-set 3, a stale READY_FOR_SINGLE_RETRY gate coexisting with the newer quarantine, and an unbounded systemd restart storm reaching NRestarts=13134.
-
 ## Next safe action
 
-Hold all scientific GPU execution. Capture one bounded read-only research-engine/gpu controller journal snapshot to classify the exact crash-loop error while implementing controller-reliability-hardening-v1 on branch `controller-reliability-hardening-v1`. No live restart/reset/reconcile/controller installation is authorized until the implementation batch passes full validation and the activation boundary is reviewed.
+Hold all scientific GPU execution. Capture one bounded read-only research-engine/gpu controller journal snapshot to classify the exact crash-loop error while implementing controller-reliability-hardening-v1 on branch controller-reliability-hardening-v1. No live restart/reset/reconcile/controller installation is authorized until the implementation batch passes full validation and the activation boundary is reviewed.
 
 ## Remaining work
 
 - Complete controller reliability hardening v1 before resuming the local-reasoner GPU bakeoff.
 - Classify the exact current research-engine/gpu crash-loop error from a bounded read-only journal snapshot and freeze it as regression evidence.
-- Fix admission ordering so valid JobAvailable evidence is processed before aggregate assignment divergence can quarantine a lane.
-- Make controller-state writes ownership-safe, recovery gates unambiguous, restart/resume certification stable, and systemd restart storms bounded.
-- Add regression coverage for every observed incident class and run full workspace-control validation on the complete batch.
-- Use one final authority-sensitive activation review only after the hardening batch is stable; do not reintroduce iterative independent-review loops during implementation.
+- Implement and validate admission ordering, recovery-state lifecycle, state-file ownership, stable restart certification, and restart-storm containment.
+- Run full workspace-control validation on the complete hardening batch.
+- Perform the owning workflow's final authority-sensitive activation review only once the implementation batch is stable; do not reintroduce iterative independent-review loops during ordinary implementation.
 
 - Dogfood merged review_automation on this exact state-only closure PR: create the authority-sensitive request through the default-branch issue_comment command, obtain a fresh independent disposition, and verify the automation posts an ACCEPTED consumption receipt without operator prompt-copy plumbing.
 - After dogfood acceptance, design the next steady-state/P2 tranche under a separate exact review gate; do not start the automatic reconcile-controller or widen live admission in this closure.
