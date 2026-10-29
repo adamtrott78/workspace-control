@@ -20,12 +20,11 @@ import json
 import os
 import pathlib
 import pwd
-import shutil
 import socket
 import subprocess
 import tempfile
 import time
-import uuid
+from datetime import datetime, timezone
 from typing import Any
 
 GO_BIN = pathlib.Path("/opt/workspace-ci/go/1.26.3/bin/go")
