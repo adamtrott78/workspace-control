@@ -332,6 +332,17 @@ class WorkspaceShellContractTests(unittest.TestCase):
         )
         self.assertEqual(good["executable"], "/usr/bin/git")
         self.assertFalse(good["write_scratch"])
+        self.assertEqual(
+            good["argv"][:8],
+            [
+                "-c", "core.hooksPath=/dev/null",
+                "-c", "core.fsmonitor=false",
+                "-c", "diff.external=",
+                "-c", "credential.helper=",
+            ],
+        )
+        self.assertEqual(good["argv"][-2:], ["rev-parse", "HEAD"])
+        self.assertEqual(good["env"]["GIT_TERMINAL_PROMPT"], "0")
 
         with self.assertRaisesRegex(
             runtime_common.ShellRuntimeError, "PROFILE_ARGV_DENIED"
@@ -355,6 +366,42 @@ class WorkspaceShellContractTests(unittest.TestCase):
                 "validation-bounded",
                 ["preflight", "--repo", "workspace-control"],
             )
+
+    def test_git_read_overrides_local_execution_hooks(self):
+        manifest = json.loads((PLUGIN / "config" / "profiles.v1.json").read_text())
+        resolved = job_launcher.resolve_profile(
+            manifest,
+            "git-read",
+            ["status", "--porcelain=v1", "--untracked-files=normal"],
+        )
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            marker = root / "fsmonitor-ran"
+            hook = root / "fsmonitor.sh"
+            hook.write_text(f"#!/bin/sh\ntouch {marker}\necho\n", encoding="utf-8")
+            hook.chmod(0o755)
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(
+                ["git", "config", "--local", "core.fsmonitor", str(hook)],
+                cwd=root,
+                check=True,
+            )
+            proc = subprocess.run(
+                [resolved["executable"], *resolved["argv"]],
+                cwd=root,
+                env={
+                    "PATH": "/usr/bin:/bin",
+                    "LANG": "C.UTF-8",
+                    "LC_ALL": "C.UTF-8",
+                    **resolved["env"],
+                },
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=5,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertFalse(marker.exists())
 
     def test_worker_sandbox_command_excludes_control_plane_and_network(self):
         manifest = json.loads((PLUGIN / "config" / "profiles.v1.json").read_text())
