@@ -16,7 +16,7 @@ HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parent
 CONFIG = PLUGIN / "config"
 REPO_ROOT = HERE.parents[2]
-AUTHORITY_ARTIFACT = REPO_ROOT / "architecture" / "workspace-shell-mcp-authority-v1.json"
+AUTHORITY_ARTIFACT = REPO_ROOT / "architecture" / "workspace-shell-mcp-authority-v2.json"
 
 SERVICE_TEMPLATES = (
     "workspace-shell-job-launcher.service.in",
@@ -198,7 +198,7 @@ def render(args):
         "revocations": "/etc/workspace-shell/approval/revocations.json",
         "helper_registry": "/etc/workspace-shell/helpers/registry.json",
         "design_authority_sha": authority_sha,
-        "policy_artifact_path": "/etc/workspace-shell/policy/workspace-shell-mcp-authority-v1.json",
+        "policy_artifact_path": "/etc/workspace-shell/policy/workspace-shell-mcp-authority-v2.json",
         "policy_artifact_sha256": policy_digest,
         "source_roots": {"workspace-control": source_root},
     }
@@ -219,8 +219,8 @@ def render(args):
     }
 
     files = {}
-    files["workspace-shell-mcp-authority-v1.json"] = write_bytes(
-        out / "workspace-shell-mcp-authority-v1.json",
+    files["workspace-shell-mcp-authority-v2.json"] = write_bytes(
+        out / "workspace-shell-mcp-authority-v2.json",
         policy_bytes,
         0o644,
     )
@@ -261,7 +261,7 @@ def render(args):
         "source_tree": source_tree,
         "design_authority_sha": authority_sha,
         "policy_artifact_sha256": policy_digest,
-        "policy_artifact_install_path": "/etc/workspace-shell/policy/workspace-shell-mcp-authority-v1.json",
+        "policy_artifact_install_path": "/etc/workspace-shell/policy/workspace-shell-mcp-authority-v2.json",
         "identities": {
             "frontend": {"uid": frontend_uid, "gid": frontend_gid},
             "worker": {"uid": worker_uid, "gid": worker_gid},
