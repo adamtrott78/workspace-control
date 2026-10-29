@@ -647,3 +647,155 @@ Already has an even cleaner shape:
 Keep it separate. It is policy deployment, not job scheduling.
 
 Host attestation belongs to the maintenance/diagnostic plane, not as a free-form qualifier on candidate execution.
+
+
+# Simplified capacity-provider architecture
+
+The runner-class partition removes the need for job-specific root admission.
+
+## Key observation
+
+A JIT config registers a runner with a scale set, not with one specific workflow job. The official reference scaler:
+1. acquires acceptable `JobAvailable` request IDs;
+2. reads `TotalAssignedJobs`;
+3. starts that many homogeneous runners.
+
+Therefore root provisioning should realize **runner-class capacity**, not compile a workflow request.
+
+## Revised authority split
+
+```text
+OWNER / EXECUTOR
+  emits human ingress command
+        |
+        v
+TRUSTED DEFAULT-BRANCH WORKFLOW
+  command grammar + candidate/experiment parameter checks
+        |
+        v
+GITHUB ACTIONS SCHEDULER
+  queue + scale-set routing + lifecycle
+        |
+        v
+RUNNER-CLASS CONTROLLER (unprivileged)
+  - authenticated Scale Set Client session
+  - exact trusted workflow/event/actor attestation
+  - AcquireJobs only for allowed workflow jobs
+  - scale from TotalAssignedJobs
+        |
+        v
+ROOT CAPACITY PROVIDER
+  - authenticate local controller -> fixed runner class
+  - validate JIT envelope / runner name
+  - realize fixed systemd/resource/model/runtime envelope
+  - no workflow command parser
+  - no route parser
+  - no candidate SHA parser
+        |
+        v
+EPHEMERAL HOMOGENEOUS RUNNER
+  executes trusted workflow gate first
+  then executes exact candidate payload
+```
+
+## Root request becomes a capacity request
+
+A strong v3 request can be reduced to:
+
+```json
+{
+  "schema_version": 3,
+  "request_id": "<runner-instance request id>",
+  "runner_name": "<class prefix + opaque suffix>",
+  "jit_config": "<opaque GitHub JIT registration>"
+}
+```
+
+The root service derives `project_id`, `runner_class_id`, execution contract, resource ceiling, GPU authority, network class, exact model/runtime mounts, and filesystem policy from the authenticated **local controller identity**.
+
+No field supplied by the controller may widen the class.
+
+This is stronger than the current v2 request because a compromised controller cannot claim a different `workload_class` merely by constructing a plausible attestation.
+
+## Local controller authentication
+
+The simplest proof-carrying local identity is a unique unprivileged Unix UID per runner class.
+
+Example:
+
+```text
+ci-ctl-wc-control
+ci-ctl-pad-cpu
+ci-ctl-pad-gpu
+ci-ctl-re-cpu
+ci-ctl-re-gpu-public
+ci-ctl-re-gpu-runtime
+ci-ctl-re-model-single
+ci-ctl-re-model-dual-offline
+ci-ctl-re-model-dual-public
+```
+
+Root maps `SO_PEERCRED.uid -> runner_class_id`.
+
+Project-scoped GitHub credentials may be shared read-only among the class-controller UIDs for the same repository, but root launch authority is not shared.
+
+Alternative local proofs (class-specific sockets/credentials or kernel cgroup/service identity) may be evaluated, but the accepted design must provide the same non-forgeability property.
+
+## Controller no longer needs per-job route parsing
+
+For each `JobAvailable`:
+- parse no human command;
+- inspect GitHub-native fields;
+- derive trusted workflow path from `JobWorkflowRef`;
+- look up the workflow in the controller's installed allowlist for **this runner class**;
+- verify the run via REST: repository, event, actor/triggering actor, workflow path, default-branch run commit;
+- verify exact workflow blob at that run commit equals the installed allowlist blob;
+- acquire the `RunnerRequestID` only if those checks pass.
+
+The controller does not need candidate SHA, PR number, experiment name, or root route identity to make the acquisition decision.
+
+## Job ID correlation is optional, not foundational
+
+Because root capacity is class-level, the controller does not require a canonical REST job ID before provisioning.
+
+For audit/recovery:
+- `WorkflowRunID + run_attempt + trusted workflow path + runner class` forms the stable attempt identity when the trusted workflow has exactly one self-hosted job in that class;
+- `JobStarted/JobCompleted` provide the GitHub JobID and runner name later;
+- REST job lookup may enrich evidence or resolve recovery, but dynamic display-name parsing is not a prerequisite for safe scaling.
+
+If a trusted workflow ever has multiple jobs targeting the same runner class, each must have a static catalogued job key/name so correlation is deterministic.
+
+# Executor command model
+
+The registered command census shows:
+- 22 of 23 current routes consume only `<command> <candidate_sha>`;
+- one route, `gpu-experiment-public`, consumes `<command> <candidate_sha> <candidate-id>`.
+
+The third token selects one of two workflow-level resource-probe payloads while the root execution envelope remains the same fixed single-GPU public class.
+
+Therefore there is currently **no legitimate registered use case where a free-form optional command token must change root runner provisioning**.
+
+The executor API can be generated from route schemas:
+
+```text
+workspace_control.validate(pr, candidate_sha)
+padataset.cpu_validate(pr, candidate_sha)
+padataset.gpu_validate(pr, candidate_sha)
+research_engine.local_extract_wave7a3(pr, candidate_sha)
+research_engine.reasoner_probe(
+    pr,
+    candidate_sha,
+    candidate = QWEN35_9B_Q6 | QWYNTHOS_9B_V2_Q6
+)
+maintenance.host_attest(project, runner_class)
+```
+
+Generated builders may emit GitHub comments as the human interface, but the infrastructure controller never parses those arguments.
+
+# GitHub-level workflow restriction
+
+GitHub runner groups can be configured to allow selected repositories and selected workflows. Where account topology supports it, runner-class groups should use selected-workflow restrictions as an additional scheduler-side allowlist.
+
+This is defense in depth, not a replacement for controller attestation:
+- account/organization capabilities may differ;
+- root authority must remain correct even if GitHub runner-group policy is misconfigured.
