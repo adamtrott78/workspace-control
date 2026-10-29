@@ -826,15 +826,14 @@ def activate(
     before: dict[str, Any],
     prepared: dict[str, Any],
 ) -> dict[str, Any]:
+    # Arm rollback before interpreting any prepared activation material.
+    rollback_armed = True
+    backup: dict[str, Any] | None = None
+
     built = pathlib.Path(prepared["built"])
     candidate_sha = str(prepared["candidate_sha256"])
     source_unit = bytes(prepared["controller_unit"])
     source_maintenance = bytes(prepared["maintenance_service"])
-
-    backup: dict[str, Any] | None = None
-
-    # The rollback/containment guard is armed before the first live mutation.
-    rollback_armed = True
     try:
         gpu_containment = contain_gpu_fail_closed()
 
