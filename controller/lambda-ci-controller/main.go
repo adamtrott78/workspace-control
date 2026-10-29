@@ -1140,6 +1140,69 @@ func recoveryMetadataComplete(job *scaleset.JobMessageBase) bool {
 		job.EventName != ""
 }
 
+func (s *scaler) stageAvailableAdmissions(
+	ctx context.Context,
+	jobs []*scaleset.JobAvailable,
+) ([]int64, []string, error) {
+	requestIDs := make([]int64, 0, len(jobs))
+	stagedKeys := make([]string, 0, len(jobs))
+	if len(jobs) == 0 {
+		return requestIDs, stagedKeys, nil
+	}
+	if !s.admissionV2 {
+		for _, job := range jobs {
+			requestIDs = append(requestIDs, job.RunnerRequestID)
+		}
+		return requestIDs, stagedKeys, nil
+	}
+
+	s.mu.Lock()
+	capacity := maxRunners - reconstructableAssignedCount(len(s.active), len(s.pending))
+	s.mu.Unlock()
+
+	for _, job := range jobs {
+		if capacity <= 0 {
+			break
+		}
+		workload, err := workloadForDisplayClaim(job.JobDisplayName)
+		if err != nil {
+			return nil, nil, fmt.Errorf("derive available workload: %w", err)
+		}
+		attestation, err := s.attestor.Attest(
+			ctx,
+			&job.JobMessageBase,
+			s.scaleSetName,
+			workload,
+		)
+		if err != nil {
+			if errors.Is(err, errTerminalWorkflowJob) {
+				s.logger.Info(
+					"Ignoring terminal JobAvailable metadata",
+					slog.Int64("runner_request_id", job.RunnerRequestID),
+					slog.Int64("workflow_run_id", job.WorkflowRunID),
+					slog.String("reason", err.Error()),
+				)
+				continue
+			}
+			return nil, nil, fmt.Errorf("attest available job before acquire: %w", err)
+		}
+		jobKey := attestation.JobID
+		s.mu.Lock()
+		if _, exists := s.pending[jobKey]; !exists {
+			s.pending[jobKey] = pendingAdmissionJob{
+				Metadata:    job.JobMessageBase,
+				Attestation: attestation,
+				Workload:    workload,
+			}
+			stagedKeys = append(stagedKeys, jobKey)
+			requestIDs = append(requestIDs, job.RunnerRequestID)
+			capacity--
+		}
+		s.mu.Unlock()
+	}
+	return requestIDs, stagedKeys, nil
+}
+
 func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage) error {
 	if msg == nil {
 		return nil
@@ -1285,59 +1348,12 @@ func (s *scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessage)
 		}
 	}
 
-	requestIDs := make([]int64, 0, len(msg.JobAvailableMessages))
-	stagedKeys := make([]string, 0, len(msg.JobAvailableMessages))
-	if len(msg.JobAvailableMessages) > 0 {
-		if s.admissionV2 {
-			s.mu.Lock()
-			capacity := maxRunners - reconstructableAssignedCount(len(s.active), len(s.pending))
-			s.mu.Unlock()
-
-			for _, job := range msg.JobAvailableMessages {
-				if capacity <= 0 {
-					break
-				}
-				workload, err := workloadForDisplayClaim(job.JobDisplayName)
-				if err != nil {
-					return fmt.Errorf("derive available workload: %w", err)
-				}
-				attestation, err := s.attestor.Attest(
-					ctx,
-					&job.JobMessageBase,
-					s.scaleSetName,
-					workload,
-				)
-				if err != nil {
-					if errors.Is(err, errTerminalWorkflowJob) {
-						s.logger.Info(
-							"Ignoring terminal JobAvailable metadata",
-							slog.Int64("runner_request_id", job.RunnerRequestID),
-							slog.Int64("workflow_run_id", job.WorkflowRunID),
-							slog.String("reason", err.Error()),
-						)
-						continue
-					}
-					return fmt.Errorf("attest available job before acquire: %w", err)
-				}
-				jobKey := attestation.JobID
-				s.mu.Lock()
-				if _, exists := s.pending[jobKey]; !exists {
-					s.pending[jobKey] = pendingAdmissionJob{
-						Metadata:    job.JobMessageBase,
-						Attestation: attestation,
-						Workload:    workload,
-					}
-					stagedKeys = append(stagedKeys, jobKey)
-					requestIDs = append(requestIDs, job.RunnerRequestID)
-					capacity--
-				}
-				s.mu.Unlock()
-			}
-		} else {
-			for _, job := range msg.JobAvailableMessages {
-				requestIDs = append(requestIDs, job.RunnerRequestID)
-			}
-		}
+	requestIDs, stagedKeys, err := s.stageAvailableAdmissions(
+		ctx,
+		msg.JobAvailableMessages,
+	)
+	if err != nil {
+		return err
 	}
 
 	if s.admissionV2 {
