@@ -789,21 +789,24 @@ class MaintenanceServiceTests(unittest.TestCase):
     def test_controller_state_atomic_write_preserves_parent_owner_contract(self):
         lane = self.lane_state()
         target = lane / "reset-pending-test.json"
-        with mock.patch.object(maintenance.os, "chown") as chown:
-            # Force a visible owner mismatch while retaining real file I/O.
-            real_path_stat = pathlib.Path.stat
-            def fake_stat(path, *args, **kwargs):
-                value = real_path_stat(path, *args, **kwargs)
-                if path == lane:
-                    return mock.Mock(st_uid=value.st_uid + 1, st_gid=value.st_gid + 1)
-                return value
-            with mock.patch.object(pathlib.Path, "stat", fake_stat):
-                maintenance._atomic_json(
-                    target,
-                    {"schema_version": 1},
-                    inherit_parent_owner=True,
-                )
-        chown.assert_called_once()
+        with (
+            mock.patch.object(
+                maintenance,
+                "_owner_pair",
+                side_effect=[(1234, 5678), (0, 0)],
+            ),
+            mock.patch.object(maintenance.os, "chown") as chown,
+        ):
+            maintenance._atomic_json(
+                target,
+                {"schema_version": 1},
+                inherit_parent_owner=True,
+            )
+        chown.assert_called_once_with(
+            mock.ANY,
+            1234,
+            5678,
+        )
         self.assertEqual(target.stat().st_mode & 0o777, 0o600)
 
     def test_failed_root_mutation_persists_terminal_fail_closed_receipt(self):
