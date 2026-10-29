@@ -4,14 +4,57 @@ import { generateKeyPairSync } from "node:crypto";
 import { chmodSync, mkdtempSync, mkdirSync, writeFileSync, symlinkSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { Readable } from "node:stream";
 import {
+  RequestAdmissionLimiter,
   authorizeTaskExecution,
   canonicalize,
+  readBoundedJsonBody,
   readReceiptNoFollow,
   resolveProfile,
   signCanonical,
   verifyCanonical,
 } from "../src/core.js";
+
+test("MCP admission limiter freezes two inflight and eight queued", async () => {
+  const limiter = new RequestAdmissionLimiter({ maxInflight: 2, maxQueued: 8 });
+  const release1 = await limiter.acquire();
+  const release2 = await limiter.acquire();
+  const queued = Array.from({ length: 8 }, () => limiter.acquire());
+  assert.deepEqual(limiter.snapshot(), { inflight: 2, queued: 8 });
+  await assert.rejects(limiter.acquire(), /MCP_QUEUE_FULL/);
+
+  release1();
+  const release3 = await queued[0];
+  assert.deepEqual(limiter.snapshot(), { inflight: 2, queued: 7 });
+  release3();
+  const release4 = await queued[1];
+  release4();
+  release2();
+
+  for (let i = 2; i < queued.length; i += 1) {
+    const release = await queued[i];
+    release();
+  }
+  assert.deepEqual(limiter.snapshot(), { inflight: 0, queued: 0 });
+});
+
+test("MCP body parser rejects over 64 KiB before SDK parsing", async () => {
+  const valid = Buffer.from(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" }));
+  assert.deepEqual(
+    await readBoundedJsonBody(Readable.from([valid]), 65536),
+    { jsonrpc: "2.0", id: 1, method: "ping" },
+  );
+  const oversized = Buffer.alloc(65537, 0x20);
+  await assert.rejects(
+    readBoundedJsonBody(Readable.from([oversized]), 65536),
+    /MCP_REQUEST_TOO_LARGE/,
+  );
+  await assert.rejects(
+    readBoundedJsonBody(Readable.from([Buffer.from("{")]), 65536),
+    /MCP_REQUEST_INVALID/,
+  );
+});
 
 test("canonical JSON and Ed25519 signatures are deterministic", () => {
   assert.equal(canonicalize({ b: 2, a: [true, "x"] }), '{"a":[true,"x"],"b":2}');
