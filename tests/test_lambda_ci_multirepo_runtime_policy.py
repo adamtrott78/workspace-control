@@ -3,6 +3,7 @@ import json
 import sys
 import tempfile
 import threading
+import time
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -686,6 +687,13 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
                     )
                 ],
             )
+            for _ in range(100):
+                record = service.state_store.read(accepted["request_id"])
+                if record is not None and record.get("status") == "COMPLETED":
+                    break
+                time.sleep(0.01)
+            self.assertIsNotNone(record)
+            self.assertEqual(record["status"], "COMPLETED")
 
     def test_reconciler_renders_deterministic_non_secret_controller_env(self):
         cpu = reconciler.render_controller_env(PAD, "cpu")
