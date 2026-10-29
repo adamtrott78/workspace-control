@@ -373,16 +373,31 @@ def stable_running(service: str, seconds: int) -> dict[str, Any]:
     return {"first": first, "second": second, "settle_seconds": seconds}
 
 
-def build_controller(repo: pathlib.Path) -> pathlib.Path:
+def git_text(repo: pathlib.Path, invoker: str, path: str) -> str:
+    return run(
+        ["git", "-C", str(repo), "show", f"HEAD:{path}"],
+        user=invoker,
+    ).stdout
+
+
+def build_controller(repo: pathlib.Path, invoker: str) -> pathlib.Path:
     if not GO_BIN.is_file():
         raise ActivationError("isolated Go toolchain missing")
     version = run([str(GO_BIN), "env", "GOVERSION"]).stdout.strip()
     if version != "go1.26.3":
         raise ActivationError(f"Go version drift: {version}")
     root = pathlib.Path(tempfile.mkdtemp(prefix="workspace-ci-controller-hardening-"))
-    src = repo / "controller" / "lambda-ci-controller"
     work = root / "src"
-    shutil.copytree(src, work)
+    work.mkdir()
+    for rel in (
+        "controller/lambda-ci-controller/main.go",
+        "controller/lambda-ci-controller/attestation.go",
+        "controller/lambda-ci-controller/go.mod",
+    ):
+        (work / pathlib.Path(rel).name).write_text(
+            git_text(repo, invoker, rel),
+            encoding="utf-8",
+        )
     controller = pwd.getpwnam("ci-controller")
     for current, dirs, files in os.walk(root):
         os.chown(current, controller.pw_uid, controller.pw_gid)
@@ -532,11 +547,24 @@ def write_receipt(value: dict[str, Any]) -> None:
             pass
 
 
-def activate(repo: pathlib.Path, expected_head: str, before: dict[str, Any]) -> dict[str, Any]:
-    built = build_controller(repo)
+def activate(
+    repo: pathlib.Path,
+    expected_head: str,
+    invoker: str,
+    before: dict[str, Any],
+) -> dict[str, Any]:
+    built = build_controller(repo, invoker)
     candidate_sha = sha256_path(built)
-    source_unit = (repo / "templates/lambda-ci/workspace-ci-controller@.service.in").read_bytes()
-    source_maintenance = (repo / "scripts/lambda_ci_maintenance_service.py").read_bytes()
+    source_unit = git_text(
+        repo,
+        invoker,
+        "templates/lambda-ci/workspace-ci-controller@.service.in",
+    ).encode("utf-8")
+    source_maintenance = git_text(
+        repo,
+        invoker,
+        "scripts/lambda_ci_maintenance_service.py",
+    ).encode("utf-8")
     backup = save_backups()
 
     mutation_started = False
@@ -666,7 +694,7 @@ def main() -> int:
         )
         return 0
 
-    receipt = activate(repo, args.expected_head, before)
+    receipt = activate(repo, args.expected_head, invoker, before)
     print(
         "CONTROLLER_RELIABILITY_ACTIVATION_RECEIPT="
         + json.dumps(receipt, sort_keys=True)
