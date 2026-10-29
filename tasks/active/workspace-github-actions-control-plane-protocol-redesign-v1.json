@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-lambda-self-hosted-execution-v1",
-  "current_stage": "canonical_protocol_and_state_machine",
+  "current_stage": "producer_and_policy_compiler_design",
   "acceptance_criteria": [
     "Produce an end-to-end protocol graph from GitHub trigger through workflow/job construction, scale-set messages, controller attestation, root admission, launch-spec resolution, JIT runner creation, execution, completion, cleanup, replay, and recovery.",
     "Enumerate every parser, serializer, identifier, state machine, authority boundary, retry boundary, durable record, and scheduler/lifecycle signal in workspace-control and relevant research-engine workflows.",
@@ -42,7 +42,7 @@
       "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
       "remote": {
         "branch": "github-actions-control-plane-protocol-redesign-v1",
-        "checkpoint_sha": "620cf09b1140b6fde88bf2ae9cb8c5241aaebcb4",
+        "checkpoint_sha": "d5d3337a17c8ea3c0a62e9909b1a03cd11da7220",
         "verified": true
       },
       "local": null,
@@ -127,7 +127,7 @@
     },
     {
       "id": "canonical_protocol_and_state_machine",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -142,13 +142,16 @@
       ],
       "validation": [
         {
-          "check": "Initial canonical protocol model",
+          "check": "Canonical protocol and state-machine freeze",
           "result": "PASS",
           "evidence": [
-            "Nine homogeneous runner classes are modeled across the three projects.",
-            "Root capacity request schema v3 contains no human command, route, candidate SHA, PR number, or experiment selector.",
-            "Controller and root state machines separate GitHub scheduler lifecycle, job admission, runner capacity, durable root state, and policy outcomes.",
-            "Request-local policy denial is modeled as data and cannot terminate the listener process."
+            "Workspace Control Validation #1219 / run 40960220712 passed at compiler-contract checkpoint 0c3598165871a569094f0c46551dfe13bdb4bb78.",
+            "Target architecture uses nine homogeneous runner classes across workspace-control, PADataset and research-engine.",
+            "Root capacity authority is derived from unique controller Unix UID via SO_PEERCRED, not request-provided class/workload strings.",
+            "Capacity protocol is two-phase RESERVE -> LAUNCH with STATUS/CANCEL recovery; JIT registration is created only after root resource reservation.",
+            "State machines separate GitHub scheduler lifecycle, controller admission/supervision, runner instance, root capacity, maintenance and reconciliation.",
+            "Explicit host resource policy preserves current effective host-wide concurrency=1 during migration.",
+            "Runner-instance crash matrix covers every boundary before/after reservation, JIT generation, systemd unit creation, runner execution and cleanup."
           ]
         }
       ],
@@ -156,7 +159,7 @@
     },
     {
       "id": "producer_and_policy_compiler_design",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -169,7 +172,17 @@
         "research-engine policy",
         "migration compatibility adapter"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Single-source compiler design started",
+          "result": "PASS",
+          "evidence": [
+            "Projection compiler contract separates static desired policy from live deployment state.",
+            "One desired-policy catalog generates root, per-class controller and executor projections with one catalog-generation digest.",
+            "Typed executor action catalog covers all 23 registered execution routes and four maintenance operations; raw command strings are not executor API inputs."
+          ]
+        }
+      ],
       "resume_condition": "Executors can only construct schema-valid requests and root policy consumes typed claims rather than reparsing producer strings."
     },
     {
@@ -209,7 +222,7 @@
   ],
   "checkpoints": [],
   "blockers": [],
-  "next_safe_action": "Complete canonical_protocol_and_state_machine on PR #572: freeze runner-class local authentication, capacity request/response semantics, retry/ack rules, and generated controller/root policy projections. Do not apply PR #571 parser hotfix to Lambda, restart project controllers, retrigger host-attest, or mutate research-engine/PADataset runtime state.",
+  "next_safe_action": "Continue producer_and_policy_compiler_design on PR #572: freeze projection/deployment schemas and implement a repository-only compiler prototype that generates root/controller/executor projections and the 23-route compatibility matrix. Do not mutate Lambda, restart controllers, apply PR #571, or retrigger host-attest.",
   "artifacts": [
     {
       "path": "architecture/github-actions-control-plane-protocol-redesign-v1.md",
@@ -260,6 +273,36 @@
       "evidence": [
         "Defines class-specific controller workflow allowlist policy."
       ]
+    },
+    {
+      "path": "architecture/lambda-ci-host-resource-policy.v1.json",
+      "state": "MODEL_ONLY_ROOT_RESOURCE_POLICY",
+      "evidence": [
+        "Makes current accidental global serialization explicit as host_max_active_runners=1 for migration.",
+        "Defines atomic exclusive GPU reservations and release/containment rules."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-projection-compiler-contract.v1.json",
+      "state": "MODEL_ONLY_COMPILER_CONTRACT",
+      "evidence": [
+        "Defines source inputs, canonical catalog generation digest, root/controller/executor projections, deployment overlay separation and compile-fail invariants."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-executor-action-catalog.v1.json",
+      "state": "MODEL_ONLY_TYPED_EXECUTOR_API",
+      "evidence": [
+        "Contains 23 execution actions and four maintenance actions.",
+        "Executor selects action_id + typed arguments; builder will render canonical ingress syntax and reject unknown/invalid arguments locally."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-control-plane-verification-plan.v1.json",
+      "state": "FROZEN_REPOSITORY_ONLY_ACCEPTANCE_PLAN",
+      "evidence": [
+        "Covers all 23 routes, nine runner classes, three control planes, scheduler lifecycle, capacity protocol, resource contention, crash recovery, maintenance, reconciliation and migration equivalence."
+      ]
     }
   ],
   "validation": [
@@ -276,32 +319,35 @@
       ]
     },
     {
-      "check": "Initial canonical protocol model",
+      "check": "Canonical protocol and state-machine freeze",
       "result": "PASS",
       "evidence": [
-        "Nine homogeneous runner classes are modeled across the three projects.",
-        "Root capacity request schema v3 contains no human command, route, candidate SHA, PR number, or experiment selector.",
-        "Controller and root state machines separate GitHub scheduler lifecycle, job admission, runner capacity, durable root state, and policy outcomes.",
-        "Request-local policy denial is modeled as data and cannot terminate the listener process."
+        "Workspace Control Validation #1219 / run 40960220712 passed at compiler-contract checkpoint 0c3598165871a569094f0c46551dfe13bdb4bb78.",
+        "Target architecture uses nine homogeneous runner classes across workspace-control, PADataset and research-engine.",
+        "Root capacity authority is derived from unique controller Unix UID via SO_PEERCRED, not request-provided class/workload strings.",
+        "Capacity protocol is two-phase RESERVE -> LAUNCH with STATUS/CANCEL recovery; JIT registration is created only after root resource reservation.",
+        "State machines separate GitHub scheduler lifecycle, controller admission/supervision, runner instance, root capacity, maintenance and reconciliation.",
+        "Explicit host resource policy preserves current effective host-wide concurrency=1 during migration.",
+        "Runner-instance crash matrix covers every boundary before/after reservation, JIT generation, systemd unit creation, runner execution and cleanup."
       ]
     },
     {
-      "check": "External scheduler architecture research",
+      "check": "Single-source compiler design started",
       "result": "PASS",
       "evidence": [
-        "GitHub Runner Scale Set Client is the pinned scheduler-facing primitive; official guidance defines scale sets as homogeneous and TotalAssignedJobs as the scaling signal.",
-        "GitLab taskscaler/fleeting and Buildkite workload-specific queues independently reinforce separation of scheduler bookkeeping, infrastructure provider, and execution class."
+        "Projection compiler contract separates static desired policy from live deployment state.",
+        "One desired-policy catalog generates root, per-class controller and executor projections with one catalog-generation digest.",
+        "Typed executor action catalog covers all 23 registered execution routes and four maintenance operations; raw command strings are not executor API inputs."
       ]
     }
   ],
   "remaining_work": [
-    "Finalize the canonical runner-class capacity protocol and local controller authentication mechanism.",
-    "Freeze the class-specific controller policy projection and root runner-class projection generated from one catalog.",
-    "Define exact retry/backoff/ack behavior for transient GitHub, JIT, and root transport failures without using systemd restart as request retry.",
-    "Model and test controller restart, message redelivery, GitHub reassignment, root restart, JIT orphan cleanup, class quarantine, and scale-set migration.",
-    "Design generated executor command builders and migrate maintenance targeting from cpu/gpu lane to runner_class_id.",
-    "Design repository-only compatibility/property/state-machine tests covering all 23 registered routes and all nine proposed runner classes.",
-    "Only after repository-only verification, design bounded migration from the five current scale sets to the nine homogeneous runner-class scale sets."
+    "Finish producer/policy compiler design: exact projection schemas, catalog-generation digest algorithm, deployment-overlay schema, and class-specific systemd/controller identity projection.",
+    "Design the executor builder interface so every execution/maintenance trigger is selected by action_id and typed arguments rather than raw comment text.",
+    "Define legacy-to-v3 migration overlay preserving current workspace-control containment and research-engine GPU quarantine/retry-invalidated authority without implicit route activation.",
+    "Implement repository-only compiler/projection prototype and compatibility matrix for all 23 routes and nine runner classes.",
+    "Implement deterministic/state-machine/fault-injection verification plan; do not modify live Lambda.",
+    "Only after repository-only verification passes, design a separately authorized one-class-at-a-time migration and live acceptance."
   ],
   "last_executor": "chatgpt",
   "last_surface": "github+web",
