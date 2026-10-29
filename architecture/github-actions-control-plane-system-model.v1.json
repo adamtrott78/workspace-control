@@ -895,5 +895,223 @@
     "scheduler lifecycle state, local execution state, and policy result are distinct state machines",
     "executor APIs are generated from a versioned route catalog and cannot synthesize unsupported protocol strings",
     "host diagnostics, project reconciliation, and candidate execution remain separate authority planes"
-  ]
+  ],
+  "proposed_runner_classes": [
+    {
+      "runner_class_id": "workspace-control-control-small-v1",
+      "project_id": "workspace-control",
+      "proposed_scale_set_name": "lambda-workspace-control-control-small",
+      "execution_contract_id": "control-small-ci-v1",
+      "execution_profile": "control-small",
+      "gpu_count": 0,
+      "model_id": null,
+      "runtime_id": null,
+      "routes": [
+        "control-validation"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "padataset-cpu-public-v1",
+      "project_id": "padataset",
+      "proposed_scale_set_name": "lambda-padataset-cpu-public",
+      "execution_contract_id": "cpu-public-ci-v1",
+      "execution_profile": "cpu-test",
+      "gpu_count": 0,
+      "model_id": null,
+      "runtime_id": null,
+      "routes": [
+        "cpu-ci"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "padataset-gpu-single-public-v1",
+      "project_id": "padataset",
+      "proposed_scale_set_name": "lambda-padataset-gpu-single-public",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "gpu_count": 1,
+      "model_id": null,
+      "runtime_id": null,
+      "routes": [
+        "gpu-ci"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-cpu-public-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-cpu-public",
+      "execution_contract_id": "cpu-public-ci-v1",
+      "execution_profile": "cpu-test",
+      "gpu_count": 0,
+      "model_id": null,
+      "runtime_id": null,
+      "routes": [
+        "cpu-test",
+        "cpu-validation-exact-provenance"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-gpu-single-public-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-gpu-single-public",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "gpu_count": 1,
+      "model_id": null,
+      "runtime_id": null,
+      "routes": [
+        "gpu-experiment-public"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-gpu-single-runtime-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-gpu-single-runtime",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "gpu_count": 1,
+      "model_id": null,
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "routes": [
+        "gpu-small",
+        "model-eval-local-extract-amr-graph-v1",
+        "model-eval-local-extract-oracle-query-v1",
+        "model-eval-local-extract-reranker-v1"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-model-single-offline-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-model-single-offline",
+      "execution_contract_id": "model-single-offline-v1",
+      "execution_profile": "gpu-small",
+      "gpu_count": 1,
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "routes": [
+        "model-eval-single-gpu"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-model-dual-offline-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-model-dual-offline",
+      "execution_contract_id": "model-dual-offline-v1",
+      "execution_profile": "gpu-heavy",
+      "gpu_count": 2,
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "routes": [
+        "model-eval-dual-gpu"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-model-dual-public-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-model-dual-public",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "gpu_count": 2,
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "routes": [
+        "model-eval-exact-provenance-binding",
+        "model-eval-local-extract-wave1",
+        "model-eval-local-extract-wave2",
+        "model-eval-local-extract-wave3",
+        "model-eval-local-extract-wave4",
+        "model-eval-local-extract-wave5",
+        "model-eval-local-extract-wave6",
+        "model-eval-local-extract-wave7-intents",
+        "model-eval-local-extract-wave7a2",
+        "model-eval-local-extract-wave7a3",
+        "model-eval-obligation-validity"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    }
+  ],
+  "proposed_scale_set_count": 9,
+  "proposed_migration": {
+    "principle": "scale_set_is_homogeneous_runner_class",
+    "current_scale_set_count": 5,
+    "proposed_scale_set_count": 9,
+    "route_count": 23,
+    "changes": [
+      "move research-engine cpu-validation-exact-provenance from current gpu lane to research-cpu-public-v1",
+      "split current lambda-research-engine-gpu into five GPU runner classes",
+      "keep workspace-control and PADataset logically one class per existing lane but rename by capability rather than generic cpu/gpu lane",
+      "derive controller/root launch authority from runner_class_id and root-owned class catalog, not parsed JobDisplayName"
+    ],
+    "no_live_migration_before_repository_verification": true
+  },
+  "correlation_model": {
+    "problem": "JobAvailable may omit JobID; current controller resolves REST job by dynamic JobDisplayName equality and also parses that name for authority.",
+    "target": [
+      "trusted workflow has exactly one self-hosted job for a registered runner class, or each self-hosted job has a root-catalogued static job name",
+      "controller correlates WorkflowRunID + repository + trusted workflow path/ref + expected request labels/static job name to exactly one nonterminal REST job",
+      "JobDisplayName may be compared as an opaque expected static identifier only; it is never parsed for command, candidate SHA, route, or resource authority",
+      "REST numeric workflow job ID becomes canonical local job identity once resolved",
+      "recovery may use the Scale Set Client JobID when present but must reconcile it with the same REST numeric identity"
+    ]
+  },
+  "failure_algebra": {
+    "request_local": [
+      "POLICY_DENIED",
+      "UNTRUSTED_WORKFLOW",
+      "AMBIGUOUS_JOB_CORRELATION",
+      "CANDIDATE_WORKFLOW_GATE_FAILED",
+      "DUPLICATE_TERMINAL"
+    ],
+    "capacity_transient": [
+      "BUSY",
+      "JIT_REGISTRATION_TRANSIENT",
+      "ROOT_SOCKET_TRANSIENT"
+    ],
+    "controller_fatal": [
+      "SCALE_SET_SESSION_INVALID",
+      "MESSAGE_TRANSPORT_CORRUPTION",
+      "DURABLE_CONTROLLER_STATE_CORRUPTION",
+      "ROOT_RESPONSE_SCHEMA_CORRUPTION"
+    ],
+    "rule": "request-local outcomes are durably recorded/cleaned and Scale returns nil so the listener acks; only controller-fatal failures may stop listener.Run"
+  },
+  "state_machines": {
+    "github_scheduler": [
+      "QUEUED",
+      "AVAILABLE",
+      "ACQUIRED_ASSIGNED",
+      "STARTED",
+      "COMPLETED_OR_CANCELED_OR_REASSIGNED"
+    ],
+    "local_runner_capacity": [
+      "ABSENT",
+      "JIT_REGISTERED",
+      "PROVISIONING",
+      "IDLE_OR_STARTING",
+      "BUSY",
+      "TERMINAL",
+      "CLEANED"
+    ],
+    "policy": [
+      "UNOBSERVED",
+      "ATTESTED",
+      "ALLOWED",
+      "DENIED"
+    ],
+    "durable_request": [
+      "MISSING",
+      "ACCEPTED",
+      "COMPLETED",
+      "FAILED",
+      "QUARANTINED"
+    ]
+  }
 }
