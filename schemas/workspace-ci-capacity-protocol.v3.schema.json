@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workspace-ci-capacity-protocol.v3.schema.json",
+  "title": "Workspace CI Capacity Protocol v3",
+  "oneOf": [
+    {
+      "title": "Provision request",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "operation",
+        "request_id",
+        "runner_name",
+        "jit_config"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 3
+        },
+        "operation": {
+          "const": "PROVISION"
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "runner_name": {
+          "type": "string",
+          "pattern": "^lambda-[A-Za-z0-9._-]{3,127}$"
+        },
+        "jit_config": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 174764
+        }
+      }
+    },
+    {
+      "title": "Status request",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "operation",
+        "request_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 3
+        },
+        "operation": {
+          "const": "STATUS"
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    {
+      "title": "Provision response",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "operation",
+        "status",
+        "request_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 3
+        },
+        "operation": {
+          "const": "PROVISION_RESULT"
+        },
+        "status": {
+          "enum": [
+            "ACCEPTED",
+            "DUPLICATE",
+            "BUSY",
+            "POLICY_DENIED"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "receipt_status": {
+          "enum": [
+            "ACCEPTED",
+            "COMPLETED",
+            "FAILED"
+          ]
+        },
+        "error_code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]{3,96}$"
+        },
+        "error": {
+          "type": "string",
+          "maxLength": 2048
+        }
+      }
+    },
+    {
+      "title": "Status response",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "operation",
+        "status",
+        "request_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 3
+        },
+        "operation": {
+          "const": "STATUS_RESULT"
+        },
+        "status": {
+          "enum": [
+            "MISSING",
+            "ACCEPTED",
+            "COMPLETED",
+            "FAILED"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "runner_name": {
+          "type": "string"
+        },
+        "error_code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]{3,96}$"
+        },
+        "error": {
+          "type": "string",
+          "maxLength": 2048
+        }
+      }
+    }
+  ]
+}
