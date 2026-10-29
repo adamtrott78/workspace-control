@@ -25,7 +25,16 @@ test("canonical JSON and Ed25519 signatures are deterministic", () => {
 });
 
 test("profile grammars reject shell/interpreter/config escape shapes", () => {
-  assert.equal(resolveProfile("git-read", ["rev-parse", "HEAD"]).executable, "/usr/bin/git");
+  const gitRead = resolveProfile("git-read", ["rev-parse", "HEAD"]);
+  assert.equal(gitRead.executable, "/usr/bin/git");
+  assert.deepEqual(gitRead.argv.slice(0, 8), [
+    "-c", "core.hooksPath=/dev/null",
+    "-c", "core.fsmonitor=false",
+    "-c", "diff.external=",
+    "-c", "credential.helper=",
+  ]);
+  assert.deepEqual(gitRead.argv.slice(-2), ["rev-parse", "HEAD"]);
+  assert.equal(gitRead.env.GIT_TERMINAL_PROMPT, "0");
   assert.throws(
     () => resolveProfile("git-read", ["-c", "alias.x=!sh", "x"]),
     /PROFILE_ARGV_DENIED/,
