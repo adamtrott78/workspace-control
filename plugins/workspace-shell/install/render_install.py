@@ -15,6 +15,8 @@ import pwd
 HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parent
 CONFIG = PLUGIN / "config"
+REPO_ROOT = HERE.parents[2]
+AUTHORITY_ARTIFACT = REPO_ROOT / "architecture" / "workspace-shell-mcp-authority-v1.json"
 
 SERVICE_TEMPLATES = (
     "workspace-shell-job-launcher.service.in",
@@ -124,6 +126,10 @@ def render(args):
 
     authority_sha = exact_sha(args.design_authority_sha, "design_authority_sha")
     policy_digest = digest64(args.policy_artifact_sha256, "policy_artifact_sha256")
+    policy_bytes = AUTHORITY_ARTIFACT.read_bytes()
+    observed_policy_digest = sha256_bytes(policy_bytes)
+    if observed_policy_digest != policy_digest:
+        fail("policy_artifact_sha256 does not match repository authority artifact")
     tunnel_cert_digest = digest64(
         args.tunnel_client_cert_sha256,
         "tunnel_client_cert_sha256",
@@ -192,6 +198,7 @@ def render(args):
         "revocations": "/etc/workspace-shell/approval/revocations.json",
         "helper_registry": "/etc/workspace-shell/helpers/registry.json",
         "design_authority_sha": authority_sha,
+        "policy_artifact_path": "/etc/workspace-shell/policy/workspace-shell-mcp-authority-v1.json",
         "policy_artifact_sha256": policy_digest,
         "source_roots": {"workspace-control": source_root},
     }
@@ -212,6 +219,11 @@ def render(args):
     }
 
     files = {}
+    files["workspace-shell-mcp-authority-v1.json"] = write_bytes(
+        out / "workspace-shell-mcp-authority-v1.json",
+        policy_bytes,
+        0o644,
+    )
     for name, payload in (
         ("frontend.json", frontend),
         ("job-launcher.json", launcher),
@@ -249,6 +261,7 @@ def render(args):
         "source_tree": source_tree,
         "design_authority_sha": authority_sha,
         "policy_artifact_sha256": policy_digest,
+        "policy_artifact_install_path": "/etc/workspace-shell/policy/workspace-shell-mcp-authority-v1.json",
         "identities": {
             "frontend": {"uid": frontend_uid, "gid": frontend_gid},
             "worker": {"uid": worker_uid, "gid": worker_gid},
