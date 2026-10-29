@@ -289,6 +289,128 @@ func (a *neverCalledAttestor) Attest(
 	return controllerAttestation{}, nil
 }
 
+type staticAdmissionAttestor struct {
+	calls int
+}
+
+func (a *staticAdmissionAttestor) Attest(
+	_ context.Context,
+	job *scaleset.JobMessageBase,
+	scaleSetName string,
+	workload string,
+) (controllerAttestation, error) {
+	a.calls++
+	return controllerAttestation{
+		SchemaVersion:    2,
+		Source:           "test",
+		Repository:       "adamtrott78/research-engine",
+		ScaleSetName:     scaleSetName,
+		JobMessageType:   string(job.MessageType),
+		RunnerRequestID:  job.RunnerRequestID,
+		WorkflowRunID:    job.WorkflowRunID,
+		JobID:            "777",
+		JobDisplayName:   job.JobDisplayName,
+		CandidateSHA:     testCandidateSHA,
+	}, nil
+}
+
+func TestAvailableAdmissionIsStagedBeforeAggregateDivergenceDecision(t *testing.T) {
+	dir := t.TempDir()
+	attestor := &staticAdmissionAttestor{}
+	s := &scaler{
+		active:       make(map[string]string),
+		scaleSetID:   17,
+		projectID:    "research-engine",
+		lane:         "cpu",
+		scaleSetName: "lambda-research-engine",
+		runnerPrefix: "lambda-research-engine-",
+		stateDir:     dir,
+		admissionV2:  true,
+		attestor:     attestor,
+		pending:      make(map[string]pendingAdmissionJob),
+		logger:       slog.Default(),
+	}
+
+	available := availableCPUJob()
+	requestIDs, stagedKeys, err := s.stageAvailableAdmissions(
+		context.Background(),
+		[]*scaleset.JobAvailable{available},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if attestor.calls != 1 {
+		t.Fatalf("available claim was not independently attested: %d", attestor.calls)
+	}
+	if !reflect.DeepEqual(requestIDs, []int64{available.RunnerRequestID}) {
+		t.Fatalf("unexpected request ids: %#v", requestIDs)
+	}
+	if !reflect.DeepEqual(stagedKeys, []string{"777"}) {
+		t.Fatalf("unexpected staged keys: %#v", stagedKeys)
+	}
+	if got := reconstructableAssignedCount(len(s.active), len(s.pending)); got != 1 {
+		t.Fatalf("attested available claim was not reconstructable before divergence check: %d", got)
+	}
+	stats := &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1}
+	if stats.TotalAssignedJobs > reconstructableAssignedCount(len(s.active), len(s.pending)) {
+		t.Fatal("normal aggregate/lifecycle skew would still be classified as divergence")
+	}
+	if _, err := os.Stat(filepath.Join(dir, "quarantine.json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("staging authoritative available work unexpectedly created quarantine: %v", err)
+	}
+}
+
+func TestNewQuarantineInvalidatesOlderReadyRetryGate(t *testing.T) {
+	dir := t.TempDir()
+	s := &scaler{
+		active:       make(map[string]string),
+		scaleSetID:   88,
+		projectID:    "research-engine",
+		lane:         "gpu",
+		scaleSetName: "lambda-research-engine-gpu",
+		stateDir:     dir,
+		pending:      make(map[string]pendingAdmissionJob),
+		logger:       slog.Default(),
+	}
+	ready := map[string]any{
+		"schema_version": 1,
+		"status": "READY_FOR_SINGLE_RETRY",
+		"receipt_id": "11111111-2222-4333-8444-555555555555",
+		"project_id": "research-engine",
+		"lane": "gpu",
+		"scale_set_name": "lambda-research-engine-gpu",
+		"old_scale_set_id": 77,
+		"new_scale_set_id": 88,
+		"reset_generation": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+		"automatic_workflow_triggered": false,
+	}
+	if err := atomicWriteJSON(s.readyForSingleRetryPath(), ready); err != nil {
+		t.Fatal(err)
+	}
+	stats := &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1}
+	if err := s.persistAssignmentQuarantine(stats, 0, 0); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(s.readyForSingleRetryPath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(raw, &got); err != nil {
+		t.Fatal(err)
+	}
+	if got["status"] != "RECOVERY_RETRY_INVALIDATED" ||
+		got["previous_status"] != "READY_FOR_SINGLE_RETRY" {
+		t.Fatalf("older retry gate remained consumable: %#v", got)
+	}
+	if got["invalidated_by_quarantine_receipt_id"] != s.quarantineID {
+		t.Fatalf("retry invalidation was not bound to new quarantine: %#v", got)
+	}
+	if _, err := os.Stat(s.quarantinePath()); err != nil {
+		t.Fatalf("new quarantine was not durably persisted: %v", err)
+	}
+}
+
 func TestAssignmentDivergenceQuarantinesAndSuppressesNewAcquisition(t *testing.T) {
 	dir := t.TempDir()
 	client := &fakeRunnerJITClient{}
