@@ -18,7 +18,7 @@ PLUGIN = ROOT / "plugins" / "workspace-shell"
 ROOT_CODE = PLUGIN / "root"
 HOST_ATTEST = PLUGIN / "install" / "host_attest.py"
 RENDER_INSTALL = PLUGIN / "install" / "render_install.py"
-AUTHORITY_ARTIFACT = ROOT / "architecture" / "workspace-shell-mcp-authority-v1.json"
+AUTHORITY_ARTIFACT = ROOT / "architecture" / "workspace-shell-mcp-authority-v2.json"
 sys.path.insert(0, str(ROOT_CODE))
 
 job_launcher = importlib.import_module("job_launcher")
@@ -224,13 +224,13 @@ class WorkspaceShellContractTests(unittest.TestCase):
                 hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
             )
             self.assertEqual(
-                (out / "workspace-shell-mcp-authority-v1.json").read_bytes(),
+                (out / "workspace-shell-mcp-authority-v2.json").read_bytes(),
                 AUTHORITY_ARTIFACT.read_bytes(),
             )
             verifier = json.loads((out / "broker-verifier.json").read_text())
             self.assertEqual(
                 verifier["policy_artifact_path"],
-                "/etc/workspace-shell/policy/workspace-shell-mcp-authority-v1.json",
+                "/etc/workspace-shell/policy/workspace-shell-mcp-authority-v2.json",
             )
             self.assertTrue((out / "workspace-shell-mcp.service").is_file())
             self.assertTrue((out / "workspace-shell-sysusers.conf").is_file())
