@@ -147,6 +147,12 @@ class WorkspaceShellContractTests(unittest.TestCase):
             self.assertEqual(meta["type"], "file")
             self.assertEqual(meta["mode"], "0644")
 
+        with patch.object(module.os, "lstat", side_effect=PermissionError(13, "denied")):
+            hidden = module.path_meta("/host-hidden/example")
+        self.assertIsNone(hidden["exists"])
+        self.assertEqual(hidden["access_error"], "PermissionError")
+        self.assertEqual(hidden["errno"], 13)
+
         result = module.run(
             [sys.executable, "-c", "print('x' * 9000)"],
             timeout=3,
