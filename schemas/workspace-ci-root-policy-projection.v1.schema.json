@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workspace-ci-root-policy-projection.v1.schema.json",
+  "title": "Workspace CI Root Policy Projection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "control_plane_generation_sha256",
+    "root_policy_sha256",
+    "host_resource_policy",
+    "runner_classes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "control_plane_generation_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "root_policy_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "host_resource_policy": {
+      "type": "object"
+    },
+    "runner_classes": {
+      "type": "object",
+      "minProperties": 1
+    }
+  }
+}
