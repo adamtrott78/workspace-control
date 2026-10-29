@@ -52,7 +52,7 @@
         "OBSERVED",
         "ATTESTING",
         "TRUSTED",
-        "DENIED",
+        "ANOMALOUS_UNTRUSTED",
         "DEFERRED",
         "ACQUIRE_REQUESTED",
         "ACQUIRED"
@@ -65,13 +65,13 @@
         },
         {
           "from": "ATTESTING",
-          "event": "exact repository/workflow/blob/event/actor policy passes",
+          "event": "exact repository/workflow/ref/blob/event/actor/class-label policy passes",
           "to": "TRUSTED"
         },
         {
           "from": "ATTESTING",
-          "event": "stable policy mismatch",
-          "to": "DENIED"
+          "event": "stable structural policy mismatch",
+          "to": "ANOMALOUS_UNTRUSTED"
         },
         {
           "from": "ATTESTING",
@@ -80,21 +80,28 @@
         },
         {
           "from": "TRUSTED",
-          "event": "AcquireJobs called",
+          "event": "AcquireJobs called with RunnerRequestID",
           "to": "ACQUIRE_REQUESTED"
         },
         {
           "from": "ACQUIRE_REQUESTED",
-          "event": "RunnerRequestID returned as acquired",
+          "event": "request id returned as acquired",
           "to": "ACQUIRED"
         },
         {
           "from": "ACQUIRE_REQUESTED",
-          "event": "not acquired / reassigned / capacity changed",
+          "event": "not acquired / scheduler reassigned",
           "to": "DEFERRED"
         }
       ],
-      "invariant": "human command tokens, candidate SHA and experiment parameters are absent from infrastructure admission"
+      "anomaly_semantics": [
+        "ANOMALOUS_UNTRUSTED is not a root provisioner policy outcome because root is never contacted",
+        "controller never calls AcquireJobs for the anomalous RunnerRequestID",
+        "message handling may be acknowledged so controller liveness is preserved",
+        "the job remains scheduler-owned/unacquired; workflow/repository policy or operator cancellation is responsible for eventual terminal handling",
+        "repeated anomalous observations emit bounded durable evidence/alerting but cannot consume systemd restart budget"
+      ],
+      "invariant": "normal trusted workflows are precompiled to the class, so runtime admission denial indicates policy/workflow drift or attack, not ordinary control flow"
     },
     "controller_supervisor": {
       "owner": "runner-class controller process",
@@ -312,15 +319,12 @@
   "error_algebra": {
     "REQUEST_LOCAL": {
       "examples": [
-        "UNTRUSTED_WORKFLOW",
-        "EVENT_NOT_ALLOWED",
-        "ACTOR_NOT_ALLOWED",
-        "AMBIGUOUS_STATIC_JOB_CORRELATION",
-        "CLASS_QUARANTINED",
-        "DUPLICATE_TERMINAL"
+        "ANOMALOUS_UNTRUSTED_JOB",
+        "DUPLICATE_TERMINAL_LOCAL_STATE"
       ],
-      "listener_action": "handle durably and return nil; message may be acknowledged",
-      "process_action": "stay running"
+      "listener_action": "do not acquire anomalous request; persist bounded anomaly evidence; keep listener process alive",
+      "process_action": "stay running",
+      "note": "root capacity provider is not involved in workflow trust denial"
     },
     "DEFER_RETRYABLE": {
       "examples": [
