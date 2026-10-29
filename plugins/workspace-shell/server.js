@@ -508,12 +508,19 @@ const handler = async (req, res) => {
     }
   }
 
+  const requestStartedAt = Date.now();
   let release;
   try {
-    release = await admissionLimiter.acquire();
+    release = await admissionLimiter.acquire({
+      timeoutMs: MAX_MCP_REQUEST_RUNTIME_MS,
+    });
   } catch (error) {
     if (error instanceof ShellPolicyError && error.code === "MCP_QUEUE_FULL") {
       res.writeHead(503, { "retry-after": "1" }).end("Workspace Shell request queue is full");
+      return;
+    }
+    if (error instanceof ShellPolicyError && error.code === "MCP_QUEUE_TIMEOUT") {
+      res.writeHead(504).end("Workspace Shell request exceeded 90-second bound");
       return;
     }
     throw error;
@@ -533,6 +540,10 @@ const handler = async (req, res) => {
     server.close();
     release();
   };
+  const remainingRequestMs = Math.max(
+    1,
+    MAX_MCP_REQUEST_RUNTIME_MS - (Date.now() - requestStartedAt),
+  );
   const requestTimer = setTimeout(() => {
     if (!res.headersSent) {
       res.writeHead(504).end("Workspace Shell request exceeded 90-second bound");
@@ -540,7 +551,7 @@ const handler = async (req, res) => {
       res.destroy();
     }
     closeRequest();
-  }, MAX_MCP_REQUEST_RUNTIME_MS);
+  }, remainingRequestMs);
   res.on("close", closeRequest);
 
   try {
