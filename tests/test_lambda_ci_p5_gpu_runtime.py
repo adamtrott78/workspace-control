@@ -1092,6 +1092,24 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
             runtime.launch_cpu_runner = original_cpu
             runtime.launch_gpu_runner = original_gpu
 
+    def test_control_small_cpu_runtime_preserves_zero_gpu_boundary(self):
+        spec = {
+            "profile": "control-small",
+            "execution_contract": {
+                "execution_profile": "control-small",
+                "gpu_count": 1,
+            },
+            "resources": {
+                "gpu_indices": [0],
+            },
+            "allow_production_services": False,
+        }
+        with self.assertRaisesRegex(
+            runtime.RuntimeLaunchError,
+            "CPU semantic contract unexpectedly contains GPU authority",
+        ):
+            runtime.launch_cpu_runner(None, spec)
+
     def test_runtime_contains_no_github_credential_client(self):
         source = MODULE_PATH.read_text()
         for forbidden in (
