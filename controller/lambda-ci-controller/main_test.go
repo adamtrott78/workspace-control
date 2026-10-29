@@ -541,7 +541,7 @@ func TestAvailableAdmissionRejectionIsFailStable(t *testing.T) {
 	tests := []struct {
 		name            string
 		mutate          func(*scaleset.JobAvailable)
-		attestor        githubAttestor
+		attestor        jobAttestor
 		wantAttestCalls int
 	}{
 		{
