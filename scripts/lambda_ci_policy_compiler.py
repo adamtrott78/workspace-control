@@ -393,22 +393,51 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
 
     root_projection = {
         "schema_version": 1,
-        "catalog_generation_sha256": generation_sha,
+        "control_plane_generation_sha256": generation_sha,
         "host_resource_policy": copy.deepcopy(host_resources),
         "runner_classes": root_classes,
     }
+    root_projection["root_policy_sha256"] = sha256_object({
+        "schema_version": root_projection["schema_version"],
+        "host_resource_policy": root_projection["host_resource_policy"],
+        "runner_classes": {
+            class_id: {
+                key: value
+                for key, value in class_policy.items()
+                if key != "catalog_generation_sha256"
+            }
+            for class_id, class_policy in root_projection["runner_classes"].items()
+        },
+    })
+
+    controller_policy_digests = {}
+    for class_id, policy in controller_policies.items():
+        policy["control_plane_generation_sha256"] = generation_sha
+        policy["controller_policy_sha256"] = sha256_object({
+            key: value
+            for key, value in policy.items()
+            if key not in {"catalog_generation_sha256", "control_plane_generation_sha256", "controller_policy_sha256"}
+        })
+        controller_policy_digests[class_id] = policy["controller_policy_sha256"]
+
     executor_projection = {
         "schema_version": 1,
-        "catalog_generation_sha256": generation_sha,
+        "control_plane_generation_sha256": generation_sha,
         "execution_actions": executor_actions,
         "maintenance_actions": maintenance_actions,
     }
+    executor_projection["executor_policy_sha256"] = sha256_object({
+        key: value
+        for key, value in executor_projection.items()
+        if key not in {"control_plane_generation_sha256", "executor_policy_sha256"}
+    })
     compatibility.sort(key=lambda x: (x["project_id"], x["route_id"]))
 
     return {
         "catalog_generation_sha256": generation_sha,
         "root_projection": root_projection,
         "controller_projections": controller_policies,
+        "controller_policy_digests": controller_policy_digests,
         "executor_projection": executor_projection,
         "compatibility_matrix": compatibility,
     }
@@ -443,6 +472,8 @@ def _write_outputs(compiled: dict[str, Any], out: pathlib.Path) -> None:
         "schema_version": 1,
         "decision": "PASS",
         "catalog_generation_sha256": compiled["catalog_generation_sha256"],
+        "root_policy_sha256": compiled["root_projection"]["root_policy_sha256"],
+        "executor_policy_sha256": compiled["executor_projection"]["executor_policy_sha256"],
         "runner_class_count": len(compiled["root_projection"]["runner_classes"]),
         "route_count": len(compiled["compatibility_matrix"]),
         "controller_projection_count": len(compiled["controller_projections"]),
