@@ -86,7 +86,7 @@ export class RequestAdmissionLimiter {
     this.queue = [];
   }
 
-  acquire() {
+  acquire({ timeoutMs = null } = {}) {
     if (this.inflight < this.maxInflight) {
       return Promise.resolve(this.#grant());
     }
@@ -96,8 +96,25 @@ export class RequestAdmissionLimiter {
         "Workspace Shell request queue is full",
       ));
     }
-    return new Promise((resolve) => {
-      this.queue.push(resolve);
+    if (timeoutMs !== null && (!Number.isInteger(timeoutMs) || timeoutMs < 1)) {
+      return Promise.reject(new ShellPolicyError(
+        "ADMISSION_CONFIG_INVALID",
+        "queue timeout must be a positive integer",
+      ));
+    }
+    return new Promise((resolve, reject) => {
+      const entry = { resolve, reject, timer: null };
+      if (timeoutMs !== null) {
+        entry.timer = setTimeout(() => {
+          const index = this.queue.indexOf(entry);
+          if (index >= 0) this.queue.splice(index, 1);
+          reject(new ShellPolicyError(
+            "MCP_QUEUE_TIMEOUT",
+            "Workspace Shell request exceeded queue-time bound",
+          ));
+        }, timeoutMs);
+      }
+      this.queue.push(entry);
     });
   }
 
@@ -109,7 +126,10 @@ export class RequestAdmissionLimiter {
       released = true;
       this.inflight -= 1;
       const next = this.queue.shift();
-      if (next) next(this.#grant());
+      if (next) {
+        if (next.timer) clearTimeout(next.timer);
+        next.resolve(this.#grant());
+      }
     };
   }
 
