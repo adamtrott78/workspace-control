@@ -145,6 +145,83 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
             [],
         )
 
+    def test_execution_parameter_schema_cannot_select_runner_class(self):
+        inputs = copy.deepcopy(self.inputs)
+        schema = inputs["parameter_schemas"]["schemas"]["candidate-sha-v1"]
+        schema["arguments"].append({
+            "name": "runner_class_id",
+            "type": "catalog_runner_class_id",
+            "required": True,
+        })
+        with self.assertRaisesRegex(
+            compiler.CompileError,
+            "execution ingress cannot select infrastructure identity",
+        ):
+            self.compile(inputs)
+
+    def test_execution_parameter_schema_rejects_root_authority_names(self):
+        inputs = copy.deepcopy(self.inputs)
+        schema = inputs["parameter_schemas"]["schemas"]["candidate-sha-v1"]
+        schema["arguments"].append({
+            "name": "gpu_profile",
+            "type": "enum",
+            "required": True,
+            "values": ["small", "heavy"],
+        })
+        with self.assertRaisesRegex(
+            compiler.CompileError,
+            "argument name implies root authority",
+        ):
+            self.compile(inputs)
+
+    def test_ingress_command_change_does_not_change_root_or_controller_policy(self):
+        baseline = self.compile()
+        inputs = copy.deepcopy(self.inputs)
+        route = inputs["catalog"]["projects"]["workspace-control"]["routes"]["control-validation"]
+        route["ingress"]["command"] = "/workspace-control-validate-v3"
+        changed = self.compile(inputs)
+
+        self.assertNotEqual(
+            baseline["catalog_generation_sha256"],
+            changed["catalog_generation_sha256"],
+        )
+        self.assertEqual(
+            baseline["root_projection"]["root_policy_sha256"],
+            changed["root_projection"]["root_policy_sha256"],
+        )
+        self.assertEqual(
+            baseline["controller_policy_digests"],
+            changed["controller_policy_digests"],
+        )
+        self.assertNotEqual(
+            baseline["executor_projection"]["executor_policy_sha256"],
+            changed["executor_projection"]["executor_policy_sha256"],
+        )
+
+    def test_executor_enum_change_does_not_change_root_or_controller_policy(self):
+        baseline = self.compile()
+        inputs = copy.deepcopy(self.inputs)
+        schema = inputs["parameter_schemas"]["schemas"]["candidate-sha-reasoner-probe-v1"]
+        enum_arg = next(arg for arg in schema["arguments"] if arg["name"] == "candidate_id")
+        enum_arg["values"] = [
+            "qwen35-9b-q6-resource",
+            "qwythos-9b-v2-q6-resource",
+            "future-diagnostic-only",
+        ]
+        changed = self.compile(inputs)
+        self.assertEqual(
+            baseline["root_projection"]["root_policy_sha256"],
+            changed["root_projection"]["root_policy_sha256"],
+        )
+        self.assertEqual(
+            baseline["controller_policy_digests"],
+            changed["controller_policy_digests"],
+        )
+        self.assertNotEqual(
+            baseline["executor_projection"]["executor_policy_sha256"],
+            changed["executor_projection"]["executor_policy_sha256"],
+        )
+
     def test_reasoner_selector_is_executor_only(self):
         result = self.compile()
         action = result["executor_projection"]["execution_actions"][
