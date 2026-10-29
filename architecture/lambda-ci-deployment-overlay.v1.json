@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "overlay_id": "lambda-ci-v3-migration-initial-v1",
+  "catalog_generation_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "status_note": "MODEL TEMPLATE ONLY. Zero digest intentionally denotes not yet compiled/frozen generation; compiler replaces it before any deployment review.",
+  "classes": {
+    "workspace-control-control-small-v1": {
+      "install_state": "NOT_INSTALLED",
+      "controller_state": "INACTIVE",
+      "containment": {
+        "state": "CLEAR",
+        "source": null
+      }
+    },
+    "padataset-cpu-public-v1": {
+      "install_state": "NOT_INSTALLED",
+      "controller_state": "INACTIVE",
+      "containment": {
+        "state": "CLEAR",
+        "source": null
+      }
+    },
+    "padataset-gpu-single-public-v1": {
+      "install_state": "NOT_INSTALLED",
+      "controller_state": "INACTIVE",
+      "containment": {
+        "state": "CLEAR",
+        "source": null
+      }
+    },
+    "research-cpu-public-v1": {
+      "install_state": "NOT_INSTALLED",
+      "controller_state": "INACTIVE",
+      "containment": {
+        "state": "CLEAR",
+        "source": null
+      }
+    },
+    "research-gpu-single-public-v1": {
+      "install_state": "NOT_INSTALLED",
+      "controller_state": "INACTIVE",
+      "containment": {
+        "state": "INHERITED_CONTAINED",
+        "source": "legacy research-engine-gpu containment must be explicitly consumed during migration"
+      }
+    },
+    "research-gpu-single-runtime-v1": {
+      "install_state": "NOT_INSTALLED",
+      "controller_state": "INACTIVE",
+      "containment": {
+        "state": "INHERITED_CONTAINED",
+        "source": "legacy research-engine-gpu containment must be explicitly consumed during migration"
+      }
+    },
+    "research-model-single-offline-v1": {
+      "install_state": "NOT_INSTALLED",
+      "controller_state": "INACTIVE",
+      "containment": {
+        "state": "INHERITED_CONTAINED",
+        "source": "legacy research-engine-gpu containment must be explicitly consumed during migration"
+      }
+    },
+    "research-model-dual-offline-v1": {
+      "install_state": "NOT_INSTALLED",
+      "controller_state": "INACTIVE",
+      "containment": {
+        "state": "INHERITED_CONTAINED",
+        "source": "legacy research-engine-gpu containment must be explicitly consumed during migration"
+      }
+    },
+    "research-model-dual-public-v1": {
+      "install_state": "NOT_INSTALLED",
+      "controller_state": "INACTIVE",
+      "containment": {
+        "state": "INHERITED_CONTAINED",
+        "source": "legacy research-engine-gpu containment must be explicitly consumed during migration"
+      }
+    }
+  },
+  "routes": {
+    "research-engine:cpu-test": {
+      "admission_state": "DISABLED",
+      "source": "migration default: new v3 route disabled until explicit cutover acceptance"
+    },
+    "research-engine:gpu-small": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-single-gpu": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-dual-gpu": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-wave1": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-wave2": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-wave3": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-wave4": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-wave5": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-wave6": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-reranker-v1": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-oracle-query-v1": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-wave7-intents": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-wave7a2": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-wave7a3": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-local-extract-amr-graph-v1": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-obligation-validity": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:cpu-validation-exact-provenance": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:model-eval-exact-provenance-binding": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "research-engine:gpu-experiment-public": {
+      "admission_state": "DISABLED",
+      "source": "migration default: legacy research-engine GPU-lane route remains contained until explicit acceptance"
+    },
+    "padataset:cpu-ci": {
+      "admission_state": "DISABLED",
+      "source": "migration default: new v3 route disabled until explicit cutover acceptance"
+    },
+    "padataset:gpu-ci": {
+      "admission_state": "DISABLED",
+      "source": "migration default: new v3 route disabled until explicit cutover acceptance"
+    },
+    "workspace-control:control-validation": {
+      "admission_state": "DISABLED",
+      "source": "migration default: new v3 route disabled until explicit cutover acceptance"
+    }
+  },
+  "legacy": {
+    "controllers": {
+      "workspace-control-cpu": "PRESENT_INACTIVE",
+      "research-engine-cpu": "PRESENT_INACTIVE",
+      "research-engine-gpu": "PRESENT_INACTIVE",
+      "padataset-cpu": "PRESENT_ACTIVE",
+      "padataset-gpu": "PRESENT_ACTIVE"
+    },
+    "scale_sets": {
+      "lambda-workspace-control": "PRESENT",
+      "lambda-research-engine": "PRESENT",
+      "lambda-research-engine-gpu": "PRESENT",
+      "lambda-padataset": "PRESENT",
+      "lambda-padataset-gpu": "PRESENT"
+    },
+    "quarantine_receipts": [
+      "research-engine-gpu:a7880e15-b29c-4b2b-bccd-3a34745f9ded"
+    ],
+    "retry_receipts": [
+      "research-engine-gpu:3eeffae8-2bd0-4344-b89f-02afbf1a445b:RECOVERY_RETRY_INVALIDATED"
+    ]
+  },
+  "invariants": [
+    "catalog compilation never changes controller_state or admission_state",
+    "new classes are INSTALLED_INACTIVE before any activation transaction",
+    "every route starts DISABLED in migration overlay and is enabled only by explicit class/route acceptance",
+    "legacy quarantine/retry authority is preserved until explicitly consumed by migration",
+    "retiring a legacy scale set occurs only after no queued/assigned/running jobs and target class acceptance"
+  ]
+}
