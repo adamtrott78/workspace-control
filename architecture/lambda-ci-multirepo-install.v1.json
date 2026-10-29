@@ -8,11 +8,11 @@
   "source_blobs": [
     {
       "path": "controller/lambda-ci-controller/attestation.go",
-      "git_blob_sha": "9866c66aaa76a662eb500664e9f4b7345cc7f570"
+      "git_blob_sha": "4f2762e7b005fb5ecf5b66b406f22843f8e19ad1"
     },
     {
       "path": "controller/lambda-ci-controller/main.go",
-      "git_blob_sha": "a1f05f3c69a8168fb6cbeeb981ed7d28299d9324"
+      "git_blob_sha": "36ac0029cbe6955b22e14c2630d635f1bd5f378f"
     },
     {
       "path": "controller/lambda-ci-controller/go.mod",
@@ -61,7 +61,7 @@
     },
     {
       "path": "templates/lambda-ci/workspace-ci-controller@.service.in",
-      "git_blob_sha": "03ee9278bfcc8d9a455ecdacefd7bee5bd4a50b7"
+      "git_blob_sha": "1cbc879695bd2b4f9f3d1e24f68eb5aa6e641ef2"
     },
     {
       "path": "templates/lambda-ci/workspace-ci-provisioner-multirepo.service.in",
