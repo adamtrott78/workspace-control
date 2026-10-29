@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shutil
 import sys
 import tempfile
 import time
@@ -25,7 +26,54 @@ runtime_common = importlib.import_module("runtime_common")
 
 
 class WorkspaceShellContractTests(unittest.TestCase):
+    @staticmethod
+    def _node20_binary():
+        candidates = []
+        override = os.environ.get("WORKSPACE_SHELL_NODE")
+        if override:
+            candidates.append(Path(override))
+
+        runner_temp = os.environ.get("RUNNER_TEMP")
+        if runner_temp:
+            runner_root = Path(runner_temp).resolve().parents[1]
+            candidates.extend([
+                runner_root / "externals" / "node24" / "bin" / "node",
+                runner_root / "externals" / "node20" / "bin" / "node",
+            ])
+
+        system_node = shutil.which("node")
+        if system_node:
+            candidates.append(Path(system_node))
+
+        checked = []
+        for candidate in candidates:
+            value = str(candidate)
+            if value in checked or not candidate.is_file():
+                continue
+            checked.append(value)
+            proc = subprocess.run(
+                [value, "--version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=5,
+            )
+            if proc.returncode != 0:
+                continue
+            version = proc.stdout.strip().lstrip("v")
+            try:
+                major = int(version.split(".", 1)[0])
+            except (ValueError, IndexError):
+                continue
+            if major >= 20:
+                return value
+        raise AssertionError(
+            "Workspace Shell tests require Node >=20; checked: "
+            + ", ".join(checked)
+        )
+
     def test_node_policy_and_approval_adversarial_suite(self):
+        node = self._node20_binary()
         files = [
             "server.js",
             "src/core.js",
@@ -33,7 +81,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
         ]
         for relative in files:
             proc = subprocess.run(
-                ["node", "--check", str(PLUGIN / relative)],
+                [node, "--check", str(PLUGIN / relative)],
                 cwd=PLUGIN,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -43,7 +91,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
 
         proc = subprocess.run(
             [
-                "node",
+                node,
                 "--test",
                 str(PLUGIN / "test" / "core.test.js"),
                 str(PLUGIN / "test" / "broker-verifier.test.js"),
@@ -93,6 +141,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             p = Path(td) / "sample"
             p.write_text("x")
+            p.chmod(0o644)
             meta = module.path_meta(p)
             self.assertTrue(meta["exists"])
             self.assertEqual(meta["type"], "file")
@@ -234,9 +283,9 @@ class WorkspaceShellContractTests(unittest.TestCase):
             cwd=ROOT,
             text=True,
         ).strip()
-        expected_body = f"/workspace-control-validate {actual_sha}"
+        expected_body = f"/workspace-control-validate {actual_sha} host-attest"
         if issue_number != 552 or body != expected_body:
-            self.skipTest("live host attestation not requested for Workspace Shell PR")
+            self.skipTest("live host attestation not explicitly requested for Workspace Shell PR")
 
         proc = subprocess.run(
             [
