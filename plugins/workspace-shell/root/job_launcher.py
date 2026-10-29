@@ -301,6 +301,9 @@ def build_systemd_run_command(cfg, unit, bwrap_cmd, worker_uid, worker_gid, scra
         "CapabilityBoundingSet=",
         "TasksMax=48",
         "MemoryMax=1G",
+        "CPUAccounting=yes",
+        "CPUQuota=100%",
+        "RuntimeMaxSec=90s",
         "KillMode=control-group",
         "TimeoutStopSec=2s",
         "UMask=0077",
@@ -370,20 +373,43 @@ def _unit_state(cfg, unit):
     return values
 
 
-def _cgroup_pids(control_group):
+def _cgroup_path(control_group):
     if not control_group:
-        return []
+        return None
     base = Path("/sys/fs/cgroup").resolve()
     candidate = (base / control_group.lstrip("/")).resolve()
     try:
         candidate.relative_to(base)
     except ValueError:
         fail("CGROUP_PATH_ESCAPE", "systemd returned a control group outside cgroup root")
-    procs = candidate / "cgroup.procs"
+    return candidate
+
+
+def _cgroup_pids(control_group):
+    candidate = _cgroup_path(control_group)
+    if candidate is None:
+        return []
     try:
-        return [line.strip() for line in procs.read_text().splitlines() if line.strip()]
+        return [
+            line.strip()
+            for line in (candidate / "cgroup.procs").read_text().splitlines()
+            if line.strip()
+        ]
     except FileNotFoundError:
         return []
+
+
+def _cgroup_kill(control_group):
+    candidate = _cgroup_path(control_group)
+    if candidate is None:
+        return False
+    try:
+        (candidate / "cgroup.kill").write_text("1\n", encoding="ascii")
+        return True
+    except FileNotFoundError:
+        return False
+    except OSError as exc:
+        fail("CGROUP_KILL_FAILED", f"unable to kill residual cgroup: {exc}")
 
 
 def cleanup_state(cfg, unit):
@@ -404,6 +430,10 @@ def cleanup_state(cfg, unit):
         observed = _unit_state(cfg, unit)
         if observed is not None and observed.get("ActiveState") not in {"inactive", "failed"}:
             killer(signal.SIGKILL)
+
+    observed = _unit_state(cfg, unit)
+    if observed is not None and _cgroup_pids(observed.get("ControlGroup")):
+        _cgroup_kill(observed.get("ControlGroup"))
 
     deadline = time.monotonic() + 2.0
     last = None
