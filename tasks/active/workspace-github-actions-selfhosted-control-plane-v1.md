@@ -45,7 +45,6 @@ Hold all scientific GPU execution. Capture one bounded read-only research-engine
 - Implement and validate admission ordering, recovery-state lifecycle, state-file ownership, stable restart certification, and restart-storm containment.
 - Run full workspace-control validation on the complete hardening batch.
 - Perform the owning workflow's final authority-sensitive activation review only once the implementation batch is stable; do not reintroduce iterative independent-review loops during ordinary implementation.
-
 - Dogfood merged review_automation on this exact state-only closure PR: create the authority-sensitive request through the default-branch issue_comment command, obtain a fresh independent disposition, and verify the automation posts an ACCEPTED consumption receipt without operator prompt-copy plumbing.
 - After dogfood acceptance, design the next steady-state/P2 tranche under a separate exact review gate; do not start the automatic reconcile-controller or widen live admission in this closure.
 - Then remove routine hosted-runner dependence only after private-repository steady-state CI is proven under reviewed boundaries.
