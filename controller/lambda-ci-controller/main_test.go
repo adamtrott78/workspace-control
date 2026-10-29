@@ -289,6 +289,20 @@ func (a *neverCalledAttestor) Attest(
 	return controllerAttestation{}, nil
 }
 
+type rejectingAdmissionAttestor struct {
+	calls int
+}
+
+func (a *rejectingAdmissionAttestor) Attest(
+	context.Context,
+	*scaleset.JobMessageBase,
+	string,
+	string,
+) (controllerAttestation, error) {
+	a.calls++
+	return controllerAttestation{}, fmt.Errorf("synthetic admission rejection")
+}
+
 type staticAdmissionAttestor struct {
 	calls int
 }
@@ -435,8 +449,23 @@ func TestAssignmentDivergenceQuarantinesAndSuppressesNewAcquisition(t *testing.T
 	}); err != nil {
 		t.Fatal(err)
 	}
+	if s.quarantined {
+		t.Fatalf("aggregate-only startup skew falsely quarantined lane: %#v", s)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "quarantine.json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("aggregate-only skew created durable quarantine: %v", err)
+	}
+
+	incomplete := assignedCPUJob()
+	incomplete.JobWorkflowRef = ""
+	if err := s.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics:          &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+		JobAssignedMessages: []*scaleset.JobAssigned{incomplete},
+	}); err != nil {
+		t.Fatal(err)
+	}
 	if !s.quarantined || s.quarantineID == "" {
-		t.Fatalf("assignment divergence did not quarantine lane: %#v", s)
+		t.Fatalf("unreconstructable lifecycle evidence did not quarantine lane: %#v", s)
 	}
 	if _, err := os.Stat(filepath.Join(dir, "quarantine.json")); err != nil {
 		t.Fatalf("durable quarantine receipt missing: %v", err)
@@ -457,6 +486,40 @@ func TestAssignmentDivergenceQuarantinesAndSuppressesNewAcquisition(t *testing.T
 	}
 	if !s.quarantined {
 		t.Fatal("aggregate zero improperly auto-cleared quarantine")
+	}
+}
+
+func TestAssignedAttestationRejectionQuarantinesWithoutCrashingController(t *testing.T) {
+	dir := t.TempDir()
+	attestor := &rejectingAdmissionAttestor{}
+	s := &scaler{
+		active:       make(map[string]string),
+		scaleSetID:   17,
+		projectID:    "research-engine",
+		lane:         "gpu",
+		scaleSetName: "lambda-research-engine-gpu",
+		runnerPrefix: "lambda-research-engine-gpu-",
+		stateDir:     dir,
+		admissionV2:  true,
+		attestor:     attestor,
+		pending:      make(map[string]pendingAdmissionJob),
+		logger:       slog.Default(),
+	}
+	assigned := assignedCPUJob()
+	if err := s.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics:          &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+		JobAssignedMessages: []*scaleset.JobAssigned{assigned},
+	}); err != nil {
+		t.Fatalf("admission rejection escaped as controller-fatal error: %v", err)
+	}
+	if attestor.calls != 1 {
+		t.Fatalf("assigned recovery metadata was not attested: %d", attestor.calls)
+	}
+	if !s.quarantined {
+		t.Fatal("rejected assigned metadata did not fail lane closed")
+	}
+	if _, err := os.Stat(s.quarantinePath()); err != nil {
+		t.Fatalf("rejected assigned metadata did not persist quarantine: %v", err)
 	}
 }
 
