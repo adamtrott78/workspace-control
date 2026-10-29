@@ -955,6 +955,12 @@
       "severity": "CHECKED_OK",
       "finding": "all 23 registered trusted route workflows currently contain exactly one top-level job",
       "consequence": "target policy compiler can enforce one self-hosted job per trusted route/class and remove runtime display-name correlation entirely"
+    },
+    {
+      "id": "F11_GLOBAL_ACTIVE_CONCURRENCY",
+      "severity": "ARCHITECTURAL",
+      "finding": "root provisioner stores one global _active request set but compares its length against each request project's manifest concurrency value; all three current manifests set concurrency=1",
+      "consequence": "the host is effectively globally serialized even though concurrency appears project-scoped; this accidentally prevents resource collisions but obscures the actual scheduling policy"
     }
   ],
   "target_invariants": [
@@ -1354,5 +1360,50 @@
     "runner_execution": "runner-class-capacity-v3",
     "maintenance": "runner-class-maintenance-v2",
     "reconciliation": "runner-class-reconciliation-v2"
+  },
+  "target_resource_allocator": {
+    "authority": "root capacity provider",
+    "resource_dimensions": [
+      "explicit host-wide active-runner ceiling",
+      "project active-runner ceiling",
+      "runner-class active-runner ceiling",
+      "exclusive GPU UUID set",
+      "systemd CPU quota",
+      "systemd memory ceiling",
+      "scratch/staging disk ceilings",
+      "future explicit scarce trusted-service or accelerator locks"
+    ],
+    "initial_migration_policy": {
+      "host_max_active_runners": 1,
+      "rationale": "preserve the current effective global serialization while replacing protocol/scheduler semantics; capacity expansion is a separate post-migration performance decision",
+      "project_max_active_runners": {
+        "workspace-control": 1,
+        "padataset": 1,
+        "research-engine": 1
+      }
+    },
+    "gpu_resources": {
+      "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea": {
+        "exclusivity": "EXCLUSIVE",
+        "current_consumers": [
+          "padataset-gpu-single-public-v1",
+          "research-gpu-single-public-v1",
+          "research-gpu-single-runtime-v1",
+          "research-model-single-offline-v1",
+          "research-model-dual-offline-v1",
+          "research-model-dual-public-v1"
+        ]
+      },
+      "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6": {
+        "exclusivity": "EXCLUSIVE",
+        "current_consumers": [
+          "research-model-dual-offline-v1",
+          "research-model-dual-public-v1"
+        ]
+      }
+    },
+    "allocation_rule": "a runner instance may be launched only after all host/project/class concurrency and exclusive-resource claims are atomically reserved by root",
+    "release_rule": "resource reservation is released only after runner terminal state plus containment cleanup verification",
+    "migration_rule": "protocol migration keeps host_max_active_runners=1; a later independently validated resource-utilization task may raise CPU/project concurrency after contention tests"
   }
 }
