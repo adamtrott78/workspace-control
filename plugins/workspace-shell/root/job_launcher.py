@@ -140,11 +140,18 @@ def resolve_profile(manifest, profile, argv):
 
     if profile == "git-read":
         validate_git_read(argv)
-        resolved = argv
+        resolved = [
+            "-c", "core.hooksPath=/dev/null",
+            "-c", "core.fsmonitor=false",
+            "-c", "diff.external=",
+            "-c", "credential.helper=",
+            *argv,
+        ]
         env = {
             "GIT_CONFIG_NOSYSTEM": "1",
             "GIT_CONFIG_GLOBAL": "/dev/null",
             "GIT_OPTIONAL_LOCKS": "0",
+            "GIT_TERMINAL_PROMPT": "0",
         }
     elif profile == "pytest-bounded":
         validate_pytest(argv)
