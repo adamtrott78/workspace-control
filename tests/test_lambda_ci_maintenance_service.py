@@ -171,13 +171,25 @@ class MaintenanceServiceTests(unittest.TestCase):
 
         def fake_run(argv, check=True):
             calls.append(argv)
-            if argv[:3] == ["systemctl", "is-active", "--quiet"]:
-                return mock.Mock(returncode=3, stdout="", stderr="")
             if argv[:2] == ["systemctl", "list-units"]:
                 return mock.Mock(returncode=0, stdout="", stderr="")
             raise AssertionError(f"unexpected command: {argv!r}")
 
-        with mock.patch.object(maintenance, "_run", side_effect=fake_run):
+        with (
+            mock.patch.object(maintenance, "_run", side_effect=fake_run),
+            mock.patch.object(
+                maintenance,
+                "_service_snapshot",
+                return_value={
+                    "LoadState": "loaded",
+                    "ActiveState": "inactive",
+                    "SubState": "dead",
+                    "ExecMainStatus": "0",
+                    "NRestarts": "0",
+                    "Restart": "on-failure",
+                },
+            ),
+        ):
             result = maintenance.apply_request(
                 request("DIAGNOSE_LANE"),
                 registry_path=self.registry_path,
@@ -316,7 +328,15 @@ class MaintenanceServiceTests(unittest.TestCase):
 
         with (
             mock.patch.object(maintenance, "_run", side_effect=fake_run),
-            mock.patch.object(maintenance, "_service_active", return_value=True),
+            mock.patch.object(
+                maintenance,
+                "_require_stable_running",
+                return_value={
+                    "settle_seconds": 8,
+                    "first": {"ActiveState": "active", "SubState": "running", "ExecMainStatus": "0", "NRestarts": "0", "LoadState": "loaded"},
+                    "second": {"ActiveState": "active", "SubState": "running", "ExecMainStatus": "0", "NRestarts": "0", "LoadState": "loaded"},
+                },
+            ),
         ):
             receipt = maintenance.apply_request(
                 request(
@@ -358,7 +378,15 @@ class MaintenanceServiceTests(unittest.TestCase):
                     calls.append(argv) or mock.Mock(returncode=0, stdout="", stderr="")
                 ),
             ),
-            mock.patch.object(maintenance, "_service_active", return_value=True),
+            mock.patch.object(
+                maintenance,
+                "_require_stable_running",
+                return_value={
+                    "settle_seconds": 8,
+                    "first": {"ActiveState": "active", "SubState": "running", "ExecMainStatus": "0", "NRestarts": "0", "LoadState": "loaded"},
+                    "second": {"ActiveState": "active", "SubState": "running", "ExecMainStatus": "0", "NRestarts": "0", "LoadState": "loaded"},
+                },
+            ),
         ):
             first = maintenance.apply_request(
                 request("RESTART_CONTROLLER"),
@@ -399,7 +427,15 @@ class MaintenanceServiceTests(unittest.TestCase):
         )
         with (
             mock.patch.object(maintenance, "_run", side_effect=fake_run),
-            mock.patch.object(maintenance, "_service_active", return_value=True),
+            mock.patch.object(
+                maintenance,
+                "_require_stable_running",
+                return_value={
+                    "settle_seconds": 8,
+                    "first": {"ActiveState": "active", "SubState": "running", "ExecMainStatus": "0", "NRestarts": "0", "LoadState": "loaded"},
+                    "second": {"ActiveState": "active", "SubState": "running", "ExecMainStatus": "0", "NRestarts": "0", "LoadState": "loaded"},
+                },
+            ),
         ):
             first = maintenance.apply_request(
                 req,
@@ -463,7 +499,18 @@ class MaintenanceServiceTests(unittest.TestCase):
             encoding="utf-8",
         )
         with (
-            mock.patch.object(maintenance, "_service_active", return_value=True),
+            mock.patch.object(
+                maintenance,
+                "_service_snapshot",
+                return_value={
+                    "LoadState": "loaded",
+                    "ActiveState": "active",
+                    "SubState": "running",
+                    "ExecMainStatus": "0",
+                    "NRestarts": "0",
+                    "Restart": "on-failure",
+                },
+            ),
             mock.patch.object(maintenance, "_active_project_units", return_value=[]),
         ):
             result = maintenance.apply_request(
@@ -563,7 +610,15 @@ class MaintenanceServiceTests(unittest.TestCase):
                 "_run",
                 return_value=mock.Mock(returncode=0, stdout="", stderr=""),
             ),
-            mock.patch.object(maintenance, "_service_active", return_value=True),
+            mock.patch.object(
+                maintenance,
+                "_require_stable_running",
+                return_value={
+                    "settle_seconds": 8,
+                    "first": {"ActiveState": "active", "SubState": "running", "ExecMainStatus": "0", "NRestarts": "0", "LoadState": "loaded"},
+                    "second": {"ActiveState": "active", "SubState": "running", "ExecMainStatus": "0", "NRestarts": "0", "LoadState": "loaded"},
+                },
+            ),
         ):
             receipt = maintenance.apply_request(
                 request(
@@ -620,7 +675,15 @@ class MaintenanceServiceTests(unittest.TestCase):
 
         with (
             mock.patch.object(maintenance, "_run", side_effect=fake_run),
-            mock.patch.object(maintenance, "_service_active", return_value=True),
+            mock.patch.object(
+                maintenance,
+                "_require_stable_running",
+                return_value={
+                    "settle_seconds": 8,
+                    "first": {"ActiveState": "active", "SubState": "running", "ExecMainStatus": "0", "NRestarts": "0", "LoadState": "loaded"},
+                    "second": {"ActiveState": "active", "SubState": "running", "ExecMainStatus": "0", "NRestarts": "0", "LoadState": "loaded"},
+                },
+            ),
         ):
             with self.assertRaisesRegex(
                 maintenance.MaintenanceError,
@@ -641,6 +704,107 @@ class MaintenanceServiceTests(unittest.TestCase):
         starts = [argv for argv in calls if argv[:2] == ["systemctl", "start"]]
         self.assertEqual(starts, [])
 
+
+    def test_stable_running_rejects_restart_count_growth(self):
+        samples = [
+            {
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "SubState": "running",
+                "ExecMainStatus": "0",
+                "NRestarts": "12",
+            },
+            {
+                "LoadState": "loaded",
+                "ActiveState": "active",
+                "SubState": "running",
+                "ExecMainStatus": "0",
+                "NRestarts": "13",
+            },
+        ]
+        with (
+            mock.patch.object(maintenance, "_service_snapshot", side_effect=samples),
+            mock.patch.object(maintenance.time, "sleep"),
+        ):
+            with self.assertRaisesRegex(
+                maintenance.MaintenanceError,
+                "restart count changed",
+            ):
+                maintenance._require_stable_running("controller.service")
+
+    def test_diagnose_surfaces_crash_loop_and_recovery_conflict(self):
+        lane = self.lane_state()
+        (lane / "quarantine.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "receipt_id": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+                    "status": "ASSIGNMENT_DIVERGENCE_QUARANTINED",
+                    "project_id": "workspace-control",
+                    "lane": "cpu",
+                    "scale_set_name": "lambda-workspace-control",
+                    "scale_set_id": 88,
+                }
+            ),
+            encoding="utf-8",
+        )
+        (lane / "ready-for-single-retry.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "receipt_id": "11111111-2222-4333-8444-555555555555",
+                    "status": "READY_FOR_SINGLE_RETRY",
+                    "project_id": "workspace-control",
+                    "lane": "cpu",
+                    "scale_set_name": "lambda-workspace-control",
+                    "new_scale_set_id": 88,
+                }
+            ),
+            encoding="utf-8",
+        )
+        state = {
+            "LoadState": "loaded",
+            "ActiveState": "activating",
+            "SubState": "auto-restart",
+            "Result": "exit-code",
+            "ExecMainStatus": "1",
+            "NRestarts": "13134",
+            "Restart": "on-failure",
+        }
+        with (
+            mock.patch.object(maintenance, "_service_snapshot", return_value=state),
+            mock.patch.object(maintenance, "_active_project_units", return_value=[]),
+        ):
+            result = maintenance.apply_request(
+                request("DIAGNOSE_LANE"),
+                registry_path=self.registry_path,
+                controller_state_root=self.state_root,
+                projects_dir=self.projects_dir,
+                receipts_dir=self.receipts,
+            )
+        self.assertFalse(result["service_active"])
+        self.assertEqual(result["service_state"]["NRestarts"], "13134")
+        self.assertTrue(result["recovery_state_conflict"])
+
+    def test_controller_state_atomic_write_preserves_parent_owner_contract(self):
+        lane = self.lane_state()
+        target = lane / "reset-pending-test.json"
+        with mock.patch.object(maintenance.os, "chown") as chown:
+            # Force a visible owner mismatch while retaining real file I/O.
+            real_path_stat = pathlib.Path.stat
+            def fake_stat(path, *args, **kwargs):
+                value = real_path_stat(path, *args, **kwargs)
+                if path == lane:
+                    return mock.Mock(st_uid=value.st_uid + 1, st_gid=value.st_gid + 1)
+                return value
+            with mock.patch.object(pathlib.Path, "stat", fake_stat):
+                maintenance._atomic_json(
+                    target,
+                    {"schema_version": 1},
+                    inherit_parent_owner=True,
+                )
+        chown.assert_called_once()
+        self.assertEqual(target.stat().st_mode & 0o777, 0o600)
 
     def test_failed_root_mutation_persists_terminal_fail_closed_receipt(self):
         req = request(
