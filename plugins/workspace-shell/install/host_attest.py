@@ -99,6 +99,13 @@ def path_meta(path):
         st = os.lstat(p)
     except FileNotFoundError:
         return {"exists": False, "path": str(p)}
+    except OSError as exc:
+        return {
+            "exists": None,
+            "path": str(p),
+            "access_error": type(exc).__name__,
+            "errno": exc.errno,
+        }
     kind = (
         "dir" if stat.S_ISDIR(st.st_mode)
         else "file" if stat.S_ISREG(st.st_mode)
@@ -148,6 +155,16 @@ def command_meta(name, explicit=None):
     path = explicit or shutil.which(name)
     if not path:
         return {"exists": False, "name": name, "path": None}
+    if explicit:
+        meta = path_meta(path)
+        if meta.get("exists") is not True or not os.access(path, os.X_OK):
+            return {
+                "exists": False,
+                "name": name,
+                "path": str(path),
+                "path_metadata": meta,
+                "reason": "explicit runtime path is absent or inaccessible",
+            }
     version_args = {
         "node": [path, "--version"],
         "python3": [path, "--version"],
@@ -330,6 +347,7 @@ def main():
     selinux = read_text("/sys/fs/selinux/enforce")
 
     source = git_meta(args.source_root, args.source_sha)
+    dependency_source = path_meta(args.heartbeat_node_modules)
     listener = listener_meta(args.port)
     bwrap = bwrap_probe(commands["bwrap"]["path"] if commands["bwrap"]["exists"] else None)
 
@@ -341,6 +359,10 @@ def main():
     for staged in ("bwrap", "node", "tunnel-client"):
         if not commands[staged]["exists"]:
             provisioning_requirements.append(f"stage required runtime dependency: {staged}")
+    if dependency_source.get("exists") is not True:
+        provisioning_requirements.append(
+            "stage dedicated Workspace Shell Node dependencies; existing Heartbeat dependency source is unavailable"
+        )
     if node_major(commands["node"]) is not None and node_major(commands["node"]) < 20:
         blockers.append("Node runtime is older than v20")
     if cgroup_controllers is None:
@@ -375,7 +397,7 @@ def main():
         },
         "bwrap_probe": bwrap,
         "source": source,
-        "dependency_source": path_meta(args.heartbeat_node_modules),
+        "dependency_source": dependency_source,
         "planned_listener": listener,
         "planned_users": [account_meta(name) for name in PLANNED_USERS],
         "planned_groups": [group_meta(name) for name in PLANNED_GROUPS],
