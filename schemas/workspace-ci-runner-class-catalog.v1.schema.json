@@ -7,6 +7,10 @@
   "required": [
     "schema_version",
     "catalog_id",
+    "status",
+    "authority",
+    "generated_from",
+    "invariants",
     "projects"
   ],
   "properties": {
@@ -188,6 +192,26 @@
             }
           }
         }
+      }
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_from": {
+      "type": "string",
+      "minLength": 1
+    },
+    "invariants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
       }
     }
   }
