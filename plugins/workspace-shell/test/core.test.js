@@ -39,6 +39,18 @@ test("MCP admission limiter freezes two inflight and eight queued", async () => 
   assert.deepEqual(limiter.snapshot(), { inflight: 0, queued: 0 });
 });
 
+test("MCP queued request times out and is removed from admission state", async () => {
+  const limiter = new RequestAdmissionLimiter({ maxInflight: 1, maxQueued: 1 });
+  const release = await limiter.acquire();
+  await assert.rejects(
+    limiter.acquire({ timeoutMs: 5 }),
+    /MCP_QUEUE_TIMEOUT/,
+  );
+  assert.deepEqual(limiter.snapshot(), { inflight: 1, queued: 0 });
+  release();
+  assert.deepEqual(limiter.snapshot(), { inflight: 0, queued: 0 });
+});
+
 test("MCP body parser rejects over 64 KiB before SDK parsing", async () => {
   const valid = Buffer.from(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" }));
   assert.deepEqual(
