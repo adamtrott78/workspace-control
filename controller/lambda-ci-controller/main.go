@@ -820,9 +820,6 @@ func (s *scaler) persistAssignmentQuarantine(
 	if err != nil {
 		return fmt.Errorf("create quarantine receipt id: %w", err)
 	}
-	if err := s.invalidateReadyForSingleRetry(receiptID); err != nil {
-		return err
-	}
 	receipt := laneQuarantineReceipt{
 		SchemaVersion:       1,
 		ReceiptID:           receiptID,
@@ -839,6 +836,9 @@ func (s *scaler) persistAssignmentQuarantine(
 		ObservedAt:          time.Now().UTC().Format(time.RFC3339Nano),
 	}
 	if err := atomicWriteJSON(s.quarantinePath(), receipt); err != nil {
+		return err
+	}
+	if err := s.invalidateReadyForSingleRetry(receiptID); err != nil {
 		return err
 	}
 	s.mu.Lock()
