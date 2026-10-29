@@ -275,15 +275,17 @@
     }
   },
   "recovery_algorithm": [
-    "load runner-instance durable ledger for this runner class",
-    "query root STATUS for each nonterminal request",
-    "reconcile/remove orphaned GitHub JIT runner registrations not represented by a live ledger entry",
-    "establish fresh Scale Set Client session",
-    "read current TotalAssignedJobs from session/message statistics",
-    "desired runner capacity = min(class max_runners, TotalAssignedJobs)",
-    "create homogeneous runner instances until live capacity converges to desired",
-    "use JobStarted/JobCompleted only for runner busy/terminal evidence, not for backlog counting",
-    "never reconstruct candidate SHA, route or human command to restore capacity"
+    "load runner-instance ledger and verify catalog/class identity",
+    "query root STATUS for every nonterminal request_id",
+    "for MISSING entries with recorded JIT registration, remove the exact orphan registration before regeneration",
+    "for ACCEPTED entries, retain as live capacity and await root/GitHub terminal evidence",
+    "for COMPLETED/FAILED entries, close local runner-instance state without re-execution",
+    "establish/re-establish Scale Set Client session",
+    "read current TotalAssignedJobs",
+    "desired capacity = min(class max_runners, TotalAssignedJobs)",
+    "live capacity = root-accepted nonterminal runner instances for this class",
+    "provision or allow idle capacity to retire according to ephemeral runner lifecycle until live capacity converges",
+    "never reconstruct workload/candidate authority from lifecycle strings"
   ],
   "maintenance_state_machine": {
     "ingress": "owner-authored maintenance command parsed once",
@@ -300,5 +302,96 @@
     "ingress": "successful exact trusted reconciliation workflow on workspace-control main",
     "effect": "atomically install/replace root runner-class catalog and class controller policies/identities",
     "invariant": "policy deployment is separate from candidate scheduling and execution"
+  },
+  "runner_instance_ledger": {
+    "schema_version": 1,
+    "identity": "one durable local record per root runner-instance request_id",
+    "persistent_fields": [
+      "request_id",
+      "runner_name",
+      "runner_class_id",
+      "catalog_sha256",
+      "scale_set_id",
+      "scale_set_name",
+      "state",
+      "jit_runner_id_if_known",
+      "jit_config_sha256_if_generated",
+      "root_status_if_known",
+      "created_at",
+      "updated_at"
+    ],
+    "forbidden_persistent_fields": [
+      "raw_jit_config",
+      "GitHub access token",
+      "GitHub App private key",
+      "human issue-comment body",
+      "candidate SHA",
+      "experiment selector"
+    ],
+    "write_order": [
+      "choose deterministic/unique request_id and runner_name",
+      "persist ALLOCATING ledger entry before JIT generation",
+      "generate GitHub JIT registration",
+      "persist JIT_REGISTERED with runner id and JIT SHA-256 only",
+      "submit raw JIT config once over root socket; do not persist raw JIT",
+      "persist observed root ACCEPTED/DUPLICATE/BUSY/class state",
+      "enrich from JobStarted/JobCompleted when available",
+      "persist terminal cleanup reconciliation and archive/compact according to retention policy"
+    ]
+  },
+  "crash_recovery_matrix": [
+    {
+      "crash_boundary": "after ALLOCATING ledger, before JIT generation",
+      "recovery": "no GitHub registration and root STATUS must be MISSING; safely regenerate JIT for same request/runner identity"
+    },
+    {
+      "crash_boundary": "after JIT generation, before root submission",
+      "recovery": "root STATUS MISSING; remove exact orphan JIT runner registration by recorded runner id/name; regenerate JIT; never reuse lost raw JIT bytes"
+    },
+    {
+      "crash_boundary": "after root receives request, before controller receives response",
+      "recovery": "query root STATUS by request_id; ACCEPTED/COMPLETED/FAILED is authoritative; never submit a fresh request identity until reconciled"
+    },
+    {
+      "crash_boundary": "after root ACCEPTED, before ephemeral runner becomes online",
+      "recovery": "root durable status plus exact runner registration/instance evidence governs; do not infer from candidate/job parser state"
+    },
+    {
+      "crash_boundary": "while runner busy",
+      "recovery": "GitHub lifecycle + root terminal receipt + runner-instance ledger converge; desired future capacity still comes from current TotalAssignedJobs"
+    },
+    {
+      "crash_boundary": "after runner exits, before controller observes JobCompleted",
+      "recovery": "root terminal receipt/cleanup status is sufficient for runner-instance recovery; later GitHub lifecycle enriches evidence only"
+    },
+    {
+      "crash_boundary": "cleanup failure",
+      "recovery": "root marks exact runner class quarantined; controller keeps session alive with zero new provisioning for that class until maintenance clearance"
+    }
+  ],
+  "catalog_versioning": {
+    "class_semantics_immutable": true,
+    "rule": "a runner_class_id denotes one immutable root launch envelope",
+    "changes_requiring_new_runner_class_id": [
+      "execution contract",
+      "resource class or ceiling",
+      "GPU cardinality/device authority",
+      "payload network class",
+      "filesystem/cache/state-effect class",
+      "model binding",
+      "runtime binding",
+      "controller local peer identity model"
+    ],
+    "changes_not_requiring_new_class_id": [
+      "add/remove trusted workflow route whose launch envelope is identical",
+      "change ingress slash-command spelling or workflow-local parameter schema",
+      "candidate repository commit"
+    ],
+    "catalog_binding": [
+      "root and controller projections carry canonical catalog SHA-256",
+      "runner-instance ledger and root execution receipt bind catalog SHA-256",
+      "reconciliation may install a new catalog only atomically with its projections",
+      "nonterminal requests continue under the catalog identity under which they were accepted or are explicitly drained before cutover"
+    ]
   }
 }
