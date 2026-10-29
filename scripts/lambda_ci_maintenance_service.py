@@ -54,6 +54,11 @@ def _canonical_sha256(value: Any) -> str:
     return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
 
 
+def _owner_pair(path: pathlib.Path) -> tuple[int, int]:
+    stat = path.stat()
+    return stat.st_uid, stat.st_gid
+
+
 def _atomic_json(
     path: pathlib.Path,
     value: dict[str, Any],
@@ -66,10 +71,10 @@ def _atomic_json(
     tmp.write_text(raw, encoding="utf-8")
     tmp.chmod(0o600)
     if inherit_parent_owner:
-        parent = path.parent.stat()
-        current = tmp.stat()
-        if (current.st_uid, current.st_gid) != (parent.st_uid, parent.st_gid):
-            os.chown(tmp, parent.st_uid, parent.st_gid)
+        parent_owner = _owner_pair(path.parent)
+        current_owner = _owner_pair(tmp)
+        if current_owner != parent_owner:
+            os.chown(tmp, *parent_owner)
     tmp.replace(path)
 
 
