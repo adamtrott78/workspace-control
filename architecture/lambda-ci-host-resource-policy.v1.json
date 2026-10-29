@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "policy_id": "lambda-ci-host-resource-policy-v1",
+  "status": "MODEL_ONLY_NOT_LIVE",
+  "authority": "workspace-control-root",
+  "source_checkpoint": "workspace-control@f48f46618b560d91950fae1927048e14e29a59ab",
+  "migration_mode": {
+    "host_max_active_runners": 1,
+    "reason": "make the current accidental global serialization explicit during protocol migration; performance expansion is a later task"
+  },
+  "project_limits": {
+    "workspace-control": {
+      "max_active_runners": 1
+    },
+    "padataset": {
+      "max_active_runners": 1
+    },
+    "research-engine": {
+      "max_active_runners": 1
+    }
+  },
+  "exclusive_resources": {
+    "gpu:GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea": {
+      "type": "nvidia-gpu",
+      "sharing": "exclusive",
+      "device_index_hint": 0
+    },
+    "gpu:GPU-cfed3394-a935-63aa-9325-c4cae7b568b6": {
+      "type": "nvidia-gpu",
+      "sharing": "exclusive",
+      "device_index_hint": 1
+    }
+  },
+  "derivation": {
+    "resource_class_source": "architecture/lambda-ci-workload-policy.v1.json#resource_classes",
+    "rule": "each runner class resolves its execution contract -> resource_class; gpu_uuids become atomic exclusive resource claims",
+    "atomicity": "all required exclusive resources are reserved together or none are reserved"
+  },
+  "reservation_policy": {
+    "state": "RESERVED",
+    "ttl_seconds": 60,
+    "renewal_allowed": false,
+    "allocation_order": "first successful atomic RESERVE; no persistent wait queue in migration v1",
+    "busy_semantics": "BUSY is capacity-local and creates no JIT registration",
+    "starvation_note": "migration host_max_active_runners=1 makes resource contention explicit but not throughput-optimal; fairness/concurrency expansion is a separately benchmarked post-migration policy"
+  },
+  "release_policy": {
+    "normal": "release after runner terminal and containment cleanup proof",
+    "cancel_before_launch": "release on typed CANCEL or reservation expiry",
+    "launch_failure": "release only after deterministic unit/JIT cleanup is proven",
+    "cleanup_failure": "do not release ambiguous scarce resources; quarantine exact runner class and require maintenance"
+  },
+  "invariants": [
+    "root resource allocator is the only component allowed to grant physical GPU claims",
+    "controller cannot choose GPU UUIDs",
+    "dual-GPU reservation is all-or-nothing",
+    "CPU-only class has an empty GPU claim set",
+    "catalog/resource-policy generation is bound into runner-instance receipts",
+    "raising host/project concurrency is not part of protocol migration"
+  ]
+}
