@@ -961,6 +961,12 @@
       "severity": "ARCHITECTURAL",
       "finding": "root provisioner stores one global _active request set but compares its length against each request project's manifest concurrency value; all three current manifests set concurrency=1",
       "consequence": "the host is effectively globally serialized even though concurrency appears project-scoped; this accidentally prevents resource collisions but obscures the actual scheduling policy"
+    },
+    {
+      "id": "F12_LAUNCH_EQUIVALENCE_NOT_ACTIVATION_AUTHORITY",
+      "severity": "MIGRATION_AUTHORITY",
+      "finding": "routes that share one target launch envelope may originate from different legacy controller lanes with different live containment/quarantine/retry authority",
+      "consequence": "runner-class compilation may merge routes for capacity purposes, but migration must preserve route/controller activation gates independently and may not implicitly reactivate a route because its target class is otherwise active"
     }
   ],
   "target_invariants": [
@@ -1405,5 +1411,23 @@
     "allocation_rule": "a runner instance may be launched only after all host/project/class concurrency and exclusive-resource claims are atomically reserved by root",
     "release_rule": "resource reservation is released only after runner terminal state plus containment cleanup verification",
     "migration_rule": "protocol migration keeps host_max_active_runners=1; a later independently validated resource-utilization task may raise CPU/project concurrency after contention tests"
+  },
+  "migration_authority_preservation": {
+    "principles": [
+      "runner-class equivalence determines safe capacity sharing, not whether a route/controller is live",
+      "route admission enablement and controller service activation are explicit reconciliation/migration state",
+      "legacy quarantine/retry-invalidated/disabled state is never cleared by class compilation",
+      "a route originating in a contained legacy lane remains migration-disabled until exact acceptance explicitly enables it"
+    ],
+    "research_engine_gpu_legacy_lane": {
+      "current_status": "CONTAINED; do not infer recovery authority from model-only target classes",
+      "target_routes": "all routes whose current manifest lane is gpu",
+      "migration_default": "DISABLED_PENDING_EXPLICIT_CLASS/ROUTE_ACCEPTANCE",
+      "special_case": "cpu-validation-exact-provenance may share research-cpu-public-v1 capacity with cpu-test only after its own migrated route admission is explicitly enabled; class sharing must not bypass legacy containment"
+    },
+    "controller_activation": {
+      "rule": "catalog installation creates policy/identities but does not start class controllers unless the migration receipt explicitly authorizes that class",
+      "default_new_class_state": "INSTALLED_INACTIVE"
+    }
   }
 }
