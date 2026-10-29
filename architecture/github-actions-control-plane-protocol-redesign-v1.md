@@ -161,3 +161,199 @@ This must be decided from actual GitHub API capabilities, not assumed.
 
 ## Live-system rule
 Do not apply the current optional-qualifier parser hotfix to Lambda as the final architecture. It may remain useful as incident evidence, but live promotion is paused until the protocol redesign has a migration story.
+
+
+## System inventory: semantic ownership defects
+
+The first repository inventory found that the same logical request currently crosses at least these interpretation boundaries:
+
+| Layer | Current input | Current interpretation | Architectural status |
+|---|---|---|---|
+| issue-comment workflow | `github.event.comment.body` | prefix check + later shell token extraction | legitimate ingress parsing |
+| workflow job name | entire comment body | serialized into `wc-admission-v1|...|request=<body>` | **wrong abstraction: display field becomes wire protocol** |
+| controller workload router | `JobDisplayName` | extracts `workload=` and request grammar | duplicate interpretation |
+| controller attestor | `JobDisplayName` + REST | reparses PR/command/SHA/optional qualifier | duplicate interpretation |
+| root generic admission | `attestation.job_display_name` | independently reparses route command/SHA | duplicate interpretation across language boundary |
+| workflow first step | original comment body | reparses candidate SHA/options | duplicate interpretation, but appropriately inside trusted workflow |
+| execution-contract resolver | workload/route strings | maps to profile/resources/model/runtime | legitimate typed policy if the route identity itself is canonical |
+
+The controller and root are therefore not merely validating the same typed fact. They are each implementing their own compiler from a human string into authority semantics.
+
+A second independent defect is liveness coupling: `sendProvisionRequest` converts root `REJECTED` into a Go error; the scaler returns that error to the official listener; `listener.Run` exits; systemd restarts the whole controller. A normal policy outcome is therefore represented as controller-process failure.
+
+## Scheduler boundary
+
+The official Scale Set Client already provides:
+- typed `JobAvailable`, `JobAssigned`, `JobStarted`, and `JobCompleted` messages;
+- stable GitHub identities including workflow run/job, repository/owner, workflow ref, event name, labels, and timestamps;
+- current scale-set statistics, including `TotalAssignedJobs`;
+- redelivery/acknowledgement semantics.
+
+This means the local design should not reconstruct a second queue scheduler. Its responsibilities are narrower:
+
+```text
+GitHub Actions scheduler
+  owns: queue, matching, assignment, lifecycle, reassignment
+             |
+             v
+Scale Set Client / listener
+  owns: session, polling, ack, current scheduler statistics
+             |
+             v
+Workspace policy adapter
+  owns: trusted workflow identity -> local execution contract
+             |
+             v
+Capacity provider
+  owns: JIT runner + systemd sandbox + resource realization
+```
+
+## Recommended protocol architecture
+
+### Invariant P0 — human commands are ingress syntax only
+Slash-command text is parsed by the trusted default-branch workflow/dispatcher. It is never a root-policy wire format.
+
+### Invariant P1 — infrastructure admission is keyed by GitHub identity, not display text
+The infrastructure request identity should be derived from canonical GitHub fields such as:
+- repository owner/name;
+- scale-set ID/name;
+- workflow run ID;
+- canonical workflow job ID;
+- trusted workflow path/ref/blob;
+- event type;
+- lifecycle attempt / assignment identity.
+
+`JobDisplayName` may be logged for humans but is not an authority input.
+
+### Invariant P2 — trusted workflow identity selects the local execution contract
+Root-owned policy maps a verified workflow identity to:
+- project;
+- lane/scale set;
+- execution contract;
+- resource profile;
+- optional exact model/runtime bindings;
+- filesystem/network/secrets/state-effect classes.
+
+The mapping key is a structured tuple, not a string embedded in the job name.
+
+### Invariant P3 — candidate SHA is workflow payload, not scheduler authority
+For `issue_comment`, GitHub documents that the workflow executes from the default branch, not the PR head. The trusted workflow already has the event payload and read-only `GITHUB_TOKEN`; it can validate the requested candidate SHA against the PR head before checkout.
+
+Therefore the root provisioner generally does **not** need to understand the candidate SHA in order to decide whether it may create the sandbox. It needs to know that the scheduled job came from an exact trusted workflow whose sandbox contract is safe for untrusted candidate execution.
+
+This removes the strongest reason the candidate SHA was smuggled through `JobDisplayName`.
+
+### Invariant P4 — resource/security variants are routes, not free-form options
+If two operations require different root authority, GPU count, model/runtime mounts, network class, or secrets, they are different policy routes/contracts. Use:
+- distinct trusted workflow identity, or
+- another typed static route identifier that is generated from root-owned policy.
+
+Do not dynamically widen root authority because a comment contains an extra word.
+
+Options that do **not** alter the security/resource envelope remain workflow-level typed parameters and do not participate in runner provisioning.
+
+### Invariant P5 — one canonical envelope
+The controller sends a versioned structured envelope, tentatively:
+
+```json
+{
+  "schema_version": 3,
+  "request_id": "<uuid/deterministic job-attempt id>",
+  "github": {
+    "repository": "owner/repo",
+    "scale_set_id": 1,
+    "scale_set_name": "lambda-workspace-control",
+    "workflow_run_id": 123,
+    "workflow_job_id": 456,
+    "workflow_path": ".github/workflows/...",
+    "workflow_ref": "...@refs/heads/main",
+    "workflow_blob_sha": "<git blob>",
+    "event_name": "issue_comment",
+    "actor_login": "..."
+  },
+  "route": {
+    "route_id": "control-validation",
+    "execution_contract_id": "control-small-ci-v1"
+  },
+  "runner": {
+    "runner_name": "...",
+    "jit_config": "<opaque secret>"
+  }
+}
+```
+
+The root may verify schema, identity bindings, policy membership, replay digest, and resource invariants. It must not reinterpret the original human command.
+
+### Invariant P6 — rejection is data, not process failure
+Provisioner responses are an algebraic result type:
+
+```text
+ACCEPTED | DUPLICATE | BUSY | POLICY_DENIED | TERMINAL_FAILURE
+```
+
+`POLICY_DENIED` is a terminal request result that removes/marks the local pending job and leaves the listener alive. Only controller invariant corruption, session failure, or unrecoverable transport corruption may terminate the controller process.
+
+### Invariant P7 — lifecycle and policy state machines are separate
+Scheduler state:
+`AVAILABLE -> ASSIGNED -> STARTED -> COMPLETED/CANCELED/REASSIGNED`
+
+Local execution state:
+`OBSERVED -> ATTESTED -> ADMITTED -> JIT_CREATED -> LAUNCHED -> CLEANED`
+
+Policy result:
+`ALLOW | DENY(reason)`
+
+These states may reference one another, but none is encoded by overloading another state machine's string values.
+
+## Two implementation candidates
+
+### Candidate A — workflow identity -> contract mapping (recommended)
+Keep the official Scale Set Client and current systemd capacity provider. Remove workload/command/SHA parsing from job names. Controller attests exact workflow identity via REST; root maps workflow identity to a root-owned execution contract.
+
+Benefits:
+- minimal change to proven GitHub scale-set/JIT machinery;
+- keeps root free of GitHub credentials;
+- removes cross-language grammar duplication;
+- supports many research workflows without one scale set per workflow;
+- preserves exact model/runtime binding in root manifests where needed.
+
+### Candidate B — scale set == execution contract
+Create a separate scale set for each materially distinct resource/security contract and make the controller/provisioner almost completely job-agnostic.
+
+Benefits:
+- strongest alignment with scheduler queue semantics;
+- almost no per-job policy parsing.
+
+Costs:
+- more scale sets/controllers;
+- poor fit where many workflow/model routes share one hardware envelope but require different exact root-owned mounts.
+
+Current recommendation: **Candidate A**, with scale sets representing broad isolation/resource lanes and trusted workflow identity selecting the narrower execution contract.
+
+## Executor-policy redesign
+
+Executors should not hand-author infrastructure protocol strings.
+
+The executor-facing API should expose a generated catalog such as:
+
+```text
+workspace_control.validate(pr, sha, mode=STANDARD)
+workspace_control.host_attest(pr, sha)
+research_engine.cpu_validate(pr, sha)
+research_engine.run_experiment(pr, sha, experiment_id=<enum>)
+```
+
+The builder validates parameters locally from the same versioned route catalog that generates workflow/policy tests. It may emit a slash command because GitHub comments are the user interface, but the emitted text is no longer consumed by the infrastructure admission pipeline.
+
+A valid executor request can therefore fail later only for a changed external fact (PR closed/head moved, workflow policy revoked, capacity unavailable), never because two parsers disagree on its grammar.
+
+## Verification strategy
+
+The repository-only gate before any live migration should include:
+
+1. **Protocol compiler tests** — every route catalog entry generates a valid typed envelope.
+2. **Cross-layer compatibility tests** — all admitted route/workflow identities survive controller -> root -> launch-spec simulation.
+3. **Property tests** — arbitrary valid parameter combinations cannot create parser divergence.
+4. **State-machine model tests** — duplicate/redelivered/assigned/canceled/reassigned messages and controller/provisioner restarts.
+5. **Fault injection** — root DENY, BUSY, socket timeout, JIT generation failure, cleanup failure; listener liveness must be preserved where the failure is request-local.
+6. **Migration equivalence tests** — existing research-engine and workspace-control trusted workflows resolve to the same or narrower execution contracts before live cutover.
