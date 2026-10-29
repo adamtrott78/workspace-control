@@ -86,78 +86,61 @@ Buildkite defines a stack as a controller that receives scheduled jobs and turns
 
 **Lesson:** reserve jobs and hand workers narrowly scoped execution authority; do not overload routing labels/display strings with policy semantics.
 
-## Proposed direction
+## Canonical direction
 
-### 1. Job display names become non-authoritative
-Use them only for observability/correlation. No root policy decision may depend on parsing a free-form job name.
+The investigation superseded the initial idea of carrying a richer job-semantic envelope through root. The accepted model is narrower.
 
-### 2. One canonical typed request envelope
-Define something like `WorkspaceCIRequestV1` with explicit fields:
-- protocol_version
-- request_id
-- repository_id
-- workflow_run_id
-- workflow_job_id
-- workflow_path
-- workflow_blob_sha
-- event_type
-- actor
-- pull_request_number
-- candidate_sha
-- operation
-- workload_class
-- resource_contract_id
-- option object / typed parameters
-- lifecycle attempt / reassignment identity
-- evidence timestamps/digests
+### P0 — GitHub remains the scheduler
+GitHub owns queueing, job matching, assignment, reassignment, and lifecycle. The pinned Scale Set Client owns message sessions, acquisition, acknowledgement, and the current scale-set statistics.
 
-No field changes meaning between layers.
+### P1 — one scale set means one homogeneous runner class
+Every job GitHub may assign to one scale set must be safe and executable on every runner that the class controller can create for that scale set.
 
-### 3. Parse human intent exactly once
-The slash command is an ingress UI, not the protocol. A trusted producer/compiler converts it into the canonical request. Everything downstream consumes structured data.
+A runner class fixes:
+- project isolation identity;
+- execution contract and resource ceiling;
+- GPU cardinality/device authority;
+- network/filesystem/cache/state-effect class;
+- exact model/runtime bindings;
+- local root-launch authority.
 
-### 4. Root policy validates typed claims, not producer syntax
-Root should validate:
-- schema/version,
-- exact project/workflow/contract bindings,
-- typed operation and parameter ranges,
-- replay/digest identity,
-- resource/security constraints.
+### P2 — human commands are ingress syntax only
+Slash-command text is parsed only by the trusted default-branch workflow. The infrastructure controller and root capacity provider never parse the command body, candidate SHA, experiment selector, or dynamic job display name.
 
-It should not parse the original comment body or reconstruct the controller's grammar.
+### P3 — trusted workflow identity controls acquisition
+The class controller checks structured Scale Set Client fields and GitHub REST evidence against its generated class policy:
+- repository;
+- scale-set labels;
+- workflow path/default-branch ref/blob;
+- event;
+- actor/triggering actor.
 
-### 5. Separate rejection from controller liveness
-A policy rejection is a terminal request outcome with a durable reason. It must not terminate the listener process. Listener death should be reserved for loss of its own invariant or unrecoverable transport/session failure.
+All 23 currently registered workflows have exactly one top-level job. The policy compiler preserves that constraint, so runtime job-name correlation is unnecessary.
 
-### 6. Executor-facing builders
-Executors should call a typed builder/policy surface, not synthesize slash commands by hand. The builder must know the accepted operation schema and produce either a valid request or a local validation error before GitHub is triggered.
+### P4 — root realizes capacity, not job semantics
+Root derives the runner class from `SO_PEERCRED.uid` and a root-owned catalog. The request cannot select a project, route, workload, execution contract, model, runtime, or GPU class.
 
-### 7. Protocol compatibility tests
-For every request variant:
-`producer -> canonical envelope -> controller attestation -> root admission -> launch-spec simulation`
-must be tested as one pipeline.
+### P5 — resource capacity is reserved before JIT creation
+The controller first requests a class reservation. Only after root atomically reserves host/project/class/scarce resources does the controller create the GitHub JIT registration and submit `LAUNCH`.
 
-Property/state-machine tests should cover:
-- valid operation variants,
-- malformed fields,
-- duplicated/redelivered messages,
-- JobAvailable -> JobAssigned -> Started -> Completed,
-- cancellation/reassignment,
-- controller restart,
-- provisioner restart,
-- stale aggregate statistics,
-- rejected policy,
-- cleanup failure,
-- start-limit recovery.
+This separates:
+- GitHub queue assignment;
+- local physical-resource arbitration;
+- one-time JIT capability creation.
 
-## Major design question to resolve
-The current issue-comment trigger does not expose the PR candidate SHA as the workflow's own `GITHUB_SHA`; issue-comment workflows run from the default branch. We need a clean ingress representation for PR number, candidate SHA, and operation parameters that does not turn `jobDisplayName` into the protocol. Candidate options include:
-- a durable structured request object keyed by an opaque request/comment ID;
-- a dedicated GitHub App/webhook ingress that compiles issue-comment events into typed requests;
-- a small trusted dispatcher workflow that records a canonical request artifact/state before scheduling;
-- route-per-operation only where operations are truly distinct security/resource classes.
+### P6 — failure domains are typed
+Request-local deny, class busy/quarantine, retryable transport failure, and fatal controller/configuration corruption are different result classes. Only the last class may terminate the controller process.
 
-This must be decided from actual GitHub API capabilities, not assumed.
+### P7 — policy is compiled from one catalog
+One runner-class catalog generates:
+- root projection;
+- per-class controller projection;
+- executor ingress projection.
+
+No component maintains an independent grammar for the same authority fact.
+
+### P8 — command parameters cannot widen root authority
+If a future option changes GPU count, model/runtime mount, network class, secrets, state effects, or any other root capability, it requires a distinct immutable runner class and scale set. Workflow-local parameters may vary only inside a fixed runner envelope.
 
 ## Live-system rule
 Do not apply the current optional-qualifier parser hotfix to Lambda as the final architecture. It may remain useful as incident evidence, but live promotion is paused until the protocol redesign has a migration story.
@@ -688,24 +671,49 @@ EPHEMERAL HOMOGENEOUS RUNNER
   then executes exact candidate payload
 ```
 
-## Root request becomes a capacity request
+## Root capacity protocol is two-phase
 
-A strong v3 request can be reduced to:
+The controller does **not** create a JIT registration until root has granted physical capacity.
+
+### RESERVE
 
 ```json
 {
   "schema_version": 3,
-  "request_id": "<runner-instance request id>",
-  "runner_name": "<class prefix + opaque suffix>",
-  "jit_config": "<opaque GitHub JIT registration>"
+  "operation": "RESERVE",
+  "request_id": "<uuid>",
+  "runner_name": "<class prefix + opaque suffix>"
 }
 ```
 
-The root service derives `project_id`, `runner_class_id`, execution contract, resource ceiling, GPU authority, network class, exact model/runtime mounts, and filesystem policy from the authenticated **local controller identity**.
+Root authenticates the peer UID, derives the immutable runner class, and atomically checks/reserves:
+- host-wide active-runner ceiling;
+- project concurrency;
+- class concurrency;
+- exclusive GPU UUIDs;
+- any future scarce resource locks.
 
-No field supplied by the controller may widen the class.
+The result is `RESERVED`, `BUSY`, or `CLASS_QUARANTINED`.
 
-This is stronger than the current v2 request because a compromised controller cannot claim a different `workload_class` merely by constructing a plausible attestation.
+### LAUNCH
+
+Only after `RESERVED` does the controller generate the GitHub JIT registration:
+
+```json
+{
+  "schema_version": 3,
+  "operation": "LAUNCH",
+  "request_id": "<same uuid>",
+  "runner_name": "<same runner name>",
+  "jit_config": "<opaque one-time GitHub JIT capability>"
+}
+```
+
+Root stages the raw JIT only in root-owned 0600 runtime tmpfs while creating the deterministic systemd runner unit. `ACCEPTED` is returned only after systemd owns the runner process. The raw JIT value is then unlinked; persistent records keep only its digest.
+
+`STATUS` and `CANCEL` complete the idempotent recovery protocol.
+
+No field supplied by the controller can widen its runner class.
 
 ## Local controller authentication
 
