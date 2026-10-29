@@ -232,6 +232,9 @@ def build_helper_systemd_command(cfg, unit, helper_path, verified):
         "TimeoutStopSec=2s",
         "TasksMax=64",
         "MemoryMax=1G",
+        "CPUAccounting=yes",
+        "CPUQuota=100%",
+        "RuntimeMaxSec=90s",
         "UMask=0077",
         "CapabilityBoundingSet=" + " ".join(capabilities),
     ]
@@ -320,15 +323,22 @@ def helper_unit_state(cfg, unit):
     return values
 
 
-def helper_cgroup_pids(control_group):
+def helper_cgroup_path(control_group):
     if not control_group:
-        return []
+        return None
     base = Path("/sys/fs/cgroup").resolve()
     candidate = (base / control_group.lstrip("/")).resolve()
     try:
         candidate.relative_to(base)
     except ValueError:
         fail("CGROUP_PATH_ESCAPE", "systemd returned helper cgroup outside cgroup root")
+    return candidate
+
+
+def helper_cgroup_pids(control_group):
+    candidate = helper_cgroup_path(control_group)
+    if candidate is None:
+        return []
     try:
         return [
             line.strip()
@@ -337,6 +347,19 @@ def helper_cgroup_pids(control_group):
         ]
     except FileNotFoundError:
         return []
+
+
+def helper_cgroup_kill(control_group):
+    candidate = helper_cgroup_path(control_group)
+    if candidate is None:
+        return False
+    try:
+        (candidate / "cgroup.kill").write_text("1\n", encoding="ascii")
+        return True
+    except FileNotFoundError:
+        return False
+    except OSError as exc:
+        fail("CGROUP_KILL_FAILED", f"unable to kill residual helper cgroup: {exc}")
 
 
 def cleanup_helper_unit(cfg, unit):
@@ -354,6 +377,10 @@ def cleanup_helper_unit(cfg, unit):
             or helper_cgroup_pids(observed.get("ControlGroup"))
         ):
             killer(signal.SIGKILL)
+
+    observed = helper_unit_state(cfg, unit)
+    if observed is not None and helper_cgroup_pids(observed.get("ControlGroup")):
+        helper_cgroup_kill(observed.get("ControlGroup"))
 
     deadline = time.monotonic() + 2.0
     last = None
