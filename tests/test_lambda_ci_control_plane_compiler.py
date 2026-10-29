@@ -249,6 +249,15 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
         self.assertEqual(target["exclusive_resource_claims"], [])
         self.assertEqual(target["execution_contract"]["gpu_count"], 0)
 
+    def test_emitted_projection_schema_drift_fails_compile(self):
+        inputs = copy.deepcopy(self.inputs)
+        inputs["controller_projection_schema"]["required"].append("invented_required_field")
+        with self.assertRaisesRegex(
+            compiler.CompileError,
+            "missing required keys",
+        ):
+            self.compile(inputs)
+
     def test_compiler_output_is_deterministic(self):
         first = self.compile()
         second = self.compile()
