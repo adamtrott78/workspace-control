@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workspace-ci-deployment-overlay.v1.schema.json",
+  "title": "Workspace CI Deployment Overlay v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "overlay_id",
+    "catalog_generation_sha256",
+    "classes",
+    "routes",
+    "legacy"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "overlay_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{2,127}$"
+    },
+    "catalog_generation_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "classes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "install_state",
+          "controller_state",
+          "containment"
+        ],
+        "properties": {
+          "install_state": {
+            "enum": [
+              "NOT_INSTALLED",
+              "INSTALLED"
+            ]
+          },
+          "controller_state": {
+            "enum": [
+              "INACTIVE",
+              "ACTIVE",
+              "DRAINING"
+            ]
+          },
+          "containment": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "state",
+              "source"
+            ],
+            "properties": {
+              "state": {
+                "enum": [
+                  "CLEAR",
+                  "INHERITED_CONTAINED",
+                  "CLASS_QUARANTINED"
+                ]
+              },
+              "source": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "routes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "admission_state",
+          "source"
+        ],
+        "properties": {
+          "admission_state": {
+            "enum": [
+              "DISABLED",
+              "ENABLED"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "legacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "controllers",
+        "scale_sets",
+        "quarantine_receipts",
+        "retry_receipts"
+      ],
+      "properties": {
+        "controllers": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "PRESENT_ACTIVE",
+              "PRESENT_INACTIVE",
+              "RETIRED"
+            ]
+          }
+        },
+        "scale_sets": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "PRESENT",
+              "DRAINING",
+              "RETIRED"
+            ]
+          }
+        },
+        "quarantine_receipts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "retry_receipts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
