@@ -6,9 +6,10 @@ This helper installs only the independently reviewed controller reliability payl
 - generic workspace-ci-controller@.service unit;
 - root lambda_ci_maintenance_service.py.
 
-It preserves research-engine/cpu inactive state, restarts only controllers that were
-healthy/live at the frozen preflight plus the broken research-engine/gpu lane, never
-clears quarantine, never triggers workflows, and never restores retry authority.
+It preserves research-engine/cpu inactive state, keeps research-engine/gpu stopped
+for the entire transaction, restarts only controllers that were healthy/live at the
+frozen preflight, never clears quarantine, never triggers workflows, and terminally
+invalidates stale retry authority before later mutation steps.
 """
 
 from __future__ import annotations
@@ -76,7 +77,7 @@ MAINT_ROOT = "workspace-ci-maintenance.service"
 MAINT_CONTROLLER = "workspace-ci-maintenance-controller.service"
 
 HEALTHY_CONTROLLERS = [PAD_CPU, PAD_GPU, WORKSPACE_CPU]
-ACTIVE_AFTER_INSTALL = [PAD_CPU, PAD_GPU, WORKSPACE_CPU, RESEARCH_GPU]
+ACTIVE_AFTER_INSTALL = list(HEALTHY_CONTROLLERS)
 EXPECTED_HEALTHY_BASELINES = {
     PAD_CPU: {"Result": "success", "NRestarts": "0"},
     PAD_GPU: {"Result": "success", "NRestarts": "0"},
@@ -96,6 +97,7 @@ EXPECTED_QUARANTINE = {
     "active_count": 0,
     "pending_count": 0,
     "reason": "github_assigned_count_exceeds_complete_reconstructable_jobs",
+    "observed_at": "2026-10-28T07:50:25.858984434Z",
 }
 EXPECTED_READY = {
     "schema_version": 1,
@@ -108,6 +110,8 @@ EXPECTED_READY = {
     "new_scale_set_id": 3,
     "reset_generation": "c00a10e3-1907-56e7-9e19-099fa0268d5e",
     "automatic_workflow_triggered": False,
+    "first_zero_observed_at": "2026-10-28T07:33:45.411383063Z",
+    "second_zero_observed_at": "2026-10-28T07:40:36.29291935Z",
 }
 
 STABILITY_SECONDS = 20
