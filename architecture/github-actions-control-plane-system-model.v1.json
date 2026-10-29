@@ -1187,5 +1187,116 @@
       "project manifests and exact workflow pins"
     ],
     "invariant": "reconciliation is policy deployment; it never schedules or executes candidate work"
+  },
+  "upstream_scale_set_client": {
+    "module": "github.com/actions/scaleset",
+    "pinned_commit": "e6daac702355cdb5b880b4fbdcf6d85dcd9e48e5",
+    "status": "PUBLIC_PREVIEW_PINNED_INTERFACE",
+    "job_available_fields": [
+      "runnerRequestId",
+      "repositoryName",
+      "ownerName",
+      "jobId",
+      "jobWorkflowRef",
+      "jobDisplayName",
+      "workflowRunId",
+      "eventName",
+      "requestLabels",
+      "queueTime",
+      "scaleSetAssignTime",
+      "runnerAssignTime",
+      "finishTime"
+    ],
+    "authoritative_scaling_signal": "statistics.TotalAssignedJobs",
+    "notes": [
+      "JobAvailable includes structured workflow/repository/event metadata at the exact deployed pin.",
+      "JobID may be empty on JobAvailable and is therefore not required for safe capacity provisioning.",
+      "Job display name is retained only as observational metadata in the target design."
+    ]
+  },
+  "target_controller_algorithm": {
+    "on_job_available": [
+      "validate repository/owner/event/JobWorkflowRef/request labels against this runner class policy",
+      "read workflow run metadata from GitHub and verify actor/triggering actor and exact run identity",
+      "fetch trusted workflow file at the run's default-branch commit and verify exact blob pin",
+      "if trusted, AcquireJobs for RunnerRequestID; otherwise record deny and do not acquire"
+    ],
+    "scaling": [
+      "desired = min(class.max_runners, statistics.TotalAssignedJobs)",
+      "reconcile desired against durable nonterminal runner-instance receipts, not against parsed job-message counts",
+      "provision homogeneous runner-class instances until current capacity reaches desired"
+    ],
+    "lifecycle": [
+      "JobStarted/JobCompleted enrich runner/job evidence and protect cleanup ordering",
+      "individual job messages never determine the desired runner count"
+    ],
+    "recovery": [
+      "load durable runner-instance ledger",
+      "query root STATUS for nonterminal runner-instance request IDs",
+      "reconcile orphaned JIT registrations by runner prefix/ledger",
+      "read current TotalAssignedJobs and converge class capacity",
+      "never require candidate SHA or route string to recover capacity"
+    ]
+  },
+  "target_supervisor_state_machine": {
+    "states": [
+      "SESSION_CONNECTING",
+      "SESSION_RUNNING",
+      "RETRY_BACKOFF",
+      "FATAL_CONFIGURATION"
+    ],
+    "transitions": [
+      {
+        "from": "SESSION_CONNECTING",
+        "event": "session established",
+        "to": "SESSION_RUNNING"
+      },
+      {
+        "from": "SESSION_RUNNING",
+        "event": "retryable GitHub/root transport failure",
+        "to": "RETRY_BACKOFF"
+      },
+      {
+        "from": "RETRY_BACKOFF",
+        "event": "bounded backoff elapsed",
+        "to": "SESSION_CONNECTING"
+      },
+      {
+        "from": "SESSION_RUNNING",
+        "event": "request-local deny/failure",
+        "to": "SESSION_RUNNING"
+      },
+      {
+        "from": "SESSION_RUNNING",
+        "event": "corrupt durable state or invalid static configuration",
+        "to": "FATAL_CONFIGURATION"
+      }
+    ],
+    "invariant": "systemd restart/start-limit is not the retry mechanism for request-local policy outcomes"
+  },
+  "target_root_capacity_state_machine": {
+    "states": [
+      "MISSING",
+      "ACCEPTED",
+      "COMPLETED",
+      "FAILED",
+      "QUARANTINED"
+    ],
+    "provision_flow": [
+      "authenticate peer UID and derive runner_class_id from root catalog",
+      "validate request schema, request_id, runner-name prefix and JIT size/base64",
+      "reject unknown peer or class quarantine without mutating runner state",
+      "claim request_id/digest durably",
+      "build launch spec exclusively from root runner-class catalog",
+      "launch one ephemeral class runner",
+      "record terminal execution/cleanup receipt",
+      "quarantine runner class only on cleanup/resource-containment failure defined by policy"
+    ],
+    "invariant": "no human command, workflow display name, route string, PR number, candidate SHA, model selector or experiment selector is parsed by root"
+  },
+  "target_protocol_generations": {
+    "runner_execution": "runner-class-capacity-v3",
+    "maintenance": "runner-class-maintenance-v2",
+    "reconciliation": "runner-class-reconciliation-v2"
   }
 }
