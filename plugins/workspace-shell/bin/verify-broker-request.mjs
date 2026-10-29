@@ -188,9 +188,21 @@ function main() {
   const configPath = process.argv[2];
   requireProtectedFile(configPath);
   const cfg = readJson(configPath);
-  for (const p of [cfg.frontend_public_key, cfg.trusted_issuers, cfg.revocations, cfg.helper_registry]) {
+  for (const p of [
+    cfg.frontend_public_key,
+    cfg.trusted_issuers,
+    cfg.revocations,
+    cfg.helper_registry,
+    cfg.policy_artifact_path,
+  ]) {
     requireProtectedFile(p);
   }
+  const observedPolicyArtifactSha256 = sha256Hex(readFileSync(cfg.policy_artifact_path));
+  assertExact(
+    cfg.policy_artifact_sha256,
+    observedPolicyArtifactSha256,
+    "installed policy artifact digest",
+  );
 
   const input = readFileSync(0, "utf8");
   if (Buffer.byteLength(input) > 65536) fail("REQUEST_TOO_LARGE", "broker request exceeds 64 KiB");
@@ -255,7 +267,11 @@ function main() {
   if (payload.max_uses !== 1) fail("APPROVAL_USE_LIMIT_INVALID", "v2 approval max_uses must equal 1");
 
   assertExact(payload.design_authority_sha, cfg.design_authority_sha, "design_authority_sha");
-  assertExact(payload.policy_artifact_sha256, cfg.policy_artifact_sha256, "policy_artifact_sha256");
+  assertExact(
+    payload.policy_artifact_sha256,
+    observedPolicyArtifactSha256,
+    "policy_artifact_sha256",
+  );
 
   assertExact(fr.payload.task_id, payload.task_id, "task_id");
   assertExact(fr.payload.target, payload.target, "target");
@@ -275,6 +291,16 @@ function main() {
   assertExact(payload.helper_sha256, helper.sha256, "registered helper sha256");
   assertExact(payload.target, helper.target, "registered helper target");
   assertExact(payload.operation, helper.operation, "registered helper operation");
+  if (
+    !Array.isArray(helper.task_ids) ||
+    helper.task_ids.length === 0 ||
+    !helper.task_ids.every((value) => typeof value === "string")
+  ) {
+    fail("HELPER_TASK_SCOPE_INVALID", "registered helper task_ids must be a nonempty string array");
+  }
+  if (!helper.task_ids.includes(payload.task_id)) {
+    fail("HELPER_TASK_SCOPE_DENIED", "registered helper is not admitted for this task");
+  }
   if (helper.enabled !== true) fail("HELPER_DISABLED", "registered helper is not enabled");
 
   const schemaDigest = canonicalDigest(helper.parameter_schema);
