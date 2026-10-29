@@ -55,7 +55,8 @@
         "controller/lambda-ci-controller/**",
         "scripts/lambda_ci_*.py",
         "tests/test_lambda_ci_*.py",
-        ".github/workflows/lambda-ci-workspace-control-validation.yml"
+        ".github/workflows/lambda-ci-workspace-control-validation.yml",
+        "architecture/github-actions-control-plane-system-model.v1.json"
       ]
     },
     {
@@ -90,6 +91,8 @@
       "outputs": [
         "complete request/lifecycle graph",
         "parser/serializer/authority inventory",
+        "machine-readable controller/route/protocol-generation system model",
+        "scale-set homogeneity analysis",
         "reuse-vs-custom architecture decision"
       ],
       "validation": [],
