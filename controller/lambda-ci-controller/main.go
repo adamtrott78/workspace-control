@@ -1043,7 +1043,8 @@ func (s *scaler) consumeReadyForSingleRetry(
 		return fmt.Errorf("parse recovery retry gate: %w", err)
 	}
 	status, _ := receipt["status"].(string)
-	if status == "RECOVERY_RETRY_COMPLETED" {
+	if status == "RECOVERY_RETRY_COMPLETED" ||
+		status == "RECOVERY_RETRY_INVALIDATED" {
 		return nil
 	}
 	if status == "RECOVERY_RETRY_ACQUIRED" {
@@ -1166,7 +1167,13 @@ func (s *scaler) stageAvailableAdmissions(
 		}
 		workload, err := workloadForDisplayClaim(job.JobDisplayName)
 		if err != nil {
-			return nil, nil, fmt.Errorf("derive available workload: %w", err)
+			s.logger.Error(
+				"Rejected JobAvailable admission metadata",
+				slog.Int64("runner_request_id", job.RunnerRequestID),
+				slog.Int64("workflow_run_id", job.WorkflowRunID),
+				slog.String("reason", err.Error()),
+			)
+			continue
 		}
 		attestation, err := s.attestor.Attest(
 			ctx,
@@ -1184,7 +1191,13 @@ func (s *scaler) stageAvailableAdmissions(
 				)
 				continue
 			}
-			return nil, nil, fmt.Errorf("attest available job before acquire: %w", err)
+			s.logger.Error(
+				"Rejected JobAvailable admission metadata",
+				slog.Int64("runner_request_id", job.RunnerRequestID),
+				slog.Int64("workflow_run_id", job.WorkflowRunID),
+				slog.String("reason", err.Error()),
+			)
+			continue
 		}
 		jobKey := attestation.JobID
 		s.mu.Lock()
