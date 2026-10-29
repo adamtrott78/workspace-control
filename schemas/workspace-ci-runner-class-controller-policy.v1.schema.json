@@ -6,15 +6,26 @@
   "additionalProperties": false,
   "required": [
     "schema_version",
+    "control_plane_generation_sha256",
+    "controller_policy_sha256",
     "runner_class_id",
     "repository",
     "scale_set_name",
+    "runner_prefix",
     "max_runners",
     "trusted_workflows"
   ],
   "properties": {
     "schema_version": {
       "const": 1
+    },
+    "control_plane_generation_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "controller_policy_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
     },
     "runner_class_id": {
       "type": "string",
@@ -28,6 +39,10 @@
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9-]{2,95}$"
     },
+    "runner_prefix": {
+      "type": "string",
+      "pattern": "^lambda-[a-z0-9][a-z0-9-]*-$"
+    },
     "max_runners": {
       "type": "integer",
       "minimum": 0,
@@ -40,14 +55,20 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
+          "route_id",
           "path",
           "default_branch",
           "blob_sha",
-          "job_key",
+          "compile_time_job_key",
+          "compile_time_top_level_job_count",
           "allowed_events",
           "allowed_actor_logins"
         ],
         "properties": {
+          "route_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{2,127}$"
+          },
           "path": {
             "type": "string",
             "pattern": "^\\.github/workflows/[^/]+\\.ya?ml$"
@@ -60,16 +81,20 @@
             "type": "string",
             "pattern": "^[0-9a-f]{40}$"
           },
-          "job_key": {
+          "compile_time_job_key": {
             "type": "string",
-            "pattern": "^[A-Za-z0-9_.-]{1,100}$"
+            "pattern": "^[A-Za-z0-9_-]{1,100}$"
+          },
+          "compile_time_top_level_job_count": {
+            "const": 1
           },
           "allowed_events": {
             "type": "array",
             "minItems": 1,
             "uniqueItems": true,
             "items": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             }
           },
           "allowed_actor_logins": {
@@ -77,7 +102,8 @@
             "minItems": 1,
             "uniqueItems": true,
             "items": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             }
           }
         }
