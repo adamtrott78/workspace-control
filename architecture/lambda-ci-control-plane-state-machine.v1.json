@@ -142,28 +142,51 @@
       "owner": "controller + root capacity provider",
       "states": [
         "ABSENT",
+        "RESERVING",
+        "RESERVED",
         "JIT_REGISTERED",
-        "ROOT_ACCEPTED",
+        "ROOT_PREPARING",
         "RUNNER_ONLINE",
         "BUSY",
         "TERMINAL",
         "CLEANED",
-        "FAILED"
+        "FAILED",
+        "CANCELED"
       ],
       "transitions": [
         {
           "from": "ABSENT",
-          "event": "GenerateJitRunnerConfig succeeds",
+          "event": "controller persists runner-instance ledger and submits RESERVE",
+          "to": "RESERVING"
+        },
+        {
+          "from": "RESERVING",
+          "event": "root atomically grants host/project/class/resource claim",
+          "to": "RESERVED"
+        },
+        {
+          "from": "RESERVING",
+          "event": "BUSY or CLASS_QUARANTINED",
+          "to": "ABSENT"
+        },
+        {
+          "from": "RESERVED",
+          "event": "controller GenerateJitRunnerConfig succeeds",
           "to": "JIT_REGISTERED"
         },
         {
-          "from": "JIT_REGISTERED",
-          "event": "root PROVISION accepted",
-          "to": "ROOT_ACCEPTED"
+          "from": "RESERVED",
+          "event": "reservation expires or controller CANCEL succeeds",
+          "to": "CANCELED"
         },
         {
-          "from": "ROOT_ACCEPTED",
-          "event": "ephemeral runner registers/awaits job",
+          "from": "JIT_REGISTERED",
+          "event": "controller submits LAUNCH within reservation",
+          "to": "ROOT_PREPARING"
+        },
+        {
+          "from": "ROOT_PREPARING",
+          "event": "root creates deterministic systemd runner unit",
           "to": "RUNNER_ONLINE"
         },
         {
@@ -172,47 +195,51 @@
           "to": "BUSY"
         },
         {
+          "from": "RUNNER_ONLINE",
+          "event": "runner exits without job or launch fails",
+          "to": "TERMINAL"
+        },
+        {
           "from": "BUSY",
           "event": "JobCompleted or runner exits",
           "to": "TERMINAL"
         },
         {
           "from": "TERMINAL",
-          "event": "root verifies cgroup/process/GPU/workspace cleanup",
+          "event": "root verifies containment cleanup and releases reservation/resources",
           "to": "CLEANED"
         },
         {
           "from": "JIT_REGISTERED",
-          "event": "root rejects before launch or launch fails",
-          "to": "FAILED"
-        },
-        {
-          "from": "ROOT_ACCEPTED",
-          "event": "launch/registration fails",
+          "event": "reservation expires/launch rejected",
           "to": "FAILED"
         },
         {
           "from": "FAILED",
-          "event": "cleanup verified",
+          "event": "orphan JIT removed and root resources released",
           "to": "CLEANED"
         }
       ],
-      "invariant": "runner instance is disposable and class-homogeneous; no instance carries job-specific root authority"
+      "invariant": "GitHub JIT registration is created only after root capacity/resource reservation succeeds"
     },
     "root_capacity_request": {
       "owner": "root provisioner",
       "internal_states": [
         "MISSING",
+        "RESERVED",
         "PREPARING",
         "LAUNCHED",
         "COMPLETED",
-        "FAILED"
+        "FAILED",
+        "CANCELED"
       ],
       "external_statuses": [
         "MISSING",
+        "RESERVED",
         "ACCEPTED",
         "COMPLETED",
-        "FAILED"
+        "FAILED",
+        "CANCELED"
       ],
       "side_state": [
         "RUNNER_CLASS_QUARANTINED"
@@ -220,51 +247,66 @@
       "transitions": [
         {
           "from": "MISSING",
-          "event": "authorized peer submits new request_id/runner_name/JIT",
+          "event": "authorized peer RESERVE with new request_id/runner_name",
+          "to": "RESERVED",
+          "requirements": [
+            "derive runner class from SO_PEERCRED",
+            "atomically verify host/project/class concurrency and exclusive resources",
+            "durably reserve resource vector with bounded expiry",
+            "persist catalog SHA-256 and runner-class identity",
+            "no JIT material exists yet"
+          ]
+        },
+        {
+          "from": "RESERVED",
+          "event": "same authorized peer LAUNCH with matching request_id/runner_name and unexpired reservation",
           "to": "PREPARING",
           "requirements": [
-            "atomically persist nonsecret request metadata and JIT SHA-256",
-            "stage raw JIT only in root-owned 0600 tmpfs/runtime storage",
+            "persist JIT SHA-256",
+            "stage raw JIT only in 0600 root-owned runtime tmpfs",
             "do not return ACCEPTED yet"
           ]
         },
         {
           "from": "PREPARING",
-          "event": "deterministic systemd transient runner unit successfully created",
+          "event": "deterministic systemd runner unit successfully created",
           "to": "LAUNCHED",
           "requirements": [
-            "persist launched unit identity",
-            "unlink root tmpfs raw JIT staging after systemd has inherited the environment",
+            "persist deterministic unit identity",
+            "unlink raw JIT tmpfs after systemd inherits environment",
             "only now expose external ACCEPTED"
           ]
         },
         {
+          "from": "RESERVED",
+          "event": "CANCEL or reservation expiry before LAUNCH",
+          "to": "CANCELED"
+        },
+        {
           "from": "LAUNCHED",
-          "event": "runner exits and cleanup passes",
+          "event": "runner terminal and cleanup passes",
           "to": "COMPLETED"
         },
         {
           "from": "LAUNCHED",
-          "event": "launch/execution terminal failure and cleanup passes",
+          "event": "runner/launch terminal failure and cleanup passes",
           "to": "FAILED"
         },
         {
           "from": "PREPARING",
-          "event": "launch fails before systemd unit ownership",
-          "to": "FAILED",
-          "requirements": [
-            "remove tmpfs JIT staging",
-            "controller removes orphan GitHub JIT registration before creating a fresh runner-instance request"
-          ]
+          "event": "systemd launch fails",
+          "to": "FAILED"
         }
       ],
       "startup_reconciliation": [
-        "for PREPARING record: inspect deterministic systemd unit identity",
-        "if matching unit exists with exact class/request identity, promote to LAUNCHED/ACCEPTED and remove stale JIT staging",
-        "if unit does not exist, mark FAILED and remove JIT staging; never fabricate ACCEPTED",
-        "for LAUNCHED record: reconcile unit/receipt/cleanup state before serving STATUS"
+        "expire stale RESERVED records and release their resource vectors",
+        "for PREPARING record inspect deterministic systemd unit identity",
+        "if matching unit exists, promote to LAUNCHED/external ACCEPTED and remove stale JIT tmpfs",
+        "if unit absent, mark FAILED, remove JIT tmpfs, release resources after cleanup proof",
+        "for LAUNCHED record reconcile unit/terminal/cleanup state before serving STATUS",
+        "never expose ACCEPTED when resource reservation exists but systemd runner unit does not"
       ],
-      "invariant": "external ACCEPTED means systemd has accepted the runner instance; root never exposes an accepted state that depends on lost in-memory JIT bytes"
+      "invariant": "root resources are reserved before GitHub JIT generation, and external ACCEPTED means systemd owns the runner process"
     }
   },
   "error_algebra": {
@@ -312,16 +354,17 @@
     }
   },
   "recovery_algorithm": [
-    "load runner-instance ledger and verify catalog/class identity",
+    "load class runner-instance ledger and verify catalog identity",
     "query root STATUS for every nonterminal request_id",
-    "for MISSING entries with recorded JIT registration, remove the exact orphan registration before regeneration",
-    "for ACCEPTED entries, retain as live capacity and await root/GitHub terminal evidence",
-    "for COMPLETED/FAILED entries, close local runner-instance state without re-execution",
+    "reconcile RESERVED requests before generating any JIT config",
+    "remove orphan JIT registrations for FAILED/CANCELED/expired requests",
+    "treat ACCEPTED root requests as live capacity even if JobStarted has not yet been observed",
     "establish/re-establish Scale Set Client session",
     "read current TotalAssignedJobs",
     "desired capacity = min(class max_runners, TotalAssignedJobs)",
-    "live capacity = root-accepted nonterminal runner instances for this class",
-    "provision or allow idle capacity to retire according to ephemeral runner lifecycle until live capacity converges",
+    "live-or-reserved capacity = RESERVED + ACCEPTED nonterminal root requests for this class",
+    "submit new RESERVE requests only for positive capacity deficit",
+    "generate JIT only after each reservation is granted",
     "never reconstruct workload/candidate authority from lifecycle strings"
   ],
   "maintenance_state_machine": {
@@ -351,6 +394,7 @@
       "scale_set_id",
       "scale_set_name",
       "state",
+      "reservation_expires_at_if_reserved",
       "jit_runner_id_if_known",
       "jit_config_sha256_if_generated",
       "root_status_if_known",
@@ -366,14 +410,16 @@
       "experiment selector"
     ],
     "write_order": [
-      "choose deterministic/unique request_id and runner_name",
-      "persist ALLOCATING ledger entry before JIT generation",
-      "generate GitHub JIT registration",
+      "choose request_id and runner_name",
+      "persist RESERVING ledger entry before root RESERVE",
+      "submit RESERVE",
+      "on RESERVED persist expiry/resource-state observation",
+      "only then generate GitHub JIT registration",
       "persist JIT_REGISTERED with runner id and JIT SHA-256 only",
-      "submit raw JIT config once over root socket; do not persist raw JIT",
-      "persist observed root ACCEPTED/DUPLICATE/BUSY/class state",
+      "submit LAUNCH using the existing reservation",
+      "persist ACCEPTED only after root reports systemd launch success",
       "enrich from JobStarted/JobCompleted when available",
-      "persist terminal cleanup reconciliation and archive/compact according to retention policy"
+      "persist terminal cleanup reconciliation"
     ],
     "jit_secret_handling": {
       "persistent_disk": "FORBIDDEN",
@@ -385,36 +431,40 @@
   },
   "crash_recovery_matrix": [
     {
-      "crash_boundary": "after controller ALLOCATING ledger, before GitHub JIT generation",
-      "recovery": "root STATUS MISSING; no GitHub registration exists; generate JIT"
+      "crash_boundary": "after local RESERVING ledger before root RESERVE",
+      "recovery": "root STATUS MISSING; retry RESERVE idempotently"
     },
     {
-      "crash_boundary": "after GitHub JIT generation, before root request",
-      "recovery": "root STATUS MISSING; remove exact orphan JIT registration from controller ledger, then generate a fresh JIT registration"
+      "crash_boundary": "after root RESERVED before controller receives response",
+      "recovery": "STATUS returns RESERVED with expiry; do not create a second reservation"
+    },
+    {
+      "crash_boundary": "after root RESERVED before JIT generation",
+      "recovery": "resume JIT generation if reservation valid; otherwise CANCEL/expiry releases capacity and create fresh runner-instance request"
+    },
+    {
+      "crash_boundary": "after JIT generation before LAUNCH",
+      "recovery": "STATUS RESERVED; remove orphan JIT if reservation expired, otherwise LAUNCH once"
     },
     {
       "crash_boundary": "root PREPARING before systemd unit creation",
-      "recovery": "root startup sees no deterministic unit, marks request FAILED, deletes tmpfs JIT staging; controller removes orphan GitHub registration and creates a fresh runner-instance request"
+      "recovery": "root startup sees no deterministic unit, marks FAILED, removes JIT staging, releases resources after cleanup; controller removes orphan JIT"
     },
     {
-      "crash_boundary": "root systemd unit created but process crashes before response",
-      "recovery": "root startup finds exact deterministic unit, promotes PREPARING to LAUNCHED/external ACCEPTED; controller STATUS recovers without re-execution"
+      "crash_boundary": "systemd unit created before LAUNCH response",
+      "recovery": "root startup/status sees exact unit, promotes to LAUNCHED/ACCEPTED; controller does not regenerate"
     },
     {
-      "crash_boundary": "after controller receives root ACCEPTED",
-      "recovery": "request is already LAUNCHED; root STATUS is authoritative"
+      "crash_boundary": "after ACCEPTED while runner online/busy",
+      "recovery": "root STATUS plus runner-instance ledger governs; TotalAssignedJobs controls future desired capacity"
     },
     {
-      "crash_boundary": "while runner busy",
-      "recovery": "root launch/terminal receipt plus GitHub lifecycle enrich runner-instance state; desired future capacity still comes from current TotalAssignedJobs"
-    },
-    {
-      "crash_boundary": "after runner exits before controller observes JobCompleted",
-      "recovery": "root terminal receipt/cleanup state closes runner-instance request; later GitHub lifecycle is evidence only"
+      "crash_boundary": "runner terminal before JobCompleted observed",
+      "recovery": "root terminal cleanup closes runner-instance state; GitHub lifecycle is evidence only"
     },
     {
       "crash_boundary": "cleanup failure",
-      "recovery": "root quarantines exact runner class; class controller stays alive but provisions zero new capacity until typed maintenance clearance"
+      "recovery": "root keeps resources conservatively reserved as needed and quarantines exact runner class until maintenance clears containment"
     }
   ],
   "catalog_versioning": {
