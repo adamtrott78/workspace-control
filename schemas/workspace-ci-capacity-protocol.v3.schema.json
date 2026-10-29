@@ -80,7 +80,9 @@
             "ACCEPTED",
             "DUPLICATE",
             "BUSY",
-            "POLICY_DENIED"
+            "CLASS_QUARANTINED",
+            "INVALID_REQUEST",
+            "UNAUTHORIZED_PEER"
           ]
         },
         "request_id": {
@@ -146,5 +148,18 @@
         }
       }
     }
-  ]
+  ],
+  "x-protocol-semantics": {
+    "authority_source": "SO_PEERCRED uid mapped by root-owned runner-class catalog",
+    "request_fields_non_authoritative_for_class": true,
+    "jit_config_persistence": "FORBIDDEN_RAW; persist SHA-256 digest only",
+    "status_classes": {
+      "ACCEPTED": "runner-instance request durably claimed",
+      "DUPLICATE": "same request identity already exists; reconcile receipt_status",
+      "BUSY": "class capacity temporarily unavailable; no class/policy failure",
+      "CLASS_QUARANTINED": "runner class blocked by durable containment state",
+      "INVALID_REQUEST": "controller/root protocol incompatibility; controller-fatal",
+      "UNAUTHORIZED_PEER": "local peer has no runner-class authority; controller/root configuration-fatal"
+    }
+  }
 }
