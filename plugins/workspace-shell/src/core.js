@@ -190,12 +190,19 @@ export function resolveProfile(profile, argv) {
       validateGitRead(argv);
       return {
         executable: "/usr/bin/git",
-        argv,
+        argv: [
+          "-c", "core.hooksPath=/dev/null",
+          "-c", "core.fsmonitor=false",
+          "-c", "diff.external=",
+          "-c", "credential.helper=",
+          ...argv,
+        ],
         writeScratch: false,
         env: {
           GIT_CONFIG_NOSYSTEM: "1",
           GIT_CONFIG_GLOBAL: "/dev/null",
           GIT_OPTIONAL_LOCKS: "0",
+          GIT_TERMINAL_PROMPT: "0",
         },
       };
     case "pytest-bounded":
