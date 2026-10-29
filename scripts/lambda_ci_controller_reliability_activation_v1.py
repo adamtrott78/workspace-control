@@ -343,8 +343,10 @@ def require_installed_baseline() -> dict[str, str]:
 def require_recovery_baseline() -> dict[str, Any]:
     quarantine = read_json(GPU_STATE / "quarantine.json")
     ready = read_json(GPU_STATE / "ready-for-single-retry.json")
-    exact_subset(quarantine, EXPECTED_QUARANTINE, "gpu quarantine")
-    exact_subset(ready, EXPECTED_READY, "gpu ready gate")
+    if quarantine != EXPECTED_QUARANTINE:
+        raise ActivationError("gpu quarantine baseline mismatch")
+    if ready != EXPECTED_READY:
+        raise ActivationError("gpu ready gate baseline mismatch")
     pending = list(GPU_STATE.glob("reset-pending-*.json"))
     if pending:
         raise ActivationError(f"unexpected reset-pending receipts: {pending}")
@@ -701,23 +703,14 @@ def preflight(repo: pathlib.Path) -> dict[str, Any]:
 
 def require_post_activation_recovery() -> dict[str, Any]:
     quarantine = read_json(GPU_STATE / "quarantine.json")
-    exact_subset(quarantine, EXPECTED_QUARANTINE, "post-activation quarantine")
+    if quarantine != EXPECTED_QUARANTINE:
+        raise ActivationError("post-activation quarantine changed")
     ready = read_json(GPU_STATE / "ready-for-single-retry.json")
-    expected = {
-        "status": "RECOVERY_RETRY_INVALIDATED",
-        "previous_status": "READY_FOR_SINGLE_RETRY",
-        "receipt_id": EXPECTED_READY["receipt_id"],
-        "project_id": "research-engine",
-        "lane": "gpu",
-        "scale_set_name": "lambda-research-engine-gpu",
-        "old_scale_set_id": 2,
-        "new_scale_set_id": 3,
-        "reset_generation": EXPECTED_READY["reset_generation"],
-        "invalidated_by_quarantine_receipt_id": EXPECTED_QUARANTINE["receipt_id"],
-    }
-    exact_subset(ready, expected, "post-activation retry gate")
+    _verify_invalidated_gate(ready)
     if list(GPU_STATE.glob("reset-pending-*.json")):
         raise ActivationError("reset-pending state appeared during activation")
+    if (GPU_STATE / "reset-zero-observation.json").exists():
+        raise ActivationError("reset-zero observation appeared during activation")
     return {"quarantine": quarantine, "retry_gate": ready}
 
 
@@ -740,6 +733,43 @@ def write_receipt(value: dict[str, Any]) -> None:
             pass
 
 
+def rollback_activation(
+    backup: dict[str, Any],
+) -> dict[str, Any]:
+    containment = contain_gpu_fail_closed(fail_on_initial_error=False)
+    invalidated = ensure_retry_invalidated()
+    quarantine = restore_frozen_quarantine()
+    restore_backups(backup)
+
+    run(["systemctl", "restart", MAINT_ROOT])
+    wait_socket(MAINTENANCE_SOCKET)
+    maintenance = stable_running(MAINT_ROOT, MAINTENANCE_STABILITY_SECONDS)
+
+    controllers: dict[str, Any] = {}
+    for service in HEALTHY_CONTROLLERS:
+        run(["systemctl", "reset-failed", service], check=False)
+        run(["systemctl", "restart", service])
+        controllers[service] = stable_running(
+            service,
+            MAINTENANCE_STABILITY_SECONDS,
+        )
+
+    research_cpu = require_inactive_research_cpu()
+    gpu = require_gpu_inactive()
+    require_no_active_execution()
+    recovery = require_post_activation_recovery()
+    return {
+        "containment": containment,
+        "retry_gate": invalidated,
+        "quarantine": quarantine,
+        "maintenance": maintenance,
+        "controllers": controllers,
+        "research_cpu": research_cpu,
+        "gpu": gpu,
+        "recovery": recovery,
+    }
+
+
 def activate(
     repo: pathlib.Path,
     expected_head: str,
@@ -760,13 +790,12 @@ def activate(
     ).encode("utf-8")
     backup = save_backups()
 
-    mutation_started = False
+    # The rollback guard is armed before the first runtime mutation.
+    rollback_armed = True
     try:
-        # Stop the known crash-looping lane first. Healthy lanes continue serving
-        # until the new binary/unit are atomically installed.
-        run(["systemctl", "stop", RESEARCH_GPU])
-        run(["systemctl", "reset-failed", RESEARCH_GPU], check=False)
-        mutation_started = True
+        gpu_containment = contain_gpu_fail_closed()
+        invalidated_gate = ensure_retry_invalidated()
+        frozen_quarantine = restore_frozen_quarantine()
 
         atomic_install(built.read_bytes(), CONTROLLER_BINARY, 0o755)
         atomic_install(source_unit, CONTROLLER_UNIT, 0o644)
@@ -776,25 +805,22 @@ def activate(
         # Root maintenance loads the new ownership/stability semantics.
         run(["systemctl", "restart", MAINT_ROOT])
         wait_socket(MAINTENANCE_SOCKET)
-        maintenance_root = stable_running(MAINT_ROOT, MAINTENANCE_STABILITY_SECONDS)
+        maintenance_root = stable_running(
+            MAINT_ROOT,
+            MAINTENANCE_STABILITY_SECONDS,
+        )
         maintenance_controller = require_running(MAINT_CONTROLLER)
 
-        # Restart only previously healthy/live controller lanes.
+        # Restart only lanes that were healthy/live at the frozen baseline.
+        # research-engine/gpu remains stopped throughout certification.
         controllers: dict[str, Any] = {}
         for service in HEALTHY_CONTROLLERS:
             run(["systemctl", "reset-failed", service], check=False)
             run(["systemctl", "restart", service])
 
-        # Start the repaired GPU lane last. Startup must invalidate the stale
-        # retry gate while preserving quarantine and refusing acquisition.
-        run(["systemctl", "reset-failed", RESEARCH_GPU], check=False)
-        run(["systemctl", "start", RESEARCH_GPU])
-
         for service in ACTIVE_AFTER_INSTALL:
             controllers[service] = stable_running(service, STABILITY_SECONDS)
 
-        # Re-check every controller after all sequential stability windows so a
-        # controller validated early cannot fail while later lanes are observed.
         final_controller_state: dict[str, dict[str, str]] = {}
         for service in ACTIVE_AFTER_INSTALL:
             snap = require_running(service)
@@ -807,18 +833,16 @@ def activate(
             final_controller_state[service] = snap
 
         maintenance_final = require_running(MAINT_ROOT)
-        if (
-            maintenance_final["NRestarts"]
-            != maintenance_root["second"]["NRestarts"]
-        ):
+        if maintenance_final["NRestarts"] != maintenance_root["second"]["NRestarts"]:
             raise ActivationError(
                 "maintenance root restarted after stability certification"
             )
 
-        # Research CPU was inactive before activation and must remain so.
+        # Both research-engine lanes remain non-executing: CPU stays inactive
+        # from the frozen baseline, GPU stays deliberately stopped/quarantined.
         research_cpu_after = require_inactive_research_cpu()
+        gpu_after = require_gpu_inactive()
         require_no_active_execution()
-
         recovery_after = require_post_activation_recovery()
 
         if sha256_path(CONTROLLER_BINARY) != candidate_sha:
@@ -830,7 +854,7 @@ def activate(
 
         receipt = {
             "schema_version": 1,
-            "status": "CONTROLLER_RELIABILITY_ACTIVATED",
+            "status": "CONTROLLER_RELIABILITY_ACTIVATED_GPU_HELD",
             "source_head": expected_head,
             "payload_source_head": PAYLOAD_SOURCE_HEAD,
             "candidate_controller_sha256": candidate_sha,
@@ -839,9 +863,13 @@ def activate(
             "installed_maintenance_service_sha256": sha256_path(MAINTENANCE_SERVICE),
             "preflight": before,
             "post_activation": {
+                "gpu_containment": gpu_containment,
+                "retry_gate": invalidated_gate,
+                "frozen_quarantine": frozen_quarantine,
                 "controllers": controllers,
                 "final_controller_state": final_controller_state,
                 "research_cpu": research_cpu_after,
+                "research_gpu": gpu_after,
                 "maintenance_root": maintenance_root,
                 "maintenance_final": maintenance_final,
                 "maintenance_controller": maintenance_controller,
@@ -851,27 +879,17 @@ def activate(
             "quarantine_cleared": False,
             "retry_authority_restored": False,
             "scientific_execution_started": False,
+            "research_engine_gpu_started": False,
         }
         write_receipt(receipt)
+        rollback_armed = False
         return receipt
     except Exception as exc:
         rollback_errors: list[str] = []
-        if mutation_started:
+        rollback_receipt: dict[str, Any] | None = None
+        if rollback_armed:
             try:
-                # Contain the affected GPU lane while rolling bytes back.
-                run(["systemctl", "stop", RESEARCH_GPU], check=False)
-                restore_backups(backup)
-                run(["systemctl", "restart", MAINT_ROOT])
-                wait_socket(MAINTENANCE_SOCKET)
-                stable_running(MAINT_ROOT, MAINTENANCE_STABILITY_SECONDS)
-                for service in HEALTHY_CONTROLLERS:
-                    run(["systemctl", "reset-failed", service], check=False)
-                    run(["systemctl", "restart", service])
-                    stable_running(service, MAINTENANCE_STABILITY_SECONDS)
-                require_inactive_research_cpu()
-                require_no_active_execution()
-                if service_snapshot(RESEARCH_GPU)["ActiveState"] != "inactive":
-                    raise ActivationError("rollback failed to contain research-engine gpu")
+                rollback_receipt = rollback_activation(backup)
             except Exception as rollback_exc:
                 rollback_errors.append(str(rollback_exc))
         if rollback_errors:
@@ -882,8 +900,10 @@ def activate(
             ) from exc
         raise ActivationError(
             "activation failed; old files restored, healthy lanes restored, "
-            "research-engine gpu left stopped: "
-            f"{type(exc).__name__}:{exc}"
+            "research-engine gpu held stopped/quarantined, retry authority "
+            "invalidated; rollback="
+            + json.dumps(rollback_receipt, sort_keys=True, default=str)
+            + f"; original={type(exc).__name__}:{exc}"
         ) from exc
 
 
