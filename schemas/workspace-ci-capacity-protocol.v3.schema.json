@@ -152,7 +152,12 @@
   "x-protocol-semantics": {
     "authority_source": "SO_PEERCRED uid mapped by root-owned runner-class catalog",
     "request_fields_non_authoritative_for_class": true,
-    "jit_config_persistence": "FORBIDDEN_RAW; persist SHA-256 digest only",
+    "jit_config_persistence": {
+      "persistent_filesystem": "FORBIDDEN",
+      "root_runtime_tmpfs": "0600 root-only while internal PREPARING",
+      "controller_persistence": "SHA-256 digest only",
+      "unlink_boundary": "after deterministic systemd runner unit inherits JIT environment"
+    },
     "status_classes": {
       "ACCEPTED": "runner-instance request durably claimed",
       "DUPLICATE": "same request identity already exists; reconcile receipt_status",
@@ -160,6 +165,7 @@
       "CLASS_QUARANTINED": "runner class blocked by durable containment state",
       "INVALID_REQUEST": "controller/root protocol incompatibility; controller-fatal",
       "UNAUTHORIZED_PEER": "local peer has no runner-class authority; controller/root configuration-fatal"
-    }
+    },
+    "accepted_boundary": "ACCEPTED is externally visible only after the deterministic systemd runner unit has been successfully created; internal PREPARING is never exposed as ACCEPTED"
   }
 }
