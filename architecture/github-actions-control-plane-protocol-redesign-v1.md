@@ -525,33 +525,24 @@ The pinned message type already supplies:
 
 The controller verifies the exact trusted workflow identity and GitHub lifecycle facts.
 
-## Controller -> root provisioner
-The root launch request should be keyed by `runner_class_id`, not `workload_class`.
+## Controller -> root capacity provider
+The root request is **not job-semantic**. A homogeneous runner class means root already knows the complete launch envelope from the authenticated local controller identity.
 
-The root launch envelope is already known before any candidate payload executes because the runner class is homogeneous.
-
-A v3 request therefore needs only infrastructure authority such as:
+A v3 provision request therefore carries only runner-instance mechanics:
 
 ```json
 {
   "schema_version": 3,
-  "request_id": "...",
-  "runner_class_id": "research-model-dual-public-v1",
-  "runner_name": "...",
-  "jit_config": "...",
-  "github_execution": {
-    "repository": "adamtrott78/research-engine",
-    "workflow_run_id": 123,
-    "run_attempt": 1,
-    "workflow_path": ".github/workflows/lambda-ci-local-extract-wave7a3.yml",
-    "workflow_blob_sha": "...",
-    "event_name": "issue_comment",
-    "actor_login": "adamtrott78"
-  }
+  "operation": "PROVISION",
+  "request_id": "<uuid>",
+  "runner_name": "<class-bound prefix + opaque suffix>",
+  "jit_config": "<opaque GitHub JIT registration>"
 }
 ```
 
-The original comment body, candidate SHA, PR number, experiment options, and display-name serialization are absent from the root protocol unless a future root capability genuinely requires them.
+Root derives `runner_class_id`, project isolation identity, execution contract, resource ceiling, GPU authority, network/filesystem/cache policy, and exact model/runtime bindings from `SO_PEERCRED.uid` plus the root-owned runner-class catalog.
+
+The original comment body, route/workload string, candidate SHA, PR number, workflow identity, experiment options, and display-name serialization do **not** cross the root capacity boundary.
 
 ## Local controller identity must be bound to runner class
 
@@ -571,26 +562,25 @@ The existing shared-UID design does not prove that invariant.
 
 # Job-correlation model
 
-## Why correlation remains necessary
-`JobAvailable` can omit `JobID`. The current implementation resolves the canonical REST job by matching the dynamic job display name.
+`JobAvailable` may omit `JobID`, but the target architecture does **not** need a REST job ID before provisioning capacity.
 
-Removing authority parsing therefore requires a replacement correlation rule.
+Repository analysis proves every one of the 23 registered trusted route workflows currently has exactly one top-level job. The policy compiler therefore enforces:
 
-## Proposed rule
-Each trusted route declares one static self-hosted job identity. For a Scale Set Client message, the controller:
+> one registered route workflow contains exactly one self-hosted job, and that job targets exactly one runner class.
 
-1. validates repository, event, workflow run ID, workflow ref and configured scale-set labels;
-2. resolves the workflow path from `JobWorkflowRef`;
-3. maps that exact trusted workflow to the runner class from root-synchronized policy;
-4. reads the workflow run via REST and verifies repository/event/actor/default-branch workflow identity;
-5. lists jobs for the run;
-6. selects exactly one nonterminal REST job matching the configured static job name and expected runner-class labels;
-7. records the REST numeric job ID as the canonical job identity;
-8. refuses acquisition if the correlation is zero or ambiguous.
+At runtime the controller validates only structured GitHub facts already present in the pinned Scale Set Client message plus REST run evidence:
 
-`JobDisplayName` may be retained as an opaque static equality/correlation field. No component parses tokens out of it.
+1. repository owner/name;
+2. `WorkflowRunID`;
+3. `JobWorkflowRef` -> exact trusted workflow path and default-branch ref;
+4. event name;
+5. request labels -> this controller's exact scale set;
+6. run actor/triggering actor and exact workflow run identity;
+7. exact trusted workflow blob at the run's default-branch commit.
 
-A stronger simplification is available where a trusted workflow contains exactly one self-hosted job: the canonical attempt key can be `repository + workflow_run_id + run_attempt + workflow_path + runner_class_id`, with REST job ID added after observation.
+If those facts pass, the controller may acquire `RunnerRequestID`. No runtime display-name equality or parsing is required.
+
+The YAML job key is retained only as a **compile-time workflow-shape assertion**. `JobDisplayName` is observational metadata only. Later `JobStarted`/`JobCompleted` messages may add GitHub JobID and runner identity to receipts, but neither is a prerequisite for safe class-level capacity provisioning.
 
 # Error and acknowledgement algebra
 
@@ -881,9 +871,12 @@ One file per runner class:
 - repository;
 - scale-set identity;
 - max runners;
-- exact trusted workflow path/blob/job key;
+- exact trusted workflow path/blob;
+- compile-time workflow job key/shape assertion;
 - allowed event;
 - allowed actor/triggering actor policy.
+
+The YAML job key is never expected from the Scale Set Client and is never a runtime authority field.
 
 It contains **no root resource-selection grammar** because the controller cannot select a different class.
 
