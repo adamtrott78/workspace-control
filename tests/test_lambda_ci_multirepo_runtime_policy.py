@@ -100,6 +100,40 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(multi.MultiRepoPolicyError, "route is not active"):
             multi.mint_admission(req, manifest, CONTRACTS, WORKLOAD)
 
+    def test_display_claim_accepts_bounded_optional_request_qualifier(self):
+        manifest = copy.deepcopy(WORKSPACE)
+        manifest["status"] = "ACTIVE"
+        manifest["routes"]["control-validation"]["activation_state"] = "ACTIVE"
+        req = request_for(manifest, "control-validation")
+        req["attestation"]["job_display_name"] += " host-attest"
+        admission = multi.mint_admission(
+            req,
+            manifest,
+            CONTRACTS,
+            WORKLOAD,
+            now=datetime(2026, 10, 29, tzinfo=timezone.utc),
+        )
+        self.assertEqual(admission["candidate_sha"], SHA)
+        self.assertEqual(admission["workload_class"], "control-validation")
+
+    def test_display_claim_rejects_unbounded_or_malformed_request_qualifier(self):
+        manifest = copy.deepcopy(WORKSPACE)
+        manifest["status"] = "ACTIVE"
+        manifest["routes"]["control-validation"]["activation_state"] = "ACTIVE"
+        for qualifier in (
+            "Host-Attest",
+            "host attest",
+            "x" * 129,
+            "host-attest!",
+        ):
+            req = request_for(manifest, "control-validation")
+            req["attestation"]["job_display_name"] += f" {qualifier}"
+            with self.assertRaisesRegex(
+                multi.MultiRepoPolicyError,
+                "job display claim does not match route",
+            ):
+                multi.mint_admission(req, manifest, CONTRACTS, WORKLOAD)
+
     def test_research_route_resolves_semantic_contract_not_route_name(self):
         req = request_for(RESEARCH, "cpu-test")
         admission = multi.mint_admission(
