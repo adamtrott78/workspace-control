@@ -132,7 +132,9 @@
       "state_effect_class": "CI_VALIDATION_ONLY",
       "model_id": null,
       "runtime_id": null,
-      "runner_envelope_key": "control-small-ci-v1|-|-"
+      "runner_envelope_key": "control-small-ci-v1|-|-",
+      "workflow_job_key": "control-validation",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "padataset",
@@ -155,7 +157,9 @@
       "state_effect_class": "CI_VALIDATION_ONLY",
       "model_id": null,
       "runtime_id": null,
-      "runner_envelope_key": "cpu-public-ci-v1|-|-"
+      "runner_envelope_key": "cpu-public-ci-v1|-|-",
+      "workflow_job_key": "padataset-cpu",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "padataset",
@@ -178,7 +182,9 @@
       "state_effect_class": "CI_VALIDATION_ONLY",
       "model_id": null,
       "runtime_id": null,
-      "runner_envelope_key": "gpu-single-public-ci-v1|-|-"
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|-",
+      "workflow_job_key": "padataset-gpu",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -201,7 +207,9 @@
       "state_effect_class": "CI_VALIDATION_ONLY",
       "model_id": null,
       "runtime_id": null,
-      "runner_envelope_key": "cpu-public-ci-v1|-|-"
+      "runner_envelope_key": "cpu-public-ci-v1|-|-",
+      "workflow_job_key": "autonomous-cpu",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -224,7 +232,9 @@
       "state_effect_class": "CI_VALIDATION_ONLY",
       "model_id": null,
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "autonomous-gpu",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -247,7 +257,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-single-offline-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-single-offline-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "qwen35-offline-pilot",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -270,7 +282,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-offline-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-offline-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "qwen35-dual-offline-pilot",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -293,7 +307,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave1",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -316,7 +332,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave2",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -339,7 +357,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave3",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -362,7 +382,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave4",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -385,7 +407,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave5",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -408,7 +432,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave6",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -431,7 +457,9 @@
       "state_effect_class": "CI_VALIDATION_ONLY",
       "model_id": null,
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "proposition-reranker-bakeoff",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -454,7 +482,9 @@
       "state_effect_class": "CI_VALIDATION_ONLY",
       "model_id": null,
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "oracle-query-diagnostic",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -477,7 +507,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave7-intents",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -500,7 +532,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave7a2",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -523,7 +557,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave7a3",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -546,7 +582,9 @@
       "state_effect_class": "CI_VALIDATION_ONLY",
       "model_id": null,
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "amr-graph-certificate-validation",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -569,7 +607,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "obligation-validity-precision-microbenchmark",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -592,7 +632,9 @@
       "state_effect_class": "CI_VALIDATION_ONLY",
       "model_id": null,
       "runtime_id": null,
-      "runner_envelope_key": "cpu-public-ci-v1|-|-"
+      "runner_envelope_key": "cpu-public-ci-v1|-|-",
+      "workflow_job_key": "validate",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -615,7 +657,9 @@
       "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
       "model_id": "qwen3.5-4b",
       "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
-      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3"
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "exact-provenance-binding-microbenchmark",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     },
     {
       "project_id": "research-engine",
@@ -638,7 +682,9 @@
       "state_effect_class": "CI_VALIDATION_ONLY",
       "model_id": null,
       "runtime_id": null,
-      "runner_envelope_key": "gpu-single-public-ci-v1|-|-"
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|-",
+      "workflow_job_key": "probe",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
     }
   ],
   "scale_sets": [
@@ -1078,7 +1124,9 @@
       "JobDisplayName may be compared as an opaque expected static identifier only; it is never parsed for command, candidate SHA, route, or resource authority",
       "REST numeric workflow job ID becomes canonical local job identity once resolved",
       "recovery may use the Scale Set Client JobID when present but must reconcile it with the same REST numeric identity"
-    ]
+    ],
+    "static_job_keys_complete": true,
+    "registered_route_static_job_key_count": 23
   },
   "failure_algebra": {
     "request_local": [
