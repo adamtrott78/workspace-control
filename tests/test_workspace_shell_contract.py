@@ -463,7 +463,69 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn("--property=KillMode=control-group", command)
         self.assertIn("--property=TasksMax=48", command)
         self.assertIn("--property=MemoryMax=1G", command)
+        self.assertIn("--property=CPUAccounting=yes", command)
+        self.assertIn("--property=CPUQuota=100%", command)
+        self.assertIn("--property=RuntimeMaxSec=90s", command)
         self.assertNotIn("workspace-shell-exec", joined)
+
+    def test_worker_cleanup_uses_cgroup_kill_for_residual_descendants(self):
+        state = {"ActiveState": "inactive", "ControlGroup": "/workspace-shell-test"}
+        with patch.object(job_launcher, "_unit_state", return_value=state), \
+             patch.object(job_launcher, "_cgroup_pids", side_effect=[["123"], []]), \
+             patch.object(job_launcher, "_cgroup_kill", return_value=True) as kill:
+            self.assertEqual(
+                job_launcher.cleanup_state({}, "workspace-shell-job-test"),
+                "EMPTY",
+            )
+        kill.assert_called_once_with("/workspace-shell-test")
+
+    def test_cgroup_kill_writes_kernel_kill_switch(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "cgroup.kill").write_text("", encoding="ascii")
+            with patch.object(job_launcher, "_cgroup_path", return_value=root):
+                self.assertTrue(job_launcher._cgroup_kill("/workspace-shell-test"))
+            self.assertEqual((root / "cgroup.kill").read_text(), "1\n")
+
+    def test_privileged_helper_wrapper_has_same_cpu_ceiling(self):
+        command = root_broker.build_helper_systemd_command(
+            {"systemd_run_path": "/usr/bin/true"},
+            "workspace-shell-helper-test",
+            Path("/usr/bin/true"),
+            {
+                "task_id": "task-abc",
+                "target": "workspace-control",
+                "expected_source_commit": "a" * 40,
+                "approval_id": "approval-12345678",
+                "operation": "noop",
+                "confinement": {
+                    "capabilities": [],
+                    "read_write_paths": [],
+                    "network": "deny",
+                },
+            },
+        )
+        self.assertIn("--property=CPUAccounting=yes", command)
+        self.assertIn("--property=CPUQuota=100%", command)
+        self.assertIn("--property=RuntimeMaxSec=90s", command)
+        self.assertIn("--property=KillMode=control-group", command)
+
+    def test_helper_cleanup_uses_cgroup_kill_for_residual_descendants(self):
+        state = {"ActiveState": "inactive", "ControlGroup": "/workspace-shell-helper-test"}
+        with patch.object(root_broker, "helper_unit_state", return_value=state), \
+             patch.object(
+                 root_broker,
+                 "helper_cgroup_pids",
+                 side_effect=[["123"], ["123"], ["123"], []],
+             ), \
+             patch.object(root_broker, "helper_unit_killer", return_value=lambda _sig: None), \
+             patch.object(root_broker, "helper_cgroup_kill", return_value=True) as kill, \
+             patch.object(root_broker.time, "sleep", return_value=None):
+            self.assertEqual(
+                root_broker.cleanup_helper_unit({}, "workspace-shell-helper-test"),
+                "EMPTY",
+            )
+        kill.assert_called_once_with("/workspace-shell-helper-test")
 
     def test_receipt_files_are_root_service_owned_and_frontend_group_readable(self):
         with tempfile.TemporaryDirectory() as td:
