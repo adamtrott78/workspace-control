@@ -28,7 +28,13 @@
     "format": "UTF-8 canonical JSON with recursively sorted object keys and compact separators for digest input",
     "catalog_generation_id": "sha256 over canonical desired-policy inputs plus exact source workflow blob identities",
     "projection_rule": "every generated root/controller/executor projection carries the same catalog_generation_sha256",
-    "semantic_immutability": "existing runner_class_id may not change its fully resolved root launch envelope between generations"
+    "semantic_immutability": "existing runner_class_id may not change its fully resolved root launch envelope between generations",
+    "control_plane_generation_sha256": "hash of all canonical static desired-policy inputs plus frozen workflow evidence; changes for any policy/evidence change",
+    "root_policy_sha256": "hash only of root host-resource policy plus resolved runner-class launch envelopes; ingress/workflow command-only changes MUST NOT change it",
+    "root_envelope_sha256": "hash of one immutable runner-class launch envelope excluding overall generation identity; capability change requires a new runner_class_id",
+    "controller_policy_sha256": "per-class hash of structured GitHub acquisition policy; ingress command/argument changes MUST NOT change it",
+    "executor_policy_sha256": "hash of generated execution+maintenance action surface; ingress command/parameter changes MUST change it",
+    "receipt_binding": "runner-instance/root receipts bind root_policy_sha256 + root_envelope_sha256 + runner_class_id; audit may additionally record overall control-plane generation"
   },
   "compile_steps": [
     "load and schema-validate all desired-policy inputs",
@@ -138,5 +144,16 @@
     "any route grouped into non-equivalent root envelopes fails compilation",
     "any change to immutable runner_class_id launch semantics fails compilation and requires a new class ID",
     "any executor parameter schema that can alter root projection fails compilation"
-  ]
+  ],
+  "projection_independence_invariants": [
+    "changing only a slash-command spelling changes control_plane_generation_sha256 and executor_policy_sha256 but not root_policy_sha256, root_envelope_sha256, or any controller_policy_sha256",
+    "changing only a workflow-local enum changes executor_policy_sha256 but not root or controller policy digests",
+    "changing a trusted workflow blob changes the relevant controller_policy_sha256 and overall generation; it does not change root envelope unless launch authority also changes",
+    "changing execution contract/resource/model/runtime/systemd/root path authority changes root envelope/policy and requires a new immutable runner_class_id",
+    "execution ingress parameter schemas may not contain infrastructure identity types or argument names implying runner class, GPU, resource, runtime, model, or profile selection"
+  ],
+  "compiler_inputs": {
+    "canonical_ingress_parameter_schemas": "architecture/lambda-ci-ingress-parameter-schemas.v1.json",
+    "canonical_maintenance_actions": "architecture/lambda-ci-maintenance-actions.v2.json"
+  }
 }
