@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 620cf09b1140b6fde88bf2ae9cb8c5241aaebcb4
+- Remote checkpoint: d5d3337a17c8ea3c0a62e9909b1a03cd11da7220
 - Remote verified: true
 
 ### research-engine
@@ -43,17 +43,16 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Complete canonical_protocol_and_state_machine on PR #572: freeze runner-class local authentication, capacity request/response semantics, retry/ack rules, and generated controller/root policy projections. Do not apply PR #571 parser hotfix to Lambda, restart project controllers, retrigger host-attest, or mutate research-engine/PADataset runtime state.
+Continue producer_and_policy_compiler_design on PR #572: freeze projection/deployment schemas and implement a repository-only compiler prototype that generates root/controller/executor projections and the 23-route compatibility matrix. Do not mutate Lambda, restart controllers, apply PR #571, or retrigger host-attest.
 
 ## Remaining work
 
-- Finalize the canonical runner-class capacity protocol and local controller authentication mechanism.
-- Freeze the class-specific controller policy projection and root runner-class projection generated from one catalog.
-- Define exact retry/backoff/ack behavior for transient GitHub, JIT, and root transport failures without using systemd restart as request retry.
-- Model and test controller restart, message redelivery, GitHub reassignment, root restart, JIT orphan cleanup, class quarantine, and scale-set migration.
-- Design generated executor command builders and migrate maintenance targeting from cpu/gpu lane to runner_class_id.
-- Design repository-only compatibility/property/state-machine tests covering all 23 registered routes and all nine proposed runner classes.
-- Only after repository-only verification, design bounded migration from the five current scale sets to the nine homogeneous runner-class scale sets.
+- Finish producer/policy compiler design: exact projection schemas, catalog-generation digest algorithm, deployment-overlay schema, and class-specific systemd/controller identity projection.
+- Design the executor builder interface so every execution/maintenance trigger is selected by action_id and typed arguments rather than raw comment text.
+- Define legacy-to-v3 migration overlay preserving current workspace-control containment and research-engine GPU quarantine/retry-invalidated authority without implicit route activation.
+- Implement repository-only compiler/projection prototype and compatibility matrix for all 23 routes and nine runner classes.
+- Implement deterministic/state-machine/fault-injection verification plan; do not modify live Lambda.
+- Only after repository-only verification passes, design a separately authorized one-class-at-a-time migration and live acceptance.
 
 ## Blockers / gates
 
