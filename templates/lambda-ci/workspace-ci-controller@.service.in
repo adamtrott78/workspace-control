@@ -1,5 +1,7 @@
 # RUN-3 INSTALLED GENERIC SERVICE TEMPLATE.
 [Unit]
+StartLimitIntervalSec=10min
+StartLimitBurst=30
 Description=Workspace CI project/lane scale-set controller %i
 Requires=workspace-ci-provisioner.service
 After=network-online.target workspace-ci-provisioner.service
@@ -12,7 +14,7 @@ Group=workspace-ci-controller
 ExecStart=/opt/workspace-ci/controller/lambda-ci-controller
 EnvironmentFile=/etc/workspace-ci/controllers/%i.env
 Restart=on-failure
-RestartSec=3s
+RestartSec=10s
 UMask=0077
 NoNewPrivileges=yes
 CapabilityBoundingSet=
