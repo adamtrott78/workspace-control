@@ -885,6 +885,24 @@
       "severity": "CHECKED_OK",
       "finding": "all 23 registered routes currently match their pinned trusted workflow blob on repository main",
       "consequence": "current incident class is not caused by workflow-pin drift"
+    },
+    {
+      "id": "F7_SHARED_CONTROLLER_UID",
+      "severity": "ARCHITECTURAL_SECURITY",
+      "finding": "all registry-managed scale-set controller instances run as the same Unix UID ci-controller while root provisioner authorizes that shared SO_PEERCRED identity",
+      "consequence": "root cannot cryptographically/kernel-distinguish which runner-class controller sent a request; a compromised controller can attempt to claim another class unless local peer identity is redesigned"
+    },
+    {
+      "id": "F8_CPU_GPU_LANE_SCHEMA",
+      "severity": "ARCHITECTURAL",
+      "finding": "controller identity derivation and maintenance targeting hardcode lane in {cpu,gpu}",
+      "consequence": "the installed control model cannot represent heterogeneous execution contracts without reparsing per-job route metadata; runner_class_id must replace lane as the scheduling/capacity identity"
+    },
+    {
+      "id": "F9_COMMAND_GRAMMAR_OVERGENERALIZED",
+      "severity": "ARCHITECTURAL",
+      "finding": "22 of 23 registered execution routes use exactly command + candidate SHA; only gpu-experiment-public adds one workflow-local candidate selector that does not alter root launch authority",
+      "consequence": "a generic optional infrastructure qualifier grammar is unnecessary; host-attest was a control-plane classification error, not a missing generic argument feature"
     }
   ],
   "target_invariants": [
@@ -1113,5 +1131,61 @@
       "FAILED",
       "QUARANTINED"
     ]
+  },
+  "executor_command_census": {
+    "registered_routes": 23,
+    "command_plus_candidate_sha_only": 22,
+    "routes_with_additional_workflow_local_parameter": [
+      {
+        "project_id": "research-engine",
+        "route_id": "gpu-experiment-public",
+        "command": "/lambda-reasoner-probe",
+        "parameter": "candidate_id",
+        "allowed_values": [
+          "qwen35-9b-q6-resource",
+          "qwythos-9b-v2-q6-resource"
+        ],
+        "changes_root_runner_class": false
+      }
+    ],
+    "infrastructure_optional_qualifier_required": false
+  },
+  "target_maintenance_plane": {
+    "target_identity": "runner_class_id",
+    "replaces_current_identity": "project_id + cpu|gpu lane",
+    "ingress_actions": [
+      {
+        "action": "diagnose",
+        "root_operation": "DIAGNOSE_RUNNER_CLASS",
+        "authority": "read-only"
+      },
+      {
+        "action": "restart",
+        "root_operation": "RESTART_RUNNER_CLASS_CONTROLLER",
+        "authority": "controller lifecycle only"
+      },
+      {
+        "action": "host-attest",
+        "root_operation": "HOST_ATTEST_RUNNER_CLASS",
+        "authority": "read-only host/class preflight"
+      },
+      {
+        "action": "reset-stale",
+        "root_operation": "RESET_STALE_RUNNER_CLASS",
+        "authority": "recovery receipt required"
+      }
+    ],
+    "invariant": "maintenance parses the owner command once, then root consumes typed runner-class operations; maintenance commands never enter the scale-set execution protocol"
+  },
+  "target_reconciliation_plane": {
+    "source": "successful trusted workspace-control reconciliation workflow on main",
+    "installs": [
+      "runner class catalog",
+      "class-specific controller policies",
+      "class-specific controller service environments/identities",
+      "root peer-identity -> runner-class mapping",
+      "project manifests and exact workflow pins"
+    ],
+    "invariant": "reconciliation is policy deployment; it never schedules or executes candidate work"
   }
 }
