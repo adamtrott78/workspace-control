@@ -949,6 +949,12 @@
       "severity": "ARCHITECTURAL",
       "finding": "22 of 23 registered execution routes use exactly command + candidate SHA; only gpu-experiment-public adds one workflow-local candidate selector that does not alter root launch authority",
       "consequence": "a generic optional infrastructure qualifier grammar is unnecessary; host-attest was a control-plane classification error, not a missing generic argument feature"
+    },
+    {
+      "id": "F10_SINGLE_JOB_WORKFLOW_SHAPE",
+      "severity": "CHECKED_OK",
+      "finding": "all 23 registered trusted route workflows currently contain exactly one top-level job",
+      "consequence": "target policy compiler can enforce one self-hosted job per trusted route/class and remove runtime display-name correlation entirely"
     }
   ],
   "target_invariants": [
@@ -1117,16 +1123,18 @@
     "no_live_migration_before_repository_verification": true
   },
   "correlation_model": {
-    "problem": "JobAvailable may omit JobID; current controller resolves REST job by dynamic JobDisplayName equality and also parses that name for authority.",
-    "target": [
-      "trusted workflow has exactly one self-hosted job for a registered runner class, or each self-hosted job has a root-catalogued static job name",
-      "controller correlates WorkflowRunID + repository + trusted workflow path/ref + expected request labels/static job name to exactly one nonterminal REST job",
-      "JobDisplayName may be compared as an opaque expected static identifier only; it is never parsed for command, candidate SHA, route, or resource authority",
-      "REST numeric workflow job ID becomes canonical local job identity once resolved",
-      "recovery may use the Scale Set Client JobID when present but must reconcile it with the same REST numeric identity"
+    "compile_time": [
+      "all 23 registered trusted workflows currently contain exactly one top-level job",
+      "catalog stores the YAML job key only to validate workflow shape during policy compilation",
+      "target compiler requires exactly one self-hosted job targeting the route runner class"
     ],
-    "static_job_keys_complete": true,
-    "registered_route_static_job_key_count": 23
+    "runtime": [
+      "controller does not parse JobDisplayName and does not require the YAML job key from GitHub",
+      "JobWorkflowRef + repository + WorkflowRunID + event + RequestLabels identify the trusted workflow/class context",
+      "RunnerRequestID identifies the available acquisition request",
+      "JobID/runner name from later lifecycle messages may enrich audit evidence but are not prerequisites for provisioning"
+    ],
+    "invariant": "no human-readable runtime name is an authority-bearing correlation key"
   },
   "failure_algebra": {
     "request_local": [
