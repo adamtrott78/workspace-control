@@ -62,8 +62,10 @@ function fixture() {
   const trustPath = path.join(root, "trusted-issuers.json");
   const revocationsPath = path.join(root, "revocations.json");
   const registryPath = path.join(root, "helpers.json");
+  const policyArtifactPath = path.join(root, "authority.json");
   const configPath = path.join(root, "verifier.json");
   writeFileSync(frontendPubPath, frontendPub);
+  writeFileSync(policyArtifactPath, JSON.stringify({ authority: "test-policy-v1" }));
 
   const now = Date.now();
   writeFileSync(
@@ -92,6 +94,7 @@ function fixture() {
     relative_path: "helper.sh",
     sha256: helperSha,
     target: "workspace-control",
+    task_ids: ["task-abc"],
     operation: "noop",
     parameter_schema: parameterSchema,
     source_repository: "workspace-control",
@@ -111,7 +114,8 @@ function fixture() {
     revocations: revocationsPath,
     helper_registry: registryPath,
     design_authority_sha: "a".repeat(40),
-    policy_artifact_sha256: "c".repeat(64),
+    policy_artifact_path: policyArtifactPath,
+    policy_artifact_sha256: sha256Hex(readFileSync(policyArtifactPath)),
     source_roots: { "workspace-control": source },
   };
   writeFileSync(configPath, JSON.stringify(cfg));
@@ -122,6 +126,7 @@ function fixture() {
     signer = issuerPriv,
     issuedAt = new Date(now - 1000),
     expiresAt = new Date(now + 5 * 60_000),
+    taskId = "task-abc",
   } = {}) {
     const parameters = { mode: "safe" };
     let approvalPayload = {
@@ -130,7 +135,7 @@ function fixture() {
       issuer_key_id: "operator-test",
       issued_at: issuedAt.toISOString(),
       expires_at: expiresAt.toISOString(),
-      task_id: "task-abc",
+      task_id: taskId,
       target: "workspace-control",
       design_authority_sha: cfg.design_authority_sha,
       policy_artifact_sha256: cfg.policy_artifact_sha256,
@@ -156,7 +161,7 @@ function fixture() {
     };
     let frontendPayload = buildFrontendRequest({
       requestId: "request-12345678",
-      taskId: "task-abc",
+      taskId,
       target: "workspace-control",
       expectedSha: commit,
       helperId: "test-helper",
@@ -190,6 +195,7 @@ function fixture() {
     trustPath,
     revocationsPath,
     registryPath,
+    policyArtifactPath,
     configPath,
     issuerPriv,
     build,
@@ -224,6 +230,22 @@ test("operator signer cannot widen the pinned design authority", () => {
       }),
     }),
   );
+  assert.equal(result.ok, false);
+  assert.match(result.error.code, /APPROVAL_BINDING_MISMATCH/);
+});
+
+test("registered helper task scope is independently enforced", () => {
+  const fx = fixture();
+  const result = fx.verifyRequest(fx.build({ taskId: "task-other" }));
+  assert.equal(result.ok, false);
+  assert.equal(result.error.code, "HELPER_TASK_SCOPE_DENIED");
+});
+
+test("installed policy artifact drift is rejected independently", () => {
+  const fx = fixture();
+  const request = fx.build();
+  writeFileSync(fx.policyArtifactPath, JSON.stringify({ authority: "drifted" }));
+  const result = fx.verifyRequest(request);
   assert.equal(result.ok, false);
   assert.match(result.error.code, /APPROVAL_BINDING_MISMATCH/);
 });
