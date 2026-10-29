@@ -11,10 +11,29 @@ MODULE_PATH = (
     / "scripts"
     / "lambda_ci_controller_reliability_activation_v1.py"
 )
-SPEC = importlib.util.spec_from_file_location("controller_reliability_activation", MODULE_PATH)
+SPEC = importlib.util.spec_from_file_location(
+    "controller_reliability_activation",
+    MODULE_PATH,
+)
 activation = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(activation)
+
+
+def inactive_gpu_snapshot():
+    return {
+        "LoadState": "loaded",
+        "UnitFileState": "enabled",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "Result": "success",
+        "ExecMainCode": "0",
+        "ExecMainStatus": "0",
+        "NRestarts": "14276",
+        "MainPID": "0",
+        "InvocationID": "inactive",
+        "Restart": "on-failure",
+    }
 
 
 class ControllerReliabilityActivationTests(unittest.TestCase):
@@ -56,6 +75,18 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
             "59395404e8a174fefbde32657e6215c87a4170f539c85fc8aa5e2295883f6e6d",
         )
 
+    def test_activation_scope_preserves_both_research_lanes_nonrunning(self):
+        self.assertNotIn(activation.RESEARCH_CPU, activation.ACTIVE_AFTER_INSTALL)
+        self.assertNotIn(activation.RESEARCH_GPU, activation.ACTIVE_AFTER_INSTALL)
+        self.assertEqual(
+            activation.ACTIVE_AFTER_INSTALL,
+            [
+                activation.PAD_CPU,
+                activation.PAD_GPU,
+                activation.WORKSPACE_CPU,
+            ],
+        )
+
     def test_healthy_controller_baselines_match_frozen_preflight(self):
         self.assertEqual(
             activation.EXPECTED_HEALTHY_BASELINES[activation.PAD_CPU],
@@ -70,77 +101,250 @@ class ControllerReliabilityActivationTests(unittest.TestCase):
             {"Result": "success", "NRestarts": "14140"},
         )
 
-    def test_activation_scope_preserves_inactive_research_cpu(self):
-        self.assertNotIn(activation.RESEARCH_CPU, activation.ACTIVE_AFTER_INSTALL)
-        self.assertEqual(
-            activation.ACTIVE_AFTER_INSTALL,
-            [
-                activation.PAD_CPU,
-                activation.PAD_GPU,
-                activation.WORKSPACE_CPU,
-                activation.RESEARCH_GPU,
-            ],
-        )
+    def test_gpu_stop_failure_is_reissued_and_containment_proved(self):
+        calls = []
 
-    def test_post_activation_recovery_requires_terminal_invalidation(self):
-        with tempfile.TemporaryDirectory() as td:
-            root = pathlib.Path(td)
-            quarantine = dict(activation.EXPECTED_QUARANTINE)
-            quarantine["observed_at"] = "2026-10-28T07:50:25.858984434Z"
-            ready = dict(activation.EXPECTED_READY)
+        def fake_run(argv, check=True, user=None, env=None):
+            calls.append((tuple(argv), check))
+            if (
+                argv[:3]
+                == ["systemctl", "stop", activation.RESEARCH_GPU]
+                and len(
+                    [
+                        item
+                        for item in calls
+                        if item[0][:3]
+                        == ("systemctl", "stop", activation.RESEARCH_GPU)
+                    ]
+                )
+                == 1
+            ):
+                raise activation.ActivationError(
+                    "synthetic stop returned failure after changing state"
+                )
+            return mock.Mock(returncode=0, stdout="", stderr="")
+
+        with (
+            mock.patch.object(activation, "run", side_effect=fake_run),
+            mock.patch.object(
+                activation,
+                "service_snapshot",
+                return_value=inactive_gpu_snapshot(),
+            ),
+        ):
+            with self.assertRaisesRegex(
+                activation.ActivationError,
+                "initial research-engine gpu stop failed after containment was proved",
+            ):
+                activation.contain_gpu_fail_closed()
+
+        stop_calls = [
+            item
+            for item in calls
+            if item[0][:3] == ("systemctl", "stop", activation.RESEARCH_GPU)
+        ]
+        self.assertGreaterEqual(len(stop_calls), 2)
+
+    def test_first_containment_failure_enters_rollback_guard(self):
+        with tempfile.NamedTemporaryFile() as built:
+            backup = {"files": {}}
+            rollback = {"gpu": "inactive"}
+            with (
+                mock.patch.object(
+                    activation,
+                    "build_controller",
+                    return_value=pathlib.Path(built.name),
+                ),
+                mock.patch.object(activation, "git_text", return_value="payload"),
+                mock.patch.object(activation, "save_backups", return_value=backup),
+                mock.patch.object(
+                    activation,
+                    "contain_gpu_fail_closed",
+                    side_effect=activation.ActivationError("stop failure"),
+                ),
+                mock.patch.object(
+                    activation,
+                    "rollback_activation",
+                    return_value=rollback,
+                ) as rollback_call,
+            ):
+                with self.assertRaisesRegex(
+                    activation.ActivationError,
+                    "activation failed; old files restored",
+                ):
+                    activation.activate(
+                        pathlib.Path("/tmp/repo"),
+                        "head",
+                        "operator",
+                        {},
+                    )
+            rollback_call.assert_called_once_with(backup)
+
+    def _write_recovery_state(self, root: pathlib.Path, status: str):
+        quarantine = dict(activation.EXPECTED_QUARANTINE)
+        ready = dict(activation.EXPECTED_READY)
+        ready["status"] = status
+        if status == "RECOVERY_RETRY_ACQUIRED":
             ready.update(
                 {
-                    "status": "RECOVERY_RETRY_INVALIDATED",
-                    "previous_status": "READY_FOR_SINGLE_RETRY",
-                    "invalidated_by_quarantine_receipt_id":
-                        activation.EXPECTED_QUARANTINE["receipt_id"],
-                    "invalidated_at": "2026-10-29T00:00:00Z",
-                    "first_zero_observed_at": "2026-10-28T07:33:45.411383063Z",
-                    "second_zero_observed_at": "2026-10-28T07:40:36.29291935Z",
+                    "job_id": "777",
+                    "workflow_run_id": 999,
+                    "acquired_at": "2026-10-29T00:00:00Z",
                 }
             )
-            (root / "quarantine.json").write_text(json.dumps(quarantine))
-            (root / "ready-for-single-retry.json").write_text(json.dumps(ready))
-            with mock.patch.object(activation, "GPU_STATE", root):
+        (root / "quarantine.json").write_text(
+            json.dumps(quarantine),
+            encoding="utf-8",
+        )
+        (root / "ready-for-single-retry.json").write_text(
+            json.dumps(ready),
+            encoding="utf-8",
+        )
+
+    def test_retry_authority_is_terminally_invalidated_for_ready_or_acquired(self):
+        for status in ("READY_FOR_SINGLE_RETRY", "RECOVERY_RETRY_ACQUIRED"):
+            with self.subTest(status=status), tempfile.TemporaryDirectory() as td:
+                root = pathlib.Path(td)
+                self._write_recovery_state(root, status)
+                with (
+                    mock.patch.object(activation, "GPU_STATE", root),
+                    mock.patch.object(activation.os, "chown"),
+                ):
+                    result = activation.ensure_retry_invalidated()
+                self.assertEqual(
+                    result["status"],
+                    "RECOVERY_RETRY_INVALIDATED",
+                )
+                self.assertEqual(result["previous_status"], status)
+                self.assertEqual(
+                    result["invalidated_by_quarantine_receipt_id"],
+                    activation.EXPECTED_QUARANTINE["receipt_id"],
+                )
+
+    def test_rollback_invalidates_retry_before_restoring_old_bytes(self):
+        order = []
+
+        def mark(name, value):
+            def inner(*args, **kwargs):
+                order.append(name)
+                return value
+            return inner
+
+        with (
+            mock.patch.object(
+                activation,
+                "contain_gpu_fail_closed",
+                side_effect=mark("contain", {"proof": inactive_gpu_snapshot()}),
+            ),
+            mock.patch.object(
+                activation,
+                "ensure_retry_invalidated",
+                side_effect=mark(
+                    "invalidate",
+                    {"status": "RECOVERY_RETRY_INVALIDATED"},
+                ),
+            ),
+            mock.patch.object(
+                activation,
+                "restore_frozen_quarantine",
+                side_effect=mark(
+                    "quarantine",
+                    dict(activation.EXPECTED_QUARANTINE),
+                ),
+            ),
+            mock.patch.object(
+                activation,
+                "restore_backups",
+                side_effect=mark("restore_bytes", None),
+            ),
+            mock.patch.object(activation, "run", return_value=mock.Mock(returncode=0)),
+            mock.patch.object(activation, "wait_socket"),
+            mock.patch.object(
+                activation,
+                "stable_running",
+                return_value={
+                    "first": {"NRestarts": "0"},
+                    "second": {"NRestarts": "0"},
+                },
+            ),
+            mock.patch.object(
+                activation,
+                "require_inactive_research_cpu",
+                return_value={"ActiveState": "inactive"},
+            ),
+            mock.patch.object(
+                activation,
+                "require_gpu_inactive",
+                return_value=inactive_gpu_snapshot(),
+            ),
+            mock.patch.object(activation, "require_no_active_execution"),
+            mock.patch.object(
+                activation,
+                "require_post_activation_recovery",
+                return_value={
+                    "quarantine": dict(activation.EXPECTED_QUARANTINE),
+                    "retry_gate": {"status": "RECOVERY_RETRY_INVALIDATED"},
+                },
+            ),
+        ):
+            activation.rollback_activation({"files": {}})
+
+        self.assertLess(order.index("contain"), order.index("invalidate"))
+        self.assertLess(order.index("invalidate"), order.index("restore_bytes"))
+
+    def test_certification_never_starts_gpu_even_if_work_arrives(self):
+        source = MODULE_PATH.read_text(encoding="utf-8")
+        self.assertNotIn(
+            'run(["systemctl", "start", RESEARCH_GPU])',
+            source,
+        )
+        self.assertNotIn(
+            'run(["systemctl", "restart", RESEARCH_GPU])',
+            source,
+        )
+        self.assertNotIn(activation.RESEARCH_GPU, activation.ACTIVE_AFTER_INSTALL)
+
+    def test_quarantine_restore_preserves_invalidated_retry_authority(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td)
+            self._write_recovery_state(root, "READY_FOR_SINGLE_RETRY")
+            with (
+                mock.patch.object(activation, "GPU_STATE", root),
+                mock.patch.object(activation.os, "chown"),
+            ):
+                invalidated = activation.ensure_retry_invalidated()
+                (root / "quarantine.json").unlink()
+                restored = activation.restore_frozen_quarantine()
+                reread = json.loads(
+                    (root / "ready-for-single-retry.json").read_text()
+                )
+            self.assertEqual(restored, activation.EXPECTED_QUARANTINE)
+            self.assertEqual(
+                reread["status"],
+                "RECOVERY_RETRY_INVALIDATED",
+            )
+            self.assertEqual(
+                reread["invalidated_at"],
+                invalidated["invalidated_at"],
+            )
+
+    def test_post_activation_recovery_requires_quarantine_and_invalidation(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td)
+            self._write_recovery_state(root, "READY_FOR_SINGLE_RETRY")
+            with (
+                mock.patch.object(activation, "GPU_STATE", root),
+                mock.patch.object(activation.os, "chown"),
+            ):
+                activation.ensure_retry_invalidated()
                 result = activation.require_post_activation_recovery()
+            self.assertEqual(
+                result["quarantine"],
+                activation.EXPECTED_QUARANTINE,
+            )
             self.assertEqual(
                 result["retry_gate"]["status"],
                 "RECOVERY_RETRY_INVALIDATED",
-            )
-
-    def test_post_activation_recovery_rejects_ready_authority(self):
-        with tempfile.TemporaryDirectory() as td:
-            root = pathlib.Path(td)
-            quarantine = dict(activation.EXPECTED_QUARANTINE)
-            quarantine["observed_at"] = "2026-10-28T07:50:25.858984434Z"
-            ready = dict(activation.EXPECTED_READY)
-            (root / "quarantine.json").write_text(json.dumps(quarantine))
-            (root / "ready-for-single-retry.json").write_text(json.dumps(ready))
-            with mock.patch.object(activation, "GPU_STATE", root):
-                with self.assertRaisesRegex(
-                    activation.ActivationError,
-                    "post-activation retry gate mismatch",
-                ):
-                    activation.require_post_activation_recovery()
-
-    def test_gpu_preflight_accepts_only_existing_crash_loop_shape(self):
-        snap = {
-            "LoadState": "loaded",
-            "UnitFileState": "enabled",
-            "ActiveState": "activating",
-            "SubState": "auto-restart",
-            "Result": "exit-code",
-            "ExecMainCode": "1",
-            "ExecMainStatus": "1",
-            "NRestarts": "14299",
-            "MainPID": "0",
-            "InvocationID": "abc",
-            "Restart": "on-failure",
-        }
-        with mock.patch.object(activation, "service_snapshot", return_value=snap):
-            self.assertEqual(
-                activation.require_old_gpu_loop()["NRestarts"],
-                "14299",
             )
 
     def test_source_payload_is_read_from_git_objects(self):
