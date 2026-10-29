@@ -734,6 +734,81 @@ func TestControllerQuarantineSurvivesRestart(t *testing.T) {
 	}
 }
 
+func TestControllerRestartInvalidatesConflictingRecoveryGate(t *testing.T) {
+	for _, priorStatus := range []string{
+		"READY_FOR_SINGLE_RETRY",
+		"RECOVERY_RETRY_ACQUIRED",
+	} {
+		t.Run(priorStatus, func(t *testing.T) {
+			dir := t.TempDir()
+			receipt := laneQuarantineReceipt{
+				SchemaVersion:       1,
+				ReceiptID:           "01234567-89ab-4cde-8fab-0123456789ab",
+				Status:              "ASSIGNMENT_DIVERGENCE_QUARANTINED",
+				ProjectID:           "research-engine",
+				Lane:                "gpu",
+				ScaleSetName:        "lambda-research-engine-gpu",
+				ScaleSetID:          31,
+				TotalAssignedJobs:   1,
+				ReconstructableJobs: 0,
+				ObservedAt:          time.Now().UTC().Format(time.RFC3339Nano),
+			}
+			if err := atomicWriteJSON(filepath.Join(dir, "quarantine.json"), receipt); err != nil {
+				t.Fatal(err)
+			}
+			gate := map[string]any{
+				"schema_version": 1,
+				"status": priorStatus,
+				"receipt_id": "11111111-2222-4333-8444-555555555555",
+				"project_id": "research-engine",
+				"lane": "gpu",
+				"scale_set_name": "lambda-research-engine-gpu",
+				"old_scale_set_id": 30,
+				"new_scale_set_id": 31,
+				"reset_generation": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+				"automatic_workflow_triggered": false,
+			}
+			if priorStatus == "RECOVERY_RETRY_ACQUIRED" {
+				gate["job_id"] = "prior-job"
+				gate["workflow_run_id"] = int64(999)
+				gate["acquired_at"] = time.Now().UTC().Format(time.RFC3339Nano)
+			}
+			if err := atomicWriteJSON(filepath.Join(dir, "ready-for-single-retry.json"), gate); err != nil {
+				t.Fatal(err)
+			}
+
+			s := &scaler{
+				scaleSetID:   31,
+				projectID:    "research-engine",
+				lane:         "gpu",
+				scaleSetName: "lambda-research-engine-gpu",
+				stateDir:     dir,
+				logger:       slog.Default(),
+			}
+			if err := s.loadQuarantine(); err != nil {
+				t.Fatal(err)
+			}
+			if !s.quarantined || s.quarantineID != receipt.ReceiptID {
+				t.Fatalf("quarantine did not survive restart: %#v", s)
+			}
+
+			raw, err := os.ReadFile(s.readyForSingleRetryPath())
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got map[string]any
+			if err := json.Unmarshal(raw, &got); err != nil {
+				t.Fatal(err)
+			}
+			if got["status"] != "RECOVERY_RETRY_INVALIDATED" ||
+				got["previous_status"] != priorStatus ||
+				got["invalidated_by_quarantine_receipt_id"] != receipt.ReceiptID {
+				t.Fatalf("conflicting recovery gate remained authoritative after restart: %#v", got)
+			}
+		})
+	}
+}
+
 func TestQuarantineAutoResolutionRequiresCompleteReconstructedAssignment(t *testing.T) {
 	dir := t.TempDir()
 	s := &scaler{
