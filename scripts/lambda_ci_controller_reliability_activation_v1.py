@@ -453,11 +453,190 @@ def atomic_install(raw: bytes, path: pathlib.Path, mode: int) -> None:
             pass
 
 
+def utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def atomic_state_json(path: pathlib.Path, value: dict[str, Any]) -> None:
+    if path.exists():
+        stat = path.stat()
+    else:
+        stat = path.parent.stat()
+    raw = (json.dumps(value, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    fd, name = tempfile.mkstemp(prefix=f".{path.name}.activation-", dir=path.parent)
+    tmp = pathlib.Path(name)
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(raw)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chown(tmp, stat.st_uid, stat.st_gid)
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, path)
+        dir_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(dir_fd)
+        finally:
+            os.close(dir_fd)
+    finally:
+        try:
+            tmp.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def require_gpu_inactive() -> dict[str, str]:
+    snap = service_snapshot(RESEARCH_GPU)
+    if (
+        snap["LoadState"] != "loaded"
+        or snap["UnitFileState"] != "enabled"
+        or snap["ActiveState"] != "inactive"
+        or snap["SubState"] != "dead"
+        or snap["MainPID"] != "0"
+    ):
+        raise ActivationError(
+            "research-engine gpu is not fail-closed inactive: "
+            + json.dumps(snap, sort_keys=True)
+        )
+    return snap
+
+
+def contain_gpu_fail_closed(*, fail_on_initial_error: bool = True) -> dict[str, Any]:
+    first_error: Exception | None = None
+    try:
+        run(["systemctl", "stop", RESEARCH_GPU])
+    except Exception as exc:
+        first_error = exc
+
+    # Re-issue containment even when the first stop changed state and then
+    # returned an error/timeout. Never trust the first command's exit alone.
+    run(["systemctl", "stop", RESEARCH_GPU], check=False)
+    deadline = time.monotonic() + 15
+    proof: dict[str, str] | None = None
+    while time.monotonic() < deadline:
+        snap = service_snapshot(RESEARCH_GPU)
+        if (
+            snap["ActiveState"] == "inactive"
+            and snap["SubState"] == "dead"
+            and snap["MainPID"] == "0"
+        ):
+            proof = snap
+            break
+        time.sleep(0.2)
+    if proof is None:
+        raise ActivationError(
+            "research-engine gpu containment could not be proved after stop"
+        )
+    run(["systemctl", "reset-failed", RESEARCH_GPU], check=False)
+    proof = require_gpu_inactive()
+    if first_error is not None and fail_on_initial_error:
+        raise ActivationError(
+            "initial research-engine gpu stop failed after containment was proved: "
+            + str(first_error)
+        ) from first_error
+    return {
+        "initial_stop_error": None if first_error is None else str(first_error),
+        "proof": proof,
+    }
+
+
+def _invalidated_gate_expected(previous_status: str) -> dict[str, Any]:
+    expected = dict(EXPECTED_READY)
+    expected["status"] = "RECOVERY_RETRY_INVALIDATED"
+    expected["previous_status"] = previous_status
+    expected["invalidated_by_quarantine_receipt_id"] = EXPECTED_QUARANTINE["receipt_id"]
+    return expected
+
+
+def _verify_invalidated_gate(
+    ready: dict[str, Any],
+    *,
+    previous_status: str | None = None,
+) -> None:
+    prior = previous_status or ready.get("previous_status")
+    if prior not in {"READY_FOR_SINGLE_RETRY", "RECOVERY_RETRY_ACQUIRED"}:
+        raise ActivationError("invalidated retry gate has invalid previous_status")
+    expected = _invalidated_gate_expected(str(prior))
+    mismatches = {
+        key: {"actual": ready.get(key), "expected": value}
+        for key, value in expected.items()
+        if ready.get(key) != value
+    }
+    if mismatches:
+        raise ActivationError(
+            "invalidated retry gate identity mismatch: "
+            + json.dumps(mismatches, sort_keys=True)
+        )
+    allowed = set(expected) | {"invalidated_at"}
+    if set(ready) != allowed:
+        raise ActivationError(
+            "invalidated retry gate keys mismatch: "
+            + json.dumps(sorted(ready), sort_keys=True)
+        )
+    if not isinstance(ready.get("invalidated_at"), str) or not ready["invalidated_at"]:
+        raise ActivationError("invalidated retry gate lacks invalidated_at")
+
+
+def ensure_retry_invalidated() -> dict[str, Any]:
+    quarantine = read_json(GPU_STATE / "quarantine.json")
+    if quarantine != EXPECTED_QUARANTINE:
+        raise ActivationError("frozen gpu quarantine drifted before retry invalidation")
+
+    path = GPU_STATE / "ready-for-single-retry.json"
+    ready = read_json(path)
+    status = ready.get("status")
+    if status == "RECOVERY_RETRY_INVALIDATED":
+        _verify_invalidated_gate(ready)
+        return ready
+    if status not in {"READY_FOR_SINGLE_RETRY", "RECOVERY_RETRY_ACQUIRED"}:
+        raise ActivationError(f"retry gate status cannot be invalidated safely: {status!r}")
+
+    if status == "READY_FOR_SINGLE_RETRY":
+        if ready != EXPECTED_READY:
+            raise ActivationError("READY retry gate drifted before invalidation")
+    else:
+        # ACQUIRED is supported for fail-closed rollback/re-entry only if the
+        # immutable recovery identity still matches the frozen gate.
+        for key, value in EXPECTED_READY.items():
+            if key == "status":
+                continue
+            if ready.get(key) != value:
+                raise ActivationError(
+                    f"ACQUIRED retry gate identity drift for {key}: "
+                    f"{ready.get(key)!r} != {value!r}"
+                )
+
+    updated = dict(ready)
+    updated["previous_status"] = str(status)
+    updated["status"] = "RECOVERY_RETRY_INVALIDATED"
+    updated["invalidated_by_quarantine_receipt_id"] = EXPECTED_QUARANTINE["receipt_id"]
+    updated["invalidated_at"] = utc_now()
+    atomic_state_json(path, updated)
+    reread = read_json(path)
+    _verify_invalidated_gate(reread, previous_status=str(status))
+    return reread
+
+
+def restore_frozen_quarantine() -> dict[str, Any]:
+    path = GPU_STATE / "quarantine.json"
+    try:
+        current = read_json(path)
+    except ActivationError:
+        current = {}
+    if current != EXPECTED_QUARANTINE:
+        atomic_state_json(path, EXPECTED_QUARANTINE)
+    restored = read_json(path)
+    if restored != EXPECTED_QUARANTINE:
+        raise ActivationError("failed to restore exact frozen gpu quarantine")
+    return restored
+
+
 def save_backups() -> dict[str, Any]:
     if ACTIVATION_ROOT.exists():
-        if RECEIPT_PATH.exists():
-            raise ActivationError("activation receipt already exists; refusing replay")
-    ACTIVATION_ROOT.mkdir(parents=True, exist_ok=True)
+        raise ActivationError(
+            "activation state root already exists; refusing unreviewed replay"
+        )
+    ACTIVATION_ROOT.mkdir(parents=True, exist_ok=False)
     os.chown(ACTIVATION_ROOT, 0, 0)
     os.chmod(ACTIVATION_ROOT, 0o700)
     BACKUP_ROOT.mkdir(parents=True, exist_ok=True)
