@@ -29,6 +29,9 @@ INPUT_PATHS = {
     "workflow_evidence": "architecture/lambda-ci-trusted-workflow-evidence.v1.json",
     "parameter_schemas": "architecture/lambda-ci-ingress-parameter-schemas.v1.json",
     "maintenance_actions": "architecture/lambda-ci-maintenance-actions.v2.json",
+    "root_projection_schema": "schemas/workspace-ci-root-policy-projection.v1.schema.json",
+    "controller_projection_schema": "schemas/workspace-ci-runner-class-controller-policy.v1.schema.json",
+    "executor_projection_schema": "schemas/workspace-ci-executor-policy-projection.v1.schema.json",
 }
 
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
@@ -148,6 +151,101 @@ def _check_binding_mode(
 
     if runtime_mode == "REQUIRED_EXPANDED_RUNTIME_EXACT":
         _require(runtime_id is not None, f"{project_id}/{class_id}: runtime binding required")
+
+
+def _schema_type_matches(value: Any, expected: str) -> bool:
+    if expected == "object":
+        return isinstance(value, dict)
+    if expected == "array":
+        return isinstance(value, list)
+    if expected == "string":
+        return isinstance(value, str)
+    if expected == "integer":
+        return isinstance(value, int) and not isinstance(value, bool)
+    if expected == "number":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
+    if expected == "boolean":
+        return isinstance(value, bool)
+    if expected == "null":
+        return value is None
+    raise CompileError(f"unsupported schema type {expected!r}")
+
+
+def _validate_json_schema_subset(
+    value: Any,
+    schema: dict[str, Any],
+    *,
+    path: str = "$",
+) -> None:
+    """Validate the bounded JSON-Schema subset used by compiler projections."""
+    if "oneOf" in schema:
+        successes = 0
+        errors: list[str] = []
+        for candidate in schema["oneOf"]:
+            try:
+                _validate_json_schema_subset(value, candidate, path=path)
+            except CompileError as exc:
+                errors.append(str(exc))
+            else:
+                successes += 1
+        _require(successes == 1, f"{path}: oneOf matched {successes} branches; {errors[:3]}")
+        return
+
+    if "const" in schema:
+        _require(value == schema["const"], f"{path}: value differs from const")
+    if "enum" in schema:
+        _require(value in schema["enum"], f"{path}: value not in enum")
+
+    expected_type = schema.get("type")
+    if expected_type is not None:
+        types = expected_type if isinstance(expected_type, list) else [expected_type]
+        _require(
+            any(_schema_type_matches(value, item) for item in types),
+            f"{path}: type mismatch expected {types}",
+        )
+
+    if isinstance(value, dict):
+        required = schema.get("required", [])
+        missing = [key for key in required if key not in value]
+        _require(not missing, f"{path}: missing required keys {missing}")
+        properties = schema.get("properties", {})
+        if schema.get("additionalProperties") is False:
+            extra = sorted(set(value) - set(properties))
+            _require(not extra, f"{path}: unexpected keys {extra}")
+        additional_schema = schema.get("additionalProperties")
+        for key, child in value.items():
+            child_schema = properties.get(key)
+            if child_schema is None and isinstance(additional_schema, dict):
+                child_schema = additional_schema
+            if child_schema is not None:
+                _validate_json_schema_subset(child, child_schema, path=f"{path}.{key}")
+        if "minProperties" in schema:
+            _require(len(value) >= int(schema["minProperties"]), f"{path}: too few properties")
+
+    if isinstance(value, list):
+        if "minItems" in schema:
+            _require(len(value) >= int(schema["minItems"]), f"{path}: too few items")
+        if schema.get("uniqueItems") is True:
+            encoded = [canonical_bytes(item) for item in value]
+            _require(len(encoded) == len(set(encoded)), f"{path}: items are not unique")
+        item_schema = schema.get("items")
+        if isinstance(item_schema, dict):
+            for index, child in enumerate(value):
+                _validate_json_schema_subset(child, item_schema, path=f"{path}[{index}]")
+
+    if isinstance(value, str):
+        if "minLength" in schema:
+            _require(len(value) >= int(schema["minLength"]), f"{path}: string too short")
+        if "maxLength" in schema:
+            _require(len(value) <= int(schema["maxLength"]), f"{path}: string too long")
+        if "pattern" in schema:
+            _require(re.search(schema["pattern"], value) is not None, f"{path}: pattern mismatch")
+
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if "minimum" in schema:
+            _require(value >= schema["minimum"], f"{path}: below minimum")
+        if "maximum" in schema:
+            _require(value <= schema["maximum"], f"{path}: above maximum")
 
 
 def _validate_parameter_schema(
@@ -311,7 +409,7 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
                 "runner_class_id": class_id,
                 "project_id": project_id,
                 "repository": project["repository"],
-                "catalog_generation_sha256": generation_sha,
+                "control_plane_generation_sha256": generation_sha,
                 "controller_peer": copy.deepcopy(cls["controller_peer"]),
                 "scale_set_name": scale_set,
                 "runner_prefix": prefix,
@@ -338,13 +436,12 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
                 ),
             }
             root_class["root_envelope_sha256"] = sha256_object(
-                {k: v for k, v in root_class.items() if k not in {"catalog_generation_sha256", "root_envelope_sha256"}}
+                {k: v for k, v in root_class.items() if k not in {"control_plane_generation_sha256", "root_envelope_sha256"}}
             )
             root_classes[class_id] = root_class
 
             controller_policies[class_id] = {
                 "schema_version": 1,
-                "catalog_generation_sha256": generation_sha,
                 "runner_class_id": class_id,
                 "repository": project["repository"],
                 "scale_set_name": scale_set,
@@ -460,7 +557,7 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
             class_id: {
                 key: value
                 for key, value in class_policy.items()
-                if key != "catalog_generation_sha256"
+                if key != "control_plane_generation_sha256"
             }
             for class_id, class_policy in root_projection["runner_classes"].items()
         },
@@ -472,7 +569,7 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
         policy["controller_policy_sha256"] = sha256_object({
             key: value
             for key, value in policy.items()
-            if key not in {"catalog_generation_sha256", "control_plane_generation_sha256", "controller_policy_sha256"}
+            if key not in {"control_plane_generation_sha256", "controller_policy_sha256"}
         })
         controller_policy_digests[class_id] = policy["controller_policy_sha256"]
 
@@ -487,6 +584,23 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
         for key, value in executor_projection.items()
         if key not in {"control_plane_generation_sha256", "executor_policy_sha256"}
     })
+    _validate_json_schema_subset(
+        root_projection,
+        data["root_projection_schema"],
+        path="$root_projection",
+    )
+    for class_id, policy in controller_policies.items():
+        _validate_json_schema_subset(
+            policy,
+            data["controller_projection_schema"],
+            path=f"$controller_projections.{class_id}",
+        )
+    _validate_json_schema_subset(
+        executor_projection,
+        data["executor_projection_schema"],
+        path="$executor_projection",
+    )
+
     compatibility.sort(key=lambda x: (x["project_id"], x["route_id"]))
 
     return {
