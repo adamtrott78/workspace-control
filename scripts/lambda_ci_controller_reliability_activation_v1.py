@@ -739,26 +739,71 @@ def write_receipt(value: dict[str, Any]) -> None:
             pass
 
 
+def prepare_payload(
+    repo: pathlib.Path,
+    invoker: str,
+) -> dict[str, Any]:
+    """Stage immutable candidate material before the authoritative live preflight."""
+    built = build_controller(repo, invoker)
+    return {
+        "built": built,
+        "candidate_sha256": sha256_path(built),
+        "controller_unit": git_text(
+            repo,
+            invoker,
+            "templates/lambda-ci/workspace-ci-controller@.service.in",
+        ).encode("utf-8"),
+        "maintenance_service": git_text(
+            repo,
+            invoker,
+            "scripts/lambda_ci_maintenance_service.py",
+        ).encode("utf-8"),
+    }
+
+
 def rollback_activation(
-    backup: dict[str, Any],
+    backup: dict[str, Any] | None,
 ) -> dict[str, Any]:
     containment = contain_gpu_fail_closed(fail_on_initial_error=False)
-    invalidated = ensure_retry_invalidated()
+
+    # Restore the exact frozen quarantine before retry invalidation because
+    # invalidation is intentionally bound to that durable quarantine identity.
     quarantine = restore_frozen_quarantine()
-    restore_backups(backup)
+    invalidated = ensure_retry_invalidated()
 
-    run(["systemctl", "restart", MAINT_ROOT])
-    wait_socket(MAINTENANCE_SOCKET)
-    maintenance = stable_running(MAINT_ROOT, MAINTENANCE_STABILITY_SECONDS)
-
-    controllers: dict[str, Any] = {}
-    for service in HEALTHY_CONTROLLERS:
-        run(["systemctl", "reset-failed", service], check=False)
-        run(["systemctl", "restart", service])
-        controllers[service] = stable_running(
-            service,
+    if backup is not None:
+        restore_backups(backup)
+        run(["systemctl", "restart", MAINT_ROOT])
+        wait_socket(MAINTENANCE_SOCKET)
+        maintenance = stable_running(
+            MAINT_ROOT,
             MAINTENANCE_STABILITY_SECONDS,
         )
+
+        controllers: dict[str, Any] = {}
+        for service in HEALTHY_CONTROLLERS:
+            run(["systemctl", "reset-failed", service], check=False)
+            run(["systemctl", "restart", service])
+            controllers[service] = stable_running(
+                service,
+                MAINTENANCE_STABILITY_SECONDS,
+            )
+    else:
+        # No installed bytes were replaced, so prove existing healthy services
+        # rather than introducing additional rollback mutations.
+        maintenance = {
+            "first": require_running(MAINT_ROOT),
+            "second": require_running(MAINT_ROOT),
+            "settle_seconds": 0,
+        }
+        controllers = {
+            service: {
+                "first": require_running(service),
+                "second": require_running(service),
+                "settle_seconds": 0,
+            }
+            for service in HEALTHY_CONTROLLERS
+        }
 
     research_cpu = require_inactive_research_cpu()
     gpu = require_gpu_inactive()
@@ -766,8 +811,8 @@ def rollback_activation(
     recovery = require_post_activation_recovery()
     return {
         "containment": containment,
-        "retry_gate": invalidated,
         "quarantine": quarantine,
+        "retry_gate": invalidated,
         "maintenance": maintenance,
         "controllers": controllers,
         "research_cpu": research_cpu,
@@ -777,38 +822,59 @@ def rollback_activation(
 
 
 def activate(
-    repo: pathlib.Path,
     expected_head: str,
-    invoker: str,
     before: dict[str, Any],
+    prepared: dict[str, Any],
 ) -> dict[str, Any]:
-    built = build_controller(repo, invoker)
-    candidate_sha = sha256_path(built)
-    source_unit = git_text(
-        repo,
-        invoker,
-        "templates/lambda-ci/workspace-ci-controller@.service.in",
-    ).encode("utf-8")
-    source_maintenance = git_text(
-        repo,
-        invoker,
-        "scripts/lambda_ci_maintenance_service.py",
-    ).encode("utf-8")
-    backup = save_backups()
+    built = pathlib.Path(prepared["built"])
+    candidate_sha = str(prepared["candidate_sha256"])
+    source_unit = bytes(prepared["controller_unit"])
+    source_maintenance = bytes(prepared["maintenance_service"])
 
-    # The rollback guard is armed before the first runtime mutation.
+    backup: dict[str, Any] | None = None
+
+    # The rollback/containment guard is armed before the first live mutation.
     rollback_armed = True
     try:
         gpu_containment = contain_gpu_fail_closed()
-        invalidated_gate = ensure_retry_invalidated()
+
+        # Detect any authority/lifecycle drift that happened after the
+        # authoritative preflight but before containment. Restore fail-closed
+        # state first, then abort rather than silently certifying across drift.
+        quarantine_before_restore: dict[str, Any] | None
+        try:
+            quarantine_before_restore = read_json(GPU_STATE / "quarantine.json")
+        except ActivationError:
+            quarantine_before_restore = None
+        quarantine_drifted = quarantine_before_restore != EXPECTED_QUARANTINE
+
         frozen_quarantine = restore_frozen_quarantine()
+        invalidated_gate = ensure_retry_invalidated()
+
+        # No execution may be active after containment and authority
+        # terminalization. Any ACQUIRED/other prior status proves the live
+        # handoff raced with work and forces fail-closed rollback.
+        require_no_active_execution()
+        if quarantine_drifted:
+            raise ActivationError(
+                "gpu quarantine drifted between live preflight and containment; "
+                "frozen quarantine restored and activation aborted"
+            )
+        if invalidated_gate.get("previous_status") != "READY_FOR_SINGLE_RETRY":
+            raise ActivationError(
+                "retry authority changed between live preflight and containment; "
+                "authority invalidated and activation aborted"
+            )
+
+        # Backups happen only after GPU containment, quarantine proof, retry
+        # invalidation, and the post-containment execution proof.
+        backup = save_backups()
 
         atomic_install(built.read_bytes(), CONTROLLER_BINARY, 0o755)
         atomic_install(source_unit, CONTROLLER_UNIT, 0o644)
         atomic_install(source_maintenance, MAINTENANCE_SERVICE, 0o755)
         run(["systemctl", "daemon-reload"])
 
-        # Root maintenance loads the new ownership/stability semantics.
         run(["systemctl", "restart", MAINT_ROOT])
         wait_socket(MAINTENANCE_SOCKET)
         maintenance_root = stable_running(
@@ -817,8 +883,6 @@ def activate(
         )
         maintenance_controller = require_running(MAINT_CONTROLLER)
 
-        # Restart only lanes that were healthy/live at the frozen baseline.
-        # research-engine/gpu remains stopped throughout certification.
         controllers: dict[str, Any] = {}
         for service in HEALTHY_CONTROLLERS:
             run(["systemctl", "reset-failed", service], check=False)
@@ -844,8 +908,6 @@ def activate(
                 "maintenance root restarted after stability certification"
             )
 
-        # Both research-engine lanes remain non-executing: CPU stays inactive
-        # from the frozen baseline, GPU stays deliberately stopped/quarantined.
         research_cpu_after = require_inactive_research_cpu()
         gpu_after = require_gpu_inactive()
         require_no_active_execution()
@@ -905,9 +967,9 @@ def activate(
                 f"rollback={'; '.join(rollback_errors)}"
             ) from exc
         raise ActivationError(
-            "activation failed; old files restored, healthy lanes restored, "
-            "research-engine gpu held stopped/quarantined, retry authority "
-            "invalidated; rollback="
+            "activation failed; old files preserved/restored, healthy lanes "
+            "preserved/restored, research-engine gpu held stopped/quarantined, "
+            "retry authority invalidated; rollback="
             + json.dumps(rollback_receipt, sort_keys=True, default=str)
             + f"; original={type(exc).__name__}:{exc}"
         ) from exc
@@ -929,15 +991,21 @@ def main() -> int:
     pwd.getpwnam(invoker)
 
     repo = attest_source(args.expected_head, invoker)
-    before = preflight(repo)
+
     if not args.apply:
+        before = preflight(repo)
         print(
             "CONTROLLER_RELIABILITY_ACTIVATION_PREFLIGHT="
             + json.dumps(before, sort_keys=True)
         )
         return 0
 
-    receipt = activate(repo, args.expected_head, invoker, before)
+    # Stage/build immutable candidate material before the authoritative live
+    # preflight. After preflight returns, activate() performs containment as its
+    # first transaction action; no build, source read, or backup intervenes.
+    prepared = prepare_payload(repo, invoker)
+    before = preflight(repo)
+    receipt = activate(args.expected_head, before, prepared)
     print(
         "CONTROLLER_RELIABILITY_ACTIVATION_RECEIPT="
         + json.dumps(receipt, sort_keys=True)
