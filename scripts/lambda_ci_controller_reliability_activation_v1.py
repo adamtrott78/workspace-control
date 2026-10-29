@@ -570,6 +570,13 @@ def _verify_invalidated_gate(
             + json.dumps(mismatches, sort_keys=True)
         )
     allowed = set(expected) | {"invalidated_at"}
+    if prior == "RECOVERY_RETRY_ACQUIRED":
+        acquired_keys = {"job_id", "workflow_run_id", "acquired_at"}
+        allowed |= acquired_keys
+        if not acquired_keys.issubset(ready):
+            raise ActivationError(
+                "invalidated ACQUIRED retry gate lacks acquisition identity"
+            )
     if set(ready) != allowed:
         raise ActivationError(
             "invalidated retry gate keys mismatch: "
