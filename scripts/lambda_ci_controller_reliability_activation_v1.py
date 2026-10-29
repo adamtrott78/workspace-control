@@ -77,6 +77,11 @@ MAINT_CONTROLLER = "workspace-ci-maintenance-controller.service"
 
 HEALTHY_CONTROLLERS = [PAD_CPU, PAD_GPU, WORKSPACE_CPU]
 ACTIVE_AFTER_INSTALL = [PAD_CPU, PAD_GPU, WORKSPACE_CPU, RESEARCH_GPU]
+EXPECTED_HEALTHY_BASELINES = {
+    PAD_CPU: {"Result": "success", "NRestarts": "0"},
+    PAD_GPU: {"Result": "success", "NRestarts": "0"},
+    WORKSPACE_CPU: {"Result": "success", "NRestarts": "14140"},
+}
 
 EXPECTED_QUARANTINE = {
     "schema_version": 1,
@@ -485,10 +490,15 @@ def preflight(repo: pathlib.Path) -> dict[str, Any]:
     installed = require_installed_baseline()
     research_cpu = require_inactive_research_cpu()
     gpu = require_old_gpu_loop()
-    healthy = {
-        service: require_running(service)
-        for service in HEALTHY_CONTROLLERS
-    }
+    healthy: dict[str, dict[str, str]] = {}
+    for service in HEALTHY_CONTROLLERS:
+        snap = require_running(service)
+        exact_subset(
+            snap,
+            EXPECTED_HEALTHY_BASELINES[service],
+            f"healthy controller baseline {service}",
+        )
+        healthy[service] = snap
     maintenance = {
         MAINT_ROOT: require_running(MAINT_ROOT),
         MAINT_CONTROLLER: require_running(MAINT_CONTROLLER),
@@ -600,6 +610,28 @@ def activate(
         for service in ACTIVE_AFTER_INSTALL:
             controllers[service] = stable_running(service, STABILITY_SECONDS)
 
+        # Re-check every controller after all sequential stability windows so a
+        # controller validated early cannot fail while later lanes are observed.
+        final_controller_state: dict[str, dict[str, str]] = {}
+        for service in ACTIVE_AFTER_INSTALL:
+            snap = require_running(service)
+            if snap["NRestarts"] != controllers[service]["second"]["NRestarts"]:
+                raise ActivationError(
+                    "controller restart count changed after its stability window: "
+                    f"{service}: {controllers[service]['second']['NRestarts']} "
+                    f"-> {snap['NRestarts']}"
+                )
+            final_controller_state[service] = snap
+
+        maintenance_final = require_running(MAINT_ROOT)
+        if (
+            maintenance_final["NRestarts"]
+            != maintenance_root["second"]["NRestarts"]
+        ):
+            raise ActivationError(
+                "maintenance root restarted after stability certification"
+            )
+
         # Research CPU was inactive before activation and must remain so.
         research_cpu_after = require_inactive_research_cpu()
         require_no_active_execution()
@@ -625,8 +657,10 @@ def activate(
             "preflight": before,
             "post_activation": {
                 "controllers": controllers,
+                "final_controller_state": final_controller_state,
                 "research_cpu": research_cpu_after,
                 "maintenance_root": maintenance_root,
+                "maintenance_final": maintenance_final,
                 "maintenance_controller": maintenance_controller,
                 "recovery": recovery_after,
             },
@@ -646,11 +680,11 @@ def activate(
                 restore_backups(backup)
                 run(["systemctl", "restart", MAINT_ROOT])
                 wait_socket(MAINTENANCE_SOCKET)
-                require_running(MAINT_ROOT)
+                stable_running(MAINT_ROOT, MAINTENANCE_STABILITY_SECONDS)
                 for service in HEALTHY_CONTROLLERS:
                     run(["systemctl", "reset-failed", service], check=False)
                     run(["systemctl", "restart", service])
-                    require_running(service)
+                    stable_running(service, MAINTENANCE_STABILITY_SECONDS)
                 require_inactive_research_cpu()
                 require_no_active_execution()
                 if service_snapshot(RESEARCH_GPU)["ActiveState"] != "inactive":
