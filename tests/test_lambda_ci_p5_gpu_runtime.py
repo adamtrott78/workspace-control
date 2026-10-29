@@ -1079,6 +1079,10 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
                 {"profile": "cpu"},
             )
             self.assertEqual(
+                runtime.launch_runner(Req(), {"profile": "control-small"}),
+                {"profile": "cpu"},
+            )
+            self.assertEqual(
                 runtime.launch_runner(Req(), {"profile": "gpu-small"}),
                 {"profile": "gpu"},
             )
