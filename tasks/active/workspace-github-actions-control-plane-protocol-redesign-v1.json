@@ -1,0 +1,172 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-github-actions-control-plane-protocol-redesign-v1",
+  "title": "GitHub Actions Control-Plane Protocol Redesign v1",
+  "status": "IN_PROGRESS",
+  "goal": "Replace the current parser-chained GitHub Actions runner admission path with a formally modeled, versioned, typed control-plane protocol whose routing, authority, scheduling, provisioning, execution, recovery, and lifecycle semantics are explicit end-to-end, so any executor request admitted by policy cannot later be falsely rejected by a downstream parser that implements a different grammar.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-lambda-self-hosted-execution-v1",
+  "current_stage": "system_inventory_and_external_architecture_research",
+  "acceptance_criteria": [
+    "Produce an end-to-end protocol graph from GitHub trigger through workflow/job construction, scale-set messages, controller attestation, root admission, launch-spec resolution, JIT runner creation, execution, completion, cleanup, replay, and recovery.",
+    "Enumerate every parser, serializer, identifier, state machine, authority boundary, retry boundary, durable record, and scheduler/lifecycle signal in workspace-control and relevant research-engine workflows.",
+    "Classify each field as routing metadata, identity, authority claim, policy input, resource request, lifecycle state, evidence, or human-readable display only.",
+    "Eliminate authority-bearing free-form serialization in job display names. Human-readable job names may remain for audit but must not be the canonical protocol.",
+    "Define one canonical versioned request/envelope schema and one semantic interpretation of each field. Downstream layers may validate typed invariants but must not independently reinterpret the same user-controlled string grammar.",
+    "Define a protocol-compatibility rule: a request accepted at ingress either remains representable and valid through all downstream transitions or is rejected at ingress with a stable machine-readable reason.",
+    "Separate scheduling/liveness semantics from authority/policy semantics so policy rejection cannot crash-loop a scale-set listener.",
+    "Model JobAvailable, JobAssigned, JobStarted, JobCompleted, cancellation, reassignment, duplicate delivery, controller restart, provisioner restart, stale aggregate statistics, durable request replay, and cleanup failure explicitly.",
+    "Use the official GitHub Runner Scale Set Client lifecycle semantics rather than deriving scheduler state from ad hoc per-message counts.",
+    "Compare the design with GitHub ARC/Runner Scale Set Client, GitLab Runner taskscaler/fleeting, and Buildkite stack/queue architectures and document what is reused versus custom.",
+    "Define executor-facing policy contracts for workspace-control and research-engine so executors construct requests from schemas/enums/builders rather than hand-written slash-command strings.",
+    "Add generated/centralized builders and validators so workflow producers, controller tests, root-policy tests, and executor tooling derive from the same protocol specification.",
+    "Add property-based or exhaustive compatibility tests proving every admitted request variant traverses all parsers/validators without false rejection, and every invalid variant is rejected at the first authority boundary.",
+    "Add model/state-machine tests for duplicate delivery, retries, cancellations, queue backlog, start-limit, listener restart, and provisioner rejection.",
+    "No further Lambda control-plane mutation is allowed until the protocol graph, invariant set, migration plan, and repository-only compatibility suite are complete and accepted."
+  ],
+  "constraints": [
+    "Do not treat individual parser failures as independent bugs unless the full protocol model proves they are independent.",
+    "Do not mutate Lambda, restart runner controllers, activate a new parser hotfix, or retrigger the blocked host-attest workflow while this redesign task is in architecture/research stages.",
+    "Do not start research-engine CPU/GPU controllers or alter research-engine quarantine/recovery state.",
+    "Do not replace GitHub's Runner Scale Set Client scheduling semantics with a custom queue/scheduler unless a documented capability gap requires it.",
+    "Keep root policy authority separate from GitHub credentials; redesign the evidence/envelope boundary rather than solving drift by giving root broad GitHub credentials.",
+    "Prefer typed structured data, exact identifiers, schemas, enums, generated builders, digests, and state machines over regex/string protocols.",
+    "Preserve fail-closed security boundaries, but policy rejection must be a recoverable job outcome, not a controller-fatal process outcome.",
+    "Keep GitHub-hosted validation available as a control path while the self-hosted control plane is redesigned."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.json",
+        "tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.md",
+        "architecture/github-actions-control-plane-protocol-redesign-v1.md",
+        "architecture/**lambda-ci**",
+        "schemas/**",
+        "controller/lambda-ci-controller/**",
+        "scripts/lambda_ci_*.py",
+        "tests/test_lambda_ci_*.py",
+        ".github/workflows/lambda-ci-workspace-control-validation.yml"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "mutate",
+      "base_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        ".github/workflows/lambda-ci-*.yml"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "system_inventory_and_external_architecture_research",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+web",
+      "inputs": [
+        "workspace-control main and active control-plane PRs",
+        "research-engine Lambda workflows",
+        "official GitHub Runner Scale Set Client and ARC documentation",
+        "GitLab Runner autoscaling architecture",
+        "Buildkite stack/queue architecture"
+      ],
+      "outputs": [
+        "complete request/lifecycle graph",
+        "parser/serializer/authority inventory",
+        "reuse-vs-custom architecture decision"
+      ],
+      "validation": [],
+      "resume_condition": "Every request field and lifecycle transition has one documented semantic owner and all duplicated interpretation sites are identified."
+    },
+    {
+      "id": "canonical_protocol_and_state_machine",
+      "status": "PENDING",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "inventory and external architecture research"
+      ],
+      "outputs": [
+        "versioned canonical request envelope",
+        "protocol state machine",
+        "error taxonomy",
+        "policy/routing/resource separation"
+      ],
+      "validation": [],
+      "resume_condition": "The protocol is representable without authority-bearing free-form job-name parsing."
+    },
+    {
+      "id": "producer_and_policy_compiler_design",
+      "status": "PENDING",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "canonical protocol"
+      ],
+      "outputs": [
+        "generated/shared request builders",
+        "workspace-control policy",
+        "research-engine policy",
+        "migration compatibility adapter"
+      ],
+      "validation": [],
+      "resume_condition": "Executors can only construct schema-valid requests and root policy consumes typed claims rather than reparsing producer strings."
+    },
+    {
+      "id": "repository_only_protocol_verification",
+      "status": "PENDING",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "protocol and compiler implementation"
+      ],
+      "outputs": [
+        "compatibility matrix",
+        "property/state-machine tests",
+        "fault-injection tests"
+      ],
+      "validation": [],
+      "resume_condition": "All accepted request families traverse producer -> controller -> root policy -> launch-spec simulation with zero false rejects."
+    },
+    {
+      "id": "bounded_migration_and_live_acceptance",
+      "status": "PENDING",
+      "execution_owner": "hybrid",
+      "selected_executor": "hybrid",
+      "selected_surface": "github+lambda",
+      "inputs": [
+        "repository-only verified protocol"
+      ],
+      "outputs": [
+        "migration receipt",
+        "workspace-control live validation",
+        "research-engine compatibility validation"
+      ],
+      "validation": [],
+      "resume_condition": "Live control plane is stable under valid, invalid, duplicate, canceled, and recovery scenarios without controller crash loops."
+    }
+  ],
+  "checkpoints": [],
+  "blockers": [],
+  "next_safe_action": "Complete the system inventory and external architecture comparison. Do not apply the pending optional-qualifier hotfix to Lambda and do not retrigger host-attest. Treat the current workspace-control CPU start-limit state as containment while the protocol is redesigned."
+}
