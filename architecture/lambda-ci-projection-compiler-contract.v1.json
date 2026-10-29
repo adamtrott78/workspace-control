@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "contract_id": "lambda-ci-projection-compiler-contract-v1",
+  "status": "MODEL_ONLY_NOT_IMPLEMENTED",
+  "purpose": "Compile one desired runner-class policy into root, controller, executor, and validation projections without carrying live activation/quarantine state inside the static policy catalog.",
+  "inputs": {
+    "desired_policy": [
+      "architecture/lambda-ci-runner-class-catalog.v1.json",
+      "architecture/lambda-ci-execution-contracts.v1.json",
+      "architecture/lambda-ci-workload-policy.v1.json",
+      "architecture/lambda-ci-systemd-profiles.v1.json",
+      "architecture/lambda-ci-host-resource-policy.v1.json"
+    ],
+    "source_evidence": [
+      "exact trusted workflow files from owning repositories at declared default-branch checkpoints",
+      "repository registry and project isolation roots/identities"
+    ],
+    "excluded_from_static_compilation": [
+      "live systemd active/inactive state",
+      "live controller quarantine",
+      "legacy retry authority",
+      "queued GitHub jobs",
+      "current JIT registrations",
+      "runner-instance ledgers"
+    ]
+  },
+  "canonicalization": {
+    "format": "UTF-8 canonical JSON with recursively sorted object keys and compact separators for digest input",
+    "catalog_generation_id": "sha256 over canonical desired-policy inputs plus exact source workflow blob identities",
+    "projection_rule": "every generated root/controller/executor projection carries the same catalog_generation_sha256",
+    "semantic_immutability": "existing runner_class_id may not change its fully resolved root launch envelope between generations"
+  },
+  "compile_steps": [
+    "load and schema-validate all desired-policy inputs",
+    "resolve each execution_contract_id to resource class and semantic ceilings",
+    "resolve each resource class to exact GPU UUID claims and runtime limits",
+    "resolve project isolation identities/roots and class model/runtime bindings",
+    "verify global uniqueness of runner_class_id, scale_set_name, runner_prefix, controller Unix user",
+    "fetch/parse each trusted workflow at its declared source checkpoint",
+    "verify exact workflow blob pin and default branch",
+    "require exactly one top-level job",
+    "verify the job's runs-on expression is statically equal to the generated target scale-set label after migration transformation",
+    "verify route ingress parameter schema exists and has no root-authority effect",
+    "group routes by runner_class_id and prove canonical root launch projection equivalence",
+    "emit root projection, per-class controller projections, executor projection, and compatibility matrix",
+    "validate projections against their schemas and cross-digest invariants"
+  ],
+  "outputs": {
+    "root_projection": {
+      "path_pattern": "generated/lambda-ci/root-policy.<catalog_sha>.json",
+      "authority": "root",
+      "includes": [
+        "catalog generation digest",
+        "runner-class -> controller username/UID expectation",
+        "fully resolved project runner identity/root paths",
+        "fully resolved execution contract/resource/systemd policy",
+        "exclusive host resource claims",
+        "model/runtime bindings",
+        "class concurrency/quarantine semantics"
+      ],
+      "excludes": [
+        "commands",
+        "candidate SHA",
+        "PR number",
+        "workflow display name",
+        "workflow-local parameters",
+        "GitHub credential"
+      ]
+    },
+    "controller_projection": {
+      "path_pattern": "generated/lambda-ci/controller-policy.<runner_class_id>.<catalog_sha>.json",
+      "authority": "unprivileged class controller",
+      "includes": [
+        "catalog generation digest",
+        "repository",
+        "scale set",
+        "runner prefix",
+        "max runners",
+        "trusted workflow path/ref/blob",
+        "allowed events/actors",
+        "compile-time workflow-shape digest"
+      ],
+      "excludes": [
+        "root execution selector",
+        "GPU UUID supplied by GitHub",
+        "command grammar",
+        "candidate SHA parser",
+        "JobDisplayName parser"
+      ]
+    },
+    "executor_projection": {
+      "path": "generated/lambda-ci/executor-actions.<catalog_sha>.json",
+      "authority": "ingress builder",
+      "includes": [
+        "project/route IDs",
+        "slash command",
+        "typed parameter schema",
+        "target repository and PR requirements"
+      ],
+      "excludes": [
+        "root controller UID",
+        "GPU UUID",
+        "systemd profile",
+        "model/runtime paths"
+      ]
+    },
+    "compatibility_matrix": {
+      "path": "generated/lambda-ci/compatibility-matrix.<catalog_sha>.json",
+      "includes": [
+        "23 route -> 9 class mapping",
+        "source workflow blob",
+        "compiled root envelope digest",
+        "controller projection digest",
+        "executor schema digest",
+        "legacy source lane/class mapping"
+      ]
+    }
+  },
+  "deployment_overlay": {
+    "separate_artifact_required": true,
+    "purpose": "Bind desired catalog generation to live installation/activation state without changing policy semantics.",
+    "fields": [
+      "catalog_generation_sha256",
+      "installed classes",
+      "active class controllers",
+      "enabled route admissions",
+      "legacy controller retirement state",
+      "inherited containment/quarantine gates",
+      "drain/cutover checkpoints"
+    ],
+    "rule": "compiler output never starts a service or clears a quarantine; reconciliation applies a separately authorized deployment overlay"
+  },
+  "failure_rules": [
+    "any workflow pin mismatch fails compilation",
+    "any route with more than one top-level job fails compilation in v1",
+    "any two classes sharing a controller Unix user fail compilation",
+    "any duplicate scale set or runner prefix fails compilation",
+    "any route grouped into non-equivalent root envelopes fails compilation",
+    "any change to immutable runner_class_id launch semantics fails compilation and requires a new class ID",
+    "any executor parameter schema that can alter root projection fails compilation"
+  ]
+}
