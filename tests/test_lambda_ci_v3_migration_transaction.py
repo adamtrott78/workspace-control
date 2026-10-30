@@ -245,16 +245,16 @@ class V3MigrationTransactionTests(unittest.TestCase):
                 canary_policy=policy,
             )
 
-    def test_offline_model_class_has_network_and_containment_blockers(self):
+    def test_offline_model_class_remains_blocked_only_by_inherited_containment(self):
         target = "research-model-single-offline-v1"
         entry = self.manifest["classes"][target]
-        self.assertIn(
+        self.assertNotIn(
             "PAYLOAD_NETWORK_ISOLATION_UNIMPLEMENTED",
             entry["blockers"],
         )
-        self.assertIn(
-            "INHERITED_CONTAINMENT_REQUIRES_SEPARATE_AUTHORITY",
+        self.assertEqual(
             entry["blockers"],
+            ["INHERITED_CONTAINMENT_REQUIRES_SEPARATE_AUTHORITY"],
         )
         policy = json.loads(
             (self.generated / entry["controller_policy_path"]).read_text()
