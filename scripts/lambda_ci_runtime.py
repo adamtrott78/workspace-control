@@ -1161,6 +1161,15 @@ def _validated_offline_payload_broker(
         raise RuntimeLaunchError("offline payload helper path escapes v3 payload root")
     if socket_root != pathlib.Path("/run/workspace-ci-v3-payload"):
         raise RuntimeLaunchError("offline payload socket root drift")
+    for forbidden_raw in spec.get("forbidden_paths", []):
+        forbidden = pathlib.PurePosixPath(str(forbidden_raw))
+        try:
+            pathlib.PurePosixPath(str(socket_root)).relative_to(forbidden)
+        except ValueError:
+            continue
+        raise RuntimeLaunchError(
+            "offline payload socket root is nested under an inaccessible path"
+        )
 
     runtime_binding = spec.get("runtime_binding")
     model_binding = spec.get("model_binding")
