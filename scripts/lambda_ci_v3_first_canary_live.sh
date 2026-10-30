@@ -132,17 +132,106 @@ require_inactive() {
   echo "PREFLIGHT_INACTIVE=PASS $unit"
 }
 
+require_not_enabled() {
+  local unit="$1"
+  local state
+  state="$(systemctl is-enabled "$unit" 2>/dev/null || true)"
+  if systemctl is-enabled --quiet "$unit"; then
+    echo "STOP_EXPECTED_NOT_BOOT_ENABLED_UNIT=$unit state=$state"
+    return 1
+  fi
+  echo "PREFLIGHT_NOT_BOOT_ENABLED=PASS $unit state=${state:-unknown}"
+}
+
 # Root services from Input #2 must remain active; every class stays inactive.
 require_active workspace-ci-v3-reconciler.service
 require_active workspace-ci-v3-provisioner.service
+require_not_enabled workspace-ci-v3-reconciler.service
+require_not_enabled workspace-ci-v3-provisioner.service
 require_inactive workspace-ci-controller@research-engine-gpu.service
 
 for class_id in   workspace-control-control-small-v1   padataset-cpu-public-v1   padataset-gpu-single-public-v1   research-cpu-public-v1   research-gpu-single-public-v1   research-gpu-single-runtime-v1   research-model-single-offline-v1   research-model-dual-offline-v1   research-model-dual-public-v1
 do
   require_inactive "workspace-ci-v3-controller@${class_id}.service"
+  require_not_enabled "workspace-ci-v3-controller@${class_id}.service"
 done
 
 echo "LIVE_PREFLIGHT_ROOT_AND_CLASS_STATE=PASS"
+
+# Input #2's root-services authority is expected in these shared roots.
+# Reject only canary-class authority consumption or canary transaction residue.
+if ! sudo env TARGET_CLASS="$TARGET_CLASS" /usr/bin/python3 - <<'PY'; then
+import json
+import os
+import pathlib
+
+target = os.environ["TARGET_CLASS"]
+authority_root = pathlib.Path("/var/lib/workspace-ci/v3/migration-authority")
+migration_root = pathlib.Path("/var/lib/workspace-ci/v3/migration")
+
+canary_markers = []
+for path in sorted(authority_root.glob("*.json")):
+    value = json.loads(path.read_text())
+    if (
+        value.get("operation") == "ACTIVATE_ONE_V3_CANARY"
+        or value.get("target_runner_class_id") == target
+    ):
+        canary_markers.append(str(path))
+
+canary_receipts = []
+for path in sorted(migration_root.glob("*/transaction.json")):
+    value = json.loads(path.read_text())
+    if (
+        value.get("mode") == "V3_ONE_CLASS_CANARY_GENERATION_EXCLUSION"
+        or value.get("target_runner_class_id") == target
+    ):
+        canary_receipts.append(str(path))
+
+if canary_markers:
+    raise SystemExit(
+        "canary authority consumption residue exists: " + ", ".join(canary_markers)
+    )
+if canary_receipts:
+    raise SystemExit(
+        "canary transaction residue exists: " + ", ".join(canary_receipts)
+    )
+
+print("PREFLIGHT_NO_CANARY_AUTHORITY_CONSUMPTION=PASS")
+print("PREFLIGHT_NO_CANARY_TRANSACTION_RECEIPT=PASS")
+PY
+  echo "STOP_CANARY_FORENSIC_PREFLIGHT_FAILED"
+  exit 1
+fi
+
+echo "CANARY_RUN_HISTORY_CHECK=BEGIN"
+set +e
+CANARY_RUN_COUNT="$(
+  gh run list \
+    --repo "$REPOSITORY" \
+    --workflow "$WORKFLOW_PATH" \
+    --event workflow_dispatch \
+    --branch main \
+    --limit 100 \
+    --json databaseId \
+    --jq 'length'
+)"
+CANARY_RUN_HISTORY_RC=$?
+set -e
+if [[ "$CANARY_RUN_HISTORY_RC" -ne 0 ]]; then
+  echo "STOP_CANARY_RUN_HISTORY_QUERY_FAILED rc=$CANARY_RUN_HISTORY_RC"
+  exit "$CANARY_RUN_HISTORY_RC"
+fi
+if [[ "$CANARY_RUN_COUNT" != "0" ]]; then
+  echo "STOP_EXISTING_CANARY_WORKFLOW_RUNS count=$CANARY_RUN_COUNT"
+  gh run list \
+    --repo "$REPOSITORY" \
+    --workflow "$WORKFLOW_PATH" \
+    --event workflow_dispatch \
+    --branch main \
+    --limit 20 || true
+  exit 1
+fi
+echo "PREFLIGHT_NO_CANARY_WORKFLOW_RUN=PASS"
 
 # Exact installed generation must still be the Input #1 generation.
 sudo env EXPECTED_HEAD="$SOURCE_HEAD" /usr/bin/python3 - <<'PY'
@@ -177,29 +266,127 @@ echo "TRANSACTION_HELPER_SOURCE=EXACT_GIT_OBJECT"
 # Exact Go 1.26.3 toolchain for the reviewed scale-set preflight helper.
 GO_ARCHIVE="$TMP/go1.26.3.linux-amd64.tar.gz"
 GO_SHA256="2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"
-curl -fsSL --retry 3   -o "$GO_ARCHIVE"   "https://go.dev/dl/go1.26.3.linux-amd64.tar.gz"
-printf '%s  %s\n' "$GO_SHA256" "$GO_ARCHIVE" | sha256sum -c -
-tar -C "$TMP" -xzf "$GO_ARCHIVE"
-GO_BIN="$TMP/go/bin/go"
-test "$("$GO_BIN" env GOVERSION)" = "go1.26.3"
 
-GOTOOLCHAIN=local GOMODCACHE="$TMP/gomodcache" GOCACHE="$TMP/gocache" "$GO_BIN" -C "$ROOT/controller/lambda-ci-controller"   build -mod=readonly -trimpath   -o "$PREFLIGHT_BIN"   ./cmd/v3-canary-preflight
+echo "GO_TOOLCHAIN_DOWNLOAD=BEGIN"
+if ! curl -fsSL --retry 3 \
+  -o "$GO_ARCHIVE" \
+  "https://go.dev/dl/go1.26.3.linux-amd64.tar.gz"
+then
+  echo "STOP_GO_TOOLCHAIN_DOWNLOAD_FAILED"
+  exit 1
+fi
+echo "GO_TOOLCHAIN_DOWNLOAD=PASS"
+
+echo "GO_TOOLCHAIN_CHECKSUM=BEGIN"
+if ! printf '%s  %s\n' "$GO_SHA256" "$GO_ARCHIVE" | sha256sum -c -; then
+  echo "STOP_GO_TOOLCHAIN_CHECKSUM_FAILED"
+  exit 1
+fi
+echo "GO_TOOLCHAIN_CHECKSUM=PASS"
+
+echo "GO_TOOLCHAIN_EXTRACT=BEGIN"
+if ! tar -C "$TMP" -xzf "$GO_ARCHIVE"; then
+  echo "STOP_GO_TOOLCHAIN_EXTRACT_FAILED"
+  exit 1
+fi
+echo "GO_TOOLCHAIN_EXTRACT=PASS"
+
+GO_BIN="$TMP/go/bin/go"
+echo "GO_TOOLCHAIN_VERSION_CHECK=BEGIN"
+set +e
+GO_VERSION="$("$GO_BIN" env GOVERSION)"
+GO_VERSION_RC=$?
+set -e
+if [[ "$GO_VERSION_RC" -ne 0 ]]; then
+  echo "STOP_GO_TOOLCHAIN_VERSION_QUERY_FAILED rc=$GO_VERSION_RC"
+  exit "$GO_VERSION_RC"
+fi
+if [[ "$GO_VERSION" != "go1.26.3" ]]; then
+  echo "STOP_GO_TOOLCHAIN_VERSION_MISMATCH actual=$GO_VERSION"
+  exit 1
+fi
+echo "GO_TOOLCHAIN_VERSION_CHECK=PASS version=$GO_VERSION"
+
+echo "V3_CANARY_PREFLIGHT_BUILD=BEGIN"
+set +e
+GOTOOLCHAIN=local \
+GOMODCACHE="$TMP/gomodcache" \
+GOCACHE="$TMP/gocache" \
+"$GO_BIN" -C "$ROOT/controller/lambda-ci-controller" \
+  build -mod=readonly -trimpath \
+  -o "$PREFLIGHT_BIN" \
+  ./cmd/v3-canary-preflight
+PREFLIGHT_BUILD_RC=$?
+set -e
+if [[ "$PREFLIGHT_BUILD_RC" -ne 0 ]]; then
+  echo "STOP_V3_CANARY_PREFLIGHT_BUILD_FAILED rc=$PREFLIGHT_BUILD_RC"
+  exit "$PREFLIGHT_BUILD_RC"
+fi
+if [[ ! -x "$PREFLIGHT_BIN" ]]; then
+  echo "STOP_V3_CANARY_PREFLIGHT_BUILD_OUTPUT_MISSING path=$PREFLIGHT_BIN"
+  exit 1
+fi
+echo "V3_CANARY_PREFLIGHT_BUILD=PASS"
 
 # Stage the already-authenticated operator GitHub token only for this
 # bounded canary. It is never printed and is removed after safe rollback.
 umask 077
+
+echo "V3_WORKSPACE_CONTROL_CREDENTIAL_RESET=BEGIN"
+if systemctl is-active --quiet "workspace-ci-v3-controller@$TARGET_CLASS.service"; then
+  echo "STOP_CREDENTIAL_RESET_TARGET_ACTIVE"
+  exit 1
+fi
+if ! sudo -n rm -f "$V3_TOKEN" "$V3_ENV"; then
+  echo "STOP_CREDENTIAL_RESET_FAILED"
+  exit 1
+fi
+if sudo -n test -e "$V3_TOKEN" || sudo -n test -e "$V3_ENV"; then
+  echo "STOP_CREDENTIAL_RESET_RESIDUE"
+  exit 1
+fi
+echo "V3_WORKSPACE_CONTROL_CREDENTIAL_RESET=PASS"
+
+echo "V3_WORKSPACE_CONTROL_GH_TOKEN_EXPORT=BEGIN"
+set +e
 gh auth token > "$TMP/operator-token"
-test -s "$TMP/operator-token"
+GH_TOKEN_RC=$?
+set -e
+if [[ "$GH_TOKEN_RC" -ne 0 ]]; then
+  echo "STOP_GH_AUTH_TOKEN_EXPORT_FAILED rc=$GH_TOKEN_RC"
+  rm -f "$TMP/operator-token"
+  exit "$GH_TOKEN_RC"
+fi
+if [[ ! -s "$TMP/operator-token" ]]; then
+  echo "STOP_GH_AUTH_TOKEN_EXPORT_EMPTY"
+  rm -f "$TMP/operator-token"
+  exit 1
+fi
+echo "V3_WORKSPACE_CONTROL_GH_TOKEN_EXPORT=PASS"
 
-sudo install -o root -g ci-gh-workspace-control -m 0640 \
+echo "V3_WORKSPACE_CONTROL_TOKEN_INSTALL=BEGIN"
+if ! sudo install -o root -g ci-gh-workspace-control -m 0640 \
   "$TMP/operator-token" "$V3_TOKEN"
+then
+  echo "STOP_V3_WORKSPACE_CONTROL_TOKEN_INSTALL_FAILED"
+  rm -f "$TMP/operator-token"
+  exit 1
+fi
 rm -f "$TMP/operator-token"
+echo "V3_WORKSPACE_CONTROL_TOKEN_INSTALL=PASS"
 
+echo "V3_WORKSPACE_CONTROL_ENV_INSTALL=BEGIN"
 printf 'WORKSPACE_CI_PAT_FILE=%s\n' "$V3_TOKEN" > "$TMP/controller.env"
-sudo install -o root -g ci-gh-workspace-control -m 0640 \
+if ! sudo install -o root -g ci-gh-workspace-control -m 0640 \
   "$TMP/controller.env" "$V3_ENV"
+then
+  echo "STOP_V3_WORKSPACE_CONTROL_ENV_INSTALL_FAILED"
+  exit 1
+fi
+echo "V3_WORKSPACE_CONTROL_ENV_INSTALL=PASS"
 
-sudo env V3_TOKEN="$V3_TOKEN" /usr/bin/python3 - <<'PY'
+echo "V3_WORKSPACE_CONTROL_CREDENTIAL_ATTEST=BEGIN"
+if ! sudo env V3_TOKEN="$V3_TOKEN" /usr/bin/python3 - <<'PY'; then
 import grp
 import os
 import pathlib
@@ -215,6 +402,9 @@ for raw in (
     assert stat.S_IMODE(st.st_mode) == 0o640
 print("V3_WORKSPACE_CONTROL_CREDENTIAL=PASS")
 PY
+  echo "STOP_V3_WORKSPACE_CONTROL_CREDENTIAL_ATTEST_FAILED"
+  exit 1
+fi
 
 # Every legacy scale set must be drained BEFORE generation exclusion.
 cat > "$TMP/legacy-scalesets.tsv" <<'EOF'
