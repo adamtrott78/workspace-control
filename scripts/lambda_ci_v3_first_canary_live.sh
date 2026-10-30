@@ -103,7 +103,6 @@ require_inactive() {
   echo "PREFLIGHT_INACTIVE=PASS $unit"
 }
 
-require_path "$TX_HELPER"
 require_path "$LEGACY_TOKEN"
 
 # Root services from Input #2 must remain active; every class stays inactive.
@@ -145,6 +144,7 @@ test "$TX_TREE_BLOB" = "$EXPECTED_TX_HELPER_BLOB"
 git -C "$ROOT" show "$SOURCE_HEAD:scripts/lambda_ci_v3_migration_transaction.py" > "$TX_HELPER"
 chmod 0555 "$TX_HELPER"
 test "$(git hash-object "$TX_HELPER")" = "$EXPECTED_TX_HELPER_BLOB"
+require_path "$TX_HELPER"
 echo "TRANSACTION_HELPER_SOURCE=EXACT_GIT_OBJECT"
 
 # Exact Go 1.26.3 toolchain for the reviewed scale-set preflight helper.
