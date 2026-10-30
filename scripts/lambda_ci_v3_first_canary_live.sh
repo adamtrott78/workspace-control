@@ -17,7 +17,8 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 TMP="$(mktemp -d /tmp/workspace-ci-v3-first-canary.XXXXXX)"
 SOURCE_TREE="$TMP/source"
-TX_HELPER="$SOURCE_TREE/scripts/lambda_ci_v3_migration_transaction.py"
+TX_HELPER="$TMP/lambda_ci_v3_migration_transaction.py"
+EXPECTED_TX_HELPER_BLOB="0c02ca17cf267f1c3986bfee75ebfc6172ca592a"
 CANARY_OUT="$TMP/canary"
 PREFLIGHT_BIN="$TMP/v3-canary-preflight"
 TX_RECEIPT=""
@@ -137,8 +138,14 @@ git -C "$ROOT" cat-file -e "$SOURCE_HEAD^{commit}"
 git -C "$ROOT" worktree add --detach "$SOURCE_TREE" "$SOURCE_HEAD" >/dev/null
 test "$(git -C "$SOURCE_TREE" rev-parse HEAD)" = "$SOURCE_HEAD"
 test -z "$(git -C "$SOURCE_TREE" status --porcelain --untracked-files=no)"
-require_path "$TX_HELPER"
-echo "TRANSACTION_HELPER_SOURCE=IMMUTABLE_WORKTREE"
+
+TX_TREE_BLOB="$(git -C "$ROOT" ls-tree "$SOURCE_HEAD" -- scripts/lambda_ci_v3_migration_transaction.py | awk '{print $3}')"
+test "$TX_TREE_BLOB" = "$EXPECTED_TX_HELPER_BLOB"
+
+git -C "$ROOT" show "$SOURCE_HEAD:scripts/lambda_ci_v3_migration_transaction.py" > "$TX_HELPER"
+chmod 0555 "$TX_HELPER"
+test "$(git hash-object "$TX_HELPER")" = "$EXPECTED_TX_HELPER_BLOB"
+echo "TRANSACTION_HELPER_SOURCE=EXACT_GIT_OBJECT"
 
 # Exact Go 1.26.3 toolchain for the reviewed scale-set preflight helper.
 GO_ARCHIVE="$TMP/go1.26.3.linux-amd64.tar.gz"
