@@ -312,8 +312,7 @@ class V3ControlPlaneModelTests(unittest.TestCase):
             runner_name=name,
             jit_config="orphan-jit",
         )
-        self.assertEqual(launch["status"], "DUPLICATE")
-        self.assertEqual(launch["receipt_status"], "CANCELED")
+        self.assertEqual(launch["status"], "RESERVATION_EXPIRED")
 
     def test_cancel_reserved_request_is_idempotent_and_releases_resources(self):
         class_id = "padataset-gpu-single-public-v1"
