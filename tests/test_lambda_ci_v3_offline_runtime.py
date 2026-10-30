@@ -122,6 +122,16 @@ class V3OfflineRuntimeBoundaryTests(unittest.TestCase):
             self.assertIn("CPUQuota=200%", props)
             self.assertIn(f"MemoryMax={4 * 1024**3}", props)
             self.assertIn("TasksMax=1024", props)
+            self.assertIn("Environment=CUDA_VISIBLE_DEVICES=", props)
+            self.assertIn("ProcSubset=pid", props)
+            self.assertIn(
+                "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6",
+                props,
+            )
+            self.assertNotIn(
+                "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK",
+                props,
+            )
 
     def test_broker_is_private_network_gpu_holder_with_clean_environment(self):
         for class_id in (
@@ -143,6 +153,10 @@ class V3OfflineRuntimeBoundaryTests(unittest.TestCase):
             props = self.props(command)
             self.assertIn("PrivateNetwork=yes", props)
             self.assertIn("IPAddressDeny=any", props)
+            self.assertIn(
+                "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK",
+                props,
+            )
             self.assertIn("IPAddressAllow=127.0.0.0/8", props)
             self.assertIn("IPAddressAllow=::1/128", props)
             self.assertIn("DeviceAllow=/dev/nvidiactl rw", props)
