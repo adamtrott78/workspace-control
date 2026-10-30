@@ -332,14 +332,10 @@ def _consume_authority_receipt(
     if AUTHORIZATION_ID_RE.fullmatch(authorization_id) is None:
         raise MigrationError("live canary authorization id invalid")
 
-    consumption_root.mkdir(parents=True, exist_ok=True, mode=0o700)
-    st = consumption_root.stat()
-    if not stat.S_ISDIR(st.st_mode):
-        raise MigrationError("live canary authorization consumption root is not a directory")
-    if st.st_uid != os.geteuid():
-        raise MigrationError("live canary authorization consumption root owner invalid")
-    if stat.S_IMODE(st.st_mode) != 0o700:
-        raise MigrationError("live canary authorization consumption root must be mode 0700")
+    _validate_private_state_dir(
+        consumption_root,
+        "live canary authorization consumption root",
+    )
 
     digest = _sha256(raw)
     marker = consumption_root / f"{authorization_id}.json"
@@ -456,6 +452,19 @@ def _assert_generation_drained(
             raise MigrationError(f"v3 root resource claims remain: {claims}")
 
 
+def _validate_private_state_dir(path: pathlib.Path, label: str) -> None:
+    try:
+        st = path.stat()
+    except FileNotFoundError as exc:
+        raise MigrationError(f"{label} is missing; inactive substrate is incomplete") from exc
+    if not stat.S_ISDIR(st.st_mode):
+        raise MigrationError(f"{label} is not a directory")
+    if st.st_uid != os.geteuid():
+        raise MigrationError(f"{label} owner invalid")
+    if stat.S_IMODE(st.st_mode) != 0o700:
+        raise MigrationError(f"{label} must be mode 0700")
+
+
 def _persist_transaction(path: pathlib.Path, receipt: dict[str, Any]) -> None:
     receipt["updated_at"] = _utcnow()
     _atomic_write(path, _canonical(receipt), mode=0o600)
@@ -522,6 +531,14 @@ def apply_canary(
         require_legacy_empty=False,
         require_v3_empty=True,
         state_root=provisioner_state_root,
+    )
+    _validate_private_state_dir(
+        transaction_root,
+        "v3 migration transaction root",
+    )
+    _validate_private_state_dir(
+        authority_consumption_root,
+        "live canary authorization consumption root",
     )
 
     authority_marker, authority_digest = _consume_authority_receipt(
