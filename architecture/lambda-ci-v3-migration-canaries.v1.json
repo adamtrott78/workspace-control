@@ -18,15 +18,22 @@
     "controller policy allows only workflow_dispatch by the exact owner actor",
     "migration-only canary policy replaces ordinary production trusted workflows rather than adding authority",
     "research GPU-derived classes remain blocked by inherited containment until separately authorized",
-    "offline model classes remain blocked until payload-network isolation is actually implemented and proven"
+    "offline model classes use a separate root-owned private-network payload broker; the migration canary proves online-runner/broker separation without consuming the broker or executing model inference"
   ],
   "network_verification": {
     "supported_payload_network_classes": [
-      "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD"
-    ],
-    "unresolved_payload_network_classes": [
+      "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
       "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE"
     ],
-    "unresolved_reason": "current hardened runner cgroup restricts private/link-local networks but does not separate GitHub control-plane traffic from public payload egress"
+    "unresolved_payload_network_classes": [],
+    "offline_payload_proof": [
+      "online Actions runner has no GPU device grant and empty CUDA_VISIBLE_DEVICES",
+      "online Actions runner cannot access exact promoted model/runtime objects",
+      "online Actions runner retains only GitHub control-plane-compatible networking",
+      "root-owned one-shot payload broker is active in a private network namespace with deny-all IP policy and loopback-only allow",
+      "payload broker alone has exact GPU devices plus exact promoted model/runtime read authority",
+      "runner and broker CPU/memory/task ceilings partition rather than duplicate the root-granted class envelope",
+      "migration canary inspects runner and broker cgroups/systemd properties without connecting to the broker socket or executing candidate/scientific payload"
+    ]
   }
 }
