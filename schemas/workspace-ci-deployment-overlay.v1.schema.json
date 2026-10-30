@@ -8,9 +8,11 @@
     "schema_version",
     "overlay_id",
     "catalog_generation_sha256",
+    "status_note",
     "classes",
     "routes",
-    "legacy"
+    "legacy",
+    "invariants"
   ],
   "properties": {
     "schema_version": {
@@ -139,6 +141,18 @@
             "type": "string"
           }
         }
+      }
+    },
+    "status_note": {
+      "type": "string",
+      "minLength": 1
+    },
+    "invariants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
       }
     }
   }
