@@ -183,7 +183,7 @@ class RunnerClassControllerModel:
 
     @staticmethod
     def scale_result_for_capacity(status: str) -> str:
-        if status in {"RESERVED", "ACCEPTED", "DUPLICATE"}:
+        if status in {"RESERVED", "PREPARING", "ACCEPTED", "FAILED", "DUPLICATE"}:
             return "HANDLED_KEEP_PROCESS_ALIVE"
         if status in {"BUSY", "CLASS_QUARANTINED", "RESERVATION_EXPIRED"}:
             return "CAPACITY_LOCAL_KEEP_PROCESS_ALIVE"
