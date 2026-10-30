@@ -137,6 +137,7 @@ def build_launch_spec(
     _require(isinstance(bindings, dict), "runner-class bindings missing")
     model_binding = copy.deepcopy(bindings.get("model"))
     runtime_binding = copy.deepcopy(bindings.get("runtime"))
+    payload_broker_identity = copy.deepcopy(cls.get("payload_broker_identity"))
     payload_network_class = contract.get("payload_network_class")
     offline_payload_broker = None
     if payload_network_class == "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE":
@@ -148,17 +149,38 @@ def build_launch_spec(
             int(contract.get("gpu_count", -1)) in {1, 2},
             f"{runner_class_id}: offline payload requires one or two GPUs",
         )
+        _require(
+            isinstance(payload_broker_identity, dict)
+            and set(payload_broker_identity) == {"user", "group"},
+            f"{runner_class_id}: offline payload broker identity missing",
+        )
+        _require(
+            payload_broker_identity["user"]
+            != cls["project_runner_identity"]["user"],
+            f"{runner_class_id}: payload broker user must differ from runner user",
+        )
+        _require(
+            payload_broker_identity["group"]
+            == cls["project_runner_identity"]["group"],
+            f"{runner_class_id}: payload broker group must equal project runner group",
+        )
         offline_payload_broker = {
             "network_class": payload_network_class,
             "broker_path": "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_broker.py",
             "client_path": "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_exec.py",
             "socket_root": "/run/workspace-ci/v3/payload",
             "runtime_python": runtime_binding["python_path"],
+            "run_as": payload_broker_identity,
         }
     elif payload_network_class != "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD":
         raise V3SpecError(
             f"{runner_class_id}: unsupported payload network class "
             f"{payload_network_class!r}"
+        )
+    else:
+        _require(
+            payload_broker_identity is None,
+            f"{runner_class_id}: public payload class must not grant broker identity",
         )
 
     spec = {
