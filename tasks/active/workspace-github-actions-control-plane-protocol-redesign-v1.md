@@ -1,77 +1,54 @@
 <!-- workspace-control:derived-task-handoff -->
 # Workspace Control Task Handoff
 
-Derived human-readable view.
+Authoritative capsule: `tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.json`
 
-Authoritative capsule: tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.json
+## Current live boundary
 
-If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
+**Do not repeat Inputs #1 or #2.**
 
-## Task
+- Input #1: **PASS**. Lambda has v3 source generation `09c46818252991f6a55aaeedbcf046c554e2ffee` installed and attested.
+- Input #2: **PASS**. One-shot root authority `55f15dfe-a603-4901-b148-2aa11a2c0048` was consumed. `workspace-ci-v3-reconciler.service` and `workspace-ci-v3-provisioner.service` are active; all nine v3 class controllers remain inactive/disabled; Research GPU legacy containment remains intact.
+- Input #3: **NOT COMPLETE**. No canary authority was consumed, no v2 controller was stopped, no v3 class controller was activated, and no canary workflow was dispatched.
 
-- ID: workspace-github-actions-control-plane-protocol-redesign-v1
-- Title: GitHub Actions Control-Plane Protocol Redesign v1
-- Status: IN_PROGRESS
-- Capsule schema: v2
+Latest operator:
+- PR #572 branch: `github-actions-control-plane-protocol-redesign-v1`
+- operator head: `52b82bcb1c1fe8f9304be6c4e7cd7737b5c88227`
+- operator script blob: `36e9a5419f0dcd7e45db8302bc41070cbe9137bc`
+- Validation #1361 / run `41018340472`: **SUCCESS**
+- installed live generation remains `09c46818252991f6a55aaeedbcf046c554e2ffee`
 
-## Goal
-
-Replace the current parser-chained GitHub Actions runner admission path with a formally modeled, versioned, typed control-plane protocol whose routing, authority, scheduling, provisioning, execution, recovery, and lifecycle semantics are explicit end-to-end, so any executor request admitted by policy cannot later be falsely rejected by a downstream parser that implements a different grammar.
-
-## Repositories
-
-### workspace-control
-
-- Intent: mutate
-- Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 01019177fcb46e5ab9864ea9b764b533dcf0be81
-- Remote verified: true
-
-### research-engine
-
-- Intent: mutate
-- Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 6165556086b73d2076f205f11ec7b988150f23dd
-- Remote verified: true
-
-### PADataset
-
-- Intent: mutate
-- Remote branch: main
-- Remote checkpoint: 35e6f451fe36f039b5f6461f7469f0eed1e79e43
-- Remote verified: true
+Latest Input #3 attempt passed root/class preflight, installed-generation binding, exact migration-helper Git-object materialization, and Go 1.26.3 archive verification. It then printed Go module downloads and returned silently before `V3_WORKSPACE_CONTROL_CREDENTIAL=PASS`. In operator-code order this is before `CANARY_AUTHORITY_CREATED`, `GENERATION_EXCLUSION=BEGIN`, `--apply-canary`, or `gh workflow run`.
 
 ## Next safe action
 
-Repository implementation is mechanically complete through workspace-control@01019177fcb46e5ab9864ea9b764b533dcf0be81, which passed Workspace Control Validation #1337 / run 41010515483. This includes inactive substrate install, private migration/authority state roots, one-shot short-lived anti-replay canary authority, installed-manifest-bound one-shot root-services activation/rollback, deterministic owner-only canary generation, and one-class generation-exclusion/rollback. Research Engine PR #283 remains exact head 6165556086b73d2076f205f11ec7b988150f23dd with hosted CI #642 accepted. No further repository implementation is currently required. The next step requires separate explicit live authority: apply the exact inactive substrate, then use the one-shot ACTIVATE_V3_ROOT_SERVICES transaction before the first migration-order canary. Do not merge/cut over PR #283, mutate Lambda, dispatch migration canaries, or alter Research GPU containment/retry authority without the corresponding explicit authority.
+Inspect `scripts/lambda_ci_v3_first_canary_live.sh` at `52b82...`. Diagnose the exact silent failure around the Go `v3-canary-preflight` build / immediately following ephemeral `gh auth token` credential staging. Do **not** blindly rerun the same operator.
 
-## Remaining work
+Before the next live retry, prove:
+1. reconciler + provisioner are still active and not boot-enabled;
+2. all nine v3 class controllers are inactive;
+3. `workspace-ci-controller@research-engine-gpu.service` remains inactive;
+4. no canary authority consumption marker, transaction receipt, or canary run was created by the failed attempts;
+5. workspace-control v3 credential staging is clean or deliberately recreated.
 
-- Obtain separate explicit live authority before any Lambda mutation; the migration plan currently grants NONE.
-- Under that authority, apply the exact inactive v3 substrate from repository boundary 01019177fcb46e5ab9864ea9b764b533dcf0be81, verify the installed manifest, sysusers/tmpfiles/systemd/config digests, private 0700 migration roots, and that all nine class controllers plus all v3 units remain inactive/disabled.
-- Issue a separate short-lived one-shot ACTIVATE_V3_ROOT_SERVICES receipt bound to the exact installed manifest/source head/root-policy digest, then run the installed lambda_ci_v3_root_activation.py helper; require reconciler attestation, provisioner socket proof, Research GPU containment preservation, and zero class/transient/resource activation.
-- Deploy/bind the exact owner-only workspace-control-control-small-v1 migration canary workflow/policy under the separately authorized live canary boundary, issue a one-shot ACTIVATE_ONE_V3_CANARY receipt, execute generation exclusion, dispatch only the bounded canary, and collect exact success/rollback evidence.
-- Advance additional public-network classes only in the frozen migration order under separately accepted live authority; keep every Research GPU-derived class NO_BY_DEFAULT until separate containment-recovery authority.
-- Keep Research Engine PR #283 proposal-only until separate default-branch producer cutover authority binds the exact reviewed workflow blobs into the controller/deployment generation.
-- For the two offline Research model classes, require accepted live canaries, separate Research GPU containment-recovery authority, and separate default-branch cutover authority before production route activation; hosted producer CI #642 is already accepted.
-- Only after accepted class canaries may old scale-set drain/retirement and broader production activation be separately authorized.
+Then make the corrected operator fail loudly at each pre-transaction command, validate its exact head in CI, and retry **only** `workspace-control-control-small-v1`.
 
-## Blockers / gates
+## Hard boundaries
 
-- Live migration remains deliberately unauthorized: architecture/lambda-ci-v3-migration-plan.v1.json grants live_authority=NONE. Repository mechanics are implemented and validated, but no v3 substrate/root service/class controller/canary has been installed or activated on Lambda.
-- All Research GPU-derived runner classes, including research-model-single-offline-v1 and research-model-dual-offline-v1, remain inherited-contained and NO_BY_DEFAULT until separate recovery/live authority explicitly consumes the legacy containment boundary.
-- Research Engine PR #283 remains draft/proposal-only at exact head 6165556086b73d2076f205f11ec7b988150f23dd. Hosted CI #642 is accepted repository evidence, but the reviewed workflow blobs are not on the default branch or in production trusted-workflow evidence, and no default-branch producer cutover authority has been granted.
+Do not alter Research GPU quarantine/retry authority. Do not start the legacy Research GPU controller. Do not merge/cut over Research Engine PR #283. Do not advance other runner classes until the first bounded Workspace Control canary is accepted.
 
 ## Fresh-chat initialization
 
-@GitHub
+@GitHub @Heartbeat
 
 https://github.com/adamtrott78/workspace-control
 
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.json
+Resume durable task `workspace-github-actions-control-plane-protocol-redesign-v1`.
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Read the authoritative capsule:
+`tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.json`
+
+and this handoff:
+`tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.md`
+
+YOU ARE THE CONTINUING EXECUTOR. Perform the work yourself in this chat. Do not return another handoff unless explicitly asked. Start from the live boundary above; do not repeat completed live Inputs #1/#2.
