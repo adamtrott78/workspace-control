@@ -9,10 +9,10 @@
     "repository": "adamtrott78/workspace-control",
     "branch": "github-actions-control-plane-protocol-redesign-v1",
     "runtime_boundary_validation": {
-      "exact_head": "e886f1a66d5d5f1b60efc67078f85ad852f42d79",
+      "exact_head": "e827474191063422a6b3b74a9c61b75a0f62f638",
       "workflow": "Workspace Control Validation",
-      "run_number": 1322,
-      "run_id": 41004606547,
+      "run_number": 1326,
+      "run_id": 41005440005,
       "conclusion": "success"
     },
     "offline_runner_classes": [
@@ -23,13 +23,15 @@
       "online Actions runner retains GitHub control-plane networking but has no GPU DeviceAllow and empty CUDA_VISIBLE_DEVICES",
       "exact promoted model/runtime objects are inaccessible to the online runner",
       "root-owned one-shot payload broker alone receives exact GPU DeviceAllow plus exact promoted model/runtime read authority",
-      "payload broker runs as a distinct root-projected Unix identity from the online runner and receives no controller/provisioner credential-group membership",
+      "each offline runner class receives its own distinct root-projected payload-broker Unix identity; broker identities receive no controller/provisioner credential-group membership",
       "payload broker starts with env -i and does not inherit GitHub/JIT credentials",
       "payload broker uses PrivateNetwork=yes, IPAddressDeny=any, and loopback-only IPAddressAllow",
-      "runner job/checkout tree is inaccessible to the payload broker; only the per-request staging exchange is shared through the project group",
+      "runner job/checkout tree is inaccessible to the payload broker",
+      "runner-private HOME/tmp/cache directories remain mode-private; broker HOME/tmp/HF state is broker-private",
+      "only the dedicated per-request payload-exchange directory is shared between online runner and broker through the project group",
       "runner and broker partition the existing root-granted CPU/memory/task envelope rather than doubling it",
       "broker authenticates the Unix client by SO_PEERCRED runner UID and exact runner systemd cgroup membership",
-      "root cleanup independently proves no runner-UID or broker-UID process/GPU residue remains"
+      "root cleanup independently proves no runner-UID or class-scoped broker-UID process/GPU residue remains"
     ]
   },
   "research_engine": {
@@ -60,8 +62,8 @@
       "checkout uses persist-credentials false and the workflow rejects any residual local http extraheader credential",
       "online preflight proves exact model/runtime object paths are not visible",
       "online preflight proves CUDA_VISIBLE_DEVICES is empty",
-      "online preflight binds the root-provided per-request P5_PAYLOAD_EXEC_WORKDIR under the project staging-cache root",
-      "payload script and receipt traverse only the staging exchange; broker execution cwd never requires the checkout/job tree",
+      "online preflight binds the root-provided P5_PAYLOAD_EXEC_WORKDIR to the dedicated per-request payload-exchange under the project staging-cache root",
+      "payload script and receipt traverse only payload-exchange; broker execution cwd never requires the checkout/job tree or runner-private HOME/cache",
       "model inference is invoked only through P5_PAYLOAD_EXEC_CLIENT over the root-provided Unix socket",
       "candidate metadata is passed as explicit argv to the payload and is not inherited from GitHub environment",
       "proposal is not trusted production workflow evidence until its exact blob is merged to the owning default branch and the controller projection is recompiled"
