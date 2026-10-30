@@ -9,6 +9,7 @@ workspace-control policy.
 from __future__ import annotations
 
 import hashlib
+import grp
 import json
 import os
 import pathlib
@@ -1140,6 +1141,7 @@ def _validated_offline_payload_broker(
         "client_path",
         "socket_root",
         "runtime_python",
+        "run_as",
     }
     if set(raw) != required:
         raise RuntimeLaunchError("offline payload broker config keys drift")
@@ -1168,6 +1170,20 @@ def _validated_offline_payload_broker(
         )
     if raw["runtime_python"] != runtime_binding.get("python_path"):
         raise RuntimeLaunchError("offline payload runtime Python binding drift")
+    broker_identity = raw.get("run_as")
+    if (
+        not isinstance(broker_identity, dict)
+        or set(broker_identity) != {"user", "group"}
+        or not isinstance(broker_identity.get("user"), str)
+        or not broker_identity["user"]
+        or not isinstance(broker_identity.get("group"), str)
+        or not broker_identity["group"]
+    ):
+        raise RuntimeLaunchError("offline payload broker identity is invalid")
+    if broker_identity["user"] == spec["run_as"]["user"]:
+        raise RuntimeLaunchError("offline payload broker must use a distinct Unix user")
+    if broker_identity["group"] != spec["run_as"]["group"]:
+        raise RuntimeLaunchError("offline payload broker must share only the project group")
     return dict(raw)
 
 
@@ -1454,6 +1470,7 @@ def build_gpu_systemd_command(
             "-p", "Environment=CUDA_VISIBLE_DEVICES=",
             "-p", f"Environment=P5_PAYLOAD_EXEC_SOCKET={payload_socket_path}",
             "-p", f"Environment=P5_PAYLOAD_EXEC_CLIENT={offline_payload['client_path']}",
+            "-p", f"Environment=P5_PAYLOAD_EXEC_WORKDIR={staging_dir}",
             "-p", "Environment=P5_PAYLOAD_EXEC_REQUIRED=1",
         ]
     return command
@@ -1466,7 +1483,8 @@ def build_offline_payload_broker_systemd_command(
     socket_dir: pathlib.Path,
     socket_path: pathlib.Path,
     assignment: dict[str, object],
-    expected_uid: int,
+    expected_client_uid: int,
+    expected_broker_uid: int,
 ) -> list[str]:
     offline_payload = _validated_offline_payload_broker(spec)
     if offline_payload is None:
@@ -1478,6 +1496,7 @@ def build_offline_payload_broker_systemd_command(
 
     runtime_binding = spec["runtime_binding"]
     model_binding = spec["model_binding"]
+    broker_identity = offline_payload["run_as"]
     runtime_path = pathlib.Path(runtime_binding["canonical_path"])
     runtime_python = pathlib.Path(runtime_binding["python_path"])
     model_object_root = pathlib.Path(model_binding["object_path"])
@@ -1556,9 +1575,9 @@ def build_offline_payload_broker_systemd_command(
         "--pipe",
         f"--unit={unit_name}",
         "-p", "Type=exec",
-        "-p", f"User={spec['run_as']['user']}",
-        "-p", f"Group={spec['run_as']['group']}",
-        "-p", f"WorkingDirectory={job_dir}",
+        "-p", f"User={broker_identity['user']}",
+        "-p", f"Group={broker_identity['group']}",
+        "-p", f"WorkingDirectory={staging_dir}",
         "-p", "NoNewPrivileges=yes",
         "-p", "CapabilityBoundingSet=",
         "-p", "AmbientCapabilities=",
@@ -1578,10 +1597,10 @@ def build_offline_payload_broker_systemd_command(
         "-p", "LockPersonality=yes",
         "-p", "ProtectProc=invisible",
         "-p", "ProcSubset=all",
-        "-p", "UMask=0077",
-        "-p", f"ReadWritePaths={job_dir}",
+        "-p", "UMask=0007",
         "-p", f"ReadWritePaths={staging_dir}",
         "-p", f"ReadWritePaths={socket_dir}",
+        "-p", f"InaccessiblePaths={job_dir}",
         "-p", f"BindReadOnlyPaths={runtime_path}",
         "-p", f"ReadOnlyPaths={model_object_root}",
         "-p", "InaccessiblePaths=" + " ".join(inaccessible_paths),
@@ -1613,10 +1632,10 @@ def build_offline_payload_broker_systemd_command(
             "/usr/bin/python3",
             offline_payload["broker_path"],
             "--socket", str(socket_path),
-            "--expected-uid", str(expected_uid),
+            "--expected-client-uid", str(expected_client_uid),
+            "--expected-broker-uid", str(expected_broker_uid),
             "--expected-runner-unit", spec["unit_name"],
             "--runtime-python", str(runtime_python),
-            "--job-root", str(job_dir),
             "--staging-root", str(staging_dir),
         ]
     )
@@ -2215,11 +2234,34 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     payload_socket_path: pathlib.Path | None = None
     payload_broker_unit: str | None = None
     payload_broker_command: list[str] | None = None
+    payload_broker_uid: int | None = None
+    payload_broker_gid: int | None = None
     if offline_payload is not None:
         if trusted_failure_probe is not None:
             raise RuntimeLaunchError(
                 "offline payload broker cannot be combined with trusted failure probe"
             )
+        broker_identity = offline_payload["run_as"]
+        payload_broker_uid, _ = project_identity(broker_identity["user"])
+        try:
+            payload_broker_gid = grp.getgrnam(broker_identity["group"]).gr_gid
+        except KeyError as exc:
+            raise RuntimeLaunchError(
+                "offline payload broker group is unavailable"
+            ) from exc
+        if payload_broker_uid == uid:
+            raise RuntimeLaunchError(
+                "offline payload broker user must differ from online runner"
+            )
+        if payload_broker_gid != gid:
+            raise RuntimeLaunchError(
+                "offline payload broker group must equal online runner group"
+            )
+        os.chmod(staging_dir, 0o770)
+        for child in staging_dir.iterdir():
+            if child.is_dir():
+                os.chmod(child, 0o770)
+
         socket_root = pathlib.Path(offline_payload["socket_root"])
         try:
             socket_root_stat = socket_root.stat()
@@ -2237,8 +2279,8 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         payload_socket_dir = socket_root / request_id
         if payload_socket_dir.exists():
             raise RuntimeLaunchError("offline payload request socket directory exists")
-        payload_socket_dir.mkdir(mode=0o700)
-        os.chown(payload_socket_dir, uid, gid)
+        payload_socket_dir.mkdir(mode=0o750)
+        os.chown(payload_socket_dir, payload_broker_uid, payload_broker_gid)
         payload_socket_path = payload_socket_dir / "exec.sock"
         payload_broker_unit = (
             spec["unit_name"].removesuffix(".service") + "-payload.service"
@@ -2251,6 +2293,7 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             payload_socket_path,
             assignment,
             uid,
+            payload_broker_uid,
         )
 
     if trusted_failure_probe is None:
@@ -2328,6 +2371,11 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         "exec_main_status": None,
     }
     payload_broker_output = ""
+    payload_broker_uid_residue_detected = False
+    payload_broker_uid_cleanup_pass = offline_payload is None
+    payload_broker_gpu_process_residue_detected: list[dict[str, object]] = []
+    payload_broker_gpu_cleanup_pass = offline_payload is None
+    payload_broker_leaked_gpu_processes: list[dict[str, object]] = []
     jit = request.jit_config
 
     try:
@@ -2351,9 +2399,9 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
                     continue
                 if (
                     stat.S_ISSOCK(socket_stat.st_mode)
-                    and socket_stat.st_uid == uid
-                    and socket_stat.st_gid == gid
-                    and stat.S_IMODE(socket_stat.st_mode) == 0o600
+                    and socket_stat.st_uid == payload_broker_uid
+                    and socket_stat.st_gid == payload_broker_gid
+                    and stat.S_IMODE(socket_stat.st_mode) == 0o660
                 ):
                     payload_broker_socket_ready = True
                     break
@@ -2431,6 +2479,33 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
                 "reloading",
             }
             payload_broker_log.write_text(payload_broker_output, encoding="utf-8")
+
+        if payload_broker_uid is not None:
+            try:
+                payload_broker_gpu_process_residue_detected = project_gpu_processes(
+                    payload_broker_uid
+                )
+            except Exception as exc:
+                payload_broker_gpu_process_residue_detected = [
+                    {"inspection_error": str(exc)}
+                ]
+
+            (
+                payload_broker_uid_residue_detected,
+                payload_broker_uid_cleanup_pass,
+            ) = cleanup_project_uid_processes(payload_broker_uid)
+
+            try:
+                payload_broker_leaked_gpu_processes = project_gpu_processes(
+                    payload_broker_uid
+                )
+            except Exception as exc:
+                payload_broker_leaked_gpu_processes = [
+                    {"inspection_error": str(exc)}
+                ]
+                payload_broker_gpu_cleanup_pass = False
+            else:
+                payload_broker_gpu_cleanup_pass = not payload_broker_leaked_gpu_processes
 
         if payload_socket_dir is not None:
             payload_broker_socket_dir_destroyed = remove_tree_and_verify(
@@ -2613,6 +2688,25 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "offline_payload_broker_cleanup": payload_broker_cleanup_pass,
             "offline_payload_broker_terminal_evidence": payload_broker_terminal_evidence,
             "offline_payload_socket_dir_destroyed": payload_broker_socket_dir_destroyed,
+            "offline_payload_broker_uid": payload_broker_uid,
+            "offline_payload_broker_identity_isolated": (
+                offline_payload is None or payload_broker_uid != uid
+            ),
+            "offline_payload_broker_uid_process_residue_detected": (
+                payload_broker_uid_residue_detected
+            ),
+            "offline_payload_broker_uid_process_cleanup": (
+                payload_broker_uid_cleanup_pass
+            ),
+            "offline_payload_broker_gpu_process_residue_detected": (
+                payload_broker_gpu_process_residue_detected
+            ),
+            "offline_payload_broker_gpu_process_cleanup": (
+                payload_broker_gpu_cleanup_pass
+            ),
+            "offline_payload_broker_leaked_gpu_processes": (
+                payload_broker_leaked_gpu_processes
+            ),
             "online_runner_gpu_devices_granted": offline_payload is None,
         }
         receipt.update(admission_receipt_identity(spec))
@@ -2628,6 +2722,10 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         cleanup_failures.append("offline payload broker socket was never ready")
     if not payload_broker_cleanup_pass:
         cleanup_failures.append("offline payload broker unit did not terminate cleanly")
+    if not payload_broker_uid_cleanup_pass:
+        cleanup_failures.append("offline payload broker UID processes remain")
+    if not payload_broker_gpu_cleanup_pass:
+        cleanup_failures.append("offline payload broker GPU residue remains")
     if not payload_broker_socket_dir_destroyed:
         cleanup_failures.append("offline payload broker socket directory removal failed")
     if not cleanup_pass:
