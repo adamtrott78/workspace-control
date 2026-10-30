@@ -11,7 +11,7 @@ It deliberately does NOT:
 - edit an owning repository;
 - enable/retire a scale set;
 - alter quarantine or recovery-retry receipts;
-- run host-attest;
+- invoke maintenance-plane attestation actions;
 - start more than one v3 class controller.
 
 The safety invariant is stronger than convenience: v2 and v3 project
