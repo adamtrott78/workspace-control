@@ -1159,7 +1159,7 @@ def _validated_offline_payload_broker(
         or client_path.parent != expected_payload_root
     ):
         raise RuntimeLaunchError("offline payload helper path escapes v3 payload root")
-    if socket_root != pathlib.Path("/run/workspace-ci/v3/payload"):
+    if socket_root != pathlib.Path("/run/workspace-ci-v3-payload"):
         raise RuntimeLaunchError("offline payload socket root drift")
 
     runtime_binding = spec.get("runtime_binding")
