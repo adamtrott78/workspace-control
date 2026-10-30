@@ -523,6 +523,161 @@ class V3ControlPlaneModelTests(unittest.TestCase):
             "MISSING",
         )
 
+    def test_scale_plan_uses_total_assigned_jobs_not_lifecycle_event_count(self):
+        class_id = "research-model-dual-public-v1"
+        root = self.root(host_max=4, project_max=4)
+        controller = model.RunnerClassControllerModel(self.controller_policy(class_id))
+        cycle = model.ScaleSetCycleModel(controller, root)
+
+        empty_events = cycle.plan_capacity(
+            total_assigned_jobs=1,
+            lifecycle_events=[],
+        )
+        many_events = cycle.plan_capacity(
+            total_assigned_jobs=1,
+            lifecycle_events=[
+                {"type": "JobAssigned"},
+                {"type": "JobStarted"},
+                {"type": "JobCompleted"},
+                {"type": "JobCompleted"},
+            ],
+        )
+        self.assertEqual(empty_events.desired_capacity, 1)
+        self.assertEqual(many_events.desired_capacity, 1)
+        self.assertEqual(empty_events.deficit, many_events.deficit)
+        self.assertEqual(empty_events.observed_lifecycle_events, 0)
+        self.assertEqual(many_events.observed_lifecycle_events, 4)
+
+    def test_controller_restart_with_assigned_jobs_needs_no_job_command_reconstruction(self):
+        class_id = "workspace-control-control-small-v1"
+        root = self.root()
+        controller = model.RunnerClassControllerModel(self.controller_policy(class_id))
+        cycle = model.ScaleSetCycleModel(controller, root)
+
+        plan = cycle.plan_capacity(
+            total_assigned_jobs=1,
+            lifecycle_events=[{"type": "JobAssigned", "job_display_name": "unparseable"}],
+        )
+        self.assertEqual(plan.desired_capacity, 1)
+        self.assertEqual(plan.live_or_reserved_capacity, 0)
+        self.assertEqual(plan.deficit, 1)
+
+    def test_live_reserved_capacity_satisfies_desired_count(self):
+        class_id = "workspace-control-control-small-v1"
+        root = self.root()
+        controller = model.RunnerClassControllerModel(self.controller_policy(class_id))
+        cycle = model.ScaleSetCycleModel(controller, root)
+        root.reserve(
+            peer_user=self.peer(class_id),
+            request_id="req-reserved-capacity",
+            runner_name=self.runner_name(class_id, "reserved"),
+        )
+        plan = cycle.plan_capacity(total_assigned_jobs=1)
+        self.assertEqual(plan.live_or_reserved_capacity, 1)
+        self.assertEqual(plan.deficit, 0)
+
+    def test_trusted_and_untrusted_available_jobs_can_coexist_without_parser_failure(self):
+        class_id = "workspace-control-control-small-v1"
+        policy = self.controller_policy(class_id)
+        workflow = policy["trusted_workflows"][0]
+        controller = model.RunnerClassControllerModel(policy)
+        cycle = model.ScaleSetCycleModel(controller, self.root())
+
+        trusted = self.trusted_job(class_id, workflow, request_id=501)
+        untrusted = self.trusted_job(class_id, workflow, request_id=502)
+        untrusted["workflow_blob_sha"] = "0" * 40
+        result = cycle.evaluate_available_jobs([untrusted, trusted])
+        self.assertEqual(result["acquire_runner_request_ids"], [501])
+        self.assertEqual(len(result["anomalies"]), 1)
+        self.assertEqual(result["anomalies"][0].runner_request_id, 502)
+
+    def test_job_available_redelivery_is_idempotent(self):
+        class_id = "workspace-control-control-small-v1"
+        policy = self.controller_policy(class_id)
+        workflow = policy["trusted_workflows"][0]
+        controller = model.RunnerClassControllerModel(policy)
+        cycle = model.ScaleSetCycleModel(controller, self.root())
+        job = self.trusted_job(class_id, workflow, request_id=601)
+
+        first = cycle.evaluate_available_jobs([job])
+        redelivery_before_acquire = cycle.evaluate_available_jobs([job])
+        self.assertEqual(first["acquire_runner_request_ids"], [601])
+        self.assertEqual(redelivery_before_acquire["acquire_runner_request_ids"], [])
+
+        cycle.mark_acquired([601])
+        redelivery_after_acquire = cycle.evaluate_available_jobs([job])
+        self.assertEqual(redelivery_after_acquire["acquire_runner_request_ids"], [])
+
+    def test_anomalous_job_redelivery_is_bounded_and_deduplicated_in_state(self):
+        class_id = "workspace-control-control-small-v1"
+        policy = self.controller_policy(class_id)
+        workflow = policy["trusted_workflows"][0]
+        controller = model.RunnerClassControllerModel(policy)
+        cycle = model.ScaleSetCycleModel(controller, self.root())
+        job = self.trusted_job(class_id, workflow, request_id=602)
+        job["actor_login"] = "attacker"
+
+        for _ in range(10):
+            result = cycle.evaluate_available_jobs([job])
+            self.assertEqual(len(result["anomalies"]), 1)
+        self.assertEqual(len(cycle.anomalies), 1)
+        self.assertIn(602, cycle.anomalies)
+
+    def test_request_local_and_capacity_local_outcomes_never_request_process_exit(self):
+        supervisor = model.ControllerSupervisorModel()
+        outcomes = [
+            "ANOMALOUS_UNTRUSTED_JOB",
+            "DUPLICATE_TERMINAL_LOCAL_STATE",
+            "BUSY",
+            "CLASS_QUARANTINED",
+            "RESERVATION_EXPIRED",
+        ] * 20
+        for outcome in outcomes:
+            result = supervisor.handle(outcome)
+            self.assertTrue(result.acknowledge_message)
+            self.assertFalse(result.process_exit)
+            self.assertEqual(supervisor.state, "SESSION_ACTIVE")
+        self.assertEqual(supervisor.systemd_restart_count, 0)
+
+    def test_transient_failures_use_in_process_exponential_backoff(self):
+        supervisor = model.ControllerSupervisorModel(max_backoff_seconds=8)
+        expected = [1, 2, 4, 8, 8]
+        for seconds in expected:
+            result = supervisor.handle("ROOT_SOCKET_TRANSIENT")
+            self.assertEqual(result.state, "RETRY_BACKOFF")
+            self.assertFalse(result.acknowledge_message)
+            self.assertFalse(result.process_exit)
+            self.assertEqual(result.backoff_seconds, seconds)
+            self.assertEqual(supervisor.systemd_restart_count, 0)
+            supervisor.resume_after_backoff()
+        self.assertEqual(supervisor.state, "SESSION_ACTIVE")
+
+    def test_successful_session_work_resets_retry_backoff_sequence(self):
+        supervisor = model.ControllerSupervisorModel(max_backoff_seconds=8)
+        first = supervisor.handle("GITHUB_REST_TRANSIENT")
+        self.assertEqual(first.backoff_seconds, 1)
+        supervisor.resume_after_backoff()
+        second = supervisor.handle("GITHUB_REST_TRANSIENT")
+        self.assertEqual(second.backoff_seconds, 2)
+        supervisor.resume_after_backoff()
+        supervisor.note_successful_session_work()
+        reset = supervisor.handle("GITHUB_REST_TRANSIENT")
+        self.assertEqual(reset.backoff_seconds, 1)
+
+    def test_only_fatal_configuration_or_corruption_requests_process_exit(self):
+        for fatal in model.ControllerSupervisorModel.FATAL:
+            supervisor = model.ControllerSupervisorModel()
+            result = supervisor.handle(fatal)
+            self.assertEqual(result.state, "FATAL")
+            self.assertTrue(result.process_exit)
+            self.assertFalse(result.acknowledge_message)
+            self.assertEqual(supervisor.systemd_restart_count, 1)
+
+    def test_unknown_supervisor_outcome_is_protocol_fatal(self):
+        supervisor = model.ControllerSupervisorModel()
+        with self.assertRaises(model.ProtocolFatal):
+            supervisor.handle("SOMETHING_IMPLICIT_AND_UNMODELED")
+
     def test_same_request_status_from_wrong_class_is_fatal(self):
         root = self.root(host_max=4, project_max=4)
         a = "workspace-control-control-small-v1"
