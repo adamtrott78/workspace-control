@@ -168,7 +168,7 @@ def build_launch_spec(
             "network_class": payload_network_class,
             "broker_path": "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_broker.py",
             "client_path": "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_exec.py",
-            "socket_root": "/run/workspace-ci/v3/payload",
+            "socket_root": "/run/workspace-ci-v3-payload",
             "runtime_python": runtime_binding["python_path"],
             "run_as": payload_broker_identity,
         }
