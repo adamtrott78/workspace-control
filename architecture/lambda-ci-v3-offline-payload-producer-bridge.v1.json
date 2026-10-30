@@ -38,9 +38,9 @@
   "research_engine": {
     "repository": "adamtrott78/research-engine",
     "base_branch": "main",
-    "base_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+    "base_sha": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
     "proposal_branch": "github-actions-control-plane-protocol-redesign-v1",
-    "proposal_head": "0894e04c8166eefca4250a149b879075d57ae085",
+    "proposal_head": "6165556086b73d2076f205f11ec7b988150f23dd",
     "pull_request": 283,
     "pull_request_state": "DRAFT",
     "default_branch_modified": false,
@@ -71,32 +71,51 @@
       "payload broker socket preflight accepts only /run/workspace-ci-v3-payload/<request>/exec.sock and never reopens the forbidden /run/workspace-ci control-plane tree"
     ],
     "ci_observation": {
-      "run_id": 41006265206,
-      "run_number": 639,
+      "run_id": 41007835081,
+      "run_number": 642,
       "attempts": 1,
-      "conclusion": "failure",
-      "classification": "GITHUB_HOSTED_RUNNER_STARTUP_FAILURE_NO_REPOSITORY_STEPS",
+      "conclusion": "success",
+      "classification": "GITHUB_HOSTED_CI_REPOSITORY_STEPS_SUCCESS",
       "evidence": {
-        "latest_job_id": 123901747119,
-        "steps": null,
-        "repository_steps_executed": false
+        "latest_job_id": 123906654539,
+        "repository_steps_executed": true,
+        "hosted_runner_evidence": {
+          "runner_version": "2.338.0",
+          "runner_kind": "Hosted Compute Agent",
+          "worker_id": "85a7a4a0-5274-4d54-be73-6dcde25e6fe8",
+          "image": "ubuntu-24.04"
+        },
+        "successful_steps": [
+          "Set up job",
+          "Initialize containers",
+          "Run actions/checkout@v4",
+          "Run actions/setup-python@v5",
+          "Install",
+          "Compile",
+          "Test",
+          "Validate daemon Compose configuration",
+          "Build daemon image",
+          "Stop containers"
+        ]
       },
-      "accepted_as_repository_test_evidence": false
+      "accepted_as_repository_test_evidence": true
     },
     "repository_only_self_review": {
       "result": "PASS",
-      "pr_comment_id": 6515416635,
-      "exact_head": "0894e04c8166eefca4250a149b879075d57ae085",
+      "pr_comment_id": 6515645161,
+      "exact_head": "6165556086b73d2076f205f11ec7b988150f23dd",
       "authority_granted": false,
       "findings": [
         "changed scope remains exactly the two offline Qwen pilot workflows",
+        "proposal branch is rebased onto repaired main 1031861c03b2af8cff5cf72939bbbc83a95e65a4",
         "single/dual workflows target their exact homogeneous v3 offline scale sets",
         "online phase retains GitHub control-plane duties while model/runtime/GPU authority is absent",
         "checkout persistence is disabled and residual GitHub http extraheader credentials are rejected",
         "payload execution traverses only P5_PAYLOAD_EXEC_CLIENT and the root-provided Unix socket",
         "payload script/receipt and execution cwd remain restricted to the dedicated per-request payload-exchange",
-        "payload socket preflight now uses sibling /run/workspace-ci-v3-payload and not the forbidden /run/workspace-ci control-plane subtree",
-        "candidate metadata is explicit argv rather than inherited GitHub environment"
+        "payload socket preflight uses sibling /run/workspace-ci-v3-payload and not the forbidden /run/workspace-ci control-plane subtree",
+        "candidate metadata is explicit argv rather than inherited GitHub environment",
+        "GitHub-hosted CI #642 executed repository steps and passed compile, full tests, Compose validation, daemon image build, and cleanup"
       ]
     }
   },
@@ -104,6 +123,7 @@
     "offline_payload_network_repository_blocker_resolved": true,
     "research_gpu_inherited_containment_resolved": false,
     "production_workflow_default_branch_cutover_resolved": false,
-    "live_activation_authorized": false
+    "live_activation_authorized": false,
+    "research_engine_hosted_ci_repository_evidence_resolved": true
   }
 }
