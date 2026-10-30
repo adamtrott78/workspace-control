@@ -123,6 +123,29 @@ class V3ReconcilerTests(unittest.TestCase):
         )
         self.assertNotIn("/run/workspace-ci/v3/payload", tmpfiles)
 
+    def test_migration_plan_binds_current_repository_readiness_without_live_authority(self):
+        migration = self.result["migration"]
+        self.assertEqual(
+            migration["side_by_side_paths"]["payload_socket_root"],
+            "/run/workspace-ci-v3-payload",
+        )
+        readiness = migration["repository_readiness"]
+        self.assertEqual(
+            readiness["workspace_control_repository_boundary"]["exact_head"],
+            "c3e4e5e12811ff51fd6062cca261b099e7afaa9d",
+        )
+        producer = readiness["research_engine_offline_producer"]
+        self.assertEqual(
+            producer["exact_head"],
+            "6165556086b73d2076f205f11ec7b988150f23dd",
+        )
+        self.assertEqual(producer["hosted_ci_run_number"], 642)
+        self.assertEqual(producer["hosted_ci_run_id"], 41007835081)
+        self.assertTrue(producer["repository_steps_executed"])
+        self.assertFalse(producer["default_branch_cutover_authorized"])
+        self.assertFalse(readiness["live_activation_authorized"])
+        self.assertEqual(migration["live_authority"], "NONE")
+
     def test_install_overlay_changes_only_install_generation(self):
         before = json.loads(
             (ROOT / "architecture/lambda-ci-deployment-overlay.v1.json").read_text()
