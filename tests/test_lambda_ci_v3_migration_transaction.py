@@ -87,6 +87,7 @@ class V3MigrationTransactionTests(unittest.TestCase):
         )
         self.original_policy = self.production_policy.read_bytes()
         self.migration_root = self.base / "migration"
+        self.migration_root.mkdir(mode=0o700)
         self.provisioner_state = self.base / "provisioner"
         self.provisioner_state.mkdir()
         self.source_head = "a" * 40
@@ -105,6 +106,7 @@ class V3MigrationTransactionTests(unittest.TestCase):
         }
         self.authority_raw = tx._canonical(self.authority)
         self.authority_consumption_root = self.base / "authority-used"
+        self.authority_consumption_root.mkdir(mode=0o700)
         active = {
             unit: False
             for unit in (
@@ -221,6 +223,24 @@ class V3MigrationTransactionTests(unittest.TestCase):
         self.assertTrue(marker.is_file())
         with self.assertRaisesRegex(tx.MigrationError, "already consumed"):
             self.apply()
+
+    def test_private_migration_state_roots_are_precreated_and_fail_closed_on_drift(self):
+        self.migration_root.chmod(0o755)
+        with self.assertRaisesRegex(tx.MigrationError, "transaction root must be mode 0700"):
+            self.apply()
+        marker = (
+            self.authority_consumption_root
+            / f"{self.authority['authorization_id']}.json"
+        )
+        self.assertFalse(marker.exists())
+        self.assertEqual(self.systemd.events, [])
+
+        self.migration_root.chmod(0o700)
+        self.authority_consumption_root.chmod(0o755)
+        with self.assertRaisesRegex(tx.MigrationError, "consumption root must be mode 0700"):
+            self.apply()
+        self.assertFalse(marker.exists())
+        self.assertEqual(self.systemd.events, [])
 
     def test_exact_five_v2_and_nine_v3_controller_sets(self):
         self.assertEqual(
