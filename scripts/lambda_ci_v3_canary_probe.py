@@ -19,6 +19,10 @@ from typing import Any
 ROOT_POLICY = pathlib.Path("/etc/workspace-ci/v3/root-policy.json")
 PUBLIC_NETWORK = "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD"
 OFFLINE_NETWORK = "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE"
+OFFLINE_RUNNER_CPU_PERCENT = 200
+OFFLINE_RUNNER_MEMORY_BYTES = 4 * 1024**3
+OFFLINE_RUNNER_TASKS_MAX = 1024
+OFFLINE_CLIENT_PATH = "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_exec.py"
 BASE_DENIES = (
     "127.0.0.0/8",
     "::1/128",
@@ -121,6 +125,8 @@ def _verify_snapshot(
     env: dict[str, str],
     cgroup: dict[str, str],
     unit: dict[str, str],
+    payload_cgroup: dict[str, str] | None = None,
+    payload_unit: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     checks: dict[str, bool] = {}
     failures: list[str] = []
@@ -140,9 +146,15 @@ def _verify_snapshot(
     forbidden = [str(value) for value in cls["forbidden_paths"]]
     bindings = cls["bindings"]
 
-    expected_cpu = _cpu_percent(profile)
-    expected_memory = _memory_bytes(profile["MemoryMax"])
-    expected_tasks = int(profile["TasksMax"])
+    network_class = str(contract["payload_network_class"])
+    if network_class == OFFLINE_NETWORK:
+        expected_cpu = OFFLINE_RUNNER_CPU_PERCENT
+        expected_memory = OFFLINE_RUNNER_MEMORY_BYTES
+        expected_tasks = OFFLINE_RUNNER_TASKS_MAX
+    else:
+        expected_cpu = _cpu_percent(profile)
+        expected_memory = _memory_bytes(profile["MemoryMax"])
+        expected_tasks = int(profile["TasksMax"])
     expected_runtime = min(
         _runtime_seconds(profile["RuntimeMaxSec"]),
         int(resource["max_runtime_seconds"]),
@@ -175,14 +187,19 @@ def _verify_snapshot(
     expected_gpu_csv = ",".join(expected_gpus)
     device_allow = unit.get("DeviceAllow", "")
     if expected_gpus:
-        check("cuda_visible_devices", env.get("CUDA_VISIBLE_DEVICES", "") == expected_gpu_csv)
         check("gpu_target_uuids", env.get("P5_GPU_TARGET_UUIDS", "") == expected_gpu_csv)
         selected = [x for x in env.get("P5_GPU_SELECTED_DEVICES", "").split(",") if x]
         denied = [x for x in env.get("P5_GPU_DENIED_DEVICES", "").split(",") if x]
         check("gpu_selected_cardinality", len(selected) == len(expected_gpus))
-        check("gpu_selected_device_allow", all(path in device_allow for path in selected))
-        check("gpu_denied_device_absence", all(path not in device_allow for path in denied))
-        check("nvidia_control_device", "/dev/nvidiactl" in device_allow)
+        if network_class == OFFLINE_NETWORK:
+            check("cuda_hidden_from_online_runner", env.get("CUDA_VISIBLE_DEVICES", "") == "")
+            check("online_runner_has_no_selected_gpu", all(path not in device_allow for path in selected))
+            check("online_runner_has_no_nvidia_control", "/dev/nvidiactl" not in device_allow)
+        else:
+            check("cuda_visible_devices", env.get("CUDA_VISIBLE_DEVICES", "") == expected_gpu_csv)
+            check("gpu_selected_device_allow", all(path in device_allow for path in selected))
+            check("gpu_denied_device_absence", all(path not in device_allow for path in denied))
+            check("nvidia_control_device", "/dev/nvidiactl" in device_allow)
     else:
         check("cpu_cuda_empty", env.get("CUDA_VISIBLE_DEVICES", "") == "")
         check("cpu_gpu_target_empty", env.get("P5_GPU_TARGET_UUIDS", "") == "")
@@ -195,7 +212,10 @@ def _verify_snapshot(
     else:
         runtime_path = str(runtime_binding["canonical_path"])
         check("runtime_binding_env", env.get("P5_EXPANDED_RUNTIME", "") == runtime_path)
-        check("runtime_binding_readonly", runtime_path in bind_ro)
+        if network_class == OFFLINE_NETWORK:
+            check("runtime_hidden_from_online_runner", runtime_path not in bind_ro and runtime_path in inaccessible)
+        else:
+            check("runtime_binding_readonly", runtime_path in bind_ro)
 
     model_binding = bindings.get("model")
     if model_binding is None:
@@ -203,12 +223,14 @@ def _verify_snapshot(
     else:
         model_root = str(model_binding["object_path"])
         check("model_binding_env", env.get("P5_MODEL_OBJECT_ROOT", "") == model_root)
-        check("model_binding_readonly", model_root in ro)
+        if network_class == OFFLINE_NETWORK:
+            check("model_hidden_from_online_runner", model_root not in ro and model_root in inaccessible)
+        else:
+            check("model_binding_readonly", model_root in ro)
 
     address_families = unit.get("RestrictAddressFamilies", "")
     for family in ("AF_UNIX", "AF_INET", "AF_INET6"):
         check(f"address_family_{family}", family in address_families)
-    network_class = str(contract["payload_network_class"])
     deny = unit.get("IPAddressDeny", "")
     allow = unit.get("IPAddressAllow", "")
     if network_class == PUBLIC_NETWORK:
@@ -218,7 +240,62 @@ def _verify_snapshot(
         check("public_not_broadly_denied_v4", "0.0.0.0/0" not in deny)
         check("public_not_broadly_denied_v6", "::/0" not in deny)
     elif network_class == OFFLINE_NETWORK:
-        check("offline_payload_network_isolation_implemented", False)
+        check("payload_exec_required", env.get("P5_PAYLOAD_EXEC_REQUIRED", "") == "1")
+        check("payload_exec_client", env.get("P5_PAYLOAD_EXEC_CLIENT", "") == OFFLINE_CLIENT_PATH)
+        socket_path = env.get("P5_PAYLOAD_EXEC_SOCKET", "")
+        check(
+            "payload_exec_socket",
+            socket_path.startswith("/run/workspace-ci/v3/payload/")
+            and socket_path.endswith("/exec.sock"),
+        )
+        check("online_runner_no_af_netlink", "AF_NETLINK" not in address_families)
+
+        payload_cgroup = payload_cgroup or {}
+        payload_unit = payload_unit or {}
+        check("payload_broker_present", bool(payload_unit))
+        check("payload_private_network", payload_unit.get("PrivateNetwork", "") == "yes")
+        payload_families = payload_unit.get("RestrictAddressFamilies", "")
+        for family in ("AF_UNIX", "AF_INET", "AF_INET6", "AF_NETLINK"):
+            check(f"payload_address_family_{family}", family in payload_families)
+        payload_deny = payload_unit.get("IPAddressDeny", "")
+        payload_allow = payload_unit.get("IPAddressAllow", "")
+        check(
+            "payload_network_deny_all",
+            "any" in payload_deny or "0.0.0.0/0" in payload_deny,
+        )
+        check("payload_loopback_v4_only", "127.0.0.0/8" in payload_allow)
+        check("payload_loopback_v6_only", "::1/128" in payload_allow)
+
+        payload_device_allow = payload_unit.get("DeviceAllow", "")
+        check("payload_nvidia_control_device", "/dev/nvidiactl" in payload_device_allow)
+        check(
+            "payload_selected_gpu_device_allow",
+            all(path in payload_device_allow for path in selected),
+        )
+        if runtime_binding is not None:
+            check(
+                "payload_runtime_readonly",
+                str(runtime_binding["canonical_path"])
+                in payload_unit.get("BindReadOnlyPaths", ""),
+            )
+        if model_binding is not None:
+            check(
+                "payload_model_readonly",
+                str(model_binding["object_path"])
+                in payload_unit.get("ReadOnlyPaths", ""),
+            )
+
+        total_cpu = _cpu_percent(profile)
+        broker_cpu = total_cpu - OFFLINE_RUNNER_CPU_PERCENT
+        try:
+            actual_broker_cpu = _cgroup_cpu_percent(payload_cgroup["cpu.max"])
+        except Exception:
+            actual_broker_cpu = -1
+        check("payload_cpu_remainder", actual_broker_cpu == broker_cpu)
+        broker_memory = _memory_bytes(profile["MemoryMax"]) - OFFLINE_RUNNER_MEMORY_BYTES
+        check("payload_memory_remainder", payload_cgroup.get("memory.max") == str(broker_memory))
+        broker_tasks = int(profile["TasksMax"]) - OFFLINE_RUNNER_TASKS_MAX
+        check("payload_tasks_remainder", payload_cgroup.get("pids.max") == str(broker_tasks))
     else:
         check("known_payload_network_class", False)
 
@@ -276,6 +353,8 @@ def _live_snapshot(unit_name: str, cgroup_path: pathlib.Path) -> tuple[dict[str,
         "RestrictAddressFamilies",
         "IPAddressAllow",
         "IPAddressDeny",
+        "PrivateNetwork",
+        "ControlGroup",
     ):
         unit[name] = _show(unit_name, name)
     return cgroup, unit
@@ -310,12 +389,27 @@ def main() -> int:
             f"runner unit {unit_name!r} does not match {expected_unit_prefix!r}"
         )
     cgroup, unit = _live_snapshot(unit_name, cgroup_path)
+    payload_cgroup = None
+    payload_unit = None
+    network_class = classes[args.expected_class]["execution_contract"]["payload_network_class"]
+    if network_class == OFFLINE_NETWORK:
+        payload_unit_name = unit_name.removesuffix(".service") + "-payload.service"
+        payload_control_group = _show(payload_unit_name, "ControlGroup")
+        if not payload_control_group.startswith("/"):
+            raise CanaryError("offline payload broker control group is unavailable")
+        payload_cgroup_path = pathlib.Path("/sys/fs/cgroup") / payload_control_group.lstrip("/")
+        payload_cgroup, payload_unit = _live_snapshot(
+            payload_unit_name,
+            payload_cgroup_path,
+        )
     result = _verify_snapshot(
         classes[args.expected_class],
         runner_name=runner_name,
         env=dict(os.environ),
         cgroup=cgroup,
         unit=unit,
+        payload_cgroup=payload_cgroup,
+        payload_unit=payload_unit,
     )
     result["unit_name"] = unit_name
     result["root_policy_sha256"] = policy.get("root_policy_sha256")
