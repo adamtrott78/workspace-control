@@ -4,6 +4,7 @@ import pathlib
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -93,13 +94,17 @@ class V3MigrationTransactionTests(unittest.TestCase):
             "schema_version": 1,
             "authority": "workspace-control-operator",
             "operation": "ACTIVATE_ONE_V3_CANARY",
+            "authorization_id": "11111111-2222-3333-4444-555555555555",
             "source_head": self.source_head,
             "canary_generation_sha256": self.manifest["canary_generation_sha256"],
             "target_runner_class_id": self.target,
             "controller_policy_sha256": self.canary_policy["controller_policy_sha256"],
             "workflow_blob_sha": self.entry["workflow_blob_sha"],
             "issued_at": "2026-10-30T00:00:00+00:00",
+            "expires_at": "2026-10-30T00:30:00+00:00",
         }
+        self.authority_raw = tx._canonical(self.authority)
+        self.authority_consumption_root = self.base / "authority-used"
         active = {
             unit: False
             for unit in (
@@ -125,12 +130,97 @@ class V3MigrationTransactionTests(unittest.TestCase):
             canary_policy=self.canary_policy,
             canary_policy_raw=self.canary_policy_raw,
             authority_receipt=self.authority,
+            authority_receipt_raw=self.authority_raw,
             target_class=self.target,
             source_head=self.source_head,
             production_policy_path=self.production_policy,
             transaction_root=self.migration_root,
             provisioner_state_root=self.provisioner_state,
+            authority_consumption_root=self.authority_consumption_root,
         )
+
+    def test_authority_payload_requires_current_bounded_one_shot_window(self):
+        now = datetime(2026, 10, 30, 0, 15, tzinfo=timezone.utc)
+        validated = tx._validate_authority_payload(
+            dict(self.authority),
+            expected_head=self.source_head,
+            target_class=self.target,
+            manifest=self.manifest,
+            canary_policy=self.canary_policy,
+            now=now,
+        )
+        self.assertEqual(validated["authorization_id"], self.authority["authorization_id"])
+
+        expired = dict(self.authority)
+        expired["expires_at"] = "2026-10-30T00:14:59+00:00"
+        with self.assertRaisesRegex(tx.MigrationError, "expired"):
+            tx._validate_authority_payload(
+                expired,
+                expected_head=self.source_head,
+                target_class=self.target,
+                manifest=self.manifest,
+                canary_policy=self.canary_policy,
+                now=now,
+            )
+
+        future = dict(self.authority)
+        future["issued_at"] = "2026-10-30T00:16:00+00:00"
+        future["expires_at"] = "2026-10-30T00:30:00+00:00"
+        with self.assertRaisesRegex(tx.MigrationError, "not yet valid"):
+            tx._validate_authority_payload(
+                future,
+                expected_head=self.source_head,
+                target_class=self.target,
+                manifest=self.manifest,
+                canary_policy=self.canary_policy,
+                now=now,
+            )
+
+        overlong = dict(self.authority)
+        overlong["expires_at"] = "2026-10-30T00:30:01+00:00"
+        with self.assertRaisesRegex(tx.MigrationError, "lifetime exceeds"):
+            tx._validate_authority_payload(
+                overlong,
+                expected_head=self.source_head,
+                target_class=self.target,
+                manifest=self.manifest,
+                canary_policy=self.canary_policy,
+                now=now,
+            )
+
+    def test_authority_is_consumed_once_and_rollback_never_reopens_it(self):
+        receipt_path = self.apply()
+        marker = (
+            self.authority_consumption_root
+            / f"{self.authority['authorization_id']}.json"
+        )
+        self.assertTrue(marker.is_file())
+        self.assertEqual(marker.stat().st_mode & 0o777, 0o600)
+        consumed = json.loads(marker.read_text())
+        self.assertEqual(
+            consumed["authorization_receipt_sha256"],
+            tx._sha256(self.authority_raw),
+        )
+        receipt = json.loads(receipt_path.read_text())
+        self.assertEqual(
+            receipt["authorization_id"],
+            self.authority["authorization_id"],
+        )
+        self.assertEqual(
+            receipt["authorization_consumption_marker"],
+            str(marker),
+        )
+
+        tx.rollback(
+            systemd=self.systemd,
+            registry=self.registry,
+            root_policy=self.root_policy,
+            receipt_path=receipt_path,
+            provisioner_state_root=self.provisioner_state,
+        )
+        self.assertTrue(marker.is_file())
+        with self.assertRaisesRegex(tx.MigrationError, "already consumed"):
+            self.apply()
 
     def test_exact_five_v2_and_nine_v3_controller_sets(self):
         self.assertEqual(
@@ -225,6 +315,11 @@ class V3MigrationTransactionTests(unittest.TestCase):
         target_unit = f"workspace-ci-v3-controller@{self.target}.service"
         self.assertFalse(self.systemd.active(target_unit))
         self.assertEqual(self.systemd.events, [])
+        marker = (
+            self.authority_consumption_root
+            / f"{self.authority['authorization_id']}.json"
+        )
+        self.assertFalse(marker.exists())
 
     def test_untracked_legacy_compatibility_controller_blocks_before_mutation(self):
         self.systemd.states["workspace-ci-controller.service"] = True
