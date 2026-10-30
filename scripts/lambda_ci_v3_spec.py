@@ -129,7 +129,7 @@ def build_launch_spec(
 
     max_runtime = min(
         _parse_runtime_seconds(systemd_profile["RuntimeMaxSec"]),
-        int(resource["runtime_seconds"]),
+        int(resource["max_runtime_seconds"]),
     )
     _require(max_runtime > 0, "runtime bound must be positive")
 

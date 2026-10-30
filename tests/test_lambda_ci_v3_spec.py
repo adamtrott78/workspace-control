@@ -135,17 +135,25 @@ class V3LaunchSpecTests(unittest.TestCase):
             )
 
     def test_systemd_profile_and_resource_ceiling_are_root_owned(self):
-        _, spec = self.build("research-model-single-offline-v1")
-        cls = self.root["runner_classes"]["research-model-single-offline-v1"]
-        self.assertEqual(spec["systemd_profile"], cls["systemd_profile"])
-        self.assertEqual(
-            spec["resources"]["tasks_max"],
-            int(cls["systemd_profile"]["TasksMax"]),
-        )
-        self.assertLessEqual(
-            spec["resources"]["runtime_max_seconds"],
-            int(cls["resource_class"]["runtime_seconds"]),
-        )
+        for class_id in sorted(self.root["runner_classes"]):
+            _, spec = self.build(class_id)
+            cls = self.root["runner_classes"][class_id]
+            self.assertEqual(spec["systemd_profile"], cls["systemd_profile"], class_id)
+            self.assertEqual(
+                spec["resources"]["tasks_max"],
+                int(cls["systemd_profile"]["TasksMax"]),
+                class_id,
+            )
+            self.assertEqual(
+                spec["resources"]["runtime_max_seconds"],
+                min(
+                    v3spec._parse_runtime_seconds(
+                        cls["systemd_profile"]["RuntimeMaxSec"]
+                    ),
+                    int(cls["resource_class"]["max_runtime_seconds"]),
+                ),
+                class_id,
+            )
 
     def test_no_production_service_authority(self):
         for class_id in self.root["runner_classes"]:
