@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "plan_id": "lambda-ci-v3-offline-producer-cutover-v1",
+  "status": "DESIGN_ONLY_NOT_AUTHORIZED_FOR_DEFAULT_BRANCH_OR_LIVE_EXECUTION",
+  "durable_task": "workspace-github-actions-control-plane-protocol-redesign-v1",
+  "producer_bridge": "architecture/lambda-ci-v3-offline-payload-producer-bridge.v1.json",
+  "live_authority": "NONE",
+  "scope": {
+    "repository": "adamtrott78/research-engine",
+    "pull_request": 283,
+    "reviewed_head": "5439c2a38648531b995ead92f54e5ab9de55f511",
+    "target_default_branch": "main",
+    "routes": [
+      {
+        "route_id": "model-eval-single-gpu",
+        "runner_class_id": "research-model-single-offline-v1",
+        "workflow_path": ".github/workflows/lambda-ci-qwen35-offline-pilot.yml",
+        "old_blob_sha": "31d77703d434b248aa50adf93568f9a13b89dc07",
+        "reviewed_candidate_blob_sha": "7ef5413982113113aebcc7ea1b90945fba5e4776",
+        "target_scale_set": "lambda-research-engine-model-single-offline"
+      },
+      {
+        "route_id": "model-eval-dual-gpu",
+        "runner_class_id": "research-model-dual-offline-v1",
+        "workflow_path": ".github/workflows/lambda-ci-qwen35-dual-offline-pilot.yml",
+        "old_blob_sha": "a961158615269797837e036fb4cc4a3358f60189",
+        "reviewed_candidate_blob_sha": "53a5123c20e09e115bccc2f29b2184d82da698c7",
+        "target_scale_set": "lambda-research-engine-model-dual-offline"
+      }
+    ]
+  },
+  "current_readiness": {
+    "repository_only_runtime_boundary_green": true,
+    "repository_only_producer_review_green": true,
+    "github_hosted_ci_executed_repository_steps": false,
+    "offline_class_canaries_live_accepted": false,
+    "research_gpu_containment_recovery_authorized": false,
+    "default_branch_cutover_authorized": false,
+    "lambda_live_activation_authorized": false,
+    "ready_for_cutover": false
+  },
+  "immutable_candidate_rules": [
+    "reviewed candidate authority is content-addressed by exact Git blob SHA, not by mutable branch name",
+    "if PR #283 head changes, every changed workflow blob must be re-reviewed and this plan must be regenerated",
+    "a successful hosted CI run must execute repository steps against the exact reviewed PR head; pre-runner failures do not qualify",
+    "after merge, default-branch workflow blobs must equal the exact reviewed candidate blob SHAs before any controller projection using them is installed",
+    "controller policy and deployment generation must bind the exact merged default-branch blobs before either offline class controller is activated",
+    "merging workflow bytes alone grants no root/controller/live authority"
+  ],
+  "required_authorities": [
+    "explicit Research GPU containment/recovery authority that identifies the exact inherited quarantine/retry state being consumed",
+    "explicit default-branch producer cutover authority for Research Engine PR #283 or an exact successor head",
+    "explicit Lambda v3 live migration authority for the exact workspace-control generation",
+    "accepted migration-canary receipts for both offline model classes under the frozen generation-exclusion protocol"
+  ],
+  "preflight": [
+    "verify Research Engine PR head equals reviewed_head and is mergeable without content drift",
+    "verify GitHub-hosted CI on reviewed_head completed success with a nonzero runner_id and repository steps",
+    "verify reviewed candidate workflow blob SHAs exactly match the PR head files",
+    "verify current Research Engine main workflow blobs exactly match old_blob_sha values",
+    "verify no unreviewed workflow/default-branch changes affect either route",
+    "verify all legacy v2 project controllers are stopped/drained and no legacy transient runner exists before any target v3 controller activation",
+    "verify no v3 class controller/transient/resource claim exists before entering the cutover transaction",
+    "verify inherited Research GPU containment and invalidated retry state exactly match the separately authorized recovery receipt"
+  ],
+  "transaction_order": [
+    "freeze exact reviewed PR head, old default-branch blobs, reviewed candidate blobs, workspace-control control-plane generation, and all authority receipts",
+    "quiesce/drain generations exactly as required by the existing v2/v3 generation-exclusion transaction",
+    "perform the separately authorized Research Engine default-branch merge/cutover",
+    "read Research Engine main and prove both default-branch workflow blobs equal the reviewed candidate blob SHAs; abort activation on any mismatch",
+    "compile/verify the exact controller projections and deployment generation that bind those merged workflow blobs to their homogeneous offline runner classes",
+    "install policy/deployment material while both offline class controllers remain inactive",
+    "prove Research GPU containment recovery authority is valid for this exact transaction before activating any Research GPU-derived class",
+    "activate at most the separately authorized offline class controller(s) in the frozen migration order",
+    "run only the separately authorized bounded synthetic acceptance workflow and collect broker/cgroup/cleanup evidence",
+    "prove TotalAssignedJobs returns to zero, no runner/broker transient remains, resource ledger is empty, and containment/retry state is exactly the authorized post-state before declaring cutover accepted"
+  ],
+  "rollback": {
+    "principle": "workflow/default-branch rollback and runtime-generation rollback are separate; neither may implicitly resurrect legacy Research GPU execution",
+    "before_default_branch_merge": [
+      "leave Research Engine main unchanged",
+      "stop/drain any target v3 controller that was started during preflight",
+      "restore exact pre-transaction inactive controller/policy state"
+    ],
+    "after_default_branch_merge_before_accepted_v3_execution": [
+      "stop/drain all target v3 controllers and prove no v3 transient/resource claim remains",
+      "create/merge an explicitly authorized revert that restores the exact old workflow bytes/labels and verify resulting blobs equal old_blob_sha values",
+      "restore old workspace-control workflow/controller policy generation only after exact blob proof",
+      "keep legacy Research GPU controller stopped/contained; do not restore the old crash loop or retry authority"
+    ],
+    "after_v3_execution_started": [
+      "contain target v3 class and force/await terminal cleanup",
+      "prove broker unit, runner unit, JIT registration, and root resource claim are all terminal/absent",
+      "then perform the exact workflow/policy rollback sequence",
+      "preserve Research GPU containment unless a separate authority explicitly defines a different safe post-state"
+    ]
+  },
+  "forbidden": [
+    "do not merge PR #283 merely because repository-only review passed",
+    "do not treat hosted CI runner-allocation failures as test success",
+    "do not install a controller projection that trusts proposal blobs before those exact blobs are present on the owning default branch",
+    "do not activate an offline class controller before exact workflow blob/policy/deployment binding",
+    "do not restart the legacy research-engine GPU v2 controller during rollback",
+    "do not clear or recreate READY_FOR_SINGLE_RETRY or RECOVERY_RETRY_ACQUIRED authority",
+    "do not dispatch candidate/scientific work as part of the cutover helper itself"
+  ]
+}
