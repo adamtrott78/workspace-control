@@ -1470,7 +1470,7 @@ def build_gpu_systemd_command(
             "-p", "Environment=CUDA_VISIBLE_DEVICES=",
             "-p", f"Environment=P5_PAYLOAD_EXEC_SOCKET={payload_socket_path}",
             "-p", f"Environment=P5_PAYLOAD_EXEC_CLIENT={offline_payload['client_path']}",
-            "-p", f"Environment=P5_PAYLOAD_EXEC_WORKDIR={staging_dir}",
+            "-p", f"Environment=P5_PAYLOAD_EXEC_WORKDIR={staging_dir / 'payload-exchange'}",
             "-p", "Environment=P5_PAYLOAD_EXEC_REQUIRED=1",
         ]
     return command
@@ -1501,6 +1501,11 @@ def build_offline_payload_broker_systemd_command(
     runtime_python = pathlib.Path(runtime_binding["python_path"])
     model_object_root = pathlib.Path(model_binding["object_path"])
     model_path = model_object_root / "payload"
+    payload_exchange_dir = staging_dir / "payload-exchange"
+    payload_broker_state_dir = staging_dir / "payload-broker"
+    payload_broker_home = payload_broker_state_dir / "home"
+    payload_broker_tmp = payload_broker_state_dir / "tmp"
+    payload_broker_hf = payload_broker_state_dir / "huggingface"
 
     raw_target_uuids = assignment.get("target_uuids")
     target_uuids = (
@@ -1530,10 +1535,10 @@ def build_offline_payload_broker_systemd_command(
     unit_name = spec["unit_name"].removesuffix(".service") + "-payload.service"
     env = [
         "PATH=/usr/bin:/bin",
-        f"HOME={staging_dir / 'home'}",
-        f"TMPDIR={staging_dir / 'tmp'}",
+        f"HOME={payload_broker_home}",
+        f"TMPDIR={payload_broker_tmp}",
         "PYTHONNOUSERSITE=1",
-        f"HF_HOME={staging_dir / 'huggingface'}",
+        f"HF_HOME={payload_broker_hf}",
         "HF_HUB_OFFLINE=1",
         "TRANSFORMERS_OFFLINE=1",
         "HF_HUB_DISABLE_TELEMETRY=1",
@@ -1577,7 +1582,7 @@ def build_offline_payload_broker_systemd_command(
         "-p", "Type=exec",
         "-p", f"User={broker_identity['user']}",
         "-p", f"Group={broker_identity['group']}",
-        "-p", f"WorkingDirectory={staging_dir}",
+        "-p", f"WorkingDirectory={payload_exchange_dir}",
         "-p", "NoNewPrivileges=yes",
         "-p", "CapabilityBoundingSet=",
         "-p", "AmbientCapabilities=",
@@ -1598,7 +1603,8 @@ def build_offline_payload_broker_systemd_command(
         "-p", "ProtectProc=invisible",
         "-p", "ProcSubset=all",
         "-p", "UMask=0007",
-        "-p", f"ReadWritePaths={staging_dir}",
+        "-p", f"ReadWritePaths={payload_exchange_dir}",
+        "-p", f"ReadWritePaths={payload_broker_state_dir}",
         "-p", f"ReadWritePaths={socket_dir}",
         "-p", f"InaccessiblePaths={job_dir}",
         "-p", f"BindReadOnlyPaths={runtime_path}",
@@ -1636,7 +1642,7 @@ def build_offline_payload_broker_systemd_command(
             "--expected-broker-uid", str(expected_broker_uid),
             "--expected-runner-unit", spec["unit_name"],
             "--runtime-python", str(runtime_python),
-            "--staging-root", str(staging_dir),
+            "--exchange-root", str(payload_exchange_dir),
         ]
     )
     return command
@@ -2257,10 +2263,18 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             raise RuntimeLaunchError(
                 "offline payload broker group must equal online runner group"
             )
-        os.chmod(staging_dir, 0o770)
-        for child in staging_dir.iterdir():
-            if child.is_dir():
-                os.chmod(child, 0o770)
+        os.chmod(staging_dir, 0o710)
+        payload_exchange_dir = staging_dir / "payload-exchange"
+        payload_exchange_dir.mkdir(mode=0o770)
+        os.chown(payload_exchange_dir, uid, gid)
+
+        payload_broker_state_dir = staging_dir / "payload-broker"
+        payload_broker_state_dir.mkdir(mode=0o700)
+        os.chown(payload_broker_state_dir, payload_broker_uid, payload_broker_gid)
+        for name in ("home", "tmp", "huggingface"):
+            child = payload_broker_state_dir / name
+            child.mkdir(mode=0o700)
+            os.chown(child, payload_broker_uid, payload_broker_gid)
 
         socket_root = pathlib.Path(offline_payload["socket_root"])
         try:
@@ -2689,6 +2703,16 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
             "offline_payload_broker_terminal_evidence": payload_broker_terminal_evidence,
             "offline_payload_socket_dir_destroyed": payload_broker_socket_dir_destroyed,
             "offline_payload_broker_uid": payload_broker_uid,
+            "offline_payload_exchange": (
+                str(staging_dir / "payload-exchange")
+                if offline_payload is not None
+                else None
+            ),
+            "offline_payload_broker_state": (
+                str(staging_dir / "payload-broker")
+                if offline_payload is not None
+                else None
+            ),
             "offline_payload_broker_identity_isolated": (
                 offline_payload is None or payload_broker_uid != uid
             ),
