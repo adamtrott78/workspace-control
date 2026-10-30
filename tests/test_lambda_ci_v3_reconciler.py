@@ -239,6 +239,13 @@ class V3ReconcilerTests(unittest.TestCase):
             self.assertNotIn(forbidden, source)
         self.assertIn('["systemctl", "daemon-reload"]', source)
 
+    def test_root_activation_helper_is_installed_immutable_in_reconciler_tree(self):
+        helper = self.staged(
+            "/opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py"
+        )
+        self.assertTrue(helper.is_file())
+        self.assertEqual(helper.stat().st_mode & 0o777, 0o555)
+
     def test_offline_payload_helpers_are_installed_immutable_in_v3_tree(self):
         broker = self.staged(
             "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_broker.py"
