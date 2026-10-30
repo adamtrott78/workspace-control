@@ -92,7 +92,7 @@ def build_launch_spec(
     resource = copy.deepcopy(cls["resource_class"])
     profile = contract["execution_profile"]
     _require(
-        resource["resource_class"] == contract["resource_class"],
+        cls["resource_class_id"] == contract["resource_class"],
         "resource class identity differs from execution contract",
     )
     gpu_uuids = _gpu_uuids(resource)
