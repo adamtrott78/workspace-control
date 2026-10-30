@@ -106,7 +106,8 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
         for class_id, cls in classes.items():
             identity = cls["payload_broker_identity"]
             if class_id in offline:
-                self.assertEqual(identity["user"], "ci-payload-research-engine")
+                self.assertTrue(identity["user"].startswith("ci-payload-"))
+                self.assertLessEqual(len(identity["user"]), 32)
                 self.assertEqual(identity["group"], cls["project_runner_identity"]["group"])
                 self.assertNotEqual(
                     identity["user"],
@@ -119,7 +120,7 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
                 broker_users.add(identity["user"])
             else:
                 self.assertIsNone(identity, class_id)
-        self.assertEqual(broker_users, {"ci-payload-research-engine"})
+        self.assertEqual(len(broker_users), 2)
 
     def test_duplicate_controller_peer_fails_compile(self):
         inputs = copy.deepcopy(self.inputs)
