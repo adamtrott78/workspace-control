@@ -35,7 +35,7 @@ V3_CONTROLLER_BINARY = pathlib.Path(
 V3_PROVISIONER_ROOT = pathlib.Path("/opt/workspace-ci/v3/provisioner")
 V3_RECONCILER_ROOT = pathlib.Path("/opt/workspace-ci/v3/reconciler")
 V3_CACHE_ROOT = pathlib.Path("/opt/workspace-ci/v3/cache-manager")
-V3_CANARY_ROOT = pathlib.Path("/opt/workspace-ci/v3/canary")
+V3_CANARY_ROOT = pathlib.Path("/opt/workspace-ci/v3/canary")\nV3_PAYLOAD_ROOT = pathlib.Path("/opt/workspace-ci/v3/payload")
 V3_STATE_ROOT = pathlib.Path("/var/lib/workspace-ci/v3/controller/state")
 V3_CREDENTIAL_ROOT = pathlib.Path("/var/lib/workspace-ci/v3/credentials")
 V3_SOCKET_GROUP = "workspace-ci-v3-provisioner"
@@ -238,6 +238,16 @@ def _source_files(repo_root: pathlib.Path) -> list[tuple[pathlib.Path, pathlib.P
         (
             repo_root / "scripts/lambda_ci_v3_canary_probe.py",
             V3_CANARY_ROOT / "lambda_ci_v3_canary_probe.py",
+            0o555,
+        ),
+        (
+            repo_root / "scripts/lambda_ci_v3_payload_broker.py",
+            V3_PAYLOAD_ROOT / "lambda_ci_v3_payload_broker.py",
+            0o555,
+        ),
+        (
+            repo_root / "scripts/lambda_ci_v3_payload_exec.py",
+            V3_PAYLOAD_ROOT / "lambda_ci_v3_payload_exec.py",
             0o555,
         ),
         (
