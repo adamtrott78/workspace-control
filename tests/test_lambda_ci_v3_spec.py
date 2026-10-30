@@ -188,6 +188,36 @@ class V3LaunchSpecTests(unittest.TestCase):
                 self.assertTrue(runtime["required_controls"])
             self.assertEqual(catalog_class["bindings"], cls["bindings"])
 
+    def test_only_offline_model_classes_receive_payload_broker(self):
+        offline = {
+            "research-model-single-offline-v1",
+            "research-model-dual-offline-v1",
+        }
+        observed = set()
+        for class_id in self.root["runner_classes"]:
+            _, spec = self.build(class_id)
+            broker = spec["offline_payload_broker"]
+            if class_id in offline:
+                observed.add(class_id)
+                self.assertIsInstance(broker, dict)
+                self.assertEqual(
+                    broker["network_class"],
+                    "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE",
+                )
+                self.assertEqual(
+                    broker["runtime_python"],
+                    spec["runtime_binding"]["python_path"],
+                )
+                self.assertTrue(
+                    broker["broker_path"].startswith("/opt/workspace-ci/v3/payload/")
+                )
+                self.assertTrue(
+                    broker["client_path"].startswith("/opt/workspace-ci/v3/payload/")
+                )
+            else:
+                self.assertIsNone(broker, class_id)
+        self.assertEqual(observed, offline)
+
     def test_no_production_service_authority(self):
         for class_id in self.root["runner_classes"]:
             _, spec = self.build(class_id)
