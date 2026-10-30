@@ -169,6 +169,18 @@ class V3ReconcilerTests(unittest.TestCase):
             self.assertNotIn(forbidden, source)
         self.assertIn('["systemctl", "daemon-reload"]', source)
 
+    def test_offline_payload_helpers_are_installed_immutable_in_v3_tree(self):
+        broker = self.staged(
+            "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_broker.py"
+        )
+        client = self.staged(
+            "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_exec.py"
+        )
+        self.assertTrue(broker.is_file())
+        self.assertTrue(client.is_file())
+        self.assertEqual(broker.stat().st_mode & 0o777, 0o555)
+        self.assertEqual(client.stat().st_mode & 0o777, 0o555)
+
     def test_manifest_is_digest_bound_and_verifiable_in_staging_projection(self):
         manifest = self.result["manifest"]
         self.assertEqual(manifest["runner_class_count"], 9)
