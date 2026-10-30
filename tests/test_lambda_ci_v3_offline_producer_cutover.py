@@ -22,7 +22,16 @@ class V3OfflineProducerCutoverPlanTests(unittest.TestCase):
         )
         self.assertEqual(self.plan["live_authority"], "NONE")
         readiness = self.plan["current_readiness"]
-        self.assertFalse(readiness["github_hosted_ci_executed_repository_steps"])
+        self.assertTrue(readiness["github_hosted_ci_executed_repository_steps"])
+        self.assertFalse(readiness["offline_class_canaries_live_accepted"])
+        self.assertFalse(readiness["research_gpu_containment_recovery_authorized"])
+        self.assertFalse(readiness["default_branch_cutover_authorized"])
+        self.assertFalse(readiness["lambda_live_activation_authorized"])
+        self.assertFalse(readiness["ready_for_cutover"])
+
+    def test_hosted_ci_satisfied_does_not_imply_cutover_authority(self):
+        readiness = self.plan["current_readiness"]
+        self.assertTrue(readiness["github_hosted_ci_executed_repository_steps"])
         self.assertFalse(readiness["offline_class_canaries_live_accepted"])
         self.assertFalse(readiness["research_gpu_containment_recovery_authorized"])
         self.assertFalse(readiness["default_branch_cutover_authorized"])
