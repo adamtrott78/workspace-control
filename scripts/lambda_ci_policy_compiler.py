@@ -29,6 +29,7 @@ INPUT_PATHS = {
     "workflow_evidence": "architecture/lambda-ci-trusted-workflow-evidence.v1.json",
     "parameter_schemas": "architecture/lambda-ci-ingress-parameter-schemas.v1.json",
     "maintenance_actions": "architecture/lambda-ci-maintenance-actions.v2.json",
+    "upstream_pins": "architecture/lambda-ci-upstream-pins.v1.json",
     "root_projection_schema": "schemas/workspace-ci-root-policy-projection.v1.schema.json",
     "controller_projection_schema": "schemas/workspace-ci-runner-class-controller-policy.v1.schema.json",
     "executor_projection_schema": "schemas/workspace-ci-executor-policy-projection.v1.schema.json",
@@ -305,6 +306,7 @@ def _input_generation_material(data: dict[str, Any]) -> dict[str, Any]:
         "workflow_evidence",
         "parameter_schemas",
         "maintenance_actions",
+        "upstream_pins",
         "project_manifests",
     ]
     return {key: data[key] for key in keys}
@@ -318,6 +320,7 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
     resource_classes = workload["resource_classes"]
     profiles = data["systemd_profiles"]
     host_resources = data["host_resources"]
+    upstream_pins = data["upstream_pins"]
     evidence_entries = data["workflow_evidence"]["entries"]
     parameter_schemas = data["parameter_schemas"]["schemas"]
     maintenance = data["maintenance_actions"]
@@ -548,11 +551,13 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
         "schema_version": 1,
         "control_plane_generation_sha256": generation_sha,
         "host_resource_policy": copy.deepcopy(host_resources),
+        "upstream_pins": copy.deepcopy(upstream_pins),
         "runner_classes": root_classes,
     }
     root_projection["root_policy_sha256"] = sha256_object({
         "schema_version": root_projection["schema_version"],
         "host_resource_policy": root_projection["host_resource_policy"],
+        "upstream_pins": root_projection["upstream_pins"],
         "runner_classes": {
             class_id: {
                 key: value
