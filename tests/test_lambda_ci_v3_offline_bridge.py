@@ -90,6 +90,31 @@ class V3OfflinePayloadProducerBridgeTests(unittest.TestCase):
         self.assertIn("forbidden /run/workspace-ci control-plane root", runtime)
         self.assertIn("/run/workspace-ci-v3-payload", producer)
 
+    def test_research_hosted_ci_is_exact_head_successful_repository_evidence(self):
+        research = self.bridge["research_engine"]
+        self.assertEqual(
+            research["proposal_head"],
+            "6165556086b73d2076f205f11ec7b988150f23dd",
+        )
+        ci = research["ci_observation"]
+        self.assertEqual(ci["run_number"], 642)
+        self.assertEqual(ci["run_id"], 41007835081)
+        self.assertEqual(ci["conclusion"], "success")
+        self.assertTrue(ci["evidence"]["repository_steps_executed"])
+        self.assertTrue(ci["accepted_as_repository_test_evidence"])
+        self.assertEqual(
+            ci["evidence"]["hosted_runner_evidence"]["runner_kind"],
+            "Hosted Compute Agent",
+        )
+        self.assertIn("Compile", ci["evidence"]["successful_steps"])
+        self.assertIn("Test", ci["evidence"]["successful_steps"])
+        self.assertIn("Build daemon image", ci["evidence"]["successful_steps"])
+        self.assertTrue(
+            self.bridge["migration_gate"][
+                "research_engine_hosted_ci_repository_evidence_resolved"
+            ]
+        )
+
     def test_workspace_runtime_boundary_is_bound_to_green_validation(self):
         validation = self.bridge["workspace_control"]["runtime_boundary_validation"]
         self.assertRegex(validation["exact_head"], HEX40)
