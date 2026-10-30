@@ -143,7 +143,7 @@ class V3ReconcilerTests(unittest.TestCase):
         readiness = migration["repository_readiness"]
         self.assertEqual(
             readiness["workspace_control_repository_boundary"]["exact_head"],
-            "c3e4e5e12811ff51fd6062cca261b099e7afaa9d",
+            "01019177fcb46e5ab9864ea9b764b533dcf0be81",
         )
         producer = readiness["research_engine_offline_producer"]
         self.assertEqual(
