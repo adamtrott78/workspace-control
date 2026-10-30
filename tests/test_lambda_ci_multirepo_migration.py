@@ -22,6 +22,10 @@ class MultiRepoRun3MigrationTests(unittest.TestCase):
         self.assertEqual(INSTALL["status"], "RUN3_VALIDATED_INSTALL_INPUT")
         self.assertFalse(INSTALL["padataset_activation_allowed"])
         frozen_run3_policy = {
+            "scripts/lambda_ci_multirepo.py":
+                "cf534343119ebde2a338ea592369ce36374a88b3",
+            "scripts/lambda_ci_provisioner_service.py":
+                "d728c5d26f56694507a23623ccf10d8f71eb05a0",
             "controller/lambda-ci-controller/main.go":
                 "a1f05f3c69a8168fb6cbeeb981ed7d28299d9324",
             "scripts/lambda_ci_runtime.py":

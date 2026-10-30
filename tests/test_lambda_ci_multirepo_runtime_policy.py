@@ -2,6 +2,8 @@ import copy
 import json
 import sys
 import tempfile
+import threading
+import time
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -97,6 +99,40 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         req = request_for(manifest, "cpu-ci")
         with self.assertRaisesRegex(multi.MultiRepoPolicyError, "route is not active"):
             multi.mint_admission(req, manifest, CONTRACTS, WORKLOAD)
+
+    def test_display_claim_accepts_bounded_optional_request_qualifier(self):
+        manifest = copy.deepcopy(WORKSPACE)
+        manifest["status"] = "ACTIVE"
+        manifest["routes"]["control-validation"]["activation_state"] = "ACTIVE"
+        req = request_for(manifest, "control-validation")
+        req["attestation"]["job_display_name"] += " host-attest"
+        admission = multi.mint_admission(
+            req,
+            manifest,
+            CONTRACTS,
+            WORKLOAD,
+            now=datetime(2026, 10, 29, tzinfo=timezone.utc),
+        )
+        self.assertEqual(admission["candidate_sha"], SHA)
+        self.assertEqual(admission["workload_class"], "control-validation")
+
+    def test_display_claim_rejects_unbounded_or_malformed_request_qualifier(self):
+        manifest = copy.deepcopy(WORKSPACE)
+        manifest["status"] = "ACTIVE"
+        manifest["routes"]["control-validation"]["activation_state"] = "ACTIVE"
+        for qualifier in (
+            "Host-Attest",
+            "host attest",
+            "x" * 129,
+            "host-attest!",
+        ):
+            req = request_for(manifest, "control-validation")
+            req["attestation"]["job_display_name"] += f" {qualifier}"
+            with self.assertRaisesRegex(
+                multi.MultiRepoPolicyError,
+                "job display claim does not match route",
+            ):
+                multi.mint_admission(req, manifest, CONTRACTS, WORKLOAD)
 
     def test_research_route_resolves_semantic_contract_not_route_name(self):
         req = request_for(RESEARCH, "cpu-test")
@@ -537,6 +573,9 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
                 "gpu-small", project_id="padataset"
             )
             legacy = store.lane_quarantine_path("gpu-small")
+            workspace = store.lane_quarantine_path(
+                "control-small", project_id="workspace-control"
+            )
             self.assertNotEqual(research, padataset)
             self.assertNotEqual(research, legacy)
             self.assertEqual(
@@ -546,6 +585,10 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             self.assertEqual(
                 padataset.name,
                 "_lane-quarantine-padataset-gpu-small.json",
+            )
+            self.assertEqual(
+                workspace.name,
+                "_lane-quarantine-workspace-control-control-small.json",
             )
 
     def test_generic_provisioner_reloads_registry_manifests_without_restart(self):
@@ -624,6 +667,67 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             )
             with self.assertRaises(provisioner.PolicyError):
                 service._manifest_for_request({"project_id": "unknown"})
+
+    def test_generic_provisioner_accepts_workspace_control_small_profile(self):
+        calls = []
+        done = threading.Event()
+
+        def launcher(req, spec):
+            calls.append(
+                (
+                    req.project_id,
+                    req.profile,
+                    spec["profile"],
+                    spec["resources"]["gpu_uuids"],
+                )
+            )
+            done.set()
+            return {"decision": "RUNNER_EXITED_CLEANLY"}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            service = provisioner_service.ProvisionerService(
+                manifest=None,
+                profiles=PROFILES,
+                pins=PINS,
+                workload_policy=WORKLOAD,
+                state_store=provisioner_service.StateStore(Path(tmp)),
+                controller_uid=1000,
+                launcher=launcher,
+                clock=lambda: datetime(
+                    2026, 10, 20, 0, 0, 5, tzinfo=timezone.utc
+                ),
+                registry=REGISTRY,
+                project_manifests={
+                    "research-engine": RESEARCH,
+                    "padataset": PAD,
+                    "workspace-control": WORKSPACE,
+                },
+                execution_contracts=CONTRACTS,
+            )
+            accepted = service.handle_request(
+                request_for(WORKSPACE, "control-validation"),
+                peer_uid=1000,
+            )
+            self.assertEqual(accepted["status"], "ACCEPTED")
+            self.assertTrue(done.wait(1))
+            self.assertEqual(
+                calls,
+                [
+                    (
+                        "workspace-control",
+                        "control-small",
+                        "control-small",
+                        [],
+                    )
+                ],
+            )
+            for _ in range(100):
+                record = service.state_store.read(accepted["request_id"])
+                if record is not None and record.get("status") == "COMPLETED":
+                    break
+                time.sleep(0.01)
+            self.assertIsNotNone(record)
+            self.assertEqual(record["status"], "COMPLETED")
 
     def test_reconciler_renders_deterministic_non_secret_controller_env(self):
         cpu = reconciler.render_controller_env(PAD, "cpu")
