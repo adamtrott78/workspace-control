@@ -36,7 +36,9 @@
     "transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}.service",
     "payload_helper_root": "/opt/workspace-ci/v3/payload",
     "payload_socket_root": "/run/workspace-ci-v3-payload",
-    "payload_transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}-payload.service"
+    "payload_transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}-payload.service",
+    "migration_state_root": "/var/lib/workspace-ci/v3/migration",
+    "authority_consumption_root": "/var/lib/workspace-ci/v3/migration-authority"
   },
   "socket_authorization": {
     "socket_group": "workspace-ci-v3-provisioner",
@@ -237,7 +239,7 @@
     "authority": "workspace-control-operator",
     "operation": "ACTIVATE_ONE_V3_CANARY",
     "authorization_id": "canonical UUID; unique per authorization",
-    "receipt_file_policy": "root-owned mode 0600",
+    "receipt_file_policy": "root-owned mode 0600; transaction and consumption roots are precreated root:root 0700 by inactive substrate",
     "max_lifetime_seconds": 1800,
     "consumption_root": "/var/lib/workspace-ci/v3/migration-authority",
     "consumption_semantics": [
@@ -246,6 +248,7 @@
       "authorization_id is atomically consumed with O_CREAT|O_EXCL into the root-private consumption root and fsynced before the first transaction mutation",
       "a consumed authorization_id is permanently replay-rejected by the migration transaction",
       "rollback never deletes or reopens a consumed authorization marker"
-    ]
+    ],
+    "transaction_state_root": "/var/lib/workspace-ci/v3/migration"
   }
 }
