@@ -156,6 +156,7 @@ def render_tmpfiles(
         "d /run/workspace-ci/v3 0711 root root -\n",
         "d /run/workspace-ci/v3/provisioner 0700 root root -\n",
         "d /run/workspace-ci/v3/provisioner/jit 0700 root root -\n",
+        "d /run/workspace-ci-v3-payload 0711 root root -\n",
         "d /var/lib/workspace-ci/v3 0711 root root -\n",
         "d /var/lib/workspace-ci/v3/provisioner 0700 root root -\n",
         "d /var/lib/workspace-ci/v3/controller 0711 root root -\n",
