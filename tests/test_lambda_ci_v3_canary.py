@@ -186,7 +186,7 @@ class V3MigrationCanaryTests(unittest.TestCase):
             env["P5_PAYLOAD_EXEC_CLIENT"] = probe.OFFLINE_CLIENT_PATH
             env["P5_PAYLOAD_EXEC_WORKDIR"] = (
                 str(roots["staging_cache"])
-                + "/p5-11111111-2222-3333-4444-555555555555"
+                + "/p5-11111111-2222-3333-4444-555555555555/payload-exchange"
             )
             env["P5_PAYLOAD_EXEC_SOCKET"] = (
                 "/run/workspace-ci/v3/payload/"
@@ -237,6 +237,8 @@ class V3MigrationCanaryTests(unittest.TestCase):
         selected = [x for x in env["P5_GPU_SELECTED_DEVICES"].split(",") if x]
         runtime = cls["bindings"]["runtime"]
         model = cls["bindings"]["model"]
+        exchange = env["P5_PAYLOAD_EXEC_WORKDIR"]
+        request_staging = str(pathlib.PurePosixPath(exchange).parent)
         return {
             "cpu.max": f"{broker_quota * period // 100} {period}",
             "memory.max": str(broker_memory),
@@ -245,6 +247,8 @@ class V3MigrationCanaryTests(unittest.TestCase):
             "PrivateNetwork": "yes",
             "User": cls["payload_broker_identity"]["user"],
             "Group": cls["payload_broker_identity"]["group"],
+            "WorkingDirectory": exchange,
+            "ReadWritePaths": f"{exchange} {request_staging}/payload-broker",
             "RestrictAddressFamilies": "AF_UNIX AF_INET AF_INET6 AF_NETLINK",
             "IPAddressDeny": "any",
             "IPAddressAllow": "127.0.0.0/8 ::1/128",
