@@ -119,7 +119,7 @@ class V3OfflineRuntimeBoundaryTests(unittest.TestCase):
                 props,
             )
             self.assertIn(
-                f"Environment=P5_PAYLOAD_EXEC_WORKDIR={staging}",
+                f"Environment=P5_PAYLOAD_EXEC_WORKDIR={staging / 'payload-exchange'}",
                 props,
             )
             self.assertIn("Environment=P5_PAYLOAD_EXEC_REQUIRED=1", props)
@@ -165,9 +165,17 @@ class V3OfflineRuntimeBoundaryTests(unittest.TestCase):
                 f"Group={spec['offline_payload_broker']['run_as']['group']}",
                 props,
             )
+            exchange = staging / "payload-exchange"
+            broker_state = staging / "payload-broker"
             self.assertNotIn(f"ReadWritePaths={job}", props)
             self.assertIn(f"InaccessiblePaths={job}", props)
-            self.assertIn(f"ReadWritePaths={staging}", props)
+            self.assertNotIn(f"ReadWritePaths={staging}", props)
+            self.assertIn(f"ReadWritePaths={exchange}", props)
+            self.assertIn(f"ReadWritePaths={broker_state}", props)
+            self.assertIn(f"WorkingDirectory={exchange}", props)
+            self.assertIn(f"Environment=HOME={broker_state / 'home'}", command)
+            self.assertIn(f"TMPDIR={broker_state / 'tmp'}", command)
+            self.assertIn(f"HF_HOME={broker_state / 'huggingface'}", command)
             self.assertIn("UMask=0007", props)
             self.assertIn("IPAddressDeny=any", props)
             self.assertIn(
@@ -194,6 +202,8 @@ class V3OfflineRuntimeBoundaryTests(unittest.TestCase):
             self.assertNotIn("ACTIONS_RUNTIME_TOKEN", " ".join(command))
             self.assertIn("--expected-client-uid", command)
             self.assertIn("--expected-broker-uid", command)
+            self.assertIn("--exchange-root", command)
+            self.assertNotIn("--staging-root", command)
             self.assertIn("--expected-runner-unit", command)
             self.assertIn(spec["unit_name"], command)
 
