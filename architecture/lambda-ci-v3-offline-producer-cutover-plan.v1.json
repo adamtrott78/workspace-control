@@ -8,7 +8,7 @@
   "scope": {
     "repository": "adamtrott78/research-engine",
     "pull_request": 283,
-    "reviewed_head": "3729fd3306381e2199b59e9517d3a5a49dc720fe",
+    "reviewed_head": "0894e04c8166eefca4250a149b879075d57ae085",
     "target_default_branch": "main",
     "routes": [
       {
@@ -16,7 +16,7 @@
         "runner_class_id": "research-model-single-offline-v1",
         "workflow_path": ".github/workflows/lambda-ci-qwen35-offline-pilot.yml",
         "old_blob_sha": "31d77703d434b248aa50adf93568f9a13b89dc07",
-        "reviewed_candidate_blob_sha": "a3b89a89cfcd32d4d07dd0a92d012c295c5d4ea1",
+        "reviewed_candidate_blob_sha": "4016ec3d23627dd7299ef9a7d36ff1dcbcdf47fe",
         "target_scale_set": "lambda-research-engine-model-single-offline"
       },
       {
@@ -24,7 +24,7 @@
         "runner_class_id": "research-model-dual-offline-v1",
         "workflow_path": ".github/workflows/lambda-ci-qwen35-dual-offline-pilot.yml",
         "old_blob_sha": "a961158615269797837e036fb4cc4a3358f60189",
-        "reviewed_candidate_blob_sha": "bb0710fd97fd38a0788fcd6a42483b7d7bab7fbb",
+        "reviewed_candidate_blob_sha": "90f8dc55c54f9f4759bc71dffa5d3fe622aa0b07",
         "target_scale_set": "lambda-research-engine-model-dual-offline"
       }
     ]
