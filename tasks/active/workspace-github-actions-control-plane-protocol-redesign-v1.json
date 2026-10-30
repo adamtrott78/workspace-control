@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-lambda-self-hosted-execution-v1",
-  "current_stage": "repository_only_protocol_verification",
+  "current_stage": "bounded_migration_and_live_acceptance",
   "acceptance_criteria": [
     "Produce an end-to-end protocol graph from GitHub trigger through workflow/job construction, scale-set messages, controller attestation, root admission, launch-spec resolution, JIT runner creation, execution, completion, cleanup, replay, and recovery.",
     "Enumerate every parser, serializer, identifier, state machine, authority boundary, retry boundary, durable record, and scheduler/lifecycle signal in workspace-control and relevant research-engine workflows.",
@@ -42,7 +42,7 @@
       "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
       "remote": {
         "branch": "github-actions-control-plane-protocol-redesign-v1",
-        "checkpoint_sha": "2281b005dca2ceee955eabeb2d0e7c888ab23a0b",
+        "checkpoint_sha": "c0fd0b10cac51e3ace3f988132cdeec661d3a905",
         "verified": true
       },
       "local": null,
@@ -191,7 +191,7 @@
     },
     {
       "id": "repository_only_protocol_verification",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -205,11 +205,17 @@
       ],
       "validation": [
         {
-          "check": "Repository-only verification baseline",
+          "check": "Whole-fleet repository-only protocol verification",
           "result": "PASS",
           "evidence": [
-            "Compiler/builder foundation is green; no Lambda mutation occurred.",
-            "Verification plan covers scheduler lifecycle, capacity protocol, resource allocator, supervisor retry, crash recovery, maintenance, reconciliation and migration equivalence."
+            "Exact head 06d58450bb735178b516d9966fcb099763d8b4b0 passed Workspace Control Validation #1266 / run 40990406861 / job 123851171378.",
+            "616 unit tests passed; pinned Go scale-set controller validation and full integration contracts passed.",
+            "23/23 routes attest from structured workflow identity without authority-bearing display/candidate parsing.",
+            "9/9 runner classes pass RESERVE -> JIT -> LAUNCH -> terminal cleanup modeling.",
+            "TotalAssignedJobs-only scaling, redelivery, canceled reassignment, request-local anomaly liveness, retry backoff, root crash boundaries, controller ledger crash boundaries, reservation expiry, GPU atomicity, class quarantine, maintenance, reconciliation and deployment overlay are covered.",
+            "23/23 current routes have exact-equivalent target root launch envelopes.",
+            "Durable receipt: architecture/lambda-ci-control-plane-verification-receipt.v1.json.",
+            "PR #572 verification acceptance comment: 6513301714."
           ]
         }
       ],
@@ -217,7 +223,7 @@
     },
     {
       "id": "bounded_migration_and_live_acceptance",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "hybrid",
       "selected_executor": "hybrid",
       "selected_surface": "github+lambda",
@@ -229,13 +235,23 @@
         "workspace-control live validation",
         "research-engine compatibility validation"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Migration architecture initialized",
+          "result": "PASS",
+          "evidence": [
+            "architecture/lambda-ci-v3-migration-plan.v1.json defines disjoint v2/v3 paths and one-class canaries.",
+            "Migration design forbids simultaneous active v2/v3 project controllers because the generations do not share one physical-resource ledger.",
+            "Research GPU-derived classes remain installed-inactive/inherited-contained absent separate recovery authority."
+          ]
+        }
+      ],
       "resume_condition": "Live control plane is stable under valid, invalid, duplicate, canceled, and recovery scenarios without controller crash loops."
     }
   ],
   "checkpoints": [],
   "blockers": [],
-  "next_safe_action": "Continue repository_only_protocol_verification on PR #572: implement pure controller/capacity state-machine prototypes and fault-injection tests for all scheduler/recovery boundaries. Do not mutate Lambda, restart controllers, apply PR #571, or retrigger host-attest.",
+  "next_safe_action": "Implement and repository-verify the production v3 root capacity provider, v3 runner-class controller, v3 reconciliation/systemd install surface, and migration-canary/cutover tooling under disjoint paths on PR #572. Do not mutate Lambda, start v3 controllers, apply PR #571, retrigger host-attest, or alter research-engine GPU containment.",
   "artifacts": [
     {
       "path": "architecture/github-actions-control-plane-protocol-redesign-v1.md",
@@ -358,6 +374,49 @@
       "evidence": [
         "Compiler validates emitted executor projection against this schema."
       ]
+    },
+    {
+      "path": "architecture/lambda-ci-control-plane-verification-receipt.v1.json",
+      "state": "REPOSITORY_ONLY_PROTOCOL_VERIFIED",
+      "evidence": [
+        "Exact head 06d58450bb735178b516d9966fcb099763d8b4b0; validation #1266 SUCCESS; 616 tests PASS.",
+        "No Lambda mutation authorized or performed."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-v3-migration-plan.v1.json",
+      "state": "DESIGN_ONLY_MIGRATION_PLAN",
+      "evidence": [
+        "Defines disjoint v3 install paths, class identities, one-class canaries, generation exclusion, active-fleet cutover, rollback, legacy retirement, and preserved Research GPU containment."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_model.py",
+      "state": "REPOSITORY_ONLY_VERIFIED_MODEL",
+      "evidence": [
+        "Models scheduler admission/capacity, supervisor liveness, root resource allocation, assignment requeue, durable runner ledger and JIT crash recovery."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_deployment_overlay.py",
+      "state": "REPOSITORY_ONLY_VERIFIED_MODEL",
+      "evidence": [
+        "Proves generation binding cannot implicitly install/activate/enable/clear containment."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_control_planes.py",
+      "state": "REPOSITORY_ONLY_VERIFIED_MODEL",
+      "evidence": [
+        "Models maintenance and reconciliation isolation."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_migration_equivalence.py",
+      "state": "REPOSITORY_ONLY_VERIFIED_PROOF",
+      "evidence": [
+        "23/23 legacy routes exact-equivalent to target root launch envelopes."
+      ]
     }
   ],
   "validation": [
@@ -400,23 +459,38 @@
       ]
     },
     {
-      "check": "Repository-only verification baseline",
+      "check": "Whole-fleet repository-only protocol verification",
       "result": "PASS",
       "evidence": [
-        "Compiler/builder foundation is green; no Lambda mutation occurred.",
-        "Verification plan covers scheduler lifecycle, capacity protocol, resource allocator, supervisor retry, crash recovery, maintenance, reconciliation and migration equivalence."
+        "Exact head 06d58450bb735178b516d9966fcb099763d8b4b0 passed Workspace Control Validation #1266 / run 40990406861 / job 123851171378.",
+        "616 unit tests passed; pinned Go scale-set controller validation and full integration contracts passed.",
+        "23/23 routes attest from structured workflow identity without authority-bearing display/candidate parsing.",
+        "9/9 runner classes pass RESERVE -> JIT -> LAUNCH -> terminal cleanup modeling.",
+        "TotalAssignedJobs-only scaling, redelivery, canceled reassignment, request-local anomaly liveness, retry backoff, root crash boundaries, controller ledger crash boundaries, reservation expiry, GPU atomicity, class quarantine, maintenance, reconciliation and deployment overlay are covered.",
+        "23/23 current routes have exact-equivalent target root launch envelopes.",
+        "Durable receipt: architecture/lambda-ci-control-plane-verification-receipt.v1.json.",
+        "PR #572 verification acceptance comment: 6513301714."
+      ]
+    },
+    {
+      "check": "Migration architecture initialized",
+      "result": "PASS",
+      "evidence": [
+        "architecture/lambda-ci-v3-migration-plan.v1.json defines disjoint v2/v3 paths and one-class canaries.",
+        "Migration design forbids simultaneous active v2/v3 project controllers because the generations do not share one physical-resource ledger.",
+        "Research GPU-derived classes remain installed-inactive/inherited-contained absent separate recovery authority."
       ]
     }
   ],
   "remaining_work": [
-    "Implement repository-only runner-class controller admission/supervisor state-machine model against the exact pinned actions/scaleset lifecycle semantics.",
-    "Implement repository-only two-phase root capacity/resource allocator model: RESERVE, LAUNCH, STATUS, CANCEL, crash reconciliation and class quarantine.",
-    "Implement fault-injection/model tests for redelivery, reassignment, TotalAssignedJobs/lifecycle skew, transient GitHub/root errors, reservation expiry, root crash boundaries and cleanup failure.",
-    "Verify all nine runner classes and 23 routes against the state-machine model and migration-equivalence matrix.",
-    "Prototype runner-class maintenance/reconciliation projections and prove no cpu/gpu lane grammar or live activation leakage remains.",
-    "Only after repository-only protocol verification passes, design a separately authorized one-class-at-a-time live migration."
+    "Implement a production v3 root capacity provider from the verified two-phase RESERVE/LAUNCH/STATUS/CANCEL model under disjoint v3 paths.",
+    "Implement a production v3 Go runner-class controller using the pinned actions/scaleset client, TotalAssignedJobs scaling, structured trusted-workflow admission, in-process retry/backoff, and no JobDisplayName parser.",
+    "Implement v3 reconciliation/install projections, unique controller Unix identities, project credential groups, systemd templates, tmpfiles, and disjoint persistent/runtime state.",
+    "Generate migration-only class canary workflows and prove their payloads cannot execute candidate code or widen class authority.",
+    "Add repository-only integration tests proving v2/v3 install-path disjointness and the generation-exclusion cutover/rollback transaction.",
+    "Only after the production implementation candidate and migration transaction are exact-head green may any separate live activation authority be considered."
   ],
   "last_executor": "chatgpt",
-  "last_surface": "github+web",
+  "last_surface": "github",
   "notes": "Incremental live parser repair is intentionally suspended. Current workspace-control CPU start-limit state is treated as containment while the protocol is redesigned."
 }
