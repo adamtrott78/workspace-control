@@ -502,6 +502,13 @@ def apply_canary(
         target_class=target_class,
         canary_policy=canary_policy,
     )
+    _validate_authority_payload(
+        authority_receipt,
+        expected_head=source_head,
+        target_class=target_class,
+        manifest=canary_manifest,
+        canary_policy=canary_policy,
+    )
     if authority_receipt["source_head"] != source_head:
         raise MigrationError("authorization receipt source head mismatch")
     if authority_receipt["target_runner_class_id"] != target_class:
