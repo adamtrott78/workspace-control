@@ -1,0 +1,39 @@
+[Unit]
+Description=Workspace Shell fixed-profile root job launcher
+After=local-fs.target systemd-tmpfiles-setup.service
+Before=workspace-shell-mcp.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/python3 /opt/workspace-shell/runtime/plugins/workspace-shell/root/job_launcher.py --config /etc/workspace-shell/job-launcher.json
+Restart=on-failure
+RestartSec=2s
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER CAP_KILL CAP_SETGID CAP_SETUID
+AmbientCapabilities=
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateNetwork=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=no
+ProtectProc=invisible
+ProcSubset=pid
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX
+ReadOnlyPaths=/etc/workspace-shell/job-launcher.json /etc/workspace-shell/profiles.v1.json /opt/workspace-shell /srv/workspace-shell
+ReadWritePaths=/run/workspace-shell-control /var/lib/workspace-shell/jobs /var/lib/workspace-shell/receipts
+InaccessiblePaths=/root /home /etc/workspace-shell/approval /etc/workspace-shell/tunnel /var/lib/workspace-shell/replay /var/lib/workspace-shell/helper-cache
+TasksMax=64
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target
