@@ -174,6 +174,25 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
         ):
             self.compile(inputs)
 
+    def test_actions_runner_pin_is_root_authority(self):
+        baseline = self.compile()
+        inputs = copy.deepcopy(self.inputs)
+        runner = inputs["upstream_pins"]["actions_runner"]
+        runner["linux_x64_sha256"] = "f" * 64
+        changed = self.compile(inputs)
+        self.assertNotEqual(
+            baseline["root_projection"]["root_policy_sha256"],
+            changed["root_projection"]["root_policy_sha256"],
+        )
+        self.assertEqual(
+            baseline["controller_policy_digests"],
+            changed["controller_policy_digests"],
+        )
+        self.assertEqual(
+            baseline["executor_projection"]["executor_policy_sha256"],
+            changed["executor_projection"]["executor_policy_sha256"],
+        )
+
     def test_ingress_command_change_does_not_change_root_or_controller_policy(self):
         baseline = self.compile()
         inputs = copy.deepcopy(self.inputs)
