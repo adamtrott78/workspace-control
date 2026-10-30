@@ -68,6 +68,7 @@ TRUSTED_CACHE_MANAGER_PATH = pathlib.Path(
     "/opt/workspace-ci/cache-manager/lambda_ci_trusted_cache.py"
 )
 TRUSTED_CACHE_MANAGER_BLOB = "a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807"
+CPU_EXECUTION_PROFILES = frozenset({"control-small", "cpu-test"})
 
 def run(argv: list[str], *, check: bool = True):
     proc = subprocess.run(
@@ -1604,8 +1605,11 @@ def admission_receipt_identity(spec: dict[str, Any]) -> dict[str, Any]:
 def launch_cpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     """Launch one semantically authorized CPU runner and return a cleanup receipt."""
     semantics = execution_semantics(spec)
-    if spec["profile"] != "cpu-test" or semantics["execution_profile"] != "cpu-test":
-        raise RuntimeLaunchError("CPU runtime requires cpu-test semantic contract")
+    profile = spec["profile"]
+    if profile not in CPU_EXECUTION_PROFILES:
+        raise RuntimeLaunchError("CPU runtime requires an accepted CPU execution profile")
+    if semantics["execution_profile"] != profile:
+        raise RuntimeLaunchError("CPU runtime profile differs from semantic contract")
     if semantics["gpu_count"] != 0 or spec["resources"]["gpu_indices"]:
         raise RuntimeLaunchError("CPU semantic contract unexpectedly contains GPU authority")
     if spec["allow_production_services"]:
@@ -2221,7 +2225,7 @@ def launch_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     semantics = execution_semantics(spec)
     if semantics["execution_profile"] != profile:
         raise RuntimeLaunchError("launch profile differs from semantic contract")
-    if profile == "cpu-test":
+    if profile in CPU_EXECUTION_PROFILES:
         return launch_cpu_runner(request, spec)
     if profile == "gpu-small":
         return launch_gpu_runner(request, spec)
