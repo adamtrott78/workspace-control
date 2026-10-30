@@ -115,6 +115,14 @@ class V3ReconcilerTests(unittest.TestCase):
                 tmpfiles,
             )
 
+    def test_payload_socket_root_is_staged_outside_control_plane_runtime(self):
+        tmpfiles = self.staged("/etc/tmpfiles.d/workspace-ci-v3.conf").read_text()
+        self.assertIn(
+            "d /run/workspace-ci-v3-payload 0711 root root -",
+            tmpfiles,
+        )
+        self.assertNotIn("/run/workspace-ci/v3/payload", tmpfiles)
+
     def test_install_overlay_changes_only_install_generation(self):
         before = json.loads(
             (ROOT / "architecture/lambda-ci-deployment-overlay.v1.json").read_text()
