@@ -125,6 +125,14 @@ class V3PayloadProtocolTests(unittest.TestCase):
             )
         )
 
+    def test_broker_main_exposes_exchange_only_not_job_or_staging_root(self):
+        source = (
+            ROOT / "scripts" / "lambda_ci_v3_payload_broker.py"
+        ).read_text()
+        self.assertIn("--exchange-root", source)
+        self.assertNotIn("--job-root", source)
+        self.assertNotIn("--staging-root", source)
+
     def test_client_source_never_serializes_runner_environment(self):
         source = (ROOT / "scripts" / "lambda_ci_v3_payload_exec.py").read_text()
         self.assertNotIn("os.environ.items", source)
