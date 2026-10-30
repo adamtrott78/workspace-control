@@ -34,7 +34,7 @@
     "reconcile_socket": "/run/workspace-ci/v3/reconciler.sock",
     "transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}.service",
     "payload_helper_root": "/opt/workspace-ci/v3/payload",
-    "payload_socket_root": "/run/workspace-ci/v3/payload",
+    "payload_socket_root": "/run/workspace-ci-v3-payload",
     "payload_transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}-payload.service"
   },
   "socket_authorization": {
@@ -204,10 +204,31 @@
   },
   "live_authority": "NONE",
   "next_repository_work": [
-    "obtain a Research Engine PR #283 GitHub-hosted CI attempt that allocates a runner and executes repository steps; current attempts fail before allocation",
+    "hosted producer CI is accepted at Research Engine PR #283 head 6165556086b73d2076f205f11ec7b988150f23dd via CI #642 / run 41007835081; do not reopen that gate unless the proposal head or reviewed workflow blobs change",
     "keep offline producer workflow proposal blobs isolated from current default-branch trusted evidence until a separately authorized cutover",
     "maintain exact repository-only v3 runtime/controller/reconciler/canary/cutover proofs while live_authority remains NONE",
     "after separate live authority, begin only with inactive v3 substrate/root-reconciler preparation and the first migration-order canary",
     "do not advance Research GPU-derived classes until separate containment/recovery authority is explicitly bound"
-  ]
+  ],
+  "repository_readiness": {
+    "workspace_control_repository_boundary": {
+      "exact_head": "c3e4e5e12811ff51fd6062cca261b099e7afaa9d",
+      "validation_run_number": 1333,
+      "validation_run_id": 41008371197,
+      "conclusion": "success"
+    },
+    "research_engine_offline_producer": {
+      "pull_request": 283,
+      "exact_head": "6165556086b73d2076f205f11ec7b988150f23dd",
+      "base_main": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+      "hosted_ci_run_number": 642,
+      "hosted_ci_run_id": 41007835081,
+      "hosted_ci_job_id": 123906654539,
+      "conclusion": "success",
+      "repository_steps_executed": true,
+      "exact_head_acceptance_comment": 6515645161,
+      "default_branch_cutover_authorized": false
+    },
+    "live_activation_authorized": false
+  }
 }
