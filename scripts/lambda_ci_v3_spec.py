@@ -137,6 +137,29 @@ def build_launch_spec(
     _require(isinstance(bindings, dict), "runner-class bindings missing")
     model_binding = copy.deepcopy(bindings.get("model"))
     runtime_binding = copy.deepcopy(bindings.get("runtime"))
+    payload_network_class = contract.get("payload_network_class")
+    offline_payload_broker = None
+    if payload_network_class == "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE":
+        _require(
+            isinstance(model_binding, dict) and isinstance(runtime_binding, dict),
+            f"{runner_class_id}: offline payload requires exact model/runtime bindings",
+        )
+        _require(
+            int(contract.get("gpu_count", -1)) in {1, 2},
+            f"{runner_class_id}: offline payload requires one or two GPUs",
+        )
+        offline_payload_broker = {
+            "network_class": payload_network_class,
+            "broker_path": "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_broker.py",
+            "client_path": "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_exec.py",
+            "socket_root": "/run/workspace-ci/v3/payload",
+            "runtime_python": runtime_binding["python_path"],
+        }
+    elif payload_network_class != "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD":
+        raise V3SpecError(
+            f"{runner_class_id}: unsupported payload network class "
+            f"{payload_network_class!r}"
+        )
 
     spec = {
         "schema_version": 3,
@@ -184,5 +207,6 @@ def build_launch_spec(
         "allow_production_services": False,
         "runtime_binding": runtime_binding,
         "model_binding": model_binding,
+        "offline_payload_broker": offline_payload_broker,
     }
     return RuntimeRequest(request_id=request_id, jit_config=jit_config), spec
