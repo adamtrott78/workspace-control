@@ -532,6 +532,29 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
                 runtime_id,
             )
 
+            payload_broker_identity = None
+            if (
+                contract.get("payload_network_class")
+                == "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE"
+            ):
+                broker_user = f"ci-payload-{project_id}"
+                _require(
+                    CONTROLLER_USER.fullmatch(broker_user) is not None,
+                    f"{class_id}: invalid payload broker unix user",
+                )
+                _require(
+                    broker_user != manifest["derived_identity"]["runner_user"],
+                    f"{class_id}: payload broker user must differ from runner user",
+                )
+                _require(
+                    broker_user != controller_user,
+                    f"{class_id}: payload broker user must differ from controller user",
+                )
+                payload_broker_identity = {
+                    "user": broker_user,
+                    "group": manifest["derived_identity"]["runner_group"],
+                }
+
             gpu_uuids = list(resource.get("gpu_uuids", []))
             if resource.get("gpu_uuid") is not None:
                 _require(not gpu_uuids, f"{class_id}: both gpu_uuid and gpu_uuids present")
@@ -554,6 +577,7 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
                     "user": manifest["derived_identity"]["runner_user"],
                     "group": manifest["derived_identity"]["runner_group"],
                 },
+                "payload_broker_identity": payload_broker_identity,
                 "project_roots": copy.deepcopy(manifest["roots"]),
                 "forbidden_paths": copy.deepcopy(manifest["forbidden_paths"]),
                 "execution_contract_id": contract_id,
