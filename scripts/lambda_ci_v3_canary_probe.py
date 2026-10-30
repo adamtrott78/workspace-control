@@ -251,7 +251,7 @@ def _verify_snapshot(
         socket_path = env.get("P5_PAYLOAD_EXEC_SOCKET", "")
         check(
             "payload_exec_socket",
-            socket_path.startswith("/run/workspace-ci/v3/payload/")
+            socket_path.startswith("/run/workspace-ci-v3-payload/")
             and socket_path.endswith("/exec.sock"),
         )
         check("online_runner_no_af_netlink", "AF_NETLINK" not in address_families)
