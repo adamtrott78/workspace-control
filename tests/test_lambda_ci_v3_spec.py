@@ -228,6 +228,23 @@ class V3LaunchSpecTests(unittest.TestCase):
                 self.assertTrue(
                     broker["client_path"].startswith("/opt/workspace-ci/v3/payload/")
                 )
+                self.assertEqual(
+                    broker["socket_root"],
+                    "/run/workspace-ci-v3-payload",
+                )
+                socket_root = pathlib.PurePosixPath(broker["socket_root"])
+                for forbidden_raw in spec["forbidden_paths"]:
+                    forbidden = pathlib.PurePosixPath(forbidden_raw)
+                    with self.subTest(class_id=class_id, forbidden=forbidden_raw):
+                        try:
+                            socket_root.relative_to(forbidden)
+                        except ValueError:
+                            pass
+                        else:
+                            self.fail(
+                                "payload socket root nested under forbidden path "
+                                f"{forbidden_raw}"
+                            )
             else:
                 self.assertIsNone(broker, class_id)
         self.assertEqual(observed, offline)
