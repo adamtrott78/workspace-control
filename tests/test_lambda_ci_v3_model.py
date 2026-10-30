@@ -610,6 +610,30 @@ class V3ControlPlaneModelTests(unittest.TestCase):
         redelivery_after_acquire = cycle.evaluate_available_jobs([job])
         self.assertEqual(redelivery_after_acquire["acquire_runner_request_ids"], [])
 
+    def test_canceled_assignment_releases_request_dedupe_for_requeue(self):
+        class_id = "workspace-control-control-small-v1"
+        policy = self.controller_policy(class_id)
+        workflow = policy["trusted_workflows"][0]
+        controller = model.RunnerClassControllerModel(policy)
+        cycle = model.ScaleSetCycleModel(controller, self.root())
+        job = self.trusted_job(class_id, workflow, request_id=603)
+
+        first = cycle.evaluate_available_jobs([job])
+        self.assertEqual(first["acquire_runner_request_ids"], [603])
+        cycle.mark_acquired([603])
+        self.assertIn(603, cycle.acquired_ids)
+
+        cycle.complete_scheduler_attempt(
+            runner_request_id=603,
+            result="canceled",
+        )
+        self.assertNotIn(603, cycle.acquired_ids)
+
+        # If GitHub reuses the request id, we are still safe; if it issues a
+        # new id, this behavior is equivalent.
+        requeued = cycle.evaluate_available_jobs([job])
+        self.assertEqual(requeued["acquire_runner_request_ids"], [603])
+
     def test_anomalous_job_redelivery_is_bounded_and_deduplicated_in_state(self):
         class_id = "workspace-control-control-small-v1"
         policy = self.controller_policy(class_id)
