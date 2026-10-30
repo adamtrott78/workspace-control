@@ -75,6 +75,34 @@ class V3ReconcilerTests(unittest.TestCase):
             self.assertIn(f"User={user}", dropin)
             self.assertIn("SupplementaryGroups=workspace-ci-v3-provisioner", dropin)
 
+    def test_offline_payload_broker_identity_is_installed_without_credential_groups(self):
+        compiled = self.result["compiled"]
+        classes = compiled["root_projection"]["runner_classes"]
+        identities = {
+            policy["payload_broker_identity"]["user"]:
+                policy["payload_broker_identity"]["group"]
+            for policy in classes.values()
+            if policy["payload_broker_identity"] is not None
+        }
+        self.assertEqual(
+            identities,
+            {"ci-payload-research-engine": "ci-research-engine"},
+        )
+        sysusers = self.staged("/etc/sysusers.d/workspace-ci-v3.conf").read_text()
+        self.assertIn("u ci-payload-research-engine -", sysusers)
+        self.assertIn(
+            "m ci-payload-research-engine ci-research-engine",
+            sysusers,
+        )
+        self.assertNotIn(
+            "m ci-payload-research-engine workspace-ci-v3-provisioner",
+            sysusers,
+        )
+        for group in self.result["migration"]["controller_identity"][
+            "project_credential_groups"
+        ].values():
+            self.assertNotIn(f"m ci-payload-research-engine {group}", sysusers)
+
     def test_project_credential_groups_are_exact_and_repository_scoped(self):
         migration = self.result["migration"]
         expected = migration["controller_identity"]["project_credential_groups"]
