@@ -86,12 +86,15 @@ class V3OfflinePayloadProducerBridgeTests(unittest.TestCase):
         self.assertIn("persist-credentials false", producer)
         self.assertIn("payload-exchange", producer)
         self.assertIn("execution cwd never requires the checkout/job tree", producer)
+        self.assertIn("/run/workspace-ci-v3-payload", runtime)
+        self.assertIn("forbidden /run/workspace-ci control-plane root", runtime)
+        self.assertIn("/run/workspace-ci-v3-payload", producer)
 
     def test_workspace_runtime_boundary_is_bound_to_green_validation(self):
         validation = self.bridge["workspace_control"]["runtime_boundary_validation"]
         self.assertRegex(validation["exact_head"], HEX40)
-        self.assertEqual(validation["run_number"], 1326)
-        self.assertEqual(validation["run_id"], 41005440005)
+        self.assertEqual(validation["run_number"], 1329)
+        self.assertEqual(validation["run_id"], 41006161421)
         self.assertEqual(validation["conclusion"], "success")
 
 
