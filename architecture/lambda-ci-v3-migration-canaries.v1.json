@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "spec_id": "lambda-ci-v3-migration-canaries-v1",
+  "status": "GENERATED_NOT_INSTALLED_NOT_AUTHORIZED_FOR_LIVE_EXECUTION",
+  "authority": "workspace-control",
+  "owner_actor_login": "adamtrott78",
+  "trigger": "workflow_dispatch",
+  "workflow_path_template": ".github/workflows/workspace-ci-v3-migration-canary-{runner_class_id}.yml",
+  "job_key": "v3-class-canary",
+  "probe_path": "/opt/workspace-ci/v3/canary/lambda_ci_v3_canary_probe.py",
+  "timeout_minutes": 5,
+  "ordinary_executor_action_catalog_excluded": true,
+  "rules": [
+    "canary workflow lives in owning repository but generated artifacts in workspace-control are inert staging material",
+    "workflow has no inputs and no candidate checkout",
+    "workflow invokes only the immutable root-installed v3 canary probe with a compile-time runner class constant",
+    "controller policy trusts only the exact canary workflow blob on the owning repository default branch",
+    "controller policy allows only workflow_dispatch by the exact owner actor",
+    "migration-only canary policy replaces ordinary production trusted workflows rather than adding authority",
+    "research GPU-derived classes remain blocked by inherited containment until separately authorized",
+    "offline model classes remain blocked until payload-network isolation is actually implemented and proven"
+  ],
+  "network_verification": {
+    "supported_payload_network_classes": [
+      "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD"
+    ],
+    "unresolved_payload_network_classes": [
+      "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE"
+    ],
+    "unresolved_reason": "current hardened runner cgroup restricts private/link-local networks but does not separate GitHub control-plane traffic from public payload egress"
+  }
+}
