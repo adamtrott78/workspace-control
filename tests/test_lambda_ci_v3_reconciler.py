@@ -115,6 +115,17 @@ class V3ReconcilerTests(unittest.TestCase):
                 tmpfiles,
             )
 
+    def test_private_migration_state_roots_are_staged_by_inactive_substrate(self):
+        tmpfiles = self.staged("/etc/tmpfiles.d/workspace-ci-v3.conf").read_text()
+        self.assertIn(
+            "d /var/lib/workspace-ci/v3/migration 0700 root root -",
+            tmpfiles,
+        )
+        self.assertIn(
+            "d /var/lib/workspace-ci/v3/migration-authority 0700 root root -",
+            tmpfiles,
+        )
+
     def test_payload_socket_root_is_staged_outside_control_plane_runtime(self):
         tmpfiles = self.staged("/etc/tmpfiles.d/workspace-ci-v3.conf").read_text()
         self.assertIn(
