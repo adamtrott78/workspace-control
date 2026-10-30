@@ -126,6 +126,16 @@ jobs:
           assert materialize in source
           assert require in source
           assert source.index(materialize) < source.index(require)
+
+          assert '/var/lib/workspace-ci/controller/github-token' not in source
+          assert 'gh auth token > "$TMP/operator-token"' in source
+          assert 'sudo -n rm -f "$V3_TOKEN" "$V3_ENV"' in source
+          assert 'timeout 420 gh run watch' in source
+
+          parse_receipt = 'TX_RECEIPT="$('
+          apply_failure = 'if [[ "$APPLY_RC" -ne 0 ]]; then'
+          assert source.index(parse_receipt, source.index('APPLY_RC=')) < source.index(apply_failure)
+          assert 'cancel_dispatched_canary' in source
           PY
 
       - name: Validate generated v3 systemd substrate in isolated root
