@@ -537,7 +537,10 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
                 contract.get("payload_network_class")
                 == "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE"
             ):
-                broker_user = f"ci-payload-{project_id}"
+                broker_user = (
+                    "ci-payload-"
+                    + hashlib.sha256(class_id.encode("utf-8")).hexdigest()[:16]
+                )
                 _require(
                     CONTROLLER_USER.fullmatch(broker_user) is not None,
                     f"{class_id}: invalid payload broker unix user",
