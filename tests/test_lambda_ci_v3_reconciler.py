@@ -84,24 +84,24 @@ class V3ReconcilerTests(unittest.TestCase):
             for policy in classes.values()
             if policy["payload_broker_identity"] is not None
         }
-        self.assertEqual(
-            identities,
-            {"ci-payload-research-engine": "ci-research-engine"},
-        )
+        self.assertEqual(len(identities), 2)
+        self.assertEqual(set(identities.values()), {"ci-research-engine"})
         sysusers = self.staged("/etc/sysusers.d/workspace-ci-v3.conf").read_text()
-        self.assertIn("u ci-payload-research-engine -", sysusers)
-        self.assertIn(
-            "m ci-payload-research-engine ci-research-engine",
-            sysusers,
-        )
-        self.assertNotIn(
-            "m ci-payload-research-engine workspace-ci-v3-provisioner",
-            sysusers,
-        )
-        for group in self.result["migration"]["controller_identity"][
-            "project_credential_groups"
-        ].values():
-            self.assertNotIn(f"m ci-payload-research-engine {group}", sysusers)
+        for broker_user in identities:
+            self.assertTrue(broker_user.startswith("ci-payload-"))
+            self.assertIn(f"u {broker_user} -", sysusers)
+            self.assertIn(
+                f"m {broker_user} ci-research-engine",
+                sysusers,
+            )
+            self.assertNotIn(
+                f"m {broker_user} workspace-ci-v3-provisioner",
+                sysusers,
+            )
+            for group in self.result["migration"]["controller_identity"][
+                "project_credential_groups"
+            ].values():
+                self.assertNotIn(f"m {broker_user} {group}", sysusers)
 
     def test_project_credential_groups_are_exact_and_repository_scoped(self):
         migration = self.result["migration"]
