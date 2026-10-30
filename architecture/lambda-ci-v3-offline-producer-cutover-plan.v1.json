@@ -8,7 +8,7 @@
   "scope": {
     "repository": "adamtrott78/research-engine",
     "pull_request": 283,
-    "reviewed_head": "0894e04c8166eefca4250a149b879075d57ae085",
+    "reviewed_head": "6165556086b73d2076f205f11ec7b988150f23dd",
     "target_default_branch": "main",
     "routes": [
       {
@@ -32,7 +32,7 @@
   "current_readiness": {
     "repository_only_runtime_boundary_green": true,
     "repository_only_producer_review_green": true,
-    "github_hosted_ci_executed_repository_steps": false,
+    "github_hosted_ci_executed_repository_steps": true,
     "offline_class_canaries_live_accepted": false,
     "research_gpu_containment_recovery_authorized": false,
     "default_branch_cutover_authorized": false,
