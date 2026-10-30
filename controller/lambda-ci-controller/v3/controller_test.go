@@ -577,3 +577,19 @@ func TestControllerPolicyDigestDriftIsFatalBeforeMutation(t *testing.T) {
 		t.Fatalf("policy drift mutated capacity: %#v", events)
 	}
 }
+
+func TestReadSecretFileAllowsOnlyReadOnlyCredentialGroup(t *testing.T) {
+	path := t.TempDir() + "/github-token"
+	if err := os.WriteFile(path, []byte("token\n"), 0o640); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := readSecretFile(path); err != nil {
+		t.Fatalf("0640 project credential must be readable: %v", err)
+	}
+	if err := os.Chmod(path, 0o660); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := readSecretFile(path); err == nil {
+		t.Fatal("group-writable project credential must be rejected")
+	}
+}

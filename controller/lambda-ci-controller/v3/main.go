@@ -95,8 +95,15 @@ func readSecretFile(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if info.Mode().Perm()&0o077 != 0 {
-		return "", fmt.Errorf("credential file %s must not be group/world accessible", path)
+	perm := info.Mode().Perm()
+	// V3 class users intentionally share only their repository-scoped
+	// credential group. Allow owner read/write plus optional group read, but
+	// reject owner execute, group write/execute, and every world permission.
+	if perm&0o137 != 0 || perm&0o440 == 0 {
+		return "", fmt.Errorf(
+			"credential file %s must be owner-readable with at most read-only group access",
+			path,
+		)
 	}
 	raw, err := os.ReadFile(path)
 	if err != nil {

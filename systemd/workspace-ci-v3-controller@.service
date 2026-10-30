@@ -1,0 +1,35 @@
+[Unit]
+Description=Workspace CI v3 homogeneous runner-class controller %i
+After=network-online.target workspace-ci-v3-provisioner.service
+Wants=network-online.target
+ConditionPathExists=/etc/workspace-ci/v3/controllers/%i.json
+ConditionPathExists=/opt/workspace-ci/v3/controller/lambda-ci-controller-v3
+
+[Service]
+Type=simple
+# Deliberately invalid defaults. Reconciliation installs an exact per-class
+# drop-in that replaces both User and Group; a missing mapping must fail closed.
+User=workspace-ci-v3-invalid
+Group=workspace-ci-v3-invalid
+UMask=0077
+Environment=WORKSPACE_CI_V3_CONTROLLER_POLICY=/etc/workspace-ci/v3/controllers/%i.json
+Environment=WORKSPACE_CI_V3_PROVISIONER_SOCKET=/run/workspace-ci/v3/provisioner.sock
+Environment=WORKSPACE_CI_V3_CONTROLLER_STATE_ROOT=/var/lib/workspace-ci/v3/controller/state
+ExecStartPre=/usr/bin/test -r /etc/workspace-ci/v3/controllers/%i.json
+ExecStart=/opt/workspace-ci/v3/controller/lambda-ci-controller-v3
+Restart=on-failure
+RestartSec=5s
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/lib/workspace-ci/v3/controller/state/%i
+
+[Install]
+WantedBy=multi-user.target

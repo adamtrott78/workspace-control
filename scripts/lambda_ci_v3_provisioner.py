@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import pathlib
@@ -35,8 +36,41 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable
 
-import lambda_ci_runtime as runtime
 import lambda_ci_v3_spec as v3spec
+
+
+def _load_isolated_v3_runtime():
+    """Load the shared hardened runtime logic with v3-owned immutable paths.
+
+    Loading by file location creates a distinct module object, so v2 tests and
+    live v2 imports keep their historical constants unchanged.
+    """
+
+    runtime_path = pathlib.Path(__file__).with_name("lambda_ci_runtime.py")
+    spec = importlib.util.spec_from_file_location(
+        "workspace_ci_v3_isolated_runtime",
+        runtime_path,
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load v3 runtime from {runtime_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    module.TRUSTED_CUDA_OOM_PROBE_PATH = pathlib.Path(
+        "/opt/workspace-ci/v3/provisioner/trusted-probes/lambda_ci_cuda_oom_probe.py"
+    )
+    module.TRUSTED_DUAL_TIMEOUT_PROBE_PATH = pathlib.Path(
+        "/opt/workspace-ci/v3/provisioner/trusted-probes/lambda_ci_dual_timeout_probe.py"
+    )
+    module.TRUSTED_DUAL_CUDA_OOM_PROBE_PATH = pathlib.Path(
+        "/opt/workspace-ci/v3/provisioner/trusted-probes/lambda_ci_dual_cuda_oom_probe.py"
+    )
+    module.TRUSTED_CACHE_MANAGER_PATH = pathlib.Path(
+        "/opt/workspace-ci/v3/cache-manager/lambda_ci_trusted_cache.py"
+    )
+    return module
+
+
+runtime = _load_isolated_v3_runtime()
 
 
 DEFAULT_SOCKET = pathlib.Path("/run/workspace-ci/v3/provisioner.sock")
