@@ -17,7 +17,8 @@
     "production cutover of the currently active fleet is one generation boundary after all active-class canaries pass",
     "research-engine GPU-derived classes remain installed-inactive and inherited-contained until separate recovery authority explicitly consumes legacy containment",
     "catalog installation, controller activation, route admission, and legacy retirement are separate transitions",
-    "offline model payloads execute only in a root-owned private-network broker while the Actions runner retains GitHub control-plane connectivity without GPU/model/runtime authority"
+    "offline model payloads execute only in a root-owned private-network broker while the Actions runner retains GitHub control-plane connectivity without GPU/model/runtime authority",
+    "live canary authorization receipts are short-lived one-shot capabilities; rollback never reopens consumed authority"
   ],
   "side_by_side_paths": {
     "root_service": "workspace-ci-v3-provisioner.service",
@@ -230,5 +231,21 @@
       "default_branch_cutover_authorized": false
     },
     "live_activation_authorized": false
+  },
+  "live_canary_authority_receipt": {
+    "schema_version": 1,
+    "authority": "workspace-control-operator",
+    "operation": "ACTIVATE_ONE_V3_CANARY",
+    "authorization_id": "canonical UUID; unique per authorization",
+    "receipt_file_policy": "root-owned mode 0600",
+    "max_lifetime_seconds": 1800,
+    "consumption_root": "/var/lib/workspace-ci/v3/migration-authority",
+    "consumption_semantics": [
+      "authorization is validated against exact source head, canary generation, target runner class, controller policy digest, and workflow blob before use",
+      "authorization must be currently valid and may live for at most 1800 seconds",
+      "authorization_id is atomically consumed with O_CREAT|O_EXCL into the root-private consumption root and fsynced before the first transaction mutation",
+      "a consumed authorization_id is permanently replay-rejected by the migration transaction",
+      "rollback never deletes or reopens a consumed authorization marker"
+    ]
   }
 }
