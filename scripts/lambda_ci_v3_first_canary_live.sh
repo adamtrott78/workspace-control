@@ -26,7 +26,7 @@ DISPATCHED_AT=""
 ROLLBACK_DONE=0
 
 cleanup_files() {
-  target_unit="workspace-ci-v3-controller@$TARGET_CLASS.service"
+  local target_unit="workspace-ci-v3-controller@$TARGET_CLASS.service"
   if ! systemctl is-active --quiet "$target_unit"; then
     sudo -n rm -f "$V3_TOKEN" "$V3_ENV" >/dev/null 2>&1 || true
   else
@@ -49,7 +49,15 @@ cancel_dispatched_canary() {
     [[ -n "$candidate" ]] || continue
     gh run cancel "$candidate" --repo "$REPOSITORY" >/dev/null 2>&1 || true
   done < <(
-    gh run list       --repo "$REPOSITORY"       --workflow "$WORKFLOW_PATH"       --event workflow_dispatch       --branch main       --limit 20       --json databaseId,createdAt,status       --jq ".[] | select(.createdAt >= \"$DISPATCHED_AT\" and (.status == \"queued\" or .status == \"in_progress\" or .status == \"waiting\" or .status == \"requested\" or .status == \"pending\")) | .databaseId"       2>/dev/null || true
+    gh run list \
+      --repo "$REPOSITORY" \
+      --workflow "$WORKFLOW_PATH" \
+      --event workflow_dispatch \
+      --branch main \
+      --limit 20 \
+      --json databaseId,createdAt,status \
+      --jq ".[] | select(.createdAt >= \"$DISPATCHED_AT\" and (.status == \"queued\" or .status == \"in_progress\" or .status == \"waiting\" or .status == \"requested\" or .status == \"pending\")) | .databaseId" \
+      2>/dev/null || true
   )
 }
 
@@ -178,16 +186,18 @@ test "$("$GO_BIN" env GOVERSION)" = "go1.26.3"
 GOTOOLCHAIN=local GOMODCACHE="$TMP/gomodcache" GOCACHE="$TMP/gocache" "$GO_BIN" -C "$ROOT/controller/lambda-ci-controller"   build -mod=readonly -trimpath   -o "$PREFLIGHT_BIN"   ./cmd/v3-canary-preflight
 
 # Stage the already-authenticated operator GitHub token only for this
-# bounded canary. It is never printed and is deleted by cleanup_files.
+# bounded canary. It is never printed and is removed after safe rollback.
 umask 077
 gh auth token > "$TMP/operator-token"
 test -s "$TMP/operator-token"
 
-sudo install -o root -g ci-gh-workspace-control -m 0640   "$TMP/operator-token" "$V3_TOKEN"
+sudo install -o root -g ci-gh-workspace-control -m 0640 \
+  "$TMP/operator-token" "$V3_TOKEN"
 rm -f "$TMP/operator-token"
 
 printf 'WORKSPACE_CI_PAT_FILE=%s\n' "$V3_TOKEN" > "$TMP/controller.env"
-sudo install -o root -g ci-gh-workspace-control -m 0640   "$TMP/controller.env" "$V3_ENV"
+sudo install -o root -g ci-gh-workspace-control -m 0640 \
+  "$TMP/controller.env" "$V3_ENV"
 
 sudo env V3_TOKEN="$V3_TOKEN" /usr/bin/python3 - <<'PY'
 import grp
@@ -354,7 +364,8 @@ if [[ "$APPLY_RC" -ne 0 ]]; then
 fi
 
 test -n "$TX_RECEIPT"
-grep -q '^V3_ONE_CLASS_CANARY_ACTIVE=PASS
+grep -q '^V3_ONE_CLASS_CANARY_ACTIVE=PASS$' "$APPLY_LOG"
+
 echo "TRANSACTION_RECEIPT=$TX_RECEIPT"
 echo "GENERATION_EXCLUSION=ACTIVE"
 
@@ -382,104 +393,6 @@ echo "CANARY_RUN_ID=$RUN_ID"
 
 CANARY_RC=0
 timeout 420 gh run watch "$RUN_ID" --repo "$REPOSITORY" --exit-status || CANARY_RC=$?
-
-# Restore exact v2 prestate after the canary is terminal.
-for _ in $(seq 1 60); do
-  if sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$TX_HELPER"     --repo-root "$SOURCE_TREE"     --rollback "$TX_RECEIPT"
-  then
-    ROLLBACK_DONE=1
-    TX_RECEIPT=""
-    break
-  fi
-  sleep 2
-done
-
-test "$ROLLBACK_DONE" -eq 1
-echo "GENERATION_EXCLUSION_ROLLBACK=PASS"
-
-if [[ "$CANARY_RC" -ne 0 ]]; then
-  echo "CANARY_RESULT=FAILED"
-  exit "$CANARY_RC"
-fi
-
-CONCLUSION="$(
-  gh run view "$RUN_ID"     --repo "$REPOSITORY"     --json conclusion     --jq '.conclusion'
-)"
-test "$CONCLUSION" = "success"
-
-sudo /usr/bin/python3 - <<'PY'
-import json
-import pathlib
-import subprocess
-
-root_policy = json.loads(
-    pathlib.Path("/etc/workspace-ci/v3/root-policy.json").read_text()
-)
-
-assert subprocess.run(
-    ["systemctl", "is-active", "--quiet", "workspace-ci-v3-reconciler.service"]
-).returncode == 0
-assert subprocess.run(
-    ["systemctl", "is-active", "--quiet", "workspace-ci-v3-provisioner.service"]
-).returncode == 0
-
-for class_id in root_policy["runner_classes"]:
-    assert subprocess.run(
-        [
-            "systemctl",
-            "is-active",
-            "--quiet",
-            f"workspace-ci-v3-controller@{class_id}.service",
-        ]
-    ).returncode != 0
-
-assert subprocess.run(
-    [
-        "systemctl",
-        "is-active",
-        "--quiet",
-        "workspace-ci-controller@research-engine-gpu.service",
-    ]
-).returncode != 0
-
-print("POST_CANARY_ROOT_SERVICES=ACTIVE")
-print("POST_CANARY_V3_CLASS_CONTROLLERS=INACTIVE")
-print("RESEARCH_GPU_CONTAINMENT=PRESERVED")
-PY
-
-echo "CANARY_RESULT=SUCCESS"
-echo "TERMINAL_INPUT_3=PASS"
-echo "INITIAL_V3_LIVE_PROOF=COMPLETE"
-echo "=== V3 FIRST CANARY: COMPLETE ==="
- "$APPLY_LOG"
-
-echo "TRANSACTION_RECEIPT=$TX_RECEIPT"
-echo "GENERATION_EXCLUSION=ACTIVE"
-
-# Dispatch exactly the owner-only workflow now trusted by the canary policy.
-BEFORE_RUN_ID="$(
-  gh run list     --repo "$REPOSITORY"     --workflow "$WORKFLOW_PATH"     --event workflow_dispatch     --branch main     --limit 1     --json databaseId     --jq '.[0].databaseId // 0'
-)"
-
-DISPATCHED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-gh workflow run "$WORKFLOW_PATH"   --repo "$REPOSITORY"   --ref main
-
-for _ in $(seq 1 30); do
-  RUN_ID="$(
-    gh run list       --repo "$REPOSITORY"       --workflow "$WORKFLOW_PATH"       --event workflow_dispatch       --branch main       --limit 10       --json databaseId,createdAt       --jq "map(select(.databaseId != $BEFORE_RUN_ID and .createdAt >= \"$DISPATCHED_AT\")) | .[0].databaseId // 0"
-  )"
-  if [[ "$RUN_ID" != "0" && -n "$RUN_ID" ]]; then
-    break
-  fi
-  RUN_ID=""
-  sleep 2
-done
-
-test -n "$RUN_ID"
-echo "CANARY_RUN_ID=$RUN_ID"
-
-CANARY_RC=0
-gh run watch "$RUN_ID" --repo "$REPOSITORY" --exit-status || CANARY_RC=$?
 
 # Restore exact v2 prestate after the canary is terminal.
 for _ in $(seq 1 60); do
