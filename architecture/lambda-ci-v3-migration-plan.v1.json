@@ -54,9 +54,9 @@
   "controller_identity": {
     "unique_unix_user_per_runner_class": true,
     "project_credential_groups": {
-      "workspace-control": "workspace-ci-github-workspace-control",
-      "padataset": "workspace-ci-github-padataset",
-      "research-engine": "workspace-ci-github-research-engine"
+      "workspace-control": "ci-gh-workspace-control",
+      "padataset": "ci-gh-padataset",
+      "research-engine": "ci-gh-research-engine"
     },
     "credential_policy": "class users may share only repository-scoped GitHub observation credential groups; root launch authority remains per-UID/class",
     "state_policy": "each class controller owns a distinct 0700 state directory; no class controller can read or mutate another class ledger"
