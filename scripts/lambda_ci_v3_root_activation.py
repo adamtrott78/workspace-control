@@ -52,6 +52,7 @@ PROVISIONER_SOCKET_GROUP = "workspace-ci-v3-provisioner"
 
 PROVISIONER_UNIT = "workspace-ci-v3-provisioner.service"
 RECONCILER_UNIT = "workspace-ci-v3-reconciler.service"
+RESEARCH_GPU_V2_UNIT = "workspace-ci-controller@research-engine-gpu.service"
 AUTHORITY_MAX_LIFETIME_SECONDS = 30 * 60
 UUID_RE = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
 AUTHORIZATION_ID_RE = re.compile(rf"^{UUID_RE}$")
@@ -64,6 +65,7 @@ class RootActivationError(RuntimeError):
 
 class Systemd(Protocol):
     def active(self, unit: str) -> bool: ...
+    def enabled(self, unit: str) -> bool: ...
     def start(self, unit: str) -> None: ...
     def stop(self, unit: str) -> None: ...
     def list_units(self) -> list[str]: ...
@@ -87,6 +89,9 @@ class RealSystemd:
 
     def active(self, unit: str) -> bool:
         return self._run(["systemctl", "is-active", "--quiet", unit], check=False).returncode == 0
+
+    def enabled(self, unit: str) -> bool:
+        return self._run(["systemctl", "is-enabled", "--quiet", unit], check=False).returncode == 0
 
     def start(self, unit: str) -> None:
         self._run(["systemctl", "start", unit])
@@ -321,6 +326,22 @@ def _class_units(root_policy: dict[str, Any]) -> list[str]:
     ]
 
 
+def _assert_research_gpu_contained(systemd: Systemd) -> None:
+    if systemd.active(RESEARCH_GPU_V2_UNIT):
+        raise RootActivationError(
+            "legacy Research GPU controller is active; inherited containment drifted"
+        )
+
+
+def _assert_v3_units_not_enabled(systemd: Systemd, root_policy: dict[str, Any]) -> None:
+    units = [RECONCILER_UNIT, PROVISIONER_UNIT, *_class_units(root_policy)]
+    enabled = [unit for unit in units if systemd.enabled(unit)]
+    if enabled:
+        raise RootActivationError(
+            f"v3 units unexpectedly enabled for boot persistence: {enabled}"
+        )
+
+
 def _assert_class_controllers_inactive(systemd: Systemd, root_policy: dict[str, Any]) -> None:
     active = [unit for unit in _class_units(root_policy) if systemd.active(unit)]
     if active:
@@ -453,6 +474,8 @@ def activate_root_services(
     )
     if systemd.active(PROVISIONER_UNIT) or systemd.active(RECONCILER_UNIT):
         raise RootActivationError("root v3 services must both be inactive before activation")
+    _assert_research_gpu_contained(systemd)
+    _assert_v3_units_not_enabled(systemd, root_policy)
     _assert_no_execution_state(
         systemd,
         root_policy,
@@ -484,6 +507,8 @@ def activate_root_services(
         "workflow_mutated": False,
         "legacy_v2_mutated": False,
         "containment_or_retry_authority_mutated": False,
+        "research_gpu_containment_preserved": True,
+        "v3_units_enabled": False,
     }
     _persist_receipt(receipt_path, receipt)
 
@@ -491,6 +516,8 @@ def activate_root_services(
         systemd.start(RECONCILER_UNIT)
         if not systemd.active(RECONCILER_UNIT):
             raise RootActivationError("v3 reconciler failed to become active")
+        _assert_research_gpu_contained(systemd)
+        _assert_v3_units_not_enabled(systemd, root_policy)
         _assert_no_execution_state(
             systemd,
             root_policy,
@@ -503,6 +530,8 @@ def activate_root_services(
         if not systemd.active(PROVISIONER_UNIT):
             raise RootActivationError("v3 provisioner failed to become active")
         socket_evidence = socket_probe()
+        _assert_research_gpu_contained(systemd)
+        _assert_v3_units_not_enabled(systemd, root_policy)
         _assert_no_execution_state(
             systemd,
             root_policy,
