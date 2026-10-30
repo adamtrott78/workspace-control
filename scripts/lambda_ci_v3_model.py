@@ -750,3 +750,229 @@ class ControllerSupervisorModel:
         if self.state != "SESSION_ACTIVE":
             raise ProtocolFatal("successful work requires SESSION_ACTIVE")
         self.retry_attempt = 0
+
+
+
+@dataclasses.dataclass
+class ControllerRunnerLedgerRecord:
+    request_id: str
+    runner_name: str
+    runner_class_id: str
+    state: str
+    reservation_expires_at: int | None = None
+    root_status: str | None = None
+    jit_runner_id: int | None = None
+    jit_sha256: str | None = None
+
+
+class GitHubJitRegistryModel:
+    """Pure model of ephemeral GitHub JIT runner registrations."""
+
+    def __init__(self) -> None:
+        self.next_runner_id = 1
+        self.registrations: dict[int, dict[str, Any]] = {}
+
+    def generate(self, runner_name: str) -> tuple[int, str]:
+        if not isinstance(runner_name, str) or not runner_name:
+            raise ProtocolFatal("JIT runner name required")
+        runner_id = self.next_runner_id
+        self.next_runner_id += 1
+        raw = f"jit:{runner_id}:{runner_name}"
+        self.registrations[runner_id] = {
+            "runner_name": runner_name,
+            "state": "REGISTERED",
+        }
+        return runner_id, raw
+
+    def remove(self, runner_id: int) -> bool:
+        record = self.registrations.get(runner_id)
+        if record is None:
+            return False
+        record["state"] = "REMOVED"
+        return True
+
+    def mark_consumed(self, runner_id: int) -> None:
+        record = self.registrations.get(runner_id)
+        if record is None:
+            raise ProtocolFatal("unknown JIT runner registration")
+        record["state"] = "CONSUMED"
+
+    def state(self, runner_id: int) -> str | None:
+        record = self.registrations.get(runner_id)
+        return None if record is None else str(record["state"])
+
+
+class RecoveringClassCapacityControllerModel:
+    """Controller ledger model for all crash boundaries around RESERVE/JIT/LAUNCH."""
+
+    def __init__(
+        self,
+        controller_policy: dict[str, Any],
+        root: RootCapacityModel,
+        jit_registry: GitHubJitRegistryModel,
+    ) -> None:
+        self.policy = copy.deepcopy(controller_policy)
+        self.runner_class_id = controller_policy["runner_class_id"]
+        self.root = root
+        self.jit_registry = jit_registry
+        self.peer_user = root.policy["runner_classes"][self.runner_class_id][
+            "controller_peer"
+        ]["unix_user"]
+        self.ledger: dict[str, ControllerRunnerLedgerRecord] = {}
+
+    def begin(self, *, request_id: str, runner_name: str) -> ControllerRunnerLedgerRecord:
+        if request_id in self.ledger:
+            raise ProtocolFatal("runner-instance request already exists in controller ledger")
+        record = ControllerRunnerLedgerRecord(
+            request_id=request_id,
+            runner_name=runner_name,
+            runner_class_id=self.runner_class_id,
+            state="RESERVING",
+        )
+        self.ledger[request_id] = record
+        return record
+
+    def reserve(self, *, request_id: str) -> str:
+        record = self.ledger.get(request_id)
+        if record is None:
+            raise ProtocolFatal("reserve requires controller ledger entry")
+        response = self.root.reserve(
+            peer_user=self.peer_user,
+            request_id=record.request_id,
+            runner_name=record.runner_name,
+        )
+        status = str(response["status"])
+        record.root_status = status
+        if status == "RESERVED":
+            record.state = "RESERVED"
+            record.reservation_expires_at = response["reservation_expires_at"]
+        elif status in {"BUSY", "CLASS_QUARANTINED"}:
+            record.state = "WAITING_CAPACITY"
+        elif status == "DUPLICATE":
+            receipt = str(response.get("receipt_status"))
+            record.root_status = receipt
+            if receipt == "RESERVED":
+                record.state = "RESERVED"
+                record.reservation_expires_at = response.get("reservation_expires_at")
+            elif receipt == "ACCEPTED":
+                record.state = "ACCEPTED"
+            elif receipt in {"COMPLETED", "FAILED", "CANCELED"}:
+                record.state = "TERMINAL"
+            else:
+                raise ProtocolFatal(f"unknown duplicate reserve receipt {receipt!r}")
+        else:
+            raise ProtocolFatal(f"unexpected RESERVE status {status!r}")
+        return status
+
+    def generate_jit(self, *, request_id: str) -> str:
+        record = self.ledger.get(request_id)
+        if record is None or record.state != "RESERVED":
+            raise ProtocolFatal("JIT generation requires RESERVED controller state")
+        root_status = self.root.status(
+            peer_user=self.peer_user,
+            request_id=request_id,
+        )["status"]
+        if root_status != "RESERVED":
+            raise ProtocolFatal("root reservation is not valid for JIT generation")
+
+        runner_id, raw = self.jit_registry.generate(record.runner_name)
+        record.jit_runner_id = runner_id
+        record.jit_sha256 = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+        record.state = "JIT_REGISTERED"
+        # Raw bytes are returned to the caller only and are never stored in the
+        # durable ledger model.
+        return raw
+
+    def launch(self, *, request_id: str, jit_config: str) -> str:
+        record = self.ledger.get(request_id)
+        if record is None or record.state != "JIT_REGISTERED":
+            raise ProtocolFatal("LAUNCH requires JIT_REGISTERED controller state")
+        if hashlib.sha256(jit_config.encode("utf-8")).hexdigest() != record.jit_sha256:
+            raise ProtocolFatal("memory-only JIT does not match durable digest")
+        response = self.root.launch(
+            peer_user=self.peer_user,
+            request_id=request_id,
+            runner_name=record.runner_name,
+            jit_config=jit_config,
+        )
+        status = str(response["status"])
+        record.root_status = status
+        if status == "ACCEPTED":
+            record.state = "ACCEPTED"
+            if record.jit_runner_id is not None:
+                self.jit_registry.mark_consumed(record.jit_runner_id)
+        elif status == "RESERVATION_EXPIRED":
+            self._remove_orphan_jit(record)
+            record.state = "NEEDS_NEW_REQUEST"
+        elif status == "DUPLICATE":
+            receipt = str(response.get("receipt_status"))
+            record.root_status = receipt
+            if receipt == "ACCEPTED":
+                record.state = "ACCEPTED"
+            elif receipt in {"COMPLETED", "FAILED", "CANCELED"}:
+                self._remove_orphan_jit(record)
+                record.state = "TERMINAL"
+            else:
+                raise ProtocolFatal(f"unknown duplicate launch receipt {receipt!r}")
+        else:
+            raise ProtocolFatal(f"unexpected LAUNCH status {status!r}")
+        return status
+
+    def _remove_orphan_jit(self, record: ControllerRunnerLedgerRecord) -> None:
+        if record.jit_runner_id is not None:
+            self.jit_registry.remove(record.jit_runner_id)
+        record.jit_runner_id = None
+        record.jit_sha256 = None
+
+    def recover(self, *, request_id: str) -> str:
+        record = self.ledger.get(request_id)
+        if record is None:
+            raise ProtocolFatal("recover requires controller ledger entry")
+        status = str(
+            self.root.status(
+                peer_user=self.peer_user,
+                request_id=request_id,
+            )["status"]
+        )
+        record.root_status = status
+
+        if status == "MISSING":
+            self._remove_orphan_jit(record)
+            record.state = "RESERVING"
+            record.reservation_expires_at = None
+            return "RETRY_RESERVE"
+
+        if status == "RESERVED":
+            if record.jit_runner_id is not None:
+                # Raw JIT bytes are intentionally unrecoverable after a
+                # controller crash. Remove the exact orphan registration and
+                # generate a new one under the still-valid reservation.
+                self._remove_orphan_jit(record)
+                record.state = "RESERVED"
+                return "REMOVE_ORPHAN_AND_REGENERATE_JIT"
+            record.state = "RESERVED"
+            return "GENERATE_JIT"
+
+        if status == "ACCEPTED":
+            record.state = "ACCEPTED"
+            # Do not remove a registration here: the launched runner may still
+            # be consuming it after a response-loss crash.
+            return "AWAIT_ROOT_OR_GITHUB_TERMINAL"
+
+        if status in {"COMPLETED", "FAILED"}:
+            self._remove_orphan_jit(record)
+            record.state = "TERMINAL"
+            return "TERMINAL"
+
+        if status == "CANCELED":
+            self._remove_orphan_jit(record)
+            record.state = "NEEDS_NEW_REQUEST"
+            return "NEW_REQUEST_REQUIRED"
+
+        raise ProtocolFatal(f"unknown root STATUS result {status!r}")
+
+    def durable_record(self, request_id: str) -> dict[str, Any]:
+        record = self.ledger.get(request_id)
+        if record is None:
+            raise ProtocolFatal("unknown controller ledger request")
+        return dataclasses.asdict(record)
