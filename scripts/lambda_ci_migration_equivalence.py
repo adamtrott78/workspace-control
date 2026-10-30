@@ -50,8 +50,18 @@ def _current_route_envelope(
 
     model_id = route["bindings"]["model_id"]
     runtime_id = route["bindings"]["runtime_id"]
-    model_binding = compiler._resolve_model(workload, project_id, model_id)
-    runtime_binding = compiler._resolve_runtime(workload, project_id, runtime_id)
+    model_binding = compiler._resolve_model(
+        workload,
+        manifest,
+        project_id,
+        model_id,
+    )
+    runtime_binding = compiler._resolve_runtime(
+        workload,
+        manifest,
+        project_id,
+        runtime_id,
+    )
     compiler._check_binding_mode(
         project_id=project_id,
         class_id=f"legacy-route:{route_id}",
