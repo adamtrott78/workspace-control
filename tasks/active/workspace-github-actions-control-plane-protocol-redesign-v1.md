@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 2281b005dca2ceee955eabeb2d0e7c888ab23a0b
+- Remote checkpoint: c0fd0b10cac51e3ace3f988132cdeec661d3a905
 - Remote verified: true
 
 ### research-engine
@@ -43,16 +43,16 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Continue repository_only_protocol_verification on PR #572: implement pure controller/capacity state-machine prototypes and fault-injection tests for all scheduler/recovery boundaries. Do not mutate Lambda, restart controllers, apply PR #571, or retrigger host-attest.
+Implement and repository-verify the production v3 root capacity provider, v3 runner-class controller, v3 reconciliation/systemd install surface, and migration-canary/cutover tooling under disjoint paths on PR #572. Do not mutate Lambda, start v3 controllers, apply PR #571, retrigger host-attest, or alter research-engine GPU containment.
 
 ## Remaining work
 
-- Implement repository-only runner-class controller admission/supervisor state-machine model against the exact pinned actions/scaleset lifecycle semantics.
-- Implement repository-only two-phase root capacity/resource allocator model: RESERVE, LAUNCH, STATUS, CANCEL, crash reconciliation and class quarantine.
-- Implement fault-injection/model tests for redelivery, reassignment, TotalAssignedJobs/lifecycle skew, transient GitHub/root errors, reservation expiry, root crash boundaries and cleanup failure.
-- Verify all nine runner classes and 23 routes against the state-machine model and migration-equivalence matrix.
-- Prototype runner-class maintenance/reconciliation projections and prove no cpu/gpu lane grammar or live activation leakage remains.
-- Only after repository-only protocol verification passes, design a separately authorized one-class-at-a-time live migration.
+- Implement a production v3 root capacity provider from the verified two-phase RESERVE/LAUNCH/STATUS/CANCEL model under disjoint v3 paths.
+- Implement a production v3 Go runner-class controller using the pinned actions/scaleset client, TotalAssignedJobs scaling, structured trusted-workflow admission, in-process retry/backoff, and no JobDisplayName parser.
+- Implement v3 reconciliation/install projections, unique controller Unix identities, project credential groups, systemd templates, tmpfiles, and disjoint persistent/runtime state.
+- Generate migration-only class canary workflows and prove their payloads cannot execute candidate code or widen class authority.
+- Add repository-only integration tests proving v2/v3 install-path disjointness and the generation-exclusion cutover/rollback transaction.
+- Only after the production implementation candidate and migration transaction are exact-head green may any separate live activation authority be considered.
 
 ## Blockers / gates
 
