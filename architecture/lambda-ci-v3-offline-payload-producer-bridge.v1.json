@@ -63,15 +63,32 @@
     "ci_observation": {
       "run_id": 41002055202,
       "run_number": 635,
-      "attempts": 2,
+      "attempts": 3,
       "conclusion": "failure",
       "classification": "GITHUB_HOSTED_RUNNER_STARTUP_FAILURE_NO_REPOSITORY_STEPS",
       "evidence": {
+        "latest_job_id": 123891027413,
+        "runner_label": "ubuntu-latest",
         "runner_id": 0,
+        "runner_name": "",
         "steps": [],
-        "second_attempt_started_at": "2026-10-30T04:18:44Z",
-        "second_attempt_completed_at": "2026-10-30T04:18:46Z"
-      }
+        "latest_attempt_started_at": "2026-10-30T04:26:00Z",
+        "latest_attempt_completed_at": "2026-10-30T04:26:02Z"
+      },
+      "accepted_as_repository_test_evidence": false
+    },
+    "repository_only_self_review": {
+      "result": "PASS",
+      "pr_comment_id": 6514972948,
+      "exact_head": "5439c2a38648531b995ead92f54e5ab9de55f511",
+      "authority_granted": false,
+      "findings": [
+        "changed scope is exactly the two offline Qwen pilot workflows",
+        "single/dual workflows target their exact homogeneous v3 offline scale sets",
+        "online phase retains GitHub control-plane duties while model/runtime/GPU authority is absent",
+        "payload execution traverses only P5_PAYLOAD_EXEC_CLIENT and the root-provided Unix socket",
+        "candidate metadata is explicit argv rather than inherited GitHub environment"
+      ]
     }
   },
   "migration_gate": {
