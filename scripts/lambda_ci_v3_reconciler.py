@@ -159,6 +159,8 @@ def render_tmpfiles(
         "d /run/workspace-ci-v3-payload 0711 root root -\n",
         "d /var/lib/workspace-ci/v3 0711 root root -\n",
         "d /var/lib/workspace-ci/v3/provisioner 0700 root root -\n",
+        "d /var/lib/workspace-ci/v3/migration 0700 root root -\n",
+        "d /var/lib/workspace-ci/v3/migration-authority 0700 root root -\n",
         "d /var/lib/workspace-ci/v3/controller 0711 root root -\n",
         "d /var/lib/workspace-ci/v3/controller/state 0711 root root -\n",
         "d /var/lib/workspace-ci/v3/credentials 0711 root root -\n",
