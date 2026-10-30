@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "bridge_id": "lambda-ci-v3-offline-payload-producer-bridge-v1",
+  "status": "PROPOSED_CROSS_REPO_NOT_DEFAULT_BRANCH_NOT_LIVE",
+  "authority": "workspace-control",
+  "durable_task": "workspace-github-actions-control-plane-protocol-redesign-v1",
+  "live_authority": "NONE",
+  "workspace_control": {
+    "repository": "adamtrott78/workspace-control",
+    "branch": "github-actions-control-plane-protocol-redesign-v1",
+    "runtime_boundary_validation": {
+      "exact_head": "50b209efe8c6219b0bb428016fcf911470a953ba",
+      "workflow": "Workspace Control Validation",
+      "run_number": 1329,
+      "run_id": 41006161421,
+      "conclusion": "success"
+    },
+    "offline_runner_classes": [
+      "research-model-single-offline-v1",
+      "research-model-dual-offline-v1"
+    ],
+    "invariants": [
+      "online Actions runner retains GitHub control-plane networking but has no GPU DeviceAllow and empty CUDA_VISIBLE_DEVICES",
+      "exact promoted model/runtime objects are inaccessible to the online runner",
+      "root-owned one-shot payload broker alone receives exact GPU DeviceAllow plus exact promoted model/runtime read authority",
+      "each offline runner class receives its own distinct root-projected payload-broker Unix identity; broker identities receive no controller/provisioner credential-group membership",
+      "payload broker starts with env -i and does not inherit GitHub/JIT credentials",
+      "payload broker uses PrivateNetwork=yes, IPAddressDeny=any, and loopback-only IPAddressAllow",
+      "runner job/checkout tree is inaccessible to the payload broker",
+      "runner-private HOME/tmp/cache directories remain mode-private; broker HOME/tmp/HF state is broker-private",
+      "only the dedicated per-request payload-exchange directory is shared between online runner and broker through the project group",
+      "runner and broker partition the existing root-granted CPU/memory/task envelope rather than doubling it",
+      "broker authenticates the Unix client by SO_PEERCRED runner UID and exact runner systemd cgroup membership",
+      "root cleanup independently proves no runner-UID or class-scoped broker-UID process/GPU residue remains",
+      "payload data-plane socket root /run/workspace-ci-v3-payload is a sibling of the forbidden /run/workspace-ci control-plane root, because systemd InaccessiblePaths cannot be reopened by nested ReadWritePaths or bind mounts"
+    ]
+  },
+  "research_engine": {
+    "repository": "adamtrott78/research-engine",
+    "base_branch": "main",
+    "base_sha": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+    "proposal_branch": "github-actions-control-plane-protocol-redesign-v1",
+    "proposal_head": "6165556086b73d2076f205f11ec7b988150f23dd",
+    "pull_request": 283,
+    "pull_request_state": "DRAFT",
+    "default_branch_modified": false,
+    "workflows": {
+      "model-eval-single-gpu": {
+        "path": ".github/workflows/lambda-ci-qwen35-offline-pilot.yml",
+        "proposed_blob_sha": "4016ec3d23627dd7299ef9a7d36ff1dcbcdf47fe",
+        "target_scale_set": "lambda-research-engine-model-single-offline",
+        "current_default_branch_blob_sha": "31d77703d434b248aa50adf93568f9a13b89dc07"
+      },
+      "model-eval-dual-gpu": {
+        "path": ".github/workflows/lambda-ci-qwen35-dual-offline-pilot.yml",
+        "proposed_blob_sha": "90f8dc55c54f9f4759bc71dffa5d3fe622aa0b07",
+        "target_scale_set": "lambda-research-engine-model-dual-offline",
+        "current_default_branch_blob_sha": "a961158615269797837e036fb4cc4a3358f60189"
+      }
+    },
+    "producer_invariants": [
+      "GitHub PR gate, exact checkout, and artifact upload remain in the online Actions runner",
+      "checkout uses persist-credentials false and the workflow rejects any residual local http extraheader credential",
+      "online preflight proves exact model/runtime object paths are not visible",
+      "online preflight proves CUDA_VISIBLE_DEVICES is empty",
+      "online preflight binds the root-provided P5_PAYLOAD_EXEC_WORKDIR to the dedicated per-request payload-exchange under the project staging-cache root",
+      "payload script and receipt traverse only payload-exchange; broker execution cwd never requires the checkout/job tree or runner-private HOME/cache",
+      "model inference is invoked only through P5_PAYLOAD_EXEC_CLIENT over the root-provided Unix socket",
+      "candidate metadata is passed as explicit argv to the payload and is not inherited from GitHub environment",
+      "proposal is not trusted production workflow evidence until its exact blob is merged to the owning default branch and the controller projection is recompiled",
+      "payload broker socket preflight accepts only /run/workspace-ci-v3-payload/<request>/exec.sock and never reopens the forbidden /run/workspace-ci control-plane tree"
+    ],
+    "ci_observation": {
+      "run_id": 41007835081,
+      "run_number": 642,
+      "attempts": 1,
+      "conclusion": "success",
+      "classification": "GITHUB_HOSTED_CI_REPOSITORY_STEPS_SUCCESS",
+      "evidence": {
+        "latest_job_id": 123906654539,
+        "repository_steps_executed": true,
+        "hosted_runner_evidence": {
+          "runner_version": "2.338.0",
+          "runner_kind": "Hosted Compute Agent",
+          "worker_id": "85a7a4a0-5274-4d54-be73-6dcde25e6fe8",
+          "image": "ubuntu-24.04"
+        },
+        "successful_steps": [
+          "Set up job",
+          "Initialize containers",
+          "Run actions/checkout@v4",
+          "Run actions/setup-python@v5",
+          "Install",
+          "Compile",
+          "Test",
+          "Validate daemon Compose configuration",
+          "Build daemon image",
+          "Stop containers"
+        ]
+      },
+      "accepted_as_repository_test_evidence": true
+    },
+    "repository_only_self_review": {
+      "result": "PASS",
+      "pr_comment_id": 6515645161,
+      "exact_head": "6165556086b73d2076f205f11ec7b988150f23dd",
+      "authority_granted": false,
+      "findings": [
+        "changed scope remains exactly the two offline Qwen pilot workflows",
+        "proposal branch is rebased onto repaired main 1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+        "single/dual workflows target their exact homogeneous v3 offline scale sets",
+        "online phase retains GitHub control-plane duties while model/runtime/GPU authority is absent",
+        "checkout persistence is disabled and residual GitHub http extraheader credentials are rejected",
+        "payload execution traverses only P5_PAYLOAD_EXEC_CLIENT and the root-provided Unix socket",
+        "payload script/receipt and execution cwd remain restricted to the dedicated per-request payload-exchange",
+        "payload socket preflight uses sibling /run/workspace-ci-v3-payload and not the forbidden /run/workspace-ci control-plane subtree",
+        "candidate metadata is explicit argv rather than inherited GitHub environment",
+        "GitHub-hosted CI #642 executed repository steps and passed compile, full tests, Compose validation, daemon image build, and cleanup"
+      ]
+    }
+  },
+  "migration_gate": {
+    "offline_payload_network_repository_blocker_resolved": true,
+    "research_gpu_inherited_containment_resolved": false,
+    "production_workflow_default_branch_cutover_resolved": false,
+    "live_activation_authorized": false,
+    "research_engine_hosted_ci_repository_evidence_resolved": true
+  }
+}

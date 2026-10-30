@@ -1,0 +1,510 @@
+{
+  "schema_version": 1,
+  "model_id": "lambda-ci-control-plane-state-machine-v1",
+  "status": "MODEL_ONLY_NOT_LIVE",
+  "upstream": {
+    "scale_set_client_commit": "e6daac702355cdb5b880b4fbdcf6d85dcd9e48e5",
+    "scale_signal": "RunnerScaleSetStatistic.TotalAssignedJobs",
+    "acknowledgment_rule": "listener deletes a message only after Scale returns nil; non-nil Scale error stops listener and leaves message for redelivery"
+  },
+  "state_machines": {
+    "github_job": {
+      "owner": "GitHub Actions service",
+      "states": [
+        "AVAILABLE",
+        "ACQUIRED_ASSIGNED",
+        "STARTED",
+        "COMPLETED",
+        "CANCELED_REQUEUED"
+      ],
+      "transitions": [
+        {
+          "from": "AVAILABLE",
+          "event": "trusted controller AcquireJobs accepts RunnerRequestID",
+          "to": "ACQUIRED_ASSIGNED"
+        },
+        {
+          "from": "ACQUIRED_ASSIGNED",
+          "event": "runner begins job",
+          "to": "STARTED"
+        },
+        {
+          "from": "STARTED",
+          "event": "job terminal success/failure/cancel",
+          "to": "COMPLETED"
+        },
+        {
+          "from": "ACQUIRED_ASSIGNED",
+          "event": "GitHub assignment timeout/cancel and requeue",
+          "to": "CANCELED_REQUEUED"
+        },
+        {
+          "from": "CANCELED_REQUEUED",
+          "event": "GitHub makes job available again",
+          "to": "AVAILABLE"
+        }
+      ],
+      "invariant": "controller never derives queue depth from lifecycle-message counts"
+    },
+    "controller_job_admission": {
+      "owner": "unprivileged runner-class controller",
+      "states": [
+        "OBSERVED",
+        "ATTESTING",
+        "TRUSTED",
+        "ANOMALOUS_UNTRUSTED",
+        "DEFERRED",
+        "ACQUIRE_REQUESTED",
+        "ACQUIRED"
+      ],
+      "transitions": [
+        {
+          "from": "OBSERVED",
+          "event": "JobAvailable",
+          "to": "ATTESTING"
+        },
+        {
+          "from": "ATTESTING",
+          "event": "exact repository/workflow/ref/blob/event/actor/class-label policy passes",
+          "to": "TRUSTED"
+        },
+        {
+          "from": "ATTESTING",
+          "event": "stable structural policy mismatch",
+          "to": "ANOMALOUS_UNTRUSTED"
+        },
+        {
+          "from": "ATTESTING",
+          "event": "temporary GitHub observation unavailable",
+          "to": "DEFERRED"
+        },
+        {
+          "from": "TRUSTED",
+          "event": "AcquireJobs called with RunnerRequestID",
+          "to": "ACQUIRE_REQUESTED"
+        },
+        {
+          "from": "ACQUIRE_REQUESTED",
+          "event": "request id returned as acquired",
+          "to": "ACQUIRED"
+        },
+        {
+          "from": "ACQUIRE_REQUESTED",
+          "event": "not acquired / scheduler reassigned",
+          "to": "DEFERRED"
+        }
+      ],
+      "anomaly_semantics": [
+        "ANOMALOUS_UNTRUSTED is not a root provisioner policy outcome because root is never contacted",
+        "controller never calls AcquireJobs for the anomalous RunnerRequestID",
+        "message handling may be acknowledged so controller liveness is preserved",
+        "the job remains scheduler-owned/unacquired; workflow/repository policy or operator cancellation is responsible for eventual terminal handling",
+        "repeated anomalous observations emit bounded durable evidence/alerting but cannot consume systemd restart budget"
+      ],
+      "invariant": "normal trusted workflows are precompiled to the class, so runtime admission denial indicates policy/workflow drift or attack, not ordinary control flow"
+    },
+    "controller_supervisor": {
+      "owner": "runner-class controller process",
+      "states": [
+        "BOOTSTRAP",
+        "SESSION_ACTIVE",
+        "RETRY_BACKOFF",
+        "FATAL"
+      ],
+      "transitions": [
+        {
+          "from": "BOOTSTRAP",
+          "event": "static config/catalog valid and scale-set session established",
+          "to": "SESSION_ACTIVE"
+        },
+        {
+          "from": "SESSION_ACTIVE",
+          "event": "request-local deny or root class quarantine",
+          "to": "SESSION_ACTIVE"
+        },
+        {
+          "from": "SESSION_ACTIVE",
+          "event": "retryable GitHub/root transport/session failure",
+          "to": "RETRY_BACKOFF"
+        },
+        {
+          "from": "RETRY_BACKOFF",
+          "event": "bounded backoff elapsed",
+          "to": "BOOTSTRAP"
+        },
+        {
+          "from": "BOOTSTRAP",
+          "event": "invalid static identity/catalog/durable state",
+          "to": "FATAL"
+        },
+        {
+          "from": "SESSION_ACTIVE",
+          "event": "protocol corruption / impossible root response",
+          "to": "FATAL"
+        }
+      ],
+      "invariant": "systemd restart is not the request retry mechanism; request-local failures cannot consume StartLimitBurst"
+    },
+    "runner_instance": {
+      "owner": "controller + root capacity provider",
+      "states": [
+        "ABSENT",
+        "RESERVING",
+        "RESERVED",
+        "JIT_REGISTERED",
+        "ROOT_PREPARING",
+        "RUNNER_ONLINE",
+        "BUSY",
+        "TERMINAL",
+        "CLEANED",
+        "FAILED",
+        "CANCELED"
+      ],
+      "transitions": [
+        {
+          "from": "ABSENT",
+          "event": "controller persists runner-instance ledger and submits RESERVE",
+          "to": "RESERVING"
+        },
+        {
+          "from": "RESERVING",
+          "event": "root atomically grants host/project/class/resource claim",
+          "to": "RESERVED"
+        },
+        {
+          "from": "RESERVING",
+          "event": "BUSY or CLASS_QUARANTINED",
+          "to": "ABSENT"
+        },
+        {
+          "from": "RESERVED",
+          "event": "controller GenerateJitRunnerConfig succeeds",
+          "to": "JIT_REGISTERED"
+        },
+        {
+          "from": "RESERVED",
+          "event": "reservation expires or controller CANCEL succeeds",
+          "to": "CANCELED"
+        },
+        {
+          "from": "JIT_REGISTERED",
+          "event": "controller submits LAUNCH within reservation",
+          "to": "ROOT_PREPARING"
+        },
+        {
+          "from": "ROOT_PREPARING",
+          "event": "root creates deterministic systemd runner unit",
+          "to": "RUNNER_ONLINE"
+        },
+        {
+          "from": "RUNNER_ONLINE",
+          "event": "JobStarted identifies runner",
+          "to": "BUSY"
+        },
+        {
+          "from": "RUNNER_ONLINE",
+          "event": "runner exits without job or launch fails",
+          "to": "TERMINAL"
+        },
+        {
+          "from": "BUSY",
+          "event": "JobCompleted or runner exits",
+          "to": "TERMINAL"
+        },
+        {
+          "from": "TERMINAL",
+          "event": "root verifies containment cleanup and releases reservation/resources",
+          "to": "CLEANED"
+        },
+        {
+          "from": "JIT_REGISTERED",
+          "event": "reservation expires/launch rejected",
+          "to": "FAILED"
+        },
+        {
+          "from": "FAILED",
+          "event": "orphan JIT removed and root resources released",
+          "to": "CLEANED"
+        }
+      ],
+      "invariant": "GitHub JIT registration is created only after root capacity/resource reservation succeeds"
+    },
+    "root_capacity_request": {
+      "owner": "root provisioner",
+      "internal_states": [
+        "MISSING",
+        "RESERVED",
+        "PREPARING",
+        "LAUNCHED",
+        "COMPLETED",
+        "FAILED",
+        "EXPIRED",
+        "CANCELED"
+      ],
+      "external_statuses": [
+        "MISSING",
+        "RESERVED",
+        "ACCEPTED",
+        "COMPLETED",
+        "FAILED",
+        "CANCELED"
+      ],
+      "side_state": [
+        "RUNNER_CLASS_QUARANTINED"
+      ],
+      "transitions": [
+        {
+          "from": "MISSING",
+          "event": "authorized peer RESERVE with new request_id/runner_name",
+          "to": "RESERVED",
+          "requirements": [
+            "derive runner class from SO_PEERCRED",
+            "atomically verify host/project/class concurrency and exclusive resources",
+            "durably reserve resource vector with bounded expiry",
+            "persist catalog SHA-256 and runner-class identity",
+            "no JIT material exists yet"
+          ]
+        },
+        {
+          "from": "RESERVED",
+          "event": "same authorized peer LAUNCH with matching request_id/runner_name and unexpired reservation",
+          "to": "PREPARING",
+          "requirements": [
+            "persist JIT SHA-256",
+            "stage raw JIT only in 0600 root-owned runtime tmpfs",
+            "do not return ACCEPTED yet"
+          ]
+        },
+        {
+          "from": "PREPARING",
+          "event": "deterministic systemd runner unit successfully created",
+          "to": "LAUNCHED",
+          "requirements": [
+            "persist deterministic unit identity",
+            "unlink raw JIT tmpfs after systemd inherits environment",
+            "only now expose external ACCEPTED"
+          ]
+        },
+        {
+          "from": "RESERVED",
+          "event": "typed CANCEL before LAUNCH",
+          "to": "CANCELED"
+        },
+        {
+          "from": "LAUNCHED",
+          "event": "runner terminal and cleanup passes",
+          "to": "COMPLETED"
+        },
+        {
+          "from": "LAUNCHED",
+          "event": "runner/launch terminal failure and cleanup passes",
+          "to": "FAILED"
+        },
+        {
+          "from": "PREPARING",
+          "event": "systemd launch fails",
+          "to": "FAILED"
+        },
+        {
+          "from": "RESERVED",
+          "event": "reservation TTL elapses before LAUNCH",
+          "to": "EXPIRED",
+          "requirements": [
+            "release reserved host/project/class/scarce resources",
+            "retain tombstone so a late LAUNCH receives RESERVATION_EXPIRED rather than ambiguous DUPLICATE"
+          ]
+        }
+      ],
+      "startup_reconciliation": [
+        "expire stale RESERVED records to internal EXPIRED tombstones and release their resource vectors",
+        "for PREPARING record inspect deterministic systemd unit identity",
+        "if matching unit exists, promote to LAUNCHED/external ACCEPTED and remove stale JIT tmpfs",
+        "if unit absent, mark FAILED, remove JIT tmpfs, release resources after cleanup proof",
+        "for LAUNCHED record reconcile unit/terminal/cleanup state before serving STATUS",
+        "never expose ACCEPTED when resource reservation exists but systemd runner unit does not"
+      ],
+      "invariant": "root resources are reserved before GitHub JIT generation, and external ACCEPTED means systemd owns the runner process"
+    }
+  },
+  "error_algebra": {
+    "REQUEST_LOCAL": {
+      "examples": [
+        "ANOMALOUS_UNTRUSTED_JOB",
+        "DUPLICATE_TERMINAL_LOCAL_STATE"
+      ],
+      "listener_action": "do not acquire anomalous request; persist bounded anomaly evidence; keep listener process alive",
+      "process_action": "stay running",
+      "note": "root capacity provider is not involved in workflow trust denial"
+    },
+    "DEFER_RETRYABLE": {
+      "examples": [
+        "GITHUB_REST_TRANSIENT",
+        "SCALESET_API_TRANSIENT",
+        "ROOT_SOCKET_TRANSIENT",
+        "JIT_API_TRANSIENT"
+      ],
+      "listener_action": "preserve/redeliver work according to explicit retry strategy",
+      "process_action": "supervisor reconnect/backoff without consuming systemd crash-loop budget"
+    },
+    "CAPACITY_LOCAL": {
+      "examples": [
+        "ROOT_BUSY",
+        "RUNNER_START_TRANSIENT",
+        "ASSIGNMENT_REQUEUED"
+      ],
+      "listener_action": "converge from current TotalAssignedJobs",
+      "process_action": "stay running"
+    },
+    "FATAL_CONFIGURATION_OR_CORRUPTION": {
+      "examples": [
+        "UNKNOWN_CONTROLLER_PEER",
+        "RUNNER_CLASS_CATALOG_INVALID",
+        "RUNNER_PREFIX_GENERATOR_VIOLATION",
+        "DURABLE_LEDGER_CORRUPT",
+        "ROOT_RESPONSE_SCHEMA_CORRUPT"
+      ],
+      "listener_action": "do not pretend request was handled",
+      "process_action": "stop/fail for operator attention"
+    }
+  },
+  "recovery_algorithm": [
+    "load class runner-instance ledger and verify catalog identity",
+    "query root STATUS for every nonterminal request_id",
+    "reconcile RESERVED requests before generating JIT; if the durable ledger says JIT_REGISTERED but no raw JIT exists after restart, remove the exact orphan registration and generate a fresh JIT under the same valid reservation",
+    "remove orphan JIT registrations for FAILED/CANCELED/expired requests",
+    "treat ACCEPTED root requests as live capacity even if JobStarted has not yet been observed",
+    "establish/re-establish Scale Set Client session",
+    "read current TotalAssignedJobs",
+    "desired capacity = min(class max_runners, TotalAssignedJobs)",
+    "live-or-reserved capacity = RESERVED + ACCEPTED nonterminal root requests for this class",
+    "submit new RESERVE requests only for positive capacity deficit",
+    "generate JIT only after each reservation is granted",
+    "never reconstruct workload/candidate authority from lifecycle strings"
+  ],
+  "maintenance_state_machine": {
+    "ingress": "owner-authored maintenance command parsed once",
+    "target_identity": "runner_class_id",
+    "operations": [
+      "DIAGNOSE_RUNNER_CLASS",
+      "HOST_ATTEST_RUNNER_CLASS",
+      "RESTART_RUNNER_CLASS_CONTROLLER",
+      "RESET_STALE_RUNNER_CLASS"
+    ],
+    "invariant": "maintenance never enters scheduler execution protocol"
+  },
+  "reconciliation_state_machine": {
+    "ingress": "successful exact trusted reconciliation workflow on workspace-control main",
+    "effect": "atomically install/replace root runner-class catalog and class controller policies/identities",
+    "invariant": "policy deployment is separate from candidate scheduling and execution"
+  },
+  "runner_instance_ledger": {
+    "schema_version": 1,
+    "identity": "one durable local record per root runner-instance request_id",
+    "persistent_fields": [
+      "request_id",
+      "runner_name",
+      "runner_class_id",
+      "catalog_sha256",
+      "scale_set_id",
+      "scale_set_name",
+      "state",
+      "reservation_expires_at_if_reserved",
+      "jit_runner_id_if_known",
+      "jit_config_sha256_if_generated",
+      "root_status_if_known",
+      "created_at",
+      "updated_at"
+    ],
+    "forbidden_persistent_fields": [
+      "raw_jit_config on persistent filesystem",
+      "GitHub access token",
+      "GitHub App private key",
+      "human issue-comment body",
+      "candidate SHA",
+      "experiment selector"
+    ],
+    "write_order": [
+      "choose request_id and runner_name",
+      "persist RESERVING ledger entry before root RESERVE",
+      "submit RESERVE",
+      "on RESERVED persist expiry/root status",
+      "only then generate GitHub JIT registration",
+      "persist JIT_REGISTERED with exact GitHub runner registration id/name and JIT SHA-256 only; raw JIT bytes remain memory-only",
+      "submit LAUNCH using memory-only raw JIT bytes",
+      "persist ACCEPTED only after root reports systemd launch success",
+      "after controller restart, a JIT_REGISTERED + root RESERVED record requires exact orphan registration removal and fresh JIT generation because raw JIT is unrecoverable by design",
+      "enrich from JobStarted/JobCompleted when available",
+      "persist terminal cleanup reconciliation"
+    ],
+    "jit_secret_handling": {
+      "persistent_disk": "FORBIDDEN",
+      "root_runtime_tmpfs": "ALLOWED_ONLY_DURING_PREPARING",
+      "mode": "0600 root:root",
+      "unlink_boundary": "immediately after deterministic systemd runner unit successfully inherits JIT environment",
+      "reboot_semantics": "missing tmpfs JIT plus absent deterministic unit resolves PREPARING to FAILED; controller removes orphan GitHub registration and creates a fresh runner-instance request"
+    }
+  },
+  "crash_recovery_matrix": [
+    {
+      "crash_boundary": "after local RESERVING ledger before root RESERVE",
+      "recovery": "root STATUS MISSING; retry RESERVE idempotently"
+    },
+    {
+      "crash_boundary": "after root RESERVED before controller receives response",
+      "recovery": "STATUS returns RESERVED with expiry; do not create a second reservation"
+    },
+    {
+      "crash_boundary": "after root RESERVED before JIT generation",
+      "recovery": "resume JIT generation only while reservation valid; on TTL expiry root records EXPIRED, releases capacity, and a late LAUNCH receives RESERVATION_EXPIRED"
+    },
+    {
+      "crash_boundary": "after JIT generation before LAUNCH",
+      "recovery": "raw JIT bytes are intentionally lost across controller restart; STATUS RESERVED proves capacity still held, controller removes the exact orphan JIT registration using persisted runner registration id/name, generates a fresh JIT registration under the same unexpired reservation, then LAUNCHes once"
+    },
+    {
+      "crash_boundary": "root PREPARING before systemd unit creation",
+      "recovery": "root startup sees no deterministic unit, marks FAILED, removes JIT staging, releases resources after cleanup; controller removes orphan JIT"
+    },
+    {
+      "crash_boundary": "systemd unit created before LAUNCH response",
+      "recovery": "root startup/status sees exact unit, promotes to LAUNCHED/ACCEPTED; controller does not regenerate"
+    },
+    {
+      "crash_boundary": "after ACCEPTED while runner online/busy",
+      "recovery": "root STATUS plus runner-instance ledger governs; TotalAssignedJobs controls future desired capacity"
+    },
+    {
+      "crash_boundary": "runner terminal before JobCompleted observed",
+      "recovery": "root terminal cleanup closes runner-instance state; GitHub lifecycle is evidence only"
+    },
+    {
+      "crash_boundary": "cleanup failure",
+      "recovery": "root keeps resources conservatively reserved as needed and quarantines exact runner class until maintenance clears containment"
+    }
+  ],
+  "catalog_versioning": {
+    "class_semantics_immutable": true,
+    "rule": "a runner_class_id denotes one immutable root launch envelope",
+    "changes_requiring_new_runner_class_id": [
+      "execution contract",
+      "resource class or ceiling",
+      "GPU cardinality/device authority",
+      "payload network class",
+      "filesystem/cache/state-effect class",
+      "model binding",
+      "runtime binding",
+      "controller local peer identity model"
+    ],
+    "changes_not_requiring_new_class_id": [
+      "add/remove trusted workflow route whose launch envelope is identical",
+      "change ingress slash-command spelling or workflow-local parameter schema",
+      "candidate repository commit"
+    ],
+    "catalog_binding": [
+      "root and controller projections carry canonical catalog SHA-256",
+      "runner-instance ledger and root execution receipt bind catalog SHA-256",
+      "reconciliation may install a new catalog only atomically with its projections",
+      "nonterminal requests continue under the catalog identity under which they were accepted or are explicitly drained before cutover"
+    ]
+  }
+}

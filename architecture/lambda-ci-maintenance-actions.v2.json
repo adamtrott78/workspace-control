@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "actions_id": "lambda-ci-maintenance-actions-v2",
+  "status": "MODEL_ONLY_CANONICAL_INPUT",
+  "issue_owner_repository": "adamtrott78/workspace-control",
+  "actions": {
+    "maintenance.diagnose": {
+      "command": "/workspace-ci-maintain diagnose",
+      "parameter_schema_id": "maintenance-runner-class-v2",
+      "root_operation": "DIAGNOSE_RUNNER_CLASS",
+      "authority": "READ_ONLY"
+    },
+    "maintenance.host_attest": {
+      "command": "/workspace-ci-maintain host-attest",
+      "parameter_schema_id": "maintenance-runner-class-v2",
+      "root_operation": "HOST_ATTEST_RUNNER_CLASS",
+      "authority": "READ_ONLY"
+    },
+    "maintenance.restart_controller": {
+      "command": "/workspace-ci-maintain restart",
+      "parameter_schema_id": "maintenance-runner-class-v2",
+      "root_operation": "RESTART_RUNNER_CLASS_CONTROLLER",
+      "authority": "CONTROLLER_LIFECYCLE_ONLY"
+    },
+    "maintenance.reset_stale": {
+      "command": "/workspace-ci-maintain reset-stale",
+      "parameter_schema_id": "maintenance-reset-stale-v2",
+      "root_operation": "RESET_STALE_RUNNER_CLASS",
+      "authority": "RECOVERY_RECEIPT_REQUIRED"
+    }
+  },
+  "invariants": [
+    "maintenance target identity is runner_class_id, never cpu/gpu lane",
+    "command is parsed exactly once by unprivileged maintenance controller",
+    "root receives typed operation and resolved class identity",
+    "maintenance actions never enter GitHub runner scale-set execution protocol"
+  ]
+}

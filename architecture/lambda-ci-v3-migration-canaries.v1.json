@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "spec_id": "lambda-ci-v3-migration-canaries-v1",
+  "status": "GENERATED_NOT_INSTALLED_NOT_AUTHORIZED_FOR_LIVE_EXECUTION",
+  "authority": "workspace-control",
+  "owner_actor_login": "adamtrott78",
+  "trigger": "workflow_dispatch",
+  "workflow_path_template": ".github/workflows/workspace-ci-v3-migration-canary-{runner_class_id}.yml",
+  "job_key": "v3-class-canary",
+  "probe_path": "/opt/workspace-ci/v3/canary/lambda_ci_v3_canary_probe.py",
+  "timeout_minutes": 5,
+  "ordinary_executor_action_catalog_excluded": true,
+  "rules": [
+    "canary workflow lives in owning repository but generated artifacts in workspace-control are inert staging material",
+    "workflow has no inputs and no candidate checkout",
+    "workflow invokes only the immutable root-installed v3 canary probe with a compile-time runner class constant",
+    "controller policy trusts only the exact canary workflow blob on the owning repository default branch",
+    "controller policy allows only workflow_dispatch by the exact owner actor",
+    "migration-only canary policy replaces ordinary production trusted workflows rather than adding authority",
+    "research GPU-derived classes remain blocked by inherited containment until separately authorized",
+    "offline model classes use a separate root-owned private-network payload broker; the migration canary proves online-runner/broker separation without consuming the broker or executing model inference"
+  ],
+  "network_verification": {
+    "supported_payload_network_classes": [
+      "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE"
+    ],
+    "unresolved_payload_network_classes": [],
+    "offline_payload_proof": [
+      "online Actions runner has no GPU device grant and empty CUDA_VISIBLE_DEVICES",
+      "online Actions runner cannot access exact promoted model/runtime objects",
+      "online Actions runner retains only GitHub control-plane-compatible networking",
+      "root-owned one-shot payload broker is active in a private network namespace with deny-all IP policy and loopback-only allow",
+      "payload broker alone has exact GPU devices plus exact promoted model/runtime read authority",
+      "runner and broker CPU/memory/task ceilings partition rather than duplicate the root-granted class envelope",
+      "migration canary inspects runner and broker cgroups/systemd properties without connecting to the broker socket or executing candidate/scientific payload"
+    ]
+  }
+}

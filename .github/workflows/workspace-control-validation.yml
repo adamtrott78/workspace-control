@@ -103,6 +103,79 @@ jobs:
         if: steps.plan.outputs.tier != 'FAST_STATIC'
         run: python3 -m unittest discover -s tests -v
 
+      - name: Validate first v3 live canary operator syntax
+        if: steps.plan.outputs.tier != 'FAST_STATIC'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/lambda_ci_v3_first_canary_live.sh
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path("scripts/lambda_ci_v3_first_canary_live.sh").read_text()
+          required = [
+              'SOURCE_HEAD="09c46818252991f6a55aaeedbcf046c554e2ffee"',
+              'TARGET_CLASS="workspace-control-control-small-v1"',
+              'TARGET_SCALE_SET="lambda-workspace-control-control-small"',
+              'EXPECTED_WORKFLOW_BLOB="c7471bdd5e35a7f8be27c3153f615a382845e195"',
+          ]
+          for value in required:
+              assert value in source, value
+
+          materialize = 'git -C "$ROOT" show "$SOURCE_HEAD:scripts/lambda_ci_v3_migration_transaction.py" > "$TX_HELPER"'
+          require = 'require_path "$TX_HELPER"'
+          assert materialize in source
+          assert require in source
+          assert source.index(materialize) < source.index(require)
+
+          assert '/var/lib/workspace-ci/controller/github-token' not in source
+          assert 'gh auth token > "$TMP/operator-token"' in source
+          assert 'sudo -n rm -f "$V3_TOKEN" "$V3_ENV"' in source
+          assert 'V3_CANARY_PREFLIGHT_BUILD=BEGIN' in source
+          assert 'STOP_V3_CANARY_PREFLIGHT_BUILD_FAILED' in source
+          assert 'V3_WORKSPACE_CONTROL_GH_TOKEN_EXPORT=BEGIN' in source
+          assert 'STOP_GH_AUTH_TOKEN_EXPORT_FAILED' in source
+          assert 'V3_WORKSPACE_CONTROL_CREDENTIAL_RESET=PASS' in source
+          assert 'PREFLIGHT_NO_CANARY_AUTHORITY_CONSUMPTION=PASS' in source
+          assert 'PREFLIGHT_NO_CANARY_TRANSACTION_RECEIPT=PASS' in source
+          assert 'PREFLIGHT_NO_CANARY_WORKFLOW_RUN=PASS' in source
+          assert 'require_not_enabled workspace-ci-v3-reconciler.service' in source
+          assert 'require_not_enabled workspace-ci-v3-provisioner.service' in source
+          assert 'timeout 420 gh run watch' in source
+
+          parse_receipt = 'TX_RECEIPT="$('
+          apply_failure = 'if [[ "$APPLY_RC" -ne 0 ]]; then'
+          assert source.index(parse_receipt, source.index('APPLY_RC=')) < source.index(apply_failure)
+          assert 'cancel_dispatched_canary' in source
+          PY
+
+      - name: Validate generated v3 systemd substrate in isolated root
+        if: steps.plan.outputs.tier != 'FAST_STATIC'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          trap 'sudo rm -rf "$tmp"' EXIT
+
+          mkdir -p "$tmp/stage" "$tmp/root"
+          cp /bin/true "$tmp/controller"
+
+          python3 scripts/lambda_ci_v3_reconciler.py             --stage-dir "$tmp/stage"             --controller-binary "$tmp/controller"
+
+          cp -a "$tmp/stage/." "$tmp/root/"
+          sudo chown -R root:root "$tmp/root"
+
+          sudo systemd-sysusers             --root="$tmp/root"             workspace-ci-v3.conf
+
+          sudo systemd-tmpfiles             --root="$tmp/root"             --create             workspace-ci-v3.conf
+
+          test -d "$tmp/root/var/lib/workspace-ci/v3/migration"
+          test -d "$tmp/root/var/lib/workspace-ci/v3/migration-authority"
+          test -d "$tmp/root/run/workspace-ci-v3-payload"
+
+          grep -q '^ci-gh-workspace-control:' "$tmp/root/etc/group"
+          grep -q '^ci-gh-padataset:' "$tmp/root/etc/group"
+          grep -q '^ci-gh-research-engine:' "$tmp/root/etc/group"
+
       - name: Set up Go 1.26.3 for Lambda controller
         if: steps.plan.outputs.tier != 'FAST_STATIC'
         uses: actions/setup-go@v6
@@ -115,8 +188,8 @@ jobs:
         working-directory: controller/lambda-ci-controller
         run: |
           set -euo pipefail
-          go test -mod=mod ./...
-          go build -mod=mod ./...
+          go test -mod=readonly ./...
+          go build -mod=readonly ./...
 
       - name: Run full integration contracts
         if: steps.plan.outputs.tier == 'FULL_INTEGRATION' || steps.plan.outputs.tier == 'CANONICAL_REGRESSION'

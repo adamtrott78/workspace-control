@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workspace-ci-executor-policy-projection.v1.schema.json",
+  "title": "Workspace CI Executor Policy Projection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "control_plane_generation_sha256",
+    "executor_policy_sha256",
+    "execution_actions",
+    "maintenance_actions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "control_plane_generation_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "executor_policy_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "execution_actions": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "maintenance_actions": {
+      "type": "object",
+      "minProperties": 1
+    }
+  }
+}

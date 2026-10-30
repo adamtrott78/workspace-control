@@ -1,0 +1,24 @@
+[Unit]
+Description=Workspace CI v3 installed-generation verifier
+After=local-fs.target
+ConditionPathExists=/etc/workspace-ci/v3/install-manifest.json
+ConditionPathExists=/opt/workspace-ci/v3/reconciler/lambda_ci_v3_reconciler.py
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/bin/python3 /opt/workspace-ci/v3/reconciler/lambda_ci_v3_reconciler.py --verify-installed --manifest /etc/workspace-ci/v3/install-manifest.json
+RemainAfterExit=yes
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target

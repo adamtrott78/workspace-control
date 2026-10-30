@@ -1,0 +1,27 @@
+[Unit]
+Description=Workspace CI v3 root capacity provisioner
+After=local-fs.target
+ConditionPathExists=/etc/workspace-ci/v3/root-policy.json
+ConditionPathExists=/opt/workspace-ci/v3/provisioner/lambda_ci_v3_provisioner.py
+
+[Service]
+Type=simple
+User=root
+Group=root
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/workspace-ci/v3/provisioner/lambda_ci_v3_provisioner.py --root-policy /etc/workspace-ci/v3/root-policy.json --state-dir /var/lib/workspace-ci/v3/provisioner --jit-root /run/workspace-ci/v3/provisioner/jit --socket /run/workspace-ci/v3/provisioner.sock --socket-group workspace-ci-v3-provisioner
+Restart=on-failure
+RestartSec=5s
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+ReadWritePaths=/var/lib/workspace-ci/v3/provisioner /run/workspace-ci/v3
+
+[Install]
+WantedBy=multi-user.target
