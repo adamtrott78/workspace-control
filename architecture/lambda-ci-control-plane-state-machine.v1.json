@@ -238,6 +238,7 @@
         "LAUNCHED",
         "COMPLETED",
         "FAILED",
+        "EXPIRED",
         "CANCELED"
       ],
       "external_statuses": [
@@ -286,7 +287,7 @@
         },
         {
           "from": "RESERVED",
-          "event": "CANCEL or reservation expiry before LAUNCH",
+          "event": "typed CANCEL before LAUNCH",
           "to": "CANCELED"
         },
         {
@@ -303,10 +304,19 @@
           "from": "PREPARING",
           "event": "systemd launch fails",
           "to": "FAILED"
+        },
+        {
+          "from": "RESERVED",
+          "event": "reservation TTL elapses before LAUNCH",
+          "to": "EXPIRED",
+          "requirements": [
+            "release reserved host/project/class/scarce resources",
+            "retain tombstone so a late LAUNCH receives RESERVATION_EXPIRED rather than ambiguous DUPLICATE"
+          ]
         }
       ],
       "startup_reconciliation": [
-        "expire stale RESERVED records and release their resource vectors",
+        "expire stale RESERVED records to internal EXPIRED tombstones and release their resource vectors",
         "for PREPARING record inspect deterministic systemd unit identity",
         "if matching unit exists, promote to LAUNCHED/external ACCEPTED and remove stale JIT tmpfs",
         "if unit absent, mark FAILED, remove JIT tmpfs, release resources after cleanup proof",
@@ -444,11 +454,11 @@
     },
     {
       "crash_boundary": "after root RESERVED before JIT generation",
-      "recovery": "resume JIT generation if reservation valid; otherwise CANCEL/expiry releases capacity and create fresh runner-instance request"
+      "recovery": "resume JIT generation only while reservation valid; on TTL expiry root records EXPIRED, releases capacity, and a late LAUNCH receives RESERVATION_EXPIRED"
     },
     {
       "crash_boundary": "after JIT generation before LAUNCH",
-      "recovery": "STATUS RESERVED; remove orphan JIT if reservation expired, otherwise LAUNCH once"
+      "recovery": "STATUS externally reports CANCELED for an expired reservation, while a late LAUNCH returns RESERVATION_EXPIRED so the controller removes the orphan JIT and creates a fresh runner-instance request"
     },
     {
       "crash_boundary": "root PREPARING before systemd unit creation",
