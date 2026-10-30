@@ -1393,18 +1393,13 @@ def build_gpu_systemd_command(
 
     model_binding = spec.get("model_binding")
     if model_binding is not None:
-        # vLLM/psutil require read access to non-process procfs files such as
-        # /proc/meminfo during engine initialization. Keep ProtectProc=invisible
-        # for process privacy, but expose the normal non-process procfs subset
-        # only for the exact promoted-model workload.
-        command[command.index("ProcSubset=pid")] = "ProcSubset=all"
-        # Gloo resolves GLOO_SOCKET_IFNAME via getifaddrs(3). On Linux,
-        # getifaddrs uses AF_NETLINK to enumerate interface addresses. Keep
-        # the base AF_UNIX/AF_INET/AF_INET6 restriction for ordinary GPU jobs,
-        # and add AF_NETLINK only for the exact promoted-model workload.
-        command[
-            command.index("RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6")
-        ] = "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK"
+        if offline_payload is None:
+            # Public model workloads execute in the runner cgroup and need
+            # non-process procfs plus AF_NETLINK for vLLM/Gloo bootstrap.
+            command[command.index("ProcSubset=pid")] = "ProcSubset=all"
+            command[
+                command.index("RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6")
+            ] = "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK"
 
         model_object_root = pathlib.Path(model_binding["object_path"])
         model_path = model_object_root / "payload"
@@ -1443,6 +1438,10 @@ def build_gpu_systemd_command(
     if offline_payload is not None:
         for device in ["/dev/nvidiactl", *selected_devices, *support_devices]:
             _remove_systemd_property(command, f"DeviceAllow={device} rw")
+        _remove_systemd_property(
+            command,
+            f"Environment=CUDA_VISIBLE_DEVICES={target_uuid_csv}",
+        )
         if runtime_path is None or runtime_python is None or model_binding is None:
             raise RuntimeLaunchError("offline payload binding state is incomplete")
         model_object_root = pathlib.Path(model_binding["object_path"])
@@ -1452,6 +1451,7 @@ def build_gpu_systemd_command(
         command[executable_index:executable_index] = [
             "-p", f"InaccessiblePaths={runtime_path}",
             "-p", f"InaccessiblePaths={model_object_root}",
+            "-p", "Environment=CUDA_VISIBLE_DEVICES=",
             "-p", f"Environment=P5_PAYLOAD_EXEC_SOCKET={payload_socket_path}",
             "-p", f"Environment=P5_PAYLOAD_EXEC_CLIENT={offline_payload['client_path']}",
             "-p", "Environment=P5_PAYLOAD_EXEC_REQUIRED=1",
