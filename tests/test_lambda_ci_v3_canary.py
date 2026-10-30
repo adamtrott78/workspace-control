@@ -189,7 +189,7 @@ class V3MigrationCanaryTests(unittest.TestCase):
                 + "/p5-11111111-2222-3333-4444-555555555555/payload-exchange"
             )
             env["P5_PAYLOAD_EXEC_SOCKET"] = (
-                "/run/workspace-ci/v3/payload/"
+                "/run/workspace-ci-v3-payload/"
                 "11111111-2222-3333-4444-555555555555/exec.sock"
             )
             device_allow = ""
