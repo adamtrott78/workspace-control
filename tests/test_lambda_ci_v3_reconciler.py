@@ -103,6 +103,45 @@ class V3ReconcilerTests(unittest.TestCase):
             ].values():
                 self.assertNotIn(f"m {broker_user} {group}", sysusers)
 
+    def test_all_generated_sysusers_names_are_portable(self):
+        migration = self.result["migration"]
+        groups = migration["controller_identity"]["project_credential_groups"]
+        self.assertEqual(
+            groups,
+            {
+                "workspace-control": "ci-gh-workspace-control",
+                "padataset": "ci-gh-padataset",
+                "research-engine": "ci-gh-research-engine",
+            },
+        )
+        for group in groups.values():
+            self.assertRegex(group, reconciler.SYSUSER_NAME_RE)
+            self.assertLessEqual(len(group), 31)
+
+        classes = self.result["compiled"]["root_projection"]["runner_classes"]
+        for class_id, policy in classes.items():
+            user = policy["controller_peer"]["unix_user"]
+            self.assertRegex(user, reconciler.SYSUSER_NAME_RE, class_id)
+            self.assertLessEqual(len(user), 31, class_id)
+            broker = policy.get("payload_broker_identity")
+            if broker is not None:
+                for field in ("user", "group"):
+                    value = broker[field]
+                    self.assertRegex(value, reconciler.SYSUSER_NAME_RE)
+                    self.assertLessEqual(len(value), 31)
+
+    def test_invalid_sysusers_identity_fails_before_stage_materialization(self):
+        compiled = self.result["compiled"]
+        migration = json.loads(json.dumps(self.result["migration"]))
+        migration["controller_identity"]["project_credential_groups"][
+            "workspace-control"
+        ] = "x" * 32
+        with self.assertRaisesRegex(
+            reconciler.ReconcileError,
+            "portable systemd sysuser/group name",
+        ):
+            reconciler.render_sysusers(compiled, migration)
+
     def test_project_credential_groups_are_exact_and_repository_scoped(self):
         migration = self.result["migration"]
         expected = migration["controller_identity"]["project_credential_groups"]
