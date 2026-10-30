@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 52b82bcb1c1fe8f9304be6c4e7cd7737b5c88227
+- Remote checkpoint: f7ac4e66313928c2f6d334a446bb30e4da160737
 - Remote verified: true
 
 ### research-engine
@@ -43,13 +43,11 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-LIVE MIGRATION IS PARTIALLY COMPLETE. Do NOT repeat inactive install or root-services activation. Lambda Input #1 PASS installed/attested v3 source generation 09c46818252991f6a55aaeedbcf046c554e2ffee with all nine class controllers inactive/disabled and Research GPU legacy controller inactive. Lambda Input #2 PASS consumed one-shot ACTIVATE_V3_ROOT_SERVICES authority 55f15dfe-a603-4901-b148-2aa11a2c0048 and left workspace-ci-v3-reconciler.service plus workspace-ci-v3-provisioner.service ACTIVE, provisioner socket valid, all class controllers inactive/disabled, and Research GPU containment preserved. Input #3 has NOT crossed the canary transaction boundary. Latest operator head 52b82bcb1c1fe8f9304be6c4e7cd7737b5c88227 passed Validation #1361/run 41018340472, but the live attempt exited silently during the pre-transaction Go/preflight-credential section after downloading Go modules. The script had already passed root/class state preflight, installed-generation binding, exact transaction-helper Git-object materialization, and Go 1.26.3 archive verification. It did NOT print V3_WORKSPACE_CONTROL_CREDENTIAL=PASS, CANARY_AUTHORITY_CREATED, GENERATION_EXCLUSION=BEGIN, a transaction receipt, or a canary run ID. Therefore no ACTIVATE_ONE_V3_CANARY authority was consumed, no v2 controller was quiesced, no v3 class controller was activated, and no canary workflow was dispatched. First action in the new executor: inspect scripts/lambda_ci_v3_first_canary_live.sh at 52b82..., diagnose the silent failure around the Go build / ephemeral gh-token credential preflight without blindly rerunning it, then produce a corrected exact-head-green operator and continue only the workspace-control-control-small-v1 bounded canary.
+LIVE MIGRATION IS PARTIALLY COMPLETE. Do NOT repeat Input #1 or Input #2. The corrected Input #3 operator is exact head f7ac4e66313928c2f6d334a446bb30e4da160737, script blob 06ea115cdf1156f534a98829b140b74c59463bff, and Workspace Control Validation #1364 / run 41019685530 is SUCCESS. The prior silent failure cannot be distinguished post hoc between the bare Go build and immediately following credential-staging commands because the old script emitted no per-step terminal marker and cleanup removed its temporary state. The corrected operator now fails loudly for every Go toolchain/build and ephemeral gh-token credential-staging command; it also re-proves root-service active/non-enabled state, all nine v3 class controllers inactive/non-enabled, Research GPU legacy containment, absence of canary-specific authority consumption/transaction residue, zero prior migration-canary workflow runs, and deliberate credential reset before creating any new authority. Public GitHub evidence currently shows zero workflow_dispatch runs on main. Next safe action: execute exactly scripts/lambda_ci_v3_first_canary_live.sh from head f7ac4e66313928c2f6d334a446bb30e4da160737 on Lambda. If any preflight/diagnostic STOP marker appears, do not retry blindly; return that exact output. If all preflight gates pass, the same bounded operator may proceed with exactly one workspace-control-control-small-v1 canary and exact v2 prestate rollback.
 
 ## Remaining work
 
-- Diagnose and fix the pre-transaction silent exit in scripts/lambda_ci_v3_first_canary_live.sh at operator head 52b82bcb1c1fe8f9304be6c4e7cd7737b5c88227. The observed last output is Go module downloads from the v3-canary-preflight build; no V3_WORKSPACE_CONTROL_CREDENTIAL=PASS followed.
-- Before any retry, verify live state: v3 reconciler/provisioner active and non-enabled, all nine v3 class controllers inactive, Research GPU legacy controller inactive, no ACTIVATE_ONE_V3_CANARY consumption marker/transaction receipt/canary run from the failed attempts, and clean or intentionally recreated workspace-control v3 credential staging.
-- Make the corrected Input #3 operator fail loudly around the Go preflight-helper build and ephemeral gh-token credential staging; validate the exact new head in Workspace Control CI before Lambda retry.
+- Execute the exact-head-green corrected Input #3 operator at f7ac4e66313928c2f6d334a446bb30e4da160737. It must first re-prove live root/class/containment state, no canary authority/transaction residue, zero prior canary runs, and clean credential staging; any STOP marker is terminal for that attempt.
 - Complete exactly one workspace-control-control-small-v1 generation-exclusion canary: create one-shot authority, prove v2 drain, activate only target v3 controller, dispatch only the owner-only canary, require terminal success, prove v3 execution/resource drain, then restore exact captured v2 prestate.
 - After accepted first canary, advance additional public-network classes only in frozen migration order under separately accepted live authority.
 - Keep all Research GPU-derived classes NO_BY_DEFAULT until separate containment-recovery authority; keep Research Engine PR #283 proposal-only until separate default-branch producer cutover authority.
@@ -57,7 +55,7 @@ LIVE MIGRATION IS PARTIALLY COMPLETE. Do NOT repeat inactive install or root-ser
 
 ## Blockers / gates
 
-- Input #3 operator head 52b82bcb1c1fe8f9304be6c4e7cd7737b5c88227 exits silently during the pre-transaction Go/preflight-credential section after Go module downloads. Diagnose the exact command failure before another live retry.
+- One operator action on Lambda is now required to execute the exact corrected Input #3 operator at f7ac4e66313928c2f6d334a446bb30e4da160737. No further repository-only evidence can identify the old silent command because the prior script had no per-step marker and removed temporary state on exit.
 - Lambda root services are already live from successful Input #2: workspace-ci-v3-reconciler.service and workspace-ci-v3-provisioner.service must remain active/attested; do not repeat ACTIVATE_V3_ROOT_SERVICES or create a competing root activation receipt.
 - All Research GPU-derived runner classes remain inherited-contained and NO_BY_DEFAULT. Do not start workspace-ci-controller@research-engine-gpu.service, restore retry authority, or advance any Research GPU-derived v3 class.
 - Research Engine PR #283 remains draft/proposal-only at exact head 6165556086b73d2076f205f11ec7b988150f23dd; no default-branch producer cutover is authorized.
