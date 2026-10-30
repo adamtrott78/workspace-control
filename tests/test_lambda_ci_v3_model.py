@@ -19,6 +19,8 @@ model_spec = importlib.util.spec_from_file_location(
 )
 model = importlib.util.module_from_spec(model_spec)
 assert model_spec.loader is not None
+import sys
+sys.modules["lambda_ci_v3_model"] = model
 model_spec.loader.exec_module(model)
 
 
