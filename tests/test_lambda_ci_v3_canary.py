@@ -143,10 +143,9 @@ class V3MigrationCanaryTests(unittest.TestCase):
 
     def _snapshot_for(self, cls):
         profile = cls["systemd_profile"]
-        quota = int(str(profile["CPUQuota"])[:-1])
-        period = 100000
-        cpu_max = f"{quota * period // 100} {period}"
         resource = cls["resource_class"]
+        network = cls["execution_contract"]["payload_network_class"]
+        period = 100000
         gpu_uuids = list(resource.get("gpu_uuids", []))
         if resource.get("gpu_uuid") is not None:
             gpu_uuids = [resource["gpu_uuid"]]
@@ -172,10 +171,37 @@ class V3MigrationCanaryTests(unittest.TestCase):
         if model is not None:
             env["P5_MODEL_OBJECT_ROOT"] = model["object_path"]
             ro += " " + model["object_path"]
+
+        quota = int(str(profile["CPUQuota"])[:-1])
+        memory = probe._memory_bytes(profile["MemoryMax"])
+        tasks = int(profile["TasksMax"])
+        device_allow = " ".join(["/dev/nvidiactl", *selected]) if gpu_uuids else ""
+        address_families = "AF_UNIX AF_INET AF_INET6 AF_NETLINK"
+        if network == probe.OFFLINE_NETWORK:
+            quota = probe.OFFLINE_RUNNER_CPU_PERCENT
+            memory = probe.OFFLINE_RUNNER_MEMORY_BYTES
+            tasks = probe.OFFLINE_RUNNER_TASKS_MAX
+            env["CUDA_VISIBLE_DEVICES"] = ""
+            env["P5_PAYLOAD_EXEC_REQUIRED"] = "1"
+            env["P5_PAYLOAD_EXEC_CLIENT"] = probe.OFFLINE_CLIENT_PATH
+            env["P5_PAYLOAD_EXEC_SOCKET"] = (
+                "/run/workspace-ci/v3/payload/"
+                "11111111-2222-3333-4444-555555555555/exec.sock"
+            )
+            device_allow = ""
+            address_families = "AF_UNIX AF_INET AF_INET6"
+            if runtime is not None:
+                bind_ro = ""
+                inaccessible += " " + runtime["canonical_path"]
+            if model is not None:
+                ro = str(roots["trusted_cache"])
+                inaccessible += " " + model["object_path"]
+
+        cpu_max = f"{quota * period // 100} {period}"
         return env, {
             "cpu.max": cpu_max,
-            "memory.max": str(probe._memory_bytes(profile["MemoryMax"])),
-            "pids.max": str(profile["TasksMax"]),
+            "memory.max": str(memory),
+            "pids.max": str(tasks),
         }, {
             "RuntimeMaxUSec": (
                 f"{min(probe._runtime_seconds(profile['RuntimeMaxSec']), int(resource['max_runtime_seconds']))}s"
@@ -185,13 +211,38 @@ class V3MigrationCanaryTests(unittest.TestCase):
             "InaccessiblePaths": inaccessible,
             "BindReadOnlyPaths": bind_ro,
             "DevicePolicy": "closed",
-            "DeviceAllow": (
-                " ".join(["/dev/nvidiactl", *selected])
-                if gpu_uuids else ""
-            ),
-            "RestrictAddressFamilies": "AF_UNIX AF_INET AF_INET6 AF_NETLINK",
+            "DeviceAllow": device_allow,
+            "RestrictAddressFamilies": address_families,
             "IPAddressAllow": "127.0.0.53/32",
             "IPAddressDeny": " ".join(probe.BASE_DENIES) + " 192.0.2.0/24",
+        }
+
+    def _offline_payload_snapshot_for(self, cls, env):
+        profile = cls["systemd_profile"]
+        resource = cls["resource_class"]
+        total_quota = int(str(profile["CPUQuota"])[:-1])
+        period = 100000
+        broker_quota = total_quota - probe.OFFLINE_RUNNER_CPU_PERCENT
+        broker_memory = (
+            probe._memory_bytes(profile["MemoryMax"])
+            - probe.OFFLINE_RUNNER_MEMORY_BYTES
+        )
+        broker_tasks = int(profile["TasksMax"]) - probe.OFFLINE_RUNNER_TASKS_MAX
+        selected = [x for x in env["P5_GPU_SELECTED_DEVICES"].split(",") if x]
+        runtime = cls["bindings"]["runtime"]
+        model = cls["bindings"]["model"]
+        return {
+            "cpu.max": f"{broker_quota * period // 100} {period}",
+            "memory.max": str(broker_memory),
+            "pids.max": str(broker_tasks),
+        }, {
+            "PrivateNetwork": "yes",
+            "RestrictAddressFamilies": "AF_UNIX AF_INET AF_INET6 AF_NETLINK",
+            "IPAddressDeny": "any",
+            "IPAddressAllow": "127.0.0.0/8 ::1/128",
+            "DeviceAllow": " ".join(["/dev/nvidiactl", *selected]),
+            "BindReadOnlyPaths": runtime["canonical_path"],
+            "ReadOnlyPaths": model["object_path"],
         }
 
     def test_probe_accepts_all_public_network_class_snapshots(self):
@@ -209,29 +260,46 @@ class V3MigrationCanaryTests(unittest.TestCase):
             )
             self.assertEqual(result["status"], "PASS", (class_id, result))
 
-    def test_probe_fails_closed_for_offline_contract_until_network_isolation_exists(self):
+    def test_probe_accepts_offline_contract_only_with_separate_broker_boundary(self):
         offline = []
         for class_id, cls in self.compiled["root_projection"]["runner_classes"].items():
             if cls["execution_contract"]["payload_network_class"] != probe.OFFLINE_NETWORK:
                 continue
             offline.append(class_id)
             env, cgroup, unit = self._snapshot_for(cls)
+            payload_cgroup, payload_unit = self._offline_payload_snapshot_for(cls, env)
             result = probe._verify_snapshot(
                 cls,
                 runner_name=cls["runner_prefix"] + "canary",
                 env=env,
                 cgroup=cgroup,
                 unit=unit,
+                payload_cgroup=payload_cgroup,
+                payload_unit=payload_unit,
             )
-            self.assertEqual(result["status"], "FAIL")
-            self.assertIn(
-                "offline_payload_network_isolation_implemented",
-                result["failures"],
-            )
-            self.assertIn(
+            self.assertEqual(result["status"], "PASS", (class_id, result))
+            self.assertNotIn(
                 "PAYLOAD_NETWORK_ISOLATION_UNIMPLEMENTED",
                 self.manifest["classes"][class_id]["blockers"],
             )
+            self.assertIn(
+                "INHERITED_CONTAINMENT_REQUIRES_SEPARATE_AUTHORITY",
+                self.manifest["classes"][class_id]["blockers"],
+            )
+
+            broken_payload = dict(payload_unit)
+            broken_payload["PrivateNetwork"] = "no"
+            broken = probe._verify_snapshot(
+                cls,
+                runner_name=cls["runner_prefix"] + "canary",
+                env=env,
+                cgroup=cgroup,
+                unit=unit,
+                payload_cgroup=payload_cgroup,
+                payload_unit=broken_payload,
+            )
+            self.assertEqual(broken["status"], "FAIL")
+            self.assertIn("payload_private_network", broken["failures"])
         self.assertEqual(
             set(offline),
             {
