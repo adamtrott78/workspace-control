@@ -42,7 +42,7 @@
       "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
       "remote": {
         "branch": "github-actions-control-plane-protocol-redesign-v1",
-        "checkpoint_sha": "c0fd0b10cac51e3ace3f988132cdeec661d3a905",
+        "checkpoint_sha": "09216de5663718810b00f645e911e948bfeb13c0",
         "verified": true
       },
       "local": null,
@@ -250,8 +250,10 @@
     }
   ],
   "checkpoints": [],
-  "blockers": [],
-  "next_safe_action": "Implement and repository-verify the production v3 root capacity provider, v3 runner-class controller, v3 reconciliation/systemd install surface, and migration-canary/cutover tooling under disjoint paths on PR #572. Do not mutate Lambda, start v3 controllers, apply PR #571, retrigger host-attest, or alter research-engine GPU containment.",
+  "blockers": [
+    "PR #572 exact head 09216de5663718810b00f645e911e948bfeb13c0 fails Workspace Control Validation #1279 / run 40991317744 in unit regression: 9 test_lambda_ci_v3_spec tests error at scripts/lambda_ci_v3_spec.py:132 with KeyError 'runtime_seconds'. The canonical workload resource classes use max_runtime_seconds. This is a repository-only production-v3 adapter/schema-name mismatch; no Lambda mutation is authorized."
+  ],
+  "next_safe_action": "Resume PR #572 at exact head 09216de5663718810b00f645e911e948bfeb13c0. First fix the repository-only production-v3 launch-spec blocker exposed by Workspace Control Validation #1279 / run 40991317744: scripts/lambda_ci_v3_spec.py line 132 reads resource['runtime_seconds'], but architecture/lambda-ci-workload-policy.v1.json resource classes define max_runtime_seconds. Confirm the intended root-owned runtime bound is min(systemd_profile.RuntimeMaxSec, resource_class.max_runtime_seconds), correct the adapter and add/retain regression coverage across all nine runner classes. Then rerun exact-head validation and continue production-v3 root capacity provider/controller/reconciliation/migration tooling only if green. Do not mutate Lambda, start v3 controllers, apply PR #571, retrigger host-attest, or alter research-engine GPU containment.",
   "artifacts": [
     {
       "path": "architecture/github-actions-control-plane-protocol-redesign-v1.md",
@@ -483,14 +485,16 @@
     }
   ],
   "remaining_work": [
-    "Implement a production v3 root capacity provider from the verified two-phase RESERVE/LAUNCH/STATUS/CANCEL model under disjoint v3 paths.",
-    "Implement a production v3 Go runner-class controller using the pinned actions/scaleset client, TotalAssignedJobs scaling, structured trusted-workflow admission, in-process retry/backoff, and no JobDisplayName parser.",
-    "Implement v3 reconciliation/install projections, unique controller Unix identities, project credential groups, systemd templates, tmpfiles, and disjoint persistent/runtime state.",
+    "Resolve the exact-head production-v3 launch-spec mismatch: use the canonical root-owned resource runtime bound (max_runtime_seconds) consistently and prove all nine runner classes build without widening authority.",
+    "Re-run exact-head Workspace Control validation; consume any remaining production-v3 spec/controller/root-provider failures before adding migration authority.",
+    "Complete the production v3 root capacity provider from the verified two-phase RESERVE/LAUNCH/STATUS/CANCEL model under disjoint v3 paths.",
+    "Complete the production v3 Go runner-class controller using the pinned actions/scaleset client, TotalAssignedJobs scaling, structured trusted-workflow admission, in-process retry/backoff, and no JobDisplayName parser.",
+    "Complete v3 reconciliation/install projections, unique controller Unix identities, project credential groups, systemd templates, tmpfiles, and disjoint persistent/runtime state.",
     "Generate migration-only class canary workflows and prove their payloads cannot execute candidate code or widen class authority.",
     "Add repository-only integration tests proving v2/v3 install-path disjointness and the generation-exclusion cutover/rollback transaction.",
     "Only after the production implementation candidate and migration transaction are exact-head green may any separate live activation authority be considered."
   ],
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Incremental live parser repair is intentionally suspended. Current workspace-control CPU start-limit state is treated as containment while the protocol is redesigned."
+  "notes": "Incremental live parser repair is intentionally suspended. Current workspace-control CPU start-limit state is treated as containment while the protocol is redesigned. Handoff boundary 2026-10-29: exact PR #572 head 09216de5663718810b00f645e911e948bfeb13c0; validation #1279 fails only after task-contract validation, in unit regression, due v3 launch-spec resource runtime field mismatch (runtime_seconds vs canonical max_runtime_seconds). No live Lambda mutation performed in this handoff turn."
 }
