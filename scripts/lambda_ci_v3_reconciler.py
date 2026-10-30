@@ -35,7 +35,8 @@ V3_CONTROLLER_BINARY = pathlib.Path(
 V3_PROVISIONER_ROOT = pathlib.Path("/opt/workspace-ci/v3/provisioner")
 V3_RECONCILER_ROOT = pathlib.Path("/opt/workspace-ci/v3/reconciler")
 V3_CACHE_ROOT = pathlib.Path("/opt/workspace-ci/v3/cache-manager")
-V3_CANARY_ROOT = pathlib.Path("/opt/workspace-ci/v3/canary")\nV3_PAYLOAD_ROOT = pathlib.Path("/opt/workspace-ci/v3/payload")
+V3_CANARY_ROOT = pathlib.Path("/opt/workspace-ci/v3/canary")
+V3_PAYLOAD_ROOT = pathlib.Path("/opt/workspace-ci/v3/payload")
 V3_STATE_ROOT = pathlib.Path("/var/lib/workspace-ci/v3/controller/state")
 V3_CREDENTIAL_ROOT = pathlib.Path("/var/lib/workspace-ci/v3/credentials")
 V3_SOCKET_GROUP = "workspace-ci-v3-provisioner"
