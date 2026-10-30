@@ -117,6 +117,7 @@ jobs:
           python3 scripts/lambda_ci_v3_reconciler.py             --stage-dir "$tmp/stage"             --controller-binary "$tmp/controller"
 
           cp -a "$tmp/stage/." "$tmp/root/"
+          sudo chown -R root:root "$tmp/root"
 
           sudo systemd-sysusers             --root="$tmp/root"             workspace-ci-v3.conf
 
