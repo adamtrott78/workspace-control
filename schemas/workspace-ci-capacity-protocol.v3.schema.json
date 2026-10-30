@@ -181,7 +181,9 @@
         },
         "status": {
           "enum": [
+            "PREPARING",
             "ACCEPTED",
+            "FAILED",
             "DUPLICATE",
             "RESERVATION_EXPIRED",
             "INVALID_REQUEST",
@@ -232,6 +234,7 @@
           "enum": [
             "MISSING",
             "RESERVED",
+            "PREPARING",
             "ACCEPTED",
             "COMPLETED",
             "FAILED",
@@ -330,6 +333,8 @@
       "BUSY",
       "CLASS_QUARANTINED",
       "RESERVATION_EXPIRED"
-    ]
+    ],
+    "launch_preparing": "LAUNCH may return PREPARING after the root-owned supervisor unit is created but before the inner runner unit is proven; controller polls STATUS without creating a second request",
+    "launch_failed": "FAILED is a request-local terminal launch outcome; controller removes any orphan GitHub JIT registration and keeps its listener process alive"
   }
 }
