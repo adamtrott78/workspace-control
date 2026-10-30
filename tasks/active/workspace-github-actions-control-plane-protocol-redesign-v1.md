@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: d5d3337a17c8ea3c0a62e9909b1a03cd11da7220
+- Remote checkpoint: 2281b005dca2ceee955eabeb2d0e7c888ab23a0b
 - Remote verified: true
 
 ### research-engine
@@ -43,16 +43,16 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Continue producer_and_policy_compiler_design on PR #572: freeze projection/deployment schemas and implement a repository-only compiler prototype that generates root/controller/executor projections and the 23-route compatibility matrix. Do not mutate Lambda, restart controllers, apply PR #571, or retrigger host-attest.
+Continue repository_only_protocol_verification on PR #572: implement pure controller/capacity state-machine prototypes and fault-injection tests for all scheduler/recovery boundaries. Do not mutate Lambda, restart controllers, apply PR #571, or retrigger host-attest.
 
 ## Remaining work
 
-- Finish producer/policy compiler design: exact projection schemas, catalog-generation digest algorithm, deployment-overlay schema, and class-specific systemd/controller identity projection.
-- Design the executor builder interface so every execution/maintenance trigger is selected by action_id and typed arguments rather than raw comment text.
-- Define legacy-to-v3 migration overlay preserving current workspace-control containment and research-engine GPU quarantine/retry-invalidated authority without implicit route activation.
-- Implement repository-only compiler/projection prototype and compatibility matrix for all 23 routes and nine runner classes.
-- Implement deterministic/state-machine/fault-injection verification plan; do not modify live Lambda.
-- Only after repository-only verification passes, design a separately authorized one-class-at-a-time migration and live acceptance.
+- Implement repository-only runner-class controller admission/supervisor state-machine model against the exact pinned actions/scaleset lifecycle semantics.
+- Implement repository-only two-phase root capacity/resource allocator model: RESERVE, LAUNCH, STATUS, CANCEL, crash reconciliation and class quarantine.
+- Implement fault-injection/model tests for redelivery, reassignment, TotalAssignedJobs/lifecycle skew, transient GitHub/root errors, reservation expiry, root crash boundaries and cleanup failure.
+- Verify all nine runner classes and 23 routes against the state-machine model and migration-equivalence matrix.
+- Prototype runner-class maintenance/reconciliation projections and prove no cpu/gpu lane grammar or live activation leakage remains.
+- Only after repository-only protocol verification passes, design a separately authorized one-class-at-a-time live migration.
 
 ## Blockers / gates
 
