@@ -8,7 +8,6 @@ WORKFLOW_PATH=".github/workflows/workspace-ci-v3-migration-canary-workspace-cont
 EXPECTED_WORKFLOW_BLOB="c7471bdd5e35a7f8be27c3153f615a382845e195"
 REPOSITORY="adamtrott78/workspace-control"
 
-INSTALLED_TX="/opt/workspace-ci/v3/reconciler/lambda_ci_v3_migration_transaction.py"
 LEGACY_TOKEN="/var/lib/workspace-ci/controller/github-token"
 V3_CREDENTIAL_DIR="/var/lib/workspace-ci/v3/credentials/workspace-control"
 V3_TOKEN="$V3_CREDENTIAL_DIR/github-token"
@@ -18,6 +17,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 TMP="$(mktemp -d /tmp/workspace-ci-v3-first-canary.XXXXXX)"
 SOURCE_TREE="$TMP/source"
+TX_HELPER="$SOURCE_TREE/scripts/lambda_ci_v3_migration_transaction.py"
 CANARY_OUT="$TMP/canary"
 PREFLIGHT_BIN="$TMP/v3-canary-preflight"
 TX_RECEIPT=""
@@ -41,7 +41,7 @@ rollback_transaction() {
   fi
 
   for _ in $(seq 1 60); do
-    if sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$INSTALLED_TX"       --repo-root "$SOURCE_TREE"       --rollback "$TX_RECEIPT"
+    if sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$TX_HELPER"       --repo-root "$SOURCE_TREE"       --rollback "$TX_RECEIPT"
     then
       ROLLBACK_DONE=1
       TX_RECEIPT=""
@@ -102,7 +102,7 @@ require_inactive() {
   echo "PREFLIGHT_INACTIVE=PASS $unit"
 }
 
-require_path "$INSTALLED_TX"
+require_path "$TX_HELPER"
 require_path "$LEGACY_TOKEN"
 
 # Root services from Input #2 must remain active; every class stays inactive.
@@ -137,6 +137,8 @@ git -C "$ROOT" cat-file -e "$SOURCE_HEAD^{commit}"
 git -C "$ROOT" worktree add --detach "$SOURCE_TREE" "$SOURCE_HEAD" >/dev/null
 test "$(git -C "$SOURCE_TREE" rev-parse HEAD)" = "$SOURCE_HEAD"
 test -z "$(git -C "$SOURCE_TREE" status --porcelain --untracked-files=no)"
+require_path "$TX_HELPER"
+echo "TRANSACTION_HELPER_SOURCE=IMMUTABLE_WORKTREE"
 
 # Exact Go 1.26.3 toolchain for the reviewed scale-set preflight helper.
 GO_ARCHIVE="$TMP/go1.26.3.linux-amd64.tar.gz"
@@ -282,7 +284,7 @@ echo "GENERATION_EXCLUSION=BEGIN"
 
 APPLY_LOG="$TMP/apply.log"
 set +e
-sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$INSTALLED_TX"   --repo-root "$SOURCE_TREE"   --apply-canary   --source-head "$SOURCE_HEAD"   --target-class "$TARGET_CLASS"   --canary-manifest "$CANARY_MANIFEST"   --canary-policy "$CANARY_POLICY"   --authorization-receipt "$AUTH_PATH"   | tee "$APPLY_LOG"
+sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$TX_HELPER"   --repo-root "$SOURCE_TREE"   --apply-canary   --source-head "$SOURCE_HEAD"   --target-class "$TARGET_CLASS"   --canary-manifest "$CANARY_MANIFEST"   --canary-policy "$CANARY_POLICY"   --authorization-receipt "$AUTH_PATH"   | tee "$APPLY_LOG"
 APPLY_RC=${PIPESTATUS[0]}
 set -e
 
@@ -348,7 +350,7 @@ gh run watch "$RUN_ID" --repo "$REPOSITORY" --exit-status || CANARY_RC=$?
 
 # Restore exact v2 prestate after the canary is terminal.
 for _ in $(seq 1 60); do
-  if sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$INSTALLED_TX"     --repo-root "$SOURCE_TREE"     --rollback "$TX_RECEIPT"
+  if sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$TX_HELPER"     --repo-root "$SOURCE_TREE"     --rollback "$TX_RECEIPT"
   then
     ROLLBACK_DONE=1
     TX_RECEIPT=""
