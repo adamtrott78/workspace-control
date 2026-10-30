@@ -9,10 +9,10 @@
     "repository": "adamtrott78/workspace-control",
     "branch": "github-actions-control-plane-protocol-redesign-v1",
     "runtime_boundary_validation": {
-      "exact_head": "c6c0bb1278273d9526dc7f141954fbd367591a06",
+      "exact_head": "e886f1a66d5d5f1b60efc67078f85ad852f42d79",
       "workflow": "Workspace Control Validation",
-      "run_number": 1309,
-      "run_id": 41002016747,
+      "run_number": 1322,
+      "run_id": 41004606547,
       "conclusion": "success"
     },
     "offline_runner_classes": [
@@ -23,10 +23,13 @@
       "online Actions runner retains GitHub control-plane networking but has no GPU DeviceAllow and empty CUDA_VISIBLE_DEVICES",
       "exact promoted model/runtime objects are inaccessible to the online runner",
       "root-owned one-shot payload broker alone receives exact GPU DeviceAllow plus exact promoted model/runtime read authority",
+      "payload broker runs as a distinct root-projected Unix identity from the online runner and receives no controller/provisioner credential-group membership",
       "payload broker starts with env -i and does not inherit GitHub/JIT credentials",
       "payload broker uses PrivateNetwork=yes, IPAddressDeny=any, and loopback-only IPAddressAllow",
+      "runner job/checkout tree is inaccessible to the payload broker; only the per-request staging exchange is shared through the project group",
       "runner and broker partition the existing root-granted CPU/memory/task envelope rather than doubling it",
-      "broker authenticates the Unix client by SO_PEERCRED UID and exact runner systemd cgroup membership"
+      "broker authenticates the Unix client by SO_PEERCRED runner UID and exact runner systemd cgroup membership",
+      "root cleanup independently proves no runner-UID or broker-UID process/GPU residue remains"
     ]
   },
   "research_engine": {
@@ -34,59 +37,60 @@
     "base_branch": "main",
     "base_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
     "proposal_branch": "github-actions-control-plane-protocol-redesign-v1",
-    "proposal_head": "5439c2a38648531b995ead92f54e5ab9de55f511",
+    "proposal_head": "3729fd3306381e2199b59e9517d3a5a49dc720fe",
     "pull_request": 283,
     "pull_request_state": "DRAFT",
     "default_branch_modified": false,
     "workflows": {
       "model-eval-single-gpu": {
         "path": ".github/workflows/lambda-ci-qwen35-offline-pilot.yml",
-        "proposed_blob_sha": "7ef5413982113113aebcc7ea1b90945fba5e4776",
+        "proposed_blob_sha": "a3b89a89cfcd32d4d07dd0a92d012c295c5d4ea1",
         "target_scale_set": "lambda-research-engine-model-single-offline",
         "current_default_branch_blob_sha": "31d77703d434b248aa50adf93568f9a13b89dc07"
       },
       "model-eval-dual-gpu": {
         "path": ".github/workflows/lambda-ci-qwen35-dual-offline-pilot.yml",
-        "proposed_blob_sha": "53a5123c20e09e115bccc2f29b2184d82da698c7",
+        "proposed_blob_sha": "bb0710fd97fd38a0788fcd6a42483b7d7bab7fbb",
         "target_scale_set": "lambda-research-engine-model-dual-offline",
         "current_default_branch_blob_sha": "a961158615269797837e036fb4cc4a3358f60189"
       }
     },
     "producer_invariants": [
       "GitHub PR gate, exact checkout, and artifact upload remain in the online Actions runner",
+      "checkout uses persist-credentials false and the workflow rejects any residual local http extraheader credential",
       "online preflight proves exact model/runtime object paths are not visible",
       "online preflight proves CUDA_VISIBLE_DEVICES is empty",
+      "online preflight binds the root-provided per-request P5_PAYLOAD_EXEC_WORKDIR under the project staging-cache root",
+      "payload script and receipt traverse only the staging exchange; broker execution cwd never requires the checkout/job tree",
       "model inference is invoked only through P5_PAYLOAD_EXEC_CLIENT over the root-provided Unix socket",
       "candidate metadata is passed as explicit argv to the payload and is not inherited from GitHub environment",
       "proposal is not trusted production workflow evidence until its exact blob is merged to the owning default branch and the controller projection is recompiled"
     ],
     "ci_observation": {
-      "run_id": 41002055202,
-      "run_number": 635,
-      "attempts": 3,
+      "run_id": 41004695334,
+      "run_number": 637,
+      "attempts": 1,
       "conclusion": "failure",
       "classification": "GITHUB_HOSTED_RUNNER_STARTUP_FAILURE_NO_REPOSITORY_STEPS",
       "evidence": {
-        "latest_job_id": 123891027413,
-        "runner_label": "ubuntu-latest",
-        "runner_id": 0,
-        "runner_name": "",
-        "steps": [],
-        "latest_attempt_started_at": "2026-10-30T04:26:00Z",
-        "latest_attempt_completed_at": "2026-10-30T04:26:02Z"
+        "latest_job_id": 123896814599,
+        "steps": null,
+        "repository_steps_executed": false
       },
       "accepted_as_repository_test_evidence": false
     },
     "repository_only_self_review": {
       "result": "PASS",
-      "pr_comment_id": 6514972948,
-      "exact_head": "5439c2a38648531b995ead92f54e5ab9de55f511",
+      "pr_comment_id": 6515204461,
+      "exact_head": "3729fd3306381e2199b59e9517d3a5a49dc720fe",
       "authority_granted": false,
       "findings": [
         "changed scope is exactly the two offline Qwen pilot workflows",
         "single/dual workflows target their exact homogeneous v3 offline scale sets",
         "online phase retains GitHub control-plane duties while model/runtime/GPU authority is absent",
+        "checkout persistence is disabled and residual GitHub http extraheader credentials are rejected",
         "payload execution traverses only P5_PAYLOAD_EXEC_CLIENT and the root-provided Unix socket",
+        "payload script/receipt and execution cwd are restricted to the root-provided per-request staging exchange",
         "candidate metadata is explicit argv rather than inherited GitHub environment"
       ]
     }
