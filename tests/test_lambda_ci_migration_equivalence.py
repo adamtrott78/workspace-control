@@ -68,7 +68,10 @@ class MigrationEquivalenceTests(unittest.TestCase):
         self.assertGreaterEqual(len(rows), 1)
         for row in rows:
             self.assertEqual(row["gpu_count"], 2)
-            self.assertEqual(row["payload_network_class"], "PUBLIC")
+            self.assertEqual(
+                row["payload_network_class"],
+                "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+            )
 
     def test_semantic_drift_is_detected(self):
         data = compiler.load_inputs(ROOT)
@@ -96,9 +99,11 @@ class MigrationEquivalenceTests(unittest.TestCase):
         target = compiled["root_projection"]["runner_classes"][class_id]
         self.assertEqual(
             target["execution_contract"]["payload_network_class"],
-            "OFFLINE",
+            "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE",
         )
-        target["execution_contract"]["payload_network_class"] = "PUBLIC"
+        target["execution_contract"]["payload_network_class"] = (
+            "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD"
+        )
 
         current = equivalence._current_route_envelope(
             data,
@@ -112,11 +117,11 @@ class MigrationEquivalenceTests(unittest.TestCase):
         self.assertNotEqual(current, changed)
         self.assertEqual(
             current["execution_contract"]["payload_network_class"],
-            "OFFLINE",
+            "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE",
         )
         self.assertEqual(
             changed["execution_contract"]["payload_network_class"],
-            "PUBLIC",
+            "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
         )
 
 
