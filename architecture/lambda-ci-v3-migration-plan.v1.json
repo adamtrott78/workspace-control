@@ -18,7 +18,8 @@
     "research-engine GPU-derived classes remain installed-inactive and inherited-contained until separate recovery authority explicitly consumes legacy containment",
     "catalog installation, controller activation, route admission, and legacy retirement are separate transitions",
     "offline model payloads execute only in a root-owned private-network broker while the Actions runner retains GitHub control-plane connectivity without GPU/model/runtime authority",
-    "live canary authorization receipts are short-lived one-shot capabilities; rollback never reopens consumed authority"
+    "live canary authorization receipts are short-lived one-shot capabilities; rollback never reopens consumed authority",
+    "v3 root services are activated only by the installed-manifest-bound one-shot root-services transaction; operators do not improvise systemctl activation"
   ],
   "side_by_side_paths": {
     "root_service": "workspace-ci-v3-provisioner.service",
@@ -38,7 +39,8 @@
     "payload_socket_root": "/run/workspace-ci-v3-payload",
     "payload_transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}-payload.service",
     "migration_state_root": "/var/lib/workspace-ci/v3/migration",
-    "authority_consumption_root": "/var/lib/workspace-ci/v3/migration-authority"
+    "authority_consumption_root": "/var/lib/workspace-ci/v3/migration-authority",
+    "root_activation_helper": "/opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py"
   },
   "socket_authorization": {
     "socket_group": "workspace-ci-v3-provisioner",
@@ -79,7 +81,46 @@
       "do not change any v2 controller/service/scale set",
       "do not clear research GPU containment"
     ],
-    "success_state": "v3 root services healthy; all target classes INSTALLED_INACTIVE; all target routes DISABLED"
+    "success_state": "v3 root services healthy; all target classes INSTALLED_INACTIVE; all target routes DISABLED",
+    "root_services_activation": {
+      "authority": "SEPARATE_ONE_SHOT_LIVE_AUTHORITY_REQUIRED",
+      "operation": "ACTIVATE_V3_ROOT_SERVICES",
+      "helper": "/opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py",
+      "authority_binding": [
+        "exact installed source_head from /etc/workspace-ci/v3/install-manifest.json",
+        "exact SHA-256 of installed install-manifest.json",
+        "exact installed root_policy_sha256",
+        "canonical unique authorization_id",
+        "timezone-aware issued_at/expires_at with maximum lifetime 1800 seconds"
+      ],
+      "preconditions": [
+        "reconciler.verify_installed passes for every managed artifact",
+        "workspace-ci-v3-provisioner.service and workspace-ci-v3-reconciler.service are both inactive",
+        "all nine v3 class controllers are inactive",
+        "no v3 transient/supervisor unit exists",
+        "v3 provisioner has no active resource claim",
+        "root-private migration and migration-authority roots are present mode 0700"
+      ],
+      "transaction_order": [
+        "atomically consume and fsync the one-shot authorization marker before any service mutation",
+        "persist PREPARED activation receipt",
+        "start workspace-ci-v3-reconciler.service and require installed-generation attestation to remain active",
+        "start workspace-ci-v3-provisioner.service",
+        "verify /run/workspace-ci/v3/provisioner.sock is a root-owned Unix socket, group workspace-ci-v3-provisioner, mode 0660",
+        "re-prove every v3 class controller/transient/resource claim remains absent",
+        "persist ROOT_SERVICES_ACTIVE receipt"
+      ],
+      "failure_rollback": [
+        "stop workspace-ci-v3-provisioner.service if active",
+        "stop workspace-ci-v3-reconciler.service if active",
+        "persist ROLLED_BACK_AFTER_ACTIVATION_FAILURE",
+        "never delete or reopen the consumed authorization marker"
+      ],
+      "explicit_non_authority": [
+        "does not start/enable/restart any v3 class controller",
+        "does not mutate any workflow, route, scale set, v2 service, quarantine, containment, or retry receipt"
+      ]
+    }
   },
   "canary_strategy": {
     "type": "MIGRATION_ONLY_TRUSTED_WORKFLOW_PER_RUNNER_CLASS",
@@ -209,8 +250,8 @@
   "next_repository_work": [
     "hosted producer CI is accepted at Research Engine PR #283 head 6165556086b73d2076f205f11ec7b988150f23dd via CI #642 / run 41007835081; do not reopen that gate unless the proposal head or reviewed workflow blobs change",
     "keep offline producer workflow proposal blobs isolated from current default-branch trusted evidence until a separately authorized cutover",
-    "maintain exact repository-only v3 runtime/controller/reconciler/canary/cutover proofs while live_authority remains NONE",
-    "after separate live authority, begin only with inactive v3 substrate/root-reconciler preparation and the first migration-order canary",
+    "maintain exact repository-only v3 runtime/controller/reconciler/root-activation/canary/cutover proofs while live_authority remains NONE",
+    "after separate live authority, apply the inactive substrate, issue a separate one-shot ACTIVATE_V3_ROOT_SERVICES receipt bound to the installed manifest, and use the root activation helper before the first migration-order canary",
     "do not advance Research GPU-derived classes until separate containment/recovery authority is explicitly bound"
   ],
   "repository_readiness": {
