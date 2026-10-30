@@ -294,6 +294,11 @@ def _source_files(repo_root: pathlib.Path) -> list[tuple[pathlib.Path, pathlib.P
             0o755,
         ),
         (
+            repo_root / "scripts/lambda_ci_v3_root_activation.py",
+            V3_RECONCILER_ROOT / "lambda_ci_v3_root_activation.py",
+            0o555,
+        ),
+        (
             repo_root / "scripts/lambda_ci_policy_compiler.py",
             V3_RECONCILER_ROOT / "lambda_ci_policy_compiler.py",
             0o644,
