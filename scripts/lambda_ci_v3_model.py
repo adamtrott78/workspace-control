@@ -370,6 +370,11 @@ class RootCapacityModel:
                 "request_id": request_id,
                 "receipt_status": "ACCEPTED",
             }
+        if record.state == "EXPIRED":
+            return {
+                "status": "RESERVATION_EXPIRED",
+                "request_id": request_id,
+            }
         if record.state in {"COMPLETED", "FAILED", "CANCELED"}:
             return {
                 "status": "DUPLICATE",
@@ -405,6 +410,8 @@ class RootCapacityModel:
     def external_status(self, record: CapacityRecord) -> str:
         if record.state == "LAUNCHED":
             return "ACCEPTED"
+        if record.state == "EXPIRED":
+            return "CANCELED"
         if record.state in {"RESERVED", "COMPLETED", "FAILED", "CANCELED"}:
             return record.state
         if record.state == "PREPARING":
@@ -434,7 +441,7 @@ class RootCapacityModel:
             record.state = "CANCELED"
             record.reservation_expires_at = None
             return {"status": "CANCELED", "request_id": request_id}
-        if record.state in {"COMPLETED", "FAILED", "CANCELED"}:
+        if record.state in {"COMPLETED", "FAILED", "CANCELED", "EXPIRED"}:
             return {"status": "ALREADY_TERMINAL", "request_id": request_id}
         return {"status": "NOT_CANCELABLE", "request_id": request_id}
 
@@ -446,7 +453,7 @@ class RootCapacityModel:
                 and self.now >= record.reservation_expires_at
             ):
                 self._release_resources(record)
-                record.state = "CANCELED"
+                record.state = "EXPIRED"
                 record.reservation_expires_at = None
 
     def reconcile_startup(self) -> None:
