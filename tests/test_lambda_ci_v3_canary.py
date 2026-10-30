@@ -184,6 +184,10 @@ class V3MigrationCanaryTests(unittest.TestCase):
             env["CUDA_VISIBLE_DEVICES"] = ""
             env["P5_PAYLOAD_EXEC_REQUIRED"] = "1"
             env["P5_PAYLOAD_EXEC_CLIENT"] = probe.OFFLINE_CLIENT_PATH
+            env["P5_PAYLOAD_EXEC_WORKDIR"] = (
+                str(roots["staging_cache"])
+                + "/p5-11111111-2222-3333-4444-555555555555"
+            )
             env["P5_PAYLOAD_EXEC_SOCKET"] = (
                 "/run/workspace-ci/v3/payload/"
                 "11111111-2222-3333-4444-555555555555/exec.sock"
@@ -215,6 +219,8 @@ class V3MigrationCanaryTests(unittest.TestCase):
             "RestrictAddressFamilies": address_families,
             "IPAddressAllow": "127.0.0.53/32",
             "IPAddressDeny": " ".join(probe.BASE_DENIES) + " 192.0.2.0/24",
+            "User": cls["project_runner_identity"]["user"],
+            "Group": cls["project_runner_identity"]["group"],
         }
 
     def _offline_payload_snapshot_for(self, cls, env):
@@ -237,6 +243,8 @@ class V3MigrationCanaryTests(unittest.TestCase):
             "pids.max": str(broker_tasks),
         }, {
             "PrivateNetwork": "yes",
+            "User": cls["payload_broker_identity"]["user"],
+            "Group": cls["payload_broker_identity"]["group"],
             "RestrictAddressFamilies": "AF_UNIX AF_INET AF_INET6 AF_NETLINK",
             "IPAddressDeny": "any",
             "IPAddressAllow": "127.0.0.0/8 ::1/128",
