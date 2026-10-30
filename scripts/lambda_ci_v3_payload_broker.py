@@ -181,7 +181,7 @@ def serve_once(
     server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     try:
         server.bind(str(socket_path))
-        os.chmod(socket_path, 0o600)
+        os.chmod(socket_path, 0o660)
         server.listen(1)
         conn, _ = server.accept()
         with conn:
@@ -226,22 +226,24 @@ def serve_once(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--socket", type=pathlib.Path, required=True)
-    parser.add_argument("--expected-uid", type=int, required=True)
+    parser.add_argument("--expected-client-uid", type=int, required=True)
+    parser.add_argument("--expected-broker-uid", type=int, required=True)
     parser.add_argument("--expected-runner-unit", required=True)
     parser.add_argument("--runtime-python", type=pathlib.Path, required=True)
-    parser.add_argument("--job-root", type=pathlib.Path, required=True)
     parser.add_argument("--staging-root", type=pathlib.Path, required=True)
     args = parser.parse_args()
-    if os.geteuid() != args.expected_uid:
+    if os.geteuid() != args.expected_broker_uid:
         raise PayloadBrokerError(
-            "broker effective UID differs from root-bound project identity"
+            "broker effective UID differs from root-bound broker identity"
         )
+    if args.expected_broker_uid == args.expected_client_uid:
+        raise PayloadBrokerError("broker and online runner identities must differ")
     return serve_once(
         socket_path=args.socket,
-        expected_uid=args.expected_uid,
+        expected_uid=args.expected_client_uid,
         expected_runner_unit=args.expected_runner_unit,
         runtime_python=args.runtime_python,
-        allowed_cwd_roots=(args.job_root, args.staging_root),
+        allowed_cwd_roots=(args.staging_root,),
     )
 
 
