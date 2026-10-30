@@ -79,17 +79,19 @@ class V3OfflinePayloadProducerBridgeTests(unittest.TestCase):
     def test_runtime_and_producer_bind_distinct_broker_staging_boundary(self):
         runtime = "\n".join(self.bridge["workspace_control"]["invariants"]).lower()
         producer = "\n".join(self.bridge["research_engine"]["producer_invariants"]).lower()
-        self.assertIn("distinct root-projected unix identity", runtime)
+        self.assertIn("each offline runner class receives its own", runtime)
         self.assertIn("runner job/checkout tree is inaccessible", runtime)
-        self.assertIn("per-request staging exchange", runtime)
+        self.assertIn("runner-private home/tmp/cache", runtime)
+        self.assertIn("dedicated per-request payload-exchange", runtime)
         self.assertIn("persist-credentials false", producer)
+        self.assertIn("payload-exchange", producer)
         self.assertIn("execution cwd never requires the checkout/job tree", producer)
 
     def test_workspace_runtime_boundary_is_bound_to_green_validation(self):
         validation = self.bridge["workspace_control"]["runtime_boundary_validation"]
         self.assertRegex(validation["exact_head"], HEX40)
-        self.assertEqual(validation["run_number"], 1322)
-        self.assertEqual(validation["run_id"], 41004606547)
+        self.assertEqual(validation["run_number"], 1326)
+        self.assertEqual(validation["run_id"], 41005440005)
         self.assertEqual(validation["conclusion"], "success")
 
 
