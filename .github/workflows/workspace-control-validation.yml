@@ -118,9 +118,9 @@ jobs:
 
           cp -a "$tmp/stage/." "$tmp/root/"
 
-          sudo systemd-sysusers             --root="$tmp/root"             /etc/sysusers.d/workspace-ci-v3.conf
+          sudo systemd-sysusers             --root="$tmp/root"             workspace-ci-v3.conf
 
-          sudo systemd-tmpfiles             --root="$tmp/root"             --create             /etc/tmpfiles.d/workspace-ci-v3.conf
+          sudo systemd-tmpfiles             --root="$tmp/root"             --create             workspace-ci-v3.conf
 
           test -d "$tmp/root/var/lib/workspace-ci/v3/migration"
           test -d "$tmp/root/var/lib/workspace-ci/v3/migration-authority"
