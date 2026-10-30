@@ -8,7 +8,6 @@ WORKFLOW_PATH=".github/workflows/workspace-ci-v3-migration-canary-workspace-cont
 EXPECTED_WORKFLOW_BLOB="c7471bdd5e35a7f8be27c3153f615a382845e195"
 REPOSITORY="adamtrott78/workspace-control"
 
-LEGACY_TOKEN="/var/lib/workspace-ci/controller/github-token"
 V3_CREDENTIAL_DIR="/var/lib/workspace-ci/v3/credentials/workspace-control"
 V3_TOKEN="$V3_CREDENTIAL_DIR/github-token"
 V3_ENV="$V3_CREDENTIAL_DIR/controller.env"
@@ -26,6 +25,7 @@ RUN_ID=""
 ROLLBACK_DONE=0
 
 cleanup_files() {
+  sudo -n rm -f "$V3_TOKEN" "$V3_ENV" >/dev/null 2>&1 || true
   git -C "$ROOT" worktree remove --force "$SOURCE_TREE" >/dev/null 2>&1 || true
   rm -rf "$TMP" >/dev/null 2>&1 || sudo -n rm -rf "$TMP" >/dev/null 2>&1 || true
 }
@@ -103,8 +103,6 @@ require_inactive() {
   echo "PREFLIGHT_INACTIVE=PASS $unit"
 }
 
-require_path "$LEGACY_TOKEN"
-
 # Root services from Input #2 must remain active; every class stays inactive.
 require_active workspace-ci-v3-reconciler.service
 require_active workspace-ci-v3-provisioner.service
@@ -158,8 +156,14 @@ test "$("$GO_BIN" env GOVERSION)" = "go1.26.3"
 
 GOTOOLCHAIN=local GOMODCACHE="$TMP/gomodcache" GOCACHE="$TMP/gocache" "$GO_BIN" -C "$ROOT/controller/lambda-ci-controller"   build -mod=readonly -trimpath   -o "$PREFLIGHT_BIN"   ./cmd/v3-canary-preflight
 
-# Stage the existing repository credential into the new repository-scoped group.
-sudo install -o root -g ci-gh-workspace-control -m 0640   "$LEGACY_TOKEN" "$V3_TOKEN"
+# Stage the already-authenticated operator GitHub token only for this
+# bounded canary. It is never printed and is deleted by cleanup_files.
+umask 077
+gh auth token > "$TMP/operator-token"
+test -s "$TMP/operator-token"
+
+sudo install -o root -g ci-gh-workspace-control -m 0640   "$TMP/operator-token" "$V3_TOKEN"
+rm -f "$TMP/operator-token"
 
 printf 'WORKSPACE_CI_PAT_FILE=%s\n' "$V3_TOKEN" > "$TMP/controller.env"
 sudo install -o root -g ci-gh-workspace-control -m 0640   "$TMP/controller.env" "$V3_ENV"
@@ -190,7 +194,7 @@ https://github.com/adamtrott78/research-engine	lambda-research-engine
 https://github.com/adamtrott78/research-engine	lambda-research-engine-gpu
 EOF
 
-sudo "$PREFLIGHT_BIN"   --token-file "$LEGACY_TOKEN"   --legacy-scalesets "$TMP/legacy-scalesets.tsv"   --source-head "$SOURCE_HEAD"   --target-name "$TARGET_SCALE_SET"
+sudo "$PREFLIGHT_BIN"   --token-file "$V3_TOKEN"   --legacy-scalesets "$TMP/legacy-scalesets.tsv"   --source-head "$SOURCE_HEAD"   --target-name "$TARGET_SCALE_SET"
 
 # Generate exact canary artifacts from the installed source generation.
 mkdir -p "$CANARY_OUT"
