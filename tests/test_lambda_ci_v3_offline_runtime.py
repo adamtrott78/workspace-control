@@ -207,6 +207,27 @@ class V3OfflineRuntimeBoundaryTests(unittest.TestCase):
             self.assertIn("--expected-runner-unit", command)
             self.assertIn(spec["unit_name"], command)
 
+    def test_payload_socket_root_is_not_hidden_by_project_forbidden_paths(self):
+        for class_id in (
+            "research-model-single-offline-v1",
+            "research-model-dual-offline-v1",
+        ):
+            spec = self.build(class_id)
+            socket_root = pathlib.PurePosixPath(
+                spec["offline_payload_broker"]["socket_root"]
+            )
+            self.assertEqual(str(socket_root), "/run/workspace-ci-v3-payload")
+            self.assertIn("/run/workspace-ci", spec["forbidden_paths"])
+            for forbidden_raw in spec["forbidden_paths"]:
+                forbidden = pathlib.PurePosixPath(forbidden_raw)
+                try:
+                    socket_root.relative_to(forbidden)
+                except ValueError:
+                    continue
+                self.fail(
+                    f"{class_id}: socket root {socket_root} hidden by {forbidden}"
+                )
+
     def test_runner_plus_broker_never_exceeds_root_granted_job_envelope(self):
         for class_id in (
             "research-model-single-offline-v1",
