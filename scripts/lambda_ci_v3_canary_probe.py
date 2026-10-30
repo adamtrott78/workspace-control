@@ -242,11 +242,11 @@ def _verify_snapshot(
     elif network_class == OFFLINE_NETWORK:
         check("payload_exec_required", env.get("P5_PAYLOAD_EXEC_REQUIRED", "") == "1")
         check("payload_exec_client", env.get("P5_PAYLOAD_EXEC_CLIENT", "") == OFFLINE_CLIENT_PATH)
+        payload_workdir = env.get("P5_PAYLOAD_EXEC_WORKDIR", "")
         check(
             "payload_exec_workdir",
-            env.get("P5_PAYLOAD_EXEC_WORKDIR", "").startswith(
-                str(roots["staging_cache"]) + "/"
-            ),
+            payload_workdir.startswith(str(roots["staging_cache"]) + "/p5-")
+            and payload_workdir.endswith("/payload-exchange"),
         )
         socket_path = env.get("P5_PAYLOAD_EXEC_SOCKET", "")
         check(
@@ -274,6 +274,17 @@ def _verify_snapshot(
             payload_unit.get("Group", "") == broker_identity.get("group"),
         )
         check("payload_private_network", payload_unit.get("PrivateNetwork", "") == "yes")
+        exchange = pathlib.PurePosixPath(payload_workdir)
+        request_staging = str(exchange.parent)
+        broker_state = request_staging + "/payload-broker"
+        payload_rw = payload_unit.get("ReadWritePaths", "").split()
+        check(
+            "payload_working_directory_exchange",
+            payload_unit.get("WorkingDirectory", "") == payload_workdir,
+        )
+        check("payload_exchange_rw", payload_workdir in payload_rw)
+        check("payload_broker_private_state_rw", broker_state in payload_rw)
+        check("payload_whole_staging_not_rw", request_staging not in payload_rw)
         payload_families = payload_unit.get("RestrictAddressFamilies", "")
         for family in ("AF_UNIX", "AF_INET", "AF_INET6", "AF_NETLINK"):
             check(f"payload_address_family_{family}", family in payload_families)
@@ -376,6 +387,7 @@ def _live_snapshot(unit_name: str, cgroup_path: pathlib.Path) -> tuple[dict[str,
         "PrivateNetwork",
         "User",
         "Group",
+        "WorkingDirectory",
         "ControlGroup",
     ):
         unit[name] = _show(unit_name, name)
