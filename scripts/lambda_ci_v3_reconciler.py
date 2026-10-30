@@ -86,6 +86,7 @@ def render_sysusers(
     groups = _project_groups(migration)
     classes = compiled["root_projection"]["runner_classes"]
     users: dict[str, str] = {}
+    broker_users: dict[str, tuple[str, str]] = {}
     lines = [
         "# Generated from compiled Lambda CI v3 root policy.\n",
         f"g {V3_SOCKET_GROUP} -\n",
@@ -106,10 +107,43 @@ def render_sysusers(
         )
         lines.append(f"m {user} {V3_SOCKET_GROUP}\n")
         lines.append(f"m {user} {groups[project]}\n")
+
+        broker = policy.get("payload_broker_identity")
+        if broker is not None:
+            if not isinstance(broker, dict) or set(broker) != {"user", "group"}:
+                raise ReconcileError(f"{class_id}: payload broker identity invalid")
+            broker_user = str(broker["user"])
+            broker_group = str(broker["group"])
+            if broker_user == policy["project_runner_identity"]["user"]:
+                raise ReconcileError(
+                    f"{class_id}: payload broker user equals runner user"
+                )
+            if broker_group != policy["project_runner_identity"]["group"]:
+                raise ReconcileError(
+                    f"{class_id}: payload broker group differs from runner group"
+                )
+            if broker_user in users:
+                raise ReconcileError(
+                    f"{class_id}: payload broker user collides with controller user"
+                )
+            prior = broker_users.get(broker_user)
+            current = (project, broker_group)
+            if prior is not None and prior != current:
+                raise ReconcileError(
+                    f"payload broker Unix user {broker_user} reused across identities"
+                )
+            broker_users[broker_user] = current
+
     if len(users) != 9:
         raise ReconcileError(f"expected nine unique class users, got {len(users)}")
-    return "".join(lines)
 
+    for broker_user, (project, broker_group) in sorted(broker_users.items()):
+        lines.append(
+            f'u {broker_user} - "Workspace CI v3 offline payload {project}" '
+            "- /usr/sbin/nologin\n"
+        )
+        lines.append(f"m {broker_user} {broker_group}\n")
+    return "".join(lines)
 
 def render_tmpfiles(
     compiled: dict[str, Any],
