@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "plan_id": "lambda-ci-v3-side-by-side-migration-v1",
+  "status": "DESIGN_ONLY_NOT_AUTHORIZED_FOR_LIVE_EXECUTION",
+  "source_verification": {
+    "receipt": "architecture/lambda-ci-control-plane-verification-receipt.v1.json",
+    "exact_head": "06d58450bb735178b516d9966fcb099763d8b4b0",
+    "validation_run_id": 40990406861,
+    "validation_run_number": 1266,
+    "tests_passed": 616
+  },
+  "principles": [
+    "v2 remains byte-for-byte live until the v3 substrate and every active-class canary are independently accepted",
+    "v3 is installed under disjoint paths, sockets, units, state directories, controller users, scale-set names, and runner prefixes",
+    "v2 and v3 project controllers are never active concurrently during migration because they do not share one physical-resource ledger",
+    "class canaries are executed one runner class at a time with every legacy project controller quiesced and no active legacy or v3 transient runner",
+    "production cutover of the currently active fleet is one generation boundary after all active-class canaries pass",
+    "research-engine GPU-derived classes remain installed-inactive and inherited-contained until separate recovery authority explicitly consumes legacy containment",
+    "catalog installation, controller activation, route admission, and legacy retirement are separate transitions"
+  ],
+  "side_by_side_paths": {
+    "root_service": "workspace-ci-v3-provisioner.service",
+    "root_socket": "/run/workspace-ci/v3/provisioner.sock",
+    "root_state_dir": "/var/lib/workspace-ci/v3/provisioner",
+    "config_root": "/etc/workspace-ci/v3",
+    "controller_service_template": "workspace-ci-v3-controller@.service",
+    "controller_binary": "/opt/workspace-ci/v3/controller/lambda-ci-controller-v3",
+    "controller_state_root": "/var/lib/workspace-ci/v3/controller/state",
+    "credential_root": "/var/lib/workspace-ci/v3/credentials",
+    "root_binary": "/opt/workspace-ci/v3/provisioner/lambda_ci_v3_provisioner.py",
+    "reconcile_root_service": "workspace-ci-v3-reconciler.service",
+    "reconcile_controller_service": "workspace-ci-v3-reconcile-controller.service",
+    "reconcile_socket": "/run/workspace-ci/v3/reconciler.sock",
+    "transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}.service"
+  },
+  "socket_authorization": {
+    "socket_group": "workspace-ci-v3-provisioner",
+    "socket_mode": "0660",
+    "parent_owner": "root",
+    "parent_group": "root",
+    "parent_mode": "0711",
+    "root_authority": "SO_PEERCRED numeric UID -> exactly one root-owned runner_class_id",
+    "invariant": "request JSON contains no authoritative runner_class_id selector"
+  },
+  "controller_identity": {
+    "unique_unix_user_per_runner_class": true,
+    "project_credential_groups": {
+      "workspace-control": "workspace-ci-github-workspace-control",
+      "padataset": "workspace-ci-github-padataset",
+      "research-engine": "workspace-ci-github-research-engine"
+    },
+    "credential_policy": "class users may share only repository-scoped GitHub observation credential groups; root launch authority remains per-UID/class",
+    "state_policy": "each class controller owns a distinct 0700 state directory; no class controller can read or mutate another class ledger"
+  },
+  "generation_exclusion": {
+    "reason": "v2 and v3 provisioners maintain independent active/resource ledgers; simultaneous project-controller operation would create a physical-resource race",
+    "migration_rule": "before any v3 controller becomes ACTIVE, stop all v2 project controllers and prove no legacy transient execution unit exists",
+    "canary_rule": "during one-class canary, only the target v3 controller may be active",
+    "rollback_rule": "stop target v3 controller, prove no v3 transient execution, then legacy v2 controllers may be resumed",
+    "final_cutover_rule": "all legacy project controllers are quiesced and drained before active v3 production controllers are started",
+    "excluded_solution": "do not add a cross-generation scheduler/lock broker solely to permit mixed-generation production operation"
+  },
+  "install_phase": {
+    "name": "V3_SUBSTRATE_INSTALL_INACTIVE",
+    "live_effect_if_eventually_authorized": [
+      "create nine class controller Unix users and three project GitHub credential groups",
+      "install v3 binaries/config/catalog/projection schemas under disjoint v3 paths",
+      "install v3 systemd unit templates and tmpfiles",
+      "start root v3 provisioner/reconciler only after exact source and config attestation",
+      "do not start any v3 class controller",
+      "do not change any workflow runs-on label",
+      "do not change any v2 controller/service/scale set",
+      "do not clear research GPU containment"
+    ],
+    "success_state": "v3 root services healthy; all target classes INSTALLED_INACTIVE; all target routes DISABLED"
+  },
+  "canary_strategy": {
+    "type": "MIGRATION_ONLY_TRUSTED_WORKFLOW_PER_RUNNER_CLASS",
+    "event": "workflow_dispatch or dedicated owner-only migration trigger",
+    "repository_scope": "canary lives in the owning repository because scale sets are repository-scoped",
+    "policy": "canary is compiled into a migration-only controller policy and never added to the ordinary executor action catalog",
+    "payload_rules": [
+      "do not checkout or execute candidate PR code",
+      "verify class systemd CPU/memory/task ceilings",
+      "verify expected GPU cardinality and exact visible UUID set",
+      "verify model/runtime mounts are present or absent exactly as class requires",
+      "verify payload network policy without widening it",
+      "verify project filesystem roots and forbidden paths",
+      "emit only bounded non-secret evidence"
+    ],
+    "precondition": "all v2 project controllers stopped; no legacy/v3 transient runner active; target v3 class controller is the only active project controller",
+    "postcondition": "target v3 controller stopped after canary; no transient runner remains; v2 may be resumed if production cutover is not yet occurring"
+  },
+  "canary_order": [
+    {
+      "order": 1,
+      "runner_class_id": "workspace-control-control-small-v1",
+      "rationale": "legacy workspace-control controller is already inactive/contained; validates control-small and v3 control path without disturbing active scientific runners"
+    },
+    {
+      "order": 2,
+      "runner_class_id": "padataset-cpu-public-v1",
+      "rationale": "active production class but CPU-only; lowest physical-resource risk after workspace-control v3 proof"
+    },
+    {
+      "order": 3,
+      "runner_class_id": "padataset-gpu-single-public-v1",
+      "rationale": "validates GPU0-exclusive public class before active-fleet cutover"
+    },
+    {
+      "order": 4,
+      "runner_class_id": "research-cpu-public-v1",
+      "rationale": "may be installed/canary-tested only if route/controller activation authority is separately explicit; exact-provenance route remains admission-disabled until legacy GPU containment migration is accepted"
+    },
+    {
+      "order": 5,
+      "runner_class_id": "research-gpu-single-public-v1",
+      "allowed": "NO_BY_DEFAULT",
+      "rationale": "inherits legacy research-engine GPU containment"
+    },
+    {
+      "order": 6,
+      "runner_class_id": "research-gpu-single-runtime-v1",
+      "allowed": "NO_BY_DEFAULT",
+      "rationale": "inherits legacy research-engine GPU containment"
+    },
+    {
+      "order": 7,
+      "runner_class_id": "research-model-single-offline-v1",
+      "allowed": "NO_BY_DEFAULT",
+      "rationale": "inherits legacy research-engine GPU containment"
+    },
+    {
+      "order": 8,
+      "runner_class_id": "research-model-dual-offline-v1",
+      "allowed": "NO_BY_DEFAULT",
+      "rationale": "inherits legacy research-engine GPU containment"
+    },
+    {
+      "order": 9,
+      "runner_class_id": "research-model-dual-public-v1",
+      "allowed": "NO_BY_DEFAULT",
+      "rationale": "inherits legacy research-engine GPU containment"
+    }
+  ],
+  "active_fleet_cutover": {
+    "initial_scope": [
+      "workspace-control-control-small-v1 if explicitly accepted",
+      "padataset-cpu-public-v1",
+      "padataset-gpu-single-public-v1"
+    ],
+    "research_cpu": "keep inactive unless separately authorized; installation/equivalence does not grant activation",
+    "research_gpu_classes": "must remain inactive/contained",
+    "transaction_order": [
+      "freeze exact v3 source/catalog/deployment-overlay candidate",
+      "verify no queued/in-progress migration transaction already exists",
+      "stop all legacy v2 project controllers",
+      "prove no legacy transient runner unit remains and old scale-set assigned/running counts are zero",
+      "prove v3 root/reconciler healthy and all target controllers inactive",
+      "atomically install trusted production workflow changes that retarget only accepted routes to their exact v3 scale-set names and update exact workflow pins/projections",
+      "bind deployment overlay generation",
+      "enable only accepted production routes",
+      "start only accepted v3 class controllers",
+      "run one exact production validation per accepted class",
+      "prove TotalAssignedJobs returns to zero, runner-instance ledgers terminal/clean, no restart loop, and resource ledger empty",
+      "only then mark corresponding legacy controllers/scale sets DRAINING then RETIRED"
+    ],
+    "failure_before_v3_job": "restore workflow/policy generation, keep all v3 class controllers inactive, resume exact legacy v2 controllers",
+    "failure_after_v3_job_started": "contain target v3 class, allow/force terminal cleanup, do not resume v2 until no v3 transient runner/resource claim remains, then restore old workflow generation and resume v2",
+    "rollback_invariant": "never allow v2 and v3 project controllers to be active at the same time"
+  },
+  "workflow_cutover": {
+    "rule": "production route workflow runs-on changes from legacy scale-set name to target v3 class scale-set name only after class canary acceptance",
+    "atomic_policy_binding": "workflow blob pin/controller projection/deployment overlay must bind the exact workflow commit before target route admission becomes ENABLED",
+    "no_fallback_label": "do not encode v2/v3 fallback in runs-on; mixed-generation routing is intentionally forbidden"
+  },
+  "legacy_retirement": {
+    "per_scale_set_preconditions": [
+      "no queued/assigned/running jobs",
+      "no active runner registration owned by legacy prefix",
+      "target v3 route/class accepted",
+      "rollback window receipt recorded"
+    ],
+    "order": [
+      "disable legacy controller",
+      "preserve old installed bytes/config/state for rollback window",
+      "delete/retire legacy scale set only after accepted v3 production proof",
+      "remove legacy controller config/state only in later cleanup task, not cutover transaction"
+    ]
+  },
+  "research_gpu_containment": {
+    "legacy_quarantine_receipt": "a7880e15-b29c-4b2b-bccd-3a34745f9ded",
+    "legacy_retry_receipt": "3eeffae8-2bd0-4344-b89f-02afbf1a445b",
+    "retry_state": "RECOVERY_RETRY_INVALIDATED",
+    "migration_default": "target GPU-derived classes may be installed but controller_state stays INACTIVE and containment stays INHERITED_CONTAINED",
+    "forbidden": "catalog installation, v3 substrate activation, PADataset/workspace-control cutover, or class equivalence proof may not clear/consume/rewrite this authority"
+  },
+  "live_authority": "NONE",
+  "next_repository_work": [
+    "implement production v3 root capacity provider on the verified model",
+    "implement production v3 Go class controller on the pinned Scale Set Client",
+    "implement v3 reconciliation installer/projections and systemd templates under disjoint paths",
+    "generate migration-only class canary workflows and compile-time tests",
+    "add repository-only integration tests proving v2/v3 path disjointness and generation-exclusion transaction semantics"
+  ]
+}
