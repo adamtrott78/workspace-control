@@ -230,7 +230,7 @@ def main() -> int:
     parser.add_argument("--expected-broker-uid", type=int, required=True)
     parser.add_argument("--expected-runner-unit", required=True)
     parser.add_argument("--runtime-python", type=pathlib.Path, required=True)
-    parser.add_argument("--staging-root", type=pathlib.Path, required=True)
+    parser.add_argument("--exchange-root", type=pathlib.Path, required=True)
     args = parser.parse_args()
     if os.geteuid() != args.expected_broker_uid:
         raise PayloadBrokerError(
@@ -243,7 +243,7 @@ def main() -> int:
         expected_uid=args.expected_client_uid,
         expected_runner_unit=args.expected_runner_unit,
         runtime_python=args.runtime_python,
-        allowed_cwd_roots=(args.staging_root,),
+        allowed_cwd_roots=(args.exchange_root,),
     )
 
 
