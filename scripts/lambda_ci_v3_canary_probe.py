@@ -242,6 +242,12 @@ def _verify_snapshot(
     elif network_class == OFFLINE_NETWORK:
         check("payload_exec_required", env.get("P5_PAYLOAD_EXEC_REQUIRED", "") == "1")
         check("payload_exec_client", env.get("P5_PAYLOAD_EXEC_CLIENT", "") == OFFLINE_CLIENT_PATH)
+        check(
+            "payload_exec_workdir",
+            env.get("P5_PAYLOAD_EXEC_WORKDIR", "").startswith(
+                str(roots["staging_cache"]) + "/"
+            ),
+        )
         socket_path = env.get("P5_PAYLOAD_EXEC_SOCKET", "")
         check(
             "payload_exec_socket",
@@ -253,6 +259,20 @@ def _verify_snapshot(
         payload_cgroup = payload_cgroup or {}
         payload_unit = payload_unit or {}
         check("payload_broker_present", bool(payload_unit))
+        broker_identity = cls.get("payload_broker_identity") or {}
+        check(
+            "payload_broker_identity_bound",
+            set(broker_identity) == {"user", "group"},
+        )
+        check(
+            "payload_broker_distinct_user",
+            payload_unit.get("User", "") == broker_identity.get("user")
+            and payload_unit.get("User", "") != unit.get("User", ""),
+        )
+        check(
+            "payload_broker_project_group",
+            payload_unit.get("Group", "") == broker_identity.get("group"),
+        )
         check("payload_private_network", payload_unit.get("PrivateNetwork", "") == "yes")
         payload_families = payload_unit.get("RestrictAddressFamilies", "")
         for family in ("AF_UNIX", "AF_INET", "AF_INET6", "AF_NETLINK"):
@@ -354,6 +374,8 @@ def _live_snapshot(unit_name: str, cgroup_path: pathlib.Path) -> tuple[dict[str,
         "IPAddressAllow",
         "IPAddressDeny",
         "PrivateNetwork",
+        "User",
+        "Group",
         "ControlGroup",
     ):
         unit[name] = _show(unit_name, name)
