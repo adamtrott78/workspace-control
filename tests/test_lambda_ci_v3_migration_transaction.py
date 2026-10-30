@@ -4,7 +4,7 @@ import pathlib
 import sys
 import tempfile
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -91,6 +91,7 @@ class V3MigrationTransactionTests(unittest.TestCase):
         self.provisioner_state = self.base / "provisioner"
         self.provisioner_state.mkdir()
         self.source_head = "a" * 40
+        authority_now = datetime.now(timezone.utc)
         self.authority = {
             "schema_version": 1,
             "authority": "workspace-control-operator",
@@ -101,8 +102,8 @@ class V3MigrationTransactionTests(unittest.TestCase):
             "target_runner_class_id": self.target,
             "controller_policy_sha256": self.canary_policy["controller_policy_sha256"],
             "workflow_blob_sha": self.entry["workflow_blob_sha"],
-            "issued_at": "2026-10-30T00:00:00+00:00",
-            "expires_at": "2026-10-30T00:30:00+00:00",
+            "issued_at": (authority_now - timedelta(seconds=5)).isoformat(),
+            "expires_at": (authority_now + timedelta(minutes=25)).isoformat(),
         }
         self.authority_raw = tx._canonical(self.authority)
         self.authority_consumption_root = self.base / "authority-used"
@@ -143,8 +144,11 @@ class V3MigrationTransactionTests(unittest.TestCase):
 
     def test_authority_payload_requires_current_bounded_one_shot_window(self):
         now = datetime(2026, 10, 30, 0, 15, tzinfo=timezone.utc)
+        fixed = dict(self.authority)
+        fixed["issued_at"] = "2026-10-30T00:00:00+00:00"
+        fixed["expires_at"] = "2026-10-30T00:30:00+00:00"
         validated = tx._validate_authority_payload(
-            dict(self.authority),
+            fixed,
             expected_head=self.source_head,
             target_class=self.target,
             manifest=self.manifest,
@@ -153,7 +157,7 @@ class V3MigrationTransactionTests(unittest.TestCase):
         )
         self.assertEqual(validated["authorization_id"], self.authority["authorization_id"])
 
-        expired = dict(self.authority)
+        expired = dict(fixed)
         expired["expires_at"] = "2026-10-30T00:14:59+00:00"
         with self.assertRaisesRegex(tx.MigrationError, "expired"):
             tx._validate_authority_payload(
@@ -165,7 +169,7 @@ class V3MigrationTransactionTests(unittest.TestCase):
                 now=now,
             )
 
-        future = dict(self.authority)
+        future = dict(fixed)
         future["issued_at"] = "2026-10-30T00:16:00+00:00"
         future["expires_at"] = "2026-10-30T00:30:00+00:00"
         with self.assertRaisesRegex(tx.MigrationError, "not yet valid"):
@@ -178,7 +182,7 @@ class V3MigrationTransactionTests(unittest.TestCase):
                 now=now,
             )
 
-        overlong = dict(self.authority)
+        overlong = dict(fixed)
         overlong["expires_at"] = "2026-10-30T00:30:01+00:00"
         with self.assertRaisesRegex(tx.MigrationError, "lifetime exceeds"):
             tx._validate_authority_payload(
