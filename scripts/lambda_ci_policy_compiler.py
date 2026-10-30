@@ -109,30 +109,153 @@ def _generic_systemd_common(
 
 def _resolve_model(
     workload_policy: dict[str, Any],
+    manifest: dict[str, Any],
     project_id: str,
     model_id: str | None,
 ) -> dict[str, Any] | None:
     if model_id is None:
         return None
-    binding = workload_policy.get("project_bindings", {}).get(project_id, {})
-    models = binding.get("allowed_models", [])
-    matches = [x for x in models if isinstance(x, dict) and x.get("model_id") == model_id]
-    _require(len(matches) == 1, f"{project_id}: model binding {model_id!r} not uniquely resolved")
-    return copy.deepcopy(matches[0])
+
+    policy_binding = workload_policy.get("project_bindings", {}).get(project_id, {})
+    allowed = policy_binding.get("allowed_models", [])
+    matches = [
+        item
+        for item in allowed
+        if isinstance(item, dict) and item.get("model_id") == model_id
+    ]
+    _require(
+        len(matches) == 1,
+        f"{project_id}: model authorization {model_id!r} not uniquely resolved",
+    )
+    authorized = matches[0]
+
+    materialized = manifest.get("bindings", {}).get("models", {}).get(model_id)
+    _require(
+        isinstance(materialized, dict),
+        f"{project_id}: materialized model binding {model_id!r} missing",
+    )
+    required = {
+        "model_id",
+        "repository",
+        "revision",
+        "object_path",
+        "object_id",
+        "tree_sha256",
+        "manifest_sha256",
+        "descriptor_sha256",
+        "promotion_receipt_sha256",
+        "serialization_risk_class",
+        "complete_offline",
+    }
+    _require(
+        set(materialized) == required,
+        f"{project_id}: materialized model binding keys drift",
+    )
+    for key in ("model_id", "repository", "revision"):
+        _require(
+            materialized[key] == authorized[key],
+            f"{project_id}: materialized model {key} differs from workload authorization",
+        )
+    _require(
+        authorized.get("serialization_requirement") == "SAFE_ONLY",
+        f"{project_id}: model authorization is not SAFE_ONLY",
+    )
+    _require(
+        authorized.get("promotion_required_before_eval") is True,
+        f"{project_id}: model authorization must require promotion",
+    )
+    _require(
+        materialized["serialization_risk_class"] == "SAFE",
+        f"{project_id}: materialized model is not SAFE",
+    )
+    _require(
+        materialized["complete_offline"] is True,
+        f"{project_id}: materialized model is not complete offline",
+    )
+    _require(
+        materialized["object_id"]
+        == materialized["tree_sha256"]
+        == materialized["manifest_sha256"],
+        f"{project_id}: materialized model object/tree/manifest identity drift",
+    )
+    return copy.deepcopy(materialized)
 
 
 def _resolve_runtime(
     workload_policy: dict[str, Any],
+    manifest: dict[str, Any],
     project_id: str,
     runtime_id: str | None,
 ) -> dict[str, Any] | None:
     if runtime_id is None:
         return None
-    binding = workload_policy.get("project_bindings", {}).get(project_id, {})
-    runtimes = binding.get("allowed_runtimes", [])
-    matches = [x for x in runtimes if isinstance(x, dict) and x.get("runtime_id") == runtime_id]
-    _require(len(matches) == 1, f"{project_id}: runtime binding {runtime_id!r} not uniquely resolved")
-    return copy.deepcopy(matches[0])
+
+    policy_binding = workload_policy.get("project_bindings", {}).get(project_id, {})
+    allowed = policy_binding.get("allowed_runtimes", [])
+    matches = [
+        item
+        for item in allowed
+        if isinstance(item, dict) and item.get("runtime_id") == runtime_id
+    ]
+    _require(
+        len(matches) == 1,
+        f"{project_id}: runtime authorization {runtime_id!r} not uniquely resolved",
+    )
+    authorized = matches[0]
+
+    materialized = manifest.get("bindings", {}).get("runtimes", {}).get(runtime_id)
+    _require(
+        isinstance(materialized, dict),
+        f"{project_id}: materialized runtime binding {runtime_id!r} missing",
+    )
+    required = {
+        "runtime_id",
+        "canonical_path",
+        "python_path",
+        "receipt_path",
+        "tree_digest_sha256",
+        "manifest_identity_sha256",
+        "source_trusted_runtime_object",
+        "required_controls",
+    }
+    _require(
+        set(materialized) == required,
+        f"{project_id}: materialized runtime binding keys drift",
+    )
+    _require(
+        authorized.get("promotion_required_before_eval") is True,
+        f"{project_id}: runtime authorization must require promotion",
+    )
+    expanded = authorized.get("expanded_runtime")
+    _require(
+        isinstance(expanded, dict),
+        f"{project_id}: authorized expanded runtime metadata missing",
+    )
+    _require(
+        materialized["runtime_id"] == authorized["runtime_id"],
+        f"{project_id}: materialized runtime id differs from authorization",
+    )
+    for key in (
+        "canonical_path",
+        "receipt_path",
+        "tree_digest_sha256",
+        "manifest_identity_sha256",
+    ):
+        _require(
+            materialized[key] == expanded.get(key),
+            f"{project_id}: materialized runtime {key} differs from authorization",
+        )
+    _require(
+        materialized["python_path"]
+        == str(pathlib.Path(materialized["canonical_path"]) / "bin/python"),
+        f"{project_id}: materialized runtime python path drift",
+    )
+    _require(
+        isinstance(materialized["required_controls"], list)
+        and len(materialized["required_controls"]) > 0,
+        f"{project_id}: materialized runtime controls missing",
+    )
+    return copy.deepcopy(materialized)
 
 
 def _check_binding_mode(
@@ -396,8 +519,18 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
                 model_id=model_id,
                 runtime_id=runtime_id,
             )
-            model_binding = _resolve_model(workload, project_id, model_id)
-            runtime_binding = _resolve_runtime(workload, project_id, runtime_id)
+            model_binding = _resolve_model(
+                workload,
+                manifest,
+                project_id,
+                model_id,
+            )
+            runtime_binding = _resolve_runtime(
+                workload,
+                manifest,
+                project_id,
+                runtime_id,
+            )
 
             gpu_uuids = list(resource.get("gpu_uuids", []))
             if resource.get("gpu_uuid") is not None:

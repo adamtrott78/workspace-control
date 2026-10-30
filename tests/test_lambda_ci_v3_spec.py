@@ -155,6 +155,39 @@ class V3LaunchSpecTests(unittest.TestCase):
                 class_id,
             )
 
+    def test_runtime_and_model_bindings_are_exact_materialized_project_objects(self):
+        manifests = compiler.load_inputs(ROOT)["project_manifests"]
+        research = manifests["research-engine"]
+        for class_id, cls in self.root["runner_classes"].items():
+            if cls["project_id"] != "research-engine":
+                continue
+            model = cls["bindings"]["model"]
+            runtime = cls["bindings"]["runtime"]
+            catalog_class = self.compiled["root_projection"]["runner_classes"][class_id]
+            if model is not None:
+                self.assertIn(model["model_id"], research["bindings"]["models"])
+                self.assertEqual(
+                    model,
+                    research["bindings"]["models"][model["model_id"]],
+                    class_id,
+                )
+                self.assertIn("object_path", model)
+                self.assertIn("descriptor_sha256", model)
+            if runtime is not None:
+                self.assertIn(runtime["runtime_id"], research["bindings"]["runtimes"])
+                self.assertEqual(
+                    runtime,
+                    research["bindings"]["runtimes"][runtime["runtime_id"]],
+                    class_id,
+                )
+                self.assertEqual(
+                    runtime["python_path"],
+                    runtime["canonical_path"] + "/bin/python",
+                )
+                self.assertIn("source_trusted_runtime_object", runtime)
+                self.assertTrue(runtime["required_controls"])
+            self.assertEqual(catalog_class["bindings"], cls["bindings"])
+
     def test_no_production_service_authority(self):
         for class_id in self.root["runner_classes"]:
             _, spec = self.build(class_id)
