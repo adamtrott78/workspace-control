@@ -45,6 +45,8 @@ V3_CONFIG_ROOT = pathlib.Path("/etc/workspace-ci/v3")
 V3_STATE_ROOT = pathlib.Path("/var/lib/workspace-ci/v3")
 MIGRATION_ROOT = V3_STATE_ROOT / "migration"
 V3_PROVISIONER_STATE = V3_STATE_ROOT / "provisioner"
+AUTHORITY_CONSUMPTION_ROOT = V3_STATE_ROOT / "migration-authority"
+AUTHORITY_MAX_LIFETIME_SECONDS = 30 * 60
 
 V3_PROVISIONER_UNIT = "workspace-ci-v3-provisioner.service"
 V3_RECONCILER_UNIT = "workspace-ci-v3-reconciler.service"
@@ -54,6 +56,7 @@ COMPATIBILITY_V2_UNITS = (
     "workspace-ci-controller-gpu.service",
 )
 UUID_RE = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+AUTHORIZATION_ID_RE = re.compile(rf"^{UUID_RE}$")
 V3_SUPERVISOR_RE = re.compile(r"^workspace-ci-v3-supervisor-[0-9a-f]{20}\.service$")
 
 
@@ -216,30 +219,37 @@ def v3_resource_claims(state_root: pathlib.Path = V3_PROVISIONER_STATE) -> list[
     return claims
 
 
-def _validate_authority_file(
-    path: pathlib.Path,
+def _parse_authority_time(value: Any, field: str) -> datetime:
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise MigrationError(f"live canary authorization {field} invalid") from exc
+    if parsed.tzinfo is None:
+        raise MigrationError(f"live canary authorization {field} must be timezone-aware")
+    return parsed.astimezone(timezone.utc)
+
+
+def _validate_authority_payload(
+    receipt: dict[str, Any],
     *,
     expected_head: str,
     target_class: str,
     manifest: dict[str, Any],
     canary_policy: dict[str, Any],
+    now: datetime | None = None,
 ) -> dict[str, Any]:
-    st = path.stat()
-    if st.st_uid != 0:
-        raise MigrationError("live canary authorization receipt must be root-owned")
-    if stat.S_IMODE(st.st_mode) != 0o600:
-        raise MigrationError("live canary authorization receipt must be mode 0600")
-    receipt = _load(path)
     required = {
         "schema_version",
         "authority",
         "operation",
+        "authorization_id",
         "source_head",
         "canary_generation_sha256",
         "target_runner_class_id",
         "controller_policy_sha256",
         "workflow_blob_sha",
         "issued_at",
+        "expires_at",
     }
     if set(receipt) != required:
         raise MigrationError("live canary authorization receipt keys drift")
@@ -249,6 +259,11 @@ def _validate_authority_file(
         raise MigrationError("live canary authorization authority invalid")
     if receipt["operation"] != "ACTIVATE_ONE_V3_CANARY":
         raise MigrationError("live canary authorization operation invalid")
+    authorization_id = str(receipt["authorization_id"])
+    if AUTHORIZATION_ID_RE.fullmatch(authorization_id) is None:
+        raise MigrationError("live canary authorization id invalid")
+    if str(uuid.UUID(authorization_id)) != authorization_id:
+        raise MigrationError("live canary authorization id is not canonical")
     if receipt["source_head"] != expected_head:
         raise MigrationError("live canary authorization source head mismatch")
     if receipt["canary_generation_sha256"] != manifest["canary_generation_sha256"]:
@@ -260,7 +275,103 @@ def _validate_authority_file(
         raise MigrationError("live canary authorization policy mismatch")
     if receipt["workflow_blob_sha"] != entry["workflow_blob_sha"]:
         raise MigrationError("live canary authorization workflow blob mismatch")
+
+    issued_at = _parse_authority_time(receipt["issued_at"], "issued_at")
+    expires_at = _parse_authority_time(receipt["expires_at"], "expires_at")
+    clock = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    if expires_at <= issued_at:
+        raise MigrationError("live canary authorization expiry must follow issuance")
+    if (expires_at - issued_at).total_seconds() > AUTHORITY_MAX_LIFETIME_SECONDS:
+        raise MigrationError("live canary authorization lifetime exceeds maximum")
+    if issued_at > clock:
+        raise MigrationError("live canary authorization is not yet valid")
+    if expires_at <= clock:
+        raise MigrationError("live canary authorization expired")
     return receipt
+
+
+def _validate_authority_file(
+    path: pathlib.Path,
+    *,
+    expected_head: str,
+    target_class: str,
+    manifest: dict[str, Any],
+    canary_policy: dict[str, Any],
+) -> tuple[dict[str, Any], bytes]:
+    st = path.stat()
+    if st.st_uid != 0:
+        raise MigrationError("live canary authorization receipt must be root-owned")
+    if stat.S_IMODE(st.st_mode) != 0o600:
+        raise MigrationError("live canary authorization receipt must be mode 0600")
+    raw = path.read_bytes()
+    try:
+        receipt = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise MigrationError("live canary authorization receipt is not valid JSON") from exc
+    if not isinstance(receipt, dict):
+        raise MigrationError("live canary authorization receipt must be object")
+    return (
+        _validate_authority_payload(
+            receipt,
+            expected_head=expected_head,
+            target_class=target_class,
+            manifest=manifest,
+            canary_policy=canary_policy,
+        ),
+        raw,
+    )
+
+
+def _consume_authority_receipt(
+    receipt: dict[str, Any],
+    raw: bytes,
+    *,
+    consumption_root: pathlib.Path = AUTHORITY_CONSUMPTION_ROOT,
+) -> tuple[pathlib.Path, str]:
+    authorization_id = str(receipt["authorization_id"])
+    if AUTHORIZATION_ID_RE.fullmatch(authorization_id) is None:
+        raise MigrationError("live canary authorization id invalid")
+
+    consumption_root.mkdir(parents=True, exist_ok=True, mode=0o700)
+    st = consumption_root.stat()
+    if not stat.S_ISDIR(st.st_mode):
+        raise MigrationError("live canary authorization consumption root is not a directory")
+    if st.st_uid != os.geteuid():
+        raise MigrationError("live canary authorization consumption root owner invalid")
+    if stat.S_IMODE(st.st_mode) != 0o700:
+        raise MigrationError("live canary authorization consumption root must be mode 0700")
+
+    digest = _sha256(raw)
+    marker = consumption_root / f"{authorization_id}.json"
+    record = {
+        "schema_version": 1,
+        "authorization_id": authorization_id,
+        "authorization_receipt_sha256": digest,
+        "source_head": receipt["source_head"],
+        "canary_generation_sha256": receipt["canary_generation_sha256"],
+        "target_runner_class_id": receipt["target_runner_class_id"],
+        "controller_policy_sha256": receipt["controller_policy_sha256"],
+        "workflow_blob_sha": receipt["workflow_blob_sha"],
+        "consumed_at": _utcnow(),
+    }
+    try:
+        fd = os.open(
+            marker,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+            0o600,
+        )
+    except FileExistsError as exc:
+        raise MigrationError("live canary authorization receipt already consumed") from exc
+    with os.fdopen(fd, "wb") as handle:
+        handle.write(_canonical(record))
+        handle.flush()
+        os.fsync(handle.fileno())
+    dir_fd = os.open(consumption_root, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(dir_fd)
+    finally:
+        os.close(dir_fd)
+    return marker, digest
 
 
 def validate_canary_target(
@@ -369,11 +480,13 @@ def apply_canary(
     canary_policy: dict[str, Any],
     canary_policy_raw: bytes,
     authority_receipt: dict[str, Any],
+    authority_receipt_raw: bytes,
     target_class: str,
     source_head: str,
     production_policy_path: pathlib.Path,
     transaction_root: pathlib.Path = MIGRATION_ROOT,
     provisioner_state_root: pathlib.Path = V3_PROVISIONER_STATE,
+    authority_consumption_root: pathlib.Path = AUTHORITY_CONSUMPTION_ROOT,
 ) -> pathlib.Path:
     entry = validate_canary_target(
         canary_manifest,
@@ -411,6 +524,12 @@ def apply_canary(
         state_root=provisioner_state_root,
     )
 
+    authority_marker, authority_digest = _consume_authority_receipt(
+        authority_receipt,
+        authority_receipt_raw,
+        consumption_root=authority_consumption_root,
+    )
+
     transaction_id = str(uuid.uuid4())
     transaction_dir = transaction_root / transaction_id
     transaction_dir.mkdir(parents=True, exist_ok=False)
@@ -425,6 +544,9 @@ def apply_canary(
         "schema_version": 1,
         "transaction_id": transaction_id,
         "mode": "V3_ONE_CLASS_CANARY_GENERATION_EXCLUSION",
+        "authorization_id": authority_receipt["authorization_id"],
+        "authorization_receipt_sha256": authority_digest,
+        "authorization_consumption_marker": str(authority_marker),
         "source_head": source_head,
         "canary_generation_sha256": canary_manifest["canary_generation_sha256"],
         "target_runner_class_id": target_class,
@@ -600,14 +722,13 @@ def main() -> int:
     policy = json.loads(policy_raw)
     if not isinstance(policy, dict):
         raise MigrationError("canary policy must be object")
-    _validate_authority_file(
+    authority, authority_raw = _validate_authority_file(
         args.authorization_receipt,
         expected_head=args.source_head,
         target_class=args.target_class,
         manifest=manifest,
         canary_policy=policy,
     )
-    authority = _load(args.authorization_receipt)
 
     production_policy = (
         V3_CONFIG_ROOT / "controllers" / f"{args.target_class}.json"
@@ -620,6 +741,7 @@ def main() -> int:
         canary_policy=policy,
         canary_policy_raw=policy_raw,
         authority_receipt=authority,
+        authority_receipt_raw=authority_raw,
         target_class=args.target_class,
         source_head=args.source_head,
         production_policy_path=production_policy,
