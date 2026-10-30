@@ -370,7 +370,7 @@
   "recovery_algorithm": [
     "load class runner-instance ledger and verify catalog identity",
     "query root STATUS for every nonterminal request_id",
-    "reconcile RESERVED requests before generating any JIT config",
+    "reconcile RESERVED requests before generating JIT; if the durable ledger says JIT_REGISTERED but no raw JIT exists after restart, remove the exact orphan registration and generate a fresh JIT under the same valid reservation",
     "remove orphan JIT registrations for FAILED/CANCELED/expired requests",
     "treat ACCEPTED root requests as live capacity even if JobStarted has not yet been observed",
     "establish/re-establish Scale Set Client session",
@@ -427,11 +427,12 @@
       "choose request_id and runner_name",
       "persist RESERVING ledger entry before root RESERVE",
       "submit RESERVE",
-      "on RESERVED persist expiry/resource-state observation",
+      "on RESERVED persist expiry/root status",
       "only then generate GitHub JIT registration",
-      "persist JIT_REGISTERED with runner id and JIT SHA-256 only",
-      "submit LAUNCH using the existing reservation",
+      "persist JIT_REGISTERED with exact GitHub runner registration id/name and JIT SHA-256 only; raw JIT bytes remain memory-only",
+      "submit LAUNCH using memory-only raw JIT bytes",
       "persist ACCEPTED only after root reports systemd launch success",
+      "after controller restart, a JIT_REGISTERED + root RESERVED record requires exact orphan registration removal and fresh JIT generation because raw JIT is unrecoverable by design",
       "enrich from JobStarted/JobCompleted when available",
       "persist terminal cleanup reconciliation"
     ],
@@ -458,7 +459,7 @@
     },
     {
       "crash_boundary": "after JIT generation before LAUNCH",
-      "recovery": "STATUS externally reports CANCELED for an expired reservation, while a late LAUNCH returns RESERVATION_EXPIRED so the controller removes the orphan JIT and creates a fresh runner-instance request"
+      "recovery": "raw JIT bytes are intentionally lost across controller restart; STATUS RESERVED proves capacity still held, controller removes the exact orphan JIT registration using persisted runner registration id/name, generates a fresh JIT registration under the same unexpired reservation, then LAUNCHes once"
     },
     {
       "crash_boundary": "root PREPARING before systemd unit creation",
