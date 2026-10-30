@@ -118,6 +118,10 @@ class V3OfflineRuntimeBoundaryTests(unittest.TestCase):
                 f"Environment=P5_PAYLOAD_EXEC_CLIENT={spec['offline_payload_broker']['client_path']}",
                 props,
             )
+            self.assertIn(
+                f"Environment=P5_PAYLOAD_EXEC_WORKDIR={staging}",
+                props,
+            )
             self.assertIn("Environment=P5_PAYLOAD_EXEC_REQUIRED=1", props)
             self.assertIn("CPUQuota=200%", props)
             self.assertIn(f"MemoryMax={4 * 1024**3}", props)
@@ -149,9 +153,22 @@ class V3OfflineRuntimeBoundaryTests(unittest.TestCase):
                 socket_path,
                 assignment,
                 43210,
+                43211,
             )
             props = self.props(command)
             self.assertIn("PrivateNetwork=yes", props)
+            self.assertIn(
+                f"User={spec['offline_payload_broker']['run_as']['user']}",
+                props,
+            )
+            self.assertIn(
+                f"Group={spec['offline_payload_broker']['run_as']['group']}",
+                props,
+            )
+            self.assertNotIn(f"ReadWritePaths={job}", props)
+            self.assertIn(f"InaccessiblePaths={job}", props)
+            self.assertIn(f"ReadWritePaths={staging}", props)
+            self.assertIn("UMask=0007", props)
             self.assertIn("IPAddressDeny=any", props)
             self.assertIn(
                 "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK",
@@ -175,6 +192,8 @@ class V3OfflineRuntimeBoundaryTests(unittest.TestCase):
             self.assertNotIn("GH_TOKEN", " ".join(command))
             self.assertNotIn("GITHUB_TOKEN", " ".join(command))
             self.assertNotIn("ACTIONS_RUNTIME_TOKEN", " ".join(command))
+            self.assertIn("--expected-client-uid", command)
+            self.assertIn("--expected-broker-uid", command)
             self.assertIn("--expected-runner-unit", command)
             self.assertIn(spec["unit_name"], command)
 
