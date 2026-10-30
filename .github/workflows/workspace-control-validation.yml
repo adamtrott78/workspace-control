@@ -120,6 +120,12 @@ jobs:
           ]
           for value in required:
               assert value in source, value
+
+          materialize = 'git -C "$ROOT" show "$SOURCE_HEAD:scripts/lambda_ci_v3_migration_transaction.py" > "$TX_HELPER"'
+          require = 'require_path "$TX_HELPER"'
+          assert materialize in source
+          assert require in source
+          assert source.index(materialize) < source.index(require)
           PY
 
       - name: Validate generated v3 systemd substrate in isolated root
