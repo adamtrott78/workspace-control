@@ -550,3 +550,187 @@ class ClassCapacityControllerModel:
             jit_config=jit,
         )
         return launch["status"]
+
+
+
+@dataclasses.dataclass(frozen=True)
+class ScalePlan:
+    total_assigned_jobs: int
+    desired_capacity: int
+    live_or_reserved_capacity: int
+    deficit: int
+    surplus: int
+    observed_lifecycle_events: int
+
+
+class ScaleSetCycleModel:
+    """Pure scheduler-facing model that uses statistics for capacity, not event counts."""
+
+    def __init__(
+        self,
+        controller: RunnerClassControllerModel,
+        root: RootCapacityModel,
+    ) -> None:
+        self.controller = controller
+        self.root = root
+        self.runner_class_id = controller.runner_class_id
+        self.pending_acquire_ids: set[int] = set()
+        self.acquired_ids: set[int] = set()
+        self.anomalies: dict[int, str] = {}
+
+    def evaluate_available_jobs(
+        self,
+        jobs: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        acquire: list[int] = []
+        anomalies: list[AdmissionDecision] = []
+        for job in jobs:
+            decision = self.controller.attest_job(job)
+            if decision.state == "TRUSTED":
+                request_id = decision.runner_request_id
+                if (
+                    request_id not in self.pending_acquire_ids
+                    and request_id not in self.acquired_ids
+                ):
+                    self.pending_acquire_ids.add(request_id)
+                    acquire.append(request_id)
+                continue
+
+            if decision.state == "ANOMALOUS_UNTRUSTED":
+                self.anomalies.setdefault(
+                    decision.runner_request_id,
+                    decision.reason or "untrusted",
+                )
+                anomalies.append(decision)
+                continue
+            raise ProtocolFatal(f"unknown admission decision {decision.state!r}")
+
+        return {
+            "acquire_runner_request_ids": acquire,
+            "anomalies": anomalies,
+        }
+
+    def mark_acquired(self, runner_request_ids: list[int]) -> None:
+        for request_id in runner_request_ids:
+            if request_id in self.pending_acquire_ids:
+                self.pending_acquire_ids.remove(request_id)
+            self.acquired_ids.add(request_id)
+
+    def live_or_reserved_capacity(self) -> int:
+        return sum(
+            record.runner_class_id == self.runner_class_id
+            and record.state in {"RESERVED", "PREPARING", "LAUNCHED"}
+            for record in self.root.records.values()
+        )
+
+    def plan_capacity(
+        self,
+        *,
+        total_assigned_jobs: int,
+        lifecycle_events: list[dict[str, Any]] | None = None,
+    ) -> ScalePlan:
+        # lifecycle_events are evidence only; they are deliberately excluded
+        # from desired-capacity arithmetic.
+        events = lifecycle_events or []
+        desired = self.controller.desired_capacity(total_assigned_jobs)
+        live = self.live_or_reserved_capacity()
+        return ScalePlan(
+            total_assigned_jobs=total_assigned_jobs,
+            desired_capacity=desired,
+            live_or_reserved_capacity=live,
+            deficit=max(0, desired - live),
+            surplus=max(0, live - desired),
+            observed_lifecycle_events=len(events),
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class SupervisorOutcome:
+    state: str
+    acknowledge_message: bool
+    process_exit: bool
+    backoff_seconds: int
+    category: str
+
+
+class ControllerSupervisorModel:
+    """Models in-process retry/backoff versus process-fatal failures."""
+
+    REQUEST_LOCAL = {
+        "ANOMALOUS_UNTRUSTED_JOB",
+        "DUPLICATE_TERMINAL_LOCAL_STATE",
+    }
+    CAPACITY_LOCAL = {
+        "BUSY",
+        "CLASS_QUARANTINED",
+        "RESERVATION_EXPIRED",
+    }
+    RETRYABLE = {
+        "GITHUB_REST_TRANSIENT",
+        "SCALESET_API_TRANSIENT",
+        "ROOT_SOCKET_TRANSIENT",
+        "JIT_API_TRANSIENT",
+    }
+    FATAL = {
+        "UNKNOWN_CONTROLLER_PEER",
+        "RUNNER_CLASS_CATALOG_INVALID",
+        "RUNNER_PREFIX_GENERATOR_VIOLATION",
+        "DURABLE_LEDGER_CORRUPT",
+        "ROOT_RESPONSE_SCHEMA_CORRUPT",
+    }
+
+    def __init__(self, *, max_backoff_seconds: int = 60) -> None:
+        self.state = "SESSION_ACTIVE"
+        self.retry_attempt = 0
+        self.max_backoff_seconds = max_backoff_seconds
+        self.systemd_restart_count = 0
+        self.process_exit_requested = False
+
+    def handle(self, outcome: str) -> SupervisorOutcome:
+        if self.state == "FATAL":
+            raise ProtocolFatal("supervisor is already fatal")
+
+        if outcome in self.REQUEST_LOCAL:
+            self.state = "SESSION_ACTIVE"
+            return SupervisorOutcome(
+                self.state, True, False, 0, "REQUEST_LOCAL"
+            )
+
+        if outcome in self.CAPACITY_LOCAL:
+            self.state = "SESSION_ACTIVE"
+            return SupervisorOutcome(
+                self.state, True, False, 0, "CAPACITY_LOCAL"
+            )
+
+        if outcome in self.RETRYABLE:
+            self.retry_attempt += 1
+            self.state = "RETRY_BACKOFF"
+            backoff = min(
+                self.max_backoff_seconds,
+                2 ** min(self.retry_attempt - 1, 16),
+            )
+            return SupervisorOutcome(
+                self.state, False, False, backoff, "RETRYABLE"
+            )
+
+        if outcome in self.FATAL:
+            self.state = "FATAL"
+            self.process_exit_requested = True
+            # A true fatal process exit is where systemd would observe one
+            # process failure; request-local outcomes never increment this.
+            self.systemd_restart_count += 1
+            return SupervisorOutcome(
+                self.state, False, True, 0, "FATAL"
+            )
+
+        raise ProtocolFatal(f"unknown supervisor outcome {outcome!r}")
+
+    def resume_after_backoff(self) -> None:
+        if self.state != "RETRY_BACKOFF":
+            raise ProtocolFatal("resume_after_backoff requires RETRY_BACKOFF")
+        self.state = "SESSION_ACTIVE"
+
+    def note_successful_session_work(self) -> None:
+        if self.state != "SESSION_ACTIVE":
+            raise ProtocolFatal("successful work requires SESSION_ACTIVE")
+        self.retry_attempt = 0
