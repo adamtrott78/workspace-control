@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import copy
 import dataclasses
+import pathlib
 import re
 from typing import Any
 
@@ -164,11 +165,24 @@ def build_launch_spec(
             == cls["project_runner_identity"]["group"],
             f"{runner_class_id}: payload broker group must equal project runner group",
         )
+        payload_socket_root = pathlib.PurePosixPath(
+            "/run/workspace-ci-v3-payload"
+        )
+        for forbidden_raw in cls["forbidden_paths"]:
+            forbidden = pathlib.PurePosixPath(forbidden_raw)
+            try:
+                payload_socket_root.relative_to(forbidden)
+            except ValueError:
+                continue
+            raise V3SpecError(
+                f"{runner_class_id}: payload socket root is nested under "
+                f"forbidden path {forbidden}"
+            )
         offline_payload_broker = {
             "network_class": payload_network_class,
             "broker_path": "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_broker.py",
             "client_path": "/opt/workspace-ci/v3/payload/lambda_ci_v3_payload_exec.py",
-            "socket_root": "/run/workspace-ci-v3-payload",
+            "socket_root": str(payload_socket_root),
             "runtime_python": runtime_binding["python_path"],
             "run_as": payload_broker_identity,
         }
