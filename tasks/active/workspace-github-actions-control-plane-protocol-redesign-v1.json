@@ -42,7 +42,7 @@
       "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
       "remote": {
         "branch": "github-actions-control-plane-protocol-redesign-v1",
-        "checkpoint_sha": "09216de5663718810b00f645e911e948bfeb13c0",
+        "checkpoint_sha": "455f0585d9006435335112ca896af7671a0f9f64",
         "verified": true
       },
       "local": null,
@@ -244,6 +244,30 @@
             "Migration design forbids simultaneous active v2/v3 project controllers because the generations do not share one physical-resource ledger.",
             "Research GPU-derived classes remain installed-inactive/inherited-contained absent separate recovery authority."
           ]
+        },
+        {
+          "check": "Production v3 repository implementation candidate",
+          "result": "PASS",
+          "evidence": [
+            "Exact head 455f0585d9006435335112ca896af7671a0f9f64 passed Workspace Control Validation #1293 / run 40999275931.",
+            "The canonical runtime bound is enforced for all nine runner classes as min(systemd RuntimeMaxSec, resource_class.max_runtime_seconds).",
+            "Production v3 root capacity provider implements SO_PEERCRED class authority, RESERVE -> JIT -> LAUNCH ordering, STATUS/CANCEL recovery, durable non-secret state, tmpfs-only raw JIT, resource reservation and fail-closed cleanup quarantine.",
+            "Separate production v3 Go runner-class controller uses the pinned actions/scaleset client, structured workflow/repository/event/actor/blob admission, TotalAssignedJobs capacity authority, durable crash recovery and in-process retry/backoff without JobDisplayName authority parsing.",
+            "Inactive v3 install/reconciliation substrate generates nine unique controller identities, three project credential groups, disjoint v3 systemd/tmpfiles/state paths, exact compiled projections, and contains no start/enable/restart operation.",
+            "Migration-only canary generator creates owner-only workflow_dispatch workflows with no inputs, checkout or candidate payload and replaces rather than widens controller trust.",
+            "One-class generation-exclusion transaction captures exact v2 prestate, blocks contained Research GPU and legacy compatibility paths, proves v2 drain before one v3 start, and proves v3 controller/transient/resource drain before exact legacy restore.",
+            "No Lambda mutation, v3 activation, workflow dispatch, quarantine change or retry-authority restoration was performed."
+          ]
+        },
+        {
+          "check": "Materialized binding and canary safety corrections",
+          "result": "PASS",
+          "evidence": [
+            "Compiler now uses workload policy as authorization while projecting exact materialized model/runtime bindings from the owning project manifest into root launch envelopes.",
+            "Migration equivalence consumes the same materialized bindings and remains green.",
+            "Canary verification exposed that GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE is not currently enforceable by the shared runner cgroup; research-model-single-offline-v1 and research-model-dual-offline-v1 remain blocked rather than falsely certified.",
+            "Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT absent separate recovery authority."
+          ]
         }
       ],
       "resume_condition": "Live control plane is stable under valid, invalid, duplicate, canceled, and recovery scenarios without controller crash loops."
@@ -251,9 +275,10 @@
   ],
   "checkpoints": [],
   "blockers": [
-    "PR #572 exact head 09216de5663718810b00f645e911e948bfeb13c0 fails Workspace Control Validation #1279 / run 40991317744 in unit regression: 9 test_lambda_ci_v3_spec tests error at scripts/lambda_ci_v3_spec.py:132 with KeyError 'runtime_seconds'. The canonical workload resource classes use max_runtime_seconds. This is a repository-only production-v3 adapter/schema-name mismatch; no Lambda mutation is authorized."
+    "Live migration remains deliberately unauthorized: architecture/lambda-ci-v3-migration-plan.v1.json still grants live_authority=NONE. No v3 substrate, root service, class controller, canary workflow or migration transaction has been installed/activated on Lambda.",
+    "research-model-single-offline-v1 and research-model-dual-offline-v1 declare GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE, but the current shared runner cgroup can restrict private/link-local networks only and cannot separate GitHub control-plane traffic from arbitrary public payload egress. Both classes remain blocked; they are also within inherited Research GPU containment."
   ],
-  "next_safe_action": "Resume PR #572 at exact head 09216de5663718810b00f645e911e948bfeb13c0. First fix the repository-only production-v3 launch-spec blocker exposed by Workspace Control Validation #1279 / run 40991317744: scripts/lambda_ci_v3_spec.py line 132 reads resource['runtime_seconds'], but architecture/lambda-ci-workload-policy.v1.json resource classes define max_runtime_seconds. Confirm the intended root-owned runtime bound is min(systemd_profile.RuntimeMaxSec, resource_class.max_runtime_seconds), correct the adapter and add/retain regression coverage across all nine runner classes. Then rerun exact-head validation and continue production-v3 root capacity provider/controller/reconciliation/migration tooling only if green. Do not mutate Lambda, start v3 controllers, apply PR #571, retrigger host-attest, or alter research-engine GPU containment.",
+  "next_safe_action": "Repository-only production v3 implementation and the one-class generation-exclusion canary transaction are exact-head green at 455f0585d9006435335112ca896af7671a0f9f64 (Workspace Control Validation #1293 / run 40999275931). The next step requires separate operator/live authority; do not mutate Lambda until such authority is explicitly issued. If authorized, begin only with the inactive v3 substrate/root-reconciler preparation and the first migration-order canary (workspace-control-control-small-v1), using an exact-generation root-owned authorization receipt and the generated owner-only canary workflow/policy. Preserve all Research GPU containment/retry invalidation. Do not authorize the two offline model classes until payload-network isolation is separately implemented and proven.",
   "artifacts": [
     {
       "path": "architecture/github-actions-control-plane-protocol-redesign-v1.md",
@@ -419,6 +444,62 @@
       "evidence": [
         "23/23 legacy routes exact-equivalent to target root launch envelopes."
       ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_provisioner.py",
+      "state": "PRODUCTION_V3_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Root-owned v3 capacity provider: SO_PEERCRED class authority, RESERVE/JIT/LAUNCH/STATUS/CANCEL, tmpfs-only JIT, persistent non-secret ledger and quarantine/resource-hold recovery.",
+        "Covered by exact-head Validation #1293; not installed on Lambda."
+      ]
+    },
+    {
+      "path": "controller/lambda-ci-controller/v3",
+      "state": "PRODUCTION_V3_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Separate homogeneous runner-class controller using pinned actions/scaleset client.",
+        "Structured admission, TotalAssignedJobs capacity, crash ledger and in-process retry; no JobDisplayName authority parser.",
+        "Covered by exact-head Validation #1293; not activated."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_reconciler.py",
+      "state": "INACTIVE_INSTALL_TRANSACTION_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Generates exact nine class identities, project credential groups, disjoint systemd/tmpfiles/state and install manifest.",
+        "APPLY_INACTIVE refuses active v3 services and contains no start/enable/restart operation."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-v3-migration-canaries.v1.json",
+      "state": "MIGRATION_CANARY_POLICY_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Nine migration-only canaries are staged, not installed or live-authorized.",
+        "Owner-only workflow_dispatch, no inputs/checkout/candidate authority; blocked classes remain blocked."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_canary.py",
+      "state": "MIGRATION_CANARY_GENERATOR_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Generates owning-repository canary workflows and one-workflow-only controller policies outside the ordinary executor action catalog."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_canary_probe.py",
+      "state": "MIGRATION_CANARY_PROBE_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Verifies root-owned class envelope without network access or payload execution.",
+        "Fails closed for unimplemented offline payload-network isolation."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_migration_transaction.py",
+      "state": "GENERATION_EXCLUSION_TRANSACTION_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Requires separate exact-generation root-owned live authorization receipt.",
+        "Stops/drains v2 before one v3 controller start; rollback drains v3 before exact v2 state restore; never dispatches workflows or mutates containment receipts."
+      ]
     }
   ],
   "validation": [
@@ -482,19 +563,27 @@
         "Migration design forbids simultaneous active v2/v3 project controllers because the generations do not share one physical-resource ledger.",
         "Research GPU-derived classes remain installed-inactive/inherited-contained absent separate recovery authority."
       ]
+    },
+    {
+      "check": "Production v3 repository implementation and migration transaction",
+      "result": "PASS",
+      "evidence": [
+        "Exact head 455f0585d9006435335112ca896af7671a0f9f64 passed Workspace Control Validation #1293 / run 40999275931.",
+        "All unit regressions, pinned Go scale-set controller checks, and full integration contracts passed.",
+        "No Lambda mutation authorized or performed."
+      ]
     }
   ],
   "remaining_work": [
-    "Resolve the exact-head production-v3 launch-spec mismatch: use the canonical root-owned resource runtime bound (max_runtime_seconds) consistently and prove all nine runner classes build without widening authority.",
-    "Re-run exact-head Workspace Control validation; consume any remaining production-v3 spec/controller/root-provider failures before adding migration authority.",
-    "Complete the production v3 root capacity provider from the verified two-phase RESERVE/LAUNCH/STATUS/CANCEL model under disjoint v3 paths.",
-    "Complete the production v3 Go runner-class controller using the pinned actions/scaleset client, TotalAssignedJobs scaling, structured trusted-workflow admission, in-process retry/backoff, and no JobDisplayName parser.",
-    "Complete v3 reconciliation/install projections, unique controller Unix identities, project credential groups, systemd templates, tmpfiles, and disjoint persistent/runtime state.",
-    "Generate migration-only class canary workflows and prove their payloads cannot execute candidate code or widen class authority.",
-    "Add repository-only integration tests proving v2/v3 install-path disjointness and the generation-exclusion cutover/rollback transaction.",
-    "Only after the production implementation candidate and migration transaction are exact-head green may any separate live activation authority be considered."
+    "Obtain separate explicit live authority before any Lambda mutation; the migration plan currently grants NONE.",
+    "Under that authority, install only the exact inactive v3 substrate candidate, verify generated identities/policies/systemd/tmpfiles/state and root/reconciler health, with all nine class controllers still inactive.",
+    "Deploy and bind the exact generated owner-only migration canary workflow/policy for workspace-control-control-small-v1, then execute the generation-exclusion transaction: stop/drain all v2 project controllers before starting exactly one v3 class controller, without dispatching from the transaction helper.",
+    "Collect the exact canary receipt and rollback/restore proof; preserve Research GPU quarantine and invalidated retry authority throughout.",
+    "Advance additional public-network classes only under separate accepted live authority and in the frozen migration order; Research GPU-derived classes remain NO_BY_DEFAULT.",
+    "Design, implement and prove process/network separation for GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE before either offline model class can enter live acceptance.",
+    "Only after accepted class canaries may production workflow route cutover, old scale-set drain/retirement and broader live activation be separately authorized."
   ],
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Incremental live parser repair is intentionally suspended. Current workspace-control CPU start-limit state is treated as containment while the protocol is redesigned. Handoff boundary 2026-10-29: exact PR #572 head 09216de5663718810b00f645e911e948bfeb13c0; validation #1279 fails only after task-contract validation, in unit regression, due v3 launch-spec resource runtime field mismatch (runtime_seconds vs canonical max_runtime_seconds). No live Lambda mutation performed in this handoff turn."
+  "notes": "Repository-only implementation boundary 2026-10-30: PR #572 exact head 455f0585d9006435335112ca896af7671a0f9f64 passed Workspace Control Validation #1293 / run 40999275931. Production v3 root provider, separate Go class controller, inactive install/reconciliation substrate, migration-only canary generator/probe, exact materialized model/runtime bindings, and one-class generation-exclusion rollback transaction are all repository-green. No live Lambda mutation was performed. Live authority remains NONE. The two offline model classes remain explicitly blocked on payload-network isolation, and all Research GPU-derived classes retain inherited containment."
 }
