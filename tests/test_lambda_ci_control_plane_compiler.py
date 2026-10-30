@@ -95,6 +95,32 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
         self.assertEqual(len(scale_sets), len(set(scale_sets)))
         self.assertEqual(len(prefixes), len(set(prefixes)))
 
+    def test_offline_payload_broker_identity_is_distinct_and_root_owned(self):
+        result = self.compile()
+        classes = result["root_projection"]["runner_classes"]
+        offline = {
+            "research-model-single-offline-v1",
+            "research-model-dual-offline-v1",
+        }
+        broker_users = set()
+        for class_id, cls in classes.items():
+            identity = cls["payload_broker_identity"]
+            if class_id in offline:
+                self.assertEqual(identity["user"], "ci-payload-research-engine")
+                self.assertEqual(identity["group"], cls["project_runner_identity"]["group"])
+                self.assertNotEqual(
+                    identity["user"],
+                    cls["project_runner_identity"]["user"],
+                )
+                self.assertNotEqual(
+                    identity["user"],
+                    cls["controller_peer"]["unix_user"],
+                )
+                broker_users.add(identity["user"])
+            else:
+                self.assertIsNone(identity, class_id)
+        self.assertEqual(broker_users, {"ci-payload-research-engine"})
+
     def test_duplicate_controller_peer_fails_compile(self):
         inputs = copy.deepcopy(self.inputs)
         projects = inputs["catalog"]["projects"]
