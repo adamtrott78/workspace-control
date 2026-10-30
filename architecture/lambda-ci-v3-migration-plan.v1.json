@@ -97,6 +97,8 @@
         "reconciler.verify_installed passes for every managed artifact",
         "workspace-ci-v3-provisioner.service and workspace-ci-v3-reconciler.service are both inactive",
         "all nine v3 class controllers are inactive",
+        "no v3 root/class unit is enabled for boot persistence",
+        "legacy workspace-ci-controller@research-engine-gpu.service is inactive so inherited Research GPU containment remains intact",
         "no v3 transient/supervisor unit exists",
         "v3 provisioner has no active resource claim",
         "root-private migration and migration-authority roots are present mode 0700"
@@ -104,10 +106,11 @@
       "transaction_order": [
         "atomically consume and fsync the one-shot authorization marker before any service mutation",
         "persist PREPARED activation receipt",
-        "start workspace-ci-v3-reconciler.service and require installed-generation attestation to remain active",
-        "start workspace-ci-v3-provisioner.service",
+        "start workspace-ci-v3-reconciler.service transiently and require installed-generation attestation to remain active",
+        "re-prove Research GPU containment and that no v3 root/class unit is enabled for boot persistence",
+        "start workspace-ci-v3-provisioner.service transiently",
         "verify /run/workspace-ci/v3/provisioner.sock is a root-owned Unix socket, group workspace-ci-v3-provisioner, mode 0660",
-        "re-prove every v3 class controller/transient/resource claim remains absent",
+        "re-prove Research GPU containment, every v3 class controller/transient/resource claim absent, and all v3 root/class units still disabled for boot persistence",
         "persist ROOT_SERVICES_ACTIVE receipt"
       ],
       "failure_rollback": [
@@ -117,6 +120,7 @@
         "never delete or reopen the consumed authorization marker"
       ],
       "explicit_non_authority": [
+        "uses systemctl start only; never enable or restart",
         "does not start/enable/restart any v3 class controller",
         "does not mutate any workflow, route, scale set, v2 service, quarantine, containment, or retry receipt"
       ]
