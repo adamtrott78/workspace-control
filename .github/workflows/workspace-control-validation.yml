@@ -103,6 +103,33 @@ jobs:
         if: steps.plan.outputs.tier != 'FAST_STATIC'
         run: python3 -m unittest discover -s tests -v
 
+      - name: Validate generated v3 systemd substrate in isolated root
+        if: steps.plan.outputs.tier != 'FAST_STATIC'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          trap 'sudo rm -rf "$tmp"' EXIT
+
+          mkdir -p "$tmp/stage" "$tmp/root"
+          cp /bin/true "$tmp/controller"
+
+          python3 scripts/lambda_ci_v3_reconciler.py             --stage-dir "$tmp/stage"             --controller-binary "$tmp/controller"
+
+          cp -a "$tmp/stage/." "$tmp/root/"
+
+          sudo systemd-sysusers             --root="$tmp/root"             /etc/sysusers.d/workspace-ci-v3.conf
+
+          sudo systemd-tmpfiles             --root="$tmp/root"             --create             /etc/tmpfiles.d/workspace-ci-v3.conf
+
+          test -d "$tmp/root/var/lib/workspace-ci/v3/migration"
+          test -d "$tmp/root/var/lib/workspace-ci/v3/migration-authority"
+          test -d "$tmp/root/run/workspace-ci-v3-payload"
+
+          grep -q '^ci-gh-workspace-control:' "$tmp/root/etc/group"
+          grep -q '^ci-gh-padataset:' "$tmp/root/etc/group"
+          grep -q '^ci-gh-research-engine:' "$tmp/root/etc/group"
+
       - name: Set up Go 1.26.3 for Lambda controller
         if: steps.plan.outputs.tier != 'FAST_STATIC'
         uses: actions/setup-go@v6
