@@ -208,6 +208,20 @@ class V3LaunchSpecTests(unittest.TestCase):
                     broker["runtime_python"],
                     spec["runtime_binding"]["python_path"],
                 )
+                self.assertEqual(
+                    broker["run_as"],
+                    self.root["runner_classes"][class_id][
+                        "payload_broker_identity"
+                    ],
+                )
+                self.assertNotEqual(
+                    broker["run_as"]["user"],
+                    spec["run_as"]["user"],
+                )
+                self.assertEqual(
+                    broker["run_as"]["group"],
+                    spec["run_as"]["group"],
+                )
                 self.assertTrue(
                     broker["broker_path"].startswith("/opt/workspace-ci/v3/payload/")
                 )
