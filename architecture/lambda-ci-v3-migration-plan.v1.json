@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "plan_id": "lambda-ci-v3-side-by-side-migration-v1",
-  "status": "DESIGN_ONLY_NOT_AUTHORIZED_FOR_LIVE_EXECUTION",
+  "status": "REPOSITORY_VERIFIED_NOT_AUTHORIZED_FOR_LIVE_EXECUTION",
   "source_verification": {
     "receipt": "architecture/lambda-ci-control-plane-verification-receipt.v1.json",
     "exact_head": "06d58450bb735178b516d9966fcb099763d8b4b0",
@@ -260,9 +260,9 @@
   ],
   "repository_readiness": {
     "workspace_control_repository_boundary": {
-      "exact_head": "c3e4e5e12811ff51fd6062cca261b099e7afaa9d",
-      "validation_run_number": 1333,
-      "validation_run_id": 41008371197,
+      "exact_head": "01019177fcb46e5ab9864ea9b764b533dcf0be81",
+      "validation_run_number": 1337,
+      "validation_run_id": 41010515483,
       "conclusion": "success"
     },
     "research_engine_offline_producer": {
