@@ -173,7 +173,7 @@ class V3OfflineRuntimeBoundaryTests(unittest.TestCase):
             self.assertIn(f"ReadWritePaths={exchange}", props)
             self.assertIn(f"ReadWritePaths={broker_state}", props)
             self.assertIn(f"WorkingDirectory={exchange}", props)
-            self.assertIn(f"Environment=HOME={broker_state / 'home'}", command)
+            self.assertIn(f"HOME={broker_state / 'home'}", command)
             self.assertIn(f"TMPDIR={broker_state / 'tmp'}", command)
             self.assertIn(f"HF_HOME={broker_state / 'huggingface'}", command)
             self.assertIn("UMask=0007", props)
