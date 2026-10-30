@@ -16,7 +16,8 @@
     "class canaries are executed one runner class at a time with every legacy project controller quiesced and no active legacy or v3 transient runner",
     "production cutover of the currently active fleet is one generation boundary after all active-class canaries pass",
     "research-engine GPU-derived classes remain installed-inactive and inherited-contained until separate recovery authority explicitly consumes legacy containment",
-    "catalog installation, controller activation, route admission, and legacy retirement are separate transitions"
+    "catalog installation, controller activation, route admission, and legacy retirement are separate transitions",
+    "offline model payloads execute only in a root-owned private-network broker while the Actions runner retains GitHub control-plane connectivity without GPU/model/runtime authority"
   ],
   "side_by_side_paths": {
     "root_service": "workspace-ci-v3-provisioner.service",
@@ -31,7 +32,10 @@
     "reconcile_root_service": "workspace-ci-v3-reconciler.service",
     "reconcile_controller_service": "workspace-ci-v3-reconcile-controller.service",
     "reconcile_socket": "/run/workspace-ci/v3/reconciler.sock",
-    "transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}.service"
+    "transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}.service",
+    "payload_helper_root": "/opt/workspace-ci/v3/payload",
+    "payload_socket_root": "/run/workspace-ci/v3/payload",
+    "payload_transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}-payload.service"
   },
   "socket_authorization": {
     "socket_group": "workspace-ci-v3-provisioner",
@@ -86,7 +90,8 @@
       "verify model/runtime mounts are present or absent exactly as class requires",
       "verify payload network policy without widening it",
       "verify project filesystem roots and forbidden paths",
-      "emit only bounded non-secret evidence"
+      "emit only bounded non-secret evidence",
+      "for offline classes, inspect the online runner and waiting payload broker as separate systemd/cgroup envelopes without connecting to the broker socket or executing model/candidate payload"
     ],
     "precondition": "all v2 project controllers stopped; no legacy/v3 transient runner active; target v3 class controller is the only active project controller",
     "postcondition": "target v3 controller stopped after canary; no transient runner remains; v2 may be resumed if production cutover is not yet occurring"
@@ -172,7 +177,9 @@
   "workflow_cutover": {
     "rule": "production route workflow runs-on changes from legacy scale-set name to target v3 class scale-set name only after class canary acceptance",
     "atomic_policy_binding": "workflow blob pin/controller projection/deployment overlay must bind the exact workflow commit before target route admission becomes ENABLED",
-    "no_fallback_label": "do not encode v2/v3 fallback in runs-on; mixed-generation routing is intentionally forbidden"
+    "no_fallback_label": "do not encode v2/v3 fallback in runs-on; mixed-generation routing is intentionally forbidden",
+    "offline_model_producer_plan": "architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json",
+    "offline_model_rule": "reviewed proposal blobs remain non-authoritative until exact bytes are on the owning default branch and the exact controller/deployment generation is bound under separate cutover/live authority"
   },
   "legacy_retirement": {
     "per_scale_set_preconditions": [
@@ -197,10 +204,10 @@
   },
   "live_authority": "NONE",
   "next_repository_work": [
-    "implement production v3 root capacity provider on the verified model",
-    "implement production v3 Go class controller on the pinned Scale Set Client",
-    "implement v3 reconciliation installer/projections and systemd templates under disjoint paths",
-    "generate migration-only class canary workflows and compile-time tests",
-    "add repository-only integration tests proving v2/v3 path disjointness and generation-exclusion transaction semantics"
+    "obtain a Research Engine PR #283 GitHub-hosted CI attempt that allocates a runner and executes repository steps; current attempts fail before allocation",
+    "keep offline producer workflow proposal blobs isolated from current default-branch trusted evidence until a separately authorized cutover",
+    "maintain exact repository-only v3 runtime/controller/reconciler/canary/cutover proofs while live_authority remains NONE",
+    "after separate live authority, begin only with inactive v3 substrate/root-reconciler preparation and the first migration-order canary",
+    "do not advance Research GPU-derived classes until separate containment/recovery authority is explicitly bound"
   ]
 }
