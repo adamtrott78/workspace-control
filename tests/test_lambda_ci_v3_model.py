@@ -704,6 +704,263 @@ class V3ControlPlaneModelTests(unittest.TestCase):
         with self.assertRaises(model.ProtocolFatal):
             supervisor.handle("SOMETHING_IMPLICIT_AND_UNMODELED")
 
+    def test_all_nine_runner_classes_can_reserve_launch_and_cleanup(self):
+        for class_id in sorted(self.compiled["root_projection"]["runner_classes"]):
+            root = self.root(host_max=9, project_max=9)
+            peer = self.peer(class_id)
+            request_id = f"req-all-{class_id}"
+            runner_name = self.runner_name(class_id, "smoke")
+            self.assertEqual(
+                root.reserve(
+                    peer_user=peer,
+                    request_id=request_id,
+                    runner_name=runner_name,
+                )["status"],
+                "RESERVED",
+                class_id,
+            )
+            self.assertEqual(
+                root.launch(
+                    peer_user=peer,
+                    request_id=request_id,
+                    runner_name=runner_name,
+                    jit_config=f"jit-{class_id}",
+                )["status"],
+                "ACCEPTED",
+                class_id,
+            )
+            root.finish(
+                request_id=request_id,
+                success=True,
+                cleanup_ok=True,
+            )
+            self.assertEqual(
+                root.status(peer_user=peer, request_id=request_id)["status"],
+                "COMPLETED",
+                class_id,
+            )
+
+    def test_multiple_trusted_routes_in_same_class_share_capacity_without_route_parser(self):
+        class_id = "research-model-dual-public-v1"
+        policy = self.controller_policy(class_id)
+        self.assertGreaterEqual(len(policy["trusted_workflows"]), 2)
+        controller = model.RunnerClassControllerModel(policy)
+        cycle = model.ScaleSetCycleModel(controller, self.root())
+        jobs = [
+            self.trusted_job(
+                class_id,
+                workflow,
+                request_id=700 + i,
+                run_id=800 + i,
+            )
+            for i, workflow in enumerate(policy["trusted_workflows"][:2])
+        ]
+        result = cycle.evaluate_available_jobs(jobs)
+        self.assertEqual(len(result["acquire_runner_request_ids"]), 2)
+        self.assertEqual(result["anomalies"], [])
+        # Capacity still comes from the scale-set statistic and class max=1.
+        plan = cycle.plan_capacity(total_assigned_jobs=2)
+        self.assertEqual(plan.desired_capacity, 1)
+
+    def test_controller_ledger_crash_before_reserve_retries_same_reservation_identity(self):
+        class_id = "workspace-control-control-small-v1"
+        root = self.root()
+        jit = model.GitHubJitRegistryModel()
+        ctl = model.RecoveringClassCapacityControllerModel(
+            self.controller_policy(class_id),
+            root,
+            jit,
+        )
+        ctl.begin(
+            request_id="ledger-before-reserve",
+            runner_name=self.runner_name(class_id, "before-reserve"),
+        )
+        self.assertEqual(
+            ctl.recover(request_id="ledger-before-reserve"),
+            "RETRY_RESERVE",
+        )
+        self.assertEqual(
+            ctl.durable_record("ledger-before-reserve")["state"],
+            "RESERVING",
+        )
+
+    def test_controller_recovers_lost_reserved_response_without_new_reservation(self):
+        class_id = "workspace-control-control-small-v1"
+        root = self.root()
+        jit = model.GitHubJitRegistryModel()
+        ctl = model.RecoveringClassCapacityControllerModel(
+            self.controller_policy(class_id),
+            root,
+            jit,
+        )
+        request_id = "ledger-reserve-response-lost"
+        runner_name = self.runner_name(class_id, "reserve-lost")
+        ctl.begin(request_id=request_id, runner_name=runner_name)
+        # Simulate root receiving RESERVE while controller loses the response.
+        root.reserve(
+            peer_user=self.peer(class_id),
+            request_id=request_id,
+            runner_name=runner_name,
+        )
+        self.assertEqual(ctl.recover(request_id=request_id), "GENERATE_JIT")
+        self.assertEqual(ctl.durable_record(request_id)["state"], "RESERVED")
+        self.assertEqual(len(root.records), 1)
+
+    def test_crash_after_jit_before_launch_removes_orphan_and_regenerates(self):
+        class_id = "workspace-control-control-small-v1"
+        root = self.root()
+        registry = model.GitHubJitRegistryModel()
+        ctl = model.RecoveringClassCapacityControllerModel(
+            self.controller_policy(class_id),
+            root,
+            registry,
+        )
+        request_id = "ledger-jit-crash"
+        ctl.begin(
+            request_id=request_id,
+            runner_name=self.runner_name(class_id, "jit-crash"),
+        )
+        self.assertEqual(ctl.reserve(request_id=request_id), "RESERVED")
+        raw = ctl.generate_jit(request_id=request_id)
+        record = ctl.durable_record(request_id)
+        old_runner_id = record["jit_runner_id"]
+        self.assertEqual(registry.state(old_runner_id), "REGISTERED")
+        self.assertNotIn(raw, str(record))
+        self.assertIsNotNone(record["jit_sha256"])
+
+        # Crash discards raw memory. Recovery sees root still RESERVED.
+        self.assertEqual(
+            ctl.recover(request_id=request_id),
+            "REMOVE_ORPHAN_AND_REGENERATE_JIT",
+        )
+        self.assertEqual(registry.state(old_runner_id), "REMOVED")
+        recovered = ctl.durable_record(request_id)
+        self.assertEqual(recovered["state"], "RESERVED")
+        self.assertIsNone(recovered["jit_runner_id"])
+        self.assertIsNone(recovered["jit_sha256"])
+
+        new_raw = ctl.generate_jit(request_id=request_id)
+        new_record = ctl.durable_record(request_id)
+        self.assertNotEqual(new_record["jit_runner_id"], old_runner_id)
+        self.assertEqual(
+            ctl.launch(request_id=request_id, jit_config=new_raw),
+            "ACCEPTED",
+        )
+
+    def test_expired_reservation_after_jit_requires_new_request_identity(self):
+        class_id = "workspace-control-control-small-v1"
+        root = self.root()
+        registry = model.GitHubJitRegistryModel()
+        ctl = model.RecoveringClassCapacityControllerModel(
+            self.controller_policy(class_id),
+            root,
+            registry,
+        )
+        request_id = "ledger-expired-after-jit"
+        ctl.begin(
+            request_id=request_id,
+            runner_name=self.runner_name(class_id, "expired-jit"),
+        )
+        ctl.reserve(request_id=request_id)
+        ctl.generate_jit(request_id=request_id)
+        runner_id = ctl.durable_record(request_id)["jit_runner_id"]
+        root.advance(60)
+        self.assertEqual(
+            ctl.recover(request_id=request_id),
+            "NEW_REQUEST_REQUIRED",
+        )
+        self.assertEqual(registry.state(runner_id), "REMOVED")
+        self.assertEqual(
+            ctl.durable_record(request_id)["state"],
+            "NEEDS_NEW_REQUEST",
+        )
+
+    def test_root_crash_before_unit_after_jit_recovers_failed_and_removes_orphan(self):
+        class_id = "workspace-control-control-small-v1"
+        root = self.root()
+        registry = model.GitHubJitRegistryModel()
+        ctl = model.RecoveringClassCapacityControllerModel(
+            self.controller_policy(class_id),
+            root,
+            registry,
+        )
+        request_id = "ledger-root-crash-before-unit"
+        runner_name = self.runner_name(class_id, "root-crash-before")
+        ctl.begin(request_id=request_id, runner_name=runner_name)
+        ctl.reserve(request_id=request_id)
+        raw = ctl.generate_jit(request_id=request_id)
+        runner_id = ctl.durable_record(request_id)["jit_runner_id"]
+
+        with self.assertRaises(model.ModelError):
+            root.launch(
+                peer_user=self.peer(class_id),
+                request_id=request_id,
+                runner_name=runner_name,
+                jit_config=raw,
+                fault="crash_before_unit",
+            )
+        root.reconcile_startup()
+        self.assertEqual(ctl.recover(request_id=request_id), "TERMINAL")
+        self.assertEqual(registry.state(runner_id), "REMOVED")
+        self.assertEqual(ctl.durable_record(request_id)["state"], "TERMINAL")
+
+    def test_root_crash_after_unit_before_response_recovers_accepted_without_jit_regeneration(self):
+        class_id = "workspace-control-control-small-v1"
+        root = self.root()
+        registry = model.GitHubJitRegistryModel()
+        ctl = model.RecoveringClassCapacityControllerModel(
+            self.controller_policy(class_id),
+            root,
+            registry,
+        )
+        request_id = "ledger-root-crash-after-unit"
+        runner_name = self.runner_name(class_id, "root-crash-after")
+        ctl.begin(request_id=request_id, runner_name=runner_name)
+        ctl.reserve(request_id=request_id)
+        raw = ctl.generate_jit(request_id=request_id)
+        runner_id = ctl.durable_record(request_id)["jit_runner_id"]
+
+        with self.assertRaises(model.ModelError):
+            root.launch(
+                peer_user=self.peer(class_id),
+                request_id=request_id,
+                runner_name=runner_name,
+                jit_config=raw,
+                fault="crash_after_unit",
+            )
+        root.reconcile_startup()
+        self.assertEqual(
+            ctl.recover(request_id=request_id),
+            "AWAIT_ROOT_OR_GITHUB_TERMINAL",
+        )
+        self.assertEqual(ctl.durable_record(request_id)["state"], "ACCEPTED")
+        # Do not remove/regenerate: launched runner may still be consuming it.
+        self.assertEqual(registry.state(runner_id), "REGISTERED")
+
+    def test_controller_ledger_never_persists_raw_jit_config(self):
+        class_id = "workspace-control-control-small-v1"
+        root = self.root()
+        registry = model.GitHubJitRegistryModel()
+        ctl = model.RecoveringClassCapacityControllerModel(
+            self.controller_policy(class_id),
+            root,
+            registry,
+        )
+        request_id = "ledger-no-secret"
+        ctl.begin(
+            request_id=request_id,
+            runner_name=self.runner_name(class_id, "no-secret"),
+        )
+        ctl.reserve(request_id=request_id)
+        raw = ctl.generate_jit(request_id=request_id)
+        durable = ctl.durable_record(request_id)
+        self.assertNotIn("jit_config", durable)
+        self.assertNotIn(raw, str(durable))
+        self.assertEqual(
+            durable["jit_sha256"],
+            __import__("hashlib").sha256(raw.encode()).hexdigest(),
+        )
+
     def test_same_request_status_from_wrong_class_is_fatal(self):
         root = self.root(host_max=4, project_max=4)
         a = "workspace-control-control-small-v1"
