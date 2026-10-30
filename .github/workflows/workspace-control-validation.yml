@@ -130,6 +130,16 @@ jobs:
           assert '/var/lib/workspace-ci/controller/github-token' not in source
           assert 'gh auth token > "$TMP/operator-token"' in source
           assert 'sudo -n rm -f "$V3_TOKEN" "$V3_ENV"' in source
+          assert 'V3_CANARY_PREFLIGHT_BUILD=BEGIN' in source
+          assert 'STOP_V3_CANARY_PREFLIGHT_BUILD_FAILED' in source
+          assert 'V3_WORKSPACE_CONTROL_GH_TOKEN_EXPORT=BEGIN' in source
+          assert 'STOP_GH_AUTH_TOKEN_EXPORT_FAILED' in source
+          assert 'V3_WORKSPACE_CONTROL_CREDENTIAL_RESET=PASS' in source
+          assert 'PREFLIGHT_NO_CANARY_AUTHORITY_CONSUMPTION=PASS' in source
+          assert 'PREFLIGHT_NO_CANARY_TRANSACTION_RECEIPT=PASS' in source
+          assert 'PREFLIGHT_NO_CANARY_WORKFLOW_RUN=PASS' in source
+          assert 'require_not_enabled workspace-ci-v3-reconciler.service' in source
+          assert 'require_not_enabled workspace-ci-v3-provisioner.service' in source
           assert 'timeout 420 gh run watch' in source
 
           parse_receipt = 'TX_RECEIPT="$('
