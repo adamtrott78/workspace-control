@@ -42,7 +42,7 @@
       "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
       "remote": {
         "branch": "github-actions-control-plane-protocol-redesign-v1",
-        "checkpoint_sha": "601ca411ea14045944b503a6abc70ef4aadf86d2",
+        "checkpoint_sha": "9751a52baa2df4c28975419ee119d1d7fe438c82",
         "verified": true
       },
       "local": null,
@@ -65,7 +65,7 @@
       "base_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
       "remote": {
         "branch": "github-actions-control-plane-protocol-redesign-v1",
-        "checkpoint_sha": "5439c2a38648531b995ead92f54e5ab9de55f511",
+        "checkpoint_sha": "3729fd3306381e2199b59e9517d3a5a49dc720fe",
         "verified": true
       },
       "local": null,
@@ -274,14 +274,16 @@
           "check": "Offline payload broker and cross-repo producer bridge",
           "result": "PASS",
           "evidence": [
-            "Exact workspace-control head 601ca411ea14045944b503a6abc70ef4aadf86d2 passed Workspace Control Validation #1320 / run 41003165205, including unit regression, pinned Go controller validation, and full integration contracts.",
-            "Online offline-class runners have no GPU DeviceAllow, empty CUDA_VISIBLE_DEVICES, no AF_NETLINK, ProcSubset=pid, and inaccessible exact promoted model/runtime objects.",
-            "The root-owned broker uses env -i, PrivateNetwork=yes, IPAddressDeny=any with loopback-only allow, exact GPU DeviceAllow, exact promoted model/runtime read authority, and SO_PEERCRED plus exact runner-cgroup peer authentication.",
-            "Runner and broker CPU/memory/task ceilings partition the original root-granted class envelope instead of duplicating capacity.",
-            "Migration canary inspects both systemd/cgroup envelopes without connecting to the broker or executing candidate/scientific payload.",
-            "Research Engine draft PR #283 at head 5439c2a38648531b995ead92f54e5ab9de55f511 proposes exact broker-only producer wiring; repository-only producer review PASS is durable comment 6514972948.",
-            "architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json pre-binds old/proposed workflow blobs, independent live/default-branch/containment/canary gates, and rollback that never restarts the legacy Research GPU controller.",
-            "Workspace Control PR #572 durable repository-boundary receipt comment: 6515017656.",
+            "Exact workspace-control head 9751a52baa2df4c28975419ee119d1d7fe438c82 passed Workspace Control Validation #1323 / run 41004856927, including task-contract validation, unit regression, pinned Go controller validation, and full integration contracts.",
+            "Offline classes retain GitHub control-plane networking in the online runner while granting that runner no GPU DeviceAllow, empty CUDA_VISIBLE_DEVICES, ProcSubset=pid, and no readable exact promoted model/runtime objects.",
+            "The root projection now binds offline payload execution to distinct Unix user ci-payload-research-engine rather than online runner ci-research-engine; inactive reconciliation creates that broker identity without workspace-ci-v3-provisioner or controller credential-group membership.",
+            "The payload broker uses env -i, PrivateNetwork=yes, IPAddressDeny=any with loopback-only allow, exact GPU DeviceAllow, and exact promoted model/runtime read authority.",
+            "The broker cannot access the runner job/checkout tree; payload script, cwd, receipt and artifact handoff use only the root-provided per-request staging exchange through the project group.",
+            "SO_PEERCRED authenticates the exact online-runner UID plus runner systemd cgroup while root cleanup independently proves runner-UID and broker-UID process/GPU residue are absent.",
+            "Runner and broker CPU/memory/task ceilings partition the original root-granted class envelope instead of duplicating capacity, and migration canary verification covers the distinct broker User/Group boundary without executing candidate/scientific payload.",
+            "Research Engine draft PR #283 exact head 3729fd3306381e2199b59e9517d3a5a49dc720fe contains only the two offline Qwen producer workflows; exact-head repository-only review PASS is durable comment 6515204461.",
+            "Research Engine CI #637 / run 41004695334 failed before any repository step (job 123896814599, steps=null) because private GitHub-hosted execution is unavailable; it is explicitly not accepted as code/test evidence.",
+            "architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json binds the reviewed Research Engine head and exact candidate workflow blobs while preserving independent hosted-CI, containment, live-canary, default-branch and Lambda-activation gates.",
             "No Lambda mutation, workflow dispatch, Research GPU containment change, retry-authority restoration, or Research Engine default-branch workflow cutover was performed."
           ]
         }
@@ -293,9 +295,9 @@
   "blockers": [
     "Live migration remains deliberately unauthorized: architecture/lambda-ci-v3-migration-plan.v1.json still grants live_authority=NONE. No v3 substrate, root service, class controller, canary workflow or migration transaction has been installed/activated on Lambda.",
     "All Research GPU-derived runner classes, including research-model-single-offline-v1 and research-model-dual-offline-v1, remain inherited-contained and NO_BY_DEFAULT until separate recovery/live authority explicitly consumes the legacy containment boundary.",
-    "Research Engine PR #283 remains draft/proposal-only and its exact workflow blobs are not on the default branch or in production trusted-workflow evidence. GitHub-hosted CI run 41002055202 failed before runner allocation on three attempts (ubuntu-latest, runner_id=0, zero steps), so an actual hosted CI execution is still required before any default-branch cutover review can be accepted."
+    "Research Engine PR #283 remains draft/proposal-only at exact head 3729fd3306381e2199b59e9517d3a5a49dc720fe; its reviewed workflow blobs are not on the default branch or in production trusted-workflow evidence. GitHub-hosted CI #637 / run 41004695334 failed before any repository step (steps=null), so a future hosted execution that actually allocates a runner and executes steps is still required before default-branch cutover acceptance."
   ],
-  "next_safe_action": "Repository-only v3 offline payload separation, migration-canary proof, cross-repo producer binding, and future default-branch cutover/rollback design are exact-head green at workspace-control@601ca411ea14045944b503a6abc70ef4aadf86d2 (Workspace Control Validation #1320 / run 41003165205; durable PR #572 receipt comment 6515017656). Research Engine producer changes remain isolated in draft PR #283 at 5439c2a38648531b995ead92f54e5ab9de55f511 (repository-only review comment 6514972948). The only repository-safe unresolved validation is obtaining a private-repo GitHub-hosted CI attempt that actually allocates a runner and executes steps. Do not merge/cut over PR #283, mutate Lambda, activate v3, dispatch migration canaries, or alter Research GPU containment/retry authority without separate explicit authority.",
+  "next_safe_action": "Repository-only v3 offline payload isolation is exact-head green at workspace-control@9751a52baa2df4c28975419ee119d1d7fe438c82 (Workspace Control Validation #1323 / run 41004856927): the root-owned payload broker now has a distinct Unix identity from the online Actions runner, no controller/provisioner credential-group authority, no runner job/checkout-tree access, and only the bounded per-request staging exchange. Research Engine producer changes remain isolated in draft PR #283 at 3729fd3306381e2199b59e9517d3a5a49dc720fe with exact-head repository-only review PASS comment 6515204461; CI #637 executed no repository steps and is non-evidence. Continue only with repository-safe review/validation while private hosted minutes are unavailable. Do not merge/cut over PR #283, mutate Lambda, activate v3, dispatch migration canaries, or alter Research GPU containment/retry authority without separate explicit authority.",
   "artifacts": [
     {
       "path": "architecture/github-actions-control-plane-protocol-redesign-v1.md",
@@ -528,18 +530,19 @@
     },
     {
       "path": "architecture/lambda-ci-v3-offline-payload-producer-bridge.v1.json",
-      "state": "CROSS_REPO_PROPOSAL_REVIEWED_NOT_LIVE",
+      "state": "CROSS_REPO_PROPOSAL_REVIEWED_DISTINCT_BROKER_NOT_LIVE",
       "evidence": [
-        "Records Research Engine PR #283 exact proposal head/workflow blobs and target homogeneous scale sets.",
-        "Repository-only producer self-review PASS recorded on PR #283 comment 6514972948.",
-        "Hosted CI remains non-evidence after three runner-allocation failures; current main workflow blobs remain the production trust source."
+        "Records Research Engine PR #283 exact proposal head 3729fd3306381e2199b59e9517d3a5a49dc720fe, workflow blobs and target homogeneous scale sets.",
+        "Repository-only producer self-review PASS recorded on PR #283 comment 6515204461.",
+        "Workspace Control Validation #1323 proves distinct broker Unix identity, staging-only exchange, and independent broker residue cleanup.",
+        "Research Engine CI #637 remains non-evidence because no repository step executed; current main workflow blobs remain the production trust source."
       ]
     },
     {
       "path": "architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json",
       "state": "DEFAULT_BRANCH_CUTOVER_DESIGN_REPOSITORY_VERIFIED_NOT_AUTHORIZED",
       "evidence": [
-        "Pre-binds old and reviewed candidate workflow blobs and exact target runner classes.",
+        "Pre-binds old workflow blobs and reviewed candidate blobs a3b89a89cfcd32d4d07dd0a92d012c295c5d4ea1 / bb0710fd97fd38a0788fcd6a42483b7d7bab7fbb at Research Engine head 3729fd3306381e2199b59e9517d3a5a49dc720fe.",
         "Separates hosted CI, live canary, containment recovery, default-branch cutover and Lambda activation authorities.",
         "Rollback restores workflow/policy bytes only after v3 drain and never restarts legacy Research GPU."
       ]
@@ -620,30 +623,32 @@
       "check": "Offline payload broker and cross-repo producer bridge",
       "result": "PASS",
       "evidence": [
-        "Exact workspace-control head 601ca411ea14045944b503a6abc70ef4aadf86d2 passed Workspace Control Validation #1320 / run 41003165205, including unit regression, pinned Go controller validation, and full integration contracts.",
-        "Online offline-class runners have no GPU DeviceAllow, empty CUDA_VISIBLE_DEVICES, no AF_NETLINK, ProcSubset=pid, and inaccessible exact promoted model/runtime objects.",
-        "The root-owned broker uses env -i, PrivateNetwork=yes, IPAddressDeny=any with loopback-only allow, exact GPU DeviceAllow, exact promoted model/runtime read authority, and SO_PEERCRED plus exact runner-cgroup peer authentication.",
-        "Runner and broker CPU/memory/task ceilings partition the original root-granted class envelope instead of duplicating capacity.",
-        "Migration canary inspects both systemd/cgroup envelopes without connecting to the broker or executing candidate/scientific payload.",
-        "Research Engine draft PR #283 at head 5439c2a38648531b995ead92f54e5ab9de55f511 proposes exact broker-only producer wiring; repository-only producer review PASS is durable comment 6514972948.",
-        "architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json pre-binds old/proposed workflow blobs, independent live/default-branch/containment/canary gates, and rollback that never restarts the legacy Research GPU controller.",
-        "Workspace Control PR #572 durable repository-boundary receipt comment: 6515017656.",
+        "Exact workspace-control head 9751a52baa2df4c28975419ee119d1d7fe438c82 passed Workspace Control Validation #1323 / run 41004856927, including task-contract validation, unit regression, pinned Go controller validation, and full integration contracts.",
+        "Offline classes retain GitHub control-plane networking in the online runner while granting that runner no GPU DeviceAllow, empty CUDA_VISIBLE_DEVICES, ProcSubset=pid, and no readable exact promoted model/runtime objects.",
+        "The root projection now binds offline payload execution to distinct Unix user ci-payload-research-engine rather than online runner ci-research-engine; inactive reconciliation creates that broker identity without workspace-ci-v3-provisioner or controller credential-group membership.",
+        "The payload broker uses env -i, PrivateNetwork=yes, IPAddressDeny=any with loopback-only allow, exact GPU DeviceAllow, and exact promoted model/runtime read authority.",
+        "The broker cannot access the runner job/checkout tree; payload script, cwd, receipt and artifact handoff use only the root-provided per-request staging exchange through the project group.",
+        "SO_PEERCRED authenticates the exact online-runner UID plus runner systemd cgroup while root cleanup independently proves runner-UID and broker-UID process/GPU residue are absent.",
+        "Runner and broker CPU/memory/task ceilings partition the original root-granted class envelope instead of duplicating capacity, and migration canary verification covers the distinct broker User/Group boundary without executing candidate/scientific payload.",
+        "Research Engine draft PR #283 exact head 3729fd3306381e2199b59e9517d3a5a49dc720fe contains only the two offline Qwen producer workflows; exact-head repository-only review PASS is durable comment 6515204461.",
+        "Research Engine CI #637 / run 41004695334 failed before any repository step (job 123896814599, steps=null) because private GitHub-hosted execution is unavailable; it is explicitly not accepted as code/test evidence.",
+        "architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json binds the reviewed Research Engine head and exact candidate workflow blobs while preserving independent hosted-CI, containment, live-canary, default-branch and Lambda-activation gates.",
         "No Lambda mutation, workflow dispatch, Research GPU containment change, retry-authority restoration, or Research Engine default-branch workflow cutover was performed."
       ]
     }
   ],
   "remaining_work": [
-    "Obtain a Research Engine PR #283 GitHub-hosted CI run that actually allocates a runner and executes repository steps; run 41002055202 has failed before runner allocation on three attempts and provides no code/test result.",
+    "Obtain a Research Engine PR #283 GitHub-hosted CI run that actually allocates a runner and executes repository steps; CI #637 / run 41004695334 failed before any repository step and provides no code/test result.",
     "Keep PR #283 proposal-only until a separately authorized production workflow cutover binds the exact merged default-branch blobs into controller projections/deployment generation according to architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json.",
     "Obtain separate explicit live authority before any Lambda mutation; the migration plan currently grants NONE.",
     "Under that authority, install only the exact inactive v3 substrate candidate, verify generated identities/policies/systemd/tmpfiles/state and root/reconciler health, with all nine class controllers still inactive.",
     "Deploy and bind the exact generated owner-only migration canary workflow/policy for workspace-control-control-small-v1, then execute the generation-exclusion transaction: stop/drain all v2 project controllers before starting exactly one v3 class controller, without dispatching from the transaction helper.",
     "Collect exact canary receipt and rollback/restore proof; preserve Research GPU quarantine and invalidated retry authority throughout.",
     "Advance additional public-network classes only under separate accepted live authority and in the frozen migration order; Research GPU-derived classes remain NO_BY_DEFAULT until separate containment recovery authority.",
-    "For the two offline Research model classes, require both accepted live canaries and the separate producer/default-branch cutover authority before any production route activation.",
+    "For the two offline Research model classes, require accepted live canaries, separate Research GPU containment-recovery authority, a successful hosted producer CI execution, and separate default-branch cutover authority before any production route activation.",
     "Only after accepted class canaries may old scale-set drain/retirement and broader live activation be separately authorized."
   ],
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "Repository-only implementation boundary 2026-10-30: workspace-control exact head 601ca411ea14045944b503a6abc70ef4aadf86d2 passed Workspace Control Validation #1320 / run 41003165205 and is recorded on PR #572 comment 6515017656. The offline model network class is enforced by a root-owned private-network one-shot payload broker while the online Actions runner retains GitHub control-plane traffic but no direct GPU/model/runtime authority; canary verification covers both envelopes without payload execution. Research Engine draft PR #283 proposes corresponding producer wiring at exact head 5439c2a38648531b995ead92f54e5ab9de55f511 and passed repository-only self-review comment 6514972948, but remains proposal-only/default-branch-untrusted. Its hosted CI run 41002055202 failed before runner allocation on three attempts, so no hosted test result is accepted. The future default-branch cutover/rollback is frozen in architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json. No live Lambda mutation or containment/retry change was performed. Live authority remains NONE; all Research GPU-derived classes retain inherited containment."
+  "notes": "Repository-only implementation boundary 2026-10-30: workspace-control exact head 9751a52baa2df4c28975419ee119d1d7fe438c82 passed Workspace Control Validation #1323 / run 41004856927. The offline model network class is enforced by a root-owned private-network one-shot payload broker running as distinct Unix user ci-payload-research-engine, separate from the online ci-research-engine runner; the broker has no controller/provisioner credential-group authority, cannot access the runner job/checkout tree, and shares only the per-request staging exchange. Research Engine draft PR #283 exact head 3729fd3306381e2199b59e9517d3a5a49dc720fe contains the corresponding staging-only producer wiring and passed repository-only self-review comment 6515204461, but remains proposal-only/default-branch-untrusted. CI #637 / run 41004695334 failed before any repository step and is not accepted as test evidence. No live Lambda mutation or containment/retry change was performed. Live authority remains NONE; all Research GPU-derived classes retain inherited containment."
 }
