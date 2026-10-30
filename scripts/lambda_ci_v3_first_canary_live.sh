@@ -14,7 +14,8 @@ V3_CREDENTIAL_DIR="/var/lib/workspace-ci/v3/credentials/workspace-control"
 V3_TOKEN="$V3_CREDENTIAL_DIR/github-token"
 V3_ENV="$V3_CREDENTIAL_DIR/controller.env"
 
-ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 TMP="$(mktemp -d /tmp/workspace-ci-v3-first-canary.XXXXXX)"
 SOURCE_TREE="$TMP/source"
 CANARY_OUT="$TMP/canary"
@@ -72,17 +73,46 @@ sudo -v
 command -v gh >/dev/null
 gh auth status >/dev/null
 
-test -x "$INSTALLED_TX"
-test -f "$LEGACY_TOKEN"
+require_path() {
+  local path="$1"
+  if [[ ! -e "$path" ]]; then
+    echo "STOP_MISSING_PATH=$path"
+    return 1
+  fi
+  echo "PREFLIGHT_PATH=PASS $path"
+}
+
+require_active() {
+  local unit="$1"
+  if ! systemctl is-active --quiet "$unit"; then
+    echo "STOP_EXPECTED_ACTIVE_UNIT=$unit"
+    systemctl status --no-pager --full "$unit" || true
+    return 1
+  fi
+  echo "PREFLIGHT_ACTIVE=PASS $unit"
+}
+
+require_inactive() {
+  local unit="$1"
+  if systemctl is-active --quiet "$unit"; then
+    echo "STOP_EXPECTED_INACTIVE_UNIT=$unit"
+    systemctl status --no-pager --full "$unit" || true
+    return 1
+  fi
+  echo "PREFLIGHT_INACTIVE=PASS $unit"
+}
+
+require_path "$INSTALLED_TX"
+require_path "$LEGACY_TOKEN"
 
 # Root services from Input #2 must remain active; every class stays inactive.
-systemctl is-active --quiet workspace-ci-v3-reconciler.service
-systemctl is-active --quiet workspace-ci-v3-provisioner.service
-! systemctl is-active --quiet workspace-ci-controller@research-engine-gpu.service
+require_active workspace-ci-v3-reconciler.service
+require_active workspace-ci-v3-provisioner.service
+require_inactive workspace-ci-controller@research-engine-gpu.service
 
 for class_id in   workspace-control-control-small-v1   padataset-cpu-public-v1   padataset-gpu-single-public-v1   research-cpu-public-v1   research-gpu-single-public-v1   research-gpu-single-runtime-v1   research-model-single-offline-v1   research-model-dual-offline-v1   research-model-dual-public-v1
 do
-  ! systemctl is-active --quiet "workspace-ci-v3-controller@${class_id}.service"
+  require_inactive "workspace-ci-v3-controller@${class_id}.service"
 done
 
 echo "LIVE_PREFLIGHT_ROOT_AND_CLASS_STATE=PASS"
