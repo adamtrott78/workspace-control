@@ -616,6 +616,22 @@ class ScaleSetCycleModel:
                 self.pending_acquire_ids.remove(request_id)
             self.acquired_ids.add(request_id)
 
+    def complete_scheduler_attempt(
+        self,
+        *,
+        runner_request_id: int,
+        result: str,
+    ) -> None:
+        if runner_request_id <= 0:
+            raise ProtocolFatal("completed scheduler attempt requires positive RunnerRequestID")
+        self.pending_acquire_ids.discard(runner_request_id)
+        self.acquired_ids.discard(runner_request_id)
+        # A canceled assignment may later be requeued by GitHub, potentially
+        # with new messages for the same workflow job. Local dedupe is scoped
+        # only to the current scheduler attempt.
+        if result == "canceled":
+            self.anomalies.pop(runner_request_id, None)
+
     def live_or_reserved_capacity(self) -> int:
         return sum(
             record.runner_class_id == self.runner_class_id
