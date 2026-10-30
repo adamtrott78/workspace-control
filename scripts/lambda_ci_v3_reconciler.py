@@ -15,6 +15,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import shutil
 import stat
 import subprocess
@@ -70,12 +71,25 @@ def _sha256(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
+SYSUSER_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]{0,30}$")
+
+
+def _validate_sysuser_name(name: str, *, label: str) -> str:
+    if not isinstance(name, str) or not SYSUSER_NAME_RE.fullmatch(name):
+        raise ReconcileError(
+            f"{label} is not a portable systemd sysuser/group name: {name!r}"
+        )
+    return name
+
+
 def _project_groups(migration: dict[str, Any]) -> dict[str, str]:
     groups = migration["controller_identity"]["project_credential_groups"]
     if set(groups) != {"workspace-control", "padataset", "research-engine"}:
         raise ReconcileError("project credential group set drifted")
     if len(set(groups.values())) != len(groups):
         raise ReconcileError("project credential groups must be unique")
+    for project, group in sorted(groups.items()):
+        _validate_sysuser_name(group, label=f"{project} credential group")
     return dict(groups)
 
 
@@ -87,6 +101,7 @@ def render_sysusers(
     classes = compiled["root_projection"]["runner_classes"]
     users: dict[str, str] = {}
     broker_users: dict[str, tuple[str, str]] = {}
+    _validate_sysuser_name(V3_SOCKET_GROUP, label="v3 provisioner socket group")
     lines = [
         "# Generated from compiled Lambda CI v3 root policy.\n",
         f"g {V3_SOCKET_GROUP} -\n",
@@ -96,6 +111,7 @@ def render_sysusers(
     for class_id, policy in sorted(classes.items()):
         user = policy["controller_peer"]["unix_user"]
         project = policy["project_id"]
+        _validate_sysuser_name(user, label=f"{class_id} controller user")
         if user in users:
             raise ReconcileError(
                 f"controller Unix user {user} reused by {users[user]} and {class_id}"
@@ -114,6 +130,14 @@ def render_sysusers(
                 raise ReconcileError(f"{class_id}: payload broker identity invalid")
             broker_user = str(broker["user"])
             broker_group = str(broker["group"])
+            _validate_sysuser_name(
+                broker_user,
+                label=f"{class_id} payload broker user",
+            )
+            _validate_sysuser_name(
+                broker_group,
+                label=f"{class_id} payload broker group",
+            )
             if broker_user == policy["project_runner_identity"]["user"]:
                 raise ReconcileError(
                     f"{class_id}: payload broker user equals runner user"
