@@ -34,12 +34,16 @@ activation = load(
 class FakeSystemd:
     def __init__(self, states):
         self.states = dict(states)
+        self.enabled_states = {unit: False for unit in states}
         self.events = []
         self.extra_units = []
         self.fail_start = set()
 
     def active(self, unit):
         return bool(self.states.get(unit, False))
+
+    def enabled(self, unit):
+        return bool(self.enabled_states.get(unit, False))
 
     def start(self, unit):
         self.events.append(("start", unit))
@@ -104,6 +108,7 @@ class V3RootActivationTests(unittest.TestCase):
         states = {
             activation.PROVISIONER_UNIT: False,
             activation.RECONCILER_UNIT: False,
+            activation.RESEARCH_GPU_V2_UNIT: False,
         }
         for unit in activation._class_units(self.root_policy):
             states[unit] = False
@@ -162,6 +167,8 @@ class V3RootActivationTests(unittest.TestCase):
         self.assertFalse(receipt["workflow_mutated"])
         self.assertFalse(receipt["legacy_v2_mutated"])
         self.assertFalse(receipt["containment_or_retry_authority_mutated"])
+        self.assertTrue(receipt["research_gpu_containment_preserved"])
+        self.assertFalse(receipt["v3_units_enabled"])
         self.assertEqual(receipt["provisioner_socket"], self.socket_evidence)
         self.assertTrue(self.marker().is_file())
         self.assertEqual(self.marker().stat().st_mode & 0o777, 0o600)
@@ -318,6 +325,36 @@ class V3RootActivationTests(unittest.TestCase):
                 expected_root_policy_sha256=self.root_policy["root_policy_sha256"],
                 now=fixed_now,
             )
+
+    def test_research_gpu_containment_drift_blocks_before_authority_consumption(self):
+        self.systemd.states[activation.RESEARCH_GPU_V2_UNIT] = True
+        with self.assertRaisesRegex(
+            activation.RootActivationError,
+            "inherited containment drifted",
+        ):
+            self.apply()
+        self.assertFalse(self.marker().exists())
+        self.assertEqual(self.systemd.events, [])
+
+    def test_enabled_v3_unit_blocks_transient_activation_before_authority_consumption(self):
+        self.systemd.enabled_states[activation.PROVISIONER_UNIT] = True
+        with self.assertRaisesRegex(
+            activation.RootActivationError,
+            "enabled for boot persistence",
+        ):
+            self.apply()
+        self.assertFalse(self.marker().exists())
+        self.assertEqual(self.systemd.events, [])
+
+    def test_helper_source_never_enables_or_restarts_v3_services(self):
+        source = (ROOT / "scripts/lambda_ci_v3_root_activation.py").read_text()
+        for forbidden in (
+            '["systemctl", "enable"',
+            '["systemctl", "restart"',
+            "systemctl enable ",
+            "systemctl restart ",
+        ):
+            self.assertNotIn(forbidden, source)
 
     def test_existing_root_service_blocks_without_mutation_or_authority_consumption(self):
         self.systemd.states[activation.RECONCILER_UNIT] = True
