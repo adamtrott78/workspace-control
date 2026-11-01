@@ -24,16 +24,13 @@ import sys
 import tempfile
 
 
-PLANNED_USERS = (
-    "workspace-shell-mcp",
-    "workspace-shell-exec",
-    "workspace-shell-tunnel",
+PLANNED_IDENTITIES = (
+    {"name": "workspace-shell-mcp", "uid": 41010, "gid": 41010},
+    {"name": "workspace-shell-exec", "uid": 41011, "gid": 41011},
+    {"name": "workspace-shell-tunnel", "uid": 41012, "gid": 41012},
 )
-PLANNED_GROUPS = (
-    "workspace-shell-mcp",
-    "workspace-shell-exec",
-    "workspace-shell-tunnel",
-)
+PLANNED_USERS = tuple(item["name"] for item in PLANNED_IDENTITIES)
+PLANNED_GROUPS = tuple(item["name"] for item in PLANNED_IDENTITIES)
 PLANNED_UNITS = (
     "workspace-shell-job-launcher.service",
     "workspace-shell-root-broker.service",
@@ -148,6 +145,44 @@ def group_meta(name):
         "name": name,
         "gid": entry.gr_gid,
         "members": list(entry.gr_mem),
+    }
+
+
+def uid_meta(uid):
+    try:
+        entry = pwd.getpwuid(uid)
+    except KeyError:
+        return {"exists": False, "uid": uid}
+    return {
+        "exists": True,
+        "uid": uid,
+        "name": entry.pw_name,
+        "gid": entry.pw_gid,
+    }
+
+
+def gid_meta(gid):
+    try:
+        entry = grp.getgrgid(gid)
+    except KeyError:
+        return {"exists": False, "gid": gid}
+    return {
+        "exists": True,
+        "gid": gid,
+        "name": entry.gr_name,
+        "members": list(entry.gr_mem),
+    }
+
+
+def identity_meta(item):
+    return {
+        "name": item["name"],
+        "uid": item["uid"],
+        "gid": item["gid"],
+        "name_user": account_meta(item["name"]),
+        "name_group": group_meta(item["name"]),
+        "numeric_uid": uid_meta(item["uid"]),
+        "numeric_gid": gid_meta(item["gid"]),
     }
 
 
@@ -350,6 +385,9 @@ def main():
     dependency_source = path_meta(args.heartbeat_node_modules)
     listener = listener_meta(args.port)
     bwrap = bwrap_probe(commands["bwrap"]["path"] if commands["bwrap"]["exists"] else None)
+    identities = [identity_meta(item) for item in PLANNED_IDENTITIES]
+    planned_paths = [path_meta(path) for path in PLANNED_PATHS]
+    planned_units = [systemd_unit_meta(unit) for unit in PLANNED_UNITS]
 
     blockers = []
     provisioning_requirements = []
@@ -371,10 +409,42 @@ def main():
         blockers.append("workspace-control source repository is missing")
     if args.source_sha and source.get("requested_sha_exists", {}).get("returncode") != 0:
         blockers.append("requested source SHA is absent from the local source repository")
+    if args.source_sha and (source.get("head") or {}).get("stdout") != args.source_sha:
+        blockers.append("workspace-control source HEAD does not equal requested source SHA")
+    if (source.get("status") or {}).get("returncode") != 0:
+        blockers.append("workspace-control source status could not be read")
+    elif (source.get("status") or {}).get("stdout"):
+        blockers.append("workspace-control source checkout is dirty")
     if listener.get("occupied") is True:
         blockers.append(f"planned loopback port {args.port} is already occupied")
     if bwrap.get("attempted") and not bwrap.get("passed"):
         blockers.append("bubblewrap exists but namespace probe failed")
+
+    for identity in identities:
+        name = identity["name"]
+        if identity["name_user"].get("exists"):
+            blockers.append(f"planned user name already exists: {name}")
+        if identity["name_group"].get("exists"):
+            blockers.append(f"planned group name already exists: {name}")
+        if identity["numeric_uid"].get("exists"):
+            blockers.append(
+                f"planned UID {identity['uid']} already belongs to "
+                f"{identity['numeric_uid'].get('name')}"
+            )
+        if identity["numeric_gid"].get("exists"):
+            blockers.append(
+                f"planned GID {identity['gid']} already belongs to "
+                f"{identity['numeric_gid'].get('name')}"
+            )
+
+    for meta in planned_paths:
+        if meta.get("exists") is not False:
+            blockers.append(f"planned Workspace Shell path already exists or is unreadable: {meta['path']}")
+
+    for meta in planned_units:
+        properties = meta.get("properties") or {}
+        if meta.get("returncode") != 0 or properties.get("LoadState") != "not-found":
+            blockers.append(f"planned Workspace Shell unit already exists or is not inspectable: {meta['unit']}")
 
     evidence = {
         "schema": "workspace-shell-host-attestation.v1",
@@ -399,10 +469,11 @@ def main():
         "source": source,
         "dependency_source": dependency_source,
         "planned_listener": listener,
+        "planned_identities": identities,
         "planned_users": [account_meta(name) for name in PLANNED_USERS],
         "planned_groups": [group_meta(name) for name in PLANNED_GROUPS],
-        "planned_paths": [path_meta(path) for path in PLANNED_PATHS],
-        "planned_units": [systemd_unit_meta(unit) for unit in PLANNED_UNITS],
+        "planned_paths": planned_paths,
+        "planned_units": planned_units,
         "heartbeat_listener": listener_meta(8787),
         "blockers": blockers,
         "provisioning_requirements": provisioning_requirements,
