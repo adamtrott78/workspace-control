@@ -24,6 +24,7 @@ FINAL_HOST_ATTEST = PLUGIN / "install" / "evidence" / "lambda-host-attestation.f
 COMMISSIONING_SOURCE_SHA = "f999b25a866f25c95243cbbd6d1377a799fafb78"
 COMMISSIONING_ATTEST_SHA256 = "d44cda1f6f13f814e093bef9228410f319d504c76cf80ba8e6d2ecbb8d321353"
 DESIGN_AUTHORITY_SHA = "0c24e42ea57a3e23af01351a5974d5f09f3ce319"
+TEST_RUNTIME_SOURCE_SHA = "d" * 40
 AUTHORITY_ARTIFACT = ROOT / "architecture" / "workspace-shell-mcp-authority-v2.json"
 sys.path.insert(0, str(ROOT_CODE))
 
@@ -229,6 +230,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
                     "--attestation", str(attestation),
                     "--output-dir", str(out),
                     "--source-sha", "a" * 40,
+                    "--runtime-source-sha", TEST_RUNTIME_SOURCE_SHA,
                     "--design-authority-sha", "c" * 40,
                     "--policy-artifact-sha256", hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
                 ],
@@ -241,6 +243,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
             self.assertEqual(proc.returncode, 0, proc.stderr)
             manifest = json.loads((out / "install-manifest.json").read_text())
             self.assertEqual(manifest["source_sha"], "a" * 40)
+            self.assertEqual(manifest["runtime_source_sha"], TEST_RUNTIME_SOURCE_SHA)
             self.assertFalse(manifest["privileged_helpers_enabled"])
             self.assertEqual(
                 manifest["operator_trust_store_state"],
@@ -316,6 +319,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
                     "--attestation", str(attestation),
                     "--output-dir", str(bundle),
                     "--source-sha", "a" * 40,
+                    "--runtime-source-sha", TEST_RUNTIME_SOURCE_SHA,
                     "--design-authority-sha", "c" * 40,
                     "--policy-artifact-sha256",
                     hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
@@ -393,6 +397,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
                     "--attestation", str(attestation),
                     "--output-dir", str(out),
                     "--source-sha", "a" * 40,
+                    "--runtime-source-sha", TEST_RUNTIME_SOURCE_SHA,
                     "--design-authority-sha", "c" * 40,
                     "--policy-artifact-sha256",
                     hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
@@ -447,6 +452,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
                     "--attestation", str(FINAL_HOST_ATTEST),
                     "--output-dir", str(out),
                     "--source-sha", COMMISSIONING_SOURCE_SHA,
+                    "--runtime-source-sha", TEST_RUNTIME_SOURCE_SHA,
                     "--design-authority-sha", DESIGN_AUTHORITY_SHA,
                     "--policy-artifact-sha256",
                     hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
@@ -466,6 +472,10 @@ class WorkspaceShellContractTests(unittest.TestCase):
             self.assertEqual(
                 manifest["source_sha"],
                 COMMISSIONING_SOURCE_SHA,
+            )
+            self.assertEqual(
+                manifest["runtime_source_sha"],
+                TEST_RUNTIME_SOURCE_SHA,
             )
             self.assertEqual(
                 manifest["design_authority_sha"],
@@ -511,6 +521,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
                     "--attestation", str(attestation),
                     "--output-dir", str(out),
                     "--source-sha", "a" * 40,
+                    "--runtime-source-sha", TEST_RUNTIME_SOURCE_SHA,
                     "--design-authority-sha", "c" * 40,
                     "--policy-artifact-sha256", hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
                 ],
