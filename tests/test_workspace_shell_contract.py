@@ -593,6 +593,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
             ],
         )
         self.assertEqual(good["argv"][-2:], ["rev-parse", "HEAD"])
+        self.assertIn("safe.directory=/workspace", good["argv"])
         self.assertEqual(good["env"]["GIT_TERMINAL_PROMPT"], "0")
 
         with self.assertRaisesRegex(
