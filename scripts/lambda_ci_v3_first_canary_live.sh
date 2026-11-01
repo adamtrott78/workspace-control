@@ -2,6 +2,7 @@
 set -euo pipefail
 
 BASE_SOURCE_HEAD="09c46818252991f6a55aaeedbcf046c554e2ffee"
+CONTROLLER_SOURCE_HEAD="b0e3c490c277deaf06e86138f84e27d40a3e5007"
 TARGET_CLASS="workspace-control-control-small-v1"
 TARGET_SCALE_SET="lambda-workspace-control-control-small"
 WORKFLOW_PATH=".github/workflows/workspace-ci-v3-migration-canary-workspace-control-control-small-v1.yml"
@@ -209,7 +210,7 @@ CANARY_RUN_META="$(
     -f event=workflow_dispatch \
     -f branch=main \
     -f per_page=100 \
-    --jq '[length, (map(select(.status != "completed")) | length)] | @tsv'
+    --jq '.workflow_runs | [length, (map(select(.status != "completed")) | length)] | @tsv'
 )"
 CANARY_RUN_HISTORY_RC=$?
 set -e
@@ -246,11 +247,22 @@ assert manifest["route_state"] == "DISABLED"
 print("BASE_INSTALLED_GENERATION_BINDING=PASS")
 PY
 
+echo "CONTROLLER_SOURCE_EQUIVALENCE_CHECK=BEGIN"
+git -C "$ROOT" cat-file -e "$CONTROLLER_SOURCE_HEAD^{commit}"
+if ! git -C "$ROOT" diff --quiet \
+  "$CONTROLLER_SOURCE_HEAD" "$SOURCE_HEAD" -- \
+  controller/lambda-ci-controller
+then
+  echo "STOP_CONTROLLER_SOURCE_DRIFT"
+  exit 1
+fi
+echo "CONTROLLER_SOURCE_EQUIVALENCE=PASS head=$CONTROLLER_SOURCE_HEAD"
+
 echo "CONTROLLER_OVERRIDE_BINDING_CHECK=BEGIN"
 if ! sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 \
   "$ROOT/scripts/lambda_ci_v3_controller_refresh.py" \
   --verify-active \
-  --expected-source-head "$SOURCE_HEAD" \
+  --expected-source-head "$CONTROLLER_SOURCE_HEAD" \
   --base-source-head "$BASE_SOURCE_HEAD"
 then
   echo "STOP_CONTROLLER_OVERRIDE_BINDING_FAILED"
