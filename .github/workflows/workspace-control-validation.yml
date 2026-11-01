@@ -139,13 +139,18 @@ jobs:
           assert 'PREFLIGHT_NO_CANARY_TRANSACTION_RECEIPT=PASS' in source
           assert 'PREFLIGHT_NO_CANARY_WORKFLOW_RUN=PASS' in source
           assert 'gh api --method GET' in source
-          assert '"repos/$REPOSITORY/actions/runs"' in source
+          assert 'gh api --method POST' in source
+          assert '"repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/runs"' in source
+          assert '"repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/dispatches"' in source
+          assert '"repos/$REPOSITORY/actions/runs/$RUN_ID"' in source
           assert '-f event=workflow_dispatch' in source
           assert '-f branch=main' in source
-          assert 'gh run list' not in source
+          assert 'gh run ' not in source
+          assert 'gh workflow run' not in source
+          assert 'STOP_CANARY_RUN_TIMEOUT' in source
+          assert 'CANARY_TERMINAL=PASS' in source
           assert 'require_not_enabled workspace-ci-v3-reconciler.service' in source
           assert 'require_not_enabled workspace-ci-v3-provisioner.service' in source
-          assert 'timeout 420 gh run watch' in source
 
           parse_receipt = 'TX_RECEIPT="$('
           apply_failure = 'if [[ "$APPLY_RC" -ne 0 ]]; then'
