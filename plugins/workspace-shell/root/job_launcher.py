@@ -145,6 +145,7 @@ def resolve_profile(manifest, profile, argv):
             "-c", "core.fsmonitor=false",
             "-c", "diff.external=",
             "-c", "credential.helper=",
+            "-c", "safe.directory=/workspace",
             *argv,
         ]
         env = {
