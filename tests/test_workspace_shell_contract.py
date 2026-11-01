@@ -24,6 +24,7 @@ VALIDATE_TUNNEL_DOCTOR = PLUGIN / "install" / "validate_tunnel_doctor.py"
 ACTIVATE_LIVE = PLUGIN / "install" / "activate_live.sh"
 FRONTEND_ACCESS_REPAIR = PLUGIN / "install" / "repair_frontend_config_access_v1.sh"
 WORKER_PROC_REPAIR = PLUGIN / "install" / "repair_worker_proc_bootstrap_v1.sh"
+WORKER_SCRATCH_REPAIR = PLUGIN / "install" / "repair_worker_scratch_root_v1.sh"
 SYSUSERS = PLUGIN / "install" / "sysusers.conf"
 TMPFILES = PLUGIN / "install" / "tmpfiles.conf"
 FINAL_HOST_ATTEST = PLUGIN / "install" / "evidence" / "lambda-host-attestation.f999b25a.json"
@@ -926,6 +927,30 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertNotIn('systemctl enable ', source)
         self.assertNotIn('runtime-key', source)
         self.assertNotIn('ACTIVATE_WORKSPACE_SHELL', source)
+
+    def test_worker_scratch_root_repair_is_traverse_only_and_source_pinned(self):
+        proc = subprocess.run(
+            ["bash", "-n", str(WORKER_SCRATCH_REPAIR)],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        source = WORKER_SCRATCH_REPAIR.read_text()
+        self.assertIn(
+            'EXPECTED_SOURCE_SHA="01a95b61410e2f427b9885a19e6a0b9c5ee60a38"',
+            source,
+        )
+        self.assertIn('sudo chmod 0711 "$SCRATCH_ROOT"', source)
+        self.assertIn('sudo -u "$WORKER_USER" test -x "$SCRATCH_ROOT"', source)
+        self.assertIn('sudo -u "$WORKER_USER" test -r "$SCRATCH_ROOT"', source)
+        self.assertIn('sudo -u "$WORKER_USER" test ! -w "$SCRATCH_ROOT"', source)
+        self.assertIn('WORKER_TRAVERSE_ONLY=PASS', source)
+        self.assertNotIn('systemctl restart', source)
+        self.assertNotIn('systemctl enable ', source)
+        self.assertNotIn('runtime-key', source)
 
     def test_independent_filtered_remote_clone_can_materialize_historical_source(self):
         with tempfile.TemporaryDirectory() as td:
