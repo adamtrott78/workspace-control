@@ -20,6 +20,7 @@ HOST_ATTEST = PLUGIN / "install" / "host_attest.py"
 RENDER_INSTALL = PLUGIN / "install" / "render_install.py"
 SEAL_INSTALL = PLUGIN / "install" / "seal_install.py"
 RENDER_TUNNEL_PROFILE = PLUGIN / "install" / "render_tunnel_profile.py"
+VALIDATE_TUNNEL_DOCTOR = PLUGIN / "install" / "validate_tunnel_doctor.py"
 ACTIVATE_LIVE = PLUGIN / "install" / "activate_live.sh"
 SYSUSERS = PLUGIN / "install" / "sysusers.conf"
 FINAL_HOST_ATTEST = PLUGIN / "install" / "evidence" / "lambda-host-attestation.f999b25a.json"
@@ -603,6 +604,66 @@ class WorkspaceShellContractTests(unittest.TestCase):
             self.assertNotIn("sk-", profile)
             self.assertNotIn("channel=main,url=", profile)
 
+    def test_tunnel_doctor_gate_accepts_only_known_v0018_mtls_false_negative(self):
+        base_checks = [
+            {"id": "config_source", "status": "PASS", "summary": "profile: workspace-shell-production"},
+            {"id": "profile_load", "status": "PASS", "summary": "/etc/workspace-shell/tunnel-client-profiles/workspace-shell-production.yaml"},
+            {"id": "tunnel_id", "status": "PASS", "summary": "tunnel_" + "a" * 32},
+            {"id": "control_plane_api_key", "status": "PASS", "summary": "configured"},
+            {"id": "mcp_target", "status": "PASS", "summary": "https://127.0.0.1:8797/mcp"},
+            {"id": "mcp_server_reachable", "status": "PASS", "summary": "TCP connect succeeded to 127.0.0.1:8797; HTTP request failed: remote error: tls: certificate required"},
+            {"id": "oauth_metadata", "status": "FAIL", "summary": "oauth discovery GET https://127.0.0.1:8797: remote error: tls: certificate required"},
+            {"id": "health_listener", "status": "PASS", "summary": "ephemeral bind ok"},
+            {"id": "ui", "status": "PASS", "summary": "ephemeral port"},
+            {"id": "codex_plugin", "status": "SKIP", "summary": "Codex not detected locally"},
+        ]
+        with tempfile.TemporaryDirectory() as td:
+            report = Path(td) / "doctor.json"
+            report.write_text(json.dumps({
+                "result": "fail",
+                "failed_checks": ["oauth_metadata"],
+                "checks": base_checks,
+            }))
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(VALIDATE_TUNNEL_DOCTOR),
+                    "--report", str(report),
+                    "--exit-code", "2",
+                ],
+                cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertIn(
+                "TUNNEL_DOCTOR_GATE=KNOWN_V0_0_18_MTLS_DIAGNOSTIC_LIMITATION",
+                proc.stdout,
+            )
+
+            bad = json.loads(report.read_text())
+            bad["failed_checks"] = ["oauth_metadata", "health_listener"]
+            for check in bad["checks"]:
+                if check["id"] == "health_listener":
+                    check["status"] = "FAIL"
+            report.write_text(json.dumps(bad))
+            rejected = subprocess.run(
+                [
+                    sys.executable,
+                    str(VALIDATE_TUNNEL_DOCTOR),
+                    "--report", str(report),
+                    "--exit-code", "2",
+                ],
+                cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10,
+            )
+            self.assertNotEqual(rejected.returncode, 0)
+
     def test_live_lambda_host_attestation_when_explicitly_requested(self):
         event_path = os.environ.get("GITHUB_EVENT_PATH")
         if not event_path or not Path(event_path).is_file():
@@ -740,7 +801,10 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertNotIn('tunnel-client init', source)
         self.assertNotIn('--mcp-server-url "channel=main,url=', source)
         self.assertIn('LOCAL_MTLS_HEALTH=PASS', source)
-        self.assertIn('TUNNEL_DOCTOR=PASS', source)
+        self.assertIn('validate_tunnel_doctor.py', source)
+        self.assertIn('TUNNEL_DOCTOR_GATE=KNOWN_V0_0_18_MTLS_DIAGNOSTIC_LIMITATION', source)
+        self.assertIn('PASS_WITH_KNOWN_V0_0_18_MTLS_DIAGNOSTIC_LIMITATION', source)
+        self.assertIn('=== SECURE MCP TUNNEL DIAGNOSTICS: BEGIN ===', source)
         self.assertIn('TUNNEL_READY=PASS', source)
         self.assertIn('SERVICES_ACTIVE_BOOT_DISABLED=PASS', source)
         self.assertIn('workspace-shell-disable', source)
