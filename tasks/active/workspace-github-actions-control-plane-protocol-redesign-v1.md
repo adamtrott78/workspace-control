@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: e8d879305ce8d016b06903cf3dc839861fe0e228
+- Remote checkpoint: 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa
 - Remote verified: true
 
 ### research-engine
@@ -43,21 +43,23 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-LIVE MIGRATION IS PARTIALLY COMPLETE. Do NOT repeat Input #1 or Input #2. The latest Lambda Input #3 attempt at prior head 7d324814aeca24e18ef6f1df51c9ecbcd958fbb1 failed safely before credential install, canary authority creation, generation exclusion, controller mutation, or workflow dispatch. Live output re-proved all preflight invariants and reached V3_WORKSPACE_CONTROL_GH_TOKEN_VERIFY=BEGIN after a successful `gh auth token` export, then stopped with STOP_GH_AUTH_TOKEN_VERIFY_FAILED rc=1. Root cause is now proven in the operator implementation: the compatibility patch used `tr -d '\\r\\n'`, which does not remove CR/LF, so the exported token was reinjected incorrectly; the fallback Python regex also used double-escaped whitespace classes. The corrected operator is exact head e8d879305ce8d016b06903cf3dc839861fe0e228, script blob 131b47b36cf3e5350a38e2a34f4614a40822fb09, Workspace Control Validation #1375 / run 41258778360 SUCCESS. It now reads the exported token byte-safely with `IFS= read -r`, verifies the exact token through GH_TOKEN, unsets it, and fixes the fallback regex. CI explicitly forbids the old bad escaped forms. Next safe action: execute exactly scripts/lambda_ci_v3_first_canary_live.sh from head e8d879305ce8d016b06903cf3dc839861fe0e228 on Lambda. Any STOP marker is terminal for that attempt; otherwise allow exactly one workspace-control-control-small-v1 canary and exact v2 prestate rollback.
+INPUT #3 IS ACCEPTED. The initial live v3 proof for workspace-control-control-small-v1 succeeded end-to-end at exact controller/source head 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa. Do NOT repeat Input #1, Input #2, or the workspace-control first canary. The accepted canary run is 41264356722 and the operator proved exact rollback, root services still active, all v3 class controllers inactive, and Research GPU containment preserved. Next migration-order target is padataset-cpu-public-v1. Before any live mutation, prepare and validate a separate one-class canary package/authority for that target, preserving generation exclusion, exact rollback, and all Research GPU-derived NO_BY_DEFAULT containment.
 
 ## Remaining work
 
-- Execute the exact-head-green corrected Input #3 operator at e8d879305ce8d016b06903cf3dc839861fe0e228 / script blob 131b47b36cf3e5350a38e2a34f4614a40822fb09. It must re-prove all live invariants before creating authority.
-- Complete exactly one workspace-control-control-small-v1 generation-exclusion canary: create one-shot authority, prove v2 drain, activate only target v3 controller, dispatch only the owner-only canary through REST, require terminal success, prove v3 execution/resource drain, then restore exact captured v2 prestate.
-- After accepted first canary, advance additional public-network classes only in frozen migration order under separately accepted live authority.
-- Keep all Research GPU-derived classes NO_BY_DEFAULT until separate containment-recovery authority; keep Research Engine PR #283 proposal-only until separate default-branch producer cutover authority.
+- Prepare the migration-order #2 canary for padataset-cpu-public-v1 under a new separately validated one-shot ACTIVATE_ONE_V3_CANARY authority. Do not reuse the consumed workspace-control authority or transaction.
+- Execute padataset-cpu-public-v1 canary only after exact repository validation and live preflight prove all v2/v3 transients drained, the existing v3 root services healthy, and every non-target v3 class inactive.
+- After PADataset CPU acceptance, prepare migration-order #3 padataset-gpu-single-public-v1 canary with the same generation-exclusion/rollback discipline.
+- Keep research-cpu-public-v1 inactive unless separately authorized; keep all Research GPU-derived classes NO_BY_DEFAULT until separate containment-recovery authority.
+- Keep Research Engine PR #283 proposal-only until separate default-branch producer cutover authority.
 
 ## Blockers / gates
 
-- One operator action on Lambda remains: execute corrected Input #3 head e8d879305ce8d016b06903cf3dc839861fe0e228. The prior token-verification stop was caused by a double-escaping bug in the operator, not by GitHub authentication or token expiry.
-- Lambda root services are already live from successful Input #2; do not repeat ACTIVATE_V3_ROOT_SERVICES.
-- All Research GPU-derived runner classes remain inherited-contained and NO_BY_DEFAULT. Do not start workspace-ci-controller@research-engine-gpu.service, restore retry authority, or advance any Research GPU-derived v3 class.
-- Research Engine PR #283 remains draft/proposal-only at exact head 6165556086b73d2076f205f11ec7b988150f23dd; no default-branch producer cutover is authorized.
+- No blocker remains for the accepted workspace-control first canary; it is complete and must not be repeated.
+- Further live migration requires a new separately bound one-shot canary authority per class, beginning with padataset-cpu-public-v1.
+- Research CPU activation remains separately gated.
+- All Research GPU-derived runner classes remain inherited-contained and NO_BY_DEFAULT.
+- Research Engine PR #283 remains draft/proposal-only; no default-branch producer cutover is authorized.
 
 ## Fresh-chat initialization
 
