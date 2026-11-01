@@ -1,0 +1,111 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-shell-mcp-v1",
+  "design_id": "WORKSPACE_SHELL_MCP_AUTHORITY_V2",
+  "status": "IMPLEMENTATION_ACTIVE_HOST_ATTESTATION_REQUIRED",
+  "supersedes": {
+    "design_id": "WORKSPACE_SHELL_MCP_AUTHORITY_V1",
+    "scope": "External independent-review gates and review-record bindings only. All least-privilege, isolation, provenance, replay, receipt, timeout, cancellation, and rollback controls remain in force."
+  },
+  "operator_policy": {
+    "effective_date": "2026-10-28",
+    "external_independent_review_gate": false,
+    "implementation_loop": "implement -> exact-head CI/adversarial self-review -> fix -> continue",
+    "live_activation": "requires validated host-specific installation evidence and explicit operator activation authority"
+  },
+  "control_plane": {
+    "principals": [
+      "workspace-shell-tunnel",
+      "workspace-shell-mcp",
+      "root-owned workspace-shell-job-launcher",
+      "workspace-shell-exec",
+      "root-owned workspace-shell-root-broker"
+    ],
+    "invariants": [
+      "workspace-shell-exec is a hostile repository-code principal distinct from frontend/tunnel/root services",
+      "worker has no tunnel/frontend/broker/job-launcher credentials or control sockets",
+      "ordinary execution is limited to the frozen profile grammar and exact task/source binding",
+      "root broker never accepts generic root argv, shell, sudo, package-manager, or systemctl authority",
+      "Heartbeat remains separate and receives no Workspace Shell execution authority"
+    ]
+  },
+  "unprivileged_execution": {
+    "target": "workspace-control",
+    "profiles": [
+      "git-read",
+      "pytest-bounded",
+      "validation-bounded"
+    ],
+    "max_wall_ms": 90000,
+    "output_bytes_per_stream": 65536,
+    "network": "deny",
+    "source_policy": "git-read may inspect a dirty exact-SHA checkout; profiles that execute repository code require clean source and disposable scratch copy",
+    "cancellation": "caller disconnect/timeout terminates the transient cgroup and verifies cleanup"
+  },
+  "privileged_approval": {
+    "schema": "workspace-shell-approval.v2",
+    "issuer": "operator-controlled Ed25519 signer outside Lambda and outside ChatGPT/MCP/tunnel/frontend/worker/broker identities",
+    "external_reviewer_record_required": false,
+    "max_lifetime_seconds": 900,
+    "max_uses": 1,
+    "required_bindings": [
+      "approval_id",
+      "issuer_key_id",
+      "issued_at",
+      "expires_at",
+      "task_id",
+      "target",
+      "design_authority_sha",
+      "policy_artifact_sha256",
+      "helper_registry_version",
+      "helper_registry_sha256",
+      "helper_entry_sha256",
+      "helper_id",
+      "helper_sha256",
+      "expected_source_repository",
+      "expected_source_commit",
+      "expected_source_tree",
+      "operation",
+      "parameter_schema_sha256",
+      "parameter_digest_sha256",
+      "nonce",
+      "idempotency_key",
+      "max_uses"
+    ],
+    "enforcement": [
+      "root broker verifies frontend SO_PEERCRED and frontend Ed25519 request signature",
+      "root broker independently verifies operator approval signature against root-owned trust/revocation stores",
+      "approval ID, nonce, and idempotency key are consumed durably before mutation",
+      "helper registry, helper entry, helper bytes, parameters, source commit and source tree are recomputed and exact-bound",
+      "registered helper must be enabled and executes inside a bounded transient cgroup with declared confinement"
+    ]
+  },
+  "receipts": {
+    "ownership": "root:workspace-shell-mcp",
+    "mode": "0640",
+    "directory": "root:workspace-shell-mcp 0750",
+    "frontend_access": "read-only",
+    "chain_state": "root-only",
+    "output": "bounded returned bytes with full-stream SHA256 and observed byte counts"
+  },
+  "installation_gate": {
+    "required_before_apply": [
+      "read-only host attestation",
+      "exact source/runtime/dependency provenance",
+      "distinct UID/GID and path collision checks",
+      "bubblewrap/user-namespace/cgroup-v2 capability check",
+      "loopback port availability",
+      "systemd unit/config render validation",
+      "dedicated tunnel identity and mTLS material distinct from Heartbeat",
+      "operator activation instruction"
+    ],
+    "prohibited_before_apply": [
+      "OS principal creation",
+      "systemd installation/enable/start",
+      "tunnel credential provisioning",
+      "TLS/signing key provisioning",
+      "root broker/job launcher activation",
+      "live Workspace Shell execution"
+    ]
+  }
+}
