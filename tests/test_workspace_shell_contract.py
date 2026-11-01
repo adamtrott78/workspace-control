@@ -1110,6 +1110,8 @@ class WorkspaceShellContractTests(unittest.TestCase):
 
         joined = "\n".join(command)
         self.assertIn("--unshare-all", command)
+        self.assertIn("--proc", command)
+        self.assertIn("/proc", command)
         self.assertIn("--cap-drop", command)
         self.assertIn("ALL", command)
         self.assertNotIn("/run/workspace-shell-control", joined)
