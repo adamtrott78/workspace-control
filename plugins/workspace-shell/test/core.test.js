@@ -115,8 +115,9 @@ test("profile grammars reject shell/interpreter/config escape shapes", () => {
 test("task authority is read from the trusted authority root and target-bound", () => {
   const root = mkdtempSync(path.join(os.tmpdir(), "workspace-shell-task-"));
   mkdirSync(path.join(root, "tasks", "active"), { recursive: true });
+  const taskPath = path.join(root, "tasks", "active", "task-abc.json");
   writeFileSync(
-    path.join(root, "tasks", "active", "task-abc.json"),
+    taskPath,
     JSON.stringify({
       schema_version: 2,
       task_id: "task-abc",
@@ -127,7 +128,9 @@ test("task authority is read from the trusted authority root and target-bound", 
         remote: { checkpoint_sha: "a".repeat(40) },
       }],
     }),
+    { mode: 0o644 },
   );
+  chmodSync(taskPath, 0o644);
   const result = authorizeTaskExecution({
     authorityRoot: root,
     taskId: "task-abc",
@@ -136,6 +139,20 @@ test("task authority is read from the trusted authority root and target-bound", 
     authorityOwnerUid: typeof process.getuid === "function" ? process.getuid() : null,
   });
   assert.equal(result.repository.name, "workspace-control");
+
+  chmodSync(taskPath, 0o664);
+  assert.throws(
+    () =>
+      authorizeTaskExecution({
+        authorityRoot: root,
+        taskId: "task-abc",
+        target: "workspace-control",
+        expectedSha: "a".repeat(40),
+        authorityOwnerUid: typeof process.getuid === "function" ? process.getuid() : null,
+      }),
+    /AUTHORITY_MODE_INVALID/,
+  );
+  chmodSync(taskPath, 0o644);
   assert.throws(
     () =>
       authorizeTaskExecution({
