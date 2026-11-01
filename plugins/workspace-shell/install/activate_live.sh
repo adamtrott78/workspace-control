@@ -284,7 +284,8 @@ sudo python3 -m py_compile \
   /opt/workspace-shell/runtime/plugins/workspace-shell/root/job_launcher.py \
   /opt/workspace-shell/runtime/plugins/workspace-shell/root/root_broker.py \
   /opt/workspace-shell/runtime/plugins/workspace-shell/root/runtime_common.py \
-  /opt/workspace-shell/runtime/plugins/workspace-shell/install/render_tunnel_profile.py
+  /opt/workspace-shell/runtime/plugins/workspace-shell/install/render_tunnel_profile.py \
+  /opt/workspace-shell/runtime/plugins/workspace-shell/install/validate_tunnel_doctor.py
 echo "STAGED_RUNTIME_TESTS=PASS"
 
 echo "=== INSTALL STATIC FAIL-CLOSED CONFIG ==="
@@ -474,12 +475,36 @@ sudo chmod 0600 /etc/workspace-shell/tunnel/runtime-key
 echo "TUNNEL_RUNTIME_KEY_STAGED=PASS"
 
 echo "=== TUNNEL DOCTOR ==="
+DOCTOR_REPORT="$TMP/tunnel-doctor.json"
+DOCTOR_RC=0
 sudo -u workspace-shell-tunnel env HOME=/var/lib/workspace-shell/tunnel \
   /opt/workspace-shell/bin/tunnel-client doctor \
   --profile "$PROFILE" \
   --profile-dir /etc/workspace-shell/tunnel-client-profiles \
-  --explain
-echo "TUNNEL_DOCTOR=PASS"
+  --json >"$DOCTOR_REPORT" || DOCTOR_RC=$?
+
+DOCTOR_GATE="$(
+  /usr/bin/python3 /opt/workspace-shell/runtime/plugins/workspace-shell/install/validate_tunnel_doctor.py \
+    --report "$DOCTOR_REPORT" \
+    --exit-code "$DOCTOR_RC"
+)" || {
+  echo "=== TUNNEL DOCTOR UNEXPECTED FAILURE ===" >&2
+  cat "$DOCTOR_REPORT" >&2 || true
+  sudo -u workspace-shell-tunnel env HOME=/var/lib/workspace-shell/tunnel \
+    /opt/workspace-shell/bin/tunnel-client doctor \
+    --profile "$PROFILE" \
+    --profile-dir /etc/workspace-shell/tunnel-client-profiles \
+    --explain >&2 || true
+  fail "tunnel-client doctor failed outside the accepted v0.0.18 mTLS diagnostic limitation"
+}
+echo "$DOCTOR_GATE"
+if [ "$DOCTOR_GATE" = "TUNNEL_DOCTOR_GATE=PASS" ]; then
+  TUNNEL_DOCTOR_RECEIPT="PASS"
+elif [ "$DOCTOR_GATE" = "TUNNEL_DOCTOR_GATE=KNOWN_V0_0_18_MTLS_DIAGNOSTIC_LIMITATION" ]; then
+  TUNNEL_DOCTOR_RECEIPT="PASS_WITH_KNOWN_V0_0_18_MTLS_DIAGNOSTIC_LIMITATION"
+else
+  fail "unexpected tunnel doctor gate result"
+fi
 
 sudo rm -f /var/lib/workspace-shell/tunnel/health.url
 sudo systemctl start workspace-shell-tunnel.service
@@ -496,7 +521,22 @@ for _ in $(seq 1 200); do
   fi
   sleep 0.2
 done
-[ "$TUNNEL_READY" = "1" ] || fail "Secure MCP Tunnel failed readiness"
+if [ "$TUNNEL_READY" != "1" ]; then
+  echo "=== SECURE MCP TUNNEL DIAGNOSTICS: BEGIN ===" >&2
+  sudo systemctl show workspace-shell-tunnel.service --no-pager \
+    --property=Id,LoadState,ActiveState,SubState,MainPID,ExecMainCode,ExecMainStatus,Result,User,Group,FragmentPath \
+    2>&1 | head -n 80 >&2 || true
+  sudo journalctl -u workspace-shell-tunnel.service -n 120 --no-pager --output=short-iso \
+    2>&1 | tail -n 120 >&2 || true
+  if sudo test -s /var/lib/workspace-shell/tunnel/health.url; then
+    HEALTH_URL="$(sudo cat /var/lib/workspace-shell/tunnel/health.url)"
+    echo "TUNNEL_HEALTH_URL=$HEALTH_URL" >&2
+    curl -fsS --max-time 2 "$HEALTH_URL/healthz" >&2 || true
+    curl -fsS --max-time 2 "$HEALTH_URL/readyz" >&2 || true
+  fi
+  echo "=== SECURE MCP TUNNEL DIAGNOSTICS: END ===" >&2
+  fail "Secure MCP Tunnel failed readiness"
+fi
 echo "TUNNEL_READY=PASS"
 
 for svc in "${SERVICES[@]}"; do
@@ -509,9 +549,9 @@ echo "SERVICES_ACTIVE_BOOT_DISABLED=PASS"
 MANIFEST_SHA="$(sudo sha256sum /etc/workspace-shell/install-manifest.json | awk '{print $1}')"
 TUNNEL_VERSION="$(/opt/workspace-shell/bin/tunnel-client --version 2>&1 | head -n1)"
 sudo install -d -o root -g root -m 0700 /var/lib/workspace-shell/commissioning
-python3 - "$OPERATOR_HEAD" "$SOURCE_HEAD" "$ATTEST_SHA256" "$MANIFEST_SHA" "$TUNNEL_ID" "$TUNNEL_VERSION" "$HEALTH_URL" > "$TMP/activation-receipt.json" <<'PY'
+python3 - "$OPERATOR_HEAD" "$SOURCE_HEAD" "$ATTEST_SHA256" "$MANIFEST_SHA" "$TUNNEL_ID" "$TUNNEL_VERSION" "$HEALTH_URL" "$TUNNEL_DOCTOR_RECEIPT" > "$TMP/activation-receipt.json" <<'PY'
 import datetime as dt, json, sys
-operator,source,attest,manifest,tunnel_id,tunnel_version,health=sys.argv[1:]
+operator,source,attest,manifest,tunnel_id,tunnel_version,health,doctor=sys.argv[1:]
 print(json.dumps({
   "schema":"workspace-shell-activation-receipt.v1",
   "timestamp_utc":dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -527,7 +567,7 @@ print(json.dumps({
   "privileged_helpers_enabled":False,
   "operator_trust_store_state":"EMPTY_FAIL_CLOSED",
   "local_mtls_health":"PASS",
-  "tunnel_doctor":"PASS",
+  "tunnel_doctor":doctor,
   "tunnel_ready":"PASS",
 },indent=2,sort_keys=True))
 PY
