@@ -811,6 +811,16 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn('=== PRE-TUNNEL MCP DIAGNOSTICS: BEGIN ===', source)
         self.assertIn('=== SECURE MCP TUNNEL DIAGNOSTICS: BEGIN ===', source)
         self.assertIn('workspace-shell-mcp.service', source)
+        self.assertIn(
+            'HEALTH_CANDIDATE="$(sudo cat /var/lib/workspace-shell/tunnel/health.url 2>/dev/null)"',
+            source,
+        )
+        self.assertNotIn(
+            'if sudo test -s /var/lib/workspace-shell/tunnel/health.url; then',
+            source,
+        )
+        self.assertIn('NRestarts,MemoryCurrent,MemoryPeak', source)
+        self.assertIn('TUNNEL_HEALTH_URL=UNAVAILABLE', source)
         self.assertIn('TUNNEL_READY=PASS', source)
         self.assertIn('SERVICES_ACTIVE_BOOT_DISABLED=PASS', source)
         self.assertIn('workspace-shell-disable', source)
