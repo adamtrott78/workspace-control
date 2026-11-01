@@ -2,6 +2,8 @@
 set -Eeuo pipefail
 
 SOURCE_HEAD="f999b25a866f25c95243cbbd6d1377a799fafb78"
+SOURCE_REPO_URL="https://github.com/adamtrott78/workspace-control.git"
+SOURCE_BRANCH="workspace-shell-mcp-v1-current-main"
 ATTEST_SHA256="d44cda1f6f13f814e093bef9228410f319d504c76cf80ba8e6d2ecbb8d321353"
 DESIGN_AUTHORITY_SHA="0c24e42ea57a3e23af01351a5974d5f09f3ce319"
 PROFILE="workspace-shell-production"
@@ -109,11 +111,10 @@ echo "SOURCE_HEAD=$SOURCE_HEAD"
 [ "$(sha256_file "$EVIDENCE")" = "$ATTEST_SHA256" ] \
   || fail "final host attestation digest mismatch"
 
-git -C "$ROOT" cat-file -e "${SOURCE_HEAD}^{commit}"
-git clone --no-hardlinks --no-checkout "$ROOT" "$SOURCE" >/dev/null
-git -C "$SOURCE" checkout --detach "$SOURCE_HEAD" >/dev/null
-git -C "$SOURCE" remote remove origin >/dev/null 2>&1 || true
+git clone   --no-checkout   --filter=blob:none   --branch "$SOURCE_BRANCH"   "$SOURCE_REPO_URL"   "$SOURCE" >/dev/null
 git -C "$SOURCE" config core.hooksPath /dev/null
+git -C "$SOURCE" -c credential.helper= checkout --detach "$SOURCE_HEAD" >/dev/null
+git -C "$SOURCE" remote remove origin >/dev/null 2>&1 || true
 
 [ "$(git -C "$SOURCE" rev-parse HEAD)" = "$SOURCE_HEAD" ] \
   || fail "prepared source head mismatch"
