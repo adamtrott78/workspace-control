@@ -41,11 +41,14 @@ def verify_request(cfg, raw_request):
     verifier = cfg["verifier_script"]
     require_protected_path(verifier)
     node = cfg.get("node_path", "/usr/bin/node")
+    openssl_conf = cfg.get("node_openssl_conf", "/etc/ssl/openssl.cnf")
+    require_protected_path(openssl_conf)
     env = {
         "PATH": "/usr/bin:/bin",
         "LANG": "C.UTF-8",
         "LC_ALL": "C.UTF-8",
         "TZ": "UTC",
+        "OPENSSL_CONF": openssl_conf,
     }
     proc = subprocess.run(
         [node, verifier, cfg["verifier_config"]],
