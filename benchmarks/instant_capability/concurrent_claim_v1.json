@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "benchmark": "INSTANT_CONCURRENT_CLAIMS_V1",
+  "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+  "shared_branch": "instant-concurrent-claims-v1-20261101",
+  "state_version": 0,
+  "invariant": "each action may have at most one owner",
+  "actions": {
+    "X": {
+      "state": "PENDING",
+      "owner": null
+    },
+    "Y": {
+      "state": "PENDING",
+      "owner": null
+    }
+  },
+  "claim_protocol": {
+    "selection": "lexicographically smallest PENDING action",
+    "compare_and_swap": "GitHub update_ref with expected_sha",
+    "force": false,
+    "on_conflict": "reread shared branch, recompute eligibility, retry on next available action",
+    "execution_after_claim": false
+  }
+}
