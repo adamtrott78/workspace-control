@@ -6,9 +6,16 @@
   "branch": "instant-worker-smoke-v1-20261101",
   "workspace_shell_task_id": "workspace-shell-mcp-v1",
   "expected_workspace_shell_sha": "01a95b61410e2f427b9885a19e6a0b9c5ee60a38",
-  "phase": "GITHUB_WRITE_CREATED",
+  "phase": "END_TO_END_VERIFIED",
   "github_write_success": true,
-  "workspace_shell_result": null,
-  "workspace_shell_receipt_id": null,
-  "final_status": "IN_PROGRESS"
+  "workspace_shell_result": "PASS",
+  "workspace_shell_receipt_id": "job-cb71f3fa-a5c6-41d2-82ee-0f3bf2d463d2",
+  "final_status": "PASS",
+  "workspace_shell_head": "01a95b61410e2f427b9885a19e6a0b9c5ee60a38",
+  "workspace_shell_clean": true,
+  "workspace_shell_authorization": "ALLOW",
+  "workspace_shell_privileged": false,
+  "github_round_trip_verified": true,
+  "manual_state_relay_required": false,
+  "initial_benchmark_file_commit_sha": "8f3c8921ec11a0692c31b0ae2be9df9cc2f99eff"
 }
