@@ -6,7 +6,7 @@
   "goal": "Give ChatGPT durable, auditable, least-privilege command-execution access to the Lambda workspace through a separate private MCP/plugin so workspace-control tasks can execute and inspect bounded shell operations directly without using the operator as a copy/paste terminal relay, while preserving explicit provenance, credential isolation, rollback boundaries, and separately auditable privileged authority.",
   "execution_topology": "remote_only",
   "workflow": null,
-  "current_stage": "host_attestation_and_install_bundle",
+  "current_stage": "implement_isolated_policy_core",
   "acceptance_criteria": [
     "Keep Workspace Shell structurally separate from Workspace Heartbeat; Heartbeat remains a low-authority progress/liveness channel and gains no command-execution authority.",
     "Use a private authenticated MCP/plugin transport. Prefer an outbound-only OpenAI Secure MCP Tunnel or equivalently bounded private transport; do not expose a broad unauthenticated public shell endpoint.",
