@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 92cbea0e71b3992f9a399b388a1884bbd3ce13a8
+- Remote checkpoint: e8d879305ce8d016b06903cf3dc839861fe0e228
 - Remote verified: true
 
 ### research-engine
@@ -43,18 +43,18 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-LIVE MIGRATION IS PARTIALLY COMPLETE. Do NOT repeat Input #1 or Input #2. The Lambda GitHub CLI compatibility blocker is cleared: host gh was upgraded from Ubuntu 2.4.0+dfsg1 to GitHub official gh 2.103.3; `gh api user --jq .login` returned adamtrott78 and `gh auth token >/dev/null` succeeded. All prior Input #3 failures occurred before canary authority creation/generation exclusion, and the latest live preflight re-proved no canary authority consumption, no transaction receipt, zero prior canary runs, root/class containment state, installed-generation binding, exact transaction helper, and successful v3-canary-preflight build. Next safe action: execute exactly scripts/lambda_ci_v3_first_canary_live.sh from current validated head 7d324814aeca24e18ef6f1df51c9ecbcd958fbb1, script blob 44ce0c0edc07b67354b0e7abafc0fa1b01353911. Any STOP marker is terminal for that attempt; otherwise allow exactly one workspace-control-control-small-v1 canary and exact v2 prestate rollback.
+LIVE MIGRATION IS PARTIALLY COMPLETE. Do NOT repeat Input #1 or Input #2. The latest Lambda Input #3 attempt at prior head 7d324814aeca24e18ef6f1df51c9ecbcd958fbb1 failed safely before credential install, canary authority creation, generation exclusion, controller mutation, or workflow dispatch. Live output re-proved all preflight invariants and reached V3_WORKSPACE_CONTROL_GH_TOKEN_VERIFY=BEGIN after a successful `gh auth token` export, then stopped with STOP_GH_AUTH_TOKEN_VERIFY_FAILED rc=1. Root cause is now proven in the operator implementation: the compatibility patch used `tr -d '\\r\\n'`, which does not remove CR/LF, so the exported token was reinjected incorrectly; the fallback Python regex also used double-escaped whitespace classes. The corrected operator is exact head e8d879305ce8d016b06903cf3dc839861fe0e228, script blob 131b47b36cf3e5350a38e2a34f4614a40822fb09, Workspace Control Validation #1375 / run 41258778360 SUCCESS. It now reads the exported token byte-safely with `IFS= read -r`, verifies the exact token through GH_TOKEN, unsets it, and fixes the fallback regex. CI explicitly forbids the old bad escaped forms. Next safe action: execute exactly scripts/lambda_ci_v3_first_canary_live.sh from head e8d879305ce8d016b06903cf3dc839861fe0e228 on Lambda. Any STOP marker is terminal for that attempt; otherwise allow exactly one workspace-control-control-small-v1 canary and exact v2 prestate rollback.
 
 ## Remaining work
 
-- Execute the exact-head-green Input #3 operator at 7d324814aeca24e18ef6f1df51c9ecbcd958fbb1 / script blob 44ce0c0edc07b67354b0e7abafc0fa1b01353911 now that gh 2.103.3 and raw-token export are proven working.
+- Execute the exact-head-green corrected Input #3 operator at e8d879305ce8d016b06903cf3dc839861fe0e228 / script blob 131b47b36cf3e5350a38e2a34f4614a40822fb09. It must re-prove all live invariants before creating authority.
 - Complete exactly one workspace-control-control-small-v1 generation-exclusion canary: create one-shot authority, prove v2 drain, activate only target v3 controller, dispatch only the owner-only canary through REST, require terminal success, prove v3 execution/resource drain, then restore exact captured v2 prestate.
 - After accepted first canary, advance additional public-network classes only in frozen migration order under separately accepted live authority.
 - Keep all Research GPU-derived classes NO_BY_DEFAULT until separate containment-recovery authority; keep Research Engine PR #283 proposal-only until separate default-branch producer cutover authority.
 
 ## Blockers / gates
 
-- One operator action on Lambda remains: execute exact Input #3 head 7d324814aeca24e18ef6f1df51c9ecbcd958fbb1. The prior GitHub CLI token-export blocker is cleared by gh 2.103.3.
+- One operator action on Lambda remains: execute corrected Input #3 head e8d879305ce8d016b06903cf3dc839861fe0e228. The prior token-verification stop was caused by a double-escaping bug in the operator, not by GitHub authentication or token expiry.
 - Lambda root services are already live from successful Input #2; do not repeat ACTIVATE_V3_ROOT_SERVICES.
 - All Research GPU-derived runner classes remain inherited-contained and NO_BY_DEFAULT. Do not start workspace-ci-controller@research-engine-gpu.service, restore retry authority, or advance any Research GPU-derived v3 class.
 - Research Engine PR #283 remains draft/proposal-only at exact head 6165556086b73d2076f205f11ec7b988150f23dd; no default-branch producer cutover is authorized.
