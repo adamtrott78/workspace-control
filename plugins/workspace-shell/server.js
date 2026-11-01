@@ -245,6 +245,7 @@ function createShellServer() {
         receipt_id: z.string().min(8).max(128).optional(),
       },
       outputSchema: { ok: z.boolean() },
+      _meta: {},
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     },
     async (args, extra = {}) => {
@@ -333,6 +334,7 @@ function createShellServer() {
         timeout_ms: z.number().int().min(1000).max(90000),
       },
       outputSchema: { ok: z.boolean() },
+      _meta: {},
       annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false, idempotentHint: false },
     },
     async (args, extra = {}) => {
@@ -384,6 +386,7 @@ function createShellServer() {
         }),
       },
       outputSchema: { ok: z.boolean() },
+      _meta: {},
       annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false, idempotentHint: false },
     },
     async (args, extra = {}) => {
@@ -432,6 +435,7 @@ function createShellServer() {
         receipt_id: z.string().min(8).max(128),
       },
       outputSchema: { ok: z.boolean() },
+      _meta: {},
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     },
     async ({ task_id, receipt_id }) => {
