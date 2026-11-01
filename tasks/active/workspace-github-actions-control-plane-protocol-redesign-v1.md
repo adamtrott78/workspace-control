@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 2480a1321ebf65a13d77d7d31443314fbfb95cd2
+- Remote checkpoint: 92cbea0e71b3992f9a399b388a1884bbd3ce13a8
 - Remote verified: true
 
 ### research-engine
@@ -43,20 +43,20 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-LIVE MIGRATION IS PARTIALLY COMPLETE. Do NOT repeat Input #1 or Input #2. The latest Lambda Input #3 attempt using prior operator f7ac4e66313928c2f6d334a446bb30e4da160737 failed safely before any canary authority creation, v2 quiesce, v3 class activation, or workflow dispatch. Live output proved reconciler/provisioner ACTIVE and disabled, all nine v3 class controllers INACTIVE and disabled, legacy Research GPU INACTIVE, PREFLIGHT_NO_CANARY_AUTHORITY_CONSUMPTION=PASS, and PREFLIGHT_NO_CANARY_TRANSACTION_RECEIPT=PASS. The exact failure was the installed older gh CLI rejecting gh run list --event during CANARY_RUN_HISTORY_CHECK; STOP_CANARY_RUN_HISTORY_QUERY_FAILED rc=1. The corrected operator is exact substantive head 2480a1321ebf65a13d77d7d31443314fbfb95cd2, script blob 1b36bd64311fc7e45f56909a356c41a856fb0f85, Workspace Control Validation #1367 / run 41257124698 SUCCESS. It removes all gh run and gh workflow run subcommand dependencies: workflow ID resolution, history checks, dispatch, run discovery, terminal polling, and cancellation use gh api REST endpoints only. Next safe action: execute exactly scripts/lambda_ci_v3_first_canary_live.sh from head 2480a1321ebf65a13d77d7d31443314fbfb95cd2 on Lambda. Any STOP marker is terminal for that attempt and must not be blindly retried; otherwise allow exactly one workspace-control-control-small-v1 canary and exact v2 prestate rollback.
+LIVE MIGRATION IS PARTIALLY COMPLETE. Do NOT repeat Input #1 or Input #2. The latest Lambda Input #3 attempt at prior substantive head 2480a1321ebf65a13d77d7d31443314fbfb95cd2 failed safely before canary authority creation or generation exclusion. Live output proved both v3 root services ACTIVE and boot-disabled, all nine v3 class controllers INACTIVE and disabled, legacy Research GPU INACTIVE, no ACTIVATE_ONE_V3_CANARY consumption marker, no canary transaction receipt, exact owner-only canary workflow ID 401444238 resolved, zero prior canary runs, installed generation binding PASS, exact migration helper materialization PASS, Go 1.26.3 verification PASS, v3-canary-preflight build PASS, and credential reset PASS. The exact failure was STOP_GH_AUTH_TOKEN_EXPORT_FAILED rc=1 at the newer `gh auth token` command. The corrected operator is exact head 92cbea0e71b3992f9a399b388a1884bbd3ce13a8, script blob 44ce0c0edc07b67354b0e7abafc0fa1b01353911, Workspace Control Validation #1370 / run 41257730195 SUCCESS. It first tries `gh auth token`; if unsupported, it securely captures `gh auth status --hostname github.com --show-token` into a mode-0600 temp file, parses exactly one unmasked token without printing it, verifies that exported token through `gh api user` as login adamtrott78, then stages it root:ci-gh-workspace-control 0640. Next safe action: execute exactly scripts/lambda_ci_v3_first_canary_live.sh from head 92cbea0e71b3992f9a399b388a1884bbd3ce13a8 on Lambda. Any STOP marker is terminal for that attempt; otherwise allow exactly one workspace-control-control-small-v1 canary and exact v2 prestate rollback.
 
 ## Remaining work
 
-- Execute the exact-head-green corrected Input #3 operator at 2480a1321ebf65a13d77d7d31443314fbfb95cd2. It must re-prove live root/class/containment state, no canary authority/transaction residue, resolve the exact canary workflow ID through the REST API, prove zero prior canary runs, and clean/stage credentials before creating authority.
-- Complete exactly one workspace-control-control-small-v1 generation-exclusion canary: create one-shot authority, prove v2 drain, activate only target v3 controller, dispatch only the owner-only canary through the REST API, require terminal success, prove v3 execution/resource drain, then restore exact captured v2 prestate.
+- Execute the exact-head-green corrected Input #3 operator at 92cbea0e71b3992f9a399b388a1884bbd3ce13a8. It must re-prove all live preflight invariants and use the legacy-safe token export fallback if `gh auth token` is unavailable.
+- Complete exactly one workspace-control-control-small-v1 generation-exclusion canary: create one-shot authority, prove v2 drain, activate only target v3 controller, dispatch only the owner-only canary through REST, require terminal success, prove v3 execution/resource drain, then restore exact captured v2 prestate.
 - After accepted first canary, advance additional public-network classes only in frozen migration order under separately accepted live authority.
 - Keep all Research GPU-derived classes NO_BY_DEFAULT until separate containment-recovery authority; keep Research Engine PR #283 proposal-only until separate default-branch producer cutover authority.
 - Only after accepted class canaries may old scale-set drain/retirement and broader production activation be separately authorized.
 
 ## Blockers / gates
 
-- One operator action on Lambda is required to execute the exact corrected Input #3 operator at 2480a1321ebf65a13d77d7d31443314fbfb95cd2. The prior attempt failed safely because the installed gh CLI lacks gh run list --event/--branch support; the corrected operator now uses gh api REST endpoints for all Actions run control.
-- Lambda root services are already live from successful Input #2: workspace-ci-v3-reconciler.service and workspace-ci-v3-provisioner.service must remain active/attested; do not repeat ACTIVATE_V3_ROOT_SERVICES or create a competing root activation receipt.
+- One operator action on Lambda is required to execute exact corrected Input #3 head 92cbea0e71b3992f9a399b388a1884bbd3ce13a8. The prior attempt failed safely because the installed gh CLI does not support the newer `gh auth token` command; the corrected operator has a secret-safe legacy `gh auth status --show-token` fallback and verifies the exported identity before staging.
+- Lambda root services are already live from successful Input #2; do not repeat ACTIVATE_V3_ROOT_SERVICES.
 - All Research GPU-derived runner classes remain inherited-contained and NO_BY_DEFAULT. Do not start workspace-ci-controller@research-engine-gpu.service, restore retry authority, or advance any Research GPU-derived v3 class.
 - Research Engine PR #283 remains draft/proposal-only at exact head 6165556086b73d2076f205f11ec7b988150f23dd; no default-branch producer cutover is authorized.
 
