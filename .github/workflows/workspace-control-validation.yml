@@ -129,6 +129,13 @@ jobs:
 
           assert '/var/lib/workspace-ci/controller/github-token' not in source
           assert 'gh auth token > "$TMP/operator-token"' in source
+          assert 'gh auth status \\' in source
+          assert '--show-token' in source
+          assert 'STATUS_TOKEN_FILE="$TMP/gh-auth-status-token"' in source
+          assert 'STOP_GH_AUTH_STATUS_TOKEN_EXPORT_FAILED' in source
+          assert 'STOP_GH_AUTH_STATUS_TOKEN_PARSE_FAILED' in source
+          assert 'V3_WORKSPACE_CONTROL_GH_TOKEN_VERIFY=PASS' in source
+          assert 'TOKEN_EXPORT_METHOD="auth-status-show-token"' in source
           assert 'sudo -n rm -f "$V3_TOKEN" "$V3_ENV"' in source
           assert 'V3_CANARY_PREFLIGHT_BUILD=BEGIN' in source
           assert 'STOP_V3_CANARY_PREFLIGHT_BUILD_FAILED' in source
