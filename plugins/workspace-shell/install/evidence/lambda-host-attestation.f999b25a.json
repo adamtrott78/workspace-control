@@ -1,0 +1,383 @@
+{
+  "blockers": [],
+  "bwrap_probe": {
+    "attempted": true,
+    "passed": true,
+    "returncode": 0,
+    "stderr": ""
+  },
+  "commands": {
+    "bwrap": {
+      "exists": true,
+      "name": "bwrap",
+      "path": "/usr/bin/bwrap",
+      "version": [
+        "bubblewrap 0.6.1"
+      ],
+      "version_returncode": 0
+    },
+    "git": {
+      "exists": true,
+      "name": "git",
+      "path": "/usr/bin/git",
+      "version": [
+        "git version 2.34.1"
+      ],
+      "version_returncode": 0
+    },
+    "node": {
+      "exists": true,
+      "name": "node",
+      "path": "/home/atrott/miniforge3/envs/workspace-heartbeat-node/bin/node",
+      "version": [
+        "v20.20.2"
+      ],
+      "version_returncode": 0
+    },
+    "openssl": {
+      "exists": true,
+      "name": "openssl",
+      "path": "/usr/bin/openssl",
+      "version": [
+        "OpenSSL 3.0.2 15 Mar 2022 (Library: OpenSSL 3.0.2 15 Mar 2022)"
+      ],
+      "version_returncode": 0
+    },
+    "python3": {
+      "exists": true,
+      "name": "python3",
+      "path": "/usr/bin/python3.12",
+      "version": [
+        "Python 3.12.15"
+      ],
+      "version_returncode": 0
+    },
+    "systemd-run": {
+      "exists": true,
+      "name": "systemd-run",
+      "path": "/usr/bin/systemd-run",
+      "version": [
+        "systemd 249 (249.11-0ubuntu3.23)"
+      ],
+      "version_returncode": 0
+    },
+    "tunnel-client": {
+      "exists": true,
+      "name": "tunnel-client",
+      "path": "/home/atrott/adamArchives/Adam/tooling/openai-tunnel-client/v0.0.18/unpacked/tunnel-client",
+      "version": [
+        "0.0.18+274a5588414819f063d27100a4fb1096aae3830f (git sha: 274a5588414819f063d27100a4fb1096aae3830f)"
+      ],
+      "version_returncode": 0
+    }
+  },
+  "decision": "READY_FOR_INSTALL_PLAN",
+  "dependency_source": {
+    "exists": true,
+    "gid": 1005,
+    "mode": "0775",
+    "path": "/home/atrott/adamArchives/Adam/workspace-heartbeat-runtime-v048/plugins/workspace-heartbeat/node_modules",
+    "type": "dir",
+    "uid": 1005
+  },
+  "effective_identity": {
+    "gid": 1005,
+    "uid": 1005,
+    "user": "atrott"
+  },
+  "heartbeat_listener": {
+    "matching_listeners": [
+      "LISTEN 0      511                              *:8787        *:*"
+    ],
+    "occupied": true,
+    "port": 8787,
+    "ss_available": true
+  },
+  "hostname": "gokhan-Lambda-Vector",
+  "kernel": {
+    "apparmor_enabled": "Y",
+    "cgroup_v2_controllers": "cpuset cpu io memory hugetlb pids rdma misc",
+    "lsm": "lockdown,capability,landlock,yama,apparmor",
+    "max_user_namespaces": "1029622",
+    "selinux_enforce": null,
+    "uname": [
+      "Linux",
+      "gokhan-Lambda-Vector",
+      "6.8.0-138-generic",
+      "#138~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Aug  7 13:43:15 UTC ",
+      "x86_64"
+    ],
+    "unprivileged_userns_clone": "1"
+  },
+  "planned_groups": [
+    {
+      "exists": false,
+      "name": "workspace-shell-mcp"
+    },
+    {
+      "exists": false,
+      "name": "workspace-shell-exec"
+    },
+    {
+      "exists": false,
+      "name": "workspace-shell-tunnel"
+    }
+  ],
+  "planned_identities": [
+    {
+      "gid": 41010,
+      "name": "workspace-shell-mcp",
+      "name_group": {
+        "exists": false,
+        "name": "workspace-shell-mcp"
+      },
+      "name_user": {
+        "exists": false,
+        "name": "workspace-shell-mcp"
+      },
+      "numeric_gid": {
+        "exists": false,
+        "gid": 41010
+      },
+      "numeric_uid": {
+        "exists": false,
+        "uid": 41010
+      },
+      "uid": 41010
+    },
+    {
+      "gid": 41011,
+      "name": "workspace-shell-exec",
+      "name_group": {
+        "exists": false,
+        "name": "workspace-shell-exec"
+      },
+      "name_user": {
+        "exists": false,
+        "name": "workspace-shell-exec"
+      },
+      "numeric_gid": {
+        "exists": false,
+        "gid": 41011
+      },
+      "numeric_uid": {
+        "exists": false,
+        "uid": 41011
+      },
+      "uid": 41011
+    },
+    {
+      "gid": 41012,
+      "name": "workspace-shell-tunnel",
+      "name_group": {
+        "exists": false,
+        "name": "workspace-shell-tunnel"
+      },
+      "name_user": {
+        "exists": false,
+        "name": "workspace-shell-tunnel"
+      },
+      "numeric_gid": {
+        "exists": false,
+        "gid": 41012
+      },
+      "numeric_uid": {
+        "exists": false,
+        "uid": 41012
+      },
+      "uid": 41012
+    }
+  ],
+  "planned_listener": {
+    "matching_listeners": [],
+    "occupied": false,
+    "port": 8797,
+    "ss_available": true
+  },
+  "planned_paths": [
+    {
+      "exists": false,
+      "path": "/etc/workspace-shell"
+    },
+    {
+      "exists": false,
+      "path": "/opt/workspace-shell"
+    },
+    {
+      "exists": false,
+      "path": "/run/workspace-shell-control"
+    },
+    {
+      "exists": false,
+      "path": "/var/lib/workspace-shell"
+    },
+    {
+      "exists": false,
+      "path": "/srv/workspace-shell"
+    }
+  ],
+  "planned_units": [
+    {
+      "properties": {
+        "ActiveState": "inactive",
+        "FragmentPath": "",
+        "Group": "",
+        "LoadState": "not-found",
+        "SubState": "dead",
+        "User": ""
+      },
+      "returncode": 0,
+      "stderr": "",
+      "unit": "workspace-shell-job-launcher.service"
+    },
+    {
+      "properties": {
+        "ActiveState": "inactive",
+        "FragmentPath": "",
+        "Group": "",
+        "LoadState": "not-found",
+        "SubState": "dead",
+        "User": ""
+      },
+      "returncode": 0,
+      "stderr": "",
+      "unit": "workspace-shell-root-broker.service"
+    },
+    {
+      "properties": {
+        "ActiveState": "inactive",
+        "FragmentPath": "",
+        "Group": "",
+        "LoadState": "not-found",
+        "SubState": "dead",
+        "User": ""
+      },
+      "returncode": 0,
+      "stderr": "",
+      "unit": "workspace-shell-mcp.service"
+    },
+    {
+      "properties": {
+        "ActiveState": "inactive",
+        "FragmentPath": "",
+        "Group": "",
+        "LoadState": "not-found",
+        "SubState": "dead",
+        "User": ""
+      },
+      "returncode": 0,
+      "stderr": "",
+      "unit": "workspace-shell-tunnel.service"
+    }
+  ],
+  "planned_users": [
+    {
+      "exists": false,
+      "name": "workspace-shell-mcp"
+    },
+    {
+      "exists": false,
+      "name": "workspace-shell-exec"
+    },
+    {
+      "exists": false,
+      "name": "workspace-shell-tunnel"
+    }
+  ],
+  "provisioning_requirements": [],
+  "schema": "workspace-shell-host-attestation.v1",
+  "secret_policy": {
+    "api_tokens_read": false,
+    "process_environments_read": false,
+    "secret_file_contents_read": false,
+    "ssh_material_read": false
+  },
+  "source": {
+    "exists": true,
+    "head": {
+      "argv": [
+        "/usr/bin/git",
+        "-C",
+        "/tmp/workspace-shell-attest.A1hK23/repo",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "core.fsmonitor=false",
+        "-c",
+        "diff.external=",
+        "-c",
+        "credential.helper=",
+        "rev-parse",
+        "HEAD"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "f999b25a866f25c95243cbbd6d1377a799fafb78"
+    },
+    "path": "/tmp/workspace-shell-attest.A1hK23/repo",
+    "requested_sha": "f999b25a866f25c95243cbbd6d1377a799fafb78",
+    "requested_sha_exists": {
+      "argv": [
+        "/usr/bin/git",
+        "-C",
+        "/tmp/workspace-shell-attest.A1hK23/repo",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "core.fsmonitor=false",
+        "-c",
+        "diff.external=",
+        "-c",
+        "credential.helper=",
+        "cat-file",
+        "-e",
+        "f999b25a866f25c95243cbbd6d1377a799fafb78^{commit}"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    "status": {
+      "argv": [
+        "/usr/bin/git",
+        "-C",
+        "/tmp/workspace-shell-attest.A1hK23/repo",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "core.fsmonitor=false",
+        "-c",
+        "diff.external=",
+        "-c",
+        "credential.helper=",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=normal"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    "tree": {
+      "argv": [
+        "/usr/bin/git",
+        "-C",
+        "/tmp/workspace-shell-attest.A1hK23/repo",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "core.fsmonitor=false",
+        "-c",
+        "diff.external=",
+        "-c",
+        "credential.helper=",
+        "rev-parse",
+        "HEAD^{tree}"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "321154c3b75310bcc3a1e5e812a9c685028c8e26"
+    }
+  },
+  "timestamp_utc": "2026-11-01T02:53:36.993169+00:00"
+}
