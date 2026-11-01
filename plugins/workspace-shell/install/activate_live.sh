@@ -376,8 +376,11 @@ sudo chown workspace-shell-tunnel:workspace-shell-tunnel /etc/workspace-shell/tu
 sudo chmod 0600 /etc/workspace-shell/tunnel/runtime-key
 echo "TUNNEL_RUNTIME_KEY_STAGED=PASS"
 
+TUNNEL_PROFILE_RENDERER="/opt/workspace-shell/runtime/plugins/workspace-shell/install/render_tunnel_profile.py"
+sudo -u workspace-shell-tunnel test -r "$TUNNEL_PROFILE_RENDERER" \
+  || fail "staged tunnel profile renderer is not readable by tunnel identity"
 sudo -u workspace-shell-tunnel env HOME=/var/lib/workspace-shell/tunnel \
-  /usr/bin/python3 "$ROOT/plugins/workspace-shell/install/render_tunnel_profile.py" \
+  /usr/bin/python3 "$TUNNEL_PROFILE_RENDERER" \
   --profile "$PROFILE" \
   --profile-dir /etc/workspace-shell/tunnel-client-profiles \
   --tunnel-id "$TUNNEL_ID" \
