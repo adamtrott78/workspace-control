@@ -135,6 +135,12 @@ jobs:
           assert 'STOP_GH_AUTH_STATUS_TOKEN_EXPORT_FAILED' in source
           assert 'STOP_GH_AUTH_STATUS_TOKEN_PARSE_FAILED' in source
           assert 'V3_WORKSPACE_CONTROL_GH_TOKEN_VERIFY=PASS' in source
+          assert 'STOP_GH_AUTH_TOKEN_VERIFY_EMPTY' in source
+          assert 'IFS= read -r EXPORTED_TOKEN < "$TMP/operator-token" || true' in source
+          assert 'env GH_TOKEN="$EXPORTED_TOKEN"' in source
+          assert "tr -d '\\\\r\\\\n'" not in source
+          assert 're.search(r"(?:^|\\\\s)Token:\\\\s*(\\\\S+)\\\\s*$", line)' not in source
+          assert 're.search(r"(?:^|\\s)Token:\\s*(\\S+)\\s*$", line)' in source
           assert 'TOKEN_EXPORT_METHOD="auth-status-show-token"' in source
           assert 'sudo -n rm -f "$V3_TOKEN" "$V3_ENV"' in source
           assert 'V3_CANARY_PREFLIGHT_BUILD=BEGIN' in source
