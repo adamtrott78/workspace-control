@@ -545,40 +545,44 @@ The existing shared-UID design does not prove that invariant.
 
 # Job-correlation model
 
-`JobAvailable` may omit `JobID`, but the target architecture does **not** need a REST job ID before provisioning capacity.
+Live canary evidence on GitHub.com establishes two scheduler message shapes that the controller must support without weakening trust:
 
-Repository analysis proves every one of the 23 registered trusted route workflows currently has exactly one top-level job. The policy compiler therefore enforces:
+1. **complete `JobAvailable`** — positive `RunnerRequestID` and `WorkflowRunID` are present, so the controller can verify the structured broker identity plus REST run evidence and explicitly call `AcquireJobs`;
+2. **identity-incomplete assigned demand** — GitHub.com may emit `JobAssigned` with `runnerRequestId=0` and `workflowRunId=0` while the scale-set statistics still report `TotalAssignedJobs > 0`.
 
-> one registered route workflow contains exactly one self-hosted job, and that job targets exactly one runner class.
+The second shape is not hypothetical. The first live Workspace Control canary received two such `JobAssigned` messages with positive advertised capacity, and the GitHub REST API simultaneously exposed the exact queued workflow run/job, including workflow path, event, actor/triggering actor, default-branch SHA, target scale-set label, and positive REST job ID.
 
-At runtime the controller validates only structured GitHub facts already present in a `JobAvailable` message plus REST run evidence:
+Therefore broker lifecycle messages and REST evidence have different authority roles:
 
-1. repository owner/name;
-2. `WorkflowRunID`;
-3. `JobWorkflowRef` -> exact trusted workflow path and default-branch ref;
-4. event name;
-5. request labels -> this controller's exact scale set;
-6. run actor/triggering actor and exact workflow run identity;
-7. exact trusted workflow blob at the run's default-branch commit.
+- `JobAssigned` is **never authority by itself**, whether its IDs are present or zero;
+- `JobAvailable` with complete structured identity may create authority only after exact verification and successful `AcquireJobs`;
+- when GitHub.com has already assigned demand without broker IDs, `TotalAssignedJobs` is only the **count** signal; before creating root capacity, the controller must enumerate active queued REST jobs carrying this class's exact scale-set label and prove that **every eligible target-label job is trusted**;
+- if any eligible target-label job is untrusted, ambiguous, already runner-bound without durable controller state, or cannot be attested, the controller provisions **nothing** for the class;
+- a positive REST job ID from the all-trusted eligible set may be used as the durable authority anchor for a required capacity slot. It is not treated as a broker `RunnerRequestID`, and its provenance source is persisted explicitly.
 
-If those facts pass, the controller may acquire `RunnerRequestID`. No runtime display-name equality or parsing is required.
+Exact REST attestation requires:
 
-### GitHub.com assignment-control requirement
+1. repository identity equals the controller policy repository;
+2. workflow path is allowlisted for this runner class;
+3. workflow run event is allowlisted;
+4. run head branch is the trusted default branch;
+5. actor and triggering actor are allowlisted;
+6. run head SHA is concrete;
+7. the workflow blob at that exact run SHA equals the installed policy blob;
+8. the queued job carries this controller's exact scale-set label;
+9. the REST job ID is positive and the job is not already bound to a runner without durable controller state.
 
-Live canary evidence on 2026-10-31 reproduced the GitHub.com behavior reported upstream since 2025: `JobAssigned` lifecycle payloads may carry `runnerRequestId=0` and `workflowRunId=0`. Therefore `JobAssigned` is not an admissible authority source.
+The listener must advertise the real class capacity. GitHub's `maxCapacity` is a scheduler-capacity/drain signal; advertising `0` suppresses assignable demand and cannot be used as an admission firewall.
 
-The v3 controller must keep two capacities distinct:
+The authority flows are therefore:
 
-- **scheduler-advertised automatic capacity = 0** on every long poll, so GitHub cannot directly assign work before local admission;
-- **local/root class capacity = policy `max_runners`**, used only after a trusted `JobAvailable` has been verified and explicitly acquired.
+`JobAvailable -> exact broker+REST attestation -> AcquireJobs -> TotalAssignedJobs -> RESERVE -> JIT -> LAUNCH`
 
-This forces the authority path to remain:
+or, for GitHub.com identity-incomplete assigned demand:
 
-`JobAvailable -> exact attestation -> AcquireJobs -> TotalAssignedJobs -> RESERVE -> JIT -> LAUNCH`.
+`positive maxCapacity -> TotalAssignedJobs -> whole-set REST target-label attestation -> durable REST authority anchor -> RESERVE -> JIT -> LAUNCH`.
 
-A standalone `JobAssigned`, including one with non-zero legacy IDs, is lifecycle evidence only. It may update an existing ledger entry created from trusted `JobAvailable`, but it must never reconstruct scheduler authority. On restart with assigned-but-untracked work, the controller fails closed and waits for GitHub cancellation/requeue and a later `JobAvailable`.
-
-The YAML job key is retained only as a **compile-time workflow-shape assertion**. `JobDisplayName` is observational metadata only. Later `JobStarted`/`JobCompleted` messages may add GitHub JobID and runner identity to receipts, but neither is a prerequisite for safe class-level capacity provisioning.
+Repository analysis proves every registered trusted route workflow currently has exactly one top-level self-hosted job. The policy compiler preserves that as a compile-time shape assertion, but runtime safety does not depend on display-name parsing. `JobDisplayName`, comment text, candidate SHA, and other human-facing fields carry no infrastructure authority.
 
 # Error and acknowledgement algebra
 
@@ -643,12 +647,16 @@ The runner-class partition removes the need for job-specific root admission.
 
 ## Key observation
 
-A JIT config registers a runner with a scale set, not with one specific workflow job. The official reference scaler:
-1. acquires acceptable `JobAvailable` request IDs;
-2. reads `TotalAssignedJobs`;
-3. starts that many homogeneous runners.
+A JIT config registers a runner with a scale set, not with one specific workflow job. The official scale-set protocol treats `maxCapacity` as the amount of demand the backend may assign and `TotalAssignedJobs` as the desired-capacity count.
 
-Therefore root provisioning should realize **runner-class capacity**, not compile a workflow request.
+GitHub.com may expose complete `JobAvailable` messages, or it may assign demand first and emit identity-incomplete `JobAssigned` messages. The controller therefore separates **demand count** from **trust attestation**:
+
+1. advertise the real homogeneous class capacity;
+2. use `TotalAssignedJobs` only as the desired-capacity count;
+3. establish trust either from complete `JobAvailable` + `AcquireJobs`, or from whole-set REST attestation of queued target-label jobs when broker IDs are absent;
+4. start only the number of homogeneous runners justified by both trusted evidence and the assigned-demand count.
+
+Therefore root provisioning realizes **runner-class capacity**, not a workflow command or display-string request.
 
 ## Revised authority split
 
@@ -667,9 +675,10 @@ GITHUB ACTIONS SCHEDULER
         v
 RUNNER-CLASS CONTROLLER (unprivileged)
   - authenticated Scale Set Client session
-  - advertise scheduler automatic capacity = 0
-  - exact trusted JobAvailable workflow/event/actor attestation
-  - AcquireJobs only for allowed workflow jobs
+  - advertise the real homogeneous class max_runners
+  - treat JobAssigned as lifecycle/count evidence, never standalone authority
+  - verify complete JobAvailable and AcquireJobs when GitHub supplies broker IDs
+  - otherwise attest the entire queued REST target-label set before provisioning
   - scale physical class capacity from TotalAssignedJobs
         |
         v
@@ -755,30 +764,49 @@ Project-scoped GitHub credentials may be shared read-only among the class-contro
 
 Alternative local proofs (class-specific sockets/credentials or kernel cgroup/service identity) may be evaluated, but the accepted design must provide the same non-forgeability property.
 
-## Controller no longer needs per-job route parsing
+## Controller admission paths
 
-For each `JobAvailable`:
-- the listener poll that delivered it advertised automatic scheduler capacity `0`;
-- parse no human command;
-- inspect GitHub-native fields;
-- derive trusted workflow path from `JobWorkflowRef`;
-- look up the workflow in the controller's installed allowlist for **this runner class**;
+The controller parses no human command, candidate SHA, PR number, experiment name, or display-name protocol.
+
+### Path A — complete `JobAvailable`
+
+For each complete `JobAvailable`:
+
+- verify positive broker `RunnerRequestID` and `WorkflowRunID`;
+- verify repository and exact class label;
+- derive the allowlisted workflow path from `JobWorkflowRef`;
+- verify the default-branch ref and allowed event;
 - verify the run via REST: repository, event, actor/triggering actor, workflow path, default-branch run commit;
-- verify exact workflow blob at that run commit equals the installed allowlist blob;
-- acquire the `RunnerRequestID` only if those checks pass.
+- verify the exact workflow blob at that commit;
+- call `AcquireJobs` only after those checks pass;
+- persist the authority source as broker-acquired.
 
-The controller does not need candidate SHA, PR number, experiment name, or root route identity to make the acquisition decision.
+### Path B — GitHub.com assigned demand with missing broker IDs
 
-## Job ID correlation is optional, not foundational
+When `TotalAssignedJobs` requires additional class capacity but no trusted broker-acquired ledger exists:
 
-Because root capacity is class-level, the controller does not require a canonical REST job ID before provisioning.
+- enumerate active queued/in-progress workflow runs through GitHub REST;
+- enumerate their queued jobs;
+- select every queued job carrying this class's exact scale-set label;
+- require every selected target-label job to pass exact repository/workflow/default-branch/event/actor/blob attestation;
+- reject the entire capacity increase if even one target-label job is untrusted or already runner-bound without durable authority;
+- choose deterministic positive REST job IDs from the all-trusted set as durable authority anchors for the required capacity slots;
+- persist `authority_source=REST_ACTIVE_JOB_SET`;
+- proceed to root `RESERVE -> JIT -> LAUNCH` only after that durable attestation exists.
 
-For audit/recovery:
-- `WorkflowRunID + run_attempt + trusted workflow path + runner class` forms the stable attempt identity when the trusted workflow has exactly one self-hosted job in that class;
-- `JobStarted/JobCompleted` provide the GitHub JobID and runner name later;
-- REST job lookup may enrich evidence or resolve recovery, but dynamic display-name parsing is not a prerequisite for safe scaling.
+This whole-set rule matters because a generic scale-set runner may be assigned to any queued job eligible for that label. Proving one trusted job is insufficient if an untrusted job could compete for the same runner.
 
-If a trusted workflow ever has multiple jobs targeting the same runner class, each must have a static catalogued job key/name so correlation is deterministic.
+## Correlation and recovery
+
+The REST job ID is an authority **anchor**, not a claim that GitHub will necessarily bind that exact job to the newly registered generic runner when multiple trusted jobs are eligible. Safety comes from proving the entire eligible target-label set is trusted and homogeneous.
+
+For recovery/audit:
+
+- durable controller records persist the authority source, REST job ID when used, workflow run ID/path/blob, runner name, and root request identity;
+- `JobStarted`/`JobCompleted` correlate by the generated runner name and update scheduler lifecycle state;
+- a controller restart never reconstructs authority from a standalone `JobAssigned`;
+- if assigned demand exists but REST evidence has not converged yet, the controller waits and retries in-process without creating root capacity;
+- if a target-label job is untrusted or ambiguous, the class fails closed without consuming root capacity or systemd restart budget.
 
 # Executor command model
 
