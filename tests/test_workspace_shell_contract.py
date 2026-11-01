@@ -18,6 +18,8 @@ PLUGIN = ROOT / "plugins" / "workspace-shell"
 ROOT_CODE = PLUGIN / "root"
 HOST_ATTEST = PLUGIN / "install" / "host_attest.py"
 RENDER_INSTALL = PLUGIN / "install" / "render_install.py"
+SEAL_INSTALL = PLUGIN / "install" / "seal_install.py"
+SYSUSERS = PLUGIN / "install" / "sysusers.conf"
 AUTHORITY_ARTIFACT = ROOT / "architecture" / "workspace-shell-mcp-authority-v2.json"
 sys.path.insert(0, str(ROOT_CODE))
 
@@ -27,6 +29,35 @@ runtime_common = importlib.import_module("runtime_common")
 
 
 class WorkspaceShellContractTests(unittest.TestCase):
+    @staticmethod
+    def _ready_attestation():
+        identities = []
+        for name, ident in (
+            ("workspace-shell-mcp", 41010),
+            ("workspace-shell-exec", 41011),
+            ("workspace-shell-tunnel", 41012),
+        ):
+            identities.append({
+                "name": name,
+                "uid": ident,
+                "gid": ident,
+                "name_user": {"exists": False, "name": name},
+                "name_group": {"exists": False, "name": name},
+                "numeric_uid": {"exists": False, "uid": ident},
+                "numeric_gid": {"exists": False, "gid": ident},
+            })
+        return {
+            "schema": "workspace-shell-host-attestation.v1",
+            "decision": "READY_FOR_INSTALL_PLAN",
+            "blockers": [],
+            "planned_identities": identities,
+            "source": {
+                "head": {"stdout": "a" * 40},
+                "tree": {"stdout": "b" * 40},
+                "requested_sha": "a" * 40,
+            },
+        }
+
     @staticmethod
     def _node20_binary():
         candidates = []
@@ -133,6 +164,16 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn('"workspace-shell-host-attestation.v1"', source)
         self.assertIn('"--unshare-all"', source)
         self.assertIn('"--cap-drop"', source)
+        self.assertIn("PLANNED_IDENTITIES", source)
+        self.assertIn('"numeric_uid"', source)
+        self.assertIn("41010", source)
+        self.assertIn("41011", source)
+        self.assertIn("41012", source)
+
+        sysusers = SYSUSERS.read_text()
+        self.assertIn("workspace-shell-mcp    41010", sysusers)
+        self.assertIn("workspace-shell-exec   41011", sysusers)
+        self.assertIn("workspace-shell-tunnel 41012", sysusers)
 
     def test_host_attestation_functions_bound_output_and_do_not_mutate(self):
         spec = importlib.util.spec_from_file_location("workspace_shell_host_attest", HOST_ATTEST)
@@ -175,16 +216,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
             td = Path(td)
             attestation = td / "attestation.json"
             out = td / "bundle"
-            fake = {
-                "schema": "workspace-shell-host-attestation.v1",
-                "decision": "READY_FOR_INSTALL_PLAN",
-                "blockers": [],
-                "source": {
-                    "head": {"stdout": "a" * 40},
-                    "tree": {"stdout": "b" * 40},
-                    "requested_sha": "a" * 40,
-                },
-            }
+            fake = self._ready_attestation()
             attestation.write_text(json.dumps(fake))
             proc = subprocess.run(
                 [
@@ -195,13 +227,6 @@ class WorkspaceShellContractTests(unittest.TestCase):
                     "--source-sha", "a" * 40,
                     "--design-authority-sha", "c" * 40,
                     "--policy-artifact-sha256", hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
-                    "--tunnel-client-cert-sha256", "e" * 64,
-                    "--frontend-uid", "41010",
-                    "--frontend-gid", "41010",
-                    "--worker-uid", "41011",
-                    "--worker-gid", "41011",
-                    "--tunnel-uid", "41012",
-                    "--tunnel-gid", "41012",
                 ],
                 cwd=ROOT,
                 stdout=subprocess.PIPE,
@@ -219,6 +244,19 @@ class WorkspaceShellContractTests(unittest.TestCase):
             )
             self.assertFalse(manifest["tunnel_runtime_key_included"])
             self.assertFalse(manifest["tls_private_keys_included"])
+            self.assertFalse(manifest["activation_sealed"])
+            self.assertTrue(manifest["requires_activation_seal"])
+            self.assertIsNone(manifest["tunnel_client_cert_sha256"])
+            self.assertFalse((out / "frontend.json").exists())
+            self.assertTrue((out / "frontend.unsealed.json").is_file())
+            self.assertEqual(
+                manifest["identities"],
+                {
+                    "frontend": {"uid": 41010, "gid": 41010},
+                    "worker": {"uid": 41011, "gid": 41011},
+                    "tunnel": {"uid": 41012, "gid": 41012},
+                },
+            )
             self.assertEqual(
                 manifest["policy_artifact_sha256"],
                 hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
@@ -248,6 +286,122 @@ class WorkspaceShellContractTests(unittest.TestCase):
             self.assertNotIn("BEGIN PRIVATE KEY", contents)
             self.assertNotIn("tunnel-runtime-key", contents)
 
+
+    def test_activation_seal_requires_valid_public_x509_and_pins_der_digest(self):
+        openssl = shutil.which("openssl")
+        if not openssl:
+            self.skipTest("openssl unavailable")
+        proc = subprocess.run(
+            [sys.executable, "-m", "py_compile", str(SEAL_INSTALL)],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            attestation = td / "attestation.json"
+            bundle = td / "bundle"
+            attestation.write_text(json.dumps(self._ready_attestation()))
+            render = subprocess.run(
+                [
+                    sys.executable,
+                    str(RENDER_INSTALL),
+                    "--attestation", str(attestation),
+                    "--output-dir", str(bundle),
+                    "--source-sha", "a" * 40,
+                    "--design-authority-sha", "c" * 40,
+                    "--policy-artifact-sha256",
+                    hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
+                ],
+                cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10,
+            )
+            self.assertEqual(render.returncode, 0, render.stderr)
+
+            key = td / "client.key"
+            cert = td / "client.crt"
+            make_cert = subprocess.run(
+                [
+                    openssl, "req", "-x509", "-newkey", "rsa:2048",
+                    "-keyout", str(key), "-out", str(cert),
+                    "-nodes", "-days", "1", "-subj", "/CN=workspace-shell-test",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=20,
+            )
+            self.assertEqual(make_cert.returncode, 0, make_cert.stderr)
+
+            sealed = subprocess.run(
+                [
+                    sys.executable,
+                    str(SEAL_INSTALL),
+                    "--bundle-dir", str(bundle),
+                    "--tunnel-client-cert", str(cert),
+                    "--openssl-path", openssl,
+                ],
+                cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10,
+            )
+            self.assertEqual(sealed.returncode, 0, sealed.stderr)
+
+            der = subprocess.run(
+                [openssl, "x509", "-in", str(cert), "-outform", "DER"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=True,
+            ).stdout
+            expected = hashlib.sha256(der).hexdigest()
+            manifest = json.loads((bundle / "install-manifest.json").read_text())
+            frontend = json.loads((bundle / "frontend.json").read_text())
+            self.assertTrue(manifest["activation_sealed"])
+            self.assertFalse(manifest["requires_activation_seal"])
+            self.assertEqual(manifest["tunnel_client_cert_sha256"], expected)
+            self.assertEqual(frontend["tunnel_client_cert_sha256"], expected)
+            self.assertFalse((bundle / "frontend.unsealed.json").exists())
+
+    def test_install_renderer_rejects_identity_collision(self):
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            attestation = td / "attestation.json"
+            out = td / "bundle"
+            fake = self._ready_attestation()
+            fake["planned_identities"][0]["numeric_uid"] = {
+                "exists": True,
+                "uid": 41010,
+                "name": "already-used",
+            }
+            attestation.write_text(json.dumps(fake))
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(RENDER_INSTALL),
+                    "--attestation", str(attestation),
+                    "--output-dir", str(out),
+                    "--source-sha", "a" * 40,
+                    "--design-authority-sha", "c" * 40,
+                    "--policy-artifact-sha256",
+                    hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
+                ],
+                cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10,
+            )
+            self.assertNotEqual(proc.returncode, 0)
+            self.assertIn("collision evidence", proc.stderr)
+
     def test_install_renderer_rejects_blocked_attestation(self):
         with tempfile.TemporaryDirectory() as td:
             td = Path(td)
@@ -271,13 +425,6 @@ class WorkspaceShellContractTests(unittest.TestCase):
                     "--source-sha", "a" * 40,
                     "--design-authority-sha", "c" * 40,
                     "--policy-artifact-sha256", hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
-                    "--tunnel-client-cert-sha256", "e" * 64,
-                    "--frontend-uid", "41010",
-                    "--frontend-gid", "41010",
-                    "--worker-uid", "41011",
-                    "--worker-gid", "41011",
-                    "--tunnel-uid", "41012",
-                    "--tunnel-gid", "41012",
                 ],
                 cwd=ROOT,
                 stdout=subprocess.PIPE,
