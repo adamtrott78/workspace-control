@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa
+- Remote checkpoint: d72ae5c1dc94624e9c7cc58f9e2f6844a6f554d2
 - Remote verified: true
 
 ### research-engine
@@ -41,22 +41,30 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 - Remote checkpoint: 35e6f451fe36f039b5f6461f7469f0eed1e79e43
 - Remote verified: true
 
+## Current stage
+
+- bounded_migration_and_live_acceptance
+
 ## Next safe action
 
-INPUT #3 IS ACCEPTED. The initial live v3 proof for workspace-control-control-small-v1 succeeded end-to-end at exact controller/source head 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa. Do NOT repeat Input #1, Input #2, or the workspace-control first canary. The accepted canary run is 41264356722 and the operator proved exact rollback, root services still active, all v3 class controllers inactive, and Research GPU containment preserved. Next migration-order target is padataset-cpu-public-v1. Before any live mutation, prepare and validate a separate one-class canary package/authority for that target, preserving generation exclusion, exact rollback, and all Research GPU-derived NO_BY_DEFAULT containment.
+PAUSE LIVE GITRUNNER MUTATION UNTIL WORKSPACE SHELL CHATGPT ACCEPTANCE COMPLETES. The initial workspace-control-control-small-v1 v3 canary is already accepted and must not be repeated. Current GitRunner PR #572 head d72ae5c1dc94624e9c7cc58f9e2f6844a6f554d2 passed Workspace Control Validation #1399/run 41264548554. Workspace Shell itself is live on Lambda at operator/runtime head 01a95b61410e2f427b9885a19e6a0b9c5ee60a38 with TUNNEL_READY=PASS, but ChatGPT-side tool acceptance is still pending. Finish workspace-shell-mcp-v1 acceptance first. Then resume this task using Workspace Shell as the preferred terminal transport and prepare a fresh one-class canary/one-shot authority for padataset-cpu-public-v1, preserving generation exclusion, exact rollback, and all Research GPU-derived NO_BY_DEFAULT containment.
 
 ## Remaining work
 
+- First complete workspace-shell-mcp-v1 ChatGPT plugin/tool live acceptance. Do not rerun Shell commissioning; the live tunnel/service activation already passed.
+- After Shell acceptance, use Workspace Shell as the preferred bounded terminal transport for subsequent GitRunner v3 live work.
 - Prepare the migration-order #2 canary for padataset-cpu-public-v1 under a new separately validated one-shot ACTIVATE_ONE_V3_CANARY authority. Do not reuse the consumed workspace-control authority or transaction.
 - Execute padataset-cpu-public-v1 canary only after exact repository validation and live preflight prove all v2/v3 transients drained, the existing v3 root services healthy, and every non-target v3 class inactive.
 - After PADataset CPU acceptance, prepare migration-order #3 padataset-gpu-single-public-v1 canary with the same generation-exclusion/rollback discipline.
 - Keep research-cpu-public-v1 inactive unless separately authorized; keep all Research GPU-derived classes NO_BY_DEFAULT until separate containment-recovery authority.
 - Keep Research Engine PR #283 proposal-only until separate default-branch producer cutover authority.
+- Add Workspace Shell privileged helpers only when a concrete migration operation requires them; keep each helper narrow, reviewed, provenance-bound, and independently authorized rather than introducing a generic root shell.
 
 ## Blockers / gates
 
 - No blocker remains for the accepted workspace-control first canary; it is complete and must not be repeated.
-- Further live migration requires a new separately bound one-shot canary authority per class, beginning with padataset-cpu-public-v1.
+- Operational sequencing gate: complete Workspace Shell ChatGPT plugin/tool live acceptance before resuming additional live v3 migration, so subsequent Lambda operations can use the bounded Shell transport instead of manual operator terminal relay.
+- Further live migration still requires a new separately bound one-shot canary authority per class, beginning with padataset-cpu-public-v1.
 - Research CPU activation remains separately gated.
 - All Research GPU-derived runner classes remain inherited-contained and NO_BY_DEFAULT.
 - Research Engine PR #283 remains draft/proposal-only; no default-branch producer cutover is authorized.
@@ -67,10 +75,14 @@ INPUT #3 IS ACCEPTED. The initial live v3 proof for workspace-control-control-sm
 
 https://github.com/adamtrott78/workspace-control
 
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.json
+Continue durable task:
+"workspace-github-actions-control-plane-protocol-redesign-v1"
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Read first: tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.json
+Then: tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.md
+
+Trust the capsule and exact verified Git/runtime state over older conversation text.
+Do NOT repeat Input #1, Input #2, or the already accepted workspace-control-control-small-v1 canary.
+Do NOT resume live runner migration until workspace-shell-mcp-v1 ChatGPT-side acceptance is complete.
+After Workspace Shell acceptance, use it as the preferred terminal transport and continue with padataset-cpu-public-v1 under a fresh one-shot canary authority.
+Preserve all Research GPU-derived NO_BY_DEFAULT containment and keep Research Engine PR #283 proposal-only.
