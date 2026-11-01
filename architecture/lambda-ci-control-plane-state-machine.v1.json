@@ -5,7 +5,9 @@
   "upstream": {
     "scale_set_client_commit": "e6daac702355cdb5b880b4fbdcf6d85dcd9e48e5",
     "scale_signal": "RunnerScaleSetStatistic.TotalAssignedJobs",
-    "acknowledgment_rule": "listener deletes a message only after Scale returns nil; non-nil Scale error stops listener and leaves message for redelivery"
+    "acknowledgment_rule": "listener deletes a message only after Scale returns nil; non-nil Scale error stops listener and leaves message for redelivery",
+    "scheduler_advertised_max_capacity": 0,
+    "scheduler_assignment_policy": "automatic GitHub assignment is disabled on every listener poll; only a verified JobAvailable RunnerRequestID may be explicitly acquired"
   },
   "state_machines": {
     "github_job": {
@@ -99,9 +101,10 @@
         "controller never calls AcquireJobs for the anomalous RunnerRequestID",
         "message handling may be acknowledged so controller liveness is preserved",
         "the job remains scheduler-owned/unacquired; workflow/repository policy or operator cancellation is responsible for eventual terminal handling",
-        "repeated anomalous observations emit bounded durable evidence/alerting but cannot consume systemd restart budget"
+        "repeated anomalous observations emit bounded durable evidence/alerting but cannot consume systemd restart budget",
+        "JobAssigned is lifecycle evidence only and cannot create authority; zero-ID GitHub.com JobAssigned is a stable no-op unless an existing trusted JobAvailable-derived ledger can be correlated"
       ],
-      "invariant": "normal trusted workflows are precompiled to the class, so runtime admission denial indicates policy/workflow drift or attack, not ordinary control flow"
+      "invariant": "scheduler automatic capacity is advertised as zero; normal authority originates only from exact trusted JobAvailable -> AcquireJobs, while TotalAssignedJobs remains the desired physical-capacity count"
     },
     "controller_supervisor": {
       "owner": "runner-class controller process",
