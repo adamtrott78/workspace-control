@@ -279,6 +279,16 @@ class WorkspaceShellContractTests(unittest.TestCase):
                 verifier["policy_artifact_path"],
                 "/etc/workspace-shell/policy/workspace-shell-mcp-authority-v2.json",
             )
+            service_text = (out / "workspace-shell-mcp.service").read_text()
+            self.assertIn(
+                "Environment=OPENSSL_CONF=/opt/workspace-shell/node/ssl/openssl.cnf",
+                service_text,
+            )
+            broker_cfg = json.loads((out / "root-broker.json").read_text())
+            self.assertEqual(
+                broker_cfg["node_openssl_conf"],
+                "/opt/workspace-shell/node/ssl/openssl.cnf",
+            )
             self.assertTrue((out / "workspace-shell-mcp.service").is_file())
             self.assertTrue((out / "workspace-shell-sysusers.conf").is_file())
             self.assertEqual(
@@ -676,6 +686,8 @@ class WorkspaceShellContractTests(unittest.TestCase):
             source.index('echo "LOCAL_MTLS_HEALTH=PASS"'),
             source.index('read -rsp "Runtime key: " RUNTIME_KEY'),
         )
+        self.assertIn('STAGED_NODE_OPENSSL_BINDING=PASS', source)
+        self.assertIn('STAGED_OPENSSL_CONF="/opt/workspace-shell/node/ssl/openssl.cnf"', source)
         self.assertIn('TUNNEL_PROFILE_SECRET_SCAN=PASS', source)
         self.assertIn('render_tunnel_profile.py', source)
         self.assertIn(
