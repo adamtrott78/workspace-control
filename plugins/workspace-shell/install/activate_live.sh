@@ -111,9 +111,9 @@ echo "SOURCE_HEAD=$SOURCE_HEAD"
 [ "$(sha256_file "$EVIDENCE")" = "$ATTEST_SHA256" ] \
   || fail "final host attestation digest mismatch"
 
-git clone   --no-checkout   --filter=blob:none   --branch "$SOURCE_BRANCH"   "$SOURCE_REPO_URL"   "$SOURCE" >/dev/null
+GIT_TERMINAL_PROMPT=0 git -c credential.helper= clone   --no-checkout   --filter=blob:none   --branch "$SOURCE_BRANCH"   "$SOURCE_REPO_URL"   "$SOURCE" >/dev/null
 git -C "$SOURCE" config core.hooksPath /dev/null
-git -C "$SOURCE" -c credential.helper= checkout --detach "$SOURCE_HEAD" >/dev/null
+GIT_TERMINAL_PROMPT=0 git -C "$SOURCE" -c credential.helper= checkout --detach "$SOURCE_HEAD" >/dev/null
 git -C "$SOURCE" remote remove origin >/dev/null 2>&1 || true
 
 [ "$(git -C "$SOURCE" rev-parse HEAD)" = "$SOURCE_HEAD" ] \
