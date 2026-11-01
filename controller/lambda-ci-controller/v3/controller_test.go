@@ -69,9 +69,14 @@ func (m *memoryLedger) Put(record jobRecord) error {
 }
 
 type fakeVerifier struct {
-	trusted bool
-	reason  string
-	err     error
+	trusted          bool
+	reason           string
+	err              error
+	discovered       []verifiedJob
+	discoverySafe    bool
+	discoveryReason  string
+	discoveryErr     error
+	discoveryCalls   int
 }
 
 func (f *fakeVerifier) Verify(
@@ -86,6 +91,7 @@ func (f *fakeVerifier) Verify(
 	}
 	return verifiedJob{
 		RunnerRequestID:      job.RunnerRequestID,
+		AuthoritySource:      "BROKER_JOB_AVAILABLE",
 		WorkflowRunID:        job.WorkflowRunID,
 		WorkflowPath:         ".github/workflows/control.yml",
 		WorkflowBlobSHA:      strings.Repeat("c", 40),
@@ -93,6 +99,16 @@ func (f *fakeVerifier) Verify(
 		TriggeringActorLogin: "adamtrott78",
 		EventName:            "issue_comment",
 	}, true, "", nil
+}
+
+func (f *fakeVerifier) DiscoverTrustedDemand(
+	_ context.Context,
+) ([]verifiedJob, bool, string, error) {
+	f.discoveryCalls++
+	if f.discoveryErr != nil {
+		return nil, false, "", f.discoveryErr
+	}
+	return append([]verifiedJob(nil), f.discovered...), f.discoverySafe, f.discoveryReason, nil
 }
 
 type fakeSession struct {
@@ -451,12 +467,122 @@ func TestZeroIDAssignedMessageIsStableNoop(t *testing.T) {
 	}
 }
 
-func TestSchedulerAdvertisedCapacityForcesExplicitAdmission(t *testing.T) {
-	if schedulerAdvertisedMaxCapacity != 0 {
-		t.Fatalf("scheduler advertised capacity must remain zero, got %d", schedulerAdvertisedMaxCapacity)
+func TestSchedulerAdvertisedCapacityMatchesClassCapacity(t *testing.T) {
+	policy := testPolicy()
+	if got := schedulerAdvertisedMaxCapacity(policy); got != policy.MaxRunners {
+		t.Fatalf("scheduler capacity must match class capacity: got=%d want=%d", got, policy.MaxRunners)
 	}
-	if testPolicy().MaxRunners <= 0 {
-		t.Fatal("test class capacity must remain independently positive")
+}
+
+
+func restDiscoveredJob(jobID, runID int64) verifiedJob {
+	return verifiedJob{
+		RunnerRequestID:      jobID,
+		GitHubJobID:          jobID,
+		AuthoritySource:      "REST_ACTIVE_JOB_SET",
+		WorkflowRunID:        runID,
+		WorkflowPath:         ".github/workflows/control.yml",
+		WorkflowBlobSHA:      strings.Repeat("c", 40),
+		ActorLogin:           "adamtrott78",
+		TriggeringActorLogin: "adamtrott78",
+		EventName:            "issue_comment",
+	}
+}
+
+func TestRestAttestedAssignedDemandProvisionsWithoutBrokerIDs(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	session := &fakeSession{}
+	verifier := &fakeVerifier{
+		discoverySafe: true,
+		discovered:    []verifiedJob{restDiscoveredJob(9001, 1901)},
+	}
+	scaler := testScaler(
+		verifier,
+		ledger,
+		session,
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics:          &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+		JobAssignedMessages: []*scaleset.JobAssigned{assigned(0, 0)},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if verifier.discoveryCalls != 1 {
+		t.Fatalf("REST demand discovery calls=%d want=1", verifier.discoveryCalls)
+	}
+	if len(session.acquireCalls) != 0 {
+		t.Fatalf("REST-assigned fallback must not call AcquireJobs: %#v", session.acquireCalls)
+	}
+	if len(events) != 3 ||
+		!strings.HasPrefix(events[0], "reserve:") ||
+		!strings.HasPrefix(events[1], "jit:") ||
+		!strings.HasPrefix(events[2], "launch:") {
+		t.Fatalf("REST-attested demand must preserve RESERVE -> JIT -> LAUNCH: %#v", events)
+	}
+	record, ok, err := ledger.Get(9001)
+	if err != nil || !ok {
+		t.Fatalf("REST-attested authority record missing: ok=%v err=%v", ok, err)
+	}
+	if record.GitHubJobID != 9001 ||
+		record.AuthoritySource != "REST_ACTIVE_JOB_SET" ||
+		record.WorkflowRunID != 1901 ||
+		record.SchedulerState != "REST_ATTESTED_ASSIGNED" {
+		t.Fatalf("REST-attested authority record mismatch: %#v", record)
+	}
+}
+
+func TestUnsafeRestTargetDemandNeverReachesRoot(t *testing.T) {
+	events := []string{}
+	verifier := &fakeVerifier{
+		discoverySafe:   false,
+		discoveryReason: "target-label run is untrusted",
+	}
+	scaler := testScaler(
+		verifier,
+		newMemoryLedger(),
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if verifier.discoveryCalls != 1 {
+		t.Fatalf("REST demand discovery calls=%d want=1", verifier.discoveryCalls)
+	}
+	if len(events) != 0 {
+		t.Fatalf("unsafe REST demand reached root authority: %#v", events)
+	}
+}
+
+func TestRestDemandWaitsForEvidenceConvergence(t *testing.T) {
+	events := []string{}
+	verifier := &fakeVerifier{discoverySafe: true}
+	scaler := testScaler(
+		verifier,
+		newMemoryLedger(),
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if verifier.discoveryCalls != 1 {
+		t.Fatalf("REST demand discovery calls=%d want=1", verifier.discoveryCalls)
+	}
+	if len(events) != 0 {
+		t.Fatalf("capacity mutated before REST evidence converged: %#v", events)
 	}
 }
 
