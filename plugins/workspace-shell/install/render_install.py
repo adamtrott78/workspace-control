@@ -4,12 +4,10 @@
 from __future__ import annotations
 
 import argparse
-import grp
 import hashlib
 import json
 import os
 from pathlib import Path
-import pwd
 
 
 HERE = Path(__file__).resolve().parent
@@ -79,18 +77,39 @@ def copy_text(src, dst, mode=0o644):
     return write_bytes(dst, src.read_bytes(), mode)
 
 
-def resolve_id(value, account, *, group=False):
-    if value is not None:
-        if value < 1:
-            fail(f"invalid numeric identity for {account}")
-        return value
-    try:
-        return grp.getgrnam(account).gr_gid if group else pwd.getpwnam(account).pw_uid
-    except KeyError:
-        fail(
-            f"{account} does not exist; apply the sysusers stage first "
-            "or provide an explicit numeric ID"
-        )
+EXPECTED_IDENTITIES = {
+    "workspace-shell-mcp": {"uid": 41010, "gid": 41010, "role": "frontend"},
+    "workspace-shell-exec": {"uid": 41011, "gid": 41011, "role": "worker"},
+    "workspace-shell-tunnel": {"uid": 41012, "gid": 41012, "role": "tunnel"},
+}
+
+
+def attested_identities(attestation):
+    entries = attestation.get("planned_identities")
+    if not isinstance(entries, list):
+        fail("host attestation lacks planned_identities")
+    by_name = {
+        item.get("name"): item
+        for item in entries
+        if isinstance(item, dict) and isinstance(item.get("name"), str)
+    }
+    if set(by_name) != set(EXPECTED_IDENTITIES):
+        fail("host attestation planned identities do not match Workspace Shell policy")
+
+    result = {}
+    for name, expected in EXPECTED_IDENTITIES.items():
+        item = by_name[name]
+        if item.get("uid") != expected["uid"] or item.get("gid") != expected["gid"]:
+            fail(f"host attestation identity mismatch for {name}")
+        for field in ("name_user", "name_group", "numeric_uid", "numeric_gid"):
+            evidence = item.get(field)
+            if not isinstance(evidence, dict) or evidence.get("exists") is not False:
+                fail(f"host attestation collision evidence is not clean for {name}: {field}")
+        result[expected["role"]] = {
+            "uid": expected["uid"],
+            "gid": expected["gid"],
+        }
+    return result
 
 
 def load_attestation(path):
@@ -130,22 +149,13 @@ def render(args):
     observed_policy_digest = sha256_bytes(policy_bytes)
     if observed_policy_digest != policy_digest:
         fail("policy_artifact_sha256 does not match repository authority artifact")
-    tunnel_cert_digest = digest64(
-        args.tunnel_client_cert_sha256,
-        "tunnel_client_cert_sha256",
-    )
-
-    frontend_uid = resolve_id(args.frontend_uid, "workspace-shell-mcp")
-    frontend_gid = resolve_id(args.frontend_gid, "workspace-shell-mcp", group=True)
-    worker_uid = resolve_id(args.worker_uid, "workspace-shell-exec")
-    worker_gid = resolve_id(args.worker_gid, "workspace-shell-exec", group=True)
-    tunnel_uid = resolve_id(args.tunnel_uid, "workspace-shell-tunnel")
-    tunnel_gid = resolve_id(args.tunnel_gid, "workspace-shell-tunnel", group=True)
-
-    if len({frontend_uid, worker_uid, tunnel_uid}) != 3:
-        fail("frontend, worker, and tunnel UIDs must be distinct")
-    if len({frontend_gid, worker_gid, tunnel_gid}) != 3:
-        fail("frontend, worker, and tunnel primary GIDs must be distinct")
+    identities = attested_identities(attestation)
+    frontend_uid = identities["frontend"]["uid"]
+    frontend_gid = identities["frontend"]["gid"]
+    worker_uid = identities["worker"]["uid"]
+    worker_gid = identities["worker"]["gid"]
+    tunnel_uid = identities["tunnel"]["uid"]
+    tunnel_gid = identities["tunnel"]["gid"]
 
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -166,7 +176,7 @@ def render(args):
         "tls_key": "/etc/workspace-shell/frontend/server.key",
         "tls_cert": "/etc/workspace-shell/frontend/server.crt",
         "tls_client_ca": "/etc/workspace-shell/frontend/client-ca.crt",
-        "tunnel_client_cert_sha256": tunnel_cert_digest,
+        "tunnel_client_cert_sha256": None,
         "receipt_uid": 0,
         "frontend_uid": frontend_uid,
         "frontend_gid": frontend_gid,
@@ -225,7 +235,7 @@ def render(args):
         0o644,
     )
     for name, payload in (
-        ("frontend.json", frontend),
+        ("frontend.unsealed.json", frontend),
         ("job-launcher.json", launcher),
         ("broker-verifier.json", verifier),
         ("root-broker.json", broker),
@@ -274,6 +284,9 @@ def render(args):
         },
         "privileged_helpers_enabled": False,
         "operator_trust_store_state": "EMPTY_FAIL_CLOSED",
+        "activation_sealed": False,
+        "requires_activation_seal": True,
+        "tunnel_client_cert_sha256": None,
         "tunnel_runtime_key_included": False,
         "tls_private_keys_included": False,
         "files": files,
@@ -291,13 +304,6 @@ def main():
     parser.add_argument("--source-sha")
     parser.add_argument("--design-authority-sha", required=True)
     parser.add_argument("--policy-artifact-sha256", required=True)
-    parser.add_argument("--tunnel-client-cert-sha256", required=True)
-    parser.add_argument("--frontend-uid", type=int)
-    parser.add_argument("--frontend-gid", type=int)
-    parser.add_argument("--worker-uid", type=int)
-    parser.add_argument("--worker-gid", type=int)
-    parser.add_argument("--tunnel-uid", type=int)
-    parser.add_argument("--tunnel-gid", type=int)
     args = parser.parse_args()
     render(args)
 
