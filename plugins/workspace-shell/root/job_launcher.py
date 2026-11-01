@@ -296,8 +296,11 @@ def build_systemd_run_command(cfg, unit, bwrap_cmd, worker_uid, worker_gid, scra
         "PrivateNetwork=yes",
         "PrivateDevices=yes",
         "ProtectHome=yes",
+        # Bubblewrap must read /proc/sys/kernel/overflowuid while constructing its
+        # own namespace. Keep other-process visibility restricted, but do not
+        # reduce the transient unit to ProcSubset=pid before bwrap mounts its
+        # private /proc.
         "ProtectProc=invisible",
-        "ProcSubset=pid",
         "RestrictSUIDSGID=yes",
         "CapabilityBoundingSet=",
         "TasksMax=48",
