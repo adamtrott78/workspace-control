@@ -25,6 +25,7 @@ ACTIVATE_LIVE = PLUGIN / "install" / "activate_live.sh"
 FRONTEND_ACCESS_REPAIR = PLUGIN / "install" / "repair_frontend_config_access_v1.sh"
 WORKER_PROC_REPAIR = PLUGIN / "install" / "repair_worker_proc_bootstrap_v1.sh"
 SYSUSERS = PLUGIN / "install" / "sysusers.conf"
+TMPFILES = PLUGIN / "install" / "tmpfiles.conf"
 FINAL_HOST_ATTEST = PLUGIN / "install" / "evidence" / "lambda-host-attestation.f999b25a.json"
 COMMISSIONING_SOURCE_SHA = "f999b25a866f25c95243cbbd6d1377a799fafb78"
 COMMISSIONING_ATTEST_SHA256 = "d44cda1f6f13f814e093bef9228410f319d504c76cf80ba8e6d2ecbb8d321353"
@@ -204,6 +205,10 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn("workspace-shell-mcp    41010", sysusers)
         self.assertIn("workspace-shell-exec   41011", sysusers)
         self.assertIn("workspace-shell-tunnel 41012", sysusers)
+
+        tmpfiles = TMPFILES.read_text()
+        self.assertIn("d /var/lib/workspace-shell/jobs 0711 root root - -", tmpfiles)
+        self.assertNotIn("d /var/lib/workspace-shell/jobs 0700 root root - -", tmpfiles)
 
     def test_host_attestation_functions_bound_output_and_do_not_mutate(self):
         spec = importlib.util.spec_from_file_location("workspace_shell_host_attest", HOST_ATTEST)
