@@ -227,6 +227,7 @@ def render(args):
         "receipt_root": receipt_root,
         "helper_cache_root": "/var/lib/workspace-shell/helper-cache",
         "node_path": "/opt/workspace-shell/node/bin/node",
+        "node_openssl_conf": "/opt/workspace-shell/node/ssl/openssl.cnf",
         "systemd_run_path": "/usr/bin/systemd-run",
         "systemctl_path": "/usr/bin/systemctl",
         "policy_version_sha": authority_sha,
