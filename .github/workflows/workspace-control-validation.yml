@@ -140,7 +140,10 @@ jobs:
           assert 'V3_CANARY_PREFLIGHT_BUILD=BEGIN' in source
           assert 'STOP_V3_CANARY_PREFLIGHT_BUILD_FAILED' in source
           assert 'V3_WORKSPACE_CONTROL_GH_TOKEN_EXPORT=BEGIN' in source
-          assert 'STOP_GH_AUTH_TOKEN_EXPORT_FAILED' in source
+          assert 'V3_WORKSPACE_CONTROL_GH_TOKEN_PRIMARY_UNAVAILABLE' in source
+          assert 'STOP_GH_AUTH_STATUS_TOKEN_EXPORT_FAILED' in source
+          assert 'STOP_GH_AUTH_STATUS_TOKEN_PARSE_FAILED' in source
+          assert 'STOP_GH_AUTH_TOKEN_VERIFY_FAILED' in source
           assert 'V3_WORKSPACE_CONTROL_CREDENTIAL_RESET=PASS' in source
           assert 'PREFLIGHT_NO_CANARY_AUTHORITY_CONSUMPTION=PASS' in source
           assert 'PREFLIGHT_NO_CANARY_TRANSACTION_RECEIPT=PASS' in source
