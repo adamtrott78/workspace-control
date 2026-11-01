@@ -22,6 +22,7 @@ SEAL_INSTALL = PLUGIN / "install" / "seal_install.py"
 RENDER_TUNNEL_PROFILE = PLUGIN / "install" / "render_tunnel_profile.py"
 VALIDATE_TUNNEL_DOCTOR = PLUGIN / "install" / "validate_tunnel_doctor.py"
 ACTIVATE_LIVE = PLUGIN / "install" / "activate_live.sh"
+FRONTEND_ACCESS_REPAIR = PLUGIN / "install" / "repair_frontend_config_access_v1.sh"
 SYSUSERS = PLUGIN / "install" / "sysusers.conf"
 FINAL_HOST_ATTEST = PLUGIN / "install" / "evidence" / "lambda-host-attestation.f999b25a.json"
 COMMISSIONING_SOURCE_SHA = "f999b25a866f25c95243cbbd6d1377a799fafb78"
@@ -843,6 +844,50 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertNotIn("sudo bash", source)
         self.assertNotIn("BEGIN PRIVATE KEY", source)
         self.assertNotIn("\\\\$" + "{", source)
+
+    def test_frontend_access_repair_restores_only_commissioned_metadata_and_boot_disabled_services(self):
+        proc = subprocess.run(
+            ["bash", "-n", str(FRONTEND_ACCESS_REPAIR)],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        source = FRONTEND_ACCESS_REPAIR.read_text()
+
+        self.assertIn(
+            'EXPECTED_SHA="01a95b61410e2f427b9885a19e6a0b9c5ee60a38"',
+            source,
+        )
+        self.assertIn(
+            'sudo chown root:workspace-shell-mcp "$FRONTEND"',
+            source,
+        )
+        self.assertIn('sudo chmod 0640 "$FRONTEND"', source)
+        self.assertIn('root:workspace-shell-mcp:640', source)
+        self.assertIn(
+            'sudo -u workspace-shell-mcp test -r "$FRONTEND"',
+            source,
+        )
+        self.assertIn(
+            'frontend.get("authority_root") != "/etc/workspace-shell/authority"',
+            source,
+        )
+        self.assertIn('LOCAL_MCP_INITIALIZE=PASS', source)
+        self.assertIn('TUNNEL_READY=PASS', source)
+        self.assertIn('SERVICES_ACTIVE_BOOT_DISABLED=PASS', source)
+        self.assertNotIn('systemctl enable ', source)
+        self.assertNotIn('runtime-key', source)
+        self.assertNotIn('ACTIVATE_WORKSPACE_SHELL', source)
+        self.assertNotIn('/etc/workspace-shell/approval', source)
+
+        activation = ACTIVATE_LIVE.read_text()
+        self.assertIn(
+            'sudo install -o root -g workspace-shell-mcp -m 0640 "$BUNDLE/frontend.json" /etc/workspace-shell/frontend.json',
+            activation,
+        )
 
     def test_independent_filtered_remote_clone_can_materialize_historical_source(self):
         with tempfile.TemporaryDirectory() as td:
