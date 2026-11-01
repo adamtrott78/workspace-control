@@ -23,6 +23,7 @@ PREFLIGHT_BIN="$TMP/v3-canary-preflight"
 TX_RECEIPT=""
 RUN_ID=""
 DISPATCHED_AT=""
+CANARY_WORKFLOW_ID=""
 ROLLBACK_DONE=0
 
 cleanup_files() {
@@ -38,23 +39,32 @@ cleanup_files() {
 
 cancel_dispatched_canary() {
   if [[ -n "$RUN_ID" ]]; then
-    gh run cancel "$RUN_ID" --repo "$REPOSITORY" >/dev/null 2>&1 || true
+    gh api --method POST \
+      "repos/$REPOSITORY/actions/runs/$RUN_ID/cancel" \
+      >/dev/null 2>&1 || true
     return 0
   fi
   if [[ -z "$DISPATCHED_AT" ]]; then
     return 0
   fi
 
+  local runs_endpoint="repos/$REPOSITORY/actions/runs"
+  if [[ -n "$CANARY_WORKFLOW_ID" ]]; then
+    runs_endpoint="repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/runs"
+  fi
+
   while read -r candidate; do
     [[ -n "$candidate" ]] || continue
-    gh run cancel "$candidate" --repo "$REPOSITORY" >/dev/null 2>&1 || true
+    gh api --method POST \
+      "repos/$REPOSITORY/actions/runs/$candidate/cancel" \
+      >/dev/null 2>&1 || true
   done < <(
     gh api --method GET \
-      "repos/$REPOSITORY/actions/runs" \
+      "$runs_endpoint" \
       -f event=workflow_dispatch \
       -f branch=main \
       -f per_page=100 \
-      --jq ".workflow_runs[] | select(.path == \"$WORKFLOW_PATH\" and .created_at >= \"$DISPATCHED_AT\" and (.status == \"queued\" or .status == \"in_progress\" or .status == \"waiting\" or .status == \"requested\" or .status == \"pending\")) | .id" \
+      --jq ".workflow_runs[] | select(.created_at >= \"$DISPATCHED_AT\" and (.status == \"queued\" or .status == \"in_progress\" or .status == \"waiting\" or .status == \"requested\" or .status == \"pending\")) | .id" \
       2>/dev/null || true
   )
 }
@@ -201,15 +211,36 @@ PY
   exit 1
 fi
 
+echo "CANARY_WORKFLOW_ID_RESOLVE=BEGIN"
+set +e
+CANARY_WORKFLOW_META="$(
+  gh api --method GET \
+    "repos/$REPOSITORY/actions/workflows" \
+    -f per_page=100 \
+    --jq ".workflows | map(select(.path == \"$WORKFLOW_PATH\")) | [length, (.[0].id // 0)] | @tsv"
+)"
+CANARY_WORKFLOW_META_RC=$?
+set -e
+if [[ "$CANARY_WORKFLOW_META_RC" -ne 0 ]]; then
+  echo "STOP_CANARY_WORKFLOW_ID_QUERY_FAILED rc=$CANARY_WORKFLOW_META_RC"
+  exit "$CANARY_WORKFLOW_META_RC"
+fi
+read -r CANARY_WORKFLOW_COUNT CANARY_WORKFLOW_ID <<< "$CANARY_WORKFLOW_META"
+if [[ "$CANARY_WORKFLOW_COUNT" != "1" || -z "$CANARY_WORKFLOW_ID" || "$CANARY_WORKFLOW_ID" == "0" ]]; then
+  echo "STOP_CANARY_WORKFLOW_ID_RESOLUTION count=${CANARY_WORKFLOW_COUNT:-unknown} id=${CANARY_WORKFLOW_ID:-unknown}"
+  exit 1
+fi
+echo "CANARY_WORKFLOW_ID_RESOLVE=PASS id=$CANARY_WORKFLOW_ID"
+
 echo "CANARY_RUN_HISTORY_CHECK=BEGIN"
 set +e
 CANARY_RUN_COUNT="$(
   gh api --method GET \
-    "repos/$REPOSITORY/actions/runs" \
+    "repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/runs" \
     -f event=workflow_dispatch \
     -f branch=main \
     -f per_page=100 \
-    --jq ".workflow_runs | map(select(.path == \"$WORKFLOW_PATH\")) | length"
+    --jq '.workflow_runs | length'
 )"
 CANARY_RUN_HISTORY_RC=$?
 set -e
@@ -220,11 +251,11 @@ fi
 if [[ "$CANARY_RUN_COUNT" != "0" ]]; then
   echo "STOP_EXISTING_CANARY_WORKFLOW_RUNS count=$CANARY_RUN_COUNT"
   gh api --method GET \
-    "repos/$REPOSITORY/actions/runs" \
+    "repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/runs" \
     -f event=workflow_dispatch \
     -f branch=main \
     -f per_page=100 \
-    --jq ".workflow_runs[] | select(.path == \"$WORKFLOW_PATH\") | [.id,.status,.conclusion,.created_at,.head_sha] | @tsv" || true
+    --jq '.workflow_runs[] | [.id,.status,.conclusion,.created_at,.head_sha] | @tsv' || true
   exit 1
 fi
 echo "PREFLIGHT_NO_CANARY_WORKFLOW_RUN=PASS"
@@ -558,24 +589,33 @@ echo "GENERATION_EXCLUSION=ACTIVE"
 # Dispatch exactly the owner-only workflow now trusted by the canary policy.
 BEFORE_RUN_ID="$(
   gh api --method GET \
-    "repos/$REPOSITORY/actions/runs" \
+    "repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/runs" \
     -f event=workflow_dispatch \
     -f branch=main \
     -f per_page=100 \
-    --jq ".workflow_runs | map(select(.path == \"$WORKFLOW_PATH\")) | .[0].id // 0"
+    --jq '.workflow_runs[0].id // 0'
 )"
 
 DISPATCHED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-gh workflow run "$WORKFLOW_PATH"   --repo "$REPOSITORY"   --ref main
+echo "CANARY_DISPATCH=BEGIN workflow_id=$CANARY_WORKFLOW_ID"
+if ! gh api --method POST \
+  "repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/dispatches" \
+  -f ref=main \
+  >/dev/null
+then
+  echo "STOP_CANARY_DISPATCH_FAILED"
+  exit 1
+fi
+echo "CANARY_DISPATCH=PASS"
 
 for _ in $(seq 1 30); do
   RUN_ID="$(
     gh api --method GET \
-      "repos/$REPOSITORY/actions/runs" \
+      "repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/runs" \
       -f event=workflow_dispatch \
       -f branch=main \
       -f per_page=100 \
-      --jq ".workflow_runs | map(select(.path == \"$WORKFLOW_PATH\" and .id != $BEFORE_RUN_ID and .created_at >= \"$DISPATCHED_AT\")) | .[0].id // 0"
+      --jq ".workflow_runs | map(select(.id != $BEFORE_RUN_ID and .created_at >= \"$DISPATCHED_AT\")) | .[0].id // 0"
   )"
   if [[ "$RUN_ID" != "0" && -n "$RUN_ID" ]]; then
     break
@@ -584,11 +624,47 @@ for _ in $(seq 1 30); do
   sleep 2
 done
 
-test -n "$RUN_ID"
+if [[ -z "$RUN_ID" ]]; then
+  echo "STOP_CANARY_RUN_DISCOVERY_FAILED"
+  exit 1
+fi
 echo "CANARY_RUN_ID=$RUN_ID"
 
-CANARY_RC=0
-timeout 420 gh run watch "$RUN_ID" --repo "$REPOSITORY" --exit-status || CANARY_RC=$?
+CANARY_RC=124
+CANARY_CONCLUSION=""
+for _ in $(seq 1 210); do
+  set +e
+  CANARY_STATE="$(
+    gh api --method GET \
+      "repos/$REPOSITORY/actions/runs/$RUN_ID" \
+      --jq '[.status, (.conclusion // "")] | @tsv'
+  )"
+  CANARY_STATE_RC=$?
+  set -e
+  if [[ "$CANARY_STATE_RC" -ne 0 ]]; then
+    echo "STOP_CANARY_RUN_STATUS_QUERY_FAILED rc=$CANARY_STATE_RC run_id=$RUN_ID"
+    CANARY_RC="$CANARY_STATE_RC"
+    cancel_dispatched_canary
+    break
+  fi
+
+  read -r CANARY_STATUS CANARY_CONCLUSION <<< "$CANARY_STATE"
+  if [[ "$CANARY_STATUS" == "completed" ]]; then
+    if [[ "$CANARY_CONCLUSION" == "success" ]]; then
+      CANARY_RC=0
+    else
+      CANARY_RC=1
+    fi
+    echo "CANARY_TERMINAL=PASS status=$CANARY_STATUS conclusion=$CANARY_CONCLUSION"
+    break
+  fi
+  sleep 2
+done
+
+if [[ "$CANARY_RC" -eq 124 ]]; then
+  echo "STOP_CANARY_RUN_TIMEOUT run_id=$RUN_ID"
+  cancel_dispatched_canary
+fi
 
 # Restore exact v2 prestate after the canary is terminal.
 for _ in $(seq 1 60); do
@@ -609,10 +685,7 @@ if [[ "$CANARY_RC" -ne 0 ]]; then
   exit "$CANARY_RC"
 fi
 
-CONCLUSION="$(
-  gh run view "$RUN_ID"     --repo "$REPOSITORY"     --json conclusion     --jq '.conclusion'
-)"
-test "$CONCLUSION" = "success"
+test "$CANARY_CONCLUSION" = "success"
 
 sudo /usr/bin/python3 - <<'PY'
 import json
