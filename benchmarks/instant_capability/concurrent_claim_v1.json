@@ -3,7 +3,7 @@
   "benchmark": "INSTANT_CONCURRENT_CLAIMS_V1",
   "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
   "shared_branch": "instant-concurrent-claims-v1-20261101",
-  "state_version": 1,
+  "state_version": 2,
   "invariant": "each action may have at most one owner",
   "actions": {
     "X": {
@@ -11,8 +11,8 @@
       "owner": "W1"
     },
     "Y": {
-      "state": "PENDING",
-      "owner": null
+      "state": "CLAIMED",
+      "owner": "W2"
     }
   },
   "claim_protocol": {
@@ -28,6 +28,12 @@
       "action": "X",
       "expected_shared_head": "f660daa54fd57f8d9c63566a7f88b3163f7d9c08",
       "attempt": 1
+    },
+    {
+      "worker": "W2",
+      "action": "Y",
+      "expected_shared_head": "0a8fd8ba0e3adab436829c75094ee4d75b459b87",
+      "attempt": 2
     }
   ]
 }
