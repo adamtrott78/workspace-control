@@ -14,7 +14,9 @@ FRONTEND_UID=41010
 WORKER_UID=41011
 TUNNEL_UID=41012
 
-ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd -P)"
+[ -d "$ROOT/.git" ] || [ -f "$ROOT/.git" ] || fail "activation script is not inside a Git checkout"
 OPERATOR_HEAD="$(git -C "$ROOT" rev-parse HEAD)"
 EVIDENCE="$ROOT/plugins/workspace-shell/install/evidence/lambda-host-attestation.f999b25a.json"
 TMP="$(mktemp -d /tmp/workspace-shell-activate.XXXXXX)"
