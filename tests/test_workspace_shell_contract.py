@@ -143,6 +143,26 @@ class WorkspaceShellContractTests(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, 0, proc.stdout + "\n" + proc.stderr)
 
+    def test_root_broker_verifier_uses_staged_openssl_config(self):
+        cfg = {
+            "verifier_script": "/opt/workspace-shell/runtime/plugins/workspace-shell/bin/verify-broker-request.mjs",
+            "verifier_config": "/etc/workspace-shell/broker-verifier.json",
+            "node_path": "/opt/workspace-shell/node/bin/node",
+            "node_openssl_conf": "/opt/workspace-shell/node/ssl/openssl.cnf",
+        }
+        fake_proc = type("FakeProc", (), {"stdout": b'{"ok":true}', "stderr": b""})()
+        with patch.object(root_broker, "require_protected_path") as protected:
+            with patch.object(root_broker.subprocess, "run", return_value=fake_proc) as run:
+                result = root_broker.verify_request(cfg, b"{}\n")
+        self.assertTrue(result["ok"])
+        self.assertEqual(
+            run.call_args.kwargs["env"]["OPENSSL_CONF"],
+            "/opt/workspace-shell/node/ssl/openssl.cnf",
+        )
+        protected.assert_any_call(
+            "/opt/workspace-shell/node/ssl/openssl.cnf"
+        )
+
     def test_host_attestation_is_read_only_and_secret_averse(self):
         proc = subprocess.run(
             [sys.executable, "-m", "py_compile", str(HOST_ATTEST)],
