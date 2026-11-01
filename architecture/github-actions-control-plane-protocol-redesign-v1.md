@@ -551,7 +551,7 @@ Repository analysis proves every one of the 23 registered trusted route workflow
 
 > one registered route workflow contains exactly one self-hosted job, and that job targets exactly one runner class.
 
-At runtime the controller validates only structured GitHub facts already present in the pinned Scale Set Client message plus REST run evidence:
+At runtime the controller validates only structured GitHub facts already present in a `JobAvailable` message plus REST run evidence:
 
 1. repository owner/name;
 2. `WorkflowRunID`;
@@ -562,6 +562,21 @@ At runtime the controller validates only structured GitHub facts already present
 7. exact trusted workflow blob at the run's default-branch commit.
 
 If those facts pass, the controller may acquire `RunnerRequestID`. No runtime display-name equality or parsing is required.
+
+### GitHub.com assignment-control requirement
+
+Live canary evidence on 2026-10-31 reproduced the GitHub.com behavior reported upstream since 2025: `JobAssigned` lifecycle payloads may carry `runnerRequestId=0` and `workflowRunId=0`. Therefore `JobAssigned` is not an admissible authority source.
+
+The v3 controller must keep two capacities distinct:
+
+- **scheduler-advertised automatic capacity = 0** on every long poll, so GitHub cannot directly assign work before local admission;
+- **local/root class capacity = policy `max_runners`**, used only after a trusted `JobAvailable` has been verified and explicitly acquired.
+
+This forces the authority path to remain:
+
+`JobAvailable -> exact attestation -> AcquireJobs -> TotalAssignedJobs -> RESERVE -> JIT -> LAUNCH`.
+
+A standalone `JobAssigned`, including one with non-zero legacy IDs, is lifecycle evidence only. It may update an existing ledger entry created from trusted `JobAvailable`, but it must never reconstruct scheduler authority. On restart with assigned-but-untracked work, the controller fails closed and waits for GitHub cancellation/requeue and a later `JobAvailable`.
 
 The YAML job key is retained only as a **compile-time workflow-shape assertion**. `JobDisplayName` is observational metadata only. Later `JobStarted`/`JobCompleted` messages may add GitHub JobID and runner identity to receipts, but neither is a prerequisite for safe class-level capacity provisioning.
 
@@ -652,9 +667,10 @@ GITHUB ACTIONS SCHEDULER
         v
 RUNNER-CLASS CONTROLLER (unprivileged)
   - authenticated Scale Set Client session
-  - exact trusted workflow/event/actor attestation
+  - advertise scheduler automatic capacity = 0
+  - exact trusted JobAvailable workflow/event/actor attestation
   - AcquireJobs only for allowed workflow jobs
-  - scale from TotalAssignedJobs
+  - scale physical class capacity from TotalAssignedJobs
         |
         v
 ROOT CAPACITY PROVIDER
@@ -742,6 +758,7 @@ Alternative local proofs (class-specific sockets/credentials or kernel cgroup/se
 ## Controller no longer needs per-job route parsing
 
 For each `JobAvailable`:
+- the listener poll that delivered it advertised automatic scheduler capacity `0`;
 - parse no human command;
 - inspect GitHub-native fields;
 - derive trusted workflow path from `JobWorkflowRef`;
