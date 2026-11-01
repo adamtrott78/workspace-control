@@ -23,26 +23,27 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-shell-mcp-v1-implementation
-- Remote checkpoint: d827b5d18f9920412e1f68a22264a9abf0993886
-- Remote verified: true
+- Remote branch: workspace-shell-mcp-v1-current-main
+- Remote checkpoint: f537af52b622c1f8a8265186778d5897fc86c1fd
+- Remote verified: false
 
 ## Next safe action
 
-Obtain fresh read-only Lambda host attestation for exact checkpoint d827b5d18f9920412e1f68a22264a9abf0993886 using the repository host_attest.py surface or an equivalently bounded existing Lambda execution surface. Do not request an independent reviewer. Do not install/activate Workspace Shell or provision secrets until the attestation-derived bundle is validated.
+Run the exact-head self-hosted Workspace Control validation route on PR #573 with the explicit `host-attest` suffix. The repository test will execute secret-averse read-only plugins/workspace-shell/install/host_attest.py against the exact checked-out PR head on the Lambda GitRunner and emit one bounded WORKSPACE_SHELL_HOST_ATTESTATION_JSON record. Do not install or activate Workspace Shell yet. After the attestation is captured, validate it, bind it durably, render the exact host-specific installation bundle, and re-run exact-head CI.
 
 ## Remaining work
 
-- Obtain fresh read-only Lambda host attestation for exact checkpoint d827b5d18f9920412e1f68a22264a9abf0993886 without exposing secret contents.
-- Render and validate the exact host-specific installation bundle from the attestation, including UIDs/GIDs, root-owned directories, sockets, mTLS material locations, frontend signing material locations, tunnel identity/profile, rollback and emergency disable.
-- Keep privileged helper registry empty/fail-closed until an actual typed root mutation is needed; privileged helpers use operator-signed workspace-shell-approval.v2 rather than external reviewer records.
-- Run exact-head Workspace Control Validation on every resulting implementation/state checkpoint.
-- With explicit operator activation authority, install and start Workspace Shell in isolation, verify hostile-worker denials and end-to-end bounded command execution, then connect the dedicated ChatGPT plugin/tunnel.
+- Capture fresh exact-head read-only Lambda host attestation through PR #573 self-hosted GitRunner route `/workspace-control-validate <HEAD> host-attest`.
+- Validate and durably bind the secret-averse attestation to the exact Workspace Shell source head.
+- Render and validate the exact host-specific installation bundle, including explicit distinct UIDs/GIDs, runtime/source paths, systemd units, tunnel-client staging, rollback and emergency disable.
+- Keep privileged helper registry and operator trust/revocation stores empty/fail-closed for initial unprivileged commissioning.
+- Run exact-head hosted and self-hosted validation on the rendered commissioning candidate.
+- With explicit operator activation authority, perform one bounded manual installation/activation transaction, verify hostile-worker denials and end-to-end bounded command execution, then connect the dedicated ChatGPT plugin/tunnel.
 
 ## Blockers / gates
 
-- Fresh read-only Lambda host attestation is required before exact host-specific UIDs/GIDs, runtime paths, tunnel-client path, bubblewrap/user-namespace behavior and systemd assumptions are accepted.
-- Live installation still requires explicit operator activation authority after the host-specific bundle passes exact-head validation.
+- Fresh exact-head Lambda host attestation has not yet been captured on PR #573.
+- Live Workspace Shell installation/activation remains explicitly unauthorized until the attestation-derived bundle passes exact-head validation.
 
 ## Fresh-chat initialization
 
