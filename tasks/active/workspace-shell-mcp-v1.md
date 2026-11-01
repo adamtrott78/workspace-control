@@ -24,28 +24,33 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 
 - Intent: mutate
 - Remote branch: workspace-shell-mcp-v1-current-main
-- Remote checkpoint: 483c3e8bdf8fc0e1db58ff836a1d136e49df4112
+- Remote checkpoint: 01a95b61410e2f427b9885a19e6a0b9c5ee60a38
 - Remote verified: true
+
+## Current stage
+
+- live_chatgpt_plugin_acceptance
 
 ## Next safe action
 
-ACCOUNT-SIDE GATE: create a new dedicated Workspace Shell Secure MCP Tunnel in OpenAI Platform and associate it with the target ChatGPT workspace. Create a separate restricted runtime API key with Tunnels Read + Use only; do not paste the key into chat. Then execute the exact validated plugins/workspace-shell/install/activate_live.sh from the frozen PR #573 head. The operator requires the tunnel ID, performs a no-mutation preflight, asks for literal ACTIVATE_WORKSPACE_SHELL before mutation, prompts for the runtime key with hidden input, and rolls back automatically on any failure before terminal commit. After PASS, connect the tunnel as a private ChatGPT plugin and perform live acceptance before enabling any unit at boot.
+LIVE ACTIVATION IS COMPLETE. Do not reinstall or rerun commissioning. Exact accepted Workspace Shell operator/runtime head is 01a95b61410e2f427b9885a19e6a0b9c5ee60a38; Validation #1463/run 41273806752 succeeded; activation blob 815caf6bc0462ab6b77f414b90dc9ddb0b8a458d; source snapshot remains f999b25a866f25c95243cbbd6d1377a799fafb78. Lambda passed LOCAL_MTLS_HEALTH, real LOCAL_MCP_INITIALIZE, TUNNEL_READY, and SERVICES_ACTIVE_BOOT_DISABLED, and wrote /var/lib/workspace-shell/commissioning/activation-receipt.json. NEXT: connect the dedicated tunnel as a private ChatGPT Workspace Shell plugin/connector and perform live acceptance: tool discovery, runtime/Git inspection, one bounded unprivileged execution, denial tests, and receipt verification. Do not enable units at boot and do not add privileged helpers until that acceptance passes.
 
 ## Remaining work
 
-- In OpenAI Platform tunnel settings, create a dedicated Workspace Shell tunnel (do not reuse Heartbeat) and associate it with the ChatGPT workspace.
-- Create a dedicated restricted runtime API key with only Tunnels Read + Use; keep the secret value off chat/GitHub.
-- Freeze one exact PR #573 operator head after final task/handoff synchronization and successful Workspace Control Validation; verify the activate_live.sh blob before execution.
-- Run the activation operator from that exact head. It must pass preflight before asking for ACTIVATE_WORKSPACE_SHELL, then prompt for the runtime key with hidden input, and end with local mTLS/tunnel readiness while all services remain disabled at boot.
-- Connect the dedicated tunnel as a private ChatGPT Workspace Shell plugin and perform live tool acceptance: runtime/unit inspection, exact Git inspection, one bounded unprivileged execution, denial tests, receipt verification, and empty privileged-helper denial.
-- After v1 live acceptance, decide boot enablement and then add only narrowly reviewed privileged helpers actually needed for the remaining GitRunner v3 migration.
-- Return to the GitRunner v3 fleet migration using Workspace Shell as the terminal transport.
+- Connect the dedicated Workspace Shell tunnel as a private ChatGPT plugin/connector in the target ChatGPT workspace.
+- Verify tool discovery and perform a live workspace_shell_inspect/runtime inventory call.
+- Verify exact Git inspection of workspace-control and one bounded unprivileged execution through Workspace Shell.
+- Run denial tests for unauthorized filesystem paths, credential/secret reads, arbitrary-shell escape shapes, and privileged helper invocation; all must fail closed.
+- Inspect the resulting Workspace Shell execution/audit receipts and the commissioning activation receipt.
+- Only after live acceptance decide whether the four Workspace Shell services should become boot-enabled.
+- After Workspace Shell acceptance, return to workspace-github-actions-control-plane-protocol-redesign-v1 and use Workspace Shell as the terminal transport for the remaining v3 migration, adding only narrowly reviewed privileged helpers when a concrete migration operation requires them.
 
 ## Blockers / gates
 
-- A dedicated Workspace Shell Secure MCP Tunnel has not yet been provisioned/associated with the target ChatGPT workspace.
-- A dedicated runtime API key with Tunnels Read + Use has not yet been provisioned on the operator side; its secret must never be pasted into chat or committed.
-- Live activation and ChatGPT plugin acceptance have not yet been executed. The four Workspace Shell services must remain absent until the explicit activation transaction.
+- No commissioning blocker remains: Workspace Shell is live on Lambda and the dedicated Secure MCP Tunnel reached readiness.
+- ChatGPT-side plugin/connector live acceptance has not yet been completed; until it passes, do not treat Workspace Shell as the authoritative terminal transport for other durable tasks.
+- All Workspace Shell systemd units remain boot-disabled intentionally pending live acceptance.
+- Privileged helper registry and operator trust stores remain empty/fail-closed; no privileged helper execution is currently authorized.
 
 ## Fresh-chat initialization
 
@@ -53,10 +58,16 @@ ACCOUNT-SIDE GATE: create a new dedicated Workspace Shell Secure MCP Tunnel in O
 
 https://github.com/adamtrott78/workspace-control
 
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-shell-mcp-v1.json
+YOU ARE THE CONTINUING EXECUTOR. DO THE WORK YOURSELF IN THIS CHAT.
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Resume durable task:
+"workspace-shell-mcp-v1"
+
+Read first: tasks/active/workspace-shell-mcp-v1.json
+Then: tasks/active/workspace-shell-mcp-v1.md
+
+Trust the capsule plus exact Git/runtime evidence over older conversation text.
+Do not rerun Workspace Shell installation/commissioning. Live activation already passed.
+Continue from the capsule's next_safe_action and perform ChatGPT-side live acceptance.
+Do not enable Workspace Shell at boot or add privileged helpers until live acceptance passes.
+Do not ask me to move this task to another executor unless genuinely blocked by operator-only action.
