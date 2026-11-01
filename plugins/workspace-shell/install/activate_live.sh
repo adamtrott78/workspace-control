@@ -451,8 +451,8 @@ if [ "$LOCAL_READY" != "1" ]; then
   for svc in workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service; do
     echo "--- ${svc}: state ---" >&2
     sudo systemctl show "$svc" --no-pager \
-      --property=Id,LoadState,ActiveState,SubState,MainPID,ExecMainCode,ExecMainStatus,Result,User,Group,FragmentPath \
-      2>&1 | head -n 80 >&2 || true
+      --property=Id,LoadState,ActiveState,SubState,MainPID,ExecMainCode,ExecMainStatus,Result,User,Group,FragmentPath,NRestarts,MemoryCurrent,MemoryPeak \
+      2>&1 | head -n 100 >&2 || true
     echo "--- ${svc}: journal ---" >&2
     sudo journalctl -u "$svc" -n 80 --no-pager --output=short-iso \
       2>&1 | tail -n 80 >&2 || true
@@ -498,8 +498,10 @@ sudo systemctl start workspace-shell-tunnel.service
 TUNNEL_READY=0
 HEALTH_URL=""
 for _ in $(seq 1 200); do
-  if sudo test -s /var/lib/workspace-shell/tunnel/health.url; then
-    HEALTH_URL="$(sudo cat /var/lib/workspace-shell/tunnel/health.url)"
+  HEALTH_CANDIDATE=""
+  if HEALTH_CANDIDATE="$(sudo cat /var/lib/workspace-shell/tunnel/health.url 2>/dev/null)" \
+    && [ -n "$HEALTH_CANDIDATE" ]; then
+    HEALTH_URL="$HEALTH_CANDIDATE"
     if curl -fsS --max-time 1 "$HEALTH_URL/readyz" >/dev/null 2>&1; then
       TUNNEL_READY=1
       break
@@ -512,17 +514,21 @@ if [ "$TUNNEL_READY" != "1" ]; then
   for svc in workspace-shell-tunnel.service workspace-shell-mcp.service; do
     echo "--- ${svc}: state ---" >&2
     sudo systemctl show "$svc" --no-pager \
-      --property=Id,LoadState,ActiveState,SubState,MainPID,ExecMainCode,ExecMainStatus,Result,User,Group,FragmentPath \
-      2>&1 | head -n 80 >&2 || true
+      --property=Id,LoadState,ActiveState,SubState,MainPID,ExecMainCode,ExecMainStatus,Result,User,Group,FragmentPath,NRestarts,MemoryCurrent,MemoryPeak \
+      2>&1 | head -n 100 >&2 || true
     echo "--- ${svc}: journal ---" >&2
     sudo journalctl -u "$svc" -n 120 --no-pager --output=short-iso \
       2>&1 | tail -n 120 >&2 || true
   done
-  if sudo test -s /var/lib/workspace-shell/tunnel/health.url; then
-    HEALTH_URL="$(sudo cat /var/lib/workspace-shell/tunnel/health.url)"
+  HEALTH_CANDIDATE=""
+  if HEALTH_CANDIDATE="$(sudo cat /var/lib/workspace-shell/tunnel/health.url 2>/dev/null)" \
+    && [ -n "$HEALTH_CANDIDATE" ]; then
+    HEALTH_URL="$HEALTH_CANDIDATE"
     echo "TUNNEL_HEALTH_URL=$HEALTH_URL" >&2
     curl -fsS --max-time 2 "$HEALTH_URL/healthz" >&2 || true
     curl -fsS --max-time 2 "$HEALTH_URL/readyz" >&2 || true
+  else
+    echo "TUNNEL_HEALTH_URL=UNAVAILABLE" >&2
   fi
   echo "=== SECURE MCP TUNNEL DIAGNOSTICS: END ===" >&2
   fail "Secure MCP Tunnel failed readiness"
