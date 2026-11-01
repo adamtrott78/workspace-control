@@ -24,26 +24,28 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 
 - Intent: mutate
 - Remote branch: workspace-shell-mcp-v1-current-main
-- Remote checkpoint: d3b85d9c86edbea40d6a42e8d4c29ed6c1c98350
+- Remote checkpoint: 483c3e8bdf8fc0e1db58ff836a1d136e49df4112
 - Remote verified: true
 
 ## Next safe action
 
-Run one final secret-averse read-only Lambda host attestation against the exact current PR #573 head after task-state synchronization. The final probe must prove fixed uid/gid 41010/41011/41012 are unused, planned Workspace Shell names/paths/units remain absent, port 8797 remains free, bubblewrap/user namespaces still pass, and the exact source checkout is clean. Do not install or activate Workspace Shell yet. After final attestation passes, bind the evidence durably, render/validate the unsealed host-specific bundle, and prepare the separately authorized activation transaction.
+ACCOUNT-SIDE GATE: create a new dedicated Workspace Shell Secure MCP Tunnel in OpenAI Platform and associate it with the target ChatGPT workspace. Create a separate restricted runtime API key with Tunnels Read + Use only; do not paste the key into chat. Then execute the exact validated plugins/workspace-shell/install/activate_live.sh from the frozen PR #573 head. The operator requires the tunnel ID, performs a no-mutation preflight, asks for literal ACTIVATE_WORKSPACE_SHELL before mutation, prompts for the runtime key with hidden input, and rolls back automatically on any failure before terminal commit. After PASS, connect the tunnel as a private ChatGPT plugin and perform live acceptance before enabling any unit at boot.
 
 ## Remaining work
 
-- Capture final exact-head read-only Lambda host attestation proving fixed numeric identities 41010/41011/41012 and all other pre-apply collision/isolation gates.
-- Durably bind the final secret-averse attestation and its digest to the verified Workspace Shell commissioning source.
-- Render and validate the unsealed host-specific install bundle from the final attestation; helper registry and operator trust/revocation stores remain empty/fail-closed.
-- Prepare an explicit bounded activation operator that installs fixed principals/paths/runtime, creates dedicated signing/TLS/tunnel material during the activation transaction, seals the bundle from the public tunnel client certificate, installs units disabled-by-default, and has exact rollback/emergency-disable semantics.
-- With explicit operator activation authority, execute the commissioning transaction, verify hostile-worker denials and local bounded command execution, then connect the dedicated ChatGPT plugin/tunnel.
-- After live end-to-end acceptance, close the Workspace Shell task and return to the GitRunner v3 fleet migration using Workspace Shell as the terminal transport.
+- In OpenAI Platform tunnel settings, create a dedicated Workspace Shell tunnel (do not reuse Heartbeat) and associate it with the ChatGPT workspace.
+- Create a dedicated restricted runtime API key with only Tunnels Read + Use; keep the secret value off chat/GitHub.
+- Freeze one exact PR #573 operator head after final task/handoff synchronization and successful Workspace Control Validation; verify the activate_live.sh blob before execution.
+- Run the activation operator from that exact head. It must pass preflight before asking for ACTIVATE_WORKSPACE_SHELL, then prompt for the runtime key with hidden input, and end with local mTLS/tunnel readiness while all services remain disabled at boot.
+- Connect the dedicated tunnel as a private ChatGPT Workspace Shell plugin and perform live tool acceptance: runtime/unit inspection, exact Git inspection, one bounded unprivileged execution, denial tests, receipt verification, and empty privileged-helper denial.
+- After v1 live acceptance, decide boot enablement and then add only narrowly reviewed privileged helpers actually needed for the remaining GitRunner v3 migration.
+- Return to the GitRunner v3 fleet migration using Workspace Shell as the terminal transport.
 
 ## Blockers / gates
 
-- One final exact-head Lambda host attestation is required because the preliminary probe did not check the now-fixed numeric UID/GID assignments.
-- Live Workspace Shell installation/activation remains explicitly unauthorized until the final attestation-derived unsealed bundle passes exact-head validation and a separate operator activation transaction is frozen.
+- A dedicated Workspace Shell Secure MCP Tunnel has not yet been provisioned/associated with the target ChatGPT workspace.
+- A dedicated runtime API key with Tunnels Read + Use has not yet been provisioned on the operator side; its secret must never be pasted into chat or committed.
+- Live activation and ChatGPT plugin acceptance have not yet been executed. The four Workspace Shell services must remain absent until the explicit activation transaction.
 
 ## Fresh-chat initialization
 
