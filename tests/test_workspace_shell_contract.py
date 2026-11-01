@@ -608,6 +608,10 @@ class WorkspaceShellContractTests(unittest.TestCase):
             'ATTEST_SHA256="d44cda1f6f13f814e093bef9228410f319d504c76cf80ba8e6d2ecbb8d321353"',
             source,
         )
+        self.assertIn('SCRIPT_DIR="$(cd -- "$(dirname -- "', source)
+        self.assertIn('BASH_SOURCE[0]', source)
+        self.assertIn('ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd -P)"', source)
+        self.assertNotIn('git rev-parse --show-toplevel', source)
         self.assertIn('OPERATOR_HEAD="$(git -C "$ROOT" rev-parse HEAD)"', source)
         self.assertIn('--runtime-source-sha "$OPERATOR_HEAD"', source)
         self.assertIn(
