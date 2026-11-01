@@ -297,15 +297,17 @@ class WorkspaceShellContractTests(unittest.TestCase):
         except (OSError, json.JSONDecodeError):
             self.skipTest("GitHub event unavailable")
         body = ((event.get("comment") or {}).get("body") or "").strip()
-        issue_number = (event.get("issue") or {}).get("number")
+        issue = event.get("issue") or {}
         actual_sha = subprocess.check_output(
             ["git", "rev-parse", "HEAD"],
             cwd=ROOT,
             text=True,
         ).strip()
         expected_body = f"/workspace-control-validate {actual_sha} host-attest"
-        if issue_number != 552 or body != expected_body:
-            self.skipTest("live host attestation not explicitly requested for Workspace Shell PR")
+        if not issue.get("pull_request") or body != expected_body:
+            self.skipTest(
+                "live host attestation not explicitly requested for exact Workspace Shell PR head"
+            )
 
         proc = subprocess.run(
             [
