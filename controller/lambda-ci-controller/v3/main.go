@@ -26,6 +26,13 @@ import (
 
 const githubAPIVersion = "2022-11-28"
 
+// GitHub.com may directly assign work to a scale set up to the capacity
+// advertised on GetMessage. v3 admission must happen before assignment, so the
+// listener always advertises zero automatic capacity and acquires only exact
+// trusted JobAvailable request IDs explicitly. policy.MaxRunners remains the
+// local/root class-capacity ceiling after trusted acquisition.
+const schedulerAdvertisedMaxCapacity = 0
+
 type runtimeConfig struct {
 	PolicyPath      string
 	ProvisionerSock string
@@ -709,7 +716,7 @@ func runController(ctx context.Context, cfg runtimeConfig, logger *slog.Logger) 
 	}
 	l, err := listener.New(retryingSession, listener.Config{
 		ScaleSetID: scaleSet.ID,
-		MaxRunners: policy.MaxRunners,
+		MaxRunners: schedulerAdvertisedMaxCapacity,
 		Logger:     logger.WithGroup("listener"),
 	})
 	if err != nil {
@@ -747,6 +754,7 @@ func runController(ctx context.Context, cfg runtimeConfig, logger *slog.Logger) 
 		slog.String("repository", policy.Repository),
 		slog.String("scale_set_name", policy.ScaleSetName),
 		slog.Int("max_runners", policy.MaxRunners),
+		slog.Int("scheduler_advertised_max_capacity", schedulerAdvertisedMaxCapacity),
 		slog.String("controller_policy_sha256", policy.ControllerPolicySHA256),
 		slog.String("state_dir", stateDir),
 	)
