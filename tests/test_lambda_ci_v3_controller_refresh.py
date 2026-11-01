@@ -102,6 +102,101 @@ class V3ControllerRefreshTests(unittest.TestCase):
             with self.assertRaises(refresh.ControllerRefreshError):
                 refresh.assert_migration_history_rolled_back(root)
 
+    def test_retry_history_matches_rolled_back_transaction_and_marker(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            migrations = root / "migration"
+            authorities = root / "authority"
+            tx = migrations / "one"
+            tx.mkdir(parents=True)
+            authorities.mkdir()
+            auth_id = "11111111-1111-4111-8111-111111111111"
+            target = "workspace-control-control-small-v1"
+            (tx / "transaction.json").write_text(
+                json.dumps(
+                    {
+                        "mode": "V3_ONE_CLASS_CANARY_GENERATION_EXCLUSION",
+                        "phase": "ROLLED_BACK_LEGACY_RESTORED",
+                        "target_runner_class_id": target,
+                        "authorization_id": auth_id,
+                    }
+                )
+            )
+            (authorities / f"{auth_id}.json").write_text(
+                json.dumps(
+                    {
+                        "authorization_id": auth_id,
+                        "target_runner_class_id": target,
+                    }
+                )
+            )
+            result = refresh.assert_canary_retry_history(
+                target,
+                migration_root=migrations,
+                authority_root=authorities,
+            )
+            self.assertEqual(result["rolled_back_transactions"], 1)
+            self.assertEqual(result["matched_authority_markers"], 1)
+
+    def test_retry_history_rejects_unmatched_consumed_authority(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            migrations = root / "migration"
+            authorities = root / "authority"
+            migrations.mkdir()
+            authorities.mkdir()
+            auth_id = "22222222-2222-4222-8222-222222222222"
+            target = "workspace-control-control-small-v1"
+            (authorities / f"{auth_id}.json").write_text(
+                json.dumps(
+                    {
+                        "authorization_id": auth_id,
+                        "target_runner_class_id": target,
+                    }
+                )
+            )
+            with self.assertRaises(refresh.ControllerRefreshError):
+                refresh.assert_canary_retry_history(
+                    target,
+                    migration_root=migrations,
+                    authority_root=authorities,
+                )
+
+    def test_retry_history_rejects_nonterminal_target_transaction(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            migrations = root / "migration"
+            authorities = root / "authority"
+            tx = migrations / "one"
+            tx.mkdir(parents=True)
+            authorities.mkdir()
+            auth_id = "33333333-3333-4333-8333-333333333333"
+            target = "workspace-control-control-small-v1"
+            (tx / "transaction.json").write_text(
+                json.dumps(
+                    {
+                        "mode": "V3_ONE_CLASS_CANARY_GENERATION_EXCLUSION",
+                        "phase": "CANARY_ACTIVE",
+                        "target_runner_class_id": target,
+                        "authorization_id": auth_id,
+                    }
+                )
+            )
+            (authorities / f"{auth_id}.json").write_text(
+                json.dumps(
+                    {
+                        "authorization_id": auth_id,
+                        "target_runner_class_id": target,
+                    }
+                )
+            )
+            with self.assertRaises(refresh.ControllerRefreshError):
+                refresh.assert_canary_retry_history(
+                    target,
+                    migration_root=migrations,
+                    authority_root=authorities,
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
