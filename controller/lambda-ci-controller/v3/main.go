@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -26,12 +27,14 @@ import (
 
 const githubAPIVersion = "2022-11-28"
 
-// GitHub.com may directly assign work to a scale set up to the capacity
-// advertised on GetMessage. v3 admission must happen before assignment, so the
-// listener always advertises zero automatic capacity and acquires only exact
-// trusted JobAvailable request IDs explicitly. policy.MaxRunners remains the
-// local/root class-capacity ceiling after trusted acquisition.
-const schedulerAdvertisedMaxCapacity = 0
+// GitHub's scale-set maxCapacity is a real scheduler-capacity signal. A value
+// of zero drains the scale set and suppresses new assigned demand, so the v3
+// listener must advertise the class capacity. Security admission is enforced
+// independently: broker JobAssigned is never authority by itself, and assigned
+// demand without broker IDs is provisioned only after exact REST attestation.
+func schedulerAdvertisedMaxCapacity(policy controllerPolicy) int {
+	return policy.MaxRunners
+}
 
 type runtimeConfig struct {
 	PolicyPath      string
@@ -294,6 +297,40 @@ func (s *appTokenSource) Token(ctx context.Context) (string, error) {
 	return s.token, nil
 }
 
+type githubWorkflowRun struct {
+	ID         int64  `json:"id"`
+	HeadSHA    string `json:"head_sha"`
+	HeadBranch string `json:"head_branch"`
+	Path       string `json:"path"`
+	Event      string `json:"event"`
+	Status     string `json:"status"`
+	Actor      struct {
+		Login string `json:"login"`
+	} `json:"actor"`
+	TriggeringActor struct {
+		Login string `json:"login"`
+	} `json:"triggering_actor"`
+	Repository struct {
+		FullName string `json:"full_name"`
+	} `json:"repository"`
+}
+
+type githubWorkflowRunsResponse struct {
+	WorkflowRuns []githubWorkflowRun `json:"workflow_runs"`
+}
+
+type githubWorkflowJob struct {
+	ID         int64    `json:"id"`
+	Status     string   `json:"status"`
+	Labels     []string `json:"labels"`
+	RunnerID   int64    `json:"runner_id"`
+	RunnerName string   `json:"runner_name"`
+}
+
+type githubWorkflowJobsResponse struct {
+	Jobs []githubWorkflowJob `json:"jobs"`
+}
+
 type githubVerifier struct {
 	policy     controllerPolicy
 	owner      string
@@ -397,6 +434,15 @@ func (v *githubVerifier) getJSON(ctx context.Context, path string, target any) e
 	}
 }
 
+func (v *githubVerifier) workflowByPath(path string) (trustedWorkflow, bool) {
+	for _, workflow := range v.policy.TrustedWorkflows {
+		if workflow.Path == path {
+			return workflow, true
+		}
+	}
+	return trustedWorkflow{}, false
+}
+
 func (v *githubVerifier) workflowFromRef(
 	value string,
 ) (trustedWorkflow, string, bool) {
@@ -409,74 +455,35 @@ func (v *githubVerifier) workflowFromRef(
 		return trustedWorkflow{}, "", false
 	}
 	path := strings.TrimPrefix(base, prefix)
-	for _, workflow := range v.policy.TrustedWorkflows {
-		if workflow.Path == path {
-			return workflow, ref, true
-		}
+	workflow, ok := v.workflowByPath(path)
+	if !ok {
+		return trustedWorkflow{}, "", false
 	}
-	return trustedWorkflow{}, "", false
+	return workflow, ref, true
 }
 
-func (v *githubVerifier) Verify(
+func (v *githubVerifier) attestRun(
 	ctx context.Context,
-	job *scaleset.JobMessageBase,
+	run githubWorkflowRun,
 ) (verifiedJob, bool, string, error) {
-	if job == nil || job.RunnerRequestID <= 0 || job.WorkflowRunID <= 0 {
-		return verifiedJob{}, false, "scheduler identity incomplete", nil
-	}
-	if job.OwnerName+"/"+job.RepositoryName != v.policy.Repository {
-		return verifiedJob{}, false, "repository mismatch", nil
-	}
-	if !containsString(job.RequestLabels, v.policy.ScaleSetName) {
-		return verifiedJob{}, false, "runner-class label mismatch", nil
-	}
-	workflow, ref, ok := v.workflowFromRef(job.JobWorkflowRef)
-	if !ok {
-		return verifiedJob{}, false, "workflow path is not allowlisted", nil
-	}
-	if ref != "refs/heads/"+workflow.DefaultBranch {
-		return verifiedJob{}, false, "workflow ref is not trusted default branch", nil
-	}
-	if !containsString(workflow.AllowedEvents, job.EventName) {
-		return verifiedJob{}, false, "event is not allowed", nil
-	}
-
-	var run struct {
-		ID         int64  `json:"id"`
-		HeadSHA    string `json:"head_sha"`
-		HeadBranch string `json:"head_branch"`
-		Path       string `json:"path"`
-		Event      string `json:"event"`
-		Status     string `json:"status"`
-		Actor      struct {
-			Login string `json:"login"`
-		} `json:"actor"`
-		TriggeringActor struct {
-			Login string `json:"login"`
-		} `json:"triggering_actor"`
-		Repository struct {
-			FullName string `json:"full_name"`
-		} `json:"repository"`
-	}
-	runPath := fmt.Sprintf(
-		"/repos/%s/%s/actions/runs/%d",
-		url.PathEscape(v.owner),
-		url.PathEscape(v.repo),
-		job.WorkflowRunID,
-	)
-	if err := v.getJSON(ctx, runPath, &run); err != nil {
-		return verifiedJob{}, false, "", err
+	if run.ID <= 0 {
+		return verifiedJob{}, false, "workflow run id is invalid", nil
 	}
 	if run.Status == "completed" {
 		return verifiedJob{}, false, "workflow run already terminal", nil
 	}
-	if run.ID != job.WorkflowRunID ||
-		run.Repository.FullName != v.policy.Repository ||
-		run.Path != workflow.Path ||
-		run.Event != job.EventName ||
-		run.HeadBranch != workflow.DefaultBranch ||
-		len(run.HeadSHA) != 40 {
-		return verifiedJob{}, false, "workflow run structured identity mismatch", nil
+	if run.Repository.FullName != v.policy.Repository {
+		return verifiedJob{}, false, "workflow run repository mismatch", nil
+	}
+	workflow, ok := v.workflowByPath(run.Path)
+	if !ok {
+		return verifiedJob{}, false, "workflow path is not allowlisted", nil
+	}
+	if run.Event == "" || !containsString(workflow.AllowedEvents, run.Event) {
+		return verifiedJob{}, false, "event is not allowed", nil
+	}
+	if run.HeadBranch != workflow.DefaultBranch || len(run.HeadSHA) != 40 {
+		return verifiedJob{}, false, "workflow run default-branch identity mismatch", nil
 	}
 	if !containsString(workflow.AllowedActorLogins, run.Actor.Login) {
 		return verifiedJob{}, false, "actor is not allowed", nil
@@ -507,14 +514,200 @@ func (v *githubVerifier) Verify(
 	}
 
 	return verifiedJob{
-		RunnerRequestID:      job.RunnerRequestID,
-		WorkflowRunID:        job.WorkflowRunID,
+		WorkflowRunID:        run.ID,
 		WorkflowPath:         workflow.Path,
 		WorkflowBlobSHA:      content.SHA,
 		ActorLogin:           run.Actor.Login,
 		TriggeringActorLogin: run.TriggeringActor.Login,
 		EventName:            run.Event,
 	}, true, "", nil
+}
+
+func (v *githubVerifier) Verify(
+	ctx context.Context,
+	job *scaleset.JobMessageBase,
+) (verifiedJob, bool, string, error) {
+	if job == nil || job.RunnerRequestID <= 0 || job.WorkflowRunID <= 0 {
+		return verifiedJob{}, false, "scheduler identity incomplete", nil
+	}
+	if job.OwnerName+"/"+job.RepositoryName != v.policy.Repository {
+		return verifiedJob{}, false, "repository mismatch", nil
+	}
+	if !containsString(job.RequestLabels, v.policy.ScaleSetName) {
+		return verifiedJob{}, false, "runner-class label mismatch", nil
+	}
+	workflow, ref, ok := v.workflowFromRef(job.JobWorkflowRef)
+	if !ok {
+		return verifiedJob{}, false, "workflow path is not allowlisted", nil
+	}
+	if ref != "refs/heads/"+workflow.DefaultBranch {
+		return verifiedJob{}, false, "workflow ref is not trusted default branch", nil
+	}
+	if !containsString(workflow.AllowedEvents, job.EventName) {
+		return verifiedJob{}, false, "event is not allowed", nil
+	}
+
+	var run githubWorkflowRun
+	runPath := fmt.Sprintf(
+		"/repos/%s/%s/actions/runs/%d",
+		url.PathEscape(v.owner),
+		url.PathEscape(v.repo),
+		job.WorkflowRunID,
+	)
+	if err := v.getJSON(ctx, runPath, &run); err != nil {
+		return verifiedJob{}, false, "", err
+	}
+	if run.ID != job.WorkflowRunID ||
+		run.Path != workflow.Path ||
+		run.Event != job.EventName {
+		return verifiedJob{}, false, "workflow run structured identity mismatch", nil
+	}
+	verified, trusted, reason, err := v.attestRun(ctx, run)
+	if err != nil || !trusted {
+		return verifiedJob{}, trusted, reason, err
+	}
+	verified.RunnerRequestID = job.RunnerRequestID
+	verified.AuthoritySource = "BROKER_JOB_AVAILABLE"
+	return verified, true, "", nil
+}
+
+func (v *githubVerifier) listRunsByStatus(
+	ctx context.Context,
+	status string,
+) ([]githubWorkflowRun, error) {
+	var runs []githubWorkflowRun
+	for page := 1; ; page++ {
+		var response githubWorkflowRunsResponse
+		path := fmt.Sprintf(
+			"/repos/%s/%s/actions/runs?status=%s&per_page=100&page=%d",
+			url.PathEscape(v.owner),
+			url.PathEscape(v.repo),
+			url.QueryEscape(status),
+			page,
+		)
+		if err := v.getJSON(ctx, path, &response); err != nil {
+			return nil, err
+		}
+		runs = append(runs, response.WorkflowRuns...)
+		if len(response.WorkflowRuns) < 100 {
+			return runs, nil
+		}
+	}
+}
+
+func (v *githubVerifier) activeRuns(ctx context.Context) ([]githubWorkflowRun, error) {
+	byID := map[int64]githubWorkflowRun{}
+	for _, status := range []string{"queued", "in_progress"} {
+		runs, err := v.listRunsByStatus(ctx, status)
+		if err != nil {
+			return nil, err
+		}
+		for _, run := range runs {
+			if run.ID > 0 {
+				byID[run.ID] = run
+			}
+		}
+	}
+	result := make([]githubWorkflowRun, 0, len(byID))
+	for _, run := range byID {
+		result = append(result, run)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].ID < result[j].ID
+	})
+	return result, nil
+}
+
+func (v *githubVerifier) runJobs(
+	ctx context.Context,
+	runID int64,
+) ([]githubWorkflowJob, error) {
+	var jobs []githubWorkflowJob
+	for page := 1; ; page++ {
+		var response githubWorkflowJobsResponse
+		path := fmt.Sprintf(
+			"/repos/%s/%s/actions/runs/%d/jobs?filter=latest&per_page=100&page=%d",
+			url.PathEscape(v.owner),
+			url.PathEscape(v.repo),
+			runID,
+			page,
+		)
+		if err := v.getJSON(ctx, path, &response); err != nil {
+			return nil, err
+		}
+		jobs = append(jobs, response.Jobs...)
+		if len(response.Jobs) < 100 {
+			return jobs, nil
+		}
+	}
+}
+
+func (v *githubVerifier) DiscoverTrustedDemand(
+	ctx context.Context,
+) ([]verifiedJob, bool, string, error) {
+	runs, err := v.activeRuns(ctx)
+	if err != nil {
+		return nil, false, "", err
+	}
+
+	var candidates []verifiedJob
+	for _, run := range runs {
+		jobs, err := v.runJobs(ctx, run.ID)
+		if err != nil {
+			return nil, false, "", err
+		}
+		targetJobs := make([]githubWorkflowJob, 0, len(jobs))
+		for _, job := range jobs {
+			if job.Status != "queued" ||
+				!containsString(job.Labels, v.policy.ScaleSetName) {
+				continue
+			}
+			targetJobs = append(targetJobs, job)
+		}
+		if len(targetJobs) == 0 {
+			continue
+		}
+
+		verifiedRun, trusted, reason, err := v.attestRun(ctx, run)
+		if err != nil {
+			return nil, false, "", err
+		}
+		if !trusted {
+			return nil, false, fmt.Sprintf(
+				"target-label run %d is untrusted: %s",
+				run.ID,
+				reason,
+			), nil
+		}
+
+		for _, job := range targetJobs {
+			if job.ID <= 0 {
+				return nil, false, fmt.Sprintf(
+					"target-label run %d contains job without positive REST id",
+					run.ID,
+				), nil
+			}
+			if job.RunnerID > 0 || strings.TrimSpace(job.RunnerName) != "" {
+				return nil, false, fmt.Sprintf(
+					"target-label job %d is already runner-bound without durable authority",
+					job.ID,
+				), nil
+			}
+			verified := verifiedRun
+			verified.RunnerRequestID = job.ID
+			verified.GitHubJobID = job.ID
+			verified.AuthoritySource = "REST_ACTIVE_JOB_SET"
+			candidates = append(candidates, verified)
+		}
+	}
+
+	sort.Slice(candidates, func(i, j int) bool {
+		if candidates[i].WorkflowRunID == candidates[j].WorkflowRunID {
+			return candidates[i].GitHubJobID < candidates[j].GitHubJobID
+		}
+		return candidates[i].WorkflowRunID < candidates[j].WorkflowRunID
+	})
+	return candidates, true, "", nil
 }
 
 func escapePath(path string) string {
@@ -714,9 +907,10 @@ func runController(ctx context.Context, cfg runtimeConfig, logger *slog.Logger) 
 		logger:     logger.WithGroup("session"),
 		maxBackoff: time.Minute,
 	}
+	schedulerCapacity := schedulerAdvertisedMaxCapacity(policy)
 	l, err := listener.New(retryingSession, listener.Config{
 		ScaleSetID: scaleSet.ID,
-		MaxRunners: schedulerAdvertisedMaxCapacity,
+		MaxRunners: schedulerCapacity,
 		Logger:     logger.WithGroup("listener"),
 	})
 	if err != nil {
@@ -754,7 +948,7 @@ func runController(ctx context.Context, cfg runtimeConfig, logger *slog.Logger) 
 		slog.String("repository", policy.Repository),
 		slog.String("scale_set_name", policy.ScaleSetName),
 		slog.Int("max_runners", policy.MaxRunners),
-		slog.Int("scheduler_advertised_max_capacity", schedulerAdvertisedMaxCapacity),
+		slog.Int("scheduler_advertised_max_capacity", schedulerCapacity),
 		slog.String("controller_policy_sha256", policy.ControllerPolicySHA256),
 		slog.String("state_dir", stateDir),
 	)
