@@ -49,6 +49,7 @@ def render(args) -> None:
         "  level: info",
         "  format: json",
         "mcp:",
+        f"  startup_wait_timeout: {q('15s')}",
         "  server_urls:",
         "    - channel: main",
         f"      url: {q('https://127.0.0.1:8797/mcp')}",
