@@ -613,6 +613,13 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn('ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd -P)"', source)
         self.assertNotIn('git rev-parse --show-toplevel', source)
         self.assertIn('OPERATOR_HEAD="$(git -C "$ROOT" rev-parse HEAD)"', source)
+        self.assertIn(
+            'SOURCE_REPO_URL="https://github.com/adamtrott78/workspace-control.git"',
+            source,
+        )
+        self.assertIn('SOURCE_BRANCH="workspace-shell-mcp-v1-current-main"', source)
+        self.assertIn('GIT_TERMINAL_PROMPT=0 git -c credential.helper= clone', source)
+        self.assertNotIn('git clone --no-hardlinks --no-checkout "$ROOT"', source)
         self.assertIn('--runtime-source-sha "$OPERATOR_HEAD"', source)
         self.assertIn(
             'cp -a "$SOURCE" /srv/workspace-shell/workspace-control',
@@ -640,6 +647,128 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertNotIn("sudo bash", source)
         self.assertNotIn("BEGIN PRIVATE KEY", source)
         self.assertNotIn("\\\\$" + "{", source)
+
+    def test_independent_filtered_remote_clone_can_materialize_historical_source(self):
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            work = td / "work"
+            remote = td / "remote.git"
+            caller = td / "caller"
+            source = td / "source"
+
+            subprocess.run(
+                ["git", "init", "-b", "main", str(work)],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(work), "config", "user.name", "Workspace Shell Test"],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(work), "config", "user.email", "workspace-shell-test@example.invalid"],
+                check=True,
+            )
+            historical = work / "historical.txt"
+            historical.write_text("historical-payload\n")
+            subprocess.run(["git", "-C", str(work), "add", "historical.txt"], check=True)
+            subprocess.run(
+                ["git", "-C", str(work), "commit", "-m", "historical"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            historical_sha = subprocess.check_output(
+                ["git", "-C", str(work), "rev-parse", "HEAD"],
+                text=True,
+            ).strip()
+
+            historical.write_text("current-payload\n")
+            (work / "current-only.txt").write_text("current\n")
+            subprocess.run(["git", "-C", str(work), "add", "."], check=True)
+            subprocess.run(
+                ["git", "-C", str(work), "commit", "-m", "current"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+
+            subprocess.run(
+                ["git", "clone", "--bare", str(work), str(remote)],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(remote), "config", "uploadpack.allowFilter", "true"],
+                check=True,
+            )
+
+            remote_url = remote.resolve().as_uri()
+            subprocess.run(
+                [
+                    "git", "clone", "--filter=blob:none", "--no-checkout",
+                    "--branch", "main", remote_url, str(caller),
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(caller), "checkout", "--detach", "main"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+
+            # Source preparation must be independent of the caller's partial
+            # object store. It clones the canonical remote again, then lets
+            # checkout materialize the historical blobs before removing origin.
+            subprocess.run(
+                [
+                    "git", "-c", "credential.helper=", "clone",
+                    "--no-checkout", "--filter=blob:none", "--branch", "main",
+                    remote_url, str(source),
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+            )
+            subprocess.run(
+                [
+                    "git", "-C", str(source), "-c", "credential.helper=",
+                    "checkout", "--detach", historical_sha,
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+            )
+            subprocess.run(
+                ["git", "-C", str(source), "remote", "remove", "origin"],
+                check=True,
+            )
+            self.assertEqual(
+                (source / "historical.txt").read_text(),
+                "historical-payload\n",
+            )
+            self.assertEqual(
+                subprocess.check_output(
+                    ["git", "-C", str(source), "status", "--porcelain=v1"],
+                    text=True,
+                ),
+                "",
+            )
 
     def test_launcher_duplicates_profile_grammar_and_denies_escape_shapes(self):
         manifest = json.loads((PLUGIN / "config" / "profiles.v1.json").read_text())
