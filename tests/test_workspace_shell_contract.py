@@ -1135,6 +1135,8 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn("--gid=41001", command)
         self.assertIn("--property=PrivateNetwork=yes", command)
         self.assertIn("--property=NoNewPrivileges=yes", command)
+        self.assertIn("--property=ProtectProc=invisible", command)
+        self.assertNotIn("--property=ProcSubset=pid", command)
         self.assertIn("--property=CapabilityBoundingSet=", command)
         self.assertIn("--property=KillMode=control-group", command)
         self.assertIn("--property=TasksMax=48", command)
