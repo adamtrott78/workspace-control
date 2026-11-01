@@ -718,6 +718,11 @@ class WorkspaceShellContractTests(unittest.TestCase):
             + json.dumps(attestation, sort_keys=True, separators=(",", ":"))
         )
 
+    def test_workspace_shell_tools_have_explicit_non_ui_ext_apps_metadata(self):
+        server_source = (PLUGIN / "server.js").read_text()
+        self.assertEqual(server_source.count("_meta: {}"), 4)
+        self.assertEqual(server_source.count("registerAppTool("), 4)
+
     def test_live_activation_operator_is_fail_closed_and_boot_disabled(self):
         proc = subprocess.run(
             ["bash", "-n", str(ACTIVATE_LIVE)],
@@ -802,6 +807,12 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertNotIn('tunnel-client init', source)
         self.assertNotIn('--mcp-server-url "channel=main,url=', source)
         self.assertIn('LOCAL_MTLS_HEALTH=PASS', source)
+        self.assertIn('=== LOCAL MCP INITIALIZE SMOKE ===', source)
+        self.assertIn('LOCAL_MCP_INITIALIZE=PASS', source)
+        self.assertLess(
+            source.index('echo "LOCAL_MCP_INITIALIZE=PASS"'),
+            source.index('read -rsp "Runtime key: " RUNTIME_KEY'),
+        )
         self.assertIn('PRE_TUNNEL_LOCAL_MTLS_RECHECK=PASS', source)
         self.assertIn(
             'SKIPPED_V0_0_18_DOCTOR_MTLS_DIAGNOSTIC_INCOMPATIBILITY',
