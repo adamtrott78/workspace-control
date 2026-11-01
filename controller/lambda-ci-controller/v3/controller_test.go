@@ -402,7 +402,7 @@ func TestBusyIsCapacityLocalAndNeverGeneratesJIT(t *testing.T) {
 	}
 }
 
-func TestAssignedMessageCanReconstructTrustedSchedulerAuthority(t *testing.T) {
+func TestAssignedMessageWithoutAvailableNeverReconstructsSchedulerAuthority(t *testing.T) {
 	events := []string{}
 	ledger := newMemoryLedger()
 	scaler := testScaler(
@@ -418,15 +418,45 @@ func TestAssignedMessageCanReconstructTrustedSchedulerAuthority(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	record, ok, _ := ledger.Get(14)
-	if !ok {
-		t.Fatal("assigned structured identity did not reconstruct ledger")
+	if _, ok, _ := ledger.Get(14); ok {
+		t.Fatal("standalone JobAssigned reconstructed scheduler authority")
 	}
-	if record.SchedulerState != "ASSIGNED" || record.State != "PREPARING" {
-		t.Fatalf("unexpected reconstructed/provisioned state: %#v", record)
+	if len(events) != 0 {
+		t.Fatalf("standalone JobAssigned reached root capacity: %#v", events)
 	}
-	if len(events) != 3 {
-		t.Fatalf("reconstructed assigned work did not follow full capacity sequence: %#v", events)
+}
+
+func TestZeroIDAssignedMessageIsStableNoop(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	scaler := testScaler(
+		&fakeVerifier{trusted: true},
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics:          &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+		JobAssignedMessages: []*scaleset.JobAssigned{assigned(0, 0)},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	records, err := ledger.List()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(records) != 0 || len(events) != 0 {
+		t.Fatalf("zero-id JobAssigned created authority: records=%#v events=%#v", records, events)
+	}
+}
+
+func TestSchedulerAdvertisedCapacityForcesExplicitAdmission(t *testing.T) {
+	if schedulerAdvertisedMaxCapacity != 0 {
+		t.Fatalf("scheduler advertised capacity must remain zero, got %d", schedulerAdvertisedMaxCapacity)
+	}
+	if testPolicy().MaxRunners <= 0 {
+		t.Fatal("test class capacity must remain independently positive")
 	}
 }
 
