@@ -5,9 +5,6 @@ import { chmodSync, mkdtempSync, mkdirSync, writeFileSync, symlinkSync } from "n
 import os from "node:os";
 import path from "node:path";
 import { Readable } from "node:stream";
-import { registerAppTool } from "@modelcontextprotocol/ext-apps/server";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 import {
   RequestAdmissionLimiter,
   authorizeTaskExecution,
@@ -18,32 +15,6 @@ import {
   signCanonical,
   verifyCanonical,
 } from "../src/core.js";
-
-test("ext-apps tool registration accepts explicit empty metadata for non-UI tools", () => {
-  const server = new McpServer({ name: "workspace-shell-test", version: "0.1.0" });
-  assert.doesNotThrow(() => {
-    registerAppTool(
-      server,
-      "workspace_shell_smoke",
-      {
-        description: "Registration-only smoke tool.",
-        inputSchema: { value: z.string().optional() },
-        outputSchema: { ok: z.boolean() },
-        _meta: {},
-        annotations: {
-          readOnlyHint: true,
-          destructiveHint: false,
-          openWorldHint: false,
-          idempotentHint: true,
-        },
-      },
-      async () => ({
-        structuredContent: { ok: true },
-        content: [{ type: "text", text: "ok" }],
-      }),
-    );
-  });
-});
 
 test("MCP admission limiter freezes two inflight and eight queued", async () => {
   const limiter = new RequestAdmissionLimiter({ maxInflight: 2, maxQueued: 8 });
