@@ -23,6 +23,7 @@ RENDER_TUNNEL_PROFILE = PLUGIN / "install" / "render_tunnel_profile.py"
 VALIDATE_TUNNEL_DOCTOR = PLUGIN / "install" / "validate_tunnel_doctor.py"
 ACTIVATE_LIVE = PLUGIN / "install" / "activate_live.sh"
 FRONTEND_ACCESS_REPAIR = PLUGIN / "install" / "repair_frontend_config_access_v1.sh"
+WORKER_PROC_REPAIR = PLUGIN / "install" / "repair_worker_proc_bootstrap_v1.sh"
 SYSUSERS = PLUGIN / "install" / "sysusers.conf"
 FINAL_HOST_ATTEST = PLUGIN / "install" / "evidence" / "lambda-host-attestation.f999b25a.json"
 COMMISSIONING_SOURCE_SHA = "f999b25a866f25c95243cbbd6d1377a799fafb78"
@@ -891,6 +892,35 @@ class WorkspaceShellContractTests(unittest.TestCase):
             'sudo install -o root -g workspace-shell-mcp -m 0640 "$BUNDLE/frontend.json" /etc/workspace-shell/frontend.json',
             activation,
         )
+
+    def test_worker_proc_repair_is_source_pinned_and_launcher_only(self):
+        proc = subprocess.run(
+            ["bash", "-n", str(WORKER_PROC_REPAIR)],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        source = WORKER_PROC_REPAIR.read_text()
+        self.assertIn(
+            'EXPECTED_SOURCE_SHA="01a95b61410e2f427b9885a19e6a0b9c5ee60a38"',
+            source,
+        )
+        self.assertIn(
+            'EXPECTED_OLD_BLOB="4030561a764ff47ab5bfb5cbbc345d993c2eacf7"',
+            source,
+        )
+        self.assertIn(
+            'EXPECTED_NEW_BLOB="f013957705d59b1442ee90a2a375afe631895099"',
+            source,
+        )
+        self.assertIn('workspace-shell-job-launcher.service', source)
+        self.assertIn('WORKSPACE_SHELL_WORKER_PROC_HOTFIX=PASS', source)
+        self.assertNotIn('systemctl enable ', source)
+        self.assertNotIn('runtime-key', source)
+        self.assertNotIn('ACTIVATE_WORKSPACE_SHELL', source)
 
     def test_independent_filtered_remote_clone_can_materialize_historical_source(self):
         with tempfile.TemporaryDirectory() as td:
