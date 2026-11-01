@@ -20,6 +20,10 @@ HOST_ATTEST = PLUGIN / "install" / "host_attest.py"
 RENDER_INSTALL = PLUGIN / "install" / "render_install.py"
 SEAL_INSTALL = PLUGIN / "install" / "seal_install.py"
 SYSUSERS = PLUGIN / "install" / "sysusers.conf"
+FINAL_HOST_ATTEST = PLUGIN / "install" / "evidence" / "lambda-host-attestation.f999b25a.json"
+COMMISSIONING_SOURCE_SHA = "f999b25a866f25c95243cbbd6d1377a799fafb78"
+COMMISSIONING_ATTEST_SHA256 = "d44cda1f6f13f814e093bef9228410f319d504c76cf80ba8e6d2ecbb8d321353"
+DESIGN_AUTHORITY_SHA = "0c24e42ea57a3e23af01351a5974d5f09f3ce319"
 AUTHORITY_ARTIFACT = ROOT / "architecture" / "workspace-shell-mcp-authority-v2.json"
 sys.path.insert(0, str(ROOT_CODE))
 
@@ -401,6 +405,90 @@ class WorkspaceShellContractTests(unittest.TestCase):
             )
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("collision evidence", proc.stderr)
+
+    def test_final_lambda_attestation_renders_unsealed_commissioning_bundle(self):
+        self.assertTrue(FINAL_HOST_ATTEST.is_file())
+        self.assertEqual(
+            hashlib.sha256(FINAL_HOST_ATTEST.read_bytes()).hexdigest(),
+            COMMISSIONING_ATTEST_SHA256,
+        )
+        evidence = json.loads(FINAL_HOST_ATTEST.read_text())
+        self.assertEqual(evidence["decision"], "READY_FOR_INSTALL_PLAN")
+        self.assertEqual(evidence["blockers"], [])
+        self.assertEqual(
+            evidence["source"]["head"]["stdout"],
+            COMMISSIONING_SOURCE_SHA,
+        )
+        self.assertEqual(
+            evidence["source"]["requested_sha"],
+            COMMISSIONING_SOURCE_SHA,
+        )
+        self.assertEqual(evidence["source"]["status"]["stdout"], "")
+        self.assertFalse(evidence["planned_listener"]["occupied"])
+        self.assertEqual(
+            [
+                (x["name"], x["uid"], x["gid"],
+                 x["numeric_uid"]["exists"], x["numeric_gid"]["exists"])
+                for x in evidence["planned_identities"]
+            ],
+            [
+                ("workspace-shell-mcp", 41010, 41010, False, False),
+                ("workspace-shell-exec", 41011, 41011, False, False),
+                ("workspace-shell-tunnel", 41012, 41012, False, False),
+            ],
+        )
+
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "bundle"
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(RENDER_INSTALL),
+                    "--attestation", str(FINAL_HOST_ATTEST),
+                    "--output-dir", str(out),
+                    "--source-sha", COMMISSIONING_SOURCE_SHA,
+                    "--design-authority-sha", DESIGN_AUTHORITY_SHA,
+                    "--policy-artifact-sha256",
+                    hashlib.sha256(AUTHORITY_ARTIFACT.read_bytes()).hexdigest(),
+                ],
+                cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            manifest = json.loads((out / "install-manifest.json").read_text())
+            self.assertEqual(
+                manifest["attestation_sha256"],
+                COMMISSIONING_ATTEST_SHA256,
+            )
+            self.assertEqual(
+                manifest["source_sha"],
+                COMMISSIONING_SOURCE_SHA,
+            )
+            self.assertEqual(
+                manifest["design_authority_sha"],
+                DESIGN_AUTHORITY_SHA,
+            )
+            self.assertEqual(
+                manifest["identities"],
+                {
+                    "frontend": {"uid": 41010, "gid": 41010},
+                    "worker": {"uid": 41011, "gid": 41011},
+                    "tunnel": {"uid": 41012, "gid": 41012},
+                },
+            )
+            self.assertFalse(manifest["activation_sealed"])
+            self.assertTrue(manifest["requires_activation_seal"])
+            self.assertIsNone(manifest["tunnel_client_cert_sha256"])
+            self.assertFalse(manifest["privileged_helpers_enabled"])
+            self.assertEqual(
+                manifest["operator_trust_store_state"],
+                "EMPTY_FAIL_CLOSED",
+            )
+            self.assertTrue((out / "frontend.unsealed.json").is_file())
+            self.assertFalse((out / "frontend.json").exists())
 
     def test_install_renderer_rejects_blocked_attestation(self):
         with tempfile.TemporaryDirectory() as td:
