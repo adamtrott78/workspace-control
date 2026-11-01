@@ -109,11 +109,13 @@ jobs:
         run: |
           set -euo pipefail
           bash -n scripts/lambda_ci_v3_first_canary_live.sh
+          bash -n scripts/lambda_ci_v3_controller_refresh_live.sh
           python3 - <<'PY'
           from pathlib import Path
           source = Path("scripts/lambda_ci_v3_first_canary_live.sh").read_text()
           required = [
-              'SOURCE_HEAD="09c46818252991f6a55aaeedbcf046c554e2ffee"',
+              'BASE_SOURCE_HEAD="09c46818252991f6a55aaeedbcf046c554e2ffee"',
+              'SOURCE_HEAD="$(git -C "$ROOT" rev-parse HEAD)"',
               'TARGET_CLASS="workspace-control-control-small-v1"',
               'TARGET_SCALE_SET="lambda-workspace-control-control-small"',
               'EXPECTED_WORKFLOW_BLOB="c7471bdd5e35a7f8be27c3153f615a382845e195"',
@@ -151,9 +153,15 @@ jobs:
           assert 'STOP_GH_AUTH_STATUS_TOKEN_PARSE_FAILED' in source
           assert 'STOP_GH_AUTH_TOKEN_VERIFY_FAILED' in source
           assert 'V3_WORKSPACE_CONTROL_CREDENTIAL_RESET=PASS' in source
-          assert 'PREFLIGHT_NO_CANARY_AUTHORITY_CONSUMPTION=PASS' in source
-          assert 'PREFLIGHT_NO_CANARY_TRANSACTION_RECEIPT=PASS' in source
-          assert 'PREFLIGHT_NO_CANARY_WORKFLOW_RUN=PASS' in source
+          assert 'CANARY_RETRY_HISTORY_CHECK=BEGIN' in source
+          assert '--verify-retry-history' in source
+          assert 'STOP_CANARY_RETRY_HISTORY_FAILED' in source
+          assert 'PREFLIGHT_NO_ACTIVE_CANARY_WORKFLOW_RUN=PASS' in source
+          assert 'STOP_ACTIVE_CANARY_WORKFLOW_RUNS' in source
+          assert 'BASE_INSTALLED_GENERATION_BINDING=PASS' in source
+          assert 'CONTROLLER_OVERRIDE_BINDING_CHECK=BEGIN' in source
+          assert 'CONTROLLER_OVERRIDE_BINDING=PASS' in source
+          assert 'STOP_CONTROLLER_OVERRIDE_BINDING_FAILED' in source
           assert 'gh api --method GET' in source
           assert 'gh api --method POST' in source
           assert '"repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/runs"' in source
@@ -172,6 +180,16 @@ jobs:
           apply_failure = 'if [[ "$APPLY_RC" -ne 0 ]]; then'
           assert source.index(parse_receipt, source.index('APPLY_RC=')) < source.index(apply_failure)
           assert 'cancel_dispatched_canary' in source
+
+          refresh = Path("scripts/lambda_ci_v3_controller_refresh_live.sh").read_text()
+          assert 'BASE_SOURCE_HEAD="09c46818252991f6a55aaeedbcf046c554e2ffee"' in refresh
+          assert 'SOURCE_HEAD="$(git -C "$ROOT" rev-parse HEAD)"' in refresh
+          assert 'CONTROLLER_REFRESH_APPLY=BEGIN' in refresh
+          assert 'STOP_CONTROLLER_REFRESH_APPLY_FAILED' in refresh
+          assert 'CONTROLLER_REFRESH_VERIFY=PASS' in refresh
+          assert 'CONTROLLER_REFRESH_RETRY_HISTORY=PASS' in refresh
+          assert '--verify-active' in refresh
+          assert '--verify-retry-history' in refresh
           PY
 
       - name: Validate generated v3 systemd substrate in isolated root
@@ -220,6 +238,8 @@ jobs:
           grep -F 'MaxRunners: schedulerAdvertisedMaxCapacity' v3/main.go >/dev/null
           ! grep -F 'MaxRunners: policy.MaxRunners' v3/main.go
           grep -F 'Ignoring untracked JobAssigned; authority requires verified JobAvailable' v3/controller.go >/dev/null
+          grep -F 'schedulerAdvertisedMaxCapacity = 0' v3/main.go >/dev/null
+          grep -F 'assert_canary_retry_history' ../../scripts/lambda_ci_v3_controller_refresh.py >/dev/null
 
       - name: Run full integration contracts
         if: steps.plan.outputs.tier == 'FULL_INTEGRATION' || steps.plan.outputs.tier == 'CANONICAL_REGRESSION'
