@@ -49,14 +49,12 @@ cancel_dispatched_canary() {
     [[ -n "$candidate" ]] || continue
     gh run cancel "$candidate" --repo "$REPOSITORY" >/dev/null 2>&1 || true
   done < <(
-    gh run list \
-      --repo "$REPOSITORY" \
-      --workflow "$WORKFLOW_PATH" \
-      --event workflow_dispatch \
-      --branch main \
-      --limit 20 \
-      --json databaseId,createdAt,status \
-      --jq ".[] | select(.createdAt >= \"$DISPATCHED_AT\" and (.status == \"queued\" or .status == \"in_progress\" or .status == \"waiting\" or .status == \"requested\" or .status == \"pending\")) | .databaseId" \
+    gh api --method GET \
+      "repos/$REPOSITORY/actions/runs" \
+      -f event=workflow_dispatch \
+      -f branch=main \
+      -f per_page=100 \
+      --jq ".workflow_runs[] | select(.path == \"$WORKFLOW_PATH\" and .created_at >= \"$DISPATCHED_AT\" and (.status == \"queued\" or .status == \"in_progress\" or .status == \"waiting\" or .status == \"requested\" or .status == \"pending\")) | .id" \
       2>/dev/null || true
   )
 }
@@ -206,14 +204,12 @@ fi
 echo "CANARY_RUN_HISTORY_CHECK=BEGIN"
 set +e
 CANARY_RUN_COUNT="$(
-  gh run list \
-    --repo "$REPOSITORY" \
-    --workflow "$WORKFLOW_PATH" \
-    --event workflow_dispatch \
-    --branch main \
-    --limit 100 \
-    --json databaseId \
-    --jq 'length'
+  gh api --method GET \
+    "repos/$REPOSITORY/actions/runs" \
+    -f event=workflow_dispatch \
+    -f branch=main \
+    -f per_page=100 \
+    --jq ".workflow_runs | map(select(.path == \"$WORKFLOW_PATH\")) | length"
 )"
 CANARY_RUN_HISTORY_RC=$?
 set -e
@@ -223,12 +219,12 @@ if [[ "$CANARY_RUN_HISTORY_RC" -ne 0 ]]; then
 fi
 if [[ "$CANARY_RUN_COUNT" != "0" ]]; then
   echo "STOP_EXISTING_CANARY_WORKFLOW_RUNS count=$CANARY_RUN_COUNT"
-  gh run list \
-    --repo "$REPOSITORY" \
-    --workflow "$WORKFLOW_PATH" \
-    --event workflow_dispatch \
-    --branch main \
-    --limit 20 || true
+  gh api --method GET \
+    "repos/$REPOSITORY/actions/runs" \
+    -f event=workflow_dispatch \
+    -f branch=main \
+    -f per_page=100 \
+    --jq ".workflow_runs[] | select(.path == \"$WORKFLOW_PATH\") | [.id,.status,.conclusion,.created_at,.head_sha] | @tsv" || true
   exit 1
 fi
 echo "PREFLIGHT_NO_CANARY_WORKFLOW_RUN=PASS"
@@ -561,7 +557,12 @@ echo "GENERATION_EXCLUSION=ACTIVE"
 
 # Dispatch exactly the owner-only workflow now trusted by the canary policy.
 BEFORE_RUN_ID="$(
-  gh run list     --repo "$REPOSITORY"     --workflow "$WORKFLOW_PATH"     --event workflow_dispatch     --branch main     --limit 1     --json databaseId     --jq '.[0].databaseId // 0'
+  gh api --method GET \
+    "repos/$REPOSITORY/actions/runs" \
+    -f event=workflow_dispatch \
+    -f branch=main \
+    -f per_page=100 \
+    --jq ".workflow_runs | map(select(.path == \"$WORKFLOW_PATH\")) | .[0].id // 0"
 )"
 
 DISPATCHED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -569,7 +570,12 @@ gh workflow run "$WORKFLOW_PATH"   --repo "$REPOSITORY"   --ref main
 
 for _ in $(seq 1 30); do
   RUN_ID="$(
-    gh run list       --repo "$REPOSITORY"       --workflow "$WORKFLOW_PATH"       --event workflow_dispatch       --branch main       --limit 10       --json databaseId,createdAt       --jq "map(select(.databaseId != $BEFORE_RUN_ID and .createdAt >= \"$DISPATCHED_AT\")) | .[0].databaseId // 0"
+    gh api --method GET \
+      "repos/$REPOSITORY/actions/runs" \
+      -f event=workflow_dispatch \
+      -f branch=main \
+      -f per_page=100 \
+      --jq ".workflow_runs | map(select(.path == \"$WORKFLOW_PATH\" and .id != $BEFORE_RUN_ID and .created_at >= \"$DISPATCHED_AT\")) | .[0].id // 0"
   )"
   if [[ "$RUN_ID" != "0" && -n "$RUN_ID" ]]; then
     break
