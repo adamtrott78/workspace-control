@@ -14,6 +14,11 @@ FRONTEND_UID=41010
 WORKER_UID=41011
 TUNNEL_UID=41012
 
+fail() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
+
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT="$(cd -- "$SCRIPT_DIR/../../.." && pwd -P)"
 [ -d "$ROOT/.git" ] || [ -f "$ROOT/.git" ] || fail "activation script is not inside a Git checkout"
@@ -31,11 +36,6 @@ SERVICES=(
   workspace-shell-root-broker.service
   workspace-shell-job-launcher.service
 )
-
-fail() {
-  echo "ERROR: $*" >&2
-  exit 1
-}
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || fail "required command not found: $1"
