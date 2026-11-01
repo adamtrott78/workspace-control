@@ -134,7 +134,17 @@ if result.get("serverInfo", {}).get("name") != "workspace-shell":
 PY
 echo "LOCAL_MCP_INITIALIZE=PASS"
 
-sudo systemctl restart "$TUNNEL_SERVICE"
+sudo systemctl reset-failed "$TUNNEL_SERVICE" >/dev/null 2>&1 || true
+if ! sudo systemctl restart "$TUNNEL_SERVICE"; then
+  echo "=== TUNNEL RESTART DIAGNOSTICS: BEGIN ===" >&2
+  sudo systemctl show "$TUNNEL_SERVICE" --no-pager \
+    --property=Id,LoadState,ActiveState,SubState,Result,MainPID,ExecMainPID,ExecMainCode,ExecMainStatus,NRestarts,User,Group,ActiveEnterTimestamp,ExecMainStartTimestamp,FragmentPath \
+    >&2 || true
+  sudo journalctl -u "$TUNNEL_SERVICE" -n 120 --no-pager --output=short-iso \
+    2>&1 | tail -n 120 >&2 || true
+  echo "=== TUNNEL RESTART DIAGNOSTICS: END ===" >&2
+  fail "tunnel restart failed"
+fi
 
 TUNNEL_READY=0
 for _ in $(seq 1 40); do
