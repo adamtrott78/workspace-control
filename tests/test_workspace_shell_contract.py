@@ -669,6 +669,13 @@ class WorkspaceShellContractTests(unittest.TestCase):
         )
         self.assertIn('Type ACTIVATE_WORKSPACE_SHELL to continue', source)
         self.assertIn('read -rsp "Runtime key: " RUNTIME_KEY', source)
+        self.assertIn('=== LOCAL CONTROL PLANE DIAGNOSTICS: BEGIN ===', source)
+        self.assertIn('journalctl -u "$svc" -n 80', source)
+        self.assertIn('ExecMainStatus', source)
+        self.assertLess(
+            source.index('echo "LOCAL_MTLS_HEALTH=PASS"'),
+            source.index('read -rsp "Runtime key: " RUNTIME_KEY'),
+        )
         self.assertIn('TUNNEL_PROFILE_SECRET_SCAN=PASS', source)
         self.assertIn('render_tunnel_profile.py', source)
         self.assertIn(
