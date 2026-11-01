@@ -10,6 +10,7 @@ User=workspace-shell-mcp
 Group=workspace-shell-mcp
 SupplementaryGroups=
 Environment=WORKSPACE_SHELL_CONFIG=/etc/workspace-shell/frontend.json
+Environment=OPENSSL_CONF=/opt/workspace-shell/node/ssl/openssl.cnf
 ExecStart=/opt/workspace-shell/node/bin/node /opt/workspace-shell/runtime/plugins/workspace-shell/server.js
 Restart=on-failure
 RestartSec=2s
