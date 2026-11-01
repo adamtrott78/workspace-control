@@ -275,7 +275,8 @@ esac
 sudo python3 -m py_compile \
   /opt/workspace-shell/runtime/plugins/workspace-shell/root/job_launcher.py \
   /opt/workspace-shell/runtime/plugins/workspace-shell/root/root_broker.py \
-  /opt/workspace-shell/runtime/plugins/workspace-shell/root/runtime_common.py
+  /opt/workspace-shell/runtime/plugins/workspace-shell/root/runtime_common.py \
+  /opt/workspace-shell/runtime/plugins/workspace-shell/install/render_tunnel_profile.py
 echo "STAGED_RUNTIME_TESTS=PASS"
 
 echo "=== INSTALL STATIC FAIL-CLOSED CONFIG ==="
