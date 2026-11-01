@@ -158,8 +158,17 @@ jobs:
           assert 'STOP_CANARY_RETRY_HISTORY_FAILED' in source
           assert 'PREFLIGHT_NO_ACTIVE_CANARY_WORKFLOW_RUN=PASS' in source
           assert 'STOP_ACTIVE_CANARY_WORKFLOW_RUNS' in source
+          assert '.workflow_runs | [length, (map(select(.status != "completed")) | length)] | @tsv' in source
+          assert "'[length, (map(select(.status != \"completed\")) | length)] | @tsv'" not in source
           assert 'BASE_INSTALLED_GENERATION_BINDING=PASS' in source
+          assert 'CONTROLLER_SOURCE_HEAD="b0e3c490c277deaf06e86138f84e27d40a3e5007"' in source
+          assert 'CONTROLLER_SOURCE_EQUIVALENCE_CHECK=BEGIN' in source
+          assert 'git -C "$ROOT" diff --quiet' in source
+          assert 'controller/lambda-ci-controller' in source
+          assert 'CONTROLLER_SOURCE_EQUIVALENCE=PASS' in source
+          assert 'STOP_CONTROLLER_SOURCE_DRIFT' in source
           assert 'CONTROLLER_OVERRIDE_BINDING_CHECK=BEGIN' in source
+          assert '--expected-source-head "$CONTROLLER_SOURCE_HEAD"' in source
           assert 'CONTROLLER_OVERRIDE_BINDING=PASS' in source
           assert 'STOP_CONTROLLER_OVERRIDE_BINDING_FAILED' in source
           assert 'gh api --method GET' in source
