@@ -364,18 +364,6 @@ sudo rm -f \
   /etc/workspace-shell/.client.ext
 echo "DEDICATED_LOCAL_IDENTITIES=PASS"
 
-echo "Enter the dedicated Workspace Shell Secure MCP Tunnel runtime key."
-echo "The value is hidden and written only to a 0600 file owned by workspace-shell-tunnel."
-read -rsp "Runtime key: " RUNTIME_KEY
-echo
-[ -n "$RUNTIME_KEY" ] || fail "empty runtime key"
-printf '%s' "$RUNTIME_KEY" \
-  | sudo tee /etc/workspace-shell/tunnel/runtime-key >/dev/null
-unset RUNTIME_KEY
-sudo chown workspace-shell-tunnel:workspace-shell-tunnel /etc/workspace-shell/tunnel/runtime-key
-sudo chmod 0600 /etc/workspace-shell/tunnel/runtime-key
-echo "TUNNEL_RUNTIME_KEY_STAGED=PASS"
-
 TUNNEL_PROFILE_RENDERER="/opt/workspace-shell/runtime/plugins/workspace-shell/install/render_tunnel_profile.py"
 sudo -u workspace-shell-tunnel test -r "$TUNNEL_PROFILE_RENDERER" \
   || fail "staged tunnel profile renderer is not readable by tunnel identity"
@@ -449,8 +437,33 @@ for _ in $(seq 1 100); do
   fi
   sleep 0.1
 done
-[ "$LOCAL_READY" = "1" ] || fail "Workspace Shell local mTLS health check failed"
+if [ "$LOCAL_READY" != "1" ]; then
+  echo "=== LOCAL CONTROL PLANE DIAGNOSTICS: BEGIN ===" >&2
+  for svc in workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service; do
+    echo "--- ${svc}: state ---" >&2
+    sudo systemctl show "$svc" --no-pager \
+      --property=Id,LoadState,ActiveState,SubState,MainPID,ExecMainCode,ExecMainStatus,Result,User,Group,FragmentPath \
+      2>&1 | head -n 80 >&2 || true
+    echo "--- ${svc}: journal ---" >&2
+    sudo journalctl -u "$svc" -n 80 --no-pager --output=short-iso \
+      2>&1 | tail -n 80 >&2 || true
+  done
+  echo "=== LOCAL CONTROL PLANE DIAGNOSTICS: END ===" >&2
+  fail "Workspace Shell local mTLS health check failed"
+fi
 echo "LOCAL_MTLS_HEALTH=PASS"
+
+echo "Enter the dedicated Workspace Shell Secure MCP Tunnel runtime key."
+echo "The value is hidden and written only to a 0600 file owned by workspace-shell-tunnel."
+read -rsp "Runtime key: " RUNTIME_KEY
+echo
+[ -n "$RUNTIME_KEY" ] || fail "empty runtime key"
+printf '%s' "$RUNTIME_KEY" \
+  | sudo tee /etc/workspace-shell/tunnel/runtime-key >/dev/null
+unset RUNTIME_KEY
+sudo chown workspace-shell-tunnel:workspace-shell-tunnel /etc/workspace-shell/tunnel/runtime-key
+sudo chmod 0600 /etc/workspace-shell/tunnel/runtime-key
+echo "TUNNEL_RUNTIME_KEY_STAGED=PASS"
 
 echo "=== TUNNEL DOCTOR ==="
 sudo -u workspace-shell-tunnel env HOME=/var/lib/workspace-shell/tunnel \
