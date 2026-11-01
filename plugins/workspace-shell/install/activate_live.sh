@@ -275,6 +275,7 @@ case "$(/opt/workspace-shell/bin/tunnel-client --version 2>&1 | head -n1)" in
 esac
 
 (
+  export OPENSSL_CONF="$STAGED_OPENSSL_CONF"
   cd /opt/workspace-shell/runtime/plugins/workspace-shell
   /opt/workspace-shell/node/bin/node --check server.js
   /opt/workspace-shell/node/bin/node --test test/core.test.js test/broker-verifier.test.js
