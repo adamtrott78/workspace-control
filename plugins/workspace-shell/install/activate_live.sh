@@ -376,16 +376,20 @@ sudo chmod 0600 /etc/workspace-shell/tunnel/runtime-key
 echo "TUNNEL_RUNTIME_KEY_STAGED=PASS"
 
 sudo -u workspace-shell-tunnel env HOME=/var/lib/workspace-shell/tunnel \
-  /opt/workspace-shell/bin/tunnel-client init \
-  --sample sample_mcp_remote_no_auth \
+  /usr/bin/python3 "$ROOT/plugins/workspace-shell/install/render_tunnel_profile.py" \
   --profile "$PROFILE" \
   --profile-dir /etc/workspace-shell/tunnel-client-profiles \
   --tunnel-id "$TUNNEL_ID" \
-  --mcp-server-url "channel=main,url=https://127.0.0.1:8797/mcp,client-cert=/etc/workspace-shell/tunnel/client.crt,client-key=/etc/workspace-shell/tunnel/client.key" \
+  --api-key-ref file:/etc/workspace-shell/tunnel/runtime-key \
   --ca-bundle /etc/workspace-shell/tunnel/ca.crt \
-  --health-listen-addr 127.0.0.1:0 \
-  --control-plane-api-key-ref file:/etc/workspace-shell/tunnel/runtime-key \
-  --force
+  --client-cert /etc/workspace-shell/tunnel/client.crt \
+  --client-key /etc/workspace-shell/tunnel/client.key \
+  --force >/dev/null
+
+PROFILE_PATH="/etc/workspace-shell/tunnel-client-profiles/${PROFILE}.yaml"
+[ -f "$PROFILE_PATH" ] || fail "Workspace Shell tunnel profile was not rendered"
+sudo chown workspace-shell-tunnel:workspace-shell-tunnel "$PROFILE_PATH"
+sudo chmod 0600 "$PROFILE_PATH"
 
 if sudo grep -R --binary-files=without-match -n 'sk-' /etc/workspace-shell/tunnel-client-profiles; then
   fail "tunnel profile unexpectedly contains an inline API key"
