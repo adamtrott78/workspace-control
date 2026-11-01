@@ -462,6 +462,38 @@ if [ "$LOCAL_READY" != "1" ]; then
 fi
 echo "LOCAL_MTLS_HEALTH=PASS"
 
+echo "=== LOCAL MCP INITIALIZE SMOKE ==="
+MCP_INIT_RESPONSE="$TMP/local-mcp-initialize.json"
+if ! sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 5 \
+  --cacert /etc/workspace-shell/tunnel/ca.crt \
+  --cert /etc/workspace-shell/tunnel/client.crt \
+  --key /etc/workspace-shell/tunnel/client.key \
+  -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' \
+  --data-binary '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"workspace-shell-commissioning","version":"0.1.0"}}}' \
+  https://127.0.0.1:8797/mcp >"$MCP_INIT_RESPONSE"; then
+  echo "=== LOCAL MCP INITIALIZE DIAGNOSTICS: BEGIN ===" >&2
+  sudo systemctl show workspace-shell-mcp.service --no-pager \
+    --property=Id,LoadState,ActiveState,SubState,MainPID,ExecMainCode,ExecMainStatus,Result,User,Group,FragmentPath,NRestarts,MemoryCurrent,MemoryPeak \
+    2>&1 | head -n 100 >&2 || true
+  sudo journalctl -u workspace-shell-mcp.service -n 120 --no-pager --output=short-iso \
+    2>&1 | tail -n 120 >&2 || true
+  echo "=== LOCAL MCP INITIALIZE DIAGNOSTICS: END ===" >&2
+  fail "Workspace Shell local MCP initialize smoke failed"
+fi
+/usr/bin/python3 - "$MCP_INIT_RESPONSE" <<'PY'
+import json, pathlib, sys
+payload = json.loads(pathlib.Path(sys.argv[1]).read_text())
+if payload.get("jsonrpc") != "2.0" or payload.get("id") != 1:
+    raise SystemExit("invalid MCP initialize response envelope")
+result = payload.get("result")
+if not isinstance(result, dict):
+    raise SystemExit("MCP initialize response missing result")
+if result.get("serverInfo", {}).get("name") != "workspace-shell":
+    raise SystemExit("MCP initialize response serverInfo mismatch")
+PY
+echo "LOCAL_MCP_INITIALIZE=PASS"
+
 echo "Enter the dedicated Workspace Shell Secure MCP Tunnel runtime key."
 echo "The value is hidden and written only to a 0600 file owned by workspace-shell-tunnel."
 read -rsp "Runtime key: " RUNTIME_KEY
