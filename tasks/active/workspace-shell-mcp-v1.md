@@ -27,10 +27,6 @@ Give ChatGPT durable, auditable, least-privilege command-execution access to the
 - Remote checkpoint: 01a95b61410e2f427b9885a19e6a0b9c5ee60a38
 - Remote verified: true
 
-## Current stage
-
-- live_chatgpt_plugin_acceptance
-
 ## Next safe action
 
 LIVE ACTIVATION IS COMPLETE. Do not reinstall or rerun commissioning. Exact accepted Workspace Shell operator/runtime head is 01a95b61410e2f427b9885a19e6a0b9c5ee60a38; Validation #1463/run 41273806752 succeeded; activation blob 815caf6bc0462ab6b77f414b90dc9ddb0b8a458d; source snapshot remains f999b25a866f25c95243cbbd6d1377a799fafb78. Lambda passed LOCAL_MTLS_HEALTH, real LOCAL_MCP_INITIALIZE, TUNNEL_READY, and SERVICES_ACTIVE_BOOT_DISABLED, and wrote /var/lib/workspace-shell/commissioning/activation-receipt.json. NEXT: connect the dedicated tunnel as a private ChatGPT Workspace Shell plugin/connector and perform live acceptance: tool discovery, runtime/Git inspection, one bounded unprivileged execution, denial tests, and receipt verification. Do not enable units at boot and do not add privileged helpers until that acceptance passes.
@@ -58,16 +54,10 @@ LIVE ACTIVATION IS COMPLETE. Do not reinstall or rerun commissioning. Exact acce
 
 https://github.com/adamtrott78/workspace-control
 
-YOU ARE THE CONTINUING EXECUTOR. DO THE WORK YOURSELF IN THIS CHAT.
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-shell-mcp-v1.json
 
-Resume durable task:
-"workspace-shell-mcp-v1"
-
-Read first: tasks/active/workspace-shell-mcp-v1.json
-Then: tasks/active/workspace-shell-mcp-v1.md
-
-Trust the capsule plus exact Git/runtime evidence over older conversation text.
-Do not rerun Workspace Shell installation/commissioning. Live activation already passed.
-Continue from the capsule's next_safe_action and perform ChatGPT-side live acceptance.
-Do not enable Workspace Shell at boot or add privileged helpers until live acceptance passes.
-Do not ask me to move this task to another executor unless genuinely blocked by operator-only action.
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
