@@ -254,8 +254,14 @@ sudo git -C /srv/workspace-shell/workspace-control remote remove origin >/dev/nu
 sudo cp -a "$NODE_ENV_SOURCE" /opt/workspace-shell/node
 sudo chown -R root:root /opt/workspace-shell/node
 sudo chmod -R go-w /opt/workspace-shell/node
-[ "$(/opt/workspace-shell/node/bin/node --version)" = "v20.20.2" ] \
+STAGED_OPENSSL_CONF="/opt/workspace-shell/node/ssl/openssl.cnf"
+sudo test -r "$STAGED_OPENSSL_CONF" || fail "staged Node OpenSSL config is missing"
+[ "$(OPENSSL_CONF="$STAGED_OPENSSL_CONF" /opt/workspace-shell/node/bin/node --version)" = "v20.20.2" ] \
   || fail "staged Node runtime failed"
+sudo -u workspace-shell-mcp env OPENSSL_CONF="$STAGED_OPENSSL_CONF" \
+  /opt/workspace-shell/node/bin/node --version >/dev/null \
+  || fail "frontend identity cannot initialize staged Node/OpenSSL runtime"
+echo "STAGED_NODE_OPENSSL_BINDING=PASS"
 
 sudo cp -a "$ROOT/plugins/workspace-shell" /opt/workspace-shell/runtime/plugins/workspace-shell
 sudo cp -a "$DEPENDENCY_SOURCE" /opt/workspace-shell/runtime/plugins/workspace-shell/node_modules
