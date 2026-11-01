@@ -6,8 +6,8 @@
     "scale_set_client_commit": "e6daac702355cdb5b880b4fbdcf6d85dcd9e48e5",
     "scale_signal": "RunnerScaleSetStatistic.TotalAssignedJobs",
     "acknowledgment_rule": "listener deletes a message only after Scale returns nil; non-nil Scale error stops listener and leaves message for redelivery",
-    "scheduler_advertised_max_capacity": 0,
-    "scheduler_assignment_policy": "automatic GitHub assignment is disabled on every listener poll; only a verified JobAvailable RunnerRequestID may be explicitly acquired"
+    "scheduler_advertised_max_capacity": "policy.max_runners",
+    "scheduler_assignment_policy": "GitHub maxCapacity is the real homogeneous class capacity; JobAssigned is never standalone authority. Complete JobAvailable may be acquired after exact verification; identity-incomplete assigned demand requires whole-set REST attestation of every queued target-label job before root capacity is created."
   },
   "state_machines": {
     "github_job": {
@@ -52,43 +52,71 @@
       "owner": "unprivileged runner-class controller",
       "states": [
         "OBSERVED",
-        "ATTESTING",
-        "TRUSTED",
-        "ANOMALOUS_UNTRUSTED",
-        "DEFERRED",
+        "BROKER_ATTESTING",
+        "BROKER_TRUSTED",
         "ACQUIRE_REQUESTED",
-        "ACQUIRED"
+        "ACQUIRED",
+        "REST_DEMAND_DISCOVERY",
+        "REST_SET_TRUSTED",
+        "REST_AUTHORITY_PERSISTED",
+        "ANOMALOUS_UNTRUSTED",
+        "DEFERRED"
       ],
       "transitions": [
         {
           "from": "OBSERVED",
-          "event": "JobAvailable",
-          "to": "ATTESTING"
+          "event": "complete JobAvailable",
+          "to": "BROKER_ATTESTING"
         },
         {
-          "from": "ATTESTING",
+          "from": "BROKER_ATTESTING",
           "event": "exact repository/workflow/ref/blob/event/actor/class-label policy passes",
-          "to": "TRUSTED"
+          "to": "BROKER_TRUSTED"
         },
         {
-          "from": "ATTESTING",
-          "event": "stable structural policy mismatch",
-          "to": "ANOMALOUS_UNTRUSTED"
-        },
-        {
-          "from": "ATTESTING",
-          "event": "temporary GitHub observation unavailable",
-          "to": "DEFERRED"
-        },
-        {
-          "from": "TRUSTED",
-          "event": "AcquireJobs called with RunnerRequestID",
+          "from": "BROKER_TRUSTED",
+          "event": "AcquireJobs called with positive RunnerRequestID",
           "to": "ACQUIRE_REQUESTED"
         },
         {
           "from": "ACQUIRE_REQUESTED",
           "event": "request id returned as acquired",
           "to": "ACQUIRED"
+        },
+        {
+          "from": "OBSERVED",
+          "event": "TotalAssignedJobs exceeds durable trusted authority and broker identity is absent/incomplete",
+          "to": "REST_DEMAND_DISCOVERY"
+        },
+        {
+          "from": "REST_DEMAND_DISCOVERY",
+          "event": "every queued REST job carrying exact class scale-set label passes repository/workflow/blob/default-branch/event/actor attestation",
+          "to": "REST_SET_TRUSTED"
+        },
+        {
+          "from": "REST_SET_TRUSTED",
+          "event": "persist positive REST job id as authority anchor with authority_source=REST_ACTIVE_JOB_SET",
+          "to": "REST_AUTHORITY_PERSISTED"
+        },
+        {
+          "from": "BROKER_ATTESTING",
+          "event": "stable structural policy mismatch",
+          "to": "ANOMALOUS_UNTRUSTED"
+        },
+        {
+          "from": "REST_DEMAND_DISCOVERY",
+          "event": "any queued target-label REST job is untrusted, ambiguous, terminal, or already runner-bound without durable authority",
+          "to": "ANOMALOUS_UNTRUSTED"
+        },
+        {
+          "from": "BROKER_ATTESTING",
+          "event": "temporary GitHub observation unavailable",
+          "to": "DEFERRED"
+        },
+        {
+          "from": "REST_DEMAND_DISCOVERY",
+          "event": "REST evidence has not converged yet or GitHub observation is temporarily unavailable",
+          "to": "DEFERRED"
         },
         {
           "from": "ACQUIRE_REQUESTED",
@@ -98,13 +126,13 @@
       ],
       "anomaly_semantics": [
         "ANOMALOUS_UNTRUSTED is not a root provisioner policy outcome because root is never contacted",
-        "controller never calls AcquireJobs for the anomalous RunnerRequestID",
-        "message handling may be acknowledged so controller liveness is preserved",
-        "the job remains scheduler-owned/unacquired; workflow/repository policy or operator cancellation is responsible for eventual terminal handling",
-        "repeated anomalous observations emit bounded durable evidence/alerting but cannot consume systemd restart budget",
-        "JobAssigned is lifecycle evidence only and cannot create authority; zero-ID GitHub.com JobAssigned is a stable no-op unless an existing trusted JobAvailable-derived ledger can be correlated"
+        "JobAssigned is lifecycle/count evidence only and cannot create or reconstruct scheduler authority",
+        "zero-ID GitHub.com JobAssigned is safe only because the controller independently attests the queued REST target-label set before provisioning",
+        "one trusted REST job is insufficient if another untrusted job can compete for the same scale-set runner; the whole eligible target-label set must be trusted",
+        "stable denial keeps the controller process and Scale Set Client session alive and consumes no root capacity",
+        "repeated anomalous observations emit bounded evidence/alerting without consuming systemd restart budget"
       ],
-      "invariant": "scheduler automatic capacity is advertised as zero; normal authority originates only from exact trusted JobAvailable -> AcquireJobs, while TotalAssignedJobs remains the desired physical-capacity count"
+      "invariant": "listener advertises policy.max_runners; TotalAssignedJobs is only the desired-capacity count; root capacity may be created only from a durable broker-acquired authority or a durable whole-set REST-attested authority."
     },
     "controller_supervisor": {
       "owner": "runner-class controller process",
@@ -333,9 +361,10 @@
     "REQUEST_LOCAL": {
       "examples": [
         "ANOMALOUS_UNTRUSTED_JOB",
+        "UNTRUSTED_TARGET_LABEL_SET",
         "DUPLICATE_TERMINAL_LOCAL_STATE"
       ],
-      "listener_action": "do not acquire anomalous request; persist bounded anomaly evidence; keep listener process alive",
+      "listener_action": "do not acquire/provision untrusted demand; persist bounded anomaly evidence; keep listener process alive",
       "process_action": "stay running",
       "note": "root capacity provider is not involved in workflow trust denial"
     },
@@ -376,13 +405,15 @@
     "reconcile RESERVED requests before generating JIT; if the durable ledger says JIT_REGISTERED but no raw JIT exists after restart, remove the exact orphan registration and generate a fresh JIT under the same valid reservation",
     "remove orphan JIT registrations for FAILED/CANCELED/expired requests",
     "treat ACCEPTED root requests as live capacity even if JobStarted has not yet been observed",
-    "establish/re-establish Scale Set Client session",
+    "establish/re-establish Scale Set Client session with maxCapacity=policy.max_runners",
     "read current TotalAssignedJobs",
     "desired capacity = min(class max_runners, TotalAssignedJobs)",
     "live-or-reserved capacity = RESERVED + ACCEPTED nonterminal root requests for this class",
-    "submit new RESERVE requests only for positive capacity deficit",
+    "if assigned demand exceeds durable trusted authority, first prefer complete JobAvailable verification+AcquireJobs; otherwise enumerate active queued REST jobs carrying the class label and require the entire target-label set to be trusted",
+    "persist a positive REST job id authority anchor only after whole-set REST attestation succeeds",
+    "submit new RESERVE requests only for positive capacity deficit backed by durable trusted authority",
     "generate JIT only after each reservation is granted",
-    "never reconstruct workload/candidate authority from lifecycle strings"
+    "never reconstruct authority from JobAssigned strings, JobDisplayName, human comment text, or candidate payload parameters"
   ],
   "maintenance_state_machine": {
     "ingress": "owner-authored maintenance command parsed once",
@@ -416,7 +447,12 @@
       "jit_config_sha256_if_generated",
       "root_status_if_known",
       "created_at",
-      "updated_at"
+      "updated_at",
+      "authority_source",
+      "github_job_id_if_rest_attested",
+      "workflow_run_id",
+      "workflow_path",
+      "workflow_blob_sha256"
     ],
     "forbidden_persistent_fields": [
       "raw_jit_config on persistent filesystem",
