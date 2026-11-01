@@ -375,21 +375,100 @@ fi
 echo "V3_WORKSPACE_CONTROL_CREDENTIAL_RESET=PASS"
 
 echo "V3_WORKSPACE_CONTROL_GH_TOKEN_EXPORT=BEGIN"
+TOKEN_EXPORT_METHOD=""
+
+# Newer gh releases provide `gh auth token`. Older releases on Lambda may
+# still expose the authenticated token only through `gh auth status
+# --show-token`. Capture every token-bearing diagnostic to mode-0600 temp
+# files and never print their contents.
 set +e
-gh auth token > "$TMP/operator-token"
+gh auth token > "$TMP/operator-token" 2> "$TMP/gh-auth-token.err"
 GH_TOKEN_RC=$?
 set -e
-if [[ "$GH_TOKEN_RC" -ne 0 ]]; then
-  echo "STOP_GH_AUTH_TOKEN_EXPORT_FAILED rc=$GH_TOKEN_RC"
+
+if [[ "$GH_TOKEN_RC" -eq 0 && -s "$TMP/operator-token" ]]; then
+  TOKEN_EXPORT_METHOD="auth-token"
+else
   rm -f "$TMP/operator-token"
-  exit "$GH_TOKEN_RC"
+  echo "V3_WORKSPACE_CONTROL_GH_TOKEN_PRIMARY_UNAVAILABLE rc=$GH_TOKEN_RC"
+
+  set +e
+  NO_COLOR=1 gh auth status \
+    --hostname github.com \
+    --show-token \
+    > "$TMP/gh-auth-status-token" 2>&1
+  GH_STATUS_TOKEN_RC=$?
+  set -e
+  if [[ "$GH_STATUS_TOKEN_RC" -ne 0 ]]; then
+    echo "STOP_GH_AUTH_STATUS_TOKEN_EXPORT_FAILED rc=$GH_STATUS_TOKEN_RC"
+    rm -f "$TMP/gh-auth-token.err" "$TMP/gh-auth-status-token"
+    exit "$GH_STATUS_TOKEN_RC"
+  fi
+
+  if ! env \
+    STATUS_TOKEN_FILE="$TMP/gh-auth-status-token" \
+    OUTPUT_TOKEN_FILE="$TMP/operator-token" \
+    /usr/bin/python3 - <<'PY'
+import os
+import pathlib
+import re
+
+status_path = pathlib.Path(os.environ["STATUS_TOKEN_FILE"])
+output_path = pathlib.Path(os.environ["OUTPUT_TOKEN_FILE"])
+
+tokens = []
+for line in status_path.read_text(errors="replace").splitlines():
+    match = re.search(r"(?:^|\\s)Token:\\s*(\\S+)\\s*$", line)
+    if not match:
+        continue
+    token = match.group(1)
+    if not token or "*" in token or any(ch.isspace() for ch in token):
+        continue
+    if token not in tokens:
+        tokens.append(token)
+
+if len(tokens) != 1:
+    raise SystemExit("expected exactly one unmasked token in gh auth status output")
+
+output_path.write_text(tokens[0] + "\\n")
+output_path.chmod(0o600)
+PY
+  then
+    echo "STOP_GH_AUTH_STATUS_TOKEN_PARSE_FAILED"
+    rm -f "$TMP/gh-auth-token.err" "$TMP/gh-auth-status-token" "$TMP/operator-token"
+    exit 1
+  fi
+  TOKEN_EXPORT_METHOD="auth-status-show-token"
 fi
+
+rm -f "$TMP/gh-auth-token.err" "$TMP/gh-auth-status-token"
+
 if [[ ! -s "$TMP/operator-token" ]]; then
   echo "STOP_GH_AUTH_TOKEN_EXPORT_EMPTY"
   rm -f "$TMP/operator-token"
   exit 1
 fi
-echo "V3_WORKSPACE_CONTROL_GH_TOKEN_EXPORT=PASS"
+
+echo "V3_WORKSPACE_CONTROL_GH_TOKEN_VERIFY=BEGIN"
+set +e
+EXPORTED_LOGIN="$(
+  env GH_TOKEN="$(tr -d '\\r\\n' < "$TMP/operator-token")" \
+    gh api user --jq '.login' 2>/dev/null
+)"
+EXPORTED_LOGIN_RC=$?
+set -e
+if [[ "$EXPORTED_LOGIN_RC" -ne 0 ]]; then
+  echo "STOP_GH_AUTH_TOKEN_VERIFY_FAILED rc=$EXPORTED_LOGIN_RC"
+  rm -f "$TMP/operator-token"
+  exit "$EXPORTED_LOGIN_RC"
+fi
+if [[ "$EXPORTED_LOGIN" != "adamtrott78" ]]; then
+  echo "STOP_GH_AUTH_TOKEN_IDENTITY_MISMATCH"
+  rm -f "$TMP/operator-token"
+  exit 1
+fi
+echo "V3_WORKSPACE_CONTROL_GH_TOKEN_VERIFY=PASS"
+echo "V3_WORKSPACE_CONTROL_GH_TOKEN_EXPORT=PASS method=$TOKEN_EXPORT_METHOD"
 
 echo "V3_WORKSPACE_CONTROL_TOKEN_INSTALL=BEGIN"
 if ! sudo install -o root -g ci-gh-workspace-control -m 0640 \
