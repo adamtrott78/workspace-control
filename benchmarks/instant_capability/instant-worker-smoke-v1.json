@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "instant-worker-smoke-v1-20261101",
+  "created_by": "GPT6_INSTANT",
+  "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+  "branch": "instant-worker-smoke-v1-20261101",
+  "workspace_shell_task_id": "workspace-shell-mcp-v1",
+  "expected_workspace_shell_sha": "01a95b61410e2f427b9885a19e6a0b9c5ee60a38",
+  "phase": "GITHUB_WRITE_CREATED",
+  "github_write_success": true,
+  "workspace_shell_result": null,
+  "workspace_shell_receipt_id": null,
+  "final_status": "IN_PROGRESS"
+}
