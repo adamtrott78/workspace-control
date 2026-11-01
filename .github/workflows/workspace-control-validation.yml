@@ -216,6 +216,10 @@ jobs:
           set -euo pipefail
           go test -mod=readonly ./...
           go build -mod=readonly ./...
+          grep -F 'const schedulerAdvertisedMaxCapacity = 0' v3/main.go >/dev/null
+          grep -F 'MaxRunners: schedulerAdvertisedMaxCapacity' v3/main.go >/dev/null
+          ! grep -F 'MaxRunners: policy.MaxRunners' v3/main.go
+          grep -F 'Ignoring untracked JobAssigned; authority requires verified JobAvailable' v3/controller.go >/dev/null
 
       - name: Run full integration contracts
         if: steps.plan.outputs.tier == 'FULL_INTEGRATION' || steps.plan.outputs.tier == 'CANONICAL_REGRESSION'
