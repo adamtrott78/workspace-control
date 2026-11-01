@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SOURCE_HEAD="09c46818252991f6a55aaeedbcf046c554e2ffee"
+BASE_SOURCE_HEAD="09c46818252991f6a55aaeedbcf046c554e2ffee"
 TARGET_CLASS="workspace-control-control-small-v1"
 TARGET_SCALE_SET="lambda-workspace-control-control-small"
 WORKFLOW_PATH=".github/workflows/workspace-ci-v3-migration-canary-workspace-control-control-small-v1.yml"
@@ -14,6 +14,8 @@ V3_ENV="$V3_CREDENTIAL_DIR/controller.env"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+SOURCE_HEAD="$(git -C "$ROOT" rev-parse HEAD)"
+test -z "$(git -C "$ROOT" status --porcelain --untracked-files=no)"
 TMP="$(mktemp -d /tmp/workspace-ci-v3-first-canary.XXXXXX)"
 SOURCE_TREE="$TMP/source"
 TX_HELPER="$TMP/lambda_ci_v3_migration_transaction.py"
@@ -105,6 +107,7 @@ trap on_exit EXIT
 
 echo "=== V3 FIRST CANARY: BEGIN ==="
 echo "SOURCE_HEAD=$SOURCE_HEAD"
+echo "BASE_SOURCE_HEAD=$BASE_SOURCE_HEAD"
 echo "TARGET_CLASS=$TARGET_CLASS"
 
 sudo -v
@@ -166,51 +169,17 @@ done
 
 echo "LIVE_PREFLIGHT_ROOT_AND_CLASS_STATE=PASS"
 
-# Input #2's root-services authority is expected in these shared roots.
-# Reject only canary-class authority consumption or canary transaction residue.
-if ! sudo env TARGET_CLASS="$TARGET_CLASS" /usr/bin/python3 - <<'PY'; then
-import json
-import os
-import pathlib
-
-target = os.environ["TARGET_CLASS"]
-authority_root = pathlib.Path("/var/lib/workspace-ci/v3/migration-authority")
-migration_root = pathlib.Path("/var/lib/workspace-ci/v3/migration")
-
-canary_markers = []
-for path in sorted(authority_root.glob("*.json")):
-    value = json.loads(path.read_text())
-    if (
-        value.get("operation") == "ACTIVATE_ONE_V3_CANARY"
-        or value.get("target_runner_class_id") == target
-    ):
-        canary_markers.append(str(path))
-
-canary_receipts = []
-for path in sorted(migration_root.glob("*/transaction.json")):
-    value = json.loads(path.read_text())
-    if (
-        value.get("mode") == "V3_ONE_CLASS_CANARY_GENERATION_EXCLUSION"
-        or value.get("target_runner_class_id") == target
-    ):
-        canary_receipts.append(str(path))
-
-if canary_markers:
-    raise SystemExit(
-        "canary authority consumption residue exists: " + ", ".join(canary_markers)
-    )
-if canary_receipts:
-    raise SystemExit(
-        "canary transaction residue exists: " + ", ".join(canary_receipts)
-    )
-
-print("PREFLIGHT_NO_CANARY_AUTHORITY_CONSUMPTION=PASS")
-print("PREFLIGHT_NO_CANARY_TRANSACTION_RECEIPT=PASS")
-PY
-  echo "STOP_CANARY_FORENSIC_PREFLIGHT_FAILED"
+# Prior failed canaries are durable history only when the authority marker is
+# exactly paired with a transaction that reached the terminal safe rollback phase.
+echo "CANARY_RETRY_HISTORY_CHECK=BEGIN"
+if ! sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 \
+  "$ROOT/scripts/lambda_ci_v3_controller_refresh.py" \
+  --verify-retry-history \
+  --target-class "$TARGET_CLASS"
+then
+  echo "STOP_CANARY_RETRY_HISTORY_FAILED"
   exit 1
 fi
-
 echo "CANARY_WORKFLOW_ID_RESOLVE=BEGIN"
 set +e
 CANARY_WORKFLOW_META="$(
@@ -234,13 +203,13 @@ echo "CANARY_WORKFLOW_ID_RESOLVE=PASS id=$CANARY_WORKFLOW_ID"
 
 echo "CANARY_RUN_HISTORY_CHECK=BEGIN"
 set +e
-CANARY_RUN_COUNT="$(
+CANARY_RUN_META="$(
   gh api --method GET \
     "repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/runs" \
     -f event=workflow_dispatch \
     -f branch=main \
     -f per_page=100 \
-    --jq '.workflow_runs | length'
+    --jq '[length, (map(select(.status != "completed")) | length)] | @tsv'
 )"
 CANARY_RUN_HISTORY_RC=$?
 set -e
@@ -248,20 +217,22 @@ if [[ "$CANARY_RUN_HISTORY_RC" -ne 0 ]]; then
   echo "STOP_CANARY_RUN_HISTORY_QUERY_FAILED rc=$CANARY_RUN_HISTORY_RC"
   exit "$CANARY_RUN_HISTORY_RC"
 fi
-if [[ "$CANARY_RUN_COUNT" != "0" ]]; then
-  echo "STOP_EXISTING_CANARY_WORKFLOW_RUNS count=$CANARY_RUN_COUNT"
+read -r CANARY_PRIOR_RUN_COUNT CANARY_ACTIVE_RUN_COUNT <<< "$CANARY_RUN_META"
+if [[ "$CANARY_ACTIVE_RUN_COUNT" != "0" ]]; then
+  echo "STOP_ACTIVE_CANARY_WORKFLOW_RUNS count=$CANARY_ACTIVE_RUN_COUNT"
   gh api --method GET \
     "repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/runs" \
     -f event=workflow_dispatch \
     -f branch=main \
     -f per_page=100 \
-    --jq '.workflow_runs[] | [.id,.status,.conclusion,.created_at,.head_sha] | @tsv' || true
+    --jq '.workflow_runs[] | select(.status != "completed") | [.id,.status,.conclusion,.created_at,.head_sha] | @tsv' || true
   exit 1
 fi
-echo "PREFLIGHT_NO_CANARY_WORKFLOW_RUN=PASS"
-
-# Exact installed generation must still be the Input #1 generation.
-sudo env EXPECTED_HEAD="$SOURCE_HEAD" /usr/bin/python3 - <<'PY'
+echo "PREFLIGHT_NO_ACTIVE_CANARY_WORKFLOW_RUN=PASS prior_terminal_runs=$CANARY_PRIOR_RUN_COUNT"
+# The base Input #1 generation remains immutable for root services/config.
+# The effective class-controller executable is a separately reviewed inactive
+# override bound to this exact source head.
+sudo env EXPECTED_BASE_HEAD="$BASE_SOURCE_HEAD" /usr/bin/python3 - <<'PY'
 import json
 import os
 import pathlib
@@ -269,12 +240,23 @@ import pathlib
 manifest = json.loads(
     pathlib.Path("/etc/workspace-ci/v3/install-manifest.json").read_text()
 )
-assert manifest["source_head"] == os.environ["EXPECTED_HEAD"]
+assert manifest["source_head"] == os.environ["EXPECTED_BASE_HEAD"]
 assert manifest["controller_state"] == "INACTIVE"
 assert manifest["route_state"] == "DISABLED"
-print("INSTALLED_GENERATION_BINDING=PASS")
+print("BASE_INSTALLED_GENERATION_BINDING=PASS")
 PY
 
+echo "CONTROLLER_OVERRIDE_BINDING_CHECK=BEGIN"
+if ! sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 \
+  "$ROOT/scripts/lambda_ci_v3_controller_refresh.py" \
+  --verify-active \
+  --expected-source-head "$SOURCE_HEAD" \
+  --base-source-head "$BASE_SOURCE_HEAD"
+then
+  echo "STOP_CONTROLLER_OVERRIDE_BINDING_FAILED"
+  exit 1
+fi
+echo "CONTROLLER_OVERRIDE_BINDING=PASS"
 # Create an immutable worktree for the exact live generation.
 git -C "$ROOT" cat-file -e "$SOURCE_HEAD^{commit}"
 git -C "$ROOT" worktree add --detach "$SOURCE_TREE" "$SOURCE_HEAD" >/dev/null
