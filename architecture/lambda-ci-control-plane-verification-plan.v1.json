@@ -33,7 +33,10 @@
     "resource claims release only after containment cleanup",
     "maintenance targets runner_class_id and parses its command exactly once",
     "reconciliation installs one catalog generation and projections atomically",
-    "legacy controller units/workflows cannot be accidentally selected after migration"
+    "legacy controller units/workflows cannot be accidentally selected after migration",
+    "listener maxCapacity equals generated class max_runners; zero is not used as an admission firewall",
+    "identity-incomplete assigned demand reaches root only after whole-set REST attestation of every queued exact target-label job",
+    "any untrusted queued job eligible for a class label blocks new root capacity for that class"
   ],
   "test_families": {
     "catalog_compiler": [
@@ -54,30 +57,36 @@
       "prove host-attest exists only in maintenance builder, not execution route builders"
     ],
     "controller_admission": [
-      "accept exact repository/workflow/ref/blob/event/actor/labels for every route",
+      "accept exact repository/workflow/ref/blob/event/actor/labels for every complete JobAvailable route",
       "reject wrong repository, workflow path, workflow blob, default branch ref, event, actor, triggering actor, or class labels",
       "prove arbitrary JobDisplayName content has no effect on admission decision",
       "prove arbitrary candidate SHA/comment-body content has no effect on infrastructure admission",
-      "prove JobID empty on JobAvailable remains valid",
+      "prove JobID empty on complete JobAvailable remains valid",
       "prove all stable denies keep supervisor SESSION_ACTIVE",
-      "prove GitHub.com zero-ID JobAssigned cannot create or reconstruct scheduler authority",
-      "prove standalone nonzero-ID JobAssigned without a trusted JobAvailable-derived ledger cannot create scheduler authority"
+      "prove GitHub.com zero-ID JobAssigned cannot create or reconstruct scheduler authority by itself",
+      "prove standalone nonzero-ID JobAssigned without an existing trusted ledger cannot create scheduler authority",
+      "prove REST fallback enumerates queued jobs carrying the exact class scale-set label",
+      "prove every target-label REST job must pass exact workflow/blob/default-branch/event/actor attestation before any capacity is authorized",
+      "prove one untrusted target-label job blocks the entire capacity increase even when another target-label job is trusted",
+      "prove REST job id is persisted with authority_source=REST_ACTIVE_JOB_SET and never confused with a broker-acquired source"
     ],
     "scaleset_state_machine": [
       "initial statistics with zero jobs",
       "initial statistics with assigned jobs after controller restart",
-      "JobAvailable -> AcquireJobs -> assigned -> started -> completed",
+      "complete JobAvailable -> exact verification -> AcquireJobs -> assigned -> started -> completed",
       "duplicate/redelivered message produces idempotent state",
-      "JobAssigned without JobAvailable after restart does not reconstruct command authority",
-      "assignment requeue/cancel and later JobAvailable",
+      "JobAssigned without JobAvailable never creates authority by itself",
+      "GitHub.com zero-ID JobAssigned plus TotalAssignedJobs=1 plus one trusted queued REST target-label job -> durable REST authority -> RESERVE -> JIT -> LAUNCH",
+      "GitHub.com zero-ID JobAssigned plus TotalAssignedJobs=1 plus no converged REST evidence -> no root mutation and in-process retry",
+      "GitHub.com zero-ID JobAssigned plus any untrusted queued target-label job -> no root mutation",
+      "assignment requeue/cancel and later trusted demand",
       "TotalAssignedJobs greater than lifecycle message count",
       "lifecycle arrays truncated while statistics remain authoritative",
-      "multiple trusted routes queued in same homogeneous class",
-      "untrusted available job plus trusted available job in same polling cycle",
-      "listener advertises automatic scheduler max capacity 0 while class policy max_runners remains independently positive",
-      "trusted JobAvailable is verified and explicitly acquired before any physical capacity is provisioned",
-      "after explicit acquisition, later TotalAssignedJobs=1 provisions the already-authorized ledger entry",
-      "zero-ID JobAssigned with TotalAssignedJobs>0 but no trusted ledger fails closed and provisions nothing"
+      "multiple trusted routes queued in same homogeneous class remain safe only when the entire target-label set attests",
+      "untrusted and trusted target-label jobs competing in same class fail closed",
+      "listener advertises class policy max_runners, not zero",
+      "broker-acquired and REST-attested authority sources remain explicit and idempotent",
+      "after trusted authority exists, TotalAssignedJobs controls only the number of physical class slots"
     ],
     "capacity_protocol": [
       "authorized UID RESERVE -> RESERVED -> LAUNCH -> ACCEPTED -> COMPLETED",
@@ -109,7 +118,9 @@
       "transient root socket failure triggers in-process bounded reconnect/backoff",
       "message remains unacked on retryable failure and is safe under redelivery",
       "corrupt durable ledger/config/root response schema is fatal",
-      "100 request-local denies do not increment process restart count"
+      "100 request-local denies do not increment process restart count",
+      "REST evidence race with TotalAssignedJobs waits in-process without root mutation or systemd restart",
+      "stable untrusted target-label set returns nil to listener and never contacts root"
     ],
     "crash_recovery": [
       "crash before RESERVE",
@@ -122,7 +133,7 @@
       "crash while runner busy",
       "crash after runner terminal before JobCompleted",
       "cleanup failure -> class quarantine",
-      "controller restart with TotalAssignedJobs>0 but no recoverable job semantics"
+      "controller restart with TotalAssignedJobs>0 but no durable authority requires fresh broker/REST attestation before new root capacity"
     ],
     "maintenance_plane": [
       "diagnose/restart/host-attest/reset-stale accept runner_class_id, not cpu/gpu lane",
