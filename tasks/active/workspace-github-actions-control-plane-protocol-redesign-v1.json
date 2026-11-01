@@ -318,7 +318,7 @@
         },
         {
           "check": "Workspace Shell terminal-transport commissioning dependency",
-          "result": "PASS_PENDING_CHATGPT_ACCEPTANCE",
+          "result": "PASS",
           "evidence": [
             "Workspace Shell exact operator/runtime head 01a95b61410e2f427b9885a19e6a0b9c5ee60a38 passed Workspace Control Validation #1463/run 41273806752.",
             "Live Lambda Workspace Shell activation passed LOCAL_MTLS_HEALTH, real LOCAL_MCP_INITIALIZE, PRE_TUNNEL_LOCAL_MTLS_RECHECK, TUNNEL_READY, and SERVICES_ACTIVE_BOOT_DISABLED.",
