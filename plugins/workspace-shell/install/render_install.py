@@ -143,6 +143,10 @@ def render(args):
     attestation, attestation_digest = load_attestation(args.attestation)
     source_sha, source_tree = source_identity(attestation, args.source_sha)
 
+    runtime_source_sha = exact_sha(
+        args.runtime_source_sha,
+        "runtime_source_sha",
+    )
     authority_sha = exact_sha(args.design_authority_sha, "design_authority_sha")
     policy_digest = digest64(args.policy_artifact_sha256, "policy_artifact_sha256")
     policy_bytes = AUTHORITY_ARTIFACT.read_bytes()
@@ -269,6 +273,7 @@ def render(args):
         "source_repository": "adamtrott78/workspace-control",
         "source_sha": source_sha,
         "source_tree": source_tree,
+        "runtime_source_sha": runtime_source_sha,
         "design_authority_sha": authority_sha,
         "policy_artifact_sha256": policy_digest,
         "policy_artifact_install_path": "/etc/workspace-shell/policy/workspace-shell-mcp-authority-v2.json",
@@ -302,6 +307,7 @@ def main():
     parser.add_argument("--attestation", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--source-sha")
+    parser.add_argument("--runtime-source-sha", required=True)
     parser.add_argument("--design-authority-sha", required=True)
     parser.add_argument("--policy-artifact-sha256", required=True)
     args = parser.parse_args()
