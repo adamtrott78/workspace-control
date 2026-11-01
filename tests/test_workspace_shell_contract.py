@@ -679,6 +679,18 @@ class WorkspaceShellContractTests(unittest.TestCase):
             'sudo -u workspace-shell-tunnel test -r "$TUNNEL_PROFILE_RENDERER"',
             source,
         )
+        self.assertIn(
+            'sudo -u workspace-shell-tunnel test -f "$PROFILE_PATH"',
+            source,
+        )
+        self.assertIn(
+            'sudo -u workspace-shell-tunnel test -r "$PROFILE_PATH"',
+            source,
+        )
+        self.assertNotIn(
+            '[ -f "$PROFILE_PATH" ]',
+            source,
+        )
         self.assertNotIn(
             '"$ROOT/plugins/workspace-shell/install/render_tunnel_profile.py"',
             source,
