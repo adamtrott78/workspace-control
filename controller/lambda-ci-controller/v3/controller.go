@@ -103,6 +103,8 @@ func loadControllerPolicy(path string) (controllerPolicy, error) {
 
 type verifiedJob struct {
 	RunnerRequestID        int64
+	GitHubJobID            int64
+	AuthoritySource        string
 	WorkflowRunID          int64
 	WorkflowPath           string
 	WorkflowBlobSHA        string
@@ -113,6 +115,7 @@ type verifiedJob struct {
 
 type jobVerifier interface {
 	Verify(context.Context, *scaleset.JobMessageBase) (verifiedJob, bool, string, error)
+	DiscoverTrustedDemand(context.Context) ([]verifiedJob, bool, string, error)
 }
 
 type capacityResponse struct {
@@ -151,6 +154,8 @@ type jobRecord struct {
 	SchemaVersion             int    `json:"schema_version"`
 	ControllerPolicySHA256    string `json:"controller_policy_sha256"`
 	RunnerRequestID           int64  `json:"runner_request_id"`
+	GitHubJobID               int64  `json:"github_job_id,omitempty"`
+	AuthoritySource           string `json:"authority_source,omitempty"`
 	WorkflowRunID             int64  `json:"workflow_run_id"`
 	WorkflowPath              string `json:"workflow_path"`
 	WorkflowBlobSHA           string `json:"workflow_blob_sha"`
@@ -331,6 +336,8 @@ func newJobRecord(policy controllerPolicy, job verifiedJob, state string, now ti
 		SchemaVersion:          1,
 		ControllerPolicySHA256: policy.ControllerPolicySHA256,
 		RunnerRequestID:        job.RunnerRequestID,
+		GitHubJobID:            job.GitHubJobID,
+		AuthoritySource:        job.AuthoritySource,
 		WorkflowRunID:          job.WorkflowRunID,
 		WorkflowPath:           job.WorkflowPath,
 		WorkflowBlobSHA:        job.WorkflowBlobSHA,
@@ -346,6 +353,8 @@ func newJobRecord(policy controllerPolicy, job verifiedJob, state string, now ti
 func verifiedFromRecord(record jobRecord) verifiedJob {
 	return verifiedJob{
 		RunnerRequestID: record.RunnerRequestID,
+		GitHubJobID:     record.GitHubJobID,
+		AuthoritySource: record.AuthoritySource,
 		WorkflowRunID:   record.WorkflowRunID,
 		WorkflowPath:    record.WorkflowPath,
 		WorkflowBlobSHA: record.WorkflowBlobSHA,
@@ -534,6 +543,95 @@ func (s *v3Scaler) processAvailable(
 	return nil
 }
 
+func (s *v3Scaler) processRESTDemand(
+	ctx context.Context,
+	stats *scaleset.RunnerScaleSetStatistic,
+) error {
+	desired := s.desiredCapacity(stats)
+	if desired <= 0 {
+		return nil
+	}
+
+	records, err := s.ledger.List()
+	if err != nil {
+		return fmt.Errorf("list controller ledger for REST demand: %w", err)
+	}
+	outstanding := s.outstandingAcquired(records)
+	if outstanding >= desired {
+		return nil
+	}
+
+	jobs, safe, reason, err := s.verifier.DiscoverTrustedDemand(ctx)
+	if err != nil {
+		return fmt.Errorf("discover REST-attested scheduler demand: %w", err)
+	}
+	if !safe {
+		s.logger.Warn(
+			"Refusing target-label demand because REST attestation is unsafe",
+			slog.String("reason", reason),
+			slog.Int("desired", desired),
+			slog.Int("outstanding", outstanding),
+		)
+		return nil
+	}
+	if len(jobs) == 0 {
+		s.logger.Info(
+			"Waiting for REST job evidence for assigned scheduler demand",
+			slog.Int("desired", desired),
+			slog.Int("outstanding", outstanding),
+		)
+		return nil
+	}
+
+	existingJobs := make(map[int64]struct{}, len(records))
+	for _, record := range records {
+		if record.GitHubJobID > 0 {
+			existingJobs[record.GitHubJobID] = struct{}{}
+		}
+	}
+
+	needed := desired - outstanding
+	for _, job := range jobs {
+		if needed <= 0 {
+			break
+		}
+		if job.GitHubJobID <= 0 || job.WorkflowRunID <= 0 {
+			return fmt.Errorf("REST-attested job identity is incomplete")
+		}
+		if _, ok := existingJobs[job.GitHubJobID]; ok {
+			continue
+		}
+		job.RunnerRequestID = job.GitHubJobID
+		job.AuthoritySource = "REST_ACTIVE_JOB_SET"
+		record, err := newJobRecord(s.policy, job, "ACQUIRED", s.now())
+		if err != nil {
+			return err
+		}
+		record.SchedulerState = "REST_ATTESTED_ASSIGNED"
+		if err := s.ledger.Put(record); err != nil {
+			return fmt.Errorf("persist REST-attested scheduler authority: %w", err)
+		}
+		s.logger.Info(
+			"Admitted REST-attested scheduler demand",
+			slog.Int64("authority_id", record.RunnerRequestID),
+			slog.Int64("github_job_id", record.GitHubJobID),
+			slog.Int64("workflow_run_id", record.WorkflowRunID),
+			slog.String("workflow_path", record.WorkflowPath),
+		)
+		existingJobs[job.GitHubJobID] = struct{}{}
+		needed--
+	}
+
+	if needed > 0 {
+		s.logger.Info(
+			"REST evidence has not yet converged to assigned scheduler count",
+			slog.Int("remaining_needed", needed),
+			slog.Int("candidate_count", len(jobs)),
+		)
+	}
+	return nil
+}
+
 func (s *v3Scaler) processAssigned(
 	ctx context.Context,
 	jobs []*scaleset.JobAssigned,
@@ -547,7 +645,15 @@ func (s *v3Scaler) processAssigned(
 			s.logger.Warn(
 				"Ignoring JobAssigned without positive runner_request_id",
 				slog.Int64("workflow_run_id", job.WorkflowRunID),
+				slog.String("owner_name", job.OwnerName),
+				slog.String("repository_name", job.RepositoryName),
+				slog.String("job_id", job.JobID),
 				slog.String("workflow_ref", job.JobWorkflowRef),
+				slog.String("event_name", job.EventName),
+				slog.Any("request_labels", job.RequestLabels),
+				slog.Time("queue_time", job.QueueTime),
+				slog.Time("scale_set_assign_time", job.ScaleSetAssignTime),
+				slog.Time("runner_assign_time", job.RunnerAssignTime),
 			)
 			continue
 		}
@@ -1001,6 +1107,9 @@ func (s *v3Scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessag
 		if err := s.processAvailable(ctx, msg.JobAvailableMessages); err != nil {
 			return fmt.Errorf("process JobAvailable: %w", err)
 		}
+	}
+	if err := s.processRESTDemand(ctx, stats); err != nil {
+		return fmt.Errorf("process REST-attested demand: %w", err)
 	}
 	return s.reconcileCapacity(ctx, stats)
 }
