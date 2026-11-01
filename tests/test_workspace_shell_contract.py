@@ -601,6 +601,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
             self.assertIn('client_cert: "/etc/workspace-shell/tunnel/client.crt"', profile)
             self.assertIn('client_key: "/etc/workspace-shell/tunnel/client.key"', profile)
             self.assertIn('api_key: "file:/etc/workspace-shell/tunnel/runtime-key"', profile)
+            self.assertIn('startup_wait_timeout: "15s"', profile)
             self.assertNotIn("sk-", profile)
             self.assertNotIn("channel=main,url=", profile)
 
@@ -801,10 +802,15 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertNotIn('tunnel-client init', source)
         self.assertNotIn('--mcp-server-url "channel=main,url=', source)
         self.assertIn('LOCAL_MTLS_HEALTH=PASS', source)
-        self.assertIn('validate_tunnel_doctor.py', source)
-        self.assertIn('TUNNEL_DOCTOR_GATE=KNOWN_V0_0_18_MTLS_DIAGNOSTIC_LIMITATION', source)
-        self.assertIn('PASS_WITH_KNOWN_V0_0_18_MTLS_DIAGNOSTIC_LIMITATION', source)
+        self.assertIn('PRE_TUNNEL_LOCAL_MTLS_RECHECK=PASS', source)
+        self.assertIn(
+            'SKIPPED_V0_0_18_DOCTOR_MTLS_DIAGNOSTIC_INCOMPATIBILITY',
+            source,
+        )
+        self.assertNotIn('tunnel-client doctor', source)
+        self.assertIn('=== PRE-TUNNEL MCP DIAGNOSTICS: BEGIN ===', source)
         self.assertIn('=== SECURE MCP TUNNEL DIAGNOSTICS: BEGIN ===', source)
+        self.assertIn('workspace-shell-mcp.service', source)
         self.assertIn('TUNNEL_READY=PASS', source)
         self.assertIn('SERVICES_ACTIVE_BOOT_DISABLED=PASS', source)
         self.assertIn('workspace-shell-disable', source)
