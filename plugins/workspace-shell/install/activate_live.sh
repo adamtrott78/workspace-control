@@ -391,9 +391,12 @@ sudo -u workspace-shell-tunnel env HOME=/var/lib/workspace-shell/tunnel \
   --force >/dev/null
 
 PROFILE_PATH="/etc/workspace-shell/tunnel-client-profiles/${PROFILE}.yaml"
-[ -f "$PROFILE_PATH" ] || fail "Workspace Shell tunnel profile was not rendered"
+sudo -u workspace-shell-tunnel test -f "$PROFILE_PATH" \
+  || fail "Workspace Shell tunnel profile was not rendered"
 sudo chown workspace-shell-tunnel:workspace-shell-tunnel "$PROFILE_PATH"
 sudo chmod 0600 "$PROFILE_PATH"
+sudo -u workspace-shell-tunnel test -r "$PROFILE_PATH" \
+  || fail "Workspace Shell tunnel profile is not readable by tunnel identity"
 
 if sudo grep -R --binary-files=without-match -n 'sk-' /etc/workspace-shell/tunnel-client-profiles; then
   fail "tunnel profile unexpectedly contains an inline API key"
