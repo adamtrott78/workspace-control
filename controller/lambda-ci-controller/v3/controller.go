@@ -454,7 +454,16 @@ func (s *v3Scaler) processAvailable(
 		if capacity <= 0 {
 			break
 		}
-		if job == nil || job.RunnerRequestID <= 0 {
+		if job == nil {
+			s.logger.Warn("Ignoring nil JobAvailable")
+			continue
+		}
+		if job.RunnerRequestID <= 0 {
+			s.logger.Warn(
+				"Ignoring JobAvailable without positive runner_request_id",
+				slog.Int64("workflow_run_id", job.WorkflowRunID),
+				slog.String("workflow_ref", job.JobWorkflowRef),
+			)
 			continue
 		}
 		existing, ok, err := s.ledger.Get(job.RunnerRequestID)
@@ -530,47 +539,45 @@ func (s *v3Scaler) processAssigned(
 	jobs []*scaleset.JobAssigned,
 ) error {
 	for _, job := range jobs {
-		if job == nil || job.RunnerRequestID <= 0 {
-			s.logger.Warn("Ignoring JobAssigned without positive runner_request_id")
+		if job == nil {
+			s.logger.Warn("Ignoring nil JobAssigned")
+			continue
+		}
+		if job.RunnerRequestID <= 0 {
+			s.logger.Warn(
+				"Ignoring JobAssigned without positive runner_request_id",
+				slog.Int64("workflow_run_id", job.WorkflowRunID),
+				slog.String("workflow_ref", job.JobWorkflowRef),
+			)
 			continue
 		}
 		record, ok, err := s.ledger.Get(job.RunnerRequestID)
 		if err != nil {
 			return err
 		}
-		if ok {
-			if err := s.verifyPolicyRecord(record); err != nil {
-				return err
-			}
-			if !record.terminal() && record.State == "ADMITTED" {
-				record.State = "ACQUIRED"
-			}
-			record.SchedulerState = "ASSIGNED"
-			record.UpdatedAt = s.now().UTC().Format(time.RFC3339Nano)
-			if err := s.ledger.Put(record); err != nil {
-				return err
-			}
-			continue
-		}
-
-		verified, trusted, reason, err := s.verifier.Verify(ctx, &job.JobMessageBase)
-		if err != nil {
-			return fmt.Errorf("verify JobAssigned structured identity: %w", err)
-		}
-		if !trusted {
+		if !ok {
+			// JobAssigned is lifecycle evidence only. It must never create
+			// scheduler authority because GitHub.com can emit assigned
+			// messages without the request/run IDs needed for exact
+			// provenance. Authority originates only from a verified
+			// JobAvailable followed by successful AcquireJobs.
 			s.logger.Warn(
-				"Ignoring anomalous untrusted JobAssigned",
+				"Ignoring untracked JobAssigned; authority requires verified JobAvailable",
 				slog.Int64("runner_request_id", job.RunnerRequestID),
 				slog.Int64("workflow_run_id", job.WorkflowRunID),
-				slog.String("reason", reason),
+				slog.String("workflow_ref", job.JobWorkflowRef),
 			)
 			continue
 		}
-		record, err = newJobRecord(s.policy, verified, "ACQUIRED", s.now())
-		if err != nil {
+
+		if err := s.verifyPolicyRecord(record); err != nil {
 			return err
 		}
+		if !record.terminal() && record.State == "ADMITTED" {
+			record.State = "ACQUIRED"
+		}
 		record.SchedulerState = "ASSIGNED"
+		record.UpdatedAt = s.now().UTC().Format(time.RFC3339Nano)
 		if err := s.ledger.Put(record); err != nil {
 			return err
 		}
