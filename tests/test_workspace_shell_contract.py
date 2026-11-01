@@ -671,6 +671,18 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn('read -rsp "Runtime key: " RUNTIME_KEY', source)
         self.assertIn('TUNNEL_PROFILE_SECRET_SCAN=PASS', source)
         self.assertIn('render_tunnel_profile.py', source)
+        self.assertIn(
+            'TUNNEL_PROFILE_RENDERER="/opt/workspace-shell/runtime/plugins/workspace-shell/install/render_tunnel_profile.py"',
+            source,
+        )
+        self.assertIn(
+            'sudo -u workspace-shell-tunnel test -r "$TUNNEL_PROFILE_RENDERER"',
+            source,
+        )
+        self.assertNotIn(
+            '"$ROOT/plugins/workspace-shell/install/render_tunnel_profile.py"',
+            source,
+        )
         self.assertIn('--ca-bundle /etc/workspace-shell/tunnel/ca.crt', source)
         self.assertIn('--client-cert /etc/workspace-shell/tunnel/client.crt', source)
         self.assertIn('--client-key /etc/workspace-shell/tunnel/client.key', source)
