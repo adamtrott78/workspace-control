@@ -59,7 +59,9 @@
       "prove arbitrary JobDisplayName content has no effect on admission decision",
       "prove arbitrary candidate SHA/comment-body content has no effect on infrastructure admission",
       "prove JobID empty on JobAvailable remains valid",
-      "prove all stable denies keep supervisor SESSION_ACTIVE"
+      "prove all stable denies keep supervisor SESSION_ACTIVE",
+      "prove GitHub.com zero-ID JobAssigned cannot create or reconstruct scheduler authority",
+      "prove standalone nonzero-ID JobAssigned without a trusted JobAvailable-derived ledger cannot create scheduler authority"
     ],
     "scaleset_state_machine": [
       "initial statistics with zero jobs",
@@ -71,7 +73,11 @@
       "TotalAssignedJobs greater than lifecycle message count",
       "lifecycle arrays truncated while statistics remain authoritative",
       "multiple trusted routes queued in same homogeneous class",
-      "untrusted available job plus trusted available job in same polling cycle"
+      "untrusted available job plus trusted available job in same polling cycle",
+      "listener advertises automatic scheduler max capacity 0 while class policy max_runners remains independently positive",
+      "trusted JobAvailable is verified and explicitly acquired before any physical capacity is provisioned",
+      "after explicit acquisition, later TotalAssignedJobs=1 provisions the already-authorized ledger entry",
+      "zero-ID JobAssigned with TotalAssignedJobs>0 but no trusted ledger fails closed and provisions nothing"
     ],
     "capacity_protocol": [
       "authorized UID RESERVE -> RESERVED -> LAUNCH -> ACCEPTED -> COMPLETED",
