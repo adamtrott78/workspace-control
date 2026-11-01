@@ -474,37 +474,23 @@ sudo chown workspace-shell-tunnel:workspace-shell-tunnel /etc/workspace-shell/tu
 sudo chmod 0600 /etc/workspace-shell/tunnel/runtime-key
 echo "TUNNEL_RUNTIME_KEY_STAGED=PASS"
 
-echo "=== TUNNEL DOCTOR ==="
-DOCTOR_REPORT="$TMP/tunnel-doctor.json"
-DOCTOR_RC=0
-sudo -u workspace-shell-tunnel env HOME=/var/lib/workspace-shell/tunnel \
-  /opt/workspace-shell/bin/tunnel-client doctor \
-  --profile "$PROFILE" \
-  --profile-dir /etc/workspace-shell/tunnel-client-profiles \
-  --json >"$DOCTOR_REPORT" || DOCTOR_RC=$?
-
-DOCTOR_GATE="$(
-  /usr/bin/python3 /opt/workspace-shell/runtime/plugins/workspace-shell/install/validate_tunnel_doctor.py \
-    --report "$DOCTOR_REPORT" \
-    --exit-code "$DOCTOR_RC"
-)" || {
-  echo "=== TUNNEL DOCTOR UNEXPECTED FAILURE ===" >&2
-  cat "$DOCTOR_REPORT" >&2 || true
-  sudo -u workspace-shell-tunnel env HOME=/var/lib/workspace-shell/tunnel \
-    /opt/workspace-shell/bin/tunnel-client doctor \
-    --profile "$PROFILE" \
-    --profile-dir /etc/workspace-shell/tunnel-client-profiles \
-    --explain >&2 || true
-  fail "tunnel-client doctor failed outside the accepted v0.0.18 mTLS diagnostic limitation"
-}
-echo "$DOCTOR_GATE"
-if [ "$DOCTOR_GATE" = "TUNNEL_DOCTOR_GATE=PASS" ]; then
-  TUNNEL_DOCTOR_RECEIPT="PASS"
-elif [ "$DOCTOR_GATE" = "TUNNEL_DOCTOR_GATE=KNOWN_V0_0_18_MTLS_DIAGNOSTIC_LIMITATION" ]; then
-  TUNNEL_DOCTOR_RECEIPT="PASS_WITH_KNOWN_V0_0_18_MTLS_DIAGNOSTIC_LIMITATION"
-else
-  fail "unexpected tunnel doctor gate result"
+echo "=== PRE-TUNNEL LOCAL CONTROL PLANE RECHECK ==="
+if ! sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 2 \
+  --cacert /etc/workspace-shell/tunnel/ca.crt \
+  --cert /etc/workspace-shell/tunnel/client.crt \
+  --key /etc/workspace-shell/tunnel/client.key \
+  https://127.0.0.1:8797/healthz >/dev/null 2>&1; then
+  echo "=== PRE-TUNNEL MCP DIAGNOSTICS: BEGIN ===" >&2
+  sudo systemctl show workspace-shell-mcp.service --no-pager \
+    --property=Id,LoadState,ActiveState,SubState,MainPID,ExecMainCode,ExecMainStatus,Result,User,Group,FragmentPath \
+    2>&1 | head -n 80 >&2 || true
+  sudo journalctl -u workspace-shell-mcp.service -n 120 --no-pager --output=short-iso \
+    2>&1 | tail -n 120 >&2 || true
+  echo "=== PRE-TUNNEL MCP DIAGNOSTICS: END ===" >&2
+  fail "Workspace Shell local mTLS endpoint disappeared before tunnel startup"
 fi
+echo "PRE_TUNNEL_LOCAL_MTLS_RECHECK=PASS"
+TUNNEL_DOCTOR_RECEIPT="SKIPPED_V0_0_18_DOCTOR_MTLS_DIAGNOSTIC_INCOMPATIBILITY"
 
 sudo rm -f /var/lib/workspace-shell/tunnel/health.url
 sudo systemctl start workspace-shell-tunnel.service
@@ -523,11 +509,15 @@ for _ in $(seq 1 200); do
 done
 if [ "$TUNNEL_READY" != "1" ]; then
   echo "=== SECURE MCP TUNNEL DIAGNOSTICS: BEGIN ===" >&2
-  sudo systemctl show workspace-shell-tunnel.service --no-pager \
-    --property=Id,LoadState,ActiveState,SubState,MainPID,ExecMainCode,ExecMainStatus,Result,User,Group,FragmentPath \
-    2>&1 | head -n 80 >&2 || true
-  sudo journalctl -u workspace-shell-tunnel.service -n 120 --no-pager --output=short-iso \
-    2>&1 | tail -n 120 >&2 || true
+  for svc in workspace-shell-tunnel.service workspace-shell-mcp.service; do
+    echo "--- ${svc}: state ---" >&2
+    sudo systemctl show "$svc" --no-pager \
+      --property=Id,LoadState,ActiveState,SubState,MainPID,ExecMainCode,ExecMainStatus,Result,User,Group,FragmentPath \
+      2>&1 | head -n 80 >&2 || true
+    echo "--- ${svc}: journal ---" >&2
+    sudo journalctl -u "$svc" -n 120 --no-pager --output=short-iso \
+      2>&1 | tail -n 120 >&2 || true
+  done
   if sudo test -s /var/lib/workspace-shell/tunnel/health.url; then
     HEALTH_URL="$(sudo cat /var/lib/workspace-shell/tunnel/health.url)"
     echo "TUNNEL_HEALTH_URL=$HEALTH_URL" >&2
