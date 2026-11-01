@@ -19,6 +19,7 @@ ROOT_CODE = PLUGIN / "root"
 HOST_ATTEST = PLUGIN / "install" / "host_attest.py"
 RENDER_INSTALL = PLUGIN / "install" / "render_install.py"
 SEAL_INSTALL = PLUGIN / "install" / "seal_install.py"
+ACTIVATE_LIVE = PLUGIN / "install" / "activate_live.sh"
 SYSUSERS = PLUGIN / "install" / "sysusers.conf"
 FINAL_HOST_ATTEST = PLUGIN / "install" / "evidence" / "lambda-host-attestation.f999b25a.json"
 COMMISSIONING_SOURCE_SHA = "f999b25a866f25c95243cbbd6d1377a799fafb78"
@@ -586,6 +587,55 @@ class WorkspaceShellContractTests(unittest.TestCase):
             "WORKSPACE_SHELL_HOST_ATTESTATION_JSON="
             + json.dumps(attestation, sort_keys=True, separators=(",", ":"))
         )
+
+    def test_live_activation_operator_is_fail_closed_and_boot_disabled(self):
+        proc = subprocess.run(
+            ["bash", "-n", str(ACTIVATE_LIVE)],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        source = ACTIVATE_LIVE.read_text()
+
+        self.assertIn(
+            'SOURCE_HEAD="f999b25a866f25c95243cbbd6d1377a799fafb78"',
+            source,
+        )
+        self.assertIn(
+            'ATTEST_SHA256="d44cda1f6f13f814e093bef9228410f319d504c76cf80ba8e6d2ecbb8d321353"',
+            source,
+        )
+        self.assertIn('OPERATOR_HEAD="$(git -C "$ROOT" rev-parse HEAD)"', source)
+        self.assertIn('--runtime-source-sha "$OPERATOR_HEAD"', source)
+        self.assertIn(
+            'cp -a "$SOURCE" /srv/workspace-shell/workspace-control',
+            source,
+        )
+        self.assertIn(
+            'cp -a "$ROOT/plugins/workspace-shell" /opt/workspace-shell/runtime/plugins/workspace-shell',
+            source,
+        )
+        self.assertIn('Type ACTIVATE_WORKSPACE_SHELL to continue', source)
+        self.assertIn('read -rsp "Runtime key: " RUNTIME_KEY', source)
+        self.assertIn('TUNNEL_PROFILE_SECRET_SCAN=PASS', source)
+        self.assertIn('client-cert=/etc/workspace-shell/tunnel/client.crt', source)
+        self.assertIn('client-key=/etc/workspace-shell/tunnel/client.key', source)
+        self.assertIn('LOCAL_MTLS_HEALTH=PASS', source)
+        self.assertIn('TUNNEL_DOCTOR=PASS', source)
+        self.assertIn('TUNNEL_READY=PASS', source)
+        self.assertIn('SERVICES_ACTIVE_BOOT_DISABLED=PASS', source)
+        self.assertIn('workspace-shell-disable', source)
+        self.assertIn('rollback()', source)
+        self.assertIn('userdel "$user"', source)
+        self.assertIn('groupdel "$group"', source)
+        self.assertIn('COMMITTED=1', source)
+        self.assertNotIn("systemctl enable ", source)
+        self.assertNotIn("sudo bash", source)
+        self.assertNotIn("BEGIN PRIVATE KEY", source)
+        self.assertNotIn("\\\\$" + "{", source)
 
     def test_launcher_duplicates_profile_grammar_and_denies_escape_shapes(self):
         manifest = json.loads((PLUGIN / "config" / "profiles.v1.json").read_text())
