@@ -34,6 +34,7 @@ CONTROLLER_BINARY = reconciler.V3_CONTROLLER_BINARY
 REFRESH_ROOT = pathlib.Path("/var/lib/workspace-ci/v3/controller-refresh")
 ACTIVE_RECEIPT = REFRESH_ROOT / "active.json"
 MIGRATION_ROOT = pathlib.Path("/var/lib/workspace-ci/v3/migration")
+AUTHORITY_CONSUMPTION_ROOT = pathlib.Path("/var/lib/workspace-ci/v3/migration-authority")
 ROOT_UNITS = (
     "workspace-ci-v3-reconciler.service",
     "workspace-ci-v3-provisioner.service",
@@ -149,6 +150,77 @@ def assert_migration_history_rolled_back(
                 f"canary transaction is not rolled back: {path} phase={value.get('phase')}"
             )
     return receipts
+
+def assert_canary_retry_history(
+    target_class: str,
+    *,
+    migration_root: pathlib.Path = MIGRATION_ROOT,
+    authority_root: pathlib.Path = AUTHORITY_CONSUMPTION_ROOT,
+) -> dict[str, int]:
+    """Accept only terminal rolled-back canary history with matched consumption markers."""
+
+    if not target_class:
+        raise ControllerRefreshError("target class required for retry-history verification")
+
+    transaction_ids: set[str] = set()
+    transaction_count = 0
+    if migration_root.exists():
+        for path in sorted(migration_root.glob("*/transaction.json")):
+            value = _load(path)
+            if value.get("mode") != "V3_ONE_CLASS_CANARY_GENERATION_EXCLUSION":
+                continue
+            if value.get("target_runner_class_id") != target_class:
+                continue
+            transaction_count += 1
+            if value.get("phase") != "ROLLED_BACK_LEGACY_RESTORED":
+                raise ControllerRefreshError(
+                    f"target canary transaction is not rolled back: {path} phase={value.get('phase')}"
+                )
+            authorization_id = value.get("authorization_id")
+            if not isinstance(authorization_id, str) or not authorization_id:
+                raise ControllerRefreshError(
+                    f"target canary transaction authorization id invalid: {path}"
+                )
+            if authorization_id in transaction_ids:
+                raise ControllerRefreshError(
+                    f"duplicate target canary transaction authorization id: {authorization_id}"
+                )
+            transaction_ids.add(authorization_id)
+
+    marker_ids: set[str] = set()
+    if authority_root.exists():
+        for path in sorted(authority_root.glob("*.json")):
+            value = _load(path)
+            if value.get("target_runner_class_id") != target_class:
+                continue
+            authorization_id = value.get("authorization_id")
+            if not isinstance(authorization_id, str) or not authorization_id:
+                raise ControllerRefreshError(
+                    f"target canary authority marker authorization id invalid: {path}"
+                )
+            if authorization_id in marker_ids:
+                raise ControllerRefreshError(
+                    f"duplicate target canary authority marker: {authorization_id}"
+                )
+            marker_ids.add(authorization_id)
+
+    unmatched_markers = sorted(marker_ids - transaction_ids)
+    missing_markers = sorted(transaction_ids - marker_ids)
+    if unmatched_markers:
+        raise ControllerRefreshError(
+            "consumed target canary authority lacks rolled-back transaction: "
+            + ", ".join(unmatched_markers)
+        )
+    if missing_markers:
+        raise ControllerRefreshError(
+            "rolled-back target canary transaction lacks consumption marker: "
+            + ", ".join(missing_markers)
+        )
+
+    return {
+        "rolled_back_transactions": transaction_count,
+        "matched_authority_markers": len(marker_ids),
+    }
 
 
 def _active(unit: str) -> bool:
@@ -462,7 +534,18 @@ def main() -> int:
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--verify-active", action="store_true")
     parser.add_argument("--rollback", type=pathlib.Path)
+    parser.add_argument("--verify-retry-history", action="store_true")
+    parser.add_argument("--target-class")
     args = parser.parse_args()
+
+    if args.verify_retry_history:
+        if not args.target_class:
+            raise ControllerRefreshError("--verify-retry-history requires --target-class")
+        result = assert_canary_retry_history(args.target_class)
+        print("V3_CANARY_RETRY_HISTORY=PASS")
+        print(f"ROLLED_BACK_CANARY_TRANSACTIONS={result['rolled_back_transactions']}")
+        print(f"MATCHED_CANARY_AUTHORITY_MARKERS={result['matched_authority_markers']}")
+        return 0
 
     if not args.base_source_head:
         raise ControllerRefreshError("--base-source-head is required")
