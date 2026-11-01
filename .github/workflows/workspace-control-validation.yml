@@ -138,6 +138,11 @@ jobs:
           assert 'PREFLIGHT_NO_CANARY_AUTHORITY_CONSUMPTION=PASS' in source
           assert 'PREFLIGHT_NO_CANARY_TRANSACTION_RECEIPT=PASS' in source
           assert 'PREFLIGHT_NO_CANARY_WORKFLOW_RUN=PASS' in source
+          assert 'gh api --method GET' in source
+          assert '"repos/$REPOSITORY/actions/runs"' in source
+          assert '-f event=workflow_dispatch' in source
+          assert '-f branch=main' in source
+          assert 'gh run list' not in source
           assert 'require_not_enabled workspace-ci-v3-reconciler.service' in source
           assert 'require_not_enabled workspace-ci-v3-provisioner.service' in source
           assert 'timeout 420 gh run watch' in source
