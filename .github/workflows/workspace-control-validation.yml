@@ -247,7 +247,7 @@ jobs:
           grep -F 'REST_ACTIVE_JOB_SET' v3/main.go >/dev/null
           grep -F 'REST_ACTIVE_JOB_SET' v3/controller.go >/dev/null
           grep -F 'Refusing target-label demand because REST attestation is unsafe' v3/controller.go >/dev/null
-          grep -F 'Ignoring untracked JobAssigned; authority requires verified JobAvailable' v3/controller.go >/dev/null
+          grep -F 'Ignoring untracked JobAssigned as standalone authority' v3/controller.go >/dev/null
           grep -F 'assert_canary_retry_history' ../../scripts/lambda_ci_v3_controller_refresh.py >/dev/null
 
       - name: Run full integration contracts
