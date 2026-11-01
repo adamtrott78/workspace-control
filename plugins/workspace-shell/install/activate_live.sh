@@ -122,6 +122,7 @@ git -C "$SOURCE" remote remove origin >/dev/null 2>&1 || true
   || fail "prepared source is dirty"
 
 [ -x "$NODE_ENV_SOURCE/bin/node" ] || fail "accepted Node environment is missing"
+[ -r "$NODE_ENV_SOURCE/ssl/openssl.cnf" ] || fail "accepted Node OpenSSL config is missing"
 [ "$("$NODE_ENV_SOURCE/bin/node" --version)" = "v20.20.2" ] \
   || fail "accepted Node runtime version changed"
 [ -d "$DEPENDENCY_SOURCE" ] || fail "accepted Node dependency source is missing"
