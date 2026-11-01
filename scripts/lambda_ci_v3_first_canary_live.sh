@@ -418,7 +418,7 @@ output_path = pathlib.Path(os.environ["OUTPUT_TOKEN_FILE"])
 
 tokens = []
 for line in status_path.read_text(errors="replace").splitlines():
-    match = re.search(r"(?:^|\\s)Token:\\s*(\\S+)\\s*$", line)
+    match = re.search(r"(?:^|\s)Token:\s*(\S+)\s*$", line)
     if not match:
         continue
     token = match.group(1)
@@ -450,13 +450,21 @@ if [[ ! -s "$TMP/operator-token" ]]; then
 fi
 
 echo "V3_WORKSPACE_CONTROL_GH_TOKEN_VERIFY=BEGIN"
+EXPORTED_TOKEN=""
+IFS= read -r EXPORTED_TOKEN < "$TMP/operator-token" || true
+if [[ -z "$EXPORTED_TOKEN" ]]; then
+  echo "STOP_GH_AUTH_TOKEN_VERIFY_EMPTY"
+  rm -f "$TMP/operator-token"
+  exit 1
+fi
 set +e
 EXPORTED_LOGIN="$(
-  env GH_TOKEN="$(tr -d '\\r\\n' < "$TMP/operator-token")" \
+  env GH_TOKEN="$EXPORTED_TOKEN" \
     gh api user --jq '.login' 2>/dev/null
 )"
 EXPORTED_LOGIN_RC=$?
 set -e
+unset EXPORTED_TOKEN
 if [[ "$EXPORTED_LOGIN_RC" -ne 0 ]]; then
   echo "STOP_GH_AUTH_TOKEN_VERIFY_FAILED rc=$EXPORTED_LOGIN_RC"
   rm -f "$TMP/operator-token"
