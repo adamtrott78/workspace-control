@@ -50,7 +50,7 @@ cleanup_tmp() {
 rollback() {
   set +e
   echo "=== WORKSPACE SHELL ACTIVATION ROLLBACK: BEGIN ==="
-  for svc in "\${SERVICES[@]}"; do
+  for svc in "${SERVICES[@]}"; do
     sudo systemctl stop "$svc" >/dev/null 2>&1 || true
     sudo systemctl disable "$svc" >/dev/null 2>&1 || true
   done
@@ -100,12 +100,14 @@ done
 echo "=== WORKSPACE SHELL LIVE ACTIVATION: PREFLIGHT ==="
 echo "OPERATOR_HEAD=$OPERATOR_HEAD"
 echo "SOURCE_HEAD=$SOURCE_HEAD"
+[ -z "$(git -C "$ROOT" status --porcelain=v1 --untracked-files=normal)" ] \
+  || fail "operator checkout is dirty"
 
 [ -f "$EVIDENCE" ] || fail "final host attestation evidence is missing"
 [ "$(sha256_file "$EVIDENCE")" = "$ATTEST_SHA256" ] \
   || fail "final host attestation digest mismatch"
 
-git -C "$ROOT" cat-file -e "\${SOURCE_HEAD}^{commit}"
+git -C "$ROOT" cat-file -e "${SOURCE_HEAD}^{commit}"
 git clone --no-hardlinks --no-checkout "$ROOT" "$SOURCE" >/dev/null
 git -C "$SOURCE" checkout --detach "$SOURCE_HEAD" >/dev/null
 git -C "$SOURCE" remote remove origin >/dev/null 2>&1 || true
@@ -130,7 +132,7 @@ case "$("$TUNNEL_CLIENT_SOURCE" --version 2>&1 | head -n1)" in
 esac
 
 LIVE_ATTEST="$TMP/live-attestation.json"
-python3 "$SOURCE/plugins/workspace-shell/install/host_attest.py" \
+python3 "$ROOT/plugins/workspace-shell/install/host_attest.py" \
   --source-root "$SOURCE" \
   --source-sha "$SOURCE_HEAD" \
   --strict > "$LIVE_ATTEST"
@@ -164,18 +166,23 @@ for x in d["planned_units"]:
 print("LIVE_PREACTIVATION_ATTESTATION=PASS")
 PY
 
-POLICY_SHA256="$(sha256_file "$SOURCE/architecture/workspace-shell-mcp-authority-v2.json")"
-python3 "$SOURCE/plugins/workspace-shell/install/render_install.py" \
+POLICY_SHA256="$(sha256_file "$ROOT/architecture/workspace-shell-mcp-authority-v2.json")"
+[ "$POLICY_SHA256" = "$(sha256_file "$SOURCE/architecture/workspace-shell-mcp-authority-v2.json")" ] \
+  || fail "accepted policy artifact drifted between target source and runtime head"
+python3 "$ROOT/plugins/workspace-shell/install/render_install.py" \
   --attestation "$EVIDENCE" \
   --output-dir "$BUNDLE" \
   --source-sha "$SOURCE_HEAD" \
+  --runtime-source-sha "$OPERATOR_HEAD" \
   --design-authority-sha "$DESIGN_AUTHORITY_SHA" \
   --policy-artifact-sha256 "$POLICY_SHA256" >/dev/null
 
-python3 - "$BUNDLE/install-manifest.json" <<'PY'
+python3 - "$BUNDLE/install-manifest.json" "$OPERATOR_HEAD" <<'PY'
 import json, sys
 d=json.load(open(sys.argv[1]))
+runtime_head=sys.argv[2]
 assert d["source_sha"] == "f999b25a866f25c95243cbbd6d1377a799fafb78"
+assert d["runtime_source_sha"] == runtime_head
 assert d["attestation_sha256"] == "d44cda1f6f13f814e093bef9228410f319d504c76cf80ba8e6d2ecbb8d321353"
 assert d["activation_sealed"] is False
 assert d["requires_activation_seal"] is True
@@ -189,7 +196,7 @@ assert d["identities"] == {
 print("UNSEALED_INSTALL_BUNDLE=PASS")
 PY
 
-TUNNEL_ID="\${WORKSPACE_SHELL_TUNNEL_ID:-}"
+TUNNEL_ID="${WORKSPACE_SHELL_TUNNEL_ID:-}"
 if [ -z "$TUNNEL_ID" ]; then
   read -rp "Dedicated Workspace Shell tunnel ID: " TUNNEL_ID
 fi
@@ -241,10 +248,12 @@ sudo git -C /srv/workspace-shell/workspace-control remote remove origin >/dev/nu
   || fail "installed source SHA mismatch"
 
 sudo cp -a "$NODE_ENV_SOURCE" /opt/workspace-shell/node
+sudo chown -R root:root /opt/workspace-shell/node
+sudo chmod -R go-w /opt/workspace-shell/node
 [ "$(/opt/workspace-shell/node/bin/node --version)" = "v20.20.2" ] \
   || fail "staged Node runtime failed"
 
-sudo cp -a "$SOURCE/plugins/workspace-shell" /opt/workspace-shell/runtime/plugins/workspace-shell
+sudo cp -a "$ROOT/plugins/workspace-shell" /opt/workspace-shell/runtime/plugins/workspace-shell
 sudo cp -a "$DEPENDENCY_SOURCE" /opt/workspace-shell/runtime/plugins/workspace-shell/node_modules
 sudo chown -R root:root /opt/workspace-shell/runtime
 sudo chmod -R go-w /opt/workspace-shell/runtime
@@ -381,7 +390,7 @@ fi
 echo "TUNNEL_PROFILE_SECRET_SCAN=PASS"
 
 echo "=== SEAL INSTALL BUNDLE WITH PUBLIC CLIENT CERTIFICATE ==="
-sudo python3 "$SOURCE/plugins/workspace-shell/install/seal_install.py" \
+sudo python3 "$ROOT/plugins/workspace-shell/install/seal_install.py" \
   --bundle-dir "$BUNDLE" \
   --tunnel-client-cert /etc/workspace-shell/tunnel/client.crt \
   --openssl-path /usr/bin/openssl >/dev/null
@@ -393,10 +402,10 @@ sudo install -o root -g root -m 0644 "$BUNDLE/install-manifest.json" /etc/worksp
 
 echo "=== INSTALL SYSTEMD UNITS DISABLED-BY-DEFAULT ==="
 for svc in workspace-shell-job-launcher workspace-shell-root-broker workspace-shell-mcp workspace-shell-tunnel; do
-  sudo install -o root -g root -m 0644 "$BUNDLE/\${svc}.service" "/etc/systemd/system/\${svc}.service"
+  sudo install -o root -g root -m 0644 "$BUNDLE/${svc}.service" "/etc/systemd/system/${svc}.service"
 done
 sudo systemctl daemon-reload
-for svc in "\${SERVICES[@]}"; do
+for svc in "${SERVICES[@]}"; do
   sudo systemctl disable "$svc" >/dev/null 2>&1 || true
 done
 
@@ -455,7 +464,7 @@ done
 [ "$TUNNEL_READY" = "1" ] || fail "Secure MCP Tunnel failed readiness"
 echo "TUNNEL_READY=PASS"
 
-for svc in "\${SERVICES[@]}"; do
+for svc in "${SERVICES[@]}"; do
   [ "$(systemctl is-active "$svc")" = "active" ] || fail "$svc is not active"
   ENABLED="$(systemctl is-enabled "$svc" 2>/dev/null || true)"
   [ "$ENABLED" != "enabled" ] || fail "$svc unexpectedly enabled at boot"
@@ -472,6 +481,7 @@ print(json.dumps({
   "schema":"workspace-shell-activation-receipt.v1",
   "timestamp_utc":dt.datetime.now(dt.timezone.utc).isoformat(),
   "operator_head":operator,
+  "runtime_source_head":operator,
   "source_head":source,
   "host_attestation_sha256":attest,
   "install_manifest_sha256":manifest,
