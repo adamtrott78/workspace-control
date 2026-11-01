@@ -62,7 +62,10 @@ esac
 
 BACKUP="$(mktemp /tmp/workspace-shell-job-launcher.prehotfix.XXXXXX.py)"
 trap 'rm -f "$BACKUP"' EXIT
-sudo cp -a "$INSTALLED" "$BACKUP"
+# Keep the temporary rollback copy caller-owned so EXIT cleanup cannot leave
+# a root-owned file behind in /tmp. Rollback reinstalls fixed root metadata.
+sudo cat "$INSTALLED" >"$BACKUP"
+chmod 0600 "$BACKUP"
 
 rollback() {
   rc=$?
