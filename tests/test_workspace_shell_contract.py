@@ -19,6 +19,7 @@ ROOT_CODE = PLUGIN / "root"
 HOST_ATTEST = PLUGIN / "install" / "host_attest.py"
 RENDER_INSTALL = PLUGIN / "install" / "render_install.py"
 SEAL_INSTALL = PLUGIN / "install" / "seal_install.py"
+RENDER_TUNNEL_PROFILE = PLUGIN / "install" / "render_tunnel_profile.py"
 ACTIVATE_LIVE = PLUGIN / "install" / "activate_live.sh"
 SYSUSERS = PLUGIN / "install" / "sysusers.conf"
 FINAL_HOST_ATTEST = PLUGIN / "install" / "evidence" / "lambda-host-attestation.f999b25a.json"
@@ -535,6 +536,43 @@ class WorkspaceShellContractTests(unittest.TestCase):
             self.assertNotEqual(proc.returncode, 0)
             self.assertIn("READY_FOR_INSTALL_PLAN", proc.stderr)
 
+    def test_tunnel_profile_renderer_matches_v0018_schema(self):
+        proc = subprocess.run(
+            [sys.executable, "-m", "py_compile", str(RENDER_TUNNEL_PROFILE)],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(RENDER_TUNNEL_PROFILE),
+                    "--profile", "workspace-shell-production",
+                    "--profile-dir", str(td),
+                    "--tunnel-id", "tunnel_" + "a" * 32,
+                    "--force",
+                ],
+                cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            profile = (td / "workspace-shell-production.yaml").read_text()
+            self.assertIn('ca_bundle: "/etc/workspace-shell/tunnel/ca.crt"', profile)
+            self.assertIn('url: "https://127.0.0.1:8797/mcp"', profile)
+            self.assertIn('client_cert: "/etc/workspace-shell/tunnel/client.crt"', profile)
+            self.assertIn('client_key: "/etc/workspace-shell/tunnel/client.key"', profile)
+            self.assertIn('api_key: "file:/etc/workspace-shell/tunnel/runtime-key"', profile)
+            self.assertNotIn("sk-", profile)
+            self.assertNotIn("channel=main,url=", profile)
+
     def test_live_lambda_host_attestation_when_explicitly_requested(self):
         event_path = os.environ.get("GITHUB_EVENT_PATH")
         if not event_path or not Path(event_path).is_file():
@@ -632,8 +670,12 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn('Type ACTIVATE_WORKSPACE_SHELL to continue', source)
         self.assertIn('read -rsp "Runtime key: " RUNTIME_KEY', source)
         self.assertIn('TUNNEL_PROFILE_SECRET_SCAN=PASS', source)
-        self.assertIn('client-cert=/etc/workspace-shell/tunnel/client.crt', source)
-        self.assertIn('client-key=/etc/workspace-shell/tunnel/client.key', source)
+        self.assertIn('render_tunnel_profile.py', source)
+        self.assertIn('--ca-bundle /etc/workspace-shell/tunnel/ca.crt', source)
+        self.assertIn('--client-cert /etc/workspace-shell/tunnel/client.crt', source)
+        self.assertIn('--client-key /etc/workspace-shell/tunnel/client.key', source)
+        self.assertNotIn('tunnel-client init', source)
+        self.assertNotIn('--mcp-server-url "channel=main,url=', source)
         self.assertIn('LOCAL_MTLS_HEALTH=PASS', source)
         self.assertIn('TUNNEL_DOCTOR=PASS', source)
         self.assertIn('TUNNEL_READY=PASS', source)
