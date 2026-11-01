@@ -665,10 +665,11 @@ func (s *v3Scaler) processAssigned(
 			// JobAssigned is lifecycle evidence only. It must never create
 			// scheduler authority because GitHub.com can emit assigned
 			// messages without the request/run IDs needed for exact
-			// provenance. Authority originates only from a verified
-			// JobAvailable followed by successful AcquireJobs.
+			// provenance. Complete JobAvailable may authorize via AcquireJobs;
+			// identity-incomplete demand is authorized only by separate whole-set
+			// REST attestation in processRESTDemand.
 			s.logger.Warn(
-				"Ignoring untracked JobAssigned; authority requires verified JobAvailable",
+				"Ignoring untracked JobAssigned as standalone authority",
 				slog.Int64("runner_request_id", job.RunnerRequestID),
 				slog.Int64("workflow_run_id", job.WorkflowRunID),
 				slog.String("workflow_ref", job.JobWorkflowRef),
