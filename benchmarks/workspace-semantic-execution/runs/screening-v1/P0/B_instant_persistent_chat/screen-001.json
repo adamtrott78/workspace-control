@@ -54,6 +54,12 @@
         "memory_mode": "disabled_or_temporary_chat",
         "continuity": "persistent_chat"
       }
+    },
+    {
+      "kind": "PROTOCOL_CHECKPOINT_VALIDATED",
+      "source_checkpoint_sha": "c066d731ab535f399d3698ca2cbf1e7cd272ac6e",
+      "validation_run_id": 41525886922,
+      "conclusion": "success"
     }
   ],
   "pending_external": null,
@@ -82,8 +88,9 @@
   },
   "protocol_checkpoint_validation": {
     "run_id": 41525886922,
-    "expected_conclusion": "success",
-    "status": "IN_PROGRESS_AT_SLOT_UPDATE"
+    "run_number": 1761,
+    "conclusion": "success",
+    "status": "VALIDATED"
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-001.json"
