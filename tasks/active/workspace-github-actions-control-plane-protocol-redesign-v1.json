@@ -42,7 +42,7 @@
       "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
       "remote": {
         "branch": "github-actions-control-plane-protocol-redesign-v1",
-        "checkpoint_sha": "40d2004ab58b7027a604f4462ef8f06b1cf7c92a",
+        "checkpoint_sha": "78ae60364f472fd30654dd9018c90c546e3e8836",
         "verified": true
       },
       "local": null,
@@ -79,7 +79,7 @@
       "base_sha": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "d214b20471aac348bd28802596b92f81ee146b76",
+        "checkpoint_sha": "a8f952c7cf964730a01b2dc5c6cd75850912f94f",
         "verified": true
       },
       "local": null,
