@@ -107,5 +107,38 @@
       "root broker/job launcher activation",
       "live Workspace Shell execution"
     ]
+  },
+  "read_only_gitrunner_observability": {
+    "status": "REPOSITORY_CANDIDATE",
+    "purpose": "Permit secret-free, fixed-property systemd state inspection for the Workspace Control GitRunner lane and shared maintenance/v3 root services needed to diagnose queued-job/control-plane incidents without terminal relay.",
+    "allowed_units": [
+      "workspace-ci-controller@workspace-control-cpu.service",
+      "workspace-ci-maintenance-controller.service",
+      "workspace-ci-maintenance.service",
+      "workspace-ci-v3-provisioner.service",
+      "workspace-ci-v3-reconciler.service",
+      "workspace-ci-v3-controller@workspace-control-control-small-v1.service"
+    ],
+    "fixed_properties": [
+      "Id",
+      "LoadState",
+      "ActiveState",
+      "SubState",
+      "MainPID",
+      "User",
+      "Group",
+      "FragmentPath"
+    ],
+    "prohibitions": [
+      "no generic systemctl verb",
+      "no start/stop/restart/enable/disable through workspace_shell.inspect",
+      "no maintenance-socket access",
+      "no workspace-ci-maintenance group membership",
+      "no GitHub or runner credential access",
+      "no arbitrary unit name",
+      "no sibling project controller unit inspection in this v1 expansion"
+    ],
+    "maintenance_receipt_followup": "A later sanitized receipt reader must not solve file access by joining workspace-shell-mcp to the maintenance mutation group; use a dedicated read-only export/broker boundary.",
+    "github_run_cancellation": "Not part of Workspace Shell read authority. Prefer a GitHub/control-plane cancellation surface with repository/run-id binding and no general host credentials."
   }
 }
