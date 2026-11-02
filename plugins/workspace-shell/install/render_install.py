@@ -28,6 +28,12 @@ ALLOWED_UNITS = (
     "workspace-shell-root-broker.service",
     "workspace-shell-mcp.service",
     "workspace-shell-tunnel.service",
+    "workspace-ci-controller@workspace-control-cpu.service",
+    "workspace-ci-maintenance-controller.service",
+    "workspace-ci-maintenance.service",
+    "workspace-ci-v3-provisioner.service",
+    "workspace-ci-v3-reconciler.service",
+    "workspace-ci-v3-controller@workspace-control-control-small-v1.service",
 )
 
 
