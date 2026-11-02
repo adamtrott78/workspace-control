@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 2d9dd4c43373ba55b1042e634e2cb0b4720f8af9
+- Remote checkpoint: 82ab7c3fc0847d45fb9928bafc1a084d5a19c121
 - Remote verified: true
 
 ### PADataset
