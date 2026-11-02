@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "benchmark": "INSTANT_WORKER_DISTRIBUTED_CLAIMS_V1",
+  "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+  "fixture_branch": "instant-worker-distributed-claims-v1-20261101",
+  "invariant": "worker identity and action ownership are established only by successful creation of unique Git refs; existing refs are collisions, never adoptable identities",
+  "worker_slot_branches": {
+    "W1": "instant-worker-distributed-claims-v1-slot-w1",
+    "W2": "instant-worker-distributed-claims-v1-slot-w2",
+    "W3": "instant-worker-distributed-claims-v1-slot-w3",
+    "W4": "instant-worker-distributed-claims-v1-slot-w4"
+  },
+  "action_claim_branches": {
+    "A": "instant-worker-distributed-claims-v1-action-a",
+    "B": "instant-worker-distributed-claims-v1-action-b",
+    "C": "instant-worker-distributed-claims-v1-action-c",
+    "D": "instant-worker-distributed-claims-v1-action-d"
+  },
+  "protocols": {
+    "worker_registration": "try worker slot branches W1→W4; first create_branch success wins; then add immutable worker marker file to that branch and retain resulting registration_commit",
+    "action_claim": "try action claim branches A→D; create each candidate claim branch directly from caller registration_commit; first create_branch success atomically assigns action to that worker",
+    "ownership_resolution": "action claim branch head must be caller registration_commit or a descendant preserving caller worker marker; existing action claim branch belongs to its creator and may never be adopted",
+    "shared_mutable_queue": false,
+    "no_execution": true
+  },
+  "safety": {
+    "modify_main": false,
+    "execute_actions": false,
+    "create_pr": false,
+    "workspace_shell": false,
+    "privileged_execution": false
+  }
+}
