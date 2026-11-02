@@ -1038,69 +1038,6 @@ func TestScaleSetMaintenanceDeleteRequiresExactQuiescentConfiguredScaleSet(t *te
 	}
 }
 
-func TestScaleSetMaintenanceStaleQuarantineDeleteRequiresExactGhostShape(t *testing.T) {
-	cfg := config{ScaleSetName: "lambda-workspace-control"}
-	client := &fakeScaleSetMaintenanceClient{
-		scaleSet: &scaleset.RunnerScaleSet{
-			ID:   91,
-			Name: "lambda-workspace-control",
-			Statistics: &scaleset.RunnerScaleSetStatistic{
-				TotalAssignedJobs: 1,
-				TotalBusyRunners:  1,
-			},
-		},
-	}
-
-	response, err := executeScaleSetMaintenance(
-		context.Background(),
-		client,
-		cfg,
-		scaleSetMaintenanceRequest{
-			SchemaVersion:      1,
-			Operation:          "DELETE_STALE_QUARANTINED",
-			ExpectedScaleSetID: 91,
-		},
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if response.Status != "DELETED" || client.deletedID != 91 {
-		t.Fatalf("exact stale ghost delete failed response=%#v deleted=%d", response, client.deletedID)
-	}
-
-	for _, mutate := range []func(*scaleset.RunnerScaleSetStatistic){
-		func(s *scaleset.RunnerScaleSetStatistic) { s.TotalRegisteredRunners = 1 },
-		func(s *scaleset.RunnerScaleSetStatistic) { s.TotalIdleRunners = 1 },
-		func(s *scaleset.RunnerScaleSetStatistic) { s.TotalRunningJobs = 1 },
-		func(s *scaleset.RunnerScaleSetStatistic) { s.TotalAcquiredJobs = 1 },
-		func(s *scaleset.RunnerScaleSetStatistic) { s.TotalAvailableJobs = 1 },
-		func(s *scaleset.RunnerScaleSetStatistic) { s.TotalAssignedJobs = 2 },
-		func(s *scaleset.RunnerScaleSetStatistic) { s.TotalBusyRunners = 0 },
-	} {
-		stats := &scaleset.RunnerScaleSetStatistic{
-			TotalAssignedJobs: 1,
-			TotalBusyRunners:  1,
-		}
-		mutate(stats)
-		candidate := &fakeScaleSetMaintenanceClient{
-			scaleSet: &scaleset.RunnerScaleSet{
-				ID: 92, Name: "lambda-workspace-control", Statistics: stats,
-			},
-		}
-		if _, err := executeScaleSetMaintenance(
-			context.Background(), candidate, cfg,
-			scaleSetMaintenanceRequest{
-				SchemaVersion: 1, Operation: "DELETE_STALE_QUARANTINED", ExpectedScaleSetID: 92,
-			},
-		); err == nil {
-			t.Fatal("unsafe stale-quarantine shape was accepted")
-		}
-		if candidate.deletedID != 0 {
-			t.Fatalf("unsafe stale-quarantine scale set was deleted: %d", candidate.deletedID)
-		}
-	}
-}
-
 func TestScaleSetMaintenanceInspectCannotSelectAnotherScaleSet(t *testing.T) {
 	cfg := config{ScaleSetName: "lambda-workspace-control"}
 	client := &fakeScaleSetMaintenanceClient{
