@@ -24,25 +24,27 @@ Widen Workspace Shell only enough to diagnose GitRunner/control-plane incidents 
 
 - Intent: mutate
 - Remote branch: workspace-shell-gitrunner-observability-v1
-- Remote checkpoint: 24726e194af7d1dbe379b8c49c5eaf94a39ab606
+- Remote checkpoint: 1ca44e019fed66a55f2b9985d9d04397ba37b668
 - Remote verified: true
 
 ## Next safe action
 
-Run full hosted validation on the final updater candidate. If green, retarget PR #591 back to the accepted Workspace Shell branch and invoke the updater manually on Lambda with the exact validated head; no plugin recreation or recommissioning.
+Start a fresh ChatGPT conversation with GitHub + Heartbeat + Workspace Shell. Recover this task plus the GitRunner task and umbrella semantic-execution task. Use task_id workspace-shell-mcp-v1 for live Workspace Shell inspect calls, then immediately read unit_logs_redacted for the legacy workspace-control controller and maintenance controller and maintenance_receipt for comments 6567987093 and 6567995530. Persist the exact diagnosis to PR #572 / GitRunner task. Do not stop after incident repair: return to umbrella task workspace-semantic-execution-migration-v1 and continue its next_safe_action.
 
 ## Remaining work
 
-- Run exact-head hosted validation for the transactional updater candidate.
-- Retarget PR #591 back to workspace-shell-mcp-v1-current-main after validation.
-- Apply one exact reviewed updater command on Lambda because the currently installed Workspace Shell cannot self-widen its root-owned runtime/config.
-- After live update, inspect the legacy workspace-control controller and maintenance units directly through Workspace Shell.
-- Use the new maintenance receipt/log visibility to finish the GitRunner incident diagnosis.
-- Keep GitRunner v3 activation/canary authority separate.
+- Fresh-chat MCP schema rediscovery for unit_logs_redacted and maintenance_receipt.
+- Read bounded legacy workspace-control controller journal and maintenance controller journal directly through Workspace Shell.
+- Read maintenance receipts for comments 6567987093 and 6567995530.
+- Determine why the legacy controller is ACTIVE/RUNNING while run 41378944347 remains queued with no runner assignment.
+- Record exact root cause and bounded repair/serviceability evidence on GitRunner PR #572.
+- Keep any GitRunner mutation/canary authority in the GitRunner task; observability remains diagnostic.
+- After diagnosis, hand control back to umbrella semantic-execution task rather than treating this incident as the whole program.
 
 ## Blockers / gates
 
-- None.
+- The current ChatGPT conversation cached the pre-update MCP input schema, so it cannot call the newly added unit_logs_redacted or maintenance_receipt operations even though the live server's local MCP tool-schema smoke passed. A fresh chat is required for schema rediscovery.
+- No additional GitRunner canary/cutover authority is implied by this observability task.
 
 ## Fresh-chat initialization
 
