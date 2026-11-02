@@ -237,11 +237,15 @@ function createShellServer() {
           "git_diff_name_status",
           "unit_state",
           "unit_properties_redacted",
+          "unit_logs_redacted",
+          "maintenance_receipt",
           "runtime_inventory",
           "receipt_status",
         ]),
         expected_sha: z.string().regex(/^[0-9a-f]{40}$/).optional(),
         unit: z.string().min(1).max(160).optional(),
+        max_lines: z.number().int().min(1).max(120).optional(),
+        comment_id: z.number().int().positive().optional(),
         receipt_id: z.string().min(8).max(128).optional(),
       },
       outputSchema: { ok: z.boolean() },
@@ -289,6 +293,32 @@ function createShellServer() {
         if (args.operation === "unit_state" || args.operation === "unit_properties_redacted") {
           if (args.target !== "workspace-shell" || !args.unit) fail("INVALID_INSPECT_REQUEST", "unit inspection requires workspace-shell target and unit");
           return okResult({ result: await systemctlShow(args.unit) }, "Workspace Shell unit state returned.");
+        }
+
+        if (args.operation === "unit_logs_redacted") {
+          if (args.target !== "workspace-shell" || !args.unit) fail("INVALID_INSPECT_REQUEST", "unit log inspection requires workspace-shell target and unit");
+          if (!(config.allowed_units ?? []).includes(args.unit)) fail("UNIT_NOT_AUTHORIZED", "unit is not in the root-owned Workspace Shell inspect allowlist");
+          const response = await unixRpc(config.launcher_socket, {
+            schema: "workspace-shell-job-request.v1",
+            request_id: randomUUID(),
+            operation: "inspect_unit_logs",
+            task_id: args.task_id,
+            unit: args.unit,
+            max_lines: args.max_lines ?? 80,
+          }, { timeoutMs: 10000, signal: extra.signal });
+          return okResult({ result: response }, "Workspace Shell unit logs returned.");
+        }
+
+        if (args.operation === "maintenance_receipt") {
+          if (args.target !== "workspace-shell" || !args.comment_id) fail("INVALID_INSPECT_REQUEST", "maintenance receipt inspection requires workspace-shell target and comment_id");
+          const response = await unixRpc(config.launcher_socket, {
+            schema: "workspace-shell-job-request.v1",
+            request_id: randomUUID(),
+            operation: "inspect_maintenance_receipt",
+            task_id: args.task_id,
+            comment_id: args.comment_id,
+          }, { timeoutMs: 10000, signal: extra.signal });
+          return okResult({ result: response }, "Workspace CI maintenance receipt returned.");
         }
 
         if (args.operation === "receipt_status") {
