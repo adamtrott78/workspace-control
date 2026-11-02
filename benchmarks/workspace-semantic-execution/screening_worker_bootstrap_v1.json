@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "bootstrap_id": "resumable-reasoning-screening-worker-v1",
+  "benchmark_id": "workspace-resumable-reasoning-v1",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "purpose": "Bootstrap a clean oracle-unexposed ChatGPT worker into one assigned protocol-screening run using only durable GitHub state.",
+  "repository": "adamtrott78/workspace-control",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "worker_rules": [
+    "Treat the assigned run-state file as authoritative for this screening slot.",
+    "Read only the public fixture, benchmark harness/contract, taxonomy/runset, and the assigned run-state file paths explicitly listed in the run state.",
+    "Do not read any path containing oracle, evaluator_only, evaluator-isolation secret material, any other screening run, PR comments containing evaluator results, or the control-chat transcript.",
+    "Do not use Memory/personal_context, Gmail, Drive, Slack, web search, Workspace Shell, or any connector other than GitHub for the screening run.",
+    "Do not infer or create execution authority. This is fixture-only reasoning.",
+    "When an experiment result is needed, update the assigned run state to WAITING_EXTERNAL with exactly one pending experiment request and stop reasoning. Do not poll.",
+    "After the control evaluator publishes the result into the same run-state file and sets READY_TO_RESUME, resume from durable state only.",
+    "Never invent an experiment result. Every observed result must be copied from a control-published external_result event and retained by exact result hash.",
+    "Terminal COMPLETE requires the control evaluator to publish a passing validator result. The worker may submit a terminal candidate but may not self-validate it.",
+    "Keep context bounded; persist findings/hypotheses/evidence/next action into the assigned state rather than relying on chat history."
+  ],
+  "worker_transition_contract": {
+    "READY": "claim by writing owner/executor identity and status RUNNING",
+    "RUNNING": "reason one bounded quantum; either request one experiment, checkpoint READY_TO_RESUME, decompose if the arm requires it, request justified escalation if permitted, or submit terminal candidate",
+    "WAITING_EXTERNAL": "stop; no model polling",
+    "READY_TO_RESUME": "claim current generation and continue from durable state",
+    "TERMINAL_CANDIDATE": "stop; control evaluator scores it",
+    "COMPLETED": "terminal only after control evaluator records passing validator result",
+    "FAILED": "terminal failure with exact reason/evidence"
+  },
+  "allowed_public_paths": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json"
+  ],
+  "claim_boundary": "Protocol-screening results detect harness/transport/worker-contract defects only. They are not capability-equivalence evidence."
+}
