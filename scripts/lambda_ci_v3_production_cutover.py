@@ -112,8 +112,6 @@ ROUTES: dict[str, dict[str, str]] = {
     },
 }
 
-WORKSPACE_CONTROL_SETUP_GO_SHA = "924ae3a1cded613372ab5595356fb5720e22ba16"
-
 
 class CutoverError(RuntimeError):
     pass
@@ -289,25 +287,6 @@ def _retarget_workflow(
     return rendered.encode("utf-8")
 
 
-def _inject_workspace_control_go_toolchain(raw: bytes) -> bytes:
-    text = raw.decode("utf-8")
-    anchor = "      - name: Run bounded repository validation\n"
-    if text.count(anchor) != 1:
-        raise CutoverError(
-            "workspace-control validation step anchor must occur exactly once"
-        )
-    step = (
-        "      - name: Set up Go 1.26.3 for Lambda controller\n"
-        f"        uses: actions/setup-go@{WORKSPACE_CONTROL_SETUP_GO_SHA}\n"
-        "        with:\n"
-        "          go-version: '1.26.3'\n"
-        "          cache: false\n\n"
-    )
-    if step in text:
-        raise CutoverError("workspace-control Go toolchain step already present")
-    return text.replace(anchor, step + anchor, 1).encode("utf-8")
-
-
 def _route_evidence(
     data: dict[str, Any],
     project_id: str,
@@ -379,8 +358,6 @@ def build_generation(
             legacy_scale_set_name=spec["legacy_scale_set_name"],
             target_scale_set_name=spec["target_scale_set_name"],
         )
-        if route_key == "workspace-control:control-validation":
-            new_raw = _inject_workspace_control_go_toolchain(new_raw)
         new_blob = _git_blob_sha(new_raw)
         trusted["blob_sha"] = new_blob
         evidence["workflow_blob_sha"] = new_blob
