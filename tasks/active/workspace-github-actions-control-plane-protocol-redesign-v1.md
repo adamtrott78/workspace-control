@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 78ae60364f472fd30654dd9018c90c546e3e8836
+- Remote checkpoint: 216cab36a2d71c57d6669fe851e3da3b4a152644
 - Remote verified: true
 
 ### research-engine
@@ -43,7 +43,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Validate the bounded legacy retirement tool at the exact branch head, then execute retirement only for the three production-accepted legacy scale sets: lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu. Require the committed production transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json, all six GitHub scale-set statistics at zero for each retiring set, accepted target v3 scale-set presence, all v2 controllers inactive+disabled, accepted v3 controllers active+enabled, and a root-owned rollback-window receipt persisted before any deletion. Preserve lambda-research-engine and lambda-research-engine-gpu because their replacement v3 classes are not accepted; preserve all v2 bytes/config/state. After the three accepted legacy scale sets are retired and independently verified absent, resume workspace-semantic-execution-migration-v1.
+Execute the validated legacy retirement helper from exact implementation head 216cab36a2d71c57d6669fe851e3da3b4a152644 against committed production transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json. The helper must retire only lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after all six scale-set counters are zero and accepted target v3 scale sets are present; it must persist the root-owned rollback-window receipt before deletion. Preserve both Research legacy scale sets and all v2 bytes/config/state. After PASS, independently verify the three retired names are absent and resume workspace-semantic-execution-migration-v1.
 
 ## Remaining work
 
