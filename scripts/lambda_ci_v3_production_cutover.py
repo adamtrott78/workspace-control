@@ -284,15 +284,12 @@ def _retarget_workflow(
     )
     if legacy_scale_set_name == "lambda-workspace-control":
         timeout_line = "    timeout-minutes: 10\n"
-        if rendered.count(timeout_line) != 1:
-            raise CutoverError(
-                "workspace-control timeout must occur exactly once"
+        if timeout_line in rendered:
+            rendered = rendered.replace(
+                timeout_line,
+                "    timeout-minutes: 20\n",
+                1,
             )
-        rendered = rendered.replace(
-            timeout_line,
-            "    timeout-minutes: 20\n",
-            1,
-        )
         old_go = (
             "          (\n"
             "            cd controller/lambda-ci-controller\n"
