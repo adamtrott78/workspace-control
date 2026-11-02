@@ -479,6 +479,9 @@ func applyRetirement(ctx context.Context, token, sourceHead, productionTransacti
 			targets = append(targets, snap)
 			fmt.Printf("LEGACY_SCALE_SET_DRAINED=%s available=0 acquired=0 assigned=0 running=0 registered=0 busy=0\n", target.LegacyName)
 		}
+		if err := ensureRootPrivateDir(receiptRoot); err != nil {
+			return "", err
+		}
 		id := uuid.NewString()
 		dir := filepath.Join(receiptRoot, id)
 		if err := ensureRootPrivateDir(dir); err != nil {
@@ -582,11 +585,83 @@ func applyRetirement(ctx context.Context, token, sourceHead, productionTransacti
 	return receiptPath, nil
 }
 
+func verifyCompletedRetirement(ctx context.Context, token, sourceHead, productionTransaction, receiptPath string) error {
+	production, productionRaw, err := validateProductionReceipt(productionTransaction)
+	if err != nil {
+		return err
+	}
+	if err := requireSystemdPostCommit(); err != nil {
+		return err
+	}
+
+	var receipt retirementReceipt
+	raw, err := os.ReadFile(receiptPath)
+	if err != nil {
+		return err
+	}
+	info, err := os.Stat(receiptPath)
+	if err != nil {
+		return err
+	}
+	st, ok := info.Sys().(*syscall.Stat_t)
+	if !ok || st.Uid != 0 || st.Gid != 0 || info.Mode().Perm() != 0o600 {
+		return errors.New("verification receipt ownership/mode invalid")
+	}
+	if err := json.Unmarshal(raw, &receipt); err != nil {
+		return err
+	}
+	if receipt.SchemaVersion != 1 || receipt.Mode != mode || receipt.Phase != completedPhase {
+		return fmt.Errorf("retirement receipt is not completed: mode=%s phase=%s", receipt.Mode, receipt.Phase)
+	}
+	if receipt.SourceHead != sourceHead ||
+		receipt.ProductionTransaction != productionTransaction ||
+		receipt.ProductionTransactionSHA256 != sha256Bytes(productionRaw) ||
+		receipt.ProductionGenerationSHA256 != production.ProductionGenerationSHA256 ||
+		receipt.ProductionSourceHead != production.SourceHead ||
+		!reflect.DeepEqual(receipt.AcceptedRunnerClassIDs, acceptedClasses) ||
+		!receipt.PreservedLegacyBytesConfigState ||
+		!reflect.DeepEqual(receipt.PreservedUnacceptedScaleSets, preservedUnacceptedLegacyScaleSets) {
+		return errors.New("completed retirement receipt binding mismatch")
+	}
+	if len(receipt.Targets) != len(retirementTargets) {
+		return errors.New("completed retirement target count mismatch")
+	}
+
+	for _, snap := range receipt.Targets {
+		if !snap.Retired {
+			return fmt.Errorf("retirement receipt contains non-retired target: %s", snap.LegacyName)
+		}
+		client, err := clientFor(snap.RepositoryURL, token, sourceHead)
+		if err != nil {
+			return err
+		}
+		legacy, err := client.GetRunnerScaleSet(ctx, runnerGroupID, snap.LegacyName)
+		if err != nil {
+			return err
+		}
+		if legacy != nil {
+			return fmt.Errorf("retired legacy scale set still exists: %s", snap.LegacyName)
+		}
+		target, err := client.GetRunnerScaleSet(ctx, runnerGroupID, snap.TargetName)
+		if err != nil {
+			return err
+		}
+		if target == nil || target.ID != snap.TargetID || target.Name != snap.TargetName || target.RunnerGroupID != runnerGroupID {
+			return fmt.Errorf("accepted v3 target changed after retirement: %s", snap.TargetName)
+		}
+		fmt.Printf("LEGACY_SCALE_SET_ABSENT=%s\n", snap.LegacyName)
+		fmt.Printf("V3_TARGET_SCALE_SET_PRESENT=%s id=%d\n", snap.TargetName, snap.TargetID)
+	}
+	fmt.Println("RESEARCH_LEGACY_SCALE_SETS_PRESERVED=PASS")
+	return nil
+}
+
 func main() {
 	tokenFile := flag.String("token-file", "", "file containing a GitHub token with Actions scale-set administration access")
 	sourceHead := flag.String("source-head", "", "exact reviewed workspace-control source head")
 	productionTransaction := flag.String("production-transaction", "", "accepted production cutover transaction receipt")
 	resumeReceipt := flag.String("resume-receipt", "", "existing partial retirement receipt to resume")
+	verifyReceipt := flag.String("verify-receipt", "", "completed retirement receipt to verify in a fresh process")
 	flag.Parse()
 
 	if *tokenFile == "" || *sourceHead == "" || *productionTransaction == "" {
@@ -607,6 +682,16 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
 	defer cancel()
+	if *verifyReceipt != "" {
+		if *resumeReceipt != "" {
+			fatalf("--verify-receipt and --resume-receipt are mutually exclusive")
+		}
+		if err := verifyCompletedRetirement(ctx, token, *sourceHead, *productionTransaction, *verifyReceipt); err != nil {
+			fatalf("legacy retirement verification failed: %v", err)
+		}
+		fmt.Println("V3_LEGACY_SCALE_SET_RETIREMENT_VERIFY=PASS")
+		return
+	}
 	receiptPath, err := applyRetirement(ctx, token, *sourceHead, *productionTransaction, *resumeReceipt)
 	if err != nil {
 		if receiptPath != "" {
