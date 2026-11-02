@@ -52,6 +52,17 @@ BASE_MANIFEST = V3_CONFIG_ROOT / "install-manifest.json"
 PROVISIONER_STATE = V3_STATE_ROOT / "provisioner"
 AUTHORITY_MAX_LIFETIME_SECONDS = 30 * 60
 
+ALL_CLASSES = (
+    "workspace-control-control-small-v1",
+    "padataset-cpu-public-v1",
+    "padataset-gpu-single-public-v1",
+    "research-cpu-public-v1",
+    "research-gpu-single-public-v1",
+    "research-gpu-single-runtime-v1",
+    "research-model-single-offline-v1",
+    "research-model-dual-offline-v1",
+    "research-model-dual-public-v1",
+)
 ACCEPTED_CLASSES = (
     "workspace-control-control-small-v1",
     "padataset-cpu-public-v1",
@@ -424,9 +435,7 @@ def build_overlay(
     classes = overlay.get("classes")
     routes = overlay.get("routes")
     legacy = overlay.get("legacy")
-    if not isinstance(classes, dict) or set(classes) != set(
-        compiler.compile_policy(ROOT)["root_projection"]["runner_classes"]
-    ):
+    if not isinstance(classes, dict) or set(classes) != set(ALL_CLASSES):
         raise CutoverError("installed deployment overlay class set drift")
     if not isinstance(routes, dict) or set(ROUTES) - set(routes):
         raise CutoverError("installed deployment overlay route set drift")
@@ -666,6 +675,50 @@ def _consume_authority(
     return marker
 
 
+def _assert_no_in_progress_transaction(
+    transaction_root: pathlib.Path,
+) -> None:
+    terminal = {
+        "ROLLED_BACK_LEGACY_RESTORED",
+        "COMMITTED_V3_PRODUCTION",
+    }
+    active: list[str] = []
+    for path in sorted(transaction_root.glob("*/transaction.json")):
+        try:
+            value = _load(path)
+        except (OSError, json.JSONDecodeError, CutoverError):
+            active.append(f"{path}:UNREADABLE")
+            continue
+        phase = value.get("phase")
+        if phase not in terminal:
+            active.append(f"{path}:{phase}")
+    if active:
+        raise CutoverError(
+            "nonterminal migration transaction already exists: "
+            + ", ".join(active)
+        )
+
+
+def _assert_pre_cutover_boot_state(
+    systemd: Systemd,
+    root_policy: dict[str, Any],
+) -> None:
+    for unit in migration.v3_controller_units(root_policy):
+        if systemd.enabled(unit):
+            raise CutoverError(
+                f"v3 class controller is boot-enabled before cutover: {unit}"
+            )
+    for unit in ROOT_UNITS:
+        if systemd.enabled(unit):
+            raise CutoverError(
+                f"v3 root service is boot-enabled before cutover: {unit}"
+            )
+    if systemd.enabled(migration.RESEARCH_GPU_V2_UNIT):
+        raise CutoverError(
+            "legacy Research GPU containment is boot-enabled"
+        )
+
+
 def _assert_root_and_containment(
     systemd: Systemd,
     root_policy: dict[str, Any],
@@ -814,6 +867,10 @@ def prepare(
         state_root=provisioner_state_root,
     )
     _validate_private_dir(transaction_root, "production transaction root")
+    _assert_no_in_progress_transaction(transaction_root)
+    _assert_pre_cutover_boot_state(systemd, installed_root)
+    if PRODUCTION_OVERRIDE.exists():
+        raise CutoverError("production cutover override already exists")
     marker = _consume_authority(
         authority,
         authority_raw,
@@ -874,8 +931,6 @@ def prepare(
     }
     if prestate["v2_active"].get(migration.RESEARCH_GPU_V2_UNIT):
         raise CutoverError("Research GPU containment drifted during prestate")
-    if PRODUCTION_OVERRIDE.exists():
-        raise CutoverError("production cutover override already exists")
 
     receipt = {
         "schema_version": 1,
@@ -1075,6 +1130,28 @@ def _validate_validation_confirmation(
             raise CutoverError(f"{route_key}: validation result invalid")
         if row.get("conclusion") != "success":
             raise CutoverError(f"{route_key}: production validation did not succeed")
+        expected_binding = receipt["workflow_bindings"][route_key]
+        expected_route = ROUTES[route_key]
+        if row.get("workflow_blob_sha") != expected_binding["new_blob_sha"]:
+            raise CutoverError(
+                f"{route_key}: validation workflow blob mismatch"
+            )
+        if row.get("runner_class_id") != expected_route["runner_class_id"]:
+            raise CutoverError(
+                f"{route_key}: validation runner class mismatch"
+            )
+        if row.get("scale_set_name") != expected_route["target_scale_set_name"]:
+            raise CutoverError(
+                f"{route_key}: validation scale set mismatch"
+            )
+        runner_name = row.get("runner_name")
+        expected_prefix = expected_route["target_scale_set_name"] + "-"
+        if not isinstance(runner_name, str) or not runner_name.startswith(
+            expected_prefix
+        ):
+            raise CutoverError(
+                f"{route_key}: validation runner identity mismatch"
+            )
         for field in ("run_id", "job_id"):
             value = row.get(field)
             if not isinstance(value, int) or value <= 0:
@@ -1119,12 +1196,22 @@ def commit(
     base_manifest = _load(BASE_MANIFEST)
     base_manifest_raw = BASE_MANIFEST.read_bytes()
 
+    # All v2 controllers remain stopped after generation cutover.  Accepted
+    # legacy lanes are logically retired; Research CPU remains merely inactive
+    # and separately gated, while Research GPU remains explicitly contained.
     for unit in migration.v2_controller_units(registry):
         systemd.disable(unit)
+    if any(systemd.enabled(unit) for unit in migration.v2_controller_units(registry)):
+        raise CutoverError("v2 controller remained boot-enabled at commit")
     for unit in ROOT_UNITS:
         systemd.enable(unit)
     for unit in ACCEPTED_V3_UNITS:
         systemd.enable(unit)
+    for unit in migration.v3_controller_units(installed_root):
+        if unit not in ACCEPTED_V3_UNITS and systemd.enabled(unit):
+            raise CutoverError(
+                f"non-selected v3 controller is boot-enabled: {unit}"
+            )
 
     _atomic_write(
         V3_CONFIG_ROOT / "deployment-overlay.json",
