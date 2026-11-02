@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "extension_id": "media_localization",
+  "version": "0.1",
+  "owner_repository": "synthetic-fixture",
+  "compatible_core_version": "workspace-semantic-execution-core-v0.1",
+  "source_of_truth_boundary": {
+    "authoritative_sources": [
+      "source audio/video asset",
+      "owner-approved source transcript",
+      "owner-approved terminology glossary"
+    ],
+    "projection_authority": "NON_AUTHORITATIVE_REBUILDABLE",
+    "rule": "Localization assertions and generated captions may be revised or rebuilt; they do not replace source media/transcript authority."
+  },
+  "type_definitions": [
+    {
+      "name": "media_localization:MediaAsset",
+      "layer": "intent_and_work",
+      "description": "Source media being localized."
+    },
+    {
+      "name": "media_localization:TranscriptSegment",
+      "layer": "epistemic",
+      "description": "Time-bounded source-language transcript unit."
+    },
+    {
+      "name": "media_localization:SpeakerTurn",
+      "layer": "epistemic",
+      "description": "Speaker attribution over one or more segments."
+    },
+    {
+      "name": "media_localization:TerminologyConstraint",
+      "layer": "intent_and_work",
+      "description": "Required translation/localization terminology."
+    },
+    {
+      "name": "media_localization:TranslationUnit",
+      "layer": "intent_and_work",
+      "description": "Candidate localized text for a source segment."
+    },
+    {
+      "name": "media_localization:CaptionCue",
+      "layer": "intent_and_work",
+      "description": "Rendered subtitle/caption cue with timing constraints."
+    },
+    {
+      "name": "media_localization:LocalizationFinding",
+      "layer": "epistemic",
+      "description": "QA finding about meaning, timing, speaker, or terminology."
+    }
+  ],
+  "relation_definitions": [
+    {
+      "name": "media_localization:translates_segment",
+      "subject": "media_localization:TranslationUnit",
+      "object": "media_localization:TranscriptSegment"
+    },
+    {
+      "name": "media_localization:spoken_by",
+      "subject": "media_localization:TranscriptSegment",
+      "object": "media_localization:SpeakerTurn"
+    },
+    {
+      "name": "media_localization:constrained_by_term",
+      "subject": "media_localization:TranslationUnit",
+      "object": "media_localization:TerminologyConstraint"
+    },
+    {
+      "name": "media_localization:rendered_as_cue",
+      "subject": "media_localization:TranslationUnit",
+      "object": "media_localization:CaptionCue"
+    },
+    {
+      "name": "media_localization:qa_finding_on",
+      "subject": "media_localization:LocalizationFinding",
+      "object": "media_localization:CaptionCue"
+    }
+  ],
+  "validation_contract": {
+    "validators": [
+      "all source segments have exact source provenance",
+      "translation units preserve required terminology constraints",
+      "caption timings do not overlap illegally and remain within source media duration",
+      "speaker attribution remains traceable to source evidence",
+      "terminal artifact has zero unresolved HIGH-severity localization findings"
+    ],
+    "terminal_authority": "DOMAIN_VALIDATION_ONLY_NO_EXECUTION_AUTHORITY"
+  },
+  "migration_policy": {
+    "mode": "projection_only",
+    "rollback": "delete/rebuild extension projection; authoritative source media/transcript remains unchanged",
+    "core_kernel_change_allowed": false,
+    "fallback_guessing_allowed": false
+  },
+  "authority_effects": {
+    "creates_permission": false,
+    "removes_prohibition": false,
+    "satisfies_review_requirement": false,
+    "widens_authority": false,
+    "guesses_unknown_extension_as_executable": false
+  },
+  "workflow_projection": {
+    "workflow_id": "synthetic-media-localization-qa-v1",
+    "owner": "synthetic-fixture",
+    "domain_extension": "media_localization",
+    "semantic_inputs": [
+      "media_localization:MediaAsset",
+      "media_localization:TranscriptSegment",
+      "media_localization:TerminologyConstraint"
+    ],
+    "stages": [
+      {
+        "id": "segment",
+        "produces": [
+          "media_localization:TranscriptSegment",
+          "media_localization:SpeakerTurn"
+        ]
+      },
+      {
+        "id": "translate",
+        "depends_on": [
+          "segment"
+        ],
+        "produces": [
+          "media_localization:TranslationUnit"
+        ]
+      },
+      {
+        "id": "cue",
+        "depends_on": [
+          "translate"
+        ],
+        "produces": [
+          "media_localization:CaptionCue"
+        ]
+      },
+      {
+        "id": "qa",
+        "depends_on": [
+          "cue"
+        ],
+        "produces": [
+          "media_localization:LocalizationFinding"
+        ]
+      },
+      {
+        "id": "revise",
+        "depends_on": [
+          "qa"
+        ],
+        "recursive": true,
+        "produces": [
+          "media_localization:TranslationUnit",
+          "media_localization:CaptionCue"
+        ]
+      }
+    ],
+    "stage_transition_conditions": [
+      "translate requires source segments and terminology constraints",
+      "cue requires translation units",
+      "qa requires generated cues",
+      "revise executes only when QA findings remain unresolved",
+      "complete requires all terminal validators"
+    ],
+    "required_capabilities": [
+      "source-read",
+      "language-reasoning",
+      "timing-validation",
+      "artifact-generation"
+    ],
+    "reasoning_requirements": [
+      {
+        "stage": "translate",
+        "class": "MODERATE"
+      },
+      {
+        "stage": "qa",
+        "class": "MODERATE"
+      },
+      {
+        "stage": "revise",
+        "class": "MODERATE"
+      }
+    ],
+    "artifact_or_result_roles": [
+      "localized caption artifact",
+      "QA findings",
+      "validation receipt"
+    ],
+    "validators": [
+      "source provenance completeness",
+      "terminology constraint satisfaction",
+      "caption timing invariant",
+      "zero unresolved HIGH-severity findings"
+    ],
+    "authority_refs": [],
+    "terminal_conditions": [
+      "all validators pass",
+      "no unresolved HIGH-severity findings"
+    ],
+    "recursive_expansion_points": [
+      "revise per failed QA finding"
+    ]
+  }
+}
