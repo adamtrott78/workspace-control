@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "status": "FIXTURE_MATRIX_IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION_AND_CLEAN_EXECUTION",
+  "benchmark_id": "workspace-resumable-reasoning-v1",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "frozen_inputs": {
+    "taxonomy": {
+      "path": "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json",
+      "blob_sha": "1d3fe351a7e1de5b3963add2ef14e2258a03f67a"
+    },
+    "harness": {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+      "blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2"
+    },
+    "fixture_matrix": {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
+      "blob_sha": "9a19bb1edba960cbb938a38ecff27f25ebd4e5e3"
+    }
+  },
+  "execution_stages": [
+    {
+      "id": "protocol_screening",
+      "purpose": "Catch worker-packet, wait/wake, evaluator, state-persistence, and fixture-contract defects before expensive replication.",
+      "runs_per_arm_fixture": 1,
+      "arms": [
+        "A_frontier_long_horizon",
+        "B_instant_persistent_chat",
+        "C_instant_stateless_resume",
+        "D_instant_decompose_critic",
+        "E_hybrid_escalation"
+      ],
+      "phenotypes": [
+        "P0_easy_control",
+        "P1_horizon_heavy_decomposable",
+        "P2_reasoning_heavy_coupled",
+        "P3_mixed_long_hard"
+      ],
+      "claim_bearing": false,
+      "freeze_rule": "Any fixture/prompt/harness/protocol change after screening invalidates screening comparability and requires a fresh screening pass."
+    },
+    {
+      "id": "scored_replicates",
+      "purpose": "Estimate validated quality, reliability, routing behavior, and resource use under a frozen protocol.",
+      "minimum_independent_replicates_per_selected_arm_fixture": 3,
+      "claim_bearing": true,
+      "prerequisite": "protocol_screening completes with no hard-gate failure and no protocol changes pending.",
+      "comparison_plan": [
+        {
+          "question": "Q1_horizon_externalization",
+          "pairs": [
+            [
+              "B_instant_persistent_chat",
+              "C_instant_stateless_resume"
+            ]
+          ],
+          "phenotypes": [
+            "P0_easy_control",
+            "P1_horizon_heavy_decomposable",
+            "P2_reasoning_heavy_coupled",
+            "P3_mixed_long_hard"
+          ]
+        },
+        {
+          "question": "Q2_decomposition_effect",
+          "pairs": [
+            [
+              "C_instant_stateless_resume",
+              "D_instant_decompose_critic"
+            ]
+          ],
+          "phenotypes": [
+            "P1_horizon_heavy_decomposable",
+            "P3_mixed_long_hard"
+          ]
+        },
+        {
+          "question": "Q3_intrinsic_reasoning_boundary",
+          "pairs": [
+            [
+              "D_instant_decompose_critic",
+              "A_frontier_long_horizon"
+            ]
+          ],
+          "phenotypes": [
+            "P2_reasoning_heavy_coupled",
+            "P3_mixed_long_hard"
+          ],
+          "comparison_unit": "matched residual after reasonable decomposition"
+        },
+        {
+          "question": "Q5_escalation_calibration",
+          "pairs": [
+            [
+              "D_instant_decompose_critic",
+              "E_hybrid_escalation"
+            ]
+          ],
+          "phenotypes": [
+            "P0_easy_control",
+            "P1_horizon_heavy_decomposable",
+            "P2_reasoning_heavy_coupled",
+            "P3_mixed_long_hard"
+          ]
+        }
+      ]
+    }
+  ],
+  "worker_isolation": {
+    "clean_oracle_unexposed_session_required": true,
+    "control_authoring_chat_eligible": false,
+    "allowed_inputs": [
+      "selected public fixture",
+      "current durable run state",
+      "bounded context packet",
+      "exact evidence refs named by run state"
+    ],
+    "forbidden_inputs": [
+      "any evaluator oracle",
+      "full prior control-chat transcript",
+      "other arms' terminal answers",
+      "unbounded repository dump"
+    ],
+    "worker_repository_read_rule": "Workers may read only benchmark paths explicitly named by their run packet; evaluator/oracle paths are excluded."
+  },
+  "state_path_template": "benchmarks/workspace-semantic-execution/runs/matrix-v1/{phenotype}/{arm}/{replicate_id}.json",
+  "required_run_identity": [
+    "run_id",
+    "runset_id",
+    "phenotype",
+    "arm",
+    "replicate_id",
+    "fixture_id",
+    "fixture_blob_sha",
+    "harness_blob_sha",
+    "source_checkpoint_sha",
+    "generation",
+    "owner",
+    "executor_identity",
+    "status",
+    "invocations",
+    "events",
+    "validator_results",
+    "metrics"
+  ],
+  "hard_gates": [
+    "zero oracle exposure",
+    "zero execution-authority/provenance escape",
+    "zero manual state relay",
+    "zero stale-generation completion",
+    "zero model polling while WAITING_EXTERNAL",
+    "objective terminal validator required for COMPLETE",
+    "frontier escalation requires lower-tier evidence and explicit residual reason"
+  ],
+  "analysis_order": [
+    "hard-gate eligibility",
+    "objective quality",
+    "reliability across replicates",
+    "routing/decomposition/escalation correctness",
+    "context/work quanta",
+    "frontier/local/hosted resource use",
+    "wall-clock excluding deliberate external waits"
+  ],
+  "claim_limits": [
+    "Static synthetic research_iterate fixtures cannot establish workspace-wide executor equivalence.",
+    "P0-P3 matrix can establish phenotype-specific comparative behavior under the frozen harness.",
+    "Broader claims require architecture_diagnosis, artifact_revision, software_debug_repair, and unseen-workflow extension suites.",
+    "Stronger frontier-equivalence claims require hidden ephemeral or externally blinded evaluator isolation."
+  ]
+}
