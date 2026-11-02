@@ -47,7 +47,7 @@
       "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "82ab7c3fc0847d45fb9928bafc1a084d5a19c121",
+        "checkpoint_sha": "b3f9acd8d32a913d33bbac017378ef7a92c0ff08",
         "verified": true
       },
       "local": null,
@@ -305,9 +305,19 @@
             "Fresh replacement slot screening-v1-P0-B-002 was created at 2d9dd4c43373ba55b1042e634e2cb0b4720f8af9.",
             "Bootstrap regression coverage was corrected to preserve the contaminated predecessor and validate the active replacement slot. Exact implementation head 82ab7c3fc0847d45fb9928bafc1a084d5a19c121 passed Workspace Control Validation 41529185760 / #1774 SUCCESS."
           ]
+        },
+        {
+          "check": "Supplementary GPT-6 Instant screening arm",
+          "result": "PASS",
+          "evidence": [
+            "The user's accidental GPT-6 Instant launch did not mutate the GPT-5.6 screen-002 slot and therefore required no rollback.",
+            "A distinct supplementary arm B6_gpt6_instant_persistent_chat was added instead of changing the primary B arm.",
+            "Fresh P0 GPT-6 Instant slot screening-v1-P0-B6-001 is durable and READY.",
+            "Exact implementation head b3f9acd8d32a913d33bbac017378ef7a92c0ff08 passed Workspace Control Validation 41530095255 / #1779 SUCCESS."
+          ]
         }
       ],
-      "resume_condition": "Launch screening-v1-P0-B-002 from a truly fresh Temporary Chat (preferred) or Memory-disabled ChatGPT Instant session. Do not branch from this control conversation or any prior benchmark chat. If it reaches WAITING_EXTERNAL or TERMINAL_CANDIDATE, service the evaluator transition from the control chat."
+      "resume_condition": "Either launch the primary GPT-5.6 Sol / Instant P0 slot screen-002 or the supplementary GPT-6 / Instant P0 slot screening-v1-P0-B6-001 from a truly fresh Temporary/Memory-off chat. Keep them separate; do not reuse one slot for the other executor."
     },
     {
       "id": "semantic_core_and_extension_contract",
@@ -967,7 +977,7 @@
     "Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated."
   ],
   "remaining_work": [
-    "Launch screening-v1-P0-B-002 in a truly fresh Temporary/Memory-off ChatGPT Instant chat with GitHub only; do not branch from an existing benchmark/control chat. Service its WAITING_EXTERNAL / TERMINAL_CANDIDATE transitions from this control chat.",
+    "Launch either (or both, in separate fresh chats) the primary GPT-5.6 Sol / Instant P0 slot screen-002 and the supplementary GPT-6 / Instant P0 slot screening-v1-P0-B6-001. Never reuse a slot across executor identities.",
     "After the first P0×Instant-persistent transport smoke completes cleanly, instantiate and execute the remaining non-claim-bearing A-E × P0-P3 protocol-screening slots. Any protocol change invalidates prior screening comparability and requires re-screening.",
     "Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.",
     "After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.",
@@ -981,7 +991,7 @@
     "Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.",
     "Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation."
   ],
-  "next_safe_action": "USER-ONLY CLEAN SESSION RETRY: open a brand-new Temporary Chat in ChatGPT Instant (do not branch from this conversation or reuse the contaminated worker chat), make GitHub available, and send only the canonical navigation message for assigned run-state benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json. The predecessor screen-001 is durably preserved as a successful fail-closed contamination test. Once screen-002 writes WAITING_EXTERNAL or TERMINAL_CANDIDATE, this control chat can continue directly from GitHub.",
+  "next_safe_action": "USER-ONLY CLEAN SESSION LAUNCH: choose one executor and use the matching fresh slot. For GPT-5.6 Sol / Instant, use benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json. For GPT-6 / Instant, use benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json. Open a brand-new Temporary Chat (or otherwise Memory-disabled chat), make GitHub available, and send only the canonical navigation message for that exact slot. Do not branch from this conversation or reuse the prior GPT-6 chat. Once either slot reaches WAITING_EXTERNAL or TERMINAL_CANDIDATE, this control chat can service it directly from GitHub.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
   "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion.\\n\\n2026-11-02 GITRUNNER P0 DEPENDENCY CLEARED: workspace-github-actions-control-plane-protocol-redesign-v1 completed the accepted production scope. Production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json is committed; workspace-control, PADataset CPU, and PADataset GPU production validations all passed. Validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 then retired lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after zero-work/zero-runner proof. Root-owned rollback receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was written before deletion, and fresh-process verification proved all three legacy names absent while accepted v3 targets remain. Research legacy scale sets and v2 bytes/config/state remain preserved pending separate authority. Resume resumable_reasoning_benchmark immediately; GitRunner is no longer the umbrella blocker."
