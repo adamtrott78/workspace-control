@@ -129,6 +129,34 @@ class MaintenanceControllerTests(unittest.TestCase):
         )
         self.assertEqual(requiesce["reset_generation"], generation)
 
+    def test_github_time_parser_accepts_go_rfc3339_nanoseconds(self):
+        observed = controller._parse_github_time(
+            "2026-11-01T22:20:58.365802851Z",
+            "quarantine observed_at",
+        )
+        self.assertEqual(
+            observed.isoformat(),
+            "2026-11-01T22:20:58.365802+00:00",
+        )
+
+        offset = controller._parse_github_time(
+            "2026-11-01T22:20:58.123456789-05:00",
+            "quarantine observed_at",
+        )
+        self.assertEqual(
+            offset.isoformat(),
+            "2026-11-01T22:20:58.123456-05:00",
+        )
+
+        with self.assertRaisesRegex(
+            controller.MaintenanceControllerError,
+            "timestamp is invalid",
+        ):
+            controller._parse_github_time(
+                "2026-11-01T22:20:58.not-a-fractionZ",
+                "quarantine observed_at",
+            )
+
     def test_replacement_run_gate_blocks_new_nonterminal_pilot_runs(self):
         command = reset_command()
         cutoff = "2026-10-27T01:00:00Z"
