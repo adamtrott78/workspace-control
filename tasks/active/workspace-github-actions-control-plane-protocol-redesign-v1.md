@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: e5a44edfd22a62b05cf730cf918b6e8aa7d534a2
+- Remote checkpoint: dce2327105a886cca78473dbec355c9e6b3610bc
 - Remote verified: true
 
 ### research-engine
@@ -43,20 +43,21 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-PADataset CPU retry is safe after manual-stop recovery. Transaction b899379d-7e33-4b28-90db-10fbbcc8d24b was explicitly rolled back with V3_CANARY_ROLLBACK=PASS; GitHub run 41415414390 is completed/cancelled. Independent post-recovery attestation: v3 reconciler active/exited, v3 provisioner active/running, workspace-control v2 CPU active/running, PADataset v2 CPU diagnose 6573085129 PASS active/running with no active project units/reset/recovery conflict, Research GPU diagnose 6573086034 PASS inactive/dead+disabled with no active/pending/reset conflict. The queueing root cause is fixed at e5a44edfd22a62b05cf730cf918b6e8aa7d534a2 / Validation 41416385648: the canary preflight previously hardcoded the target scale-set repository to workspace-control; it now accepts an explicit target URL and the PADataset operator binds it to https://github.com/adamtrott78/PADataset. Next safe action: rerun the bounded PADataset CPU canary from the exact validated durable head after this recovery checkpoint is synced; retry-history must match both prior rolled-back transactions and mint a new authority.
+PADataset CPU stale-v3 restart residue has been explicitly extinguished with the hardened rollback helper. The prior transaction receipt b899379d-7e33-4b28-90db-10fbbcc8d24b was replayed through the hardened helper and returned V3_CANARY_ROLLBACK=PASS / STALE_V3_CONTROLLER_RECOVERY=PASS. Independent post-recovery evidence: roots healthy (reconciler active/exited, provisioner active/running), workspace-control v2 CPU active/running, PADataset v2 CPU diagnose 6573255183 PASS active/running with no active project units/reset/recovery conflict, Research GPU diagnose 6573256344 PASS inactive/dead+disabled with no active/pending/reset/recovery conflict. Rollback race hardening is at 2af7c8bba198b5b0e58ede6f8d34d0b64c8ed0af and the operator pins that hardened helper at dce2327105a886cca78473dbec355c9e6b3610bc; Validation 41417808454 SUCCESS. The PADataset operator also retains the explicit target repository fix, so its preflight must attest V3_SCALE_SET_TARGET_URL=https://github.com/adamtrott78/PADataset. Next safe action: one fresh-authority PADataset CPU canary retry from the exact validated durable head after this task-state sync. Retry-history must recognize both prior rolled-back CPU transactions and mint a new authority.
 
 ## Remaining work
 
-- Rerun `scripts/lambda_ci_v3_padataset_cpu_canary_live.sh` once from the exact clean validated durable head containing e5a44edfd22a62b05cf730cf918b6e8aa7d534a2.
-- Require preflight output to attest `V3_SCALE_SET_TARGET_URL=https://github.com/adamtrott78/PADataset` and a PADataset target scale set before authority creation.
-- After terminal CPU canary success and rollback, independently attest roots, v3 class inactivity, zero v3 residue, exact v2 restoration, and Research GPU containment; then record acceptance.
-- Then stage/authorize/execute padataset-gpu-single-public-v1 under its own fresh authority.
-- After PADataset CPU+GPU acceptance, execute controlled production v3 cutover and v2 retirement, then resume workspace-semantic-execution-migration-v1 umbrella work.
+- Rerun `scripts/lambda_ci_v3_padataset_cpu_canary_live.sh` once from the exact clean validated durable head after task-state sync.
+- Require retry-history to report both prior rolled-back target transactions and matched authority markers; require all class preflights inactive with ActiveState/SubState checks and require `V3_SCALE_SET_TARGET_URL=https://github.com/adamtrott78/PADataset` before authority creation.
+- Allow the canary to reach terminal completion without manual interruption. The hardened rollback helper must unconditionally stop the target class on every rollback, cancelling any pending Restart=on-failure job.
+- After CPU canary success and generation-exclusion rollback, independently attest roots, v3 class inactivity as far as authorized inspection permits, zero v3 residue, exact v2 restoration, and Research GPU containment; then record CPU acceptance.
+- Then stage/authorize/execute padataset-gpu-single-public-v1 under its own fresh authority, followed by controlled production v3 cutover/v2 retirement and resumption of the semantic execution umbrella task.
 
 ## Blockers / gates
 
-- CPU canary remains unaccepted; both prior live attempts are cancelled historical runs.
-- Every new CPU retry must pass retry-history and mint a fresh ACTIVATE_ONE_V3_CANARY authority; no consumed authority may be reused.
+- CPU canary remains unaccepted; all previous live CPU attempts are historical/cancelled or pre-authority failures.
+- Every retry must pass retry-history and mint a fresh ACTIVATE_ONE_V3_CANARY authority; no prior authority may be reused.
+- Workspace Shell cannot directly inspect the PADataset v3 class unit because it is not in the fixed unit allowlist; the hardened rollback was therefore verified by its exact receipt result plus restored v2 state, and the next operator preflight must independently prove all v3 class units inactive/non-restarting before authority creation.
 - Research CPU remains separately gated; all Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT.
 
 ## Fresh-chat initialization
