@@ -43,21 +43,20 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-FIRST finish the current legacy workspace-control lane incident diagnosis using the now-live Workspace Shell observability surface from PR #591. Workspace Shell v1 acceptance is complete and the observability updater at PR #591 head 1ca44e019fed66a55f2b9985d9d04397ba37b668 passed live. In a fresh ChatGPT conversation, use the new unit_logs_redacted and maintenance_receipt operations to read the legacy workspace-control controller/maintenance evidence for queued run 41378944347 and maintenance comments 6567987093 / 6567995530. Record exact root cause and bounded repair/serviceability proof. Do NOT repeat the already accepted workspace-control-control-small-v1 canary. After the legacy lane is understood/contained and route serviceability is proven, resume migration-order #2 padataset-cpu-public-v1 under a NEW separately validated one-shot ACTIVATE_ONE_V3_CANARY authority, then PADataset GPU. Preserve all Research GPU-derived NO_BY_DEFAULT containment.
+P0 INFRASTRUCTURE PRIORITY: complete the v3 active-fleet migration and retire the legacy v2 control plane. First resolve only the minimum legacy workspace-control quarantine/stale-assignment state needed to drain the old scale set safely; do not invest in broad v2 rehabilitation. Then execute the remaining accepted-class canaries in frozen order (padataset-cpu-public-v1, then padataset-gpu-single-public-v1; research-cpu-public-v1 only under separate authority; Research GPU-derived classes remain NO_BY_DEFAULT). After all active-class canaries pass, perform the single production generation cutover defined by architecture/lambda-ci-v3-migration-plan.v1.json: quiesce/drain v2, retarget accepted workflows to v3 scale-set names, start accepted v3 controllers, run exact production validations, prove zero assigned/running jobs and clean ledgers, then mark legacy controllers/scale sets DRAINING -> RETIRED. Preserve rollback bytes/state for the defined rollback window; remove legacy config/state only in later cleanup.
 
 ## Remaining work
 
-- Fresh-chat incident diagnosis: use Workspace Shell unit_logs_redacted for workspace-ci-controller@workspace-control-cpu.service and workspace-ci-maintenance-controller.service, plus maintenance_receipt for comments 6567987093 and 6567995530.
-- Explain why legacy workspace-control controller is ACTIVE/RUNNING while Lambda validation run 41378944347 remains QUEUED with no runner assignment; distinguish controller liveness, GitHub scale-set/session state, stale job attestation, and maintenance-plane behavior.
-- Contain/cancel stale run 41378944347 through the correct scheduler/control-plane mechanism and prove Lambda-side runner/JIT/reservation/process cleanup separately; GitHub scheduler state alone is not host containment evidence.
-- Add/verify migration acceptance coverage that a restored legacy route is actually serviceable after v3 canary rollback, not merely that systemd units are active.
-- Do not repeat the accepted workspace-control-control-small-v1 first canary.
-- After incident/serviceability proof, prepare migration-order #2 padataset-cpu-public-v1 under a new separately validated one-shot ACTIVATE_ONE_V3_CANARY authority. Do not reuse consumed workspace-control authority/transaction.
-- Execute padataset-cpu-public-v1 only after exact repository validation and live preflight prove v2/v3 transients drained, v3 root services healthy, and every non-target v3 class inactive.
-- After PADataset CPU acceptance, prepare migration-order #3 padataset-gpu-single-public-v1 with the same generation-exclusion/rollback discipline.
+- Resolve only the current legacy workspace-control assignment-divergence quarantine/stale assigned job sufficiently to reach a safe drain state; do not broaden v2 repair work.
+- Contain/cancel stale run 41378944347 through the correct scheduler/control-plane mechanism and separately prove legacy Lambda-side runner/JIT/reservation/process cleanup and old scale-set assigned/running counts zero.
+- Prepare and execute migration-order #2 padataset-cpu-public-v1 canary under a NEW separately validated one-shot ACTIVATE_ONE_V3_CANARY authority.
+- Prepare and execute migration-order #3 padataset-gpu-single-public-v1 canary under its own NEW separately validated one-shot authority.
 - Keep research-cpu-public-v1 inactive unless separately authorized; keep all Research GPU-derived classes NO_BY_DEFAULT until separate containment-recovery authority.
+- After all active-class canaries pass, execute the single active-fleet production generation cutover: stop/drain v2, retarget accepted workflows to exact v3 scale-set names, enable/start accepted v3 classes, validate production serviceability, and prove clean ledgers/resources.
+- Only after accepted v3 production proof, mark corresponding legacy controllers/scale sets DRAINING then RETIRED and preserve old installed bytes/config/state for the rollback window.
+- Delete/retire legacy scale sets only after their per-scale-set preconditions hold; remove legacy controller config/state only in a later cleanup task.
 - Keep Research Engine PR #283 proposal-only until separate default-branch producer cutover authority.
-- Use Workspace Shell as the preferred bounded troubleshooting/terminal transport; widen only by reviewed exact diagnostic/helper capabilities when a concrete operation requires it, never by generic root shell.
+- Use Workspace Shell as the preferred bounded troubleshooting/terminal transport; widen only by reviewed exact diagnostic/helper capabilities when concretely required.
 
 ## Blockers / gates
 
