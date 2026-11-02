@@ -149,6 +149,9 @@ class MaintenanceControllerTests(unittest.TestCase):
         self.assertIn('SERVICE = "workspace-ci-maintenance-controller.service"', text)
         self.assertIn('"status": "ROLLED_BACK"', text)
         self.assertIn("maintenance controller PID changed during stability window", text)
+        self.assertIn('f"safe.directory={repo_hint}"', text)
+        self.assertIn('f"safe.directory={repo}"', text)
+        self.assertNotIn("git config --global", text)
 
         # The hotfix is not a migration transaction and must not operate on
         # project controllers, v3 services, scale sets, credentials, or
