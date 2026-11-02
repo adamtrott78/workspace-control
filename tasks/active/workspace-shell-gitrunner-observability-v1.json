@@ -34,7 +34,7 @@
       "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
       "remote": {
         "branch": "workspace-shell-gitrunner-observability-v1",
-        "checkpoint_sha": "3d7c4cebf24f31a8002009cce17e8be1a02419a0",
+        "checkpoint_sha": "24726e194af7d1dbe379b8c49c5eaf94a39ab606",
         "verified": true
       },
       "local": null,
@@ -47,7 +47,8 @@
         "plugins/workspace-shell/test/**",
         "tests/test_workspace_shell_contract.py",
         "procedures/workspace_shell_mcp*.md",
-        "plugins/workspace-shell/root/job_launcher.py"
+        "plugins/workspace-shell/root/job_launcher.py",
+        "plugins/workspace-shell/install/update_gitrunner_observability_live_v1.sh"
       ]
     }
   ],
@@ -67,7 +68,8 @@
         "exact read-only Workspace CI unit allowlist",
         "bounded unit journal read through root launcher",
         "bounded maintenance-controller receipt read through root launcher",
-        "tests freezing allowlists, fixed paths and denied unrelated units"
+        "transactional identity-preserving in-place live updater",
+        "tests freezing allowlists, fixed paths, updater rollback, preserved identities and denied unrelated units"
       ],
       "validation": [
         {
@@ -79,10 +81,12 @@
           ]
         },
         {
-          "check": "Workspace Control full integration validation",
+          "check": "Repository implementation boundary",
           "result": "PASS",
           "evidence": [
-            "Run 41382034139 SUCCESS at exact head bb543a9f57a20401f4c30401342c4397187a1d1d."
+            "Updater changes only MCP server, job launcher, read-only configs, policy artifact and matching broker policy digest.",
+            "Updater preserves plugin/App identity, tunnel runtime key/profile, TLS/signing identities, accepted execution source, independent authority root, helper/trust stores and boot-disabled state.",
+            "Rollback restores all mutated files and restarts the pre-existing service set."
           ]
         }
       ],
@@ -91,13 +95,14 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Retarget PR #591 back to workspace-shell-mcp-v1-current-main after final state-sync validation.",
-    "Prepare a bounded live-update procedure for the exact validated observability candidate.",
-    "After live update under operator boundary, inspect workspace-control legacy controller, maintenance controller/service, v3 provisioner/reconciler, and v3 control-small unit state.",
-    "Design/implement sanitized maintenance-receipt read without maintenance socket/group authority.",
-    "Keep GitHub Actions cancellation in a GitHub/control-plane surface rather than adding generic network credentials to Workspace Shell."
+    "Run exact-head hosted validation for the transactional updater candidate.",
+    "Retarget PR #591 back to workspace-shell-mcp-v1-current-main after validation.",
+    "Apply one exact reviewed updater command on Lambda because the currently installed Workspace Shell cannot self-widen its root-owned runtime/config.",
+    "After live update, inspect the legacy workspace-control controller and maintenance units directly through Workspace Shell.",
+    "Use the new maintenance receipt/log visibility to finish the GitRunner incident diagnosis.",
+    "Keep GitRunner v3 activation/canary authority separate."
   ],
-  "next_safe_action": "Run exact-head full validation for the expanded read-only GitRunner diagnostic surface. Do not install live changes or add mutating recovery authority until this head passes.",
+  "next_safe_action": "Run full hosted validation on the final updater candidate. If green, retarget PR #591 back to the accepted Workspace Shell branch and invoke the updater manually on Lambda with the exact validated head; no plugin recreation or recommissioning.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
   "checkpoints": [
@@ -157,7 +162,7 @@
       "check": "Hosted exact-head validation",
       "result": "NOT_RUN",
       "evidence": [
-        "Pending full validation for expanded diagnostics after checkpoint 3d7c4cebf24f31a8002009cce17e8be1a02419a0."
+        "Pending full validation for updater candidate after checkpoint 24726e194af7d1dbe379b8c49c5eaf94a39ab606."
       ]
     }
   ]
