@@ -457,5 +457,12 @@ class V3MigrationTransactionTests(unittest.TestCase):
         self.assertNotIn("RECOVERY_RETRY_INVALIDATED", source)
 
 
+    def test_rollback_stops_target_unconditionally_to_cancel_auto_restart(self):
+        source = pathlib.Path(ROOT / "scripts" / "lambda_ci_v3_migration_transaction.py").read_text()
+        rollback = source[source.index("def rollback("):source.index("def main()")]
+        self.assertIn("systemd.stop(target_unit)", rollback)
+        self.assertNotIn("if systemd.active(target_unit):\n        systemd.stop(target_unit)", rollback)
+
+
 if __name__ == "__main__":
     unittest.main()

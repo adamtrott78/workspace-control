@@ -144,12 +144,15 @@ require_active() {
 
 require_inactive() {
   local unit="$1"
-  if systemctl is-active --quiet "$unit"; then
-    echo "STOP_EXPECTED_INACTIVE_UNIT=$unit"
+  local active_state sub_state
+  active_state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+  sub_state="$(systemctl show "$unit" -p SubState --value 2>/dev/null || true)"
+  if systemctl is-active --quiet "$unit" || [[ "$active_state" == "activating" || "$sub_state" == "auto-restart" ]]; then
+    echo "STOP_EXPECTED_INACTIVE_UNIT=$unit active_state=${active_state:-unknown} sub_state=${sub_state:-unknown}"
     systemctl status --no-pager --full "$unit" || true
     return 1
   fi
-  echo "PREFLIGHT_INACTIVE=PASS $unit"
+  echo "PREFLIGHT_INACTIVE=PASS $unit active_state=${active_state:-unknown} sub_state=${sub_state:-unknown}"
 }
 
 require_not_enabled() {

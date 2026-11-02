@@ -645,8 +645,11 @@ def rollback(
     v3_units = v3_controller_units(root_policy)
     target_unit = receipt["target_controller_unit"]
 
-    if systemd.active(target_unit):
-        systemd.stop(target_unit)
+    # Stop unconditionally. A Restart=on-failure unit can be between attempts
+    # in ActiveState=activating/SubState=auto-restart while is-active returns
+    # nonzero; conditional stop would miss the queued restart and allow the
+    # target controller to reappear after rollback.
+    systemd.stop(target_unit)
     _assert_only_target_v3_active(systemd, v3_units, None)
     _assert_generation_drained(
         systemd,

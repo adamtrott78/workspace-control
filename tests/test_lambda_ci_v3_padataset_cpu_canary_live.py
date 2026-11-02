@@ -35,6 +35,13 @@ class PadatasetCpuCanaryOperatorTests(unittest.TestCase):
         self.assertLess(target, authority)
 
 
+    def test_inactive_preflight_rejects_systemd_auto_restart_window(self):
+        self.assertIn('active_state="$(systemctl show "$unit" -p ActiveState --value', self.text)
+        self.assertIn('sub_state="$(systemctl show "$unit" -p SubState --value', self.text)
+        self.assertIn('"$active_state" == "activating"', self.text)
+        self.assertIn('"$sub_state" == "auto-restart"', self.text)
+
+
     def test_padataset_credentials_are_repository_scoped(self):
         self.assertIn('/var/lib/workspace-ci/v3/credentials/padataset', self.text)
         self.assertIn('ci-gh-padataset', self.text)
