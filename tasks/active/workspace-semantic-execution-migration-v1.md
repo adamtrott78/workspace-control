@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 4ec300254c328a1b6e0fce62fe62cd6f11d7a855
+- Remote checkpoint: a8633bad2b29e49cc4b8cafb254e342983ec043a
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,12 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Launch clean oracle-unexposed model sessions for A_frontier_long_horizon, B_instant_persistent_chat, C_instant_stateless_resume, D_instant_decompose_critic, and E_hybrid_escalation against benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_runset_v1.json. Each session must recover only the frozen public fixture, current durable run state, and bounded context packet; it must never receive the evaluator oracle. Persist every reasoning quantum with exact source/fixture provenance, executor/provider/model/surface identity, context usage, evidence refs, next-safe-action, and TOO_LARGE versus INTRINSICALLY_DIFFICULT disposition. Score terminal outputs through the deterministic evaluator and compare validated quality, retries, decomposition, failed leaves, recovery effectiveness, context/work quanta, provider usage, frontier escalation frequency/reason, durable-state correctness, and provenance correctness. Do not use this authoring chat as a scored arm and do not freeze the semantic execution architecture until the benchmark, independent architecture review, and unseen-workflow extension proof are complete.
+Run the existing research_iterate fixture as a clean-session P2 calibration pilot across A_frontier_long_horizon, B_instant_persistent_chat, C_instant_stateless_resume, D_instant_decompose_critic, and E_hybrid_escalation, with at least three independent reasoning trials per arm if practical and no oracle exposure. Treat that result only as end-to-end calibration. In parallel/next, construct matched P0 easy-control, P1 horizon-heavy/decomposable, and P3 mixed long+hard fixtures under benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json. For causal comparisons, hold fixture instance, validator, tools, initial information, and resource envelope fixed while changing only the treatment factor. Apply authority/provenance and objective-quality gates before comparing cost/frontier usage. Do not freeze the semantic execution architecture until taxonomy-stratified benchmark evidence, independent architecture review, and unseen-workflow extension proof are complete.
 
 ## Remaining work
 
-- Execute the five frozen pilot arms in clean oracle-unexposed model sessions: frontier long-horizon, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid escalation; persist every quantum under the runset state contract and score terminal submissions with the deterministic evaluator.
+- Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
+- Add matched P0 easy-control, P1 horizon-heavy/decomposable, and P3 mixed long+hard fixtures, then repeat paired arm comparisons so TOO_LARGE and INTRINSICALLY_DIFFICULT can be separated empirically.
 - Strengthen evaluator isolation beyond process-protocol-only before making any frontier-equivalence claim; the current authoring chat is evaluator-contaminated and is excluded from scored arms.
 - Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.
 - Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.
