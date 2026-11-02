@@ -43,21 +43,22 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Design, validate, and execute only the bounded legacy v2 scale-set retirement transition permitted by architecture/lambda-ci-v3-migration-plan.v1.json#legacy_retirement. Preconditions must include the accepted production transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json in committed state, zero queued/assigned/running legacy jobs, no active runner registrations owned by legacy prefixes, accepted v3 route/class proof, and a recorded rollback-window receipt. Preserve all old installed v2 bytes/config/state through the rollback window; do not remove legacy controller config/state in this transition. After scale-set retirement is accepted, resume workspace-semantic-execution-migration-v1 immediately; physical controller config/state deletion is a later cleanup task.
+Validate the bounded legacy retirement tool at the exact branch head, then execute retirement only for the three production-accepted legacy scale sets: lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu. Require the committed production transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json, all six GitHub scale-set statistics at zero for each retiring set, accepted target v3 scale-set presence, all v2 controllers inactive+disabled, accepted v3 controllers active+enabled, and a root-owned rollback-window receipt persisted before any deletion. Preserve lambda-research-engine and lambda-research-engine-gpu because their replacement v3 classes are not accepted; preserve all v2 bytes/config/state. After the three accepted legacy scale sets are retired and independently verified absent, resume workspace-semantic-execution-migration-v1.
 
 ## Remaining work
 
-- Validate and execute bounded retirement of the five legacy v2 scale sets only after proving the migration-plan legacy_retirement preconditions.
-- Preserve old v2 installed bytes/config/state through the rollback window; do not remove legacy controller config/state during scale-set retirement.
-- Record exact legacy scale-set retirement evidence and keep Research GPU containment provenance intact.
-- Immediately resume workspace-semantic-execution-migration-v1 umbrella work after legacy scale-set retirement acceptance.
-- Perform physical legacy controller config/state deletion only in a later separately validated cleanup task.
+- Validate the exact-head bounded retirement implementation.
+- Retire only lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after all migration-plan per-scale-set preconditions pass.
+- Preserve lambda-research-engine and lambda-research-engine-gpu until their replacement v3 classes receive separate acceptance.
+- Preserve all v2 installed bytes/config/state through the rollback window; do not remove legacy controller config/state during scale-set retirement.
+- Record the root-owned rollback-window/retirement receipt and independently verify the three accepted legacy scale sets are absent.
+- Immediately resume workspace-semantic-execution-migration-v1 umbrella work after accepted scale-set retirement.
 
 ## Blockers / gates
 
-- Legacy physical scale-set retirement has not yet been executed; migration policy requires zero queued/assigned/running jobs, no active legacy runner registrations, accepted v3 route/class proof, and a recorded rollback-window receipt.
-- Legacy controller bytes/config/state must remain preserved through the rollback window and are not authorized for deletion in the scale-set retirement transition.
-- Research GPU containment provenance must remain intact; no Research v3 route activation is implied by production cutover acceptance.
+- The three production-accepted legacy scale sets have not yet been physically retired.
+- Research legacy scale sets are explicitly not eligible for deletion because their replacement v3 classes are not accepted/active.
+- Legacy controller bytes/config/state must remain preserved through the rollback window and are not authorized for deletion in this transition.
 
 ## Fresh-chat initialization
 
