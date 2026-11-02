@@ -7,6 +7,7 @@
   "repository": "adamtrott78/workspace-control",
   "branch": "workspace-semantic-execution-migration-v1",
   "worker_rules": [
+    "Read every immutable public input at the exact source_checkpoint_sha recorded in the assigned run state. Read the assigned mutable run-state file from the live branch and mutate only that file using GitHub CAS.",
     "Treat the assigned run-state file as authoritative for this screening slot.",
     "Read only the public fixture, benchmark harness/contract, taxonomy/runset, and the assigned run-state file paths explicitly listed in the run state.",
     "Do not read any path containing oracle, evaluator_only, evaluator-isolation secret material, any other screening run, PR comments containing evaluator results, or the control-chat transcript.",
@@ -46,5 +47,9 @@
       "memory_mode"
     ],
     "mismatch_rule": "If the actual surface/configuration differs from the arm's expected executor configuration in the matrix runset, write status EXECUTOR_IDENTITY_MISMATCH and stop."
+  },
+  "canonical_launch_contract": {
+    "user_message_pattern": "@GitHub Execute the assigned Workspace Semantic Execution protocol-screening run. Repository adamtrott78/workspace-control, branch workspace-semantic-execution-migration-v1, assigned run-state path: <RUN_STATE_PATH>. Read that file first and follow it exactly.",
+    "rule": "The launch message supplies only navigation. All experimental instructions, state, constraints, and evidence come from durable GitHub artifacts."
   }
 }
