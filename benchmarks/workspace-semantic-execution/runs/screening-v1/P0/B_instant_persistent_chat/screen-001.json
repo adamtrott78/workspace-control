@@ -9,7 +9,7 @@
   "replicate_id": "screen-001",
   "fixture_id": "research-iterate-timeout-control-p0-v1",
   "branch": "workspace-semantic-execution-migration-v1",
-  "source_checkpoint_sha": "c066d731ab535f399d3698ca2cbf1e7cd272ac6e",
+  "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
   "public_inputs": {
     "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
     "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json",
@@ -37,12 +37,12 @@
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
-      "source_checkpoint_sha": "c066d731ab535f399d3698ca2cbf1e7cd272ac6e",
+      "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
       "note": "Control-created clean-worker slot; no oracle result has been published."
     },
     {
       "kind": "EXECUTOR_CONTRACT_BOUND",
-      "source_checkpoint_sha": "c066d731ab535f399d3698ca2cbf1e7cd272ac6e",
+      "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
       "expected_executor": {
         "provider": "OpenAI",
         "model_family": "GPT-5.6",
@@ -57,8 +57,8 @@
     },
     {
       "kind": "PROTOCOL_CHECKPOINT_VALIDATED",
-      "source_checkpoint_sha": "c066d731ab535f399d3698ca2cbf1e7cd272ac6e",
-      "validation_run_id": 41525886922,
+      "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
+      "validation_run_id": 41526074412,
       "conclusion": "success"
     }
   ],
@@ -87,8 +87,8 @@
     "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
   },
   "protocol_checkpoint_validation": {
-    "run_id": 41525886922,
-    "run_number": 1761,
+    "run_id": 41526074412,
+    "run_number": 1764,
     "conclusion": "success",
     "status": "VALIDATED"
   },
