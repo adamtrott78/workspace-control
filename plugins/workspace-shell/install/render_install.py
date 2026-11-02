@@ -28,6 +28,12 @@ ALLOWED_UNITS = (
     "workspace-shell-root-broker.service",
     "workspace-shell-mcp.service",
     "workspace-shell-tunnel.service",
+    "workspace-ci-controller@workspace-control-cpu.service",
+    "workspace-ci-maintenance-controller.service",
+    "workspace-ci-maintenance.service",
+    "workspace-ci-v3-provisioner.service",
+    "workspace-ci-v3-reconciler.service",
+    "workspace-ci-v3-controller@workspace-control-control-small-v1.service",
 )
 
 
@@ -203,6 +209,9 @@ def render(args):
         "bwrap_path": "/usr/bin/bwrap",
         "systemd_run_path": "/usr/bin/systemd-run",
         "systemctl_path": "/usr/bin/systemctl",
+        "journalctl_path": "/usr/bin/journalctl",
+        "allowed_units": list(ALLOWED_UNITS),
+        "maintenance_controller_receipt_root": "/var/lib/workspace-ci/maintenance-controller/receipts",
         "policy_version_sha": authority_sha,
     }
 

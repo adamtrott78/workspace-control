@@ -22,6 +22,7 @@ SEAL_INSTALL = PLUGIN / "install" / "seal_install.py"
 RENDER_TUNNEL_PROFILE = PLUGIN / "install" / "render_tunnel_profile.py"
 VALIDATE_TUNNEL_DOCTOR = PLUGIN / "install" / "validate_tunnel_doctor.py"
 ACTIVATE_LIVE = PLUGIN / "install" / "activate_live.sh"
+GITRUNNER_OBSERVABILITY_UPDATE = PLUGIN / "install" / "update_gitrunner_observability_live_v1.sh"
 FRONTEND_ACCESS_REPAIR = PLUGIN / "install" / "repair_frontend_config_access_v1.sh"
 WORKER_PROC_REPAIR = PLUGIN / "install" / "repair_worker_proc_bootstrap_v1.sh"
 WORKER_SCRATCH_REPAIR = PLUGIN / "install" / "repair_worker_scratch_root_v1.sh"
@@ -287,6 +288,37 @@ class WorkspaceShellContractTests(unittest.TestCase):
             self.assertIsNone(manifest["tunnel_client_cert_sha256"])
             self.assertFalse((out / "frontend.json").exists())
             self.assertTrue((out / "frontend.unsealed.json").is_file())
+            frontend_unsealed = json.loads(
+                (out / "frontend.unsealed.json").read_text()
+            )
+            launcher_cfg = json.loads((out / "job-launcher.json").read_text())
+            self.assertEqual(
+                launcher_cfg["maintenance_controller_receipt_root"],
+                "/var/lib/workspace-ci/maintenance-controller/receipts",
+            )
+            self.assertEqual(
+                launcher_cfg["journalctl_path"],
+                "/usr/bin/journalctl",
+            )
+            self.assertEqual(
+                launcher_cfg["allowed_units"],
+                frontend_unsealed["allowed_units"],
+            )
+            self.assertEqual(
+                frontend_unsealed["allowed_units"],
+                [
+                    "workspace-shell-job-launcher.service",
+                    "workspace-shell-root-broker.service",
+                    "workspace-shell-mcp.service",
+                    "workspace-shell-tunnel.service",
+                    "workspace-ci-controller@workspace-control-cpu.service",
+                    "workspace-ci-maintenance-controller.service",
+                    "workspace-ci-maintenance.service",
+                    "workspace-ci-v3-provisioner.service",
+                    "workspace-ci-v3-reconciler.service",
+                    "workspace-ci-v3-controller@workspace-control-control-small-v1.service",
+                ],
+            )
             self.assertEqual(
                 manifest["identities"],
                 {
@@ -1072,6 +1104,125 @@ class WorkspaceShellContractTests(unittest.TestCase):
                     text=True,
                 ),
                 "",
+            )
+
+    def test_gitrunner_observability_live_updater_is_transactional_and_identity_preserving(self):
+        proc = subprocess.run(
+            ["bash", "-n", str(GITRUNNER_OBSERVABILITY_UPDATE)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        text = GITRUNNER_OBSERVABILITY_UPDATE.read_text(encoding="utf-8")
+
+        self.assertIn(
+            'ACCEPTED_EXECUTION_SHA="01a95b61410e2f427b9885a19e6a0b9c5ee60a38"',
+            text,
+        )
+        self.assertIn(
+            'CANDIDATE_SERVER_BLOB="ddc6cece98cf3c6057b7cd1b3208c1249d1c06d2"',
+            text,
+        )
+        self.assertIn(
+            'CANDIDATE_LAUNCHER_BLOB="137ebebe46b63550abfb404e12ab0e1fd338ba12"',
+            text,
+        )
+        self.assertIn(
+            'CANDIDATE_POLICY_BLOB="c2a18332cf4a3b13f48f3fd3cac0291ea294ae60"',
+            text,
+        )
+        self.assertIn("WORKSPACE_SHELL_UPDATE_CONFIRM=APPLY_GITRUNNER_OBSERVABILITY_V1", text)
+        self.assertIn("rollback_if_needed", text)
+        self.assertIn("LOCAL_MCP_INITIALIZE=PASS", text)
+        self.assertIn("LOCAL_MCP_TOOL_SCHEMA=PASS", text)
+        self.assertIn("TUNNEL_READY=PASS", text)
+        self.assertIn("SERVICES_ACTIVE_BOOT_DISABLED=PASS", text)
+        self.assertIn("broker_policy_digest_binding", text)
+        self.assertIn("helper_registry_and_trust_stores", text)
+
+        # No recommissioning or identity recreation is permitted.
+        self.assertNotIn("activate_live.sh", text)
+        self.assertNotIn("openssl genpkey", text)
+        self.assertNotIn("openssl req", text)
+        self.assertNotIn("systemctl enable", text)
+        self.assertNotIn("systemd-sysusers", text)
+        self.assertNotIn("systemd-tmpfiles", text)
+        self.assertNotIn("render_tunnel_profile.py", text)
+        self.assertNotIn("git -C \"$EXEC_SOURCE\" checkout", text)
+        self.assertNotIn("rm -rf \"$AUTHORITY_ROOT\"", text)
+
+    def test_gitrunner_diagnostic_reads_are_exact_and_read_only(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            receipts = root / "receipts"
+            receipts.mkdir()
+            comment_id = 6567995530
+            receipt = {
+                "schema_version": 1,
+                "status": "COMPLETED",
+                "timestamp_utc": "2026-11-02T00:00:00+00:00",
+                "identity": {
+                    "comment_id": comment_id,
+                    "repository": "adamtrott78/workspace-control",
+                    "actor": "adamtrott78",
+                    "command": {"action": "restart", "project_id": "workspace-control", "lane": "cpu"},
+                    "command_sha256": "a" * 64,
+                    "maintenance_policy_generation": "workspace-ci-maintenance-v1",
+                },
+                "result": {"service_active": True},
+                "automatic_workflow_triggered": False,
+            }
+            (receipts / f"{comment_id}.json").write_text(
+                json.dumps(receipt),
+                encoding="utf-8",
+            )
+            cfg = {
+                "maintenance_controller_receipt_root": str(receipts),
+                "allowed_units": [
+                    "workspace-ci-controller@workspace-control-cpu.service",
+                ],
+                "journalctl_path": "/usr/bin/printf",
+            }
+            observed = job_launcher.inspect_maintenance_receipt(
+                cfg,
+                {"comment_id": comment_id},
+            )
+            self.assertTrue(observed["ok"])
+            self.assertEqual(observed["status"], "COMPLETED")
+            self.assertEqual(observed["identity"]["comment_id"], comment_id)
+            self.assertNotIn("token", json.dumps(observed).lower())
+
+            with self.assertRaisesRegex(
+                runtime_common.ShellRuntimeError,
+                "INVALID_COMMENT_ID",
+            ):
+                job_launcher.inspect_maintenance_receipt(
+                    cfg,
+                    {"comment_id": 0},
+                )
+
+            with self.assertRaisesRegex(
+                runtime_common.ShellRuntimeError,
+                "UNIT_NOT_AUTHORIZED",
+            ):
+                job_launcher.inspect_unit_logs(
+                    cfg,
+                    {"unit": "ssh.service", "max_lines": 20},
+                )
+
+            logs = job_launcher.inspect_unit_logs(
+                cfg,
+                {
+                    "unit": "workspace-ci-controller@workspace-control-cpu.service",
+                    "max_lines": 20,
+                },
+            )
+            self.assertTrue(logs["ok"])
+            self.assertEqual(
+                logs["unit"],
+                "workspace-ci-controller@workspace-control-cpu.service",
             )
 
     def test_launcher_duplicates_profile_grammar_and_denies_escape_shapes(self):

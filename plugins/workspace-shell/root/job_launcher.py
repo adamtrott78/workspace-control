@@ -499,11 +499,108 @@ def redact_argv(profile, argv):
     return redacted
 
 
+def _read_json_no_follow(path, *, max_bytes=1024 * 1024):
+    fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode):
+            fail("INSPECT_FILE_INVALID", "diagnostic source must be a regular file")
+        if st.st_size < 0 or st.st_size > max_bytes:
+            fail("INSPECT_FILE_TOO_LARGE", "diagnostic source exceeds size bound")
+        raw = os.read(fd, max_bytes + 1)
+        if len(raw) > max_bytes:
+            fail("INSPECT_FILE_TOO_LARGE", "diagnostic source exceeds size bound")
+    finally:
+        os.close(fd)
+    try:
+        value = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        fail("INSPECT_JSON_INVALID", "diagnostic source is not valid UTF-8 JSON")
+    if not isinstance(value, dict):
+        fail("INSPECT_JSON_INVALID", "diagnostic source must be a JSON object")
+    return value
+
+
+def inspect_maintenance_receipt(cfg, request):
+    comment_id = request.get("comment_id")
+    if not isinstance(comment_id, int) or comment_id <= 0:
+        fail("INVALID_COMMENT_ID", "comment_id must be a positive integer")
+    root = Path(cfg["maintenance_controller_receipt_root"])
+    if not root.is_absolute():
+        fail("INSPECT_CONFIG_INVALID", "maintenance receipt root must be absolute")
+    path = root / f"{comment_id}.json"
+    if not path.is_file():
+        fail("MAINTENANCE_RECEIPT_NOT_FOUND", "maintenance controller receipt not found")
+    value = _read_json_no_follow(path)
+    identity = value.get("identity") if isinstance(value.get("identity"), dict) else {}
+    return {
+        "ok": True,
+        "operation": "maintenance_receipt",
+        "comment_id": comment_id,
+        "status": value.get("status"),
+        "timestamp_utc": value.get("timestamp_utc"),
+        "identity": {
+            "comment_id": identity.get("comment_id"),
+            "repository": identity.get("repository"),
+            "actor": identity.get("actor"),
+            "command": identity.get("command"),
+            "command_sha256": identity.get("command_sha256"),
+            "maintenance_policy_generation": identity.get("maintenance_policy_generation"),
+        },
+        "result": value.get("result"),
+        "error_type": value.get("error_type"),
+        "error": value.get("error"),
+        "automatic_workflow_triggered": value.get("automatic_workflow_triggered"),
+    }
+
+
+def inspect_unit_logs(cfg, request):
+    unit = request.get("unit")
+    allowed = cfg.get("allowed_units") or []
+    if not isinstance(unit, str) or unit not in allowed:
+        fail("UNIT_NOT_AUTHORIZED", "unit is not in the root-owned Workspace Shell inspect allowlist")
+    max_lines = request.get("max_lines", 80)
+    if not isinstance(max_lines, int) or not (1 <= max_lines <= 120):
+        fail("INVALID_LOG_LINE_LIMIT", "max_lines must be 1..120")
+    proc = subprocess.run(
+        [
+            cfg.get("journalctl_path", "/usr/bin/journalctl"),
+            "--unit", unit,
+            "--no-pager",
+            "--output=short-iso",
+            "--lines", str(max_lines),
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        timeout=4,
+        env={"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8", "TZ": "UTC"},
+        check=False,
+    )
+    if proc.returncode != 0:
+        fail("UNIT_LOG_READ_FAILED", proc.stderr.strip() or "journalctl failed")
+    encoded = proc.stdout.encode("utf-8", errors="replace")
+    if len(encoded) > 65536:
+        encoded = encoded[-65536:]
+    return {
+        "ok": True,
+        "operation": "unit_logs",
+        "unit": unit,
+        "max_lines": max_lines,
+        "logs": encoded.decode("utf-8", errors="replace"),
+    }
+
+
 def run_request(cfg, manifest, request, cancel_check=None):
     if request.get("schema") != "workspace-shell-job-request.v1":
         fail("JOB_SCHEMA_INVALID", "unexpected job request schema")
-    if request.get("operation") != "exec":
-        fail("JOB_OPERATION_DENIED", "v1 launcher accepts exec only")
+    operation = request.get("operation")
+    if operation == "inspect_maintenance_receipt":
+        return inspect_maintenance_receipt(cfg, request)
+    if operation == "inspect_unit_logs":
+        return inspect_unit_logs(cfg, request)
+    if operation != "exec":
+        fail("JOB_OPERATION_DENIED", "launcher operation is outside the frozen grammar")
     if request.get("target") != "workspace-control":
         fail("TARGET_NOT_AUTHORIZED", "v1 launcher target is workspace-control only")
 
