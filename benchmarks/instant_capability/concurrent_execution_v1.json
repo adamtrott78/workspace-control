@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "benchmark": "INSTANT_CONCURRENT_EXECUTION_V1",
+  "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+  "shared_branch": "instant-concurrent-execution-v1-20261101",
+  "state_version": 0,
+  "invariant": "each action has at most one owner; completion preserves peer state",
+  "actions": {
+    "X": {
+      "state": "PENDING",
+      "owner": null,
+      "execution_branch": null,
+      "pr": null,
+      "validated_head": null,
+      "validation_run": null,
+      "task": {
+        "files": [
+          "scripts/instant_concurrent_x.py",
+          "tests/test_instant_concurrent_x.py"
+        ],
+        "function": "normalize_slot(value) -> int",
+        "contract": [
+          "value must be an exact Python int; bool is rejected",
+          "allowed range is 1 through 8 inclusive",
+          "valid values are returned unchanged",
+          "all other inputs raise ValueError",
+          "tests must use unittest, not pytest"
+        ]
+      }
+    },
+    "Y": {
+      "state": "PENDING",
+      "owner": null,
+      "execution_branch": null,
+      "pr": null,
+      "validated_head": null,
+      "validation_run": null,
+      "task": {
+        "files": [
+          "scripts/instant_concurrent_y.py",
+          "tests/test_instant_concurrent_y.py"
+        ],
+        "function": "normalize_priority(value) -> str",
+        "contract": [
+          "value must be exactly one of LOW, MEDIUM, HIGH",
+          "input must be str",
+          "return canonical uppercase value unchanged",
+          "lowercase/mixed case and all non-strings raise ValueError",
+          "tests must use unittest, not pytest"
+        ]
+      }
+    }
+  },
+  "protocols": {
+    "claim_selection": "lexicographically smallest PENDING action",
+    "claim_cas": "update_ref shared branch with exact expected_sha and force=false",
+    "completion_cas": "reread shared branch, preserve peer state, update own action to COMPLETE, update_ref with exact expected_sha and force=false",
+    "on_cas_conflict": "reread shared branch; preserve valid peer transitions; retry from new exact head",
+    "max_claim_attempts": 3,
+    "max_completion_attempts": 3,
+    "max_code_repair_iterations": 3
+  },
+  "safety": {
+    "modify_main": false,
+    "merge_pr": false,
+    "manual_workflow_dispatch": false,
+    "workspace_shell": false,
+    "privileged_execution": false,
+    "authoritative_task_state": false
+  }
+}
