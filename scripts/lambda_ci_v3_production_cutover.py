@@ -209,6 +209,20 @@ def _load(path: pathlib.Path) -> dict[str, Any]:
     return value
 
 
+def _ensure_private_dir(path: pathlib.Path) -> None:
+    if path.exists():
+        st = path.stat()
+        if not stat.S_ISDIR(st.st_mode):
+            raise CutoverError(f"private state path is not a directory: {path}")
+        if st.st_uid != os.geteuid() or st.st_gid != os.getegid():
+            raise CutoverError(f"private state ownership invalid: {path}")
+        if stat.S_IMODE(st.st_mode) != 0o700:
+            raise CutoverError(f"private state mode invalid: {path}")
+        return
+    path.mkdir(parents=True, mode=0o700)
+    os.chmod(path, 0o700)
+
+
 def _atomic_write(path: pathlib.Path, raw: bytes, *, mode: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, name = tempfile.mkstemp(prefix=f".{path.name}.", dir=str(path.parent))
@@ -1086,6 +1100,7 @@ def activate(
             base_manifest_raw=base_manifest_raw,
             base_manifest=base_manifest,
         )
+        _ensure_private_dir(PRODUCTION_OVERRIDE.parent)
         _atomic_write(PRODUCTION_OVERRIDE, _canonical(override), mode=0o600)
         reconciler.verify_installed(BASE_MANIFEST)
 
@@ -1234,6 +1249,7 @@ def commit(
         base_manifest_raw=base_manifest_raw,
         base_manifest=base_manifest,
     )
+    _ensure_private_dir(PRODUCTION_OVERRIDE.parent)
     _atomic_write(PRODUCTION_OVERRIDE, _canonical(override), mode=0o600)
     reconciler.verify_installed(BASE_MANIFEST)
 
