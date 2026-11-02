@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: cb6520c5855a7a8b4175411d1eaccff6bde626c5
+- Remote checkpoint: 675f8772e081052289641211691caeebe6b9f76a
 - Remote verified: true
 
 ### research-engine
@@ -43,13 +43,13 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-POST-CANCELLATION ROOT RECOVERY GATE: temporary diagnostic run 41407093346/job 125151483128 is cancelled and fresh on-host diagnose receipt 6571796799 proves active_project_units=[], reset_pending=[], recovery_state_conflict=false, active_count=0, pending_count=0, with controller logs showing total_assigned_jobs=0/reconstructable_jobs=0. Historical quarantine b184ce08-d095-424b-9329-53c2b16beb62 remains provenance only. Exact helper correction cb6520c5855a7a8b4175411d1eaccff6bde626c5 passed validation 41407560030 and durable task head 44d4871c6debacbde0c97a6133606204fd72a256 passed validation 41407810560. Workspace Shell still cannot invoke this root bootstrap because the live helper registry is empty and reviewed-helper approval is externally signed. The next operator-only action is one exact root transaction from a clean checkout of the current validated branch head: run the corrected transactional root-reactivation helper updater once, mint a fresh exact-bound ACTIVATE_V3_ROOT_SERVICES receipt from the installed manifest/root-policy, and invoke the installed root activation helper. Do not reuse authority 14e58009-7bf3-43d1-8ad8-7616e70edaa3. After the operator transaction, independently attest v3 root services through Workspace Shell and resume padataset-cpu-public-v1 under its own fresh ACTIVATE_ONE_V3_CANARY authority.
+OPERATOR-ONLY POST-OUTAGE ROOT RECOVERY TRANSACTION: diagnostic run 41407093346 is cancelled and host cleanup is proven by maintenance diagnose receipt 6571796799 (active_project_units=[], reset_pending=[], recovery_state_conflict=false, active_count=0, pending_count=0; controller logs total_assigned_jobs=0/reconstructable_jobs=0). Exact bounded recovery wrapper scripts/lambda_ci_v3_post_outage_root_recovery_v1.py at head 675f8772e081052289641211691caeebe6b9f76a passed Workspace Control Validation 41408493173. Workspace Shell cannot invoke this root bootstrap because its live helper registry is empty and reviewed-helper approval requires an external operator signature. From one exact clean checkout of the current validated branch head, run the wrapper once as root with --expected-head set to that exact checkout. The wrapper transactionally installs the corrected manifest-bound mode-0555 activation helper, mints a NEW exact installed-manifest/root-policy-bound ACTIVATE_V3_ROOT_SERVICES authority (10-minute lifetime), and invokes only the installed root activation helper. It never reuses authority 14e58009-7bf3-43d1-8ad8-7616e70edaa3, never enables services, never activates a class controller, and never mutates workflows/routes/scale sets/v2 state/Research GPU containment. After it returns, independently attest v3 reconciler/provisioner, effective controller+helper override generation, non-target class inactivity, zero transient/resource claims, and Research GPU containment through Workspace Shell; then resume padataset-cpu-public-v1 under its own fresh ACTIVATE_ONE_V3_CANARY authority.
 
 ## Remaining work
 
-- Install the corrected root-reactivation helper exactly once with the validated transactional updater; require exact immutable-manifest helper digest plus root:root mode 0555 prestate and persist the narrow active helper override attestation.
-- Create a fresh exact-bound ACTIVATE_V3_ROOT_SERVICES authority after helper update; do not reuse authority 14e58009-7bf3-43d1-8ad8-7616e70edaa3.
-- Reactivate the already-installed v3 reconciler and provisioner transactionally; independently prove effective installed-generation/controller+helper override attestation, root services healthy, non-target class controllers inactive, no transient/resource claims, and Research GPU containment preserved.
+- Execute scripts/lambda_ci_v3_post_outage_root_recovery_v1.py once as root from an exact clean validated checkout. This combines only the corrected transactional helper update, fresh ACTIVATE_V3_ROOT_SERVICES authority creation, and installed root activation helper invocation.
+- After the wrapper returns, independently attest effective installed generation/controller+helper override, v3 reconciler/provisioner health, all non-target v3 class controllers inactive, no transient/resource claims, and Research GPU containment preserved.
+- Complete Workspace Shell reboot hardening from draft PR #592 and establish narrow standing/reviewed helper authority so future exact GitRunner root operations do not require operator sudo relay.
 - Reactivate the already-installed v3 reconciler and provisioner transactionally; prove effective installed-generation/controller+helper override attestation, root services healthy, non-target class controllers inactive, no transient/resource claims, and Research GPU containment preserved.
 - Complete Workspace Shell reboot hardening from draft PR #592: persist the /run/workspace-shell-control tmpfiles rule and boot-enable only the accepted recovery-plane services with emergency disable preserved.
 - Replace repeated operator sudo/bootstrap relay with narrowly reviewed Workspace Shell standing/helper authority for exact GitRunner maintenance/reactivation/canary/cutover operations; never expose generic root shell/systemctl and do not make model reasoning itself an authority source.
@@ -63,8 +63,7 @@ POST-CANCELLATION ROOT RECOVERY GATE: temporary diagnostic run 41407093346/job 1
 ## Blockers / gates
 
 - Power-loss reboot left workspace-ci-v3-reconciler.service and workspace-ci-v3-provisioner.service inactive; direct improvised systemctl activation remains forbidden.
-- Corrected root-reactivation helper updater is repository-validated but not installed live. Workspace Shell's helper registry is empty and its privileged protocol requires an external operator signature, so this root bootstrap remains an operator-only action.
-- Previously created root-reactivation authority 14e58009-7bf3-43d1-8ad8-7616e70edaa3 must not be reused; create a fresh exact-bound ACTIVATE_V3_ROOT_SERVICES authority after successful helper update.
+- The exact bounded post-outage root recovery wrapper is repository-validated at 675f8772e081052289641211691caeebe6b9f76a / run 41408493173 but has not been executed live. Workspace Shell's helper registry is empty and its privileged protocol requires an external operator signature, so this single root transaction remains operator-only.
 - Further live v3 migration requires a fresh separately bound one-shot canary authority per class, beginning with padataset-cpu-public-v1.
 - Research CPU remains separately gated; Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT; Research Engine PR #283 remains proposal-only.
 
