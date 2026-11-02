@@ -222,11 +222,12 @@
     "disposable_branches_only": true
   },
   "next_implementation_steps": [
-    "Launch clean, oracle-unexposed model sessions for frontier-control, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid-escalation arms against the frozen pilot runset.",
-    "Persist every reasoning quantum to benchmarks/workspace-semantic-execution/runs/{run_id}.json with exact source/fixture provenance, executor identity, context consumption, outcome, and validation evidence.",
-    "Evaluate terminal submissions with the objective research-iterate evaluator and compare quality, retries, decomposition, recovery, context, work quanta, provider/model usage, and escalation frequency/reason.",
-    "Do not claim frontier equivalence from process-level evaluator isolation alone; strengthen evaluator secrecy or use a clean externally sealed evaluator before any equivalence claim.",
-    "After the research-iterate pilot, add architecture_diagnosis and artifact_revision fixtures before capability-boundary conclusions."
+    "Keep the frozen research_iterate P2 fixture as the first clean-session end-to-end pilot, but treat it as harness/treatment calibration rather than a general capability-boundary result.",
+    "Add matched P0 easy-control, P1 horizon-heavy/decomposable, and P3 mixed long+hard fixtures so TOO_LARGE and INTRINSICALLY_DIFFICULT are empirically separable.",
+    "For each causal comparison, hold fixture instance, validator, tools, initial information, and resource envelope fixed while changing only the intended treatment factor.",
+    "Start model-reasoning comparisons with at least three independent trials per arm/fixture; increase replication for reliability claims and report success rate/pass@1 plus an all-k reliability statistic.",
+    "Prefer fresh hidden/ephemeral evaluators for strong capability claims; no scored worker may see evaluator oracle state.",
+    "After taxonomy-calibrated research fixtures, add architecture_diagnosis, artifact_revision, software_debug_repair, and an unseen-workflow extension fixture before architecture-freeze conclusions."
   ],
   "implementation_checkpoint": {
     "checkpoint_sha": "4ec300254c328a1b6e0fce62fe62cd6f11d7a855",
@@ -248,5 +249,20 @@
     "evaluator_isolation": "PROCESS_PROTOCOL_ONLY",
     "equivalence_claim_allowed": false,
     "clean_session_requirement": "All scored A-E arms must run in oracle-unexposed clean model sessions recovering only the frozen public fixture, durable run state, and bounded context packet."
+  },
+  "experiment_taxonomy": {
+    "path": "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json",
+    "status": "DESIGN_CANDIDATE_NOT_FROZEN",
+    "rationale": "Use a faceted taxonomy that separates causal experiment class, fixture phenotype, executor treatment, validator strength, and outcomes. This prevents horizon/size, intrinsic difficulty, domain, authority, and tool mechanics from being conflated.",
+    "current_pilot_profile": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.taxonomy.json",
+    "current_pilot_primary_phenotype": "P2_reasoning_heavy_coupled",
+    "claim_limit": "The current research_iterate pilot is appropriate for end-to-end harness calibration and causal-reasoning comparison, but is not a strong primary test of TOO_LARGE/decomposition and cannot alone establish a general capability boundary."
+  },
+  "benchmark_suite_separation": {
+    "S1_reasoning_quality_boundary": "Only suite that may support Instant/frontier reasoning-quality claims.",
+    "S2_orchestration_mechanics": "Queue/CAS/lease/recovery/wait/concurrency evidence; necessary but not reasoning-equivalence evidence.",
+    "S3_authority_safety": "Hard authority/provenance gates independent of model tier.",
+    "S4_open_world_generalization": "Unseen-workflow extension proof and architecture-freeze gate.",
+    "S5_resource_routing": "Quality-adjusted efficiency; evaluated only after S1 quality and S3 safety gates."
   }
 }
