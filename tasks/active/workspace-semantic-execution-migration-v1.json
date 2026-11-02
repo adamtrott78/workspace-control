@@ -47,7 +47,7 @@
       "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "2d9dd4c43373ba55b1042e634e2cb0b4720f8af9",
+        "checkpoint_sha": "82ab7c3fc0847d45fb9928bafc1a084d5a19c121",
         "verified": true
       },
       "local": null,
@@ -294,6 +294,16 @@
             "The contaminated attempt is preserved at commit 8c62b8b2dcbe13ca5c72e9a1e5a0a12aaca9862c rather than reset or overwritten.",
             "The stop also exposed an executor-identity labeling defect: ChatGPT reported GPT-5.6 Sol / Instant, while the runset expected generic GPT-5.6. The runset was corrected at fc59d52d4591f271c03a31f0778f746728e9933f.",
             "Fresh replacement slot screening-v1-P0-B-002 was created at 2d9dd4c43373ba55b1042e634e2cb0b4720f8af9."
+          ]
+        },
+        {
+          "check": "Contaminated screening retry implementation",
+          "result": "PASS",
+          "evidence": [
+            "screening-v1-P0-B-001 is durably preserved as CONTAMINATED_SESSION at commit 8c62b8b2dcbe13ca5c72e9a1e5a0a12aaca9862c with zero reasoning invocations and zero experiment requests.",
+            "Executor identity expectation was corrected to GPT-5.6 Sol / Instant at fc59d52d4591f271c03a31f0778f746728e9933f.",
+            "Fresh replacement slot screening-v1-P0-B-002 was created at 2d9dd4c43373ba55b1042e634e2cb0b4720f8af9.",
+            "Bootstrap regression coverage was corrected to preserve the contaminated predecessor and validate the active replacement slot. Exact implementation head 82ab7c3fc0847d45fb9928bafc1a084d5a19c121 passed Workspace Control Validation 41529185760 / #1774 SUCCESS."
           ]
         }
       ],
@@ -938,6 +948,15 @@
         "Protocol checkpoint 74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4 / Validation 41526074412 SUCCESS.",
         "Frozen READY slot 124edbf30587be8f64e579a053eb2beef8288f5a / Validation 41526365989 SUCCESS.",
         "No reasoning-quality outcome is claimed yet; the worker session has not been launched."
+      ]
+    },
+    {
+      "check": "Contaminated screening retry checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "Exact implementation head 82ab7c3fc0847d45fb9928bafc1a084d5a19c121 passed Workspace Control Validation run 41529185760 / #1774 SUCCESS.",
+        "The first contaminated attempt remains immutable evidence; it was not reset or overwritten.",
+        "The active replacement slot is screen-002 and remains READY for a truly clean Temporary/Memory-off ChatGPT Instant worker."
       ]
     }
   ],
