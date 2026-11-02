@@ -106,6 +106,13 @@ class LegacyScaleSetRetirementTests(unittest.TestCase):
             SOURCE,
         )
 
+    def test_completed_retirement_has_fresh_process_verification_mode(self):
+        self.assertIn('flag.String("verify-receipt"', SOURCE)
+        self.assertIn("verifyCompletedRetirement", SOURCE)
+        self.assertIn("LEGACY_SCALE_SET_ABSENT=", SOURCE)
+        self.assertIn("V3_TARGET_SCALE_SET_PRESENT=", SOURCE)
+        self.assertIn("V3_LEGACY_SCALE_SET_RETIREMENT_VERIFY=PASS", SOURCE)
+
     def test_migration_plan_requires_rollback_window_and_accepted_target(self):
         self.assertIn(
             '"target v3 route/class accepted"',
