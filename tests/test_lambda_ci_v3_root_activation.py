@@ -93,6 +93,9 @@ class EffectiveGenerationVerificationTests(unittest.TestCase):
             controller = root / "lambda-ci-controller-v3"
             controller.write_bytes(b"base")
             controller.chmod(0o755)
+            reconciler_script = root / "lambda_ci_v3_reconciler.py"
+            reconciler_script.write_bytes(b"base-reconciler")
+            reconciler_script.chmod(0o755)
             manifest = root / "install-manifest.json"
             payload = {
                 "schema_version": 1,
@@ -105,18 +108,26 @@ class EffectiveGenerationVerificationTests(unittest.TestCase):
                         "destination": str(controller),
                         "sha256": activation._sha256(b"base"),
                         "mode": "0755",
-                    }
+                    },
+                    {
+                        "destination": str(reconciler_script),
+                        "sha256": activation._sha256(b"base-reconciler"),
+                        "mode": "0755",
+                    },
                 ],
             }
             manifest.write_bytes(activation._canonical(payload))
             old_controller = activation.reconciler.V3_CONTROLLER_BINARY
+            old_reconciler = activation.RECONCILER_SCRIPT
             try:
                 activation.reconciler.V3_CONTROLLER_BINARY = controller
+                activation.RECONCILER_SCRIPT = reconciler_script
                 self.assertIsNone(
                     activation.verify_effective_installed_generation(manifest)
                 )
             finally:
                 activation.reconciler.V3_CONTROLLER_BINARY = old_controller
+                activation.RECONCILER_SCRIPT = old_reconciler
 
     def test_controller_override_is_bound_to_base_manifest_and_digest(self):
         with tempfile.TemporaryDirectory() as raw:
@@ -124,6 +135,9 @@ class EffectiveGenerationVerificationTests(unittest.TestCase):
             controller = root / "lambda-ci-controller-v3"
             controller.write_bytes(b"override")
             controller.chmod(0o755)
+            reconciler_script = root / "lambda_ci_v3_reconciler.py"
+            reconciler_script.write_bytes(b"base-reconciler")
+            reconciler_script.chmod(0o755)
             manifest = root / "install-manifest.json"
             payload = {
                 "schema_version": 1,
@@ -136,7 +150,12 @@ class EffectiveGenerationVerificationTests(unittest.TestCase):
                         "destination": str(controller),
                         "sha256": activation._sha256(b"base"),
                         "mode": "0755",
-                    }
+                    },
+                    {
+                        "destination": str(reconciler_script),
+                        "sha256": activation._sha256(b"base-reconciler"),
+                        "mode": "0755",
+                    },
                 ],
             }
             manifest.write_bytes(activation._canonical(payload))
@@ -160,13 +179,16 @@ class EffectiveGenerationVerificationTests(unittest.TestCase):
             receipt.chmod(0o600)
             old_controller = activation.reconciler.V3_CONTROLLER_BINARY
             old_receipt = activation.CONTROLLER_REFRESH_ACTIVE_RECEIPT
+            old_reconciler = activation.RECONCILER_SCRIPT
             try:
                 activation.reconciler.V3_CONTROLLER_BINARY = controller
                 activation.CONTROLLER_REFRESH_ACTIVE_RECEIPT = receipt
+                activation.RECONCILER_SCRIPT = reconciler_script
                 result = activation.verify_effective_installed_generation(manifest)
             finally:
                 activation.reconciler.V3_CONTROLLER_BINARY = old_controller
                 activation.CONTROLLER_REFRESH_ACTIVE_RECEIPT = old_receipt
+                activation.RECONCILER_SCRIPT = old_reconciler
             self.assertEqual(result["controller_source_head"], "c" * 40)
 
     def test_root_activation_helper_override_is_bound_to_base_manifest_and_digest(self):
@@ -178,6 +200,9 @@ class EffectiveGenerationVerificationTests(unittest.TestCase):
             helper = root / "lambda_ci_v3_root_activation.py"
             helper.write_bytes(b"candidate-helper")
             helper.chmod(0o555)
+            reconciler_script = root / "lambda_ci_v3_reconciler.py"
+            reconciler_script.write_bytes(b"base-reconciler")
+            reconciler_script.chmod(0o755)
             manifest = root / "install-manifest.json"
             payload = {
                 "schema_version": 1,
@@ -195,6 +220,11 @@ class EffectiveGenerationVerificationTests(unittest.TestCase):
                         "destination": str(helper),
                         "sha256": activation._sha256(b"base-helper"),
                         "mode": "0555",
+                    },
+                    {
+                        "destination": str(reconciler_script),
+                        "sha256": activation._sha256(b"base-reconciler"),
+                        "mode": "0755",
                     },
                 ],
             }
@@ -225,15 +255,18 @@ class EffectiveGenerationVerificationTests(unittest.TestCase):
             old_controller = activation.reconciler.V3_CONTROLLER_BINARY
             old_helper = activation.ROOT_ACTIVATION_HELPER
             old_helper_receipt = activation.ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT
+            old_reconciler = activation.RECONCILER_SCRIPT
             try:
                 activation.reconciler.V3_CONTROLLER_BINARY = controller
                 activation.ROOT_ACTIVATION_HELPER = helper
                 activation.ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT = receipt
+                activation.RECONCILER_SCRIPT = reconciler_script
                 result = activation.verify_effective_installed_generation(manifest)
             finally:
                 activation.reconciler.V3_CONTROLLER_BINARY = old_controller
                 activation.ROOT_ACTIVATION_HELPER = old_helper
                 activation.ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT = old_helper_receipt
+                activation.RECONCILER_SCRIPT = old_reconciler
 
             self.assertEqual(
                 result["root_activation_helper_override"]["helper_source_head"],
