@@ -58,6 +58,50 @@ class V3ControllerRefreshTests(unittest.TestCase):
         candidate["source_head"] = "d" * 40
         refresh.compare_manifests_for_controller_only_refresh(base, candidate)
 
+    def test_authorized_effective_non_controller_override_is_allowed(self):
+        base = self.manifest(controller_sha="old", other_sha="base")
+        candidate = self.manifest(controller_sha="new", other_sha="effective")
+        effective = {
+            entry["destination"]: entry["sha256"]
+            for entry in base["entries"]
+        }
+        effective["/etc/workspace-ci/v3/root-policy.json"] = "effective"
+        refresh.compare_manifests_for_controller_only_refresh(
+            base,
+            candidate,
+            effective_sha256=effective,
+        )
+
+    def test_candidate_non_controller_drift_beyond_effective_state_is_rejected(self):
+        base = self.manifest(controller_sha="old", other_sha="base")
+        candidate = self.manifest(controller_sha="new", other_sha="candidate-drift")
+        effective = {
+            entry["destination"]: entry["sha256"]
+            for entry in base["entries"]
+        }
+        effective["/etc/workspace-ci/v3/root-policy.json"] = "effective"
+        with self.assertRaises(refresh.ControllerRefreshError):
+            refresh.compare_manifests_for_controller_only_refresh(
+                base,
+                candidate,
+                effective_sha256=effective,
+            )
+
+    def test_effective_digest_set_must_cover_exact_managed_destinations(self):
+        base = self.manifest(controller_sha="old", other_sha="same")
+        candidate = self.manifest(controller_sha="new", other_sha="same")
+        with self.assertRaisesRegex(
+            refresh.ControllerRefreshError,
+            "effective installed digest set",
+        ):
+            refresh.compare_manifests_for_controller_only_refresh(
+                base,
+                candidate,
+                effective_sha256={
+                    str(refresh.CONTROLLER_BINARY): "old",
+                },
+            )
+
     def test_non_controller_manifest_change_is_rejected(self):
         base = self.manifest(controller_sha="old", other_sha="same")
         candidate = self.manifest(controller_sha="new", other_sha="drift")
