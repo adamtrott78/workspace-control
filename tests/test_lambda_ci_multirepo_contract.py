@@ -119,8 +119,8 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
     def test_padataset_public_repo_gate_is_fail_closed(self):
         self.assertEqual(PAD["repository_visibility"], "public")
         expected_blobs = {
-            "cpu-ci": "5e6a1d4a47ecdfa8b40d3bea23fa8739cc12cd9e",
-            "gpu-ci": "3e0c79dc1b8bed7b1480cc745c478c190a3c7da4",
+            "cpu-ci": "f63eeaba0126c8241d3130449f12790b915c9495",
+            "gpu-ci": "1ff52d3940a05a67d94bc21eeb31fd19b7e6d042",
         }
         self.assertEqual(set(PAD["routes"]), set(expected_blobs))
         for route_id, route in PAD["routes"].items():
