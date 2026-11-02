@@ -554,6 +554,7 @@ class ProductionCutoverTests(unittest.TestCase):
             repo_root=ROOT,
             receipt_path=receipt,
             validation_confirmation=fx["validation"],
+            provisioner_state_root=fx["provisioner"],
         )
         self.assertTrue(
             all(systemd.enabled(unit) for unit in production.ROOT_UNITS)
@@ -601,6 +602,62 @@ class ProductionCutoverTests(unittest.TestCase):
         self.assertEqual(
             receipt_value["phase"],
             "ROLLED_BACK_LEGACY_RESTORED",
+        )
+
+    def test_bad_workflow_rollback_confirmation_still_isolates_v3(self):
+        fx = self._install_fixture()
+        receipt = production.prepare(
+            systemd=fx["systemd"],
+            repo_root=ROOT,
+            generation_dir=fx["generation"],
+            authorization_receipt=fx["authority_path"],
+            transaction_root=fx["migration_root"],
+            authority_root=fx["authority_root"],
+            provisioner_state_root=fx["provisioner"],
+        )
+        production.activate(
+            systemd=fx["systemd"],
+            repo_root=ROOT,
+            receipt_path=receipt,
+            workflow_confirmation=fx["workflow_confirmation"],
+            provisioner_state_root=fx["provisioner"],
+        )
+        bad = json.loads(fx["rollback_confirmation"].read_text())
+        key = next(iter(production.ROUTES))
+        bad["workflow_bindings"][key]["blob_sha"] = "f" * 40
+        fx["rollback_confirmation"].write_text(
+            json.dumps(bad, indent=2, sort_keys=True) + "\n"
+        )
+        fx["rollback_confirmation"].chmod(0o600)
+
+        with self.assertRaisesRegex(
+            production.CutoverError,
+            "workflow confirmation blob mismatch",
+        ):
+            production.rollback(
+                systemd=fx["systemd"],
+                repo_root=ROOT,
+                receipt_path=receipt,
+                workflow_rollback_confirmation=fx[
+                    "rollback_confirmation"
+                ],
+                provisioner_state_root=fx["provisioner"],
+            )
+        self.assertFalse(
+            any(
+                fx["systemd"].active(unit)
+                for unit in fx["v3_units"]
+            )
+        )
+        self.assertFalse(
+            any(
+                fx["systemd"].active(unit)
+                for unit in fx["v2_units"]
+            )
+        )
+        self.assertEqual(
+            json.loads(receipt.read_text())["phase"],
+            "ROLLBACK_V3_QUIESCED",
         )
 
     def test_nonterminal_transaction_blocks_before_authority_consumption(self):
