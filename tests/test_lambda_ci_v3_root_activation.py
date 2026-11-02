@@ -29,6 +29,7 @@ activation = load(
     "lambda_ci_v3_root_activation",
     ROOT / "scripts" / "lambda_ci_v3_root_activation.py",
 )
+ROOT_REACTIVATION_UPDATER = ROOT / "scripts" / "lambda_ci_v3_root_reactivation_helper_live_update_v1.py"
 
 
 class FakeSystemd:
@@ -57,6 +58,29 @@ class FakeSystemd:
 
     def list_units(self):
         return sorted(set(self.states) | set(self.extra_units))
+
+
+class RootReactivationUpdaterContractTests(unittest.TestCase):
+    def test_updater_is_single_file_transactional_and_non_activating(self):
+        text = ROOT_REACTIVATION_UPDATER.read_text()
+        self.assertIn(
+            'BASE_SOURCE_HEAD = "09c46818252991f6a55aaeedbcf046c554e2ffee"',
+            text,
+        )
+        self.assertIn(
+            'EXPECTED_CANDIDATE_GIT_BLOB = "c40f786e7fc64b30fdaed91ffc3dacf5e77e177c"',
+            text,
+        )
+        self.assertIn(
+            '/opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py',
+            text,
+        )
+        self.assertIn("V3_ROOT_REACTIVATION_HELPER_UPDATE=PASS", text)
+        self.assertIn("verify_effective_installed_generation", text)
+        self.assertNotIn("systemctl", text)
+        self.assertNotIn("ACTIVATE_V3_ROOT_SERVICES", text)
+        self.assertNotIn("workspace-ci-v3-provisioner.service", text)
+        self.assertNotIn("workspace-ci-v3-reconciler.service", text)
 
 
 class EffectiveGenerationVerificationTests(unittest.TestCase):
