@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "fixture_id": "research-iterate-cross-region-feedback-p3-v1",
+  "fixture_blob_sha": "3a70c0eb8182d40c81e6d8a61b9ee354831073ef",
+  "taxonomy_ref": "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json",
+  "phenotype": {
+    "primary": "P3_mixed_long_hard",
+    "horizon_load": "HIGH",
+    "separability": "PARTIALLY_COUPLED",
+    "reasoning_stress": "HIGH"
+  },
+  "supported_experiment_questions": [
+    "Q1_horizon_externalization",
+    "Q2_decomposition_effect",
+    "Q3_intrinsic_reasoning_boundary",
+    "Q4_independent_critique",
+    "Q5_escalation_calibration"
+  ],
+  "purpose": "Mixed fixture: regional leaves are decomposable, but terminal diagnosis requires a coupled cross-region residual and competing-mechanism control.",
+  "domain_workflow": [
+    "research",
+    "systems_diagnosis"
+  ],
+  "reasoning_primitives": [
+    "hypothesize",
+    "causal_discrimination",
+    "plan",
+    "experiment",
+    "interpret",
+    "critique",
+    "synthesize",
+    "decide_under_uncertainty"
+  ],
+  "horizon_load": {
+    "expected_reasoning_quanta": 6,
+    "evidence_item_count": 4,
+    "expected_tool_actions": 6,
+    "dependency_depth": 3,
+    "dependency_width": 4,
+    "external_wait_count": 6,
+    "repository_or_environment_count": 1
+  },
+  "decomposability": {
+    "separability": "PARTIALLY_COUPLED",
+    "independently_validatable_leaf_fraction": 0.67,
+    "synthesis_coupling": "HIGH"
+  },
+  "reasoning_stressors": {
+    "competing_hypothesis_count": 3,
+    "conflicting_evidence": "MEDIUM",
+    "causal_identification_required": true,
+    "novelty": "MEDIUM",
+    "nonlocal_constraint_count": 4,
+    "uncertainty": "MEDIUM",
+    "search_space": "BOUNDED_LARGE",
+    "distractor_density": "MEDIUM"
+  },
+  "expected_routing_signal": "Decompose regional leaves first; only a surviving objectively evidenced coupled residual is eligible for frontier escalation.",
+  "validator": {
+    "validator_class": "EXACT_ORACLE",
+    "terminal_authority": true,
+    "partial_credit": true,
+    "evaluator_isolation": "HIDDEN_STATIC"
+  },
+  "claim_ceiling": [
+    "Supports mixed horizon/reasoning routing evidence only with clean oracle-unexposed replicated runs."
+  ]
+}
