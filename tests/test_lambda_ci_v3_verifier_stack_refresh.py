@@ -38,6 +38,7 @@ class V3VerifierStackRefreshTests(unittest.TestCase):
         self.assertIn('"class_controller_mutated":False',text)
         self.assertIn('"workflow_mutated":False',text)
         self.assertIn('"legacy_v2_mutated":False',text)
+        self.assertIn("changed=True",text)
         self.assertNotIn("systemctl start",text)
         self.assertNotIn("systemctl stop",text)
 
@@ -48,6 +49,9 @@ class V3VerifierStackRefreshTests(unittest.TestCase):
         activation=text.index("str(INSTALLED_ACTIVATOR)")
         self.assertLess(refresh,authority)
         self.assertLess(authority,activation)
+        self.assertIn("repo = exact_repo(args.expected_head)",text)
+        self.assertIn("updater = repo / VERIFIER_STACK_UPDATER_REL",text)
+        self.assertIn("cwd=repo",text)
 
 
 if __name__=="__main__":

@@ -314,7 +314,7 @@ def main() -> int:
     if SHA_RE.fullmatch(args.expected_head) is None:
         raise RecoveryError("--expected-head must be a full lowercase Git SHA")
 
-    exact_repo(args.expected_head)
+    repo = exact_repo(args.expected_head)
     require_private_root_dir(MIGRATION_ROOT)
 
     print("RESEARCH_GPU_CONTAINMENT_AND_V3_ROOT_RESUME=BEGIN")
@@ -322,11 +322,12 @@ def main() -> int:
 
     repair_research_gpu_containment(args.expected_head)
 
-    updater = Path.cwd() / VERIFIER_STACK_UPDATER_REL
+    updater = repo / VERIFIER_STACK_UPDATER_REL
     if not updater.is_file():
         raise RecoveryError(f"verifier-stack updater missing: {updater}")
     refresh = run(
-        [sys.executable, str(updater), "--expected-head", args.expected_head]
+        [sys.executable, str(updater), "--expected-head", args.expected_head],
+        cwd=repo,
     )
     if refresh.stdout:
         print(refresh.stdout, end="")

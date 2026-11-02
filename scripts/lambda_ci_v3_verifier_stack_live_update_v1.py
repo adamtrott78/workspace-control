@@ -222,8 +222,10 @@ def main() -> int:
     try:
         atomic_json(RECONCILER_OVERRIDE,rec_receipt)
         atomic_json(HELPER_OVERRIDE,helper_receipt)
-        atomic_file(INSTALLED_RECONCILER,candidate_rec,rec_mode)
+        # From this point onward, rollback both installed files on any exception,
+        # including an fsync failure after an atomic replacement.
         changed=True
+        atomic_file(INSTALLED_RECONCILER,candidate_rec,rec_mode)
         atomic_file(INSTALLED_ACTIVATOR,candidate_helper,helper_mode)
 
         # Repository verifier and installed verifier must agree after replacement.
