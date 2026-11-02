@@ -47,7 +47,7 @@
       "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "e09c7f5485914b0345ffb459512461fede94875d",
+        "checkpoint_sha": "0fd8a2b37bbd1987008a61a5e346718658a12137",
         "verified": true
       },
       "local": null,
@@ -410,6 +410,20 @@
         "Draft PR #592 makes the tmpfiles rule persistent and boot-enables only the four recovery-plane services with an emergency disable path.",
         "Privileged helper/standing authority remains a separate architectural follow-up; boot persistence must not imply arbitrary root authority."
       ]
+    },
+    {
+      "id": "gitrunner-v3-production-and-retirement-complete",
+      "kind": "dependency_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142",
+      "required_for_resume": true,
+      "evidence": [
+        "GitRunner v3 production generation cutover accepted under transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json.",
+        "Production validations succeeded for workspace-control run 41504458922/job 125480061499, PADataset CPU run 41504979316/job 125481849777, and PADataset GPU run 41505174483/job 125482508067.",
+        "Validated legacy-retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 passed Workspace Control Validation run 41512744850.",
+        "Live retirement receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json recorded before deletion.",
+        "lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu were retired after all six scale-set counters were zero; fresh-process verification proved those names absent and exact accepted v3 targets still present.",
+        "lambda-research-engine and lambda-research-engine-gpu remain intentionally preserved because their replacement v3 classes are not accepted; preserved v2 controller bytes/config/state remain outside current cleanup authority."
+      ]
     }
   ],
   "artifacts": [
@@ -560,13 +574,20 @@
         "Legacy workspace-control incident is resolved enough to stop broad v2 repair work.",
         "Current live blocker is v3 root reactivation helper prestate/metadata mismatch after a valid controller-refresh overlay, not a return to the original parser problem."
       ]
+    },
+    {
+      "check": "GitRunner P0 infrastructure dependency cleared",
+      "result": "PASS",
+      "evidence": [
+        "V3 production cutover completed and committed for the accepted Workspace Control + PADataset classes.",
+        "All three production-accepted legacy v2 scale sets were retired with rollback-window receipt and fresh-process absence verification.",
+        "The GitRunner migration no longer blocks the umbrella semantic-execution benchmark stage."
+      ]
     }
   ],
   "blockers": [
-    "Current implementation freeze is intentionally blocked until the GitRunner v3 substrate is canonical enough that new orchestration is not built atop legacy v2 reliability debt.",
     "Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark, independent review, and unseen-workflow extension proof.",
-    "Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.",
-    "Live GitRunner migration actions remain authority-owned by workspace-github-actions-control-plane-protocol-redesign-v1 and require fresh class-specific authority; this umbrella task cannot manufacture that authority."
+    "Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash."
   ],
   "remaining_work": [
     "Track the GitRunner v3 migration/retirement task as the current P0 infrastructure dependency only; consume its durable receipts/state but do not let it redefine the umbrella architecture.",
@@ -582,8 +603,8 @@
     "Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.",
     "Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation."
   ],
-  "next_safe_action": "TEMPORARY P0 INFRASTRUCTURE GATE, NOT THE OVERALL PROJECT: first allow workspace-github-actions-control-plane-protocol-redesign-v1 / PR #572 to recover v3 root services after the power outage, finish PADataset CPU/GPU active-class canaries, perform the controlled production v3 cutover, and retire v2. Do not let that incident consume or replace this umbrella program. Once v3 is canonical and the Workspace Shell recovery/standing-authority gaps are closed enough for normal operation, immediately resume the semantic-execution program at the empirical executor/reasoning evidence stage: consolidate the already completed Instant capability benchmarks, run the resumable-reasoning quality benchmark against frontier control arms, perform independent architecture review, prove an unseen workflow/domain extension, freeze the smallest open-world semantic core + ReasoningProcess + executor/resource/quota router, then incrementally migrate representative research, engineering, data-science, paper, slide, tutoring/homework, document/artifact, GitRunner, Workspace Shell, and future workflow families. Optimize for the same end-to-end functionality with minimal scarce frontier-model allowance, not for a research-only loop.",
+  "next_safe_action": "Resume the resumable_reasoning_benchmark now that the GitRunner v3 production/retirement dependency is cleared. Consolidate the existing Instant durable-worker evidence into the benchmark harness, select representative hard long-horizon research/architecture fixtures with objective validators, and run at least the persistent Instant, stateless-resume Instant, decomposition/critic Instant, hybrid-escalation, and frontier-control arms. Measure validated outcome quality, retries/decomposition, context/usage, elapsed work quanta, and escalation reason. The decision boundary must distinguish TOO_LARGE (decompose/retry cheap) from INTRINSICALLY_DIFFICULT (escalate). Do not freeze the semantic execution architecture until the benchmark, independent architecture review, and unseen-workflow extension proof are complete.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+workspace-shell+heartbeat",
-  "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion."
+  "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion.\\n\\n2026-11-02 GITRUNNER P0 DEPENDENCY CLEARED: workspace-github-actions-control-plane-protocol-redesign-v1 completed the accepted production scope. Production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json is committed; workspace-control, PADataset CPU, and PADataset GPU production validations all passed. Validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 then retired lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after zero-work/zero-runner proof. Root-owned rollback receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was written before deletion, and fresh-process verification proved all three legacy names absent while accepted v3 targets remain. Research legacy scale sets and v2 bytes/config/state remain preserved pending separate authority. Resume resumable_reasoning_benchmark immediately; GitRunner is no longer the umbrella blocker."
 }
