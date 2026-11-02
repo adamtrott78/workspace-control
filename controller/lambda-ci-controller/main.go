@@ -386,7 +386,7 @@ func executeScaleSetMaintenance(
 	if request.SchemaVersion != 1 {
 		return scaleSetMaintenanceResponse{}, fmt.Errorf("scale-set maintenance schema_version must be 1")
 	}
-	if request.Operation != "INSPECT" && request.Operation != "DELETE" {
+	if request.Operation != "INSPECT" && request.Operation != "DELETE" && request.Operation != "DELETE_STALE_QUARANTINED" {
 		return scaleSetMaintenanceResponse{}, fmt.Errorf("scale-set maintenance operation is unsupported")
 	}
 	if request.ExpectedScaleSetID < 0 {
@@ -425,20 +425,47 @@ func executeScaleSetMaintenance(
 		return response, nil
 	}
 	if request.ExpectedScaleSetID <= 0 {
-		return scaleSetMaintenanceResponse{}, fmt.Errorf("DELETE requires exact expected scale-set id")
+		return scaleSetMaintenanceResponse{}, fmt.Errorf("%s requires exact expected scale-set id", request.Operation)
 	}
 	if current.Statistics == nil {
 		return scaleSetMaintenanceResponse{}, fmt.Errorf("scale-set statistics unavailable; refusing delete")
 	}
-	if current.Statistics.TotalRegisteredRunners != 0 ||
-		current.Statistics.TotalBusyRunners != 0 ||
-		current.Statistics.TotalRunningJobs != 0 {
-		return scaleSetMaintenanceResponse{}, fmt.Errorf(
-			"scale set is not quiescent: registered=%d busy=%d running=%d",
-			current.Statistics.TotalRegisteredRunners,
-			current.Statistics.TotalBusyRunners,
-			current.Statistics.TotalRunningJobs,
-		)
+	if request.Operation == "DELETE" {
+		if current.Statistics.TotalRegisteredRunners != 0 ||
+			current.Statistics.TotalBusyRunners != 0 ||
+			current.Statistics.TotalRunningJobs != 0 {
+			return scaleSetMaintenanceResponse{}, fmt.Errorf(
+				"scale set is not quiescent: registered=%d busy=%d running=%d",
+				current.Statistics.TotalRegisteredRunners,
+				current.Statistics.TotalBusyRunners,
+				current.Statistics.TotalRunningJobs,
+			)
+		}
+	} else {
+		// Narrow recovery for a GitHub scale-set accounting ghost observed after
+		// the exact workflow run has become terminal and the controller lane is
+		// separately quiesced by the maintenance service. There must be no
+		// registered/idle runner, no running/acquired/available job, and the only
+		// residue allowed is exactly one assigned+busy bookkeeping entry.
+		stats := current.Statistics
+		if stats.TotalRegisteredRunners != 0 ||
+			stats.TotalIdleRunners != 0 ||
+			stats.TotalRunningJobs != 0 ||
+			stats.TotalAcquiredJobs != 0 ||
+			stats.TotalAvailableJobs != 0 ||
+			stats.TotalAssignedJobs != 1 ||
+			stats.TotalBusyRunners != 1 {
+			return scaleSetMaintenanceResponse{}, fmt.Errorf(
+				"stale-quarantine delete preconditions failed: available=%d acquired=%d assigned=%d running=%d registered=%d busy=%d idle=%d",
+				stats.TotalAvailableJobs,
+				stats.TotalAcquiredJobs,
+				stats.TotalAssignedJobs,
+				stats.TotalRunningJobs,
+				stats.TotalRegisteredRunners,
+				stats.TotalBusyRunners,
+				stats.TotalIdleRunners,
+			)
+		}
 	}
 	if err := client.DeleteRunnerScaleSet(ctx, current.ID); err != nil {
 		return scaleSetMaintenanceResponse{}, fmt.Errorf("delete exact configured scale set: %w", err)
