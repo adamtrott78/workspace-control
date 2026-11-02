@@ -68,7 +68,7 @@ class RootReactivationUpdaterContractTests(unittest.TestCase):
             text,
         )
         self.assertIn(
-            'EXPECTED_CANDIDATE_GIT_BLOB = "c40f786e7fc64b30fdaed91ffc3dacf5e77e177c"',
+            'EXPECTED_CANDIDATE_GIT_BLOB = "eed5c2ddac6c901b31d5b98b33d7ae0c297a0dbb"',
             text,
         )
         self.assertIn(
