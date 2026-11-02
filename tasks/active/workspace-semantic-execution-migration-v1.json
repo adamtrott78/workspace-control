@@ -47,7 +47,7 @@
       "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "ca12ad69988d1a247ae32b7454c0ff146cbb83bc",
+        "checkpoint_sha": "4ec300254c328a1b6e0fce62fe62cd6f11d7a855",
         "verified": true
       },
       "local": null,
@@ -242,9 +242,19 @@
             "INSTANT_MULTI_WORKER_SCALE_V1 durable state records all eight actions A-H COMPLETE with exact-head CI evidence and peer-preserving CAS across W1/W2/W3; worker-registration collision exposed the need for authoritative session-slot registration rather than prompt-order identity assumptions.",
             "These benchmarks prove durable queue/CAS/recovery/orchestration mechanics; they do NOT yet prove Instant matches frontier reasoning quality on intrinsically difficult research/architecture work."
           ]
+        },
+        {
+          "check": "Resumable-reasoning pilot harness implementation",
+          "result": "PASS",
+          "evidence": [
+            "PR #590 exact head 4ec300254c328a1b6e0fce62fe62cd6f11d7a855 passed Workspace Control Validation run 41519306708 SUCCESS.",
+            "The validated pilot implements durable semantic checkpoint/context serialization, generation fencing/recovery, WAITING_EXTERNAL -> READY_TO_RESUME event wake without model polling, objective research-iterate validation, and explicit DECOMPOSE versus ESCALATION_REQUIRED transitions.",
+            "The public research fixture, evaluator-only oracle, prior Instant mechanics ledger, pilot harness, runset contract, and regression tests are durable on the branch.",
+            "This is implementation/mechanics evidence only; no A-E reasoning-quality arm has yet been scored."
+          ]
         }
       ],
-      "resume_condition": "Run the quality/effectiveness benchmark on realistic long-horizon research/engineering fixtures and determine where durable Instant continuation/decomposition is sufficient versus where frontier reasoning materially improves validated outcomes."
+      "resume_condition": "Launch clean oracle-unexposed model sessions for A-E against the frozen pilot runset, persist every reasoning quantum durably, objectively score terminal submissions, and compare quality/cost/recovery/escalation evidence. The authoring session is not eligible as a scored arm because it has seen evaluator-only truth."
     },
     {
       "id": "semantic_core_and_extension_contract",
@@ -516,14 +526,79 @@
     },
     {
       "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_v1.json",
-      "state": "DESIGN_ONLY_NOT_EXECUTED",
+      "state": "PILOT_HARNESS_IMPLEMENTED_ARMS_NOT_RUN",
       "role": "Instant-vs-frontier resumable-reasoning benchmark contract",
       "origin": "workspace-semantic-execution-migration-v1",
       "persistence": "Git",
-      "regeneration": "fixture/evaluator implementation",
-      "review_requirement": "pilot before capability claims",
+      "regeneration": "revise from scored clean-session arm evidence",
+      "review_requirement": "clean A-E pilot + evaluator-isolation review before capability claims",
       "evidence": [
-        "Defines frontier control, persistent Instant, stateless Instant, decomposition/critic, and hybrid-escalation arms."
+        "Validated implementation checkpoint 4ec300254c328a1b6e0fce62fe62cd6f11d7a855 / Workspace Control Validation 41519306708 SUCCESS.",
+        "Defines frontier control, persistent Instant, stateless Instant, decomposition/critic, and hybrid-escalation arms; all scored arms remain NOT_STARTED."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/prior_instant_worker_evidence_v1.json",
+      "state": "VALIDATED_MECHANICS_EVIDENCE",
+      "role": "exact prior Instant/durable-worker mechanics ledger",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "recover from exact PR heads, comments, and validation runs",
+      "review_requirement": "none for mechanics claims; cannot support frontier-equivalence claims",
+      "evidence": [
+        "Covers PRs #574-#589 with exact heads and Workspace Control Validation runs.",
+        "Explicitly limits claims to connected-tool engineering, CAS/recovery/orchestration mechanics, and multi-worker execution."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.json",
+      "state": "FROZEN_PILOT_FIXTURE",
+      "role": "worker-visible research_iterate fixture",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned fixture replacement only",
+      "review_requirement": "fixture difficulty/representativeness review before broad capability conclusions",
+      "evidence": [
+        "Frozen public fixture blob 6def452e61be0e823bc5ee871ee2888bb1c9359f at validated implementation checkpoint."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+      "state": "EVALUATOR_ONLY_PROCESS_SEALED",
+      "role": "deterministic research_iterate oracle and terminal criteria",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned evaluator replacement only",
+      "review_requirement": "stronger evaluator secrecy/isolation required before frontier-equivalence claims",
+      "evidence": [
+        "Oracle blob acc914d4fa9862a7f1ad0eabac21dbbf7aa84d68 is intentionally excluded from worker packets.",
+        "Current isolation is process-protocol-only, not a cryptographic/tool-enforced seal."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+      "state": "VALIDATED_PILOT_HARNESS",
+      "role": "authority-free durable state/event/evaluator harness",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned harness revision with exact-head CI",
+      "review_requirement": "clean-session pilot evidence before production routing claims",
+      "evidence": [
+        "Harness blob ff55438e933e91dad3057167c2243f0ef4933df2 passed Workspace Control Validation run 41519306708.",
+        "Implements generation fencing, external wait/wake, bounded semantic context packets, objective validation, decomposition, escalation evidence, metrics and hard gates."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_runset_v1.json",
+      "state": "READY_FOR_CLEAN_MODEL_ARM_EXECUTION",
+      "role": "frozen A-E pilot runset and worker/evaluator protocol",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned runset revision only",
+      "review_requirement": "scored arms must be oracle-unexposed clean sessions",
+      "evidence": [
+        "Binds the runset to validated implementation checkpoint 4ec300254c328a1b6e0fce62fe62cd6f11d7a855 / validation 41519306708.",
+        "All five model arms remain NOT_STARTED."
       ]
     }
   ],
@@ -593,16 +668,28 @@
         "Legacy retirement receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json retired exactly lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu with fresh-process verification PASS.",
         "Umbrella current_stage is resumable_reasoning_benchmark; architecture freeze remains gated on benchmark evidence, independent review, and unseen-workflow extension proof."
       ]
+    },
+    {
+      "check": "Resumable reasoning pilot implementation checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "PR #590 exact head 4ec300254c328a1b6e0fce62fe62cd6f11d7a855 passed Workspace Control Validation run 41519306708 SUCCESS.",
+        "Changed-task validation, unit regression, pinned Lambda controller validation, and full integration contracts all passed.",
+        "The checkpoint includes the public hard research fixture, evaluator-only oracle, durable mechanics ledger, state/event/evaluator harness, bounded semantic context serializer, frozen pilot runset, and regression tests.",
+        "No frontier-quality equivalence claim is made; model arms A-E remain unexecuted."
+      ]
     }
   ],
   "blockers": [
     "Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark, independent review, and unseen-workflow extension proof.",
-    "Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash."
+    "Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.",
+    "Scored resumable-reasoning arms require oracle-unexposed clean model sessions. This authoring chat has read evaluator-only oracle truth and cannot be counted as a scored arm; the current connected-tool surface does not provide a programmatic clean ChatGPT-session spawn primitive.",
+    "Evaluator isolation is currently PROCESS_PROTOCOL_ONLY. A stronger sealed evaluator or equivalently clean execution protocol is required before any frontier-equivalence claim."
   ],
   "remaining_work": [
+    "Execute the five frozen pilot arms in clean oracle-unexposed model sessions: frontier long-horizon, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid escalation; persist every quantum under the runset state contract and score terminal submissions with the deterministic evaluator.",
+    "Strengthen evaluator isolation beyond process-protocol-only before making any frontier-equivalence claim; the current authoring chat is evaluator-contaminated and is excluded from scored arms.",
     "Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.",
-    "Consolidate already completed Instant capability evidence: multi-leaf queue endurance/resume, stateless durable recovery, concurrent exact-head CAS claiming/completion, lease expiry/recovery fencing, and multi-worker scaling with eight validated actions.",
-    "Implement and run the resumable-reasoning benchmark pilot comparing frontier long-horizon, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid-escalation arms using objective validators plus usage/context/effectiveness metrics.",
     "Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.",
     "Run an independent architecture review of the preferred hybrid semantic-projection hypothesis and challenge whether a different execution substrate/agent/workflow framework materially improves reliability or allowance efficiency.",
     "Prove at least one previously unseen workflow/domain extension can be added without core-kernel changes, closed domain enums, or authority leakage.",
@@ -612,8 +699,8 @@
     "Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.",
     "Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation."
   ],
-  "next_safe_action": "Resume the resumable_reasoning_benchmark now that the GitRunner v3 production/retirement dependency is cleared. Consolidate the existing Instant durable-worker evidence into the benchmark harness, select representative hard long-horizon research/architecture fixtures with objective validators, and run at least the persistent Instant, stateless-resume Instant, decomposition/critic Instant, hybrid-escalation, and frontier-control arms. Measure validated outcome quality, retries/decomposition, context/usage, elapsed work quanta, and escalation reason. The decision boundary must distinguish TOO_LARGE (decompose/retry cheap) from INTRINSICALLY_DIFFICULT (escalate). Do not freeze the semantic execution architecture until the benchmark, independent architecture review, and unseen-workflow extension proof are complete.",
+  "next_safe_action": "Launch clean oracle-unexposed model sessions for A_frontier_long_horizon, B_instant_persistent_chat, C_instant_stateless_resume, D_instant_decompose_critic, and E_hybrid_escalation against benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_runset_v1.json. Each session must recover only the frozen public fixture, current durable run state, and bounded context packet; it must never receive the evaluator oracle. Persist every reasoning quantum with exact source/fixture provenance, executor/provider/model/surface identity, context usage, evidence refs, next-safe-action, and TOO_LARGE versus INTRINSICALLY_DIFFICULT disposition. Score terminal outputs through the deterministic evaluator and compare validated quality, retries, decomposition, failed leaves, recovery effectiveness, context/work quanta, provider usage, frontier escalation frequency/reason, durable-state correctness, and provenance correctness. Do not use this authoring chat as a scored arm and do not freeze the semantic execution architecture until the benchmark, independent architecture review, and unseen-workflow extension proof are complete.",
   "last_executor": "gpt-5.6-sol",
-  "last_surface": "github+workspace-shell+heartbeat",
+  "last_surface": "github+heartbeat",
   "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion.\\n\\n2026-11-02 GITRUNNER P0 DEPENDENCY CLEARED: workspace-github-actions-control-plane-protocol-redesign-v1 completed the accepted production scope. Production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json is committed; workspace-control, PADataset CPU, and PADataset GPU production validations all passed. Validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 then retired lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after zero-work/zero-runner proof. Root-owned rollback receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was written before deletion, and fresh-process verification proved all three legacy names absent while accepted v3 targets remain. Research legacy scale sets and v2 bytes/config/state remain preserved pending separate authority. Resume resumable_reasoning_benchmark immediately; GitRunner is no longer the umbrella blocker."
 }
