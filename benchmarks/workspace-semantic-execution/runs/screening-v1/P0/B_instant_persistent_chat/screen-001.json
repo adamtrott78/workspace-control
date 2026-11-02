@@ -26,22 +26,23 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 1,
-  "status": "CLAIMED",
-  "owner": "chatgpt",
+  "generation": 2,
+  "status": "CONTAMINATED_SESSION",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
-    "model_family": "GPT-5.6",
+    "reported_model": "GPT-5.6 Sol",
     "chat_configuration": "Instant",
     "surface": "ChatGPT chat",
     "toolset": [
       "GitHub"
     ],
+    "memory_mode": "enabled_with_prior_benchmark_context",
     "continuity": "persistent_chat"
   },
   "continuity_regime": "persistent_chat",
   "started_at": "2026-11-02T16:28:00-05:00",
-  "completed_at": null,
+  "completed_at": "2026-11-02T16:28:00-05:00",
   "invocations": [],
   "events": [
     {
@@ -74,6 +75,11 @@
       "kind": "RUN_CLAIMED",
       "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
       "note": "Assigned worker claimed the screening slot; execution remains confined to the listed public inputs and allowed mutation path."
+    },
+    {
+      "kind": "CONTAMINATED_SESSION",
+      "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
+      "reason": "Bootstrap requires Temporary Chat or Memory disabled and mandates discard if prior benchmark/control-chat memory appears. This worker session contains prior Workspace benchmark/control context, so fixture execution is prohibited."
     }
   ],
   "pending_external": null,
@@ -83,7 +89,7 @@
   "unresolved_questions": [],
   "evidence_refs": [],
   "candidate_actions": [],
-  "next_safe_action": "Inspect only the listed public inputs and follow the screening bootstrap exactly.",
+  "next_safe_action": "Discard this screening attempt and rerun the assigned slot from a clean Temporary Chat or a chat with Memory disabled, using only GitHub and the durable run packet.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
