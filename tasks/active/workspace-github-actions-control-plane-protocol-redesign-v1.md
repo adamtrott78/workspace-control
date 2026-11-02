@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 56e5976597b0d1523ead6a11cdfe6f8a9d23dda0
+- Remote checkpoint: 602ff543a122038870598915f669d9f9bd5a9f6a
 - Remote verified: true
 
 ### research-engine
@@ -43,21 +43,22 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-All currently authorized active-class canaries are accepted. Implement and repository-validate the single controlled production generation cutover from architecture/lambda-ci-v3-migration-plan.v1.json for exactly workspace-control-control-small-v1, padataset-cpu-public-v1 and padataset-gpu-single-public-v1, while keeping Research CPU inactive and every Research GPU-derived class inherited-contained. The cutover must be transactional and fail closed: freeze exact v3 source/catalog/deployment overlay, prove no in-progress migration transaction, drain/quiesce all v2 project controllers and legacy/v3 transient work, atomically bind exact trusted production workflow retargets plus pins/projections, start only the three accepted v3 class controllers, run exact production validation, prove clean ledgers/resources, then move corresponding v2 controllers/scale sets DRAINING -> RETIRED while preserving rollback bytes/state. Do not execute live cutover until the repository implementation and exact operator/root authority path are separately validated.
+First complete task/handoff sync validation for this production-cutover implementation. Then, from a clean checkout at that exact final durable head, execute only the bounded root verifier refresh `sudo /usr/bin/python3 scripts/lambda_ci_v3_reconciler_live_update_v2.py --expected-head <FINAL_DURABLE_HEAD>`. Independently verify the new reconciler override, roots, all-class inactivity, and Research GPU containment. Only after that proof, execute `bash scripts/lambda_ci_v3_production_cutover_live.sh` from the same exact head. The operator must remain the sole creator/consumer of a fresh CUTOVER_V3_PRODUCTION_GENERATION authority and must either produce V3_PRODUCTION_CUTOVER_ACCEPTED=PASS or fail closed through workflow restoration plus v3-isolated rollback.
 
 ## Remaining work
 
-- Implement the repository-only production generation cutover transaction/operator and exhaustive rollback tests for exactly the accepted active classes: workspace-control-control-small-v1, padataset-cpu-public-v1, and padataset-gpu-single-public-v1.
-- Validate exact production workflow retarget bytes/pins/projections and a one-shot live cutover authority contract; preserve Research CPU inactive and all Research GPU-derived classes inherited-contained.
-- Execute the single controlled production generation cutover through the operator/root authority boundary, validate one exact production job per accepted class, and prove v3 controller/runner/resource ledgers clean.
-- Move corresponding v2 controllers/scale sets through DRAINING -> RETIRED only after accepted v3 production proof, preserving rollback bytes/config/state for the rollback window; perform later legacy cleanup separately.
+- Validate this task/handoff sync and freeze the final exact durable production-cutover source head.
+- Execute the reconciler-only live verifier refresh at that exact head; independently prove installed reconciler bytes/override, root health, all nine v3 class controllers inactive+boot-disabled, and Research GPU containment.
+- Execute the validated production cutover operator at the same exact head: quiesce all v2 controllers, retarget exactly three trusted production workflows, activate exactly the three accepted v3 classes, validate one real production job per accepted class, prove clean transient/resource state, and commit.
+- Independently verify post-cutover workflow blobs, selected v3 controller active+enabled state, non-selected v3 inactive+disabled state, all v2 controllers inactive+disabled, Research CPU separately gated, Research GPU contained, and production override/transaction receipts.
+- Preserve retired accepted v2 scale sets/bytes/config/state through the rollback window; perform physical legacy cleanup only as a later separately validated step.
 - Immediately resume workspace-semantic-execution-migration-v1 umbrella work after the v3/v2 infrastructure gate is accepted.
 
 ## Blockers / gates
 
-- Production v3 generation cutover/v2 retirement has not yet been executed; it requires a separately reviewed and validated live cutover transaction bound to exact accepted classes, workflow bytes, deployment generation and rollback state.
-- Current Workspace Shell authority still cannot mint live root/cutover approvals or provide generic root execution; no authority may be inferred from this task state.
-- Research CPU remains separately gated; all Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT.
+- The live host still needs the newly validated reconciler verifier installed through scripts/lambda_ci_v3_reconciler_live_update_v2.py at the final exact task-sync head before any production cutover authority can be created. The updater is reconciler-only and grants no cutover authority.
+- After that verifier refresh is independently attested, the single production cutover still requires the validated operator/root transaction; current Workspace Shell authority cannot mint the needed root approval or execute generic root mutations.
+- Research CPU is separately gated and must remain inactive after successful v3 cutover; all Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT.
 
 ## Fresh-chat initialization
 
