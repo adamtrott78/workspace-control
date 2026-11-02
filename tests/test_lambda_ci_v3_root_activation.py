@@ -59,6 +59,70 @@ class FakeSystemd:
         return sorted(set(self.states) | set(self.extra_units))
 
 
+class EffectiveGenerationVerificationTests(unittest.TestCase):
+    def test_base_generation_uses_reconciler_verifier(self):
+        with tempfile.TemporaryDirectory() as raw:
+            manifest = pathlib.Path(raw) / "install-manifest.json"
+            manifest.write_text(json.dumps({"mode": "V3_SUBSTRATE_INSTALL_INACTIVE"}))
+
+            original = activation.reconciler.verify_installed
+            try:
+                calls = []
+                activation.reconciler.verify_installed = lambda path: calls.append(path)
+                result = activation.verify_effective_installed_generation(manifest)
+            finally:
+                activation.reconciler.verify_installed = original
+
+            self.assertIsNone(result)
+            self.assertEqual(calls, [manifest])
+
+    def test_controller_only_drift_requires_valid_active_override(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            manifest = root / "install-manifest.json"
+            payload = {
+                "mode": "V3_SUBSTRATE_INSTALL_INACTIVE",
+                "source_head": "a" * 40,
+                "root_policy_sha256": "b" * 64,
+            }
+            manifest.write_bytes(activation._canonical(payload))
+
+            original_verify = activation.reconciler.verify_installed
+            original_base = activation.controller_refresh._base_manifest
+            original_current = activation.controller_refresh._verify_current_controller
+            try:
+                activation.reconciler.verify_installed = lambda path: (_ for _ in ()).throw(
+                    activation.reconciler.ReconcileError(
+                        f"managed artifact digest drift: {activation.reconciler.V3_CONTROLLER_BINARY}"
+                    )
+                )
+                activation.controller_refresh._base_manifest = lambda head: (
+                    payload,
+                    activation._sha256(manifest.read_bytes()),
+                    {"sha256": "c" * 64},
+                )
+                activation.controller_refresh._verify_current_controller = lambda **kwargs: (
+                    "d" * 64,
+                    {
+                        "mode": activation.controller_refresh.MODE,
+                        "phase": "ACTIVE",
+                        "base_source_head": "a" * 40,
+                        "controller_source_head": "e" * 40,
+                        "base_install_manifest_sha256": activation._sha256(manifest.read_bytes()),
+                        "controller_binary_sha256": "d" * 64,
+                        "non_controller_generation_equivalent": True,
+                        "root_policy_sha256": "b" * 64,
+                    },
+                )
+                result = activation.verify_effective_installed_generation(manifest)
+            finally:
+                activation.reconciler.verify_installed = original_verify
+                activation.controller_refresh._base_manifest = original_base
+                activation.controller_refresh._verify_current_controller = original_current
+
+            self.assertEqual(result["controller_source_head"], "e" * 40)
+
+
 class V3RootActivationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
