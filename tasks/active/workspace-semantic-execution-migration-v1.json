@@ -12,7 +12,7 @@
     "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
   },
   "parent_execution_owner": "workspace-knowledge-action-ontology-v1",
-  "current_stage": "resumable_reasoning_benchmark_and_architecture_review",
+  "current_stage": "resumable_reasoning_benchmark",
   "acceptance_criteria": [
     "Recover representative existing workflow families from workspace-control, PADataset, research-engine, MTH602, EAS501, and CIS560 and map their semantic, authority, execution, artifact, validation, wait/recovery, and consequence requirements.",
     "Preserve the existing authority firewall: model/semantic output may create CandidateAction-like proposals but cannot create/widen Permission, remove Prohibition, satisfy ReviewRequirement, or manufacture execution authority.",
