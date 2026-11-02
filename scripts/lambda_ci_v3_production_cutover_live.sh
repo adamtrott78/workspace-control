@@ -45,6 +45,7 @@ PAD_TOKEN="/var/lib/workspace-ci/v3/credentials/padataset/github-token"
 PAD_ENV="/var/lib/workspace-ci/v3/credentials/padataset/controller.env"
 
 PROD_HELPER="$ROOT/scripts/lambda_ci_v3_production_cutover.py"
+CONTROLLER_REFRESH_OPERATOR="$ROOT/scripts/lambda_ci_v3_controller_refresh_live.sh"
 INSTALLED_RECONCILER="/opt/workspace-ci/v3/reconciler/lambda_ci_v3_reconciler.py"
 INSTALLED_CONTROLLER="/opt/workspace-ci/v3/controller/lambda-ci-controller-v3"
 BASE_MANIFEST="/etc/workspace-ci/v3/install-manifest.json"
@@ -471,6 +472,25 @@ do
 done
 echo "LIVE_PREFLIGHT_ROOT_AND_CLASS_STATE=PASS"
 
+CONTROLLER_BOUND_HEAD="$(
+  sudo /usr/bin/python3 - <<'PY' 2>/dev/null || true
+import json, pathlib
+path=pathlib.Path("/var/lib/workspace-ci/v3/controller-refresh/active.json")
+try:
+    value=json.loads(path.read_text())
+    print(value.get("controller_source_head",""))
+except Exception:
+    pass
+PY
+)"
+if [ "$CONTROLLER_BOUND_HEAD" != "$OPERATOR_HEAD" ]; then
+  echo "PRODUCTION_CONTROLLER_REFRESH_REQUIRED current=${CONTROLLER_BOUND_HEAD:-missing} expected=$OPERATOR_HEAD"
+  bash "$CONTROLLER_REFRESH_OPERATOR"
+  echo "PRODUCTION_CONTROLLER_REFRESH=PASS"
+else
+  echo "PRODUCTION_CONTROLLER_REFRESH=SKIP exact_head=$OPERATOR_HEAD"
+fi
+
 sudo env \
   EXPECTED_HEAD="$EXPECTED_RECONCILER_SOURCE_HEAD" \
   EXPECTED_SHA="$EXPECTED_RECONCILER_SHA256" \
@@ -762,6 +782,57 @@ sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$PROD_HELPER" \
   --workflow-confirmation "$TMP/root-workflow-confirmation.json"
 echo "PRODUCTION_V3_ACTIVATION=PASS"
 
+wait_controller_terminal_ledger() {
+  class_id="$1"
+  job_id="$2"
+  conclusion="$3"
+
+  case "$conclusion" in
+    success) wanted="COMPLETED" ;;
+    failure) wanted="FAILED" ;;
+    cancelled) wanted="CANCELED" ;;
+    *)
+      echo "STOP_UNSUPPORTED_GITHUB_JOB_CONCLUSION job_id=$job_id conclusion=$conclusion"
+      return 1
+      ;;
+  esac
+
+  for _ in $(seq 1 60); do
+    if sudo env CLASS_ID="$class_id" JOB_ID="$job_id" WANTED="$wanted" \
+      /usr/bin/python3 - <<'PY'
+import json, os, pathlib, sys
+root=pathlib.Path("/var/lib/workspace-ci/v3/controller/state") / os.environ["CLASS_ID"]
+job_id=int(os.environ["JOB_ID"])
+wanted=os.environ["WANTED"]
+if not root.is_dir():
+    raise SystemExit(1)
+for path in root.glob("*.json"):
+    try:
+        value=json.loads(path.read_text())
+    except Exception:
+        continue
+    if value.get("runner_request_id") != job_id:
+        continue
+    state=value.get("state")
+    if state == wanted:
+        print(state)
+        raise SystemExit(0)
+    if state in {"COMPLETED","FAILED","CANCELED"}:
+        print(f"unexpected-terminal:{state}", file=sys.stderr)
+        raise SystemExit(2)
+    raise SystemExit(1)
+raise SystemExit(1)
+PY
+    then
+      echo "PRODUCTION_CONTROLLER_LEDGER_TERMINAL=PASS class=$class_id job_id=$job_id state=$wanted"
+      return 0
+    fi
+    sleep 2
+  done
+  echo "STOP_PRODUCTION_CONTROLLER_LEDGER_NOT_TERMINAL class=$class_id job_id=$job_id expected=$wanted"
+  return 1
+}
+
 run_validation() {
   repo="$1"
   path="$2"
@@ -818,28 +889,38 @@ EOF
     fi
     sleep 5
   done
-  if [ "$status" != "completed" ] || [ "$conclusion" != "success" ]; then
+  if [ "$status" != "completed" ]; then
     echo "STOP_PRODUCTION_VALIDATION_FAILED route=$route_key status=$status conclusion=$conclusion"
     return 1
   fi
 
   jobs_file="$TMP/jobs-$run_id.json"
   gh api --method GET "repos/$repo/actions/runs/$run_id/jobs" -f per_page=100 > "$jobs_file"
-  read -r job_id runner_name <<EOF
+  read -r job_id runner_name job_conclusion <<EOF
 $(env JOBS="$jobs_file" SCALE_SET="$scale_set" python3 - <<'PY'
 import json, os
 j=json.load(open(os.environ["JOBS"]))["jobs"]
 assert len(j)==1, f"expected one job, got {len(j)}"
 job=j[0]
-assert job["conclusion"]=="success"
 runner=job.get("runner_name") or ""
 assert runner.startswith(os.environ["SCALE_SET"]+"-"), runner
-print(job["id"], runner)
+print(job["id"], runner, job.get("conclusion") or "pending")
 PY
 )
 EOF
-  if [ -z "$job_id" ] || [ -z "$runner_name" ]; then
+  if [ -z "$job_id" ] || [ -z "$runner_name" ] || [ "$job_conclusion" = "pending" ]; then
     echo "STOP_PRODUCTION_VALIDATION_JOB_IDENTITY route=$route_key"
+    return 1
+  fi
+  if [ "$job_conclusion" != "$conclusion" ]; then
+    echo "STOP_PRODUCTION_VALIDATION_CONCLUSION_MISMATCH route=$route_key run=$conclusion job=$job_conclusion"
+    return 1
+  fi
+
+  wait_controller_terminal_ledger "$class_id" "$job_id" "$job_conclusion"
+
+  if [ "$conclusion" != "success" ]; then
+    echo "STOP_PRODUCTION_VALIDATION_FAILED route=$route_key status=$status conclusion=$conclusion"
     return 1
   fi
 
