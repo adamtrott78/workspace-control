@@ -20,7 +20,7 @@
       "workflow_blob_sha": "7e361db3a8ead667c047e9dc3fe12908c10eb96a",
       "top_level_job_count": 1,
       "top_level_job_key": "control-validation",
-      "current_scale_set_name": "lambda-workspace-control-control-small",
+      "current_scale_set_name": "lambda-workspace-control",
       "target_scale_set_name": "lambda-workspace-control-control-small",
       "evidence_status": "VERIFIED_FROM_ACCEPTED_V3_PRODUCTION_CUTOVER"
     },
@@ -33,7 +33,7 @@
       "workflow_blob_sha": "f63eeaba0126c8241d3130449f12790b915c9495",
       "top_level_job_count": 1,
       "top_level_job_key": "padataset-cpu",
-      "current_scale_set_name": "lambda-padataset-cpu-public",
+      "current_scale_set_name": "lambda-padataset",
       "target_scale_set_name": "lambda-padataset-cpu-public",
       "evidence_status": "VERIFIED_FROM_ACCEPTED_V3_PRODUCTION_CUTOVER"
     },
@@ -46,7 +46,7 @@
       "workflow_blob_sha": "1ff52d3940a05a67d94bc21eeb31fd19b7e6d042",
       "top_level_job_count": 1,
       "top_level_job_key": "padataset-gpu",
-      "current_scale_set_name": "lambda-padataset-gpu-single-public",
+      "current_scale_set_name": "lambda-padataset-gpu",
       "target_scale_set_name": "lambda-padataset-gpu-single-public",
       "evidence_status": "VERIFIED_FROM_ACCEPTED_V3_PRODUCTION_CUTOVER"
     },
