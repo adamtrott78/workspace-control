@@ -68,14 +68,17 @@ class RootReactivationUpdaterContractTests(unittest.TestCase):
             text,
         )
         self.assertIn(
-            'EXPECTED_CANDIDATE_GIT_BLOB = "eed5c2ddac6c901b31d5b98b33d7ae0c297a0dbb"',
+            'EXPECTED_CANDIDATE_GIT_BLOB = "3f617c8d85b3dabf1a6b9b2b82edc0feb1f1b930"',
             text,
         )
         self.assertIn(
             '/opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py',
             text,
         )
+        self.assertIn("V3_ROOT_REACTIVATION_HELPER_PRESTATE=PASS", text)
         self.assertIn("V3_ROOT_REACTIVATION_HELPER_UPDATE=PASS", text)
+        self.assertIn("reviewed inactive-substrate helper mode drift", text)
+        self.assertIn("root-reactivation-helper", text)
         self.assertIn("verify_effective_installed_generation", text)
         self.assertNotIn("systemctl", text)
         self.assertNotIn("ACTIVATE_V3_ROOT_SERVICES", text)
@@ -165,6 +168,125 @@ class EffectiveGenerationVerificationTests(unittest.TestCase):
                 activation.reconciler.V3_CONTROLLER_BINARY = old_controller
                 activation.CONTROLLER_REFRESH_ACTIVE_RECEIPT = old_receipt
             self.assertEqual(result["controller_source_head"], "c" * 40)
+
+    def test_root_activation_helper_override_is_bound_to_base_manifest_and_digest(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            controller = root / "lambda-ci-controller-v3"
+            controller.write_bytes(b"base-controller")
+            controller.chmod(0o755)
+            helper = root / "lambda_ci_v3_root_activation.py"
+            helper.write_bytes(b"candidate-helper")
+            helper.chmod(0o555)
+            manifest = root / "install-manifest.json"
+            payload = {
+                "schema_version": 1,
+                "mode": "V3_SUBSTRATE_INSTALL_INACTIVE",
+                "source_head": "a" * 40,
+                "root_policy_sha256": "b" * 64,
+                "runner_class_count": 9,
+                "entries": [
+                    {
+                        "destination": str(controller),
+                        "sha256": activation._sha256(b"base-controller"),
+                        "mode": "0755",
+                    },
+                    {
+                        "destination": str(helper),
+                        "sha256": activation._sha256(b"base-helper"),
+                        "mode": "0555",
+                    },
+                ],
+            }
+            manifest.write_bytes(activation._canonical(payload))
+            receipt = root / "helper-active.json"
+            receipt.write_bytes(
+                activation._canonical(
+                    {
+                        "schema_version": 1,
+                        "mode": "V3_ROOT_REACTIVATION_HELPER_OVERRIDE",
+                        "phase": "ACTIVE",
+                        "base_source_head": "a" * 40,
+                        "helper_source_head": "d" * 40,
+                        "base_install_manifest_sha256": activation._sha256(
+                            manifest.read_bytes()
+                        ),
+                        "base_helper_sha256": activation._sha256(b"base-helper"),
+                        "helper_sha256": activation._sha256(b"candidate-helper"),
+                        "helper_git_blob": "e" * 40,
+                        "helper_mode": "0555",
+                        "root_policy_sha256": "b" * 64,
+                        "non_helper_generation_equivalent": True,
+                    }
+                )
+            )
+            receipt.chmod(0o600)
+
+            old_controller = activation.reconciler.V3_CONTROLLER_BINARY
+            old_helper = activation.ROOT_ACTIVATION_HELPER
+            old_helper_receipt = activation.ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT
+            try:
+                activation.reconciler.V3_CONTROLLER_BINARY = controller
+                activation.ROOT_ACTIVATION_HELPER = helper
+                activation.ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT = receipt
+                result = activation.verify_effective_installed_generation(manifest)
+            finally:
+                activation.reconciler.V3_CONTROLLER_BINARY = old_controller
+                activation.ROOT_ACTIVATION_HELPER = old_helper
+                activation.ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT = old_helper_receipt
+
+            self.assertEqual(
+                result["root_activation_helper_override"]["helper_source_head"],
+                "d" * 40,
+            )
+
+    def test_root_activation_helper_drift_without_active_receipt_is_rejected(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            controller = root / "lambda-ci-controller-v3"
+            controller.write_bytes(b"base-controller")
+            controller.chmod(0o755)
+            helper = root / "lambda_ci_v3_root_activation.py"
+            helper.write_bytes(b"candidate-helper")
+            helper.chmod(0o555)
+            manifest = root / "install-manifest.json"
+            payload = {
+                "schema_version": 1,
+                "mode": "V3_SUBSTRATE_INSTALL_INACTIVE",
+                "source_head": "a" * 40,
+                "root_policy_sha256": "b" * 64,
+                "runner_class_count": 9,
+                "entries": [
+                    {
+                        "destination": str(controller),
+                        "sha256": activation._sha256(b"base-controller"),
+                        "mode": "0755",
+                    },
+                    {
+                        "destination": str(helper),
+                        "sha256": activation._sha256(b"base-helper"),
+                        "mode": "0555",
+                    },
+                ],
+            }
+            manifest.write_bytes(activation._canonical(payload))
+
+            old_controller = activation.reconciler.V3_CONTROLLER_BINARY
+            old_helper = activation.ROOT_ACTIVATION_HELPER
+            old_helper_receipt = activation.ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT
+            try:
+                activation.reconciler.V3_CONTROLLER_BINARY = controller
+                activation.ROOT_ACTIVATION_HELPER = helper
+                activation.ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT = root / "missing.json"
+                with self.assertRaisesRegex(
+                    activation.RootActivationError,
+                    "active root-reactivation helper override receipt missing",
+                ):
+                    activation.verify_effective_installed_generation(manifest)
+            finally:
+                activation.reconciler.V3_CONTROLLER_BINARY = old_controller
+                activation.ROOT_ACTIVATION_HELPER = old_helper
+                activation.ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT = old_helper_receipt
 
 
 class V3RootActivationTests(unittest.TestCase):

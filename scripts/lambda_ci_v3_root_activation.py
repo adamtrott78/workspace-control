@@ -45,6 +45,12 @@ INSTALL_MANIFEST = V3_CONFIG_ROOT / "install-manifest.json"
 ROOT_POLICY = V3_CONFIG_ROOT / "root-policy.json"
 V3_STATE_ROOT = pathlib.Path("/var/lib/workspace-ci/v3")
 CONTROLLER_REFRESH_ACTIVE_RECEIPT = V3_STATE_ROOT / "controller-refresh" / "active.json"
+ROOT_ACTIVATION_HELPER = pathlib.Path(
+    "/opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py"
+)
+ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT = (
+    V3_STATE_ROOT / "root-reactivation-helper" / "active.json"
+)
 MIGRATION_ROOT = V3_STATE_ROOT / "migration"
 AUTHORITY_CONSUMPTION_ROOT = V3_STATE_ROOT / "migration-authority"
 V3_PROVISIONER_STATE = V3_STATE_ROOT / "provisioner"
@@ -134,8 +140,20 @@ def _canonical(value: Any) -> bytes:
     return (json.dumps(value, indent=2, sort_keys=True) + "\n").encode("utf-8")
 
 
+def _load_override_receipt(path: pathlib.Path, label: str) -> dict[str, Any]:
+    try:
+        st = path.stat()
+    except FileNotFoundError as exc:
+        raise RootActivationError(f"{label} receipt missing") from exc
+    if st.st_uid != os.geteuid() or st.st_gid != os.getegid():
+        raise RootActivationError(f"{label} receipt ownership invalid")
+    if stat.S_IMODE(st.st_mode) != 0o600:
+        raise RootActivationError(f"{label} receipt metadata invalid")
+    return _load(path)
+
+
 def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[str, Any] | None:
-    """Verify the base generation plus an optional controller-only active override."""
+    """Verify the base generation plus narrowly attested live overrides."""
     manifest_raw = manifest_path.read_bytes()
     manifest = _load(manifest_path)
     if manifest.get("mode") != "V3_SUBSTRATE_INSTALL_INACTIVE":
@@ -144,7 +162,9 @@ def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[s
         raise RootActivationError("installed manifest runner class count invalid")
 
     controller_destination = str(reconciler.V3_CONTROLLER_BINARY)
+    helper_destination = str(ROOT_ACTIVATION_HELPER)
     controller_entry = None
+    helper_entry = None
     for entry in manifest.get("entries", []):
         destination = str(entry.get("destination", ""))
         path = pathlib.Path(destination)
@@ -156,45 +176,77 @@ def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[s
         if destination == controller_destination:
             controller_entry = entry
             continue
+        if destination == helper_destination:
+            helper_entry = entry
+            continue
         if _sha256(path.read_bytes()) != entry.get("sha256"):
             raise RootActivationError(f"managed artifact digest drift: {path}")
 
     if controller_entry is None:
         raise RootActivationError("controller binary absent from install manifest")
+
+    effective: dict[str, Any] = {}
     controller_path = pathlib.Path(controller_destination)
     actual_controller_sha = _sha256(controller_path.read_bytes())
-    if actual_controller_sha == controller_entry.get("sha256"):
-        return None
+    if actual_controller_sha != controller_entry.get("sha256"):
+        active = _load_override_receipt(
+            CONTROLLER_REFRESH_ACTIVE_RECEIPT,
+            "active controller override",
+        )
+        required = {
+            "mode": "V3_INACTIVE_CONTROLLER_BINARY_OVERRIDE",
+            "phase": "ACTIVE",
+            "base_source_head": manifest.get("source_head"),
+            "base_install_manifest_sha256": _sha256(manifest_raw),
+            "controller_binary_sha256": actual_controller_sha,
+            "root_policy_sha256": manifest.get("root_policy_sha256"),
+            "non_controller_generation_equivalent": True,
+        }
+        for key, expected in required.items():
+            if active.get(key) != expected:
+                raise RootActivationError(
+                    f"active controller override binding mismatch: {key}"
+                )
+        source_head = active.get("controller_source_head")
+        if not isinstance(source_head, str) or re.fullmatch(r"[0-9a-f]{40}", source_head) is None:
+            raise RootActivationError("active controller override source head invalid")
+        effective.update(active)
 
-    receipt_path = CONTROLLER_REFRESH_ACTIVE_RECEIPT
-    try:
-        st = receipt_path.stat()
-    except FileNotFoundError as exc:
-        raise RootActivationError(
-            "controller digest differs from base manifest without active override receipt"
-        ) from exc
-    if st.st_uid != os.geteuid() or stat.S_IMODE(st.st_mode) != 0o600:
-        raise RootActivationError("active controller override receipt metadata invalid")
-
-    active = _load(receipt_path)
-    required = {
-        "mode": "V3_INACTIVE_CONTROLLER_BINARY_OVERRIDE",
-        "phase": "ACTIVE",
-        "base_source_head": manifest.get("source_head"),
-        "base_install_manifest_sha256": _sha256(manifest_raw),
-        "controller_binary_sha256": actual_controller_sha,
-        "root_policy_sha256": manifest.get("root_policy_sha256"),
-        "non_controller_generation_equivalent": True,
-    }
-    for key, expected in required.items():
-        if active.get(key) != expected:
-            raise RootActivationError(
-                f"active controller override binding mismatch: {key}"
+    if helper_entry is not None:
+        helper_path = pathlib.Path(helper_destination)
+        actual_helper_sha = _sha256(helper_path.read_bytes())
+        if actual_helper_sha != helper_entry.get("sha256"):
+            active_helper = _load_override_receipt(
+                ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT,
+                "active root-reactivation helper override",
             )
-    source_head = active.get("controller_source_head")
-    if not isinstance(source_head, str) or re.fullmatch(r"[0-9a-f]{40}", source_head) is None:
-        raise RootActivationError("active controller override source head invalid")
-    return active
+            required_helper = {
+                "mode": "V3_ROOT_REACTIVATION_HELPER_OVERRIDE",
+                "phase": "ACTIVE",
+                "base_source_head": manifest.get("source_head"),
+                "base_install_manifest_sha256": _sha256(manifest_raw),
+                "base_helper_sha256": helper_entry.get("sha256"),
+                "helper_sha256": actual_helper_sha,
+                "helper_mode": str(helper_entry.get("mode")),
+                "root_policy_sha256": manifest.get("root_policy_sha256"),
+                "non_helper_generation_equivalent": True,
+            }
+            for key, expected in required_helper.items():
+                if active_helper.get(key) != expected:
+                    raise RootActivationError(
+                        f"active root-reactivation helper override binding mismatch: {key}"
+                    )
+            helper_source_head = active_helper.get("helper_source_head")
+            if (
+                not isinstance(helper_source_head, str)
+                or re.fullmatch(r"[0-9a-f]{40}", helper_source_head) is None
+            ):
+                raise RootActivationError(
+                    "active root-reactivation helper override source head invalid"
+                )
+            effective["root_activation_helper_override"] = active_helper
+
+    return effective or None
 
 
 
