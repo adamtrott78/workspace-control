@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "benchmark_id": "workspace-resumable-reasoning-v1",
-  "status": "DESIGN_ONLY_NOT_EXECUTED",
+  "status": "PILOT_HARNESS_IMPLEMENTED_ARMS_NOT_RUN",
   "purpose": "Measure whether disposable ChatGPT Instant invocations operating from durable Workspace Control state can match long-horizon frontier reasoning on decomposable research/evaluate/iterate work, and identify the residual boundary where stronger reasoning is required.",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "hypotheses": {
@@ -222,10 +222,30 @@
     "disposable_branches_only": true
   },
   "next_implementation_steps": [
-    "Build public fixture + sealed evaluator split for research_iterate.",
-    "Build deterministic event/wait harness so experiment completion wakes a process without model polling.",
-    "Define context-packet serializer from durable state.",
-    "Define per-arm run manifest and exact provenance fields.",
-    "Run a small pilot before expanding to cross-domain cases."
-  ]
+    "Launch clean, oracle-unexposed model sessions for frontier-control, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid-escalation arms against the frozen pilot runset.",
+    "Persist every reasoning quantum to benchmarks/workspace-semantic-execution/runs/{run_id}.json with exact source/fixture provenance, executor identity, context consumption, outcome, and validation evidence.",
+    "Evaluate terminal submissions with the objective research-iterate evaluator and compare quality, retries, decomposition, recovery, context, work quanta, provider/model usage, and escalation frequency/reason.",
+    "Do not claim frontier equivalence from process-level evaluator isolation alone; strengthen evaluator secrecy or use a clean externally sealed evaluator before any equivalence claim.",
+    "After the research-iterate pilot, add architecture_diagnosis and artifact_revision fixtures before capability-boundary conclusions."
+  ],
+  "implementation_checkpoint": {
+    "checkpoint_sha": "6da70bc638a6c5decbe4ed2e4943257e9d447e55",
+    "workspace_control_validation_run": 41518944500,
+    "validation": "SUCCESS",
+    "note": "Executable durable-state/event/evaluator harness and regression tests are validated. This is an implementation checkpoint, not a reasoning-quality result."
+  },
+  "implementation_artifacts": [
+    "benchmarks/workspace-semantic-execution/prior_instant_worker_evidence_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_runset_v1.json",
+    "tests/test_workspace_semantic_execution_resumable_reasoning.py"
+  ],
+  "pilot_constraints": {
+    "authoring_session_contaminated": true,
+    "reason": "This session authored/read evaluator-only oracle truth and cannot count as a scored model arm.",
+    "evaluator_isolation": "PROCESS_PROTOCOL_ONLY",
+    "equivalence_claim_allowed": false
+  }
 }
