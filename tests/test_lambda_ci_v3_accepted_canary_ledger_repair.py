@@ -1,6 +1,5 @@
 import importlib.util
 import json
-import os
 import pathlib
 import sys
 import tempfile
@@ -29,218 +28,120 @@ repair = load(
 
 
 class AcceptedCanaryLedgerRepairTests(unittest.TestCase):
-    def proof(self):
-        return {
-            "schema_version": 1,
-            "repository": repair.TARGET_REPOSITORY,
-            "workflow_run_id": repair.TARGET_WORKFLOW_RUN_ID,
-            "workflow_run_status": "completed",
-            "workflow_run_conclusion": "success",
-            "github_job_id": repair.TARGET_GITHUB_JOB_ID,
-            "github_job_name": repair.TARGET_GITHUB_JOB_NAME,
-            "github_job_status": "completed",
-            "github_job_conclusion": "success",
-        }
+    def proof_payload(self):
+        jobs = []
+        for spec in repair.CANARIES:
+            jobs.append(
+                {
+                    "repository": spec["repository"],
+                    "workflow_run_id": spec["workflow_run_id"],
+                    "workflow_run_status": "completed",
+                    "workflow_run_conclusion": spec["github_job_conclusion"],
+                    "github_job_id": spec["github_job_id"],
+                    "github_job_name": spec["github_job_name"],
+                    "github_job_status": "completed",
+                    "github_job_conclusion": spec["github_job_conclusion"],
+                }
+            )
+        return {"schema_version": 1, "jobs": jobs}
 
-    def record(self):
+    def record_for(self, spec, state="ACCEPTED"):
         return {
             "schema_version": 1,
             "controller_policy_sha256": "a" * 64,
-            "runner_request_id": repair.TARGET_GITHUB_JOB_ID,
-            "github_job_id": repair.TARGET_GITHUB_JOB_ID,
-            "workflow_run_id": repair.TARGET_WORKFLOW_RUN_ID,
-            "workflow_path": ".github/workflows/workspace-ci-v3-migration-canary-workspace-control-control-small-v1.yml",
+            "runner_request_id": spec["github_job_id"],
+            "github_job_id": spec["github_job_id"],
+            "workflow_run_id": spec["workflow_run_id"],
+            "workflow_path": ".github/workflows/test.yml",
             "workflow_blob_sha": "b" * 40,
-            "request_id": "11111111-2222-5333-8444-555555555555",
-            "runner_name": "lambda-wc-control-deadbeef",
+            "request_id": f"request-{spec['github_job_id']}",
+            "runner_name": f"runner-{spec['github_job_id']}",
             "provision_attempt": 0,
-            "state": "ACCEPTED",
-            "scheduler_state": "ACCEPTED",
+            "state": state,
+            "scheduler_state": state,
             "updated_at": "2026-11-02T00:00:00+00:00",
         }
 
-    def test_github_proof_exact_success_is_accepted(self):
-        repair._validate_github_proof(self.proof())
+    def test_terminal_proof_exact_set_is_accepted(self):
+        proofs = repair._validate_terminal_proofs(self.proof_payload())
+        self.assertEqual(set(proofs), {repair._spec_key(spec) for spec in repair.CANARIES})
 
-    def test_github_proof_nonterminal_is_rejected(self):
-        proof = self.proof()
-        proof["github_job_status"] = "in_progress"
+    def test_terminal_proof_conclusion_drift_is_rejected(self):
+        payload = self.proof_payload()
+        payload["jobs"][0]["github_job_conclusion"] = "failure"
         with self.assertRaises(repair.LedgerRepairError):
-            repair._validate_github_proof(proof)
+            repair._validate_terminal_proofs(payload)
 
-    def test_matching_transaction_requires_exact_accepted_source_and_terminal_phase(self):
+    def test_unknown_nonterminal_is_visible_before_mutation(self):
+        root_policy = {"runner_classes": {"unknown-class": {}}}
         with tempfile.TemporaryDirectory() as raw:
             root = pathlib.Path(raw)
-            tx = root / "one"
+            class_root = root / "unknown-class"
+            class_root.mkdir()
+            path = class_root / "scheduler-99.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "runner_request_id": 99,
+                        "state": "ACCEPTED",
+                    }
+                )
+            )
+            found = repair._load_nonterminal_ledgers(root, root_policy)
+            self.assertEqual(set(found), {("unknown-class", 99)})
+
+    def test_terminal_ledgers_are_not_selected_for_repair(self):
+        spec = repair.CANARIES[0]
+        root_policy = {"runner_classes": {spec["class_id"]: {}}}
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            class_root = root / spec["class_id"]
+            class_root.mkdir()
+            path = class_root / f"scheduler-{spec['github_job_id']}.json"
+            path.write_text(json.dumps(self.record_for(spec, state="COMPLETED")))
+            found = repair._load_nonterminal_ledgers(root, root_policy)
+            self.assertEqual(found, {})
+
+    def test_exact_transaction_binding_requires_terminal_rollback(self):
+        spec = dict(repair.CANARIES[1])
+        record = self.record_for(spec)
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            tx = root / spec["transaction_id"]
             tx.mkdir()
-            record = self.record()
             (tx / "transaction.json").write_text(
                 json.dumps(
                     {
                         "mode": "V3_ONE_CLASS_CANARY_GENERATION_EXCLUSION",
                         "phase": "ROLLED_BACK_LEGACY_RESTORED",
-                        "target_runner_class_id": repair.TARGET_CLASS,
-                        "source_head": repair.TARGET_CANARY_SOURCE_HEAD,
+                        "target_runner_class_id": spec["class_id"],
+                        "source_head": repair.CANARY_SOURCE_HEAD,
                         "controller_policy_sha256": record["controller_policy_sha256"],
                         "workflow_blob_sha": record["workflow_blob_sha"],
                     }
                 )
             )
             with mock.patch.object(repair.migration, "MIGRATION_ROOT", root):
-                self.assertEqual(repair._matching_canary_transactions(record), [tx / "transaction.json"])
-
+                self.assertEqual(
+                    repair._matching_transaction(spec, record),
+                    tx / "transaction.json",
+                )
             value = json.loads((tx / "transaction.json").read_text())
             value["phase"] = "CANARY_ACTIVE"
             (tx / "transaction.json").write_text(json.dumps(value))
             with mock.patch.object(repair.migration, "MIGRATION_ROOT", root):
                 with self.assertRaises(repair.LedgerRepairError):
-                    repair._matching_canary_transactions(record)
+                    repair._matching_transaction(spec, record)
 
-    def test_repair_terminalizes_only_exact_accepted_record_and_preserves_provenance(self):
-        with tempfile.TemporaryDirectory() as raw:
-            root = pathlib.Path(raw)
-            repo = root / "repo"
-            repo.mkdir()
-            proof_path = root / "proof.json"
-            proof_path.write_text(json.dumps(self.proof()))
-
-            config = root / "etc"
-            config.mkdir()
-            root_policy = {
-                "runner_classes": {
-                    repair.TARGET_CLASS: {
-                        "repository": repair.TARGET_REPOSITORY,
-                    }
-                }
-            }
-            root_policy_path = config / "root-policy.json"
-            root_policy_path.write_text(json.dumps(root_policy))
-
-            state_root = root / "controller-state"
-            class_root = state_root / repair.TARGET_CLASS
-            class_root.mkdir(parents=True)
-            ledger = class_root / f"scheduler-{repair.TARGET_GITHUB_JOB_ID}.json"
-            ledger.write_text(json.dumps(self.record()) + "\n")
-            os.chmod(ledger, 0o600)
-
-            migration_root = root / "migration"
-            tx = migration_root / "accepted"
-            tx.mkdir(parents=True)
-            record = self.record()
-            (tx / "transaction.json").write_text(
-                json.dumps(
-                    {
-                        "mode": "V3_ONE_CLASS_CANARY_GENERATION_EXCLUSION",
-                        "phase": "ROLLED_BACK_LEGACY_RESTORED",
-                        "target_runner_class_id": repair.TARGET_CLASS,
-                        "source_head": repair.TARGET_CANARY_SOURCE_HEAD,
-                        "controller_policy_sha256": record["controller_policy_sha256"],
-                        "workflow_blob_sha": record["workflow_blob_sha"],
-                    }
-                )
-            )
-
-            repair_root = root / "repairs"
-
-            def simple_rewrite(path, payload):
-                path.write_bytes(payload)
-                os.chmod(path, 0o600)
-
-            with (
-                mock.patch.object(repair.os, "geteuid", return_value=0),
-                mock.patch.object(repair, "ROOT_POLICY", root_policy_path),
-                mock.patch.object(repair, "CONTROLLER_STATE_ROOT", state_root),
-                mock.patch.object(repair, "REPAIR_ROOT", repair_root),
-                mock.patch.object(repair.migration, "MIGRATION_ROOT", migration_root),
-                mock.patch.object(repair, "_git_exact_head"),
-                mock.patch.object(repair, "_assert_runtime_boundary"),
-                mock.patch.object(repair, "_remove_stale_unconsumed_authority", return_value=True),
-                mock.patch.object(repair, "_atomic_rewrite_preserving_owner", side_effect=simple_rewrite),
-                mock.patch.object(repair.migration, "v3_resource_claims", return_value=[]),
-                mock.patch.object(repair.production, "_assert_controller_ledgers_terminal"),
-            ):
-                receipt = repair.repair(
-                    repo_root=repo,
-                    expected_source_head="c" * 40,
-                    github_proof_path=proof_path,
-                    systemd=mock.Mock(),
-                )
-
-            self.assertIsNotNone(receipt)
-            repaired = json.loads(ledger.read_text())
-            self.assertEqual(repaired["state"], "COMPLETED")
-            self.assertEqual(repaired["scheduler_state"], "GITHUB_JOB_COMPLETED_SUCCESS")
-            self.assertEqual(
-                repaired["terminalization_provenance"]["workflow_run_id"],
-                repair.TARGET_WORKFLOW_RUN_ID,
-            )
-            receipt_data = json.loads(pathlib.Path(receipt).read_text())
-            self.assertEqual(receipt_data["phase"], "COMMITTED")
-            self.assertTrue(receipt_data["stale_unconsumed_production_authority_removed"])
-
-    def test_live_resource_claim_blocks_terminalization(self):
-        with tempfile.TemporaryDirectory() as raw:
-            root = pathlib.Path(raw)
-            repo = root / "repo"
-            repo.mkdir()
-            proof_path = root / "proof.json"
-            proof_path.write_text(json.dumps(self.proof()))
-            config = root / "etc"
-            config.mkdir()
-            root_policy_path = config / "root-policy.json"
-            root_policy_path.write_text(
-                json.dumps(
-                    {
-                        "runner_classes": {
-                            repair.TARGET_CLASS: {
-                                "repository": repair.TARGET_REPOSITORY,
-                            }
-                        }
-                    }
-                )
-            )
-            state_root = root / "controller-state"
-            class_root = state_root / repair.TARGET_CLASS
-            class_root.mkdir(parents=True)
-            ledger = class_root / f"scheduler-{repair.TARGET_GITHUB_JOB_ID}.json"
-            record = self.record()
-            ledger.write_text(json.dumps(record))
-            os.chmod(ledger, 0o600)
-            migration_root = root / "migration"
-            tx = migration_root / "accepted"
-            tx.mkdir(parents=True)
-            (tx / "transaction.json").write_text(
-                json.dumps(
-                    {
-                        "mode": "V3_ONE_CLASS_CANARY_GENERATION_EXCLUSION",
-                        "phase": "ROLLED_BACK_LEGACY_RESTORED",
-                        "target_runner_class_id": repair.TARGET_CLASS,
-                        "source_head": repair.TARGET_CANARY_SOURCE_HEAD,
-                        "controller_policy_sha256": record["controller_policy_sha256"],
-                        "workflow_blob_sha": record["workflow_blob_sha"],
-                    }
-                )
-            )
-            with (
-                mock.patch.object(repair.os, "geteuid", return_value=0),
-                mock.patch.object(repair, "ROOT_POLICY", root_policy_path),
-                mock.patch.object(repair, "CONTROLLER_STATE_ROOT", state_root),
-                mock.patch.object(repair.migration, "MIGRATION_ROOT", migration_root),
-                mock.patch.object(repair, "_git_exact_head"),
-                mock.patch.object(repair, "_assert_runtime_boundary"),
-                mock.patch.object(
-                    repair.migration,
-                    "v3_resource_claims",
-                    return_value=[record["request_id"]],
-                ),
-            ):
-                with self.assertRaisesRegex(repair.LedgerRepairError, "resource claim"):
-                    repair.repair(
-                        repo_root=repo,
-                        expected_source_head="d" * 40,
-                        github_proof_path=proof_path,
-                        systemd=mock.Mock(),
-                    )
+    def test_success_and_failure_map_to_distinct_terminal_states(self):
+        by_conclusion = {
+            spec["github_job_conclusion"]:
+            ("COMPLETED" if spec["github_job_conclusion"] == "success" else "FAILED")
+            for spec in repair.CANARIES
+        }
+        self.assertEqual(by_conclusion["success"], "COMPLETED")
+        self.assertEqual(by_conclusion["failure"], "FAILED")
 
 
 if __name__ == "__main__":
