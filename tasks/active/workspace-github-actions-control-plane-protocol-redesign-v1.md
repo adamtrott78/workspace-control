@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 40d2004ab58b7027a604f4462ef8f06b1cf7c92a
+- Remote checkpoint: 78ae60364f472fd30654dd9018c90c546e3e8836
 - Remote verified: true
 
 ### research-engine
@@ -38,27 +38,26 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: main
-- Remote checkpoint: d214b20471aac348bd28802596b92f81ee146b76
+- Remote checkpoint: a8f952c7cf964730a01b2dc5c6cd75850912f94f
 - Remote verified: true
 
 ## Next safe action
 
-Complete this task/handoff sync and freeze the resulting exact branch head. From a fresh clean checkout at that exact final head, run only `bash scripts/lambda_ci_v3_controller_refresh_live.sh`. The refresh must prove roots active+boot-disabled, all nine v3 class controllers non-active+boot-disabled, Research GPU legacy containment, fully rolled-back migration history, and shared reconciler verification of the effective installed generation before replacing only /opt/workspace-ci/v3/controller/lambda-ci-controller-v3. Independently verify the root-owned V3_INACTIVE_CONTROLLER_BINARY_OVERRIDE receipt and unchanged runtime/reconciler bindings. Only then retry `bash scripts/lambda_ci_v3_production_cutover_live.sh` from the same exact head with a fresh production authority.
+Design, validate, and execute only the bounded legacy v2 scale-set retirement transition permitted by `architecture/lambda-ci-v3-migration-plan.v1.json#legacy_retirement`. Preconditions must include the accepted production transaction `/var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json` in committed state, zero queued/assigned/running legacy jobs, no active runner registrations owned by legacy prefixes, accepted v3 route/class proof, and a recorded rollback-window receipt. Preserve all old installed v2 bytes/config/state through the rollback window; do not remove legacy controller config/state in this transition. After scale-set retirement is accepted, resume `workspace-semantic-execution-migration-v1` immediately; physical controller config/state deletion is a later cleanup task.
 
 ## Remaining work
 
-- Validate this task/handoff sync and freeze the final exact controller-refresh/cutover source head.
-- Run scripts/lambda_ci_v3_controller_refresh_live.sh from that exact head; independently verify controller override provenance, binary digest, roots, all-class inactivity/boot state, restored v2 lanes, and Research GPU containment.
-- Retry the production generation cutover from the same exact head. Production prepare must reject any nonterminal durable v3 ledger before authority; terminal prior-generation history is inert.
-- Independently verify all three real production jobs, exact workflow blobs, selected v3 active+enabled state, non-selected v3 inactive+disabled state, all v2 inactive+disabled after commit, Research CPU separately gated, Research GPU contained, and production transaction/override receipts.
-- Preserve retired accepted v2 scale sets/bytes/config/state through the rollback window; physical legacy cleanup remains a later separately validated action.
-- Immediately resume workspace-semantic-execution-migration-v1 umbrella work once the v3/v2 infrastructure gate is accepted.
+- Validate and execute bounded retirement of the five legacy v2 scale sets only after proving the migration-plan `legacy_retirement` preconditions.
+- Preserve old v2 installed bytes/config/state through the rollback window; do not remove legacy controller config/state during scale-set retirement.
+- Record exact legacy scale-set retirement evidence and keep Research GPU containment provenance intact.
+- Immediately resume `workspace-semantic-execution-migration-v1` umbrella work after legacy scale-set retirement acceptance.
+- Perform physical legacy controller config/state deletion only in a later separately validated cleanup task.
 
 ## Blockers / gates
 
-- The validated controller binary and refresh-verifier repair still require one bounded root controller-only refresh from the final exact task-sync head. The prior refresh attempt failed before mutation and does not need rollback.
-- After that controller refresh is independently verified, production cutover attempt #2 requires a fresh one-shot CUTOVER_V3_PRODUCTION_GENERATION authority through the validated live operator; no prior production authority may be reused.
-- Research CPU remains separately gated; all Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT.
+- Legacy physical scale-set retirement has not yet been executed; migration policy requires zero queued/assigned/running jobs, no active legacy runner registrations, accepted v3 route/class proof, and a recorded rollback-window receipt.
+- Legacy controller bytes/config/state must remain preserved through the rollback window and are not authorized for deletion in the scale-set retirement transition.
+- Research GPU containment provenance must remain intact; no Research v3 route activation is implied by production cutover acceptance.
 
 ## Fresh-chat initialization
 
