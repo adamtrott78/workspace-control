@@ -90,5 +90,59 @@
   ],
   "next_safe_action": "Open a draft PR and run exact-head hosted validation. If green, design the sanitized maintenance-receipt read path as a separate read-only boundary; do not install live changes until the exact validated head is explicitly bound for Workspace Shell update.",
   "last_executor": "gpt-5.6-sol",
-  "last_surface": "github+heartbeat"
+  "last_surface": "github+heartbeat",
+  "checkpoints": [
+    {
+      "id": "workspace-shell-live-parent",
+      "kind": "accepted_live_runtime",
+      "identity": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #573 LIVE CHATGPT ACCEPTANCE COMPLETE records accepted Workspace Shell v1 runtime.",
+        "This observability branch is based directly on accepted head 44b4e4f2020450c81cec56e86b711cdee7e651d9."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "architecture/workspace-shell-mcp-authority-v2.json",
+      "state": "OBSERVABILITY_EXTENSION_CANDIDATE",
+      "role": "authority contract",
+      "origin": "workspace-shell-gitrunner-observability-v1",
+      "persistence": "Git",
+      "regeneration": "manual design update",
+      "review_requirement": "exact-head validation before live update",
+      "evidence": [
+        "Adds only read_only_gitrunner_observability contract."
+      ]
+    },
+    {
+      "path": "plugins/workspace-shell/install/render_install.py",
+      "state": "OBSERVABILITY_EXTENSION_CANDIDATE",
+      "role": "rendered exact unit allowlist",
+      "origin": "workspace-shell-gitrunner-observability-v1",
+      "persistence": "Git",
+      "regeneration": "deterministic install renderer",
+      "review_requirement": "exact-head validation before live update",
+      "evidence": [
+        "Adds six exact read-only unit names; no mutation verbs."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Explicit operator scope",
+      "result": "PASS",
+      "evidence": [
+        "Operator explicitly approved bounded Workspace Shell widening for queued-job cancellation and/or reading host maintenance receipts/controller unit state; this task implements only the read-only observability portion first."
+      ]
+    },
+    {
+      "check": "Authority narrowing",
+      "result": "PASS",
+      "evidence": [
+        "No generic systemctl, maintenance socket access, group membership, credentials, sibling controller units, v3 activation, or GitHub cancellation authority added."
+      ]
+    }
+  ]
 }
