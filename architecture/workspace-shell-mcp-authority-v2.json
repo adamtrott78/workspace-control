@@ -136,9 +136,26 @@
       "no workspace-ci-maintenance group membership",
       "no GitHub or runner credential access",
       "no arbitrary unit name",
-      "no sibling project controller unit inspection in this v1 expansion"
+      "no sibling project controller unit inspection in this v1 expansion",
+      "no arbitrary journal unit or journal query",
+      "no arbitrary file path or receipt root selector",
+      "no maintenance mutation through diagnostic read operations"
     ],
-    "maintenance_receipt_followup": "A later sanitized receipt reader must not solve file access by joining workspace-shell-mcp to the maintenance mutation group; use a dedicated read-only export/broker boundary.",
-    "github_run_cancellation": "Not part of Workspace Shell read authority. Prefer a GitHub/control-plane cancellation surface with repository/run-id binding and no general host credentials."
+    "maintenance_receipt_followup": "Implemented as a root-launcher read-only fixed-path operation. Workspace Shell does not join the workspace-ci-maintenance group and receives no maintenance socket access.",
+    "github_run_cancellation": "Not part of Workspace Shell read authority. Prefer a GitHub/control-plane cancellation surface with repository/run-id binding and no general host credentials.",
+    "operations": [
+      {
+        "operation": "unit_state",
+        "semantics": "existing fixed systemctl show property set for exact allowlisted units only"
+      },
+      {
+        "operation": "unit_logs_redacted",
+        "semantics": "root launcher runs fixed journalctl argv for exact allowlisted units, max 120 lines / 64 KiB returned"
+      },
+      {
+        "operation": "maintenance_receipt",
+        "semantics": "root launcher reads only /var/lib/workspace-ci/maintenance-controller/receipts/<positive-comment-id>.json with O_NOFOLLOW and returns bounded structured diagnostic fields"
+      }
+    ]
   }
 }
