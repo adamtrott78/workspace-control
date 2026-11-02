@@ -47,7 +47,7 @@
       "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "fbb065a235ef271f3c55210833ee3b95e9d61f54",
+        "checkpoint_sha": "e09c7f5485914b0345ffb459512461fede94875d",
         "verified": true
       },
       "local": null,
@@ -231,8 +231,20 @@
         "usage/context/effectiveness measurements",
         "objective fixture/evaluator evidence"
       ],
-      "validation": [],
-      "resume_condition": "Empirical evidence separates horizon/size limitations from intrinsic reasoning limitations."
+      "validation": [
+        {
+          "check": "Instant durable orchestration capability primitives",
+          "result": "PASS",
+          "evidence": [
+            "INSTANT_MULTI_LEAF_QUEUE_V1 draft PR #577 reached MULTI_LEAF_QUEUE_PASS with dependency ordering, five actions processed, decomposition and escalation classification, durable checkpoints, exact-head validation and stateless recovery.",
+            "INSTANT_CONCURRENT_EXECUTION_V1 durable state records X and Y COMPLETE under distinct workers using exact-head force=false CAS; PRs #578/#579 validated at runs 41365696966 and 41365779932.",
+            "INSTANT_WORKER_LEASE_RECOVERY_V1 durable state records generation-0 W1 result fenced, generation advanced, W2 independently recovered and completed generation 1; PR #581 validated run 41367274890 while W1 stale evidence remained preserved.",
+            "INSTANT_MULTI_WORKER_SCALE_V1 durable state records all eight actions A-H COMPLETE with exact-head CI evidence and peer-preserving CAS across W1/W2/W3; worker-registration collision exposed the need for authoritative session-slot registration rather than prompt-order identity assumptions.",
+            "These benchmarks prove durable queue/CAS/recovery/orchestration mechanics; they do NOT yet prove Instant matches frontier reasoning quality on intrinsically difficult research/architecture work."
+          ]
+        }
+      ],
+      "resume_condition": "Run the quality/effectiveness benchmark on realistic long-horizon research/engineering fixtures and determine where durable Instant continuation/decomposition is sufficient versus where frontier reasoning materially improves validated outcomes."
     },
     {
       "id": "semantic_core_and_extension_contract",
@@ -359,6 +371,44 @@
         "Transactional live updater reported PASS while preserving accepted Workspace Shell execution source 01a95b61410e2f427b9885a19e6a0b9c5ee60a38.",
         "Fresh live unit_state calls prove legacy workspace-control controller, maintenance controller/service, and v3 provisioner are active; v3 workspace-control control-small remains inactive.",
         "Fresh chat is required to rediscover newly added unit_logs_redacted and maintenance_receipt MCP schema operations."
+      ]
+    },
+    {
+      "id": "instant-durable-worker-capability-evidence",
+      "kind": "benchmark_checkpoint",
+      "identity": "instant-capability-benchmarks-2026-11-01",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #577 head c0fa03ce0d31e5fdd4de92f719de82d8bf901ab7: multi-leaf queue benchmark completed with exact-head validation and durable resumability.",
+        "Concurrent execution benchmark shared state: X complete by W2 at validated head ad3479da49ec277d164c4eb5dc217274a3bf5352/run 41365696966; Y complete by W1 at 4ccb6804cc453f3e4ec3af5855e0948afd82976a/run 41365779932.",
+        "Lease recovery benchmark shared state generation=1: W2 completed recovered X at head 98a0ea26911d4c5216f6dc9df95b2da98f0e3d3f/run 41367274890 while preserving W1 stale result history.",
+        "Multi-worker scale shared state version 19: A-H all COMPLETE with eight exact-head validation runs; workers W1/W2/W3 registered and peer state preserved; W4 remained FREE, demonstrating a registration/orchestration edge case rather than action-execution failure.",
+        "Conclusion: Instant workers can execute durable asynchronous task trees with CAS ownership, resume after chat returns, recover expired workers, and preserve peer state; quality equivalence on hard reasoning remains unproven."
+      ]
+    },
+    {
+      "id": "gitrunner-post-outage-current",
+      "kind": "dependency_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:74c027df26253c9836f23240f7456623a5979859",
+      "required_for_resume": true,
+      "evidence": [
+        "Legacy workspace-control stuck-lane incident was resolved as a migration blocker; broad v2 rehabilitation is out of scope.",
+        "Power outage left accepted v3 reconciler/provisioner inactive.",
+        "Refresh-aware root-reactivation correction at head 74c027df26253c9836f23240f7456623a5979859 passed Workspace Control Validation 41405429998.",
+        "Live helper updater failed closed before mutation on installed helper metadata mismatch for /opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py.",
+        "GitRunner task must reconcile exact helper prestate, reactivate roots, then continue PADataset CPU/GPU canaries and controlled v2 retirement."
+      ]
+    },
+    {
+      "id": "workspace-shell-post-outage-recovery-gap",
+      "kind": "dependency_checkpoint",
+      "identity": "PR592@d26ad592c16bb8673e6b91184b5c4c1907cedf13",
+      "required_for_resume": false,
+      "evidence": [
+        "Power outage proved Workspace Shell services and /run/workspace-shell-control were not cold-boot durable.",
+        "Manual recreation of /run/workspace-shell-control restored the recovery plane; prior diagnostics showed local mTLS/MCP healthy while launcher/root-broker/tunnel crash-looped on 226/NAMESPACE because the runtime directory was absent.",
+        "Draft PR #592 makes the tmpfiles rule persistent and boot-enables only the four recovery-plane services with an emergency disable path.",
+        "Privileged helper/standing authority remains a separate architectural follow-up; boot persistence must not imply arbitrary root authority."
       ]
     }
   ],
@@ -493,24 +543,47 @@
         "The queued run exercises the legacy v2 workspace-control lane, not v3 production admission.",
         "Dedicated Workspace Shell observability workstream PR #591 was created and live-updated to remove terminal-relay dependence for diagnosis."
       ]
+    },
+    {
+      "check": "Instant capability benchmark evidence recovered",
+      "result": "PASS",
+      "evidence": [
+        "Durable GitHub benchmark state proves multi-leaf queue execution/resume, concurrent CAS ownership, lease fencing/recovery, and eight-action multi-worker execution with exact-head CI evidence.",
+        "The evidence is capability/mechanics evidence only; it does not establish frontier-quality equivalence for intrinsically difficult reasoning."
+      ]
+    },
+    {
+      "check": "GitRunner dependency state reconciled after power outage",
+      "result": "PASS",
+      "evidence": [
+        "PR #572 current head 74c027df26253c9836f23240f7456623a5979859 is Workspace Control Validation 41405429998 SUCCESS.",
+        "Legacy workspace-control incident is resolved enough to stop broad v2 repair work.",
+        "Current live blocker is v3 root reactivation helper prestate/metadata mismatch after a valid controller-refresh overlay, not a return to the original parser problem."
+      ]
     }
   ],
   "blockers": [
-    "Architecture freeze is intentionally blocked pending resumable-reasoning benchmark evidence and independent review.",
-    "Live GitRunner migration actions remain controlled by workspace-github-actions-control-plane-protocol-redesign-v1 and require fresh class-specific authority; this task cannot issue that authority."
+    "Current implementation freeze is intentionally blocked until the GitRunner v3 substrate is canonical enough that new orchestration is not built atop legacy v2 reliability debt.",
+    "Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark, independent review, and unseen-workflow extension proof.",
+    "Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.",
+    "Live GitRunner migration actions remain authority-owned by workspace-github-actions-control-plane-protocol-redesign-v1 and require fresh class-specific authority; this umbrella task cannot manufacture that authority."
   ],
   "remaining_work": [
-    "Track the separate GitRunner task as the current P0 infrastructure dependency until accepted v3 production cutover and v2 retirement are complete; do not issue its live authority from this umbrella task.",
-    "After the GitRunner substrate is stable on v3, implement and run the resumable-reasoning benchmark pilot.",
-    "Compare frontier long-horizon, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid-escalation arms using objective validators and usage/context metrics.",
-    "Run an independent architecture review of the preferred hybrid semantic-projection hypothesis.",
-    "Prove one previously unseen workflow/domain extension without kernel changes or authority leakage.",
-    "Decide whether Temporal/Dapr or LangGraph/Agent Framework spikes are justified by expected material benefit.",
-    "Freeze and implement the smallest viable semantic projection + ReasoningProcess + executor/resource router only after evidence is sufficient.",
-    "Migrate representative workflows across research, engineering, data science, papers, presentations, tutoring, documents, and controller/runtime operations.",
-    "Measure and minimize scarce frontier allowance; keep escalation evidence-based."
+    "Track the GitRunner v3 migration/retirement task as the current P0 infrastructure dependency only; consume its durable receipts/state but do not let it redefine the umbrella architecture.",
+    "Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.",
+    "Consolidate already completed Instant capability evidence: multi-leaf queue endurance/resume, stateless durable recovery, concurrent exact-head CAS claiming/completion, lease expiry/recovery fencing, and multi-worker scaling with eight validated actions.",
+    "Implement and run the resumable-reasoning benchmark pilot comparing frontier long-horizon, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid-escalation arms using objective validators plus usage/context/effectiveness metrics.",
+    "Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.",
+    "Run an independent architecture review of the preferred hybrid semantic-projection hypothesis and challenge whether a different execution substrate/agent/workflow framework materially improves reliability or allowance efficiency.",
+    "Prove at least one previously unseen workflow/domain extension can be added without core-kernel changes, closed domain enums, or authority leakage.",
+    "Freeze and implement the smallest stable semantic core, versioned domain/workflow extension contract, durable ReasoningProcess, executor/provider/model/surface/harness capability model, resource/quota router, task-tree/lease/CAS semantics, and evidence-based escalation policy.",
+    "Design the human-in-the-loop orchestration surface so launching/resuming many temporary Instant workers is trivial for the operator while all real scheduling/ownership/recovery state remains durable and machine-managed; browser/tab mechanics are a transport concern, not the durable scheduler.",
+    "Migrate representative workflows incrementally across: automated research/evaluate/iterate loops; systems engineering and coding; data science/ML experiments; PADataset/research-engine; paper drafting/evidence/citation pipelines; slide/presentation creation; tutoring and homework/assignment generation for MTH602/EAS501/CIS560; generic document/artifact production; GitRunner/Lambda operations; Workspace Shell maintenance; and future workflows not known today.",
+    "Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.",
+    "Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation."
   ],
-  "next_safe_action": "TEMPORARY P0 INFRASTRUCTURE GATE: allow the separate GitRunner task workspace-github-actions-control-plane-protocol-redesign-v1 to complete the accepted active-fleet v3 migration and retire the legacy v2 plane before resuming broad semantic-execution implementation work. Continue to treat PR #590 as the umbrella program and preserve its architecture/benchmark state, but do not let the legacy runner substrate remain a reliability dependency underneath new orchestration work. Consume only durable GitRunner results; do not issue canary/cutover authority from this task. After v3 production cutover and v2 retirement are accepted, resume the resumable-reasoning benchmark, architecture review, unseen-workflow extension proof, and minimal implementation freeze.",
+  "next_safe_action": "TEMPORARY P0 INFRASTRUCTURE GATE, NOT THE OVERALL PROJECT: first allow workspace-github-actions-control-plane-protocol-redesign-v1 / PR #572 to recover v3 root services after the power outage, finish PADataset CPU/GPU active-class canaries, perform the controlled production v3 cutover, and retire v2. Do not let that incident consume or replace this umbrella program. Once v3 is canonical and the Workspace Shell recovery/standing-authority gaps are closed enough for normal operation, immediately resume the semantic-execution program at the empirical executor/reasoning evidence stage: consolidate the already completed Instant capability benchmarks, run the resumable-reasoning quality benchmark against frontier control arms, perform independent architecture review, prove an unseen workflow/domain extension, freeze the smallest open-world semantic core + ReasoningProcess + executor/resource/quota router, then incrementally migrate representative research, engineering, data-science, paper, slide, tutoring/homework, document/artifact, GitRunner, Workspace Shell, and future workflow families. Optimize for the same end-to-end functionality with minimal scarce frontier-model allowance, not for a research-only loop.",
   "last_executor": "gpt-5.6-sol",
-  "last_surface": "github+web+heartbeat"
+  "last_surface": "github+workspace-shell+heartbeat",
+  "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion."
 }
