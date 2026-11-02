@@ -47,7 +47,7 @@
       "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "0fd8a2b37bbd1987008a61a5e346718658a12137",
+        "checkpoint_sha": "ca12ad69988d1a247ae32b7454c0ff146cbb83bc",
         "verified": true
       },
       "local": null,
@@ -69,7 +69,7 @@
       "base_sha": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
       "remote": {
         "branch": "main",
-        "checkpoint_sha": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
+        "checkpoint_sha": "a8f952c7cf964730a01b2dc5c6cd75850912f94f",
         "verified": true
       },
       "local": null,
@@ -582,6 +582,16 @@
         "V3 production cutover completed and committed for the accepted Workspace Control + PADataset classes.",
         "All three production-accepted legacy v2 scale sets were retired with rollback-window receipt and fresh-process absence verification.",
         "The GitRunner migration no longer blocks the umbrella semantic-execution benchmark stage."
+      ]
+    },
+    {
+      "check": "Umbrella resume checkpoint after GitRunner retirement",
+      "result": "PASS",
+      "evidence": [
+        "PR #590 exact head ca12ad69988d1a247ae32b7454c0ff146cbb83bc passed Workspace Control Validation run 41515157344 SUCCESS.",
+        "GitRunner P0 dependency is cleared: production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json committed and accepted.",
+        "Legacy retirement receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json retired exactly lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu with fresh-process verification PASS.",
+        "Umbrella current_stage is resumable_reasoning_benchmark; architecture freeze remains gated on benchmark evidence, independent review, and unseen-workflow extension proof."
       ]
     }
   ],
