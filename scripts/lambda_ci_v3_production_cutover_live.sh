@@ -406,8 +406,10 @@ on_exit() {
     rollback_transaction || true
   fi
   cleanup_padataset_validation_pr
-  if [ "$CUTOVER_COMMITTED" -eq 0 ] && [ "$ROLLBACK_DONE" -eq 1 ]; then
-    remove_staged_credentials
+  if [ "$CUTOVER_COMMITTED" -eq 0 ]; then
+    if [ "$ROLLBACK_DONE" -eq 1 ] || [ -z "$TX_RECEIPT" ]; then
+      remove_staged_credentials
+    fi
   fi
   rm -rf "$TMP" >/dev/null 2>&1 || sudo -n rm -rf "$TMP" >/dev/null 2>&1 || true
   exit "$rc"
