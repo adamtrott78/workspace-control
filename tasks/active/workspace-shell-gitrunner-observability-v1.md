@@ -24,20 +24,21 @@ Widen Workspace Shell only enough to diagnose GitRunner/control-plane incidents 
 
 - Intent: mutate
 - Remote branch: workspace-shell-gitrunner-observability-v1
-- Remote checkpoint: 3d7c4cebf24f31a8002009cce17e8be1a02419a0
+- Remote checkpoint: 24726e194af7d1dbe379b8c49c5eaf94a39ab606
 - Remote verified: true
 
 ## Next safe action
 
-Run exact-head full validation for the expanded read-only GitRunner diagnostic surface. Do not install live changes or add mutating recovery authority until this head passes.
+Run full hosted validation on the final updater candidate. If green, retarget PR #591 back to the accepted Workspace Shell branch and invoke the updater manually on Lambda with the exact validated head; no plugin recreation or recommissioning.
 
 ## Remaining work
 
-- Retarget PR #591 back to workspace-shell-mcp-v1-current-main after final state-sync validation.
-- Prepare a bounded live-update procedure for the exact validated observability candidate.
-- After live update under operator boundary, inspect workspace-control legacy controller, maintenance controller/service, v3 provisioner/reconciler, and v3 control-small unit state.
-- Design/implement sanitized maintenance-receipt read without maintenance socket/group authority.
-- Keep GitHub Actions cancellation in a GitHub/control-plane surface rather than adding generic network credentials to Workspace Shell.
+- Run exact-head hosted validation for the transactional updater candidate.
+- Retarget PR #591 back to workspace-shell-mcp-v1-current-main after validation.
+- Apply one exact reviewed updater command on Lambda because the currently installed Workspace Shell cannot self-widen its root-owned runtime/config.
+- After live update, inspect the legacy workspace-control controller and maintenance units directly through Workspace Shell.
+- Use the new maintenance receipt/log visibility to finish the GitRunner incident diagnosis.
+- Keep GitRunner v3 activation/canary authority separate.
 
 ## Blockers / gates
 
