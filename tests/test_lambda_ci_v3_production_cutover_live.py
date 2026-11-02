@@ -63,10 +63,14 @@ class ProductionCutoverLiveOperatorTests(unittest.TestCase):
             self.text[loop:authority],
         )
 
-    def test_verifier_and_runtime_bindings_precede_authority(self):
+    def test_verifier_controller_and_runtime_bindings_precede_authority(self):
         authority = self.text.index("PRODUCTION_AUTHORITY_CREATED=PASS")
         self.assertLess(
             self.text.index("PRODUCTION_RECONCILER_BINDING=PASS"),
+            authority,
+        )
+        self.assertLess(
+            self.text.index("PRODUCTION_CONTROLLER_BINDING=PASS"),
             authority,
         )
         self.assertLess(
@@ -74,7 +78,19 @@ class ProductionCutoverLiveOperatorTests(unittest.TestCase):
             authority,
         )
         self.assertIn(
-            'reconciler_source_head"]==os.environ["EXPECTED_HEAD"]',
+            'EXPECTED_RECONCILER_SOURCE_HEAD="559c6186b44f17d4b83cb9267d554b355cda2ef7"',
+            self.text,
+        )
+        self.assertIn(
+            'EXPECTED_RECONCILER_SHA256="c8ef68bb99626a64a7783ec09b4e6383f6875c0193c5d9a771d52a218251e749"',
+            self.text,
+        )
+        self.assertIn(
+            'controller_source_head"]==os.environ["EXPECTED_HEAD"]',
+            self.text,
+        )
+        self.assertIn(
+            'EXPECTED_HEAD="$OPERATOR_HEAD"',
             self.text,
         )
         self.assertIn(
