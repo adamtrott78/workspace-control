@@ -1251,16 +1251,15 @@ def rollback(
     receipt = _load(receipt_path)
     if receipt.get("mode") != "V3_PRODUCTION_GENERATION_CUTOVER":
         raise CutoverError("production transaction mode invalid")
-    confirmation, _ = _validate_root_json(
-        workflow_rollback_confirmation,
-        "production workflow rollback confirmation",
-    )
-    _validate_workflow_confirmation(confirmation, receipt, rollback=True)
 
     installed_root = _load(V3_CONFIG_ROOT / "root-policy.json")
     registry = compiler.load_inputs(repo_root)["registry"]
     v3_units = migration.v3_controller_units(installed_root)
 
+    # Isolation precedes GitHub rollback confirmation.  If restoring the old
+    # default-branch workflows is incomplete or ambiguous, stop v3 and leave
+    # every project controller quiesced rather than continuing to execute a
+    # partially retargeted routing generation.
     for unit in ACCEPTED_V3_UNITS:
         systemd.stop(unit)
     if any(systemd.active(unit) for unit in v3_units):
@@ -1273,6 +1272,14 @@ def rollback(
         require_v3_empty=True,
         state_root=provisioner_state_root,
     )
+    receipt["phase"] = "ROLLBACK_V3_QUIESCED"
+    _persist(receipt_path, receipt)
+
+    confirmation, _ = _validate_root_json(
+        workflow_rollback_confirmation,
+        "production workflow rollback confirmation",
+    )
+    _validate_workflow_confirmation(confirmation, receipt, rollback=True)
 
     backups = receipt["backups"]
     for class_id in ACCEPTED_CLASSES:
