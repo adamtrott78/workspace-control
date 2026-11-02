@@ -1,0 +1,426 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-semantic-execution-migration-v1",
+  "title": "Workspace Semantic Execution Migration v1",
+  "status": "IN_PROGRESS",
+  "goal": "Design, benchmark, and incrementally migrate Workspace Control to an open-world semantic execution architecture that preserves current research, engineering, tutoring, publication, presentation, document, data-science, and operations workflows while minimizing scarce frontier-model allowance through deterministic execution, resumable Instant/local reasoning, bounded context, capability-aware routing, and explicit escalation—without weakening project-local truth, provenance, authority, GitRunner/Workspace Shell security, or rollback.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/evidence-first-solution-research.v1.json",
+    "checkpoint_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+    "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
+  },
+  "parent_execution_owner": "workspace-knowledge-action-ontology-v1",
+  "current_stage": "architecture_family_comparison_and_benchmark_design",
+  "acceptance_criteria": [
+    "Recover representative existing workflow families from workspace-control, PADataset, research-engine, MTH602, EAS501, and CIS560 and map their semantic, authority, execution, artifact, validation, wait/recovery, and consequence requirements.",
+    "Preserve the existing authority firewall: model/semantic output may create CandidateAction-like proposals but cannot create/widen Permission, remove Prohibition, satisfy ReviewRequirement, or manufacture execution authority.",
+    "Preserve project-local domain truth and treat any cross-workspace semantic graph/projection as rebuildable unless a separately reviewed contract explicitly grants authority.",
+    "Support open-world extension: a future workflow/domain family must be representable through versioned semantic/workflow adapters without adding a hard-coded domain branch to the execution kernel.",
+    "Compare materially distinct architecture families using current external evidence before implementation freeze, including minimal evolution, generalized research-engine, graph-first, durable-workflow-engine, agent-framework, and hybrid approaches.",
+    "Define resumable reasoning semantics so long-horizon work can be advanced by disposable model invocations with durable checkpoints and event-driven resume rather than long-lived chat state.",
+    "Empirically distinguish TOO_LARGE/decomposable work from INTRINSICALLY_DIFFICULT work that requires stronger reasoning.",
+    "Define executor identity as provider + model + execution surface/harness + toolset/capabilities + resource/quota state, not model name alone.",
+    "Define a resource/usage model that can route across deterministic, Instant, local, subscription, frontier, pay-as-you-go, and human executors without conflating financial cost with renewable allowance scarcity.",
+    "Integrate the unfinished GitRunner v3 fleet migration as a separate authority-owned infrastructure dependency: preserve accepted workspace-control canary evidence, continue PADataset CPU/GPU migration only under its own fresh authority, and keep Research GPU-derived classes NO_BY_DEFAULT absent separate reopening.",
+    "Demonstrate representative workflow coverage across research, coding/CI, architecture review, data science, paper creation, presentation creation, tutoring, homework/report production, document artifacts, and controller/runtime operations.",
+    "Before architecture freeze, prove the preferred design can represent at least one previously unseen workflow extension without core-kernel redesign and can preserve rollback to the current system."
+  ],
+  "constraints": [
+    "Do not treat the current hybrid semantic-projection architecture as frozen; it is a preferred migration hypothesis pending benchmark/review evidence.",
+    "Do not replace PostgreSQL, Git/GitHub task state, research-engine durable jobs, GitRunner, Workspace Shell, or project-local workflows merely because an external framework overlaps conceptually.",
+    "Do not adopt Temporal, Dapr, LangGraph, Microsoft Agent Framework, or another framework without a bounded comparison showing material benefit over current substrates.",
+    "Do not let semantic inference or model-generated edges become execution authority.",
+    "Do not move PADataset scientific truth, course truth/mastery state, research-engine runtime truth, or other project-owned semantics into workspace-control as authoritative state.",
+    "Do not hard-code research, tutoring, papers, slides, or any present domain as a closed universe in the generic kernel.",
+    "Do not burn reasoning/model usage while waiting for CI, experiments, human decisions, or external events; waiting must be deterministic/event-driven.",
+    "Do not resume or widen live GitRunner migration authority from this task. The controller task owns its canary and activation authority.",
+    "Do not reuse Workspace Shell task authority for GitRunner work. PR #573 acceptance only satisfies the GitRunner dependency condition.",
+    "Do not activate Research GPU-derived v3 classes; they remain NO_BY_DEFAULT absent separate exact authority.",
+    "Keep existing workflows operable during migration until replacements are independently validated."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+      "remote": {
+        "branch": "workspace-semantic-execution-migration-v1",
+        "checkpoint_sha": "c0108f87f9dd10a517151ab399762530f06610cf",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-semantic-execution-migration-v1.json",
+        "tasks/active/workspace-semantic-execution-migration-v1.md",
+        "architecture/workspace-semantic-execution-migration.v0.1.md",
+        "architecture/workspace-capability-workflow-inventory.v0.1.md",
+        "architecture/workspace-semantic-execution-architecture-options.v0.1.md",
+        "architecture/workspace-semantic-execution-*.md",
+        "architecture/workspace-semantic-execution-*.json",
+        "benchmarks/workspace-semantic-execution/**",
+        "tests/test_workspace_semantic_execution*.py"
+      ]
+    },
+    {
+      "name": "PADataset",
+      "intent": "read",
+      "base_sha": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "MTH602-AdamTrott",
+      "intent": "read",
+      "base_sha": "747e49fb9219b949e0b0e9d15860a766fbcb1f23",
+      "remote": {
+        "branch": "hw3-exam1-prep",
+        "checkpoint_sha": "747e49fb9219b949e0b0e9d15860a766fbcb1f23",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "EAS501-AdamTrott",
+      "intent": "read",
+      "base_sha": "b2b390d042d539165f140821a3080dc4e5a82001",
+      "remote": {
+        "branch": "eas501-tutor-bootstrap",
+        "checkpoint_sha": "b2b390d042d539165f140821a3080dc4e5a82001",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "CIS560-AdamTrott",
+      "intent": "read",
+      "base_sha": "aba8c2e87dd4bb50ba414206270f592e8ca841a4",
+      "remote": {
+        "branch": "tutor-framework",
+        "checkpoint_sha": "aba8c2e87dd4bb50ba414206270f592e8ca841a4",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "workspace_inventory_and_problem_frame",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github+web",
+      "inputs": [
+        "workspace-control main and existing reusable workflow/policy artifacts",
+        "PADataset main and milcom-presentation branch",
+        "research-engine main durable orchestrator",
+        "MTH602/EAS501/CIS560 tutoring branches",
+        "existing research knowledge ontology",
+        "recent Instant worker benchmark evidence"
+      ],
+      "outputs": [
+        "architecture/workspace-semantic-execution-migration.v0.1.md",
+        "architecture/workspace-capability-workflow-inventory.v0.1.md"
+      ],
+      "validation": [
+        {
+          "check": "Representative workflow families recovered",
+          "result": "PASS",
+          "evidence": [
+            "Inventory includes research/experiments, engineering, tutoring/coursework, paper production, presentation production, generic document artifacts, evidence-first architecture research, GitRunner/Lambda execution, local semantic models, and Chat/Instant reasoning.",
+            "PADataset, research-engine, MTH602, EAS501, CIS560 and workspace-control were inspected directly through GitHub."
+          ]
+        },
+        {
+          "check": "Open-world requirement captured",
+          "result": "PASS",
+          "evidence": [
+            "Migration architecture forbids a closed domain enum and requires versioned domain/workflow extensions that do not modify core scheduler semantics."
+          ]
+        }
+      ],
+      "resume_condition": "Representative current workflows and unfinished infrastructure dependencies are durably inventoried."
+    },
+    {
+      "id": "architecture_family_comparison_and_benchmark_design",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github+web+heartbeat+lambda-ci",
+      "inputs": [
+        "workspace capability/workflow inventory",
+        "evidence-first solution research workflow",
+        "Temporal/Dapr/LangGraph/Microsoft Agent Framework/OPA/PROV-O/AI Scientist/AFlow current evidence",
+        "GitRunner task workspace-github-actions-control-plane-protocol-redesign-v1 current branch 6456847b0b4b1268ed6f5bd4d0b847ebde1a21e5",
+        "Workspace Shell acceptance PR #573 comment 6565110368"
+      ],
+      "outputs": [
+        "architecture/workspace-semantic-execution-architecture-options.v0.1.md",
+        "resumable reasoning benchmark contract",
+        "semantic core/extension candidate",
+        "executor/resource/quota model candidate"
+      ],
+      "validation": [
+        {
+          "check": "Materially distinct architecture families compared",
+          "result": "PASS",
+          "evidence": [
+            "Current comparison covers minimal evolution, generalized research-engine, graph-first, Temporal/Dapr durable workflow, agent-framework, and hybrid semantic-projection approaches.",
+            "Hybrid semantic projection + existing execution substrates is marked PREFERRED_MIGRATION_HYPOTHESIS, not frozen."
+          ]
+        },
+        {
+          "check": "Workspace Shell dependency evidence reconciled",
+          "result": "PASS",
+          "evidence": [
+            "PR #573 comment 6565110368 records LIVE CHATGPT ACCEPTANCE COMPLETE.",
+            "Accepted execution/authority SHA 01a95b61410e2f427b9885a19e6a0b9c5ee60a38; durable head 44b4e4f2020450c81cec56e86b711cdee7e651d9; Validation run 41359338969 SUCCESS.",
+            "Current Workspace Shell runtime_inventory call returns normally.",
+            "No GitRunner canary authority is inferred from this evidence."
+          ]
+        }
+      ],
+      "resume_condition": "Architecture comparison, resumable reasoning benchmark, semantic extension model and executor/resource routing model are concrete enough for independent review and bounded prototype selection."
+    },
+    {
+      "id": "resumable_reasoning_benchmark",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control-benchmark",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Instant worker benchmark infrastructure",
+        "representative long-horizon workflow cases",
+        "frontier comparison arm"
+      ],
+      "outputs": [
+        "Instant persistent vs stateless resume results",
+        "decomposition/critique results",
+        "frontier-escalation boundary",
+        "usage/context/effectiveness measurements"
+      ],
+      "validation": [],
+      "resume_condition": "Empirical evidence separates horizon/size limitations from intrinsic reasoning limitations."
+    },
+    {
+      "id": "semantic_core_and_extension_contract",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "existing research knowledge ontology",
+        "workflow inventory",
+        "PROV-O/policy prior art",
+        "architecture benchmark evidence"
+      ],
+      "outputs": [
+        "small stable core semantic schema",
+        "versioned domain extension contract",
+        "authority firewall invariants",
+        "unseen-workflow extension fixture"
+      ],
+      "validation": [],
+      "resume_condition": "A new domain can be added without kernel change and without manufacturing authority."
+    },
+    {
+      "id": "executor_resource_router_design",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "executor benchmark evidence",
+        "current ChatGPT/other provider usage models",
+        "local model/runtime capabilities",
+        "GitRunner/Workspace Shell capability boundaries"
+      ],
+      "outputs": [
+        "Executor/Provider/Model/Surface/Harness schema",
+        "CapabilityRequirement and ReasoningRequirement schema",
+        "QuotaPool/UsageRecord schema",
+        "routing and escalation policy"
+      ],
+      "validation": [],
+      "resume_condition": "Routing can choose cheapest sufficient executor while failing closed on missing capability/authority."
+    },
+    {
+      "id": "representative_workflow_migration_and_acceptance",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "accepted architecture contract",
+        "representative workflow fixtures",
+        "existing project-local owners"
+      ],
+      "outputs": [
+        "incremental adapters",
+        "end-to-end acceptance evidence",
+        "rollback evidence"
+      ],
+      "validation": [],
+      "resume_condition": "Representative workflows complete without manual transport and with measured scarce-frontier usage."
+    },
+    {
+      "id": "gitrunner_migration_dependency_tracking",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-github-actions-control-plane-protocol-redesign-v1",
+      "selected_executor": "separate-authority-owned-task",
+      "selected_surface": "github+workspace-shell+lambda",
+      "inputs": [
+        "GitRunner PR #572 branch github-actions-control-plane-protocol-redesign-v1",
+        "Workspace Shell accepted state from PR #573",
+        "frozen v3 canary order"
+      ],
+      "outputs": [
+        "PADataset CPU/GPU v3 migration under separate exact authority",
+        "Research CPU migration only if separately authorized",
+        "Research GPU-derived containment preserved"
+      ],
+      "validation": [],
+      "resume_condition": "This semantic migration consumes only durable GitRunner receipts/state; it never issues live canary authority."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "migration-architecture-initial",
+      "kind": "design_checkpoint",
+      "identity": "workspace-control@c0108f87f9dd10a517151ab399762530f06610cf",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #590 contains migration architecture, workflow inventory and architecture-family comparison.",
+        "Workspace Control hosted validation run 41378088808 passed the earlier PR head 236b2f589cf5d75f961ace1e89ef68eab1c1d52f.",
+        "Lambda controller exact-head validation was requested separately after subsequent updates."
+      ]
+    },
+    {
+      "id": "gitrunner-current-owner",
+      "kind": "dependency_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:6456847b0b4b1268ed6f5bd4d0b847ebde1a21e5",
+      "required_for_resume": true,
+      "evidence": [
+        "GitRunner task remains IN_PROGRESS / bounded_migration_and_live_acceptance.",
+        "workspace-control-control-small-v1 first canary accepted; next migration class is padataset-cpu-public-v1 under fresh separate one-shot authority.",
+        "Research GPU-derived classes remain NO_BY_DEFAULT."
+      ]
+    },
+    {
+      "id": "workspace-shell-acceptance",
+      "kind": "dependency_checkpoint",
+      "identity": "PR573-comment-6565110368",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Shell v1 LIVE CHATGPT ACCEPTANCE COMPLETE.",
+        "durable head 44b4e4f2020450c81cec56e86b711cdee7e651d9",
+        "accepted execution/authority SHA 01a95b61410e2f427b9885a19e6a0b9c5ee60a38",
+        "Workspace Control Validation run 41359338969 SUCCESS"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "architecture/workspace-semantic-execution-migration.v0.1.md",
+      "state": "DRAFT",
+      "role": "problem framing and target invariants",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "manual design revision from durable evidence",
+      "review_requirement": "independent architecture review before freeze",
+      "evidence": [
+        "Created on PR #590.",
+        "Defines open-world extensibility and authority-preserving migration goals."
+      ]
+    },
+    {
+      "path": "architecture/workspace-capability-workflow-inventory.v0.1.md",
+      "state": "DRAFT",
+      "role": "workflow/capability inventory",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "expand from owning repositories",
+      "review_requirement": "coverage review",
+      "evidence": [
+        "Includes existing workflow families and unfinished GitRunner migration dependency.",
+        "Workspace Shell acceptance evidence reconciled."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-architecture-options.v0.1.md",
+      "state": "DRAFT",
+      "role": "evidence-first architecture comparison",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "revise as benchmark evidence arrives",
+      "review_requirement": "independent architecture review before freeze",
+      "evidence": [
+        "Compares six materially distinct architecture families.",
+        "Hybrid approach is a preferred hypothesis, not a frozen decision."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Explicit user authorization",
+      "result": "PASS",
+      "evidence": [
+        "User explicitly requested continued autonomous work on the Workspace Control migration, durable documentation, integration of unfinished GitRunner migration work, use of GitHub/GitRunners/controllers, and Heartbeat progress reporting."
+      ]
+    },
+    {
+      "check": "Initial PR validation",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation run 41378088808 completed successfully for PR #590 exact head 236b2f589cf5d75f961ace1e89ef68eab1c1d52f."
+      ]
+    },
+    {
+      "check": "Current Lambda GitRunner validation",
+      "result": "NOT_RUN",
+      "evidence": [
+        "Owner-gated command /workspace-control-validate cbc71b51b28c96b7b08b92a5e8e17b8566803d73 created Lambda CI Workspace Control Validation run 41378944347.",
+        "Run was observed queued while design work continued asynchronously."
+      ]
+    }
+  ],
+  "blockers": [
+    "Architecture freeze is intentionally blocked pending resumable-reasoning benchmark evidence and independent review.",
+    "Live GitRunner migration actions remain controlled by workspace-github-actions-control-plane-protocol-redesign-v1 and require fresh class-specific authority; this task cannot issue that authority."
+  ],
+  "remaining_work": [
+    "Observe exact-head Lambda validation result without polling with a reasoning model while nothing changes.",
+    "Define and implement the resumable Instant-vs-frontier benchmark contract on disposable benchmark state.",
+    "Define the minimal semantic core and versioned domain-extension registration contract.",
+    "Define executor/resource/quota ontology and routing/escalation decision contract.",
+    "Expand workflow inventory to concrete workflow descriptors and acceptance cases.",
+    "Run an independent architecture review of the hybrid hypothesis.",
+    "Perform a bounded external-runtime spike only if the comparison shows sufficient likely benefit.",
+    "Demonstrate an unseen workflow extension without kernel change.",
+    "Keep the separate GitRunner migration progressing under its own authority, starting with PADataset CPU when fresh canary authority exists."
+  ],
+  "next_safe_action": "Continue evidence-first architecture work on PR #590: create the resumable reasoning benchmark contract and minimal semantic-core/executor-resource schemas, while treating the Lambda validation run as an external async wait. Do not perform live GitRunner canary/migration mutation from this task. Consume the separate GitRunner task's durable results when they change.",
+  "last_executor": "gpt-5.6-sol",
+  "last_surface": "github+web+heartbeat"
+}
