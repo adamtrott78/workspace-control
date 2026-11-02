@@ -162,7 +162,7 @@
       "check": "Hosted exact-head validation",
       "result": "NOT_RUN",
       "evidence": [
-        "Pending full validation for updater candidate after checkpoint 24726e194af7d1dbe379b8c49c5eaf94a39ab606."
+        "Final transactional updater candidate retargeted to main for full hosted validation; result pending."
       ]
     }
   ]
