@@ -164,6 +164,20 @@ class MaintenanceControllerTests(unittest.TestCase):
         self.assertNotIn("github-read-token", text)
         self.assertNotIn("runner-token", text)
 
+    def test_github_time_normalizer_truncates_go_rfc3339_nanoseconds(self):
+        self.assertEqual(
+            controller._normalize_github_time(
+                "2026-11-01T22:20:58.365802851Z"
+            ),
+            "2026-11-01T22:20:58.365802+00:00",
+        )
+        self.assertEqual(
+            controller._normalize_github_time(
+                "2026-11-01T22:20:58.123456789-05:00"
+            ),
+            "2026-11-01T22:20:58.123456-05:00",
+        )
+
     def test_github_time_parser_accepts_go_rfc3339_nanoseconds(self):
         observed = controller._parse_github_time(
             "2026-11-01T22:20:58.365802851Z",
