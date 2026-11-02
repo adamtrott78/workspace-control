@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 28853cc42608def1790e25711c1a9dcbdb652346
+- Remote checkpoint: 74c027df26253c9836f23240f7456623a5979859
 - Remote verified: true
 
 ### research-engine
@@ -43,39 +43,46 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Apply the exact validated single-file maintenance-controller hotfix from scripts/lambda_ci_maintenance_controller_live_update_v1.py using validated code/test head 28853cc42608def1790e25711c1a9dcbdb652346 (or a later metadata-only descendant whose candidate/old blob pins remain identical). This is the current unavoidable root bootstrap boundary. After PASS, ChatGPT should verify the service via Workspace Shell, post a fresh reset-stale command for quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, consume the maintenance receipt, and continue v3 migration without user terminal relay.
+IMMEDIATE POST-OUTAGE V3 ROOT REACTIVATION GATE: do not rerun the failed live updater or root activation blindly. Exact repository head 74c027df26253c9836f23240f7456623a5979859 passed Workspace Control Validation run 41405429998 and makes root reactivation aware of the accepted ACTIVE controller-refresh override. The operator then ran scripts/lambda_ci_v3_root_reactivation_helper_live_update_v1.py, which failed CLOSED before mutation with `installed helper metadata mismatch: /opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py`. First recover the exact live helper metadata/digest/ownership/mode and prior activation/update receipts using Workspace Shell/read-only host evidence; compare them to the updater's frozen expected prestate and determine why the installed helper does not match. Correct only the updater/prestate contract if required, validate the exact new head, then perform one transactional helper update. Treat the previously created root-reactivation authority receipt /var/lib/workspace-ci/v3/migration/root-reactivation-authority-14e58009-7bf3-43d1-8ad8-7616e70edaa3.json as non-reusable until its consumption state is independently proven; issue a fresh ACTIVATE_V3_ROOT_SERVICES authority if there is any ambiguity. After reconciler/provisioner are healthy, resume the frozen migration order at padataset-cpu-public-v1 under a fresh class-specific ACTIVATE_ONE_V3_CANARY authority.
 
 ## Remaining work
 
-- Pass full repository validation for the RFC3339 nanosecond maintenance timestamp fix and freeze its exact source/blob.
-- Establish the smallest durable Workspace Shell reviewed-helper bootstrap/update path needed to install exact root-owned GitRunner maintenance/cutover helpers without future plugin schema changes; preserve empty-by-default generic authority and never expose generic bash/systemctl.
-- Install only the validated maintenance-controller fix on Lambda, restart only the maintenance controller if required, and prove service health.
-- Re-run reset-stale against quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d; require fresh scale-set ID, two zero-state observations, and READY_FOR_SINGLE_RETRY with automatic_workflow_triggered=false.
-- Contain/cancel stale run 41378944347 through the correct scheduler/control-plane mechanism and separately prove legacy Lambda-side runner/JIT/reservation/process cleanup and old scale-set assigned/running counts zero.
+- Resolve the exact installed-helper metadata mismatch blocking the validated refresh-aware root-reactivation helper; do not widen authority or bypass installed-byte/metadata attestation.
+- Reactivate the already-installed v3 reconciler and provisioner after the power-loss reboot using fresh installed-manifest-bound ACTIVATE_V3_ROOT_SERVICES authority; prove controller-refresh override attestation, root services healthy, non-target class controllers inactive, and Research GPU containment preserved.
+- Complete Workspace Shell reboot hardening from draft PR #592: persist the /run/workspace-shell-control tmpfiles rule and boot-enable only the accepted recovery-plane services with emergency disable preserved.
+- Replace repeated operator sudo/bootstrap relay with narrowly reviewed Workspace Shell standing/helper authority for exact GitRunner maintenance/reactivation/canary/cutover operations; never expose generic root shell/systemctl and do not make model reasoning itself an authority source.
 - Prepare and execute migration-order #2 padataset-cpu-public-v1 canary under a NEW separately validated one-shot ACTIVATE_ONE_V3_CANARY authority.
 - Prepare and execute migration-order #3 padataset-gpu-single-public-v1 canary under its own NEW separately validated one-shot authority.
-- After active-class canaries pass, execute the single production generation cutover and retire v2 under the migration plan.
-- Keep research-cpu-public-v1 separately gated and all Research GPU-derived classes NO_BY_DEFAULT.
+- After accepted active-class canaries, perform the single production generation cutover: drain/quiesce v2, retarget accepted workflows to v3 scale-set names, start accepted production v3 class controllers, prove exact production serviceability/cleanup, then mark corresponding v2 controllers/scale sets DRAINING -> RETIRED.
+- Preserve old installed bytes/config/state for the rollback window and remove legacy v2 config/state only in later cleanup after retirement preconditions hold.
+- Keep research-cpu-public-v1 separately gated; keep all Research GPU-derived classes inherited-contained and NO_BY_DEFAULT absent separate containment-recovery authority.
+- Keep Research Engine PR #283 draft/proposal-only until separate default-branch producer-cutover authority.
 
 ## Blockers / gates
 
-- Current incident gate: legacy workspace-control route has a queued job 41378944347 with no runner assignment even though workspace-ci-controller@workspace-control-cpu.service is ACTIVE/RUNNING. Exact journal/maintenance-receipt evidence requires a fresh ChatGPT conversation because the current chat cached the pre-update MCP schema.
-- Run 41378944347 became stale after PR #590 advanced; do not use it as a clean serviceability probe once controller recovery occurs. A correct exact-head attestor may reject it.
-- Further live v3 migration still requires a new separately bound one-shot canary authority per class, beginning with padataset-cpu-public-v1.
-- Research CPU activation remains separately gated.
-- All Research GPU-derived runner classes remain inherited-contained and NO_BY_DEFAULT.
-- Research Engine PR #283 remains draft/proposal-only; no default-branch producer cutover is authorized.
+- Power-loss reboot left workspace-ci-v3-reconciler.service and workspace-ci-v3-provisioner.service inactive; migration plan forbids improvised direct systemctl activation.
+- Validated refresh-aware root-reactivation candidate 74c027df26253c9836f23240f7456623a5979859 / run 41405429998 SUCCESS is not live: transactional updater failed before mutation on installed helper metadata mismatch for /opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py.
+- The previously created root-reactivation authority receipt may have been created before the failed activation/update sequence; consumption/replay eligibility must be proven from durable authority state, never inferred.
+- Workspace Shell privileged-helper registry/standing root authority is still insufficient for this root bootstrap class, so the architecture still has an operator-terminal relay gap to eliminate.
+- Further live v3 migration requires a fresh separately bound one-shot canary authority per class, beginning with padataset-cpu-public-v1.
+- Research CPU activation remains separately gated; Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT; Research Engine PR #283 remains proposal-only.
 
 ## Fresh-chat initialization
 
 @GitHub
 
+@Workspace Shell
+
+@Heartbeat
+
 https://github.com/adamtrott78/workspace-control
+
+YOU ARE THE CONTINUING EXECUTOR. DO THE WORK YOURSELF IN THIS CHAT. DO NOT RETURN ANOTHER HANDOFF OR REVIEWER PROMPT.
 
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.json
 
 Start from the normal workspace-control root route.
+Recover exact durable GitHub/runtime state before acting; do not rely on conversational memory where repository/runtime evidence exists.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Follow the capsule's next_safe_action and preserve all authority boundaries.
