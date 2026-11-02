@@ -27,6 +27,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.request
 from datetime import datetime, timezone
 
 
@@ -36,6 +37,9 @@ EXPECTED_GOMOD_BLOB = "c6eac3f02843fbe5d384594b7ff1e60806a1ba14"
 EXPECTED_GOSUM_BLOB = "9bbeb18130880f5ff5e9cbf2b247493c80f8cfa1"
 EXPECTED_OLD_MAINTENANCE_BLOB = "44234db6ceac33f42406731ec190f8de65ecf3f4"
 EXPECTED_NEW_MAINTENANCE_BLOB = "4c451faa19d785b0bbab04b93f1ab78529048ed5"
+GO_VERSION = "go1.26.3"
+GO_URL = "https://go.dev/dl/go1.26.3.linux-amd64.tar.gz"
+GO_SHA256 = "2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"
 
 CONTROLLER_SERVICE = "workspace-ci-controller@workspace-control-cpu.service"
 MAINTENANCE_SERVICE = "workspace-ci-maintenance-controller.service"
@@ -129,6 +133,34 @@ def go_vcs_revision(binary: Path, go_bin: str) -> str:
     raise UpdateError(f"binary has no Go vcs.revision build setting: {binary}")
 
 
+def provision_go_toolchain(build_dir: Path) -> str:
+    archive = build_dir / "go1.26.3.linux-amd64.tar.gz"
+    request = urllib.request.Request(
+        GO_URL,
+        headers={"User-Agent": "workspace-control-stale-recovery-updater/1"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            with archive.open("wb") as out:
+                shutil.copyfileobj(response, out)
+    except Exception as exc:
+        raise UpdateError(f"failed to download pinned Go toolchain: {exc}") from exc
+
+    if sha256(archive) != GO_SHA256:
+        raise UpdateError("pinned Go toolchain checksum mismatch")
+
+    run(["tar", "-C", str(build_dir), "-xzf", str(archive)])
+    go_bin = build_dir / "go" / "bin" / "go"
+    if not go_bin.is_file():
+        raise UpdateError("pinned Go toolchain extraction is incomplete")
+    observed = run([str(go_bin), "env", "GOVERSION"]).stdout.strip()
+    if observed != GO_VERSION:
+        raise UpdateError(
+            f"pinned Go toolchain version mismatch: expected {GO_VERSION}, observed {observed}"
+        )
+    return str(go_bin)
+
+
 def atomic_json(path: Path, value: dict) -> None:
     tmp = path.with_name(path.name + ".tmp")
     tmp.write_text(
@@ -169,10 +201,6 @@ def main() -> int:
         or any(c not in "0123456789abcdef" for c in args.expected_head)
     ):
         raise UpdateError("--expected-head must be a full lowercase Git SHA")
-
-    go_bin = shutil.which("go")
-    if not go_bin:
-        raise UpdateError("go toolchain is unavailable")
 
     repo_hint = Path.cwd().resolve()
     repo = Path(
@@ -259,6 +287,7 @@ def main() -> int:
     build_dir = Path(tempfile.mkdtemp(prefix="workspace-ci-stale-recovery-build."))
     candidate_binary = build_dir / "lambda-ci-controller"
     try:
+        go_bin = provision_go_toolchain(build_dir)
         run([go_bin, "test", "-mod=mod", "./..."], cwd=controller_dir)
         run(
             [go_bin, "build", "-mod=mod", "-o", str(candidate_binary), "."],
