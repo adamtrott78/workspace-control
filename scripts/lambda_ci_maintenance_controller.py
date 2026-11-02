@@ -347,8 +347,31 @@ def invoke_scale_set_helper(
 def _parse_github_time(value: Any, label: str) -> datetime:
     if not isinstance(value, str) or not value:
         raise MaintenanceControllerError(f"{label} timestamp is missing")
+
+    # Controller quarantine receipts are written by Go and may contain RFC3339
+    # timestamps with nanosecond precision, while Python's fromisoformat
+    # accepts at most microsecond precision on the deployed host. Normalize
+    # only the fractional precision; preserve the exact wall-clock second and
+    # timezone offset used for the fail-closed replacement-run boundary.
+    match = re.fullmatch(
+        r"(?P<base>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})"
+        r"(?:\\.(?P<fraction>\\d+))?"
+        r"(?P<zone>Z|[+-]\\d{2}:\\d{2})",
+        value,
+    )
+    normalized = value
+    if match is not None:
+        fraction = match.group("fraction")
+        zone = "+00:00" if match.group("zone") == "Z" else match.group("zone")
+        normalized = match.group("base")
+        if fraction is not None:
+            normalized += "." + fraction[:6]
+        normalized += zone
+    else:
+        normalized = value.replace("Z", "+00:00")
+
     try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return datetime.fromisoformat(normalized)
     except ValueError as exc:
         raise MaintenanceControllerError(f"{label} timestamp is invalid") from exc
 
