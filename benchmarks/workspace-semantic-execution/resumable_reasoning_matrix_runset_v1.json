@@ -37,7 +37,10 @@
         "P3_mixed_long_hard"
       ],
       "claim_bearing": false,
-      "freeze_rule": "Any fixture/prompt/harness/protocol change after screening invalidates screening comparability and requires a fresh screening pass."
+      "freeze_rule": "Any fixture/prompt/harness/protocol change after screening invalidates screening comparability and requires a fresh screening pass.",
+      "supplementary_screening_arms": [
+        "B6_gpt6_instant_persistent_chat"
+      ]
     },
     {
       "id": "scored_replicates",
@@ -249,6 +252,22 @@
       "status": "PLANNED_EXPLORATORY",
       "rationale": "Useful as a best-available ceiling, but not the primary causal control because Work changes the execution surface and agent affordances in addition to model capability."
     },
-    "runtime_identity_rule": "Persist the exact model name and configuration reported by the surface. For GPT-5.6 on paid ChatGPT surfaces, `GPT-5.6 Sol` with `Instant` is the expected B/C/D default identity; compare configuration as well as model family. If the actual treatment differs, mark EXECUTOR_IDENTITY_MISMATCH."
+    "runtime_identity_rule": "Persist the exact model name and configuration reported by the surface. For GPT-5.6 on paid ChatGPT surfaces, `GPT-5.6 Sol` with `Instant` is the expected B/C/D default identity; compare configuration as well as model family. If the actual treatment differs, mark EXECUTOR_IDENTITY_MISMATCH.",
+    "supplementary_instant_controls": {
+      "B6_gpt6_instant_persistent_chat": {
+        "provider": "OpenAI",
+        "model_family": "GPT-6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_or_temporary_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "status": "PLANNED_SCREENING",
+        "rationale": "Supplementary same-surface Instant comparison against GPT-5.6 Sol / Instant. This does not replace the primary B arm; it measures model-generation effect at Instant configuration."
+      }
+    }
   }
 }
