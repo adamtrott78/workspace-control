@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "fixture_id": "research-iterate-timeout-control-p0-v1",
+  "visibility": "evaluator_only_do_not_supply_to_reasoning_worker",
+  "experiment_results": {
+    "E_restore_timeout": {
+      "p95_latency_ms": 5100,
+      "timeout_failure_rate": 0.01,
+      "interpretation_hint": "Restoring the prior timeout removes almost all deadline failures."
+    },
+    "E_double_cpu": {
+      "p95_latency_ms": 5000,
+      "timeout_failure_rate": 0.39,
+      "interpretation_hint": "More CPU does not change the deadline boundary or failure rate."
+    },
+    "E_network_bypass": {
+      "p95_latency_ms": 5000,
+      "timeout_failure_rate": 0.38,
+      "interpretation_hint": "A clean network path does not change the deadline boundary or failure rate."
+    }
+  },
+  "terminal_criteria": {
+    "expected_hypothesis": "H_timeout_config",
+    "minimum_unique_experiments": 2,
+    "required_experiment_groups": [
+      [
+        "E_restore_timeout"
+      ],
+      [
+        "E_double_cpu",
+        "E_network_bypass"
+      ]
+    ],
+    "required_rejected_hypotheses": [
+      "H_cpu"
+    ],
+    "required_addressed_observations": [
+      "O1"
+    ]
+  },
+  "seal_note": "Static hidden oracle for taxonomy-calibration fixture. Scored workers must not receive this file."
+}
