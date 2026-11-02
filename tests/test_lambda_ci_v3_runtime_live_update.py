@@ -32,6 +32,7 @@ UPDATER = SCRIPTS / "lambda_ci_v3_runtime_live_update_v1.py"
 class RuntimeLiveUpdateContractTests(unittest.TestCase):
     def test_updater_is_narrow_transactional_and_provisioner_only(self):
         text = UPDATER.read_text(encoding="utf-8")
+        compile(text, str(UPDATER), "exec")
         self.assertIn(
             'BASE_SOURCE_HEAD = "09c46818252991f6a55aaeedbcf046c554e2ffee"',
             text,
