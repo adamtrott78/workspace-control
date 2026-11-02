@@ -222,12 +222,12 @@
     "disposable_branches_only": true
   },
   "next_implementation_steps": [
-    "Validate the complete P0-P3 static fixture matrix and staged matrix runset at exact PR head.",
-    "Run one clean oracle-unexposed protocol-screening execution per A-E arm/fixture; these screening results are non-claim-bearing and exist to catch protocol defects.",
-    "Freeze the protocol after screening, then execute at least three independent clean replicates for the selected paired causal comparisons.",
-    "Use P1 as the primary TOO_LARGE/decomposition fixture, P2 as the primary short/coupled intrinsic-reasoning fixture, and P3 to test decompose-first-then-escalate behavior.",
-    "Do not claim workspace-wide executor equivalence from the synthetic research_iterate matrix; add architecture_diagnosis, artifact_revision, software_debug_repair, and unseen-extension suites.",
-    "Strengthen evaluator isolation to hidden-ephemeral or externally blinded evaluation before strong frontier-equivalence claims."
+    "Validate the P0-P3 matrix plus hidden-ephemeral evaluator primitive at an exact PR head.",
+    "Provision or identify a control-owned evaluator-only runtime store that clean model workers cannot read; persist oracle/seed/nonce there and expose only public fixture + commitment to workers.",
+    "Run one non-claim-bearing clean screening execution per A-E arm/fixture under the staged matrix runset.",
+    "Freeze worker packets/prompts/harness after screening, then run at least three independent clean replicates for selected causal comparisons.",
+    "Use static fixtures for pilot calibration and hidden-ephemeral fixtures for stronger capability claims.",
+    "Add architecture_diagnosis, artifact_revision, software_debug_repair, and unseen-extension suites before workspace-wide conclusions."
   ],
   "implementation_checkpoint": {
     "checkpoint_sha": "4ec300254c328a1b6e0fce62fe62cd6f11d7a855",
@@ -253,7 +253,10 @@
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.taxonomy.json",
     "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
     "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json",
-    "tests/test_workspace_semantic_execution_fixture_matrix.py"
+    "tests/test_workspace_semantic_execution_fixture_matrix.py",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_ephemeral_fixture_v1.py",
+    "benchmarks/workspace-semantic-execution/evaluator_isolation_v1.json",
+    "tests/test_workspace_semantic_execution_evaluator_isolation.py"
   ],
   "pilot_constraints": {
     "authoring_session_contaminated": true,
@@ -291,5 +294,13 @@
     "screening_rule": "Run one non-claim-bearing clean screening execution per arm/fixture before replicated scoring; any protocol change requires re-screening.",
     "scored_rule": "After a frozen screening pass, use at least three independent clean replicates for each selected arm/fixture causal comparison.",
     "current_claim_ceiling": "Fixture design and harness compatibility only until clean oracle-unexposed model runs exist."
+  },
+  "evaluator_isolation_upgrade": {
+    "status": "IMPLEMENTED_PRIMITIVE_RUNTIME_SEAL_NOT_YET_PROVEN",
+    "contract_path": "benchmarks/workspace-semantic-execution/evaluator_isolation_v1.json",
+    "generator_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_ephemeral_fixture_v1.py",
+    "test_path": "tests/test_workspace_semantic_execution_evaluator_isolation.py",
+    "model": "Fresh fixture generation uses evaluator-only seed + hidden commitment nonce. Workers receive only the public fixture and a pre-run commitment. Oracle/seed/nonce must remain in a control-owned store outside worker-readable GitHub state.",
+    "claim_rule": "Static repository oracles remain pilot-only. Stronger equivalence claims require validated hidden-ephemeral or externally blinded runtime isolation."
   }
 }
