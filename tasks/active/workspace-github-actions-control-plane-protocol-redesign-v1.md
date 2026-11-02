@@ -43,23 +43,21 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Repository and observation preflights for PADataset GPU attempt #2 are now prepared and validated at implementation head 56e5976597b0d1523ead6a11cdfe6f8a9d23dda0 / Validation 41424882222 SUCCESS. From a clean checkout of the current durable GitRunner branch after this task-sync head validates, execute exactly scripts/lambda_ci_v3_padataset_gpu_canary_live.sh through the existing operator/root transaction boundary. The script must independently re-prove roots healthy, all nine v3 class controllers inactive/non-restarting and boot-disabled, exact e1a2d44 runtime override/update-receipt binding, retry history, zero active prior canary runs, exact PADataset main workflow blob 9311657f079aa1894d16d5e83ed0b18a813af487, and drained legacy scale sets BEFORE it creates one NEW ACTIVATE_ONE_V3_CANARY authority for exactly padataset-gpu-single-public-v1. Do not reuse GPU #1 authority and do not repeat accepted canaries.
+All currently authorized active-class canaries are accepted. Implement and repository-validate the single controlled production generation cutover from architecture/lambda-ci-v3-migration-plan.v1.json for exactly workspace-control-control-small-v1, padataset-cpu-public-v1 and padataset-gpu-single-public-v1, while keeping Research CPU inactive and every Research GPU-derived class inherited-contained. The cutover must be transactional and fail closed: freeze exact v3 source/catalog/deployment overlay, prove no in-progress migration transaction, drain/quiesce all v2 project controllers and legacy/v3 transient work, atomically bind exact trusted production workflow retargets plus pins/projections, start only the three accepted v3 class controllers, run exact production validation, prove clean ledgers/resources, then move corresponding v2 controllers/scale sets DRAINING -> RETIRED while preserving rollback bytes/state. Do not execute live cutover until the repository implementation and exact operator/root authority path are separately validated.
 
 ## Remaining work
 
-- Execute exactly one fresh-authority padataset-gpu-single-public-v1 canary through the validated operator/root transaction boundary; observe immutable-envelope success and terminal rollback.
-- Independently verify the resulting PADataset workflow run/job and require V3_CANARY_ROLLBACK=PASS, GENERATION_EXCLUSION_ROLLBACK=PASS, POST_CANARY_ROOT_SERVICES=ACTIVE, POST_CANARY_V3_CLASS_CONTROLLERS=INACTIVE, RESEARCH_GPU_CONTAINMENT=PRESERVED, CANARY_RESULT=SUCCESS, and PADATASET_GPU_CANARY_ACCEPTED=PASS.
-- Independently attest roots, no v3 transient/resource residue, exact v2 restoration, PADataset lane health, and Research GPU containment; record GPU acceptance durably.
-- Then perform the single controlled production generation cutover, drain/quiesce v2, retarget accepted workflows to exact v3 scale-set names, activate accepted production v3 classes, validate production, move v2 DRAINING -> RETIRED while preserving rollback bytes/state, and later clean legacy state.
+- Implement the repository-only production generation cutover transaction/operator and exhaustive rollback tests for exactly the accepted active classes: workspace-control-control-small-v1, padataset-cpu-public-v1, and padataset-gpu-single-public-v1.
+- Validate exact production workflow retarget bytes/pins/projections and a one-shot live cutover authority contract; preserve Research CPU inactive and all Research GPU-derived classes inherited-contained.
+- Execute the single controlled production generation cutover through the operator/root authority boundary, validate one exact production job per accepted class, and prove v3 controller/runner/resource ledgers clean.
+- Move corresponding v2 controllers/scale sets through DRAINING -> RETIRED only after accepted v3 production proof, preserving rollback bytes/config/state for the rollback window; perform later legacy cleanup separately.
 - Immediately resume workspace-semantic-execution-migration-v1 umbrella work after the v3/v2 infrastructure gate is accepted.
 
 ## Blockers / gates
 
-- GPU canary remains unaccepted; failed run 41420426352 is historical and its consumed authority must never be reused.
-- The repository-side GPU #2 operator is validated, but actual canary activation remains a live root/sudo transaction boundary. Current Workspace Shell authority cannot mint operator approvals or generic root execution, and the accepted Workspace Shell task explicitly keeps privileged helper/trust stores fail-closed.
-- The next GPU attempt requires a completely fresh one-shot ACTIVATE_ONE_V3_CANARY authority created only by the validated operator after its live preflights pass.
+- Production v3 generation cutover/v2 retirement has not yet been executed; it requires a separately reviewed and validated live cutover transaction bound to exact accepted classes, workflow bytes, deployment generation and rollback state.
+- Current Workspace Shell authority still cannot mint live root/cutover approvals or provide generic root execution; no authority may be inferred from this task state.
 - Research CPU remains separately gated; all Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT.
-- Production v3 cutover/v2 retirement remains gated on accepted PADataset GPU canary and exact post-canary acceptance.
 
 ## Fresh-chat initialization
 
