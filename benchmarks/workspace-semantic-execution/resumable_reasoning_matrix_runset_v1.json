@@ -185,7 +185,7 @@
       },
       "B_instant_persistent_chat": {
         "provider": "OpenAI",
-        "model_family": "GPT-5.6",
+        "model_family": "GPT-5.6 Sol",
         "chat_configuration": "Instant",
         "surface": "ChatGPT chat",
         "toolset": [
@@ -197,7 +197,7 @@
       },
       "C_instant_stateless_resume": {
         "provider": "OpenAI",
-        "model_family": "GPT-5.6",
+        "model_family": "GPT-5.6 Sol",
         "chat_configuration": "Instant",
         "surface": "ChatGPT chat",
         "toolset": [
@@ -209,7 +209,7 @@
       },
       "D_instant_decompose_critic": {
         "provider": "OpenAI",
-        "model_family": "GPT-5.6",
+        "model_family": "GPT-5.6 Sol",
         "chat_configuration": "Instant",
         "surface": "ChatGPT chat",
         "toolset": [
@@ -227,7 +227,7 @@
       },
       "E_hybrid_escalation": {
         "provider": "OpenAI",
-        "default_model_family": "GPT-5.6",
+        "default_model_family": "GPT-5.6 Sol",
         "default_chat_configuration": "Instant",
         "escalation_model_family": "GPT-5.6 Sol",
         "escalation_chat_configuration": "High",
@@ -249,6 +249,6 @@
       "status": "PLANNED_EXPLORATORY",
       "rationale": "Useful as a best-available ceiling, but not the primary causal control because Work changes the execution surface and agent affordances in addition to model capability."
     },
-    "runtime_identity_rule": "Each worker must persist the model/configuration actually reported by its surface. If it differs from the expected treatment, mark EXECUTOR_IDENTITY_MISMATCH and do not count the run."
+    "runtime_identity_rule": "Persist the exact model name and configuration reported by the surface. For GPT-5.6 on paid ChatGPT surfaces, `GPT-5.6 Sol` with `Instant` is the expected B/C/D default identity; compare configuration as well as model family. If the actual treatment differs, mark EXECUTOR_IDENTITY_MISMATCH."
   }
 }
