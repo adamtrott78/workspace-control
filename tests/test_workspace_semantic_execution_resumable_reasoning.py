@@ -118,6 +118,37 @@ class GenerationFencingTests(unittest.TestCase):
         self.assertEqual(run["status"], "READY_TO_RESUME")
 
 
+class DurableContextPacketTests(unittest.TestCase):
+    def test_semantic_checkpoint_serializes_without_chat_transcript(self):
+        run = harness.new_run(
+            arm="C_instant_stateless_resume",
+            fixture_id=PUBLIC["fixture_id"],
+            process_id="R-context",
+        )
+        run = harness.claim_run(run, worker_id="W1", expected_generation=0)
+        run = harness.persist_semantic_state(
+            run,
+            expected_generation=0,
+            established_findings=[{"id": "F1", "text": "Queue occupancy is not saturated."}],
+            open_hypotheses=[{"id": "H_retry_state"}],
+            unresolved_questions=["Which intervention discriminates retry-state retention?"],
+            evidence_refs=["O1", "O3"],
+            candidate_actions=[{"kind": "experiment", "id": "E_force_retry_reset"}],
+            next_safe_action="Request E_force_retry_reset.",
+            authority_refs=["fixture-only:no-production-authority"],
+            validation_requirements=["objective research validator"],
+        )
+        packet_value = harness.context_packet_from_run(
+            run,
+            objective=PUBLIC["objective"],
+            invariants=["no authority expansion", "oracle is not worker input"],
+        )
+        self.assertEqual(packet_value["process_id"], "R-context")
+        self.assertEqual(packet_value["evidence_refs"], ["O1", "O3"])
+        self.assertNotIn("full_prior_chat_transcript", packet_value)
+        self.assertLess(harness.context_packet_size_bytes(packet_value), 8192)
+
+
 class RoutingDisciplineTests(unittest.TestCase):
     def test_decomposition_and_escalation_are_distinct(self):
         run = harness.new_run(
