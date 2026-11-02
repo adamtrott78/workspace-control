@@ -282,6 +282,29 @@ def _retarget_workflow(
         text,
         count=1,
     )
+    if legacy_scale_set_name == "lambda-workspace-control":
+        old_go = (
+            "          (\n"
+            "            cd controller/lambda-ci-controller\n"
+            "            go test -mod=mod ./...\n"
+            "          )\n"
+        )
+        if old_go in rendered:
+            pinned_go = (
+                "          go_archive=\"$RUNNER_TEMP/go1.26.3.linux-amd64.tar.gz\"\n"
+                "          curl -fsSL --retry 3 -o \"$go_archive\" \\\n"
+                "            \"https://go.dev/dl/go1.26.3.linux-amd64.tar.gz\"\n"
+                "          printf '%s  %s\\n' \\\n"
+                "            '2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556' \\\n"
+                "            \"$go_archive\" | sha256sum -c -\n"
+                "          tar -C \"$RUNNER_TEMP\" -xzf \"$go_archive\"\n"
+                "          [[ \"$(\"$RUNNER_TEMP/go/bin/go\" env GOVERSION)\" == \"go1.26.3\" ]]\n"
+                "          (\n"
+                "            cd controller/lambda-ci-controller\n"
+                "            \"$RUNNER_TEMP/go/bin/go\" test -mod=mod ./...\n"
+                "          )\n"
+            )
+            rendered = rendered.replace(old_go, pinned_go, 1)
     if rendered == text:
         raise CutoverError("workflow retarget produced no byte change")
     return rendered.encode("utf-8")
