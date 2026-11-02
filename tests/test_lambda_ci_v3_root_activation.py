@@ -60,67 +60,87 @@ class FakeSystemd:
 
 
 class EffectiveGenerationVerificationTests(unittest.TestCase):
-    def test_base_generation_uses_reconciler_verifier(self):
-        with tempfile.TemporaryDirectory() as raw:
-            manifest = pathlib.Path(raw) / "install-manifest.json"
-            manifest.write_text(json.dumps({"mode": "V3_SUBSTRATE_INSTALL_INACTIVE"}))
-
-            original = activation.reconciler.verify_installed
-            try:
-                calls = []
-                activation.reconciler.verify_installed = lambda path: calls.append(path)
-                result = activation.verify_effective_installed_generation(manifest)
-            finally:
-                activation.reconciler.verify_installed = original
-
-            self.assertIsNone(result)
-            self.assertEqual(calls, [manifest])
-
-    def test_controller_only_drift_requires_valid_active_override(self):
+    def test_base_generation_accepts_exact_controller(self):
         with tempfile.TemporaryDirectory() as raw:
             root = pathlib.Path(raw)
+            controller = root / "lambda-ci-controller-v3"
+            controller.write_bytes(b"base")
+            controller.chmod(0o755)
             manifest = root / "install-manifest.json"
             payload = {
+                "schema_version": 1,
                 "mode": "V3_SUBSTRATE_INSTALL_INACTIVE",
                 "source_head": "a" * 40,
                 "root_policy_sha256": "b" * 64,
+                "runner_class_count": 9,
+                "entries": [
+                    {
+                        "destination": str(controller),
+                        "sha256": activation._sha256(b"base"),
+                        "mode": "0755",
+                    }
+                ],
             }
             manifest.write_bytes(activation._canonical(payload))
-
-            original_verify = activation.reconciler.verify_installed
-            original_base = activation.controller_refresh._base_manifest
-            original_current = activation.controller_refresh._verify_current_controller
+            old_controller = activation.reconciler.V3_CONTROLLER_BINARY
             try:
-                activation.reconciler.verify_installed = lambda path: (_ for _ in ()).throw(
-                    activation.reconciler.ReconcileError(
-                        f"managed artifact digest drift: {activation.reconciler.V3_CONTROLLER_BINARY}"
-                    )
+                activation.reconciler.V3_CONTROLLER_BINARY = controller
+                self.assertIsNone(
+                    activation.verify_effective_installed_generation(manifest)
                 )
-                activation.controller_refresh._base_manifest = lambda head: (
-                    payload,
-                    activation._sha256(manifest.read_bytes()),
-                    {"sha256": "c" * 64},
-                )
-                activation.controller_refresh._verify_current_controller = lambda **kwargs: (
-                    "d" * 64,
+            finally:
+                activation.reconciler.V3_CONTROLLER_BINARY = old_controller
+
+    def test_controller_override_is_bound_to_base_manifest_and_digest(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            controller = root / "lambda-ci-controller-v3"
+            controller.write_bytes(b"override")
+            controller.chmod(0o755)
+            manifest = root / "install-manifest.json"
+            payload = {
+                "schema_version": 1,
+                "mode": "V3_SUBSTRATE_INSTALL_INACTIVE",
+                "source_head": "a" * 40,
+                "root_policy_sha256": "b" * 64,
+                "runner_class_count": 9,
+                "entries": [
                     {
-                        "mode": activation.controller_refresh.MODE,
+                        "destination": str(controller),
+                        "sha256": activation._sha256(b"base"),
+                        "mode": "0755",
+                    }
+                ],
+            }
+            manifest.write_bytes(activation._canonical(payload))
+            receipt = root / "active.json"
+            receipt.write_bytes(
+                activation._canonical(
+                    {
+                        "mode": "V3_INACTIVE_CONTROLLER_BINARY_OVERRIDE",
                         "phase": "ACTIVE",
                         "base_source_head": "a" * 40,
-                        "controller_source_head": "e" * 40,
-                        "base_install_manifest_sha256": activation._sha256(manifest.read_bytes()),
-                        "controller_binary_sha256": "d" * 64,
-                        "non_controller_generation_equivalent": True,
+                        "controller_source_head": "c" * 40,
+                        "base_install_manifest_sha256": activation._sha256(
+                            manifest.read_bytes()
+                        ),
+                        "controller_binary_sha256": activation._sha256(b"override"),
                         "root_policy_sha256": "b" * 64,
-                    },
+                        "non_controller_generation_equivalent": True,
+                    }
                 )
+            )
+            receipt.chmod(0o600)
+            old_controller = activation.reconciler.V3_CONTROLLER_BINARY
+            old_receipt = activation.CONTROLLER_REFRESH_ACTIVE_RECEIPT
+            try:
+                activation.reconciler.V3_CONTROLLER_BINARY = controller
+                activation.CONTROLLER_REFRESH_ACTIVE_RECEIPT = receipt
                 result = activation.verify_effective_installed_generation(manifest)
             finally:
-                activation.reconciler.verify_installed = original_verify
-                activation.controller_refresh._base_manifest = original_base
-                activation.controller_refresh._verify_current_controller = original_current
-
-            self.assertEqual(result["controller_source_head"], "e" * 40)
+                activation.reconciler.V3_CONTROLLER_BINARY = old_controller
+                activation.CONTROLLER_REFRESH_ACTIVE_RECEIPT = old_receipt
+            self.assertEqual(result["controller_source_head"], "c" * 40)
 
 
 class V3RootActivationTests(unittest.TestCase):
