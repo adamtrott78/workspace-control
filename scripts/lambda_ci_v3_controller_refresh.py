@@ -271,7 +271,7 @@ def _assert_live_boundary() -> list[str]:
     return class_ids
 
 
-def _verify_base_non_controller(
+def _controller_entry_from_base_manifest(
     manifest: dict[str, Any],
     *,
     controller_destination: str = str(CONTROLLER_BINARY),
@@ -280,20 +280,28 @@ def _verify_base_non_controller(
     controller = entries.get(controller_destination)
     if controller is None:
         raise ControllerRefreshError("controller binary absent from base manifest")
-    for destination, entry in entries.items():
-        if destination == controller_destination:
-            continue
-        path = pathlib.Path(destination)
-        if not path.is_file():
-            raise ControllerRefreshError(f"managed artifact missing: {path}")
-        if _sha256(path.read_bytes()) != entry.get("sha256"):
-            raise ControllerRefreshError(f"managed artifact digest drift: {path}")
-        if stat.S_IMODE(path.stat().st_mode) != int(str(entry.get("mode")), 8):
-            raise ControllerRefreshError(f"managed artifact mode drift: {path}")
     return controller
 
 
+def _verify_effective_installed_generation(
+    manifest_path: pathlib.Path = BASE_MANIFEST,
+) -> None:
+    """Delegate installed-generation truth to the reconciler's shared verifier.
+
+    Controller refresh adds controller-specific provenance checks after this
+    call, but it must not independently reinterpret accepted live overrides
+    for the controller, reconciler, or root-activation helper.
+    """
+    try:
+        reconciler.verify_installed(manifest_path)
+    except reconciler.ReconcileError as exc:
+        raise ControllerRefreshError(
+            f"effective installed generation invalid: {exc}"
+        ) from exc
+
+
 def _base_manifest(expected_base_head: str) -> tuple[dict[str, Any], str, dict[str, Any]]:
+    _verify_effective_installed_generation(BASE_MANIFEST)
     raw = BASE_MANIFEST.read_bytes()
     manifest = json.loads(raw)
     if not isinstance(manifest, dict):
@@ -304,7 +312,7 @@ def _base_manifest(expected_base_head: str) -> tuple[dict[str, Any], str, dict[s
         raise ControllerRefreshError(
             f"base source head mismatch: {manifest.get('source_head')} != {expected_base_head}"
         )
-    controller_entry = _verify_base_non_controller(manifest)
+    controller_entry = _controller_entry_from_base_manifest(manifest)
     return manifest, _sha256(raw), controller_entry
 
 

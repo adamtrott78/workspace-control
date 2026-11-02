@@ -4,6 +4,7 @@ import pathlib
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -69,6 +70,50 @@ class V3ControllerRefreshTests(unittest.TestCase):
         candidate["root_policy_sha256"] = "d" * 64
         with self.assertRaises(refresh.ControllerRefreshError):
             refresh.compare_manifests_for_controller_only_refresh(base, candidate)
+
+    def test_base_manifest_delegates_effective_generation_to_reconciler(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            manifest_path = root / "install-manifest.json"
+            manifest = self.manifest(controller_sha="base-controller")
+            manifest["entries"].append(
+                {
+                    "destination": "/opt/workspace-ci/v3/reconciler/lambda_ci_v3_reconciler.py",
+                    "sha256": "base-reconciler",
+                    "mode": "0755",
+                }
+            )
+            manifest_path.write_text(json.dumps(manifest))
+            with (
+                mock.patch.object(refresh, "BASE_MANIFEST", manifest_path),
+                mock.patch.object(refresh.reconciler, "verify_installed") as verify,
+            ):
+                loaded, _, controller = refresh._base_manifest("a" * 40)
+            verify.assert_called_once_with(manifest_path)
+            self.assertEqual(controller["sha256"], "base-controller")
+            self.assertEqual(loaded["source_head"], "a" * 40)
+
+    def test_base_manifest_fails_closed_when_shared_verifier_rejects(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            manifest_path = root / "install-manifest.json"
+            manifest_path.write_text(json.dumps(self.manifest()))
+            with (
+                mock.patch.object(refresh, "BASE_MANIFEST", manifest_path),
+                mock.patch.object(
+                    refresh.reconciler,
+                    "verify_installed",
+                    side_effect=refresh.reconciler.ReconcileError(
+                        "active reconciler override binding mismatch"
+                    ),
+                ),
+            ):
+                with self.assertRaisesRegex(
+                    refresh.ControllerRefreshError,
+                    "effective installed generation invalid",
+                ):
+                    refresh._base_manifest("a" * 40)
+
 
     def test_prior_rolled_back_canary_history_is_accepted(self):
         with tempfile.TemporaryDirectory() as raw:
