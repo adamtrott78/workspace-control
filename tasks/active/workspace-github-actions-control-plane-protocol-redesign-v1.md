@@ -47,11 +47,11 @@ Task complete for the accepted production scope. Resume workspace-semantic-execu
 
 ## Remaining work
 
-None. The accepted GitRunner v3 production migration scope is complete.
+- None.
 
 ## Blockers / gates
 
-None for this completed task. Research legacy scale sets and preserved v2 controller bytes/config/state remain intentionally out of scope pending separate future authority.
+- None.
 
 ## Fresh-chat initialization
 
@@ -66,13 +66,3 @@ Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
-
-
-## Completion evidence
-
-- Production generation cutover accepted with transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json.
-- Legacy retirement receipt: /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json.
-- Retired: lambda-workspace-control id=3; lambda-padataset id=2; lambda-padataset-gpu id=1.
-- Fresh-process verification proved the three legacy names absent and accepted v3 targets still present: lambda-workspace-control-control-small id=2; lambda-padataset-cpu-public id=3; lambda-padataset-gpu-single-public id=4.
-- Research legacy scale sets remain preserved; all v2 controller bytes/config/state remain preserved for later authorized cleanup.
-- Resume umbrella task workspace-semantic-execution-migration-v1.
