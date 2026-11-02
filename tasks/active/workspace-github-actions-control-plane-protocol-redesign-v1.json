@@ -42,7 +42,7 @@
       "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
       "remote": {
         "branch": "github-actions-control-plane-protocol-redesign-v1",
-        "checkpoint_sha": "7d138b900944b1138a74f7d92c2db1b6e8d25ba7",
+        "checkpoint_sha": "28853cc42608def1790e25711c1a9dcbdb652346",
         "verified": true
       },
       "local": null,
@@ -387,7 +387,7 @@
     "All Research GPU-derived runner classes remain inherited-contained and NO_BY_DEFAULT.",
     "Research Engine PR #283 remains draft/proposal-only; no default-branch producer cutover is authorized."
   ],
-  "next_safe_action": "Apply the exact validated single-file maintenance-controller hotfix from scripts/lambda_ci_maintenance_controller_live_update_v1.py at the final validated branch head. This is the only remaining manual root bootstrap boundary for the current parser repair; the updater verifies the old installed Git blob, replaces only /opt/workspace-ci/maintenance-controller/lambda_ci_maintenance_controller.py, restarts only workspace-ci-maintenance-controller.service, performs two stable-running samples, and rolls back automatically on failure. After PASS, ChatGPT should immediately verify the service via Workspace Shell, post a new reset-stale command for quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, consume the maintenance receipt, and continue the v3 migration.",
+  "next_safe_action": "Apply the exact validated single-file maintenance-controller hotfix from scripts/lambda_ci_maintenance_controller_live_update_v1.py using validated code/test head 28853cc42608def1790e25711c1a9dcbdb652346 (or a later metadata-only descendant whose candidate/old blob pins remain identical). This is the current unavoidable root bootstrap boundary. After PASS, ChatGPT should verify the service via Workspace Shell, post a fresh reset-stale command for quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, consume the maintenance receipt, and continue v3 migration without user terminal relay.",
   "artifacts": [
     {
       "path": "architecture/github-actions-control-plane-protocol-redesign-v1.md",
@@ -785,7 +785,8 @@
         "Repository repair at candidate head 7d138b900944b1138a74f7d92c2db1b6e8d25ba7 normalizes RFC3339 fractional precision to microseconds while preserving second/timezone semantics.",
         "Regression covers nanosecond Z and offset timestamps plus malformed input rejection.",
         "Transactional single-file live updater is statically frozen to old Git blob 4b5ec97754c83e4b01103dea9c2f84112b3d6110 and candidate blob f994992cb3e4713c1e0a165c18de459fa44dac74 and cannot mutate scale sets/controllers/v3/quarantine/credentials.",
-        "Workspace Control Validation run 41390414785 completed SUCCESS on exact head 7d138b900944b1138a74f7d92c2db1b6e8d25ba7."
+        "Workspace Control Validation run 41390709810 completed SUCCESS on exact final hotfix code/test head 28853cc42608def1790e25711c1a9dcbdb652346.",
+        "Final updater revision uses per-command Git safe.directory binding for the exact temporary worktree and makes no persistent/global Git configuration change."
       ]
     }
   ],
