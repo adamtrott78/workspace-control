@@ -14,6 +14,8 @@ ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 OPERATOR_HEAD="$(git -C "$ROOT" rev-parse HEAD)"
 test -z "$(git -C "$ROOT" status --porcelain --untracked-files=no)"
 
+EXPECTED_RECONCILER_SOURCE_HEAD="559c6186b44f17d4b83cb9267d554b355cda2ef7"
+EXPECTED_RECONCILER_SHA256="c8ef68bb99626a64a7783ec09b4e6383f6875c0193c5d9a771d52a218251e749"
 EXPECTED_RUNTIME_SOURCE_HEAD="e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15"
 EXPECTED_RUNTIME_SHA256="86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da"
 
@@ -44,6 +46,7 @@ PAD_ENV="/var/lib/workspace-ci/v3/credentials/padataset/controller.env"
 
 PROD_HELPER="$ROOT/scripts/lambda_ci_v3_production_cutover.py"
 INSTALLED_RECONCILER="/opt/workspace-ci/v3/reconciler/lambda_ci_v3_reconciler.py"
+INSTALLED_CONTROLLER="/opt/workspace-ci/v3/controller/lambda-ci-controller-v3"
 BASE_MANIFEST="/etc/workspace-ci/v3/install-manifest.json"
 
 TMP="$(mktemp -d /tmp/workspace-ci-v3-production-cutover.XXXXXX)"
@@ -468,10 +471,9 @@ do
 done
 echo "LIVE_PREFLIGHT_ROOT_AND_CLASS_STATE=PASS"
 
-EXPECTED_REC_SHA="$(sha256sum "$ROOT/scripts/lambda_ci_v3_reconciler.py" | awk '{print $1}')"
 sudo env \
-  EXPECTED_HEAD="$OPERATOR_HEAD" \
-  EXPECTED_SHA="$EXPECTED_REC_SHA" \
+  EXPECTED_HEAD="$EXPECTED_RECONCILER_SOURCE_HEAD" \
+  EXPECTED_SHA="$EXPECTED_RECONCILER_SHA256" \
   INSTALLED="$INSTALLED_RECONCILER" \
   /usr/bin/python3 - <<'PY'
 import hashlib, json, os, pathlib, stat
@@ -489,6 +491,26 @@ assert r["non_reconciler_generation_equivalent"] is True
 st=active.stat()
 assert st.st_uid==0 and st.st_gid==0 and stat.S_IMODE(st.st_mode)==0o600
 print("PRODUCTION_RECONCILER_BINDING=PASS")
+PY
+
+sudo env \
+  EXPECTED_HEAD="$OPERATOR_HEAD" \
+  INSTALLED="$INSTALLED_CONTROLLER" \
+  /usr/bin/python3 - <<'PY'
+import hashlib, json, os, pathlib, stat
+installed=pathlib.Path(os.environ["INSTALLED"])
+active=pathlib.Path("/var/lib/workspace-ci/v3/controller-refresh/active.json")
+actual=hashlib.sha256(installed.read_bytes()).hexdigest()
+r=json.loads(active.read_text())
+assert r["schema_version"]==1
+assert r["mode"]=="V3_INACTIVE_CONTROLLER_BINARY_OVERRIDE"
+assert r["phase"]=="ACTIVE"
+assert r["controller_source_head"]==os.environ["EXPECTED_HEAD"]
+assert r["controller_binary_sha256"]==actual
+assert r["non_controller_generation_equivalent"] is True
+st=active.stat()
+assert st.st_uid==0 and st.st_gid==0 and stat.S_IMODE(st.st_mode)==0o600
+print("PRODUCTION_CONTROLLER_BINDING=PASS")
 PY
 
 sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 "$INSTALLED_RECONCILER" \
