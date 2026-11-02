@@ -42,7 +42,7 @@
       "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
       "remote": {
         "branch": "github-actions-control-plane-protocol-redesign-v1",
-        "checkpoint_sha": "626c9c7c81c50878b9b3bcce5932bc08c086313f",
+        "checkpoint_sha": "7d138b900944b1138a74f7d92c2db1b6e8d25ba7",
         "verified": true
       },
       "local": null,
@@ -387,7 +387,7 @@
     "All Research GPU-derived runner classes remain inherited-contained and NO_BY_DEFAULT.",
     "Research Engine PR #283 remains draft/proposal-only; no default-branch producer cutover is authorized."
   ],
-  "next_safe_action": "Validate and deploy the narrow maintenance-controller RFC3339 nanosecond parser fix without broad v2 rehabilitation. Because live Workspace Shell diagnostics are available but root helper/trust stores are still empty/fail-closed, establish a one-time stable reviewed-helper bootstrap/update authority behind the existing workspace_shell_run_reviewed_helper schema; do not add new MCP operations. Then install/restart only the exact maintenance-controller bytes, re-run reset-stale for quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, prove READY_FOR_SINGLE_RETRY and zero-state, and continue the v3 migration.",
+  "next_safe_action": "Apply the exact validated single-file maintenance-controller hotfix from scripts/lambda_ci_maintenance_controller_live_update_v1.py at the final validated branch head. This is the only remaining manual root bootstrap boundary for the current parser repair; the updater verifies the old installed Git blob, replaces only /opt/workspace-ci/maintenance-controller/lambda_ci_maintenance_controller.py, restarts only workspace-ci-maintenance-controller.service, performs two stable-running samples, and rolls back automatically on failure. After PASS, ChatGPT should immediately verify the service via Workspace Shell, post a new reset-stale command for quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, consume the maintenance receipt, and continue the v3 migration.",
   "artifacts": [
     {
       "path": "architecture/github-actions-control-plane-protocol-redesign-v1.md",
@@ -775,6 +775,17 @@
         "Workspace Shell v1 live acceptance complete at PR #573 comment 6565110368.",
         "Bounded GitRunner observability extension PR #591 head 1ca44e019fed66a55f2b9985d9d04397ba37b668 passed Workspace Control Validation 41384504196 and live transactional update PASS.",
         "No v3 canary/cutover authority was created by the observability task."
+      ]
+    },
+    {
+      "check": "Maintenance nanosecond recovery parser repair",
+      "result": "PASS",
+      "evidence": [
+        "Reset-stale maintenance comment 6569249619 failed closed before scale-set mutation because Go quarantine timestamp 2026-11-01T22:20:58.365802851Z exceeded deployed Python fromisoformat precision.",
+        "Repository repair at candidate head 7d138b900944b1138a74f7d92c2db1b6e8d25ba7 normalizes RFC3339 fractional precision to microseconds while preserving second/timezone semantics.",
+        "Regression covers nanosecond Z and offset timestamps plus malformed input rejection.",
+        "Transactional single-file live updater is statically frozen to old Git blob 4b5ec97754c83e4b01103dea9c2f84112b3d6110 and candidate blob f994992cb3e4713c1e0a165c18de459fa44dac74 and cannot mutate scale sets/controllers/v3/quarantine/credentials.",
+        "Workspace Control Validation run 41390414785 completed SUCCESS on exact head 7d138b900944b1138a74f7d92c2db1b6e8d25ba7."
       ]
     }
   ],
