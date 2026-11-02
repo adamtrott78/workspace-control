@@ -47,7 +47,7 @@
       "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "a8633bad2b29e49cc4b8cafb254e342983ec043a",
+        "checkpoint_sha": "d3d87c6e4001f220e75a0f910f1c85784cc9d03c",
         "verified": true
       },
       "local": null,
@@ -263,9 +263,20 @@
             "Four core fixture phenotypes are defined: P0 easy control, P1 horizon-heavy/decomposable, P2 reasoning-heavy/coupled, and P3 mixed long+hard.",
             "The existing research_iterate fixture is classified as P2_reasoning_heavy_coupled. It remains useful for the first end-to-end clean-session pilot but is explicitly not a strong primary decomposition/TOO_LARGE fixture."
           ]
+        },
+        {
+          "check": "P0-P3 fixture matrix and hidden-evaluator primitive",
+          "result": "PASS",
+          "evidence": [
+            "PR #590 exact head d3d87c6e4001f220e75a0f910f1c85784cc9d03c passed Workspace Control Validation run 41523766067 SUCCESS.",
+            "Matched synthetic research_iterate fixtures now cover P0 easy control, P1 horizon-heavy/decomposable, P2 reasoning-heavy/coupled, and P3 mixed long+hard under one worker interface and objective evaluator class.",
+            "The staged matrix runset performs one non-claim-bearing protocol-screening run per arm/fixture before frozen replicated scoring, preventing expensive replication of protocol defects.",
+            "Hidden-ephemeral fixture generation now produces a worker-visible public fixture plus pre-run oracle commitment while keeping oracle/seed/nonce evaluator-only by contract.",
+            "Runtime evaluator-only storage remains unproven; therefore no strong frontier-equivalence claim is enabled by this checkpoint."
+          ]
         }
       ],
-      "resume_condition": "Use the current P2 research_iterate fixture as an end-to-end clean-session calibration pilot, then add matched P0/P1/P3 fixtures before making a general Instant-versus-frontier capability-boundary claim. Causal comparisons must hold fixture/validator/tools/resource envelope fixed and vary only the intended treatment."
+      "resume_condition": "Provision/validate evaluator-only runtime storage and launch clean oracle-unexposed protocol-screening runs against the P0-P3 matrix. After screening completes without protocol changes or hard-gate failures, freeze the protocol and execute replicated paired comparisons."
     },
     {
       "id": "semantic_core_and_extension_contract",
@@ -651,6 +662,58 @@
         "Classifies the current pilot as P2_reasoning_heavy_coupled.",
         "Explicitly records that Q2 decomposition-effect evidence is weak for this fixture because horizon/load is modest."
       ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
+      "state": "VALIDATED_STATIC_FIXTURE_MATRIX_NOT_SCORED",
+      "role": "exact P0-P3 matched research_iterate fixture matrix",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned matrix revision with exact-head CI",
+      "review_requirement": "clean screening + replicated scored arms before reasoning-quality conclusions",
+      "evidence": [
+        "Validated at PR #590 head d3d87c6e4001f220e75a0f910f1c85784cc9d03c / Workspace Control Validation 41523766067 SUCCESS.",
+        "P1 is the primary TOO_LARGE/decomposition fixture; P2 is the primary short/coupled reasoning fixture; P3 requires decomposition plus a coupled residual."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json",
+      "state": "VALIDATED_RUNSET_NOT_EXECUTED",
+      "role": "two-stage clean-session screening and replicated-scoring runset",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned runset revision only",
+      "review_requirement": "worker isolation and runtime evaluator-store validation before claim-bearing runs",
+      "evidence": [
+        "Defines protocol screening before replication and matched causal comparisons for Q1/Q2/Q3/Q5.",
+        "Worker packet excludes oracle, control transcript, other-arm answers, and unbounded repository access."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_ephemeral_fixture_v1.py",
+      "state": "VALIDATED_EVALUATOR_ISOLATION_PRIMITIVE",
+      "role": "fresh hidden-oracle fixture generator and commitment verifier",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned generator revision with exact-head CI",
+      "review_requirement": "must be paired with a runtime store inaccessible to scored workers",
+      "evidence": [
+        "Generator and tests passed Workspace Control Validation 41523766067.",
+        "Worker material excludes seed, seal nonce, oracle, and expected hypothesis; commitment verification detects oracle tampering."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/evaluator_isolation_v1.json",
+      "state": "IMPLEMENTED_PRIMITIVE_RUNTIME_STORE_UNPROVEN",
+      "role": "worker/evaluator secrecy and audit contract",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "revise with runtime-isolation implementation evidence",
+      "review_requirement": "prove evaluator-only storage is unreadable by scored workers",
+      "evidence": [
+        "Defines evaluator-only seed/oracle/nonce and public pre-run commitment.",
+        "Strong claims remain blocked until evaluator secrets are stored outside worker-readable GitHub state."
+      ]
     }
   ],
   "validation": [
@@ -738,18 +801,28 @@
         "Changed-task validation, taxonomy regression tests, unit regression, pinned Lambda controller validation and full integration contracts all passed.",
         "The benchmark contract now references the taxonomy and limits the current research pilot to P2 calibration rather than general capability inference."
       ]
+    },
+    {
+      "check": "P0-P3 benchmark matrix implementation checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "PR #590 exact head d3d87c6e4001f220e75a0f910f1c85784cc9d03c passed Workspace Control Validation run 41523766067 SUCCESS.",
+        "Changed-task validation, fixture/evaluator regression tests, taxonomy tests, unit regression, pinned Lambda controller validation, and full integration contracts all passed.",
+        "No A-E model arm result is claimed from this implementation checkpoint."
+      ]
     }
   ],
   "blockers": [
     "Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark, independent review, and unseen-workflow extension proof.",
     "Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.",
     "Scored resumable-reasoning arms require oracle-unexposed clean model sessions. This authoring chat has read evaluator-only oracle truth and cannot be counted as a scored arm; the current connected-tool surface does not provide a programmatic clean ChatGPT-session spawn primitive.",
-    "Evaluator isolation is currently PROCESS_PROTOCOL_ONLY. A stronger sealed evaluator or equivalently clean execution protocol is required before any frontier-equivalence claim."
+    "Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated."
   ],
   "remaining_work": [
+    "Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.",
+    "Run one clean oracle-unexposed protocol-screening execution for each A-E arm across P0-P3; screening is non-claim-bearing and must be repeated if the protocol changes.",
+    "After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.",
     "Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.",
-    "Add matched P0 easy-control, P1 horizon-heavy/decomposable, and P3 mixed long+hard fixtures, then repeat paired arm comparisons so TOO_LARGE and INTRINSICALLY_DIFFICULT can be separated empirically.",
-    "Strengthen evaluator isolation beyond process-protocol-only before making any frontier-equivalence claim; the current authoring chat is evaluator-contaminated and is excluded from scored arms.",
     "Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.",
     "Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.",
     "Run an independent architecture review of the preferred hybrid semantic-projection hypothesis and challenge whether a different execution substrate/agent/workflow framework materially improves reliability or allowance efficiency.",
@@ -760,8 +833,8 @@
     "Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.",
     "Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation."
   ],
-  "next_safe_action": "Run the existing research_iterate fixture as a clean-session P2 calibration pilot across A_frontier_long_horizon, B_instant_persistent_chat, C_instant_stateless_resume, D_instant_decompose_critic, and E_hybrid_escalation, with at least three independent reasoning trials per arm if practical and no oracle exposure. Treat that result only as end-to-end calibration. In parallel/next, construct matched P0 easy-control, P1 horizon-heavy/decomposable, and P3 mixed long+hard fixtures under benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json. For causal comparisons, hold fixture instance, validator, tools, initial information, and resource envelope fixed while changing only the treatment factor. Apply authority/provenance and objective-quality gates before comparing cost/frontier usage. Do not freeze the semantic execution architecture until taxonomy-stratified benchmark evidence, independent architecture review, and unseen-workflow extension proof are complete.",
+  "next_safe_action": "Validate an evaluator-only runtime storage boundary for benchmarks/workspace-semantic-execution/resumable_reasoning_ephemeral_fixture_v1.py so oracle/seed/nonce material cannot be read by scored workers. Then run the non-claim-bearing protocol_screening stage from benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json across A-E and P0-P3 using clean oracle-unexposed sessions. If screening exposes any fixture/packet/harness defect, revise and re-screen; otherwise freeze the protocol and execute at least three independent replicates for the declared paired comparisons. This control chat remains ineligible as a scored worker for fixtures whose oracle it has seen or generated.",
   "last_executor": "gpt-5.6-sol",
-  "last_surface": "github+web+heartbeat",
+  "last_surface": "github+heartbeat",
   "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion.\\n\\n2026-11-02 GITRUNNER P0 DEPENDENCY CLEARED: workspace-github-actions-control-plane-protocol-redesign-v1 completed the accepted production scope. Production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json is committed; workspace-control, PADataset CPU, and PADataset GPU production validations all passed. Validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 then retired lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after zero-work/zero-runner proof. Root-owned rollback receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was written before deletion, and fresh-process verification proved all three legacy names absent while accepted v3 targets remain. Research legacy scale sets and v2 bytes/config/state remain preserved pending separate authority. Resume resumable_reasoning_benchmark immediately; GitRunner is no longer the umbrella blocker."
 }
