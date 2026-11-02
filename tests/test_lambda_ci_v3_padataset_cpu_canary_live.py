@@ -14,14 +14,26 @@ class PadatasetCpuCanaryOperatorTests(unittest.TestCase):
         self.assertIn('TARGET_CLASS="padataset-cpu-public-v1"', self.text)
         self.assertIn('TARGET_SCALE_SET="lambda-padataset-cpu-public"', self.text)
         self.assertIn('REPOSITORY="adamtrott78/PADataset"', self.text)
+        self.assertIn('TARGET_GITHUB_URL="https://github.com/adamtrott78/PADataset"', self.text)
         self.assertIn('EXPECTED_WORKFLOW_BLOB="f42c165ef6dc658f026976984c87d2eb28f5cd17"', self.text)
 
     def test_controller_generation_is_decoupled_from_operator_head(self):
         self.assertIn('CONTROLLER_SOURCE_HEAD="3e8a231483413ba3a16d405ba61b55d0ab9ff3aa"', self.text)
         self.assertIn('OPERATOR_HEAD="$(git -C "$ROOT" rev-parse HEAD)"', self.text)
         self.assertIn('SOURCE_HEAD="$CONTROLLER_SOURCE_HEAD"', self.text)
-        self.assertIn('"$GO_BIN" -C "$SOURCE_TREE/controller/lambda-ci-controller"', self.text)
+        self.assertIn('"$GO_BIN" -C "$ROOT/controller/lambda-ci-controller"', self.text)
+        self.assertNotIn('"$GO_BIN" -C "$SOURCE_TREE/controller/lambda-ci-controller"', self.text)
         self.assertIn('EXPECTED_TX_HELPER_BLOB="0c02ca17cf267f1c3986bfee75ebfc6172ca592a"', self.text)
+
+    def test_preflight_target_repository_is_explicit_and_operator_bound(self):
+        self.assertIn('--target-url "$TARGET_GITHUB_URL"', self.text)
+        self.assertIn('TARGET_GITHUB_URL="https://github.com/adamtrott78/PADataset"', self.text)
+        build = self.text.index('V3_CANARY_PREFLIGHT_BUILD=BEGIN')
+        target = self.text.index('--target-url "$TARGET_GITHUB_URL"')
+        authority = self.text.index('CANARY_AUTHORITY_CREATED=PASS')
+        self.assertLess(build, target)
+        self.assertLess(target, authority)
+
 
     def test_padataset_credentials_are_repository_scoped(self):
         self.assertIn('/var/lib/workspace-ci/v3/credentials/padataset', self.text)

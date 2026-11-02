@@ -13,6 +13,7 @@ TARGET_SCALE_SET="lambda-padataset-cpu-public"
 WORKFLOW_PATH=".github/workflows/workspace-ci-v3-migration-canary-padataset-cpu-public-v1.yml"
 EXPECTED_WORKFLOW_BLOB="f42c165ef6dc658f026976984c87d2eb28f5cd17"
 REPOSITORY="adamtrott78/PADataset"
+TARGET_GITHUB_URL="https://github.com/adamtrott78/PADataset"
 
 V3_CREDENTIAL_DIR="/var/lib/workspace-ci/v3/credentials/padataset"
 V3_TOKEN="$V3_CREDENTIAL_DIR/github-token"
@@ -335,7 +336,7 @@ set +e
 GOTOOLCHAIN=local \
 GOMODCACHE="$TMP/gomodcache" \
 GOCACHE="$TMP/gocache" \
-"$GO_BIN" -C "$SOURCE_TREE/controller/lambda-ci-controller" \
+"$GO_BIN" -C "$ROOT/controller/lambda-ci-controller" \
   build -mod=readonly -trimpath \
   -o "$PREFLIGHT_BIN" \
   ./cmd/v3-canary-preflight
@@ -525,7 +526,7 @@ https://github.com/adamtrott78/research-engine	lambda-research-engine
 https://github.com/adamtrott78/research-engine	lambda-research-engine-gpu
 EOF
 
-sudo "$PREFLIGHT_BIN"   --token-file "$V3_TOKEN"   --legacy-scalesets "$TMP/legacy-scalesets.tsv"   --source-head "$SOURCE_HEAD"   --target-name "$TARGET_SCALE_SET"
+sudo "$PREFLIGHT_BIN"   --token-file "$V3_TOKEN"   --legacy-scalesets "$TMP/legacy-scalesets.tsv"   --source-head "$SOURCE_HEAD"   --target-name "$TARGET_SCALE_SET"   --target-url "$TARGET_GITHUB_URL"
 
 # Generate exact canary artifacts from the installed source generation.
 mkdir -p "$CANARY_OUT"

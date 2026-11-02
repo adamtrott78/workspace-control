@@ -66,9 +66,10 @@ func main() {
 	legacySets := flag.String("legacy-scalesets", "", "tab-separated URL/name file")
 	sourceHead := flag.String("source-head", "", "exact reviewed source head")
 	targetName := flag.String("target-name", "", "target v3 runner scale-set name")
+	targetURL := flag.String("target-url", "https://github.com/adamtrott78/workspace-control", "target repository GitHub config URL")
 	flag.Parse()
 
-	if *tokenFile == "" || *legacySets == "" || *sourceHead == "" || *targetName == "" {
+	if *tokenFile == "" || *legacySets == "" || *sourceHead == "" || *targetName == "" || *targetURL == "" {
 		fatalf("all flags are required")
 	}
 
@@ -108,7 +109,7 @@ func main() {
 	}
 
 	targetClient := clientFor(
-		"https://github.com/adamtrott78/workspace-control",
+		*targetURL,
 		token,
 		*sourceHead,
 	)
@@ -151,6 +152,7 @@ func main() {
 		)
 	}
 
+	fmt.Printf("V3_SCALE_SET_TARGET_URL=%s\n", *targetURL)
 	fmt.Printf("V3_SCALE_SET_READY=%s\n", target.Name)
 	fmt.Printf("V3_SCALE_SET_ID=%d\n", target.ID)
 	fmt.Println("V3_SCALE_SET_ASSIGNED=0")
