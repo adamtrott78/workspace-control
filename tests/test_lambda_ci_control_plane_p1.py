@@ -66,7 +66,7 @@ class ControlPlaneP1ContractTests(unittest.TestCase):
         self.assertIn("github.actor == 'adamtrott78'", raw)
         self.assertIn("github.event.comment.author_association == 'OWNER'", raw)
         self.assertIn("startsWith(github.event.comment.body, '/workspace-control-validate ')", raw)
-        self.assertIn("runs-on: lambda-workspace-control", raw)
+        self.assertIn("runs-on: lambda-workspace-control-control-small", raw)
         self.assertNotIn("pull_request:\n", raw)
         self.assertNotIn("push:\n", raw)
 
