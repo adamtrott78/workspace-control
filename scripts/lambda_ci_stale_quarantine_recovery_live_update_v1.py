@@ -8,7 +8,7 @@ This updater changes exactly two installed files:
 It does not itself mutate GitHub scale sets, workflows, credentials, quarantine
 state, retry authority, v3 services, or Workspace Shell. It only installs the
 exact validated controller + maintenance-controller pair that understands the
-narrow DELETE_STALE_QUARANTINED recovery operation.
+narrow stale-quarantine recovery operation.
 
 The legacy workspace-control controller's pre-update active/inactive state is
 preserved. The maintenance controller must remain active and stable.
