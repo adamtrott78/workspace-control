@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 216cab36a2d71c57d6669fe851e3da3b4a152644
+- Remote checkpoint: 8129291a59be2b25fa837c81091a0d7d8cac3387
 - Remote verified: true
 
 ### research-engine
@@ -43,7 +43,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Execute the validated legacy retirement helper from exact implementation head 216cab36a2d71c57d6669fe851e3da3b4a152644 against committed production transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json. The helper must retire only lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after all six scale-set counters are zero and accepted target v3 scale sets are present; it must persist the root-owned rollback-window receipt before deletion. Preserve both Research legacy scale sets and all v2 bytes/config/state. After PASS, independently verify the three retired names are absent and resume workspace-semantic-execution-migration-v1.
+Execute the validated legacy retirement helper from exact implementation head 8129291a59be2b25fa837c81091a0d7d8cac3387 against committed production transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json. The helper must retire only lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after all six scale-set counters are zero and accepted target v3 scale sets are present; it must persist the root-owned rollback-window receipt before deletion. Then run its fresh-process verify-receipt mode to prove all three legacy names are absent and the exact v3 targets remain. Preserve both Research legacy scale sets and all v2 bytes/config/state. After PASS, record durable retirement evidence and resume workspace-semantic-execution-migration-v1.
 
 ## Remaining work
 
