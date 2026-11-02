@@ -22,6 +22,7 @@ SEAL_INSTALL = PLUGIN / "install" / "seal_install.py"
 RENDER_TUNNEL_PROFILE = PLUGIN / "install" / "render_tunnel_profile.py"
 VALIDATE_TUNNEL_DOCTOR = PLUGIN / "install" / "validate_tunnel_doctor.py"
 ACTIVATE_LIVE = PLUGIN / "install" / "activate_live.sh"
+GITRUNNER_OBSERVABILITY_UPDATE = PLUGIN / "install" / "update_gitrunner_observability_live_v1.sh"
 FRONTEND_ACCESS_REPAIR = PLUGIN / "install" / "repair_frontend_config_access_v1.sh"
 WORKER_PROC_REPAIR = PLUGIN / "install" / "repair_worker_proc_bootstrap_v1.sh"
 WORKER_SCRATCH_REPAIR = PLUGIN / "install" / "repair_worker_scratch_root_v1.sh"
@@ -1104,6 +1105,53 @@ class WorkspaceShellContractTests(unittest.TestCase):
                 ),
                 "",
             )
+
+    def test_gitrunner_observability_live_updater_is_transactional_and_identity_preserving(self):
+        proc = subprocess.run(
+            ["bash", "-n", str(GITRUNNER_OBSERVABILITY_UPDATE)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        text = GITRUNNER_OBSERVABILITY_UPDATE.read_text(encoding="utf-8")
+
+        self.assertIn(
+            'ACCEPTED_EXECUTION_SHA="01a95b61410e2f427b9885a19e6a0b9c5ee60a38"',
+            text,
+        )
+        self.assertIn(
+            'CANDIDATE_SERVER_BLOB="ddc6cece98cf3c6057b7cd1b3208c1249d1c06d2"',
+            text,
+        )
+        self.assertIn(
+            'CANDIDATE_LAUNCHER_BLOB="137ebebe46b63550abfb404e12ab0e1fd338ba12"',
+            text,
+        )
+        self.assertIn(
+            'CANDIDATE_POLICY_BLOB="c2a18332cf4a3b13f48f3fd3cac0291ea294ae60"',
+            text,
+        )
+        self.assertIn("WORKSPACE_SHELL_UPDATE_CONFIRM=APPLY_GITRUNNER_OBSERVABILITY_V1", text)
+        self.assertIn("rollback_if_needed", text)
+        self.assertIn("LOCAL_MCP_INITIALIZE=PASS", text)
+        self.assertIn("LOCAL_MCP_TOOL_SCHEMA=PASS", text)
+        self.assertIn("TUNNEL_READY=PASS", text)
+        self.assertIn("SERVICES_ACTIVE_BOOT_DISABLED=PASS", text)
+        self.assertIn("broker_policy_digest_binding", text)
+        self.assertIn("helper_registry_and_trust_stores", text)
+
+        # No recommissioning or identity recreation is permitted.
+        self.assertNotIn("activate_live.sh", text)
+        self.assertNotIn("openssl genpkey", text)
+        self.assertNotIn("openssl req", text)
+        self.assertNotIn("systemctl enable", text)
+        self.assertNotIn("systemd-sysusers", text)
+        self.assertNotIn("systemd-tmpfiles", text)
+        self.assertNotIn("render_tunnel_profile.py", text)
+        self.assertNotIn("git -C \"$EXEC_SOURCE\" checkout", text)
+        self.assertNotIn("rm -rf \"$AUTHORITY_ROOT\"", text)
 
     def test_gitrunner_diagnostic_reads_are_exact_and_read_only(self):
         with tempfile.TemporaryDirectory() as td:
