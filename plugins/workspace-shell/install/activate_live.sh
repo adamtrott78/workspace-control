@@ -62,7 +62,8 @@ rollback() {
     /etc/systemd/system/workspace-shell-job-launcher.service \
     /etc/systemd/system/workspace-shell-root-broker.service \
     /etc/systemd/system/workspace-shell-mcp.service \
-    /etc/systemd/system/workspace-shell-tunnel.service
+    /etc/systemd/system/workspace-shell-tunnel.service \
+    /etc/tmpfiles.d/workspace-shell.conf
   sudo systemctl daemon-reload >/dev/null 2>&1 || true
   sudo systemctl reset-failed >/dev/null 2>&1 || true
 
@@ -228,7 +229,9 @@ sudo systemd-sysusers "$BUNDLE/workspace-shell-sysusers.conf"
 [ "$(getent group workspace-shell-tunnel | cut -d: -f3)" = "$TUNNEL_UID" ] || fail "tunnel GID mismatch"
 echo "FIXED_IDENTITIES=PASS"
 
-sudo systemd-tmpfiles --create "$BUNDLE/workspace-shell-tmpfiles.conf"
+sudo install -o root -g root -m 0644 "$BUNDLE/workspace-shell-tmpfiles.conf" \
+  /etc/tmpfiles.d/workspace-shell.conf
+sudo systemd-tmpfiles --create /etc/tmpfiles.d/workspace-shell.conf
 sudo install -d -o root -g root -m 0755 \
   /etc/workspace-shell \
   /etc/workspace-shell/policy \
@@ -411,7 +414,7 @@ sudo python3 "$ROOT/plugins/workspace-shell/install/seal_install.py" \
 sudo install -o root -g workspace-shell-mcp -m 0640 "$BUNDLE/frontend.json" /etc/workspace-shell/frontend.json
 sudo install -o root -g root -m 0644 "$BUNDLE/install-manifest.json" /etc/workspace-shell/install-manifest.json
 
-echo "=== INSTALL SYSTEMD UNITS DISABLED-BY-DEFAULT ==="
+echo "=== INSTALL SYSTEMD UNITS FAIL-CLOSED THEN BOOT-PERSIST ==="
 for svc in workspace-shell-job-launcher workspace-shell-root-broker workspace-shell-mcp workspace-shell-tunnel; do
   sudo install -o root -g root -m 0644 "$BUNDLE/${svc}.service" "/etc/systemd/system/${svc}.service"
 done
@@ -423,7 +426,7 @@ done
 sudo tee /opt/workspace-shell/bin/workspace-shell-disable >/dev/null <<'DISABLE'
 #!/usr/bin/env bash
 set -euo pipefail
-systemctl stop workspace-shell-tunnel.service workspace-shell-mcp.service workspace-shell-root-broker.service workspace-shell-job-launcher.service
+systemctl disable --now workspace-shell-tunnel.service workspace-shell-mcp.service workspace-shell-root-broker.service workspace-shell-job-launcher.service
 echo "WORKSPACE_SHELL_DISABLED=PASS"
 DISABLE
 sudo chmod 0755 /opt/workspace-shell/bin/workspace-shell-disable
@@ -569,10 +572,20 @@ echo "TUNNEL_READY=PASS"
 
 for svc in "${SERVICES[@]}"; do
   [ "$(systemctl is-active "$svc")" = "active" ] || fail "$svc is not active"
-  ENABLED="$(systemctl is-enabled "$svc" 2>/dev/null || true)"
-  [ "$ENABLED" != "enabled" ] || fail "$svc unexpectedly enabled at boot"
 done
-echo "SERVICES_ACTIVE_BOOT_DISABLED=PASS"
+sudo systemctl enable \
+  workspace-shell-job-launcher.service \
+  workspace-shell-root-broker.service \
+  workspace-shell-mcp.service \
+  workspace-shell-tunnel.service
+for svc in "${SERVICES[@]}"; do
+  [ "$(systemctl is-enabled "$svc")" = "enabled" ] || fail "$svc is not enabled at boot"
+done
+[ "$(stat -c '%U:%G:%a' /run/workspace-shell-control)" = "root:workspace-shell-mcp:750" ] \
+  || fail "Workspace Shell runtime control root metadata mismatch"
+[ -f /etc/tmpfiles.d/workspace-shell.conf ] \
+  || fail "persistent Workspace Shell tmpfiles rule is missing"
+echo "SERVICES_ACTIVE_BOOT_ENABLED=PASS"
 
 MANIFEST_SHA="$(sudo sha256sum /etc/workspace-shell/install-manifest.json | awk '{print $1}')"
 TUNNEL_VERSION="$(/opt/workspace-shell/bin/tunnel-client --version 2>&1 | head -n1)"
@@ -591,7 +604,7 @@ print(json.dumps({
   "tunnel_id":tunnel_id,
   "tunnel_client_version":tunnel_version,
   "tunnel_health_url":health,
-  "boot_enabled":False,
+  "boot_enabled":True,
   "privileged_helpers_enabled":False,
   "operator_trust_store_state":"EMPTY_FAIL_CLOSED",
   "local_mtls_health":"PASS",
@@ -611,6 +624,6 @@ echo "TUNNEL_ID=$TUNNEL_ID"
 echo "TUNNEL_HEALTH=$HEALTH_URL"
 echo "ACTIVATION_RECEIPT=/var/lib/workspace-shell/commissioning/activation-receipt.json"
 echo "EMERGENCY_DISABLE=/opt/workspace-shell/bin/workspace-shell-disable"
-echo "BOOT_ENABLEMENT=DISABLED"
+echo "BOOT_ENABLEMENT=ENABLED"
 echo "PRIVILEGED_HELPERS=EMPTY_FAIL_CLOSED"
 echo "NEXT_GATE=CHATGPT_PLUGIN_LIVE_ACCEPTANCE"
