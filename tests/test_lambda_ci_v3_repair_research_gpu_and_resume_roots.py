@@ -42,9 +42,17 @@ class ResearchGPUContainmentRootResumeTests(unittest.TestCase):
         self.assertNotIn("40396f92-3db3-40f5-83e9-28fdef0370da", self.text)
 
     def test_containment_is_not_rolled_back_on_activation_failure(self):
-        self.assertIn("containment remains fail-safe", self.text)
+        self.assertIn("containment remains", self.text)
+        self.assertIn("fail-safe and authority/transaction evidence", self.text)
         self.assertNotIn('["systemctl", "start", RESEARCH_GPU_V2_UNIT]', self.text)
         self.assertNotIn('["systemctl", "enable", RESEARCH_GPU_V2_UNIT]', self.text)
+
+    def test_post_activation_rechecks_containment_and_roots(self):
+        self.assertIn("POST_ACTIVATION_RESEARCH_GPU_CONTAINMENT=PASS", self.text)
+        self.assertIn("POST_ACTIVATION_V3_ROOT_SERVICES=PASS", self.text)
+        self.assertIn("Research GPU containment drifted after v3 root activation", self.text)
+        self.assertIn("Research execution appeared after v3 root activation", self.text)
+        self.assertIn("v3 root service post-activation attestation failed", self.text)
 
     def test_exact_clean_checkout_and_root_required(self):
         self.assertIn("os.geteuid() != 0", self.text)

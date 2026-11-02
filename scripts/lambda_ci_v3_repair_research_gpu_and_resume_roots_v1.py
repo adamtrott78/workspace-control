@@ -341,6 +341,29 @@ def main() -> int:
             f"(rc={activation.returncode})"
         )
 
+    post_gpu = service_snapshot(RESEARCH_GPU_V2_UNIT)
+    if service_active(post_gpu) or post_gpu.get("UnitFileState") != "disabled":
+        raise RecoveryError(
+            "Research GPU containment drifted after v3 root activation: "
+            + json.dumps(post_gpu, sort_keys=True)
+        )
+    post_exec = active_research_execution_units()
+    if post_exec:
+        raise RecoveryError(
+            "Research execution appeared after v3 root activation: " + ",".join(post_exec)
+        )
+    post_roots = {
+        RECONCILER_UNIT: service_snapshot(RECONCILER_UNIT),
+        PROVISIONER_UNIT: service_snapshot(PROVISIONER_UNIT),
+    }
+    if any(s.get("ActiveState") != "active" or s.get("SubState") != "running" for s in post_roots.values()):
+        raise RecoveryError(
+            "v3 root service post-activation attestation failed: "
+            + json.dumps(post_roots, sort_keys=True)
+        )
+
+    print("POST_ACTIVATION_RESEARCH_GPU_CONTAINMENT=PASS")
+    print("POST_ACTIVATION_V3_ROOT_SERVICES=PASS")
     print("RESEARCH_GPU_CONTAINMENT_AND_V3_ROOT_RESUME=PASS")
     return 0
 
