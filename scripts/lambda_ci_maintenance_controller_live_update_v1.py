@@ -116,14 +116,26 @@ def main() -> int:
     if len(args.expected_head) != 40 or any(c not in "0123456789abcdef" for c in args.expected_head):
         raise UpdateError("--expected-head must be a full lowercase Git SHA")
 
-    repo = Path(run(["git", "rev-parse", "--show-toplevel"]).stdout.strip()).resolve()
-    observed_head = run(["git", "-C", str(repo), "rev-parse", "HEAD"]).stdout.strip()
+    repo_hint = Path.cwd().resolve()
+    repo = Path(
+        run(
+            [
+                "git",
+                "-c",
+                f"safe.directory={repo_hint}",
+                "rev-parse",
+                "--show-toplevel",
+            ]
+        ).stdout.strip()
+    ).resolve()
+    git_prefix = ["git", "-c", f"safe.directory={repo}", "-C", str(repo)]
+    observed_head = run(git_prefix + ["rev-parse", "HEAD"]).stdout.strip()
     if observed_head != args.expected_head:
         raise UpdateError(
             f"checkout HEAD mismatch: expected {args.expected_head}, observed {observed_head}"
         )
     if run(
-        ["git", "-C", str(repo), "status", "--porcelain=v1", "--untracked-files=normal"]
+        git_prefix + ["status", "--porcelain=v1", "--untracked-files=normal"]
     ).stdout.strip():
         raise UpdateError("checkout is dirty")
 
