@@ -1,0 +1,6 @@
+{
+  "benchmark": "INSTANT_WORKER_SESSION_IDENTITY_V2",
+  "worker_id": "W2",
+  "registration_branch": "instant-worker-session-identity-v2-slot-w2",
+  "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964"
+}
