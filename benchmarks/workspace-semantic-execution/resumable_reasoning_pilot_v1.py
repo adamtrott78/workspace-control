@@ -79,6 +79,14 @@ def new_run(
         "escalations": [],
         "validator_results": [],
         "terminal_submission": None,
+        "established_findings": [],
+        "open_hypotheses": [],
+        "unresolved_questions": [],
+        "evidence_refs": [],
+        "candidate_actions": [],
+        "next_safe_action": None,
+        "authority_refs": [],
+        "validation_requirements": [],
         "metrics": {
             "retries": 0,
             "decomposition_count": 0,
@@ -545,3 +553,79 @@ def hard_gate_violations(run: Mapping[str, Any]) -> list[str]:
         if not escalation_item["reason"] or not escalation_item["lower_tier_evidence_refs"]:
             violations.append("unjustified_frontier_escalation")
     return violations
+
+
+def persist_semantic_state(
+    run: Mapping[str, Any],
+    *,
+    expected_generation: int,
+    established_findings: list[Mapping[str, Any]] | None = None,
+    open_hypotheses: list[Mapping[str, Any]] | None = None,
+    unresolved_questions: list[str] | None = None,
+    evidence_refs: list[str] | None = None,
+    candidate_actions: list[Mapping[str, Any]] | None = None,
+    next_safe_action: str | None = None,
+    authority_refs: list[str] | None = None,
+    validation_requirements: list[str] | None = None,
+) -> dict[str, Any]:
+    """Persist bounded semantic continuation state without creating authority."""
+    next_run = deepcopy(run)
+    _require_generation(next_run, expected_generation)
+    if next_run["status"] != "RUNNING":
+        raise BenchmarkContractError("semantic checkpoint requires RUNNING state")
+    fields = {
+        "established_findings": established_findings,
+        "open_hypotheses": open_hypotheses,
+        "unresolved_questions": unresolved_questions,
+        "evidence_refs": evidence_refs,
+        "candidate_actions": candidate_actions,
+        "authority_refs": authority_refs,
+        "validation_requirements": validation_requirements,
+    }
+    for key, value in fields.items():
+        if value is not None:
+            if not isinstance(value, list):
+                raise BenchmarkContractError(f"{key} must be a list")
+            next_run[key] = deepcopy(value)
+    if next_safe_action is not None:
+        if not isinstance(next_safe_action, str) or not next_safe_action.strip():
+            raise BenchmarkContractError("next_safe_action must be non-empty when supplied")
+        next_run["next_safe_action"] = next_safe_action
+    next_run["events"].append(
+        {
+            "kind": "SEMANTIC_CHECKPOINT",
+            "generation": expected_generation,
+            "evidence_ref_count": len(next_run["evidence_refs"]),
+        }
+    )
+    return next_run
+
+
+def context_packet_from_run(
+    run: Mapping[str, Any],
+    *,
+    objective: str,
+    invariants: list[str],
+) -> dict[str, Any]:
+    """Serialize only the bounded durable continuation state required by a worker."""
+    if not isinstance(objective, str) or not objective.strip():
+        raise BenchmarkContractError("objective is required")
+    if not isinstance(invariants, list):
+        raise BenchmarkContractError("invariants must be a list")
+    packet = {
+        "process_id": run["process_id"],
+        "generation": run["generation"],
+        "status": run["status"],
+        "objective": objective,
+        "established_findings": deepcopy(run.get("established_findings", [])),
+        "open_hypotheses": deepcopy(run.get("open_hypotheses", [])),
+        "unresolved_questions": deepcopy(run.get("unresolved_questions", [])),
+        "evidence_refs": list(run.get("evidence_refs", [])),
+        "candidate_actions": deepcopy(run.get("candidate_actions", [])),
+        "next_safe_action": run.get("next_safe_action"),
+        "authority_refs": list(run.get("authority_refs", [])),
+        "validation_requirements": list(run.get("validation_requirements", [])),
+        "invariants": list(invariants),
+    }
+    context_packet_size_bytes(packet)
+    return packet
