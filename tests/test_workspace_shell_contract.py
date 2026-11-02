@@ -763,7 +763,7 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertEqual(server_source.count("_meta: {}"), 4)
         self.assertEqual(server_source.count("registerAppTool("), 4)
 
-    def test_live_activation_operator_is_fail_closed_and_boot_disabled(self):
+    def test_live_activation_operator_is_fail_closed_and_boot_persistent(self):
         proc = subprocess.run(
             ["bash", "-n", str(ACTIVATE_LIVE)],
             cwd=ROOT,
@@ -873,13 +873,18 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn('NRestarts,MemoryCurrent,MemoryPeak', source)
         self.assertIn('TUNNEL_HEALTH_URL=UNAVAILABLE', source)
         self.assertIn('TUNNEL_READY=PASS', source)
-        self.assertIn('SERVICES_ACTIVE_BOOT_DISABLED=PASS', source)
+        self.assertIn('SERVICES_ACTIVE_BOOT_ENABLED=PASS', source)
+        self.assertIn('/etc/tmpfiles.d/workspace-shell.conf', source)
+        self.assertIn('systemd-tmpfiles --create /etc/tmpfiles.d/workspace-shell.conf', source)
+        self.assertIn('systemctl enable \\', source)
+        self.assertIn('systemctl disable --now workspace-shell-tunnel.service', source)
+        self.assertIn('"boot_enabled":True', source)
+        self.assertIn('BOOT_ENABLEMENT=ENABLED', source)
         self.assertIn('workspace-shell-disable', source)
         self.assertIn('rollback()', source)
         self.assertIn('userdel "$user"', source)
         self.assertIn('groupdel "$group"', source)
         self.assertIn('COMMITTED=1', source)
-        self.assertNotIn("systemctl enable ", source)
         self.assertNotIn("sudo bash", source)
         self.assertNotIn("BEGIN PRIVATE KEY", source)
         self.assertNotIn("\\\\$" + "{", source)
