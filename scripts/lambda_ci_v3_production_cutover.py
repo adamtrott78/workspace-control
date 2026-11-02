@@ -50,7 +50,9 @@ AUTHORITY_ROOT = V3_STATE_ROOT / "migration-authority"
 PRODUCTION_OVERRIDE = V3_STATE_ROOT / "production-cutover" / "active.json"
 BASE_MANIFEST = V3_CONFIG_ROOT / "install-manifest.json"
 PROVISIONER_STATE = V3_STATE_ROOT / "provisioner"
+CONTROLLER_STATE_ROOT = V3_STATE_ROOT / "controller" / "state"
 AUTHORITY_MAX_LIFETIME_SECONDS = 30 * 60
+TERMINAL_CONTROLLER_STATES = {"COMPLETED", "FAILED", "CANCELED"}
 
 ALL_CLASSES = (
     "workspace-control-control-small-v1",
@@ -689,6 +691,61 @@ def _consume_authority(
     return marker
 
 
+def _assert_controller_ledgers_terminal(
+    controller_state_root: pathlib.Path,
+    root_policy: dict[str, Any],
+) -> None:
+    classes = root_policy.get("runner_classes")
+    if not isinstance(classes, dict) or set(classes) != set(ALL_CLASSES):
+        raise CutoverError("installed root policy class set invalid")
+    if not controller_state_root.exists():
+        return
+    if controller_state_root.is_symlink() or not controller_state_root.is_dir():
+        raise CutoverError("controller state root must be a real directory")
+    for class_id in ALL_CLASSES:
+        class_root = controller_state_root / class_id
+        if not class_root.exists():
+            continue
+        if class_root.is_symlink() or not class_root.is_dir():
+            raise CutoverError(
+                f"{class_id}: controller state path must be a real directory"
+            )
+        for path in sorted(class_root.glob("*.json")):
+            if path.is_symlink() or not path.is_file():
+                raise CutoverError(
+                    f"{class_id}: controller ledger entry must be a regular file"
+                )
+            try:
+                record = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                raise CutoverError(
+                    f"{class_id}: controller ledger entry unreadable: {path.name}"
+                ) from exc
+            if not isinstance(record, dict) or record.get("schema_version") != 1:
+                raise CutoverError(
+                    f"{class_id}: controller ledger entry schema invalid: {path.name}"
+                )
+            request_id = record.get("runner_request_id")
+            if not isinstance(request_id, int) or request_id <= 0:
+                raise CutoverError(
+                    f"{class_id}: controller ledger identity invalid: {path.name}"
+                )
+            digest = record.get("controller_policy_sha256")
+            if (
+                not isinstance(digest, str)
+                or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+            ):
+                raise CutoverError(
+                    f"{class_id}: controller ledger policy binding invalid: {path.name}"
+                )
+            state = record.get("state")
+            if state not in TERMINAL_CONTROLLER_STATES:
+                raise CutoverError(
+                    f"{class_id}: nonterminal controller ledger blocks production "
+                    f"cutover runner_request_id={request_id} state={state}"
+                )
+
+
 def _assert_no_in_progress_transaction(
     transaction_root: pathlib.Path,
 ) -> None:
@@ -856,6 +913,7 @@ def prepare(
     transaction_root: pathlib.Path = MIGRATION_ROOT,
     authority_root: pathlib.Path = AUTHORITY_ROOT,
     provisioner_state_root: pathlib.Path = PROVISIONER_STATE,
+    controller_state_root: pathlib.Path = CONTROLLER_STATE_ROOT,
 ) -> pathlib.Path:
     manifest, policies, _, _ = _generation_artifacts(generation_dir)
     authority, authority_raw = _validate_root_json(
@@ -879,6 +937,10 @@ def prepare(
         require_legacy_empty=True,
         require_v3_empty=True,
         state_root=provisioner_state_root,
+    )
+    _assert_controller_ledgers_terminal(
+        controller_state_root,
+        installed_root,
     )
     _validate_private_dir(transaction_root, "production transaction root")
     _assert_no_in_progress_transaction(transaction_root)
