@@ -23,6 +23,8 @@ RENDER_TUNNEL_PROFILE = PLUGIN / "install" / "render_tunnel_profile.py"
 VALIDATE_TUNNEL_DOCTOR = PLUGIN / "install" / "validate_tunnel_doctor.py"
 ACTIVATE_LIVE = PLUGIN / "install" / "activate_live.sh"
 GITRUNNER_OBSERVABILITY_UPDATE = PLUGIN / "install" / "update_gitrunner_observability_live_v1.sh"
+BOOT_RECOVERY_UPDATE = PLUGIN / "install" / "update_boot_recovery_live_v1.sh"
+EMERGENCY_DISABLE = PLUGIN / "install" / "workspace-shell-disable.sh"
 FRONTEND_ACCESS_REPAIR = PLUGIN / "install" / "repair_frontend_config_access_v1.sh"
 WORKER_PROC_REPAIR = PLUGIN / "install" / "repair_worker_proc_bootstrap_v1.sh"
 WORKER_SCRATCH_REPAIR = PLUGIN / "install" / "repair_worker_scratch_root_v1.sh"
@@ -877,7 +879,10 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertIn('/etc/tmpfiles.d/workspace-shell.conf', source)
         self.assertIn('systemd-tmpfiles --create /etc/tmpfiles.d/workspace-shell.conf', source)
         self.assertIn('systemctl enable \\', source)
-        self.assertIn('systemctl disable --now workspace-shell-tunnel.service', source)
+        self.assertIn('workspace-shell-disable.sh', source)
+        disable_source = EMERGENCY_DISABLE.read_text()
+        self.assertIn('systemctl disable --now \\', disable_source)
+        self.assertIn('workspace-shell-tunnel.service', disable_source)
         self.assertIn('"boot_enabled":True', source)
         self.assertIn('BOOT_ENABLEMENT=ENABLED', source)
         self.assertIn('workspace-shell-disable', source)
