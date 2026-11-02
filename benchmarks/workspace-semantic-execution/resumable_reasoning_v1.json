@@ -229,10 +229,10 @@
     "After the research-iterate pilot, add architecture_diagnosis and artifact_revision fixtures before capability-boundary conclusions."
   ],
   "implementation_checkpoint": {
-    "checkpoint_sha": "6da70bc638a6c5decbe4ed2e4943257e9d447e55",
-    "workspace_control_validation_run": 41518944500,
+    "checkpoint_sha": "4ec300254c328a1b6e0fce62fe62cd6f11d7a855",
+    "workspace_control_validation_run": 41519306708,
     "validation": "SUCCESS",
-    "note": "Executable durable-state/event/evaluator harness and regression tests are validated. This is an implementation checkpoint, not a reasoning-quality result."
+    "note": "Executable durable-state/event/evaluator harness, bounded semantic context serialization, and regression tests are validated. This is an implementation checkpoint, not a reasoning-quality result."
   },
   "implementation_artifacts": [
     "benchmarks/workspace-semantic-execution/prior_instant_worker_evidence_v1.json",
@@ -244,8 +244,9 @@
   ],
   "pilot_constraints": {
     "authoring_session_contaminated": true,
-    "reason": "This session authored/read evaluator-only oracle truth and cannot count as a scored model arm.",
+    "reason": "This authoring session has seen evaluator-only oracle truth and cannot count as a scored model arm.",
     "evaluator_isolation": "PROCESS_PROTOCOL_ONLY",
-    "equivalence_claim_allowed": false
+    "equivalence_claim_allowed": false,
+    "clean_session_requirement": "All scored A-E arms must run in oracle-unexposed clean model sessions recovering only the frozen public fixture, durable run state, and bounded context packet."
   }
 }
