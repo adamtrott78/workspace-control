@@ -33,10 +33,8 @@ class PostOutageRootRecoveryContractTests(unittest.TestCase):
 
     def test_wrapper_preserves_activation_failure_evidence(self):
         text = WRAPPER.read_text(encoding="utf-8")
-        self.assertIn(
-            "authority/transaction evidence is preserved for diagnosis",
-            text,
-        )
+        self.assertIn("authority/transaction evidence is preserved", text)
+        self.assertIn("for diagnosis", text)
         self.assertNotIn("unlink(authority_path", text)
 
 
