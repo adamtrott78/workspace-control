@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: c0108f87f9dd10a517151ab399762530f06610cf
+- Remote checkpoint: fbb065a235ef271f3c55210833ee3b95e9d61f54
 - Remote verified: true
 
 ### PADataset
@@ -70,19 +70,20 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Continue evidence-first architecture work on PR #590: create the resumable reasoning benchmark contract and minimal semantic-core/executor-resource schemas, while treating the Lambda validation run as an external async wait. Do not perform live GitRunner canary/migration mutation from this task. Consume the separate GitRunner task's durable results when they change.
+Treat this as the umbrella program. In a fresh ChatGPT conversation, first finish the bounded GitRunner incident diagnosis through the live PR #591 Workspace Shell observability surface (new unit_logs_redacted + maintenance_receipt operations) and persist the exact root cause/repair evidence to the GitRunner task/PR #572. Do not let that incident consume or replace the broader migration. Once lane serviceability is understood, continue the semantic-execution program on PR #590 by implementing/running the resumable Instant-vs-frontier benchmark pilot, independently reviewing the hybrid architecture hypothesis, proving an unseen workflow extension without kernel change, and only then freezing implementation architecture. Keep PADataset/Research v3 canary authority owned exclusively by the GitRunner task.
 
 ## Remaining work
 
-- Observe exact-head Lambda validation result without polling with a reasoning model while nothing changes.
-- Define and implement the resumable Instant-vs-frontier benchmark contract on disposable benchmark state.
-- Define the minimal semantic core and versioned domain-extension registration contract.
-- Define executor/resource/quota ontology and routing/escalation decision contract.
-- Expand workflow inventory to concrete workflow descriptors and acceptance cases.
-- Run an independent architecture review of the hybrid hypothesis.
-- Perform a bounded external-runtime spike only if the comparison shows sufficient likely benefit.
-- Demonstrate an unseen workflow extension without kernel change.
-- Keep the separate GitRunner migration progressing under its own authority, starting with PADataset CPU when fresh canary authority exists.
+- Fresh-chat GitRunner incident diagnosis: use PR #591 live unit_logs_redacted and maintenance_receipt operations to identify why an ACTIVE legacy workspace-control controller is not assigning queued run 41378944347; record exact evidence and repair without widening authority gratuitously.
+- Keep the GitRunner v3 fleet migration as a separate authority-owned dependency: after incident/serviceability proof, PADataset CPU is next under a fresh class-specific one-shot canary authority, then PADataset GPU; Research CPU remains separately gated and all Research GPU-derived classes remain NO_BY_DEFAULT.
+- Implement and run a small resumable-reasoning benchmark pilot using the durable contract at benchmarks/workspace-semantic-execution/resumable_reasoning_v1.json.
+- Compare frontier long-horizon, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid-escalation arms using objective validators and usage/context metrics.
+- Run an independent architecture review of the preferred hybrid semantic-projection hypothesis; do not freeze merely because the current design is coherent.
+- Prove the semantic core can register and execute one previously unseen workflow/domain extension without a kernel domain switch and without authority leakage.
+- Decide whether a Temporal/Dapr or LangGraph/Agent Framework spike is justified by expected material benefit; benchmark before adopting.
+- After architecture evidence is sufficient, implement the minimal semantic projection + ReasoningProcess + executor/resource router incrementally while preserving current project-local authority and execution substrates.
+- Migrate representative workflows across research/experiments, coding+CI repair, architecture review, data science, paper creation, presentations, tutoring/homework, documents, and controller/runtime operations.
+- Measure and minimize scarce frontier allowance rather than assuming Instant is equivalent to frontier reasoning; escalation must be evidence-based.
 
 ## Blockers / gates
 
