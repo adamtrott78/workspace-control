@@ -3,7 +3,7 @@
   "benchmark": "INSTANT_MULTI_WORKER_SCALE_V1",
   "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
   "shared_branch": "instant-multi-worker-scale-v1-20261101",
-  "state_version": 17,
+  "state_version": 18,
   "worker_count": 4,
   "invariant": "each action has at most one owner; every completion preserves all peer state; workers choose lexicographically smallest PENDING action",
   "actions": {
@@ -116,12 +116,12 @@
       }
     },
     "F": {
-      "state": "CLAIMED",
+      "state": "COMPLETE",
       "owner": "W3",
-      "execution_branch": null,
-      "pr": null,
-      "validated_head": null,
-      "validation_run": null,
+      "execution_branch": "instant-multi-worker-scale-v1-w3-f",
+      "pr": 587,
+      "validated_head": "6d3ab88014b19a80e4c05bdddeb769ab33939bc6",
+      "validation_run": 41369801135,
       "task": {
         "files": [
           "scripts/instant_scale_f.py",
@@ -294,6 +294,13 @@
       "expected_shared_head": "8a957b86a8a1e5937e51d1af672663ff5bafa283",
       "validated_head": "e174c0d1372d688370dab5a19d0db72563425b83",
       "validation_run": 41369832915
+    },
+    {
+      "worker": "W3",
+      "action": "F",
+      "expected_shared_head": "16efbd27d1195e4d0a68f01b3129a65bfbdcaa30",
+      "validated_head": "6d3ab88014b19a80e4c05bdddeb769ab33939bc6",
+      "validation_run": 41369801135
     }
   ],
   "worker_slots": {
