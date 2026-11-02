@@ -34,7 +34,7 @@
       "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
       "remote": {
         "branch": "workspace-shell-gitrunner-observability-v1",
-        "checkpoint_sha": "bb543a9f57a20401f4c30401342c4397187a1d1d",
+        "checkpoint_sha": "951b6987e590f9452eefaec15ba20b39e8af5bf3",
         "verified": true
       },
       "local": null,
@@ -46,7 +46,8 @@
         "plugins/workspace-shell/server.js",
         "plugins/workspace-shell/test/**",
         "tests/test_workspace_shell_contract.py",
-        "procedures/workspace_shell_mcp*.md"
+        "procedures/workspace_shell_mcp*.md",
+        "plugins/workspace-shell/root/job_launcher.py"
       ]
     }
   ],
@@ -63,9 +64,10 @@
         "operator explicit approval to widen Workspace Shell read/diagnostic authority to a bounded extent"
       ],
       "outputs": [
-        "architecture/workspace-shell-mcp-authority-v2.json read_only_gitrunner_observability",
-        "plugins/workspace-shell/install/render_install.py exact allowed-unit expansion",
-        "tests/test_workspace_shell_contract.py rendered-config regression"
+        "exact read-only Workspace CI unit allowlist",
+        "bounded unit journal read through root launcher",
+        "bounded maintenance-controller receipt read through root launcher",
+        "tests freezing allowlists, fixed paths and denied unrelated units"
       ],
       "validation": [
         {
@@ -95,7 +97,7 @@
     "Design/implement sanitized maintenance-receipt read without maintenance socket/group authority.",
     "Keep GitHub Actions cancellation in a GitHub/control-plane surface rather than adding generic network credentials to Workspace Shell."
   ],
-  "next_safe_action": "Retarget PR #591 back to accepted Workspace Shell branch for a five-file review delta. Then prepare a bounded live-update procedure for the exact validated observability head; do not self-widen root/helper trust or use this task for GitRunner mutation.",
+  "next_safe_action": "Run exact-head full validation for the expanded read-only GitRunner diagnostic surface. Do not install live changes or add mutating recovery authority until this head passes.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
   "checkpoints": [
@@ -153,9 +155,9 @@
     },
     {
       "check": "Hosted exact-head validation",
-      "result": "PASS",
+      "result": "NOT_RUN",
       "evidence": [
-        "Workspace Control Validation run 41382034139 completed SUCCESS on exact head bb543a9f57a20401f4c30401342c4397187a1d1d."
+        "Pending full validation for exact head 951b6987e590f9452eefaec15ba20b39e8af5bf3."
       ]
     }
   ]
