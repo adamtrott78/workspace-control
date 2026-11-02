@@ -10,12 +10,12 @@
     "project_root": "/srv/workspace-ci/padataset",
     "lanes": {
       "cpu": {
-        "scale_set_name": "lambda-padataset-cpu-public",
-        "runner_prefix": "lambda-padataset-cpu-public-"
+        "scale_set_name": "lambda-padataset",
+        "runner_prefix": "lambda-padataset-"
       },
       "gpu": {
-        "scale_set_name": "lambda-padataset-gpu-single-public",
-        "runner_prefix": "lambda-padataset-gpu-single-public-"
+        "scale_set_name": "lambda-padataset-gpu",
+        "runner_prefix": "lambda-padataset-gpu-"
       }
     }
   },
