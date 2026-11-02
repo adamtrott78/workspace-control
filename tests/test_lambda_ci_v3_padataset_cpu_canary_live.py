@@ -19,11 +19,14 @@ class PadatasetCpuCanaryOperatorTests(unittest.TestCase):
 
     def test_controller_generation_is_decoupled_from_operator_head(self):
         self.assertIn('CONTROLLER_SOURCE_HEAD="3e8a231483413ba3a16d405ba61b55d0ab9ff3aa"', self.text)
+        self.assertIn('MIGRATION_HELPER_SOURCE_HEAD="2af7c8bba198b5b0e58ede6f8d34d0b64c8ed0af"', self.text)
         self.assertIn('OPERATOR_HEAD="$(git -C "$ROOT" rev-parse HEAD)"', self.text)
         self.assertIn('SOURCE_HEAD="$CONTROLLER_SOURCE_HEAD"', self.text)
         self.assertIn('"$GO_BIN" -C "$ROOT/controller/lambda-ci-controller"', self.text)
         self.assertNotIn('"$GO_BIN" -C "$SOURCE_TREE/controller/lambda-ci-controller"', self.text)
-        self.assertIn('EXPECTED_TX_HELPER_BLOB="0c02ca17cf267f1c3986bfee75ebfc6172ca592a"', self.text)
+        self.assertIn('EXPECTED_TX_HELPER_BLOB="d859cbcc4f8d2d25a76495e2159def2d6ac0c850"', self.text)
+        self.assertIn('ls-tree "$MIGRATION_HELPER_SOURCE_HEAD"', self.text)
+        self.assertIn('show "$MIGRATION_HELPER_SOURCE_HEAD:scripts/lambda_ci_v3_migration_transaction.py"', self.text)
 
     def test_preflight_target_repository_is_explicit_and_operator_bound(self):
         self.assertIn('--target-url "$TARGET_GITHUB_URL"', self.text)

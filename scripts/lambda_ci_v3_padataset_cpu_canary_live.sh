@@ -8,6 +8,7 @@ set -euo pipefail
 
 BASE_SOURCE_HEAD="09c46818252991f6a55aaeedbcf046c554e2ffee"
 CONTROLLER_SOURCE_HEAD="3e8a231483413ba3a16d405ba61b55d0ab9ff3aa"
+MIGRATION_HELPER_SOURCE_HEAD="2af7c8bba198b5b0e58ede6f8d34d0b64c8ed0af"
 TARGET_CLASS="padataset-cpu-public-v1"
 TARGET_SCALE_SET="lambda-padataset-cpu-public"
 WORKFLOW_PATH=".github/workflows/workspace-ci-v3-migration-canary-padataset-cpu-public-v1.yml"
@@ -27,7 +28,7 @@ test -z "$(git -C "$ROOT" status --porcelain --untracked-files=no)"
 TMP="$(mktemp -d /tmp/workspace-ci-v3-first-canary.XXXXXX)"
 SOURCE_TREE="$TMP/source"
 TX_HELPER="$TMP/lambda_ci_v3_migration_transaction.py"
-EXPECTED_TX_HELPER_BLOB="0c02ca17cf267f1c3986bfee75ebfc6172ca592a"
+EXPECTED_TX_HELPER_BLOB="d859cbcc4f8d2d25a76495e2159def2d6ac0c850"
 CANARY_OUT="$TMP/canary"
 PREFLIGHT_BIN="$TMP/v3-canary-preflight"
 TX_RECEIPT=""
@@ -116,6 +117,7 @@ trap on_exit EXIT
 echo "=== V3 PADATASET CPU CANARY: BEGIN ==="
 echo "OPERATOR_HEAD=$OPERATOR_HEAD"
 echo "CONTROLLER_SOURCE_HEAD=$SOURCE_HEAD"
+echo "MIGRATION_HELPER_SOURCE_HEAD=$MIGRATION_HELPER_SOURCE_HEAD"
 echo "BASE_SOURCE_HEAD=$BASE_SOURCE_HEAD"
 echo "TARGET_CLASS=$TARGET_CLASS"
 
@@ -281,10 +283,11 @@ git -C "$ROOT" worktree add --detach "$SOURCE_TREE" "$SOURCE_HEAD" >/dev/null
 test "$(git -C "$SOURCE_TREE" rev-parse HEAD)" = "$SOURCE_HEAD"
 test -z "$(git -C "$SOURCE_TREE" status --porcelain --untracked-files=no)"
 
-TX_TREE_BLOB="$(git -C "$ROOT" ls-tree "$SOURCE_HEAD" -- scripts/lambda_ci_v3_migration_transaction.py | awk '{print $3}')"
+git -C "$ROOT" cat-file -e "$MIGRATION_HELPER_SOURCE_HEAD^{commit}"
+TX_TREE_BLOB="$(git -C "$ROOT" ls-tree "$MIGRATION_HELPER_SOURCE_HEAD" -- scripts/lambda_ci_v3_migration_transaction.py | awk '{print $3}')"
 test "$TX_TREE_BLOB" = "$EXPECTED_TX_HELPER_BLOB"
 
-git -C "$ROOT" show "$SOURCE_HEAD:scripts/lambda_ci_v3_migration_transaction.py" > "$TX_HELPER"
+git -C "$ROOT" show "$MIGRATION_HELPER_SOURCE_HEAD:scripts/lambda_ci_v3_migration_transaction.py" > "$TX_HELPER"
 chmod 0555 "$TX_HELPER"
 test "$(git hash-object "$TX_HELPER")" = "$EXPECTED_TX_HELPER_BLOB"
 require_path "$TX_HELPER"
