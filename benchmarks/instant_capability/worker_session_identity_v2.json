@@ -1,0 +1,75 @@
+{
+  "schema_version": 2,
+  "benchmark": "INSTANT_WORKER_SESSION_IDENTITY_V2",
+  "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+  "shared_branch": "instant-worker-session-identity-v2-20261101",
+  "state_version": 0,
+  "invariant": "a worker slot is owned only by the chat that successfully created its dedicated slot branch; existing slot branches may never be adopted by another chat",
+  "slot_branches": {
+    "W1": "instant-worker-session-identity-v2-slot-w1",
+    "W2": "instant-worker-session-identity-v2-slot-w2",
+    "W3": "instant-worker-session-identity-v2-slot-w3",
+    "W4": "instant-worker-session-identity-v2-slot-w4"
+  },
+  "worker_slots": {
+    "W1": {
+      "state": "FREE",
+      "registration_branch": null,
+      "registration_commit": null
+    },
+    "W2": {
+      "state": "FREE",
+      "registration_branch": null,
+      "registration_commit": null
+    },
+    "W3": {
+      "state": "FREE",
+      "registration_branch": null,
+      "registration_commit": null
+    },
+    "W4": {
+      "state": "FREE",
+      "registration_branch": null,
+      "registration_commit": null
+    }
+  },
+  "actions": {
+    "A": {
+      "state": "PENDING",
+      "owner_worker": null,
+      "owner_registration_commit": null
+    },
+    "B": {
+      "state": "PENDING",
+      "owner_worker": null,
+      "owner_registration_commit": null
+    },
+    "C": {
+      "state": "PENDING",
+      "owner_worker": null,
+      "owner_registration_commit": null
+    },
+    "D": {
+      "state": "PENDING",
+      "owner_worker": null,
+      "owner_registration_commit": null
+    }
+  },
+  "protocols": {
+    "slot_allocation": "anonymous chat attempts create_branch for W1 then W2 then W3 then W4 using dedicated immutable slot branch names; the first create_branch success establishes that chat's worker slot; an already-existing branch is a collision, never ownership",
+    "registration_marker": "after successful slot-branch creation, create a fixed marker file on that slot branch; resulting commit SHA is the durable registration_commit for that chat",
+    "durable_registration": "record worker slot, registration_branch and registration_commit into shared state through exact-head CAS",
+    "resume": "chat may act for a worker only if it previously observed successful creation of that slot branch and its retained registration_commit matches durable state; otherwise fail closed",
+    "action_claim": "claim one PENDING action through exact-head CAS and record both owner_worker and owner_registration_commit",
+    "no_execution": true
+  },
+  "safety": {
+    "modify_main": false,
+    "execute_actions": false,
+    "create_pr": false,
+    "workspace_shell": false,
+    "privileged_execution": false
+  },
+  "worker_history": [],
+  "claim_history": []
+}
