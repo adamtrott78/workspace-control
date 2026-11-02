@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 602ff543a122038870598915f669d9f9bd5a9f6a
+- Remote checkpoint: 467b8fb136d71448f7b44788200afca6c9673e32
 - Remote verified: true
 
 ### research-engine
@@ -43,22 +43,23 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-First complete task/handoff sync validation for this production-cutover implementation. Then, from a clean checkout at that exact final durable head, execute only the bounded root verifier refresh `sudo /usr/bin/python3 scripts/lambda_ci_v3_reconciler_live_update_v2.py --expected-head <FINAL_DURABLE_HEAD>`. Independently verify the new reconciler override, roots, all-class inactivity, and Research GPU containment. Only after that proof, execute `bash scripts/lambda_ci_v3_production_cutover_live.sh` from the same exact head. The operator must remain the sole creator/consumer of a fresh CUTOVER_V3_PRODUCTION_GENERATION authority and must either produce V3_PRODUCTION_CUTOVER_ACCEPTED=PASS or fail closed through workflow restoration plus v3-isolated rollback.
+Finish the existing production-cutover rollback first. The operator terminal that launched scripts/lambda_ci_v3_production_cutover_live.sh must be interrupted once if it is still running so its existing EXIT rollback trap can complete. Independently require: production workflows restored to their old blobs, workspace-control-control-small-v1 inactive/dead, all other v3 class controllers inactive, v2 workspace-control/PADataset CPU/PADataset GPU/Research CPU restored to their exact pre-cutover active+enabled states, Research GPU inactive+disabled, roots healthy, and transaction c4c11247-0883-4eab-91fd-3b5306b23de6 phase ROLLED_BACK_LEGACY_RESTORED. Only then freeze the final task-sync head, install the validated controller binary with scripts/lambda_ci_v3_controller_refresh_live.sh, verify its active root-owned controller override, and retry production cutover from that same exact head.
 
 ## Remaining work
 
-- Validate this task/handoff sync and freeze the final exact durable production-cutover source head.
-- Execute the reconciler-only live verifier refresh at that exact head; independently prove installed reconciler bytes/override, root health, all nine v3 class controllers inactive+boot-disabled, and Research GPU containment.
-- Execute the validated production cutover operator at the same exact head: quiesce all v2 controllers, retarget exactly three trusted production workflows, activate exactly the three accepted v3 classes, validate one real production job per accepted class, prove clean transient/resource state, and commit.
+- Complete and independently attest rollback of production cutover attempt #1; no new authority or live refresh while the transaction is nonterminal.
+- Task/handoff-sync the validated durable-ledger generation fix and freeze the final exact source head.
+- Install the controller-only refresh from that exact head using scripts/lambda_ci_v3_controller_refresh_live.sh; verify all v3 class controllers remained inactive during refresh and Research GPU containment remained intact.
+- Retry the single production generation cutover. Terminal historical ledger records may be ignored; any nonterminal ledger record must block before authority. Validate one real production job per accepted class and prove clean transient/resource state before commit.
 - Independently verify post-cutover workflow blobs, selected v3 controller active+enabled state, non-selected v3 inactive+disabled state, all v2 controllers inactive+disabled, Research CPU separately gated, Research GPU contained, and production override/transaction receipts.
-- Preserve retired accepted v2 scale sets/bytes/config/state through the rollback window; perform physical legacy cleanup only as a later separately validated step.
+- Preserve retired accepted v2 scale sets/bytes/config/state through the rollback window; perform physical legacy cleanup only later.
 - Immediately resume workspace-semantic-execution-migration-v1 umbrella work after the v3/v2 infrastructure gate is accepted.
 
 ## Blockers / gates
 
-- The live host still needs the newly validated reconciler verifier installed through scripts/lambda_ci_v3_reconciler_live_update_v2.py at the final exact task-sync head before any production cutover authority can be created. The updater is reconciler-only and grants no cutover authority.
-- After that verifier refresh is independently attested, the single production cutover still requires the validated operator/root transaction; current Workspace Shell authority cannot mint the needed root approval or execute generic root mutations.
-- Research CPU is separately gated and must remain inactive after successful v3 cutover; all Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT.
+- Production cutover attempt #1 is still in a partial rollback boundary. The queued validation run is cancelled and old workflow blobs are restored, but the existing root transaction has not yet proven V3_PRODUCTION_ROLLBACK=PASS / ROLLED_BACK_LEGACY_RESTORED. Do not retry cutover or refresh the controller until that transaction is terminal and all accepted v3 class controllers are inactive.
+- After rollback is terminal, the validated controller-only fix at the final task-sync head must be installed with scripts/lambda_ci_v3_controller_refresh_live.sh while all v3 class controllers are inactive. Current Workspace Shell cannot perform this root mutation.
+- Research CPU remains separately gated; all Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT.
 
 ## Fresh-chat initialization
 
