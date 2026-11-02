@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 626c9c7c81c50878b9b3bcce5932bc08c086313f
+- Remote checkpoint: 7d138b900944b1138a74f7d92c2db1b6e8d25ba7
 - Remote verified: true
 
 ### research-engine
@@ -43,7 +43,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Validate and deploy the narrow maintenance-controller RFC3339 nanosecond parser fix without broad v2 rehabilitation. Because live Workspace Shell diagnostics are available but root helper/trust stores are still empty/fail-closed, establish a one-time stable reviewed-helper bootstrap/update authority behind the existing workspace_shell_run_reviewed_helper schema; do not add new MCP operations. Then install/restart only the exact maintenance-controller bytes, re-run reset-stale for quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, prove READY_FOR_SINGLE_RETRY and zero-state, and continue the v3 migration.
+Apply the exact validated single-file maintenance-controller hotfix from scripts/lambda_ci_maintenance_controller_live_update_v1.py at the final validated branch head. This is the only remaining manual root bootstrap boundary for the current parser repair; the updater verifies the old installed Git blob, replaces only /opt/workspace-ci/maintenance-controller/lambda_ci_maintenance_controller.py, restarts only workspace-ci-maintenance-controller.service, performs two stable-running samples, and rolls back automatically on failure. After PASS, ChatGPT should immediately verify the service via Workspace Shell, post a new reset-stale command for quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, consume the maintenance receipt, and continue the v3 migration.
 
 ## Remaining work
 
