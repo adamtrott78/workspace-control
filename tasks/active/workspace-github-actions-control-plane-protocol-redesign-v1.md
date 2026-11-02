@@ -1,7 +1,45 @@
 <!-- workspace-control:derived-task-handoff -->
 # Workspace Control Task Handoff
 
+Derived human-readable view.
+
 Authoritative capsule: tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.json
+
+If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
+
+## Task
+
+- ID: workspace-github-actions-control-plane-protocol-redesign-v1
+- Title: GitHub Actions Control-Plane Protocol Redesign v1
+- Status: IN_PROGRESS
+- Capsule schema: v2
+
+## Goal
+
+Replace the current parser-chained GitHub Actions runner admission path with a formally modeled, versioned, typed control-plane protocol whose routing, authority, scheduling, provisioning, execution, recovery, and lifecycle semantics are explicit end-to-end, so any executor request admitted by policy cannot later be falsely rejected by a downstream parser that implements a different grammar.
+
+## Repositories
+
+### workspace-control
+
+- Intent: mutate
+- Remote branch: github-actions-control-plane-protocol-redesign-v1
+- Remote checkpoint: eae9ba119ace3fc1acba4642c577c1454a03a064
+- Remote verified: true
+
+### research-engine
+
+- Intent: mutate
+- Remote branch: github-actions-control-plane-protocol-redesign-v1
+- Remote checkpoint: 6165556086b73d2076f205f11ec7b988150f23dd
+- Remote verified: true
+
+### PADataset
+
+- Intent: mutate
+- Remote branch: main
+- Remote checkpoint: 35e6f451fe36f039b5f6461f7469f0eed1e79e43
+- Remote verified: true
 
 ## Next safe action
 
@@ -19,3 +57,17 @@ PADATASET CPU CANARY PRE-AUTHORITY VERIFIER DRIFT FIXED. The first PADataset CPU
 - No live mutation blocker remains from the failed attempt: it failed before fresh canary authority creation, generation-exclusion transaction apply, or workflow dispatch.
 - A single operator-root rerun of the corrected PADataset CPU canary script is still required because Workspace Shell has no accepted privileged helper/signature for this transaction.
 - Research CPU remains separately gated; all Research GPU-derived v3 classes remain inherited-contained and NO_BY_DEFAULT.
+
+## Fresh-chat initialization
+
+@GitHub
+
+https://github.com/adamtrott78/workspace-control
+
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
