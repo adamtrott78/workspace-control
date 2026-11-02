@@ -3,19 +3,19 @@
   "benchmark": "INSTANT_WORKER_LEASE_RECOVERY_V1",
   "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
   "shared_branch": "instant-worker-lease-recovery-v1-20261101",
-  "state_version": 2,
-  "recovery_generation": 0,
+  "state_version": 3,
+  "recovery_generation": 1,
   "invariant": "only the owner whose claim_generation equals recovery_generation may record completion",
   "action": {
     "id": "X",
-    "state": "CLAIMED",
-    "owner": "W1",
+    "state": "LEASE_EXPIRED",
+    "owner": null,
     "claim_generation": 0,
     "execution_branch": "instant-worker-lease-recovery-v1-w1-x",
     "pr": 580,
     "validated_head": "723363567420ccea0027cd51c9ad906601381caa",
     "validation_run": 41366619408,
-    "prior_owner": null,
+    "prior_owner": "W1",
     "task": {
       "files": [
         "scripts/instant_lease_recovery_x.py",
@@ -59,6 +59,15 @@
       "from": "PENDING",
       "to": "CLAIMED",
       "expected_head": "67e2e383a15c4f347434a638fc834877550a1dbc"
+    }
+  ],
+  "lease_history": [
+    {
+      "event": "EXPIRED",
+      "prior_owner": "W1",
+      "old_generation": 0,
+      "new_generation": 1,
+      "expected_shared_head": "8f8e357b83e9c49e99d11de2577e65e31039fce0"
     }
   ]
 }
