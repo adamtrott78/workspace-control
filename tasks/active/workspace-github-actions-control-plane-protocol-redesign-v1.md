@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 7d138b900944b1138a74f7d92c2db1b6e8d25ba7
+- Remote checkpoint: 28853cc42608def1790e25711c1a9dcbdb652346
 - Remote verified: true
 
 ### research-engine
@@ -43,7 +43,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Apply the exact validated single-file maintenance-controller hotfix from scripts/lambda_ci_maintenance_controller_live_update_v1.py at the final validated branch head. This is the only remaining manual root bootstrap boundary for the current parser repair; the updater verifies the old installed Git blob, replaces only /opt/workspace-ci/maintenance-controller/lambda_ci_maintenance_controller.py, restarts only workspace-ci-maintenance-controller.service, performs two stable-running samples, and rolls back automatically on failure. After PASS, ChatGPT should immediately verify the service via Workspace Shell, post a new reset-stale command for quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, consume the maintenance receipt, and continue the v3 migration.
+Apply the exact validated single-file maintenance-controller hotfix from scripts/lambda_ci_maintenance_controller_live_update_v1.py using validated code/test head 28853cc42608def1790e25711c1a9dcbdb652346 (or a later metadata-only descendant whose candidate/old blob pins remain identical). This is the current unavoidable root bootstrap boundary. After PASS, ChatGPT should verify the service via Workspace Shell, post a fresh reset-stale command for quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, consume the maintenance receipt, and continue v3 migration without user terminal relay.
 
 ## Remaining work
 
