@@ -3,18 +3,18 @@
   "benchmark": "INSTANT_WORKER_LEASE_RECOVERY_V1",
   "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
   "shared_branch": "instant-worker-lease-recovery-v1-20261101",
-  "state_version": 4,
+  "state_version": 5,
   "recovery_generation": 1,
   "invariant": "only the owner whose claim_generation equals recovery_generation may record completion",
   "action": {
     "id": "X",
-    "state": "CLAIMED",
+    "state": "COMPLETED",
     "owner": "W2",
     "claim_generation": 1,
-    "execution_branch": "instant-worker-lease-recovery-v1-w1-x",
-    "pr": 580,
-    "validated_head": "723363567420ccea0027cd51c9ad906601381caa",
-    "validation_run": 41366619408,
+    "execution_branch": "instant-worker-lease-recovery-v1-w2-x",
+    "pr": 581,
+    "validated_head": "98a0ea26911d4c5216f6dc9df95b2da98f0e3d3f",
+    "validation_run": 41367274890,
     "prior_owner": "W1",
     "task": {
       "files": [
@@ -31,8 +31,11 @@
       ]
     },
     "result_ready": true,
-    "completion_not_recorded": true,
-    "stale_completion_expected_head": "51f5074e89cb8ca7be10e98b6dd1d180e913e469"
+    "completion_not_recorded": false,
+    "stale_completion_expected_head": "51f5074e89cb8ca7be10e98b6dd1d180e913e469",
+    "completion_generation": 1,
+    "completion_owner": "W2",
+    "validation_result": "SUCCESS"
   },
   "protocols": {
     "claim": "CAS shared branch with exact expected_sha and force=false; successful claimant records claim_generation equal to current recovery_generation",
@@ -77,6 +80,21 @@
       "old_generation": 0,
       "new_generation": 1,
       "expected_shared_head": "8f8e357b83e9c49e99d11de2577e65e31039fce0"
+    }
+  ],
+  "completion_history": [
+    {
+      "worker": "W2",
+      "action": "X",
+      "generation": 1,
+      "from": "CLAIMED",
+      "to": "COMPLETED",
+      "expected_head": "757cc6b834178dbd9866ca060ac4c2a2515d046c",
+      "execution_branch": "instant-worker-lease-recovery-v1-w2-x",
+      "pr": 581,
+      "validated_head": "98a0ea26911d4c5216f6dc9df95b2da98f0e3d3f",
+      "validation_run": 41367274890,
+      "validation_result": "SUCCESS"
     }
   ]
 }
