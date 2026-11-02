@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: fbb065a235ef271f3c55210833ee3b95e9d61f54
+- Remote checkpoint: e09c7f5485914b0345ffb459512461fede94875d
 - Remote verified: true
 
 ### PADataset
@@ -70,35 +70,46 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-TEMPORARY P0 INFRASTRUCTURE GATE: allow the separate GitRunner task workspace-github-actions-control-plane-protocol-redesign-v1 to complete the accepted active-fleet v3 migration and retire the legacy v2 plane before resuming broad semantic-execution implementation work. Continue to treat PR #590 as the umbrella program and preserve its architecture/benchmark state, but do not let the legacy runner substrate remain a reliability dependency underneath new orchestration work. Consume only durable GitRunner results; do not issue canary/cutover authority from this task. After v3 production cutover and v2 retirement are accepted, resume the resumable-reasoning benchmark, architecture review, unseen-workflow extension proof, and minimal implementation freeze.
+TEMPORARY P0 INFRASTRUCTURE GATE, NOT THE OVERALL PROJECT: first allow workspace-github-actions-control-plane-protocol-redesign-v1 / PR #572 to recover v3 root services after the power outage, finish PADataset CPU/GPU active-class canaries, perform the controlled production v3 cutover, and retire v2. Do not let that incident consume or replace this umbrella program. Once v3 is canonical and the Workspace Shell recovery/standing-authority gaps are closed enough for normal operation, immediately resume the semantic-execution program at the empirical executor/reasoning evidence stage: consolidate the already completed Instant capability benchmarks, run the resumable-reasoning quality benchmark against frontier control arms, perform independent architecture review, prove an unseen workflow/domain extension, freeze the smallest open-world semantic core + ReasoningProcess + executor/resource/quota router, then incrementally migrate representative research, engineering, data-science, paper, slide, tutoring/homework, document/artifact, GitRunner, Workspace Shell, and future workflow families. Optimize for the same end-to-end functionality with minimal scarce frontier-model allowance, not for a research-only loop.
 
 ## Remaining work
 
-- Track the separate GitRunner task as the current P0 infrastructure dependency until accepted v3 production cutover and v2 retirement are complete; do not issue its live authority from this umbrella task.
-- After the GitRunner substrate is stable on v3, implement and run the resumable-reasoning benchmark pilot.
-- Compare frontier long-horizon, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid-escalation arms using objective validators and usage/context metrics.
-- Run an independent architecture review of the preferred hybrid semantic-projection hypothesis.
-- Prove one previously unseen workflow/domain extension without kernel changes or authority leakage.
-- Decide whether Temporal/Dapr or LangGraph/Agent Framework spikes are justified by expected material benefit.
-- Freeze and implement the smallest viable semantic projection + ReasoningProcess + executor/resource router only after evidence is sufficient.
-- Migrate representative workflows across research, engineering, data science, papers, presentations, tutoring, documents, and controller/runtime operations.
-- Measure and minimize scarce frontier allowance; keep escalation evidence-based.
+- Track the GitRunner v3 migration/retirement task as the current P0 infrastructure dependency only; consume its durable receipts/state but do not let it redefine the umbrella architecture.
+- Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.
+- Consolidate already completed Instant capability evidence: multi-leaf queue endurance/resume, stateless durable recovery, concurrent exact-head CAS claiming/completion, lease expiry/recovery fencing, and multi-worker scaling with eight validated actions.
+- Implement and run the resumable-reasoning benchmark pilot comparing frontier long-horizon, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid-escalation arms using objective validators plus usage/context/effectiveness metrics.
+- Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.
+- Run an independent architecture review of the preferred hybrid semantic-projection hypothesis and challenge whether a different execution substrate/agent/workflow framework materially improves reliability or allowance efficiency.
+- Prove at least one previously unseen workflow/domain extension can be added without core-kernel changes, closed domain enums, or authority leakage.
+- Freeze and implement the smallest stable semantic core, versioned domain/workflow extension contract, durable ReasoningProcess, executor/provider/model/surface/harness capability model, resource/quota router, task-tree/lease/CAS semantics, and evidence-based escalation policy.
+- Design the human-in-the-loop orchestration surface so launching/resuming many temporary Instant workers is trivial for the operator while all real scheduling/ownership/recovery state remains durable and machine-managed; browser/tab mechanics are a transport concern, not the durable scheduler.
+- Migrate representative workflows incrementally across: automated research/evaluate/iterate loops; systems engineering and coding; data science/ML experiments; PADataset/research-engine; paper drafting/evidence/citation pipelines; slide/presentation creation; tutoring and homework/assignment generation for MTH602/EAS501/CIS560; generic document/artifact production; GitRunner/Lambda operations; Workspace Shell maintenance; and future workflows not known today.
+- Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.
+- Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation.
 
 ## Blockers / gates
 
-- Architecture freeze is intentionally blocked pending resumable-reasoning benchmark evidence and independent review.
-- Live GitRunner migration actions remain controlled by workspace-github-actions-control-plane-protocol-redesign-v1 and require fresh class-specific authority; this task cannot issue that authority.
+- Current implementation freeze is intentionally blocked until the GitRunner v3 substrate is canonical enough that new orchestration is not built atop legacy v2 reliability debt.
+- Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark, independent review, and unseen-workflow extension proof.
+- Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.
+- Live GitRunner migration actions remain authority-owned by workspace-github-actions-control-plane-protocol-redesign-v1 and require fresh class-specific authority; this umbrella task cannot manufacture that authority.
 
 ## Fresh-chat initialization
 
 @GitHub
 
+@Workspace Shell
+
+@Heartbeat
+
 https://github.com/adamtrott78/workspace-control
+
+YOU ARE THE CONTINUING EXECUTOR. DO THE WORK YOURSELF IN THIS CHAT. DO NOT RETURN ANOTHER HANDOFF OR REVIEWER PROMPT.
 
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-semantic-execution-migration-v1.json
 
 Start from the normal workspace-control root route.
+Recover exact durable GitHub/runtime state before acting; do not rely on conversational memory where repository/runtime evidence exists.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Follow the capsule's next_safe_action and preserve all authority boundaries.
