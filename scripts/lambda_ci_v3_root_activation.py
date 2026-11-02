@@ -38,6 +38,7 @@ from datetime import datetime, timezone
 from typing import Any, Callable, Protocol
 
 import lambda_ci_v3_reconciler as reconciler
+import lambda_ci_v3_controller_refresh as controller_refresh
 
 
 V3_CONFIG_ROOT = pathlib.Path("/etc/workspace-ci/v3")
@@ -131,6 +132,58 @@ def _load(path: pathlib.Path) -> dict[str, Any]:
 
 def _canonical(value: Any) -> bytes:
     return (json.dumps(value, indent=2, sort_keys=True) + "\n").encode("utf-8")
+
+
+def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[str, Any] | None:
+    """Verify the effective installed v3 generation while root services are inactive.
+
+    The immutable base install manifest remains authoritative for every managed
+    artifact except the shared controller binary. A later controller-only
+    refresh is authoritative only when the root-owned ACTIVE override receipt
+    binds the exact installed controller digest back to that base manifest and
+    proves non-controller generation equivalence.
+    """
+    try:
+        reconciler.verify_installed(manifest_path)
+        return None
+    except reconciler.ReconcileError as exc:
+        expected = f"managed artifact digest drift: {reconciler.V3_CONTROLLER_BINARY}"
+        if str(exc) != expected:
+            raise
+
+    raw = manifest_path.read_bytes()
+    manifest = _load(manifest_path)
+    if manifest.get("mode") != "V3_SUBSTRATE_INSTALL_INACTIVE":
+        raise RootActivationError("installed manifest mode invalid")
+    base_head = str(manifest.get("source_head", ""))
+    if not base_head:
+        raise RootActivationError("installed manifest source head missing")
+
+    base, base_sha, base_controller = controller_refresh._base_manifest(base_head)
+    actual, active = controller_refresh._verify_current_controller(
+        base_controller_entry=base_controller,
+        base_manifest_sha256=base_sha,
+    )
+    if active is None:
+        raise RootActivationError(
+            "controller digest differs from base manifest without active override"
+        )
+    if active.get("base_source_head") != base_head:
+        raise RootActivationError("active controller override base head mismatch")
+    if active.get("base_install_manifest_sha256") != _sha256(raw):
+        raise RootActivationError("active controller override manifest binding mismatch")
+    if active.get("controller_binary_sha256") != actual:
+        raise RootActivationError("active controller override digest mismatch")
+    if active.get("non_controller_generation_equivalent") is not True:
+        raise RootActivationError(
+            "active controller override lacks non-controller equivalence proof"
+        )
+    if active.get("root_policy_sha256") != base.get("root_policy_sha256"):
+        raise RootActivationError("active controller override root-policy binding mismatch")
+    source_head = active.get("controller_source_head")
+    if not isinstance(source_head, str) or re.fullmatch(r"[0-9a-f]{40}", source_head) is None:
+        raise RootActivationError("active controller override source head invalid")
+    return active
 
 
 def _sha256(raw: bytes) -> str:
@@ -607,7 +660,7 @@ def main() -> int:
     if args.authorization_receipt is None:
         raise RootActivationError("--activate requires --authorization-receipt")
 
-    reconciler.verify_installed(args.manifest)
+    effective_controller_override = verify_effective_installed_generation(args.manifest)
     install_manifest_raw = args.manifest.read_bytes()
     install_manifest = _load(args.manifest)
     install_manifest_sha256 = _sha256(install_manifest_raw)
