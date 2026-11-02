@@ -894,6 +894,54 @@ class WorkspaceShellContractTests(unittest.TestCase):
         self.assertNotIn("BEGIN PRIVATE KEY", source)
         self.assertNotIn("\\\\$" + "{", source)
 
+    def test_boot_recovery_updater_is_narrow_transactional_and_boot_persistent(self):
+        for script in (BOOT_RECOVERY_UPDATE, EMERGENCY_DISABLE):
+            proc = subprocess.run(
+                ["bash", "-n", str(script)],
+                cwd=ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=10,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+
+        source = BOOT_RECOVERY_UPDATE.read_text()
+        self.assertIn(
+            'ACCEPTED_OBSERVABILITY_HEAD="98ce61aad8addd604f93e7a04876eaefd0989589"',
+            source,
+        )
+        self.assertIn(
+            'TMPFILES_BLOB="7d873c16bb1be1776a41db0ddcb88dad97abc6ff"',
+            source,
+        )
+        self.assertIn(
+            'DISABLE_BLOB="a71be010885e5144fdff99e33ddcbaf4b4f56c5b"',
+            source,
+        )
+        self.assertIn("ENABLE_BOOT_RECOVERY_V1", source)
+        self.assertIn("/etc/tmpfiles.d/workspace-shell.conf", source)
+        self.assertIn('systemd-tmpfiles --create "$TMPFILES_DST"', source)
+        self.assertIn('systemctl enable "${SERVICES[@]}"', source)
+        self.assertIn("SERVICES_ACTIVE_BOOT_ENABLED=PASS", source)
+        self.assertIn('"runtime_services_restarted": False', source)
+        self.assertIn('"helper_authority_changed": False', source)
+        self.assertIn('"mcp_schema_changed": False', source)
+        self.assertIn("ROLLBACK", source)
+        self.assertNotIn("systemctl restart", source)
+        self.assertNotIn("openssl ", source)
+        self.assertNotIn("activate_live.sh", source)
+
+        disable = EMERGENCY_DISABLE.read_text()
+        self.assertIn("systemctl disable --now", disable)
+        for unit in (
+            "workspace-shell-job-launcher.service",
+            "workspace-shell-root-broker.service",
+            "workspace-shell-mcp.service",
+            "workspace-shell-tunnel.service",
+        ):
+            self.assertIn(unit, disable)
+
     def test_frontend_access_repair_restores_only_commissioned_metadata_and_boot_disabled_services(self):
         proc = subprocess.run(
             ["bash", "-n", str(FRONTEND_ACCESS_REPAIR)],
