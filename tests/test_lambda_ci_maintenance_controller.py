@@ -183,6 +183,11 @@ class MaintenanceControllerTests(unittest.TestCase):
             'EXPECTED_MAIN_BLOB = "7ef485a14ab6092ee4bea79e701e7fca6e562821"',
             text,
         )
+        self.assertIn('GO_VERSION = "go1.26.3"', text)
+        self.assertIn(
+            'GO_SHA256 = "2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"',
+            text,
+        )
         self.assertIn(
             '"controller/lambda-ci-controller/main.go",',
             text,
