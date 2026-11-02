@@ -26,7 +26,7 @@ import tempfile
 
 BASE_SOURCE_HEAD = "09c46818252991f6a55aaeedbcf046c554e2ffee"
 SOURCE_REL = "scripts/lambda_ci_v3_root_activation.py"
-EXPECTED_CANDIDATE_GIT_BLOB = "c40f786e7fc64b30fdaed91ffc3dacf5e77e177c"
+EXPECTED_CANDIDATE_GIT_BLOB = "eed5c2ddac6c901b31d5b98b33d7ae0c297a0dbb"
 INSTALLED = Path("/opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py")
 INSTALL_MANIFEST = Path("/etc/workspace-ci/v3/install-manifest.json")
 BACKUP_ROOT = Path("/var/lib/workspace-ci/v3/migration")
