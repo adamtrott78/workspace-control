@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 82ab7c3fc0847d45fb9928bafc1a084d5a19c121
+- Remote checkpoint: b3f9acd8d32a913d33bbac017378ef7a92c0ff08
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-USER-ONLY CLEAN SESSION RETRY: open a brand-new Temporary Chat in ChatGPT Instant (do not branch from this conversation or reuse the contaminated worker chat), make GitHub available, and send only the canonical navigation message for assigned run-state benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json. The predecessor screen-001 is durably preserved as a successful fail-closed contamination test. Once screen-002 writes WAITING_EXTERNAL or TERMINAL_CANDIDATE, this control chat can continue directly from GitHub.
+USER-ONLY CLEAN SESSION LAUNCH: choose one executor and use the matching fresh slot. For GPT-5.6 Sol / Instant, use benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json. For GPT-6 / Instant, use benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json. Open a brand-new Temporary Chat (or otherwise Memory-disabled chat), make GitHub available, and send only the canonical navigation message for that exact slot. Do not branch from this conversation or reuse the prior GPT-6 chat. Once either slot reaches WAITING_EXTERNAL or TERMINAL_CANDIDATE, this control chat can service it directly from GitHub.
 
 ## Remaining work
 
-- Launch screening-v1-P0-B-002 in a truly fresh Temporary/Memory-off ChatGPT Instant chat with GitHub only; do not branch from an existing benchmark/control chat. Service its WAITING_EXTERNAL / TERMINAL_CANDIDATE transitions from this control chat.
+- Launch either (or both, in separate fresh chats) the primary GPT-5.6 Sol / Instant P0 slot screen-002 and the supplementary GPT-6 / Instant P0 slot screening-v1-P0-B6-001. Never reuse a slot across executor identities.
 - After the first P0×Instant-persistent transport smoke completes cleanly, instantiate and execute the remaining non-claim-bearing A-E × P0-P3 protocol-screening slots. Any protocol change invalidates prior screening comparability and requires re-screening.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
