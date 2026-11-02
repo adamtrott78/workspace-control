@@ -96,7 +96,7 @@ class LegacyScaleSetRetirementTests(unittest.TestCase):
 
     def test_retirement_is_resumable_after_partial_remote_mutation(self):
         self.assertIn('"PARTIAL_RETIREMENT"', SOURCE)
-        self.assertIn("--resume-receipt", SOURCE)
+        self.assertIn('flag.String("resume-receipt"', SOURCE)
         self.assertIn(
             "retired scale set unexpectedly exists during resume",
             SOURCE,
