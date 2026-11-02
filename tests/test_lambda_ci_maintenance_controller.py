@@ -364,6 +364,135 @@ class MaintenanceControllerTests(unittest.TestCase):
                 "2026-10-27T01:00:00Z",
             )
 
+    def test_stale_busy_ghost_requires_exact_shape_and_quarantine_evidence(self):
+        ghost = {
+            "totalAvailableJobs": 0,
+            "totalAcquiredJobs": 0,
+            "totalAssignedJobs": 1,
+            "totalRunningJobs": 0,
+            "totalRegisteredRunners": 0,
+            "totalBusyRunners": 1,
+            "totalIdleRunners": 0,
+        }
+        self.assertTrue(controller._stale_busy_ghost_shape(ghost))
+        for key in ghost:
+            bad = dict(ghost)
+            bad[key] = 2 if key in {"totalAssignedJobs", "totalBusyRunners"} else 1
+            self.assertFalse(controller._stale_busy_ghost_shape(bad), key)
+
+        command = reset_command()
+        root_diag = {
+            "status": "COMPLETED",
+            "result": {
+                "service_active": False,
+                "active_project_units": [],
+                "quarantine": {
+                    "receipt_id": command["quarantine_receipt_id"],
+                    "status": "ASSIGNMENT_DIVERGENCE_QUARANTINED",
+                    "project_id": "workspace-control",
+                    "lane": "cpu",
+                    "reconstructable_jobs": 0,
+                    "active_count": 0,
+                    "pending_count": 0,
+                },
+            },
+        }
+        controller.require_stale_quarantine_delete_evidence(root_diag, command)
+
+        for key in (
+            "receipt_id",
+            "status",
+            "project_id",
+            "lane",
+            "reconstructable_jobs",
+            "active_count",
+            "pending_count",
+        ):
+            bad = json.loads(json.dumps(root_diag))
+            current = bad["result"]["quarantine"][key]
+            bad["result"]["quarantine"][key] = (
+                "wrong" if isinstance(current, str) else current + 1
+            )
+            with self.assertRaises(controller.MaintenanceControllerError):
+                controller.require_stale_quarantine_delete_evidence(bad, command)
+
+    def test_stale_busy_delete_requires_no_nonterminal_pilot_demand(self):
+        class Client:
+            def __init__(self, runs, jobs):
+                self.runs = runs
+                self.jobs = jobs
+
+            def get_json(self, path):
+                if "/actions/runs/" in path and "/jobs" in path:
+                    run_id = int(path.split("/actions/runs/", 1)[1].split("/", 1)[0])
+                    return {"jobs": self.jobs.get(run_id, [])}
+                return {"workflow_runs": self.runs}
+
+        completed = {
+            "id": 10,
+            "status": "completed",
+            "created_at": "2026-11-02T02:40:02Z",
+            "updated_at": "2026-11-02T06:33:34Z",
+            "run_attempt": 1,
+        }
+        controller.assert_no_nonterminal_pilot_runs(Client([completed], {}))
+
+        maintenance_self_trigger = {
+            "id": 11,
+            "status": "in_progress",
+            "created_at": "2026-11-02T06:34:00Z",
+            "updated_at": "2026-11-02T06:34:00Z",
+            "run_attempt": 1,
+        }
+        controller.assert_no_nonterminal_pilot_runs(
+            Client(
+                [maintenance_self_trigger],
+                {
+                    11: [
+                        {
+                            "name": (
+                                "wc-admission-v1|workload=control-validation|"
+                                "pr=${{ github.event.issue.number }}|"
+                                "request=${{ github.event.comment.body }}"
+                            ),
+                            "status": "completed",
+                            "conclusion": "skipped",
+                        }
+                    ]
+                },
+            )
+        )
+
+        live = {
+            "id": 12,
+            "status": "queued",
+            "created_at": "2026-11-02T06:34:00Z",
+            "updated_at": "2026-11-02T06:34:00Z",
+            "run_attempt": 1,
+        }
+        with self.assertRaisesRegex(
+            controller.MaintenanceControllerError,
+            "non-terminal runner demand",
+        ):
+            controller.assert_no_nonterminal_pilot_runs(
+                Client(
+                    [live],
+                    {
+                        12: [
+                            {
+                                "name": (
+                                    "wc-admission-v1|workload=control-validation|"
+                                    "pr=590|request=/workspace-control-validate "
+                                    "cbc71b51b28c96b7b08b92a5e8e17b8566803d73"
+                                ),
+                                "status": "queued",
+                                "conclusion": None,
+                            }
+                        ]
+                    },
+                )
+            )
+
     def test_p1_reset_is_limited_to_workspace_control_cpu(self):
         command = dict(reset_command())
         command["project_id"] = "research-engine"
