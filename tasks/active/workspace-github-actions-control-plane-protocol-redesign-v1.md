@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: 675f8772e081052289641211691caeebe6b9f76a
+- Remote checkpoint: ff56679982bc290842a95436ae24adfd568e8c56
 - Remote verified: true
 
 ### research-engine
@@ -43,12 +43,12 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-OPERATOR-ONLY POST-OUTAGE ROOT RECOVERY TRANSACTION: diagnostic run 41407093346 is cancelled and host cleanup is proven by maintenance diagnose receipt 6571796799 (active_project_units=[], reset_pending=[], recovery_state_conflict=false, active_count=0, pending_count=0; controller logs total_assigned_jobs=0/reconstructable_jobs=0). Exact bounded recovery wrapper scripts/lambda_ci_v3_post_outage_root_recovery_v1.py at head 675f8772e081052289641211691caeebe6b9f76a passed Workspace Control Validation 41408493173. Workspace Shell cannot invoke this root bootstrap because its live helper registry is empty and reviewed-helper approval requires an external operator signature. From one exact clean checkout of the current validated branch head, run the wrapper once as root with --expected-head set to that exact checkout. The wrapper transactionally installs the corrected manifest-bound mode-0555 activation helper, mints a NEW exact installed-manifest/root-policy-bound ACTIVATE_V3_ROOT_SERVICES authority (10-minute lifetime), and invokes only the installed root activation helper. It never reuses authority 14e58009-7bf3-43d1-8ad8-7616e70edaa3, never enables services, never activates a class controller, and never mutates workflows/routes/scale sets/v2 state/Research GPU containment. After it returns, independently attest v3 reconciler/provisioner, effective controller+helper override generation, non-target class inactivity, zero transient/resource claims, and Research GPU containment through Workspace Shell; then resume padataset-cpu-public-v1 under its own fresh ACTIVATE_ONE_V3_CANARY authority.
+OPERATOR-ONLY CONTAINMENT REPAIR + V3 ROOT RESUME: the previous post-outage root transaction correctly installed the refreshed helper but root activation failed before authority consumption because legacy workspace-ci-controller@research-engine-gpu.service had rebooted active/running and enabled. Observation-only maintenance diagnose 6571931973 proves service_active=true, UnitFileState=enabled, active_project_units=[], quarantine active_count=0/pending_count=0, reset_pending=[], recovery_state_conflict=false. v3 reconciler/provisioner remain inactive/dead. Exact bounded recovery script scripts/lambda_ci_v3_repair_research_gpu_and_resume_roots_v1.py at head ff56679982bc290842a95436ae24adfd568e8c56 passed Workspace Control Validation 41409276446 SUCCESS. From one exact clean checkout of that validated head, run the script once as root with --expected-head set to that head. It may only stop+disable the exact legacy Research GPU controller after proving no Research execution units and v3 roots inactive, persists a containment receipt, mints a NEW ACTIVATE_V3_ROOT_SERVICES authority, invokes the installed activator, then re-attests Research GPU inactive+disabled and both v3 root services active/running. It never starts/enables Research GPU, touches Research CPU/PADataset/workspace-control v2, activates a v3 class controller, mutates workflows/routes/scale sets, or reuses the failed authority. After it returns, independently verify live state via Workspace Shell and continue padataset-cpu-public-v1 under its own fresh ACTIVATE_ONE_V3_CANARY authority.
 
 ## Remaining work
 
-- Execute scripts/lambda_ci_v3_post_outage_root_recovery_v1.py once as root from an exact clean validated checkout. This combines only the corrected transactional helper update, fresh ACTIVATE_V3_ROOT_SERVICES authority creation, and installed root activation helper invocation.
-- After the wrapper returns, independently attest effective installed generation/controller+helper override, v3 reconciler/provisioner health, all non-target v3 class controllers inactive, no transient/resource claims, and Research GPU containment preserved.
+- Execute scripts/lambda_ci_v3_repair_research_gpu_and_resume_roots_v1.py once as root from an exact clean checkout of validated head ff56679982bc290842a95436ae24adfd568e8c56. This repairs only the exact legacy Research GPU controller containment, creates a fresh root authority, and invokes the installed v3 root activator.
+- After the wrapper returns, independently attest legacy Research GPU inactive+disabled, v3 reconciler/provisioner active/running, effective installed controller+helper override generation valid, all v3 class controllers inactive, no transient/resource claims, and no Research execution units.
 - Complete Workspace Shell reboot hardening from draft PR #592 and establish narrow standing/reviewed helper authority so future exact GitRunner root operations do not require operator sudo relay.
 - Reactivate the already-installed v3 reconciler and provisioner transactionally; prove effective installed-generation/controller+helper override attestation, root services healthy, non-target class controllers inactive, no transient/resource claims, and Research GPU containment preserved.
 - Complete Workspace Shell reboot hardening from draft PR #592: persist the /run/workspace-shell-control tmpfiles rule and boot-enable only the accepted recovery-plane services with emergency disable preserved.
@@ -62,10 +62,10 @@ OPERATOR-ONLY POST-OUTAGE ROOT RECOVERY TRANSACTION: diagnostic run 41407093346 
 
 ## Blockers / gates
 
-- Power-loss reboot left workspace-ci-v3-reconciler.service and workspace-ci-v3-provisioner.service inactive; direct improvised systemctl activation remains forbidden.
-- The exact bounded post-outage root recovery wrapper is repository-validated at 675f8772e081052289641211691caeebe6b9f76a / run 41408493173 but has not been executed live. Workspace Shell's helper registry is empty and its privileged protocol requires an external operator signature, so this single root transaction remains operator-only.
+- Legacy workspace-ci-controller@research-engine-gpu.service rebooted active/running and enabled, violating inherited Research GPU NO_BY_DEFAULT containment. Diagnose receipt 6571931973 proves no active Research execution units and no active/pending runner units, so exact controller containment repair is safe but still requires operator root execution.
+- The validated bounded containment-repair/root-resume script at ff56679982bc290842a95436ae24adfd568e8c56 / run 41409276446 has not yet executed live. Workspace Shell's privileged-helper registry remains empty, so this one root transaction is operator-only.
 - Further live v3 migration requires a fresh separately bound one-shot canary authority per class, beginning with padataset-cpu-public-v1.
-- Research CPU remains separately gated; Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT; Research Engine PR #283 remains proposal-only.
+- Research CPU remains separately gated; all Research GPU-derived v3 classes remain inherited-contained and NO_BY_DEFAULT; Research Engine PR #283 remains proposal-only.
 
 ## Fresh-chat initialization
 
